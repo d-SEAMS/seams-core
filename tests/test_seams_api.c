@@ -119,7 +119,11 @@ int main(void) {
   const int *cols = NULL;
   int n_offsets = 0;
   int nnz = 0;
+  /* ABI 1 callers still reach the deprecated borrow, so it stays tested. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   expect(seams_neighbours_csr(nb, &offsets, &n_offsets, &cols, &nnz) == SEAMS_OK, "csr");
+#pragma GCC diagnostic pop
   expect(n_offsets == n + 1, "csr rows");
   expect(seams_neighbours_count(nb) == n, "neighbour rows");
   int degree_ok = 1;
@@ -129,7 +133,11 @@ int main(void) {
     }
   }
   expect(degree_ok, "four neighbours");
+  expect(seams_system_count(sys) == n, "clear the error before destroy");
   seams_neighbours_destroy(nb);
+  expect(strcmp(seams_last_error(), "double destroy") != 0, "first destroy frees the list");
+  seams_neighbours_destroy(nb);
+  expect(strcmp(seams_last_error(), "double destroy") == 0, "second destroy is refused");
 
   int *labels = calloc((size_t)n, sizeof(int));
   int counts[9];

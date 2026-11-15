@@ -84,5 +84,17 @@ if !isempty(root)
         @test chill_plus(frame).counts["cubic"] == 4096
         @test cages(frame).n_ic == 4096
         @test nframes(cubic) >= 1
+        @test read(joinpath(root, "bindings", "julia", "capi.jl")) ==
+              read(joinpath(@__DIR__, "..", "src", "capi.jl"))
+    end
+end
+
+# seams.h against the C++ census, when a checkout build names the oracle.
+oracle = get(ENV, "SEAMS_CPP_ORACLE", "")
+cpp_match = joinpath(@__DIR__, "..", "..", "cpp_match.jl")
+if !isempty(oracle) && isfile(oracle) && isfile(cpp_match)
+    @testset "seams.h matches the C++ path" begin
+        include(joinpath(@__DIR__, "..", "..", "cpp_match.jl"))
+        check_seams_against_cpp()
     end
 end

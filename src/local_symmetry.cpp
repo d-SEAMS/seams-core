@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
 #include <local_symmetry.hpp>
 
 #include <ira_sofi.hpp>
@@ -420,6 +421,7 @@ std::string trimSymbol(const char *text) {
   return s;
 }
 
+#ifdef SEAMS_HAS_SPGLIB
 Eigen::Vector3d fracOf(const Eigen::Matrix3d &vectors, const Eigen::Vector3d &cart) {
   Eigen::Vector3d f = vectors.transpose().inverse() * cart;
   for (int k = 0; k < 3; k++) {
@@ -427,6 +429,7 @@ Eigen::Vector3d fracOf(const Eigen::Matrix3d &vectors, const Eigen::Vector3d &ca
   }
   return f;
 }
+#endif
 
 void writeFracCrystal(symm::Lattice &cell, const Eigen::MatrixXd &frac) {
   cell.cartesian.resize(frac.rows(), 3);
@@ -755,10 +758,14 @@ Eigen::MatrixXd iceShellOrtho(const Eigen::MatrixXd &cartesian, double Lx, doubl
     }
     return std::max(3, ncell);
   };
-  const int nx = cellsOf(Lx);
-  const int ny = cellsOf(Ly);
-  const int nz = cellsOf(Lz);
-  const int ncell = nx * ny * nz;
+  int nx = cellsOf(Lx);
+  int ny = cellsOf(Ly);
+  int nz = cellsOf(Lz);
+  seams::coarsenUntilFits(nx, ny, nz, 3);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return {};
+  }
   std::vector<int> head(static_cast<std::size_t>(ncell), -1);
   std::vector<int> next(static_cast<std::size_t>(n), -1);
   std::vector<double> wrapped(static_cast<std::size_t>(n) * 3);

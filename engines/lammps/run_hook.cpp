@@ -67,8 +67,11 @@ int main(int argc, char **argv) {
     return 2;
   }
   Hook hook;
-  int narg = 1;
-  char *extra[] = {argv[0]};
+  // The deck directory is in the source tree; screen output is the log.
+  char log_flag[] = "-log";
+  char log_none[] = "none";
+  char *extra[] = {argv[0], log_flag, log_none};
+  int narg = 3;
   hook.lmp = lammps_open_no_mpi(narg, extra, nullptr);
   if (hook.lmp == nullptr) {
     std::fprintf(stderr, "lammps_open failed\n");

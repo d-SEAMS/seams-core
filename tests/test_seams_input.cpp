@@ -507,11 +507,11 @@ TEST_CASE("readChemfiles matches the hand-rolled LAMMPS reader", "[seams_input]"
 
     REQUIRE(hand.nop > 0);
     REQUIRE(chem.nop == hand.nop);
-    for (int k = 0; k < 3; k++) {
+    for (std::size_t k = 0; k < 3; k++) {
       REQUIRE_THAT(chem.box[k],
                    Catch::Matchers::WithinAbs(hand.box[k], 1e-9));
     }
-    for (int i = 0; i < hand.nop; i++) {
+    for (std::size_t i = 0; i < static_cast<std::size_t>(hand.nop); i++) {
       REQUIRE(chem.pts[i].atomID == hand.pts[i].atomID);
       REQUIRE(chem.pts[i].type == hand.pts[i].type);
       REQUIRE_THAT(chem.pts[i].x,
@@ -1555,6 +1555,35 @@ TEST_CASE("an empty xyz names the header", "[seams_input]") {
   fs::remove(path);
 }
 
+TEST_CASE("an xyz header past the reader limit is refused", "[seams_input][reader_limit]") {
+  const auto path = dseams_test::freshFile("dseams_huge.xyz");
+  {
+    std::ofstream out(path, std::ios::binary);
+    const char bytes[] = "666666666\x14" "666666666\n";
+    out.write(bytes, sizeof bytes - 1);
+  }
+  try {
+    sinp::readXYZ(path.string());
+    FAIL("a huge xyz header must not allocate the declared count");
+  } catch (const std::runtime_error &err) {
+    REQUIRE(std::string(err.what()) == "XYZ header is not an atom count.");
+  }
+  fs::remove(path);
+}
+
+TEST_CASE("a dump header past the reader limit is refused", "[seams_input][reader_limit]") {
+  const auto path = dseams_test::freshFile("dseams_huge.lammpstrj");
+  {
+    std::ofstream out(path);
+    out << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n666666666\n"
+        << "ITEM: BOX BOUNDS pp pp pp\n0 1\n0 1\n0 1\n"
+        << "ITEM: ATOMS id type x y z\n";
+  }
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  REQUIRE_THROWS_AS(sinp::readLammpsTrj(path.string(), 1, cloud), std::runtime_error);
+  fs::remove(path);
+}
+
 TEST_CASE("a junk xyz header names the failure", "[seams_input]") {
   const auto path = dseams_test::freshFile("dseams_junk.xyz");
   {
@@ -2115,7 +2144,7 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
   cloud = sinp::readLammpsTrj(follow.string(), 1, cloud);
   REQUIRE(cloud.nop == 1);
   {
-    const auto stamp = fs::last_write_time(follow);
+    const auto followStamp = fs::last_write_time(follow);
     std::fstream io(follow, std::ios::in | std::ios::out | std::ios::binary);
     std::string bytes((std::istreambuf_iterator<char>(io)), {});
     const auto at = bytes.find("\nITEM: TIMESTEP\n1\n");
@@ -2125,7 +2154,7 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
     io.seekp(static_cast<std::streamoff>(pos));
     io << "XXXX: TIMESTEP";
     io.close();
-    fs::last_write_time(follow, stamp);
+    fs::last_write_time(follow, followStamp);
   }
   cloud = sinp::readLammpsTrj(follow.string(), 2, cloud);
   REQUIRE(cloud.nop == 0);

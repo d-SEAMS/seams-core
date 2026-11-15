@@ -49,7 +49,7 @@ def fortran(build, env):
     work = Path(tempfile.mkdtemp(prefix="seams-fortran-"))
     lib = build / "src"
     run(
-        [gfortran, "-J", str(work), "-c", str(REPO / "bindings/fortran/seams.f90"), "-o", str(work / "seams.o")],
+        [gfortran, "-J", str(work), "-c", str(REPO / "bindings/fortran/src/seams_c.f90"), "-o", str(work / "seams.o")],
         env,
         REPO,
     )

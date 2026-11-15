@@ -1,0 +1,8 @@
+loadavg 0.14 0.92 0.71 1/282 22198
+stdout nop 46 f4 nan n 0
+repeat 1 process_ms 3.181900
+repeat 2 process_ms 3.077642
+repeat 3 process_ms 3.159136
+repeat 4 process_ms 3.092611
+repeat 5 process_ms 3.158086
+repeat 6 process_ms 4.034468

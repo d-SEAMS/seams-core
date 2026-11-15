@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time chill input/traj/genice_sI.lammpstrj 1 1 1 6
+loadavg 0.20 0.98 0.72 1/297 21832
+returncode 0
+stdout
+meta mode chill
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 46
+repeat 1 kernel_ms 0.024806
+repeat 1 path_ms 0.040511
+repeat 2 kernel_ms 0.023426
+repeat 2 path_ms 0.036340
+repeat 3 kernel_ms 0.022226
+repeat 3 path_ms 0.035805
+repeat 4 kernel_ms 0.022374
+repeat 4 path_ms 0.035763
+repeat 5 kernel_ms 0.022148
+repeat 5 path_ms 0.035570
+repeat 6 kernel_ms 0.022262
+repeat 6 path_ms 0.035401
+meta sink 644
+
+stderr

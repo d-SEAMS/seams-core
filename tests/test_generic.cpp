@@ -301,9 +301,8 @@ TEST_CASE("relDist mixed image disagrees with span wrap", "[generic]") {
   REQUIRE_THAT(dr[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
   // Independent-axis wrap of i-j uses bound spans, not the (0,-1,0) image.
   std::array<double, 3> span = {0.5 - 1.0, 0.5 - 8.0, 1.0 - 1.0};
-  for (int k = 0; k < 3; k++) {
-    span[k] -= cloud.box[static_cast<size_t>(k)] *
-               std::round(span[k] / cloud.box[static_cast<size_t>(k)]);
+  for (size_t k = 0; k < 3; k++) {
+    span[k] -= cloud.box[k] * std::round(span[k] / cloud.box[k]);
   }
   REQUIRE(std::abs(dr[0] - span[0]) > 1.0);
   double x0, y0, z0, x1, y1, z1;

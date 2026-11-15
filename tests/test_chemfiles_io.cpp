@@ -308,6 +308,41 @@ TEST_CASE("a numeric dump guesses type 2 and then type 1", "[chemfiles]") {
   fs::remove(path);
 }
 
+TEST_CASE("an atom count after the ATOMS header stays inside the id scan",
+          "[chemfiles]") {
+  // capi_read_fuzzer: the id table was sized before NUMBER OF ATOMS grew.
+  const auto late = dseams_test::freshFile("dseams_chem_late_count.lammpstrj");
+  {
+    std::ofstream out(late);
+    out << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+           "ITEM: ATOMS id type x y z\n"
+           "ITEM: NUMBER OF ATOMS\n4\n"
+           "3 1 1.0 1.0 1.0\n4 1 2.0 2.0 2.0\n";
+  }
+  for (const int frame : {1, 2}) {
+    for (const int type : {-1, 0, 1}) {
+      try {
+        (void)sinp::openFrame(late.string(), frame, type);
+      } catch (const std::exception &) {
+      }
+    }
+  }
+  fs::remove(late);
+}
+
+#ifdef SEAMS_CHEMFILES_PATCHED
+TEST_CASE("a MOL2 molecule with no counts line is an error", "[chemfiles]") {
+  // capi_read_fuzzer: chemfiles 0.10.4 read counts[0] of an empty split.
+  const auto mol2 = dseams_test::freshFile("dseams_chem_no_counts.mol2");
+  {
+    std::ofstream out(mol2);
+    out << "@<TRIPOS>MOLECULE\nwater\n\n@<TRIPOS>ATOM\n";
+  }
+  REQUIRE(sinp::chemfilesSteps(mol2.string()) == -1);
+  fs::remove(mol2);
+}
+#endif
+
 TEST_CASE("a range walks every chemfiles step and skips CON", "[chemfiles]") {
   const auto path = dseams_test::freshFile("dseams_chem_range.xyz");
   {
@@ -376,15 +411,31 @@ TEST_CASE("a triclinic cell is stored with three tilt factors", "[chemfiles]") {
 
   const auto pdb = dseams_test::freshFile("dseams_chem_res.pdb");
   {
-    std::ofstream out(pdb);
-    out << "ATOM      1  OW  SOL     7       1.000   2.000   3.000  1.00  0.00\n"
-        << "END\n";
+    std::ofstream pdbOut(pdb);
+    pdbOut << "ATOM      1  OW  SOL     7       1.000   2.000   3.000  1.00  0.00\n"
+           << "END\n";
   }
   Cloud residue;
   residue = sinp::openFrame(pdb.string(), 1, -1);
   REQUIRE(residue.nop == 1);
   REQUIRE(residue.pts[0].molID == 7);
   fs::remove(pdb);
+}
+
+TEST_CASE("a tilted dump keeps the LAMMPS cell edge", "[chemfiles]") {
+  // BOX BOUNDS on genice_sH is the bounding box padded by xy = -6.2106057.
+  // The edge is 24.8424228; the 31.053 bound span is not a cell length.
+  Cloud cloud = sinp::openFrame("traj/genice_sH.lammpstrj", 1, 1);
+  REQUIRE(cloud.nop == 136);
+  REQUIRE(cloud.box.size() >= 6);
+  double cell[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(cloud.box, cloud.boxLow, cell, origin);
+  REQUIRE_THAT(cell[0][0], Catch::Matchers::WithinAbs(24.8424228, 1e-6));
+  REQUIRE_THAT(cell[1][1], Catch::Matchers::WithinAbs(10.7570846, 1e-6));
+  REQUIRE_THAT(cell[2][2], Catch::Matchers::WithinAbs(20.1312910, 1e-6));
+  REQUIRE_THAT(cell[1][0], Catch::Matchers::WithinAbs(-6.2106057, 1e-6));
+  REQUIRE_THAT(origin[0], Catch::Matchers::WithinAbs(0.0, 1e-6));
 }
 
 TEST_CASE("a dcd uses the sibling pdb names", "[chemfiles]") {

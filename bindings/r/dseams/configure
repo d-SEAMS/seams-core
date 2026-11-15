@@ -34,9 +34,33 @@ if [ -n "${SEAMS_LIBDIR:-}" ]; then
     echo "configure: SEAMS_LIBDIR is set, but seams_lang.h is not in SEAMS_INCLUDE='${SEAMS_INCLUDE:-}'" >&2
     exit 1
   fi
-  echo "configure: linking libseams_lang from ${SEAMS_LIBDIR}"
-  SEAMS_CPPFLAGS="-I${SEAMS_INCLUDE}"
-  SEAMS_LIBS="-L${SEAMS_LIBDIR} -lseams_lang -Wl,-rpath,${SEAMS_LIBDIR}"
+  # seams_call.c binds include/seams.h. libseams and the generated
+  # seams_version.h sit in src/ of the build that holds SEAMS_LIBDIR,
+  # whatever that build directory is called.
+  SEAMS_H_DIR="${SEAMS_H_DIR:-${DSEAMS_ROOT:+${DSEAMS_ROOT}/include}}"
+  if [ -z "${SEAMS_H_DIR}" ] || [ ! -f "${SEAMS_H_DIR}/seams.h" ]; then
+    echo "configure: SEAMS_LIBDIR is set, but seams.h is not in SEAMS_H_DIR='${SEAMS_H_DIR:-}'; set DSEAMS_ROOT or SEAMS_H_DIR" >&2
+    exit 1
+  fi
+  SEAMS_SO_DIR="${SEAMS_SO_DIR:-}"
+  for dir in \
+    "${SEAMS_SO_DIR}" \
+    "$(dirname "${SEAMS_LIBDIR}")/src" \
+    "${SEAMS_LIBDIR}" \
+    "${DSEAMS_ROOT:-.}/build/src"
+  do
+    if [ -n "${dir}" ] && [ -f "${dir}/seams_version.h" ]; then
+      SEAMS_SO_DIR=$dir
+      break
+    fi
+  done
+  if [ -z "${SEAMS_SO_DIR}" ]; then
+    echo "configure: no seams_version.h next to libseams; set SEAMS_SO_DIR to the build's src directory" >&2
+    exit 1
+  fi
+  echo "configure: linking libseams_lang from ${SEAMS_LIBDIR} and libseams from ${SEAMS_SO_DIR}"
+  SEAMS_CPPFLAGS="-I${SEAMS_INCLUDE} -I${SEAMS_H_DIR} -I${SEAMS_SO_DIR}"
+  SEAMS_LIBS="-L${SEAMS_LIBDIR} -lseams_lang -L${SEAMS_SO_DIR} -lseams -Wl,-rpath,${SEAMS_LIBDIR} -Wl,-rpath,${SEAMS_SO_DIR}"
   OPENMP_CXXFLAGS=""
   ENGINE_OBJECTS=""
 else
@@ -45,7 +69,7 @@ else
     echo "configure: build the source package with 'sh tools/vendor.sh' first." >&2
     exit 1
   fi
-  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_LANG_VERSION='\"${version}\"'"
+  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_STATIC -DSEAMS_LANG_VERSION='\"${version}\"'"
   SEAMS_LIBS=""
   ENGINE_OBJECTS='$(SEAMS_OBJECTS)'
   # An empty SHLIB_OPENMP_CXXFLAGS (Apple clang, for one) builds the

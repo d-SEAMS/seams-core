@@ -181,6 +181,7 @@ bool shareFromAssign(const Cloud &cloud, int rank, const std::vector<int> &assig
   return true;
 }
 
+#ifdef SEAMS_HAS_MPI
 void linkcellSends(const Cloud &cloud, const Share &share, const std::vector<int> &assign,
                    const std::vector<int> &nbrs, std::vector<std::vector<int>> &sendAt) {
   sendAt.assign(nbrs.size(), {});
@@ -204,6 +205,7 @@ void linkcellSends(const Cloud &cloud, const Share &share, const std::vector<int
     }
   }
 }
+#endif
 #endif
 
 } // namespace
@@ -822,7 +824,7 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
     const int f = near.local[k];
     frame.push_back(f);
     std::vector<int> row;
-    if (f >= 0 && static_cast<std::size_t>(f) < full.size() && !full[f].empty()) {
+    if (f >= 0 && static_cast<std::size_t>(f) < full.size() && !full[static_cast<std::size_t>(f)].empty()) {
       row.assign(full[static_cast<std::size_t>(f)].begin() + 1,
                  full[static_cast<std::size_t>(f)].end());
     }

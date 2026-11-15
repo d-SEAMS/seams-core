@@ -363,7 +363,7 @@ WillardChandler willardChandler(Cloud cloud, double xi) {
   std::vector<double> fieldX;
   std::vector<double> fieldY;
   for (double delta = -8.0; delta <= 12.0; delta += 0.5) {
-    double acc = 0.0;
+    double sum = 0.0;
     int nField = 0;
     for (int k = 0; k < nRay; ++k) {
       if (radius[static_cast<std::size_t>(k)] < 0.0) {
@@ -377,12 +377,12 @@ WillardChandler willardChandler(Cloud cloud, double xi) {
       }
       const double frac = idx - static_cast<double>(lo);
       const auto &row = along[static_cast<std::size_t>(k)];
-      acc += row[static_cast<std::size_t>(lo)] * (1.0 - frac) +
+      sum += row[static_cast<std::size_t>(lo)] * (1.0 - frac) +
              row[static_cast<std::size_t>(lo + 1)] * frac;
       ++nField;
     }
     fieldX.push_back(delta);
-    fieldY.push_back(nField > 0 ? acc / static_cast<double>(nField) : 0.0);
+    fieldY.push_back(nField > 0 ? sum / static_cast<double>(nField) : 0.0);
   }
   surface.densityWidth = tenNinety(fieldX, fieldY);
   (void)dens;

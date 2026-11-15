@@ -4,7 +4,7 @@ Atoms in
 
 Read a frame into an opaque handle.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 69 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 83 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_atoms.c
    :language: c
@@ -21,9 +21,9 @@ seams_system_create
 
 Allocate an empty frame.
 
-Returns: A new handle, or NULL on allocation failure. seams_last_error() then explains the failure. The caller owns the handle and passes it to seams_system_destroy().
+Returns: A new handle, or NULL on allocation failure. seams_last_error_message() then explains the failure.
 
-Thread safety: safe. The new handle is not shared yet.
+@par Ownership The caller owns the handle and passes it to seams_system_destroy(). @par Thread safety Safe. The new handle is not shared yet. @par Example @code seams_system \*sys = seams_system_create(); if (sys == NULL) { return SEAMS_ERR_NOMEM; } seams_system_destroy(sys); @endcode
 
 .. _capi-seams_system_destroy:
 
@@ -38,9 +38,9 @@ seams_system_destroy
 Free a frame.
 
 ``sys``
-    Handle from seams_system_create(), or NULL.
+    Handle from seams_system_create(), or NULL. NULL is ignored.
 
-Ownership: the handle and the frame it stored are released. Neighbour, ring, cage, and brine handles built from it stay valid: they hold their own copies. Thread safety: the caller must not use sys after this returns, and must not call it concurrently with any use of sys.
+@par Ownership The handle and the frame it stored are released. Neighbour, ring, cage, and brine handles built from it stay valid: they hold their own copies. @par Thread safety The caller must not use sys after this returns, and must not call it concurrently with any use of sys. @par Example @code seams_system_destroy(sys); sys = NULL; @endcode
 
 .. _capi-seams_system_set_atoms:
 
@@ -58,13 +58,13 @@ Store points and a general cell. Lengths are size_t.
     Frame handle.
 
 ``xyz``
-    n times 3 Cartesian coordinates, Angstrom.
+    n times 3 Cartesian coordinates, Angstrom. Every value must be finite.
 
 ``n``
     Atom count. Zero is rejected. A count that does not fit in the frame's integer width is rejected.
 
 ``box9``
-    Cell numbers. box_len selects how many are read.
+    Cell numbers: ox, oy, oz, lx, ly, lz, xy, xz, yz.
 
 ``box_len``
     Must be 9.
@@ -75,9 +75,13 @@ Store points and a general cell. Lengths are size_t.
 ``ids``
     Atom ids, or NULL to store 1..n. Ids must be unique.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL for a NULL sys, xyz, or box9; ::SEAMS_ERR_RANGE for n == 0 or box_len != 9; ::SEAMS_ERR_BOX for a non-finite cell or a non-positive edge; ::SEAMS_ERR_ARG for a non-finite coordinate or repeated ids; ::SEAMS_ERR_NOMEM; ::SEAMS_ERR_INTERNAL.
 
-Ownership: the library copies the arrays. The caller keeps them. Thread safety: exclusive use of sys.
+On failure the previously stored frame, if any, is kept.
+
+A reload on the same handle reuses its per-atom storage. When @p ids is NULL or 1..n and @p n matches the previous load, the id table is kept as well, so reloading a trajectory frame by frame costs one pass over the input after the finiteness check. seams_system_set_positions() also skips the type and id pass.
+
+@par Handle access Non-const: replaces the stored frame. On failure the old frame stays. @par Ownership The library copies the arrays. The caller keeps them. @par Thread safety Exclusive use of sys. @par Example @code const double xyz[6] = {0, 0, 0, 1.5, 0, 0}; const double box9[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0}; seams_status rc = seams_system_set_atoms(sys, xyz, 2, box9, 9, NULL, NULL); @endcode
 
 .. _capi-seams_system_set_frame:
 
@@ -89,7 +93,7 @@ seams_system_set_frame
 
    seams_status seams_system_set_frame(seams_system *sys, const double *xyz, int n, const double *box9, const int *types, const int *ids)
 
-Store points and a general LAMMPS cell.
+Store points and a general LAMMPS cell, with an int count.
 
 ``sys``
     Frame handle.
@@ -111,7 +115,9 @@ Store points and a general LAMMPS cell.
 
 Returns: Same codes as seams_system_set_atoms().
 
-ABI 1 entry. n is an int. New callers use seams_system_set_atoms(). Ownership: the library copies the arrays. Thread safety: exclusive use of sys.
+ABI 1 entry. New callers use seams_system_set_atoms().
+
+@par Handle access Non-const: replaces the stored frame. On failure the old frame stays. @par Ownership The library copies the arrays. @par Thread safety Exclusive use of sys. @par Example @code seams_status rc = seams_system_set_frame(sys, xyz, 2, box9, NULL, NULL); @endcode
 
 .. _capi-seams_system_set_ortho:
 
@@ -160,7 +166,7 @@ Store points and an orthorhombic cell.
 
 Returns: Same codes as seams_system_set_frame(). The tilt is zero.
 
-Thread safety: exclusive use of sys.
+@par Handle access Non-const: replaces the stored frame. On failure the old frame stays. @par Ownership The library copies the arrays. @par Thread safety Exclusive use of sys. @par Example @code seams_status rc = seams_system_set_ortho(sys, xyz, 2, 0, 0, 0, 10, 10, 10, NULL, NULL); @endcode
 
 .. _capi-seams_system_read:
 
@@ -186,9 +192,9 @@ Read one frame from a trajectory file.
 ``type_filter``
     Negative keeps every atom. Zero guesses the oxygen species. A positive value keeps that species number.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE (frame index or empty frame), ::SEAMS_ERR_ARG (unreadable file), ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-Ownership: the library copies the frame out of the file. Thread safety: exclusive use of sys. Concurrent reads of distinct paths on distinct handles are safe.
+@par Handle access Non-const: replaces the stored frame. On failure the old frame stays. @par Ownership The library copies the frame out of the file. @par Thread safety Exclusive use of sys. Concurrent reads of distinct paths on distinct handles are safe. @par Example @code seams_status rc = seams_system_read(sys, "ice.lammpstrj", 1, -1); @endcode
 
 .. _capi-seams_path_nframes:
 
@@ -208,9 +214,9 @@ Number of frames in a trajectory path.
 ``nframes``
     Receives the count. Must be non-NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_INTERNAL. \*nframes is unchanged on failure.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_INTERNAL. \*nframes is unchanged on failure.
 
-Thread safety: safe for distinct paths.
+@par Ownership path is read during the call only. nframes is caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Safe for distinct paths. @par Example @code size_t nframes = 0; seams_status rc = seams_path_nframes("ice.lammpstrj", &nframes); @endcode
 
 .. _capi-seams_system_count:
 
@@ -222,12 +228,195 @@ seams_system_count
 
    int seams_system_count(const seams_system *sys)
 
-Number of points in the frame.
+Number of points in the frame, as an int.
 
 ``sys``
     Frame handle, or NULL.
 
 Returns: The atom count, or 0 when sys is NULL or holds no frame.
 
-Thread safety: exclusive use of sys.
+ABI 1 query. It cannot report an error; seams_system_natoms() can.
+
+@par Ownership The caller owns sys; the call borrows it. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code int n = seams_system_count(sys); @endcode
+
+.. _capi-seams_system_natoms:
+
+seams_system_natoms
+-------------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_natoms(const seams_system *sys, size_t *n)
+
+Number of points in the frame.
+
+``sys``
+    Frame handle.
+
+``n``
+    Receives the atom count.
+
+Returns: ::SEAMS_OK, ::SEAMS_ERR_NULL when sys or n is NULL, or ::SEAMS_ERR_STATE when sys holds no frame. \*n is unchanged on failure.
+
+@par Ownership The caller owns sys; the call borrows it. n is caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code size_t n = 0; if (seams_system_natoms(sys, &n) == SEAMS_OK) { labels = malloc(n \* sizeof \*labels); } @endcode
+
+.. _capi-seams_system_set_positions:
+
+seams_system_set_positions
+--------------------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_set_positions(seams_system *sys, const double *xyz, size_t n, const double *box9, size_t box_len)
+
+Overwrite the coordinates, and optionally the cell, of the stored frame.
+
+``sys``
+    Frame handle with a stored frame.
+
+``xyz``
+    n times 3 Cartesian coordinates, Angstrom. Every value must be finite.
+
+``n``
+    Atom count. Must equal the stored count.
+
+``box9``
+    New cell (ox, oy, oz, lx, ly, lz, xy, xz, yz), or NULL to keep the stored cell.
+
+``box_len``
+    9 when box9 is not NULL; ignored otherwise.
+
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL for a NULL sys or xyz; ::SEAMS_ERR_STATE when no frame is stored; ::SEAMS_ERR_RANGE when n differs from the stored count or box_len != 9; ::SEAMS_ERR_BOX for a non-finite cell or a non-positive edge; ::SEAMS_ERR_ARG for a non-finite coordinate; ::SEAMS_ERR_NOMEM; ::SEAMS_ERR_INTERNAL.
+
+Types and ids stay as stored. Per-atom labels written by an earlier seams_chill() or seams_chill_plus() are reset. On failure the frame is unchanged.
+
+By default the call checks every coordinate first and then writes them in place, which reads xyz twice and needs no extra memory. After seams_system_stage_positions(sys, 1) it reads xyz once instead (see there).
+
+@par Handle access Non-const: replaces the stored coordinates and cell. @par Ownership The library copies xyz and box9. The caller keeps them and may reuse the buffers as soon as the call returns. @par Thread safety Exclusive use of sys. @par Example @code seams_system_set_atoms(sys, frame0, n, box9, 9, types, NULL); for (size_t f = 1; f < nframes; ++f) { seams_system_set_positions(sys, frames[f], n, NULL, 0); seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, n, NULL); } @endcode
+
+.. _capi-seams_system_stage_positions:
+
+seams_system_stage_positions
+----------------------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_stage_positions(seams_system *sys, int enable)
+
+Trade memory for a single pass in seams_system_set_positions().
+
+``sys``
+    Frame handle, with or without a stored frame.
+
+``enable``
+    Nonzero to keep the second set, 0 to free it.
+
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL for a NULL sys.
+
+With enable nonzero the handle keeps a second set of per-atom records, about 72 bytes per atom. seams_system_set_positions() then checks and writes the coordinates into that set in one pass and swaps it with the stored frame when every value was finite, so a failed call still leaves the frame unchanged. The first reload after each load fills the second set from the frame. With enable 0, the default, the second set is freed. The setting survives loads.
+
+@par Handle access Non-const: changes how later reloads use memory. The stored frame is not touched. @par Ownership The library owns the second set and frees it with enable 0 or seams_system_destroy(). @par Thread safety Exclusive use of sys. @par Example @code seams_system_stage_positions(sys, 1); for (size_t f = 1; f < nframes; ++f) { seams_system_set_positions(sys, frames[f], n, NULL, 0); } @endcode
+
+.. _capi-seams_system_box:
+
+seams_system_box
+----------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_box(const seams_system *sys, double *box9, size_t box_len)
+
+Copy the stored cell out as nine LAMMPS numbers.
+
+``sys``
+    Frame handle.
+
+``box9``
+    Caller buffer: ox, oy, oz, lx, ly, lz, xy, xz, yz. The values match the cell that was stored, to rounding.
+
+``box_len``
+    Must be 9.
+
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_RANGE when box_len != 9; ::SEAMS_ERR_STATE when no frame is stored.
+
+@par Ownership The caller owns box9. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code double cell[9]; seams_system_box(sys, cell, 9); @endcode
+
+.. _capi-seams_system_positions:
+
+seams_system_positions
+----------------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_positions(const seams_system *sys, double *xyz, size_t len)
+
+Copy the stored coordinates out.
+
+``sys``
+    Frame handle.
+
+``xyz``
+    Caller buffer for 3 n doubles, Angstrom, in stored order.
+
+``len``
+    Length of xyz in doubles. Must be at least 3 n.
+
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE when no frame is stored; ::SEAMS_ERR_RANGE for a short buffer.
+
+@par Ownership The caller owns xyz. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code size_t n = 0; seams_system_natoms(sys, &n); double \*xyz = malloc(3 \* n \* sizeof \*xyz); seams_system_positions(sys, xyz, 3 \* n); @endcode
+
+.. _capi-seams_system_types:
+
+seams_system_types
+------------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_types(const seams_system *sys, int *types, size_t len)
+
+Copy the stored atom types out.
+
+``sys``
+    Frame handle.
+
+``types``
+    Caller buffer for n ints, in stored order.
+
+``len``
+    Length of types. Must be at least n.
+
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE when no frame is stored; ::SEAMS_ERR_RANGE for a short buffer.
+
+@par Ownership The caller owns types. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code seams_system_types(sys, types, n); @endcode
+
+.. _capi-seams_system_ids:
+
+seams_system_ids
+----------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_ids(const seams_system *sys, int *ids, size_t len)
+
+Copy the stored atom ids out.
+
+``sys``
+    Frame handle.
+
+``ids``
+    Caller buffer for n ints, in stored order.
+
+``len``
+    Length of ids. Must be at least n.
+
+Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE when no frame is stored; ::SEAMS_ERR_RANGE for a short buffer.
+
+@par Ownership The caller owns ids. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code seams_system_ids(sys, ids, n); @endcode
 

@@ -9,7 +9,7 @@ homepage = "https://dseams.info"
 categories = ["scientific"]
 keywords = ["molecular-dynamics", "ice", "clathrate", "chemistry"]
 
-# The module binds include/seams.h through iso_c_binding and links an
+# The modules bind include/seams.h through iso_c_binding and link an
 # installed libseams (meson install, conda, Nix or Spack). Point fpm at it:
 #   export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
 # The repository-root fpm.toml is the same package for git dependencies.
@@ -27,6 +27,16 @@ source-dir = "src"
 name = "check_dseams"
 source-dir = "test"
 main = "check_dseams.f90"
+
+[[test]]
+name = "capi"
+source-dir = "ci"
+main = "test_seams.f90"
+
+[[test]]
+name = "high"
+source-dir = "test"
+main = "test_high.f90"
 
 [install]
 library = true

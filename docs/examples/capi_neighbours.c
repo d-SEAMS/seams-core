@@ -6,6 +6,7 @@
 int main(void) {
   seams_system *sys = seams_system_create();
   seams_neighbours *nb = NULL;
+  size_t nrows = 0;
   if (seams_system_read(sys, "input/traj/ice1h.lammpstrj", 1, -1) != SEAMS_OK) {
     return 1;
   }
@@ -14,8 +15,12 @@ int main(void) {
     return 1;
   }
   int rows = seams_neighbours_count(nb);
+  if (seams_neighbours_nrows(nb, &nrows) != SEAMS_OK || nrows != 128 || rows != 128) {
+    fprintf(stderr, "nrows %zu count %d\n", nrows, rows);
+    return 1;
+  }
   printf("neighbours %d\n", rows);
   seams_neighbours_destroy(nb);
   seams_system_destroy(sys);
-  return rows == 128 ? 0 : 1;
+  return 0;
 }

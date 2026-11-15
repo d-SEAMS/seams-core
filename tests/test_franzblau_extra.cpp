@@ -57,7 +57,7 @@ TEST_CASE("populateGraphFromNListID builds graph from ID-based nList",
   REQUIRE(graph.pts.size() == 3);
   // Each vertex should have the correct atomIndex
   for (int i = 0; i < 3; i++) {
-    REQUIRE(graph.pts[i].atomIndex == i);
+    REQUIRE(graph.pts[static_cast<std::size_t>(i)].atomIndex == i);
   }
   // Atom 0 should list atoms 1 and 2 as neighbours (by index)
   REQUIRE(graph.pts[0].neighListIndex.size() == 2);
@@ -126,9 +126,10 @@ std::vector<int> canonicalRing(std::vector<int> r) {
   std::vector<int> best;
   for (int dir = 0; dir < 2; dir++) {
     for (int s = 0; s < n; s++) {
-      std::vector<int> cand(n);
+      std::vector<int> cand(static_cast<std::size_t>(n));
       for (int i = 0; i < n; i++) {
-        cand[i] = r[(dir ? (s - i + 2 * n) : (s + i)) % n];
+        cand[static_cast<std::size_t>(i)] =
+            r[static_cast<std::size_t>((dir ? (s - i + 2 * n) : (s + i)) % n)];
       }
       if (best.empty() || cand < best) {
         best = cand;
@@ -332,7 +333,7 @@ TEST_CASE("RingUpdater equals full recomputation across perturbed frames",
   };
   for (int frame = 0; frame < 3; frame++) {
     for (int k = 0; k < 3; k++) {
-      auto &p = cloud.pts[pick(n)];
+      auto &p = cloud.pts[static_cast<std::size_t>(pick(n))];
       p.x += 0.8 * ((frame + k) % 2 ? 1.0 : -1.0);
       p.y += 0.4;
     }
@@ -364,7 +365,7 @@ TEST_CASE("RingUpdater matches ringNetwork element by element on every frame",
     const int moves = frame < 2 ? 0 : (frame < 4 ? 4 : n / 3);
     for (int k = 0; k < moves; k++) {
       auto &p =
-          cloud.pts[static_cast<int>(rnd() % static_cast<unsigned long long>(n))];
+          cloud.pts[static_cast<std::size_t>(rnd() % static_cast<unsigned long long>(n))];
       p.x += 1.1 * ((frame + k) % 2 ? 1.0 : -1.0);
       p.y += 0.6;
       p.z -= 0.4;

@@ -208,8 +208,8 @@ TEST_CASE("length-2 shortcut is not a chord and is not a primitive ring", "[ring
   std::vector<std::vector<int>> adj(7);
   const int hex[6] = {0, 1, 2, 3, 4, 5};
   for (int i = 0; i < 6; i++) {
-    adj[hex[i]].push_back(hex[(i + 1) % 6]);
-    adj[hex[(i + 1) % 6]].push_back(hex[i]);
+    adj[static_cast<std::size_t>(hex[i])].push_back(hex[(i + 1) % 6]);
+    adj[static_cast<std::size_t>(hex[(i + 1) % 6])].push_back(hex[i]);
   }
   adj[0].push_back(6);
   adj[6].push_back(0);
@@ -250,8 +250,8 @@ TEST_CASE("antipode 0-1/4 hexagon is not primitive", "[ring]") {
   std::vector<std::vector<int>> adj(7);
   const int hex[6] = {1, 2, 3, 4, 5, 6};
   for (int i = 0; i < 6; i++) {
-    adj[hex[i]].push_back(hex[(i + 1) % 6]);
-    adj[hex[(i + 1) % 6]].push_back(hex[i]);
+    adj[static_cast<std::size_t>(hex[i])].push_back(hex[(i + 1) % 6]);
+    adj[static_cast<std::size_t>(hex[(i + 1) % 6])].push_back(hex[i]);
   }
   adj[0].push_back(1);
   adj[1].push_back(0);
@@ -274,8 +274,8 @@ TEST_CASE("antipode 0-1/4 hexagon is not primitive", "[ring]") {
 TEST_CASE("a chorded square is rejected by both searches", "[ring]") {
   std::vector<std::vector<int>> adj(4);
   for (int i = 0; i < 4; i++) {
-    adj[i].push_back((i + 1) % 4);
-    adj[(i + 1) % 4].push_back(i);
+    adj[static_cast<std::size_t>(i)].push_back((i + 1) % 4);
+    adj[static_cast<std::size_t>((i + 1) % 4)].push_back(i);
   }
   adj[0].push_back(2);
   adj[2].push_back(0);
@@ -336,8 +336,8 @@ TEST_CASE("hop probe matches the ball table and an independent cycle search", "[
 TEST_CASE("a changed bond only rewrites rings through its endpoints", "[ring]") {
   std::vector<std::vector<int>> adj(7);
   for (int i = 0; i < 6; i++) {
-    adj[i].push_back((i + 1) % 6);
-    adj[(i + 1) % 6].push_back(i);
+    adj[static_cast<std::size_t>(i)].push_back((i + 1) % 6);
+    adj[static_cast<std::size_t>((i + 1) % 6)].push_back(i);
   }
   adj[0].push_back(6);
   adj[6].push_back(0);

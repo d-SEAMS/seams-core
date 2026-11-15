@@ -228,14 +228,15 @@ std::vector<std::vector<int>> leviGraph(int q) {
   const int m = static_cast<int>(v.size());
   std::vector<std::vector<int>> nList(static_cast<std::size_t>(2 * m));
   for (int i = 0; i < 2 * m; ++i) {
-    nList[i].push_back(i);
+    nList[static_cast<std::size_t>(i)].push_back(i);
   }
   for (int p = 0; p < m; ++p) {
+    const auto &vp = v[static_cast<std::size_t>(p)];
     for (int l = 0; l < m; ++l) {
-      if ((v[p][0] * v[l][0] + v[p][1] * v[l][1] + v[p][2] * v[l][2]) % q ==
-          0) {
-        nList[p].push_back(m + l);
-        nList[m + l].push_back(p);
+      const auto &vl = v[static_cast<std::size_t>(l)];
+      if ((vp[0] * vl[0] + vp[1] * vl[1] + vp[2] * vl[2]) % q == 0) {
+        nList[static_cast<std::size_t>(p)].push_back(m + l);
+        nList[static_cast<std::size_t>(m + l)].push_back(p);
       }
     }
   }

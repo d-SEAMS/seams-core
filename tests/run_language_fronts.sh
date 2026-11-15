@@ -87,10 +87,18 @@ fi
 
 if command -v gfortran >/dev/null 2>&1; then
   mod=$(mktemp -d)
-  gfortran -J"$mod" -c "$root/bindings/fortran/seams.f90" -o "$mod/seams.o"
-  gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams.o" \
+  gfortran -J"$mod" -c "$root/bindings/fortran/src/seams_kinds.f90" -o "$mod/seams_kinds.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_c.f90" -o "$mod/seams_c.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_support.f90" -o "$mod/seams_support.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams.f90" -o "$mod/seams.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_methods.f90" -o "$mod/seams_methods.o"
+  gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams_c.o" \
     -o "$mod/test_seams" -L"$lib" -lseams -Wl,-rpath,"$lib"
-  LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams" "$root"
+  gfortran -I"$mod" "$root/bindings/fortran/test/test_high.f90" \
+    "$mod/seams_kinds.o" "$mod/seams_c.o" "$mod/seams_support.o" "$mod/seams.o" "$mod/seams_methods.o" \
+    -o "$mod/test_high" -L"$lib" -lseams -Wl,-rpath,"$lib"
+  OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams" "$root"
+  OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_high" "$root"
   rm -rf "$mod"
 else
   note_missing gfortran
@@ -101,18 +109,38 @@ if command -v cargo >/dev/null 2>&1; then
   # target directory from being rebuilt under a live test.
   flock "$root/bindings/rust/.cargo-test.lock" \
     env SEAMS_LIB_DIR=$lib LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
-    SEAMS_SOURCE_ROOT="$root" SEAMS_CPP_ORACLE="$lang/binding_oracle" \
+    SEAMS_SOURCE_ROOT="$root" SEAMS_CPP_ORACLE="$lang/binding_oracle" OMP_NUM_THREADS=1 \
     cargo test --manifest-path "$root/bindings/rust/Cargo.toml" -- --test-threads=1
 else
   note_missing cargo
 fi
 
+if ! command -v julia >/dev/null 2>&1 && [ -d "${HOME}/.local/julia" ]; then
+  for candidate in "${HOME}/.local/julia"/julia-*/bin/julia; do
+    if [ -x "$candidate" ]; then
+      PATH=$(dirname "$candidate"):$PATH
+      break
+    fi
+  done
+fi
 if command -v julia >/dev/null 2>&1; then
   (cd "$root/bindings/julia/Dseams" && \
     julia --project=. dev/develop_jll.jl >/dev/null 2>&1 && \
     SEAMS_LANG_LIB=$lang/libseams_lang.so \
+    SEAMS_LIB=$lib/libseams.so \
+    SEAMS_CPP_ORACLE=$build/bindings/binding_oracle \
+    SEAMS_SOURCE_ROOT=$root \
     DSEAMS_ROOT=$root \
+    OMP_NUM_THREADS=1 \
     LD_LIBRARY_PATH=$lang:$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+    julia --project=. test/runtests.jl)
+  (cd "$root/bindings/julia/Seams" && \
+    SEAMS_LIB=$lib/libseams.so \
+    SEAMS_CPP_ORACLE=$build/bindings/binding_oracle \
+    SEAMS_SOURCE_ROOT=$root \
+    DSEAMS_ROOT=$root \
+    OMP_NUM_THREADS=1 \
+    LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
     julia --project=. test/runtests.jl)
 else
   note_missing julia

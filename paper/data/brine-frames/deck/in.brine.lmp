@@ -1,0 +1,82 @@
+# Ice Ih / NaCl brine direct coexistence: TIP4P/2005 water with the
+# Madrid 2019 scaled-charge ions. Stage 1 melts the liquid half with the ice
+# half held in place; stage 2 runs the front at T.
+# This is the campaign deck (dseams2_repro templates/in.brine.lammps).
+# The deck's PLUMED DSEAMS_CAGES line is a print of a force-free collective
+# variable. It is left out here so the integrator, thermostat and seeds are
+# the ones that move the atoms. Cage and CHILL+ labels are computed on the
+# saved frames.
+# Variables: data, groups, T, P, seed, steps_melt, steps, dumpevery, dump, timeout
+units           real
+atom_style      full
+boundary        p p p
+read_data       ${data}
+include         ${groups}
+
+# TIP4P/2005: O-M 0.1546 A, O-H 0.9572 A, H-O-H 104.52 deg, O sigma 3.1589 A,
+# epsilon 0.7749 kJ/mol = 0.18520 kcal/mol. Madrid 2019 (kJ/mol -> kcal/mol):
+# Na 2.2173668 A 0.35190; Cl 4.6990563 A 0.018385; Na-O 2.6083754 A 0.18963;
+# Cl-O 4.2386698 A 0.014814; Na-Cl 3.0051231 A 0.34391; H no LJ.
+pair_style      lj/cut/tip4p/long 1 2 1 1 0.1546 8.5
+pair_modify     tail no
+kspace_style    pppm/tip4p 1.0e-5
+pair_coeff      1 1 0.18520 3.1589
+pair_coeff      2 2 0.0 0.0
+pair_coeff      3 3 0.35190 2.2173668
+pair_coeff      4 4 0.018385 4.6990563
+pair_coeff      1 3 0.18963 2.6083754
+pair_coeff      1 4 0.014814 4.2386698
+pair_coeff      3 4 0.34391 3.0051231
+pair_coeff      2 3 0.0 0.0
+pair_coeff      2 4 0.0 0.0
+pair_coeff      1 2 0.0 0.0
+bond_style      harmonic
+bond_coeff      1 0.0 0.9572
+angle_style     harmonic
+angle_coeff     1 0.0 104.52
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+timestep        2.0
+# Each run command stops at this wall time. Melt and quench finish first.
+# The production run then gets the same cap, which is what bounds the front.
+timer           timeout ${timeout} every 500
+fix             shake water shake 1.0e-5 100 0 b 1 a 1
+
+# Stage 1: melt the liquid half at 400 K with the ice half frozen
+velocity        liquid create 400.0 ${seed} dist gaussian
+fix             hold ice setforce 0.0 0.0 0.0
+velocity        ice set 0.0 0.0 0.0
+fix             melt liquid nvt temp 400.0 400.0 200.0
+thermo          1000
+thermo_style    custom step temp press vol pe
+run             ${steps_melt}
+unfix           melt
+# quench the liquid half to T with the ice still held
+velocity        liquid scale ${T}
+fix             quench liquid nvt temp ${T} ${T} 200.0
+run             ${steps_melt}
+unfix           quench
+unfix           hold
+
+# Stage 2: release the ice, NPT along z (the front normal)
+velocity        all create ${T} ${seed} dist gaussian
+fix             npt all npt temp ${T} ${T} 200.0 z ${P} ${P} 2000.0
+reset_timestep  0
+dump            d all custom ${dumpevery} ${dump} id type x y z
+dump_modify     d flush yes
+# Step 0 is the released front. The campaign dump interval still applies.
+# ${steps} is 2500000. The labelled frames are step 0, 830000, 1670000
+# and 2500000, so production is split 830000 + 840000 + 830000. Each
+# landing step is written as step-*.restart and can be dumped later with
+# in.resume.lmp and run 0.
+if "${steps} != 2500000" then "quit 1"
+run             0
+write_restart   step-*.restart
+restart         125000 restart.a restart.b
+run             830000
+write_restart   step-*.restart
+run             840000
+write_restart   step-*.restart
+run             830000
+write_restart   step-*.restart
+write_restart   end.restart

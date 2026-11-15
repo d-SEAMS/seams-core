@@ -8,6 +8,22 @@ binding_oracle = executable(
   build_rpath: meson.project_build_root() / 'src',
 )
 
+seams_hpp_test = executable(
+  'test_seams_hpp',
+  files('../tests/test_seams_hpp.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.project_build_root() / 'src'],
+)
+
+test(
+  'seams_hpp_match',
+  seams_hpp_test,
+  args: [binding_oracle.full_path(), meson.project_source_root()],
+  depends: [binding_oracle, seams_api_lib],
+  timeout: 180,
+)
+
 seams_lang = shared_library(
   'seams_lang',
   files('cxx/seams_lang.cpp'),
@@ -84,8 +100,33 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     endif
   endif
   _rscript = find_program('Rscript', required: false)
+  r_docs_lib = []
   if _rscript.found()
     chill_env.prepend('PATH', _fs.parent(_rscript.full_path()))
+    _r = find_program(_fs.parent(_rscript.full_path()) / 'R', required: false)
+    if _r.found()
+      r_docs_lib = custom_target(
+        'docs-r-lib',
+        output: 'docs-r-lib.stamp',
+        command: [
+          find_program('python3', required: true),
+          files('r/install_docs_lib.py'),
+          _r,
+          meson.project_source_root(),
+          meson.project_build_root(),
+          _fs.parent(seams_lang.full_path()),
+          '@OUTPUT@',
+        ],
+        depends: [seams_lang],
+        depend_files: files(
+          'r/dseams/DESCRIPTION', 'r/dseams/NAMESPACE', 'r/dseams/configure',
+          'r/dseams/R/capi.R', 'r/dseams/R/cpp11.R', 'r/dseams/R/dseams-package.R',
+          'r/dseams/R/dseams.R', 'r/dseams/R/s3.R',
+          'r/dseams/src/cpp11.cpp', 'r/dseams/src/dseams.cpp', 'r/dseams/src/seams_call.c',
+        ),
+        build_by_default: true,
+      )
+    endif
   endif
   _r_libs = get_option('r_libs_user')
   if _r_libs != ''
@@ -100,7 +141,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       seams_lang.full_path(),
     ],
     env: chill_env,
-    depends: [seams_exe, seams_lang],
+    depends: [seams_exe, seams_lang, r_docs_lib],
     timeout: 600,
   )
   test(
@@ -154,7 +195,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       meson.project_build_root(),
     ],
     env: _front_env,
-    depends: [seams_lang, ydslib, binding_oracle],
+    depends: [seams_lang, ydslib, seams_api_lib, binding_oracle],
     timeout: 600,
   )
   test(
@@ -170,6 +211,11 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
   _parity_env.set('DSEAMS_SRC', meson.project_source_root())
   _parity_env.set('DSEAMS_BUILD', meson.project_build_root())
   _parity_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python')
+  _parity_depends = [seams_lang]
+  if is_variable('dseams_core')
+    _parity_env.set('DSEAMS_CORE', dseams_core.full_path())
+    _parity_depends += dseams_core
+  endif
   test(
     'python_frame_parity',
     find_program('python3', required: true),
@@ -178,8 +224,23 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       meson.project_source_root() / 'bindings' / 'python' / 'tests' / 'frame_parity.py',
     ],
     env: _parity_env,
-    depends: [seams_lang],
+    depends: _parity_depends,
     timeout: 600,
+  )
+  _tip4p_env = environment()
+  _tip4p_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
+  _tip4p_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  if chemfiles_libdir != ''
+    _tip4p_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+  endif
+  test(
+    'tip4p_overhead',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_tip4p_overhead.py'],
+    workdir: meson.project_source_root(),
+    env: _tip4p_env,
+    depends: [seams_lang],
+    timeout: 180,
   )
   test(
     'symmetry_ctypes',
@@ -194,6 +255,7 @@ endif
 # CxxWrap needs libcxxwrap_julia, which is a BinaryBuilder product and
 # is not part of the pixi or Nix closure. The Julia front that ships is
 # the ccall package under bindings/julia/Dseams.
+subdir('fortran')
 subdir('lua')
 
 cxxwrap_dep = dependency('libcxxwrap_julia', required: false)

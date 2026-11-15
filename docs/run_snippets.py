@@ -196,12 +196,19 @@ def base_env(build):
         env["SEAMS_LANG_LIB"] = str(lang)
     env["SEAMS_LIB_DIR"] = str(build / "src")
     env["SEAMS_LIBDIR"] = str(build / "src")
+    env["SEAMS_LIB"] = str(build / "src" / "libseams.so")
     env["SEAMS_BUILD"] = str(build)
+    oracle = build / "bindings" / "binding_oracle"
+    if oracle.is_file():
+        # The binding test suites that pages run compare against it.
+        env["SEAMS_CPP_ORACLE"] = str(oracle)
+        env["SEAMS_SOURCE_ROOT"] = str(ROOT)
     env["PYTHONPATH"] = os.pathsep.join(
         [
             str(stage_dseams(build)),
             str(DOCS / "examples"),
             str(ROOT / "bindings" / "python"),
+            str(ROOT / "bindings" / "python" / "src"),
             str(ROOT / "adapters" / "python"),
             str(ROOT / "scripts"),
             env.get("PYTHONPATH", ""),
@@ -280,11 +287,36 @@ def pkgconfig_env():
     return env
 
 
+def compiler_includes():
+    folders = []
+    for name in ("CPATH", "CPLUS_INCLUDE_PATH", "C_INCLUDE_PATH"):
+        folders.extend(Path(part) for part in os.environ.get(name, "").split(os.pathsep) if part)
+    return list(dict.fromkeys(folders))
+
+
+def library_file(name):
+    """The shared library the linker would take for ``name``, or None."""
+    compiler = shutil.which("cc")
+    if compiler is not None:
+        found = subprocess.run(
+            [compiler, "-print-file-name=" + name],
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        if os.path.isabs(found) and os.path.isfile(found):
+            return found
+    # clang links from LIBRARY_PATH but -print-file-name does not search it.
+    for part in os.environ.get("LIBRARY_PATH", "").split(os.pathsep):
+        if part and os.path.isfile(os.path.join(part, name)):
+            return os.path.join(part, name)
+    return None
+
+
 def sdk_flags(text):
     flags = []
     rpaths = []
     if shutil.which("pkg-config"):
-        for spec, needle in (("libgromacs", "gromacs/"), ("plumed", "plumed/")):
+        for spec, needle in (("libgromacs", "gromacs/"), ("plumed", "plumed/"), ("lammps", "library.h")):
             if needle not in text:
                 continue
             done = subprocess.run(
@@ -308,6 +340,19 @@ def sdk_flags(text):
             if folder.is_dir() and any(token in text for token in ("gromacs/", "plumed/", "OpenMM.h", "library.h")):
                 flags.append("-L" + str(folder))
                 rpaths.append(str(folder))
+    if "plumed/" in text and "-lplumedKernel" not in flags:
+        # The kernel symbols, such as PLMD::OpenMP, are in libplumedKernel.
+        kernel = library_file("libplumedKernel.so")
+        if kernel:
+            flags.extend(["-L" + os.path.dirname(kernel), "-lplumedKernel"])
+    if "OpenMM.h" in text and "-lOpenMM" not in flags:
+        # Module systems put OpenMM on the compiler search paths, as
+        # engines/meson.build finds it, and leave LD_LIBRARY_PATH alone.
+        for include in compiler_includes():
+            lib = include.parent / "lib"
+            if (include / "OpenMM.h").is_file() and (lib / "libOpenMM.so").is_file():
+                flags.extend(["-L" + str(lib), "-lOpenMM"])
+                break
     seen = []
     for flag in flags:
         if flag.startswith("-L") and len(flag) > 2:
@@ -321,6 +366,21 @@ def sdk_flags(text):
         if flags[index] == "-L":
             rpaths.append(flags[index + 1])
         index += 1
+    # pkg-config leaves out -L for folders already on LIBRARY_PATH, so the
+    # library links and then has no runpath.
+    for flag in flags:
+        if not flag.startswith("-l"):
+            continue
+        found = library_file("lib{}.so".format(flag[2:]))
+        if found:
+            rpaths.append(os.path.dirname(os.path.realpath(found)))
+    if "-fopenmp" in flags:
+        # clang's -fopenmp links libomp from its own folder, which the loader does not search.
+        for runtime in ("libomp.so", "libgomp.so"):
+            found = library_file(runtime)
+            if found:
+                rpaths.append(os.path.dirname(os.path.realpath(found)))
+                break
     for folder in dict.fromkeys(rpaths):
         link = "-Wl,-rpath," + folder
         if link not in seen:
@@ -401,7 +461,8 @@ def compile_c_family(build, env, source, out, extra=None, more_sources=None):
     cmd.extend(vendored_links(build))
     cmd.extend(sdk_flags(text))
     if source.suffix != ".c":
-        cmd.insert(1, "-std=c++17")
+        # The project default; seams.hpp uses std::span.
+        cmd.insert(1, "-std=c++20")
     if out.suffix == ".so":
         cmd.insert(1, "-fPIC")
         cmd.insert(1, "-shared")
@@ -425,7 +486,11 @@ def program_args(text, build):
         return [str(seams)]
     if "SEAMS_BUILD" in text:
         return []
-    if "get_command_argument" in text and "input/traj" in text:
+    if "<repository root>" in text:
+        return [str(ROOT)]
+    if 'Path(sys.argv[1]) if len(sys.argv) > 1 else root / "build"\n' in text:
+        return [str(build)]
+    if "input/traj" in text and any(token in text for token in ("get_command_argument", "arg[1]", "ARGS[1]")):
         return [str(ROOT)]
     if "commandArgs" in text or ("get_command_argument" in text and "input/traj" not in text):
         return [str(FIXTURE)]
@@ -521,12 +586,8 @@ def run_source(build, env, path):
         elif path.suffix in {".f90", ".F90"}:
             gfortran = which("gfortran")
             work = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-"))
-            # seams.f90 is the module. It does not use itself and it has no
-            # program, so linking it looks for a main that is not there.
-            if re.search(r"(?m)^\s*module\s+\w+", text) and not re.search(r"(?m)^\s*program\s+\w+", text):
-                run([gfortran, "-c", str(path), "-o", str(work / "unit.o")], env, cwd=work)
-                return
-            if "use seams" not in text:
+            is_program = re.search(r"(?m)^\s*program\s+\w+", text) is not None
+            if "use seams" not in text and is_program:
                 exe = work / "snippet"
                 run(
                     [
@@ -546,12 +607,18 @@ def run_source(build, env, path):
                 )
                 run([str(exe), *program_args(text, build)], env)
                 return
-            run(
-                [gfortran, "-J", str(work), "-c", str(ROOT / "bindings" / "fortran" / "seams.f90"), "-o", str(work / "seams.o")],
-                env,
-                cwd=work,
-            )
-            if not re.search(r"(?m)^\s*program\s+\w+", text):
+            # Same order as fortran_lib_src in bindings/fortran/meson.build.
+            objects = []
+            for unit in ("seams_kinds", "seams_c", "seams_support", "seams", "seams_methods"):
+                obj = work / (unit + ".o")
+                run(
+                    [gfortran, "-J", str(work), "-c", str(ROOT / "bindings" / "fortran" / "src" / (unit + ".f90")), "-o", str(obj)],
+                    env,
+                    cwd=work,
+                )
+                objects.append(str(obj))
+            if not is_program:
+                # A module or submodule has no main to link.
                 run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env, cwd=work)
                 return
             exe = work / "snippet"
@@ -561,7 +628,7 @@ def run_source(build, env, path):
                     "-I",
                     str(work),
                     str(path),
-                    str(work / "seams.o"),
+                    *objects,
                     "-o",
                     str(exe),
                     "-L" + str(build / "src"),
@@ -873,10 +940,16 @@ def run_julia_text(build, env, body):
             lines.append(line)
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-jl-"))
     script = work / "snippet.jl"
-    script.write_text("using Dseams\n" + "\n".join(lines) + "\n", encoding="utf-8")
+    # Seams and Dseams export the same verbs, so a Seams block must not
+    # also load Dseams or the unqualified calls become ambiguous.
+    module = "Seams" if re.search(r"^\s*using Seams\b", body, re.M) else "Dseams"
+    prelude = "" if module == "Seams" else "using Dseams\n"
+    script.write_text(prelude + "\n".join(lines) + "\n", encoding="utf-8")
+    project = ROOT / "bindings" / "julia" / module
     local = dict(env)
-    local["JULIA_LOAD_PATH"] = str(ROOT / "bindings" / "julia" / "Dseams") + os.pathsep
-    run([julia, "--startup-file=no", "--project=" + str(ROOT / "bindings" / "julia" / "Dseams"), str(script)], local)
+    local["JULIA_LOAD_PATH"] = str(project) + os.pathsep
+    local["SEAMS_LIB"] = str(build / "src" / "libseams.so")
+    run([julia, "--startup-file=no", "--project=" + str(project), str(script)], local)
 
 
 def run_lua_text(build, env, body):
@@ -923,8 +996,13 @@ def run_r_text(build, env, body):
 
 def run_rust_text(build, env, body):
     which("cargo")
-    if "fn main" not in body or "assert" not in body:
-        raise Fail("Rust example must be a complete main that asserts its result")
+    if "assert" not in body:
+        raise Fail("Rust example must assert its result")
+    if "fn main" not in body:
+        # A fragment such as the error example runs inside a main that
+        # returns the crate's Result, as a rustdoc example would.
+        indented = "".join("    " + line if line.strip() else line for line in body.splitlines(True))
+        body = "fn main() -> Result<(), seams::Error> {\n" + indented.rstrip("\n") + "\n    Ok(())\n}\n"
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-rs-"))
     (work / "src").mkdir()
     (work / "Cargo.toml").write_text(
@@ -985,13 +1063,11 @@ def execute_page(path, build):
                 if "tests" in excerpt.parts and excerpt.suffix in {".c", ".cpp", ".h", ".hpp", ".py"}:
                     ran += 1
                     continue
-                if excerpt.name == "bench_cli_fast.py" and not (ROOT / "build" / "seams").is_file():
-                    link = ROOT / "build"
-                    if not link.exists() and (build / "seams").is_file():
-                        link.symlink_to(build)
-                if excerpt.name == "bench_cli_fast.py" and not (ROOT / "build" / "seams").is_file():
+                if excerpt.name == "bench_cli_fast.py":
+                    # check_excerpt found the quoted line. The driver is a
+                    # timing run that rewrites markdown/cli-fast-paths.md,
+                    # so a snippet test must not execute it.
                     ran += 1
-                    skips.append("bench driver looks for build/seams")
                     continue
                 run_source(build, env, excerpt)
                 ran += 1
@@ -1028,6 +1104,12 @@ def execute_page(path, build):
                 continue
             if lang == "rust":
                 run_rust_text(build, env, body)
+                ran += 1
+                continue
+            if lang in {"fortran", "f90"}:
+                source = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-")) / "snippet.f90"
+                source.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
+                run_source(build, env, source)
                 ran += 1
                 continue
             raise Fail("unhandled " + lang)

@@ -12,11 +12,13 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -61,13 +63,17 @@ bool histogramCellPairs(
                  static_cast<int>(std::min(frame.wy / span, 1.0e6)),
                  static_cast<int>(std::min(frame.wz / span, 1.0e6))};
   // A dilute frame takes coarser cells rather than walking empty ones.
-  while (1LL * dims[0] * dims[1] * dims[2] > 2LL * n + 27) {
+  const long long cellCap = std::min(2LL * n + 27, static_cast<long long>(std::numeric_limits<int>::max()));
+  while (1LL * dims[0] * dims[1] * dims[2] > cellCap) {
     int *widest = std::max_element(dims, dims + 3);
     *widest = std::max(1, *widest / 2);
   }
   const int ny = dims[1];
   const int nz = dims[2];
-  const int ncell = dims[0] * ny * nz;
+  int ncell = 0;
+  if (!seams::gridFits(dims[0], ny, nz, ncell)) {
+    return false;
+  }
   const double lx = frame.lx, ly = frame.ly, lz = frame.lz;
   const double xy = frame.xy, xz = frame.xz, yz = frame.yz;
 
@@ -249,7 +255,7 @@ int rdf2::rdf2Danalysis_AA(
     if (nbin < 1) {
       nbin = 1;
     }
-    rdfValues.resize(nbin);
+    rdfValues.resize(static_cast<std::size_t>(nbin));
   }
   volumeLengths = rdf2::getSystemLengths(yCloud);
   nbin = static_cast<int>(cutoff / binwidth);
@@ -257,7 +263,7 @@ int rdf2::rdf2Danalysis_AA(
     nbin = 1;
   }
   if (static_cast<int>(rdfValues.size()) != nbin) {
-    rdfValues.assign(nbin, 0.0);
+    rdfValues.assign(static_cast<std::size_t>(nbin), 0.0);
   }
   // Sample for the current frame!!
   histogram = rdf2::sampleRDF_AA(yCloud, cutoff, binwidth, nbin);
@@ -308,7 +314,7 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   std::vector<int> histogram;
 
   // Init the histogram to 0
-  histogram.resize(nbin);
+  histogram.resize(static_cast<std::size_t>(nbin));
 
   // Inside the one-image ball every pair has a single image within the
   // cutoff, and the cell pairs find it. Past the ball the direct loop takes
@@ -419,8 +425,8 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> &rdfValues,
     binVolume = 4 * gen::pi * pow(binwidth, 3.0) *
                 (pow(ibin + 1, 3.0) - pow(ibin, 3.0)) / 3.0;
     // Update the RDF
-    rdfValues[ibin] +=
-        histogram[ibin] / (nIter * binVolume * nopA * volumeDensity * factor);
+    rdfValues[static_cast<std::size_t>(ibin)] +=
+        histogram[static_cast<std::size_t>(ibin)] / (nIter * binVolume * nopA * volumeDensity * factor);
   } // end of loop through every bin
 
   return 0;
@@ -463,25 +469,25 @@ std::vector<double> rdf2::getSystemLengths(
 
   // Loop through the entire PointCloud
   for (int iatom = 1; iatom < yCloud.nop; iatom++) {
-    r_iatom[0] = yCloud.pts[iatom].x; // x coordinate of iatom
-    r_iatom[1] = yCloud.pts[iatom].y; // y coordinate of iatom
-    r_iatom[2] = yCloud.pts[iatom].z; // z coordinate of iatom
+    r_iatom[0] = yCloud.pts[static_cast<std::size_t>(iatom)].x; // x coordinate of iatom
+    r_iatom[1] = yCloud.pts[static_cast<std::size_t>(iatom)].y; // y coordinate of iatom
+    r_iatom[2] = yCloud.pts[static_cast<std::size_t>(iatom)].z; // z coordinate of iatom
     // Loop through every dimension
     for (int k = 0; k < dim; k++) {
       // Update rMin
-      if (r_iatom[k] < rMin[k]) {
-        rMin[k] = r_iatom[k];
+      if (r_iatom[static_cast<std::size_t>(k)] < rMin[static_cast<std::size_t>(k)]) {
+        rMin[static_cast<std::size_t>(k)] = r_iatom[static_cast<std::size_t>(k)];
       } // end of rMin update
       // Update rMax
-      if (r_iatom[k] > rMax[k]) {
-        rMax[k] = r_iatom[k];
+      if (r_iatom[static_cast<std::size_t>(k)] > rMax[static_cast<std::size_t>(k)]) {
+        rMax[static_cast<std::size_t>(k)] = r_iatom[static_cast<std::size_t>(k)];
       } // end of rMax update
     }   // end of looping through every dimension
   }     // end of loop through all the atoms
 
   // Get the lengths
   for (int k = 0; k < dim; k++) {
-    lengths.push_back(rMax[k] - rMin[k]);
+    lengths.push_back(rMax[static_cast<std::size_t>(k)] - rMin[static_cast<std::size_t>(k)]);
   } // end of updating lengths
 
   return lengths;

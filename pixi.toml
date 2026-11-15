@@ -59,6 +59,8 @@ sphericart = { features = ["sphericart"] }
 nauty = { features = ["nauty"] }
 repro = { features = ["repro"] }
 cycles = { features = ["cycles"], no-default-feature = true }
+crosscheck = { features = ["crosscheck"] }
+abi = { features = ["abi"] }
 
 [feature.cycles]
 # bpy wheels follow Blender's Python, 3.13 from Blender 5.1. The molecule
@@ -152,7 +154,7 @@ cmd = "emacs --batch --load export.el"
 description = "Generates XML via Doxygen and converts it to RST via Doxyrest"
 cwd = "docs/source"
 depends-on = ["patch-doxyrest"]
-cmd = "doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua && python3 ../../scripts/doxyrest_targets.py ."
+cmd = "python3 ../../scripts/doxygen_version_header.py && doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua && python3 ../../scripts/doxyrest_targets.py ."
 
 [feature.docs.tasks.sphinxbld]
 depends-on = ["mkrst", "doxybuild"]
@@ -174,8 +176,22 @@ description = "Copy doxyYoda HTML into the Sphinx publish tree"
 depends-on = ["sphinxbld", "doxyhtml"]
 cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-cpp"
 
+[feature.docs.tasks.ford]
+description = "FORD HTML for the Fortran bindings"
+cmd = "ford bindings/fortran/ford.md"
+
+[feature.docs.tasks.ldoc]
+description = "LDoc HTML for the Lua bindings"
+cwd = "bindings/lua"
+cmd = "ldoc ."
+
+[feature.docs.tasks.install-binding-docs]
+description = "Copy FORD and LDoc HTML into the Sphinx publish tree"
+depends-on = ["sphinxbld", "ford", "ldoc"]
+cmd = "rm -rf docs/build/fortran docs/build/lua && cp -R docs/ford docs/build/fortran && cp -R docs/ldoc docs/build/lua"
+
 [feature.docs.tasks.docbld]
-depends-on = ["sphinxbld", "install-doxyhtml"]
+depends-on = ["sphinxbld", "install-doxyhtml", "install-binding-docs"]
 
 [feature.docs.tasks.docdel]
 cwd = "docs"
@@ -184,6 +200,8 @@ cmd = """
 rm -rf build
 rm -rf doctrees
 rm -rf doxygen-html
+rm -rf ford
+rm -rf ldoc
 rm -rf source/xml
 rm -rf source/api
 rm -rf source/contributing
@@ -210,13 +228,28 @@ lua = ">=5.4,<5.5"
 [feature.repro.pypi-dependencies]
 snakemake = ">=8.0"
 
+[feature.crosscheck]
+# PyPI freud-analysis and ovito for the C API comparison.
+platforms = ["linux-64"]
+
+[feature.crosscheck.pypi-dependencies]
+freud-analysis = ">=3.6.1,<4"
+ovito = ">=3.12.0,<4"
+
+[feature.abi]
+# abidiff for the type-level step of capi_abi. conda-forge builds
+# libabigail for linux only.
+platforms = ["linux-64"]
+
+[feature.abi.dependencies]
+libabigail = "2.9.*"
+
 [target.linux-64.dependencies]
 lammps = ">=2024.8.29,<2026"
 gromacs = ">=2026.3,<2027"
 openmm = ">=8.6.1,<9"
 plumed = ">=2.9.2,<3"
 packmol = ">=21.2.1,<22"
-freud = ">=3.6.1,<4"
 pyscal3 = ">=4.1.0,<5"
 ase = ">=3.29.0,<4"
 libegl = ">=1.7.0,<2"
@@ -240,6 +273,7 @@ luajit = ">=2.1"
 lua = ">=5.4,<5.5"
 
 [pypi-dependencies]
+freud-analysis = ">=3.6.1,<4"
 ovito = ">=3.12.0, <4"
 genice2 = ">=2.2.13.3, <3"
 solvis-tools = ">=0.1.5, <0.2"

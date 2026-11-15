@@ -1,0 +1,38 @@
+command taskset -c 0 [path] time cluster-chill input/traj/nucleation_f1.lammpstrj 1 1 1 6
+loadavg 0.39 0.75 0.67 1/283 26574
+returncode 0
+stdout
+meta mode cluster-chill
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 6.829032
+repeat 1 largest 155
+repeat 1 ice_like 349
+repeat 1 subset 349
+repeat 2 path_ms 6.859462
+repeat 2 largest 155
+repeat 2 ice_like 349
+repeat 2 subset 349
+repeat 3 path_ms 6.815731
+repeat 3 largest 155
+repeat 3 ice_like 349
+repeat 3 subset 349
+repeat 4 path_ms 6.694122
+repeat 4 largest 155
+repeat 4 ice_like 349
+repeat 4 subset 349
+repeat 5 path_ms 6.800829
+repeat 5 largest 155
+repeat 5 ice_like 349
+repeat 5 subset 349
+repeat 6 path_ms 7.097863
+repeat 6 largest 155
+repeat 6 ice_like 349
+repeat 6 subset 349
+meta sink 29757
+
+stderr

@@ -43,10 +43,10 @@ int main() {
     OpenMM::State state = context.getState(OpenMM::State::Positions);
     const auto &pos = state.getPositions();
     std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
-    for (int i = 0; i < n; ++i) {
-      xyz[static_cast<std::size_t>(3 * i)] = pos[i][0] * 10.0;
-      xyz[static_cast<std::size_t>(3 * i + 1)] = pos[i][1] * 10.0;
-      xyz[static_cast<std::size_t>(3 * i + 2)] = pos[i][2] * 10.0;
+    for (std::size_t i = 0; i < static_cast<std::size_t>(n); ++i) {
+      xyz[3 * i] = pos[i][0] * 10.0;
+      xyz[3 * i + 1] = pos[i][1] * 10.0;
+      xyz[3 * i + 2] = pos[i][2] * 10.0;
     }
     const double box9[9] = {0, 0, 0, a, a, a, 0, 0, 0};
     std::vector<int> labels(static_cast<std::size_t>(n));

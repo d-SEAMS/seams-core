@@ -1,0 +1,6 @@
+file genice_sH.lammpstrj
+frames 1
+mode cluster-q6
+frame 1 largest 4
+max_largest 4
+max_frame 1

@@ -1,0 +1,5 @@
+Neighbour-list and ring head-to-heads are outside this run.
+d-SEAMS 1 commit 6e51956f is not in this checkout, so the version-comparison ratios were not recomputed.
+The 148-frame nucleation trajectory is not shipped; only input/traj/nucleation_f1.lammpstrj is present.
+Parallel strong-scaling speedups were not run; the protocol is one thread.
+submission/cpc-v3 and REMOVED.tsv are not on a reachable remote, so the 57 v1 decimals were not listed.

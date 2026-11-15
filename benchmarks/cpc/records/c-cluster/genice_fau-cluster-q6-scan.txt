@@ -1,0 +1,6 @@
+file genice_fau.lammpstrj
+frames 1
+mode cluster-q6
+frame 1 largest 192
+max_largest 192
+max_frame 1

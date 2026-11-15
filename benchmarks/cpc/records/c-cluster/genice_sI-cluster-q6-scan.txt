@@ -1,0 +1,6 @@
+file genice_sI.lammpstrj
+frames 1
+mode cluster-q6
+frame 1 largest 0
+max_largest 0
+max_frame 1

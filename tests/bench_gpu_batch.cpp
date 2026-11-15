@@ -49,9 +49,10 @@ int main(int argc, char **argv) {
     const auto base = static_cast<std::size_t>(got) *
                       static_cast<std::size_t>(nAtoms) * 3;
     for (int i = 0; i < nAtoms; ++i) {
-      xyz[base + static_cast<std::size_t>(i) * 3 + 0] = cloud.pts[i].x;
-      xyz[base + static_cast<std::size_t>(i) * 3 + 1] = cloud.pts[i].y;
-      xyz[base + static_cast<std::size_t>(i) * 3 + 2] = cloud.pts[i].z;
+      const auto &pt = cloud.pts[static_cast<std::size_t>(i)];
+      xyz[base + static_cast<std::size_t>(i) * 3 + 0] = pt.x;
+      xyz[base + static_cast<std::size_t>(i) * 3 + 1] = pt.y;
+      xyz[base + static_cast<std::size_t>(i) * 3 + 2] = pt.z;
     }
     if (!tiltDump) {
       box[static_cast<std::size_t>(got) * 3 + 0] = cloud.box[0];

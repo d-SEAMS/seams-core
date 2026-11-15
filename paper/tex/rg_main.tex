@@ -793,7 +793,7 @@ Hexagonal, cubic and mixed molecules in each of the \dsv{n@frames} frames of \ds
 \label{fig:nucleation}
 \end{figure}
 
-The benchmark systems are the cages, the ice lattices, a nucleation seed, a brine slab and the two clathrate hydrates (Figures~\ref{fig:renders-cages}, \ref{fig:renders-ice}, \ref{fig:renders-seed} and~\ref{fig:renders-hydrate}).
+The benchmark systems are the cages, the ice lattices, a nucleation seed, a brine front and the two clathrate hydrates (Figures~\ref{fig:renders-cages}, \ref{fig:renders-ice}, \ref{fig:renders-seed}, \ref{fig:brine-front} and~\ref{fig:renders-hydrate}).
 
 \begin{figure}[tbp]
 \centering
@@ -820,14 +820,29 @@ Every molecule of the hexagonal lattice lies on hexagonal cages, and every molec
 \label{fig:renders-seed}
 \end{figure}
 
+% paper/tex/figures/brine_front.pdf is gitignored.
+% paper/tex/repro/brine_front.sh runs the brine_front_pdf rule.
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.32\textwidth]{figures/brine_slab_xyzrender}\hfill
-\includegraphics[width=0.32\textwidth]{figures/si_hydrate_xyzrender}\hfill
-\includegraphics[width=0.32\textwidth]{figures/sii_hydrate_xyzrender}
-\caption{\textbf{The brine slab and the two methane hydrates.}
-In the brine drawing the ice is the connected slab and the ions sit in the liquid half.
-Every drawn hydrate cage contains one methane.}
+\includegraphics[width=85mm]{figures/brine_front}
+\caption{\textbf{A 230 K TIP4P/2005 ice front against Madrid-2019 brine.}
+(a) The 20-pair cell at the start of production, after the liquid half was melted at 400 K and quenched, and the same cell after 5 ns.
+Water oxygens are coloured by the d-SEAMS CHILL+ label: hexagonal orange, cubic blue, interfacial green, liquid grey, clathrate light blue and interfacial clathrate pink.
+Sodium is violet and chloride is black, and both sit in the liquid.
+(b) Hexagonal and cubic molecules and the ice thickness at 5 ns against the NaCl loading, one marker per replica.
+The thickness is the distance between the two half-crystal crossings of a 20-bin profile along $z$.
+A bar spans the replicas when two or more have the frame.
+Only replica r0 at 0, 20 and 40 pairs is in the dataset; there is no second replica and no 10-pair loading, so no range is drawn.
+The values are in \texttt{paper/data/brine-frames/replicas.csv}.}
+\label{fig:brine-front}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/si_hydrate_xyzrender}\hfill
+\includegraphics[width=0.48\textwidth]{figures/sii_hydrate_xyzrender}
+\caption{\textbf{The two methane hydrates.}
+Every drawn cage contains one methane.}
 \label{fig:renders-hydrate}
 \end{figure}
 

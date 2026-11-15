@@ -56,7 +56,7 @@ TEST_CASE("getPointCloudOneAtomType filters by type", "[selection]") {
   // Type 1 atoms: indices 0, 2, 4
   REQUIRE(result.nop == 3);
   for (int i = 0; i < result.nop; i++) {
-    REQUIRE(result.pts[i].type == 1);
+    REQUIRE(result.pts[static_cast<std::size_t>(i)].type == 1);
   }
 }
 

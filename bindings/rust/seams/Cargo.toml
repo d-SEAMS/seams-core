@@ -37,5 +37,9 @@ path = "examples/minimal.rs"
 name = "ice_ih"
 path = "examples/ice_ih.rs"
 
+[[example]]
+name = "binding_overhead"
+path = "examples/binding_overhead.rs"
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

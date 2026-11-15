@@ -1,0 +1,36 @@
+name: Sanitizers
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, modernize]
+  pull_request:
+    branches: [main]
+
+jobs:
+  asan-ubsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-sanitize-suite-
+      # scripts/sanitize_suite.sh is the same configure and the whole meson
+      # suite. AddressSanitizer and UndefinedBehaviorSanitizer together.
+      # Julia and R cannot host that runtime; the Python front is in the suite.
+      - run: pixi run scripts/sanitize_suite.sh
+
+  tsan-openmp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-sanitize-tsan-
+      - run: pixi run meson setup build-tsan --buildtype=debugoptimized -Dwith_tests=true -Dwith_python=false -Dwith_cli=true -Db_sanitize=thread
+      - run: pixi run ninja -C build-tsan tests/test_neighbours tests/test_bop tests/test_chill_plus_rule tests/test_cage_enum tests/test_rings_ih
+      - run: pixi run meson test -C build-tsan --print-errorlogs neighbours bop chill_plus_rule cage_enum rings_ih
+        env:
+          OMP_NUM_THREADS: "8"
+          TSAN_OPTIONS: halt_on_error=1

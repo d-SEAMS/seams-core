@@ -1,0 +1,1 @@
+`docs/examples/c/` holds one short C program per C API family: neighbours, rings, CHILL+, q4 and q6, cages, and errors. Each checks its own results on the in-tree ice Ih fixture, and `capi_example_<family>` compiles it as C11 with `-Wall -Wextra -Wpedantic -Werror` and runs it. The C API page includes all six.

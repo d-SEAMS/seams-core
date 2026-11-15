@@ -1,6 +1,8 @@
 # Julia
 
-`bindings/julia/Dseams` is the package CI runs. It calls `libseams_lang`. Point `SEAMS_LANG_LIB` at that shared library and `DSEAMS_ROOT` at the checkout. `bindings/julia/Seams` is the thin `libseams` example.
+`bindings/julia/Dseams` calls `libseams_lang`. `bindings/julia/Seams` calls
+`libseams` (`include/seams.h`). Set `SEAMS_LANG_LIB` and `SEAMS_LIB`.
+`DSEAMS_ROOT` is the checkout.
 
 `Dseams` and its engine package `libseams_jll` are not in the General registry yet, so `Pkg.add("Dseams")` does not work. `bindings/julia/Dseams/dev/develop_jll.jl` develops a stand-in `libseams_jll` with no binaries, and `SEAMS_LANG_LIB` or `Dseams.set_library!` names a local `libseams_lang`. `packaging/yggdrasil/L/libseams` is the Yggdrasil recipe for the JLL.
 
@@ -9,6 +11,90 @@
 `docs/examples/minimal_julia.jl` reads the
 GenIce sI cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`.
 `meson test docs_examples` runs it.
+
+Both modules are packages with `Project.toml`, exports, and `Pkg.test`.
+Handles are mutable structs with finalizers. Result values are structs
+with `Base.show`. A failing call throws `SeamsError`. The message is
+`seams_handle_error` for the C API and `seams_last_error` for `libseams_lang`.
+
+## Quickstart
+
+```julia
+using Dseams
+path = joinpath(ENV["DSEAMS_ROOT"], "input", "traj", "exampleTraj.lammpstrj")
+frame = read_frame(path; type = 2)
+ice = chill_plus(frame)
+println(ice)
+println(ice.counts["water"])
+```
+
+On `input/traj/exampleTraj.lammpstrj` with oxygen type 2 the cutoff shell
+is 9 interClathrate and 241 water. The mutual shell is 1 clathrate,
+7 interClathrate, and 242 water. Mean q3 on the cutoff shell is 0.374897.
+`primitive_rings` indexes by size: `rings[6] == 224` at depth 8.
+
+`Seams` on the cubic cell:
+
+```julia
+using Seams
+a = 2.75 * 4 / sqrt(3)
+fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+basis = ((0.0, 0.0, 0.0), (0.25, 0.25, 0.25))
+sites = [((i, j, k) .+ f .+ b) .* a for i in 0:1, j in 0:1, k in 0:1, f in fcc, b in basis]
+xyz = reduce(hcat, collect.(vec(sites)))
+edge = 2a
+set_num_threads(1)
+sys = System()
+set_ortho!(sys, xyz, (edge, edge, edge))
+labels, counts = chill_plus(sys; rule = Seams.PUBLISHED)
+q4, q6 = q4q6(sys)
+six, fraction = six_rings(sys)
+```
+
+`ChillLabels`, `Q4Q6Pair`, and `SixRings` iterate in field order, so the
+unpacking above is the struct itself. Every atom is cubic. Mean q6 is
+above 0.3. The six-ring fraction is above 0.5.
+
+## Ownership
+
+`Frame` calls `seams_frame_free` from its finalizer. `System` calls
+`seams_system_destroy`. A null pointer is ignored, so the finalizer is
+safe to run twice. Neighbour and ring handles created inside `six_rings`,
+`seams_cages`, and `seams_rings_vertices` are destroyed before those
+functions return. `show(sys)` prints the atom count.
+
+## Errors
+
+`SeamsError` is the exception. Pass a path that the reader rejects and
+the message is the handle string. An empty `System` has `seams_chill`
+throw before any label buffer is trusted.
+
+## Multiple dispatch
+
+`chill_plus` accepts a `Frame`, a trajectory path, or, in `Seams`, a
+`System` and a `3 × n` matrix. `read_frame`, `nop`, and `nframes` stay
+on the path and frame methods.
+
+## Native reference
+
+Documenter builds the reference from the docstrings:
+
+```bash
+julia --project=bindings/julia/Dseams/docs -e 'using Pkg; Pkg.instantiate()'
+julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/docs/make.jl
+julia --project=bindings/julia/Seams/docs -e 'using Pkg; Pkg.instantiate()'
+julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
+```
+
+That is the same split readcon uses between the bindings page and the
+generated crate pages. `doctest = false` in `make.jl` because the
+numerical checks live in `Pkg.test`, which needs the shared libraries.
+The built reference is linked from this book:
+
+```{raw} html
+<p><a href="../julia-dseams/index.html">Dseams Documenter reference</a>
+and <a href="../julia-seams/index.html">Seams Documenter reference</a>.</p>
+```
 
 `docs/examples/core_counts.jl` checks Ice Ih (128 hexagonal, 256
 six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
@@ -25,10 +111,6 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 ```{literalinclude} ../../../docs/examples/julia_api.jl
 :language: julia
 ```
-
-`Frame`, `nop`, `read_frame`, `nframes`, `chill_plus`, `cages`, `primitive_rings`, `signature_cages`, `symmetry`, `q4_q6`, `jump_tau90`, and `steinhardt` are the exported `Dseams` calls. `steinhardt` with no `graph` uses the cutoff shell. `Seams` exports `System`, `version`, `set_num_threads`, `num_threads`, `set_ortho!`, `chill_plus`, `q4q6`, and `six_rings` over `libseams`.
-
-`bindings/julia/Dseams/test/runtests.jl` and `bindings/julia/Seams/test/runtests.jl` are the tests `language_fronts` runs.
 
 ```{literalinclude} ../../../bindings/julia/Dseams/test/runtests.jl
 :language: julia
@@ -459,6 +541,206 @@ Errors: Error() with the text of seams_last_error when the status is not zero.
 Units: labels are dimensionless codes
 
 Example: `docs/examples/minimal_julia.jl`
+### System
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_system_count
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_system_read
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_chill
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_steinhardt
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_cages
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_signature_cages
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_neighbours_knn
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_rdf
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_running_cn
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_coordination
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_hbonds
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_density_axis
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_fingerprint
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_contact_pairs
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_domains
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_prisms
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_monolayer
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_rings_vertices
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_site_table
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
 <!-- API_SYMBOLS_END -->
 
 

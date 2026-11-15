@@ -1,3 +1,5 @@
+# Copyright (c) d-SEAMS developers
+
 #' @keywords internal
 #' @useDynLib dseams, .registration = TRUE
 "_PACKAGE"

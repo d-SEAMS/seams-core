@@ -53,8 +53,8 @@ bool bond::donatedHydrogenBond(
       continue;
     }
     const auto oh = gen::relDistFromPoint(
-        yCloud, acceptorIndex, hCloud.pts[hAtomIndex].x,
-        hCloud.pts[hAtomIndex].y, hCloud.pts[hAtomIndex].z);
+        yCloud, acceptorIndex, hCloud.pts[static_cast<std::size_t>(hAtomIndex)].x,
+        hCloud.pts[static_cast<std::size_t>(hAtomIndex)].y, hCloud.pts[static_cast<std::size_t>(hAtomIndex)].z);
     const double oh2 = oh[0] * oh[0] + oh[1] * oh[1] + oh[2] * oh[2];
     if (oh2 >= dist2) {
       continue;
@@ -101,11 +101,11 @@ std::vector<std::vector<int>> bond::populateBonds(
 
   // Loop through every atom in the neighbour list by index
   for (int i = 0; i < nList.size(); i++) {
-    iatom = nList[i][0]; // Index of the i^th atom
+    iatom = nList[static_cast<std::size_t>(i)][0]; // Index of the i^th atom
     // Get the neighbours of iatom
-    for (int j = 1; j < nList[i].size(); j++) {
+    for (int j = 1; j < nList[static_cast<std::size_t>(i)].size(); j++) {
       //
-      jatom = nList[iatom][j]; // Index of the neighbour
+      jatom = nList[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)]; // Index of the neighbour
       // To avoid duplicates, skip all bonds such
       // that iatom>jatom
       if (iatom > jatom) {
@@ -115,8 +115,8 @@ std::vector<std::vector<int>> bond::populateBonds(
       // Clear the current bond vector
       currentBond.clear();
       // Fill the current bond vector with ATOM IDs
-      iatomID = yCloud.pts[iatom].atomID;
-      jatomID = yCloud.pts[jatom].atomID;
+      iatomID = yCloud.pts[static_cast<std::size_t>(iatom)].atomID;
+      jatomID = yCloud.pts[static_cast<std::size_t>(jatom)].atomID;
       currentBond.push_back(iatomID);
       currentBond.push_back(jatomID);
       // Add to the bonds vector of vectors
@@ -169,17 +169,17 @@ std::vector<std::vector<int>> bond::populateBonds(
 
   // Loop through every atom in the neighbour list by index
   for (int i = 0; i < nList.size(); i++) {
-    iatom = nList[i][0]; // Index of the i^th atom
+    iatom = nList[static_cast<std::size_t>(i)][0]; // Index of the i^th atom
     // Skip for dummy atoms
-    if (atomTypes[iatom] == cage::iceType::dummy) {
+    if (atomTypes[static_cast<std::size_t>(iatom)] == cage::iceType::dummy) {
       continue;
     } // Skip for dummy atoms
     // Get the neighbours of iatom
-    for (int j = 1; j < nList[i].size(); j++) {
+    for (int j = 1; j < nList[static_cast<std::size_t>(i)].size(); j++) {
       //
-      jatom = nList[iatom][j]; // Index of the neighbour
+      jatom = nList[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)]; // Index of the neighbour
       // Skip for dummy atoms
-      if (atomTypes[jatom] == cage::iceType::dummy) {
+      if (atomTypes[static_cast<std::size_t>(jatom)] == cage::iceType::dummy) {
         continue;
       } // Skip for dummy atoms
       // To avoid duplicates, skip all bonds such
@@ -191,8 +191,8 @@ std::vector<std::vector<int>> bond::populateBonds(
       // Clear the current bond vector
       currentBond.clear();
       // Fill the current bond vector with ATOM IDs
-      iatomID = yCloud.pts[iatom].atomID;
-      jatomID = yCloud.pts[jatom].atomID;
+      iatomID = yCloud.pts[static_cast<std::size_t>(iatom)].atomID;
+      jatomID = yCloud.pts[static_cast<std::size_t>(jatom)].atomID;
       currentBond.push_back(iatomID);
       currentBond.push_back(jatomID);
       // Add to the bonds vector of vectors
@@ -271,17 +271,17 @@ std::vector<std::vector<int>> bond::populateHbondsFromDonors(
     if (hAtomIndex < 0 || hAtomIndex >= hCloud.nop) {
       continue;
     }
-    donorHsByMol[hCloud.pts[hAtomIndex].molID].push_back(hAtomIndex);
+    donorHsByMol[hCloud.pts[static_cast<std::size_t>(hAtomIndex)].molID].push_back(hAtomIndex);
   }
 
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     hBondNet.push_back(std::vector<int>());
-    hBondNet[iatom].push_back(yCloud.pts[iatom].atomID);
+    hBondNet[static_cast<std::size_t>(iatom)].push_back(yCloud.pts[static_cast<std::size_t>(iatom)].atomID);
   }
 
   const std::vector<int> emptyHs;
   auto hsFor = [&](int donorIndex) -> const std::vector<int> & {
-    auto it = donorHsByMol.find(yCloud.pts[donorIndex].molID);
+    auto it = donorHsByMol.find(yCloud.pts[static_cast<std::size_t>(donorIndex)].molID);
     if (it == donorHsByMol.end()) {
       return emptyHs;
     }
@@ -296,7 +296,7 @@ std::vector<std::vector<int>> bond::populateHbondsFromDonors(
     const int nnumNeighbours = static_cast<int>(nList[iatom].size()) - 1;
     const int iatomIndex = static_cast<int>(iatom);
     for (int j = 1; j <= nnumNeighbours; j++) {
-      const int jatomID = nList[iatom][j];
+      const int jatomID = nList[iatom][static_cast<std::size_t>(j)];
       if (iatomID >= jatomID) {
         continue;
       }
@@ -311,8 +311,8 @@ std::vector<std::vector<int>> bond::populateHbondsFromDonors(
           bond::donatedHydrogenBond(yCloud, hCloud, jatomIndex, iatomIndex,
                                     hsFor(iatomIndex), distCutoff,
                                     angleCutoff)) {
-        hBondNet[iatomIndex].push_back(jatomID);
-        hBondNet[jatomIndex].push_back(iatomID);
+        hBondNet[static_cast<std::size_t>(iatomIndex)].push_back(jatomID);
+        hBondNet[static_cast<std::size_t>(jatomIndex)].push_back(iatomID);
       }
     }
   }
@@ -333,9 +333,9 @@ double bond::getHbondDistanceOH(
     const molSys::PointCloud<molSys::Point<double>, double> &oCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &hCloud,
     int oAtomIndex, int hAtomIndex) {
-  const std::vector<double> hpt = {hCloud.pts[hAtomIndex].x,
-                                   hCloud.pts[hAtomIndex].y,
-                                   hCloud.pts[hAtomIndex].z};
+  const std::vector<double> hpt = {hCloud.pts[static_cast<std::size_t>(hAtomIndex)].x,
+                                   hCloud.pts[static_cast<std::size_t>(hAtomIndex)].y,
+                                   hCloud.pts[static_cast<std::size_t>(hAtomIndex)].z};
   return gen::unWrappedDistFromPoint(oCloud, oAtomIndex, hpt);
 }
 
@@ -378,21 +378,21 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
   // Loop through all the cages
   for (int icage = 0; icage < cageList.size(); icage++) {
     // Skip if the cage is of a different type
-    if (cageList[icage].type != type) {
+    if (cageList[static_cast<std::size_t>(icage)].type != type) {
       continue;
     }
-    nRings += cageList[icage].rings.size(); // Add to the number of rings
+    nRings += cageList[static_cast<std::size_t>(icage)].rings.size(); // Add to the number of rings
     //
     // Now loop through a particular ring inside the i^th cage
-    for (int iring = 0; iring < cageList[icage].rings.size(); iring++) {
-      currentRing = cageList[icage].rings[iring]; // Current ring index
+    for (int iring = 0; iring < cageList[static_cast<std::size_t>(icage)].rings.size(); iring++) {
+      currentRing = cageList[static_cast<std::size_t>(icage)].rings[static_cast<std::size_t>(iring)]; // Current ring index
       // Get the first atom of each pair inside currentRing
-      for (int k = 0; k < rings[currentRing].size() - 1; k++) {
+      for (int k = 0; k < rings[static_cast<std::size_t>(currentRing)].size() - 1; k++) {
         // Clear the current bond vector
         currentBond.clear();
         // Fill the current bond vector
-        currentBond.push_back(rings[currentRing][k]);
-        currentBond.push_back(rings[currentRing][k + 1]);
+        currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][static_cast<std::size_t>(k)]);
+        currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][static_cast<std::size_t>(k + 1)]);
         std::sort(currentBond.begin(), currentBond.end());
         // Add to the bonds vector of vectors
         bonds.push_back(currentBond);
@@ -400,8 +400,8 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
       // The last pair is with the last element and the first element
       // Fill currentBond and update bonds
       currentBond.clear();
-      currentBond.push_back(rings[currentRing][ringSize - 1]);
-      currentBond.push_back(rings[currentRing][0]);
+      currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][static_cast<std::size_t>(ringSize - 1)]);
+      currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][0]);
       std::sort(currentBond.begin(), currentBond.end());
       bonds.push_back(currentBond);
     } // end of loop through a particular ring

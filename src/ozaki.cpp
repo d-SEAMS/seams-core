@@ -251,7 +251,10 @@ int sliceWidthFor(int n) {
   return w;
 }
 
-__attribute__((optimize("fp-contract=off"))) double exactIntegerDot(
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("fp-contract=off")))
+#endif
+double exactIntegerDot(
     const double *cx, const double *cy, int n) {
   double acc = 0.0;
   for (int i = 0; i < n; i++) {
@@ -514,17 +517,18 @@ void packRealImag(const std::complex<double> *z, int n, std::vector<double> &re,
 }
 
 #if defined(__x86_64__)
-// Clang does not give an OpenMP region the target attribute of the
-// function around it, so the AVX-512 work of one row is its own function.
-__attribute__((target("avx512f,avx512bw,avx512vnni"))) void vnniRow(
-    int i, int n, int kp, int np, const uint8_t *Au, const int8_t *Bp,
-    const int32_t *colSum, int *C, int ldc) {
+// The vector locals live in a separate function. Clang's OpenMP outline does
+// not inherit a target attribute, so those locals cannot sit in the parallel
+// loop itself. noinline stops the body being copied back into that outline.
+__attribute__((noinline, target("avx512f,avx512vnni"))) void int8VnniRow(
+    int n, int kp, int np, const uint8_t *auRow, const int8_t *bp,
+    const int32_t *colSum, int *cRow) {
   std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
   for (int j0 = 0; j0 < n; j0 += 16) {
     __m512i acc = _mm512_setzero_si512();
     for (int t = 0; t < kp; t += 4) {
       uint32_t a4 = 0;
-      std::memcpy(&a4, Au + static_cast<std::size_t>(i) * kp + t, 4);
+      std::memcpy(&a4, auRow + t, 4);
       const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
       alignas(64) int8_t packed[64];
       for (int lane = 0; lane < 4; lane++) {
@@ -532,7 +536,8 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) void vnniRow(
           const int j = j0 + c;
           int8_t b = 0;
           if (j < np && t + lane < kp) {
-            b = Bp[static_cast<std::size_t>(t + lane) * np + j];
+            b = bp[static_cast<std::size_t>(t + lane) * static_cast<std::size_t>(np) +
+                   static_cast<std::size_t>(j)];
           }
           packed[c * 4 + lane] = b;
         }
@@ -544,11 +549,12 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) void vnniRow(
     _mm512_store_si512(tmp, acc);
     for (int c = 0; c < 16 && j0 + c < n; c++) {
       const int j = j0 + c;
-      row[static_cast<std::size_t>(j)] = tmp[c] - 128 * colSum[j];
+      const int32_t corrected = tmp[c] - 128 * colSum[static_cast<std::size_t>(j)];
+      row[static_cast<std::size_t>(j)] = corrected;
     }
   }
   for (int j = 0; j < n; j++) {
-    C[i * ldc + j] += row[static_cast<std::size_t>(j)];
+    cRow[j] += row[static_cast<std::size_t>(j)];
   }
 }
 
@@ -559,30 +565,32 @@ bool int8GemmVnni(int m, int n, int k, const signed char *A, int lda,
   }
   const int kp = (k + 3) & ~3;
   const int np = (n + 15) & ~15;
-  std::vector<uint8_t> Au(static_cast<std::size_t>(m) * kp);
-  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * np);
+  std::vector<uint8_t> Au(static_cast<std::size_t>(m) * static_cast<std::size_t>(kp));
+  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * static_cast<std::size_t>(np));
   for (int i = 0; i < m; i++) {
     for (int t = 0; t < k; t++) {
       const int s = static_cast<int>(A[i * lda + t]);
-      Au[static_cast<std::size_t>(i) * kp + t] = static_cast<uint8_t>(s + 128);
+      Au[static_cast<std::size_t>(i) * static_cast<std::size_t>(kp) + static_cast<std::size_t>(t)] = static_cast<uint8_t>(s + 128);
     }
   }
   for (int t = 0; t < k; t++) {
     for (int j = 0; j < n; j++) {
-      Bp[static_cast<std::size_t>(t) * np + j] = B[t * ldb + j];
+      Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)] = B[t * ldb + j];
     }
   }
   std::vector<int32_t> colSum(static_cast<std::size_t>(n), 0);
   for (int t = 0; t < k; t++) {
     for (int j = 0; j < n; j++) {
-      colSum[static_cast<std::size_t>(j)] += Bp[static_cast<std::size_t>(t) * np + j];
+      colSum[static_cast<std::size_t>(j)] += Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)];
     }
   }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    vnniRow(i, n, kp, np, Au.data(), Bp.data(), colSum.data(), C, ldc);
+    int8VnniRow(n, kp, np,
+                Au.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(kp),
+                Bp.data(), colSum.data(), C + static_cast<std::ptrdiff_t>(i) * ldc);
   }
   return true;
 }
@@ -597,16 +605,16 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
   const int mp = (m + 15) & ~15;
   const int np = (n + 15) & ~15;
   const int kp = (k + 63) & ~63;
-  std::vector<int8_t> Ap(static_cast<std::size_t>(mp) * kp, 0);
-  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * np, 0);
+  std::vector<int8_t> Ap(static_cast<std::size_t>(mp) * static_cast<std::size_t>(kp), 0);
+  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * static_cast<std::size_t>(np), 0);
   for (int i = 0; i < m; i++) {
     for (int t = 0; t < k; t++) {
-      Ap[static_cast<std::size_t>(i) * kp + t] = A[i * lda + t];
+      Ap[static_cast<std::size_t>(i) * static_cast<std::size_t>(kp) + static_cast<std::size_t>(t)] = A[i * lda + t];
     }
   }
   for (int t = 0; t < k; t++) {
     for (int j = 0; j < n; j++) {
-      Bp[static_cast<std::size_t>(t) * np + j] = B[t * ldb + j];
+      Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)] = B[t * ldb + j];
     }
   }
   struct TileCfg {
@@ -647,14 +655,14 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
           for (int t0 = 0; t0 < kp; t0 += 64) {
             for (int r = 0; r < 16; r++) {
               std::memcpy(at + r * 64,
-                          Ap.data() + static_cast<std::size_t>(i0 + r) * kp + t0, 64);
+                          Ap.data() + static_cast<std::size_t>(i0 + r) * static_cast<std::size_t>(kp) + t0, 64);
             }
             for (int g = 0; g < 16; g++) {
               for (int c = 0; c < 16; c++) {
                 for (int lane = 0; lane < 4; lane++) {
                   const int kk = t0 + g * 4 + lane;
                   bt[(g * 16 + c) * 4 + lane] =
-                      Bp[static_cast<std::size_t>(kk) * np + (j0 + c)];
+                      Bp[static_cast<std::size_t>(kk) * static_cast<std::size_t>(np) + (static_cast<std::size_t>(j0 + c))];
                 }
               }
             }
@@ -690,35 +698,35 @@ bool int8GemmAmx(int, int, int, const signed char *, int, const signed char *, i
 }
 #endif
 
-__attribute__((target("avx512f,fma"))) void gemmAvx512Row(
-    int i, int n, int k, const double *A, int lda, const double *B, int ldb,
-    double *C, int ldc) {
+__attribute__((noinline, target("avx512f,fma"))) void gemmAvx512OneRow(
+    int n, int k, const double *aRow, const double *b, int ldb, double *cRow) {
   int j = 0;
   for (; j + 8 <= n; j += 8) {
     __m512d acc = _mm512_setzero_pd();
     for (int t = 0; t < k; t++) {
-      const __m512d b = _mm512_loadu_pd(B + static_cast<std::ptrdiff_t>(t) * ldb + j);
-      acc = _mm512_fmadd_pd(_mm512_set1_pd(A[static_cast<std::ptrdiff_t>(i) * lda + t]), b, acc);
+      const __m512d bv =
+          _mm512_loadu_pd(b + static_cast<std::ptrdiff_t>(t) * ldb + j);
+      acc = _mm512_fmadd_pd(_mm512_set1_pd(aRow[t]), bv, acc);
     }
-    _mm512_storeu_pd(C + static_cast<std::ptrdiff_t>(i) * ldc + j, acc);
+    _mm512_storeu_pd(cRow + j, acc);
   }
   for (; j < n; j++) {
     double acc = 0.0;
     for (int t = 0; t < k; t++) {
-      acc += A[static_cast<std::ptrdiff_t>(i) * lda + t] *
-             B[static_cast<std::ptrdiff_t>(t) * ldb + j];
+      acc += aRow[t] * b[static_cast<std::ptrdiff_t>(t) * ldb + j];
     }
-    C[static_cast<std::ptrdiff_t>(i) * ldc + j] = acc;
+    cRow[j] = acc;
   }
 }
 
-void gemmAvx512Rows(int m, int n, int k, const double *A, int lda,
-                    const double *B, int ldb, double *C, int ldc) {
+void gemmAvx512Rows(int m, int n, int k, const double *A, int lda, const double *B,
+                    int ldb, double *C, int ldc) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    gemmAvx512Row(i, n, k, A, lda, B, ldb, C, ldc);
+    gemmAvx512OneRow(n, k, A + static_cast<std::ptrdiff_t>(i) * lda, B, ldb,
+                     C + static_cast<std::ptrdiff_t>(i) * ldc);
   }
 }
 #endif
@@ -1083,8 +1091,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
   }
   const int kA = kSum / 2;
   const int kB = kSum - kA;
-  std::vector<int64_t> Ap(static_cast<std::size_t>(m) * k);
-  std::vector<int64_t> Bp(static_cast<std::size_t>(k) * n);
+  std::vector<int64_t> Ap(static_cast<std::size_t>(m) * static_cast<std::size_t>(k));
+  std::vector<int64_t> Bp(static_cast<std::size_t>(k) * static_cast<std::size_t>(n));
   std::vector<int> rowExp(static_cast<std::size_t>(m));
   std::vector<int> colExp(static_cast<std::size_t>(n));
   for (int i = 0; i < m; i++) {
@@ -1095,7 +1103,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
     }
     rowExp[static_cast<std::size_t>(i)] = exp;
     for (int t = 0; t < k; t++) {
-      Ap[static_cast<std::size_t>(i) * k + t] = row[static_cast<std::size_t>(t)];
+      Ap[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) + static_cast<std::size_t>(t)] = row[static_cast<std::size_t>(t)];
     }
   }
   for (int j = 0; j < n; j++) {
@@ -1110,13 +1118,13 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
     }
     colExp[static_cast<std::size_t>(j)] = exp;
     for (int t = 0; t < k; t++) {
-      Bp[static_cast<std::size_t>(t) * n + j] = scaled[static_cast<std::size_t>(t)];
+      Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)] = scaled[static_cast<std::size_t>(t)];
     }
   }
-  std::vector<i128> acc(static_cast<std::size_t>(m) * n, 0);
-  std::vector<signed char> Ai(static_cast<std::size_t>(m) * k);
-  std::vector<signed char> Bi(static_cast<std::size_t>(k) * n);
-  std::vector<int> partial(static_cast<std::size_t>(m) * n, 0);
+  std::vector<i128> acc(static_cast<std::size_t>(m) * static_cast<std::size_t>(n), 0);
+  std::vector<signed char> Ai(static_cast<std::size_t>(m) * static_cast<std::size_t>(k));
+  std::vector<signed char> Bi(static_cast<std::size_t>(k) * static_cast<std::size_t>(n));
+  std::vector<int> partial(static_cast<std::size_t>(m) * static_cast<std::size_t>(n), 0);
   for (int mod = 0; mod < table.s; mod++) {
     const int modulus = static_cast<int>(table.m[mod]);
     for (int i = 0; i < m * k; i++) {
@@ -1166,7 +1174,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
         for (int t = 0; t < k; t++) {
           const double b = B[static_cast<std::ptrdiff_t>(t) * ldb + j];
           trunc += invD * std::fabs(static_cast<long double>(b));
-          trunc += std::fabs(static_cast<long double>(Ap[static_cast<std::size_t>(i) * k + t])) *
+          trunc += std::fabs(static_cast<long double>(Ap[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) + static_cast<std::size_t>(t)])) *
                    invD * invE;
         }
         trunc *= 1.0L + 16.0L * static_cast<long double>(k) *
@@ -1215,7 +1223,7 @@ GemmInfo gemm(int m, int n, int k, const double *A, int lda, const double *B, in
       const RealDot d = realDot(row.data(), col.data(), k, which);
       C[static_cast<std::ptrdiff_t>(i) * ldc + j] = d.value;
       if (bounds != nullptr) {
-        bounds[static_cast<std::size_t>(i) * n + j] = d.bound;
+        bounds[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)] = d.bound;
       }
     }
   }

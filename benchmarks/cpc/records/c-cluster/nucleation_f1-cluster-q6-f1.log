@@ -1,0 +1,18 @@
+command taskset -c 0 [path] time cluster-q6 input/traj/nucleation_f1.lammpstrj 1 1 0 1
+loadavg 0.39 0.75 0.67 1/283 26573
+returncode 0
+stdout
+meta mode cluster-q6
+meta frame 1
+meta type 1
+meta warmup 0
+meta repeats 1
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 8.279668
+repeat 1 largest 116
+repeat 1 ice_like 277
+repeat 1 subset 277
+meta sink 4212
+
+stderr

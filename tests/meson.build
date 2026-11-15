@@ -1,13 +1,15 @@
 # d-SEAMS tests (Catch2 v3)
 
 # Prefer an installed Catch2 that actually links. A copy built against a
-# newer libc, or without PIE, is replaced by the wrap.
+# newer libc, or without PIE, is replaced by the wrap, which only the tests
+# use and so is not installed with d-SEAMS.
 catch2_dep = dependency('catch2-with-main', required: false)
 if not catch2_dep.found() or not cppc.links(
     '#include <catch2/catch_test_macros.hpp>\nTEST_CASE("link") {}\n',
     dependencies: catch2_dep,
     name: 'installed catch2 links')
-  catch2_dep = subproject('catch2').get_variable('catch2_with_main_dep')
+  catch2_dep = subproject('catch2', default_options: ['tests=false', 'install=false']).get_variable(
+    'catch2_with_main_dep')
 endif
 
 test_sources = {
@@ -68,6 +70,13 @@ test_sources = {
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
+  'wide_cell': 'test_wide_cell.cpp',
+  'offset_limit': 'test_offset_limit.cpp',
+  'prism_empty': 'test_prism_empty.cpp',
+  'basal_needle': 'test_basal_needle.cpp',
+  'ddc_copies': 'test_ddc_copies.cpp',
+  'hc_template': 'test_hc_template.cpp',
+  'avx_gemm': 'test_avx_gemm.cpp',
 }
 
 if readcon_dep.found()
@@ -404,6 +413,20 @@ executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_h2h_cpc', 'bench_h2h_cpc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+bench_ring_carry = executable('bench_ring_carry', 'bench_ring_carry.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -466,6 +489,36 @@ executable('bench_rings_h2h', 'bench_rings_h2h.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+
+rings_ih_inc = [include_directories('.'), include_directories('../include')]
+rings_ih_args = _args + ['-I' + meson.project_build_root() / 'src']
+rings_ih_test = executable('test_rings_ih', 'test_rings_ih.cpp',
+  dependencies: [catch2_dep],
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc,
+  build_rpath: _test_rpath)
+test('rings_ih', rings_ih_test, timeout: 180, env: _test_env)
+
+executable('bench_capi_overhead', 'bench_capi_overhead.cpp',
+  dependencies: [yds_dep],
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc + [_incdirs],
+  build_rpath: _test_rpath)
+
+executable('bench_rings_ih', 'bench_rings_ih.cpp',
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc,
+  build_rpath: _test_rpath)
+
+test('rings_ih_external', find_program('python3'),
+  args: [meson.project_source_root() / 'tests' / 'test_rings_ih_external.py'],
+  timeout: 180)
 
 executable('bench_stages', 'bench_stages.cpp',
   dependencies: [yds_dep],
@@ -618,6 +671,21 @@ test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),
   timeout: 30)
+test('cpc_logs', find_program('python3'),
+  args: [files('test_cpc_logs.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('h2h_harness', find_program('python3'),
+  args: [files('test_h2h_harness.py'),
+         meson.project_build_root() / 'tests' / 'bench_h2h_cpc'],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
+test('ion_shell_rings', find_program('python3'),
+  args: [files('test_ion_shell_rings.py'), meson.project_build_root() / 'seams'],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
 test('docs_sources', find_program('python3'),
   args: [files('docs_sources.py')],
   workdir: meson.project_source_root(),
@@ -627,6 +695,23 @@ test('option_names', find_program('python3'),
          meson.project_build_root()],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('cycless_pentagon', find_program('python3'),
+  args: [files('test_cycless_pentagon.py'),
+         meson.project_build_root() / 'src' / 'libseams.so'],
+  workdir: meson.project_source_root(),
+  timeout: 120)
+test('sqq_sh_triclinic', find_program('python3'),
+  args: [files('test_sqq_sh.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('ring_carry', bench_ring_carry,
+  args: ['800', '2'],
+  timeout: 180)
+test('ovito_chill_atoms', find_program('python3'),
+  args: [files('test_ovito_chill_atoms.py'),
+         meson.project_build_root() / 'src' / 'libseams.so'],
+  workdir: meson.project_source_root(),
+  timeout: 180)
 test('ovito_ring_counts', find_program('python3'),
   args: [files('test_ovito_ring_counts.py'),
          meson.project_build_root() / 'tests' / 'bench_ring_ic'],
@@ -645,6 +730,29 @@ test('mw215_frame', find_program('python3'),
   args: [files('test_mw215_deck.py'), 'frame'],
   workdir: meson.project_source_root(),
   timeout: 600)
+
+test('omp_threads',
+  executable('test_omp_threads', 'test_omp_threads.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  env: _test_env,
+  timeout: 120)
+
+test('chill_mixed',
+  executable('test_chill_mixed', 'test_chill_mixed.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
 
 dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
 dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',

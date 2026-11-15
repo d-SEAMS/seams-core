@@ -1,0 +1,8 @@
+loadavg 0.20 0.98 0.72 1/297 21828
+command ovito ChillPlusModifier cutoff=3.5
+repeat 1 path_ms 6.732687
+repeat 2 path_ms 6.438130
+repeat 3 path_ms 6.224059
+repeat 4 path_ms 6.534673
+repeat 5 path_ms 6.232331
+repeat 6 path_ms 6.284056

@@ -1,0 +1,17 @@
+cores 8 affinity 1
+pinned_threads 1
+plumed 2.10.0
+samples 20
+switch SWITCH={CUSTOM FUNC=step(3.5-x) R_0=1 D_MAX=4.2}
+check ice4096 coordination max_abs 0.000e+00
+check ice4096 q6 max_abs 2.220e-16
+robust op ice4096 coordination threads 1 molecules 4096 dseams_median 0.3155 dseams_iqr 0.0291 dseams_min 0.2799 plumed_median 10.6496 plumed_iqr 0.1567 plumed_min 10.4155 WIN
+robust op ice4096 q6 threads 1 molecules 4096 dseams_median 1.0220 dseams_iqr 0.0407 dseams_min 0.9798 plumed_median 110.9923 plumed_iqr 1.9339 plumed_min 109.4033 WIN
+check ice32768 coordination max_abs 0.000e+00
+check ice32768 q6 max_abs 5.551e-16
+robust op ice32768 coordination threads 1 molecules 32768 dseams_median 2.2880 dseams_iqr 0.0750 dseams_min 2.2596 plumed_median 79.3540 plumed_iqr 1.6231 plumed_min 78.5518 WIN
+robust op ice32768 q6 threads 1 molecules 32768 dseams_median 9.5289 dseams_iqr 1.3117 dseams_min 8.4715 plumed_median 815.6154 plumed_iqr 4.2460 plumed_min 810.3413 WIN
+check ice110592 coordination max_abs 0.000e+00
+check ice110592 q6 max_abs 5.551e-16
+robust op ice110592 coordination threads 1 molecules 110592 dseams_median 9.2935 dseams_iqr 1.1628 dseams_min 8.6754 plumed_median 272.0855 plumed_iqr 2.7267 plumed_min 270.3535 WIN
+robust op ice110592 q6 threads 1 molecules 110592 dseams_median 34.8589 dseams_iqr 1.0874 dseams_min 29.7852 plumed_median 2814.6016 plumed_iqr 6.8275 plumed_min 2799.5670 WIN

@@ -25,7 +25,7 @@ void buildStoddardList(const Cloud &yCloud,
                        const std::vector<std::vector<int>> &nList,
                        const std::vector<bool> &mask,
                        std::vector<int> &linkedList) {
-  linkedList.assign(yCloud.nop, -1);
+  linkedList.assign(static_cast<std::size_t>(yCloud.nop), -1);
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     if (iatom >= static_cast<int>(mask.size()) ||
         !mask[static_cast<std::size_t>(iatom)] ||
@@ -184,39 +184,39 @@ int clump::largestIceCluster(
   // Loop through the linked list from the starting element
   // startingIndex[lClusIndex].
   int startCluster =
-      startingIndex[lClusIndex]; // index in linkedList to start from
+      startingIndex[static_cast<std::size_t>(lClusIndex)]; // index in linkedList to start from
 
   // L[i]->j->L[j]->k->L[k]->i
   index = startCluster;
   // Update iceCloud
-  iPoint = yCloud.pts[index];
+  iPoint = yCloud.pts[static_cast<std::size_t>(index)];
   iceCloud.pts.push_back(iPoint);
   //
-  nextElement = linkedList[startCluster];
+  nextElement = linkedList[static_cast<std::size_t>(startCluster)];
   while (nextElement != index) {
     currentIndex = nextElement;
     // update with currentIndex
-    iPoint = yCloud.pts[currentIndex];
+    iPoint = yCloud.pts[static_cast<std::size_t>(currentIndex)];
     iceCloud.pts.push_back(iPoint);
     // end update
-    nextElement = linkedList[currentIndex];
+    nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
   } // get the largest cluster
   // -----------------------------------------------------------
   // Update other variables in iceCloud
 
   iceCloud.currentFrame = yCloud.currentFrame;
-  iceCloud.nop = iceCloud.pts.size();
+  iceCloud.nop = static_cast<int>(iceCloud.pts.size());
   iceCloud.box = yCloud.box;
   iceCloud.boxLow = yCloud.boxLow;
 
   // Update idIndexMap
   for (int iatom = 0; iatom < iceCloud.nop; iatom++) {
-    iceCloud.idIndexMap[iceCloud.pts[iatom].atomID] = iatom;
+    iceCloud.idIndexMap[iceCloud.pts[static_cast<std::size_t>(iatom)].atomID] = iatom;
   } // end of loop through iceCloud
 
   // -----------------------------------------------------------
   // Write out the cluster statistics
-  int totalClusters = nClusters.size(); // Total number of clusters
+  int totalClusters = static_cast<int>(nClusters.size()); // Total number of clusters
   int smallestCluster = nLargestCluster =
       *std::min_element(nClusters.begin(),
                         nClusters.end()); // Size of the smallest cluster
@@ -224,7 +224,7 @@ int clump::largestIceCluster(
 
   // Get the average cluster size
   for (int iCluster = 0; iCluster < totalClusters; iCluster++) {
-    avgClusterSize += nClusters[iCluster];
+    avgClusterSize += nClusters[static_cast<std::size_t>(iCluster)];
   } // Loop through the clusters
   // Normalize by the number
   if (totalClusters == 0) {
@@ -234,7 +234,7 @@ int clump::largestIceCluster(
   }
 
   iceCloud.currentFrame = yCloud.currentFrame;
-  nLargestCluster = nClusters[lClusIndex];
+  nLargestCluster = nClusters[static_cast<std::size_t>(lClusIndex)];
 
   // Write out to the file
   sout::writeClusterStats(path, yCloud.currentFrame, nLargestCluster,
@@ -283,18 +283,18 @@ int clump::singleClusterLinkedList(
   //
   // -----------------------------------------------------------
   // INITIALIZATION
-  linkedList.resize(iceCloud.nop);
+  linkedList.resize(static_cast<std::size_t>(iceCloud.nop));
   // Initial values of the list.
   for (int iatom = 0; iatom < iceCloud.nop; iatom++) {
     // Assign the index as the ID
-    linkedList[iatom] = iatom;
+    linkedList[static_cast<std::size_t>(iatom)] = iatom;
   } // init of cluster IDs
   // -----------------------------------------------------------
   // Get the linked list
   for (int i = 0; i < iceCloud.nop - 1; i++) {
     //
     // If iatom is already in a cluster, skip it
-    if (linkedList[i] != i) {
+    if (linkedList[static_cast<std::size_t>(i)] != i) {
       continue;
     } // Already part of a cluster
     //
@@ -305,21 +305,21 @@ int clump::singleClusterLinkedList(
       // Go through the rest of the atoms (KLOOP)
       for (int k = i + 1; k < iceCloud.nop; k++) {
         // Skip if already part of a cluster
-        if (linkedList[k] != k) {
+        if (linkedList[static_cast<std::size_t>(k)] != k) {
           continue;
         } // Already part of a cluster
         //
         // Check to see if k is a nearest neighbour of j
-        auto it = std::find(nList[j].begin() + 1, nList[j].end(), k);
-        if (it != nList[j].end()) {
+        auto it = std::find(nList[static_cast<std::size_t>(j)].begin() + 1, nList[static_cast<std::size_t>(j)].end(), k);
+        if (it != nList[static_cast<std::size_t>(j)].end()) {
           // Swap!
-          temp = linkedList[j];
-          linkedList[j] = linkedList[k];
-          linkedList[k] = temp;
+          temp = linkedList[static_cast<std::size_t>(j)];
+          linkedList[static_cast<std::size_t>(j)] = linkedList[static_cast<std::size_t>(k)];
+          linkedList[static_cast<std::size_t>(k)] = temp;
         } // j and k are nearest neighbours
       }   // end of loop through k (KLOOP)
       //
-      j = linkedList[j];
+      j = linkedList[static_cast<std::size_t>(j)];
     } while (j != i); // end of control for j!=i
     //
 
@@ -372,7 +372,7 @@ int clump::clusterAnalysis(
   // Clear the neighbour list by index
   nneigh::clearNeighbourList(iceNeighbourList);
   // Init the vector of bools for every particle in yCloud
-  isIce.resize(yCloud.nop);
+  isIce.resize(static_cast<std::size_t>(yCloud.nop));
   nTotalIce = 0; // Total number of ice-like molecules
   // -------------------------------------------------------
   // Use a bond-orientational parameter to find ice-like particles
@@ -386,8 +386,8 @@ int clump::clusterAnalysis(
     // of the q6 parameter. If q6 is greater than 0.5, it is ice-like.
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       // If q6 is greater than 0.5, it is ice-like
-      if (q6Values[iatom] > 0.5) {
-        isIce[iatom] = true; // is ice-like; by default false
+      if (q6Values[static_cast<std::size_t>(iatom)] > 0.5) {
+        isIce[static_cast<std::size_t>(iatom)] = true; // is ice-like; by default false
         nTotalIce++;         // Add to the number of ice-like molecules
       }                      // ice-like molecule found
     }                        // end of loop through every atom in yCloud
@@ -403,13 +403,13 @@ int clump::clusterAnalysis(
     // Assign values to isIce according to the CHILL algorithm
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       // If it is an ice-like molecule, add it, otherwise skip
-      if (yCloud.pts[iatom].iceType == molSys::atom_state_type::water) {
+      if (yCloud.pts[static_cast<std::size_t>(iatom)].iceType == molSys::atom_state_type::water) {
         continue;
       } // water
-      if (yCloud.pts[iatom].iceType == molSys::atom_state_type::unclassified) {
+      if (yCloud.pts[static_cast<std::size_t>(iatom)].iceType == molSys::atom_state_type::unclassified) {
         continue;
       }                    // unclassified
-      isIce[iatom] = true; // is ice-like; by default false
+      isIce[static_cast<std::size_t>(iatom)] = true; // is ice-like; by default false
       nTotalIce++;         // Add to the number of ice-like molecules
 
     } // end of loop through every atom in yCloud
@@ -458,7 +458,7 @@ int clump::recenterClusterCloud(
   // --------------------------------------------------------------------------
   // Loop through the entire looped list
   // init
-  visited.resize(iceCloud.nop);
+  visited.resize(static_cast<std::size_t>(iceCloud.nop));
 
   // The starting value is the first atom
   int currentIndex; // Current atom
@@ -468,26 +468,26 @@ int clump::recenterClusterCloud(
   // Loop through the entire linked list
   for (int i = 0; i < iceCloud.nop; i++) {
     //
-    if (visited[i]) {
+    if (visited[static_cast<std::size_t>(i)]) {
       continue;
     }                  // Already counted
-    visited[i] = true; // Visited
+    visited[static_cast<std::size_t>(i)] = true; // Visited
     // Should never execute
-    if (linkedList[i] == i) {
+    if (linkedList[static_cast<std::size_t>(i)] == i) {
       continue;
     } // only one element
     //
     currentIndex = i;
-    nextElement = linkedList[currentIndex];
+    nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
     index = i;
     while (nextElement != index) {
       const auto dr = gen::relDist(iceCloud, currentIndex, nextElement);
-      iceCloud.pts[nextElement].x = iceCloud.pts[currentIndex].x - dr[0];
-      iceCloud.pts[nextElement].y = iceCloud.pts[currentIndex].y - dr[1];
-      iceCloud.pts[nextElement].z = iceCloud.pts[currentIndex].z - dr[2];
-      visited[nextElement] = true;
+      iceCloud.pts[static_cast<std::size_t>(nextElement)].x = iceCloud.pts[static_cast<std::size_t>(currentIndex)].x - dr[0];
+      iceCloud.pts[static_cast<std::size_t>(nextElement)].y = iceCloud.pts[static_cast<std::size_t>(currentIndex)].y - dr[1];
+      iceCloud.pts[static_cast<std::size_t>(nextElement)].z = iceCloud.pts[static_cast<std::size_t>(currentIndex)].z - dr[2];
+      visited[static_cast<std::size_t>(nextElement)] = true;
       currentIndex = nextElement;
-      nextElement = linkedList[currentIndex];
+      nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
     }
     //
   } // end of loop through atoms
@@ -498,9 +498,9 @@ int clump::recenterClusterCloud(
   z_centroid = 0.0;
 
   for (int i = 0; i < iceCloud.nop; i++) {
-    x_centroid += iceCloud.pts[i].x;
-    y_centroid += iceCloud.pts[i].y;
-    z_centroid += iceCloud.pts[i].z;
+    x_centroid += iceCloud.pts[static_cast<std::size_t>(i)].x;
+    y_centroid += iceCloud.pts[static_cast<std::size_t>(i)].y;
+    z_centroid += iceCloud.pts[static_cast<std::size_t>(i)].z;
   } // end of loop through the particles
 
   if (iceCloud.nop == 0) {
@@ -521,9 +521,9 @@ int clump::recenterClusterCloud(
 
   // Loop through all atoms and shift them
   for (int i = 0; i < iceCloud.nop; i++) {
-    iceCloud.pts[i].x -= xShift;
-    iceCloud.pts[i].y -= yShift;
-    iceCloud.pts[i].z -= zShift;
+    iceCloud.pts[static_cast<std::size_t>(i)].x -= xShift;
+    iceCloud.pts[static_cast<std::size_t>(i)].y -= yShift;
+    iceCloud.pts[static_cast<std::size_t>(i)].z -= zShift;
   } // end of loop through the particles
 
   return 0;

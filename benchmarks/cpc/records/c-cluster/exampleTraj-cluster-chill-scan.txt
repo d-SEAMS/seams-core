@@ -1,0 +1,6 @@
+file exampleTraj.lammpstrj
+frames 1
+mode cluster-chill
+frame 1 largest 0
+max_largest 0
+max_frame 1

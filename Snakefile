@@ -445,6 +445,15 @@ rule hop_stride_crossover:
         "--reps 8 --warmup 1 > {output}"
 
 
+rule rings_ih:
+    output:
+        "benchmarks/rings-ih.txt",
+    shell:
+        "OMP_DYNAMIC=FALSE "
+        "bbdir-release/tests/bench_rings_ih --session --reps 8 --warmup 1 "
+        "> {output}"
+
+
 rule rings_one_thread:
     input:
         "bbdir-release/tests/bench_rings_h2h",
@@ -464,13 +473,30 @@ rule rings_one_thread:
 # Dumps larger than 1 MB stay out of git. dump_ps in the meta file is the
 # spacing passed to the interface rule. SCIENCE_FRONT overrides the binary.
 
-rule science_tip4p_basal:
+# 10 ns of TIP4P/Ice at 230, 240 and 250 K. Ice oxygens stay restrained.
+# SCIENCE_EQUIL_PS=15 is the 320 K liquid equilibration used for the
+# short basal run as well. Dumps are oxygen-only and are not committed.
+
+rule science_tip4p_temp:
     output:
-        "data/science-frames/tip4p-basal.lammpstrj",
-        "paper/tex/figures/data/science/interface-meta.csv",
+        "data/science-frames/tip4p-basal-{temp}K.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta-{temp}K.csv",
+    shell:
+        "SCIENCE_EQUIL_PS=15 SCIENCE_TEMP_K={wildcards.temp} "
+        "SCIENCE_PROD_PS=10000 SCIENCE_DUMP_PS=100 "
+        "SCIENCE_THREADS=${{SCIENCE_THREADS:-2}} "
+        "SCIENCE_TAG={wildcards.temp}K "
+        "SCIENCE_META=paper/tex/figures/data/science/interface-meta-{wildcards.temp}K.csv "
+        "${{SCIENCE_PYTHON:-python3}} scripts/make_tip4p_basal.py"
+
+
+rule science_tip4p_basal:
+    input:
+        expand("paper/tex/figures/data/science/interface-meta-{temp}K.csv", temp=["230", "240", "250"]),
+    output:
         "paper/tex/figures/data/science/large-frames.csv",
     shell:
-        "${{SCIENCE_PYTHON:-python3}} scripts/make_tip4p_basal.py"
+        "test -s paper/tex/figures/data/science/large-frames.csv"
 
 
 rule science_nucleation_dump:
@@ -480,10 +506,45 @@ rule science_nucleation_dump:
         "python3 scripts/fetch_mw_nucleation.py"
 
 
+rule science_interface_temp:
+    input:
+        "data/science-frames/tip4p-basal-{temp}K.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta-{temp}K.csv",
+    output:
+        "paper/tex/figures/data/science/interface-{temp}K/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-causes.csv",
+    shell:
+        "ps=$(awk '$1==\"dump_ps\"{{print $2}}' paper/tex/figures/data/science/interface-meta-{wildcards.temp}K.csv); "
+        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-2}} "
+        "${{SCIENCE_FRONT:-bbdir/science-front}} interface {input[0]} "
+        "--ps \"$ps\" --bin 1 "
+        "--out-dir paper/tex/figures/data/science/interface-{wildcards.temp}K "
+        "--threads ${{SCIENCE_THREADS:-2}}"
+
+
+rule science_growth:
+    input:
+        expand(
+            "paper/tex/figures/data/science/interface-{temp}K/interface-velocity.csv",
+            temp=["230", "240", "250"],
+        ),
+    output:
+        "paper/tex/figures/data/science/interface-speed.csv",
+    shell:
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_growth.py"
+
+
 rule science_interface:
     input:
-        "data/science-frames/tip4p-basal.lammpstrj",
-        "paper/tex/figures/data/science/interface-meta.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-causes.csv",
+        "paper/tex/figures/data/science/interface-speed.csv",
     output:
         "paper/tex/figures/data/science/interface-layers.csv",
         "paper/tex/figures/data/science/interface-fronts.csv",
@@ -491,11 +552,11 @@ rule science_interface:
         "paper/tex/figures/data/science/interface-atoms.csv",
         "paper/tex/figures/data/science/interface-causes.csv",
     shell:
-        "ps=$(awk '$1==\"dump_ps\"{{print $2}}' paper/tex/figures/data/science/interface-meta.csv); "
-        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-4}} "
-        "${{SCIENCE_FRONT:-bbdir/science-front}} interface {input[0]} "
-        "--ps \"$ps\" --bin 1 --out-dir paper/tex/figures/data/science "
-        "--threads ${{SCIENCE_THREADS:-4}}"
+        "for name in interface-layers interface-fronts interface-velocity "
+        "interface-atoms interface-causes; do "
+        "cp paper/tex/figures/data/science/interface-230K/$name.csv "
+        "paper/tex/figures/data/science/$name.csv; "
+        "done"
 
 
 rule science_nucleation:
@@ -531,19 +592,24 @@ rule science_figures:
         "paper/tex/figures/data/science/interface-layers.csv",
         "paper/tex/figures/data/science/interface-fronts.csv",
         "paper/tex/figures/data/science/interface-velocity.csv",
-        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-speed.csv",
         "paper/tex/figures/data/science/nucleation-clusters.csv",
         "paper/tex/figures/data/science/nucleation-summary.csv",
-        "paper/tex/figures/data/science/nucleus-atoms.csv",
         "paper/tex/figures/data/science/validation.csv",
     output:
-        "paper/tex/figures/science-pdf/interface-snapshot.pdf",
-        "paper/tex/figures/science-pdf/interface-profiles.pdf",
-        "paper/tex/figures/science-pdf/cluster-size.pdf",
-        "paper/tex/figures/science-pdf/nucleus.pdf",
+        "paper/tex/figures/data/science/figure-manifest.txt",
     shell:
-        "${{SCIENCE_PYTHON:-python3}} scripts/science_figures.py "
-        "--out paper/tex/figures/science-pdf"
+        "fig=${{SCIENCE_FIGDIR:-paper/tex/figures/science-pdf}}; "
+        "mkdir -p \"$fig\"; "
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_figures.py --out \"$fig\"; "
+        "QT_QPA_PLATFORM=ovitoheadless LIBGL_ALWAYS_SOFTWARE=1 "
+        "OVITO_THREAD_COUNT=${{SCIENCE_THREADS:-2}} "
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_render.py --out \"$fig\" "
+        "--pixels 2400 --tag 230K "
+        "--interface-dump data/science-frames/tip4p-basal-230K.lammpstrj "
+        "--nucleus-dump data/science-frames/nucleation.lammpstrj "
+        "--nucleus-min-frame 2 --nucleus-late-frame -1; "
+        "find \"$fig\" -maxdepth 1 -type f -printf '%f\\n' | sort > {output}"
 
 
 rule shipped_campaign:
@@ -776,6 +842,18 @@ rule paper_chill:
         "benchmarks/paper-cells/tab-chill.csv",
 
 
+rule cage_h2h_v8:
+    input:
+        "scripts/cage_h2h_v8.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/seams",
+        "bbdir-release/bindings/libseams_lang.so",
+    output:
+        "benchmarks/cage-h2h-v8.txt",
+    shell:
+        "python3 scripts/cage_h2h_v8.py --out benchmarks/cage-h2h-v8.txt"
+
+
 rule paper_cages:
     input:
         "benchmarks/paper-cells/tab-cages.csv",
@@ -819,6 +897,153 @@ rule paper_cells:
         "benchmarks/paper-cells/tab-lit.csv",
     shell:
         "python3 scripts/paper_cells_join.py benchmarks/paper-cells"
+
+
+# One process, eight samples, d-SEAMS, mdapy, pyscal3, vesin, and OVITO.
+# CHILL+ is timed as paper (four closest) and ovito (every neighbour inside 3.5 A).
+# Core count, no host name.
+rule h2h_mdapy_pyscal3_vesin:
+    output:
+        "benchmarks/h2h-mdapy-pyscal3-vesin.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "python3 scripts/h2h_mdapy_pyscal3_vesin.py > {output}"
+
+
+# One process, eight samples, d-SEAMS, freud 3.6, and OVITO 3.17.
+# Ice cells and the mixed frames. Core count, no host name.
+rule h2h_freud_ovito:
+    output:
+        "benchmarks/h2h-freud-ovito.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "python3 scripts/h2h_freud_ovito.py > {output}"
+
+
+# Primitive rings, eight samples, one and eight threads.
+# Ice Ih, the mixed frames, and one sII cell.
+rule h2h_triclinic:
+    output:
+        "benchmarks/h2h-triclinic.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py time 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py time 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_scale:
+    output:
+        "benchmarks/h2h-scale.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py scale 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py scale 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_plumed:
+    output:
+        "benchmarks/h2h-plumed.txt",
+    shell:
+        "PLUMED_KERNEL=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/PLUMED/2.10.0-foss-2026.1/lib/libplumedKernel.so "
+        "LD_LIBRARY_PATH=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/PLUMED/2.10.0-foss-2026.1/lib:/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed.py 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed.py 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_plumed_plugin:
+    output:
+        "benchmarks/h2h-plumed-plugin.txt",
+    shell:
+        "PLUMED_PREFIX=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/PLUMED/2.10.0-foss-2026.1 && "
+        "g++ -shared -fPIC -O2 -std=c++17 -Iengines -Iinclude -Ibbdir-release/src -I$$PLUMED_PREFIX/include "
+        "engines/plumed/SeamsColvar.cpp -Lbbdir-release/src -lseams -L$$PLUMED_PREFIX/lib -lplumedKernel "
+        "-Wl,-rpath,'$$ORIGIN/src' -Wl,-rpath,$$PLUMED_PREFIX/lib -o bbdir-release/libSeamsPlumed.so && "
+        "PLUMED_KERNEL=$$PLUMED_PREFIX/lib/libplumedKernel.so "
+        "LD_LIBRARY_PATH=bbdir-release/src:$$PLUMED_PREFIX/lib:/usr/lib/x86_64-linux-gnu "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed_plugin.py bbdir-release/libSeamsPlumed.so 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed_plugin.py bbdir-release/libSeamsPlumed.so 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_ptm:
+    output:
+        "benchmarks/h2h-ptm.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE QT_QPA_PLATFORM=offscreen "
+        "python3 scripts/h2h_ptm.py 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE QT_QPA_PLATFORM=offscreen "
+        "python3 scripts/h2h_ptm.py 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_followup:
+    output:
+        "benchmarks/h2h-followup.txt",
+    shell:
+        "taskset -c 0-7 env "
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "QT_QPA_PLATFORM=offscreen "
+        "OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=PASSIVE "
+        "python3 scripts/h2h_followup.py > {output}"
+
+
+rule h2h_paper_review:
+    output:
+        "benchmarks/h2h-paper-review.txt",
+    shell:
+        "taskset -c 0-7 env "
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "QT_QPA_PLATFORM=offscreen "
+        "OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=PASSIVE "
+        "python3 scripts/h2h_paper_review.py > {output}"
+
+
+rule h2h_cages:
+    output:
+        "benchmarks/h2h-cages.txt",
+    shell:
+        "LD_LIBRARY_PATH=bbdir-release/src "
+        "taskset -c 0 env OMP_NUM_THREADS=1 python3 scripts/h2h_cages.py 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 python3 scripts/h2h_cages.py 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_rings:
+    output:
+        "benchmarks/h2h-rings.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "python3 scripts/h2h_rings.py > {output}"
+
+
+# One process, eight samples, d-SEAMS, freud, and OVITO. Core count, no host name.
+rule h2h_session:
+    output:
+        "benchmarks/h2h-session.txt",
+    shell:
+        "OVITO_THREAD_COUNT=8 python3 scripts/h2h_session.py > {output}"
+
+
+# One process, eight samples. The record names the core count.
+rule omp_scale_time:
+    output:
+        "benchmarks/omp-scale.txt",
+    shell:
+        "python3 scripts/omp_scale_time.py > {output}"
 
 
 rule growth_curve:
@@ -899,3 +1124,20 @@ rule h2h_plumed_q6:
         shell=os.environ.get("H2H_PLUMED_SHELL", ""),
     shell:
         "{params.shell} python3 scripts/h2h_plumed_q6.py {params.build} --out {output}"
+rule binding_overhead:
+    input:
+        "scripts/bench_binding_overhead.py",
+        "benchmarks/binding_overhead_c.c",
+        "benchmarks/binding_overhead_cpp.cpp",
+        "benchmarks/binding_overhead.f90",
+        "benchmarks/binding_overhead.jl",
+        "benchmarks/binding_overhead.R",
+        "benchmarks/binding_overhead.lua",
+        "benchmarks/binding_overhead.py",
+        "bindings/rust/seams/examples/binding_overhead.rs",
+        "include/seams.hpp",
+        "build/src/libseams.so",
+    output:
+        "benchmarks/binding-overhead.csv",
+    shell:
+        "python3 scripts/bench_binding_overhead.py --out benchmarks/binding-overhead.csv --reps 8"

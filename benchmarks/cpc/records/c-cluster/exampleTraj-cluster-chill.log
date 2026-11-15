@@ -1,0 +1,38 @@
+command taskset -c 0 [path] time cluster-chill input/traj/exampleTraj.lammpstrj 1 2 1 6
+loadavg 0.34 0.74 0.67 1/283 26476
+returncode 0
+stdout
+meta mode cluster-chill
+meta frame 1
+meta type 2
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 0.225012
+repeat 1 largest 0
+repeat 1 ice_like 0
+repeat 1 subset 0
+repeat 2 path_ms 0.217735
+repeat 2 largest 0
+repeat 2 ice_like 0
+repeat 2 subset 0
+repeat 3 path_ms 0.209944
+repeat 3 largest 0
+repeat 3 ice_like 0
+repeat 3 subset 0
+repeat 4 path_ms 0.196558
+repeat 4 largest 0
+repeat 4 ice_like 0
+repeat 4 subset 0
+repeat 5 path_ms 0.208123
+repeat 5 largest 0
+repeat 5 ice_like 0
+repeat 5 subset 0
+repeat 6 path_ms 0.185403
+repeat 6 largest 0
+repeat 6 ice_like 0
+repeat 6 subset 0
+meta sink 1750
+
+stderr

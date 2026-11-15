@@ -8,6 +8,16 @@ import sys
 from pathlib import Path
 
 
+def pkg_config_program():
+    """The conda pkg-config wrapper applies PKG_CONFIG_SYSROOT_DIR twice."""
+    found = shutil.which("pkg-config")
+    if found:
+        sibling = Path(found).with_name("pkg-config.bin")
+        if sibling.is_file():
+            return str(sibling)
+    return found or "pkg-config"
+
+
 def run(cmd, env=None, cwd=None):
     subprocess.check_call(cmd, env=env, cwd=cwd)
 
@@ -24,6 +34,15 @@ def prefix_of(build):
         if option["name"] == "prefix":
             return option["value"]
     raise SystemExit("meson prefix is missing")
+
+
+def project_version(build):
+    import json
+
+    info = json.loads(
+        subprocess.check_output(["meson", "introspect", "--projectinfo", str(build)], text=True)
+    )
+    return info["version"]
 
 
 def library_dirs(binary, env, search):
@@ -58,7 +77,7 @@ def main():
     if stage.exists():
         shutil.rmtree(stage)
     work.mkdir(parents=True, exist_ok=True)
-    run(["meson", "install", "-C", str(build), "--destdir", str(stage)])
+    run(["meson", "install", "-C", str(build), "--no-rebuild", "--destdir", str(stage)])
 
     pc_files = list(stage.rglob("seams.pc"))
     configs = list(stage.rglob("seams-config.cmake"))
@@ -77,12 +96,13 @@ def main():
     # and PKG_CONFIG_SYSROOT_DIR then prepends the destdir a second time.
     # Name the destdir prefix explicitly and do not set a sysroot.
     env.pop("PKG_CONFIG_SYSROOT_DIR", None)
+    pkg_config = pkg_config_program()
     define = "--define-variable=prefix=" + str(installed)
     cflags = subprocess.check_output(
-        ["pkg-config", define, "--cflags", "seams"], env=env, text=True
+        [pkg_config, define, "--cflags", "seams"], env=env, text=True
     ).split()
     libs = subprocess.check_output(
-        ["pkg-config", define, "--libs", "seams"], env=env, text=True
+        [pkg_config, define, "--libs", "seams"], env=env, text=True
     ).split()
     binary = work / "quickstart-pkg"
     cc = os.environ.get("CC", "cc")
@@ -90,12 +110,33 @@ def main():
         [cc, str(source / "examples" / "c" / "quickstart.c"), "-o", str(binary), *cflags, *libs, "-lm"],
         env=env,
     )
+    compile_env = dict(env)
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(libdir), str(build / "src"), env.get("LD_LIBRARY_PATH", "")]
     )
     env = library_dirs(binary, env, [stage, build])
     sample = source / "input" / "traj" / "agi_water_tiny.lammpstrj"
     run([str(binary), str(sample)], env=env)
+
+    version = project_version(build)
+    modversion = subprocess.check_output(
+        [pkg_config, "--modversion", "seams"], env=env, text=True
+    ).strip()
+    if modversion != version:
+        raise SystemExit("pkg-config says {}, project is {}".format(modversion, version))
+    pinned = subprocess.run(
+        [pkg_config, "--exists", "seams >= " + version], env=env
+    )
+    if pinned.returncode != 0:
+        raise SystemExit("pkg-config --exists 'seams >= {}' failed".format(version))
+    find_check = source / "examples" / "c" / "find_check"
+    version_bin = work / "version-pkg"
+    run(
+        [cc, str(find_check / "version.c"), "-o", str(version_bin), *cflags, *libs],
+        env=compile_env,
+    )
+    env = library_dirs(version_bin, env, [stage, build])
+    run([str(version_bin), version], env=env)
 
     cmake_build = work / "cmake"
     if cmake_build.exists():
@@ -116,6 +157,26 @@ def main():
     cmake_bin = cmake_build / "quickstart"
     env = library_dirs(cmake_bin, env, [stage, build])
     run([str(cmake_bin), str(sample)], env=env)
+
+    find_build = work / "cmake-find"
+    if find_build.exists():
+        shutil.rmtree(find_build)
+    run(
+        [
+            "cmake",
+            "-S",
+            str(find_check),
+            "-B",
+            str(find_build),
+            "-DCMAKE_PREFIX_PATH=" + str(installed),
+            "-Dseams_DIR=" + str(configs[0].parent),
+            "-DSEAMS_EXPECT_VERSION=" + version,
+        ]
+    )
+    run(["cmake", "--build", str(find_build)])
+    find_bin = find_build / "version"
+    env = library_dirs(find_bin, env, [stage, build])
+    run([str(find_bin), version], env=env)
     print("installed C quickstart ok")
 
 

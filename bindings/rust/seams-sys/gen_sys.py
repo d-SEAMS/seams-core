@@ -11,6 +11,8 @@ export macro and the comments removed. Run it again when seams.h grows:
 
 import pathlib
 import re
+import shutil
+import subprocess
 import sys
 
 RUST_KEYWORDS = {
@@ -188,7 +190,7 @@ def functions_of(text):
         ret = " ".join(match.group(1).split())
         name = match.group(2)
         args = " ".join(match.group(3).split())
-        found.append((rust_type(ret) or "()", name, split_params(args)))
+        found.append((rust_type(ret), name, split_params(args)))
     return found
 
 
@@ -229,7 +231,11 @@ def render(header):
 
 def main(argv):
     header = pathlib.Path(argv[1]).read_text()
-    pathlib.Path(argv[2]).write_text(render(header))
+    out = pathlib.Path(argv[2])
+    out.write_text(render(header))
+    rustfmt = shutil.which("rustfmt")
+    if rustfmt:
+        subprocess.check_call([rustfmt, "--edition", "2021", str(out)])
     return 0
 
 

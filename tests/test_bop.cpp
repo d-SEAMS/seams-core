@@ -71,7 +71,7 @@ TEST_CASE("spheriHarmo Y_l0 at theta=0 is real and matches known value",
 
   // m ranges from -3 to 3; index 3 corresponds to m=0
   // For m!=0, values should be zero at theta=0
-  for (int k = 0; k < 7; k++) {
+  for (std::size_t k = 0; k < 7; k++) {
     if (k == 3)
       continue; // skip m=0
     REQUIRE_THAT(std::abs(result[k]), Catch::Matchers::WithinAbs(0.0, 1e-10));
@@ -200,7 +200,7 @@ TEST_CASE("getIceTypeNoPrint classifies atoms after correlation", "[bop]") {
   // Every atom should have an ice type assigned (could be any type)
   for (int i = 0; i < cloud.nop; i++) {
     // Just check that it's a valid enum value (not undefined)
-    auto t = cloud.pts[i].iceType;
+    auto t = cloud.pts[static_cast<std::size_t>(i)].iceType;
     bool validType =
         (t == molSys::atom_state_type::cubic ||
          t == molSys::atom_state_type::hexagonal ||
@@ -247,18 +247,22 @@ TEST_CASE("getq6 uses the four nearest neighbours, not the cutoff list",
 
   std::vector<std::vector<int>> fourOnly(full.size());
   for (int iatom = 0; iatom < cloud.nop; iatom++) {
+    const auto &row = full[static_cast<std::size_t>(iatom)];
+    auto &fourRow = fourOnly[static_cast<std::size_t>(iatom)];
     std::vector<std::pair<double, int>> cand;
-    for (size_t j = 1; j < full[iatom].size(); j++) {
-      const auto it = cloud.idIndexMap.find(full[iatom][j]);
+    for (size_t j = 1; j < row.size(); j++) {
+      const auto it = cloud.idIndexMap.find(row[j]);
       REQUIRE(it != cloud.idIndexMap.end());
       cand.emplace_back(gen::periodicDistSq(cloud, iatom, it->second),
-                        full[iatom][j]);
+                        row[j]);
     }
     const size_t keep = std::min<size_t>(4, cand.size());
-    std::partial_sort(cand.begin(), cand.begin() + keep, cand.end());
-    fourOnly[iatom].push_back(full[iatom][0]);
+    std::partial_sort(cand.begin(),
+                      cand.begin() + static_cast<std::ptrdiff_t>(keep),
+                      cand.end());
+    fourRow.push_back(row[0]);
     for (size_t k = 0; k < keep; k++) {
-      fourOnly[iatom].push_back(cand[k].second);
+      fourRow.push_back(cand[k].second);
     }
   }
   REQUIRE(fourOnly[0].size() < full[0].size());
@@ -282,7 +286,7 @@ TEST_CASE("reclassifyWater uses Q6 to reclassify water atoms", "[bop]") {
 
   // Should not crash and all types should still be valid
   for (int i = 0; i < cloud.nop; i++) {
-    auto t = cloud.pts[i].iceType;
+    auto t = cloud.pts[static_cast<std::size_t>(i)].iceType;
     REQUIRE(static_cast<int>(t) >= 0);
   }
 }
@@ -731,7 +735,7 @@ TEST_CASE("spherical harmonics obey the Condon-Shortley relation", "[bop]") {
 
   for (const auto &[theta, phi] : directions) {
     auto q3 = sph::lookupTableQ3Vec({phi, theta});
-    for (int m = 1; m <= 3; m++) {
+    for (std::size_t m = 1; m <= 3; m++) {
       const std::complex<double> expected =
           ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q3[3 - m]);
       REQUIRE_THAT(q3[3 + m].real(),
@@ -741,7 +745,7 @@ TEST_CASE("spherical harmonics obey the Condon-Shortley relation", "[bop]") {
     }
 
     auto q6 = sph::lookupTableQ6Vec({phi, theta});
-    for (int m = 1; m <= 6; m++) {
+    for (std::size_t m = 1; m <= 6; m++) {
       const std::complex<double> expected =
           ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q6[6 - m]);
       REQUIRE_THAT(q6[6 + m].real(),
@@ -787,18 +791,18 @@ TEST_CASE("per-order lookup agrees with the vector form", "[bop]") {
     for (int m = 0; m < 7; m++) {
       const auto single = sph::lookupTableQ3(m, angles);
       REQUIRE_THAT(single.real(),
-                   Catch::Matchers::WithinAbs(q3[m].real(), 1e-15));
+                   Catch::Matchers::WithinAbs(q3[static_cast<std::size_t>(m)].real(), 1e-15));
       REQUIRE_THAT(single.imag(),
-                   Catch::Matchers::WithinAbs(q3[m].imag(), 1e-15));
+                   Catch::Matchers::WithinAbs(q3[static_cast<std::size_t>(m)].imag(), 1e-15));
     }
 
     auto q6 = sph::lookupTableQ6Vec(angles);
     for (int m = 0; m < 13; m++) {
       const auto single = sph::lookupTableQ6(m, angles);
       REQUIRE_THAT(single.real(),
-                   Catch::Matchers::WithinAbs(q6[m].real(), 1e-15));
+                   Catch::Matchers::WithinAbs(q6[static_cast<std::size_t>(m)].real(), 1e-15));
       REQUIRE_THAT(single.imag(),
-                   Catch::Matchers::WithinAbs(q6[m].imag(), 1e-15));
+                   Catch::Matchers::WithinAbs(q6[static_cast<std::size_t>(m)].imag(), 1e-15));
     }
   }
 }
@@ -893,7 +897,7 @@ TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
     }
     REQUIRE_THAT(sum, Catch::Matchers::WithinAbs(9.0 / (4.0 * M_PI), 1e-13));
 
-    for (int m = 1; m <= 4; m++) {
+    for (std::size_t m = 1; m <= 4; m++) {
       const std::complex<double> expected =
           ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q4[4 - m]);
       REQUIRE_THAT(q4[4 + m].real(),
@@ -905,9 +909,9 @@ TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
     for (int m = 0; m < 9; m++) {
       const auto single = sph::lookupTableQ4(m, {phi, theta});
       REQUIRE_THAT(single.real(),
-                   Catch::Matchers::WithinAbs(q4[m].real(), 1e-15));
+                   Catch::Matchers::WithinAbs(q4[static_cast<std::size_t>(m)].real(), 1e-15));
       REQUIRE_THAT(single.imag(),
-                   Catch::Matchers::WithinAbs(q4[m].imag(), 1e-15));
+                   Catch::Matchers::WithinAbs(q4[static_cast<std::size_t>(m)].imag(), 1e-15));
     }
   }
 }
@@ -921,9 +925,9 @@ TEST_CASE("device Ylm matches spheriHarmo for l=3,4,6", "[bop]") {
     const int nComp = 2 * l + 1;
     for (int m = 0; m < nComp; m++) {
       REQUIRE_THAT(dev[2 * m],
-                   Catch::Matchers::WithinAbs(host[m].real(), 1e-12));
+                   Catch::Matchers::WithinAbs(host[static_cast<std::size_t>(m)].real(), 1e-12));
       REQUIRE_THAT(dev[2 * m + 1],
-                   Catch::Matchers::WithinAbs(host[m].imag(), 1e-12));
+                   Catch::Matchers::WithinAbs(host[static_cast<std::size_t>(m)].imag(), 1e-12));
     }
   }
 }
@@ -942,8 +946,8 @@ TEST_CASE("Cartesian Ylm matches spheriHarmo for l=3 and l=6", "[bop]") {
       REQUIRE(seams::ylm::ylmReal(orderL, d[0], d[1], d[2], re, im));
       const int nComp = 2 * orderL + 1;
       for (int m = 0; m < nComp; m++) {
-        REQUIRE_THAT(re[m], Catch::Matchers::WithinAbs(host[m].real(), 1e-12));
-        REQUIRE_THAT(im[m], Catch::Matchers::WithinAbs(host[m].imag(), 1e-12));
+        REQUIRE_THAT(re[m], Catch::Matchers::WithinAbs(host[static_cast<std::size_t>(m)].real(), 1e-12));
+        REQUIRE_THAT(im[m], Catch::Matchers::WithinAbs(host[static_cast<std::size_t>(m)].imag(), 1e-12));
       }
     }
   }
@@ -994,8 +998,10 @@ TEST_CASE("steinhardtQl l=3 vanishes on an inversion-symmetric FCC lattice",
 
   REQUIRE(q3.ql.size() == static_cast<size_t>(cloud.nop));
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE_THAT(q3.ql[i], Catch::Matchers::WithinAbs(0.0, 1e-5));
-    REQUIRE_THAT(q3.qlBar[i], Catch::Matchers::WithinAbs(0.0, 1e-5));
+    REQUIRE_THAT(q3.ql[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.0, 1e-5));
+    REQUIRE_THAT(q3.qlBar[static_cast<std::size_t>(i)],
+                 Catch::Matchers::WithinAbs(0.0, 1e-5));
   }
 }
 
@@ -1010,14 +1016,15 @@ TEST_CASE("getCorrel coordination number generalizes beyond four", "[bop]") {
   auto nList = nneigh::neighListO(cutoff, cloudDefault, 1);
   chill::getCorrel(cloudDefault, nList, false);
   for (int i = 0; i < cloudDefault.nop; i++) {
-    REQUIRE(cloudDefault.pts[i].c_ij.size() == 4);
+    REQUIRE(cloudDefault.pts[static_cast<std::size_t>(i)].c_ij.size() == 4);
   }
 
   auto cloudTwelve = fccCloud(3, lattice);
   chill::getCorrel(cloudTwelve, nList, false, 12);
   for (int i = 0; i < cloudTwelve.nop; i++) {
-    REQUIRE(cloudTwelve.pts[i].c_ij.size() == 12);
-    for (const auto &cij : cloudTwelve.pts[i].c_ij) {
+    const auto &pt = cloudTwelve.pts[static_cast<std::size_t>(i)];
+    REQUIRE(pt.c_ij.size() == 12);
+    for (const auto &cij : pt.c_ij) {
       REQUIRE(cij.c_value >= -1.0);
       REQUIRE(cij.c_value <= 1.0);
     }
@@ -1027,13 +1034,14 @@ TEST_CASE("getCorrel coordination number generalizes beyond four", "[bop]") {
   chill::getCorrel(cloudRow, nList, false, 0);
   for (int i = 0; i < cloudRow.nop; i++) {
     // Row layout: the first entry is the atom's own ID
-    REQUIRE(cloudRow.pts[i].c_ij.size() == nList[i].size() - 1);
+    const auto ui = static_cast<std::size_t>(i);
+    REQUIRE(cloudRow.pts[ui].c_ij.size() == nList[ui].size() - 1);
   }
 
   auto cloudPlus = fccCloud(3, lattice);
   chill::getCorrelPlus(cloudPlus, nList, false, 12);
   for (int i = 0; i < cloudPlus.nop; i++) {
-    REQUIRE(cloudPlus.pts[i].c_ij.size() == 12);
+    REQUIRE(cloudPlus.pts[static_cast<std::size_t>(i)].c_ij.size() == 12);
   }
 }
 
@@ -1098,11 +1106,12 @@ TEST_CASE("Steinhardt parameters reproduce the FCC reference values", "[bop]") {
   REQUIRE(q4.ql.size() == static_cast<size_t>(cloud.nop));
 
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE_THAT(q4.ql[i], Catch::Matchers::WithinAbs(0.190941, 1e-5));
-    REQUIRE_THAT(q6.ql[i], Catch::Matchers::WithinAbs(0.574524, 1e-5));
+    const auto ui = static_cast<std::size_t>(i);
+    REQUIRE_THAT(q4.ql[ui], Catch::Matchers::WithinAbs(0.190941, 1e-5));
+    REQUIRE_THAT(q6.ql[ui], Catch::Matchers::WithinAbs(0.574524, 1e-5));
     // Uniform environment: averaging changes nothing
-    REQUIRE_THAT(q4.qlBar[i], Catch::Matchers::WithinAbs(q4.ql[i], 1e-9));
-    REQUIRE_THAT(q6.qlBar[i], Catch::Matchers::WithinAbs(q6.ql[i], 1e-9));
+    REQUIRE_THAT(q4.qlBar[ui], Catch::Matchers::WithinAbs(q4.ql[ui], 1e-9));
+    REQUIRE_THAT(q6.qlBar[ui], Catch::Matchers::WithinAbs(q6.ql[ui], 1e-9));
   }
 }
 
@@ -1192,9 +1201,10 @@ TEST_CASE("steinhardtQl is independent of the OpenMP thread count", "[bop]") {
     p.z = 0.0;
     cloud.pts.push_back(p);
     cloud.idIndexMap[p.atomID] = i;
-    nList[i].push_back(p.atomID);
+    auto &row = nList[static_cast<std::size_t>(i)];
+    row.push_back(p.atomID);
     if (i + 1 < nAtoms) {
-      nList[i].push_back(i + 2);
+      row.push_back(i + 2);
     }
   }
 
@@ -1212,7 +1222,7 @@ TEST_CASE("steinhardtQl is independent of the OpenMP thread count", "[bop]") {
 
   REQUIRE(serial.ql.size() == static_cast<size_t>(nAtoms));
   REQUIRE(threaded.ql.size() == serial.ql.size());
-  for (int i = 0; i < nAtoms; i++) {
+  for (std::size_t i = 0; i < serial.ql.size(); i++) {
     REQUIRE_THAT(threaded.ql[i],
                  Catch::Matchers::WithinAbs(serial.ql[i], 1e-15));
     REQUIRE_THAT(threaded.qlBar[i],
@@ -1299,7 +1309,9 @@ chill::SteinhardtQl perBondSteinhardt(
     offsets.push_back(static_cast<int>(cols.size()));
   }
   const int nComp = 2 * orderL + 1;
-  std::vector<double> qlm(static_cast<std::size_t>(cloud.nop) * nComp * 2, 0.0);
+  std::vector<double> qlm(static_cast<std::size_t>(cloud.nop) *
+                              static_cast<std::size_t>(nComp) * 2,
+                          0.0);
   chill::SteinhardtQl out;
   out.ql.assign(static_cast<std::size_t>(cloud.nop), 0.0);
   out.qlBar.assign(static_cast<std::size_t>(cloud.nop), 0.0);
@@ -1369,10 +1381,11 @@ TEST_CASE("steinhardtQl matches a per-bond reference on threaded frames with "
       if (orderL != 12) {
         const auto ref = perBondSteinhardt(dense, denseRows, orderL);
         for (int i = 0; i < dense.nop; i++) {
-          REQUIRE_THAT(runs[0].ql[i],
-                       Catch::Matchers::WithinAbs(ref.ql[i], 1e-12));
-          REQUIRE_THAT(runs[0].qlBar[i],
-                       Catch::Matchers::WithinAbs(ref.qlBar[i], 1e-12));
+          const auto ui = static_cast<std::size_t>(i);
+          REQUIRE_THAT(runs[0].ql[ui],
+                       Catch::Matchers::WithinAbs(ref.ql[ui], 1e-12));
+          REQUIRE_THAT(runs[0].qlBar[ui],
+                       Catch::Matchers::WithinAbs(ref.qlBar[ui], 1e-12));
         }
       }
     }
@@ -1451,7 +1464,7 @@ TEST_CASE("Q8 satisfies the addition theorem and Condon-Shortley", "[bop]") {
       sum += std::norm(y);
     }
     REQUIRE_THAT(sum, Catch::Matchers::WithinAbs(17.0 / (4.0 * M_PI), 1e-13));
-    for (int m = 1; m <= 8; m++) {
+    for (std::size_t m = 1; m <= 8; m++) {
       const std::complex<double> expected =
           ((m % 2 == 0) ? 1.0 : -1.0) * std::conj(q8[8 - m]);
       REQUIRE_THAT(q8[8 + m].real(),
@@ -1462,9 +1475,9 @@ TEST_CASE("Q8 satisfies the addition theorem and Condon-Shortley", "[bop]") {
     for (int m = 0; m < 17; m++) {
       const auto single = sph::lookupTableQ8(m, {phi, theta});
       REQUIRE_THAT(single.real(),
-                   Catch::Matchers::WithinAbs(q8[m].real(), 1e-15));
+                   Catch::Matchers::WithinAbs(q8[static_cast<std::size_t>(m)].real(), 1e-15));
       REQUIRE_THAT(single.imag(),
-                   Catch::Matchers::WithinAbs(q8[m].imag(), 1e-15));
+                   Catch::Matchers::WithinAbs(q8[static_cast<std::size_t>(m)].imag(), 1e-15));
     }
   }
 }
@@ -1678,8 +1691,9 @@ TEST_CASE("steinhardtQl accepts l=8 and averages correctly on FCC", "[bop]") {
   auto q8 = chill::steinhardtQl(cloud, nList, 8);
   REQUIRE(q8.ql.size() == static_cast<size_t>(cloud.nop));
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE_THAT(q8.ql[i], Catch::Matchers::WithinAbs(0.40391, 1e-4));
-    REQUIRE_THAT(q8.qlBar[i], Catch::Matchers::WithinAbs(q8.ql[i], 1e-9));
+    const auto ui = static_cast<std::size_t>(i);
+    REQUIRE_THAT(q8.ql[ui], Catch::Matchers::WithinAbs(0.40391, 1e-4));
+    REQUIRE_THAT(q8.qlBar[ui], Catch::Matchers::WithinAbs(q8.ql[ui], 1e-9));
   }
 }
 

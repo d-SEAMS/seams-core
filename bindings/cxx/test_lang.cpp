@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
     return fail("rings");
   }
   std::cout << "tip4p mutual rings";
-  for (int i = 3; i <= 8; ++i) {
+  for (std::size_t i = 3; i <= 8; ++i) {
     std::cout << " " << i << ":" << rings[i];
   }
   std::cout << "\n";
@@ -1050,13 +1050,13 @@ int main(int argc, char **argv) {
   seams_frame_free(ice);
   seams_frame_free(guest);
   {
-    const double xyz[] = {10, 10, 10, 12.8, 10, 10, 9.07, 12.42, 10,
-                          9.07, 8.79, 11.62, 9.07, 8.79, 8.38, 12.0, 10, 10};
-    const double box9[] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
+    const double brineXyz[] = {10, 10, 10, 12.8, 10, 10, 9.07, 12.42, 10,
+                               9.07, 8.79, 11.62, 9.07, 8.79, 8.38, 12.0, 10, 10};
+    const double brineBox[] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
     const int types[] = {1, 1, 1, 1, 1, 3};
     const int mols[] = {1, 2, 3, 4, 5, 6};
     seams_frame *mixed =
-        seams_frame_from_species(xyz, 6, box9, types, nullptr, mols);
+        seams_frame_from_species(brineXyz, 6, brineBox, types, nullptr, mols);
     if (mixed == nullptr) {
       return fail("brine frame");
     }
@@ -1089,15 +1089,15 @@ int main(int argc, char **argv) {
       return fail("brine rings");
     }
     int hex = 0;
-    int cubic = 0;
+    int cubicCages = 0;
     int water = 0;
     int both = 0;
-    if (seams_frame_cages(mixed, 3.5, 1, 4, "cutoff", 0, nullptr, &hex, &cubic,
+    if (seams_frame_cages(mixed, 3.5, 1, 4, "cutoff", 0, nullptr, &hex, &cubicCages,
                           &water, &both) != 0) {
       seams_frame_free(mixed);
       return fail("brine cages");
     }
-    if (hex + cubic + water + both != 5) {
+    if (hex + cubicCages + water + both != 5) {
       seams_frame_free(mixed);
       return fail("brine cages counted the ion");
     }
@@ -1128,9 +1128,9 @@ int main(int argc, char **argv) {
       moved[static_cast<std::size_t>(i)] = src[i];
     }
     moved[0] += 1.0e-4;
-    double box9[9];
-    seams_frame_box(fresh, box9);
-    if (seams_frame_set_positions(fresh, moved.data(), nFresh, box9) != 0) {
+    double freshBox[9];
+    seams_frame_box(fresh, freshBox);
+    if (seams_frame_set_positions(fresh, moved.data(), nFresh, freshBox) != 0) {
       seams_frame_free(fresh);
       return fail("set positions");
     }
@@ -1142,13 +1142,13 @@ int main(int argc, char **argv) {
       seams_frame_free(fresh);
       return fail("neighbour pairs");
     }
-    std::vector<double> ql(static_cast<std::size_t>(nFresh));
+    std::vector<double> freshQl(static_cast<std::size_t>(nFresh));
     std::vector<double> bar(static_cast<std::size_t>(nFresh));
-    if (seams_frame_steinhardt(fresh, 3.5, 2, 6, ql.data(), bar.data()) != 0) {
+    if (seams_frame_steinhardt(fresh, 3.5, 2, 6, freshQl.data(), bar.data()) != 0) {
       seams_frame_free(fresh);
       return fail("steinhardt");
     }
-    if (seams_frame_steinhardt_graph(fresh, 3.5, 2, 6, "cutoff", ql.data(), bar.data()) != 0) {
+    if (seams_frame_steinhardt_graph(fresh, 3.5, 2, 6, "cutoff", freshQl.data(), bar.data()) != 0) {
       seams_frame_free(fresh);
       return fail("steinhardt graph");
     }

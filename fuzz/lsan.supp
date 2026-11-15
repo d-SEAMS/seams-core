@@ -1,0 +1,3 @@
+# libomp keeps its thread state until exit; LeakSanitizer reports it
+# from clang builds, where the OpenMP runtime is libomp.
+leak:___kmp_allocate

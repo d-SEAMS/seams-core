@@ -6,6 +6,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+import capi_docs  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 HEADER = ROOT / "include" / "seams.h"
 TOUR = ROOT / "docs" / "examples" / "c_api_tour.c"
@@ -33,9 +36,10 @@ filter keeps that species. `seams_system_count` is the number of points, or 0 fo
 null handle. Neighbour, ring, cage, brine, and fingerprint handles are separate
 objects. Destroying the frame does not free them.
 
-One thread uses a handle. Another thread may use a different handle at the same time.
-`seams_ql`, `seams_q4q6`, `seams_q6bar`, and `seams_steinhardt` share one
-process-global scratch, so those four calls do not overlap.
+One thread uses a handle. Another thread may use a different handle at the same time,
+including for `seams_ql`, `seams_q4q6`, `seams_q6bar`, and `seams_steinhardt`: their
+q_lm scratch belongs to the calling thread. `tests/capi_q_threads.c` runs them, and
+CHILL+, on eight handles in eight threads.
 
 ## Status codes
 
@@ -123,7 +127,12 @@ def main():
         chunks.append("```\n{}\n```\n".format(row))
     chunks.append("<!-- API_SYMBOLS_BEGIN -->\n")
     chunks.append("## Symbol reference\n")
+    funcs = capi_docs.functions(header)
     for name in names:
+        fn = funcs.get(name)
+        if fn is not None and fn.documented:
+            chunks.extend(capi_docs.render_function(fn))
+            continue
         chunks.append("### {}\n".format(name))
         chunks.append("Purpose: Public name in include/seams.h.\n")
         chunks.append("Parameters: see the declaration in include/seams.h.\n")

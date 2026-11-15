@@ -139,7 +139,7 @@ SCENARIO("Test the HC algorithm for a single hexagonal cage.", "[topo]") {
     iPoint.z = 10.5340004;  // z
     yCloud.pts.push_back(iPoint);
     // Update nop
-    yCloud.nop = yCloud.pts.size();
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
     // Update the unordered map
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       yCloud.idIndexMap[iatom] = iatom;
@@ -272,7 +272,7 @@ SCENARIO("Test the DDC algorithm for a single double-diamond cage.", "[topo]") {
     iPoint.z = 27.073;      // z
     yCloud.pts.push_back(iPoint);
     // Update nop
-    yCloud.nop = yCloud.pts.size();
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
     // Update the unordered map
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       yCloud.idIndexMap[iatom] = iatom;
@@ -658,7 +658,7 @@ TEST_CASE("findBulkPrisms on ideal prism geometry", "[topo_bulk][prism3]") {
   if (fourRings.size() >= 2) {
     std::vector<ring::strucType> ringType(fourRings.size(),
                                            ring::strucType::unclassified);
-    std::vector<double> rmsdPerAtom(cloud.nop, -1.0);
+    std::vector<double> rmsdPerAtom(static_cast<size_t>(cloud.nop), -1.0);
 
     int ret = prism3::findBulkPrisms(fourRings, ringType, nList, cloud,
                                       rmsdPerAtom, 8.0);
@@ -769,8 +769,8 @@ TEST_CASE("Cage counts are invariant under atom relabelling",
       std::vector<std::vector<int>> faces;
       for (const int ri : c.rings) {
         std::vector<int> face;
-        for (const int a : six[ri]) {
-          face.push_back(label[a]);
+        for (const int a : six[static_cast<size_t>(ri)]) {
+          face.push_back(label[static_cast<size_t>(a)]);
         }
         std::sort(face.begin(), face.end());
         faces.push_back(face);
@@ -782,7 +782,7 @@ TEST_CASE("Cage counts are invariant under atom relabelling",
     return out;
   };
 
-  std::vector<int> identity(n);
+  std::vector<int> identity(static_cast<size_t>(n));
   std::iota(identity.begin(), identity.end(), 0);
   const Cages reference = cagesOf(yCloud, identity);
   REQUIRE(!reference.empty());
@@ -797,14 +797,15 @@ TEST_CASE("Cage counts are invariant under atom relabelling",
     std::mt19937 rng(seed);
     std::shuffle(perm.begin(), perm.end(), rng);
     Cloud relabelled = yCloud;
-    std::vector<int> back(n);
+    std::vector<int> back(static_cast<size_t>(n));
     for (int a = 0; a < n; a++) {
-      relabelled.pts[perm[a]] = yCloud.pts[a];
-      back[perm[a]] = a;
+      const auto to = static_cast<size_t>(perm[static_cast<size_t>(a)]);
+      relabelled.pts[to] = yCloud.pts[static_cast<size_t>(a)];
+      back[to] = a;
     }
     relabelled.idIndexMap.clear();
     for (int i = 0; i < n; i++) {
-      relabelled.pts[i].atomID = i + 1;
+      relabelled.pts[static_cast<size_t>(i)].atomID = i + 1;
       relabelled.idIndexMap[i + 1] = i;
     }
     const Cages got = cagesOf(relabelled, back);
@@ -892,7 +893,7 @@ TEST_CASE("positionRank rejects two atoms at one wrapped position",
   cloud.boxLow = {0.0, 0.0, 0.0};
   cloud.pts.resize(3);
   const double xs[3] = {2.0, 1.0, 3.0};
-  for (int i = 0; i < 3; i++) {
+  for (size_t i = 0; i < 3; i++) {
     cloud.pts[i].x = xs[i];
     cloud.pts[i].y = 1.0;
     cloud.pts[i].z = 1.0;
@@ -940,7 +941,7 @@ int bruteIndependent(int n, const std::vector<std::pair<int, int>> &edges) {
       }
     }
     if (ok) {
-      best = std::max(best, __builtin_popcount(mask));
+      best = std::max(best, __builtin_popcount(static_cast<unsigned>(mask)));
     }
   }
   return best;

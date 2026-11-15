@@ -1,0 +1,8 @@
+command taskset -c 0 [path] f4 input/traj/clathrate-thf.lammpstrj --type 1 --htype 2
+loadavg 0.14 0.92 0.71 1/282 22208
+returncode 0
+stdout
+nop 7168 f4 0.963168 n 2176
+
+stderr
+hint: more than two LAMMPS types; set --family (default waterIce)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The vendored renderer stays the f65657b9 body plus the shared palette.
+"""The vendored renderer stays the bb1dbdbf body plus the shared palette.
 
 The palette import and the triclinic cell read are the only edits.
 docs/check_sh_cell.py and docs/check_palette.py lock those two edits.
@@ -13,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts" / "science_render.py"
 MARKER = b"# END-HEADER\n"
 # sha256 of the body after the palette import and the triclinic cell read.
-# The renderer underneath is still f65657b9b89481e7dd6617b1987bc58b2ec0f01c.
-EXPECTED = "95fb812110839cbc6310776f547356acab306b3f081bab13c93fc33139111064"
+# The renderer underneath is still bb1dbdbf25553174a47da6fa3f4be8f31238d7f0.
+EXPECTED = "122aff01ddd900e6f654675a728c5235157ffc45d733c0bbff9eac21f3dc8a70"
 
 
 def main():

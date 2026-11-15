@@ -3,7 +3,7 @@
 ! Label one cubic ice cell (8 waters) with CHILL+ through the dseams package.
 program downstream
   use, intrinsic :: iso_c_binding
-  use seams
+  use seams_c
   implicit none
   real(c_double), parameter :: sites(3, 8) = reshape([ &
     0d0, 0d0, 0d0, 0.5d0, 0.5d0, 0d0, 0.5d0, 0d0, 0.5d0, 0d0, 0.5d0, 0.5d0, &

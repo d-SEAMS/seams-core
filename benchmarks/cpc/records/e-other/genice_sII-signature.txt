@@ -1,0 +1,7 @@
+nop 136 graph cutoff signature 5:12 cages 16 atoms 136
+nop 136 graph cutoff signature 5:12,6:2 cages 0 atoms 0
+nop 136 graph cutoff signature 5:12,6:4 cages 8 atoms 128
+median_ms 4.415195
+q1_ms 4.227753
+q3_ms 4.655508
+iqr_ms 0.427755

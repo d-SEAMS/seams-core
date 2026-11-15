@@ -6,7 +6,7 @@ Open-face padding is the second-shell completion in the shell
 classifier. The validation compares that completion off and on.
 CHILL+ stays the published rule.
 
-Leave the completion on when the bulk-liquid gate records no added
+Leave the completion on when the bulk-liquid check records no added
 false positive. On an interface, read the layers whose label changed
 before treating the extra shell labels as ice. The classify timings
 are the same bulk liquid with the completion off and on.

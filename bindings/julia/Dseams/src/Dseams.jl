@@ -7,6 +7,18 @@ Julia front for the d-SEAMS engine. Calls `libseams_lang` with `ccall`.
 The library comes from `libseams_jll`. A local build is used instead when
 the `SEAMS_LANG_LIB` environment variable or the `libseams_lang`
 preference names it; see [`Dseams.set_library!`](@ref).
+
+CxxWrap is not required. Ice Ih (`input/traj/ice1h.lammpstrj`, every
+atom) is 128 hexagonal waters and 256 primitive six-rings.
+
+The C API names re-exported here call `libseams` (`SEAMS_LIB`, else the
+loader path) and are System, seams_system_count, seams_system_read,
+seams_chill, seams_steinhardt, seams_cages,
+seams_signature_cages, seams_neighbours_knn, seams_rdf, seams_running_cn,
+seams_coordination, seams_hbonds, seams_density_axis, seams_fingerprint,
+seams_contact_pairs, seams_domains, seams_prisms, seams_monolayer,
+seams_rings_vertices, seams_site_table, SeamsError, ChillPlus,
+RingHistogram, CageScore, SteinhardtOrder, SignatureCages, and Q4Q6.
 """
 module Dseams
 
@@ -36,6 +48,12 @@ end
 Path of the Ice Ih example, `example_path("ice1h.lammpstrj")`.
 """
 ice_ih_path() = example_path("ice1h.lammpstrj")
+
+export System, seams_system_count, seams_system_read, seams_chill, seams_steinhardt, seams_cages, seams_signature_cages
+export seams_neighbours_knn, seams_rdf, seams_running_cn, seams_coordination, seams_hbonds
+export seams_density_axis, seams_fingerprint, seams_contact_pairs, seams_domains, seams_prisms
+export seams_monolayer, seams_rings_vertices, seams_site_table
+export SeamsError, ChillPlus, RingHistogram, CageScore, SteinhardtOrder, SignatureCages, Q4Q6
 
 const ICE_NAMES = (
     "cubic",
@@ -125,20 +143,14 @@ function _check(code::Integer)
     code == 0 && return
     err = unsafe_string(ccall(dlsym(_so(), :seams_last_error), Ptr{Cchar}, ()))
     isempty(err) && (err = "dseams call failed")
-    error(err)
+    throw(SeamsError(err))
 end
 
 """
-    Frame(ptr)
+    Frame
 
-One trajectory frame. Freed when the object is collected.
-
-```jldoctest
-julia> using Dseams
-
-julia> read_frame(Dseams.ice_ih_path(); type=-1) isa Frame
-true
-```
+One frame from `libseams_lang`. The finalizer calls `seams_frame_free`.
+Do not use `ptr` after the frame is finalized.
 """
 mutable struct Frame
     ptr::Ptr{Cvoid}
@@ -154,17 +166,86 @@ mutable struct Frame
     end
 end
 
+"""One frame. `ptr` is owned by the finalizer, which calls `seams_frame_free`."""
+function Base.show(io::IO, frame::Frame)
+    n = frame.ptr == C_NULL ? 0 : nop(frame)
+    print(io, "Frame(", n, " atoms)")
+end
+
+"""CHILL+ labels, per-atom names, and the nine-label histogram."""
+struct ChillPlus
+    labels::Vector{Int32}
+    names::Vector{String}
+    counts::Dict{String,Int}
+end
+
+function Base.show(io::IO, ice::ChillPlus)
+    water = get(ice.counts, "water", 0)
+    print(io, "ChillPlus(", length(ice.labels), " atoms, water ", water, ")")
+end
+
+"""Hexagonal and double-diamond membership. The four counts are disjoint."""
+struct CageScore
+    cage::Vector{Int32}
+    n_ih::Int
+    n_ic::Int
+    n_water::Int
+    n_both::Int
+end
+
+function Base.show(io::IO, found::CageScore)
+    print(io, "CageScore(hex ", found.n_ih, ", cubic ", found.n_ic, ", both ", found.n_both, ", water ", found.n_water, ")")
+end
+
+"""Primitive-ring histogram. `counts[size]` is the number of rings of that size."""
+struct RingHistogram
+    counts::Dict{Int,Int}
+end
+
+Base.getindex(hist::RingHistogram, size::Integer) = hist.counts[size]
+
+function Base.show(io::IO, hist::RingHistogram)
+    print(io, "RingHistogram(")
+    join(io, ["$(k)=>$(v)" for (k, v) in sort!(collect(hist.counts))], ", ")
+    print(io, ")")
+end
+
+"""Local Steinhardt `ql` and the Lechner-Dellago `qlbar`."""
+struct SteinhardtOrder
+    ql::Vector{Float64}
+    qlbar::Vector{Float64}
+end
+
+function Base.show(io::IO, order::SteinhardtOrder)
+    print(io, "SteinhardtOrder(n=", length(order.ql), ")")
+end
+
+"""Closed cages of one ring census."""
+struct SignatureCages
+    cages::Int
+    atoms::Int
+end
+
+function Base.show(io::IO, sig::SignatureCages)
+    print(io, "SignatureCages(", sig.cages, " cages, ", sig.atoms, " atoms)")
+end
+
+"""Local and averaged q4 and q6."""
+struct Q4Q6
+    q4::Vector{Float64}
+    q6::Vector{Float64}
+    q4bar::Vector{Float64}
+    q6bar::Vector{Float64}
+end
+
+function Base.show(io::IO, order::Q4Q6)
+    print(io, "Q4Q6(n=", length(order.q6), ")")
+end
+
 """
     nframes(path)
 
-Number of frames in a trajectory.
-
-```jldoctest
-julia> using Dseams
-
-julia> nframes(Dseams.ice_ih_path())
-1
-```
+Number of frames in a trajectory. An XYZ file counts as one.
 """
 function nframes(path::AbstractString)
     _need_file(path)
@@ -176,14 +257,8 @@ end
 """
     read_frame(path; frame=1, type=0)
 
-Read one frame. `type = -1` keeps every atom.
-
-```jldoctest
-julia> using Dseams
-
-julia> nop(read_frame(Dseams.ice_ih_path(); type=-1))
-128
-```
+Read one frame. `frame` is 1-based. `type = 0` guesses oxygen. A positive
+type keeps that species. A negative type keeps every atom.
 """
 function read_frame(path::AbstractString; frame::Integer = 1, type::Integer = 0)
     _need_file(path)
@@ -202,14 +277,7 @@ end
 """
     nop(frame)
 
-Number of atoms in a frame.
-
-```jldoctest
-julia> using Dseams
-
-julia> nop(read_frame(Dseams.ice_ih_path(); type=-1))
-128
-```
+Number of atoms in `frame`.
 """
 nop(frame::Frame) = Int(ccall(dlsym(_so(), :seams_frame_nop), Cint, (Ptr{Cvoid},), frame.ptr))
 
@@ -219,15 +287,6 @@ nop(frame::Frame) = Int(ccall(dlsym(_so(), :seams_frame_nop), Cint, (Ptr{Cvoid},
 CHILL+ labels. `graph = "cutoff"` (the default) bonds every pair closer
 than `cutoff`. `graph = "mutual"` keeps the mutual four nearest
 neighbours inside `cutoff + 1.5`.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> chill_plus(f; graph="cutoff").counts["hexagonal"]
-128
-```
 """
 function chill_plus(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
     n = nop(frame)
@@ -247,22 +306,25 @@ function chill_plus(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::
     _check(code)
     names = [ICE_NAMES[Int(label) + 1] for label in labels]
     histogram = Dict(ICE_NAMES[i] => Int(counts[i]) for i in 1:9)
-    (labels = labels, names = names, counts = histogram)
+    ChillPlus(labels, names, histogram)
+end
+
+"""
+    chill_plus(path; frame=1, type=0, cutoff=3.5, graph="cutoff")
+
+Read `path` and label it. `type` is the trajectory filter, not the
+CHILL+ species filter.
+"""
+function chill_plus(path::AbstractString; frame::Integer=1, type::Integer=0, cutoff::Real=3.5, graph::AbstractString="cutoff")
+    chill_plus(read_frame(path; frame=frame, type=type); cutoff=cutoff, graph=graph)
 end
 
 """
     cages(frame; cutoff=3.5, type=0, k=4, graph="seeded")
 
-Hexagonal and cubic cage membership.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> cages(f; graph="cutoff").n_ih
-128
-```
+Hexagonal and double-diamond membership. `cage` is 0 water, 1 hexagonal
+only, 2 double-diamond only, 3 both. The four counts are disjoint and
+match `seams cages`. `cutoff` is angstrom.
 """
 function cages(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, k::Integer = 4, graph::AbstractString = "seeded")
     n = nop(frame)
@@ -288,15 +350,28 @@ function cages(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, k::Integer =
         n_both,
     )
     _check(code)
-    (
-        cage = per,
-        # Disjoint counters, the same four numbers `seams cages` prints.
-        # cage is 0 water, 1 hexagonal only, 2 double-diamond only, 3 both.
-        n_ih = Int(n_hex[]),
-        n_ic = Int(n_cubic[]),
-        n_water = Int(n_water[]),
-        n_both = Int(n_both[]),
+    # Disjoint counters, the same four numbers `seams cages` prints.
+    # cage is 0 water, 1 hexagonal only, 2 double-diamond only, 3 both.
+    CageScore(per, Int(n_hex[]), Int(n_cubic[]), Int(n_water[]), Int(n_both[]))
+end
+
+"""
+    neighbour_pairs(frame; cutoff=3.5, type=0, graph="cutoff")
+
+Directed pairs in the neighbour list. The self entry is omitted.
+"""
+function neighbour_pairs(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
+    code = ccall(
+        dlsym(_so(), :seams_frame_neighbours),
+        Cint,
+        (Ptr{Cvoid}, Cdouble, Cint, Cstring),
+        frame.ptr,
+        Cdouble(cutoff),
+        Cint(type),
+        graph,
     )
+    _check(code)
+    Int(ccall(dlsym(_so(), :seams_frame_neighbour_pairs), Cint, (Ptr{Cvoid},), frame.ptr))
 end
 
 """
@@ -321,16 +396,7 @@ end
 """
     primitive_rings(frame; cutoff=3.5, type=0, graph="mutual", max_depth=6)
 
-Primitive-ring histogram. The key is the ring size.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> primitive_rings(f; graph="cutoff", max_depth=6)[6]
-256
-```
+Histogram of primitive rings. Index with the ring size: `rings[6]`.
 """
 function primitive_rings(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "mutual", max_depth::Integer = 6)
     counts = zeros(Cint, max_depth + 1)
@@ -347,22 +413,15 @@ function primitive_rings(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, gr
         length(counts),
     )
     _check(code)
-    Dict(size => Int(counts[size + 1]) for size in 3:max_depth if counts[size + 1] != 0)
+    RingHistogram(Dict(size => Int(counts[size + 1]) for size in 3:max_depth if counts[size + 1] != 0))
 end
 
 """
     steinhardt(frame, order_l; cutoff=3.5, type=0, graph=nothing)
 
-Local Steinhardt parameter and the Lechner-Dellago average.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> length(steinhardt(f, 6).ql)
-128
-```
+Local Steinhardt parameter. `order_l` is 3, 4, 6, 8, or 12. Omitting
+`graph` uses the cutoff shell. `"mutual"` is the four nearest neighbours
+inside `cutoff + 1.5`.
 """
 function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::Integer = 0, graph::Union{Nothing,AbstractString} = nothing)
     n = nop(frame)
@@ -396,22 +455,13 @@ function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::In
         )
     end
     _check(code)
-    (ql = ql, qlbar = qlbar)
+    SteinhardtOrder(ql, qlbar)
 end
 
 """
     signature_cages(frame, spec; cutoff=3.5, type=0, graph="cutoff")
 
-Closed cages whose faces match `spec`.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> signature_cages(f, "512").cages isa Int
-true
-```
+Closed cages whose ring census matches `spec`, for example `"512"`.
 """
 function signature_cages(frame::Frame, spec::AbstractString; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
     n_cages = Ref{Cint}(0)
@@ -429,22 +479,14 @@ function signature_cages(frame::Frame, spec::AbstractString; cutoff::Real = 3.5,
         n_atoms,
     )
     _check(code)
-    (cages = Int(n_cages[]), atoms = Int(n_atoms[]))
+    SignatureCages(Int(n_cages[]), Int(n_atoms[]))
 end
 
 """
     jump_tau90(first, second, dt=1.0; oxygen_type=1, hydrogen_type=2)
 
-Jump-rotor tau_90 between two frames.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> jump_tau90(f, f) isa Float64
-true
-```
+Time for an H-H vector to rotate 90 degrees between two frames.
+Returns `dt` when any water rotates that far, and `NaN` otherwise.
 """
 function jump_tau90(first::Frame, second::Frame, dt::Real = 1.0; oxygen_type::Integer = 1, hydrogen_type::Integer = 2)
     tau = Ref{Cdouble}(0.0)
@@ -466,16 +508,8 @@ end
 """
     symmetry(frame; shell_rmsd=0.12)
 
-Per-atom shell label. 0 is ice Ih.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> length(symmetry(f))
-128
-```
+Per-atom shell label. 0 is ice Ih, 1 is ice Ic, 2 is stacking disorder,
+and -1 is anything else.
 """
 function symmetry(frame::Frame; shell_rmsd::Real = 0.12)
     n = nop(frame)
@@ -495,16 +529,7 @@ end
 """
     q4_q6(frame; cutoff=3.5, type=0)
 
-Local q4 and q6 and the Lechner-Dellago averages.
-
-```jldoctest
-julia> using Dseams
-
-julia> f = read_frame(Dseams.ice_ih_path(); type=-1);
-
-julia> length(q4_q6(f).q6)
-128
-```
+Local and Lechner-Dellago q4 and q6 on the cutoff shell. `cutoff` is angstrom.
 """
 function q4_q6(frame::Frame; cutoff::Real = 3.5, type::Integer = 0)
     n = nop(frame)
@@ -525,7 +550,11 @@ function q4_q6(frame::Frame; cutoff::Real = 3.5, type::Integer = 0)
         q6bar,
     )
     _check(code)
-    (q4 = q4, q6 = q6, q4bar = q4bar, q6bar = q6bar)
+    Q4Q6(q4, q6, q4bar, q6bar)
 end
+
+# A copy of bindings/julia/capi.jl, so the registered package is complete.
+# The checkout test checks that the two files agree.
+include("capi.jl")
 
 end

@@ -87,7 +87,7 @@ double getAverageWithoutOutliers(std::vector<double> inpVec);
  *  @return The median value
  */
 inline double calcMedian(std::vector<double> *input) {
-  int n = (*input).size(); // Number of elements
+  int n = static_cast<int>((*input).size()); // Number of elements
   double median;           // Output median value
 
   // Sort a copy (avoid mutating input)
@@ -97,9 +97,9 @@ inline double calcMedian(std::vector<double> *input) {
   // Calculate the median
   // For even values, the median is the average of the two middle values
   if (n % 2 == 0) {
-    median = 0.5 * (sorted[n / 2] + sorted[n / 2 - 1]);
+    median = 0.5 * (sorted[static_cast<std::size_t>(n / 2)] + sorted[static_cast<std::size_t>(n / 2 - 1)]);
   } else {
-    median = sorted[(n + 1) / 2 - 1];
+    median = sorted[static_cast<std::size_t>((n + 1) / 2 - 1)];
   }
 
   return median;
@@ -365,10 +365,10 @@ inline double
 periodicDistSq(const FracBox &b,
                const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                int iatom, int jatom) {
-  const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
+  const auto &atom = yCloud.pts[static_cast<std::size_t>(iatom)];
   const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom)];
   if (b.ok) {
-    const auto wrapped = fracDelta(b, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+    const auto wrapped = fracDelta(b, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z);
     const double r2 =
         wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2];
     if (smithInside(b, r2)) {
@@ -376,12 +376,12 @@ periodicDistSq(const FracBox &b,
     }
 #ifdef SEAMS_HAS_MINIMAGE
     double ed[3] = {0.0, 0.0, 0.0};
-    if (euclideanDelta(yCloud, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z, ed)) {
+    if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z, ed)) {
       return ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
     }
     return r2;
 #else
-    const std::array<double, 3> raw = {pi.x - pj.x, pi.y - pj.y, pi.z - pj.z};
+    const std::array<double, 3> raw = {atom.x - pj.x, atom.y - pj.y, atom.z - pj.z};
     const auto euc = mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz,
                                              raw, wrapped);
     return euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
@@ -389,14 +389,14 @@ periodicDistSq(const FracBox &b,
   }
   if (yCloud.box.size() >= 6) {
     const auto dr =
-        triclinicMinImage(yCloud, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+        triclinicMinImage(yCloud, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z);
     return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
   }
   std::array<double, 3> dr;
   double r2 = 0.0;
-  dr[0] = std::fabs(pi.x - pj.x);
-  dr[1] = std::fabs(pi.y - pj.y);
-  dr[2] = std::fabs(pi.z - pj.z);
+  dr[0] = std::fabs(atom.x - pj.x);
+  dr[1] = std::fabs(atom.y - pj.y);
+  dr[2] = std::fabs(atom.z - pj.z);
   for (int k = 0; k < 3; k++) {
     dr[static_cast<std::size_t>(k)] -=
         yCloud.box[static_cast<std::size_t>(k)] *
@@ -440,8 +440,8 @@ inline void batchPeriodicDistSq(
   if (n > 0 && b.ok && b.triclinic) {
     mi_cell cell;
     if (pointCloudCell(yCloud, &cell)) {
-      const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
-      const double p[3] = {pi.x, pi.y, pi.z};
+      const auto &atom = yCloud.pts[static_cast<std::size_t>(iatom)];
+      const double p[3] = {atom.x, atom.y, atom.z};
       std::vector<double> qs(n * 3);
       for (std::size_t k = 0; k < n; ++k) {
         const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom[k])];
@@ -494,10 +494,10 @@ inline void writeDumpBoxBounds(
   }
   for (int k = 0; k < 3; k++) {
     const double lo = (static_cast<std::size_t>(k) < yCloud.boxLow.size())
-                          ? yCloud.boxLow[k]
+                          ? yCloud.boxLow[static_cast<std::size_t>(k)]
                           : 0.0;
     const double len = (static_cast<std::size_t>(k) < yCloud.box.size())
-                           ? yCloud.box[k]
+                           ? yCloud.box[static_cast<std::size_t>(k)]
                            : 0.0;
     os << lo << ' ' << lo + len;
     if (tilt) {
@@ -523,36 +523,36 @@ inline std::array<double, 3> relDistFromPoint(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     double xj, double yj, double zj) {
   if (b.ok) {
-    const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
-    const auto dr = fracDelta(b, pi.x, pi.y, pi.z, xj, yj, zj);
+    const auto &atom = yCloud.pts[static_cast<std::size_t>(iatom)];
+    const auto dr = fracDelta(b, atom.x, atom.y, atom.z, xj, yj, zj);
     const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
     if (smithInside(b, r2)) {
       return dr;
     }
 #ifdef SEAMS_HAS_MINIMAGE
     double ed[3] = {0.0, 0.0, 0.0};
-    if (euclideanDelta(yCloud, pi.x, pi.y, pi.z, xj, yj, zj, ed)) {
+    if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, xj, yj, zj, ed)) {
       return {ed[0], ed[1], ed[2]};
     }
     return dr;
 #else
-    const std::array<double, 3> raw = {pi.x - xj, pi.y - yj, pi.z - zj};
+    const std::array<double, 3> raw = {atom.x - xj, atom.y - yj, atom.z - zj};
     return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
 #endif
   }
   if (yCloud.box.size() >= 6) {
-    return triclinicMinImage(yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y,
-                             yCloud.pts[iatom].z, xj, yj, zj);
+    return triclinicMinImage(yCloud, yCloud.pts[static_cast<std::size_t>(iatom)].x, yCloud.pts[static_cast<std::size_t>(iatom)].y,
+                             yCloud.pts[static_cast<std::size_t>(iatom)].z, xj, yj, zj);
   }
 
-  std::array<double, 3> dr = {yCloud.pts[iatom].x - xj, yCloud.pts[iatom].y - yj,
-                              yCloud.pts[iatom].z - zj};
+  std::array<double, 3> dr = {yCloud.pts[static_cast<std::size_t>(iatom)].x - xj, yCloud.pts[static_cast<std::size_t>(iatom)].y - yj,
+                              yCloud.pts[static_cast<std::size_t>(iatom)].z - zj};
   for (int k = 0; k < 3; k++) {
-    if (dr[k] < -yCloud.box[k] * 0.5) {
-      dr[k] += yCloud.box[k];
+    if (dr[static_cast<std::size_t>(k)] < -yCloud.box[static_cast<std::size_t>(k)] * 0.5) {
+      dr[static_cast<std::size_t>(k)] += yCloud.box[static_cast<std::size_t>(k)];
     }
-    if (dr[k] >= yCloud.box[k] * 0.5) {
-      dr[k] -= yCloud.box[k];
+    if (dr[static_cast<std::size_t>(k)] >= yCloud.box[static_cast<std::size_t>(k)] * 0.5) {
+      dr[static_cast<std::size_t>(k)] -= yCloud.box[static_cast<std::size_t>(k)];
     }
   }
   return dr;
@@ -590,13 +590,13 @@ distance(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int ia
   double r2 = 0.0; // Squared absolute distance
 
   // Get x1-x2 etc
-  dr[0] = fabs(yCloud.pts[iatom].x - yCloud.pts[jatom].x);
-  dr[1] = fabs(yCloud.pts[iatom].y - yCloud.pts[jatom].y);
-  dr[2] = fabs(yCloud.pts[iatom].z - yCloud.pts[jatom].z);
+  dr[0] = fabs(yCloud.pts[static_cast<std::size_t>(iatom)].x - yCloud.pts[static_cast<std::size_t>(jatom)].x);
+  dr[1] = fabs(yCloud.pts[static_cast<std::size_t>(iatom)].y - yCloud.pts[static_cast<std::size_t>(jatom)].y);
+  dr[2] = fabs(yCloud.pts[static_cast<std::size_t>(iatom)].z - yCloud.pts[static_cast<std::size_t>(jatom)].z);
 
   // Get the squared absolute distance
   for (int k = 0; k < 3; k++) {
-    r2 += pow(dr[k], 2.0);
+    r2 += pow(dr[static_cast<std::size_t>(k)], 2.0);
   }
 
   return sqrt(r2);
@@ -616,8 +616,8 @@ distance(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int ia
 inline std::array<double, 3>
 relDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
         int jatom) {
-  return relDistFromPoint(yCloud, iatom, yCloud.pts[jatom].x,
-                          yCloud.pts[jatom].y, yCloud.pts[jatom].z);
+  return relDistFromPoint(yCloud, iatom, yCloud.pts[static_cast<std::size_t>(jatom)].x,
+                          yCloud.pts[static_cast<std::size_t>(jatom)].y, yCloud.pts[static_cast<std::size_t>(jatom)].z);
 }
 
 // Function for sorting according to atom ID
@@ -711,7 +711,7 @@ avgVector(std::vector<std::complex<double>> v, int l, int neigh) {
     return v;
   }
   for (int m = 0; m < 2 * l + 1; m++) {
-    v[m] = (1.0 / static_cast<double>(neigh)) * v[m];
+    v[static_cast<std::size_t>(m)] = (1.0 / static_cast<double>(neigh)) * v[static_cast<std::size_t>(m)];
   }
 
   return v;

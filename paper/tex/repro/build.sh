@@ -1,3 +1,5 @@
+# The brine front PDF is not in git. paper/tex/repro/brine_front.sh
+# runs rule brine_front_pdf.
 meson setup build -Dbuildtype=release -Dwith_tests=true -Dwith_cli=true \
   -Dwith_linkcell=enabled -Dwith_minimage=enabled -Dwith_gpulite=disabled \
   -Dwith_ira=disabled -Dwith_sphericart=disabled

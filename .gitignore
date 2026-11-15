@@ -2,11 +2,19 @@
 .pixi/
 .venv-paper/
 benchmarks/paper-cells/.sitting-large.jsonl
+benchmarks/logs/binding-overhead/
+docs/source/_static/binding-overhead.png
 benchmarks/paper-cells/.sitting-agree/
 benchmarks/paper-cells/*.pdf
 benchmarks/paper-cells/.liquid-work/
 benchmarks/*.png
 mw215-frames/
+# Rendered by docs/render_h2h.py from benchmarks/paper-cells/*.csv, both
+# at Sphinx build (docs/source/conf.py) and by meson test docs_h2h_tables.
+docs/source/explanation/performance-h2h-tables.rst
+docs/source/explanation/sitting-large-threads.svg
+# LAMMPS writes its log beside the deck unless told -log none.
+engines/lammps/log.lammps
 /result
 /.ccls-cache/
 shellBuild/
@@ -14,7 +22,10 @@ doxyYoda
 doxyYoda_*
 /run*
 bbdir/
+bbdir-*/
 bbdir-cov/
+bindings/rust/target/
+__pycache__/
 /.snakemake/
 # Manual updates ONLY
 spack.yml
@@ -95,7 +106,10 @@ markdown/cli-fast-plots/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
 # Nested exports and CSV tables are the same kind of generated page.
 docs/build/
+docs/ford/
+docs/ldoc/
 docs/doctrees/
+docs/native-html/
 docs/doxygen-html/
 docs/lang-cpp/
 docs/lang-lua/
@@ -117,6 +131,8 @@ docs/source/tutorials/molecules.rst
 docs/source/videos/players.rst
 docs/videos/**/*.png
 docs/source/xml/
+docs/source/doxygen-include/
+docs/source/crates/
 docs/source/api/
 m.css/
 compile_commands.json
@@ -410,6 +426,11 @@ repro/figshare/
 repro/results/
 repro/zenodo/payload/
 input/brine/work/
+paper/data/brine-frames/out/
+paper/tex/figures/brine_front.pdf
+paper/data/brine-frames/.dry-run/
+# Local checkout of the d-SEAMS/brine-frames dataset.
+/d-SEAMS/
 .tip_sha
 /.lammps-src
 /docs/nucleation/mw4096-leads.png

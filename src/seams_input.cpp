@@ -36,7 +36,16 @@
 #include <seams_input.hpp>
 #include <string_view>
 #include <thread>
+#include <utility>
 #include <sys/stat.h>
+
+// Larger than the 884736-molecule cell. A header past this is not a frame
+// the reader will allocate.
+constexpr int kMaxDeclaredAtoms = 8000000;
+
+bool declaredAtomsOk(int nop) {
+  return nop >= 0 && nop <= kMaxDeclaredAtoms;
+}
 #include <unistd.h>
 #ifdef _WIN32
 #include <io.h>
@@ -413,7 +422,7 @@ struct LammpsDumpSession {
       }
     }
     stream().clear();
-    stream().seekg(static_cast<std::streamoff>(offsets[frame - 1]));
+    stream().seekg(static_cast<std::streamoff>(offsets[static_cast<std::size_t>(frame - 1)]));
     std::string line;
     if (!std::getline(stream(), line) || !isLammpsTimestep(line)) {
       return false;
@@ -614,7 +623,7 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
       bool ok = true;
       for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
         try {
-          id.push_back(std::stoi(tokens[i]));
+          id.push_back(std::stoi(tokens[static_cast<std::size_t>(i)]));
         } catch (...) {
           ok = false;
           break;
@@ -776,7 +785,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       xyzFile->close();
       throw std::runtime_error("XYZ header is not an atom count.");
     }
-    if (nop < 0) {
+    if (!declaredAtomsOk(nop)) {
       xyzFile->close();
       throw std::runtime_error("XYZ header is not an atom count.");
     }
@@ -790,7 +799,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       throw;
     }
     // Reserve memory for atom coordinates using nop read in
-    yCloud.pts.reserve(nop);
+    yCloud.pts.reserve(static_cast<std::size_t>(nop));
     yCloud.nop = nop;
     // Run this until EOF or you reach the next timestep
     std::map<std::string, int> elementType;
@@ -982,6 +991,9 @@ void parseLammpsFrameBody(
 
     if (readNOP && !itemLine) {
       if (parseDumpInt(line, nop) && nop >= 0) {
+        if (!declaredAtomsOk(nop)) {
+          throw std::runtime_error("declared atom count is past the reader limit");
+        }
         yCloud.pts.reserve(static_cast<std::size_t>(nop));
         yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
         if (keep == LammpsKeep::All) {
@@ -1075,16 +1087,16 @@ void parseLammpsFrameBody(
         sawMol = false;
         nextSyntheticId = 1;
         for (int i = 2; i < static_cast<int>(tokens.size()); i++) {
-          if (tokens[i] == "type") {
+          if (tokens[static_cast<std::size_t>(i)] == "type") {
             typeIndex = i - 2;
-          } else if (tokens[i] == "mol") {
+          } else if (tokens[static_cast<std::size_t>(i)] == "mol") {
             molIndex = i - 2;
             sawMol = true;
-          } else if (tokens[i] == "id") {
+          } else if (tokens[static_cast<std::size_t>(i)] == "id") {
             atomIndex = i - 2;
             sawId = true;
           } else {
-            noteCoordColumn(i - 2, tokens[i], xIndex, yIndex, zIndex);
+            noteCoordColumn(i - 2, tokens[static_cast<std::size_t>(i)], xIndex, yIndex, zIndex);
           }
         }
       }
@@ -1273,7 +1285,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   nextLine(s, e);
   int nop = 0;
   const char *np = s;
-  if (!parseLooseInt(np, e, nop) || nop < 0) {
+  if (!parseLooseInt(np, e, nop) || !declaredAtomsOk(nop)) {
     return false;
   }
   nextLine(s, e);
@@ -1304,7 +1316,6 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     return false;
   }
   yCloud.pts.clear();
-  yCloud.pts.reserve(static_cast<std::size_t>(nop));
   yCloud.idIndexMap.clear();
   yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
   yCloud.box = {span[0], span[1], span[2]};
@@ -1312,46 +1323,89 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   const bool filter = keep != LammpsKeep::All;
   int kept = 0;
   bool failed = false;
-  for (int i = 0; i < nop; ++i) {
-    if (p >= end) {
-      failed = true;
-      break;
+  // One pointer per atom line, then the numbers are parsed with no
+  // per-line string. The lines are independent, so the team splits them.
+  std::vector<const char *> lineAt(static_cast<std::size_t>(nop));
+  std::vector<const char *> lineEnd(static_cast<std::size_t>(nop));
+  {
+    const char *scan = p;
+    for (int i = 0; i < nop; ++i) {
+      if (scan >= end) {
+        failed = true;
+        break;
+      }
+      const char *ls = scan;
+      while (scan < end && *scan != '\n') {
+        ++scan;
+      }
+      const char *le = scan;
+      if (le > ls && le[-1] == '\r') {
+        --le;
+      }
+      if (startsWith(ls, le, "ITEM:")) {
+        failed = true;
+        break;
+      }
+      lineAt[static_cast<std::size_t>(i)] = ls;
+      lineEnd[static_cast<std::size_t>(i)] = le;
+      if (scan < end && *scan == '\n') {
+        ++scan;
+      }
     }
-    nextLine(s, e);
-    if (startsWith(s, e, "ITEM:")) {
-      failed = true;
-      break;
+    if (!failed) {
+      p = scan;
     }
-    const char *ap = s;
+  }
+  struct Parsed {
     int id = 0;
     int typ = 0;
     double x = 0;
     double y = 0;
     double z = 0;
-    if (!parseLooseInt(ap, e, id) || !parseLooseInt(ap, e, typ) ||
-        !parseLooseDouble(ap, e, x) || !parseLooseDouble(ap, e, y) ||
-        !parseLooseDouble(ap, e, z)) {
-      failed = true;
-      break;
+    char ok = 0;
+  };
+  std::vector<Parsed> parsed(static_cast<std::size_t>(failed ? 0 : nop));
+  if (!failed) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 1024 && !omp_in_parallel())
+#endif
+    for (int i = 0; i < nop; ++i) {
+      const char *ap = lineAt[static_cast<std::size_t>(i)];
+      const char *ae = lineEnd[static_cast<std::size_t>(i)];
+      Parsed row;
+      row.ok = parseLooseInt(ap, ae, row.id) && parseLooseInt(ap, ae, row.typ) &&
+                       parseLooseDouble(ap, ae, row.x) && parseLooseDouble(ap, ae, row.y) &&
+                       parseLooseDouble(ap, ae, row.z)
+                   ? 1
+                   : 0;
+      parsed[static_cast<std::size_t>(i)] = row;
     }
-    if (filter && typ != typeFilter) {
-      continue;
+    yCloud.pts.reserve(static_cast<std::size_t>(nop));
+    for (int i = 0; i < nop; ++i) {
+      const Parsed &row = parsed[static_cast<std::size_t>(i)];
+      if (!row.ok) {
+        failed = true;
+        break;
+      }
+      if (filter && row.typ != typeFilter) {
+        continue;
+      }
+      molSys::Point<double> point;
+      point.atomID = row.id;
+      point.molID = row.id;
+      point.type = row.typ;
+      point.x = row.x;
+      point.y = row.y;
+      point.z = row.z;
+      yCloud.pts.push_back(point);
+      if (!yCloud.idIndexMap.emplace(row.id, kept).second) {
+        std::cerr << "Warning: duplicate atom ID " << row.id
+                  << " in the input frame; the ID-to-index map keeps only the "
+                     "last atom read with this ID\n";
+        yCloud.idIndexMap[row.id] = kept;
+      }
+      ++kept;
     }
-    molSys::Point<double> point;
-    point.atomID = id;
-    point.molID = id;
-    point.type = typ;
-    point.x = x;
-    point.y = y;
-    point.z = z;
-    yCloud.pts.push_back(point);
-    if (!yCloud.idIndexMap.emplace(id, kept).second) {
-      std::cerr << "Warning: duplicate atom ID " << id
-                << " in the input frame; the ID-to-index map keeps only the "
-                   "last atom read with this ID\n";
-      yCloud.idIndexMap[id] = kept;
-    }
-    ++kept;
   }
   if (failed) {
     // The snapshot was taken at st.st_size. An append or a replace during
@@ -1453,7 +1507,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                     std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, -1, LammpsKeep::All, isSlice,
                   coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 /**
@@ -1476,7 +1530,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
                      std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, typeO, LammpsKeep::Type,
                   isSlice, coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 /**
@@ -1498,7 +1552,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, typeI,
                   LammpsKeep::TypeInSlice, isSlice, coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 #ifdef SEAMS_HAS_READCON

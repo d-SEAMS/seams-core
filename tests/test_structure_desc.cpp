@@ -271,10 +271,10 @@ Cloud xorshiftFrame(int n, double tilt) {
 std::vector<double> soapByTerms(const Cloud &cloud,
                                 const std::vector<std::vector<int>> &nList,
                                 int iatom, int nMax, int lMax, double rcut) {
-  const int nComp = (lMax + 1) * (lMax + 1);
+  const auto nComp = static_cast<size_t>((lMax + 1) * (lMax + 1));
   const double sigma = rcut / static_cast<double>(nMax);
-  std::vector<std::complex<double>> coeff(
-      static_cast<size_t>(nMax) * static_cast<size_t>(nComp), {0.0, 0.0});
+  std::vector<std::complex<double>> coeff(static_cast<size_t>(nMax) * nComp,
+                                          {0.0, 0.0});
   for (size_t j = 1; j < nList[static_cast<size_t>(iatom)].size(); j++) {
     const int jatom = cloud.idIndexMap.at(nList[static_cast<size_t>(iatom)][j]);
     const auto d = gen::relDist(cloud, iatom, jatom);
@@ -295,7 +295,7 @@ std::vector<double> soapByTerms(const Cloud &cloud,
         }
         const auto yl = sph::spheriHarmo(l, angles);
         for (int m = 0; m < 2 * l + 1; m++) {
-          coeff[static_cast<size_t>(n) * nComp + l * l + m] +=
+          coeff[static_cast<size_t>(n) * nComp + static_cast<size_t>(l * l + m)] +=
               g * yl[static_cast<size_t>(m)];
         }
       }
@@ -307,8 +307,9 @@ std::vector<double> soapByTerms(const Cloud &cloud,
       for (int l = 0; l <= lMax; l++) {
         std::complex<double> acc = 0.0;
         for (int m = 0; m < 2 * l + 1; m++) {
-          acc += coeff[static_cast<size_t>(n) * nComp + l * l + m] *
-                 std::conj(coeff[static_cast<size_t>(np) * nComp + l * l + m]);
+          const auto lm = static_cast<size_t>(l * l + m);
+          acc += coeff[static_cast<size_t>(n) * nComp + lm] *
+                 std::conj(coeff[static_cast<size_t>(np) * nComp + lm]);
         }
         spec.push_back(acc.real());
       }

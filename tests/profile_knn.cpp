@@ -58,8 +58,8 @@ int main(int argc, char **argv) {
     std::vector<int> out(static_cast<std::size_t>(n) * static_cast<std::size_t>(k),
                          -1);
     auto a1 = Clock::now();
-    if (lc_knearest(xyz.data(), n, &box, k, mask.data(), hint, out.data()) !=
-        0) {
+    if (lc_knearest(xyz.data(), static_cast<std::size_t>(n), &box, k,
+                    mask.data(), hint, out.data()) != 0) {
       std::fprintf(stderr, "%s\n", lc_last_error());
       return 1;
     }

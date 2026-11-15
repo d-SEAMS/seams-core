@@ -18,7 +18,6 @@
 #else
 #include <nauty.h>
 #endif
-#endif
 
 namespace {
 
@@ -36,7 +35,6 @@ void collectAtoms(const std::vector<std::vector<int>> &rings,
   }
 }
 
-#ifdef SEAMS_HAS_NAUTY
 std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> &edges,
                                   int root = -1,
                                   const std::vector<int> &colours = {}) {
@@ -98,7 +96,6 @@ std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> 
   }
   return out.str();
 }
-#endif
 
 std::vector<std::pair<int, int>>
 ringEdges(const std::vector<std::vector<int>> &rings,
@@ -122,7 +119,6 @@ ringEdges(const std::vector<std::vector<int>> &rings,
   return edges;
 }
 
-#ifdef SEAMS_HAS_NAUTY
 std::string hexPrismCertificate() {
   std::vector<std::pair<int, int>> edges;
   for (int i = 0; i < 6; i++) {
@@ -132,9 +128,9 @@ std::string hexPrismCertificate() {
   }
   return densenautyCertificate(12, edges);
 }
-#endif
 
 } // namespace
+#endif
 
 namespace cage {
 

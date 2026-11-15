@@ -11,13 +11,17 @@ SEAMS_OBJECTS = \
   seams/absOrientation.o \
   seams/bond.o \
   seams/bop.o \
+  seams/brine_front.o \
   seams/cage_affiliation.o \
   seams/cage_canon.o \
   seams/cage_enum.o \
   seams/cage_pack.o \
   seams/chemfiles_io.o \
   seams/chill_plus_scheme.o \
+  seams/cluster.o \
   seams/cutoff_csr.o \
+  seams/density.o \
+  seams/diamond_cna.o \
   seams/franzblau.o \
   seams/generic.o \
   seams/ira_sofi.o \
@@ -30,17 +34,21 @@ SEAMS_OBJECTS = \
   seams/rdf.o \
   seams/rdf2d.o \
   seams/ring.o \
+  seams/seams_api.o \
+  seams/seams_c_api.o \
   seams/seams_input.o \
   seams/seams_output.o \
   seams/shapeMatch.o \
   seams/shell_classify.o \
   seams/shell_kernel.o \
+  seams/site.o \
   seams/steinhardt_parallel.o \
   seams/topo_bulk.o \
+  seams/topo_fingerprint.o \
   seams/topo_one_dim.o \
   seams/topo_two_dim.o \
   seams/tum_offload.o \
   seams/water_select.o \
   seams/ylm_cartesian.o
 
-OBJECTS = cpp11.o dseams.o dseams_r_io.o @ENGINE_OBJECTS@
+OBJECTS = cpp11.o dseams.o dseams_r_io.o seams_call.o @ENGINE_OBJECTS@

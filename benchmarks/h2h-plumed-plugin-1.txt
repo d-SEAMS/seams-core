@@ -1,0 +1,22 @@
+cores 8 affinity 1
+pinned_threads 1
+plugin SEAMS
+samples 20
+check ice4096 q6 plugin 0.62853936 dseams 0.62853936 abs 3.464e-14
+check ice4096 ice plugin 0 dseams 0 abs 0.000e+00
+check ice4096 ring plugin 1 dseams 1 abs 0.000e+00
+check ice4096 hexagonal plugin 4096 dseams 4096 abs 0.000e+00
+check ice4096 six plugin 8192 dseams 8192 abs 0.000e+00
+arm ice4096 plugin threads 1 molecules 4096 api_median 7.1219 api_iqr 0.0981 api_min 6.9878 plugin_median 5.7593 plugin_iqr 0.0415 plugin_min 5.6700
+check ice32768 q6 plugin 0.62853936 dseams 0.62853936 abs 1.447e-13
+check ice32768 ice plugin 0 dseams 0 abs 0.000e+00
+check ice32768 ring plugin 1 dseams 1 abs 0.000e+00
+check ice32768 hexagonal plugin 32768 dseams 32768 abs 0.000e+00
+check ice32768 six plugin 65536 dseams 65536 abs 0.000e+00
+arm ice32768 plugin threads 1 molecules 32768 api_median 55.4908 api_iqr 0.3037 api_min 54.9573 plugin_median 44.3415 plugin_iqr 0.1361 plugin_min 44.1019
+check ice110592 q6 plugin 0.62853936 dseams 0.62853936 abs 5.362e-13
+check ice110592 ice plugin 0 dseams 0 abs 0.000e+00
+check ice110592 ring plugin 1 dseams 1 abs 0.000e+00
+check ice110592 hexagonal plugin 110592 dseams 110592 abs 0.000e+00
+check ice110592 six plugin 221184 dseams 221184 abs 0.000e+00
+arm ice110592 plugin threads 1 molecules 110592 api_median 187.1502 api_iqr 2.1517 api_min 183.9848 plugin_median 147.9200 plugin_iqr 1.1430 plugin_min 146.8307

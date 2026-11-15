@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time q6 input/traj/genice_sI.lammpstrj 1 1 1 6
+loadavg 0.14 0.92 0.71 1/282 22152
+returncode 0
+stdout
+meta mode q6
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 46
+repeat 1 kernel_ms 0.010892
+repeat 1 path_ms 0.027155
+repeat 2 kernel_ms 0.010643
+repeat 2 path_ms 0.025859
+repeat 3 kernel_ms 0.010670
+repeat 3 path_ms 0.025424
+repeat 4 kernel_ms 0.010609
+repeat 4 path_ms 0.026137
+repeat 5 kernel_ms 0.010506
+repeat 5 path_ms 0.024995
+repeat 6 kernel_ms 0.010501
+repeat 6 path_ms 0.025658
+meta sink 644
+
+stderr

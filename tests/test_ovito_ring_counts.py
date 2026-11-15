@@ -26,6 +26,15 @@ def prepare_ovito() -> bool:
     site = os.environ.get("SEAMS_OVITO_SITE", "")
     if site and os.path.isdir(site) and site not in sys.path:
         sys.path.insert(0, site)
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    # An interpreter that already loads OVITO keeps its own loader path.
+    # The host folders go first only when the import fails without them.
+    try:
+        import ovito  # noqa: F401
+
+        return True
+    except ImportError:
+        pass
     extra = []
     gl = "/usr/lib/x86_64-linux-gnu"
     qt = os.path.join(site, "PySide6", "Qt", "lib")

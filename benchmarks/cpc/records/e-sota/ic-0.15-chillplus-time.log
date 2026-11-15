@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time chillplus benchmarks/cpc/records/e-sota/frames/ic-0.15.lammpstrj 1 1 1 6
+loadavg 0.14 0.92 0.71 3/282 22297
+returncode 0
+stdout
+meta mode chillplus
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 512
+repeat 1 kernel_ms 0.238429
+repeat 1 path_ms 0.358206
+repeat 2 kernel_ms 0.214556
+repeat 2 path_ms 0.324402
+repeat 3 kernel_ms 0.212656
+repeat 3 path_ms 0.327907
+repeat 4 kernel_ms 0.211761
+repeat 4 path_ms 0.319438
+repeat 5 kernel_ms 0.211032
+repeat 5 path_ms 0.362023
+repeat 6 kernel_ms 0.211305
+repeat 6 path_ms 0.317928
+meta sink 7168
+
+stderr

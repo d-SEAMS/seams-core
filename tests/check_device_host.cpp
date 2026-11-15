@@ -52,21 +52,22 @@ public:
       : rings_(rings), nList_(nList) {
     through_.resize(nList.size());
     for (int r = 0; r < static_cast<int>(rings.size()); ++r) {
-      for (const int a : rings[r]) {
-        through_[a].push_back(r);
+      for (const int a : rings[static_cast<std::size_t>(r)]) {
+        through_[static_cast<std::size_t>(a)].push_back(r);
       }
     }
   }
 
   Labels run() const {
     const int nR = static_cast<int>(rings_.size());
-    std::vector<char> hc(nR, 0);
+    std::vector<char> hc(static_cast<std::size_t>(nR), 0);
     int left = nR;
     for (int i = 0; i < nR && left > 0; ++i) {
       std::vector<int> cand;
-      for (const int a : rings_[i]) {
-        for (std::size_t n = 1; n < nList_[a].size(); ++n) {
-          for (const int s : through_[nList_[a][n]]) {
+      for (const int a : rings_[static_cast<std::size_t>(i)]) {
+        const auto &row = nList_[static_cast<std::size_t>(a)];
+        for (std::size_t n = 1; n < row.size(); ++n) {
+          for (const int s : through_[static_cast<std::size_t>(row[n])]) {
             cand.push_back(s);
           }
         }
@@ -74,17 +75,18 @@ public:
       std::sort(cand.begin(), cand.end());
       cand.erase(std::unique(cand.begin(), cand.end()), cand.end());
       auto mark = [&](int m) {
-        if (m < 0 || m >= nR || hc[m]) {
+        if (m < 0 || m >= nR || hc[static_cast<std::size_t>(m)]) {
           return;
         }
-        hc[m] = 1;
+        hc[static_cast<std::size_t>(m)] = 1;
         --left;
       };
       for (const int j : cand) {
         if (left == 0) {
           break;
         }
-        if (j == i || !beta(rings_[i], rings_[j])) {
+        if (j == i || !beta(rings_[static_cast<std::size_t>(i)],
+                            rings_[static_cast<std::size_t>(j)])) {
           continue;
         }
         mark(i);
@@ -94,16 +96,16 @@ public:
         }
       }
     }
-    std::vector<char> ddc(nR, 0);
+    std::vector<char> ddc(static_cast<std::size_t>(nR), 0);
     for (int i = 0; i < nR; ++i) {
-      if (hc[i]) {
+      if (hc[static_cast<std::size_t>(i)]) {
         continue;
       }
       std::vector<int> peri;
       if (epsilon(i, peri)) {
-        ddc[i] = 1;
+        ddc[static_cast<std::size_t>(i)] = 1;
         for (const int p : peri) {
-          ddc[p] = 1;
+          ddc[static_cast<std::size_t>(p)] = 1;
         }
       }
     }
@@ -111,12 +113,12 @@ public:
     c.nSix = nR;
     c.atomHc.assign(nList_.size(), 0);
     c.atomDdc.assign(nList_.size(), 0);
-    for (int r = 0; r < nR; ++r) {
+    for (std::size_t r = 0; r < rings_.size(); ++r) {
       c.hcRings += hc[r];
       c.ddcRings += ddc[r];
       for (const int a : rings_[r]) {
-        c.atomHc[a] |= hc[r];
-        c.atomDdc[a] |= ddc[r];
+        c.atomHc[static_cast<std::size_t>(a)] |= hc[r];
+        c.atomDdc[static_cast<std::size_t>(a)] |= ddc[r];
       }
     }
     c.hcAtoms =
@@ -132,8 +134,8 @@ private:
   Graph through_;
 
   bool bonded(int a, int b) const {
-    return std::find(nList_[a].begin() + 1, nList_[a].end(), b) !=
-           nList_[a].end();
+    const auto &row = nList_[static_cast<std::size_t>(a)];
+    return std::find(row.begin() + 1, row.end(), b) != row.end();
   }
 
   static bool in(const std::vector<int> &r, int a) {
@@ -153,12 +155,12 @@ private:
     if (common(R, S) != 0) {
       return false;
     }
-    const int perms[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2},
-                             {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
-    for (int p = 0; p < 2; ++p) {
-      for (int q = 0; q < 2; ++q) {
+    const std::size_t perms[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2},
+                                     {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+    for (std::size_t p = 0; p < 2; ++p) {
+      for (std::size_t q = 0; q < 2; ++q) {
         bool oddFree = true;
-        for (int t = 0; t < 3 && oddFree; ++t) {
+        for (std::size_t t = 0; t < 3 && oddFree; ++t) {
           for (const int x : R) {
             if (bonded(x, S[(q + 1 + 2 * t) % 6])) {
               oddFree = false;
@@ -171,7 +173,7 @@ private:
         }
         for (const auto &s : perms) {
           bool ok = true;
-          for (int t = 0; t < 3 && ok; ++t) {
+          for (std::size_t t = 0; t < 3 && ok; ++t) {
             ok = bonded(R[(p + 2 * t) % 6], S[(q + 2 * s[t]) % 6]);
           }
           if (ok) {
@@ -186,13 +188,13 @@ private:
   std::vector<int> ringsWith(const std::vector<int> &atoms, int skipA,
                              int skipB) const {
     std::vector<int> out;
-    for (const int r : through_[atoms[0]]) {
+    for (const int r : through_[static_cast<std::size_t>(atoms[0])]) {
       if (r == skipA || r == skipB) {
         continue;
       }
       bool all = true;
       for (const int a : atoms) {
-        all = all && in(rings_[r], a);
+        all = all && in(rings_[static_cast<std::size_t>(r)], a);
       }
       if (all) {
         out.push_back(r);
@@ -203,14 +205,14 @@ private:
 
   std::vector<int> prismatic(int i, int j) const {
     std::vector<int> out;
-    const auto &R = rings_[i];
-    const auto &S = rings_[j];
-    for (int q = 0; q < 6; ++q) {
+    const auto &R = rings_[static_cast<std::size_t>(i)];
+    const auto &S = rings_[static_cast<std::size_t>(j)];
+    for (std::size_t q = 0; q < 6; ++q) {
       const std::vector<int> trip{R[q], R[(q + 1) % 6], R[(q + 2) % 6]};
       for (const int k : ringsWith(trip, i, j)) {
         int rest = 0;
         int inS = 0;
-        for (const int a : rings_[k]) {
+        for (const int a : rings_[static_cast<std::size_t>(k)]) {
           if (!in(trip, a)) {
             ++rest;
             inS += in(S, a) ? 1 : 0;
@@ -225,22 +227,24 @@ private:
   }
 
   bool epsilon(int i, std::vector<int> &peri) const {
-    const auto &R = rings_[i];
+    const auto &R = rings_[static_cast<std::size_t>(i)];
     for (const int a : R) {
-      if (static_cast<int>(through_[a].size()) - 1 < 3) {
+      if (static_cast<int>(through_[static_cast<std::size_t>(a)].size()) - 1 <
+          3) {
         return false;
       }
     }
     Graph T(6);
-    for (int k = 0; k < 6; ++k) {
+    for (std::size_t k = 0; k < 6; ++k) {
       T[k] = ringsWith({R[k], R[(k + 1) % 6], R[(k + 2) % 6]}, i, -1);
       if (T[k].empty()) {
         return false;
       }
     }
     auto shareOne = [&](int a, int b, int c) {
-      for (const int x : rings_[a]) {
-        if (in(rings_[b], x) && in(rings_[c], x)) {
+      for (const int x : rings_[static_cast<std::size_t>(a)]) {
+        if (in(rings_[static_cast<std::size_t>(b)], x) &&
+            in(rings_[static_cast<std::size_t>(c)], x)) {
           return true;
         }
       }
@@ -274,7 +278,9 @@ private:
                 for (int r = 0; r < 6 && !aligned; ++r) {
                   for (int flip = 0; flip < 2 && !aligned; ++flip) {
                     auto at = [&](int k) {
-                      return P[flip ? (r - k + 12) % 6 : (r + k) % 6];
+                      const int slot = flip ? (r - k + 12) % 6 : (r + k) % 6;
+                      return static_cast<std::size_t>(
+                          P[static_cast<std::size_t>(slot)]);
                     };
                     aligned = common(rings_[at(0)], rings_[at(2)]) >= 3 &&
                               common(rings_[at(1)], rings_[at(3)]) >= 3 &&
@@ -323,8 +329,8 @@ bool same(const Labels &a, const Labels &b) {
 Labels unpermute(Labels c, const std::vector<int> &perm) {
   std::vector<int> hc(perm.size()), ddc(perm.size());
   for (std::size_t a = 0; a < perm.size(); ++a) {
-    hc[a] = c.atomHc[perm[a]];
-    ddc[a] = c.atomDdc[perm[a]];
+    hc[a] = c.atomHc[static_cast<std::size_t>(perm[a])];
+    ddc[a] = c.atomDdc[static_cast<std::size_t>(perm[a])];
   }
   c.atomHc = std::move(hc);
   c.atomDdc = std::move(ddc);
@@ -339,10 +345,10 @@ Graph relabel(const Graph &nList, const std::vector<int> &perm) {
     std::vector<int> row;
     row.push_back(perm[a]);
     for (std::size_t n = 1; n < nList[a].size(); ++n) {
-      row.push_back(perm[nList[a][n]]);
+      row.push_back(perm[static_cast<std::size_t>(nList[a][n])]);
     }
     std::shuffle(row.begin() + 1, row.end(), rng);
-    out[perm[a]] = row;
+    out[static_cast<std::size_t>(perm[a])] = row;
   }
   return out;
 }
@@ -363,14 +369,16 @@ Graph leviGraph(int q) {
   const int m = static_cast<int>(v.size());
   Graph nList(static_cast<std::size_t>(2 * m));
   for (int i = 0; i < 2 * m; ++i) {
-    nList[i].push_back(i);
+    nList[static_cast<std::size_t>(i)].push_back(i);
   }
   for (int p = 0; p < m; ++p) {
+    const auto &vp = v[static_cast<std::size_t>(p)];
     for (int l = 0; l < m; ++l) {
-      const int dot = v[p][0] * v[l][0] + v[p][1] * v[l][1] + v[p][2] * v[l][2];
+      const auto &vl = v[static_cast<std::size_t>(l)];
+      const int dot = vp[0] * vl[0] + vp[1] * vl[1] + vp[2] * vl[2];
       if (dot % q == 0) {
-        nList[p].push_back(m + l);
-        nList[m + l].push_back(p);
+        nList[static_cast<std::size_t>(p)].push_back(m + l);
+        nList[static_cast<std::size_t>(m + l)].push_back(p);
       }
     }
   }
@@ -453,7 +461,7 @@ int main(int argc, char **argv) {
     std::vector<int> per(nList.size(), 0);
     for (const auto &r : six) {
       for (const int a : r) {
-        ++per[a];
+        ++per[static_cast<std::size_t>(a)];
       }
     }
     const int mx = per.empty() ? 0 : *std::max_element(per.begin(), per.end());

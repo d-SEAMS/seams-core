@@ -30,5 +30,15 @@ name = "check_dseams"
 source-dir = "bindings/fortran/test"
 main = "check_dseams.f90"
 
+[[test]]
+name = "capi"
+source-dir = "bindings/fortran/ci"
+main = "test_seams.f90"
+
+[[test]]
+name = "high"
+source-dir = "bindings/fortran/test"
+main = "test_high.f90"
+
 [install]
 library = true

@@ -1,0 +1,1 @@
+A plain build writes `bindings/lua/dseams_ffi.lua`, which the LuaJIT FFI tutorial and the Lua video tape load from the build directory. Only `meson test lua_examples` used to generate it, so the tape failed in a fresh build.

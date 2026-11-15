@@ -75,7 +75,16 @@ endif
 
 fs = import('fs')
 fennel_lua = ''
-foreach candidate : [get_option('fennel_lua'), '/usr/local/share/fennel.lua', '/usr/share/lua/5.4/fennel.lua']
+fennel_candidates = [get_option('fennel_lua'), '/usr/local/share/fennel.lua', '/usr/share/lua/5.4/fennel.lua']
+conda_prefix = run_command('sh', '-c', 'printf %s "$CONDA_PREFIX"', check: false)
+if conda_prefix.returncode() == 0 and conda_prefix.stdout() != ''
+  fennel_candidates += conda_prefix.stdout() / 'share/lua/5.4/fennel.lua'
+endif
+lua_prog = find_program('lua', required: false)
+if lua_prog.found()
+  fennel_candidates += fs.parent(fs.parent(lua_prog.full_path())) / 'share/lua/5.4/fennel.lua'
+endif
+foreach candidate : fennel_candidates
   if fennel_lua == '' and fs.exists(candidate)
     fennel_lua = candidate
   endif

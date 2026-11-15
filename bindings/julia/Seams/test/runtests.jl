@@ -35,3 +35,8 @@ end
     @test six > 0
     @test fraction > 0.5
 end
+
+@testset "seams.h matches the C++ path" begin
+    include(joinpath(@__DIR__, "..", "..", "cpp_match.jl"))
+    check_seams_against_cpp()
+end

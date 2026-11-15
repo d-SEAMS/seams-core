@@ -76,6 +76,17 @@ if [ -n "$left" ]; then
   exit 1
 fi
 
+# The public C header for src/seams_call.c and seams_api.cpp. It goes in
+# after the console check: its usage comment prints, and nothing in the
+# package compiles that comment.
+cp "$root/include/seams.h" "$dest/include/"
+major=${version%%.*}
+rest=${version#*.}
+minor=${rest%%.*}
+patch=${rest#*.}
+sed -e "s/@MAJOR@/$major/" -e "s/@MINOR@/$minor/" -e "s/@PATCH@/$patch/" \
+  -e "s/@STRING@/$version/" "$root/include/seams_version.h.in" > "$dest/include/seams_version.h"
+
 rev=unknown
 if command -v git >/dev/null 2>&1 && git -C "$root" rev-parse HEAD >/dev/null 2>&1; then
   rev=$(git -C "$root" rev-parse HEAD)

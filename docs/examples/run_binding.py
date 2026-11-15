@@ -25,10 +25,13 @@ def run_fortran(build):
         raise SystemExit("gfortran is not on PATH")
     lib = build / "src"
     work = Path(tempfile.mkdtemp(prefix="seams-fortran-"))
-    subprocess.check_call(
-        [gfortran, "-J", str(work), "-c", str(ROOT / "bindings/fortran/seams.f90"), "-o", str(work / "seams.o")],
-        cwd=work,
-    )
+    objects = []
+    for name in ("seams_kinds.f90", "seams_c.f90", "seams_support.f90", "seams.f90", "seams_methods.f90"):
+        obj = work / (name.replace(".f90", ".o"))
+        subprocess.check_call(
+            [gfortran, "-J", str(work), "-I", str(work), "-c", str(ROOT / "bindings/fortran/src" / name), "-o", str(obj)]
+        )
+        objects.append(str(obj))
     exe = work / "test_seams"
     subprocess.check_call(
         [
@@ -36,7 +39,7 @@ def run_fortran(build):
             "-I",
             str(work),
             str(ROOT / "bindings/fortran/test_seams.f90"),
-            str(work / "seams.o"),
+            str(work / "seams_c.o"),
             "-o",
             str(exe),
             "-L" + str(lib),
@@ -46,10 +49,26 @@ def run_fortran(build):
         ],
         cwd=work,
     )
+    high = work / "test_high"
+    subprocess.check_call(
+        [
+            gfortran,
+            "-I",
+            str(work),
+            str(ROOT / "bindings/fortran/test/test_high.f90"),
+            *objects,
+            "-o",
+            str(high),
+            "-L" + str(lib),
+            "-lseams",
+            "-Wl,-rpath," + str(lib),
+        ]
+    )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = library_path(build)
     env["OMP_NUM_THREADS"] = "1"
     subprocess.check_call([str(exe), str(ROOT)], env=env)
+    subprocess.check_call([str(high), str(ROOT)], env=env)
 
 
 def run_rust(build):
@@ -67,16 +86,24 @@ def run_rust(build):
 
     with open(lock, "a", encoding="utf-8") as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
+        manifest = str(ROOT / "bindings/rust/Cargo.toml")
         subprocess.check_call(
-            [
-                cargo,
-                "test",
-                "--offline",
-                "--manifest-path",
-                str(ROOT / "bindings/rust/Cargo.toml"),
-                "--",
-                "--test-threads=1",
-            ],
+            [cargo, "fmt", "--check", "--manifest-path", manifest, "--all"],
+            env=env,
+            cwd=ROOT,
+        )
+        subprocess.check_call(
+            [cargo, "clippy", "--offline", "--manifest-path", manifest, "--all-targets", "--", "-D", "warnings"],
+            env=env,
+            cwd=ROOT,
+        )
+        subprocess.check_call(
+            [cargo, "test", "--offline", "--manifest-path", manifest, "--", "--test-threads=1"],
+            env=env,
+            cwd=ROOT,
+        )
+        subprocess.check_call(
+            [cargo, "test", "--offline", "--manifest-path", manifest, "--examples", "--", "--test-threads=1"],
             env=env,
             cwd=ROOT,
         )
@@ -134,7 +161,10 @@ def install_r_package(build):
 
 def run_r(build):
     script, env = install_r_package(build)
+    env["SEAMS_CPP_ORACLE"] = str(build / "bindings" / "binding_oracle")
+    env["OMP_NUM_THREADS"] = "1"
     subprocess.check_call([script, str(ROOT / "docs/examples/r_api.R")], env=env)
+    subprocess.check_call([script, str(ROOT / "docs/examples/r_capi.R")], env=env)
 
 
 def julia_bin():

@@ -15,3 +15,4 @@ if(NOT TARGET seams::seams)
 endif()
 
 set(SEAMS_FOUND TRUE)
+set(SEAMS_CXX_HEADER "${SEAMS_INCLUDE_DIR}/seams.hpp")

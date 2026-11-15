@@ -92,14 +92,14 @@ void writeDump(const std::string &path, const std::vector<double> &xyz, const do
   std::ofstream out(path);
   out.setf(std::ios::scientific);
   out.precision(17);
-  const int n = static_cast<int>(xyz.size() / 3);
+  const std::size_t n = xyz.size() / 3;
   out << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n" << n << "\n";
   out << "ITEM: BOX BOUNDS xy xz yz pp pp pp\n";
   out << (xlo + xmin) << " " << (xlo + lx + xmax) << " " << xy << "\n";
   out << (ylo + ymin) << " " << (ylo + ly + ymax) << " " << xz << "\n";
   out << zlo << " " << (zlo + lz) << " " << yz << "\n";
   out << "ITEM: ATOMS id type x y z\n";
-  for (int i = 0; i < n; i++) {
+  for (std::size_t i = 0; i < n; i++) {
     out << (i + 1) << " 1 " << xyz[3 * i] << " " << xyz[3 * i + 1] << " " << xyz[3 * i + 2]
         << "\n";
   }

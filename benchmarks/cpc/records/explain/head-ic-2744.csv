@@ -1,0 +1,41 @@
+meta mode cages
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+meta maxring 7
+count atoms 2744
+count rings 5488
+count six_rings 5488
+count hc_rings 0
+count ddc_rings 5488
+count ddc_equators 5488
+count hc_cages 0
+count ddc_cages 1372
+repeat 1 rings_ms 2.104757
+repeat 1 hc_ms 2.897135
+repeat 1 ddc_ms 7.356602
+repeat 1 path_ms 12.358494
+repeat 2 rings_ms 2.088058
+repeat 2 hc_ms 2.908226
+repeat 2 ddc_ms 7.411567
+repeat 2 path_ms 12.407851
+repeat 3 rings_ms 2.094761
+repeat 3 hc_ms 2.970861
+repeat 3 ddc_ms 7.368072
+repeat 3 path_ms 12.433694
+repeat 4 rings_ms 2.146404
+repeat 4 hc_ms 2.888015
+repeat 4 ddc_ms 7.467254
+repeat 4 path_ms 12.501673
+repeat 5 rings_ms 1.997997
+repeat 5 hc_ms 2.892911
+repeat 5 ddc_ms 7.386232
+repeat 5 path_ms 12.277140
+repeat 6 rings_ms 2.072589
+repeat 6 hc_ms 2.909176
+repeat 6 ddc_ms 7.350853
+repeat 6 path_ms 12.332618
+meta sink 78204

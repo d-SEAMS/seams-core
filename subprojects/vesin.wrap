@@ -3,6 +3,7 @@ url = https://github.com/Luthaf/vesin.git
 revision = 56a790f90d5831904fcc1fd16ad28798a29788ba
 depth = 1
 patch_directory = vesin
+diff_files = vesin-null-reset.patch
 
 [provide]
 vesin = vesin_dep

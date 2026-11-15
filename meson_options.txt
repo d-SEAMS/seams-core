@@ -38,6 +38,8 @@ option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
 option('with_lua', type: 'feature', value: 'auto',
   description: 'Build require("dseams") for Lua 5.4 and LuaJIT when the interpreter is found')
+option('with_fortran', type: 'feature', value: 'auto',
+  description: 'Build the Fortran module when a Fortran compiler is found')
 
 option('with_chemfiles', type: 'feature', value: 'auto',
   description: 'Trajectory I/O via chemfiles (on when the library is found or can be fetched)')
@@ -55,3 +57,12 @@ option('with_readcon', type: 'feature', value: 'auto',
   description: 'Build the readcon-core and readcon-db .con readers (Rust, needs cargo and crates.io)')
 option('system_libseams', type: 'boolean', value: false,
   description: 'Build only the dseams Python module against an installed libseams (pkg-config seams)')
+option('capi_sanitize', type: 'combo',
+  choices: ['none', 'address', 'undefined', 'address,undefined', 'thread'], value: 'none',
+  description: 'Sanitizer for the C API suite and the libraries it calls')
+option('capi_valgrind', type: 'boolean', value: false,
+  description: 'Run the C API suite under valgrind memcheck')
+option('capi_fuzz_coverage', type: 'boolean', value: false,
+  description: 'Instrument this project for libFuzzer coverage (clang only)')
+option('capi_fuzz_seconds', type: 'integer', min: 1, max: 3600, value: 30,
+  description: 'libFuzzer max_total_time for each harness')

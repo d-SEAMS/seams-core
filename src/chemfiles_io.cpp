@@ -159,7 +159,29 @@ std::string forcedFormat(const std::string &filename) {
   return "";
 }
 
+// chemfiles 0.10 mmCIFFormat::init_ dereferences a null block when the
+// file has no data_ record. Reject those files before the constructor.
+bool mmcifHasData(const std::string &filename) {
+  if (extensionOf(filename) != "mmcif") {
+    return true;
+  }
+  std::ifstream in(filename);
+  if (!in) {
+    return false;
+  }
+  std::string chunk(8192, '\0');
+  in.read(chunk.data(), static_cast<std::streamsize>(chunk.size()));
+  chunk.resize(static_cast<std::size_t>(std::max<std::streamsize>(in.gcount(), 0)));
+  return chunk.find("data_") != std::string::npos ||
+         chunk.find("_atom_site") != std::string::npos ||
+         chunk.find("_cell.") != std::string::npos;
+}
+
 int sinp::chemfilesSteps(const std::string &filename) {
+  if (!mmcifHasData(filename)) {
+    chemfilesError = "mmCIF file has no data_ block";
+    return -1;
+  }
   try {
     chemfiles::Trajectory trajectory(filename, 'r', forcedFormat(filename));
     return static_cast<int>(trajectory.nsteps());
@@ -187,6 +209,11 @@ sinp::readChemfiles(std::string filename,
   chemfilesError.clear();
   yCloud = molSys::clearPointCloud(yCloud);
   if (request.frame < 1) {
+    return yCloud;
+  }
+  if (!mmcifHasData(filename)) {
+    chemfilesUnreadable = true;
+    chemfilesError = "mmCIF file has no data_ block";
     return yCloud;
   }
   try {
@@ -370,9 +397,11 @@ std::string sinp::currentExceptionText() {
 
 namespace {
 
-// One bit per frame: ids are exactly {1..N}. Chemfiles then stores
-// id k at index k-1. A gap would index past the atom count, so those
-// frames stay on the native reader. The file is walked once and kept.
+// One bit per frame: ids are exactly {1..N} and the box has no tilt.
+// Chemfiles then stores id k at index k-1. A gap would index past the
+// atom count. Chemfiles 0.10.4 also takes xhi_bound - xlo_bound as the
+// edge of a tilted cell without removing the tilt padding, so those
+// frames stay on the native reader too. The file is walked once and kept.
 
 bool startsWith(const std::string &line, const char *prefix) {
   const auto n = std::char_traits<char>::length(prefix);
@@ -405,6 +434,7 @@ DumpIdIndex scanDumpIds(const std::string &path) {
   int got = 0;
   int unique = 0;
   bool atoms = false;
+  bool tilted = false;
   std::vector<char> seenId;
   std::string line;
   auto finish = [&]() {
@@ -412,7 +442,7 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       return;
     }
     out.oneToN.resize(static_cast<std::size_t>(seen) + 1, 0);
-    const bool ok = natoms > 0 && unique == natoms;
+    const bool ok = natoms > 0 && unique == natoms && !tilted;
     out.oneToN[static_cast<std::size_t>(seen)] = ok ? 1 : 0;
   };
   while (std::getline(in, line)) {
@@ -424,7 +454,22 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       idCol = -1;
       got = 0;
       unique = 0;
+      tilted = false;
       seenId.clear();
+      continue;
+    }
+    if (startsWith(line, "ITEM: BOX BOUNDS")) {
+      if (line.find("xy") != std::string::npos) {
+        for (int axis = 0; axis < 3 && std::getline(in, line); ++axis) {
+          std::istringstream bounds(line);
+          double lo = 0.0;
+          double hi = 0.0;
+          double tilt = 0.0;
+          if (bounds >> lo >> hi >> tilt && tilt != 0.0) {
+            tilted = true;
+          }
+        }
+      }
       continue;
     }
     if (startsWith(line, "ITEM: NUMBER OF ATOMS")) {
@@ -465,7 +510,9 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       continue;
     }
     const int id = std::atoi(fields[static_cast<std::size_t>(idCol)].c_str());
-    if (id >= 1 && id <= natoms && seenId[static_cast<std::size_t>(id)] == 0) {
+    // NUMBER OF ATOMS can follow the ATOMS header, so natoms may exceed seenId.
+    if (id >= 1 && id <= natoms && static_cast<std::size_t>(id) < seenId.size() &&
+        seenId[static_cast<std::size_t>(id)] == 0) {
       seenId[static_cast<std::size_t>(id)] = 1;
       unique += 1;
     }
@@ -534,8 +581,8 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
   const auto extNow = extensionOf(filename);
   const bool dumpFile = extNow == "lammpstrj" || extNow == "dump";
   if (dumpFile && !dumpFrameIsOneToN(filename, frame)) {
-      // Gaps or ids that do not start at 1. Chemfiles stores an atom at
-      // index id-1 and would address past the atom count. One native read.
+      // Gaps, ids that do not start at 1, or a tilted box (see
+      // scanDumpIds). One native read.
       if (typeI < 0) {
         return readLammpsTrj(filename, frame, cloud);
       }

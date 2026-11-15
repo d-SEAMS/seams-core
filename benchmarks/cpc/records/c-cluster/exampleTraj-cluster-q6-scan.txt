@@ -1,0 +1,6 @@
+file exampleTraj.lammpstrj
+frames 1
+mode cluster-q6
+frame 1 largest 180
+max_largest 180
+max_frame 1

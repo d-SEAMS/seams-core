@@ -1,0 +1,7 @@
+proseguard 0.1.0
+persona rohit-paper
+lexical style rgoswami
+no-llm
+file benchmarks/cpc/EXPLAIN.md
+proseguard: profile 'rohit-paper' — 0 findings
+exit 0

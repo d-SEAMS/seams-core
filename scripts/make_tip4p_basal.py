@@ -7,8 +7,11 @@ The oxygen lattice is the GenIce ice Ih cell shipped in
 input/traj/ice1h.lammpstrj. The basal normal is the axis whose layer
 gaps match the ice Ih bilayer spacing, and that axis is rotated to z.
 A liquid block of TIP4P/Ice is placed against the slab. Ice oxygens are
-harmonically restrained and the liquid is equilibrated, then a short
-production run is stored as an oxygen-only LAMMPS dump.
+harmonically restrained and the liquid is equilibrated, then production
+at SCIENCE_TEMP_K (default 230 K) is stored as an oxygen-only LAMMPS dump.
+SCIENCE_PROD_PS sets the production length. Unset, the length is the
+wall-clock budget SCIENCE_BUDGET_S, capped at 2 ns. SCIENCE_DUMP_PS sets
+the spacing. SCIENCE_THREADS is the OpenMM CPU thread count.
 
 TIP4P/Ice parameters are those of Abascal, Sanz, Fernandez and Vega,
 J. Chem. Phys. 122, 234511 (2005). CHILL+ and q6 read the oxygens.
@@ -219,21 +222,25 @@ def record_large(path: Path, root: Path) -> None:
     csv_path.write_text("\n".join(lines) + "\n")
 
 
+def write_frame(handle, step: int, oxygens: np.ndarray, box: np.ndarray) -> None:
+    n = oxygens.shape[0]
+    handle.write("ITEM: TIMESTEP\n")
+    handle.write(f"{step}\n")
+    handle.write("ITEM: NUMBER OF ATOMS\n")
+    handle.write(f"{n}\n")
+    handle.write("ITEM: BOX BOUNDS pp pp pp\n")
+    for length in box:
+        handle.write(f"0.0 {length:.8f}\n")
+    handle.write("ITEM: ATOMS id type x y z\n")
+    for i, (x, y, z) in enumerate(oxygens, start=1):
+        handle.write(f"{i} 1 {x:.8f} {y:.8f} {z:.8f}\n")
+
+
 def write_dump(path: Path, frames: list[tuple[int, np.ndarray]], box: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as handle:
         for step, oxygens in frames:
-            n = oxygens.shape[0]
-            handle.write("ITEM: TIMESTEP\n")
-            handle.write(f"{step}\n")
-            handle.write("ITEM: NUMBER OF ATOMS\n")
-            handle.write(f"{n}\n")
-            handle.write("ITEM: BOX BOUNDS pp pp pp\n")
-            for length in box:
-                handle.write(f"0.0 {length:.8f}\n")
-            handle.write("ITEM: ATOMS id type x y z\n")
-            for i, (x, y, z) in enumerate(oxygens, start=1):
-                handle.write(f"{i} 1 {x:.8f} {y:.8f} {z:.8f}\n")
+            write_frame(handle, step, oxygens, box)
 
 
 def wrap_coordinates(positions_nm: np.ndarray, box_nm: np.ndarray) -> np.ndarray:
@@ -298,15 +305,18 @@ def run_openmm(ice: np.ndarray, liquid: np.ndarray, box_a: np.ndarray):
         oxygen = ice[i] / 10.0
         restraint.addParticle(i * 4, oxygen.tolist())
     system.addForce(restraint)
-    equil_ps = float(os.environ.get("SCIENCE_EQUIL_PS", "20"))
+    equil_ps = float(os.environ.get("SCIENCE_EQUIL_PS", "15"))
     budget_s = float(os.environ.get("SCIENCE_BUDGET_S", "900"))
     temperature = float(os.environ.get("SCIENCE_TEMP_K", "230"))
     dt_ps = 0.002
     integrator = openmm.LangevinMiddleIntegrator(
         320 * unit.kelvin, 1.0 / unit.picosecond, dt_ps * unit.picoseconds
     )
+    threads = str(int(os.environ.get("SCIENCE_THREADS", "4")))
     platform = openmm.Platform.getPlatformByName("CPU")
-    simulation = openmm.app.Simulation(top, system, integrator, platform)
+    simulation = openmm.app.Simulation(
+        top, system, integrator, platform, {"Threads": threads}
+    )
     simulation.context.setPositions(positions / 10.0 * unit.nanometer)
     simulation.context.setPeriodicBoxVectors(vec_a, vec_b, vec_c)
     simulation.context.applyConstraints(1e-5)
@@ -328,26 +338,62 @@ def run_openmm(ice: np.ndarray, liquid: np.ndarray, box_a: np.ndarray):
     simulation.step(probe)
     elapsed = max(time.perf_counter() - t0, 1e-6)
     steps_per_s = probe / elapsed
-    prod_steps = int(budget_s * steps_per_s)
-    prod_steps = max(prod_steps, int(20.0 / dt_ps))
-    prod_steps = min(prod_steps, int(2000.0 / dt_ps))
-    n_dump = 16
-    stride = max(1, prod_steps // n_dump)
+    prod_ps_env = os.environ.get("SCIENCE_PROD_PS")
+    if prod_ps_env:
+        prod_steps = int(round(float(prod_ps_env) / dt_ps))
+    else:
+        prod_steps = int(budget_s * steps_per_s)
+        prod_steps = max(prod_steps, int(20.0 / dt_ps))
+        prod_steps = min(prod_steps, int(2000.0 / dt_ps))
+    dump_ps_env = os.environ.get("SCIENCE_DUMP_PS")
+    if dump_ps_env:
+        stride = max(1, int(round(float(dump_ps_env) / dt_ps)))
+    else:
+        stride = max(1, prod_steps // 16)
+    n_dump = max(1, prod_steps // stride)
     prod_steps = stride * n_dump
     dump_ps = stride * dt_ps
     print(
-        f"production {prod_steps * dt_ps:.1f} ps at {steps_per_s:.0f} steps/s, "
-        f"dump every {dump_ps:.3f} ps",
+        f"production {prod_steps * dt_ps:.1f} ps at {steps_per_s:.0f} steps/s "
+        f"on {threads} threads, dump every {dump_ps:.3f} ps ({n_dump} frames)",
         flush=True,
     )
+    if os.environ.get("SCIENCE_PROBE_ONLY") == "1":
+        meta = {
+            "model": "TIP4P/Ice",
+            "temperature_K": f"{temperature:.1f}",
+            "prod_ps": f"{prod_steps * dt_ps:.3f}",
+            "dump_ps": f"{dump_ps:.6f}",
+            "openmm_threads": threads,
+            "steps_per_s": f"{steps_per_s:.1f}",
+            "n_frames": "0",
+        }
+        return [], meta
     frames = []
+    stream = os.environ.get("SCIENCE_STREAM", "").strip()
+    stream_path = Path(stream) if stream else None
+    if stream_path is not None and not stream_path.is_absolute():
+        stream_path = repo_root() / stream_path
+    clock = time.perf_counter()
 
     def grab(step_index: int) -> None:
         state = simulation.context.getState(getPositions=True, enforcePeriodicBox=True)
         pos = state.getPositions(asNumpy=True).value_in_unit(unit.angstrom)
         oxy = np.asarray(pos[0::4], dtype=float)
         frames.append((step_index, wrap_coordinates(oxy, box_a)))
-        print(f"dump step {step_index} waters {oxy.shape[0]}", flush=True)
+        if stream_path is not None:
+            mode = "w" if len(frames) == 1 else "a"
+            with stream_path.open(mode) as handle:
+                write_frame(handle, step_index, frames[-1][1], box_a)
+        done = len(frames) - 1
+        elapsed_prod = time.perf_counter() - clock
+        rate = (done * stride / elapsed_prod) if done and elapsed_prod > 0 else steps_per_s
+        left = ((n_dump - done) * stride / rate) if rate else 0
+        print(
+            f"dump {done}/{n_dump} step {step_index} waters {oxy.shape[0]} "
+            f"eta_s {left:.0f}",
+            flush=True,
+        )
 
     step = equil_steps + cool_steps + probe
     grab(step)
@@ -369,6 +415,8 @@ def run_openmm(ice: np.ndarray, liquid: np.ndarray, box_a: np.ndarray):
         "n_frames": str(len(frames)),
         "cutoff_A": f"{CUTOFF_A:.1f}",
         "equil_energy_kJ_mol": f"{energy:.6f}",
+        "openmm_threads": threads,
+        "steps_per_s": f"{steps_per_s:.1f}",
     }
     return frames, meta
 
@@ -401,11 +449,24 @@ def main() -> int:
         f"ice {ice.shape[0]} liquid {liquid.shape[0]} box {box[0]:.2f} {box[1]:.2f} {box[2]:.2f}",
         flush=True,
     )
+    tag = os.environ.get("SCIENCE_TAG", "").strip()
+    name = f"tip4p-basal-{tag}.lammpstrj" if tag else "tip4p-basal.lammpstrj"
+    dest = root / "data" / "science-frames" / name
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if os.environ.get("SCIENCE_PROBE_ONLY") != "1":
+        os.environ["SCIENCE_STREAM"] = str(dest)
     frames, meta = run_openmm(ice, liquid, box)
-    dest = root / "data" / "science-frames" / "tip4p-basal.lammpstrj"
-    write_dump(dest, frames, box)
-    record_large(dest, root)
-    meta_path = root / "paper" / "tex" / "figures" / "data" / "science" / "interface-meta.csv"
+    if frames and not os.environ.get("SCIENCE_STREAM"):
+        write_dump(dest, frames, box)
+    if frames:
+        record_large(dest, root)
+    meta_name = os.environ.get("SCIENCE_META", "").strip()
+    if meta_name:
+        meta_path = Path(meta_name)
+        if not meta_path.is_absolute():
+            meta_path = root / meta_path
+    else:
+        meta_path = root / "paper" / "tex" / "figures" / "data" / "science" / "interface-meta.csv"
     meta_path.parent.mkdir(parents=True, exist_ok=True)
     rows = [
         "key value",

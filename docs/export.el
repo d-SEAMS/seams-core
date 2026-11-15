@@ -6,10 +6,11 @@
 (package-initialize)
 
 ;; ox-rst tracks current Org. Prefer an ELPA Org over the editor's builtin.
-(let ((org-elpa
-       (car (sort (directory-files (expand-file-name "elpa" user-emacs-directory)
-                                   t "^org-[0-9][0-9.]*$")
-                  #'string>))))
+(let* ((elpa (expand-file-name "elpa" user-emacs-directory))
+       (org-elpa
+        (and (file-directory-p elpa)
+             (car (sort (directory-files elpa t "^org-[0-9][0-9.]*$")
+                        #'string>)))))
   (when org-elpa
     (setq load-path (cons org-elpa load-path))))
 
@@ -121,6 +122,9 @@
          :publishing-directory "./source/"
          :publishing-function org-rst-publish-to-rst
          :recursive t
+         ;; render_binding_overhead.py writes the RST page with its figure
+         ;; and tables. The Org copy is the prose only.
+         :exclude "binding-overhead\\.org\\'"
          :headline-levels 4
          :with-toc nil
          :section-numbers nil

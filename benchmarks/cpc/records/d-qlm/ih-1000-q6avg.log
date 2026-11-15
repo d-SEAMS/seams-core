@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time q6avg benchmarks/cpc/frames/ih-1000.lammpstrj 1 1 1 6
+loadavg 0.14 0.92 0.71 1/282 22142
+returncode 0
+stdout
+meta mode q6avg
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 1000
+repeat 1 kernel_ms 0.823408
+repeat 1 path_ms 1.043269
+repeat 2 kernel_ms 0.823311
+repeat 2 path_ms 1.077005
+repeat 3 kernel_ms 0.824110
+repeat 3 path_ms 1.028938
+repeat 4 kernel_ms 0.823229
+repeat 4 path_ms 1.040508
+repeat 5 kernel_ms 0.874758
+repeat 5 path_ms 1.025238
+repeat 6 kernel_ms 0.822958
+repeat 6 path_ms 1.020992
+meta sink 14000
+
+stderr

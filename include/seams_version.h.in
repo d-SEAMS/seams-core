@@ -1,20 +1,31 @@
 #ifndef SEAMS_VERSION_H_
 #define SEAMS_VERSION_H_
 
-/*
- * Copyright (c) d-SEAMS developers
+/**
+ * @file seams_version.h
+ * @brief Compile-time version of the d-SEAMS C API.
  *
  * Written by the build from the project version. seams.h includes this
- * header. Do not put a version literal next to it.
+ * header. Do not put a version literal next to it. Compare these macros
+ * with seams_version() to detect a header and library mismatch.
+ *
+ * Copyright (c) d-SEAMS developers
  */
 
+/** @brief Major version. A change here may break source compatibility. */
 #define SEAMS_VERSION_MAJOR @MAJOR@
+/** @brief Minor version. Raised when functions or enumerators are added. */
 #define SEAMS_VERSION_MINOR @MINOR@
+/** @brief Patch version. Raised for fixes that leave the interface alone. */
 #define SEAMS_VERSION_PATCH @PATCH@
+/** @brief Version text, for example "2.14.0". */
 #define SEAMS_VERSION_STRING "@STRING@"
 
-/* Packed as (major << 16) | (minor << 8) | patch. seams_version()
- * returns this value. */
+/**
+ * @brief Packed version, (major << 16) | (minor << 8) | patch.
+ *
+ * seams_version() returns the value the library was built with.
+ */
 #define SEAMS_VERSION_NUMBER \
   ((SEAMS_VERSION_MAJOR << 16) | (SEAMS_VERSION_MINOR << 8) | SEAMS_VERSION_PATCH)
 

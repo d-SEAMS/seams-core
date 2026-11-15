@@ -1,0 +1,40 @@
+cores 8 affinity 8
+samples 8
+recorded rings OVITO faster at 136, 4096, 110592: 865 ms vs 511 ms
+recorded symmetry d-SEAMS 40.6 ms vs identify-diamond 36.1 ms
+recorded library cages 282 ms vs command 213 ms
+frame cages molecules 69632
+robust op sII69632 cages threads 1 molecules 69632 library_median 267.1949 library_min 260.9820 command_median 339.8672 command_min 330.7572 affinity 1 WIN cages 4096
+robust op sII69632 cages threads 8 molecules 69632 library_median 90.2774 library_min 86.8601 command_median 170.6214 command_min 168.4684 affinity 8 WIN cages 4096
+ovito 3.17.2
+robust op sII136 rings threads 1 molecules 136 dseams_median 0.3117 dseams_min 0.3007 ovito_median 0.7958 ovito_min 0.7495 affinity 1 WIN
+robust op ice4096 rings threads 1 molecules 4096 dseams_median 4.5111 dseams_min 4.4168 ovito_median 16.6996 ovito_min 15.8174 affinity 1 WIN
+check ice4096 symmetry molecules 4096 agree 4096 of 4096 hex/hex=4096
+robust op ice4096 symmetry threads 1 molecules 4096 dseams_median 0.7703 dseams_min 0.7396 diamond_median 5.0161 diamond_min 4.7900 affinity 1 WIN
+robust op ice110592 rings threads 1 molecules 110592 dseams_median 129.3174 dseams_min 127.3258 ovito_median 612.5372 ovito_min 593.6394 affinity 1 WIN
+check ice110592 symmetry molecules 110592 agree 110592 of 110592 hex/hex=110592
+robust op ice110592 symmetry threads 1 molecules 110592 dseams_median 24.7037 dseams_min 23.1459 diamond_median 144.6198 diamond_min 143.4221 affinity 1 WIN
+robust op sII136 rings threads 8 molecules 136 dseams_median 0.3071 dseams_min 0.2900 ovito_median 0.9018 ovito_min 0.8157 affinity 8 WIN
+robust op ice4096 rings threads 8 molecules 4096 dseams_median 2.4660 dseams_min 2.2643 ovito_median 17.3098 ovito_min 16.4014 affinity 8 WIN
+check ice4096 symmetry molecules 4096 agree 4096 of 4096 hex/hex=4096
+robust op ice4096 symmetry threads 8 molecules 4096 dseams_median 0.9864 dseams_min 0.6911 diamond_median 5.0960 diamond_min 4.8840 affinity 8 WIN
+robust op ice110592 rings threads 8 molecules 110592 dseams_median 47.6434 dseams_min 43.8954 ovito_median 638.4205 ovito_min 604.5090 affinity 8 WIN
+check ice110592 symmetry molecules 110592 agree 110592 of 110592 hex/hex=110592
+robust op ice110592 symmetry threads 8 molecules 110592 dseams_median 11.4723 dseams_min 9.7169 diamond_median 152.9105 diamond_min 147.8397 affinity 8 WIN
+chill_plus thresholds published staggered<=-0.35 eclipsed -0.8..0.25
+chill_plus ovito mode uses the open edges and every neighbour inside 3.5 A
+check Ih512 chill_ovito_vs_modifier mismatches 0 of 512
+matrix Ih512 paper_vs_ovito_rule hexagonal/hexagonal=512
+matrix Ih512 ovito_rule_vs_modifier hexagonal/hexagonal=512
+check Ic512 chill_ovito_vs_modifier mismatches 0 of 512
+matrix Ic512 paper_vs_ovito_rule cubic/cubic=512
+matrix Ic512 ovito_rule_vs_modifier cubic/cubic=512
+check interface chill_ovito_vs_modifier mismatches 0 of 512
+matrix interface paper_vs_ovito_rule clathrate/clathrate=1 clathrate/water=1 cubic/cubic=1 hexagonal/hexagonal=138 hexagonal/interfacial=3 interclathrate/clathrate=4 interclathrate/interclathrate=6 interclathrate/water=4 interfacial/hexagonal=1 interfacial/interfacial=44 water/clathrate=1 water/interclathrate=6 water/water=302
+matrix interface ovito_rule_vs_modifier clathrate/clathrate=6 cubic/cubic=1 hexagonal/hexagonal=139 interclathrate/interclathrate=12 interfacial/interfacial=47 water/water=307
+check stacking chill_ovito_vs_modifier mismatches 0 of 512
+matrix stacking paper_vs_ovito_rule cubic/cubic=128 hexagonal/hexagonal=320 water/water=64
+matrix stacking ovito_rule_vs_modifier cubic/cubic=128 hexagonal/hexagonal=320 water/water=64
+check melted chill_ovito_vs_modifier mismatches 0 of 512
+matrix melted paper_vs_ovito_rule clathrate/interclathrate=1 hexagonal/hexagonal=364 hexagonal/interfacial=5 interclathrate/water=4 interfacial/hexagonal=1 interfacial/interfacial=19 interfacial/water=4 water/interclathrate=2 water/water=112
+matrix melted ovito_rule_vs_modifier hexagonal/hexagonal=365 interclathrate/interclathrate=3 interfacial/interfacial=24 water/water=120

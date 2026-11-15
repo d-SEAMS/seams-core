@@ -3,6 +3,7 @@
 """The molecule stills use the Ruhi palette, then one still is drawn."""
 
 import importlib.util
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -30,9 +31,18 @@ def fail(message):
 
 
 def load():
+    # The import puts the host OpenGL folders first on LD_LIBRARY_PATH.
+    # The renders below must start from the suite's path, as a direct run does.
+    saved = os.environ.get("LD_LIBRARY_PATH")
     spec = importlib.util.spec_from_file_location("render_molecules", SCRIPT)
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    try:
+        spec.loader.exec_module(module)
+    finally:
+        if saved is None:
+            os.environ.pop("LD_LIBRARY_PATH", None)
+        else:
+            os.environ["LD_LIBRARY_PATH"] = saved
     return module
 
 

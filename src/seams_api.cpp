@@ -26,6 +26,7 @@
 #include <edge_set.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
+#include <index_range.hpp>
 #include <local_symmetry.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -48,13 +49,16 @@
 #include <charconv>
 #include <climits>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <exception>
 #include <fstream>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -66,19 +70,65 @@ namespace {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
+/* The error slot is the only state a const-handle call may write, and only
+ * when it fails. Several threads may run const calls on one handle, so
+ * those writes take the lock. */
 struct seams_object {
-  std::string error;
+  mutable std::string error;
+  mutable std::mutex error_mu;
 };
 
 thread_local std::string g_error;
-thread_local seams_object *g_current = nullptr;
+thread_local const seams_object *g_current = nullptr;
 int g_threads = 0;
+std::mutex g_live_mu;
+std::unordered_set<void *> g_live;
 
+void *track(void *ptr) {
+  if (ptr == nullptr) {
+    return nullptr;
+  }
+  std::lock_guard<std::mutex> lock(g_live_mu);
+  g_live.insert(ptr);
+  return ptr;
+}
+
+/* Storing a message must not throw out of a C entry point. On a failed
+ * allocation the message is dropped and the status code still returns. */
+void set_error(const char *message) noexcept {
+  try {
+    g_error = message == nullptr ? "" : message;
+  } catch (...) {
+    g_error.clear();
+  }
+}
+
+/* NULL is a no-op. A second destroy records an error and does not free. */
+bool claim(void *ptr) noexcept {
+  if (ptr == nullptr) {
+    return false;
+  }
+  try {
+    std::lock_guard<std::mutex> lock(g_live_mu);
+    if (g_live.erase(ptr) == 0) {
+      set_error("double destroy");
+      return false;
+    }
+  } catch (...) {
+    set_error("handle registry is unavailable");
+    return false;
+  }
+  return true;
+}
+
+/* Calls on a mutable handle own it, so the slot is cleared on entry and
+ * seams_handle_error reports this call. */
 struct handle_guard {
-  seams_object *previous;
+  const seams_object *previous;
   explicit handle_guard(seams_object *object) : previous(g_current) {
     g_current = object;
     if (object != nullptr) {
+      std::lock_guard<std::mutex> lock(object->error_mu);
       object->error.clear();
     }
   }
@@ -87,13 +137,31 @@ struct handle_guard {
   handle_guard &operator=(const handle_guard &) = delete;
 };
 
-void note_error() {
+/* Calls on a const handle write nothing on success. A failure still lands
+ * in the slot, so bindings that read seams_handle_error after a failed
+ * status keep their message. */
+struct read_guard {
+  const seams_object *previous;
+  explicit read_guard(const seams_object *object) : previous(g_current) {
+    g_current = object;
+  }
+  ~read_guard() { g_current = previous; }
+  read_guard(const read_guard &) = delete;
+  read_guard &operator=(const read_guard &) = delete;
+};
+
+void note_error() noexcept {
   if (g_current == nullptr) {
     return;
   }
   try {
-    g_current->error = g_error;
-  } catch (const std::bad_alloc &) {
+    std::lock_guard<std::mutex> lock(g_current->error_mu);
+    try {
+      g_current->error = g_error;
+    } catch (...) {
+      g_current->error.clear();
+    }
+  } catch (...) {
   }
 }
 
@@ -110,23 +178,24 @@ int saved_omp_threads() {
 }
 #endif
 
-void clear_error() { g_error.clear(); }
+void clear_error() noexcept { g_error.clear(); }
 
-seams_status fail(seams_status code, const char *message) {
-  g_error = message == nullptr ? "" : message;
+seams_status fail(seams_status code, const char *message) noexcept {
+  set_error(message);
   note_error();
   return code;
 }
 
-void remember() {
+/* Call only from inside a catch handler. */
+void remember() noexcept {
   try {
     throw;
   } catch (const std::bad_alloc &) {
-    g_error = "out of memory";
+    set_error("out of memory");
   } catch (const std::exception &ex) {
-    g_error = ex.what();
+    set_error(ex.what());
   } catch (...) {
-    g_error = "unknown error";
+    set_error("unknown error");
   }
   note_error();
 }
@@ -147,6 +216,71 @@ bool finite_box(const double *box9) {
     }
   }
   return true;
+}
+
+// A double is NaN or infinite exactly when its exponent bits are all set,
+// and adding one to an all-ones exponent carries into the sign bit, so the
+// OR of the sums has its top bit set exactly when some value is not finite.
+// Add, AND and OR vectorise at any width, where a 64-bit compare needs
+// SSE4.1 and std::isfinite does not vectorise. The scan runs from the end,
+// which leaves the start of the input in cache for a write pass that walks
+// forward. The explicit prefetch 8 KiB ahead cut the reload of a 21 MB
+// input by about 4%.
+template <int Lanes> inline bool finite_scan(const double *v, std::size_t count) {
+  constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
+  constexpr std::uint64_t carry = 0x0010000000000000ULL;
+  constexpr std::size_t ahead = 1024;
+  std::uint64_t acc[Lanes] = {};
+  std::size_t k = count;
+  while (k >= Lanes) {
+    k -= Lanes;
+#if defined(__GNUC__) || defined(__clang__)
+    if (k > ahead) {
+      __builtin_prefetch(v + (k - ahead));
+    }
+#endif
+    std::uint64_t bits[Lanes];
+    std::memcpy(bits, v + k, sizeof bits);
+    for (int l = 0; l < Lanes; ++l) {
+      acc[l] |= (bits[l] & exponent) + carry;
+    }
+  }
+  std::uint64_t bad = 0;
+  for (int l = 0; l < Lanes; ++l) {
+    bad |= acc[l];
+  }
+  while (k > 0) {
+    --k;
+    std::uint64_t bits;
+    std::memcpy(&bits, v + k, sizeof bits);
+    bad |= (bits & exponent) + carry;
+  }
+  return (bad >> 63) == 0;
+}
+
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
+__attribute__((target("avx512f"))) bool finite_scan_avx512(const double *v, std::size_t count) {
+  return finite_scan<32>(v, count);
+}
+
+__attribute__((target("avx2"))) bool finite_scan_avx2(const double *v, std::size_t count) {
+  return finite_scan<16>(v, count);
+}
+#endif
+
+bool finite_coordinates(const double *xyz, std::size_t n_atoms) {
+#if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
+  static const int width = __builtin_cpu_supports("avx512f") ? 2
+                           : __builtin_cpu_supports("avx2")  ? 1
+                                                             : 0;
+  if (width == 2) {
+    return finite_scan_avx512(xyz, 3 * n_atoms);
+  }
+  if (width == 1) {
+    return finite_scan_avx2(xyz, 3 * n_atoms);
+  }
+#endif
+  return finite_scan<8>(xyz, 3 * n_atoms);
 }
 
 Cloud unified_copy(const Cloud &cloud, int type, int &typ) {
@@ -198,6 +332,22 @@ std::vector<std::vector<int>> bond_rows(const Cloud &cloud, double cutoff, int t
 struct seams_system : seams_object {
   Cloud cloud;
   bool ready = false;
+  // cloud.idIndexMap holds atom id i + 1 -> i for this many atoms, so a
+  // reload with default or sequential ids keeps the map. Zero after any
+  // other load.
+  std::size_t identity_ids = 0;
+  // A load is built here first and swapped in only once it has passed
+  // every check, so a failed load leaves the frame as it was.
+  std::unordered_map<int, int> spare_ids;
+  std::vector<double> spare_box;
+  std::vector<double> spare_low;
+  // With stage set, set_positions writes the new coordinates here in the
+  // same pass that checks them, and swaps this with cloud.pts only when
+  // every value was finite. While staged_current is set, types and ids
+  // here match the frame; any load clears it.
+  bool stage = false;
+  decltype(Cloud::pts) staged;
+  bool staged_current = false;
 };
 
 struct seams_neighbours : seams_object {
@@ -208,8 +358,19 @@ struct seams_neighbours : seams_object {
 
 struct seams_rings : seams_object {
   std::vector<std::vector<int>> rings;
-  std::vector<int> symmetry;
+  // Filled lazily by const label reads, under refine_mu.
+  mutable std::vector<int> symmetry;
   int n_atoms = 0;
+  // Kept so prism and cage labels can be filled when a caller asks for
+  // them. The ring census itself does not need that pass. The prism
+  // search takes the frame by non-const reference, so it is mutable too
+  // and only touched under refine_mu.
+  mutable Cloud cloud;
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  mutable std::vector<std::vector<int>> idx;
+  mutable bool refined = false;
+  mutable std::mutex refine_mu;
 };
 
 struct seams_cage_set : seams_object {
@@ -467,6 +628,35 @@ void flags_from_affiliation(int n, const std::vector<std::vector<int>> &six,
   }
 }
 
+seams_status copy_text(const std::string &text, char *buf, size_t cap, size_t *n_out) {
+  if (n_out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "text length is null");
+  }
+  *n_out = text.size();
+  if (buf == nullptr) {
+    return SEAMS_OK;
+  }
+  if (cap < text.size() + 1) {
+    return fail(SEAMS_ERR_RANGE, "buffer is short");
+  }
+  if (!text.empty()) {
+    std::memcpy(buf, text.data(), text.size());
+  }
+  buf[text.size()] = '\0';
+  return SEAMS_OK;
+}
+
+rdf::PartialRdf partial_of(const Cloud &cloud, double rmax, int bins, int type_i, int type_j) {
+  int bins_used = bins;
+  if (bins_used <= 0) {
+    bins_used = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  int typ = 1;
+  Cloud work = unified_copy(cloud, type_i, typ);
+  const int j = type_j > 0 ? type_j : typ;
+  return rdf::partialRdf(work, typ, j, rmax, bins_used);
+}
+
 } // namespace
 
 extern "C" {
@@ -617,18 +807,20 @@ int seams_get_num_threads(void) {
 seams_system *seams_system_create(void) {
   try {
     clear_error();
-    return new seams_system();
-  } catch (const std::bad_alloc &) {
-    g_error = "out of memory";
+    auto *sys = new seams_system();
+    track(sys);
+    return sys;
+  } catch (...) {
+    set_error("out of memory");
     return nullptr;
   }
 }
 
 void seams_system_destroy(seams_system *sys) {
-  try {
-    delete sys;
-  } catch (...) {
+  if (!claim(sys)) {
+    return;
   }
+  delete sys;
 }
 
 seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t n,
@@ -653,36 +845,57 @@ seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t
     return fail(SEAMS_ERR_BOX, "box contains a non-finite number");
   }
   try {
-    Cloud cloud;
-    if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+    if (!nneigh::setBoxFromLammpsEdges(sys->spare_box, sys->spare_low, box9[0], box9[1],
                                       box9[2], box9[3], box9[4], box9[5], box9[6],
                                       box9[7], box9[8])) {
       return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
     }
-    cloud.nop = count;
-    cloud.currentFrame = 1;
+    if (!finite_coordinates(xyz, n)) {
+      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    }
+    bool sequential = true;
+    if (ids != nullptr) {
+      for (int i = 0; i < count && sequential; ++i) {
+        sequential = ids[i] == i + 1;
+      }
+    }
+    const bool rebuild = !sequential || !sys->ready || sys->identity_ids != n;
+    if (rebuild) {
+      auto &map = sys->spare_ids;
+      map.clear();
+      map.reserve(n);
+      for (int i = 0; i < count; ++i) {
+        if (!map.emplace(ids == nullptr ? i + 1 : ids[i], i).second) {
+          return fail(SEAMS_ERR_ARG, "atom ids are not unique");
+        }
+      }
+    }
+    Cloud &cloud = sys->cloud;
+    sys->staged_current = false;
     cloud.pts.resize(n);
+    // Nothing below allocates, so the frame is either the old one or the
+    // whole new one.
     for (int i = 0; i < count; ++i) {
       const std::size_t base = static_cast<std::size_t>(i) * 3;
-      const double x = xyz[base];
-      const double y = xyz[base + 1];
-      const double z = xyz[base + 2];
-      if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)) {
-        return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
-      }
       auto &point = cloud.pts[static_cast<std::size_t>(i)];
-      point.x = x;
-      point.y = y;
-      point.z = z;
+      point.x = xyz[base];
+      point.y = xyz[base + 1];
+      point.z = xyz[base + 2];
       point.type = types == nullptr ? 1 : types[i];
       point.atomID = ids == nullptr ? i + 1 : ids[i];
       point.molID = point.atomID;
       point.iceType = molSys::atom_state_type::unclassified;
-      if (!cloud.idIndexMap.emplace(point.atomID, i).second) {
-        return fail(SEAMS_ERR_ARG, "atom ids are not unique");
-      }
+      point.inSlice = true;
+      point.c_ij.clear();
     }
-    sys->cloud = std::move(cloud);
+    if (rebuild) {
+      cloud.idIndexMap.swap(sys->spare_ids);
+    }
+    cloud.box.swap(sys->spare_box);
+    cloud.boxLow.swap(sys->spare_low);
+    cloud.nop = count;
+    cloud.currentFrame = 1;
+    sys->identity_ids = sequential ? n : 0;
     sys->ready = true;
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
@@ -743,6 +956,38 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
   try {
     use_threads();
     int typ = 1;
+    if (graph == SEAMS_GRAPH_CUTOFF) {
+      // The cutoff list only reads coordinates. Copying the frame first
+      // duplicated every point, including its bond vectors, and that copy
+      // was slower than the search.
+      const Cloud &work = sys->cloud;
+      const std::vector<int> *sub = nullptr;
+      std::vector<int> subset;
+      if (type > 0) {
+        typ = type;
+        bool uniform = work.nop > 0;
+        for (int i = 0; i < work.nop && uniform; ++i) {
+          if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+            uniform = false;
+          }
+        }
+        if (!uniform) {
+          subset.reserve(static_cast<std::size_t>(work.nop));
+          for (int i = 0; i < work.nop; ++i) {
+            if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+              subset.push_back(i);
+            }
+          }
+          sub = &subset;
+        }
+      }
+      auto direct = std::make_unique<seams_neighbours>();
+      direct->n = work.nop;
+      if (nneigh::orthoFullCsr(work, sub, cutoff, direct->offsets, direct->cols, false)) {
+        *out = static_cast<seams_neighbours *>(track(direct.release()));
+        return SEAMS_OK;
+      }
+    }
     Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     auto idx = nneigh::neighbourListByIndex(work, rows);
@@ -752,7 +997,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
       idx.resize(static_cast<std::size_t>(n));
     }
     nb->n = n;
-    nb->offsets.assign(static_cast<std::size_t>(n + 1), 0);
+    std::vector<int> degrees(static_cast<std::size_t>(n), 0);
     for (int i = 0; i < n; ++i) {
       const auto &row = idx[static_cast<std::size_t>(i)];
       int degree = 0;
@@ -761,8 +1006,10 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
           ++degree;
         }
       }
-      nb->offsets[static_cast<std::size_t>(i + 1)] =
-          nb->offsets[static_cast<std::size_t>(i)] + degree;
+      degrees[static_cast<std::size_t>(i)] = degree;
+    }
+    if (!seams::prefixCounts(degrees.data(), n, nb->offsets)) {
+      return fail(SEAMS_ERR_RANGE, "neighbour list does not fit");
     }
     nb->cols.resize(static_cast<std::size_t>(nb->offsets[static_cast<std::size_t>(n)]));
     for (int i = 0; i < n; ++i) {
@@ -775,7 +1022,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
         nb->cols[static_cast<std::size_t>(cursor++)] = id;
       }
     }
-    *out = nb.release();
+    *out = static_cast<seams_neighbours *>(track(nb.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -788,10 +1035,10 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
 }
 
 void seams_neighbours_destroy(seams_neighbours *nb) {
-  try {
-    delete nb;
-  } catch (...) {
+  if (!claim(nb)) {
+    return;
   }
+  delete nb;
 }
 
 int seams_neighbours_count(const seams_neighbours *nb) {
@@ -800,7 +1047,7 @@ int seams_neighbours_count(const seams_neighbours *nb) {
 
 seams_status seams_neighbours_csr(const seams_neighbours *nb, const int **offsets,
                                   int *n_offsets, const int **cols, int *nnz) {
-  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  read_guard guard(nb);
   clear_error();
   if (nb == nullptr || offsets == nullptr || n_offsets == nullptr || cols == nullptr ||
       nnz == nullptr) {
@@ -832,23 +1079,49 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   try {
     use_threads();
     int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
-    if (rule == SEAMS_CHILL_PUBLISHED && graph == SEAMS_GRAPH_CUTOFF) {
+    if ((rule == SEAMS_CHILL_PUBLISHED || rule == SEAMS_CHILL_OVITO) &&
+        (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+      // Labels are written onto the frame. The bond vectors are not: the
+      // caller reads the label buffer. Skipping the frame copy keeps the
+      // same iceType values the copied frame used to carry out.
+      Cloud &work = sys->cloud;
+      if (type > 0) {
+        typ = type;
+      }
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
-      if (type > 0) {
-        subset.reserve(static_cast<std::size_t>(work.nop));
-        for (int i = 0; i < work.nop; ++i) {
-          if (work.pts[static_cast<std::size_t>(i)].type == typ) {
-            subset.push_back(i);
+      if (graph == SEAMS_GRAPH_CUTOFF && type > 0) {
+        bool uniform = work.nop > 0;
+        for (int i = 0; i < work.nop && uniform; ++i) {
+          if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+            uniform = false;
           }
         }
-        sub = &subset;
+        if (!uniform) {
+          subset.reserve(static_cast<std::size_t>(work.nop));
+          for (int i = 0; i < work.nop; ++i) {
+            if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+              subset.push_back(i);
+            }
+          }
+          sub = &subset;
+        }
       }
       std::vector<int> offsets;
       std::vector<int> cols;
-      if (nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false)) {
-        chill::chillPlusFromCsr(work, offsets, cols);
+      bool listed = false;
+      if (graph == SEAMS_GRAPH_MUTUAL) {
+        nneigh::kNearestCsr(work, 4, cutoff + 1.5, typ, true, offsets, cols, false);
+        listed = static_cast<int>(offsets.size()) == work.nop + 1;
+      } else {
+        listed = nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false);
+      }
+      if (listed) {
+        if (rule == SEAMS_CHILL_OVITO) {
+          chill::chillPlusOvitoFromCsr(work, offsets, cols);
+        } else {
+          chill::chillPlusFromCsr(work, offsets, cols, false);
+        }
         const int n = work.nop;
         int counts[9] = {};
         for (int i = 0; i < n; ++i) {
@@ -869,6 +1142,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
         return SEAMS_OK;
       }
     }
+    Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     const char *spec = rule == SEAMS_CHILL_OVITO ? "ovito-chill+" : "chill+";
     chill::applyChillPlus(work, rows, chill::chillPlusRule(spec), false);
@@ -972,6 +1246,9 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     Cloud work = unified_copy(sys->cloud, type, typ);
     std::vector<std::vector<int>> idx;
     std::vector<std::vector<int>> found;
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    bool listed = false;
     if (graph == SEAMS_GRAPH_CUTOFF) {
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
@@ -984,23 +1261,12 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
         }
         sub = &subset;
       }
-      std::vector<int> offsets;
-      std::vector<int> cols;
       if (nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false)) {
+        listed = true;
         found = primitive::ringNetwork(offsets, cols, max_depth);
-        idx.assign(static_cast<std::size_t>(work.nop), {});
-        for (int i = 0; i < work.nop && i + 1 < static_cast<int>(offsets.size()); ++i) {
-          const int a = offsets[static_cast<std::size_t>(i)];
-          const int b = offsets[static_cast<std::size_t>(i) + 1];
-          auto &row = idx[static_cast<std::size_t>(i)];
-          row.reserve(static_cast<std::size_t>(std::max(0, b - a)));
-          for (int k = a; k < b; ++k) {
-            row.push_back(cols[static_cast<std::size_t>(k)]);
-          }
-        }
       }
     }
-    if (found.empty() && idx.empty()) {
+    if (!listed) {
       auto rows = bond_rows(work, cutoff, typ, graph);
       idx = nneigh::neighbourListByIndex(work, rows);
       if (static_cast<int>(idx.size()) < work.nop) {
@@ -1008,14 +1274,60 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
       }
       found = primitive::ringNetwork(idx, max_depth);
     }
-    if (static_cast<int>(idx.size()) < work.nop) {
-      idx.resize(static_cast<std::size_t>(work.nop));
-    }
     auto rings = std::make_unique<seams_rings>();
     rings->n_atoms = work.nop;
+    rings->cloud = std::move(work);
+    rings->offsets = std::move(offsets);
+    rings->cols = std::move(cols);
+    rings->idx = std::move(idx);
     rings->rings = std::move(found);
     rings->symmetry.assign(rings->rings.size(), SEAMS_RING_OTHER);
-    std::vector<std::vector<int>> six;
+    for (std::size_t i = 0; i < rings->rings.size(); ++i) {
+      const int size = static_cast<int>(rings->rings[i].size());
+      if (size == 5) {
+        rings->symmetry[i] = SEAMS_RING_PENTAGON;
+      } else if (size == 6) {
+        rings->symmetry[i] = SEAMS_RING_HEXAGON;
+      }
+    }
+    *out = static_cast<seams_rings *>(track(rings.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+// The census is the ring list. Cage and prism codes are filled the first
+// time a caller reads symmetry, from the cloud and neighbour rows kept
+// on the handle.
+void refine_ring_labels(const seams_rings *rings) {
+  if (rings == nullptr) {
+    return;
+  }
+  std::lock_guard<std::mutex> lock(rings->refine_mu);
+  if (rings->refined) {
+    return;
+  }
+  if (rings->idx.empty() && rings->offsets.size() >= 2) {
+    const int nop = rings->n_atoms;
+    rings->idx.assign(static_cast<std::size_t>(std::max(nop, 0)), {});
+    for (int i = 0; i < nop && i + 1 < static_cast<int>(rings->offsets.size()); ++i) {
+      const int a = rings->offsets[static_cast<std::size_t>(i)];
+      const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
+      auto &row = rings->idx[static_cast<std::size_t>(i)];
+      row.reserve(static_cast<std::size_t>(std::max(0, b - a)));
+      for (int k = a; k < b; ++k) {
+        row.push_back(rings->cols[static_cast<std::size_t>(k)]);
+      }
+    }
+  }
+  const auto &idx = rings->idx;
+  std::vector<std::vector<int>> six;
     std::vector<int> six_at;
     for (std::size_t i = 0; i < rings->rings.size(); ++i) {
       const int size = static_cast<int>(rings->rings[i].size());
@@ -1071,10 +1383,11 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
           continue;
         }
         std::vector<ring::strucType> kind(bySize[size].size(), ring::strucType::unclassified);
-        std::vector<double> rmsd(static_cast<std::size_t>(std::max(work.nop, 0)), -1.0);
+        std::vector<double> rmsd(static_cast<std::size_t>(std::max(rings->cloud.nop, 0)), -1.0);
         int perfect = 0;
         int imperfect = 0;
-        ring::findPrisms(bySize[size], kind, perfect, imperfect, idx, work, rmsd, false);
+        ring::findPrisms(bySize[size], kind, perfect, imperfect, idx, rings->cloud, rmsd,
+                         false);
         for (std::size_t k = 0; k < kind.size(); ++k) {
           int code = -1;
           if (kind[k] == ring::strucType::Prism) {
@@ -1098,23 +1411,14 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     } catch (const std::exception &) {
       /* Prism labels stay at the size or cage code already written. */
     }
-    *out = rings.release();
-    return SEAMS_OK;
-  } catch (const std::bad_alloc &) {
-    return fail(SEAMS_ERR_NOMEM, "out of memory");
-  } catch (const std::invalid_argument &ex) {
-    return fail(SEAMS_ERR_ARG, ex.what());
-  } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
-  }
+  rings->refined = true;
 }
 
 void seams_rings_destroy(seams_rings *rings) {
-  try {
-    delete rings;
-  } catch (...) {
+  if (!claim(rings)) {
+    return;
   }
+  delete rings;
 }
 
 int seams_rings_count(const seams_rings *rings) {
@@ -1123,7 +1427,7 @@ int seams_rings_count(const seams_rings *rings) {
 
 seams_status seams_rings_histogram(const seams_rings *rings, int *counts,
                                    int counts_len) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || counts == nullptr) {
     return fail(SEAMS_ERR_NULL, "histogram output is null");
@@ -1144,13 +1448,23 @@ seams_status seams_rings_histogram(const seams_rings *rings, int *counts,
 }
 
 seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symmetry) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr) {
     return fail(SEAMS_ERR_NULL, "rings handle is null");
   }
   if (sizes == nullptr && symmetry == nullptr) {
     return fail(SEAMS_ERR_NULL, "sizes and symmetry are both null");
+  }
+  if (symmetry != nullptr) {
+    try {
+      refine_ring_labels(rings);
+    } catch (const std::bad_alloc &) {
+      return fail(SEAMS_ERR_NOMEM, "out of memory");
+    } catch (...) {
+      remember();
+      return SEAMS_ERR_INTERNAL;
+    }
   }
   for (std::size_t i = 0; i < rings->rings.size(); ++i) {
     if (sizes != nullptr) {
@@ -1164,7 +1478,7 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
 }
 
 seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fraction) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || fraction == nullptr) {
     return fail(SEAMS_ERR_NULL, "fraction output is null");
@@ -1173,7 +1487,12 @@ seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fr
     *fraction = 0.0;
     return SEAMS_OK;
   }
-  std::vector<char> hit(static_cast<std::size_t>(rings->n_atoms), 0);
+  std::vector<char> hit;
+  try {
+    hit.assign(static_cast<std::size_t>(rings->n_atoms), 0);
+  } catch (...) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  }
   for (const auto &ring : rings->rings) {
     if (size > 0 && static_cast<int>(ring.size()) != size) {
       continue;
@@ -1195,7 +1514,7 @@ seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fr
 seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets,
                                    size_t offsets_cap, size_t *n_offsets, int *cols,
                                    size_t cols_cap, size_t *nnz) {
-  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  read_guard guard(nb);
   clear_error();
   if (nb == nullptr || n_offsets == nullptr || nnz == nullptr) {
     return fail(SEAMS_ERR_NULL, "csr output is null");
@@ -1219,7 +1538,7 @@ seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets,
 
 seams_status seams_rings_vertices(const seams_rings *rings, int index, int *atoms,
                                   size_t cap, size_t *n_out) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || n_out == nullptr) {
     return fail(SEAMS_ERR_NULL, "ring vertex output is null");
@@ -1312,6 +1631,9 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
     return fail(SEAMS_ERR_RANGE, "frame index starts at 1");
   }
   try {
+    if (!gen::file_exists(path)) {
+      return fail(SEAMS_ERR_ARG, "cannot read path");
+    }
     Cloud cloud = sinp::openFrame(path, frame, type_filter);
     if (cloud.nop <= 0) {
       return fail(SEAMS_ERR_RANGE, "frame has no atoms");
@@ -1320,16 +1642,17 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
       cloud.currentFrame = frame;
     }
     sys->cloud = std::move(cloud);
+    sys->identity_ids = 0;
+    sys->staged_current = false;
     sys->ready = true;
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (const std::exception &ex) {
-    const std::string message = ex.what();
-    const bool past = message.find("past the last") != std::string::npos;
-    g_error = message.empty() ? "cannot read frame" : message;
-    note_error();
-    return past ? SEAMS_ERR_RANGE : SEAMS_ERR_ARG;
+    const char *what = ex.what();
+    const bool empty = what == nullptr || what[0] == '\0';
+    const bool past = !empty && std::strstr(what, "past the last") != nullptr;
+    return fail(past ? SEAMS_ERR_RANGE : SEAMS_ERR_ARG, empty ? "cannot read frame" : what);
   } catch (...) {
     remember();
     return SEAMS_ERR_INTERNAL;
@@ -1361,6 +1684,48 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
   try {
     use_threads();
     int typ = 1;
+    if (rule == SEAMS_CHILL_PUBLISHED &&
+        (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+      // Correlations stay in a flat table. The per-atom bond vectors are
+      // not built. iceType is written on the frame the caller already holds.
+      Cloud &work = sys->cloud;
+      if (type > 0) {
+        typ = type;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      bool listed = false;
+      if (graph == SEAMS_GRAPH_CUTOFF) {
+        const std::vector<int> *sub = nullptr;
+        std::vector<int> subset;
+        if (type > 0) {
+          bool uniform = work.nop > 0;
+          for (int i = 0; i < work.nop && uniform; ++i) {
+            if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+              uniform = false;
+            }
+          }
+          if (!uniform) {
+            subset.reserve(static_cast<std::size_t>(work.nop));
+            for (int i = 0; i < work.nop; ++i) {
+              if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+                subset.push_back(i);
+              }
+            }
+            sub = &subset;
+          }
+        }
+        listed = nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false);
+      } else {
+        nneigh::kNearestCsr(work, 4, cutoff + 1.5, typ, true, offsets, cols, false);
+        listed = static_cast<int>(offsets.size()) == work.nop + 1;
+      }
+      if (listed) {
+        chill::chillFromCsr(work, offsets, cols);
+        write_ice_labels(work, type, labels, counts9);
+        return SEAMS_OK;
+      }
+    }
     Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     if (rule == SEAMS_CHILL_OVITO) {
@@ -1397,6 +1762,28 @@ seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, i
   }
   if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
+  }
+  if (sys->cloud.box.size() >= 3) {
+    const double edge =
+        std::min(sys->cloud.box[0], std::min(sys->cloud.box[1], sys->cloud.box[2]));
+    double absurd = edge;
+    if (sys->cloud.box.size() >= 6) {
+      absurd = std::max(absurd, std::max(std::abs(sys->cloud.box[3]),
+                                         std::max(std::abs(sys->cloud.box[4]),
+                                                  std::abs(sys->cloud.box[5]))));
+      absurd = std::max(absurd, std::max(sys->cloud.box[0], std::max(sys->cloud.box[1],
+                                                                    sys->cloud.box[2])));
+    }
+    double shear = 0.0;
+    if (sys->cloud.box.size() >= 6 && edge > 0.0) {
+      shear = std::max(std::abs(sys->cloud.box[3]),
+                       std::max(std::abs(sys->cloud.box[4]), std::abs(sys->cloud.box[5]))) /
+              edge;
+    }
+    const bool many = edge > 0.0 && (cutoff / edge > 64.0 || shear > 64.0);
+    if (many || absurd > 1.0e8) {
+      return fail(SEAMS_ERR_BOX, "cutoff spans too many periodic images");
+    }
   }
   if (order_l != 3 && order_l != 4 && order_l != 6 && order_l != 8 && order_l != 12) {
     return fail(SEAMS_ERR_RANGE, "order is 3, 4, 6, 8, or 12");
@@ -1518,6 +1905,57 @@ seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_
   }
 }
 
+// Cutoff graph as the CSR the ring search already uses, plus the index
+// rows the cage walk wants (self first, then neighbours). Skips the
+// atom-ID round trip in neighListO. Returns false when the box cannot
+// use that list or the frame mixes types.
+bool cutoff_csr_graph(const Cloud &work, double cutoff, int typ,
+                      std::vector<std::vector<int>> &idx,
+                      std::vector<std::vector<int>> &rings, int depth) {
+  if (work.nop <= 0) {
+    idx.clear();
+    rings.clear();
+    return true;
+  }
+  // The tilted cell list does not feed the same pairs as neighListO.
+  // Keep that builder for triclinic frames.
+  if (work.box.size() != 3) {
+    return false;
+  }
+  for (int i = 0; i < work.nop; ++i) {
+    if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+      return false;
+    }
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  if (!nneigh::orthoFullCsr(work, nullptr, cutoff, offsets, cols, false)) {
+    return false;
+  }
+  idx.assign(static_cast<std::size_t>(work.nop), {});
+  const int rows = static_cast<int>(offsets.size()) - 1;
+  for (int i = 0; i < work.nop && i < rows; ++i) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i + 1)];
+    auto &row = idx[static_cast<std::size_t>(i)];
+    row.reserve(static_cast<std::size_t>(std::max(0, b - a) + 1));
+    row.push_back(i);
+    for (int k = a; k < b; ++k) {
+      row.push_back(cols[static_cast<std::size_t>(k)]);
+    }
+  }
+  // One thread is faster on the packed rows. A team is faster on the
+  // per-atom vectors, which is the layout the command uses.
+#ifdef SEAMS_HAS_OPENMP
+  const bool packed = omp_in_parallel() || omp_get_max_threads() <= 1;
+#else
+  const bool packed = true;
+#endif
+  rings = packed ? primitive::ringNetwork(offsets, cols, depth)
+                 : primitive::ringNetwork(idx, depth);
+  return true;
+}
+
 seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int graph, int k,
                               int complete, seams_cage_set **out) {
   handle_guard guard(sys);
@@ -1577,8 +2015,14 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
         ddc[static_cast<std::size_t>(i)] = aff.ddc[static_cast<std::size_t>(i)];
       }
     } else {
-      auto rows = bond_rows(work, cutoff, typ, graph);
-      auto idx = nneigh::neighbourListByIndex(work, rows);
+      std::vector<std::vector<int>> idx;
+      std::vector<std::vector<int>> found_rings;
+      const bool csr = graph == SEAMS_GRAPH_CUTOFF &&
+                       cutoff_csr_graph(work, cutoff, typ, idx, found_rings, 6);
+      if (!csr) {
+        auto rows = bond_rows(work, cutoff, typ, graph);
+        idx = nneigh::neighbourListByIndex(work, rows);
+      }
       if (static_cast<int>(idx.size()) < n) {
         idx.resize(static_cast<std::size_t>(n));
       }
@@ -1590,13 +2034,16 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
           ddc[static_cast<std::size_t>(i)] = counts.atomDdc[static_cast<std::size_t>(i)] != 0;
         }
       } else {
-        auto six = six_of(ring::contractibleRings(primitive::ringNetwork(idx, 6), work));
+        if (!csr) {
+          found_rings = primitive::ringNetwork(idx, 6);
+        }
+        auto six = six_of(ring::contractibleRings(found_rings, work));
         flags_from_affiliation(n, six, ring::cageAffiliation(six, idx), hc, ddc);
       }
     }
     auto cages = std::make_unique<seams_cage_set>();
     tally_cages(cages.get(), work, type, hc, ddc);
-    *out = cages.release();
+    *out = static_cast<seams_cage_set *>(track(cages.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -1609,15 +2056,15 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
 }
 
 void seams_cages_destroy(seams_cage_set *cages) {
-  try {
-    delete cages;
-  } catch (...) {
+  if (!claim(cages)) {
+    return;
   }
+  delete cages;
 }
 
 seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_cubic,
                                 int *n_water, int *n_both) {
-  handle_guard guard(const_cast<seams_cage_set *>(cages));
+  read_guard guard(cages);
   clear_error();
   if (cages == nullptr) {
     return fail(SEAMS_ERR_NULL, "cages handle is null");
@@ -1641,7 +2088,7 @@ seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_
 }
 
 seams_status seams_cages_labels(const seams_cage_set *cages, int *per_atom, size_t len) {
-  handle_guard guard(const_cast<seams_cage_set *>(cages));
+  read_guard guard(cages);
   clear_error();
   if (cages == nullptr || per_atom == nullptr) {
     return fail(SEAMS_ERR_NULL, "cage labels are null");
@@ -1674,13 +2121,29 @@ seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, i
   }
   try {
     use_threads();
-    int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
-    auto rows = bond_rows(work, cutoff, typ, graph);
-    auto idx = nneigh::neighbourListByIndex(work, rows);
+    // A type filter that keeps every atom is the frame itself. Copying the
+    // cloud copies its atom-id map, and that copy is what made the library
+    // call slower than the command on a wide run.
+    int typ = type > 0 ? type : 1;
+    Cloud copied;
+    const Cloud *held = &sys->cloud;
+    if (type > 0) {
+      copied = unified_copy(sys->cloud, type, typ);
+      held = &copied;
+    }
+    const Cloud &work = *held;
     const auto signature = cage::Signature::parse(spec);
     const int depth = std::max(signature.maxRingSize(), 3);
-    const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth), work, cutoff);
+    std::vector<std::vector<int>> idx;
+    std::vector<std::vector<int>> found_rings;
+    const bool csr = graph == SEAMS_GRAPH_CUTOFF &&
+                     cutoff_csr_graph(work, cutoff, typ, idx, found_rings, depth);
+    if (!csr) {
+      auto rows = bond_rows(work, cutoff, typ, graph);
+      idx = nneigh::neighbourListByIndex(work, rows);
+      found_rings = primitive::ringNetwork(idx, depth);
+    }
+    const auto rings = ring::cageRings(found_rings, work, cutoff);
     const auto window = cage::parseEdgeWindow("");
     std::vector<std::array<double, 3>> xyz(static_cast<std::size_t>(std::max(work.nop, 0)));
     for (int i = 0; i < work.nop; ++i) {
@@ -1688,7 +2151,7 @@ seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, i
       xyz[static_cast<std::size_t>(i)] = {point.x, point.y, point.z};
     }
     const auto found_of = cage::findBySignatures(rings, idx, std::vector<cage::Signature>{signature},
-                                                 {}, &xyz, &work.box, window);
+                                                 {}, &xyz, &work.box, window, &work.boxLow);
     const auto &found = found_of.at(0);
     std::set<int> atoms;
     for (const auto &cage_i : found) {
@@ -1805,7 +2268,7 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
     options.axis = axis;
     auto front = std::make_unique<seams_brine>();
     front->snapshot = site::analyseFront(sys->cloud, ice_flag, waters, ions, options);
-    *out = front.release();
+    *out = static_cast<seams_brine *>(track(front.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -1818,15 +2281,15 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
 }
 
 void seams_brine_destroy(seams_brine *front) {
-  try {
-    delete front;
-  } catch (...) {
+  if (!claim(front)) {
+    return;
   }
+  delete front;
 }
 
 seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, double *z_exit,
                                 double *thickness, int *found) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr) {
     return fail(SEAMS_ERR_NULL, "brine handle is null");
@@ -1852,7 +2315,7 @@ seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, doubl
 
 seams_status seams_brine_rejection(const seams_brine *front, double *c_ice, double *c_liquid,
                                    double *k, int *defined) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr) {
     return fail(SEAMS_ERR_NULL, "brine handle is null");
@@ -1878,7 +2341,7 @@ seams_status seams_brine_rejection(const seams_brine *front, double *c_ice, doub
 
 seams_status seams_brine_profile(const seams_brine *front, double *z_mid, double *molality,
                                  double *ice_fraction, size_t cap, size_t *n_out) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr || n_out == nullptr) {
     return fail(SEAMS_ERR_NULL, "profile output is null");
@@ -1921,39 +2384,6 @@ seams_status seams_steinhardt(seams_system *sys, double cutoff, int type, int or
                   qlbar_len);
 }
 
-namespace {
-
-seams_status copy_text(const std::string &text, char *buf, size_t cap, size_t *n_out) {
-  if (n_out == nullptr) {
-    return fail(SEAMS_ERR_NULL, "text length is null");
-  }
-  *n_out = text.size();
-  if (buf == nullptr) {
-    return SEAMS_OK;
-  }
-  if (cap < text.size() + 1) {
-    return fail(SEAMS_ERR_RANGE, "buffer is short");
-  }
-  if (!text.empty()) {
-    std::memcpy(buf, text.data(), text.size());
-  }
-  buf[text.size()] = '\0';
-  return SEAMS_OK;
-}
-
-rdf::PartialRdf partial_of(const Cloud &cloud, double rmax, int bins, int type_i, int type_j) {
-  int bins_used = bins;
-  if (bins_used <= 0) {
-    bins_used = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
-  }
-  int typ = 1;
-  Cloud work = unified_copy(cloud, type_i, typ);
-  const int j = type_j > 0 ? type_j : typ;
-  return rdf::partialRdf(work, typ, j, rmax, bins_used);
-}
-
-} // namespace
-
 seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int type,
                                   int mutual, seams_neighbours **out) {
   handle_guard guard(sys);
@@ -1977,37 +2407,33 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
   try {
     use_threads();
     int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
-    auto rows = nneigh::kNearestNeighbourList(work, k, cutoff + 1.5, typ, mutual != 0);
-    auto idx = nneigh::neighbourListByIndex(work, rows);
+    const Cloud *src = &sys->cloud;
+    Cloud owned;
+    if (type > 0) {
+      typ = type;
+      bool uniform = sys->cloud.nop > 0;
+      for (int i = 0; i < sys->cloud.nop && uniform; ++i) {
+        if (sys->cloud.pts[static_cast<std::size_t>(i)].type != type) {
+          uniform = false;
+        }
+      }
+      if (!uniform) {
+        owned = unified_copy(sys->cloud, type, typ);
+        src = &owned;
+      }
+    } else {
+      owned = unified_copy(sys->cloud, type, typ);
+      src = &owned;
+    }
     auto nb = std::make_unique<seams_neighbours>();
-    const int n = work.nop;
-    if (static_cast<int>(idx.size()) < n) {
-      idx.resize(static_cast<std::size_t>(n));
-    }
-    nb->n = n;
-    nb->offsets.assign(static_cast<std::size_t>(n + 1), 0);
-    for (int i = 0; i < n; ++i) {
-      int degree = 0;
-      for (int id : idx[static_cast<std::size_t>(i)]) {
-        if (id != i) {
-          ++degree;
-        }
-      }
-      nb->offsets[static_cast<std::size_t>(i + 1)] =
-          nb->offsets[static_cast<std::size_t>(i)] + degree;
-    }
-    nb->cols.resize(static_cast<std::size_t>(nb->offsets[static_cast<std::size_t>(n)]));
-    for (int i = 0; i < n; ++i) {
-      int cursor = nb->offsets[static_cast<std::size_t>(i)];
-      for (int id : idx[static_cast<std::size_t>(i)]) {
-        if (id == i) {
-          continue;
-        }
-        nb->cols[static_cast<std::size_t>(cursor++)] = id;
-      }
-    }
-    *out = nb.release();
+    nb->n = src->nop;
+    // Parking the OpenMP team at the start of a k-nearest call made the
+    // next search late by a fraction of a millisecond, which is the whole
+    // of a few-thousand-atom triclinic query. The linkcell pool sleeps
+    // on its own. The handle stays in the live set so destroy frees it.
+    nneigh::kNearestCsr(*src, k, cutoff + 1.5, typ, mutual != 0, nb->offsets, nb->cols,
+                        false);
+    *out = static_cast<seams_neighbours *>(track(nb.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -2152,7 +2578,8 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
   if (!sys->ready) {
     return fail(SEAMS_ERR_STATE, "system has no frame");
   }
-  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0)) {
+  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(cutoff) || !std::isfinite(dist_cutoff) || !std::isfinite(angle_cutoff)) {
     return fail(SEAMS_ERR_RANGE, "cutoffs must be positive");
   }
   if (hydrogen_type <= 0) {
@@ -2307,7 +2734,7 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
     handle->atom_keys = fp.atomKeys;
     handle->ring_census = fp.ringCensus;
     handle->hops = fp.hops;
-    *out = handle.release();
+    *out = static_cast<seams_topo *>(track(handle.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -2320,14 +2747,14 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
 }
 
 void seams_fingerprint_destroy(seams_topo *fp) {
-  try {
-    delete fp;
-  } catch (...) {
+  if (!claim(fp)) {
+    return;
   }
+  delete fp;
 }
 
 seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, size_t *n_out) {
-  handle_guard guard(const_cast<seams_topo *>(fp));
+  read_guard guard(fp);
   clear_error();
   if (fp == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint handle is null");
@@ -2337,7 +2764,7 @@ seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, 
 
 seams_status seams_fingerprint_atom(const seams_topo *fp, int index, char *buf, size_t cap,
                                     size_t *n_out) {
-  handle_guard guard(const_cast<seams_topo *>(fp));
+  read_guard guard(fp);
   clear_error();
   if (fp == nullptr || n_out == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint atom output is null");
@@ -2349,10 +2776,13 @@ seams_status seams_fingerprint_atom(const seams_topo *fp, int index, char *buf, 
 }
 
 seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts, size_t counts_len) {
-  handle_guard guard(const_cast<seams_topo *>(fp));
+  read_guard guard(fp);
   clear_error();
   if (fp == nullptr || counts == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint ring output is null");
+  }
+  if (counts_len == 0) {
+    return fail(SEAMS_ERR_RANGE, "ring census length is empty");
   }
   for (std::size_t i = 0; i < counts_len; ++i) {
     counts[i] = i < fp->ring_census.size() ? fp->ring_census[i] : 0;
@@ -2535,7 +2965,8 @@ seams_status seams_monolayer(seams_system *sys, double cutoff, int type, int max
   if (max_depth < 3 || counts_len < static_cast<std::size_t>(max_depth) + 1) {
     return fail(SEAMS_ERR_RANGE, "monolayer needs max_depth >= 3 and a long counts buffer");
   }
-  if (!(cutoff > 0.0) || !(sheet_area > 0.0)) {
+  if (!(cutoff > 0.0) || !(sheet_area > 0.0) || !std::isfinite(cutoff) ||
+      !std::isfinite(sheet_area)) {
     return fail(SEAMS_ERR_RANGE, "cutoff and sheet area must be positive");
   }
   try {
@@ -2596,7 +3027,7 @@ seams_status seams_site_table(seams_system *sys, const char *spec, int *kinds, s
 
 seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets,
                                  int *reservoir_waters) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr) {
     return fail(SEAMS_ERR_NULL, "brine handle is null");
@@ -2609,6 +3040,296 @@ seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets,
   }
   if (reservoir_waters != nullptr) {
     *reservoir_waters = front->snapshot.pockets.reservoirWaters;
+  }
+  return SEAMS_OK;
+}
+
+const char *seams_last_error_message(void) { return g_error.c_str(); }
+
+seams_status seams_system_natoms(const seams_system *sys, size_t *n) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or count is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  *n = static_cast<size_t>(sys->cloud.nop);
+  return SEAMS_OK;
+}
+
+seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t *n) {
+  read_guard guard(nb);
+  clear_error();
+  if (nb == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "neighbours or count is null");
+  }
+  *n = static_cast<size_t>(nb->n);
+  return SEAMS_OK;
+}
+
+seams_status seams_rings_nrings(const seams_rings *rings, size_t *n) {
+  read_guard guard(rings);
+  clear_error();
+  if (rings == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings or count is null");
+  }
+  *n = rings->rings.size();
+  return SEAMS_OK;
+}
+
+seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int type, int graph,
+                                int rule, int *labels, size_t labels_len, int counts9[9]) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || labels == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or labels is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(labels_len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "label buffer is short");
+  }
+  return seams_chill_plus(sys, cutoff, type, graph, rule, labels, counts9);
+}
+
+seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, double *q4,
+                          size_t q4_len, double *q6, size_t q6_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system is null");
+  }
+  if (q4 == nullptr && q6 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "q4 and q6 are both null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if ((q4 != nullptr && !buffer_fits(q4_len, sys->cloud.nop)) ||
+      (q6 != nullptr && !buffer_fits(q6_len, sys->cloud.nop))) {
+    return fail(SEAMS_ERR_RANGE, "q buffer is short");
+  }
+  return seams_q4q6(sys, cutoff, type, q4, q6);
+}
+
+seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes, size_t sizes_len,
+                                  int *symmetry, size_t symmetry_len) {
+  read_guard guard(rings);
+  clear_error();
+  if (rings == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings handle is null");
+  }
+  if (sizes == nullptr && symmetry == nullptr) {
+    return fail(SEAMS_ERR_NULL, "sizes and symmetry are both null");
+  }
+  const size_t need = rings->rings.size();
+  if ((sizes != nullptr && sizes_len < need) ||
+      (symmetry != nullptr && symmetry_len < need)) {
+    return fail(SEAMS_ERR_RANGE, "ring label buffer is short");
+  }
+  return seams_rings_labels(rings, sizes, symmetry);
+}
+
+seams_status seams_rings_histogram_n(const seams_rings *rings, int *counts,
+                                     size_t counts_len) {
+  read_guard guard(rings);
+  clear_error();
+  if (rings == nullptr || counts == nullptr) {
+    return fail(SEAMS_ERR_NULL, "histogram output is null");
+  }
+  if (counts_len == 0) {
+    return fail(SEAMS_ERR_RANGE, "histogram length is empty");
+  }
+  for (size_t i = 0; i < counts_len; ++i) {
+    counts[i] = 0;
+  }
+  for (const auto &ring : rings->rings) {
+    if (ring.size() < counts_len) {
+      counts[ring.size()] += 1;
+    }
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_system_set_positions(seams_system *sys, const double *xyz, size_t n,
+                                        const double *box9, size_t box_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || xyz == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or coordinates is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (n != static_cast<std::size_t>(sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "atom count differs from the loaded frame");
+  }
+  if (box9 != nullptr) {
+    if (box_len != 9) {
+      return fail(SEAMS_ERR_RANGE, "box length is 9");
+    }
+    if (!finite_box(box9)) {
+      return fail(SEAMS_ERR_BOX, "box contains a non-finite number");
+    }
+  }
+  try {
+    if (box9 != nullptr &&
+        !nneigh::setBoxFromLammpsEdges(sys->spare_box, sys->spare_low, box9[0], box9[1],
+                                       box9[2], box9[3], box9[4], box9[5], box9[6],
+                                       box9[7], box9[8])) {
+      return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
+    }
+    if (sys->stage) {
+      auto &next = sys->staged;
+      if (!sys->staged_current) {
+        next = sys->cloud.pts;
+        sys->staged_current = true;
+      }
+      constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
+      std::uint64_t bad = 0;
+      for (std::size_t i = 0; i < n; ++i) {
+        std::uint64_t bits[3];
+        std::memcpy(bits, xyz + 3 * i, sizeof bits);
+        bad |= static_cast<std::uint64_t>((bits[0] & exponent) == exponent) |
+               static_cast<std::uint64_t>((bits[1] & exponent) == exponent) |
+               static_cast<std::uint64_t>((bits[2] & exponent) == exponent);
+        auto &point = next[i];
+        point.x = xyz[3 * i];
+        point.y = xyz[3 * i + 1];
+        point.z = xyz[3 * i + 2];
+        point.iceType = molSys::atom_state_type::unclassified;
+        point.inSlice = true;
+        point.c_ij.clear();
+      }
+      if (bad != 0) {
+        return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+      }
+      sys->cloud.pts.swap(next);
+    } else {
+      if (!finite_coordinates(xyz, n)) {
+        return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+      }
+      for (std::size_t i = 0; i < n; ++i) {
+        auto &point = sys->cloud.pts[i];
+        point.x = xyz[3 * i];
+        point.y = xyz[3 * i + 1];
+        point.z = xyz[3 * i + 2];
+        point.iceType = molSys::atom_state_type::unclassified;
+        point.inSlice = true;
+        point.c_ij.clear();
+      }
+    }
+    if (box9 != nullptr) {
+      sys->cloud.box.swap(sys->spare_box);
+      sys->cloud.boxLow.swap(sys->spare_low);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_system_stage_positions(seams_system *sys, int enable) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system is null");
+  }
+  sys->stage = enable != 0;
+  if (!sys->stage) {
+    decltype(Cloud::pts)().swap(sys->staged);
+    sys->staged_current = false;
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_system_box(const seams_system *sys, double *box9, size_t box_len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || box9 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or box is null");
+  }
+  if (box_len != 9) {
+    return fail(SEAMS_ERR_RANGE, "box length is 9");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  double H[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(sys->cloud.box, sys->cloud.boxLow, H, origin);
+  box9[0] = origin[0];
+  box9[1] = origin[1];
+  box9[2] = origin[2];
+  box9[3] = H[0][0];
+  box9[4] = H[1][1];
+  box9[5] = H[2][2];
+  box9[6] = H[1][0];
+  box9[7] = H[2][0];
+  box9[8] = H[2][1];
+  return SEAMS_OK;
+}
+
+seams_status seams_system_positions(const seams_system *sys, double *xyz, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || xyz == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or coordinates is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  const std::size_t n = static_cast<std::size_t>(sys->cloud.nop);
+  if (len / 3 < n) {
+    return fail(SEAMS_ERR_RANGE, "coordinate buffer is short");
+  }
+  for (std::size_t i = 0; i < n; ++i) {
+    const auto &point = sys->cloud.pts[i];
+    xyz[3 * i] = point.x;
+    xyz[3 * i + 1] = point.y;
+    xyz[3 * i + 2] = point.z;
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_system_types(const seams_system *sys, int *types, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || types == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or types is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "type buffer is short");
+  }
+  for (int i = 0; i < sys->cloud.nop; ++i) {
+    types[i] = sys->cloud.pts[static_cast<std::size_t>(i)].type;
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_system_ids(const seams_system *sys, int *ids, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || ids == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or ids is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "id buffer is short");
+  }
+  for (int i = 0; i < sys->cloud.nop; ++i) {
+    ids[i] = sys->cloud.pts[static_cast<std::size_t>(i)].atomID;
   }
   return SEAMS_OK;
 }

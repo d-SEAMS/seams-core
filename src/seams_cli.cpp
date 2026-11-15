@@ -331,7 +331,8 @@ bool gatherFrameResults(const FrameRanks &ranks,
 std::string jsonEscape(std::string_view value) {
   std::string escaped;
   escaped.reserve(value.size());
-  for (const unsigned char ch : value) {
+  for (char raw : value) {
+    const auto ch = static_cast<unsigned char>(raw);
     switch (ch) {
     case '\\':
       escaped += "\\\\";
@@ -1171,6 +1172,12 @@ int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
   for (int n : census.ionsInCluster) {
     ionsInIce += n;
   }
+  int nCapped = 0;
+  int nBroken = 0;
+  for (const auto &shell : env.members) {
+    nCapped += static_cast<int>(site::cappedRings(sixS, shell, 6).size());
+    nBroken += static_cast<int>(site::brokenRings(idxS, shell, 6).size());
+  }
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("ice") << " " << nIce << " "
      << colorizer.longOption("ions") << " " << env.ion.size() << " "
@@ -1180,7 +1187,9 @@ int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
      << colorizer.longOption("shell") << " " << meanShell << " "
      << colorizer.longOption("shell-ice") << " " << meanFraction << " "
      << colorizer.longOption("clusters") << " " << census.nClusters << " "
-     << colorizer.longOption("ions-in-ice") << " " << ionsInIce << "\n";
+     << colorizer.longOption("ions-in-ice") << " " << ionsInIce << " "
+     << colorizer.longOption("capped") << " " << nCapped << " "
+     << colorizer.longOption("broken") << " " << nBroken << "\n";
   return 0;
 }
 
@@ -1564,8 +1573,8 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
         xyzPtr = &xyz;
         boxPtr = &cloud.box;
       }
-      const auto foundOf =
-          cage::findBySignatures(rings, idx, sigs, rank, xyzPtr, boxPtr, window);
+      const auto foundOf = cage::findBySignatures(
+          rings, idx, sigs, rank, xyzPtr, boxPtr, window, &cloud.boxLow);
       for (size_t si = 0; si < sigs.size(); ++si) {
         const auto &sig = sigs[si];
         const auto &found = foundOf[si];
@@ -1628,8 +1637,8 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
           }
           os << " " << colorizer.longOption("shape");
           for (const auto &c : found) {
-            const auto xyz = cage::coordsOfVertices(all, c.vertices);
-            const auto sh = cage::shapeOfVertices(xyz);
+            const auto cageXyz = cage::coordsOfVertices(all, c.vertices);
+            const auto sh = cage::shapeOfVertices(cageXyz);
             os << " " << sh.nVertices << ":"
                << (sh.status == 0 ? sh.pointGroup : "off");
           }
@@ -2698,15 +2707,15 @@ int main(int argc, char *argv[]) {
       }
     }
     if (cmd == "ions") {
-      std::vector<int> ionTypes;
+      std::vector<int> parsedIons;
       std::string tok;
       std::istringstream in(ionTypesFlag);
       while (std::getline(in, tok, ',')) {
         if (!tok.empty()) {
-          ionTypes.push_back(parseIntegral<int>(tok));
+          parsedIons.push_back(parseIntegral<int>(tok));
         }
       }
-      return cmdIons(os, carry, cloud, cutoff, typeI, k, completeFlag, ionTypes,
+      return cmdIons(os, carry, cloud, cutoff, typeI, k, completeFlag, parsedIons,
                      ionCutoff > 0.0 ? ionCutoff : cutoff, perAtomPath,
                      waterTypes);
     }
@@ -2782,8 +2791,8 @@ int main(int argc, char *argv[]) {
       return 2;
     }
     std::ostringstream line;
-    FrameCarry once(false);
-    const int rc = runOne(line, once, cloud);
+    FrameCarry frameCarry(false);
+    const int rc = runOne(line, frameCarry, cloud);
     emitResult(std::cout, outputFormat, cmd, cloud.currentFrame, rc,
                line.str());
     return rc;

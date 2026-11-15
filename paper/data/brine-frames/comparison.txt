@@ -1,0 +1,7 @@
+# 230 K r0 after 5.000 ns (2,500,000 steps). Campaign columns are the
+# 5 ns r0 rows of the brine table: nmax, ions in liquid, CHILL+ ice.
+# Ours is the last row of front.csv. CHILL+ ice is cubic plus hexagonal.
+# tag t_ns nmax ion_liquid ion_ice ion_front chill_ice campaign_nmax campaign_ionliq campaign_chillice
+T230_m0_r0 5.0000 1079 0 0 0 856 1115 0 880
+T230_m20_r0 5.0000 926 29 0 11 741 997 25 785
+T230_m40_r0 5.0000 861 56 0 24 667 859 63 694

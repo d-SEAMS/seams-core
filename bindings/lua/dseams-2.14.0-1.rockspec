@@ -47,6 +47,7 @@ build = {
    install = {
       lua = {
          dseams_fnl = "bindings/lua/dseams_fnl.fnl",
+         seams = "bindings/lua/seams.fnl",
       },
    },
    copy_directories = {},

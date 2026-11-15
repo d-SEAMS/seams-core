@@ -45,7 +45,7 @@ Cloud makeCloud(int nAtoms, int typeI) {
   cloud.currentFrame = 1;
   cloud.box = {boxLength, boxLength, boxLength};
   cloud.boxLow = {0.0, 0.0, 0.0};
-  cloud.pts.reserve(nAtoms);
+  cloud.pts.reserve(static_cast<std::size_t>(nAtoms));
 
   unsigned long long state = 88172645463325252ULL;
   auto jitter = [&state, spacing]() {
@@ -112,8 +112,9 @@ int main(int argc, char **argv) {
 
     // Coordinates in the layout vesin wants, marshalled once and excluded
     // from the timing, so this measures the kernel alone
-    std::vector<std::array<double, 3>> positions(nAtoms);
-    for (int i = 0; i < nAtoms; i++) {
+    std::vector<std::array<double, 3>> positions(
+        static_cast<std::size_t>(nAtoms));
+    for (std::size_t i = 0; i < positions.size(); i++) {
       positions[i] = {cloud.pts[i].x, cloud.pts[i].y, cloud.pts[i].z};
     }
     double box[3][3] = {{cloud.box[0], 0.0, 0.0},
@@ -137,7 +138,8 @@ int main(int argc, char **argv) {
           VesinNeighborList neighbors;
           const char *err = nullptr;
           vesin_neighbors(
-              reinterpret_cast<const double (*)[3]>(positions.data()), nAtoms,
+              reinterpret_cast<const double (*)[3]>(positions.data()),
+              positions.size(),
               box, periodic, device, options, &neighbors, &err);
           nPairs = neighbors.length;
           vesin_free(&neighbors);

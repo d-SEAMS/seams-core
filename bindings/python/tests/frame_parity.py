@@ -6,8 +6,10 @@ PYDSEAMS211_PYTHON to its interpreter. The comparison never puts that
 tree on this process's import path.
 """
 
+import atexit
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -55,14 +57,29 @@ def _stage_extension():
     return stage
 
 
+def _stage(core):
+    """A dseams package beside the built _core, so the import never waits on python_dseams."""
+    stage = Path(tempfile.mkdtemp(prefix="dseams-parity-"))
+    atexit.register(shutil.rmtree, stage, True)
+    package = stage / "dseams"
+    package.mkdir()
+    source = ROOT / "bindings" / "python"
+    for path in (source / "dseams").glob("*.py"):
+        (package / path.name).symlink_to(path)
+    (package / "frames.py").symlink_to(source / "frames.py")
+    (package / core.name).symlink_to(core)
+    return stage
+
+
 def _ours():
     os.environ.pop("DSEAMS_DOC_BUILD", None)
-    parts = [str(ROOT / "bindings" / "python")]
-    staged = _stage_extension()
+    paths = [str(ROOT / "bindings" / "python")]
+    core = os.environ.get("DSEAMS_CORE", "")
+    staged = _stage(Path(core)) if core else _stage_extension()
     if staged is not None:
-        parts.insert(0, str(staged))
-    os.environ["PYTHONPATH"] = os.pathsep.join(parts + [os.environ.get("PYTHONPATH", "")])
-    sys.path[:0] = parts
+        paths.insert(0, str(staged))
+    os.environ["PYTHONPATH"] = os.pathsep.join(paths + [os.environ.get("PYTHONPATH", "")])
+    sys.path[:0] = paths
     import pydseams as ds
     from pydseams.band import ring_census
 

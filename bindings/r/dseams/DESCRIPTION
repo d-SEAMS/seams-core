@@ -37,6 +37,7 @@ LinkingTo:
     RcppEigen (>= 0.3.4.0.0)
 VignetteBuilder: knitr
 SystemRequirements: C++20
+NeedsCompilation: yes
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1

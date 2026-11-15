@@ -4,7 +4,7 @@ Further analyses
 
 Brine fronts, topology, and the remaining exports.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 69 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 83 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. _capi-seams_brine_analyse:
 
@@ -42,11 +42,11 @@ Planar ice/brine front from an ice assignment.
 ``out``
     Receives a new handle. On failure \*out is NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
 ice[i] is non-zero when atom i is ice. water_type 0 keeps every atom whose type is not ion_type. ion_type 0 means the frame has no ions. n_bins 0 selects 20 bins. axis is 0, 1, or 2. The ice fraction cut is 0.5, and the bulk ice and liquid cuts are 0.85 and 0.15.
 
-Ownership: the caller frees \*out with seams_brine_destroy(). Thread safety: exclusive use of sys.
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller frees \*out with seams_brine_destroy(). @par Thread safety Exclusive use of sys. @par Example @code seams_brine \*front = NULL; if (seams_brine_analyse(sys, ice, n, 1, 2, 0, 2, &front) == SEAMS_OK) { seams_brine_destroy(front); } @endcode
 
 .. _capi-seams_brine_destroy:
 
@@ -61,9 +61,9 @@ seams_brine_destroy
 Free a brine-front handle.
 
 ``front``
-    Handle from seams_brine_analyse(), or NULL.
+    Handle from seams_brine_analyse(), or NULL. NULL is ignored.
 
-Thread safety: the caller must not use front after this returns.
+@par Ownership Releases the handle and its profile. @par Thread safety The caller must not use front after this returns. @par Example @code seams_brine_destroy(front); @endcode
 
 .. _capi-seams_brine_fronts:
 
@@ -92,9 +92,11 @@ The two planar crossings of the ice slab.
 ``found``
     Receives 1 when both crossings exist, otherwise 0, or NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL. At least one output pointer must be non-NULL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or every output pointer is NULL.
 
-Lengths are Angstrom, in the frame's cell. Thread safety: exclusive use of front.
+Lengths are Angstrom, in the frame's cell.
+
+@par Ownership The caller owns front; the call borrows it. z_enter, z_exit, thickness and found are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. @par Example @code double thick = 0; int found = 0; seams_brine_fronts(front, NULL, NULL, &thick, &found); @endcode
 
 .. _capi-seams_brine_rejection:
 
@@ -123,9 +125,11 @@ Molal rejection coefficient k = c_ice / c_liquid.
 ``defined``
     Receives 1 when the liquid bulk contains salt or the ice bulk does not, otherwise 0, or NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL. At least one output pointer must be non-NULL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or every output pointer is NULL.
 
-Molality is formula units per kilogram of water. Thread safety: exclusive use of front.
+Molality is formula units per kilogram of water.
+
+@par Ownership The caller owns front; the call borrows it. c_ice, c_liquid, k and defined are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. @par Example @code double k = 0; int defined = 0; seams_brine_rejection(front, NULL, NULL, &k, &defined); @endcode
 
 .. _capi-seams_brine_profile:
 
@@ -157,9 +161,11 @@ Concentration profile along the front axis.
 ``n_out``
     Receives the bin count.
 
-Returns: SEAMS_OK when every non-NULL column was filled, or when every column pointer was NULL and n_out was written. SEAMS_ERR_RANGE when a non-NULL column is short. SEAMS_ERR_NULL when front or n_out is NULL.
+Returns: ::SEAMS_OK when every non-NULL column was filled, or when every column pointer was NULL and n_out was written. ::SEAMS_ERR_RANGE when a non-NULL column is short. ::SEAMS_ERR_NULL when front or n_out is NULL.
 
-z_mid is Angstrom. molality is mol/kg. ice_fraction is dimensionless. Ownership: the caller owns the columns. Thread safety: exclusive use of front.
+z_mid is Angstrom. molality is mol/kg. ice_fraction is dimensionless.
+
+@par Ownership The caller owns the columns. @par Thread safety Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. @par Example @code size_t bins = 0; seams_brine_profile(front, NULL, NULL, NULL, 0, &bins); @endcode
 
 .. _capi-seams_brine_pockets:
 
@@ -182,9 +188,9 @@ Brine pockets trapped in the ice, excluding the liquid reservoir.
 ``reservoir_waters``
     Receives the water count of the liquid reservoir, or NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL. At least one output pointer must be non-NULL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or both output pointers are NULL.
 
-Thread safety: exclusive use of front.
+@par Ownership The caller owns front; the call borrows it. n_pockets and reservoir_waters are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. @par Example @code int pockets = 0; seams_brine_pockets(front, &pockets, NULL); @endcode
 
 .. _capi-seams_rdf:
 
@@ -198,11 +204,32 @@ seams_rdf
 
 Partial radial distribution.
 
+``sys``
+    Frame handle.
+
+``rmax``
+    Positive finite outer radius, Angstrom.
+
 ``bins``
     Bin count. Zero selects about rmax / 0.1.
 
-``r,``
-    g, count Caller columns, or NULL to query.
+``type_i``
+    First species. Zero and negative keep every atom of a single-species frame, or every atom as one species otherwise.
+
+``type_j``
+    Second species. Zero and negative reuse the type_i species.
+
+``r``
+    Bin centres, or NULL to query.
+
+``g``
+    g(r) per bin, or NULL to query.
+
+``count``
+    Pair count per bin, or NULL to query.
+
+``cap``
+    Capacity of each non-NULL column.
 
 ``n_out``
     Receives the bin count.
@@ -210,7 +237,11 @@ Partial radial distribution.
 ``volume``
     Receives the cell volume, or NULL.
 
-r is Angstrom. g is dimensionless. volume is cubic Angstrom. Thread safety: exclusive use of sys.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+r is Angstrom. g is dimensionless. volume is cubic Angstrom.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns the columns. @par Thread safety Exclusive use of sys. @par Example @code size_t bins = 0; seams_rdf(sys, 8.0, 80, 0, 0, NULL, NULL, NULL, 0, &bins, NULL); @endcode
 
 .. _capi-seams_running_cn:
 
@@ -224,7 +255,36 @@ seams_running_cn
 
 Running coordination number along the partial RDF.
 
-Thread safety: exclusive use of sys.
+``sys``
+    Frame handle.
+
+``rmax``
+    Positive finite outer radius, Angstrom.
+
+``bins``
+    Bin count. Zero selects about rmax / 0.1.
+
+``type_i``
+    Central species, as in seams_rdf().
+
+``type_j``
+    Counted species, as in seams_rdf().
+
+``r``
+    Bin centres, Angstrom, or NULL to query.
+
+``cn``
+    Running coordination number, or NULL to query.
+
+``cap``
+    Capacity of each non-NULL column.
+
+``n_out``
+    Receives the bin count.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns the columns. @par Thread safety Exclusive use of sys. @par Example @code double r[80], cn[80]; size_t bins = 0; seams_running_cn(sys, 8.0, 80, 0, 0, r, cn, 80, &bins); @endcode
 
 .. _capi-seams_coordination:
 
@@ -238,7 +298,27 @@ seams_coordination
 
 Coordination number integrated to rmax.
 
-Thread safety: exclusive use of sys.
+``sys``
+    Frame handle.
+
+``rmax``
+    Positive finite outer radius, Angstrom.
+
+``bins``
+    Bin count. Zero selects about rmax / 0.1.
+
+``type_i``
+    Central species, as in seams_rdf().
+
+``type_j``
+    Counted species, as in seams_rdf().
+
+``cn``
+    Receives the coordination number.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. cn is caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code double cn = 0; seams_coordination(sys, 3.5, 0, 1, 1, &cn); @endcode
 
 .. _capi-seams_hbonds:
 
@@ -251,6 +331,12 @@ seams_hbonds
    seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type, int hydrogen_type, double dist_cutoff, double angle_cutoff, int *n_bonds)
 
 Hydrogen-bond count on one frame.
+
+``sys``
+    Frame handle.
+
+``cutoff``
+    Positive finite donor-acceptor cutoff, Angstrom.
 
 ``oxygen_type``
     Heavy-atom species. Zero keeps every atom that is not hydrogen_type.
@@ -267,7 +353,9 @@ Hydrogen-bond count on one frame.
 ``n_bonds``
     Receives the number of hydrogen bonds.
 
-Thread safety: exclusive use of sys.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. n_bonds is caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code int n_bonds = 0; seams_hbonds(sys, 3.5, 1, 2, 2.4, 30.0, &n_bonds); @endcode
 
 .. _capi-seams_density_axis:
 
@@ -281,13 +369,35 @@ seams_density_axis
 
 Number density along one cell axis.
 
+``sys``
+    Frame handle.
+
+``type``
+    Species filter. Zero keeps every atom.
+
 ``bins``
     Bin count. Zero selects about one bin per 0.1 Angstrom.
 
 ``axis``
     0, 1, or 2.
 
-z is Angstrom. rho is number density. Thread safety: exclusive use of sys.
+``z``
+    Bin centres, or NULL to query.
+
+``rho``
+    Density per bin, or NULL to query.
+
+``cap``
+    Capacity of each non-NULL column.
+
+``n_out``
+    Receives the bin count.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+z is Angstrom. rho is number density, atoms per cubic Angstrom.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns the columns. @par Thread safety Exclusive use of sys. @par Example @code double z[50], rho[50]; size_t bins = 0; seams_density_axis(sys, 0, 50, 2, z, rho, 50, &bins); @endcode
 
 .. _capi-seams_fingerprint:
 
@@ -301,6 +411,21 @@ seams_fingerprint
 
 Topological fingerprint of the bonded graph.
 
+``sys``
+    Frame handle.
+
+``cutoff``
+    Positive finite cutoff, Angstrom.
+
+``type``
+    Species filter.
+
+``k``
+    Neighbour count for the mutual graph. Zero selects 4.
+
+``graph``
+    ::SEAMS_GRAPH_CUTOFF or ::SEAMS_GRAPH_MUTUAL.
+
 ``hops``
     Neighbourhood depth. Zero selects 2.
 
@@ -308,9 +433,11 @@ Topological fingerprint of the bonded graph.
     Non-zero colours vertices by LAMMPS type.
 
 ``out``
-    Receives a seams_topo. Free it with seams_fingerprint_destroy().
+    Receives a ::seams_topo. On failure \*out is NULL.
 
-Thread safety: exclusive use of sys.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller frees \*out with seams_fingerprint_destroy(). @par Thread safety Exclusive use of sys. @par Example @code seams_topo \*fp = NULL; seams_fingerprint(sys, 3.5, 0, 4, SEAMS_GRAPH_CUTOFF, 2, 0, &fp); seams_fingerprint_destroy(fp); @endcode
 
 .. _capi-seams_fingerprint_destroy:
 
@@ -322,7 +449,12 @@ seams_fingerprint_destroy
 
    void seams_fingerprint_destroy(seams_topo *fp)
 
-@brief Free a fingerprint. NULL is ignored.
+Free a fingerprint.
+
+``fp``
+    Handle from seams_fingerprint(), or NULL. NULL is ignored.
+
+@par Ownership Releases the handle and its key strings. @par Thread safety The caller must not use fp after this returns. @par Example @code seams_fingerprint_destroy(fp); @endcode
 
 .. _capi-seams_fingerprint_key:
 
@@ -334,7 +466,23 @@ seams_fingerprint_key
 
    seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, size_t *n_out)
 
-Frame key text. A null buffer queries \*n_out, the length without the terminating NUL. A short buffer returns SEAMS_ERR_RANGE.
+Frame key text.
+
+``fp``
+    Fingerprint handle.
+
+``buf``
+    Caller buffer of cap bytes, or NULL to query.
+
+``cap``
+    Capacity of buf, including the terminating NUL.
+
+``n_out``
+    Receives the key length without the terminating NUL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE when buf is short.
+
+@par Ownership The caller owns buf. The copy is NUL-terminated. @par Thread safety Read-only: may run alongside other const calls on fp, and not alongside a non-const call on fp. @par Example @code size_t len = 0; seams_fingerprint_key(fp, NULL, 0, &len); char \*key = malloc(len + 1); seams_fingerprint_key(fp, key, len + 1, &len); @endcode
 
 .. _capi-seams_fingerprint_atom:
 
@@ -346,7 +494,26 @@ seams_fingerprint_atom
 
    seams_status seams_fingerprint_atom(const seams_topo *fp, int index, char *buf, size_t cap, size_t *n_out)
 
-@brief Local key of one atom. Same buffer rule as seams_fingerprint_key().
+Local key of one atom. Same buffer rule as seams_fingerprint_key().
+
+``fp``
+    Fingerprint handle.
+
+``index``
+    Atom index in the frame.
+
+``buf``
+    Caller buffer of cap bytes, or NULL to query.
+
+``cap``
+    Capacity of buf, including the terminating NUL.
+
+``n_out``
+    Receives the key length without the terminating NUL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE for a bad index or a short buffer.
+
+@par Ownership The caller owns buf. @par Thread safety Read-only: may run alongside other const calls on fp, and not alongside a non-const call on fp. @par Example @code char key[256]; size_t len = 0; seams_fingerprint_atom(fp, 0, key, sizeof key, &len); @endcode
 
 .. _capi-seams_fingerprint_rings:
 
@@ -358,7 +525,20 @@ seams_fingerprint_rings
 
    seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts, size_t counts_len)
 
-@brief Primitive-ring census stored on the fingerprint. counts[k] is size k.
+Primitive-ring census stored on the fingerprint.
+
+``fp``
+    Fingerprint handle.
+
+``counts``
+    Caller buffer. counts[k] receives the number of rings of size k. Sizes past the buffer are dropped.
+
+``counts_len``
+    Length of counts. Must be positive.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE when counts_len is 0.
+
+@par Ownership The caller owns counts. @par Thread safety Read-only: may run alongside other const calls on fp, and not alongside a non-const call on fp. @par Example @code int census[13]; seams_fingerprint_rings(fp, census, 13); @endcode
 
 .. _capi-seams_contact_pairs:
 
@@ -372,10 +552,26 @@ seams_contact_pairs
 
 Mutual nearest unlike contacts of a site table.
 
-``site_spec``
-    Text such as "1=cationHead,2=anion".
+``sys``
+    Frame handle.
 
-Cation and anion counts are molecules in the ion cloud. Thread safety: exclusive use of sys.
+``site_spec``
+    Text such as "1=cationHead,2=anion". Must be non-NULL.
+
+``n_pairs``
+    Receives the contact count, or NULL.
+
+``n_cation``
+    Receives the cation molecule count, or NULL.
+
+``n_anion``
+    Receives the anion molecule count, or NULL. At least one of the three outputs must be non-NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+Cation and anion counts are molecules in the ion cloud.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. site_spec is read during the call only. n_pairs, n_cation and n_anion are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code size_t pairs = 0; seams_contact_pairs(sys, "1=cationHead,2=anion", &pairs, NULL, NULL); @endcode
 
 .. _capi-seams_domains:
 
@@ -389,10 +585,30 @@ seams_domains
 
 Largest domain of a polar or apolar site subset.
 
+``sys``
+    Frame handle.
+
+``cutoff``
+    Positive finite cluster cutoff, Angstrom.
+
+``site_spec``
+    Site table text. Must be non-NULL.
+
 ``subset``
     0 is apolar, 1 is polar.
 
-Thread safety: exclusive use of sys.
+``n_subset``
+    Receives the number of sites in the subset, or NULL.
+
+``largest``
+    Receives the size of the largest domain, or NULL.
+
+``percolation``
+    Receives the largest domain size over the subset size, or NULL. At least one output must be non-NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. site_spec is read during the call only. n_subset, largest and percolation are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code int largest = 0; seams_domains(sys, 5.0, "1=cationHead,2=anion,3=tail", 0, NULL, &largest, NULL); @endcode
 
 .. _capi-seams_site_table:
 
@@ -406,8 +622,19 @@ seams_site_table
 
 Per-atom site kind from a site-table spec.
 
-``kinds``
-    One seams_site_kind per atom.
+``sys``
+    Frame handle.
 
-Thread safety: exclusive use of sys.
+``spec``
+    Site table text such as "1=cationHead,2=anion". Must be non-NULL.
+
+``kinds``
+    One ::seams_site_kind per atom.
+
+``len``
+    Length of kinds. Must be at least the frame count.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns kinds. @par Thread safety Exclusive use of sys. @par Example @code seams_site_table(sys, "1=cationHead,2=anion", kinds, n); @endcode
 

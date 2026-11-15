@@ -186,23 +186,39 @@ configure_file(
   install: true,
   install_dir: get_option('includedir'))
 
+_seams_map = files('libseams.map')
+_seams_api_link = _lib_link_args
+_seams_api_link_depends = []
+if host_machine.system() not in ['darwin', 'windows'] and \
+   meson.get_compiler('cpp').has_link_argument(
+     '-Wl,--version-script=' + (meson.current_source_dir() / 'libseams.map'))
+  _seams_api_link += ['-Wl,--version-script=' + (meson.current_source_dir() / 'libseams.map')]
+  _seams_api_link_depends += _seams_map
+endif
+_seams_api_args = _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden',
+                           '-DSEAMS_BUILDING', '-I' + meson.current_build_dir()]
 seams_api_lib = shared_library(
   'seams',
   'seams_api.cpp',
   dependencies: yds_dep,
   include_directories: include_directories('../include'),
-  cpp_args: _args + ['-fvisibility=hidden',
-                     '-I' + meson.current_build_dir()],
-  link_args: _lib_link_args,
+  cpp_args: _seams_api_args,
+  link_args: _seams_api_link,
+  link_depends: _seams_api_link_depends,
   install: true)
 
-install_headers(files('../include/seams.h'))
+_abidiff = find_program('abidiff', required: false)
+if _abidiff.found()
+  subdir('abi')
+endif
+
+install_headers(files('../include/seams.h', '../include/seams.hpp'))
 
 pkgconfig.generate(
   seams_api_lib,
   name: 'seams',
   filebase: 'seams',
-  description: 'd-SEAMS stable C API',
+  description: 'd-SEAMS stable C API and the seams.hpp C++ wrapper',
   version: meson.project_version(),
   extra_cflags: _public_defines)
 
@@ -264,6 +280,19 @@ docs_api_cpp = executable(
   cpp_args: ['-I' + meson.current_build_dir()],
   link_args: ['-lm'])
 test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
+
+docs_api_hpp = executable(
+  'docs_api_hpp',
+  files('../docs/examples/cpp_api.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.current_build_dir()])
+test(
+  'docs_api_hpp',
+  docs_api_hpp,
+  args: [meson.project_source_root()],
+  suite: 'docs',
+  timeout: 120)
 
 docs_quickstart_c = executable(
   'docs_quickstart_c',

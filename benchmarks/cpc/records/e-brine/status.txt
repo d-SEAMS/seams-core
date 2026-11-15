@@ -1,0 +1,3 @@
+The atomic brine trajectories are not in dseams2_repro.
+summary.tsv is brine_summary.py reread of the stored BRINE columns.
+It is not a new engine classification. Reference conditions name GenIce Ih TIP4P/2005, 1152 molecules, engine v2.9.2.

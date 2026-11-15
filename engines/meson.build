@@ -136,7 +136,9 @@ endif
 gromacs_opt = get_option('with_gromacs')
 if gromacs_opt.allowed()
   gromacs_rpath = ''
-  gromacs_dep = dependency('libgromacs', required: false)
+  # System include, so the -Werror conversions of a clang build stop at
+  # this project's code and not in the GROMACS headers.
+  gromacs_dep = dependency('libgromacs', required: false, include_type: 'system')
   if gromacs_dep.found()
     gromacs_rpath = gromacs_dep.get_variable('libdir', default_value: '')
   endif
@@ -241,11 +243,20 @@ if openmm_opt.allowed()
     error('with_openmm is enabled but libOpenMM was not found')
   endif
   if openmm_dep.found()
-    # The test runs the driver without LD_LIBRARY_PATH.
+    # The test runs the driver without LD_LIBRARY_PATH. A library found on
+    # LIBRARY_PATH links as -lOpenMM with no runpath, so ask the compiler
+    # where it is, then the usual prefixes.
     openmm_rpath = ''
     if openmm_dep.type_name() == 'pkgconfig'
       openmm_rpath = openmm_dep.get_variable('libdir', default_value: '')
+    elif openmm_dep.type_name() == 'library'
+      _openmm_so = run_command(cppc.cmd_array() + ['-print-file-name=libOpenMM.so'],
+                               check: false).stdout().strip()
+      if fs.is_absolute(_openmm_so) and fs.is_file(_openmm_so)
+        openmm_rpath = fs.parent(_openmm_so)
+      endif
     endif
+    # clang links from LIBRARY_PATH but -print-file-name does not search it.
     if openmm_rpath == ''
       openmm_lib_py = find_program('python3', required: false)
       if openmm_lib_py.found()

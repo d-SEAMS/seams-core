@@ -357,6 +357,7 @@ framework.
    explanation/trace-threads
    explanation/performance
    explanation/performance-overview
+   explanation/binding-overhead
    explanation/performance-range
    paper/index
    paper/versions

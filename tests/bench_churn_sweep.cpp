@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
   b = sinp::readLammpsTrjO(traj, frameB, b, atomType);
   std::unordered_map<int, int> inB;
   for (int i = 0; i < b.nop; i++) {
-    inB[b.pts[i].atomID] = i;
+    inB[b.pts[static_cast<std::size_t>(i)].atomID] = i;
   }
   const Rings idxA = graphOf(a, cutoff, atomType);
   const Rings sixA = sixOf(primitive::ringNetwork(idxA, 6));
@@ -116,19 +116,20 @@ int main(int argc, char **argv) {
   for (const double radius : radii) {
     Cloud c = a;
     int moved = 0;
-    for (int i = 0; i < c.nop; i++) {
+    for (std::size_t i = 0; i < static_cast<std::size_t>(c.nop); i++) {
       double d2 = 0.0;
       const double p[3] = {c.pts[i].x, c.pts[i].y, c.pts[i].z};
-      for (int k = 0; k < 3; k++) {
+      for (std::size_t k = 0; k < 3; k++) {
         double d = p[k] - (c.boxLow[k] + 0.5 * c.box[k]);
         d -= c.box[k] * std::round(d / c.box[k]);
         d2 += d * d;
       }
       const auto it = inB.find(c.pts[i].atomID);
       if (d2 < radius * radius && it != inB.end()) {
-        c.pts[i].x = b.pts[it->second].x;
-        c.pts[i].y = b.pts[it->second].y;
-        c.pts[i].z = b.pts[it->second].z;
+        const auto j = static_cast<std::size_t>(it->second);
+        c.pts[i].x = b.pts[j].x;
+        c.pts[i].y = b.pts[j].y;
+        c.pts[i].z = b.pts[j].z;
         ++moved;
       }
     }
