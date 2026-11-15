@@ -11,6 +11,16 @@
 // parameter alone. DUMP=file appends one LAMMPS dump frame per call with
 // the coordinates handed to d-SEAMS, in angstrom, and the per-atom values.
 
+// PLUMED is included from a distinct -I so it wins over CPATH. That also
+// puts its headers under this project's -Werror set. The diagnostics are
+// restored before any of this file's own code.
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wshorten-64-to-32"
+#pragma clang diagnostic ignored "-Wunknown-attributes"
+#endif
 #include "plumed/config/version.h"
 #include "plumed/core/ActionAtomistic.h"
 #include "plumed/core/ActionRegister.h"
@@ -19,6 +29,9 @@
 #include "plumed/tools/Units.h"
 #if PLUMED_VERSION_MAJOR == 2 && PLUMED_VERSION_MINOR < 10
 #include "plumed/core/Atoms.h"
+#endif
+#if defined(__clang__)
+#pragma clang diagnostic pop
 #endif
 #include "seams.h"
 #include "../triclinic_box.hpp"

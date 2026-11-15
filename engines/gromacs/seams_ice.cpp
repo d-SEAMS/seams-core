@@ -128,8 +128,10 @@ class SeamsIce : public gmx::TrajectoryAnalysisModule {
                  xlo, xhi, xy, ylo, yhi, xz, box9[2], box9[2] + box9[5], yz);
     std::fprintf(fp, "ITEM: ATOMS id type x y z label\n");
     for (int i = 0; i < n; ++i) {
+      const auto at = static_cast<std::size_t>(i);
+      const auto base = at * 3u;
       std::fprintf(fp, "%d 1 %.17g %.17g %.17g %d\n", sel.position(i).atomIndices()[0] + 1,
-                   xyz[3 * i], xyz[3 * i + 1], xyz[3 * i + 2], labels[i]);
+                   xyz[base], xyz[base + 1u], xyz[base + 2u], labels[at]);
     }
     std::fclose(fp);
   }
