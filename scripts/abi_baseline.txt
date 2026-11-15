@@ -116,6 +116,7 @@ T seams_frame_select
 T seams_frame_set_positions
 T seams_frame_signature
 T seams_frame_signature_edge
+T seams_frame_signature_vertices
 T seams_frame_steinhardt
 T seams_frame_steinhardt_graph
 T seams_frame_symmetry
