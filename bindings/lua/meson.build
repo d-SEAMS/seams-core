@@ -100,8 +100,14 @@ version_inc = '-I' + meson.project_build_root() / 'src'
 lua54_cargs = [version_inc]
 # Debian's lua5.4/luaconf.h includes a multiarch header that lives beside
 # the compiler's system includes. A non-distro compiler does not search it.
-deb_arch = run_command('dpkg-architecture', '-qDEB_HOST_MULTIARCH', check: false)
-if deb_arch.returncode() == 0
+# Other distributions have no dpkg-architecture and need no extra path.
+dpkg_arch = find_program('dpkg-architecture', required: false)
+deb_ok = false
+if dpkg_arch.found()
+  deb_arch = run_command(dpkg_arch, '-qDEB_HOST_MULTIARCH', check: false)
+  deb_ok = deb_arch.returncode() == 0
+endif
+if deb_ok
   deb_inc = '/usr/include/' + deb_arch.stdout().strip()
   deb_header = deb_inc / 'lua5.4-deb-multiarch.h'
   # A private directory, so the multiarch -I does not hide the compiler's libc.
