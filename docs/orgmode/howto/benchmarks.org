@@ -37,7 +37,7 @@ Cutoff 3.5 Å. The neighbour build is inside every sample.
 Two warm-ups, then ten samples.
 The median is the linear percentile at one half, position =0.5 * (n - 1)=.
 The interquartile range is the same estimator at three quarters minus the one at one quarter.
-=discovery/v13-session.txt= is the raw log.
+The raw session log is not stored in the tree.
 OVITO's q6 call also builds degrees 2 through 5, because =max_l= is the highest degree.
 pyscal3 has no CHILL+ classifier.
 The published CHILL+ thresholds are unchanged.
@@ -65,7 +65,7 @@ One q6 sample in the same session reached 462.98 ms and faulted no pages.
 Sixty further q6 calls, pinned the same way, stayed between 299.9 and 324.6 ms.
 Each of those ran on the CPU.
 The scheduler delay on every one of them was under 0.05 ms.
-=discovery/v13-q6-sched.txt= is that probe.
+That probe is not stored in the tree.
 The 523.6 ms point did not come back, and the one q6 outlier is not a page fault, not a fresh allocation, and not a repeatable first touch.
 
 The one-thread q4-bar median here is 368.01 (interquartile range 3.13, samples 356.35–387.92).
@@ -88,7 +88,7 @@ OVITO 3.17.2 builds only up to the requested degree here (~max_l~ is that degree
 freud 3.6.1 stores \(q_l\) as float32.
 The largest per-atom gap to OVITO on these frames is \(7.8 \times 10^{-16}\).
 The largest per-atom gap to freud on the ice frames is \(1.6 \times 10^{-7}\).
-=discovery/ql-integrate.txt= is the same table.
+That comparison is not stored as a session log.
 
 Medians, in milliseconds:
 

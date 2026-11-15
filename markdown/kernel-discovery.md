@@ -123,7 +123,7 @@ checks the same agreement to 1e-12, including a cloud seeded with
 Ideal ice Ic, 110592 molecules, cutoff 3.5 A, every atom cubic
 (count 110592) in seams, mdapy 2.0.0 and OVITO 3.17.2. One warm-up,
 then eight samples. Taskset on cpus 0-7, no `OMP_PROC_BIND`. The raw
-transcript is `discovery/chillplus-session.txt`. An earlier OVITO
+transcript is not stored in the tree. An earlier OVITO
 attempt returned a cached pipeline (samples near 0.01 ms) and is not
 used; the samples below are fresh pipelines, timing only `compute`.
 
@@ -221,7 +221,7 @@ A reused q_lm row was also adding the previous frame onto the next, so
 a second call drifted off the ideal-ice value 0.509175 (l = 4) and
 0.628539 (l = 6). The row is cleared at the start of each atom. Both
 values are stable across eight samples. The raw transcript, including
-the drifted pass that was replaced, is `discovery/v3-session.txt`.
+the drifted pass that was replaced, is not stored in the tree.
 
 The figshare nucleation deposit (doi:10.6084/m9.figshare.11448702) is
 148 frames of 4096 molecules, not 13553. Timings use step 15677000 of
@@ -245,8 +245,8 @@ is inside the cutoff. q4, q6 and published CHILL+ use that list. On
 one thread and 110592 molecules the orthorhombic build is 25.12 ms.
 The same ice, deformed with the cell (xy = 4, xz = 1.5, yz = 0.8), is
 25.68 ms. A Cartesian point set dropped into that tilted cell, which
-is not the crystal of the cell, stays at 43.49 ms. Raw samples are
-`discovery/v5-session.txt`.
+is not the crystal of the cell, stays at 43.49 ms. The raw samples
+are not stored in the tree.
 
 Against OVITO 3.17.2 and mdapy 2.0.0 on that deformed crystal, one
 thread, medians in ms:
@@ -276,8 +276,7 @@ a full neighbour set leaves the counts for the thread that owns the
 cell. q4 and q6 of one atom read each neighbour's harmonic row once.
 Bonds of a tilted cell are wrapped in reduced coordinates.
 
-On the 110592-molecule triclinic crystal, eight threads, medians in ms
-(`discovery/v6-session.txt`):
+On the 110592-molecule triclinic crystal, eight threads, medians in ms:
 
 | call | seams | OVITO | mdapy |
 | --- | ---: | ---: | ---: |
@@ -300,8 +299,7 @@ One thread: 6.04 / 79.69 / 21.57, 51.62 / 734.37 / 205.83, and
 parameters. The Python wrapper is ~q4_q6_chill~ in
 =bindings/python/chill_plus.py=.
 
-One thread, 884736 molecules, cutoff 3.5
-(`discovery/v8-session.txt`). q6 samples do not overlap: seams
+One thread, 884736 molecules, cutoff 3.5. q6 samples do not overlap: seams
 416.8–424.4 ms (median 419.5), OVITO 475.5–505.5 ms (median 485.1).
 The median margin is 65.6 ms, and the slowest seams sample is 51.0 ms
 under the fastest OVITO sample. q4 medians are 391.8 ms against
@@ -319,10 +317,10 @@ nucleation trajectory (4096 molecules, figshare
 step 15677000 to 0.291 at step 15818000, and the number of molecules
 with q6-bar above 0.3 moves from 1001 to 1471. The highest mean on
 the dump is 0.293 at step 15816000, with 1517 molecules above 0.3.
-`discovery/nucleation-q6bar.txt` has one row per frame.
+The per-frame table is not stored in the tree.
 
 One thread, 884736 molecules, the q4 samples now sit clear of OVITO
-(`discovery/v9-session.txt`). seams 346.0–363.4 ms (median 356.1),
+. seams 346.0–363.4 ms (median 356.1),
 OVITO 384.5–397.6 ms (median 390.8). The slowest seams sample is
 21.1 ms under the fastest OVITO sample. Eight atoms share one
 evaluation. Their four bonds are added in SoA, and one blocked
@@ -342,7 +340,7 @@ range. mdapy is slower than OVITO at both sizes.
 
 On the 148-frame nucleation trajectory the largest cluster is the
 cutoff graph (3.5 Å) restricted to a label.
-`discovery/nucleation-clusters.txt` has one row per frame. Molecules
+The per-frame table is not stored in the tree. Molecules
 with \(\bar q_6 > 0.3\) form a component that grows from 302 to 1248,
 with 110–190 such clusters still present, so it is not one nucleus.
 The crystalline CHILL+ cluster (cubic or hexagonal) grows from 59 to
@@ -373,7 +371,7 @@ and \(l = 6\). On ideal ice Ic every molecule has
 \(\hat w_4 = -0.15931737\), \(\hat w_6 = 0.01316060\).
 
 Medians, milliseconds, eight samples after two warm-ups, neighbour
-build inside the call (`discovery/v10-session.txt`). Eight cores.
+build inside the call. Eight cores.
 OVITO 3.17.2 writes averaged q and does not write w. mdapy 2.0.0 is
 the same. pyscal3 4.1.0 writes both. Columns are seams / OVITO /
 mdapy / pyscal3, and a dash where that code has no w.
@@ -416,8 +414,7 @@ Eight threads, 884736 molecules:
 
 The v9 eight-thread plain q4 median at 884736 molecules was 73.8 ms.
 The v10 averaged q4 median was 165 ms. Those two numbers are not noise
-and they are not a change of thread count. In one later session
-(`discovery/v11-session.txt`) the same ice, the same cutoff and
+and they are not a change of thread count. In one later session the same ice, the same cutoff and
 `max_l = 4` were timed both ways. With `OVITO_THREAD_COUNT` 8 the
 process held 17 threads and was pinned to cpus 0–7 for both calls.
 Plain q4 was 77.2–90.3 ms (median 82.0). Averaged q4 was 172.7–212.2 ms
@@ -439,8 +436,7 @@ values above, while the averages move to \(\bar q_4 = 0.36925759\)
 and \(\bar q_6 = 0.56765069\).
 
 The single-trajectory inflections 739 and 186 are not two readings of
-one nucleus. Twenty seeded mW quenches separate them
-(`discovery/v11-session.txt`). LAMMPS (22 Jul 2025) with the
+one nucleus. Twenty seeded mW quenches separate them. LAMMPS (22 Jul 2025) with the
 Molinero and Moore mW Stillinger–Weber parameters, 8 MPI ranks, 4096
 molecules in a 49.606 Å cube. An ice Ic core was held fixed while the
 rest of a perfect crystal melted at 480 K. The released core is 84
@@ -477,12 +473,11 @@ sheared 884736 cell is where the two walks separate: 295.0 ms against
 242.8 ms on one thread, and 42.5 ms against 33.5 ms on eight. The
 orthorhombic cell stays within a millisecond at 884736 (230.1 ms
 against 231.2 ms on one thread, 31.4 ms against 32.2 ms on eight).
-`discovery/v12-walk.txt` is that comparison. One warmup, then the mean
+That comparison is not stored in the tree. One warmup, then the mean
 of four calls.
 
 q4, q6, q4-bar and the published CHILL+ were timed again in one
-session on the same eight cores (`discovery/v12-session.txt`,
-`nproc` 8, one thread per core, cpus 0–7). Two warm-ups, then eight
+session on the same eight cores (`nproc` 8, one thread per core, cpus 0–7). Two warm-ups, then eight
 samples. The median is the mean of the two central samples. The
 neighbour build is inside every sample. `merge` is this tree,
 `kd` is `e943930a`, `rel` is `245190a0`. All three call
@@ -558,7 +553,7 @@ completes without warnings.
 
 The 523.6 ms one-thread q4 sample was one of eight. A rerun of q4, q6,
 q4-bar and CHILL+ at 884736 molecules, one and eight threads, ten
-samples after two warm-ups, is `discovery/v13-session.txt`. Eight
+samples after two warm-ups, is not stored in the tree. Eight
 cores, one thread per core, cpus 0–7. The median is the linear
 percentile at one half. The interquartile range is the three-quarter
 percentile minus the one-quarter percentile.
@@ -569,7 +564,7 @@ q4 call faulted none. The ten steady samples are min 290.36, median
 static, so that cost is the first call of a degree and the warm-ups
 drop it. The 523.6 ms sample did not recur. One q6 sample in the same
 session reached 462.98 ms with no new minor faults. Sixty further q6
-calls (`discovery/v13-q6-sched.txt`), pinned the same way, stayed
+calls, pinned the same way, stayed
 between 299.9 and 324.6 ms, on the CPU, with scheduler delay under
 0.05 ms. That outlier is not a page fault and not an allocator miss.
 
