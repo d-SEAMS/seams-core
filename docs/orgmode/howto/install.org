@@ -1,71 +1,29 @@
 #+TITLE: Install the engine
 #+OPTIONS: toc:nil num:nil
 
-Get a ~seams~ binary, ~libyodaLib~, and ~libseams~. The nanobind
-module is built in this repository. ~-Dwith_lua=auto~ builds
-~require("dseams")~ when Lua 5.4 or LuaJIT is present.
-This page is the 2.14.0 install: pip or conda-forge for the Python
-module and the library, the conda-forge toolchain or a plain source
-build for the engine, and the native packages of the other fronts.
-
-* Python from PyPI
-
-#+begin_src bash
-python -m pip install 'pydseamslib==2.14.0'
-python -c 'import dseams; print(dseams.__version__)'
-#+end_src
-
-The distribution is ~pydseamslib~; the import is ~dseams~, the same
-module the source build below makes from the in-tree
-~bindings/python~. 2.14.0
-replaces the 2.11 wheels in place: ~pip install -U pydseamslib~
-upgrades them, and ~import pydseams~ and ~import pydseamslib~ still
-resolve to the same module. The 2.11 extension names
-~pydseams.yoda~ and ~cyoda~ are gone.
-
-Wheels exist for Linux (manylinux_2_28 and musllinux_1_2, x86_64 and
-aarch64) and macOS 14 or later (arm64 and x86_64). CPython 3.10 and
-3.11 have their own wheels; one ~cp312-abi3~ wheel serves 3.12 and
-later. Windows has no wheel: the engine needs GCC or Clang.
-
-A wheel is the C++ engine with OpenMP (Linux) and vesin, plus
-~libseams_lang~ for ~dseams.cages~, ~dseams.symmetry~ and the
-~Frame~ helpers. The Rust backends (linkcell, minimage, readcon-core,
-readcon-db), chemfiles readers, BLAS and GPU paths are left out so the
-sdist builds with no network and no Rust toolchain. The x86_64 shell
-classifier needs AVX2.
-
-The sdist builds anywhere with a C++20 compiler:
-
-#+begin_src bash
-python -m pip install --no-binary pydseamslib pydseamslib
-#+end_src
-
-It carries Eigen 3.4.0, vesin, nanobind and robin-map, so the build
-fetches nothing beyond the Python build requirements (~meson-python~,
-~meson~, ~ninja~).
+Get a ~seams~ binary, ~libyodaLib~, ~libseams~, and ~libseams_lang~.
+This page is the 2.14.0 install of the engine: conda-forge, a plain
+source build, pixi, or the Nix flake. The language bindings are
+separate packages built from their own repositories against the same
+engine version; the last section lists them.
 
 * conda-forge
 
 #+begin_src bash
-conda install -c conda-forge 'pydseamslib=2.14.0'   # Python, pulls libseams
-conda install -c conda-forge 'libseams=2.14.0'      # library, headers, seams CLI
+conda install -c conda-forge 'libseams=2.14.0'
 #+end_src
 
 ~libseams~ is the engine: ~libyodaLib~, ~libseams~ (~seams.h~),
 ~libseams_lang~, the ~seams~ CLI, and the ~seams~ and ~seams-core~
-pkg-config and CMake files. ~pydseamslib~ is the ~dseams~ module
-linked against that library. The recipe is ~recipe/recipe.yaml~
-(rattler-build). It builds with ~-Dsystem_libseams=true~ for the
-Python output so the module does not carry a second engine. Until a
-conda-forge chemfiles passes the mmCIF probe below, the conda build
-leaves chemfiles off.
+pkg-config and CMake files. The recipe is ~recipe/recipe.yaml~
+(rattler-build). Until a conda-forge chemfiles passes the mmCIF probe
+below, the conda build leaves chemfiles off.
 
 conda-forge also carries the toolchain for a source build:
 
 #+begin_src bash
-conda install -c conda-forge meson ninja pkg-config eigen python numpy
-meson setup build -Dwith_python=true
+conda install -c conda-forge meson ninja pkg-config eigen
+meson setup build
 meson compile -C build
 #+end_src
 
@@ -75,16 +33,14 @@ meson compile -C build
 meson setup build && meson compile -C build
 #+end_src
 
-~-Dwith_python=true~ is the Meson default. The same two lines are the
-install when the compilers are already on ~PATH~. A full checkout,
-install and Python module:
+The same two lines are the install when the compilers are already on
+~PATH~. A full checkout and install:
 
 #+begin_src bash
 git clone https://github.com/d-SEAMS/seams-core && cd seams-core
 meson setup bbdir -Dwith_tests=false
 meson compile -C bbdir
 meson install -C bbdir           # --prefix sets the destination
-python -m pip install .          # the dseams module, as on PyPI
 #+end_src
 
 ~meson setup~ needs Eigen 3.4 or a network connection to fetch it, and
@@ -94,118 +50,9 @@ only package builders use:
 
 | Option                    | Effect                                                         |
 |---------------------------+----------------------------------------------------------------|
-| ~-Dsystem_libseams=true~  | Build only the ~dseams~ module against an installed ~libseams~ |
 | ~-Dwith_blas=disabled~    | Do not link BLAS or LAPACK; nothing calls them yet             |
 | ~-Dwith_readcon=disabled~ | Leave out the readcon-core and readcon-db ~.con~ readers       |
 | ~--wrap-mode=nodownload~  | Fail instead of fetching a subproject                          |
-
-* Rust from crates.io
-
-#+begin_src toml
-[dependencies]
-dseams = "2.14.0"
-#+end_src
-
-The crates are ~dseams-sys~ (raw FFI) and ~dseams~ (the safe wrapper),
-because ~seams~ on crates.io is an unrelated project. The library
-names stay ~seams_sys~ and ~seams~, so ~use seams::System~ is
-unchanged. By default ~dseams-sys~ compiles a bundled copy of the C
-API and Eigen with the ~cc~ crate (x86_64, a C++20 compiler with
-OpenMP); that copy reads LAMMPS dumps and XYZ. The ~system~ feature
-links an installed ~libseams~ through pkg-config instead, with every
-reader it was built with. In this tree, ~SEAMS_LIB_DIR~ points both
-crates at a build:
-
-#+begin_src bash
-SEAMS_LIB_DIR="$PWD/bbdir/src" cargo test --manifest-path bindings/rust/Cargo.toml
-#+end_src
-
-* Fortran with fpm
-
-The Fortran module is the fpm package ~dseams~. It links an installed
-~libseams~:
-
-#+begin_src toml
-[dependencies]
-dseams = { git = "https://github.com/d-SEAMS/seams-core", tag = "v2.14.0" }
-#+end_src
-
-#+begin_src bash
-export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
-fpm test
-#+end_src
-
-fpm reads a git dependency's manifest from the repository root, so the
-root ~fpm.toml~ points at ~bindings/fortran~.
-~bindings/fortran/examples/downstream~ is a project with a path
-dependency on it.
-
-* Lua with LuaRocks
-
-~bindings/lua/dseams-2.14.0-1.rockspec~ compiles ~dseams_core~ against
-an installed ~libseams~ and installs ~dseams.lua~, ~yoda.lua~ and
-~dseams_fnl.fnl~ for Lua 5.1 to 5.4 and LuaJIT:
-
-#+begin_src bash
-luarocks make bindings/lua/dseams-2.14.0-1.rockspec SEAMS_DIR="$prefix" SEAMS_LIBDIR="$(pkg-config --variable=libdir seams)"
-luarocks test bindings/lua/dseams-2.14.0-1.rockspec
-#+end_src
-
-~-Dwith_lua=auto~ in the Meson build is the other route to
-~require("dseams")~.
-
-* R and Julia
-
-R and Julia install from this checkout. ~dseams~ is not on CRAN, and
-~Dseams~ and ~libseams_jll~ are not in the Julia General registry yet,
-so ~install.packages("dseams")~ and ~Pkg.add("Dseams")~ do not work.
-
-The R package compiles its own copy of the engine and needs no Meson
-build. ~configure~ runs ~tools/vendor.sh~, which copies the engine
-sources and the example data out of the checkout:
-
-#+begin_src bash
-Rscript -e 'install.packages(c("cpp11", "RcppEigen"))'
-R CMD INSTALL bindings/r/dseams
-#+end_src
-
-~R CMD build bindings/r/dseams~ writes ~dseams_2.14.0.tar.gz~, a source
-package that installs without the checkout. ~DSEAMS_ROOT~ points
-~tools/vendor.sh~ at another checkout:
-
-#+begin_src bash
-DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
-#+end_src
-
-To link a built ~libseams_lang~ instead of compiling the engine again,
-build the library first and name it:
-
-#+begin_src bash
-SEAMS_LIBDIR="$PWD/bbdir/bindings" SEAMS_INCLUDE="$PWD/bindings/cxx" R CMD INSTALL --preclean bindings/r/dseams
-#+end_src
-
-~R CMD INSTALL~ builds the directory in place, so ~--preclean~ runs
-~cleanup~ first; without it, objects left by the other mode are reused.
-
-Julia's ~bindings/julia/Dseams~ calls ~libseams_lang~ and
-~bindings/julia/Seams~ calls ~libseams~. Dseams takes its engine from
-~libseams_jll~. Until that is registered, ~dev/develop_jll.jl~ develops
-a stand-in JLL with no binaries, and the engine is a local build named
-by ~SEAMS_LANG_LIB~:
-
-#+begin_src bash
-julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
-export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so" DSEAMS_ROOT="$PWD"
-julia --project=bindings/julia/Dseams -e 'using Dseams'
-julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.test()'
-#+end_src
-
-~Dseams.set_library!~ stores the path as a preference instead.
-~DSEAMS_ROOT~ adds the tests that compare with files in the checkout.
-~packaging/yggdrasil/L/libseams~ is the recipe for ~libseams_jll~;
-~julia build_tarballs.jl --deploy=local~ builds it, and
-~develop_jll.jl~ with that path develops the result in place of the
-stand-in.
 
 * pixi
 
@@ -271,17 +118,27 @@ seams --version
 seams --features
 #+end_src
 
-The in-tree fronts are ~bindings/python~ (nanobind ~dseams._core~,
-~-Dwith_python=true~, the default), ~bindings/r/dseams~,
-~bindings/julia/Dseams~, ~bindings/fortran~, and ~bindings/rust~.
 Engine hooks follow ~-Dwith_lammps=auto~, ~-Dwith_gromacs=auto~,
-~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~.
-~-Dwith_lua=auto~ builds ~require("dseams")~ when Lua 5.4 or LuaJIT
-is present. The module calls ~seams.h~. The walk-through is
-[[file:lua.org][Lua and Fennel]].
+~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~. The LAMMPS compute and
+the PLUMED module install as in [[file:../paper/reproduce.org][Reproduce]],
+which also pins the release of the d-SEAMS 2.0 paper.
 
-* Front ends and simulation interfaces
+* Language bindings
 
-The Python and Lua front ends, the LAMMPS compute and the PLUMED
-module install as in [[file:../paper/reproduce.org][Reproduce]], which
-also pins the release of the d-SEAMS 2.0 paper.
+Each binding is its own repository and package, released with the same
+version as the engine it calls:
+
+| Language    | Install                                            | Repository |
+|-------------+----------------------------------------------------+------------|
+| Python      | ~pip install 'pydseamslib==2.14.0'~                 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
+| Lua, Fennel | LuaRocks ~dseams~                                   | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
+| R           | the ~dseams~ source package                         | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
+| Julia       | ~Dseams~, with the engine from ~libseams_jll~         | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
+| Rust        | crates ~dseams-sys~ and ~dseams~                     | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
+| Fortran     | fpm ~dseams~                                        | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
+
+Each repository's README has the full install, including linking an
+installed ~libseams~ from this page. [[file:bindings.org][Use a
+language binding]] lists what each one links, and the
+[[file:../contributing/repositories.org][repository map]] covers
+building a binding against a local engine.

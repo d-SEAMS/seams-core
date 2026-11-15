@@ -18,48 +18,25 @@ A program that already used the C++ classes keeps those classes.
 The language ABI is ~seams_lang.h~ and ~libseams_lang~. Use it when
 the program reads a trajectory path or keeps a frame across calls.
 
-* Fortran
+* Language bindings
 
-~bindings/fortran/seams.f90~ is a new module ~seams~. Compile it with
-the program and link ~libseams~. That one file compiles every module in
-~bindings/fortran/src~: ~seams~ has derived types with final procedures,
-and in ~seams_c~ every procedure is ~bind(C)~ to the symbol in ~seams.h~.
+2.14 moves every language binding out of this repository. Each one is
+its own repository and package, built against the seams-core 2.14.0 tag
+and versioned 2.14.0:
 
-* Python
+| Language | 2.13 location | 2.14 repository | Package |
+|----------+---------------+-----------------+---------|
+| Python | PydSEAMSlib (~pydseams~) and the in-tree ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
+| Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ |
+| R | none | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ |
+| Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~, over ~libseams_jll~ |
+| Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
+| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
 
-The in-tree module is ~import dseams~. ~chill_plus~ defaults to the
-published rule and the cutoff graph. ~q4q6~, ~neighbours~, and ~rings~
-read ~libseams~. ~cages~, ~signature_cages~, and ~symmetry~ need
-~libseams_lang~ on the loader path (~SEAMS_LANG_LIB~).
-PydSEAMSlib is still the separate package. A script that imported that
-package keeps doing so. A script that wants the 2.14 calls uses ~dseams~.
-
-* Julia
-
-Point ~SEAMS_LANG_LIB~ at ~libseams_lang~ and ~DSEAMS_ROOT~ at the
-checkout. ~Dseams~ now exports ~chill_plus~, ~cages~,
-~primitive_rings~, ~steinhardt~, ~signature_cages~, ~symmetry~,
-~q4_q6~, and ~jump_tau90~. ~chill_plus~ defaults ~graph~ to ~"cutoff"~.
-~Seams~ is the new thin wrapper over ~libseams~.
-~Dseams~ now depends on ~libseams_jll~, which is not in the General
-registry yet; run ~dev/develop_jll.jl~ in place of ~Pkg.instantiate()~
-before the first ~using Dseams~.
-
-* R
-
-~R CMD INSTALL bindings/r/dseams~ no longer needs ~DSEAMS_ROOT~, or
-~SEAMS_INCLUDE~ and ~SEAMS_LIBDIR~: in a checkout ~configure~ runs
-~tools/vendor.sh~ and the package compiles its own copy of the engine.
-~SEAMS_INCLUDE~ and ~SEAMS_LIBDIR~ still make it link a built
-~libseams_lang~ and find ~seams_lang.h~, and ~DSEAMS_ROOT~ still names
-the checkout. ~dseams~ is not on CRAN yet. The new calls are ~signature_cages~, ~symmetry~,
-~q4_q6~, ~jump_tau90~, and ~steinhardt~ on the cutoff shell.
-
-* Rust
-
-Set ~SEAMS_LIB_DIR~ to the directory that contains ~libseams.so~ and
-build ~bindings/rust~. ~seams::System~ is the safe wrapper.
-~seams::set_num_threads~ and ~seams::version~ match the C API.
+A Python script keeps working after ~pip install -U 'pydseamslib==2.14.0'~.
+The per-language upgrade notes (new calls, renamed options, the ~SEAMS_LANG_LIB~
+and ~SEAMS_LIB_DIR~ variables) are in each repository's changelog. Paths
+under ~bindings/~ other than =bindings/cxx= no longer exist in this tree.
 
 * Engines
 

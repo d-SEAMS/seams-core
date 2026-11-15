@@ -3,26 +3,29 @@
 
 This is the maintainer cut. ~.github/workflows/release.yml~ only
 runs ~gh release create~ when a ~v*~ tag is pushed. Versions,
-newsfragments, bindings wraps, and the Zenodo pin are not
-automated.
+newsfragments, packages, and the Zenodo pin are not automated.
 
-d-SEAMS is five packages:
+This page is the seams-core cut: the tag, the GitHub release, conda
+~libseams~ from ~recipe/~, and ~libseams_jll~ from
+~packaging/yggdrasil~. The language bindings release from their own
+repositories after the tag; [[file:repositories.org][the repository
+map]] has the order.
 
 | repo | product |
 |------+---------|
-| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~libseams~, ~seams~, and the in-tree fronts |
-| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ |
-| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~dseams~ Lua/Fennel |
+| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~libseams~, ~libseams_lang~, ~seams~, the engine drivers |
+| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ (~import dseams~, ~import pydseams~) |
+| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ (Lua and Fennel) |
+| [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | the R package ~dseams~ |
+| [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~ |
+| [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
+| [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
 | [[https://github.com/d-SEAMS/linkcell][linkcell]] | periodic k-nearest neighbour search |
 | [[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed]] | ~DSEAMS_CAGES~ PLUMED action |
 
-Python, R, Julia, Fortran, and Rust bindings live in ~bindings/~.
-~-Dwith_python=true~ builds the nanobind module from the in-tree
-~libseams~. ~-Dwith_lammps~, ~-Dwith_gromacs~, ~-Dwith_openmm~, and
+~-Dwith_lammps~, ~-Dwith_gromacs~, ~-Dwith_openmm~, and
 ~-Dwith_plumed~ are ~auto~: the hook is built when the library is
-found. ~-Dwith_lua=auto~ builds ~require("dseams")~ from ~bindings/lua~
-when Lua 5.4 or LuaJIT is present. Leave ~yodaStruct -c~ and
-~conf.yaml~ in that historical front.
+found.
 
 * Checklist
 
@@ -58,17 +61,20 @@ when Lua 5.4 or LuaJIT is present. Leave ~yodaStruct -c~ and
 7. Tag ~vX.Y.Z~ on ~d-SEAMS/seams-core~ and push the tag.
    ~release.yml~ mints the GitHub release
    (~gh release create --generate-notes~).
-8. Point PydSEAMSlib and yodaStruct
-   ~subprojects/seams-core.wrap~ ~revision~ at that tag. Bump
-   those package versions to the same ~X.Y.Z~ when the wrap is
-   the only change. When the wrap stays and a front end binds new
-   engine surfaces, cut a frontend-only minor: keep the wrap tag,
-   bump the package version, and tag that repository. Tag those
-   repositories on their own schedule.
-9. Zenodo: run ~repro/stage_zenodo.sh~ and pin the software in
+8. Build conda ~libseams~ from ~recipe/recipe.yaml~ at the tag and
+   update the conda-forge feedstock. Open the Yggdrasil pull request
+   for ~libseams_jll~ from ~packaging/yggdrasil/L/libseams~ with the
+   tag's source hash.
+9. Each binding moves its seams-core pin to ~vX.Y.Z~, sets its
+   version to ~X.Y.Z~, and follows its own release document:
+   PydSEAMSlib, dseams-rs, yodaStruct, dseams-fortran and dseams-r
+   in any order, then Dseams.jl after ~libseams_jll~ ~X.Y.Z~ is
+   registered. The core Docs workflow installs ~pydseamslib~ from the
+   PydSEAMSlib ~vX.Y.Z~ tag.
+10. Zenodo: run ~repro/stage_zenodo.sh~ and pin the software in
    that record to the release tag, never a commit. Do not mint a
    new DOI version for prose. See ~repro/zenodo/README.md~.
-10. GitHub native stacked PRs are same-repo only. Use
+11. GitHub native stacked PRs are same-repo only. Use
     ~gh stack link~ to attach PRs and ~gh stack merge~ to land
     them. Cross-fork stacks are not supported. Merge-top lands
     the whole stack. Use ~gh stack merge~ (async stack merge),
@@ -90,15 +96,8 @@ seams-core cut:
 | ~docs/source/Doxyfile_seams.cfg~ | ~PROJECT_NUMBER~ |
 | ~docs/source/conf.py~ | ~version~ and ~release~ |
 
-Front ends, after the engine tag exists:
-
-| file | field |
-|------+-------|
-| ~subprojects/seams-core.wrap~ | ~revision = vX.Y.Z~ |
-| PydSEAMSlib ~pyproject.toml~, ~meson.build~, ~CITATION.cff~ | package version |
-| PydSEAMSlib ~docs/source/conf.py~ | ~release~ |
-| yodaStruct ~meson.build~, ~CITATION.cff~ | package version |
-| yodaStruct ~docs/source/conf.py~ | ~release~ |
+Each binding repository lists its own version files in its release
+document.
 
 * Newsfragments
 
