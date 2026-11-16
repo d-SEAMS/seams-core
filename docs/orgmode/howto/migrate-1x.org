@@ -1,6 +1,10 @@
 #+TITLE: Migrate from d-SEAMS 1.x
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/migrate.rst
+#+end_export
+
 1.x was a Lua script plus ~yodaStruct -c lua_inputs/config.yml~.
 The config named the trajectory and switched analyses on. 2.14 is one
 ~seams~ subcommand, or one call in ~seams.h~ / ~seams_lang.h~, for

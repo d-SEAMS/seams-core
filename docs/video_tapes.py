@@ -314,8 +314,8 @@ def main():
     if set(names) != set(CUTS) | set(NOTES):
         fail("video folders are {}, cuts plus notes are {}".format(
             ", ".join(names), ", ".join(sorted(set(CUTS) | set(NOTES)))))
-    if len(CUTS) != 19:
-        fail("expected 19 cuts, found {}".format(len(CUTS)))
+    if len(CUTS) != 20:
+        fail("expected 20 cuts, found {}".format(len(CUTS)))
     # The Fortran, Julia, Lua, R and Rust recordings stay on the docs pages,
     # but their tapes build and run sources that moved to the binding
     # repositories (dseams-fortran, Dseams.jl, yodaStruct, dseams-r,

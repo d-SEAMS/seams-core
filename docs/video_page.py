@@ -41,8 +41,8 @@ BLURB = {
     "cages": "Ice Ih hexagonal cages, cubic double-diamond cages, then the clathrate cells.",
 }
 
-# The nineteen cuts. migrate and rings-cages keep their shot lists on disk
-# and are not gallery videos.
+# The twenty cuts. rings-cages keeps its shot list on disk and is not a
+# gallery video.
 CUTS = (
     "brine",
     "c",
@@ -56,6 +56,7 @@ CUTS = (
     "julia",
     "lammps",
     "lua",
+    "migrate",
     "nucleation",
     "openmm",
     "plumed",
@@ -64,7 +65,7 @@ CUTS = (
     "rings",
     "rust",
 )
-NOTES = ("migrate", "rings-cages")
+NOTES = ("rings-cages",)
 # claim-name:claim-id, checked against the d-SEAMS channel.
 CLAIMS = {
     "interface": "dseams-interface:74af20635ceeef7945f8e22cb5b02522a865baa6",
@@ -86,11 +87,12 @@ CLAIMS = {
     "lua": "dseams-lua:9a7ffc26dff9590174a707db848f5f5d6d7a737f",
     "brine": "dseams-brine:124a3a7fa52cdf7aff34ac00cfba6068e240a947",
     "cages": "dseams-cages:1c258cea9384acd2e21eeec509c5eedc050d08db",
+    "migrate": "dseams-migrate:ca1381615800e95d41cc8a379d62abd324800e59",
 }
 
 # Topic page, relative to the repo, and the recording that belongs on it.
 # lua-fennel is the lua slug. chill-interface is the interface slug.
-# migrate and rings-cages are not cuts.
+# rings-cages is not a cut.
 TOPICS = {
     "cli": (
         "docs/orgmode/reference/cli.org",
@@ -123,6 +125,7 @@ TOPICS = {
     "cages": ("docs/orgmode/howto/cages-trace.org",),
     "brine": ("docs/orgmode/tutorials/brine.org",),
     "nucleation": ("docs/orgmode/tutorials/nucleation.org",),
+    "migrate": ("docs/orgmode/howto/migrate-1x.org",),
 }
 
 
