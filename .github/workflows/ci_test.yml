@@ -100,6 +100,12 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # The Open MPI LAMMPS and PLUMED in the pixi env then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
@@ -123,6 +129,12 @@ jobs:
   # tutorials, and the docs snippets against pydseamslib. A skip fails the job.
   pixi-suite:
     runs-on: ubuntu-latest
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # The Open MPI LAMMPS and PLUMED in the pixi env then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
