@@ -877,6 +877,15 @@ nucleation_link = _link_args
 if host_system == 'linux'
   nucleation_link += ['-Wl,--enable-new-dtags']
 endif
+
+# Installed programs find libyodaLib in the installed libdir. Mach-O
+# dylibs carry their absolute install name instead.
+_bin_install_rpath = ''
+if host_system not in ['darwin', 'windows']
+  _bin_install_rpath = '$ORIGIN' / import('fs').relative_to(
+    get_option('prefix') / get_option('libdir'),
+    get_option('prefix') / get_option('bindir'))
+endif
 science_front_exe = executable(
   'science-front',
   files('scripts/science_front.cpp') + backward_src,
@@ -885,6 +894,7 @@ science_front_exe = executable(
   cpp_args: _args,
   link_args: nucleation_link,
   build_rpath: meson.current_build_dir() / 'src',
+  install_rpath: _bin_install_rpath,
   install: true,
   install_tag: 'bin')
 
@@ -896,6 +906,7 @@ nucleation_pathway_exe = executable(
   cpp_args: _args,
   link_args: nucleation_link,
   build_rpath: meson.current_build_dir() / 'src',
+  install_rpath: _bin_install_rpath,
   install: true,
   install_tag: 'bin')
 
@@ -937,6 +948,7 @@ if get_option('with_cli')
     cpp_args: _args + ['-DSEAMS_VERSION="' + meson.project_version() + '"'],
     link_args: seams_cli_link,
     build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
+    install_rpath: _bin_install_rpath,
     install: true)
   brine_front_exe = executable(
     'brine_front',
@@ -946,6 +958,7 @@ if get_option('with_cli')
     cpp_args: _args,
     link_args: seams_cli_link,
     build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
+    install_rpath: _bin_install_rpath,
     install: true)
 endif
 
