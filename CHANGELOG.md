@@ -117,6 +117,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `require("dseams")` is a Lua 5.4 and LuaJIT module over `seams.h`, with userdata handles and a Fennel wrapper on the same module. Reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer call that header.
 - `seams chill` and `seams chill-plus` take `--per-atom FILE` and append a LAMMPS dump frame with a `label` column, the CHILL or CHILL+ class of each site. Workers under `--jobs` append whole frames.
 - `seams_c_last_stages` returns the wall seconds of the last `seams_cutoff_csr` or `seams_ql_cutoff` call on the calling thread, split into point-cloud conversion, cutoff-list build, q_l and copy-out.
+- `seams_frame_chordless` lists the chordless cycles of one size on a `libseams_lang` frame, with the same rows as `seams_rings_chordless` on that frame. `seams.hpp` returns them from `Neighbours::chordless` and `rings_chordless`.
 - science::layersOf bins published CHILL+, the shell label and q6 along the interface normal. science::criticalSize is the mean size of the band around the smallest largest cluster. That number is an upper bound when the minimum falls in the first two frames. It is not a committor.
 - seams rings prints the primitive-ring census by size. seams prisms counts perfect and imperfect prisms of size 3 to 6. seams cluster prints the largest domain, the subset, and whether it percolates.
 - seams.h is ABI 1. A frame carries an orthorhombic or triclinic cell, and the library returns neighbours, both CHILL+ rules, q4 and q6, primitive rings, and ring symmetry labels.
@@ -233,6 +234,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - q12 is the Cartesian solid harmonic, eight bonds at a time. The value matches the associated-Legendre form.
 - q4 and q6 share one cutoff list. A multi-thread cutoff walk records each pair once. Seeded cages with identical neighbour rows search rings and cages once, and the k-nearest nomination uses the same thread count as the rest of the command.
 
+### Deprecated
+
+- `--types` is a deprecated exact alias of `--pair-types`. The exact names both bind, and using `--types` prints a one-line warning on stderr.
+
 ### Removed
 
 - The d-SEAMS 2.0 manuscript, its benchmark campaign, the record tables and logs under `benchmarks/`, and the paper reproduction pages leave this repository for the private paper repository; the records and figure data are the `d-SEAMS/dseams2-benchmark-records` and `d-SEAMS/dseams2-paper-figure-data` datasets. The performance pages show tables rendered once from those records (`docs/records`), and the asv harness and the timing scripts stay.
@@ -261,11 +266,15 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - CHILL+ defaults to the cutoff list on the CLI, the C API, the LAMMPS `compute dseams`, and every language binding. The mutual four-nearest list is `graph = mutual`. On `input/traj/exampleTraj.lammpstrj` (oxygen, type 2) the cutoff list is 9 interClathrate and 241 water; the mutual list is 1 clathrate, 7 interClathrate, and 242 water. The docs tutorials run against the `pydseamslib` 2.14.0 package built from d-SEAMS/PydSEAMSlib.
 - Clang builds record the directory of clang's `libomp.so` as a runpath, so the libraries, tests and libFuzzer harnesses start without `LD_LIBRARY_PATH` with an EESSI LLVM and with the apt.llvm.org packages, whose `libomp` lives in `/usr/lib/llvm-<version>/lib`.
 - Engine checks load the plugin from the build tree. A copy staged under an install destdir is left alone.
+- Keep BondClassifier at the 2.13 layout, three doubles and one int. Open edges are an argument of classifyBond, so a caller that passes the struct by value is unchanged.
+- Keep a diamond shell while eight good (4,2,1) signatures, or the ambiguous band, are still reachable. The old count stopped once four bad rows made nine good signatures unreachable.
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
 - Keep the 2.13 signatures of `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
+- Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
+- Name the site-site pair flag `--pair-types`. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
 - On a crowded shell the diamond label uses the four nearest neighbours, the list mdapy uses, and the labels stay those of the cutoff list.
-- Rename the site-site pair flag from `--types` to `--pair-types`, so `--type` is not a prefix of another flag. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
-- Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
+- Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
+- Require readcon-db 0.1.8 so static consumers receive only the archive and shared consumers receive the runtime search path.
 - Sanitized builds of the `seams`, `brine_front`, `science-front` and `nucleation-pathway` executables leave fatal signals to the sanitizer. The backward-cpp crash handler had replaced the ASan and libFuzzer handlers, so a fuzzer stopped with no report and no saved input. `capi_signal_owner` checks that `libseams` installs no `SIGABRT` handler in plain or sanitized builds.
 - The AMX INT8 product behind `ozaki-ii-amx` is checked against exact row, weighted-row and column checksums of its inputs, and recomputed with VNNI or scalar code when one disagrees. On a KVM guest that corrupted AMX tiles while separate processes used AMX at once, `ozaki` failed in 62 of 1200 concurrent runs and now passes all of them.
 - The C API builds q4 and q6 from one cutoff shell and does not fill an atom-index map on that path.
