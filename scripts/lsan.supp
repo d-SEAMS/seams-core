@@ -51,3 +51,8 @@ leak:libOpenMMAmoeba.so
 leak:libOpenMMDrude.so
 leak:registerPythonForceProxy
 leak:SWIG_Python_addvarlink
+# pyvista_validation's C extension, imported by Frame.to_solvis:
+#   #1 fast_wrap src/fast/module.c
+#   #1 duplicate src/fast/module.c
+# The module path covers both, and neither enters seams.
+leak:pyvista_validation

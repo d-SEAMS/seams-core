@@ -1,0 +1,26 @@
+#!/bin/sh
+# Callers that bypass conda's pkg-config script run pkg-config.bin by the
+# name next to the pkg-config they found. Not a seams binary: preloaded,
+# its glib allocations leak at exit and LeakSanitizer fails the lookup.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+unset LD_PRELOAD
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/pkg-config.bin" ]; then
+    found=$dir/pkg-config.bin
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "pkg-config.bin is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

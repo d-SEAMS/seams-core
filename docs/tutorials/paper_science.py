@@ -523,12 +523,16 @@ def brine(seams, libdir, out):
             ]
         )
     )
+    # packmol is not a seams binary. Under the ASan suite the preloaded
+    # runtime reports its own exit-time leaks and fails a finished packing.
+    host_env = {k: v for k, v in os.environ.items() if k != "LD_PRELOAD"}
     done = subprocess.run(
         [packmol],
         stdin=deck.open(),
         text=True,
         capture_output=True,
         check=False,
+        env=host_env,
     )
     if done.returncode != 0 or not (out / "packed.xyz").is_file():
         sys.stderr.write(done.stdout[-500:])
