@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
+#include <vector>
 
 // One width for OpenMP and Rayon. OpenMP already follows
 // OMP_NUM_THREADS. Linkcell's pool does not, so a process whose
@@ -12,11 +13,15 @@
 // even when OpenMP was given several. lc_set_threads is read by the
 // next linkcell search.
 //
-// A taskset or a cpuset stays in force. The pool is not moved onto a cpu
-// outside the mask the process inherited.
-// The pool is built once and its workers sleep between searches. The
-// OpenMP team is not paused: a pause makes the next region pay a
-// wake-up that moves by tens of milliseconds.
+// OMP_PROC_BIND makes the OpenMP runtime pin the calling thread to its
+// first place when the library loads, and threads created afterwards, a
+// Rayon pool among them, inherit that one cpu. widenAffinity gives the
+// caller back the cpus of every place, which the runtime took from the
+// launch mask (taskset, numactl, a cgroup cpuset) and OMP_PLACES. It adds
+// no cpu outside those places. A caller the runtime did not bind, and a
+// one-thread width, keep their mask. The pool is built once and its
+// workers sleep between searches. The OpenMP team is not paused: a pause
+// makes the next region pay a wake-up that moves by tens of milliseconds.
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
@@ -30,16 +35,41 @@ extern "C" int lc_num_threads(void);
 
 namespace seams {
 
-inline void widenAffinityOnce() {
-  // A taskset or a cpuset stays in force. Adding every cpu the kernel
-  // would still allow undoes that mask.
-}
-
-// Once per process. C API callers on several threads may arrive here
-// together.
+// Once per process, on the first call that may widen. C API callers on
+// several threads may arrive here together.
 inline void widenAffinity() {
-  static std::once_flag once;
-  std::call_once(once, widenAffinityOnce);
+#if defined(__linux__) && defined(SEAMS_HAS_OPENMP)
+  static std::mutex lock;
+  static bool done = false;
+  if (omp_in_parallel() || omp_get_max_threads() < 2 || omp_get_place_num() < 0) {
+    return;
+  }
+  const std::lock_guard<std::mutex> hold(lock);
+  if (done) {
+    return;
+  }
+  done = true;
+  cpu_set_t mask;
+  CPU_ZERO(&mask);
+  if (sched_getaffinity(0, sizeof(mask), &mask) != 0) {
+    return;
+  }
+  const int places = omp_get_num_places();
+  for (int place = 0; place < places; ++place) {
+    const int count = omp_get_place_num_procs(place);
+    if (count <= 0) {
+      continue;
+    }
+    std::vector<int> ids(static_cast<std::size_t>(count));
+    omp_get_place_proc_ids(place, ids.data());
+    for (const int cpu : ids) {
+      if (cpu >= 0 && cpu < CPU_SETSIZE) {
+        CPU_SET(static_cast<std::size_t>(cpu), &mask);
+      }
+    }
+  }
+  sched_setaffinity(0, sizeof(mask), &mask);
+#endif
 }
 
 inline void releaseTeam() {
