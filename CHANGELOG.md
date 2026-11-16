@@ -10,6 +10,17 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.1] - 2026-11-16
+
+### Fixed
+
+- Ring and cage search diagnostics stay on the calling thread. Concurrent searches no longer share the process-global profile, phase and split records, and an OpenMP team copies the calling thread's flags when it starts.
+- The k-nearest degree scan starts after the linkcell pool joins, so it no longer reads a row while that row is still being stored.
+- The cage invariance fuzzer sizes its trial pool to the CPUs the process may run on.
+- C API fuzzers built with `b_sanitize=thread` link `-fsanitize=thread,fuzzer` and the shared thread runtime.
+- A ThreadSanitizer build gives plumed, gmx and lmp the unsanitized plugin, because those hosts cannot map `libclang_rt.tsan`. Interpreter shims map that runtime before they dlopen `libseams`.
+- The serial LAMMPS hook calls `lammps_mpi_finalize` after `lammps_close`, which frees the ReadData and Run commands the stub would otherwise leave allocated. The MPI build still calls `MPI_Finalize`.
+
 ## [2.14.0] - 2026-11-15
 
 ### Added
