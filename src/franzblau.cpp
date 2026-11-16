@@ -1697,7 +1697,7 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
     scr.pathBuf.reserve(128);
   }
   scr.pathBuf.clear();
-  scr.pathCount[src] = 1;
+  scr.pathCount[static_cast<std::size_t>(src)] = 1;
   thread_local std::vector<int> nPar;
   if (static_cast<int>(nPar.size()) != nVertices) {
     nPar.assign(static_cast<std::size_t>(nVertices), 0);
@@ -1715,7 +1715,7 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
   multi.clear();
   odds.clear();
   for (const int v : scr.touched) {
-    const int lv = scr.lvl[v];
+    const int lv = scr.lvl[static_cast<std::size_t>(v)];
     if (lv < 1 || lv > 3) {
       continue;
     }
@@ -1723,15 +1723,15 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
     int count = 0;
     int n = 0;
     const bool wantOdd = (lv == 1 && want3) || (lv == 2 && want5) || (lv == 3 && want7);
-    for (const int w : adjacency[v]) {
+    for (const int w : adjacency[static_cast<std::size_t>(v)]) {
       if (w < 0 || w >= nVertices) {
         continue;
       }
-      const int lw = scr.lvl[w];
+      const int lw = scr.lvl[static_cast<std::size_t>(w)];
       if (lw == lv - 1) {
         scr.pathBuf.push_back(w);
         ++n;
-        count += scr.pathCount[w];
+        count += scr.pathCount[static_cast<std::size_t>(w)];
         if (count > kMaxPaths) {
           return false;
         }
@@ -1740,9 +1740,9 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
         odds.push_back(w);
       }
     }
-    scr.pathFirst[v] = first;
-    scr.pathCount[v] = count;
-    nPar[v] = n;
+    scr.pathFirst[static_cast<std::size_t>(v)] = first;
+    scr.pathCount[static_cast<std::size_t>(v)] = count;
+    nPar[static_cast<std::size_t>(v)] = n;
     if (count >= 2 && ((lv == 2 && want4) || (lv == 3 && want6))) {
       multi.push_back(v);
     }
@@ -1796,20 +1796,20 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
       return 1;
     }
     if (lv == 2) {
-      const int *ps = scr.pathBuf.data() + scr.pathFirst[v];
-      const int n = nPar[v];
+      const int *ps = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(v)];
+      const int n = nPar[static_cast<std::size_t>(v)];
       for (int i = 0; i < n; ++i) {
         arms[i] = Arm{ps[i], -1};
       }
       return n;
     }
     int n = 0;
-    const int *ps = scr.pathBuf.data() + scr.pathFirst[v];
-    const int np = nPar[v];
+    const int *ps = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(v)];
+    const int np = nPar[static_cast<std::size_t>(v)];
     for (int i = 0; i < np; ++i) {
       const int b = ps[i];
-      const int *as = scr.pathBuf.data() + scr.pathFirst[b];
-      const int na = nPar[b];
+      const int *as = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(b)];
+      const int na = nPar[static_cast<std::size_t>(b)];
       for (int j = 0; j < na; ++j) {
         arms[n] = Arm{as[j], b};
         ++n;
@@ -1819,7 +1819,7 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
   };
 
   for (const int p : multi) {
-    const int lp = scr.lvl[p];
+    const int lp = scr.lvl[static_cast<std::size_t>(p)];
     Arm armsP[kMaxPaths];
     const int gotP = fill(p, lp, armsP);
     for (int i = 0; i < gotP; ++i) {
@@ -1841,7 +1841,7 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
   for (std::size_t e = 0; e < odds.size(); e += 2) {
     const int p = odds[e];
     const int q = odds[e + 1];
-    const int lp = scr.lvl[p];
+    const int lp = scr.lvl[static_cast<std::size_t>(p)];
     if (lp == 1) {
       int r[3] = {src, p, q};
       if (unique(r, 3) && !shortcut(r, 3, -1)) {
@@ -1849,7 +1849,7 @@ countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
       }
       continue;
     }
-    if (scr.pathCount[p] <= 0 || scr.pathCount[q] <= 0) {
+    if (scr.pathCount[static_cast<std::size_t>(p)] <= 0 || scr.pathCount[static_cast<std::size_t>(q)] <= 0) {
       continue;
     }
     Arm armsP[kMaxPaths];

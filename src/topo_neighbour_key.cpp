@@ -4,7 +4,10 @@
 //-----------------------------------------------------------------------------------
 // Keep this translation unit out of the cold partition. A cold clone
 // lands before the ring search and moves it.
+// The option is GCC only.
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC optimize("no-reorder-blocks-and-partition")
+#endif
 
 #include <topo_fingerprint.hpp>
 

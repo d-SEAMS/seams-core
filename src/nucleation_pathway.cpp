@@ -466,7 +466,7 @@ q6DotScore(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
       const double theta = std::acos(std::clamp(dz / r, -1.0, 1.0));
       const double phi = std::atan2(dy, dx);
       for (int m = 0; m <= kL; ++m) {
-        const double y = std::sph_legendre(kL, m, theta);
+        const double y = std::sph_legendre(static_cast<unsigned>(kL), static_cast<unsigned>(m), theta);
         q[m] += std::complex<double>(y * std::cos(m * phi), y * std::sin(m * phi));
       }
     }

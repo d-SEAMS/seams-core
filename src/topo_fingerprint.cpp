@@ -56,8 +56,8 @@ void fillRingCensus(std::vector<int> &census,
 
 std::uint64_t hashString(const std::string &s) {
   std::uint64_t h = kOffset;
-  for (unsigned char c : s) {
-    h ^= c;
+  for (const char ch : s) {
+    h ^= static_cast<unsigned char>(ch);
     h *= kPrime;
   }
   return h;

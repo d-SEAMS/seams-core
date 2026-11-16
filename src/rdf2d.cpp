@@ -119,7 +119,7 @@ bool histogramCellPairs(
   // Row t holds the cell counts of thread t's static block of atoms; after
   // the scan it holds that block's first slot in each cell, so the scatter
   // keeps the serial atom order inside every cell.
-  blockAt.assign(static_cast<std::size_t>(nthreads) * ncell, 0);
+  blockAt.assign(static_cast<std::size_t>(nthreads) * static_cast<std::size_t>(ncell), 0);
   px.resize(static_cast<std::size_t>(n));
   py.resize(static_cast<std::size_t>(n));
   pz.resize(static_cast<std::size_t>(n));
@@ -140,7 +140,7 @@ bool histogramCellPairs(
 #endif
     const int lo = static_cast<int>(1LL * n * tid / team);
     const int hi = static_cast<int>(1LL * n * (tid + 1) / team);
-    int *mine = blockAt.data() + static_cast<std::size_t>(tid) * ncell;
+    int *mine = blockAt.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(ncell);
     for (int i = lo; i < hi; i++) {
       const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
       const double fz = (p.z - frame.oz) / lz;
@@ -171,7 +171,7 @@ bool histogramCellPairs(
       for (int c = 0; c < ncell; c++) {
         start[static_cast<std::size_t>(c)] = at;
         for (int t = 0; t < team; t++) {
-          int &slot = blockAt[static_cast<std::size_t>(t) * ncell + c];
+          int &slot = blockAt[static_cast<std::size_t>(t) * static_cast<std::size_t>(ncell) + static_cast<std::size_t>(c)];
           const int count = slot;
           slot = at;
           at += count;

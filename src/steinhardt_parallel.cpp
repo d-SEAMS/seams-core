@@ -1610,8 +1610,8 @@ SteinhardtQl cutoffSolid(
       }
       seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
       for (int bond = 0; bond < filled; bond++) {
-        const double *yr = re + static_cast<std::size_t>(bond) * nComp;
-        const double *yi = im + static_cast<std::size_t>(bond) * nComp;
+        const double *yr = re + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
+        const double *yi = im + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
         for (int m = 0; m < nKeep; m++) {
           dst[2 * m] += yr[m];
           dst[2 * m + 1] += yi[m];

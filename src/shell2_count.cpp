@@ -95,7 +95,7 @@ bool ringIsPrimitive(const DistOracle &oracle, const std::vector<int> &ring, int
       if (ringDist <= 1) {
         continue;
       }
-      if (oracle.shorter(ring[i], ring[j], ringDist)) {
+      if (oracle.shorter(ring[static_cast<std::size_t>(i)], ring[static_cast<std::size_t>(j)], ringDist)) {
         return false;
       }
     }
@@ -114,8 +114,10 @@ inline bool pushUniqueMember(std::vector<int> &ring, int v) {
 }
 
 
-inline void tallyRing(const int *ring, int k, std::vector<int> *hist, int *perAtom,
-                      int perStride) {
+// Called only from the per-atom instantiation, which this file does not
+// make; the two-word shell is a census.
+[[maybe_unused]] inline void tallyRing(const int *ring, int k, std::vector<int> *hist,
+                                        int *perAtom, int perStride) {
   if (perAtom != nullptr) {
     for (int i = 0; i < k; i++) {
       const int a = ring[i];
@@ -157,22 +159,22 @@ void levelsFrom(const Graph &adjacency, int src, int maxLvl, int minVertex,
                 std::vector<int> &lvl, std::vector<int> &touched,
                 std::vector<int> &frontier, std::vector<int> &next) {
   for (const int w : touched) {
-    lvl[w] = -1;
+    lvl[static_cast<std::size_t>(w)] = -1;
   }
   touched.clear();
-  lvl[src] = 0;
+  lvl[static_cast<std::size_t>(src)] = 0;
   touched.push_back(src);
   frontier.assign(1, src);
   for (int depth = 1; depth <= maxLvl && !frontier.empty(); depth++) {
     next.clear();
     for (const int u : frontier) {
-      for (const int w : adjacency[u]) {
+      for (const int w : adjacency[static_cast<std::size_t>(u)]) {
         // Distances are on the whole graph. A shortcut may pass through a
         // vertex below the source without that vertex sitting on the ring.
         // minVertex 0 keeps those shortcuts visible. A positive minVertex
         // is only for a caller that has already restricted the component.
-        if (w >= minVertex && w < static_cast<int>(lvl.size()) && lvl[w] == -1) {
-          lvl[w] = depth;
+        if (w >= minVertex && w < static_cast<int>(lvl.size()) && lvl[static_cast<std::size_t>(w)] == -1) {
+          lvl[static_cast<std::size_t>(w)] = depth;
           touched.push_back(w);
           next.push_back(w);
         }
@@ -188,40 +190,40 @@ bool shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr,
                        int cap) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.pathFirst.size()) != nVertices) {
-    scr.pathFirst.assign(nVertices, 0);
-    scr.pathCount.assign(nVertices, 0);
+    scr.pathFirst.assign(static_cast<std::size_t>(nVertices), 0);
+    scr.pathCount.assign(static_cast<std::size_t>(nVertices), 0);
   }
   scr.pathBuf.clear();
-  scr.pathFirst[src] = 0;
-  scr.pathCount[src] = 1;
+  scr.pathFirst[static_cast<std::size_t>(src)] = 0;
+  scr.pathCount[static_cast<std::size_t>(src)] = 1;
   for (const int v : scr.touched) {
-    const int lv = scr.lvl[v];
+    const int lv = scr.lvl[static_cast<std::size_t>(v)];
     if (lv < 1) {
       continue;
     }
     const int first = static_cast<int>(scr.pathBuf.size());
     int count = 0;
     if constexpr (CheckCap) {
-      for (const int w : adjacency[v]) {
-        if (w < 0 || w >= nVertices || scr.lvl[w] != lv - 1) {
+      for (const int w : adjacency[static_cast<std::size_t>(v)]) {
+        if (w < 0 || w >= nVertices || scr.lvl[static_cast<std::size_t>(w)] != lv - 1) {
           continue;
         }
-        count += scr.pathCount[w];
+        count += scr.pathCount[static_cast<std::size_t>(w)];
       }
       if (count > cap) {
         return false;
       }
     }
     const int plen = lv - 1;
-    for (const int w : adjacency[v]) {
-      if (w < 0 || w >= nVertices || scr.lvl[w] != lv - 1) {
+    for (const int w : adjacency[static_cast<std::size_t>(v)]) {
+      if (w < 0 || w >= nVertices || scr.lvl[static_cast<std::size_t>(w)] != lv - 1) {
         continue;
       }
       if constexpr (!CheckCap) {
-        count += scr.pathCount[w];
+        count += scr.pathCount[static_cast<std::size_t>(w)];
       }
-      for (int k = 0; k < scr.pathCount[w]; k++) {
-        const int from = scr.pathFirst[w] + k * plen;
+      for (int k = 0; k < scr.pathCount[static_cast<std::size_t>(w)]; k++) {
+        const int from = scr.pathFirst[static_cast<std::size_t>(w)] + k * plen;
         const int dest = static_cast<int>(scr.pathBuf.size());
         scr.pathBuf.resize(scr.pathBuf.size() + static_cast<std::size_t>(lv));
         if (plen > 0) {
@@ -231,8 +233,8 @@ bool shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr,
         scr.pathBuf[static_cast<std::size_t>(dest + plen)] = v;
       }
     }
-    scr.pathFirst[v] = first;
-    scr.pathCount[v] = count;
+    scr.pathFirst[static_cast<std::size_t>(v)] = first;
+    scr.pathCount[static_cast<std::size_t>(v)] = count;
   }
   return true;
 }
@@ -967,7 +969,7 @@ void countOne(const RowView &graph, const DistOracle &oracle, RingScratch &scr, 
   levelsFrom(graph, src, maxLvl, 0, scr.lvl, scr.touched, scr.frontier, scr.next);
   for (const int v : scr.touched) {
     if (v < src) {
-      scr.lvl[v] = -1;
+      scr.lvl[static_cast<std::size_t>(v)] = -1;
     }
   }
   NoPool out;
@@ -985,12 +987,12 @@ void countOne(const RowView &graph, const DistOracle &oracle, RingScratch &scr, 
   };
   std::vector<int> &ring = scr.ring;
   for (const int p : scr.touched) {
-    const int lp = scr.lvl[p];
+    const int lp = scr.lvl[static_cast<std::size_t>(p)];
     if (lp < 1 || lp > maxLvl) {
       continue;
     }
-    const int *pathsP = scr.pathBuf.data() + scr.pathFirst[p];
-    const int nP = scr.pathCount[p];
+    const int *pathsP = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(p)];
+    const int nP = scr.pathCount[static_cast<std::size_t>(p)];
     if (2 * lp >= minSize && 2 * lp <= maxDepth) {
       for (int a = 0; a < nP; a++) {
         for (int b = a + 1; b < nP; b++) {
@@ -1012,12 +1014,12 @@ void countOne(const RowView &graph, const DistOracle &oracle, RingScratch &scr, 
     }
     if (2 * lp + 1 >= minSize && 2 * lp + 1 <= maxDepth) {
       for (const int q : graph[static_cast<std::size_t>(p)]) {
-        if (q <= p || q >= nVertices || scr.lvl[q] != lp) {
+        if (q <= p || q >= nVertices || scr.lvl[static_cast<std::size_t>(q)] != lp) {
           continue;
         }
-        const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[q];
+        const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(q)];
         for (int a = 0; a < nP; a++) {
-          for (int b = 0; b < scr.pathCount[q]; b++) {
+          for (int b = 0; b < scr.pathCount[static_cast<std::size_t>(q)]; b++) {
             const int *pa = pathsP + a * lp;
             const int *pb = pathsQ + b * lp;
             ring.assign(1, src);
