@@ -2011,6 +2011,12 @@ if get_option('with_tests')
       env: _capi_env,
       timeout: 300)
   endforeach
+  _installed_examples_env = {'CC': ' '.join(meson.get_compiler('c').cmd_array()),
+                             'SEAMS_OPENMP_LINK': ' '.join(_snippet_omp)}
+  if _asan_wrap
+    _installed_examples_env = {'CC': _snippet_cc, 'REAL_CC': _real_cc,
+                               'SEAMS_OPENMP_LINK': ' '.join(_snippet_omp)}
+  endif
   test(
     'capi_installed_examples',
     find_program('python3', required: true),
@@ -2019,8 +2025,7 @@ if get_option('with_tests')
       meson.project_build_root(),
       meson.project_source_root(),
     ],
-    env: {'CC': ' '.join(meson.get_compiler('c').cmd_array()),
-          'SEAMS_OPENMP_LINK': ' '.join(_snippet_omp)},
+    env: _installed_examples_env,
     depends: [seams_api_lib, ydslib],
     timeout: 600)
   test(
