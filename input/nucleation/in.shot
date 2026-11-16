@@ -1,0 +1,32 @@
+# One committor shot of the 4096-molecule mW lane.
+# shot.data is a climb frame. Velocities are fresh Maxwell-Boltzmann at
+# Tq from seed. Each snapshot is its own file so the driver can read a
+# frame as soon as it is complete and stop the run once the shot is
+# resolved. nrun is the 1 ns window.
+
+units real
+atom_style atomic
+boundary p p p
+atom_modify map array
+
+variable datafile index shot.data
+variable nrun index 100000
+variable ndump index 1000
+variable Tq index 180
+variable seed index 1
+
+read_data ${datafile}
+reset_timestep 0
+
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+timestep 10.0
+thermo 1000
+
+velocity all create ${Tq} ${seed} mom yes rot yes dist gaussian
+fix 1 all nvt temp ${Tq} ${Tq} 200.0
+dump 1 all custom ${ndump} frame.*.lammpstrj id type x y z
+run ${nrun}

@@ -1,0 +1,40 @@
+# Continue a homogeneous mW climb at Tq.
+# source restart reads the restart written by the previous segment.
+# The positions, velocities and the Nose-Hoover state of fix 1 carry on.
+# source data reads one dump frame written as a data file, sets the
+# step to that frame, and draws fresh Maxwell-Boltzmann velocities at
+# Tq from seed. That is for climbs that predate write_restart.
+
+variable source index restart
+variable restart index quench.restart
+variable datafile index extend.data
+variable step0 index 0
+variable nrun index 1000000
+variable ndump index 1000
+variable Tq index 180
+variable seed index 20261111
+variable out index extend-1
+
+if "${source} == restart" then &
+  "read_restart ${restart}" &
+else &
+  "units real" &
+  "atom_style atomic" &
+  "boundary p p p" &
+  "atom_modify map array" &
+  "read_data ${datafile}" &
+  "reset_timestep ${step0}"
+
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+timestep 10.0
+thermo 500
+if "${source} == data" then &
+  "velocity all create ${Tq} ${seed} mom yes rot yes dist gaussian"
+fix 1 all nvt temp ${Tq} ${Tq} 200.0
+dump 1 all custom ${ndump} ${out}.lammpstrj id type x y z
+run ${nrun}
+write_restart ${out}.restart

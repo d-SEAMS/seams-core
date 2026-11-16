@@ -46,3 +46,5 @@ fix 1 all nvt temp ${Tq} ${Tq} 200.0
 run ${nskip}
 dump 1 all custom ${ndump} quench.lammpstrj id type x y z
 run ${nquench}
+# The end state, with velocities and thermostat, for in.extend.
+write_restart quench.restart

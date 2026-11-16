@@ -379,3 +379,48 @@ The summary tables kept in the repository are
 is written next to the trajectories as `clusters.tsv`. Its checksum
 is `docs/nucleation/mw4096-clusters.dvc`. That table will be published
 as a dataset of the d-SEAMS organisation on Hugging Face.
+
+## Committor shards
+
+The committor lane is 4096 mW molecules quenched to 180 K for 10 ns
+per seed. `scripts/committor_shoot.py` fixes every rule before a shot
+is read. The order parameter is `n_chill_core`. The climb and shot
+tables also carry `n_chill_ext` and `n_q6solid`, the largest q6 solid
+cluster (ten Wolde dot product above 0.5 within 3.2 A).
+`scripts/committor_order.py` reports how the three series correlate
+in each climb.
+
+A climb has nucleated when `n_chill_core` passes 300 and reaches 600,
+or the end of the run, without falling below 300. Only those climbs
+are shot. The uncommit cut is the 95th percentile of `n_chill_core`
+from 1 ns to the onset, or from a separate 2 ns liquid when the climb
+has less than 1 ns of such frames. Shots start at the last crossing
+of 50, 75, 100, 150, 200 and 300 before the onset, and commit at
+max(2n, 300).
+
+Build the census in release. A debug build gives the same series and
+is several times slower. `LMP` is a launcher command line and may
+include `mpirun`. `LMP_NP` adds `mpirun -np LMP_NP` in front of a bare
+`LMP`. Use `nproc --all`: the drivers set `OMP_NUM_THREADS=1`, and
+plain `nproc` then returns 1. Snakemake 9 reads every word after
+`--config` as a value, so the target comes first.
+
+```bash
+meson setup bbdir --buildtype=release
+ninja -C bbdir nucleation-pathway
+export LMP=lmp LMP_NP=$(nproc --all)
+export SEAMS_LIB=$PWD/bbdir/src
+snakemake -j1 data/committor-shards/climb-0-of-20.csv \
+  --config seeds=20261111-20261130 shard=0/20
+snakemake -j1 data/committor-shards/extend-0-of-20.1.log \
+  --config seeds=20261111-20261130 shard=0/20
+snakemake -j1 data/committor-shards/shot-0-of-20.csv \
+  --config seeds=20261111-20261130 shard=0/20
+```
+
+The extension continues each climb that has not nucleated by 10 ns,
+up to 30 ns, from its restart. A climb from before the restart was
+written continues from its last dump frame with fresh velocities, and
+the climb table records the seed. `meson test -C bbdir committor_driver`
+runs the whole chain on a 512-molecule cell and skips when `LMP` is
+unset.
