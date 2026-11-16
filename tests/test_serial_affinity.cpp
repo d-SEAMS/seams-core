@@ -150,6 +150,13 @@ Seen watch(const std::function<void()> &call) {
   call();
   done = true;
   sampler.join();
+  // pthread_join returns when the kernel clears the thread id, before the
+  // task leaves /proc/self/task, and the next call's sampler would count
+  // this one as a library thread.
+  const std::string gone = "/proc/self/task/" + std::to_string(self.load());
+  while (access(gone.c_str(), F_OK) == 0) {
+    std::this_thread::sleep_for(std::chrono::microseconds(50));
+  }
   return seen;
 }
 
