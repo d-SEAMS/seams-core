@@ -355,7 +355,9 @@ CommittorCall committorOf(const std::vector<double> &series, int molecules) {
     out.fate = CommittorFate::truncated;
     return out;
   }
-  if (out.basin.occupied && series.back() >= out.basin.barrier) {
+  // Ending back on the foot has given the climb back. The replica is
+  // committed only while the final size is still strictly above it.
+  if (out.basin.occupied && series.back() > out.basin.barrier) {
     out.fate = CommittorFate::committed;
   }
   return out;

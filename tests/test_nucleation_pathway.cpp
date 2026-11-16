@@ -137,6 +137,10 @@ TEST_CASE("a committor is the grow basin and is not cut at 2N", "[nucleation]") 
   const nucleation::CommittorCall flat = nucleation::committorOf({4, 4, 4}, 100);
   REQUIRE(flat.fate == nucleation::CommittorFate::uncommitted);
   REQUIRE_FALSE(flat.basin.occupied);
+
+  const nucleation::CommittorCall melted = nucleation::committorOf({0, 1, 0}, 64);
+  REQUIRE(melted.basin.occupied);
+  REQUIRE(melted.fate == nucleation::CommittorFate::uncommitted);
 }
 
 TEST_CASE("ring fraction leads ice by the constructed lag", "[nucleation]") {

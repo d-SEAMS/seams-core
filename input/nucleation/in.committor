@@ -1,0 +1,32 @@
+# Fast fixture only. This is not the paper committor.
+# The paper lane is input/nucleation/in.homogeneous at n=16 (4096).
+# Committor quench of one shared mW configuration.
+# data.committor is written once. Each replica changes only the
+# velocity seed. The run is not stopped when the largest cluster
+# reaches 2N; the dump is the whole trajectory.
+
+units real
+atom_style atomic
+boundary p p p
+atom_modify map array
+
+variable datafile index data.committor
+variable nrun index 5000
+variable ndump index 500
+variable Tq index 220
+variable seed index 20261111
+
+read_data ${datafile}
+
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+timestep 10.0
+thermo 1000
+
+velocity all create ${Tq} ${seed} mom yes rot yes dist gaussian
+fix 1 all nvt temp ${Tq} ${Tq} 200.0
+dump 1 all custom ${ndump} quench.lammpstrj id type x y z
+run ${nrun}

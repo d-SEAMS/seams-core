@@ -133,7 +133,7 @@ struct GrowBasin {
 
 [[nodiscard]] GrowBasin growBasin(const std::vector<double> &series);
 
-//! Outcome of one replica. committed means the final size is still at or
+//! Outcome of one replica. committed means the final size is still strictly
 //! above that replica's own grow-basin barrier. truncated means the series
 //! ends on the cap 2N while that cap is also its maximum: the run was cut
 //! there and is not a committor sample. The barrier is never 2N itself.

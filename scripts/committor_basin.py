@@ -40,7 +40,7 @@ def committor(series: list[float], molecules: int) -> dict[str, str]:
     cut = bool(series) and final == cap and maximum == cap
     if cut:
         fate = "truncated"
-    elif climbed and final >= barrier:
+    elif climbed and final > barrier:
         fate = "committed"
     else:
         fate = "uncommitted"
@@ -90,6 +90,9 @@ def self_test() -> None:
     flat = committor([4, 4, 4], 100)
     if flat["fate"] != "uncommitted":
         raise SystemExit(f"flat {flat}")
+    melted = committor([0, 1, 0], 64)
+    if melted["fate"] != "uncommitted":
+        raise SystemExit(f"melted {melted}")
     print("self-test ok")
 
 
@@ -107,6 +110,12 @@ def main() -> None:
     used = 0
     committed = 0
     for replica, molecules, series in load_series(args.series):
+        for size in series:
+            if size > molecules:
+                raise SystemExit(
+                    f"{replica} nmax {size} is larger than N {molecules}; "
+                    "that series was not measured"
+                )
         call = committor(series, molecules)
         if call["fate"] != "truncated":
             used += 1
