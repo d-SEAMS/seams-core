@@ -243,12 +243,15 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacechill
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:AnalysisPhases" id="r_AnalysisPhases"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rebuild, local kernel, halo exchange, and the write-back to the frame.  <a href="structchill_1_1AnalysisPhases.html#details">More...</a><br /></td></tr>
 <tr class="memitem:BondClassifier" id="r_BondClassifier"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One rule set for classifying bond correlations \(c_{ij}\).  <a href="structchill_1_1BondClassifier.html#details">More...</a><br /></td></tr>
 <tr class="memitem:BondOrder" id="r_BondOrder"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1BondOrder.html">BondOrder</a></td></tr>
 <tr class="memitem:ChillPlusResult" id="r_ChillPlusResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1ChillPlusResult.html">ChillPlusResult</a></td></tr>
 <tr class="memitem:LinearClassifier" id="r_LinearClassifier"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1LinearClassifier.html">LinearClassifier</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One-versus-rest ridge classifier on a dense feature matrix.  <a href="structchill_1_1LinearClassifier.html#details">More...</a><br /></td></tr>
+<tr class="memitem:QlCutoffStages" id="r_QlCutoffStages"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1QlCutoffStages.html">QlCutoffStages</a></td></tr>
 <tr class="memitem:QlmAtom" id="r_QlmAtom"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1QlmAtom.html">QlmAtom</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is the local orientational bond order parameter \(q_{lm}\), of length \(2l+1\).  <a href="structchill_1_1QlmAtom.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SteinhardtQl" id="r_SteinhardtQl"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a></td></tr>
@@ -276,52 +279,62 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaf4ca04aace5b50713081cc6528bc771a" id="r_gaf4ca04aace5b50713081cc6528bc771a"><td class="memItemLeft"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaf4ca04aace5b50713081cc6528bc771a">classifyBond</a> (double cij, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool closed=true)</td></tr>
-<tr class="memitem:ga1bc0f302f0567e60061fd3f82a472b81" id="r_ga1bc0f302f0567e60061fd3f82a472b81"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga1bc0f302f0567e60061fd3f82a472b81">chillRule</a> ()</td></tr>
-<tr class="memitem:gabb43db20557ea73beb0a103a11feb906" id="r_gabb43db20557ea73beb0a103a11feb906"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gabb43db20557ea73beb0a103a11feb906">chillPlusRule</a> ()</td></tr>
-<tr class="memitem:gac4ea4fda92a94c624a187858ed83de2f" id="r_gac4ea4fda92a94c624a187858ed83de2f"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gac4ea4fda92a94c624a187858ed83de2f">bondClassifier</a> (const std::string &amp;name)</td></tr>
-<tr class="memitem:gafdbd8e7d77ca3e23619b0073b02a2e05" id="r_gafdbd8e7d77ca3e23619b0073b02a2e05"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gafdbd8e7d77ca3e23619b0073b02a2e05">registerBondClassifier</a> (const std::string &amp;name, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule)</td></tr>
-<tr class="memitem:ga65e947224bbb3fd2082fe94f470e0765" id="r_ga65e947224bbb3fd2082fe94f470e0765"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga65e947224bbb3fd2082fe94f470e0765">bondClassifierNames</a> ()</td></tr>
-<tr class="memdesc:ga65e947224bbb3fd2082fe94f470e0765"><td class="mdescLeft">&#160;</td><td class="mdescRight">Names of every registered rule set.  <br /></td></tr>
-<tr class="memitem:ga685e260b6bf728585deefc814eb82be1" id="r_ga685e260b6bf728585deefc814eb82be1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga685e260b6bf728585deefc814eb82be1">classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
-<tr class="memitem:gac0ed780ae63ea9ed490be26139f483e1" id="r_gac0ed780ae63ea9ed490be26139f483e1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gac0ed780ae63ea9ed490be26139f483e1">classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, bool closed)</td></tr>
-<tr class="memitem:gaca144c74a1021bd03c80cd5787ca8753" id="r_gaca144c74a1021bd03c80cd5787ca8753"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaca144c74a1021bd03c80cd5787ca8753">classifyBondsCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
-<tr class="memdesc:gaca144c74a1021bd03c80cd5787ca8753"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL/CHILL+ bonds from a CSR of cloud indices.  <br /></td></tr>
-<tr class="memitem:ga6f4df78035e34977f718ec80514f8504" id="r_ga6f4df78035e34977f718ec80514f8504"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga6f4df78035e34977f718ec80514f8504">chillPlusFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
-<tr class="memdesc:ga6f4df78035e34977f718ec80514f8504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count.  <br /></td></tr>
-<tr class="memitem:ga60d3bf73811f8316bc61224ed751448a" id="r_ga60d3bf73811f8316bc61224ed751448a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga60d3bf73811f8316bc61224ed751448a">bondOrder</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const std::vector&lt; char &gt; *which)</td></tr>
-<tr class="memitem:gadce994972bc6a6edaac9ac00a9410827" id="r_gadce994972bc6a6edaac9ac00a9410827"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gadce994972bc6a6edaac9ac00a9410827">correlFromOrder</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, const std::vector&lt; char &gt; *which, bool closed=true)</td></tr>
-<tr class="memitem:ga4017efb120fe038acfabec9175e2aef6" id="r_ga4017efb120fe038acfabec9175e2aef6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga4017efb120fe038acfabec9175e2aef6">getCorrel</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
-<tr class="memdesc:ga4017efb120fe038acfabec9175e2aef6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for getting the bond order correlations \(c_{ij}\) (or \(a_{ij}\) in some treatments) according to the CHILL algorithm.  <br /></td></tr>
-<tr class="memitem:ga6636e09d09e99448ff68eb6533d2e479" id="r_ga6636e09d09e99448ff68eb6533d2e479"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga6636e09d09e99448ff68eb6533d2e479">getIceTypeNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
-<tr class="memdesc:ga6636e09d09e99448ff68eb6533d2e479"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
-<tr class="memitem:ga86fb1f94d087bcc2d0a55f487629ca17" id="r_ga86fb1f94d087bcc2d0a55f487629ca17"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga86fb1f94d087bcc2d0a55f487629ca17">getIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chill.txt&quot;)</td></tr>
-<tr class="memdesc:ga86fb1f94d087bcc2d0a55f487629ca17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
-<tr class="memitem:ga00437c7dd47b3126a35b5bb410904ee2" id="r_ga00437c7dd47b3126a35b5bb410904ee2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga00437c7dd47b3126a35b5bb410904ee2">getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
-<tr class="memitem:ga3d430e0ac5cc894ab47422cd2dad5e7f" id="r_ga3d430e0ac5cc894ab47422cd2dad5e7f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga3d430e0ac5cc894ab47422cd2dad5e7f">getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, int coordinationNumber, bool closedBounds)</td></tr>
-<tr class="memdesc:ga3d430e0ac5cc894ab47422cd2dad5e7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same classification. closedBounds false uses the open OVITO edges.  <br /></td></tr>
-<tr class="memitem:gaf494786ce8fdcfe596b6181ef2a9979f" id="r_gaf494786ce8fdcfe596b6181ef2a9979f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaf494786ce8fdcfe596b6181ef2a9979f">getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chillPlus.txt&quot;)</td></tr>
-<tr class="memitem:gade10dbe4d8bea0ae2459cea84f63525b" id="r_gade10dbe4d8bea0ae2459cea84f63525b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gade10dbe4d8bea0ae2459cea84f63525b">getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice, std::string outputFileName, bool neighbourTest)</td></tr>
-<tr class="memdesc:gade10dbe4d8bea0ae2459cea84f63525b"><td class="mdescLeft">&#160;</td><td class="mdescRight">neighbourTest false is the OVITO interfacial rule.  <br /></td></tr>
-<tr class="memitem:ga02005590b436de59a09ab102fd5d78cc" id="r_ga02005590b436de59a09ab102fd5d78cc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga02005590b436de59a09ab102fd5d78cc">getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
-<tr class="memitem:ga439ba1c08661531c9e90cfc8818e6b22" id="r_ga439ba1c08661531c9e90cfc8818e6b22"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga439ba1c08661531c9e90cfc8818e6b22">getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, bool neighbourTest)</td></tr>
-<tr class="memitem:ga6c253832dc8e20f4450ed81d1edc7bf7" id="r_ga6c253832dc8e20f4450ed81d1edc7bf7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga6c253832dc8e20f4450ed81d1edc7bf7">clearIceTypesExcept</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;types)</td></tr>
-<tr class="memitem:gaa4cd8fa09ced6b06f44bf2258304a5e3" id="r_gaa4cd8fa09ced6b06f44bf2258304a5e3"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaa4cd8fa09ced6b06f44bf2258304a5e3">getq6</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
-<tr class="memitem:gaaad5ad6884511e350e8b2cda1baeaea2" id="r_gaaad5ad6884511e350e8b2cda1baeaea2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaaad5ad6884511e350e8b2cda1baeaea2">reclassifyWater</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;q6)</td></tr>
-<tr class="memitem:ga0981b3101b04cacd525c2b5dc52f8a96" id="r_ga0981b3101b04cacd525c2b5dc52f8a96"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga0981b3101b04cacd525c2b5dc52f8a96">printIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;superChill.txt&quot;)</td></tr>
-<tr class="memdesc:ga0981b3101b04cacd525c2b5dc52f8a96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints out the iceType for a particular frame onto the terminal.  <br /></td></tr>
-<tr class="memitem:ga87291ed1a8fe073028ce4de34ff38da2" id="r_ga87291ed1a8fe073028ce4de34ff38da2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga87291ed1a8fe073028ce4de34ff38da2">isInterfacial</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int iatom, int num_staggrd, int num_eclipsd, bool chillPlus=false)</td></tr>
-<tr class="memitem:gaba97c889c36d860a4842f43a3f81a6b5" id="r_gaba97c889c36d860a4842f43a3f81a6b5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaba97c889c36d860a4842f43a3f81a6b5">numStaggered</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int jatom)</td></tr>
-<tr class="memdesc:gaba97c889c36d860a4842f43a3f81a6b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the number of staggered bonds for a given atom of index jatom.  <br /></td></tr>
-<tr class="memitem:gad60f25b03dc9b26dc62d80fd3fac53c3" id="r_gad60f25b03dc9b26dc62d80fd3fac53c3"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3">steinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL)</td></tr>
-<tr class="memitem:gab2dd84ef3a70da39a6e7af85b9a48a0b" id="r_gab2dd84ef3a70da39a6e7af85b9a48a0b"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gab2dd84ef3a70da39a6e7af85b9a48a0b">steinhardtQlCutoff</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int orderL, int typeI, bool average)</td></tr>
-<tr class="memitem:ga794193ca26ae29cc438c91471a0cb3d5" id="r_ga794193ca26ae29cc438c91471a0cb3d5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga794193ca26ae29cc438c91471a0cb3d5">setSteinhardtAtomSplit</a> (bool split)</td></tr>
-<tr class="memitem:gacf09e172dbd2b204fb6470c65ee38257" id="r_gacf09e172dbd2b204fb6470c65ee38257"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gacf09e172dbd2b204fb6470c65ee38257">steinhardtQlmWidth</a> (int orderL)</td></tr>
-<tr class="memdesc:gacf09e172dbd2b204fb6470c65ee38257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.  <br /></td></tr>
-<tr class="memitem:ga5eb8eb075ca96976d2992150cfcfed5d" id="r_ga5eb8eb075ca96976d2992150cfcfed5d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga5eb8eb075ca96976d2992150cfcfed5d">writeSteinhardtQlm</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, std::vector&lt; double &gt; &amp;qlm, const std::vector&lt; char &gt; *which)</td></tr>
-<tr class="memdesc:ga5eb8eb075ca96976d2992150cfcfed5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">q_lm for atoms <em class="arg">which</em> selects. Other atoms are left zero.  <br /></td></tr>
-<tr class="memitem:ga7b9094a4f11e908dcb0d0c3987bebea3" id="r_ga7b9094a4f11e908dcb0d0c3987bebea3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga7b9094a4f11e908dcb0d0c3987bebea3">readSteinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, const std::vector&lt; double &gt; &amp;qlm, std::vector&lt; double &gt; &amp;ql, std::vector&lt; double &gt; &amp;qlBar, const std::vector&lt; char &gt; *which)</td></tr>
-<tr class="memdesc:ga7b9094a4f11e908dcb0d0c3987bebea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">ql and qlBar for atoms <em class="arg">which</em> selects, reading q_lm of their neighbours.  <br /></td></tr>
+<tr class="memitem:af4ca04aace5b50713081cc6528bc771a" id="r_af4ca04aace5b50713081cc6528bc771a"><td class="memItemLeft"><a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328">molSys::bond_type</a>&#160;</td><td class="memItemRight"><a class="el" href="#af4ca04aace5b50713081cc6528bc771a">classifyBond</a> (double cij, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool closed=true)</td></tr>
+<tr class="memitem:a1bc0f302f0567e60061fd3f82a472b81" id="r_a1bc0f302f0567e60061fd3f82a472b81"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1bc0f302f0567e60061fd3f82a472b81">chillRule</a> ()</td></tr>
+<tr class="memitem:abb43db20557ea73beb0a103a11feb906" id="r_abb43db20557ea73beb0a103a11feb906"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="#abb43db20557ea73beb0a103a11feb906">chillPlusRule</a> ()</td></tr>
+<tr class="memitem:ac4ea4fda92a94c624a187858ed83de2f" id="r_ac4ea4fda92a94c624a187858ed83de2f"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="#ac4ea4fda92a94c624a187858ed83de2f">bondClassifier</a> (const std::string &amp;name)</td></tr>
+<tr class="memitem:afdbd8e7d77ca3e23619b0073b02a2e05" id="r_afdbd8e7d77ca3e23619b0073b02a2e05"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#afdbd8e7d77ca3e23619b0073b02a2e05">registerBondClassifier</a> (const std::string &amp;name, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule)</td></tr>
+<tr class="memitem:a65e947224bbb3fd2082fe94f470e0765" id="r_a65e947224bbb3fd2082fe94f470e0765"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a65e947224bbb3fd2082fe94f470e0765">bondClassifierNames</a> ()</td></tr>
+<tr class="memdesc:a65e947224bbb3fd2082fe94f470e0765"><td class="mdescLeft">&#160;</td><td class="mdescRight">Names of every registered rule set.  <br /></td></tr>
+<tr class="memitem:a685e260b6bf728585deefc814eb82be1" id="r_a685e260b6bf728585deefc814eb82be1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a685e260b6bf728585deefc814eb82be1">classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
+<tr class="memitem:ac0ed780ae63ea9ed490be26139f483e1" id="r_ac0ed780ae63ea9ed490be26139f483e1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ac0ed780ae63ea9ed490be26139f483e1">classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, bool closed)</td></tr>
+<tr class="memitem:aca144c74a1021bd03c80cd5787ca8753" id="r_aca144c74a1021bd03c80cd5787ca8753"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aca144c74a1021bd03c80cd5787ca8753">classifyBondsCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
+<tr class="memdesc:aca144c74a1021bd03c80cd5787ca8753"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL/CHILL+ bonds from a CSR of cloud indices.  <br /></td></tr>
+<tr class="memitem:a68da69af0ad0bff7e0c2aa3705a354cf" id="r_a68da69af0ad0bff7e0c2aa3705a354cf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a68da69af0ad0bff7e0c2aa3705a354cf">chillPlusFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, bool keepBonds=true)</td></tr>
+<tr class="memitem:aa4dae25c269f70f40ed2ce175b710cbf" id="r_aa4dae25c269f70f40ed2ce175b710cbf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa4dae25c269f70f40ed2ce175b710cbf">chillPlusOvitoFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memitem:a64bc4e2366a07540c89854cfde5dfeb6" id="r_a64bc4e2366a07540c89854cfde5dfeb6"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a64bc4e2366a07540c89854cfde5dfeb6">chillFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memitem:ab26bf9461b74908aabd6e096546ef883" id="r_ab26bf9461b74908aabd6e096546ef883"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ab26bf9461b74908aabd6e096546ef883">bondOrder</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const std::vector&lt; char &gt; *which, bool fresh=true)</td></tr>
+<tr class="memitem:adce994972bc6a6edaac9ac00a9410827" id="r_adce994972bc6a6edaac9ac00a9410827"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#adce994972bc6a6edaac9ac00a9410827">correlFromOrder</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, const std::vector&lt; char &gt; *which, bool closed=true)</td></tr>
+<tr class="memitem:a4017efb120fe038acfabec9175e2aef6" id="r_a4017efb120fe038acfabec9175e2aef6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a4017efb120fe038acfabec9175e2aef6">getCorrel</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
+<tr class="memdesc:a4017efb120fe038acfabec9175e2aef6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for getting the bond order correlations \(c_{ij}\) (or \(a_{ij}\) in some treatments) according to the CHILL algorithm.  <br /></td></tr>
+<tr class="memitem:a6636e09d09e99448ff68eb6533d2e479" id="r_a6636e09d09e99448ff68eb6533d2e479"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a6636e09d09e99448ff68eb6533d2e479">getIceTypeNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
+<tr class="memdesc:a6636e09d09e99448ff68eb6533d2e479"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
+<tr class="memitem:a86fb1f94d087bcc2d0a55f487629ca17" id="r_a86fb1f94d087bcc2d0a55f487629ca17"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a86fb1f94d087bcc2d0a55f487629ca17">getIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chill.txt&quot;)</td></tr>
+<tr class="memdesc:a86fb1f94d087bcc2d0a55f487629ca17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
+<tr class="memitem:a00437c7dd47b3126a35b5bb410904ee2" id="r_a00437c7dd47b3126a35b5bb410904ee2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a00437c7dd47b3126a35b5bb410904ee2">getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
+<tr class="memitem:a3d430e0ac5cc894ab47422cd2dad5e7f" id="r_a3d430e0ac5cc894ab47422cd2dad5e7f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3d430e0ac5cc894ab47422cd2dad5e7f">getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, int coordinationNumber, bool closedBounds)</td></tr>
+<tr class="memdesc:a3d430e0ac5cc894ab47422cd2dad5e7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same classification. closedBounds false uses the open OVITO edges.  <br /></td></tr>
+<tr class="memitem:aa67d698173c16604574479c7ffeccc06" id="r_aa67d698173c16604574479c7ffeccc06"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aa67d698173c16604574479c7ffeccc06">chillPlusPublishedCutoff</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI)</td></tr>
+<tr class="memitem:a0773fb7ba0d82fc8b8681e034141971b" id="r_a0773fb7ba0d82fc8b8681e034141971b"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a0773fb7ba0d82fc8b8681e034141971b">q4q6ChillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI, std::vector&lt; double &gt; &amp;q4, std::vector&lt; double &gt; &amp;q6, std::vector&lt; double &gt; &amp;q4bar, std::vector&lt; double &gt; &amp;q6bar)</td></tr>
+<tr class="memitem:a06ede063ce645e06c6ea154a52c9703a" id="r_a06ede063ce645e06c6ea154a52c9703a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a06ede063ce645e06c6ea154a52c9703a">chillPlusSymbolicPrefilter</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI)</td></tr>
+<tr class="memitem:af494786ce8fdcfe596b6181ef2a9979f" id="r_af494786ce8fdcfe596b6181ef2a9979f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#af494786ce8fdcfe596b6181ef2a9979f">getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chillPlus.txt&quot;)</td></tr>
+<tr class="memitem:ade10dbe4d8bea0ae2459cea84f63525b" id="r_ade10dbe4d8bea0ae2459cea84f63525b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ade10dbe4d8bea0ae2459cea84f63525b">getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice, std::string outputFileName, bool neighbourTest)</td></tr>
+<tr class="memdesc:ade10dbe4d8bea0ae2459cea84f63525b"><td class="mdescLeft">&#160;</td><td class="mdescRight">neighbourTest false is the OVITO interfacial rule.  <br /></td></tr>
+<tr class="memitem:a02005590b436de59a09ab102fd5d78cc" id="r_a02005590b436de59a09ab102fd5d78cc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a02005590b436de59a09ab102fd5d78cc">getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
+<tr class="memitem:a439ba1c08661531c9e90cfc8818e6b22" id="r_a439ba1c08661531c9e90cfc8818e6b22"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a439ba1c08661531c9e90cfc8818e6b22">getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, bool neighbourTest)</td></tr>
+<tr class="memitem:a6c253832dc8e20f4450ed81d1edc7bf7" id="r_a6c253832dc8e20f4450ed81d1edc7bf7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a6c253832dc8e20f4450ed81d1edc7bf7">clearIceTypesExcept</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;types)</td></tr>
+<tr class="memitem:aa4cd8fa09ced6b06f44bf2258304a5e3" id="r_aa4cd8fa09ced6b06f44bf2258304a5e3"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa4cd8fa09ced6b06f44bf2258304a5e3">getq6</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
+<tr class="memitem:aaad5ad6884511e350e8b2cda1baeaea2" id="r_aaad5ad6884511e350e8b2cda1baeaea2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aaad5ad6884511e350e8b2cda1baeaea2">reclassifyWater</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;q6)</td></tr>
+<tr class="memitem:a0981b3101b04cacd525c2b5dc52f8a96" id="r_a0981b3101b04cacd525c2b5dc52f8a96"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0981b3101b04cacd525c2b5dc52f8a96">printIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;superChill.txt&quot;)</td></tr>
+<tr class="memdesc:a0981b3101b04cacd525c2b5dc52f8a96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints out the iceType for a particular frame onto the terminal.  <br /></td></tr>
+<tr class="memitem:a87291ed1a8fe073028ce4de34ff38da2" id="r_a87291ed1a8fe073028ce4de34ff38da2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a87291ed1a8fe073028ce4de34ff38da2">isInterfacial</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int iatom, int num_staggrd, int num_eclipsd, bool chillPlus=false)</td></tr>
+<tr class="memitem:aba97c889c36d860a4842f43a3f81a6b5" id="r_aba97c889c36d860a4842f43a3f81a6b5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aba97c889c36d860a4842f43a3f81a6b5">numStaggered</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int jatom)</td></tr>
+<tr class="memdesc:aba97c889c36d860a4842f43a3f81a6b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the number of staggered bonds for a given atom of index jatom.  <br /></td></tr>
+<tr class="memitem:ad60f25b03dc9b26dc62d80fd3fac53c3" id="r_ad60f25b03dc9b26dc62d80fd3fac53c3"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="#ad60f25b03dc9b26dc62d80fd3fac53c3">steinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL)</td></tr>
+<tr class="memitem:a2a25a9b94dbeb2999ffbe11d709821ff" id="r_a2a25a9b94dbeb2999ffbe11d709821ff"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2a25a9b94dbeb2999ffbe11d709821ff">steinhardtQlCutoff</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int orderL, int typeI, bool average, bool invariants=false)</td></tr>
+<tr class="memitem:a28009823939d7ea34c17394ba5f3fc43" id="r_a28009823939d7ea34c17394ba5f3fc43"><td class="memItemLeft"><a class="el" href="structchill_1_1QlCutoffStages.html">QlCutoffStages</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a28009823939d7ea34c17394ba5f3fc43">lastQlCutoffStages</a> ()</td></tr>
+<tr class="memitem:a54c2a4268860a308ff4d4747aed1f639" id="r_a54c2a4268860a308ff4d4747aed1f639"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a54c2a4268860a308ff4d4747aed1f639">localCutoffQ4Q6</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI, std::vector&lt; double &gt; &amp;q4, std::vector&lt; double &gt; &amp;q6)</td></tr>
+<tr class="memitem:a2edabdc2c991910b7f55ea97e3764f8d" id="r_a2edabdc2c991910b7f55ea97e3764f8d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a2edabdc2c991910b7f55ea97e3764f8d">steinhardtQ4Q6Cutoff</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int typeI, bool average, <a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> &amp;q4, <a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> &amp;q6)</td></tr>
+<tr class="memitem:abb306f05fb97b73078f1f036eb3cac36" id="r_abb306f05fb97b73078f1f036eb3cac36"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="#abb306f05fb97b73078f1f036eb3cac36">steinhardtQlMutual</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int k, double candidateCutoff, int typeI, int orderL)</td></tr>
+<tr class="memitem:a794193ca26ae29cc438c91471a0cb3d5" id="r_a794193ca26ae29cc438c91471a0cb3d5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a794193ca26ae29cc438c91471a0cb3d5">setSteinhardtAtomSplit</a> (bool split)</td></tr>
+<tr class="memitem:aa21221b501fe7bbf35fa664416cdc2d3" id="r_aa21221b501fe7bbf35fa664416cdc2d3"><td class="memItemLeft"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa21221b501fe7bbf35fa664416cdc2d3">lastChillPhases</a> ()</td></tr>
+<tr class="memitem:a5b07478b8a490e3c8272e23fdc3da49e" id="r_a5b07478b8a490e3c8272e23fdc3da49e"><td class="memItemLeft"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5b07478b8a490e3c8272e23fdc3da49e">lastSteinhardtPhases</a> ()</td></tr>
+<tr class="memitem:acf09e172dbd2b204fb6470c65ee38257" id="r_acf09e172dbd2b204fb6470c65ee38257"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#acf09e172dbd2b204fb6470c65ee38257">steinhardtQlmWidth</a> (int orderL)</td></tr>
+<tr class="memdesc:acf09e172dbd2b204fb6470c65ee38257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.  <br /></td></tr>
+<tr class="memitem:a5eb8eb075ca96976d2992150cfcfed5d" id="r_a5eb8eb075ca96976d2992150cfcfed5d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a5eb8eb075ca96976d2992150cfcfed5d">writeSteinhardtQlm</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, std::vector&lt; double &gt; &amp;qlm, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memdesc:a5eb8eb075ca96976d2992150cfcfed5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">q_lm for atoms <em class="arg">which</em> selects. Other atoms are left zero.  <br /></td></tr>
+<tr class="memitem:a7b9094a4f11e908dcb0d0c3987bebea3" id="r_a7b9094a4f11e908dcb0d0c3987bebea3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7b9094a4f11e908dcb0d0c3987bebea3">readSteinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, const std::vector&lt; double &gt; &amp;qlm, std::vector&lt; double &gt; &amp;ql, std::vector&lt; double &gt; &amp;qlBar, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memdesc:a7b9094a4f11e908dcb0d0c3987bebea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">ql and qlBar for atoms <em class="arg">which</em> selects, reading q_lm of their neighbours.  <br /></td></tr>
 <tr class="memitem:ac3eb9f55035d401247072181b24b563a" id="r_ac3eb9f55035d401247072181b24b563a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ac3eb9f55035d401247072181b24b563a">preferOffload</a> ()</td></tr>
 <tr class="memitem:a2d5243660db62c90ccdad3bb9cda319e" id="r_a2d5243660db62c90ccdad3bb9cda319e"><td class="memItemLeft"><a class="el" href="structchill_1_1ChillPlusResult.html">ChillPlusResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2d5243660db62c90ccdad3bb9cda319e">hostChillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a2d5243660db62c90ccdad3bb9cda319e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Host CHILL+ (classifyBonds + getIceTypePlusNoPrint).  <br /></td></tr>
@@ -383,11 +396,12 @@ Functions</h2></td></tr>
 <div class="fragment"><div class="line">Phase                  E    S    Neighbours  Description</div>
 <div class="line">Cubic                  0    4    4           no change was made to the staggered <a class="code hl_namespace" href="namespacebond.html">bond</a> criterion from CHILL</div>
 <div class="line">Hexagonal              1    3    4           wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K</div>
-<div class="line">Interfacial            any  2    4           must have at least one first neighbor water with more than two staggered bonds</div>
-<div class="line">                       0    3    4           must have at least one first neighbor water with more than one staggered <a class="code hl_namespace" href="namespacebond.html">bond</a></div>
+<div class="line">Interfacial            any  2    4           must have at least one first neighbor <a class="code hl_namespace" href="namespacewater.html">water</a> with more than two staggered bonds</div>
+<div class="line">                       0    3    4           must have at least one first neighbor <a class="code hl_namespace" href="namespacewater.html">water</a> with more than one staggered <a class="code hl_namespace" href="namespacebond.html">bond</a></div>
 <div class="line">Clathrate              4    0    4           bulk clathrate and part of the <span class="keyword">interface </span>of clathrates can be identified with four eclipsed bonds</div>
 <div class="line">Interfacial clathrate  3    any  4           partial clathrate cages and threads of clathrate-like order</div>
 <div class="line">Liquid                 N/A  N/A  any         classifies as liquid if none of the above criteria are fulfilled</div>
+<div class="ttc" id="anamespacewater_html"><div class="ttname"><a href="namespacewater.html">water</a></div><div class="ttdoc">Water-oxygen selection for a mixed frame.</div><div class="ttdef"><b>Definition</b> <a href="water__select_8hpp_source.html#l00019">water_select.hpp:19</a></div></div>
 </div><!-- fragment --><p>Although both the CHILL and CHILL+ classification schemes take into account the local order of the environment of each particle, both schemes output a per-particle classification.</p>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md1"></a>
 Changelog</h3>
@@ -496,6 +510,127 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="ac4ea4fda92a94c624a187858ed83de2f" name="ac4ea4fda92a94c624a187858ed83de2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4ea4fda92a94c624a187858ed83de2f">&#9670;&#160;</a></span>bondClassifier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> chill::bondClassifier </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Look up a registered rule set by name. "CHILL" and "CHILL+" are always present; registerBondClassifier adds more. Throws std::out_of_range for unknown names. </p>
+
+</div>
+</div>
+<a id="a65e947224bbb3fd2082fe94f470e0765" name="a65e947224bbb3fd2082fe94f470e0765"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65e947224bbb3fd2082fe94f470e0765">&#9670;&#160;</a></span>bondClassifierNames()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::string &gt; chill::bondClassifierNames </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Names of every registered rule set. </p>
+
+</div>
+</div>
+<a id="ab26bf9461b74908aabd6e096546ef883" name="ab26bf9461b74908aabd6e096546ef883"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab26bf9461b74908aabd6e096546ef883">&#9670;&#160;</a></span>bondOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::bondOrder </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>order</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; *</td>          <td class="paramname"><span class="paramname"><em>which</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>fresh</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a64bc4e2366a07540c89854cfde5dfeb6" name="a64bc4e2366a07540c89854cfde5dfeb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64bc4e2366a07540c89854cfde5dfeb6">&#9670;&#160;</a></span>chillFromCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::chillFromCsr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Published CHILL labels from a cutoff CSR. Correlations are the four nearest neighbours in the list. Bond vectors are not stored. Returns the cubic count. Thresholds are <a class="el" href="#a1bc0f302f0567e60061fd3f82a472b81">chillRule()</a>. </p>
+
+</div>
+</div>
 <a id="ae9068c355d803c1932d2aa7e7cc27ec8" name="ae9068c355d803c1932d2aa7e7cc27ec8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae9068c355d803c1932d2aa7e7cc27ec8">&#9670;&#160;</a></span>chillPlus()</h2>
 
@@ -525,8 +660,120 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a68da69af0ad0bff7e0c2aa3705a354cf" name="a68da69af0ad0bff7e0c2aa3705a354cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68da69af0ad0bff7e0c2aa3705a354cf">&#9670;&#160;</a></span>chillPlusFromCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::chillPlusFromCsr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>keepBonds</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count. <em class="arg">keepBonds</em> false still writes iceType and skips the per-atom bond vectors. The labels are the same either way. The vectors are what a caller that reads c_ij needs. </p>
+
+</div>
+</div>
+<a id="aa4dae25c269f70f40ed2ce175b710cbf" name="aa4dae25c269f70f40ed2ce175b710cbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4dae25c269f70f40ed2ce175b710cbf">&#9670;&#160;</a></span>chillPlusOvitoFromCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::chillPlusOvitoFromCsr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>OVITO Chill+ from a cutoff CSR. q_lm is the sum over every neighbour in the row, not the four closest. Edges are open and the Table 1 neighbour test is off, which is the Chill+ modifier. A crystal row still needs exactly four neighbours. Bond vectors are not stored. Returns the cubic count. </p>
+
+</div>
+</div>
+<a id="aa67d698173c16604574479c7ffeccc06" name="aa67d698173c16604574479c7ffeccc06"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa67d698173c16604574479c7ffeccc06">&#9670;&#160;</a></span>chillPlusPublishedCutoff()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool chill::chillPlusPublishedCutoff </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Published CHILL+ on the cutoff shell. The pair rows are read inside this call; the shared neighbour-list builder is not modified. Returns false when that search is not available. </p>
+
+</div>
+</div>
+<a id="abb43db20557ea73beb0a103a11feb906" name="abb43db20557ea73beb0a103a11feb906"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb43db20557ea73beb0a103a11feb906">&#9670;&#160;</a></span>chillPlusRule() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> chill::chillPlusRule </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The CHILL+ rule set (Nguyen and Molinero, JPCB 119, 9369, 2015): wider eclipsed band for interfacial and clathrate recognition </p>
+
+</div>
+</div>
 <a id="a367fc45a45239f46fe8f136c1be5e110" name="a367fc45a45239f46fe8f136c1be5e110"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a367fc45a45239f46fe8f136c1be5e110">&#9670;&#160;</a></span>chillPlusRule()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a367fc45a45239f46fe8f136c1be5e110">&#9670;&#160;</a></span>chillPlusRule() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -599,6 +846,222 @@ Changelog</h3>
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a06ede063ce645e06c6ea154a52c9703a" name="a06ede063ce645e06c6ea154a52c9703a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06ede063ce645e06c6ea154a52c9703a">&#9670;&#160;</a></span>chillPlusSymbolicPrefilter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool chill::chillPlusSymbolicPrefilter </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Cubic pre-filter from discovery/pysr_prefilter.py. The selected expression is cmean^4. It writes cubic and returns true only when every atom has a cutoff shell of four and a negative mean correlation whose fourth power sits above the highest non-cubic score in that search. That forces every bond below -0.84, which the published rule labels staggered, so the atom is cubic. Otherwise it returns false and leaves the cloud unchanged. The default published call does not use it. </p>
+
+</div>
+</div>
+<a id="a1bc0f302f0567e60061fd3f82a472b81" name="a1bc0f302f0567e60061fd3f82a472b81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1bc0f302f0567e60061fd3f82a472b81">&#9670;&#160;</a></span>chillRule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> chill::chillRule </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>The CHILL rule set (Moore et al., PCCP 12, 4124, 2010): strict staggered bound, narrow eclipsed band, four nearest neighbours </p>
+
+</div>
+</div>
+<a id="af4ca04aace5b50713081cc6528bc771a" name="af4ca04aace5b50713081cc6528bc771a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4ca04aace5b50713081cc6528bc771a">&#9670;&#160;</a></span>classifyBond()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328">molSys::bond_type</a> chill::classifyBond </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cij</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>closed</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Staggered, eclipsed, or out of range. <em class="arg">closed</em> selects inclusive edges (c &lt;= staggeredMax, eclipsedMin &lt;= c &lt;= eclipsedMax), the Nguyen and Molinero rule and the 2.13 behavior. Open edges match OVITO 3.17.2 (c &lt; staggeredMax, eclipsedMin &lt; c &lt; eclipsedMax). The flag is an argument so <a class="el" href="structchill_1_1BondClassifier.html" title="One rule set for classifying bond correlations .">BondClassifier</a> stays three doubles and one int. A caller that passes the struct by value does not carry a fifth field. </p>
+
+<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00193">193</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  194</span>                                                        {</div>
+<div class="line"><span class="lineno">  195</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> staggered = closed ? cij &lt;= rule.<a class="code hl_variable" href="structchill_1_1BondClassifier.html#a146b6b87ef413723796680f70c8ecca5">staggeredMax</a> : cij &lt; rule.<a class="code hl_variable" href="structchill_1_1BondClassifier.html#a146b6b87ef413723796680f70c8ecca5">staggeredMax</a>;</div>
+<div class="line"><span class="lineno">  196</span>  <span class="keywordflow">if</span> (staggered) {</div>
+<div class="line"><span class="lineno">  197</span>    <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c">molSys::bond_type::staggered</a>;</div>
+<div class="line"><span class="lineno">  198</span>  }</div>
+<div class="line"><span class="lineno">  199</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> eclipsed =</div>
+<div class="line"><span class="lineno">  200</span>      closed ? (cij &gt;= rule.<a class="code hl_variable" href="structchill_1_1BondClassifier.html#a02940fdda8b90a912eda29b5d48a4bc3">eclipsedMin</a> &amp;&amp; cij &lt;= rule.<a class="code hl_variable" href="structchill_1_1BondClassifier.html#aa9f8b29d2f9ab31e7cda7a399f2b4466">eclipsedMax</a>)</div>
+<div class="line"><span class="lineno">  201</span>             : (cij &gt; rule.eclipsedMin &amp;&amp; cij &lt; rule.eclipsedMax);</div>
+<div class="line"><span class="lineno">  202</span>  <span class="keywordflow">if</span> (eclipsed) {</div>
+<div class="line"><span class="lineno">  203</span>    <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df">molSys::bond_type::eclipsed</a>;</div>
+<div class="line"><span class="lineno">  204</span>  }</div>
+<div class="line"><span class="lineno">  205</span>  <span class="keywordflow">return</span> <a class="code hl_enumvalue" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0">molSys::bond_type::out_of_range</a>;</div>
+<div class="line"><span class="lineno">  206</span>}</div>
+<div class="ttc" id="anamespacemolSys_html_a1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df"><div class="ttname"><a href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df">molSys::bond_type::eclipsed</a></div><div class="ttdeci">@ eclipsed</div><div class="ttdoc">The bond is an eclipsed bond.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00069">mol_sys.hpp:69</a></div></div>
+<div class="ttc" id="anamespacemolSys_html_a1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0"><div class="ttname"><a href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0">molSys::bond_type::out_of_range</a></div><div class="ttdeci">@ out_of_range</div><div class="ttdoc">The bond cannot be classified as either staggered or eclipsed.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00069">mol_sys.hpp:69</a></div></div>
+<div class="ttc" id="anamespacemolSys_html_a1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c"><div class="ttname"><a href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c">molSys::bond_type::staggered</a></div><div class="ttdeci">@ staggered</div><div class="ttdoc">The bond is a staggered bond, according to the  or  value.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00069">mol_sys.hpp:69</a></div></div>
+<div class="ttc" id="astructchill_1_1BondClassifier_html_a02940fdda8b90a912eda29b5d48a4bc3"><div class="ttname"><a href="structchill_1_1BondClassifier.html#a02940fdda8b90a912eda29b5d48a4bc3">chill::BondClassifier::eclipsedMin</a></div><div class="ttdeci">double eclipsedMin</div><div class="ttdoc">Inclusive staggered edge, c_ij &lt;= staggeredMax.</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00181">bop.hpp:181</a></div></div>
+<div class="ttc" id="astructchill_1_1BondClassifier_html_a146b6b87ef413723796680f70c8ecca5"><div class="ttname"><a href="structchill_1_1BondClassifier.html#a146b6b87ef413723796680f70c8ecca5">chill::BondClassifier::staggeredMax</a></div><div class="ttdeci">double staggeredMax</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00180">bop.hpp:180</a></div></div>
+<div class="ttc" id="astructchill_1_1BondClassifier_html_aa9f8b29d2f9ab31e7cda7a399f2b4466"><div class="ttname"><a href="structchill_1_1BondClassifier.html#aa9f8b29d2f9ab31e7cda7a399f2b4466">chill::BondClassifier::eclipsedMax</a></div><div class="ttdeci">double eclipsedMax</div><div class="ttdoc">Inclusive lower edge of the eclipsed band.</div><div class="ttdef"><b>Definition</b> <a href="bop_8hpp_source.html#l00182">bop.hpp:182</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ac0ed780ae63ea9ed490be26139f483e1" name="ac0ed780ae63ea9ed490be26139f483e1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac0ed780ae63ea9ed490be26139f483e1">&#9670;&#160;</a></span>classifyBonds() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::classifyBonds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>closed</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Same classification as the four-argument form. <em class="arg">closed</em> false uses the open OVITO edges. The four-argument form stays the 2.13 symbol and keeps inclusive edges. </p>
+
+</div>
+</div>
+<a id="a685e260b6bf728585deefc814eb82be1" name="a685e260b6bf728585deefc814eb82be1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a685e260b6bf728585deefc814eb82be1">&#9670;&#160;</a></span>classifyBonds() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::classifyBonds </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Compute and classify the bond correlations c_ij under an arbitrary rule set, filling yCloud.pts[i].c_ij. getCorrel and getCorrelPlus are this engine under their canonical water rules. </p>
+
+</div>
+</div>
+<a id="aca144c74a1021bd03c80cd5787ca8753" name="aca144c74a1021bd03c80cd5787ca8753"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca144c74a1021bd03c80cd5787ca8753">&#9670;&#160;</a></span>classifyBondsCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::classifyBondsCsr </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>CHILL/CHILL+ bonds from a CSR of cloud indices. </p>
 
 </div>
 </div>
@@ -678,6 +1141,70 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a6c253832dc8e20f4450ed81d1edc7bf7" name="a6c253832dc8e20f4450ed81d1edc7bf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c253832dc8e20f4450ed81d1edc7bf7">&#9670;&#160;</a></span>clearIceTypesExcept()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::clearIceTypesExcept </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>types</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set iceType to unclassified for atoms whose LAMMPS type is not in types. Empty types leaves the cloud unchanged. Used after a water-type k-NN so substrate and ions are not scored as water. </p>
+
+</div>
+</div>
+<a id="adce994972bc6a6edaac9ac00a9410827" name="adce994972bc6a6edaac9ac00a9410827"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adce994972bc6a6edaac9ac00a9410827">&#9670;&#160;</a></span>correlFromOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::correlFromOrder </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>order</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; *</td>          <td class="paramname"><span class="paramname"><em>which</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>closed</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>c_ij for atoms <em class="arg">which</em> selects, from a bond-order vector that already holds every neighbour the bond reads. Atoms outside <em class="arg">which</em> are left untouched, including a ghost's bond list. </p>
+
+</div>
+</div>
 <a id="ad9570b8abd2d308248a07c2096e0b08e" name="ad9570b8abd2d308248a07c2096e0b08e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad9570b8abd2d308248a07c2096e0b08e">&#9670;&#160;</a></span>cutoffShellCount()</h2>
 
@@ -713,6 +1240,384 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a4017efb120fe038acfabec9175e2aef6" name="a4017efb120fe038acfabec9175e2aef6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4017efb120fe038acfabec9175e2aef6">&#9670;&#160;</a></span>getCorrel()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getCorrel </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>coordinationNumber</em></span><span class="paramdefsep"> = </span><span class="paramdefval">4</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function for getting the bond order correlations \(c_{ij}\) (or \(a_{ij}\) in some treatments) according to the CHILL algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">yCloud</td><td>The output <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>The row-ordered neighbour list, by ID. The first element of each row is the particle ID, followed by the IDs of the neighbours </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isSlice</td><td>This decides whether there is a slice or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">coordinationNumber</td><td>How many nearest neighbours the bond sum runs over. The default of four is the coordination CHILL is defined and validated against (tetrahedral water); other values reuse the c_ij machinery for differently coordinated systems, and a non-positive value gives each atom its own count from its neighbour-list row. The ice-classification tables in getIceType remain four-bond rules </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a3d430e0ac5cc894ab47422cd2dad5e7f" name="a3d430e0ac5cc894ab47422cd2dad5e7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d430e0ac5cc894ab47422cd2dad5e7f">&#9670;&#160;</a></span>getCorrelPlus() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getCorrelPlus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>coordinationNumber</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>closedBounds</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Same classification. closedBounds false uses the open OVITO edges. </p>
+
+</div>
+</div>
+<a id="a00437c7dd47b3126a35b5bb410904ee2" name="a00437c7dd47b3126a35b5bb410904ee2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00437c7dd47b3126a35b5bb410904ee2">&#9670;&#160;</a></span>getCorrelPlus() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getCorrelPlus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>coordinationNumber</em></span><span class="paramdefsep"> = </span><span class="paramdefval">4</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Gets c_ij and then classifies bond types according to the CHILL+ algorithm. coordinationNumber as in getCorrel: four is the validated CHILL+ water scheme, non-positive keeps each atom's whole neighbour row. This is the 2.13 symbol: inclusive edges (closedBounds true). </p>
+
+</div>
+</div>
+<a id="a86fb1f94d087bcc2d0a55f487629ca17" name="a86fb1f94d087bcc2d0a55f487629ca17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a86fb1f94d087bcc2d0a55f487629ca17">&#9670;&#160;</a></span>getIceType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getIceType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>outputFileName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;chill.txt&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function that classifies every particle's <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">yCloud</td><td>The output <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>Row-ordered neighbour list by atom ID </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>Path to the output directory to which ice types are written out to </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">firstFrame</td><td>First frame to be analyzed </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isSlice</td><td>This decides whether there is a slice or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outputFileName</td><td>Name of the output file, to which the ice types will be written out. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6636e09d09e99448ff68eb6533d2e479" name="a6636e09d09e99448ff68eb6533d2e479"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6636e09d09e99448ff68eb6533d2e479">&#9670;&#160;</a></span>getIceTypeNoPrint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getIceTypeNoPrint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function that classifies every particle's <a class="el" href="namespacemolSys.html#a13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm. </p>
+<p>Does not print out the information. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">yCloud</td><td>The output <a class="el" href="structmolSys_1_1PointCloud.html" title="This contains a collection of points; contains information for a particular frame.">molSys::PointCloud</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">isSlice</td><td>This decides whether there is a slice or not </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">nList</td><td>Row-ordered neighbour list by atom ID </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ade10dbe4d8bea0ae2459cea84f63525b" name="ade10dbe4d8bea0ae2459cea84f63525b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade10dbe4d8bea0ae2459cea84f63525b">&#9670;&#160;</a></span>getIceTypePlus() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getIceTypePlus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>outputFileName</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>neighbourTest</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>neighbourTest false is the OVITO interfacial rule. </p>
+
+</div>
+</div>
+<a id="af494786ce8fdcfe596b6181ef2a9979f" name="af494786ce8fdcfe596b6181ef2a9979f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af494786ce8fdcfe596b6181ef2a9979f">&#9670;&#160;</a></span>getIceTypePlus() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getIceTypePlus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>outputFileName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;chillPlus.txt&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Classifies each atom according to the CHILL+ algorithm. This is the 2.13 symbol: the published neighbour test stays on. </p>
+
+</div>
+</div>
+<a id="a439ba1c08661531c9e90cfc8818e6b22" name="a439ba1c08661531c9e90cfc8818e6b22"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a439ba1c08661531c9e90cfc8818e6b22">&#9670;&#160;</a></span>getIceTypePlusNoPrint() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getIceTypePlusNoPrint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>neighbourTest</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>neighbourTest false is the OVITO interfacial rule (two staggered bonds, or three staggered and no eclipsed bond, with no neighbour lookup). Either rule still requires a cutoff shell of four. </p>
+
+</div>
+</div>
+<a id="a02005590b436de59a09ab102fd5d78cc" name="a02005590b436de59a09ab102fd5d78cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02005590b436de59a09ab102fd5d78cc">&#9670;&#160;</a></span>getIceTypePlusNoPrint() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::getIceTypePlusNoPrint </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>CHILL+ ice types on the cloud. Does not write a file. This is the 2.13 symbol: the published neighbour test stays on. </p>
+
+</div>
+</div>
+<a id="aa4cd8fa09ced6b06f44bf2258304a5e3" name="aa4cd8fa09ced6b06f44bf2258304a5e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4cd8fa09ced6b06f44bf2258304a5e3">&#9670;&#160;</a></span>getq6()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; chill::getq6 </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>q6 can distinguish between water and ice. Use this for the largest ice cluster </p>
+
+</div>
+</div>
 <a id="a2d5243660db62c90ccdad3bb9cda319e" name="a2d5243660db62c90ccdad3bb9cda319e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d5243660db62c90ccdad3bb9cda319e">&#9670;&#160;</a></span>hostChillPlus()</h2>
 
@@ -744,6 +1649,172 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a87291ed1a8fe073028ce4de34ff38da2" name="a87291ed1a8fe073028ce4de34ff38da2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87291ed1a8fe073028ce4de34ff38da2">&#9670;&#160;</a></span>isInterfacial()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool chill::isInterfacial </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>num_staggrd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>num_eclipsd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>chillPlus</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Interfacial ice. Moore CHILL uses a neighbour with exactly two staggered bonds; Nguyen CHILL+ uses a neighbour with more than one. Pass chillPlus=true for the latter. </p>
+
+</div>
+</div>
+<a id="aa21221b501fe7bbf35fa664416cdc2d3" name="aa21221b501fe7bbf35fa664416cdc2d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa21221b501fe7bbf35fa664416cdc2d3">&#9670;&#160;</a></span>lastChillPhases()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a> chill::lastChillPhases </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a28009823939d7ea34c17394ba5f3fc43" name="a28009823939d7ea34c17394ba5f3fc43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28009823939d7ea34c17394ba5f3fc43">&#9670;&#160;</a></span>lastQlCutoffStages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1QlCutoffStages.html">QlCutoffStages</a> &amp; chill::lastQlCutoffStages </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a5b07478b8a490e3c8272e23fdc3da49e" name="a5b07478b8a490e3c8272e23fdc3da49e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b07478b8a490e3c8272e23fdc3da49e">&#9670;&#160;</a></span>lastSteinhardtPhases()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1AnalysisPhases.html">AnalysisPhases</a> chill::lastSteinhardtPhases </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a54c2a4268860a308ff4d4747aed1f639" name="a54c2a4268860a308ff4d4747aed1f639"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54c2a4268860a308ff4d4747aed1f639">&#9670;&#160;</a></span>localCutoffQ4Q6()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool chill::localCutoffQ4Q6 </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q4</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Local q4 and q6 from one cutoff list. Same values as two steinhardtQlCutoff calls with averaging off. Returns false when the shared shell cannot be built. </p>
+
+</div>
+</div>
+<a id="aba97c889c36d860a4842f43a3f81a6b5" name="aba97c889c36d860a4842f43a3f81a6b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba97c889c36d860a4842f43a3f81a6b5">&#9670;&#160;</a></span>numStaggered()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::numStaggered </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>jatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Finds the number of staggered bonds for a given atom of index jatom. </p>
+
+</div>
+</div>
 <a id="ac3eb9f55035d401247072181b24b563a" name="ac3eb9f55035d401247072181b24b563a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac3eb9f55035d401247072181b24b563a">&#9670;&#160;</a></span>preferOffload()</h2>
 
@@ -766,6 +1837,209 @@ Changelog</h3>
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0981b3101b04cacd525c2b5dc52f8a96" name="a0981b3101b04cacd525c2b5dc52f8a96"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0981b3101b04cacd525c2b5dc52f8a96">&#9670;&#160;</a></span>printIceType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::printIceType </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>outputFileName</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;superChill.txt&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Prints out the iceType for a particular frame onto the terminal. </p>
+
+</div>
+</div>
+<a id="a0773fb7ba0d82fc8b8681e034141971b" name="a0773fb7ba0d82fc8b8681e034141971b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0773fb7ba0d82fc8b8681e034141971b">&#9670;&#160;</a></span>q4q6ChillPlus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool chill::q4q6ChillPlus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q4</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q4bar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q6bar</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>One cutoff list and one bond pass for local q4, local q6, their Lechner-Dellago averages, and the published CHILL+ labels. The four q arrays match steinhardtQlCutoff with averaging on. Returns false when the atoms are not one type or the cutoff list is not available, and then writes nothing. </p>
+
+</div>
+</div>
+<a id="a7b9094a4f11e908dcb0d0c3987bebea3" name="a7b9094a4f11e908dcb0d0c3987bebea3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b9094a4f11e908dcb0d0c3987bebea3">&#9670;&#160;</a></span>readSteinhardtQl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::readSteinhardtQl </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>qlm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ql</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>qlBar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; *</td>          <td class="paramname"><span class="paramname"><em>which</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>ql and qlBar for atoms <em class="arg">which</em> selects, reading q_lm of their neighbours. </p>
+
+</div>
+</div>
+<a id="aaad5ad6884511e350e8b2cda1baeaea2" name="aaad5ad6884511e350e8b2cda1baeaea2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaad5ad6884511e350e8b2cda1baeaea2">&#9670;&#160;</a></span>reclassifyWater()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::reclassifyWater </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>'Test' condition for classifying hexagonal ice using averaged q6 and q3 Checks water According to <a href="https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a">https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a</a> Gets c_ij and then classifies bond types according to the CHILL+ algorithm </p>
+
+</div>
+</div>
+<a id="afdbd8e7d77ca3e23619b0073b02a2e05" name="afdbd8e7d77ca3e23619b0073b02a2e05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdbd8e7d77ca3e23619b0073b02a2e05">&#9670;&#160;</a></span>registerBondClassifier()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::registerBondClassifier </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Register (or replace) a named rule set at runtime, making the material's thresholds available to every front end by name </p>
+
+</div>
+</div>
+<a id="a794193ca26ae29cc438c91471a0cb3d5" name="a794193ca26ae29cc438c91471a0cb3d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a794193ca26ae29cc438c91471a0cb3d5">&#9670;&#160;</a></span>setSteinhardtAtomSplit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::setSteinhardtAtomSplit </td>
+          <td>(</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>split</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Whether steinhardtQl splits atoms over the ranks of an initialised MPI_COMM_WORLD (true unless set). A driver that gives each rank whole frames of its own turns it off. </p>
 
 </div>
 </div>
@@ -894,6 +2168,217 @@ Changelog</h3>
 <p>Flattened CHILL+. </p>
 <p>Target device when compiled with offload. </p>
 
+</div>
+</div>
+<a id="a2edabdc2c991910b7f55ea97e3764f8d" name="a2edabdc2c991910b7f55ea97e3764f8d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2edabdc2c991910b7f55ea97e3764f8d">&#9670;&#160;</a></span>steinhardtQ4Q6Cutoff()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool chill::steinhardtQ4Q6Cutoff </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>average</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>q4</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>q4 and q6 from one cutoff list. The bond vectors are wrapped once. Each degree then uses the same harmonic as steinhardtQlCutoff, so the values match two separate calls. Returns false when that list is not available; the outputs are left untouched. </p>
+
+</div>
+</div>
+<a id="ad60f25b03dc9b26dc62d80fd3fac53c3" name="ad60f25b03dc9b26dc62d80fd3fac53c3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad60f25b03dc9b26dc62d80fd3fac53c3">&#9670;&#160;</a></span>steinhardtQl()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> chill::steinhardtQl </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6, 8, or 12. Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the Lechner-Dellago average of q_lm over the particle and its neighbours. l=12 is host-only (associated Legendre, or sphericart when linked) for the Zeron hydrate pair with l=3; the device Ylm path has no l=12. Other degrees return zeros. The compute path flattens the neighbour list to CSR so the same kernel can run on the host (OpenMP), across MPI ranks (atom split plus Allgatherv of q_lm), or under OpenMP target offload when the build provides a device. </p>
+
+</div>
+</div>
+<a id="a2a25a9b94dbeb2999ffbe11d709821ff" name="a2a25a9b94dbeb2999ffbe11d709821ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a25a9b94dbeb2999ffbe11d709821ff">&#9670;&#160;</a></span>steinhardtQlCutoff()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> chill::steinhardtQlCutoff </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>average</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>invariants</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Local \(q_l\) on the cutoff list.</p>
+<p>Neighbours are orthoFullCsr, not a four-nearest rebuild, and the kernel reads that CSR directly. Lechner-Dellago \(\bar{q}_l\) is filled only when <em class="arg">average</em> is true. Otherwise <span class="tt">qlBar</span> stays zero. <em class="arg">invariants</em> fills <code>wl</code> with the normalized Steinhardt \(\hat{w}_l\) for l = 4 or 6. </p>
+
+</div>
+</div>
+<a id="abb306f05fb97b73078f1f036eb3cac36" name="abb306f05fb97b73078f1f036eb3cac36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb306f05fb97b73078f1f036eb3cac36">&#9670;&#160;</a></span>steinhardtQlMutual()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a> chill::steinhardtQlMutual </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>candidateCutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Mutual k-nearest Steinhardt parameters. The coordinate buffer built for the nomination is the one the harmonics read, and the neighbour rows stay in one packed array. l is 3, 4 or 6; other degrees return the result of building the mutual graph and calling steinhardtQl. </p>
+
+</div>
+</div>
+<a id="acf09e172dbd2b204fb6470c65ee38257" name="acf09e172dbd2b204fb6470c65ee38257"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf09e172dbd2b204fb6470c65ee38257">&#9670;&#160;</a></span>steinhardtQlmWidth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::steinhardtQlmWidth </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Width of one atom's interleaved q_lm: real, imaginary, m = -l..l. </p>
+
+<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00554">554</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  554</span>{ <span class="keywordflow">return</span> 2 * (2 * orderL + 1); }</div>
+</div><!-- fragment -->
 </div>
 </div>
 <a id="a97ec0cac9a6ea6fbcc25ccbaab1e4b31" name="a97ec0cac9a6ea6fbcc25ccbaab1e4b31"></a>
@@ -1062,6 +2547,44 @@ Changelog</h3>
 </div><div class="memdoc">
 
 <p>[q4, q6, q8] for every particle. One tessellation per order (l = 4, 6, 8). </p>
+
+</div>
+</div>
+<a id="a5eb8eb075ca96976d2992150cfcfed5d" name="a5eb8eb075ca96976d2992150cfcfed5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5eb8eb075ca96976d2992150cfcfed5d">&#9670;&#160;</a></span>writeSteinhardtQlm()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::writeSteinhardtQlm </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>qlm</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; *</td>          <td class="paramname"><span class="paramname"><em>which</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>q_lm for atoms <em class="arg">which</em> selects. Other atoms are left zero. </p>
 
 </div>
 </div>

@@ -1,0 +1,24 @@
+.. index:: pair: struct; nucleation::CommittorCall
+.. _doxid-structnucleation_1_1_committor_call:
+
+struct nucleation::CommittorCall
+================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/nucleation_pathway.hpp>
+	
+	struct CommittorCall {
+		// fields
+	
+		:ref:`CommittorFate<doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842>` :target:`fate<doxid-structnucleation_1_1_committor_call_1a7409b97c45a308034b5b633d29fa899d>` = :ref:`CommittorFate::uncommitted<doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45>`;
+		:ref:`GrowBasin<doxid-structnucleation_1_1_grow_basin>` :target:`basin<doxid-structnucleation_1_1_committor_call_1a1b265b1d24155d256d29bc10d350dd56>`;
+		bool :target:`cutAtTwiceN<doxid-structnucleation_1_1_committor_call_1ab14475a4fc2b795e4ede222e1beea2b4>` = false;
+	};

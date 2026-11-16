@@ -3,66 +3,59 @@ Repositories
 ============
 
 
-d-SEAMS 2 is not a monolith. The classifier is one C++ library.
-Cutoff neighbour lists are optional vesin (brute-force fallback).
-Periodic k-nearest graphs are optional linkcell. Each language
-ships its own package against that library.
+d-SEAMS 2.14 is one C++ library plus the stable C API and C ABI that
+the language bindings call. ``linkcell::pairs_within`` owns the cutoff list.
+vesin is the fallback when linkcell is not built.
 
 .. table::
 
-    +---------------------------------------------------------+---------------------------+-------------------------------------------+
-    | repository                                              | product                   | role                                      |
-    +=========================================================+===========================+===========================================+
-    | `seams-core <https://github.com/d-SEAMS/seams-core>`_   | ``libyodaLib``, ``seams`` | C++ engine and CLI                        |
-    +---------------------------------------------------------+---------------------------+-------------------------------------------+
-    | `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ | ``pydseams``              | Python helpers on ``yoda``                |
-    +---------------------------------------------------------+---------------------------+-------------------------------------------+
-    | `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_   | ``dseams``                | Lua/Fennel library                        |
-    +---------------------------------------------------------+---------------------------+-------------------------------------------+
-    | `linkcell <https://github.com/d-SEAMS/linkcell>`_       | ``lc_*``                  | Periodic linked-cell k-nearest neighbours |
-    +---------------------------------------------------------+---------------------------+-------------------------------------------+
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | repository                                                    | product                                                    | role                                              |
+    +===============================================================+============================================================+===================================================+
+    | `seams-core <https://github.com/d-SEAMS/seams-core>`_         | ``libyodaLib``, ``seams``, ``libseams``, ``libseams_lang`` | Engine, CLI, C API, language ABI, engine plugins  |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_       | ``pydseamslib``                                            | Python: ``import dseams`` and ``import pydseams`` |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_         | LuaRocks ``dseams``                                        | Lua and Fennel: ``require("dseams")``             |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `dseams-r <https://github.com/d-SEAMS/dseams-r>`_             | ``dseams``                                                 | R package                                         |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `Dseams.jl <https://github.com/d-SEAMS/Dseams.jl>`_           | ``Dseams``, ``Seams``                                      | Julia packages over ``libseams_jll``              |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `dseams-rs <https://github.com/d-SEAMS/dseams-rs>`_           | ``dseams-sys``, ``dseams``                                 | Rust crates                                       |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_ | fpm ``dseams``                                             | Fortran modules                                   |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
+    | `linkcell <https://github.com/d-SEAMS/linkcell>`_             | ``lc_*``                                                   | Periodic linked-cell neighbours                   |
+    +---------------------------------------------------------------+------------------------------------------------------------+---------------------------------------------------+
 
-The front ends take seams-core as a Meson subproject (``libyodaLib``)
-or as a flake input. They do not vendor a second engine.
-
-A language binding that lived in the engine tree would force every
-C++ user to take that language's toolchain, and every wheel or rock
-to rebuild the same library. Splitting the repos keeps the Catch2
-suite, the ``seams`` CLI, and the optional backends on one Meson
-project, while Python and Lua version and release on their own
-schedules.
+Each binding pins a seams-core tag, builds or links ``libseams`` and
+``libseams_lang`` from it, and releases with the same version. PydSEAMSlib
+and yodaStruct take seams-core as a Meson subproject; the others build it
+at the pin in their CI or link an installed copy. No binding carries a
+second engine implementation. Building the engine needs no language
+toolchain beyond C and C++. `The
+repository map <../contributing/repositories.rst>`_ lists the pins and the release order.
 
 .. mermaid::
 
-   flowchart TB
-     subgraph engine["seams-core"]
-       LIB[libyodaLib]
-       CLI[seams CLI]
-     end
-     subgraph fronts["Front ends"]
-       PY[pydseams Frame]
-       LUA["require(\"dseams\")"]
-     end
-     LC["linkcell k-NN"]
-     VE["vesin cutoff"]
-     GPU["gpulite TUM batch"]
-     DUMP["LAMMPS / XYZ / chemfiles / con"] --> LIB
-     LC --> LIB
-     VE --> LIB
-     GPU --> LIB
-     LIB --> CLI
-     LIB --> PY
-     LIB --> LUA
+   flowchart TD
+     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
+     NB["linkcell, vesin<br/>or gpulite"] --> LIB
+     LIB --> API[libseams]
+     API --> CLI["seams command"]
+     API --> LANG["C and C++ here"]
+     API --> BIND["Python, Lua, R, Julia,<br/>Rust, Fortran repositories"]
 
 Why ``yoda``
 ------------
 
 The 2020 product was a single executable named ``yodaStruct``. That
 binary is gone. The compiled C++ surface kept the name so existing
-registrations stay findable: the Python module is ``pydseams.yoda``
+registrations stay findable: the PydSEAMSlib module is ``pydseams.yoda``
 (``_core`` and ``cyoda`` are aliases of ``yoda``). Lua helpers are
 ``require("dseams")``; ``require("yoda")`` still resolves to that table.
-There is no ``yodaStruct`` executable in any of the three repositories.
+There is no ``yodaStruct`` executable in any d-SEAMS repository.
 
 Builds
 ------
@@ -75,18 +68,15 @@ Builds
 - **Wheels**: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
 
 The 2020 CMake Nix derivation of ``yodaStruct`` is gone.
-``-Dwith_python=true`` and ``-Dwith_lua=enabled`` are Meson errors that
-name PydSEAMSlib and yodaStruct.
 
 Neighbour backends
 ------------------
 
-- **vesin** (optional, ``SEAMS_HAS_VESIN``): cutoff pair lists
-  (``neighList``, ``neighListO``). Brute force if the wrap is off.
+- **linkcell** (optional, ``SEAMS_HAS_LINKCELL``): ``linkcell::pairs_within``
+  owns the cutoff list.
 
-- **linkcell** (optional, ``SEAMS_HAS_LINKCELL``): periodic k-NN for
-  ``knn`` / ``knn-union`` / ``seeded`` graphs and the device TUM walk.
-  Not a drop-in for vesin cutoff lists.
+- **vesin** (optional, ``SEAMS_HAS_VESIN``): the cutoff fallback when
+  linkcell is not built.
 
 ``seams --features`` prints both.
 

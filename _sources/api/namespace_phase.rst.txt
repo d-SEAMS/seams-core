@@ -30,6 +30,12 @@ Overview
 
 	struct :ref:`IceXXIHit<doxid-structphase_1_1_ice_x_x_i_hit>`;
 
+	// global variables
+
+	double :ref:`kIceIhMassDensity<doxid-namespacephase_1a1093758960f53ee03ad27ab01ac8961b>` = 0.917;
+	double :target:`kIceVIMassDensity<doxid-namespacephase_1a4d70567f43ed91b21c2cf23364150a42>` = 1.31;
+	double :ref:`kIceNumberDensityMax<doxid-namespacephase_1a0eedbca606ffe470017521f827850d0c>`                                          = 0.5*(:ref:`numberDensity<doxid-namespacephase_1a083e89f93fde59a75b4170104e235ddf>`(:ref:`kIceIhMassDensity<doxid-namespacephase_1a1093758960f53ee03ad27ab01ac8961b>`) + :ref:`numberDensity<doxid-namespacephase_1a083e89f93fde59a75b4170104e235ddf>`(:ref:`kIceVIMassDensity<doxid-namespacephase_1a4d70567f43ed91b21c2cf23364150a42>`));
+
 	// global functions
 
 	int :ref:`openChannelCount<doxid-namespacephase_1a896a28798e9ac2e9e32e8807ca720cc1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
@@ -41,6 +47,7 @@ Overview
 	double :ref:`frameDensity<doxid-namespacephase_1a548c3829160adf36ec9d7ba7dbb065a1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
 	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a201ed8bb3cd747bc5663cce11a23c2fa>`(double rho, double iceMax, double ldaMax, double mdaMin);
 	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a31b88f162592c1601d40e4363cb87898>`(double rho, double iceMax, double mdaMin);
+	double :ref:`numberDensity<doxid-namespacephase_1a083e89f93fde59a75b4170104e235ddf>`(double massGPerCm3);
 	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a8eaa4d3fda3aef905fddd4f5e9bc502c>`(double rho);
 
 	} // namespace phase
@@ -50,6 +57,29 @@ Detailed Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+Global Variables
+----------------
+
+.. index:: pair: variable; kIceIhMassDensity
+.. _doxid-namespacephase_1a1093758960f53ee03ad27ab01ac8961b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kIceIhMassDensity = 0.917
+
+Mass densities, g/cm^3. Ih is the 1 bar crystal. Ice VI is the dense tetrahedral crystal, not ice I.
+
+.. index:: pair: variable; kIceNumberDensityMax
+.. _doxid-namespacephase_1a0eedbca606ffe470017521f827850d0c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kIceNumberDensityMax                                          = 0.5*(:ref:`numberDensity<doxid-namespacephase_1a083e89f93fde59a75b4170104e235ddf>`(:ref:`kIceIhMassDensity<doxid-namespacephase_1a1093758960f53ee03ad27ab01ac8961b>`) + :ref:`numberDensity<doxid-namespacephase_1a083e89f93fde59a75b4170104e235ddf>`(:ref:`kIceVIMassDensity<doxid-namespacephase_1a4d70567f43ed91b21c2cf23364150a42>`))
+
+Ice/LDA split: the midpoint of the Ih and ice VI number densities. Ih (about 0.031) is ice. Ice VI (about 0.044) is not.
 
 Global Functions
 ----------------
@@ -134,6 +164,16 @@ HDA/MDA/LDA/ice from local number density (1/A^3). Ice first-shell density is fo
 
 Three-argument form: LDA/MDA split at the midpoint of iceMax and mdaMin.
 
+.. index:: pair: function; numberDensity
+.. _doxid-namespacephase_1a083e89f93fde59a75b4170104e235ddf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double numberDensity(double massGPerCm3)
+
+Number density in 1/A^3 from a mass density in g/cm^3.
+
 .. index:: pair: function; glassFromDensity
 .. _doxid-namespacephase_1a8eaa4d3fda3aef905fddd4f5e9bc502c:
 
@@ -142,5 +182,5 @@ Three-argument form: LDA/MDA split at the midpoint of iceMax and mdaMin.
 
 	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` glassFromDensity(double rho)
 
-Literature local-density windows: ice < 0.028, LDA < 0.040, MDA < 0.070, else HDA.
+Local-density windows, 1/A^3. Ice is below kIceNumberDensityMax, LDA below 0.040, MDA below 0.070, else HDA.
 

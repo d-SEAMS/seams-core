@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-cli" src="https://odysee.com/$/embed/dseams-cli:033f8d1535cfb7bf1e75b4c651e9789d7fa0ab16" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/cli.vtt">docs/videos/cli/captions.vtt</a></p>
+   <p>The seams command on ice Ih.</p>

@@ -8,9 +8,6 @@ MolSys
 	:hidden:
 
 	namespace_molSys.rst
-	struct_molSys_Point.rst
-	struct_molSys_PointCloud.rst
-	struct_molSys_Result.rst
 
 
 
@@ -22,14 +19,4 @@ MolSys
 	// namespaces
 
 	namespace :ref:`molSys<doxid-namespacemol_sys>`;
-
-	// structs
-
-	template <CoordinateScalar T>
-	struct :ref:`molSys::Point<doxid-structmol_sys_1_1_point>`;
-
-	template <typename S, CoordinateScalar T>
-	struct :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`;
-
-	struct :ref:`molSys::Result<doxid-structmol_sys_1_1_result>`;
 

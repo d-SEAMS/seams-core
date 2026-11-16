@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-nucleation" src="https://odysee.com/$/embed/dseams-nucleation:965e5772f700e5b1d91f1b069557eb9e87f1c60b" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/nucleation.vtt">docs/videos/nucleation/captions.vtt</a></p>
+   <p>Nucleation q6bar.</p>

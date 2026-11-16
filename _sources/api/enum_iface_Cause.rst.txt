@@ -1,0 +1,21 @@
+.. index:: pair: enum; Cause
+.. _doxid-namespaceiface_1a880354044e1248a351860d033c05721b:
+
+enum iface::Cause
+=================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <interface_order.hpp>
+
+	enum Cause {
+	    :target:`agree<doxid-namespaceiface_1a880354044e1248a351860d033c05721ba6a6334b478289b4fb3060c4f803eafd3>`     = 0,
+	    :target:`neighbour<doxid-namespaceiface_1a880354044e1248a351860d033c05721ba98b929ea2521b6f39fc260eea7d496af>` = 1,
+	    :target:`q3Shell<doxid-namespaceiface_1a880354044e1248a351860d033c05721ba28cb0457fcfa595f8f36771026c95ee1>`   = 2,
+	    :target:`openEdge<doxid-namespaceiface_1a880354044e1248a351860d033c05721ba8775a734047c8689a28062db1ac36d5f>`  = 3,
+	    :target:`mixed<doxid-namespaceiface_1a880354044e1248a351860d033c05721ba1d770934d44de09b0d24f04fd01708ba>`     = 4,
+	};
+

@@ -1,0 +1,93 @@
+.. index:: pair: struct; seams::BondOptions
+.. _doxid-structseams_1_1_bond_options:
+
+struct seams::BondOptions
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a hydrogen-bond count. :ref:`More...<details-structseams_1_1_bond_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct BondOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_bond_options_1a199603a942d43c7487bb12a7859e7594>` = 3.5;
+		int :ref:`oxygen<doxid-structseams_1_1_bond_options_1a9fe55b2c414eee1c972b644979d43ef5>` = 1;
+		int :ref:`hydrogen<doxid-structseams_1_1_bond_options_1a4ac88872af99a4a56abe0cc62f3793ef>` = 2;
+		double :ref:`distance<doxid-structseams_1_1_bond_options_1ad9c5670dd6b74ec871da289542e704fe>` = 2.42;
+		double :ref:`angle<doxid-structseams_1_1_bond_options_1a60bfe5375021d21cb3e2aad064fd421e>` = 30;
+	};
+.. _details-structseams_1_1_bond_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a hydrogen-bond count.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_bond_options_1a199603a942d43c7487bb12a7859e7594:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Heavy-atom cutoff, Angstrom.
+
+.. index:: pair: variable; oxygen
+.. _doxid-structseams_1_1_bond_options_1a9fe55b2c414eee1c972b644979d43ef5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int oxygen = 1
+
+Heavy-atom species.
+
+Zero keeps every non-hydrogen.
+
+.. index:: pair: variable; hydrogen
+.. _doxid-structseams_1_1_bond_options_1a4ac88872af99a4a56abe0cc62f3793ef:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hydrogen = 2
+
+Hydrogen species.
+
+Must be positive.
+
+.. index:: pair: variable; distance
+.. _doxid-structseams_1_1_bond_options_1ad9c5670dd6b74ec871da289542e704fe:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double distance = 2.42
+
+Acceptor-H distance, Angstrom.
+
+.. index:: pair: variable; angle
+.. _doxid-structseams_1_1_bond_options_1a60bfe5375021d21cb3e2aad064fd421e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double angle = 30
+
+O-O-H angle, degrees.
+

@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-insitu" src="https://odysee.com/$/embed/dseams-insitu:f57605cad84bbfa722e91546584c9df76751b8b5" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/insitu.vtt">docs/videos/insitu/captions.vtt</a></p>
+   <p>LAMMPS, GROMACS, OpenMM, and PLUMED.</p>

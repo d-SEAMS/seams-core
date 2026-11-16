@@ -8,7 +8,6 @@ Rdf
 	:hidden:
 
 	namespace_rdf.rst
-	struct_rdf_PartialRdf.rst
 
 
 
@@ -20,8 +19,4 @@ Rdf
 	// namespaces
 
 	namespace :ref:`rdf<doxid-namespacerdf>`;
-
-	// structs
-
-	struct :ref:`rdf::PartialRdf<doxid-structrdf_1_1_partial_rdf>`;
 

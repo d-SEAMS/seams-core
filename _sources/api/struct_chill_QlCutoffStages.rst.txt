@@ -1,0 +1,24 @@
+.. index:: pair: struct; chill::QlCutoffStages
+.. _doxid-structchill_1_1_ql_cutoff_stages:
+
+struct chill::QlCutoffStages
+============================
+
+.. toctree::
+	:hidden:
+
+Wall seconds of the last steinhardtQlCutoff call on this thread: the cutoff list, then q_l and any average from it. ``set`` is false when that call took a path that does not time the two apart (orders 8 and 12, or a cell the solid-harmonic kernel declines).
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct QlCutoffStages {
+		// fields
+	
+		double :target:`list<doxid-structchill_1_1_ql_cutoff_stages_1abed40c953dfa242823b2eaf414319b0b>` = 0.0;
+		double :target:`ql<doxid-structchill_1_1_ql_cutoff_stages_1af060d2024a6010818a813a53691bd1fc>` = 0.0;
+		bool :target:`set<doxid-structchill_1_1_ql_cutoff_stages_1acee15a46af796a168279c7e3c43db61c>` = false;
+	};

@@ -1,0 +1,91 @@
+.. index:: pair: struct; seams::CageOptions
+.. _doxid-structseams_1_1_cage_options:
+
+struct seams::CageOptions
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for hexagonal and double-diamond cages. :ref:`More...<details-structseams_1_1_cage_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct CageOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_cage_options_1a648d57ad824e6caf22f226ff38a47118>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_cage_options_1a56eeeecf9a79fd74513e3cb2ae90323c>` = 0;
+		:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` :ref:`graph<doxid-structseams_1_1_cage_options_1a8886f4ffad964890c2351bbeb6a39efa>` = :ref:`Graph::Seeded<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0>`;
+		int :ref:`k<doxid-structseams_1_1_cage_options_1ae1993c5cc3f4c242665f6736d8d37fcf>` = 4;
+		bool :ref:`complete<doxid-structseams_1_1_cage_options_1a6ef003f1961e9324db1617d532739783>` = false;
+	};
+.. _details-structseams_1_1_cage_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for hexagonal and double-diamond cages.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_cage_options_1a648d57ad824e6caf22f226ff38a47118:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_cage_options_1a56eeeecf9a79fd74513e3cb2ae90323c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; graph
+.. _doxid-structseams_1_1_cage_options_1a8886f4ffad964890c2351bbeb6a39efa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` graph = :ref:`Graph::Seeded<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0>`
+
+Cage graph.
+
+Seeded is the usual choice.
+
+.. index:: pair: variable; k
+.. _doxid-structseams_1_1_cage_options_1ae1993c5cc3f4c242665f6736d8d37fcf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int k = 4
+
+Neighbour count used to seed the graph.
+
+.. index:: pair: variable; complete
+.. _doxid-structseams_1_1_cage_options_1a6ef003f1961e9324db1617d532739783:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool complete = false
+
+Complete partial cages.
+

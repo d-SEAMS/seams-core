@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-cpp" src="https://odysee.com/$/embed/dseams-cpp:cd1c64a69f60f6bfb6e06a14eee583dd761f4a7c" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/cpp.vtt">docs/videos/cpp/captions.vtt</a></p>
+   <p>C++ on ice Ih.</p>

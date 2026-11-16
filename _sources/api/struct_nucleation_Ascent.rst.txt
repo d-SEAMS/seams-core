@@ -1,0 +1,26 @@
+.. index:: pair: struct; nucleation::Ascent
+.. _doxid-structnucleation_1_1_ascent:
+
+struct nucleation::Ascent
+=========================
+
+.. toctree::
+	:hidden:
+
+Index of the last sample before the strict climb that reaches the maximum. A flat series returns 0 and climbed is false.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/nucleation_pathway.hpp>
+	
+	struct Ascent {
+		// fields
+	
+		int :target:`index<doxid-structnucleation_1_1_ascent_1a3c22e7749621bc6b9403194f413cd305>` = 0;
+		int :target:`maxIndex<doxid-structnucleation_1_1_ascent_1ab6b1641fd7dabdf416ac1d7cb544d141>` = 0;
+		double :target:`baseline<doxid-structnucleation_1_1_ascent_1a3cab97326641acc87cb6ae483ece4bb9>` = 0;
+		double :target:`maximum<doxid-structnucleation_1_1_ascent_1af6cd4481e9609a7568110576e642a04c>` = 0;
+		bool :target:`climbed<doxid-structnucleation_1_1_ascent_1a84b51a9634ecad74e4a0dfe69fadbd5e>` = false;
+	};

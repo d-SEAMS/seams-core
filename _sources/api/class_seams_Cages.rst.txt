@@ -1,0 +1,95 @@
+.. index:: pair: class; seams::Cages
+.. _doxid-classseams_1_1_cages:
+
+class seams::Cages
+==================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Owned hexagonal and double-diamond membership. :ref:`More...<details-classseams_1_1_cages>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class Cages: public :ref:`seams::detail::Handle<doxid-classseams_1_1detail_1_1_handle>` {
+	public:
+		// methods
+	
+		:ref:`CageCounts<doxid-structseams_1_1_cage_counts>` :ref:`counts<doxid-classseams_1_1_cages_1a1f80642a50421420371555be19aaa6b5>`() const;
+		std::vector<int> :ref:`labels<doxid-classseams_1_1_cages_1a5f04aad709697fb2aafb094e8ba51847>`(std::size_t n_atoms) const;
+	};
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-inherited-code-block
+
+	public:
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:ref:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+
+.. _details-classseams_1_1_cages:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Owned hexagonal and double-diamond membership.
+
+Methods
+-------
+
+.. index:: pair: function; counts
+.. _doxid-classseams_1_1_cages_1a1f80642a50421420371555be19aaa6b5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CageCounts<doxid-structseams_1_1_cage_counts>` counts() const
+
+Disjoint population counts.
+
+
+
+.. rubric:: Returns:
+
+Hexagonal, cubic, water, and both.
+
+.. index:: pair: function; labels
+.. _doxid-classseams_1_1_cages_1a5f04aad709697fb2aafb094e8ba51847:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> labels(std::size_t n_atoms) const
+
+One cage code per atom.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- n_atoms
+
+		- Length of the frame the cages were built from.
+
+
+
+.. rubric:: Returns:
+
+Codes matching ``:ref:`CageLabel <doxid-group__seams__cpp_1ga20668948221c270d139f207595f2953c>```.
+

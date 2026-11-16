@@ -41,12 +41,13 @@ var site_8hpp =
     [ "site::indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
     [ "site::insideRayDirections", "namespacesite.html#a9231f841816296c279bcf08186f332de", null ],
     [ "site::ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],
+    [ "site::ionEnvironment", "namespacesite.html#aff6bc7a17064a71c1ca2e4b210b72d3f", null ],
     [ "site::ionEnvironment", "namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1", null ],
     [ "site::lammpsTypeOfKind", "namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53", null ],
     [ "site::parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ],
     [ "site::periodicCentroid", "namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad", null ],
-    [ "site::pointInFaces", "namespacesite.html#a040c7a9f8809cf0b1fb82b9294df197c", null ],
-    [ "site::pointInFacesTrace", "namespacesite.html#afc9315591f9625e0013b8ed56887297f", null ],
+    [ "site::pointInFaces", "namespacesite.html#a5e215d2d1aaa78e5e54c511d3617ea1d", null ],
+    [ "site::pointInFacesTrace", "namespacesite.html#aeeb8b9fec48dcc2b70f40cafe705a0c2", null ],
     [ "site::shellRingCensus", "namespacesite.html#a3327b0f82b57a80d113b241dec0eb711", null ],
     [ "site::kInsideRelTol", "namespacesite.html#a17c7ad054eafa92f5e5238e14109b97a", null ]
 ];

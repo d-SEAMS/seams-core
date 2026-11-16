@@ -1,0 +1,80 @@
+.. index:: pair: struct; iface::Profile
+.. _doxid-structiface_1_1_profile:
+
+struct iface::Profile
+=====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct Profile {
+		// fields
+	
+		double :target:`crystal<doxid-structiface_1_1_profile_1a2c127c519fb30527115826b951f8ea84>` = 0;
+		double :ref:`interfacial<doxid-structiface_1_1_profile_1a19d1a698a13b9070e8d473ac846babc0>` = 0;
+		double :ref:`solid<doxid-structiface_1_1_profile_1a411c2fe4e684c2c3bf63f5b6955247d0>` = 0;
+		double :ref:`thickness<doxid-structiface_1_1_profile_1a202d42f287ecc5ad81f34b76eb713e6f>` = 0;
+		std::vector<:ref:`Front<doxid-structiface_1_1_front>`> :ref:`fronts<doxid-structiface_1_1_profile_1ab77ce65569d6ed1411a986f007b337a5>`;
+		bool :target:`defined<doxid-structiface_1_1_profile_1a0c5da37eff6b9622425e537e4e51f260>` = false;
+	};
+.. _details-structiface_1_1_profile:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; interfacial
+.. _doxid-structiface_1_1_profile_1a19d1a698a13b9070e8d473ac846babc0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double interfacial = 0
+
+(cubic + hexagonal) / N
+
+.. index:: pair: variable; solid
+.. _doxid-structiface_1_1_profile_1a411c2fe4e684c2c3bf63f5b6955247d0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double solid = 0
+
+interfacial / N
+
+.. index:: pair: variable; thickness
+.. _doxid-structiface_1_1_profile_1a202d42f287ecc5ad81f34b76eb713e6f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double thickness = 0
+
+crystal + interfacial, over N
+
+.. index:: pair: variable; fronts
+.. _doxid-structiface_1_1_profile_1ab77ce65569d6ed1411a986f007b337a5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`Front<doxid-structiface_1_1_front>`> fronts
+
+ice span between the two 0.5 crossings, or 2 R
+

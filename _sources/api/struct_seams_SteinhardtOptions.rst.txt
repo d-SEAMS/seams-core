@@ -1,0 +1,82 @@
+.. index:: pair: struct; seams::SteinhardtOptions
+.. _doxid-structseams_1_1_steinhardt_options:
+
+struct seams::SteinhardtOptions
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a local :ref:`Steinhardt <doxid-structseams_1_1_steinhardt>` parameter on the cutoff shell. :ref:`More...<details-structseams_1_1_steinhardt_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct SteinhardtOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_steinhardt_options_1a8fd3c7a7943cebb3e6db40e437569402>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_steinhardt_options_1a213be5429e0a7db8bdd4eb8099ef5c6a>` = 0;
+		int :ref:`order<doxid-structseams_1_1_steinhardt_options_1ab413a6d2c27bfbb01acf764daac8203e>` = 6;
+		bool :ref:`average<doxid-structseams_1_1_steinhardt_options_1a102c15f0286a46e3c2a77d9b3a1e0f12>` = false;
+	};
+.. _details-structseams_1_1_steinhardt_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a local :ref:`Steinhardt <doxid-structseams_1_1_steinhardt>` parameter on the cutoff shell.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_steinhardt_options_1a8fd3c7a7943cebb3e6db40e437569402:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_steinhardt_options_1a213be5429e0a7db8bdd4eb8099ef5c6a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+Zero keeps every atom.
+
+.. index:: pair: variable; order
+.. _doxid-structseams_1_1_steinhardt_options_1ab413a6d2c27bfbb01acf764daac8203e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int order = 6
+
+Degree.
+
+3, 4, 6, 8, or 12.
+
+.. index:: pair: variable; average
+.. _doxid-structseams_1_1_steinhardt_options_1a102c15f0286a46e3c2a77d9b3a1e0f12:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool average = false
+
+Also return the Lechner-Dellago mean.
+

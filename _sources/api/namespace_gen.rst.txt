@@ -8,6 +8,7 @@ namespace gen
 	:hidden:
 
 	namespace_gen_mic.rst
+	struct_gen_FracBox.rst
 
 Overview
 ~~~~~~~~
@@ -28,6 +29,47 @@ Small generic functions that are shared by all namespaces. :ref:`More...<details
 	// structs
 
 	struct :ref:`FracBox<doxid-structgen_1_1_frac_box>`;
+
+	// global variables
+
+	double :ref:`pi<doxid-namespacegen_1a9aee9bc09915c8d7a816b9ab38cff0f3>` = std::numbers::pi;
+
+	// global functions
+
+	double :ref:`radDeg<doxid-namespacegen_1aeadb5e8ff98078b0007d0def0eaad39d>`(double angle);
+	double :ref:`eigenVecAngle<doxid-namespacegen_1a48d1277f242712a0948bb029883328e4>`(std::vector<double> OO, std::vector<double> OH);
+	double :ref:`getAverageWithoutOutliers<doxid-namespacegen_1af3593d4e71600e8d85fbd873fcd95558>`(std::vector<double> inpVec);
+	double :ref:`calcMedian<doxid-namespacegen_1a6046c3c9db73fbf420ad07834047942e>`(std::vector<double>* input);
+	:ref:`FracBox<doxid-structgen_1_1_frac_box>` :target:`makeFracBox<doxid-namespacegen_1a9833e867efd9f0e5b9e6af932811daad>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	std::array<double, 3> :target:`fracDelta<doxid-namespacegen_1ab34364ca503fda783a0795a8e4525670>`(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, double xi, double yi, double zi, double xj, double yj, double zj);
+	double :target:`fracDistSq<doxid-namespacegen_1a099f0b52a85217f92284e497b97d0466>`(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, double xi, double yi, double zi, double xj, double yj, double zj);
+	bool :target:`smithInside<doxid-namespacegen_1a9e1ff0c0e75fc4bad58a49f68f95d5c2>`(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, double r2);
+	std::array<double, 3> :target:`triclinicMinImage<doxid-namespacegen_1a74b57e7951bcff4f7c31fdc4ec5e79bf>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double xi, double yi, double zi, double xj, double yj, double zj);
+	double :ref:`periodicDistSq<doxid-namespacegen_1ac55d45ba7b50cb75763412f158ecd713>`(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom);
+	double :target:`periodicDistSq<doxid-namespacegen_1afdafa646c7cceaa4eeb8d92b14e0a192>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom);
+	double :ref:`periodicDist<doxid-namespacegen_1a4038dadde6016e7a738c2cb015344ee3>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom);
+	void :target:`batchPeriodicDistSq<doxid-namespacegen_1acdbacffd9c9867dc307efc89686e5634>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, const int* jatom, std::size_t n, double* distSq);
+	std::string :target:`formatDumpBox<doxid-namespacegen_1a92412c34a5480e96297c968633b07652>`(const std::vector<double>& box);
+	void :target:`writeDumpBoxBounds<doxid-namespacegen_1a2cc6ef1ffc20f6eebc857d8aafd47f97>`(std::ostream& os, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	std::array<double, 3> :ref:`relDistFromPoint<doxid-namespacegen_1a2fbd5127b1fdc22c99f5cd6d57d4bf86>`(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, double xj, double yj, double zj);
+	std::array<double, 3> :target:`relDistFromPoint<doxid-namespacegen_1acd27073a9df4d812fa5a6d24a8b6efae>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, double xj, double yj, double zj);
+	double :target:`unWrappedDistFromPoint<doxid-namespacegen_1afd586580b7217567d600fd49249bd87f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, const std::vector<double>& singlePoint);
+	double :ref:`distance<doxid-namespacegen_1a13dd7fd24f050c7a639a1811d22c8d5b>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom);
+	std::array<double, 3> :ref:`relDist<doxid-namespacegen_1a3c02ecf6adbdc30d78e8c0aeb95914bf>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom);
+	std::array<double, 3> :target:`unwrappedXYZ<doxid-namespacegen_1a2b92f05920ce11d515b1816e740453e1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int origin, int atom);
+	bool :ref:`compareByAtomID<doxid-namespacegen_1aed4f2e37c89f319a852355a2b7199147>`(const :ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>& a, const :ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>& b);
+	int :ref:`prettyPrintYoda<doxid-namespacegen_1aaf97563c332410a372be92dcb8f81b3f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string outFile);
+	int :ref:`unwrappedCoordShift<doxid-namespacegen_1ad4b2c207d9bddf2fe75aca626f14ffe3>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatomIndex, int jatomIndex, double* x_i, double* y_i, double* z_i, double* x_j, double* y_j, double* z_j);
+	double :ref:`angDistDegQuaternions<doxid-namespacegen_1ac7f742de2fac11d3b249c63bf4f4e126>`(std::vector<double> quat1, std::vector<double> quat2);
+	std::vector<std::string> :ref:`tokenizer<doxid-namespacegen_1aabdeca1aa6b867687a3540e97447544a>`(std::string line);
+	std::vector<double> :ref:`tokenizerDouble<doxid-namespacegen_1a98b7a158dd7a61350fdd6ca43a432e4f>`(std::string line);
+	std::vector<int> :ref:`tokenizerInt<doxid-namespacegen_1ae4ee1568b5329d93d76418227a024ac1>`(std::string line);
+	bool :ref:`file_exists<doxid-namespacegen_1aa49625658169d33851df990c1d62f097>`(const std::string& name);
+	std::vector<std::complex<double>> :ref:`avgVector<doxid-namespacegen_1a17d4f5636c0469c19d7efa59344396b2>`(std::vector<std::complex<double>> v, int l, int neigh);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`getPointCloudOneAtomType<doxid-namespacegen_1ae72039bf692acc3dd1e1a0e9cdddb8c6>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& outCloud, int atomTypeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+	void :ref:`moleculesInSingleSlice<doxid-namespacegen_1aa6a3bfc360df06a888d89bbd1496f4c7>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, bool clearPreviousSliceSelection = true, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+	void :ref:`atomsInSingleSlice<doxid-namespacegen_1a14c78fad4483668aa3d053ec7d335c79>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, bool clearPreviousSliceSelection = true, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0});
+	void :ref:`setAtomsWithSameMolID<doxid-namespacegen_1aa840597800d75f1e4819649e51a567bc>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::unordered_multimap<int, int>& molIDAtomIDmap, int molID, bool inSliceValue = true);
 
 	} // namespace gen
 .. _details-namespacegen:
@@ -61,4 +103,539 @@ Changelog
 * Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 14, 2019
 
 * Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Variables
+----------------
+
+.. index:: pair: variable; pi
+.. _doxid-namespacegen_1a9aee9bc09915c8d7a816b9ab38cff0f3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double pi = std::numbers::pi
+
+Uses Boost to get the value of pi.
+
+Global Functions
+----------------
+
+.. index:: pair: function; radDeg
+.. _doxid-namespacegen_1aeadb5e8ff98078b0007d0def0eaad39d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double radDeg(double angle)
+
+Inline function for converting radians->degrees.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- angle
+
+		- The input angle, in radians
+
+
+
+.. rubric:: Returns:
+
+The input angle, in degrees
+
+.. index:: pair: function; eigenVecAngle
+.. _doxid-namespacegen_1a48d1277f242712a0948bb029883328e4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double eigenVecAngle(std::vector<double> OO, std::vector<double> OH)
+
+Eigen function for getting the angle (in radians) between the O O and O-H vectors.
+
+.. index:: pair: function; getAverageWithoutOutliers
+.. _doxid-namespacegen_1af3593d4e71600e8d85fbd873fcd95558:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double getAverageWithoutOutliers(std::vector<double> inpVec)
+
+Get the average, after excluding the outliers, using quartiles.
+
+.. index:: pair: function; calcMedian
+.. _doxid-namespacegen_1a6046c3c9db73fbf420ad07834047942e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double calcMedian(std::vector<double>* input)
+
+Inline generic function for calculating the median given a vector of the values.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The input PointCloud, which contains the particle coordinates, simulation box lengths etc.
+
+	*
+		- input
+
+		- The input vector with the values
+
+
+
+.. rubric:: Returns:
+
+The median value
+
+.. index:: pair: function; periodicDistSq
+.. _doxid-namespacegen_1ac55d45ba7b50cb75763412f158ecd713:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double periodicDistSq(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom)
+
+Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The input PointCloud, which contains the particle coordinates, simulation box lengths etc.
+
+	*
+		- iatom
+
+		- The index of the :math:`i^{th}` atom.
+
+	*
+		- jatom
+
+		- The index of the :math:`j^{th}` atom.
+
+
+
+.. rubric:: Returns:
+
+The unwrapped periodic distance.
+
+.. index:: pair: function; periodicDist
+.. _doxid-namespacegen_1a4038dadde6016e7a738c2cb015344ee3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double periodicDist(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom)
+
+Inline generic function for obtaining the unwrapped periodic distance between two particles, whose indices (not IDs) have been given.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The input PointCloud, which contains the particle coordinates, simulation box lengths etc.
+
+	*
+		- iatom
+
+		- The index of the :math:`i^{th}` atom.
+
+	*
+		- jatom
+
+		- The index of the :math:`j^{th}` atom.
+
+
+
+.. rubric:: Returns:
+
+The unwrapped periodic distance.
+
+.. index:: pair: function; relDistFromPoint
+.. _doxid-namespacegen_1a2fbd5127b1fdc22c99f5cd6d57d4bf86:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> relDistFromPoint(const :ref:`FracBox<doxid-structgen_1_1_frac_box>`& b, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, double xj, double yj, double zj)
+
+Inline generic function for obtaining the unwrapped periodic distance between one particle and another point, whose index has been given.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- b
+
+		- The box of yCloud, from makeFracBox.
+
+	*
+		- yCloud
+
+		- The input PointCloud, which contains the particle coordinates, simulation box lengths etc.
+
+	*
+		- iatom
+
+		- The index of the :math:`i^{th}` atom.
+
+	*
+		- xj
+
+		- 
+
+	*
+		- yj
+
+		- 
+
+	*
+		- zj
+
+		- The other point.
+
+
+
+.. rubric:: Returns:
+
+The unwrapped periodic distance.
+
+.. index:: pair: function; distance
+.. _doxid-namespacegen_1a13dd7fd24f050c7a639a1811d22c8d5b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double distance(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom)
+
+Inline generic function for obtaining the wrapped distance between two particles WITHOUT applying PBCs, whose indices (not IDs) have been given.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The input PointCloud, which contains the particle coordinates, simulation box lengths etc.
+
+	*
+		- iatom
+
+		- The index of the :math:`i^{th}` atom.
+
+	*
+		- jatom
+
+		- The index of the :math:`j^{th}` atom.
+
+
+
+.. rubric:: Returns:
+
+The wrapped distance.
+
+.. index:: pair: function; relDist
+.. _doxid-namespacegen_1a3c02ecf6adbdc30d78e8c0aeb95914bf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::array<double, 3> relDist(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, int jatom)
+
+Inline generic function for getting the relative unwrapped distance between two particles for each dimension.
+
+The indices (not IDs) of the particles have been given.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The input PointCloud, which contains the particle coordinates, simulation box lengths etc.
+
+	*
+		- iatom
+
+		- The index of the :math:`i^{th}` atom.
+
+	*
+		- jatom
+
+		- The index of the :math:`j^{th}` atom.
+
+
+
+.. rubric:: Returns:
+
+The unwrapped relative distances for each dimension.
+
+.. index:: pair: function; compareByAtomID
+.. _doxid-namespacegen_1aed4f2e37c89f319a852355a2b7199147:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool compareByAtomID(const :ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>& a, const :ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>& b)
+
+Inline generic function for sorting or comparing two particles, according to the atom ID when the entire Point objects have been passed.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- a
+
+		- The input Point for A.
+
+	*
+		- b
+
+		- The input Point for B.
+
+
+
+.. rubric:: Returns:
+
+True if the atom ID of A is less than the atom ID of B
+
+.. index:: pair: function; prettyPrintYoda
+.. _doxid-namespacegen_1aaf97563c332410a372be92dcb8f81b3f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int prettyPrintYoda(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string outFile)
+
+Generic function for printing all the struct information.
+
+.. index:: pair: function; unwrappedCoordShift
+.. _doxid-namespacegen_1ad4b2c207d9bddf2fe75aca626f14ffe3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int unwrappedCoordShift(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatomIndex, int jatomIndex, double* x_i, double* y_i, double* z_i, double* x_j, double* y_j, double* z_j)
+
+Shift particles (unwrapped coordinates).
+
+.. index:: pair: function; angDistDegQuaternions
+.. _doxid-namespacegen_1ac7f742de2fac11d3b249c63bf4f4e126:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double angDistDegQuaternions(std::vector<double> quat1, std::vector<double> quat2)
+
+Function for getting the angular distance between two quaternions. Returns the result in degrees
+
+.. index:: pair: function; tokenizer
+.. _doxid-namespacegen_1aabdeca1aa6b867687a3540e97447544a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::string> tokenizer(std::string line)
+
+Function for tokenizing line strings into words (strings) delimited by whitespace.
+
+This returns a vector with the words in it.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- line
+
+		- The string containing the line to be tokenized
+
+.. index:: pair: function; tokenizerDouble
+.. _doxid-namespacegen_1a98b7a158dd7a61350fdd6ca43a432e4f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> tokenizerDouble(std::string line)
+
+Function for tokenizing line strings into a vector of doubles.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- line
+
+		- The string containing the line to be tokenized
+
+.. index:: pair: function; tokenizerInt
+.. _doxid-namespacegen_1ae4ee1568b5329d93d76418227a024ac1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> tokenizerInt(std::string line)
+
+Function for tokenizing line strings into a vector of ints.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- line
+
+		- The string containing the line to be tokenized
+
+.. index:: pair: function; file_exists
+.. _doxid-namespacegen_1aa49625658169d33851df990c1d62f097:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool file_exists(const std::string& name)
+
+Function for checking if a file exists or not.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- name
+
+		- The name of the file
+
+.. index:: pair: function; avgVector
+.. _doxid-namespacegen_1a17d4f5636c0469c19d7efa59344396b2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::complex<double>> avgVector(std::vector<std::complex<double>> v, int l, int neigh)
+
+Calculates the complex vector, normalized by the number of nearest neighbours, of length :math:`2l+1`.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- v
+
+		- The complex vector to be normalized, of length :math:`2l+1`
+
+	*
+		- l
+
+		- A free integer parameter
+
+	*
+		- neigh
+
+		- The number of nearest neighbours
+
+
+
+.. rubric:: Returns:
+
+length :math:`2l+1`, normalized by the number of nearest neighbours
+
+.. index:: pair: function; getPointCloudOneAtomType
+.. _doxid-namespacegen_1ae72039bf692acc3dd1e1a0e9cdddb8c6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> getPointCloudOneAtomType(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& outCloud, int atomTypeI, bool isSlice = false, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0})
+
+Given a pointCloud containing certain atom types, this returns a pointCloud containing atoms of only the desired type
+
+.. index:: pair: function; moleculesInSingleSlice
+.. _doxid-namespacegen_1aa6a3bfc360df06a888d89bbd1496f4c7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void moleculesInSingleSlice(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, bool clearPreviousSliceSelection = true, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0})
+
+Given a pointCloud set the inSlice bool for every atom, if the molecules are inside the specified (single) region. If even one atom of a molecule is inside the region, then all atoms of that molecule will be inside the region (irrespective of type)
+
+.. index:: pair: function; atomsInSingleSlice
+.. _doxid-namespacegen_1a14c78fad4483668aa3d053ec7d335c79:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void atomsInSingleSlice(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, bool clearPreviousSliceSelection = true, std::array<double, 3> coordLow = std::array<double, 3>{0, 0, 0}, std::array<double, 3> coordHigh = std::array<double, 3>{0, 0, 0})
+
+Given a pointCloud set the inSlice bool for every atom, if the atoms are inside the specified (single) region. Does not handle atoms in molecules straddling the boundary
+
+.. index:: pair: function; setAtomsWithSameMolID
+.. _doxid-namespacegen_1aa840597800d75f1e4819649e51a567bc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setAtomsWithSameMolID(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::unordered_multimap<int, int>& molIDAtomIDmap, int molID, bool inSliceValue = true)
+
+Given a particular molecule ID and a pointCloud set the inSlice bool for all atoms, with that molecule ID
 

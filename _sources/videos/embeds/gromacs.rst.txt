@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-gromacs" src="https://odysee.com/$/embed/dseams-gromacs:22838fea81b056f214f908414fde65dd6a42f655" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/gromacs.vtt">docs/videos/gromacs/captions.vtt</a></p>
+   <p>GROMACS gmx-seams.</p>

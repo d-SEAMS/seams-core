@@ -1,0 +1,71 @@
+.. index:: pair: struct; seams::DensityOptions
+.. _doxid-structseams_1_1_density_options:
+
+struct seams::DensityOptions
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for the axial number density. :ref:`More...<details-structseams_1_1_density_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DensityOptions {
+		// fields
+	
+		int :ref:`species<doxid-structseams_1_1_density_options_1a149a66a829bb6febb4bc4959b221df3a>` = 0;
+		int :ref:`bins<doxid-structseams_1_1_density_options_1a34c51fa23597ef9be27d917b849be932>` = 0;
+		:ref:`Axis<doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82>` :ref:`axis<doxid-structseams_1_1_density_options_1a1be050e17aa0053232fb877b2bdd97f3>` = :ref:`Axis::Z<doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5>`;
+	};
+.. _details-structseams_1_1_density_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for the axial number density.
+
+Fields
+------
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_density_options_1a149a66a829bb6febb4bc4959b221df3a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+Zero keeps every atom.
+
+.. index:: pair: variable; bins
+.. _doxid-structseams_1_1_density_options_1a34c51fa23597ef9be27d917b849be932:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int bins = 0
+
+Bin count.
+
+Zero selects about one bin per 0.1 Angstrom.
+
+.. index:: pair: variable; axis
+.. _doxid-structseams_1_1_density_options_1a1be050e17aa0053232fb877b2bdd97f3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Axis<doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82>` axis = :ref:`Axis::Z<doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5>`
+
+Cell axis.
+

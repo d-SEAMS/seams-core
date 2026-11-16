@@ -1,0 +1,57 @@
+.. index:: pair: struct; iface::Front
+.. _doxid-structiface_1_1_front:
+
+struct iface::Front
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct Front {
+		// fields
+	
+		double :target:`position<doxid-structiface_1_1_front_1a8d4e951bae4f14232a3d152cc45637d3>` = 0;
+		double :ref:`width<doxid-structiface_1_1_front_1acc149af87785232b22eb356aa520f61f>` = 0;
+		bool :ref:`defined<doxid-structiface_1_1_front_1a16d6f11e37b90eceb761644b350f3328>` = false;
+	};
+.. _details-structiface_1_1_front:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; width
+.. _doxid-structiface_1_1_front_1acc149af87785232b22eb356aa520f61f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double width = 0
+
+0.5 crossing, or the nucleus radius
+
+.. index:: pair: variable; defined
+.. _doxid-structiface_1_1_front_1a16d6f11e37b90eceb761644b350f3328:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool defined = false
+
+10-90 width along the same path
+

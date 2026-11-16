@@ -238,6 +238,11 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacesymm.
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:generic" id="r_generic"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacesymm_1_1generic.html">generic</a></td></tr>
+<tr class="memitem:avx2" id="r_avx2"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespacesymm_1_1avx2.html">avx2</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:CanonShell" id="r_CanonShell"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsymm_1_1CanonShell.html">CanonShell</a></td></tr>
@@ -275,25 +280,31 @@ Functions</h2></td></tr>
 <tr class="memitem:a5374e93c778190fce896be8d6567421f" id="r_a5374e93c778190fce896be8d6567421f"><td class="memItemLeft"><a class="el" href="structsymm_1_1Overlay.html">Overlay</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5374e93c778190fce896be8d6567421f">best</a> (const Eigen::MatrixXd &amp;environment, const char *backend=nullptr)</td></tr>
 <tr class="memitem:aea0f3f10f434d271520104e26ddd6940" id="r_aea0f3f10f434d271520104e26ddd6940"><td class="memItemLeft"><a class="el" href="structsymm_1_1Overlay.html">Overlay</a>&#160;</td><td class="memItemRight"><a class="el" href="#aea0f3f10f434d271520104e26ddd6940">matchKernel</a> (const Eigen::MatrixXd &amp;environment)</td></tr>
 <tr class="memitem:a0d6f471026642e5d578d191f37fa3888" id="r_a0d6f471026642e5d578d191f37fa3888"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a0d6f471026642e5d578d191f37fa3888">matchAll</a> (const std::vector&lt; Eigen::MatrixXd &gt; &amp;environments, std::vector&lt; <a class="el" href="structsymm_1_1Overlay.html">Overlay</a> &gt; &amp;out)</td></tr>
-<tr class="memitem:af71c213f390254bf77878c72b46a59d7" id="r_af71c213f390254bf77878c72b46a59d7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#af71c213f390254bf77878c72b46a59d7">classifyIce</a> (const Eigen::MatrixXd &amp;cartesian, const Eigen::Matrix3d &amp;vectors, std::vector&lt; int &gt; &amp;kind, double shellRmsd=<a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a>)</td></tr>
-<tr class="memitem:ad48a534521657a581174759a81c719fc" id="r_ad48a534521657a581174759a81c719fc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ad48a534521657a581174759a81c719fc">classifyIceArrays</a> (const double *x, const double *y, const double *z, int n, const double lat[3][3], int *kind, double shellRmsd=<a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a>)</td></tr>
+<tr class="memitem:a39cefe5661a6b7f5dbe0d2feb8aaa548" id="r_a39cefe5661a6b7f5dbe0d2feb8aaa548"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a39cefe5661a6b7f5dbe0d2feb8aaa548">classifyIce</a> (const Eigen::MatrixXd &amp;cartesian, const Eigen::Matrix3d &amp;vectors, std::vector&lt; int &gt; &amp;kind, double shellRmsd=<a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a>, double thermalQ=<a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a>, double bondRatio=<a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a>, bool openFace=false)</td></tr>
+<tr class="memitem:a437c457f731c3312b875fd2737849e8a" id="r_a437c457f731c3312b875fd2737849e8a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a437c457f731c3312b875fd2737849e8a">classifyIceArrays</a> (const double *x, const double *y, const double *z, int n, const double lat[3][3], int *kind, double shellRmsd=<a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a>, double thermalQ=<a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a>, double bondRatio=<a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a>, bool openFace=false)</td></tr>
+<tr class="memitem:aa3851ae81522496cab6227d627163045" id="r_aa3851ae81522496cab6227d627163045"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aa3851ae81522496cab6227d627163045">classifyIceCloud</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; int &gt; &amp;kind, bool openFace=false)</td></tr>
 <tr class="memitem:ae51b664e84ac3e7a8894b417fa4b3722" id="r_ae51b664e84ac3e7a8894b417fa4b3722"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae51b664e84ac3e7a8894b417fa4b3722">bondCosines</a> (const Eigen::MatrixXd &amp;environment, double out[4])</td></tr>
 <tr class="memitem:a477f6563ad722b78e21afebe10bc0000" id="r_a477f6563ad722b78e21afebe10bc0000"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a477f6563ad722b78e21afebe10bc0000">iceTemplateRmsd</a> (const Eigen::MatrixXd &amp;environment, <a class="el" href="#ad93e6f708650d22301ab475a32337022">Kind</a> kind)</td></tr>
 <tr class="memitem:a2afeb3e6093bd3c1d29b6c4ba0b4d46d" id="r_a2afeb3e6093bd3c1d29b6c4ba0b4d46d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a2afeb3e6093bd3c1d29b6c4ba0b4d46d">shapeMeasure</a> (const Eigen::MatrixXd &amp;environment)</td></tr>
 <tr class="memitem:a35c5f089ab9b9fca61adf4d8e6f2e360" id="r_a35c5f089ab9b9fca61adf4d8e6f2e360"><td class="memItemLeft"><a class="el" href="structsymm_1_1Group.html">Group</a>&#160;</td><td class="memItemRight"><a class="el" href="#a35c5f089ab9b9fca61adf4d8e6f2e360">pointGroup</a> (const Eigen::MatrixXd &amp;xyz, double symThr=0.05)</td></tr>
 <tr class="memitem:a481a5432812fc55d840def77eb67d986" id="r_a481a5432812fc55d840def77eb67d986"><td class="memItemLeft"><a class="el" href="structsymm_1_1Space.html">Space</a>&#160;</td><td class="memItemRight"><a class="el" href="#a481a5432812fc55d840def77eb67d986">spaceGroup</a> (const Eigen::Matrix3d &amp;vectors, const Eigen::MatrixXd &amp;cartesian, double symprec=1e-3)</td></tr>
+<tr class="memitem:afdc0e8052af03457c269c74d841c77f1" id="r_afdc0e8052af03457c269c74d841c77f1"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#afdc0e8052af03457c269c74d841c77f1">conventionalCrystalSpace</a> (const Eigen::Matrix3d &amp;vectors, const Eigen::MatrixXd &amp;cartesian, const std::vector&lt; int &gt; &amp;kind, double symprec, <a class="el" href="structsymm_1_1Space.html">Space</a> &amp;out)</td></tr>
 <tr class="memitem:aa2ec5ea19b218e462ab5cbff03d5ca7c" id="r_aa2ec5ea19b218e462ab5cbff03d5ca7c"><td class="memItemLeft"><a class="el" href="structsymm_1_1Lattice.html">Lattice</a>&#160;</td><td class="memItemRight"><a class="el" href="#aa2ec5ea19b218e462ab5cbff03d5ca7c">crystal</a> (<a class="el" href="#a0d503bcc3d5952a25a838bb0dd2ef82d">Crystal</a> which)</td></tr>
 <tr class="memitem:adec5164471ac99128cb3f7dab6020956" id="r_adec5164471ac99128cb3f7dab6020956"><td class="memItemLeft">Eigen::MatrixXd&#160;</td><td class="memItemRight"><a class="el" href="#adec5164471ac99128cb3f7dab6020956">iceShell</a> (const Eigen::MatrixXd &amp;cartesian, const Eigen::Matrix3d &amp;vectors, int atom)</td></tr>
 <tr class="memitem:a9ff120d9b19c33196cc906af929466d3" id="r_a9ff120d9b19c33196cc906af929466d3"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a9ff120d9b19c33196cc906af929466d3">iraLinked</a> ()</td></tr>
 <tr class="memitem:a9b45faa173064de84c512b815e839985" id="r_a9b45faa173064de84c512b815e839985"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a9b45faa173064de84c512b815e839985">spglibLinked</a> ()</td></tr>
 <tr class="memitem:a0f7e3ff9b3fecfaf6a79141c728b6b2b" id="r_a0f7e3ff9b3fecfaf6a79141c728b6b2b"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a0f7e3ff9b3fecfaf6a79141c728b6b2b">matcher</a> ()</td></tr>
-<tr class="memitem:ad14a718db3378b22d4f2b24eb109aae6" id="r_ad14a718db3378b22d4f2b24eb109aae6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ad14a718db3378b22d4f2b24eb109aae6">classifyPrepared</a> (const double *x, const double *y, const double *z, int n, const double lat[3][3], const <a class="el" href="structsymm_1_1CanonShell.html">CanonShell</a> &amp;canon, double gate, int *kind)</td></tr>
+<tr class="memitem:a3b5774dafdae3a0c18d9837dadc12671" id="r_a3b5774dafdae3a0c18d9837dadc12671"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a3b5774dafdae3a0c18d9837dadc12671">classifyPrepared</a> (const double *x, const double *y, const double *z, int n, const double lat[3][3], const <a class="el" href="structsymm_1_1CanonShell.html">CanonShell</a> &amp;canon, double gate, int *kind, double thermalQ=<a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a>, double bondRatio=<a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a>, bool openFace=false)</td></tr>
+<tr class="memitem:aa92a0bdaa68a6b24e5de15494a40c731" id="r_aa92a0bdaa68a6b24e5de15494a40c731"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa92a0bdaa68a6b24e5de15494a40c731">diamondCna</a> (const double *sx, const double *sy, const double *sz, int ambiguous, int *n421=nullptr, int *n422=nullptr, int *nGood=nullptr)</td></tr>
+<tr class="memitem:a4c144bb9fe1a2e1fe40be391f0768659" id="r_a4c144bb9fe1a2e1fe40be391f0768659"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a4c144bb9fe1a2e1fe40be391f0768659">avx2Kernels</a> ()</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a18b4f207cb89fa68c9b88b737243452b" id="r_a18b4f207cb89fa68c9b88b737243452b"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="#a18b4f207cb89fa68c9b88b737243452b">kTemplateCount</a> = 8</td></tr>
 <tr class="memitem:a9b4cf619ad5f42deea89aaf87b58bf71" id="r_a9b4cf619ad5f42deea89aaf87b58bf71"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a9b4cf619ad5f42deea89aaf87b58bf71">kEclipsedCosine</a> = 0.90</td></tr>
-<tr class="memitem:a441a4b9599216d4ec218f599ecbe87fa" id="r_a441a4b9599216d4ec218f599ecbe87fa"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a> = 0.12</td></tr>
+<tr class="memitem:a441a4b9599216d4ec218f599ecbe87fa" id="r_a441a4b9599216d4ec218f599ecbe87fa"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a> = 0.15</td></tr>
+<tr class="memitem:a2ff84fc4b3aa66d032b694e9228aa59a" id="r_a2ff84fc4b3aa66d032b694e9228aa59a"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a> = 0.85</td></tr>
+<tr class="memitem:a498288d747baf3e7673fcfb9c8060422" id="r_a498288d747baf3e7673fcfb9c8060422"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a> = 1.20</td></tr>
 </table>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
 <a id="a0d503bcc3d5952a25a838bb0dd2ef82d" name="a0d503bcc3d5952a25a838bb0dd2ef82d"></a>
@@ -321,11 +332,11 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba" name="a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba"></a>fault&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00134">134</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  134</span>{ <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf">iceIh</a>, <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c">iceIc</a>, <a class="code hl_enumvalue" href="#a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba">fault</a> };</div>
-<div class="ttc" id="anamespacesymm_html_a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba"><div class="ttname"><a href="#a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba">symm::Crystal::fault</a></div><div class="ttdeci">@ fault</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00134">local_symmetry.hpp:134</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c">symm::Kind::iceIc</a></div><div class="ttdeci">@ iceIc</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00023">local_symmetry.hpp:23</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf">symm::Kind::iceIh</a></div><div class="ttdeci">@ iceIh</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00022">local_symmetry.hpp:22</a></div></div>
+<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00154">154</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  154</span>{ <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf">iceIh</a>, <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c">iceIc</a>, <a class="code hl_enumvalue" href="#a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba">fault</a> };</div>
+<div class="ttc" id="anamespacesymm_html_a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba"><div class="ttname"><a href="#a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba">symm::Crystal::fault</a></div><div class="ttdeci">@ fault</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00154">local_symmetry.hpp:154</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c">symm::Kind::iceIc</a></div><div class="ttdeci">@ iceIc</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00026">local_symmetry.hpp:26</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf">symm::Kind::iceIh</a></div><div class="ttdeci">@ iceIh</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00025">local_symmetry.hpp:25</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -359,27 +370,44 @@ Variables</h2></td></tr>
 <tr><td class="fieldname"><a id="ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b" name="ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b"></a>ring6&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00021">21</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   21</span>                {</div>
-<div class="line"><span class="lineno">   22</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf">iceIh</a> = 0,</div>
-<div class="line"><span class="lineno">   23</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c">iceIc</a> = 1,</div>
-<div class="line"><span class="lineno">   24</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7">iceIsd</a> = 2,</div>
-<div class="line"><span class="lineno">   25</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb">cage512</a> = 3,</div>
-<div class="line"><span class="lineno">   26</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395">cage51262</a> = 4,</div>
-<div class="line"><span class="lineno">   27</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2">cage51264</a> = 5,</div>
-<div class="line"><span class="lineno">   28</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d">ring5</a> = 6,</div>
-<div class="line"><span class="lineno">   29</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b">ring6</a> = 7</div>
-<div class="line"><span class="lineno">   30</span>};</div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2">symm::Kind::cage51264</a></div><div class="ttdeci">@ cage51264</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00027">local_symmetry.hpp:27</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7">symm::Kind::iceIsd</a></div><div class="ttdeci">@ iceIsd</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00024">local_symmetry.hpp:24</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b">symm::Kind::ring6</a></div><div class="ttdeci">@ ring6</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00029">local_symmetry.hpp:29</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d">symm::Kind::ring5</a></div><div class="ttdeci">@ ring5</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00028">local_symmetry.hpp:28</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395">symm::Kind::cage51262</a></div><div class="ttdeci">@ cage51262</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00026">local_symmetry.hpp:26</a></div></div>
-<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb">symm::Kind::cage512</a></div><div class="ttdeci">@ cage512</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00025">local_symmetry.hpp:25</a></div></div>
+<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00024">24</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   24</span>                {</div>
+<div class="line"><span class="lineno">   25</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf">iceIh</a> = 0,</div>
+<div class="line"><span class="lineno">   26</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c">iceIc</a> = 1,</div>
+<div class="line"><span class="lineno">   27</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7">iceIsd</a> = 2,</div>
+<div class="line"><span class="lineno">   28</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb">cage512</a> = 3,</div>
+<div class="line"><span class="lineno">   29</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395">cage51262</a> = 4,</div>
+<div class="line"><span class="lineno">   30</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2">cage51264</a> = 5,</div>
+<div class="line"><span class="lineno">   31</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d">ring5</a> = 6,</div>
+<div class="line"><span class="lineno">   32</span>  <a class="code hl_enumvalue" href="#ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b">ring6</a> = 7</div>
+<div class="line"><span class="lineno">   33</span>};</div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2">symm::Kind::cage51264</a></div><div class="ttdeci">@ cage51264</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00030">local_symmetry.hpp:30</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7">symm::Kind::iceIsd</a></div><div class="ttdeci">@ iceIsd</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00027">local_symmetry.hpp:27</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b">symm::Kind::ring6</a></div><div class="ttdeci">@ ring6</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00032">local_symmetry.hpp:32</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d">symm::Kind::ring5</a></div><div class="ttdeci">@ ring5</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00031">local_symmetry.hpp:31</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395">symm::Kind::cage51262</a></div><div class="ttdeci">@ cage51262</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00029">local_symmetry.hpp:29</a></div></div>
+<div class="ttc" id="anamespacesymm_html_ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb"><div class="ttname"><a href="#ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb">symm::Kind::cage512</a></div><div class="ttdeci">@ cage512</div><div class="ttdef"><b>Definition</b> <a href="local__symmetry_8hpp_source.html#l00028">local_symmetry.hpp:28</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a4c144bb9fe1a2e1fe40be391f0768659" name="a4c144bb9fe1a2e1fe40be391f0768659"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c144bb9fe1a2e1fe40be391f0768659">&#9670;&#160;</a></span>avx2Kernels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool symm::avx2Kernels </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a5374e93c778190fce896be8d6567421f" name="a5374e93c778190fce896be8d6567421f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5374e93c778190fce896be8d6567421f">&#9670;&#160;</a></span>best()</h2>
 
@@ -422,8 +450,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="af71c213f390254bf77878c72b46a59d7" name="af71c213f390254bf77878c72b46a59d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af71c213f390254bf77878c72b46a59d7">&#9670;&#160;</a></span>classifyIce()</h2>
+<a id="a39cefe5661a6b7f5dbe0d2feb8aaa548" name="a39cefe5661a6b7f5dbe0d2feb8aaa548"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39cefe5661a6b7f5dbe0d2feb8aaa548">&#9670;&#160;</a></span>classifyIce()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -446,15 +474,30 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shellRmsd</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a></span>&#160;)</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shellRmsd</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>thermalQ</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bondRatio</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>openFace</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="ad48a534521657a581174759a81c719fc" name="ad48a534521657a581174759a81c719fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad48a534521657a581174759a81c719fc">&#9670;&#160;</a></span>classifyIceArrays()</h2>
+<a id="a437c457f731c3312b875fd2737849e8a" name="a437c457f731c3312b875fd2737849e8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a437c457f731c3312b875fd2737849e8a">&#9670;&#160;</a></span>classifyIceArrays()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -492,15 +535,56 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shellRmsd</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a></span>&#160;)</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shellRmsd</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a441a4b9599216d4ec218f599ecbe87fa">kShellRmsd</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>thermalQ</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bondRatio</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>openFace</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="ad14a718db3378b22d4f2b24eb109aae6" name="ad14a718db3378b22d4f2b24eb109aae6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad14a718db3378b22d4f2b24eb109aae6">&#9670;&#160;</a></span>classifyPrepared()</h2>
+<a id="aa3851ae81522496cab6227d627163045" name="aa3851ae81522496cab6227d627163045"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3851ae81522496cab6227d627163045">&#9670;&#160;</a></span>classifyIceCloud()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void symm::classifyIceCloud </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>kind</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>openFace</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3b5774dafdae3a0c18d9837dadc12671" name="a3b5774dafdae3a0c18d9837dadc12671"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b5774dafdae3a0c18d9837dadc12671">&#9670;&#160;</a></span>classifyPrepared()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -543,7 +627,58 @@ Variables</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>kind</em></span>&#160;)</td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>kind</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>thermalQ</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a2ff84fc4b3aa66d032b694e9228aa59a">kThermalQ</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bondRatio</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="#a498288d747baf3e7673fcfb9c8060422">kThermalBondRatio</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>openFace</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afdc0e8052af03457c269c74d841c77f1" name="afdc0e8052af03457c269c74d841c77f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdc0e8052af03457c269c74d841c77f1">&#9670;&#160;</a></span>conventionalCrystalSpace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool symm::conventionalCrystalSpace </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Matrix3d &amp;</td>          <td class="paramname"><span class="paramname"><em>vectors</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXd &amp;</td>          <td class="paramname"><span class="paramname"><em>cartesian</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>kind</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>symprec</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structsymm_1_1Space.html">Space</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -561,6 +696,52 @@ Variables</h2></td></tr>
           <td>(</td>
           <td class="paramtype"><a class="el" href="#a0d503bcc3d5952a25a838bb0dd2ef82d">Crystal</a></td>          <td class="paramname"><span class="paramname"><em>which</em></span></td><td>)</td>
           <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa92a0bdaa68a6b24e5de15494a40c731" name="aa92a0bdaa68a6b24e5de15494a40c731"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa92a0bdaa68a6b24e5de15494a40c731">&#9670;&#160;</a></span>diamondCna()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int symm::diamondCna </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>sx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>sy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>sz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ambiguous</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n421</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n422</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>nGood</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -874,7 +1055,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00076">76</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00079">79</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
 
 </div>
 </div>
@@ -888,7 +1069,7 @@ Variables</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double symm::kShellRmsd = 0.12</td>
+          <td class="memname">double symm::kShellRmsd = 0.15</td>
         </tr>
       </table>
   </td>
@@ -898,7 +1079,7 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00087">87</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00089">89</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
 
 </div>
 </div>
@@ -922,7 +1103,55 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00032">32</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="local__symmetry_8hpp_source.html#l00035">35</a> of file <a class="el" href="local__symmetry_8hpp_source.html">local_symmetry.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a498288d747baf3e7673fcfb9c8060422" name="a498288d747baf3e7673fcfb9c8060422"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a498288d747baf3e7673fcfb9c8060422">&#9670;&#160;</a></span>kThermalBondRatio</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double symm::kThermalBondRatio = 1.20</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="shell__hot_8hpp_source.html#l00038">38</a> of file <a class="el" href="shell__hot_8hpp_source.html">shell_hot.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a2ff84fc4b3aa66d032b694e9228aa59a" name="a2ff84fc4b3aa66d032b694e9228aa59a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2ff84fc4b3aa66d032b694e9228aa59a">&#9670;&#160;</a></span>kThermalQ</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double symm::kThermalQ = 0.85</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="shell__hot_8hpp_source.html#l00035">35</a> of file <a class="el" href="shell__hot_8hpp_source.html">shell_hot.hpp</a>.</p>
 
 </div>
 </div>

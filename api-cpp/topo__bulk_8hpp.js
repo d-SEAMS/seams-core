@@ -12,12 +12,15 @@ var topo__bulk_8hpp =
     [ "prism3::basalPrismConditions", "namespaceprism3.html#ab03946085dcf2e67583da676ab7f869f", null ],
     [ "prism3::basalRingsSeparation", "namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a", null ],
     [ "ring::buildRingSearchIndex", "namespacering.html#ae6af6b848c82b3f5bca8514ae6a31473", null ],
-    [ "ring::buildRingSearchIndex", "namespacering.html#a2314146c9c30c45799ab5217b8b69e61", null ],
+    [ "ring::buildRingSearchIndex", "namespacering.html#ab661e962729134479d1caf21e688a703", null ],
     [ "ring::bulkPolygonRingAnalysis", "namespacering.html#a46bc67e817124b0e736c493bc8e4d6ee", null ],
     [ "ring::cageRings", "namespacering.html#a9d784052b67c693381315d0947be0881", null ],
     [ "ring::conditionOneDDC", "namespacering.html#a7cc755c188267af7b9ff9ae73ca77579", null ],
     [ "ring::conditionOneDDC", "namespacering.html#a75c45309352d085d18f89f370dd42ab2", null ],
     [ "ring::contractibleRings", "namespacering.html#a2f56d182514c3a74d223a92c22136017", null ],
+    [ "ring::contractibleRings", "namespacering.html#a926f17abcc69431361238b764ab25619", null ],
+    [ "ring::equatorChoiceOverflow", "namespacering.html#a7e08c423e61bfe5df43c009de1b38366", null ],
+    [ "ring::equatorChoiceOverflowPut", "namespacering.html#a7e4d993e20ff5ad076f747f08c9fb780", null ],
     [ "ring::equatorialConditions", "namespacering.html#a01243f4581fb55b417184d98f9ac70aa", null ],
     [ "prism3::findBulkPrisms", "namespaceprism3.html#a1ba0089123227ca022acc1ce38baf7ee", null ],
     [ "ring::findDDC", "namespacering.html#a503bfa2deec404d907645e16ed236c28", null ],
@@ -35,5 +38,6 @@ var topo__bulk_8hpp =
     [ "ring::notNeighboursOfRing", "namespacering.html#a5db4898b22ebb13511cc37fae6674e5c", null ],
     [ "ring::positionRank", "namespacering.html#a51764966eab7aea2d90649bb6cc607ea", null ],
     [ "prism3::relaxedPrismConditions", "namespaceprism3.html#abbcd706f2576f374e6037e9073815ee8", null ],
+    [ "ring::releaseEquatorOverflow", "namespacering.html#a5c05b0dac9b7124e2770e04a424a3bf7", null ],
     [ "ring::topoBulkAnalysis", "namespacering.html#ada5f6a19834edc41365e7f85d92e4b76", null ]
 ];

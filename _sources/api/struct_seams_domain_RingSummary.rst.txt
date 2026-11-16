@@ -42,7 +42,7 @@ Fields
 
 	std::vector<long long> sizeCount
 
-Rings of each size, indexed by member count, 0 through maxDepth.
+:ref:`Rings <doxid-classseams_1_1_rings>` of each size, indexed by member count, 0 through maxDepth.
 
 .. index:: pair: variable; atomType
 .. _doxid-structseams_1_1domain_1_1_ring_summary_1acc99d07f5a72f9395e2c9555e9b37520:
@@ -52,5 +52,5 @@ Rings of each size, indexed by member count, 0 through maxDepth.
 
 	std::vector<int> atomType
 
-Largest ring size each atom belongs to, 1 when it is in none, the rule :ref:`ring::assignPolygonType <doxid-group__ring_1gafa6c593ce7cd865c74e11d39fa27f04b>` applies. Filled on the root rank only.
+Largest ring size each atom belongs to, 1 when it is in none, the rule :ref:`ring::assignPolygonType <doxid-namespacering_1afa6c593ce7cd865c74e11d39fa27f04b>` applies. Filled on the root rank only.
 

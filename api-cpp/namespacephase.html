@@ -271,7 +271,15 @@ Functions</h2></td></tr>
 <tr class="memitem:a201ed8bb3cd747bc5663cce11a23c2fa" id="r_a201ed8bb3cd747bc5663cce11a23c2fa"><td class="memItemLeft"><a class="el" href="#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a>&#160;</td><td class="memItemRight"><a class="el" href="#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a> (double rho, double iceMax, double ldaMax, double mdaMin)</td></tr>
 <tr class="memitem:a31b88f162592c1601d40e4363cb87898" id="r_a31b88f162592c1601d40e4363cb87898"><td class="memItemLeft"><a class="el" href="#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a>&#160;</td><td class="memItemRight"><a class="el" href="#a31b88f162592c1601d40e4363cb87898">glassFromDensity</a> (double rho, double iceMax, double mdaMin)</td></tr>
 <tr class="memdesc:a31b88f162592c1601d40e4363cb87898"><td class="mdescLeft">&#160;</td><td class="mdescRight">Three-argument form: LDA/MDA split at the midpoint of iceMax and mdaMin.  <br /></td></tr>
+<tr class="memitem:a083e89f93fde59a75b4170104e235ddf" id="r_a083e89f93fde59a75b4170104e235ddf"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a083e89f93fde59a75b4170104e235ddf">numberDensity</a> (double massGPerCm3)</td></tr>
+<tr class="memdesc:a083e89f93fde59a75b4170104e235ddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number density in 1/A^3 from a mass density in g/cm^3.  <br /></td></tr>
 <tr class="memitem:a8eaa4d3fda3aef905fddd4f5e9bc502c" id="r_a8eaa4d3fda3aef905fddd4f5e9bc502c"><td class="memItemLeft"><a class="el" href="#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a>&#160;</td><td class="memItemRight"><a class="el" href="#a8eaa4d3fda3aef905fddd4f5e9bc502c">glassFromDensity</a> (double rho)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a1093758960f53ee03ad27ab01ac8961b" id="r_a1093758960f53ee03ad27ab01ac8961b"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a1093758960f53ee03ad27ab01ac8961b">kIceIhMassDensity</a> = 0.917</td></tr>
+<tr class="memitem:a4d70567f43ed91b21c2cf23364150a42" id="r_a4d70567f43ed91b21c2cf23364150a42"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a4d70567f43ed91b21c2cf23364150a42">kIceVIMassDensity</a> = 1.31</td></tr>
+<tr class="memitem:a0eedbca606ffe470017521f827850d0c" id="r_a0eedbca606ffe470017521f827850d0c"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a0eedbca606ffe470017521f827850d0c">kIceNumberDensityMax</a></td></tr>
 </table>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
 <a id="a45206ea8c1350d175974e9a54cde9c71" name="a45206ea8c1350d175974e9a54cde9c71"></a>
@@ -367,7 +375,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Literature local-density windows: ice &lt; 0.028, LDA &lt; 0.040, MDA &lt; 0.070, else HDA. </p>
+<p>Local-density windows, 1/A^3. Ice is below kIceNumberDensityMax, LDA below 0.040, MDA below 0.070, else HDA. </p>
 
 </div>
 </div>
@@ -499,6 +507,38 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a083e89f93fde59a75b4170104e235ddf" name="a083e89f93fde59a75b4170104e235ddf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a083e89f93fde59a75b4170104e235ddf">&#9670;&#160;</a></span>numberDensity()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double phase::numberDensity </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>massGPerCm3</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Number density in 1/A^3 from a mass density in g/cm^3. </p>
+
+<p class="definition">Definition at line <a class="el" href="phase_8hpp_source.html#l00081">81</a> of file <a class="el" href="phase_8hpp_source.html">phase.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   81</span>                                                          {</div>
+<div class="line"><span class="lineno">   82</span>  <span class="keywordflow">return</span> massGPerCm3 * 6.02214076e23 / (18.015 * 1.0e24);</div>
+<div class="line"><span class="lineno">   83</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
 <a id="a896a28798e9ac2e9e32e8807ca720cc1" name="a896a28798e9ac2e9e32e8807ca720cc1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a896a28798e9ac2e9e32e8807ca720cc1">&#9670;&#160;</a></span>openChannelCount()</h2>
 
@@ -547,6 +587,86 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>64-bit key of donated H directions per oxygen (molID-shared hydrogens). </p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a1093758960f53ee03ad27ab01ac8961b" name="a1093758960f53ee03ad27ab01ac8961b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1093758960f53ee03ad27ab01ac8961b">&#9670;&#160;</a></span>kIceIhMassDensity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double phase::kIceIhMassDensity = 0.917</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Mass densities, g/cm^3. Ih is the 1 bar crystal. Ice VI is the dense tetrahedral crystal, not ice I. </p>
+
+<p class="definition">Definition at line <a class="el" href="phase_8hpp_source.html#l00077">77</a> of file <a class="el" href="phase_8hpp_source.html">phase.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0eedbca606ffe470017521f827850d0c" name="a0eedbca606ffe470017521f827850d0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0eedbca606ffe470017521f827850d0c">&#9670;&#160;</a></span>kIceNumberDensityMax</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double phase::kIceNumberDensityMax</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">                                         =</div>
+<div class="line">0.5 * (<a class="code hl_function" href="#a083e89f93fde59a75b4170104e235ddf">numberDensity</a>(<a class="code hl_variable" href="#a1093758960f53ee03ad27ab01ac8961b">kIceIhMassDensity</a>) + <a class="code hl_function" href="#a083e89f93fde59a75b4170104e235ddf">numberDensity</a>(<a class="code hl_variable" href="#a4d70567f43ed91b21c2cf23364150a42">kIceVIMassDensity</a>))</div>
+<div class="ttc" id="anamespacephase_html_a083e89f93fde59a75b4170104e235ddf"><div class="ttname"><a href="#a083e89f93fde59a75b4170104e235ddf">phase::numberDensity</a></div><div class="ttdeci">constexpr double numberDensity(double massGPerCm3)</div><div class="ttdoc">Number density in 1/A^3 from a mass density in g/cm^3.</div><div class="ttdef"><b>Definition</b> <a href="phase_8hpp_source.html#l00081">phase.hpp:81</a></div></div>
+<div class="ttc" id="anamespacephase_html_a1093758960f53ee03ad27ab01ac8961b"><div class="ttname"><a href="#a1093758960f53ee03ad27ab01ac8961b">phase::kIceIhMassDensity</a></div><div class="ttdeci">constexpr double kIceIhMassDensity</div><div class="ttdef"><b>Definition</b> <a href="phase_8hpp_source.html#l00077">phase.hpp:77</a></div></div>
+<div class="ttc" id="anamespacephase_html_a4d70567f43ed91b21c2cf23364150a42"><div class="ttname"><a href="#a4d70567f43ed91b21c2cf23364150a42">phase::kIceVIMassDensity</a></div><div class="ttdeci">constexpr double kIceVIMassDensity</div><div class="ttdef"><b>Definition</b> <a href="phase_8hpp_source.html#l00078">phase.hpp:78</a></div></div>
+</div><!-- fragment --><p>Ice/LDA split: the midpoint of the Ih and ice VI number densities. Ih (about 0.031) is ice. Ice VI (about 0.044) is not. </p>
+
+<p class="definition">Definition at line <a class="el" href="phase_8hpp_source.html#l00087">87</a> of file <a class="el" href="phase_8hpp_source.html">phase.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a4d70567f43ed91b21c2cf23364150a42" name="a4d70567f43ed91b21c2cf23364150a42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d70567f43ed91b21c2cf23364150a42">&#9670;&#160;</a></span>kIceVIMassDensity</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double phase::kIceVIMassDensity = 1.31</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="phase_8hpp_source.html#l00078">78</a> of file <a class="el" href="phase_8hpp_source.html">phase.hpp</a>.</p>
 
 </div>
 </div>

@@ -1,0 +1,47 @@
+.. index:: pair: class; seams::Rings::iterator
+.. _doxid-classseams_1_1_rings_1_1iterator:
+
+class seams::Rings::iterator
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Input iterator. :ref:`More...<details-classseams_1_1_rings_1_1iterator>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class iterator {
+	public:
+		// typedefs
+	
+		typedef std::vector<int> :target:`value_type<doxid-classseams_1_1_rings_1_1iterator_1a1146cd8dbc7abc026f9723ab1191734d>`;
+		typedef std::ptrdiff_t :target:`difference_type<doxid-classseams_1_1_rings_1_1iterator_1aa79d465125555a5e68d7181873c88ced>`;
+
+		// construction
+	
+		:target:`iterator<doxid-classseams_1_1_rings_1_1iterator_1ab05d59be148e83fc4f7c38c851e603c4>`(const :ref:`Rings<doxid-classseams_1_1_rings>`* owner, int index);
+
+		// methods
+	
+		:ref:`value_type<doxid-classseams_1_1_rings_1_1iterator_1a1146cd8dbc7abc026f9723ab1191734d>` :target:`operator*<doxid-classseams_1_1_rings_1_1iterator_1a45e0e174b80cc97ed1c9f74e09dba238>`() const;
+		:ref:`iterator<doxid-classseams_1_1_rings_1_1iterator_1ab05d59be148e83fc4f7c38c851e603c4>`& :target:`operator++<doxid-classseams_1_1_rings_1_1iterator_1a03217bfe449ba3338926711dd6c6046a>`();
+		bool :target:`operator==<doxid-classseams_1_1_rings_1_1iterator_1af2a6fe54fd2c19b5a428b16ef29db07e>`(const :ref:`iterator<doxid-classseams_1_1_rings_1_1iterator_1ab05d59be148e83fc4f7c38c851e603c4>`& other) const;
+		bool :target:`operator!=<doxid-classseams_1_1_rings_1_1iterator_1a9448e4d2d0786af0e2c82a95fd750871>`(const :ref:`iterator<doxid-classseams_1_1_rings_1_1iterator_1ab05d59be148e83fc4f7c38c851e603c4>`& other) const;
+	};
+.. _details-classseams_1_1_rings_1_1iterator:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Input iterator.
+
+``operator*`` copies one ring.
+

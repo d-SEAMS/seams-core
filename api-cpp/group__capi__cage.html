@@ -1,0 +1,628 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Cages and ice shells</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.14.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__cage.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Cages and ice shells </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Hexagonal and double-diamond cages, signatures, and shell labels.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:gae8b8cc80521cbe925e8fd93165fc8262" id="r_gae8b8cc80521cbe925e8fd93165fc8262"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gae8b8cc80521cbe925e8fd93165fc8262">seams_cages_find</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int graph, int k, int complete, <a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> **out)</td></tr>
+<tr class="memdesc:gae8b8cc80521cbe925e8fd93165fc8262"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hexagonal and double-diamond cage membership.  <br /></td></tr>
+<tr class="memitem:gaa7ca594d2a336eb3e276b9bc6867abf3" id="r_gaa7ca594d2a336eb3e276b9bc6867abf3"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#gaa7ca594d2a336eb3e276b9bc6867abf3">seams_cages_destroy</a> (<a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *cages)</td></tr>
+<tr class="memdesc:gaa7ca594d2a336eb3e276b9bc6867abf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a cage-membership handle.  <br /></td></tr>
+<tr class="memitem:gaef5b3de565e462890e882a243003b80a" id="r_gaef5b3de565e462890e882a243003b80a"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaef5b3de565e462890e882a243003b80a">seams_cages_counts</a> (const <a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *cages, int *n_hex, int *n_cubic, int *n_water, int *n_both)</td></tr>
+<tr class="memdesc:gaef5b3de565e462890e882a243003b80a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Disjoint cage population counts.  <br /></td></tr>
+<tr class="memitem:gac9619f018381e402302c7d49b48a73e5" id="r_gac9619f018381e402302c7d49b48a73e5"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gac9619f018381e402302c7d49b48a73e5">seams_cages_labels</a> (const <a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *cages, int *per_atom, size_t len)</td></tr>
+<tr class="memdesc:gac9619f018381e402302c7d49b48a73e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-atom cage code.  <br /></td></tr>
+<tr class="memitem:ga326e31e70a7faf5cfd98c965865bd827" id="r_ga326e31e70a7faf5cfd98c965865bd827"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga326e31e70a7faf5cfd98c965865bd827">seams_cages_signature</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double cutoff, int type, int graph, const char *spec, size_t *n_cages, size_t *n_atoms)</td></tr>
+<tr class="memdesc:ga326e31e70a7faf5cfd98c965865bd827"><td class="mdescLeft">&#160;</td><td class="mdescRight">Count closed cages whose ring census matches a signature.  <br /></td></tr>
+<tr class="memitem:ga449e85e5b84add649a9aeb1a959cb219" id="r_ga449e85e5b84add649a9aeb1a959cb219"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga449e85e5b84add649a9aeb1a959cb219">seams_system_symmetry</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double shell_rmsd, int *labels, size_t labels_len)</td></tr>
+<tr class="memdesc:ga449e85e5b84add649a9aeb1a959cb219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-atom ice shell label.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Hexagonal and double-diamond cages, signatures, and shell labels. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="gaef5b3de565e462890e882a243003b80a" name="gaef5b3de565e462890e882a243003b80a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaef5b3de565e462890e882a243003b80a">&#9670;&#160;</a></span>seams_cages_counts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_cages_counts </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *</td>          <td class="paramname"><span class="paramname"><em>cages</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_hex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_cubic</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_water</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_both</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Disjoint cage population counts. </p>
+<p>The four counts sum to the number of atoms the search kept.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cages</td><td>Cage handle. </td></tr>
+    <tr><td class="paramname">n_hex</td><td>Hexagonal only, or NULL. </td></tr>
+    <tr><td class="paramname">n_cubic</td><td>Double-diamond only, or NULL. </td></tr>
+    <tr><td class="paramname">n_water</td><td>Neither cage, or NULL. </td></tr>
+    <tr><td class="paramname">n_both</td><td>Both cages, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> when cages is NULL or every count pointer is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns cages; the call borrows it. n_hex, n_cubic, n_water and n_both are caller storage that the call fills. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on cages, and not alongside a non-const call on cages. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> hex = 0, cubic = 0;</div>
+<div class="line"><a class="code hl_function" href="#gaef5b3de565e462890e882a243003b80a">seams_cages_counts</a>(cages, &amp;hex, &amp;cubic, NULL, NULL);</div>
+<div class="ttc" id="agroup__capi__cage_html_gaef5b3de565e462890e882a243003b80a"><div class="ttname"><a href="#gaef5b3de565e462890e882a243003b80a">seams_cages_counts</a></div><div class="ttdeci">SEAMS_API seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_cubic, int *n_water, int *n_both)</div><div class="ttdoc">Disjoint cage population counts.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaa7ca594d2a336eb3e276b9bc6867abf3" name="gaa7ca594d2a336eb3e276b9bc6867abf3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa7ca594d2a336eb3e276b9bc6867abf3">&#9670;&#160;</a></span>seams_cages_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_cages_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *</td>          <td class="paramname"><span class="paramname"><em>cages</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free a cage-membership handle. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cages</td><td>Handle from <a class="el" href="#gae8b8cc80521cbe925e8fd93165fc8262" title="Hexagonal and double-diamond cage membership.">seams_cages_find()</a> or <a class="el" href="group__capi__more.html#ga0a81fbcf2123584d03ba297a9b8718bf" title="Hexagonal and double-diamond cages.">seams_cages()</a>, or NULL. NULL is ignored. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and its per-atom labels. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>The caller must not use cages after this returns. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gaa7ca594d2a336eb3e276b9bc6867abf3">seams_cages_destroy</a>(cages);</div>
+<div class="ttc" id="agroup__capi__cage_html_gaa7ca594d2a336eb3e276b9bc6867abf3"><div class="ttname"><a href="#gaa7ca594d2a336eb3e276b9bc6867abf3">seams_cages_destroy</a></div><div class="ttdeci">SEAMS_API void seams_cages_destroy(seams_cage_set *cages)</div><div class="ttdoc">Free a cage-membership handle.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gae8b8cc80521cbe925e8fd93165fc8262" name="gae8b8cc80521cbe925e8fd93165fc8262"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae8b8cc80521cbe925e8fd93165fc8262">&#9670;&#160;</a></span>seams_cages_find()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_cages_find </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>complete</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Hexagonal and double-diamond cage membership. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. The seeded graph uses cutoff + 1.5 as the candidate shell. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a>, <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>, or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58aaf0915d3bfbd7d9d3e9c3cda74ff448c" title="Mutual seeds with union completions, for cages only.">SEAMS_GRAPH_SEEDED</a>. </td></tr>
+    <tr><td class="paramname">k</td><td>Neighbour count for the seeded graph. Zero selects 4. </td></tr>
+    <tr><td class="paramname">complete</td><td>Non-zero runs ring-adjacent completion on the seeded labels. Ignored for the cutoff and mutual graphs. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives a new handle. On failure *out is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#gaa7ca594d2a336eb3e276b9bc6867abf3" title="Free a cage-membership handle.">seams_cages_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *cages = NULL;</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="#gae8b8cc80521cbe925e8fd93165fc8262">seams_cages_find</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, 0, 0, &amp;cages) == <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a>) {</div>
+<div class="line">  <a class="code hl_function" href="#gaa7ca594d2a336eb3e276b9bc6867abf3">seams_cages_destroy</a>(cages);</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__capi__cage_html_gae8b8cc80521cbe925e8fd93165fc8262"><div class="ttname"><a href="#gae8b8cc80521cbe925e8fd93165fc8262">seams_cages_find</a></div><div class="ttdeci">SEAMS_API seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int graph, int k, int complete, seams_cage_set **out)</div><div class="ttdoc">Hexagonal and double-diamond cage membership.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga3f004d0d2964dc454f1b68b1549599f5"><div class="ttname"><a href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a></div><div class="ttdeci">struct seams_cage_set seams_cage_set</div><div class="ttdoc">Hexagonal and double-diamond membership.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00247">seams.h:247</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a></div><div class="ttdeci">@ SEAMS_OK</div><div class="ttdoc">The call succeeded.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00154">seams.h:154</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a></div><div class="ttdeci">@ SEAMS_GRAPH_CUTOFF</div><div class="ttdoc">Every neighbour inside the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00208">seams.h:208</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gac9619f018381e402302c7d49b48a73e5" name="gac9619f018381e402302c7d49b48a73e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac9619f018381e402302c7d49b48a73e5">&#9670;&#160;</a></span>seams_cages_labels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_cages_labels </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga3f004d0d2964dc454f1b68b1549599f5">seams_cage_set</a> *</td>          <td class="paramname"><span class="paramname"><em>cages</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>per_atom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Per-atom cage code. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cages</td><td>Cage handle. </td></tr>
+    <tr><td class="paramname">per_atom</td><td>Caller buffer of <a class="el" href="group__capi__types.html#ga39550bff08144408ba1e369f10f8a12f" title="Per-atom cage membership from the hexagonal and double-diamond search.">seams_cage_label</a> values, one per atom in the frame. Atoms the species filter dropped are <a class="el" href="group__capi__types.html#gga39550bff08144408ba1e369f10f8a12fa992682126bfa18bd9c0ce3d582a71d18" title="In neither cage.">SEAMS_CAGE_WATER</a>. </td></tr>
+    <tr><td class="paramname">len</td><td>Length of per_atom. Must be at least the frame count stored on the handle. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a>. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns per_atom. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on cages, and not alongside a non-const call on cages. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gac9619f018381e402302c7d49b48a73e5">seams_cages_labels</a>(cages, per_atom, n);</div>
+<div class="ttc" id="agroup__capi__cage_html_gac9619f018381e402302c7d49b48a73e5"><div class="ttname"><a href="#gac9619f018381e402302c7d49b48a73e5">seams_cages_labels</a></div><div class="ttdeci">SEAMS_API seams_status seams_cages_labels(const seams_cage_set *cages, int *per_atom, size_t len)</div><div class="ttdoc">Per-atom cage code.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga326e31e70a7faf5cfd98c965865bd827" name="ga326e31e70a7faf5cfd98c965865bd827"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga326e31e70a7faf5cfd98c965865bd827">&#9670;&#160;</a></span>seams_cages_signature()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_cages_signature </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>spec</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_cages</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_atoms</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Count closed cages whose ring census matches a signature. </p>
+<p>spec is a census such as "512", "51262", or "51264", or the names "hc" and "ddc". n_cages is the number of closed cages. n_atoms is the number of distinct vertices in those cages.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">cutoff</td><td>Positive finite cutoff, Angstrom. </td></tr>
+    <tr><td class="paramname">type</td><td>Species filter. </td></tr>
+    <tr><td class="paramname">graph</td><td><a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d" title="Every neighbour inside the cutoff.">SEAMS_GRAPH_CUTOFF</a> or <a class="el" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58ab2e8986db9bb2c257dc19204ef72ae99" title="Mutual four nearest inside cutoff + 1.5.">SEAMS_GRAPH_MUTUAL</a>. </td></tr>
+    <tr><td class="paramname">spec</td><td>Signature text. Must be non-NULL. </td></tr>
+    <tr><td class="paramname">n_cages</td><td>Receives the cage count. </td></tr>
+    <tr><td class="paramname">n_atoms</td><td>Receives the vertex count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns sys; the call borrows it. spec is read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> n_cages = 0, n_atoms = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga326e31e70a7faf5cfd98c965865bd827">seams_cages_signature</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, <span class="stringliteral">&quot;512&quot;</span>, &amp;n_cages, &amp;n_atoms);</div>
+<div class="ttc" id="agroup__capi__cage_html_ga326e31e70a7faf5cfd98c965865bd827"><div class="ttname"><a href="#ga326e31e70a7faf5cfd98c965865bd827">seams_cages_signature</a></div><div class="ttdeci">SEAMS_API seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, int graph, const char *spec, size_t *n_cages, size_t *n_atoms)</div><div class="ttdoc">Count closed cages whose ring census matches a signature.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga449e85e5b84add649a9aeb1a959cb219" name="ga449e85e5b84add649a9aeb1a959cb219"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga449e85e5b84add649a9aeb1a959cb219">&#9670;&#160;</a></span>seams_system_symmetry()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_symmetry </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shell_rmsd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>labels_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Per-atom ice shell label. </p>
+<p>labels[i] is 0 for ice Ih, 1 for ice Ic, 2 for stacking disorder, or -1 when the shell does not match. A non-positive shell_rmsd selects the library ceiling (the scale-free second-shell residual, 0.15).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">shell_rmsd</td><td>Positive scale-free residual ceiling, or a non-positive value for the library ceiling. </td></tr>
+    <tr><td class="paramname">labels</td><td>Caller buffer. </td></tr>
+    <tr><td class="paramname">labels_len</td><td>Must be at least the frame count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns labels. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga449e85e5b84add649a9aeb1a959cb219">seams_system_symmetry</a>(sys, 0.0, labels, n);</div>
+<div class="ttc" id="agroup__capi__cage_html_ga449e85e5b84add649a9aeb1a959cb219"><div class="ttname"><a href="#ga449e85e5b84add649a9aeb1a959cb219">seams_system_symmetry</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_symmetry(seams_system *sys, double shell_rmsd, int *labels, size_t labels_len)</div><div class="ttdoc">Per-atom ice shell label.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

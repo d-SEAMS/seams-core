@@ -26,6 +26,10 @@ Inverted index from an atom to the rings that contain it. :ref:`More...<details-
 		std::vector<int> :target:`ringCol<doxid-structring_1_1_ring_search_index_1aeee9bc69a4e56681fe9eba8bed57a400>`;
 		std::vector<int> :target:`atomRank<doxid-structring_1_1_ring_search_index_1a891fe48d2dccc51ea7f043b562a42cbd>`;
 		std::vector<std::array<int, 3>> :ref:`ringShift<doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b>`;
+
+		// methods
+	
+		int :ref:`atomCount<doxid-structring_1_1_ring_search_index_1a4a3b1bad0b060ee2e5aa4d8a268f41c5>`() const;
 	};
 .. _details-structring_1_1_ring_search_index:
 
@@ -60,4 +64,17 @@ Same rows as ringsContainingAtom, packed. ringCol[ringOff[a] .. ringOff[a+1]) is
 	std::vector<std::array<int, 3>> ringShift
 
 Integer minimum-image winding of each ring. Empty if no box was supplied.
+
+Methods
+-------
+
+.. index:: pair: function; atomCount
+.. _doxid-structring_1_1_ring_search_index_1a4a3b1bad0b060ee2e5aa4d8a268f41c5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int atomCount() const
+
+Atoms the packed rows cover.
 

@@ -41,10 +41,12 @@ var NAVTREE =
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
+      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", "functions_vars" ],
+        [ "Typedefs", "functions_type.html", null ],
         [ "Enumerations", "functions_enum.html", null ]
       ] ]
     ] ],
@@ -52,7 +54,11 @@ var NAVTREE =
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
-        [ "Functions", "globals_func.html", null ]
+        [ "Functions", "globals_func.html", null ],
+        [ "Typedefs", "globals_type.html", null ],
+        [ "Enumerations", "globals_enum.html", null ],
+        [ "Enumerator", "globals_eval.html", null ],
+        [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]
   ] ]
@@ -61,12 +67,19 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "absOrientation_8hpp.html",
-"group__gen.html#ga2cc6ef1ffc20f6eebc857d8aafd47f97",
-"mol__sys_8hpp.html",
-"namespaceseams_1_1product.html#a4f480de28c1ceac46c4297f4f6766650",
-"seams__input_8hpp_source.html",
-"structring_1_1DdcSplit.html#aa72c211b9d8dfb4e5518bd5400d7fea2",
-"structsite_1_1IonEnvironment.html#acc7b909a25297a34f700ba58a835dcc3"
+"functions.html",
+"group__seams__cpp.html#ga66e498496a8ac061410534a9f0171779",
+"namespacegen.html#aed4f2e37c89f319a852355a2b7199147",
+"namespaceprism3.html#ad85e1c83d20a91d7e8678f5facc7cb7a",
+"namespacesite.html#a3327b0f82b57a80d113b241dec0eb711",
+"seams__c__api_8h.html#a2c3719eca0b342deb63fdaad3a4c9287",
+"structgen_1_1FracBox.html#ace4ed28ee95c0ceb0c86610120e041c1",
+"structira_1_1PointGroup.html",
+"structrdf_1_1PartialRdf.html#ab1536dc69bcf2e6823250188f98150aa",
+"structscience_1_1NucleusFrame.html#abe866c183a8781bf15d39285db7efdbc",
+"structseams_1_1cpu_1_1Features.html#a153fc543fc18c4609aaac0392a7315bb",
+"structsite_1_1IonEnvironment.html#a30493f96ed37b238ce348fc7abbffc72",
+"structwater_1_1Request.html#a36eedb8eae7bed83475b5ebf2aff9a37"
 ];
 
 const SYNCONMSG = 'click to disable panel synchronization';

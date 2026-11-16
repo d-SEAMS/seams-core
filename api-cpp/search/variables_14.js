@@ -2,5 +2,6 @@ var searchData=
 [
   ['uploadms_0',['uploadMs',['../structgpu_1_1BatchResult.html#a32c3a277a79bbc9a6c0fa6901117cac2',1,'gpu::BatchResult']]],
   ['upper_1',['upper',['../structring_1_1PackingCertificate.html#a3c8919476309e146efc52597b040d85b',1,'ring::PackingCertificate']]],
-  ['useddevice_2',['usedDevice',['../structchill_1_1ChillPlusResult.html#a3a142660eed77f73ab39a504d0425af1',1,'chill::ChillPlusResult::usedDevice'],['../structtum_1_1CageCounts.html#a7e7282c1f800764983b24c4b9ce20738',1,'tum::CageCounts::usedDevice']]]
+  ['upperbound_2',['upperBound',['../structscience_1_1CriticalSize.html#afb4903edfeb3fca066f3fe0aadb36537',1,'science::CriticalSize']]],
+  ['useddevice_3',['usedDevice',['../structchill_1_1ChillPlusResult.html#a3a142660eed77f73ab39a504d0425af1',1,'chill::ChillPlusResult::usedDevice'],['../structtum_1_1CageCounts.html#a7e7282c1f800764983b24c4b9ce20738',1,'tum::CageCounts::usedDevice']]]
 ];

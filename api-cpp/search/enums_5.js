@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['icetype_0',['iceType',['../group__cage.html#gaaac41828990e32b9d6e7db4426b61529',1,'cage']]],
-  ['int8backend_1',['Int8Backend',['../namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8',1,'seams::product']]],
-  ['ionstate_2',['IonState',['../namespacesite.html#a7cdb003964d40a8454361db4b34b4791',1,'site']]]
+  ['glasskind_0',['GlassKind',['../namespacephase.html#a45206ea8c1350d175974e9a54cde9c71',1,'phase']]],
+  ['graph_1',['Graph',['../group__seams__cpp.html#gaadb6ab84dae1fdc4c8b8c9808622abab',1,'seams']]]
 ];

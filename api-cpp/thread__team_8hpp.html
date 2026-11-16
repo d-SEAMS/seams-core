@@ -237,10 +237,21 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('thread__team_8
   <div class="headertitle"><div class="title">thread_team.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;cstdlib&gt;</code><br />
+<div class="textblock"><code>#include &lt;algorithm&gt;</code><br />
+<code>#include &lt;cstddef&gt;</code><br />
+<code>#include &lt;cstdlib&gt;</code><br />
+<code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="thread__team_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:seams_3A_3ATeamWidth" id="r_seams_3A_3ATeamWidth"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1TeamWidth.html">seams::TeamWidth</a></td></tr>
+<tr class="memitem:seams_3A_3AFairState" id="r_seams_3A_3AFairState"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1FairState.html">seams::FairState</a></td></tr>
+<tr class="memitem:seams_3A_3AFairWidth" id="r_seams_3A_3AFairWidth"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classseams_1_1FairWidth.html">seams::FairWidth</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:seams" id="r_seams"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html">seams</a></td></tr>
@@ -249,7 +260,13 @@ Namespaces</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a06195ae10c6517c497c4d0b11d8722b1" id="r_a06195ae10c6517c497c4d0b11d8722b1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a06195ae10c6517c497c4d0b11d8722b1">lc_set_threads</a> (int n)</td></tr>
 <tr class="memitem:af5582f67f5a0e934909242cf69906676" id="r_af5582f67f5a0e934909242cf69906676"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af5582f67f5a0e934909242cf69906676">lc_num_threads</a> (void)</td></tr>
+<tr class="memitem:a01eeaf2b0308959da8fbd353b1251c3f" id="r_a01eeaf2b0308959da8fbd353b1251c3f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#a01eeaf2b0308959da8fbd353b1251c3f">seams::widenAffinity</a> ()</td></tr>
+<tr class="memitem:ac0a24516fc1a602071c7a6b3c6dae07c" id="r_ac0a24516fc1a602071c7a6b3c6dae07c"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#ac0a24516fc1a602071c7a6b3c6dae07c">seams::releaseTeam</a> ()</td></tr>
+<tr class="memitem:a66f2a31973e169d4693552c47f760b66" id="r_a66f2a31973e169d4693552c47f760b66"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#a66f2a31973e169d4693552c47f760b66">seams::prepareCompute</a> ()</td></tr>
 <tr class="memitem:afd71d1c59950dc2eabbff5aa9362a16c" id="r_afd71d1c59950dc2eabbff5aa9362a16c"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#afd71d1c59950dc2eabbff5aa9362a16c">seams::adoptThreads</a> ()</td></tr>
+<tr class="memitem:a98257c92796cbd41fc8cc5f0382c7dd0" id="r_a98257c92796cbd41fc8cc5f0382c7dd0"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#a98257c92796cbd41fc8cc5f0382c7dd0">seams::teamFor</a> (int n)</td></tr>
+<tr class="memitem:a341d5d8e4742b978662f482a2e86b7ee" id="r_a341d5d8e4742b978662f482a2e86b7ee"><td class="memItemLeft"><a class="el" href="structseams_1_1FairState.html">FairState</a> &amp;&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#a341d5d8e4742b978662f482a2e86b7ee">seams::fairState</a> ()</td></tr>
+<tr class="memitem:adf03c6a9af70b7c8e5a7a322828ae8ac" id="r_adf03c6a9af70b7c8e5a7a322828ae8ac"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespaceseams.html#adf03c6a9af70b7c8e5a7a322828ae8ac">seams::fairEnabled</a> ()</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="af5582f67f5a0e934909242cf69906676" name="af5582f67f5a0e934909242cf69906676"></a>

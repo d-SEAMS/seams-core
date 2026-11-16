@@ -7,6 +7,12 @@ namespace primitive
 .. toctree::
 	:hidden:
 
+	enum_primitive_RingRows.rst
+	struct_primitive_Graph.rst
+	struct_primitive_RingSearchSplit.rst
+	struct_primitive_Vertex.rst
+	class_primitive_RingUpdater.rst
+
 Overview
 ~~~~~~~~
 
@@ -19,6 +25,10 @@ Functions for generating primitive rings. :ref:`More...<details-namespaceprimiti
 	
 	namespace primitive {
 
+	// enums
+
+	enum :ref:`RingRows<doxid-namespaceprimitive_1aed13e96b5a55094ac56900f6c6044bc8>`;
+
 	// structs
 
 	struct :ref:`Graph<doxid-structprimitive_1_1_graph>`;
@@ -28,6 +38,30 @@ Functions for generating primitive rings. :ref:`More...<details-namespaceprimiti
 	// classes
 
 	class :ref:`RingUpdater<doxid-classprimitive_1_1_ring_updater>`;
+
+	// global functions
+
+	std::vector<std::vector<int>> :ref:`ringNetwork<doxid-namespaceprimitive_1a69f1b870183f33e58426c88ee93f0635>`(const std::vector<std::vector<int>>& nList, int maxDepth);
+	std::vector<int> :ref:`atomRingSizeCounts<doxid-namespaceprimitive_1affd7decc2ecfb260078ecbac323a237e>`(const std::vector<std::vector<int>>& nList, int maxDepth);
+	std::vector<std::vector<int>> :ref:`ringNetworkMinSize<doxid-namespaceprimitive_1aa7a13f0504dd788efcda8c330370492e>`(const std::vector<std::vector<int>>& nList, int maxDepth, int minDepth);
+	std::vector<std::vector<int>> :target:`ringNetwork<doxid-namespaceprimitive_1ae4447ae3720ef42003d8acf3aedba6e8>`(const std::vector<std::vector<int>>& nList, int maxDepth, :ref:`RingRows<doxid-namespaceprimitive_1aed13e96b5a55094ac56900f6c6044bc8>` rows);
+	std::vector<std::vector<int>> :ref:`ringNetwork<doxid-namespaceprimitive_1af77d72908c71333829fc895c931f38a7>`(const std::vector<std::vector<int>>& nList, int maxDepth, const std::vector<char>& sources);
+	std::vector<std::vector<int>> :ref:`ringNetwork<doxid-namespaceprimitive_1ac9b842cdef3438ea5ee3805fd70f59d7>`(const std::vector<int>& offsets, const std::vector<int>& cols, int maxDepth, const std::vector<char>& sources = {});
+	void :ref:`ringSizeCounts<doxid-namespaceprimitive_1a5c318bb4d52d0f34c71386f163f9af29>`(const std::vector<int>& offsets, const std::vector<int>& cols, int maxDepth, int* counts, int countsLen);
+	std::vector<std::vector<int>> :ref:`ringNetworkBalls<doxid-namespaceprimitive_1a827b14f8a901ae1e6ded2a5da2a5e90e>`(const std::vector<std::vector<int>>& nList, int maxDepth);
+	int :ref:`lastRingSearchUsedBalls<doxid-namespaceprimitive_1a78fa9b2181d5c4ee74a10363b84039e9>`();
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` :ref:`populateGraphFromNListID<doxid-namespaceprimitive_1a14b7bc6572af7a5a4a0e9bff2b9dc1e8>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& neighHbondList);
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` :ref:`populateGraphFromIndices<doxid-namespaceprimitive_1a3f096393efc02530aeaa0945e24c0f76>`(const std::vector<std::vector<int>>& nList);
+	void :ref:`restoreEdgesFromIndices<doxid-namespaceprimitive_1a30435e6338c201e8908991462d0fb228>`(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph, const std::vector<std::vector<int>>& nList);
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` :ref:`countAllRingsFromIndex<doxid-namespaceprimitive_1ac81b1dd4b67e8200de61e52c498c1b2f>`(const std::vector<std::vector<int>>& neighHbondList, int maxDepth);
+	void :ref:`removeNonSPrings<doxid-namespaceprimitive_1a592086d3afae4fab5aa5ff6aa5c1d215>`(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph);
+	int :ref:`findRings<doxid-namespaceprimitive_1a277552db62f5d020b0f33ad23b79f8eb>`(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph, int v, std::vector<int>& visited, int maxDepth, int depth, int root = -1);
+	int :ref:`shortestPath<doxid-namespaceprimitive_1a6031dcefe2fd5432b7d26cb6c9f38f47>`(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph, int v, int goal, std::vector<int>& path, std::vector<int>& visited, int maxDepth, int depth = 1);
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` :ref:`clearGraph<doxid-namespaceprimitive_1ae21524f817bf459110f97aa639eea703>`(:ref:`Graph<doxid-structprimitive_1_1_graph>`& currentGraph);
+	:ref:`RingSearchSplit<doxid-structprimitive_1_1_ring_search_split>` :ref:`lastRingSearchSplit<doxid-namespaceprimitive_1a84c628db439f4e376250d4e7d89e7484>`();
+	void :ref:`setPhaseTiming<doxid-namespaceprimitive_1aa558ba62ddbd5e57ef7f092f43f95429>`(bool on);
+	double :ref:`takePrimitiveMs<doxid-namespaceprimitive_1a01c265e0dc8f91a14909c6a8bedba126>`();
+	void :ref:`setSourceWork<doxid-namespaceprimitive_1acd71332910d85cc9877eb20c71b7fea7>`(double* microseconds);
 
 	} // namespace primitive
 .. _details-namespaceprimitive:
@@ -45,9 +79,9 @@ The `Franzblau shortest-path criterion <https://journals.aps.org/prb/pdf/10.1103
 
 The following is the procedure for finding primitive rings:
 
-#. All possible rings (including non-SP) rings are found, in the :ref:`primitive::countAllRingsFromIndex <doxid-group__primitive_1gac81b1dd4b67e8200de61e52c498c1b2f>` function, using the `backtracking algorithm <https://www.math.upenn.edu/~wilf/website/CombinatorialAlgorithms.pdf>`__. This is a recursive algorithm.
+#. All possible rings (including non-SP) rings are found, in the :ref:`primitive::countAllRingsFromIndex <doxid-namespaceprimitive_1ac81b1dd4b67e8200de61e52c498c1b2f>` function, using the `backtracking algorithm <https://www.math.upenn.edu/~wilf/website/CombinatorialAlgorithms.pdf>`__. This is a recursive algorithm.
 
-#. The non-SP rings are then removed from the list of all rings, using the Franzblau shortest path criterion (:ref:`primitive::removeNonSPrings <doxid-group__primitive_1ga592086d3afae4fab5aa5ff6aa5c1d215>`), answered by a hop-bounded breadth-first sweep per vertex.
+#. The non-SP rings are then removed from the list of all rings, using the Franzblau shortest path criterion (:ref:`primitive::removeNonSPrings <doxid-namespaceprimitive_1a592086d3afae4fab5aa5ff6aa5c1d215>`), answered by a hop-bounded breadth-first sweep per vertex.
 
 
 
@@ -71,4 +105,207 @@ Changelog
 * Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 14, 2019
 
 * Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; ringNetwork
+.. _doxid-namespaceprimitive_1a69f1b870183f33e58426c88ee93f0635:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>>& nList, int maxDepth)
+
+Returns a vector of vectors containing the rings (of all sizes), by atom index, given the neighbour list also by index (preferably the hydrogen-bonded neighbour list). Each ring starts at its lowest-indexed member and runs toward the lesser of that member's ring neighbours, and the rings are sorted lexicographically.
+
+.. index:: pair: function; atomRingSizeCounts
+.. _doxid-namespaceprimitive_1affd7decc2ecfb260078ecbac323a237e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> atomRingSizeCounts(const std::vector<std::vector<int>>& nList, int maxDepth)
+
+Per-atom primitive-ring counts, without storing the rings. ``counts[atom * (maxDepth + 1) + size]`` is how many rings of that size contain the atom.
+
+.. index:: pair: function; ringNetworkMinSize
+.. _doxid-namespaceprimitive_1aa7a13f0504dd788efcda8c330370492e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ringNetworkMinSize(const std::vector<std::vector<int>>& nList, int maxDepth, int minDepth)
+
+Primitive rings whose size is at least *minDepth* and at most *maxDepth*. ringNetwork(nList, maxDepth) is minDepth 3. A separate name keeps ringNetwork(nList, maxDepth, {}) the empty source mask.
+
+.. index:: pair: function; ringNetwork
+.. _doxid-namespaceprimitive_1af77d72908c71333829fc895c931f38a7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>>& nList, int maxDepth, const std::vector<char>& sources)
+
+The rings ringNetwork returns whose lowest-indexed member is flagged in *sources* (by index; empty flags every vertex), in the same order
+
+.. index:: pair: function; ringNetwork
+.. _doxid-namespaceprimitive_1ac9b842cdef3438ea5ee3805fd70f59d7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ringNetwork(const std::vector<int>& offsets, const std::vector<int>& cols, int maxDepth, const std::vector<char>& sources = {})
+
+Rings of a CSR neighbour graph. ``cols[offsets[i] .. offsets[i + 1]]`` are the neighbours of vertex i, with no self entry. The ring set is the one ringNetwork returns for those rows with the vertex written in front of each row.
+
+.. index:: pair: function; ringSizeCounts
+.. _doxid-namespaceprimitive_1a5c318bb4d52d0f34c71386f163f9af29:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void ringSizeCounts(const std::vector<int>& offsets, const std::vector<int>& cols, int maxDepth, int* counts, int countsLen)
+
+Ring sizes of the same search as ringNetwork(offsets, cols, maxDepth). counts[s] is the number of primitive rings of size s, for s below countsLen. The rings themselves are not gathered.
+
+.. index:: pair: function; ringNetworkBalls
+.. _doxid-namespaceprimitive_1a827b14f8a901ae1e6ded2a5da2a5e90e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ringNetworkBalls(const std::vector<std::vector<int>>& nList, int maxDepth)
+
+The same ring set, built with a bounded ball at every vertex and a primitivity test of every pair. ringNetwork leaves that table out when the largest ring is at most 7, because a strict shortcut is then a walk of at most two edges. The timing harness compares the two.
+
+.. index:: pair: function; lastRingSearchUsedBalls
+.. _doxid-namespaceprimitive_1a78fa9b2181d5c4ee74a10363b84039e9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int lastRingSearchUsedBalls()
+
+0 when the last ringNetwork call answered every primitivity query from the adjacency rows, 1 when it filled the sorted pair table, 2 when it filled the occupancy bitset of a radius-4 ball, 3 when a radius-2 pair table answers distance 4 by a meet in the middle. Rings of size at most 7 report 0. Rings of size 8 and 9 report 1. Rings of size 10 report 3. ringNetworkBalls always reports 1.
+
+.. index:: pair: function; populateGraphFromNListID
+.. _doxid-namespaceprimitive_1a14b7bc6572af7a5a4a0e9bff2b9dc1e8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` populateGraphFromNListID(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& neighHbondList)
+
+Creates a graph object and fills it with the information from a neighbour list and pointCloud created before. NOTE: the neighbourListIndex contains the indices and NOT the atom IDs as in the neighbour list
+
+.. index:: pair: function; populateGraphFromIndices
+.. _doxid-namespaceprimitive_1a3f096393efc02530aeaa0945e24c0f76:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` populateGraphFromIndices(const std::vector<std::vector<int>>& nList)
+
+Creates a graph object and fills it with the information from a neighbour list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex contains the indices and NOT the atom IDs as in the neighbour list
+
+.. index:: pair: function; restoreEdgesFromIndices
+.. _doxid-namespaceprimitive_1a30435e6338c201e8908991462d0fb228:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void restoreEdgesFromIndices(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph, const std::vector<std::vector<int>>& nList)
+
+Re-fills the neighbour lists of a graph object from a neighbour list of INDICES NOT ATOM IDs created before. NOTE: the neighbourListIndex contains the indices and NOT the atom IDs as in the neighbour list
+
+.. index:: pair: function; countAllRingsFromIndex
+.. _doxid-namespaceprimitive_1ac81b1dd4b67e8200de61e52c498c1b2f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` countAllRingsFromIndex(const std::vector<std::vector<int>>& neighHbondList, int maxDepth)
+
+Creates a vector of vectors of all possible rings.
+
+.. index:: pair: function; removeNonSPrings
+.. _doxid-namespaceprimitive_1a592086d3afae4fab5aa5ff6aa5c1d215:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void removeNonSPrings(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph)
+
+Removes the non-SP rings, using the Franzblau shortest path criterion.
+
+.. index:: pair: function; findRings
+.. _doxid-namespaceprimitive_1a277552db62f5d020b0f33ad23b79f8eb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int findRings(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph, int v, std::vector<int>& visited, int maxDepth, int depth, int root = -1)
+
+Main function that searches for all rings.
+
+.. index:: pair: function; shortestPath
+.. _doxid-namespaceprimitive_1a6031dcefe2fd5432b7d26cb6c9f38f47:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int shortestPath(:ref:`Graph<doxid-structprimitive_1_1_graph>`& fullGraph, int v, int goal, std::vector<int>& path, std::vector<int>& visited, int maxDepth, int depth = 1)
+
+Calculates the shortest path.
+
+.. index:: pair: function; clearGraph
+.. _doxid-namespaceprimitive_1ae21524f817bf459110f97aa639eea703:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-structprimitive_1_1_graph>` clearGraph(:ref:`Graph<doxid-structprimitive_1_1_graph>`& currentGraph)
+
+Function for clearing vectors in :ref:`Graph <doxid-structprimitive_1_1_graph>` after multiple usage.
+
+.. index:: pair: function; lastRingSearchSplit
+.. _doxid-namespaceprimitive_1a84c628db439f4e376250d4e7d89e7484:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`RingSearchSplit<doxid-structprimitive_1_1_ring_search_split>` lastRingSearchSplit()
+
+Balls, source enumeration and the gather from the last ringNetwork call.
+
+.. index:: pair: function; setPhaseTiming
+.. _doxid-namespaceprimitive_1aa558ba62ddbd5e57ef7f092f43f95429:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setPhaseTiming(bool on)
+
+When set, ringNetwork records the primitive-test time in the split.
+
+.. index:: pair: function; takePrimitiveMs
+.. _doxid-namespaceprimitive_1a01c265e0dc8f91a14909c6a8bedba126:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double takePrimitiveMs()
+
+Primitive-test milliseconds from the last timed ringNetwork, then zero.
+
+.. index:: pair: function; setSourceWork
+.. _doxid-namespaceprimitive_1acd71332910d85cc9877eb20c71b7fea7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setSourceWork(double* microseconds)
+
+When non-null, ringNetwork adds each source's enumeration time, in microseconds, at that source's index. The buffer must hold one entry per neighbour-list row. A null buffer skips the clock.
 

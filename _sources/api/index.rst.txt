@@ -7,32 +7,57 @@ API Reference
 	generated_targets.rst
 	group_bond.rst
 	group_prism3.rst
+	group_seams_cpp.rst
 	group_cage.rst
+	group_capi_cage.rst
 	group_chill.rst
 	group_clump.rst
+	group_capi_frame_io.rst
+	group_capi_frame.rst
+	group_capi_more.rst
 	group_gen.rst
+	group_capi_brine.rst
+	group_capi_meta.rst
 	group_molSys.rst
+	group_capi_neigh.rst
 	group_nneigh.rst
+	group_capi_order.rst
 	group_primitive.rst
 	group_rdf.rst
 	group_rdf2.rst
+	group_ring.rst
+	group_capi_ring.rst
 	group_sinp.rst
+	group_capi_sized.rst
+	group_capi_types.rst
 
 .. rubric:: Further Reading:
 
 |	:ref:`Bond<doxid-group__bond>`
 |	:ref:`Bulk prisms<doxid-group__prism3>`
+|	:ref:`C++ API<doxid-group__seams__cpp>`
 |	:ref:`Cage<doxid-group__cage>`
+|	:ref:`Cages and ice shells<doxid-group__capi__cage>`
 |	:ref:`Chill<doxid-group__chill>`
 |	:ref:`Clump<doxid-group__clump>`
+|	:ref:`Frame reload and read-back<doxid-group__capi__frame__io>`
+|	:ref:`Frames<doxid-group__capi__frame>`
+|	:ref:`Further analyses<doxid-group__capi__more>`
 |	:ref:`Gen<doxid-group__gen>`
-|		:ref:`Ring<doxid-group__ring>`
+|	:ref:`Ice/brine fronts<doxid-group__capi__brine>`
+|	:ref:`Library metadata and errors<doxid-group__capi__meta>`
 |	:ref:`MolSys<doxid-group__mol_sys>`
+|	:ref:`Neighbour lists<doxid-group__capi__neigh>`
 |	:ref:`Nneigh<doxid-group__nneigh>`
+|	:ref:`Order parameters<doxid-group__capi__order>`
 |	:ref:`Primitive<doxid-group__primitive>`
 |	:ref:`Rdf<doxid-group__rdf>`
 |	:ref:`Rdf2<doxid-group__rdf2>`
+|	:ref:`Ring<doxid-group__ring>`
+|	:ref:`Rings<doxid-group__capi__ring>`
 |	:ref:`Sinp<doxid-group__sinp>`
+|	:ref:`Status-returning and length-checked entry points<doxid-group__capi__sized>`
+|	:ref:`Types<doxid-group__capi__types>`
 
 
 .. rubric:: Reference and Index:

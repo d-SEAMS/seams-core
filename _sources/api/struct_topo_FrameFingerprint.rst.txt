@@ -28,7 +28,7 @@ Overview
 		std::vector<int> :ref:`ringCensus<doxid-structtopo_1_1_frame_fingerprint_1af25731956ad220bebec8965a6e8432bc>`;
 		std::vector<std::uint64_t> :ref:`wlAtom<doxid-structtopo_1_1_frame_fingerprint_1a410ffeaef275b28480cdfca323f48985>`;
 		int :target:`hops<doxid-structtopo_1_1_frame_fingerprint_1a436b359c7a9bb9b2c849d0e37d13962d>` = 0;
-		bool :ref:`coloured<doxid-structtopo_1_1_frame_fingerprint_1aac82494c5f215c4bdda77ba4b576e839>` = false;
+		bool :ref:`colored<doxid-structtopo_1_1_frame_fingerprint_1a4bbbbc41fb33d1a11d8afe568969e383>` = false;
 	};
 .. _details-structtopo_1_1_frame_fingerprint:
 
@@ -100,13 +100,13 @@ ringCensus[s] = primitive rings of size s
 
 per-atom WL hash used in the frame key
 
-.. index:: pair: variable; coloured
-.. _doxid-structtopo_1_1_frame_fingerprint_1aac82494c5f215c4bdda77ba4b576e839:
+.. index:: pair: variable; colored
+.. _doxid-structtopo_1_1_frame_fingerprint_1a4bbbbc41fb33d1a11d8afe568969e383:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	bool coloured = false
+	bool colored = false
 
-keys carry vertex colours
+keys carry vertex colors
 

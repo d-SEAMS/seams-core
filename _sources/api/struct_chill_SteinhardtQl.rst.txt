@@ -12,6 +12,19 @@ Overview
 
 Per-particle Steinhardt order parameters of a single degree :math:`l`. :ref:`More...<details-structchill_1_1_steinhardt_ql>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct SteinhardtQl {
+		// fields
+	
+		std::vector<double> :target:`ql<doxid-structchill_1_1_steinhardt_ql_1a2b88da7a601aa10ff56f494544a1e9f4>`;
+		std::vector<double> :ref:`qlBar<doxid-structchill_1_1_steinhardt_ql_1ad4ef3b18e16844653f52f4c1a4052f26>`;
+		std::vector<double> :ref:`wl<doxid-structchill_1_1_steinhardt_ql_1a4159908a6e5f5ed304ea6ae2bd5ea0f4>`;
+	};
 .. _details-structchill_1_1_steinhardt_ql:
 
 Detailed Documentation
@@ -20,4 +33,27 @@ Detailed Documentation
 Per-particle Steinhardt order parameters of a single degree :math:`l`.
 
 Holds both the local parameter and its neighbour-averaged counterpart. The averaged form of Lechner and Dellago folds in the second coordination shell, which separates the distributions of competing structures far more cleanly than the local form alone.
+
+Fields
+------
+
+.. index:: pair: variable; qlBar
+.. _doxid-structchill_1_1_steinhardt_ql_1ad4ef3b18e16844653f52f4c1a4052f26:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> qlBar
+
+Local :math:`q_l(i)`.
+
+.. index:: pair: variable; wl
+.. _doxid-structchill_1_1_steinhardt_ql_1a4159908a6e5f5ed304ea6ae2bd5ea0f4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> wl
+
+Averaged :math:`\bar{q}_l(i)`.
 

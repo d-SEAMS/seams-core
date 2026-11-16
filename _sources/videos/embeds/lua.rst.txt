@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-lua" src="https://odysee.com/$/embed/dseams-lua:9a7ffc26dff9590174a707db848f5f5d6d7a737f" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/lua.vtt">docs/videos/lua/captions.vtt</a></p>
+   <p>Lua and Fennel.</p>

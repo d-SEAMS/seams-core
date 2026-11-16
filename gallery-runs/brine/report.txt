@@ -1,0 +1,3 @@
+brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
+brine full paper waters 864 ions 9 frames 1
+brine full waters 864 ions 9 hexagonal 352 water 434

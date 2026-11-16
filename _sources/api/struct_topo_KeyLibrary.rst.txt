@@ -23,7 +23,7 @@ A dictionary from local keys to labels: the keys of reference structures (a poly
 	
 		std::string :ref:`method<doxid-structtopo_1_1_key_library_1a47594d7eb9d0e045c8dd5c4076e7d83d>`;
 		int :target:`hops<doxid-structtopo_1_1_key_library_1a25441f901b1852385ceb142544392c80>` = 0;
-		bool :ref:`coloured<doxid-structtopo_1_1_key_library_1a773f110b6c1c1e0359d7f0f25712b3e4>` = false;
+		bool :ref:`colored<doxid-structtopo_1_1_key_library_1ab20ce8459ec561c18619d829f19cc1f8>` = false;
 		std::map<std::string, std::string> :ref:`labelOf<doxid-structtopo_1_1_key_library_1a2d23aa2fd8634ff1c0479ba2cc5bd101>`;
 	};
 .. _details-structtopo_1_1_key_library:
@@ -33,7 +33,7 @@ Detailed Documentation
 
 A dictionary from local keys to labels: the keys of reference structures (a polymorph library), so any molecule whose rooted neighbourhood matches a reference gets that reference's name.
 
-Keys are only comparable when they come from the same method, hop count and colouring, which the header records.
+Keys are only comparable when they come from the same method, hop count and coloring, which the header records.
 
 Fields
 ------
@@ -48,15 +48,15 @@ Fields
 
 "nauty" or "wl"
 
-.. index:: pair: variable; coloured
-.. _doxid-structtopo_1_1_key_library_1a773f110b6c1c1e0359d7f0f25712b3e4:
+.. index:: pair: variable; colored
+.. _doxid-structtopo_1_1_key_library_1ab20ce8459ec561c18619d829f19cc1f8:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	bool coloured = false
+	bool colored = false
 
-keys were computed with vertex colours
+keys were computed with vertex colors
 
 .. index:: pair: variable; labelOf
 .. _doxid-structtopo_1_1_key_library_1a2d23aa2fd8634ff1c0479ba2cc5bd101:

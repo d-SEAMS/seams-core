@@ -1,0 +1,80 @@
+============
+Head-to-head
+============
+
+
+Head-to-head results that are already in this tree. Each link is the
+page that records the numbers. The suite tests named here are the ones
+that recompute them.
+
+The summary table is written at build time from the CSVs under
+``docs/data/comparisons/``. Those files are copies of the benchmark
+commits named above the table. A timed row names the comparator
+version, the thread count, the repeat count and the core count.
+
+.. include:: explanation/comparisons-summary-tables.rst
+
+OVITO
+-----
+
+`OVITO FindRings <explanation/ovito-findrings.rst>`_ is a subset of
+the primitive-ring census. On K2,3, d-SEAMS reports three chordless
+4-rings and FindRings reports two. On the 864-atom interface frame at
+3.5 Å every d-SEAMS ring through size 10 is primitive, and each OVITO
+bin is no larger than that census. ``meson test ovito_ring_counts`` and
+the K2,3 case in ``tests/test_franzblau_extra.cpp`` recompute both.
+
+OVITO 3.15 has no Steinhardt modifier. Local :math:`q_4` and :math:`q_6`, and
+the Lechner-Dellago averages, are compared with freud and pyscal3
+instead. ``meson test q4_q6_equal`` runs that comparison.
+
+CHILL+ and the neighbour list against OVITO are rows of the
+`performance tables <explanation/performance-h2h.rst>`_.
+
+freud
+-----
+
+``meson test q4_q6_equal`` compares per-atom :math:`q_4` and :math:`q_6`, the
+Lechner-Dellago averages, and the mean of each, on ideal ice Ih, ideal
+ice Ic, and one liquid. The neighbour rule is the same in all three
+codes: a pair counts when its minimum-image distance is strictly below
+3.5 Å. pyscal3 matches to :math:`10^{-10}`. freud stores :math:`q_l` as
+float32, so a crystal agrees to a few units in the last place and a
+disordered shell keeps a larger residual. An empty shell is 0 in
+d-SEAMS and NaN in freud and pyscal3. The
+`q4 and q6 how-to <howto/q4-q6.rst>`_ records why that 0 stays:
+the empty accumulator is the result, and a NaN switch would enter
+every mean and every CHILL+ label.
+
+The same cutoff :math:`q_6` on the large sitting, and the published
+literature numbers, are in the
+`performance tables <explanation/performance-h2h.rst>`_ and
+`the literature reproduction <howto/literature-reproduce.rst>`_.
+
+SQQ
+---
+
+SQQ ring times are a row of the
+`performance tables <explanation/performance-h2h.rst>`_ and of
+`the literature codes <howto/literature-h2h.rst>`_. The benchmark
+records in the ``d-SEAMS/dseams2-benchmark-records`` dataset are the
+source of those cells; ``docs/records/README.md`` names the revision.
+The vendored SQQ census and the chordless and whole-tool ratios are on
+`the SQQ page <explanation/sqq.rst>`_.
+
+PLUMED
+------
+
+The colvar is `the PLUMED engine <howto/engine-plumed.rst>`_. Its
+:math:`q_6` on the large sitting is a row of the
+`performance tables <explanation/performance-h2h.rst>`_: on the
+liquid the gap is the rational switch, not the hard cutoff. The
+literature reproduction records the same comparison next to freud.
+``meson test docs_engine_plumed`` runs the engine page.
+
+ClavisCage TRACE
+----------------
+
+`ClavisCage TRACE <explanation/clavis-trace.rst>`_ is the cage
+census and the serial TRACE timing against d-SEAMS at one and eight
+threads. The cells are the vendored ClavisCage CSV, not a typed table.

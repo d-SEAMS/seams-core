@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::SignatureMatch
+.. _doxid-structseams_1_1_signature_match:
+
+struct seams::SignatureMatch
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Closed cages whose ring census matches a signature. :ref:`More...<details-structseams_1_1_signature_match>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct SignatureMatch {
+		// fields
+	
+		std::size_t :ref:`cages<doxid-structseams_1_1_signature_match_1a821e64e5beadd7a4ed931ace925638ea>` = 0;
+		std::size_t :ref:`atoms<doxid-structseams_1_1_signature_match_1a2712dbad494a7c78893a076e8d65acdf>` = 0;
+	};
+.. _details-structseams_1_1_signature_match:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Closed cages whose ring census matches a signature.
+
+Fields
+------
+
+.. index:: pair: variable; cages
+.. _doxid-structseams_1_1_signature_match_1a821e64e5beadd7a4ed931ace925638ea:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t cages = 0
+
+Number of closed cages.
+
+.. index:: pair: variable; atoms
+.. _doxid-structseams_1_1_signature_match_1a2712dbad494a7c78893a076e8d65acdf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t atoms = 0
+
+Distinct atoms in those cages.
+

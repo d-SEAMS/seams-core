@@ -1,5 +1,6 @@
 var structring_1_1RingSearchIndex =
 [
+    [ "atomCount", "structring_1_1RingSearchIndex.html#a4a3b1bad0b060ee2e5aa4d8a268f41c5", null ],
     [ "atomRank", "structring_1_1RingSearchIndex.html#a891fe48d2dccc51ea7f043b562a42cbd", null ],
     [ "ringCol", "structring_1_1RingSearchIndex.html#aeee9bc69a4e56681fe9eba8bed57a400", null ],
     [ "ringOff", "structring_1_1RingSearchIndex.html#a1f81de9808108ab22e07eaf9cacb72e4", null ],

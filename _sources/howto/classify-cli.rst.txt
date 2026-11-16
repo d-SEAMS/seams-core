@@ -3,6 +3,8 @@ Classify a dump
 ===============
 
 
+.. include:: ../videos/embeds/cli.rst
+
 You have a LAMMPS water dump and want counts. Flags and the full
 surface live on `seams CLI <../reference/cli.rst>`_. Measured
 numbers for the in-tree mixed frame live in
@@ -17,6 +19,15 @@ One frame
     seams chill-plus FILE --cutoff 3.5 --type 2
     seams cages FILE --type 2
     seams rdf FILE --type 2 --cutoff 10
+
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams read input/traj/il_tiny.lammpstrj
+    seams chill-plus input/traj/il_tiny.lammpstrj --cutoff 3.5 --type 2
+    seams cages input/traj/il_tiny.lammpstrj --type 2
+    seams rdf input/traj/il_tiny.lammpstrj --type 2 --cutoff 10
 
 ``chill`` is the original CHILL rule. ``chill-plus`` is the published CHILL+ rule: exactly four neighbours inside the cutoff, q3 over the four nearest, and the Table 1 neighbour test.
 ``chill_plus`` is a CLI alias of ``chill-plus``.
@@ -44,6 +55,14 @@ frame and scores ice on those types only.
     seams cages FILE --graph seeded --water-types 1
     seams ions FILE --ion-types 3,4 --water-types 1
 
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams chill-plus input/traj/il_tiny.lammpstrj --water-types 1
+    seams cages input/traj/il_tiny.lammpstrj --graph seeded --water-types 1
+    seams ions input/traj/il_tiny.lammpstrj --ion-types 3,4 --water-types 1
+
 ``--family`` defaults to ``waterIce``. ``chill`` / ``chill-plus`` / ``cages``
 refuse every other family. A triclinic dump uses the stored tilt;
 see `Sheared cells <sheared-cells.rst>`_.
@@ -52,6 +71,12 @@ see `Sheared cells <sheared-cells.rst>`_.
 
     seams chill-plus FILE --type 2
     seams cages input/traj/mW_cubic.lammpstrj --type 1
+
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams chill-plus input/traj/il_tiny.lammpstrj --type 2
 
 Frame range
 -----------
@@ -63,6 +88,12 @@ via ``forEachLammpsFrame`` (``--jobs 1`` is serial).
 
     seams chill-plus FILE --frame 1 --last 10 --jobs 4
 
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams chill-plus input/traj/il_tiny.lammpstrj --frame 1 --last 10 --jobs 4
+
 Bond graph for cages
 --------------------
 
@@ -73,6 +104,16 @@ Bond graph for cages
     seams cages FILE --graph cutoff --cutoff 3.5
     seams cages FILE --graph knn -k 4
     seams cages FILE --graph knn-union -k 4
+
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams cages input/traj/il_tiny.lammpstrj --graph seeded
+    seams cages input/traj/il_tiny.lammpstrj --graph seeded --complete
+    seams cages input/traj/il_tiny.lammpstrj --graph cutoff --cutoff 3.5
+    seams cages input/traj/il_tiny.lammpstrj --graph knn -k 4
+    seams cages input/traj/il_tiny.lammpstrj --graph knn-union -k 4
 
 ``seeded`` is the CLI default: mutual four-nearest seeds, union
 completions. ``--complete`` then runs ``ring::ringAdjacentCompletion``

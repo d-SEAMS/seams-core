@@ -7,5 +7,139 @@ namespace tum3
 .. toctree::
 	:hidden:
 
+Overview
+~~~~~~~~
 
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace tum3 {
+
+	// global functions
+
+	int :ref:`topoUnitMatchingBulk<doxid-namespacetum3_1ae5c6de5de1ef8c8d35823e447d491818>`(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, bool printClusters, bool onlyTetrahedral, std::string templatePath = "templates");
+	Eigen::MatrixXd :ref:`buildRefHC<doxid-namespacetum3_1aac86950b6c131788671cf63fbea860e4>`(const std::string& fileName);
+	Eigen::MatrixXd :ref:`buildRefDDC<doxid-namespacetum3_1acd0b5f204636469350cdfe95fcbf93a2>`(const std::string& fileName);
+	int :ref:`shapeMatchHC<doxid-namespacetum3_1a6a40063c694390318235689274078616>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const Eigen::MatrixXd& refPoints, :ref:`cage::Cage<doxid-structcage_1_1_cage>` cageUnit, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, std::vector<double>& quat, double& rmsd);
+	int :ref:`shapeMatchDDC<doxid-namespacetum3_1adc7a460ce02d21cf58026ba2d835580b>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const Eigen::MatrixXd& refPoints, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int cageIndex, const std::vector<std::vector<int>>& rings, std::vector<double>& quat, double& rmsd);
+	int :ref:`updateRMSDatom<doxid-namespacetum3_1a5b92b22edb21a60b985ad3305de53988>`(const std::vector<std::vector<int>>& rings, :ref:`cage::Cage<doxid-structcage_1_1_cage>` cageUnit, double rmsd, std::vector<double>& rmsdPerAtom, std::vector<int>& noOfCommonAtoms, const std::vector<:ref:`cage::iceType<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529>`>& atomTypes);
+	int :ref:`averageRMSDatom<doxid-namespacetum3_1aeb733184d3f90032143304cf1c7b4b2e>`(std::vector<double>& rmsdPerAtom, std::vector<int>& noOfCommonAtoms);
+	std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`> :ref:`topoBulkCriteria<doxid-namespacetum3_1a06d8b598b9f99e8d02a842e6565e80fd>`(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, int& numHC, int& numDDC, std::vector<:ref:`ring::strucType<doxid-namespacering_1a301cfdc88452cfe51bd4f745d223a7e1>`>& ringType);
+	int :ref:`clusterCages<doxid-namespacetum3_1a856113410d761d31f1eb70aa98b92653>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string path, const std::vector<std::vector<int>>& rings, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int numHC, int numDDC);
+	std::vector<int> :ref:`atomsFromCages<doxid-namespacetum3_1a11cd9029a926adccce0454064cfb9e45>`(const std::vector<std::vector<int>>& rings, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const std::vector<int>& clusterCages);
+
+	} // namespace tum3
+.. _details-namespacetum3:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Functions
+----------------
+
+.. index:: pair: function; topoUnitMatchingBulk
+.. _doxid-namespacetum3_1ae5c6de5de1ef8c8d35823e447d491818:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int topoUnitMatchingBulk(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, bool printClusters, bool onlyTetrahedral, std::string templatePath = "templates")
+
+Topological unit matching for bulk water. If printClusters is true, individual clusters of connected cages are printed.
+
+.. index:: pair: function; buildRefHC
+.. _doxid-namespacetum3_1aac86950b6c131788671cf63fbea860e4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	Eigen::MatrixXd buildRefHC(const std::string& fileName)
+
+Build a reference Hexagonal cage, reading in from a template XYZ file.
+
+.. index:: pair: function; buildRefDDC
+.. _doxid-namespacetum3_1acd0b5f204636469350cdfe95fcbf93a2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	Eigen::MatrixXd buildRefDDC(const std::string& fileName)
+
+Build a reference Double-Diamond cage, reading in from a template XYZ file.
+
+.. index:: pair: function; shapeMatchHC
+.. _doxid-namespacetum3_1a6a40063c694390318235689274078616:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int shapeMatchHC(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const Eigen::MatrixXd& refPoints, :ref:`cage::Cage<doxid-structcage_1_1_cage>` cageUnit, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, std::vector<double>& quat, double& rmsd)
+
+Shape-matching for a target HC.
+
+.. index:: pair: function; shapeMatchDDC
+.. _doxid-namespacetum3_1adc7a460ce02d21cf58026ba2d835580b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int shapeMatchDDC(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const Eigen::MatrixXd& refPoints, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int cageIndex, const std::vector<std::vector<int>>& rings, std::vector<double>& quat, double& rmsd)
+
+Shape-matching for a target DDC.
+
+.. index:: pair: function; updateRMSDatom
+.. _doxid-namespacetum3_1a5b92b22edb21a60b985ad3305de53988:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int updateRMSDatom(const std::vector<std::vector<int>>& rings, :ref:`cage::Cage<doxid-structcage_1_1_cage>` cageUnit, double rmsd, std::vector<double>& rmsdPerAtom, std::vector<int>& noOfCommonAtoms, const std::vector<:ref:`cage::iceType<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529>`>& atomTypes)
+
+Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the shape-matching of each cage
+
+.. index:: pair: function; averageRMSDatom
+.. _doxid-namespacetum3_1aeb733184d3f90032143304cf1c7b4b2e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int averageRMSDatom(std::vector<double>& rmsdPerAtom, std::vector<int>& noOfCommonAtoms)
+
+Average the RMSD per atom.
+
+.. index:: pair: function; topoBulkCriteria
+.. _doxid-namespacetum3_1a06d8b598b9f99e8d02a842e6565e80fd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`> topoBulkCriteria(std::string path, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int firstFrame, int& numHC, int& numDDC, std::vector<:ref:`ring::strucType<doxid-namespacering_1a301cfdc88452cfe51bd4f745d223a7e1>`>& ringType)
+
+Topological network methods Finds the HCs and DDCs for the system
+
+.. index:: pair: function; clusterCages
+.. _doxid-namespacetum3_1a856113410d761d31f1eb70aa98b92653:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int clusterCages(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string path, const std::vector<std::vector<int>>& rings, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int numHC, int numDDC)
+
+Clustering Clusters cages using the Stillinger algorithm and prints out individual XYZ files of clusters.
+
+.. index:: pair: function; atomsFromCages
+.. _doxid-namespacetum3_1a11cd9029a926adccce0454064cfb9e45:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> atomsFromCages(const std::vector<std::vector<int>>& rings, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const std::vector<int>& clusterCages)
+
+Gets the atoms in the cages of a given cluster.
 

@@ -1,0 +1,636 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Ice/brine fronts</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.14.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__brine.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Ice/brine fronts </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Planar front, rejection coefficient, profile, and pockets.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga5e69ad111a469c0c30dc4349e011abbe" id="r_ga5e69ad111a469c0c30dc4349e011abbe"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga5e69ad111a469c0c30dc4349e011abbe">seams_brine_analyse</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const int *ice, size_t n_ice, int water_type, int ion_type, int n_bins, int axis, <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> **out)</td></tr>
+<tr class="memdesc:ga5e69ad111a469c0c30dc4349e011abbe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Planar ice/brine front from an ice assignment.  <br /></td></tr>
+<tr class="memitem:gaac3e8227807940daaaa41cf70a89d9da" id="r_gaac3e8227807940daaaa41cf70a89d9da"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void&#160;</td><td class="memItemRight"><a class="el" href="#gaac3e8227807940daaaa41cf70a89d9da">seams_brine_destroy</a> (<a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *front)</td></tr>
+<tr class="memdesc:gaac3e8227807940daaaa41cf70a89d9da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free a brine-front handle.  <br /></td></tr>
+<tr class="memitem:ga7a42922803b646fe2ca573a4dbbff17e" id="r_ga7a42922803b646fe2ca573a4dbbff17e"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga7a42922803b646fe2ca573a4dbbff17e">seams_brine_fronts</a> (const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *front, double *z_enter, double *z_exit, double *thickness, int *found)</td></tr>
+<tr class="memdesc:ga7a42922803b646fe2ca573a4dbbff17e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The two planar crossings of the ice slab.  <br /></td></tr>
+<tr class="memitem:gaf0763119586d4818a0d0a51d9dccb42f" id="r_gaf0763119586d4818a0d0a51d9dccb42f"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gaf0763119586d4818a0d0a51d9dccb42f">seams_brine_rejection</a> (const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *front, double *c_ice, double *c_liquid, double *k, int *defined)</td></tr>
+<tr class="memdesc:gaf0763119586d4818a0d0a51d9dccb42f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Molal rejection coefficient k = c_ice / c_liquid.  <br /></td></tr>
+<tr class="memitem:ga558d64e1215de72fc7e6bc173ad4869a" id="r_ga558d64e1215de72fc7e6bc173ad4869a"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga558d64e1215de72fc7e6bc173ad4869a">seams_brine_profile</a> (const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *front, double *z_mid, double *molality, double *ice_fraction, size_t cap, size_t *n_out)</td></tr>
+<tr class="memdesc:ga558d64e1215de72fc7e6bc173ad4869a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Concentration profile along the front axis.  <br /></td></tr>
+<tr class="memitem:ga4f33c50180e9ac63fa855e902ce67d1d" id="r_ga4f33c50180e9ac63fa855e902ce67d1d"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga4f33c50180e9ac63fa855e902ce67d1d">seams_brine_pockets</a> (const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *front, int *n_pockets, int *reservoir_waters)</td></tr>
+<tr class="memdesc:ga4f33c50180e9ac63fa855e902ce67d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Brine pockets trapped in the ice, excluding the liquid reservoir.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Planar front, rejection coefficient, profile, and pockets. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga5e69ad111a469c0c30dc4349e011abbe" name="ga5e69ad111a469c0c30dc4349e011abbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5e69ad111a469c0c30dc4349e011abbe">&#9670;&#160;</a></span>seams_brine_analyse()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_brine_analyse </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>ice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n_ice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>water_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>ion_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n_bins</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>axis</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> **</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Planar ice/brine front from an ice assignment. </p>
+<p>ice[i] is non-zero when atom i is ice. water_type 0 keeps every atom whose type is not ion_type. ion_type 0 means the frame has no ions. n_bins 0 selects 20 bins. axis is 0, 1, or 2. The ice fraction cut is 0.5, and the bulk ice and liquid cuts are 0.85 and 0.15.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">ice</td><td>Per-atom ice flags, length n_ice. </td></tr>
+    <tr><td class="paramname">n_ice</td><td>Must equal the frame count. </td></tr>
+    <tr><td class="paramname">water_type</td><td>Species kept as water, or 0. </td></tr>
+    <tr><td class="paramname">ion_type</td><td>Species kept as ions, or 0 for none. </td></tr>
+    <tr><td class="paramname">n_bins</td><td>Bin count along axis, or 0 for 20. </td></tr>
+    <tr><td class="paramname">axis</td><td>0, 1, or 2. </td></tr>
+    <tr><td class="paramname">out</td><td>Receives a new handle. On failure *out is NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>, <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const only because the call clears the handle's error slot on entry, so <a class="el" href="group__capi__meta.html#gab40faa22c3cd21bdfc53503c403cb0be" title="Detail string stored on a handle.">seams_handle_error()</a> reports this call. It reads the frame and keeps no scratch on the handle. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller frees *out with <a class="el" href="#gaac3e8227807940daaaa41cf70a89d9da" title="Free a brine-front handle.">seams_brine_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_typedef" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *front = NULL;</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code hl_function" href="#ga5e69ad111a469c0c30dc4349e011abbe">seams_brine_analyse</a>(sys, ice, n, 1, 2, 0, 2, &amp;front) == <a class="code hl_enumvalue" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a>) {</div>
+<div class="line">  <a class="code hl_function" href="#gaac3e8227807940daaaa41cf70a89d9da">seams_brine_destroy</a>(front);</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__capi__brine_html_ga5e69ad111a469c0c30dc4349e011abbe"><div class="ttname"><a href="#ga5e69ad111a469c0c30dc4349e011abbe">seams_brine_analyse</a></div><div class="ttdeci">SEAMS_API seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice, int water_type, int ion_type, int n_bins, int axis, seams_brine **out)</div><div class="ttdoc">Planar ice/brine front from an ice assignment.</div></div>
+<div class="ttc" id="agroup__capi__brine_html_gaac3e8227807940daaaa41cf70a89d9da"><div class="ttname"><a href="#gaac3e8227807940daaaa41cf70a89d9da">seams_brine_destroy</a></div><div class="ttdeci">SEAMS_API void seams_brine_destroy(seams_brine *front)</div><div class="ttdoc">Free a brine-front handle.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ga2b1f966c399d20dd5e7f871c50bef784"><div class="ttname"><a href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a></div><div class="ttdeci">struct seams_brine seams_brine</div><div class="ttdoc">One planar ice/brine front measurement.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00249">seams.h:249</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de"><div class="ttname"><a href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de">SEAMS_OK</a></div><div class="ttdeci">@ SEAMS_OK</div><div class="ttdoc">The call succeeded.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00154">seams.h:154</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaac3e8227807940daaaa41cf70a89d9da" name="gaac3e8227807940daaaa41cf70a89d9da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaac3e8227807940daaaa41cf70a89d9da">&#9670;&#160;</a></span>seams_brine_destroy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> void seams_brine_destroy </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *</td>          <td class="paramname"><span class="paramname"><em>front</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Free a brine-front handle. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">front</td><td>Handle from <a class="el" href="#ga5e69ad111a469c0c30dc4349e011abbe" title="Planar ice/brine front from an ice assignment.">seams_brine_analyse()</a>, or NULL. NULL is ignored. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>Ownership</dt><dd>Releases the handle and its profile. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>The caller must not use front after this returns. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gaac3e8227807940daaaa41cf70a89d9da">seams_brine_destroy</a>(front);</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga7a42922803b646fe2ca573a4dbbff17e" name="ga7a42922803b646fe2ca573a4dbbff17e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7a42922803b646fe2ca573a4dbbff17e">&#9670;&#160;</a></span>seams_brine_fronts()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_brine_fronts </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *</td>          <td class="paramname"><span class="paramname"><em>front</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>z_enter</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>z_exit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>thickness</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>found</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The two planar crossings of the ice slab. </p>
+<p>Lengths are Angstrom, in the frame's cell.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">front</td><td>Brine handle. </td></tr>
+    <tr><td class="paramname">z_enter</td><td>Where the ice fraction crosses the cut on entering the ice along the positive axis, or NULL. </td></tr>
+    <tr><td class="paramname">z_exit</td><td>The crossing on leaving the ice, or NULL. </td></tr>
+    <tr><td class="paramname">thickness</td><td>Ice run along the axis, or NULL. </td></tr>
+    <tr><td class="paramname">found</td><td>Receives 1 when both crossings exist, otherwise 0, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> when front is NULL or every output pointer is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns front; the call borrows it. z_enter, z_exit, thickness and found are caller storage that the call fills. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">double</span> thick = 0;</div>
+<div class="line"><span class="keywordtype">int</span> found = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga7a42922803b646fe2ca573a4dbbff17e">seams_brine_fronts</a>(front, NULL, NULL, &amp;thick, &amp;found);</div>
+<div class="ttc" id="agroup__capi__brine_html_ga7a42922803b646fe2ca573a4dbbff17e"><div class="ttname"><a href="#ga7a42922803b646fe2ca573a4dbbff17e">seams_brine_fronts</a></div><div class="ttdeci">SEAMS_API seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, double *z_exit, double *thickness, int *found)</div><div class="ttdoc">The two planar crossings of the ice slab.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga4f33c50180e9ac63fa855e902ce67d1d" name="ga4f33c50180e9ac63fa855e902ce67d1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4f33c50180e9ac63fa855e902ce67d1d">&#9670;&#160;</a></span>seams_brine_pockets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_brine_pockets </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *</td>          <td class="paramname"><span class="paramname"><em>front</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_pockets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>reservoir_waters</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Brine pockets trapped in the ice, excluding the liquid reservoir. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">front</td><td>Brine handle. </td></tr>
+    <tr><td class="paramname">n_pockets</td><td>Receives the pocket count, or NULL. </td></tr>
+    <tr><td class="paramname">reservoir_waters</td><td>Receives the water count of the liquid reservoir, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> when front is NULL or both output pointers are NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns front; the call borrows it. n_pockets and reservoir_waters are caller storage that the call fills. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">int</span> pockets = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga4f33c50180e9ac63fa855e902ce67d1d">seams_brine_pockets</a>(front, &amp;pockets, NULL);</div>
+<div class="ttc" id="agroup__capi__brine_html_ga4f33c50180e9ac63fa855e902ce67d1d"><div class="ttname"><a href="#ga4f33c50180e9ac63fa855e902ce67d1d">seams_brine_pockets</a></div><div class="ttdeci">SEAMS_API seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets, int *reservoir_waters)</div><div class="ttdoc">Brine pockets trapped in the ice, excluding the liquid reservoir.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga558d64e1215de72fc7e6bc173ad4869a" name="ga558d64e1215de72fc7e6bc173ad4869a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga558d64e1215de72fc7e6bc173ad4869a">&#9670;&#160;</a></span>seams_brine_profile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_brine_profile </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *</td>          <td class="paramname"><span class="paramname"><em>front</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>z_mid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>molality</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>ice_fraction</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *</td>          <td class="paramname"><span class="paramname"><em>n_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Concentration profile along the front axis. </p>
+<p>z_mid is Angstrom. molality is mol/kg. ice_fraction is dimensionless.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">front</td><td>Brine handle. </td></tr>
+    <tr><td class="paramname">z_mid</td><td>Bin centers, or NULL to skip the column. </td></tr>
+    <tr><td class="paramname">molality</td><td>Bin molalities, or NULL to skip the column. </td></tr>
+    <tr><td class="paramname">ice_fraction</td><td>Bin ice fractions, or NULL to skip the column. </td></tr>
+    <tr><td class="paramname">cap</td><td>Capacity of each non-NULL column. </td></tr>
+    <tr><td class="paramname">n_out</td><td>Receives the bin count. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a> when every non-NULL column was filled, or when every column pointer was NULL and n_out was written. <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a> when a non-NULL column is short. <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> when front or n_out is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns the columns. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> bins = 0;</div>
+<div class="line"><a class="code hl_function" href="#ga558d64e1215de72fc7e6bc173ad4869a">seams_brine_profile</a>(front, NULL, NULL, NULL, 0, &amp;bins);</div>
+<div class="ttc" id="agroup__capi__brine_html_ga558d64e1215de72fc7e6bc173ad4869a"><div class="ttname"><a href="#ga558d64e1215de72fc7e6bc173ad4869a">seams_brine_profile</a></div><div class="ttdeci">SEAMS_API seams_status seams_brine_profile(const seams_brine *front, double *z_mid, double *molality, double *ice_fraction, size_t cap, size_t *n_out)</div><div class="ttdoc">Concentration profile along the front axis.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gaf0763119586d4818a0d0a51d9dccb42f" name="gaf0763119586d4818a0d0a51d9dccb42f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf0763119586d4818a0d0a51d9dccb42f">&#9670;&#160;</a></span>seams_brine_rejection()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_brine_rejection </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#ga2b1f966c399d20dd5e7f871c50bef784">seams_brine</a> *</td>          <td class="paramname"><span class="paramname"><em>front</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>c_ice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>c_liquid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>defined</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Molal rejection coefficient k = c_ice / c_liquid. </p>
+<p>Molality is formula units per kilogram of water.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">front</td><td>Brine handle. </td></tr>
+    <tr><td class="paramname">c_ice</td><td>Bulk ice molality, or NULL. </td></tr>
+    <tr><td class="paramname">c_liquid</td><td>Bulk liquid molality, or NULL. </td></tr>
+    <tr><td class="paramname">k</td><td>The ratio, or NULL. Unchanged when the ratio is undefined. </td></tr>
+    <tr><td class="paramname">defined</td><td>Receives 1 when the liquid bulk contains salt or the ice bulk does not, otherwise 0, or NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>, or <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> when front is NULL or every output pointer is NULL. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns front; the call borrows it. c_ice, c_liquid, k and defined are caller storage that the call fills. The library keeps no pointer to any argument. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on front, and not alongside a non-const call on front. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">double</span> k = 0;</div>
+<div class="line"><span class="keywordtype">int</span> defined = 0;</div>
+<div class="line"><a class="code hl_function" href="#gaf0763119586d4818a0d0a51d9dccb42f">seams_brine_rejection</a>(front, NULL, NULL, &amp;k, &amp;defined);</div>
+<div class="ttc" id="agroup__capi__brine_html_gaf0763119586d4818a0d0a51d9dccb42f"><div class="ttname"><a href="#gaf0763119586d4818a0d0a51d9dccb42f">seams_brine_rejection</a></div><div class="ttdeci">SEAMS_API seams_status seams_brine_rejection(const seams_brine *front, double *c_ice, double *c_liquid, double *k, int *defined)</div><div class="ttdoc">Molal rejection coefficient k = c_ice / c_liquid.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

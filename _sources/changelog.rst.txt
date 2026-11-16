@@ -3,9 +3,9 @@ Changelog
 =========
 
 
-The C++ engine is this repository. Python is ``pydseams``
-(`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_). Lua is
-``require("dseams")`` (`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_).
+The C++ engine, ``libseams``, ``libseams_lang`` and the ``seams`` CLI are this
+repository. Each language binding is its own repository; the
+`repository map <contributing/repositories.rst>`_ lists them.
 
 The release history is `CHANGELOG.md <../../CHANGELOG.md>`_
 (Keep a Changelog, assembled by towncrier). This page is the
@@ -14,19 +14,50 @@ narrative cut used in the book.
 2.14.0
 ------
 
-The cutoff list covers restricted triclinic boxes, and the orthorhombic
-list is a parallel cell sort.
-CHILL+ on that list counts a crystal row with four neighbours inside
-the cutoff. On the mixed TIP4P fixture, interClathrate moves from 12
-to 9 and water from 238 to 241.
-``ovito-chill+`` averages q3 on the full shell.
-``--pair-types`` names the site-site pair. ``--types`` remains a deprecated
-exact alias and prints a warning.
-Local symmetry names an ice shell, a hydrate cage, or a ring, with an
-optional IRA, SOFI, or spglib report.
-A partial diamond signature keeps a shell that can still reach eight
-good (4,2,1) patterns.
-The book builds from the committed Org sources.
+We cut 2.14.0 from tag v2.13.0. The bullets are
+`CHANGELOG.md <../../CHANGELOG.md>`_. This is the short form.
+
+``seams.h`` is ABI 1. A frame carries an orthorhombic or triclinic
+cell, and we return neighbours, both CHILL+ rules, q4 and q6,
+primitive rings, and ring symmetry labels. C and C++ call that header
+here, and the Python, Fortran, Julia, Rust, R and Lua bindings call it
+from their own repositories.
+``seams_set_num_threads(0)`` restores the OpenMP width we captured at
+first use. ``seams_system_set_positions`` overwrites the coordinates
+of a stored frame, and the const readers copy the frame back out.
+
+2.14.0 moves every language binding to its own repository, released
+with the same version against this tag. Python on PyPI is
+``pydseamslib`` 2.14.0 from PydSEAMSlib (``import dseams`` and
+``import pydseams``). The Rust crates ``dseams-sys`` and ``dseams`` come from
+dseams-rs, the fpm package ``dseams`` from dseams-fortran, the LuaRocks
+rock ``dseams`` from yodaStruct, the R package ``dseams`` from dseams-r,
+and Julia ``Dseams`` from Dseams.jl. This repository releases conda
+``libseams`` from ``recipe/recipe.yaml`` and the Yggdrasil recipe for
+``libseams_jll``.
+
+LAMMPS, GROMACS, and OpenMM call the library on the frames a running
+calculation chooses. We report the primitive ring census, the
+published CHILL labels, and the hexagonal and double-diamond cage
+flags. Live analysis does not use PLUMED, and ``-Dplumed=enabled``
+errors. The PLUMED ``SEAMS`` action is separate: it reports q6, the
+CHILL+ ice fraction, and the six-ring fraction.
+
+The cutoff list covers restricted triclinic boxes. The orthorhombic
+list is a parallel cell sort, and each OpenMP thread owns a block of
+the linkcell cut. On ``input/traj/exampleTraj.lammpstrj`` (oxygen, type
+
+1) the cutoff list is 9 interClathrate and 241 water. The mutual
+
+list is 1 clathrate, 7 interClathrate, and 242 water.
+``--pair-types`` names the site-site pair. Neighbour, CHILL+, ring,
+and cage calls can keep water oxygens by type and leave ions out.
+
+We name an ice shell from the residual of the seventeen-atom shell
+after rotation and scale, and we can attach an IRA, SOFI, or spglib
+report. The book is this Org tree. The videos page links the
+d-SEAMS Odysee channel, and a player is the embed URL of one of our
+claims.
 
 2.13.0
 ------
@@ -125,7 +156,7 @@ engine's per-atom decision for OVITO or VMD.
 Topology keys (``topo::localKey``, ``topo::fingerprint``, nauty
 certificate or Weisfeiler-Leman hash), key libraries
 (``seams fingerprint --emit-library``, ``--library``), ions read against
-the cage assignment (``seams ions``), vertex colours by species, the
+the cage assignment (``seams ions``), vertex colors by species, the
 embedded CON reader, and a refusal of CON and chemfiles input when
 their reader is absent. The CLI preserves frame order for parallel
 LAMMPS ranges, dispatches ranges for XYZ, chemfiles, and readcon

@@ -1,0 +1,58 @@
+.. index:: pair: struct; site::PocketCensus
+.. _doxid-structsite_1_1_pocket_census:
+
+struct site::PocketCensus
+=========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct PocketCensus {
+		// fields
+	
+		std::vector<:ref:`BrinePocket<doxid-structsite_1_1_brine_pocket>`> :ref:`pockets<doxid-structsite_1_1_pocket_census_1a3568690ac75f54820be55133908d8fc8>`;
+		std::vector<int> :ref:`sizes<doxid-structsite_1_1_pocket_census_1a97bf43da75537c578d29a7d0309633f1>`;
+		int :target:`reservoirWaters<doxid-structsite_1_1_pocket_census_1ab6bb7814a95f8194417b36857514c695>` = 0;
+		int :target:`nPockets<doxid-structsite_1_1_pocket_census_1a72c28551b40657f33728ab5035c062ec>` = 0;
+	};
+.. _details-structsite_1_1_pocket_census:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; pockets
+.. _doxid-structsite_1_1_pocket_census_1a3568690ac75f54820be55133908d8fc8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`BrinePocket<doxid-structsite_1_1_brine_pocket>`> pockets
+
+not including the liquid reservoir
+
+.. index:: pair: variable; sizes
+.. _doxid-structsite_1_1_pocket_census_1a97bf43da75537c578d29a7d0309633f1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> sizes
+
+pocket water counts, ascending
+

@@ -1,0 +1,23 @@
+.. index:: pair: namespace; seams::wigner
+.. _doxid-namespaceseams_1_1wigner:
+
+namespace seams::wigner
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace wigner {
+
+	// global functions
+
+	double :target:`hatW<doxid-namespaceseams_1_1wigner_1a5045ef428a751f3cc44334232c083f40>`(int orderL, const double* qlm);
+
+	} // namespace wigner

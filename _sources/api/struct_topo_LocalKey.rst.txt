@@ -64,7 +64,7 @@ canonical certificate or refinement hash
 
 	int vertices = 0
 
-atoms in the neighbourhood, centre included
+atoms in the neighbourhood, center included
 
 .. index:: pair: variable; edges
 .. _doxid-structtopo_1_1_local_key_1a46842962761d0b24c821e614b0598506:

@@ -1,0 +1,38 @@
+.. index:: pair: struct; site::FrontPair
+.. _doxid-structsite_1_1_front_pair:
+
+struct site::FrontPair
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Two planar fronts of one ice slab in a periodic box. :ref:`More...<details-structsite_1_1_front_pair>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct FrontPair {
+		// fields
+	
+		double :target:`zEnter<doxid-structsite_1_1_front_pair_1a118ea488cb249bf52d8b2313631b2c6a>` = 0;
+		double :target:`zExit<doxid-structsite_1_1_front_pair_1a87e26df94c4679ae8eb8c97ba48cd02e>` = 0;
+		double :target:`thickness<doxid-structsite_1_1_front_pair_1a5d86e67fc730eedaa46e9154418fe66c>` = 0;
+		bool :target:`wrapped<doxid-structsite_1_1_front_pair_1ab2f64a2e02c207f0747ad279dc6a10ef>` = false;
+		bool :target:`found<doxid-structsite_1_1_front_pair_1af96a77e91420c6c8d514c3a6d6294863>` = false;
+	};
+.. _details-structsite_1_1_front_pair:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Two planar fronts of one ice slab in a periodic box.
+
+``:ref:`zEnter <doxid-structsite_1_1_front_pair_1a118ea488cb249bf52d8b2313631b2c6a>``` is where the ice fraction crosses ``cut`` on entering the ice along +z, and ``:ref:`zExit <doxid-structsite_1_1_front_pair_1a87e26df94c4679ae8eb8c97ba48cd02e>``` is the crossing on leaving it. ``:ref:`thickness <doxid-structsite_1_1_front_pair_1a5d86e67fc730eedaa46e9154418fe66c>``` is the ice run along z.
+

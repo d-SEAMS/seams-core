@@ -1,0 +1,62 @@
+.. index:: pair: enum; bond_type
+.. _doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328:
+
+enum molSys::bond_type
+======================
+
+Overview
+~~~~~~~~
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <mol_sys.hpp>
+
+	enum bond_type {
+	    :ref:`staggered<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c>`,
+	    :ref:`eclipsed<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df>`,
+	    :ref:`out_of_range<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0>`,
+	};
+
+.. _details-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Enum Values
+-----------
+
+.. index:: pair: enumvalue; staggered
+.. _doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328a6012b5293d0c7397efd784be681cd35c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	staggered
+
+The bond is a staggered bond, according to the :math:`a(i,j)` or :math:`c(i,j)` value.
+
+.. index:: pair: enumvalue; eclipsed
+.. _doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328a1a0a99de3ad872b51a234d16055d14df:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	eclipsed
+
+The bond is an eclipsed bond.
+
+.. index:: pair: enumvalue; out_of_range
+.. _doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328a4fb901c70a0fdc05b55d95985f3300b0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	out_of_range
+
+The bond cannot be classified as either staggered or eclipsed.
+

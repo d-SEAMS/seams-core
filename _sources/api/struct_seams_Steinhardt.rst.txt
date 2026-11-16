@@ -1,0 +1,62 @@
+.. index:: pair: struct; seams::Steinhardt
+.. _doxid-structseams_1_1_steinhardt:
+
+struct seams::Steinhardt
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Local :ref:`Steinhardt <doxid-structseams_1_1_steinhardt>` parameter, and the average when it was asked for. :ref:`More...<details-structseams_1_1_steinhardt>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Steinhardt {
+		// fields
+	
+		std::vector<double> :ref:`local<doxid-structseams_1_1_steinhardt_1aa3051d7902203b9e0f1a297dff303b67>`;
+		std::vector<double> :ref:`average<doxid-structseams_1_1_steinhardt_1a31a5624a732042134e1d5a10ded18fcd>`;
+	};
+.. _details-structseams_1_1_steinhardt:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Local :ref:`Steinhardt <doxid-structseams_1_1_steinhardt>` parameter, and the average when it was asked for.
+
+``:ref:`average <doxid-structseams_1_1_steinhardt_1a31a5624a732042134e1d5a10ded18fcd>``` is empty when the call did not request the Lechner-Dellago mean.
+
+Fields
+------
+
+.. index:: pair: variable; local
+.. _doxid-structseams_1_1_steinhardt_1aa3051d7902203b9e0f1a297dff303b67:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> local
+
+One local q_l per atom.
+
+Dimensionless.
+
+.. index:: pair: variable; average
+.. _doxid-structseams_1_1_steinhardt_1a31a5624a732042134e1d5a10ded18fcd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> average
+
+Neighbour mean of q_lm.
+
+Empty if skipped.
+

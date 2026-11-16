@@ -1,0 +1,52 @@
+.. index:: pair: struct; science::CriticalSize
+.. _doxid-structscience_1_1_critical_size:
+
+struct science::CriticalSize
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct CriticalSize {
+		// fields
+	
+		double :target:`nStar<doxid-structscience_1_1_critical_size_1a67de93679e8d6de3e7dd8cef6496bfa9>` = 0;
+		double :target:`sigma<doxid-structscience_1_1_critical_size_1abb8a4c635689aeee731f720be9eb490a>` = 0;
+		double :ref:`lo<doxid-structscience_1_1_critical_size_1ad0c0047c0e27bf386a82ab201462962d>` = 0;
+		double :target:`hi<doxid-structscience_1_1_critical_size_1acb6440db92267627044400b006960822>` = 0;
+		int :target:`onset<doxid-structscience_1_1_critical_size_1a2a615346a61586080ecaaecf89673889>` = -1;
+		int :target:`window<doxid-structscience_1_1_critical_size_1a23f0fa700abd28dce6e09f104838c0b3>` = 0;
+		bool :target:`upperBound<doxid-structscience_1_1_critical_size_1afb4903edfeb3fca066f3fe0aadb36537>` = false;
+		bool :target:`defined<doxid-structscience_1_1_critical_size_1ad56f939d1b3e9a4a1145ef98d906921c>` = false;
+	};
+.. _details-structscience_1_1_critical_size:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; lo
+.. _doxid-structscience_1_1_critical_size_1ad0c0047c0e27bf386a82ab201462962d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double lo = 0
+
+sample standard deviation of the window
+

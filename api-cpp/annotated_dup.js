@@ -9,10 +9,12 @@ var annotated_dup =
       [ "Signature", "structcage_1_1Signature.html", "structcage_1_1Signature" ]
     ] ],
     [ "chill", "namespacechill.html", [
+      [ "AnalysisPhases", "structchill_1_1AnalysisPhases.html", "structchill_1_1AnalysisPhases" ],
       [ "BondClassifier", "structchill_1_1BondClassifier.html", "structchill_1_1BondClassifier" ],
       [ "BondOrder", "structchill_1_1BondOrder.html", "structchill_1_1BondOrder" ],
       [ "ChillPlusResult", "structchill_1_1ChillPlusResult.html", "structchill_1_1ChillPlusResult" ],
       [ "LinearClassifier", "structchill_1_1LinearClassifier.html", "structchill_1_1LinearClassifier" ],
+      [ "QlCutoffStages", "structchill_1_1QlCutoffStages.html", "structchill_1_1QlCutoffStages" ],
       [ "QlmAtom", "structchill_1_1QlmAtom.html", "structchill_1_1QlmAtom" ],
       [ "SteinhardtQl", "structchill_1_1SteinhardtQl.html", "structchill_1_1SteinhardtQl" ],
       [ "TemplateHit", "structchill_1_1TemplateHit.html", "structchill_1_1TemplateHit" ],
@@ -31,6 +33,16 @@ var annotated_dup =
       [ "Footprint", "structgpu_1_1Footprint.html", "structgpu_1_1Footprint" ],
       [ "Plan", "structgpu_1_1Plan.html", "structgpu_1_1Plan" ]
     ] ],
+    [ "iface", "namespaceiface.html", [
+      [ "Front", "structiface_1_1Front.html", "structiface_1_1Front" ],
+      [ "Profile", "structiface_1_1Profile.html", "structiface_1_1Profile" ],
+      [ "Bin", "structiface_1_1Bin.html", "structiface_1_1Bin" ],
+      [ "Study", "structiface_1_1Study.html", "structiface_1_1Study" ],
+      [ "GrowthFrame", "structiface_1_1GrowthFrame.html", "structiface_1_1GrowthFrame" ],
+      [ "Growth", "structiface_1_1Growth.html", "structiface_1_1Growth" ],
+      [ "BootstrapInterval", "structiface_1_1BootstrapInterval.html", "structiface_1_1BootstrapInterval" ],
+      [ "WillardChandler", "structiface_1_1WillardChandler.html", "structiface_1_1WillardChandler" ]
+    ] ],
     [ "ira", "namespaceira.html", [
       [ "Match", "structira_1_1Match.html", "structira_1_1Match" ],
       [ "PointGroup", "structira_1_1PointGroup.html", "structira_1_1PointGroup" ]
@@ -43,6 +55,15 @@ var annotated_dup =
     [ "nneigh", "namespacenneigh.html", [
       [ "CutoffSkin", "classnneigh_1_1CutoffSkin.html", "classnneigh_1_1CutoffSkin" ],
       [ "SkinNeighborList", "classnneigh_1_1SkinNeighborList.html", "classnneigh_1_1SkinNeighborList" ]
+    ] ],
+    [ "nucleation", "namespacenucleation.html", [
+      [ "FrameRecord", "structnucleation_1_1FrameRecord.html", "structnucleation_1_1FrameRecord" ],
+      [ "Ascent", "structnucleation_1_1Ascent.html", "structnucleation_1_1Ascent" ],
+      [ "GrowBasin", "structnucleation_1_1GrowBasin.html", "structnucleation_1_1GrowBasin" ],
+      [ "CommittorCall", "structnucleation_1_1CommittorCall.html", "structnucleation_1_1CommittorCall" ],
+      [ "HalfRise", "structnucleation_1_1HalfRise.html", "structnucleation_1_1HalfRise" ],
+      [ "Lead", "structnucleation_1_1Lead.html", "structnucleation_1_1Lead" ],
+      [ "Shift", "structnucleation_1_1Shift.html", "structnucleation_1_1Shift" ]
     ] ],
     [ "phase", "namespacephase.html", [
       [ "IceXXIHit", "structphase_1_1IceXXIHit.html", "structphase_1_1IceXXIHit" ]
@@ -68,13 +89,30 @@ var annotated_dup =
       [ "SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ],
       [ "StackingPlanes", "structring_1_1StackingPlanes.html", "structring_1_1StackingPlanes" ]
     ] ],
+    [ "science", "namespacescience.html", [
+      [ "Front", "structscience_1_1Front.html", "structscience_1_1Front" ],
+      [ "LayerRow", "structscience_1_1LayerRow.html", "structscience_1_1LayerRow" ],
+      [ "Layers", "structscience_1_1Layers.html", "structscience_1_1Layers" ],
+      [ "SlopeInterval", "structscience_1_1SlopeInterval.html", "structscience_1_1SlopeInterval" ],
+      [ "CriticalSize", "structscience_1_1CriticalSize.html", "structscience_1_1CriticalSize" ],
+      [ "ClusterPart", "structscience_1_1ClusterPart.html", "structscience_1_1ClusterPart" ],
+      [ "NucleusFrame", "structscience_1_1NucleusFrame.html", "structscience_1_1NucleusFrame" ],
+      [ "AtomRow", "structscience_1_1AtomRow.html", "structscience_1_1AtomRow" ]
+    ] ],
     [ "seams", "namespaceseams.html", [
       [ "cfg", "namespaceseams_1_1cfg.html", [
         [ "Runtime", "structseams_1_1cfg_1_1Runtime.html", "structseams_1_1cfg_1_1Runtime" ]
       ] ],
+      [ "cpu", "namespaceseams_1_1cpu.html", [
+        [ "Features", "structseams_1_1cpu_1_1Features.html", "structseams_1_1cpu_1_1Features" ]
+      ] ],
+      [ "detail", "namespaceseams_1_1detail.html", [
+        [ "Handle", "classseams_1_1detail_1_1Handle.html", "classseams_1_1detail_1_1Handle" ]
+      ] ],
       [ "domain", "namespaceseams_1_1domain.html", [
         [ "Share", "structseams_1_1domain_1_1Share.html", "structseams_1_1domain_1_1Share" ],
-        [ "RingSummary", "structseams_1_1domain_1_1RingSummary.html", "structseams_1_1domain_1_1RingSummary" ]
+        [ "RingSummary", "structseams_1_1domain_1_1RingSummary.html", "structseams_1_1domain_1_1RingSummary" ],
+        [ "RingPhases", "structseams_1_1domain_1_1RingPhases.html", "structseams_1_1domain_1_1RingPhases" ]
       ] ],
       [ "product", "namespaceseams_1_1product.html", [
         [ "RealDot", "structseams_1_1product_1_1RealDot.html", "structseams_1_1product_1_1RealDot" ],
@@ -82,15 +120,73 @@ var annotated_dup =
         [ "Cij", "structseams_1_1product_1_1Cij.html", "structseams_1_1product_1_1Cij" ],
         [ "GemmInfo", "structseams_1_1product_1_1GemmInfo.html", "structseams_1_1product_1_1GemmInfo" ]
       ] ],
-      [ "EdgeSet", "structseams_1_1EdgeSet.html", "structseams_1_1EdgeSet" ]
+      [ "tsan", "namespaceseams_1_1tsan.html", [
+        [ "Slot", "structseams_1_1tsan_1_1Slot.html", "structseams_1_1tsan_1_1Slot" ]
+      ] ],
+      [ "BondOptions", "structseams_1_1BondOptions.html", "structseams_1_1BondOptions" ],
+      [ "Brine", "classseams_1_1Brine.html", "classseams_1_1Brine" ],
+      [ "BrineFronts", "structseams_1_1BrineFronts.html", "structseams_1_1BrineFronts" ],
+      [ "BrineOptions", "structseams_1_1BrineOptions.html", "structseams_1_1BrineOptions" ],
+      [ "BrineProfile", "structseams_1_1BrineProfile.html", "structseams_1_1BrineProfile" ],
+      [ "CageCounts", "structseams_1_1CageCounts.html", "structseams_1_1CageCounts" ],
+      [ "CageOptions", "structseams_1_1CageOptions.html", "structseams_1_1CageOptions" ],
+      [ "Cages", "classseams_1_1Cages.html", "classseams_1_1Cages" ],
+      [ "ChillOptions", "structseams_1_1ChillOptions.html", "structseams_1_1ChillOptions" ],
+      [ "ChordlessCycles", "structseams_1_1ChordlessCycles.html", "structseams_1_1ChordlessCycles" ],
+      [ "Classification", "structseams_1_1Classification.html", "structseams_1_1Classification" ],
+      [ "Contacts", "structseams_1_1Contacts.html", "structseams_1_1Contacts" ],
+      [ "DensityOptions", "structseams_1_1DensityOptions.html", "structseams_1_1DensityOptions" ],
+      [ "DensityProfile", "structseams_1_1DensityProfile.html", "structseams_1_1DensityProfile" ],
+      [ "Distribution", "structseams_1_1Distribution.html", "structseams_1_1Distribution" ],
+      [ "DistributionOptions", "structseams_1_1DistributionOptions.html", "structseams_1_1DistributionOptions" ],
+      [ "DomainOptions", "structseams_1_1DomainOptions.html", "structseams_1_1DomainOptions" ],
+      [ "DomainReport", "structseams_1_1DomainReport.html", "structseams_1_1DomainReport" ],
+      [ "EdgeSet", "structseams_1_1EdgeSet.html", "structseams_1_1EdgeSet" ],
+      [ "Error", "classseams_1_1Error.html", "classseams_1_1Error" ],
+      [ "FairState", "structseams_1_1FairState.html", "structseams_1_1FairState" ],
+      [ "FairWidth", "classseams_1_1FairWidth.html", "classseams_1_1FairWidth" ],
+      [ "Fingerprint", "classseams_1_1Fingerprint.html", "classseams_1_1Fingerprint" ],
+      [ "FingerprintOptions", "structseams_1_1FingerprintOptions.html", "structseams_1_1FingerprintOptions" ],
+      [ "KnnOptions", "structseams_1_1KnnOptions.html", "structseams_1_1KnnOptions" ],
+      [ "NeighbourOptions", "structseams_1_1NeighbourOptions.html", "structseams_1_1NeighbourOptions" ],
+      [ "Neighbours", "classseams_1_1Neighbours.html", "classseams_1_1Neighbours" ],
+      [ "OrderOptions", "structseams_1_1OrderOptions.html", "structseams_1_1OrderOptions" ],
+      [ "Pockets", "structseams_1_1Pockets.html", "structseams_1_1Pockets" ],
+      [ "PrismCensus", "structseams_1_1PrismCensus.html", "structseams_1_1PrismCensus" ],
+      [ "PrismOptions", "structseams_1_1PrismOptions.html", "structseams_1_1PrismOptions" ],
+      [ "Q4Q6", "structseams_1_1Q4Q6.html", "structseams_1_1Q4Q6" ],
+      [ "Q6Bar", "structseams_1_1Q6Bar.html", "structseams_1_1Q6Bar" ],
+      [ "Q6BarOptions", "structseams_1_1Q6BarOptions.html", "structseams_1_1Q6BarOptions" ],
+      [ "Rejection", "structseams_1_1Rejection.html", "structseams_1_1Rejection" ],
+      [ "RingOptions", "structseams_1_1RingOptions.html", "structseams_1_1RingOptions" ],
+      [ "Rings", "classseams_1_1Rings.html", "classseams_1_1Rings" ],
+      [ "RunningCoordination", "structseams_1_1RunningCoordination.html", "structseams_1_1RunningCoordination" ],
+      [ "SheetOptions", "structseams_1_1SheetOptions.html", "structseams_1_1SheetOptions" ],
+      [ "SignatureMatch", "structseams_1_1SignatureMatch.html", "structseams_1_1SignatureMatch" ],
+      [ "SignatureOptions", "structseams_1_1SignatureOptions.html", "structseams_1_1SignatureOptions" ],
+      [ "Steinhardt", "structseams_1_1Steinhardt.html", "structseams_1_1Steinhardt" ],
+      [ "SteinhardtOptions", "structseams_1_1SteinhardtOptions.html", "structseams_1_1SteinhardtOptions" ],
+      [ "System", "classseams_1_1System.html", "classseams_1_1System" ],
+      [ "TeamWidth", "structseams_1_1TeamWidth.html", "structseams_1_1TeamWidth" ]
     ] ],
     [ "site", "namespacesite.html", [
+      [ "BrinePocket", "structsite_1_1BrinePocket.html", "structsite_1_1BrinePocket" ],
+      [ "ConcentrationBin", "structsite_1_1ConcentrationBin.html", "structsite_1_1ConcentrationBin" ],
+      [ "ConcentrationProfile", "structsite_1_1ConcentrationProfile.html", "structsite_1_1ConcentrationProfile" ],
       [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
+      [ "FrontLayerReport", "structsite_1_1FrontLayerReport.html", "structsite_1_1FrontLayerReport" ],
+      [ "FrontOptions", "structsite_1_1FrontOptions.html", "structsite_1_1FrontOptions" ],
+      [ "FrontPair", "structsite_1_1FrontPair.html", "structsite_1_1FrontPair" ],
+      [ "FrontSnapshot", "structsite_1_1FrontSnapshot.html", "structsite_1_1FrontSnapshot" ],
       [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
       [ "IceClusterIons", "structsite_1_1IceClusterIons.html", "structsite_1_1IceClusterIons" ],
       [ "InsideTrace", "structsite_1_1InsideTrace.html", "structsite_1_1InsideTrace" ],
       [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
-      [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ]
+      [ "LinearFit", "structsite_1_1LinearFit.html", "structsite_1_1LinearFit" ],
+      [ "PocketCensus", "structsite_1_1PocketCensus.html", "structsite_1_1PocketCensus" ],
+      [ "RejectionCoefficient", "structsite_1_1RejectionCoefficient.html", "structsite_1_1RejectionCoefficient" ],
+      [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
+      [ "TrapEvent", "structsite_1_1TrapEvent.html", "structsite_1_1TrapEvent" ]
     ] ],
     [ "symm", "namespacesymm.html", [
       [ "CanonShell", "structsymm_1_1CanonShell.html", "structsymm_1_1CanonShell" ],
@@ -112,5 +208,11 @@ var annotated_dup =
     [ "tum", "namespacetum.html", [
       [ "CageCounts", "structtum_1_1CageCounts.html", "structtum_1_1CageCounts" ],
       [ "SpecializedCaps", "structtum_1_1SpecializedCaps.html", "structtum_1_1SpecializedCaps" ]
+    ] ],
+    [ "water", "namespacewater.html", [
+      [ "Request", "structwater_1_1Request.html", "structwater_1_1Request" ],
+      [ "Selection", "structwater_1_1Selection.html", "structwater_1_1Selection" ],
+      [ "IonSite", "structwater_1_1IonSite.html", "structwater_1_1IonSite" ],
+      [ "IonReport", "structwater_1_1IonReport.html", "structwater_1_1IonReport" ]
     ] ]
 ];

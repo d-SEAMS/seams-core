@@ -1,0 +1,26 @@
+.. index:: pair: struct; water::Request
+.. _doxid-structwater_1_1_request:
+
+struct water::Request
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/water_select.hpp>
+	
+	struct Request {
+		// fields
+	
+		int :target:`type<doxid-structwater_1_1_request_1a0b3611a8b0b9a5b05545e6b3fc90c205>` = 0;
+		std::vector<int> :target:`types<doxid-structwater_1_1_request_1a29f4ca72d51af7b4e308c64c4a596287>`;
+		std::vector<int> :target:`molecules<doxid-structwater_1_1_request_1a7f3534f150ea9edfa3b3e27969dd6c5d>`;
+		:ref:`MolMode<doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0>` :target:`mol_mode<doxid-structwater_1_1_request_1a36eedb8eae7bed83475b5ebf2aff9a37>` = :ref:`MolMode::None<doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0a6adf97f83acf6453d4a6a4b1070f3754>`;
+		std::vector<int> :target:`ion_types<doxid-structwater_1_1_request_1a2a1fb4b1bf1106925f31032a27a82e2e>`;
+	};

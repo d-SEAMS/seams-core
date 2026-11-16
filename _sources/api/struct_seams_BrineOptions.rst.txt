@@ -1,0 +1,80 @@
+.. index:: pair: struct; seams::BrineOptions
+.. _doxid-structseams_1_1_brine_options:
+
+struct seams::BrineOptions
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a planar ice front. :ref:`More...<details-structseams_1_1_brine_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct BrineOptions {
+		// fields
+	
+		int :ref:`water_type<doxid-structseams_1_1_brine_options_1a1a02efc12e9c01de1816a64a752d9c54>` = 0;
+		int :ref:`ion_type<doxid-structseams_1_1_brine_options_1a98ad1095b5623c558cc6e7b3a2222ba0>` = 0;
+		int :ref:`bins<doxid-structseams_1_1_brine_options_1a80be947d339929a793fe6ef68869fae1>` = 0;
+		:ref:`Axis<doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82>` :ref:`axis<doxid-structseams_1_1_brine_options_1ae24ed7385d7fd449a53514d1842caa9d>` = :ref:`Axis::Z<doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5>`;
+	};
+.. _details-structseams_1_1_brine_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a planar ice front.
+
+Fields
+------
+
+.. index:: pair: variable; water_type
+.. _doxid-structseams_1_1_brine_options_1a1a02efc12e9c01de1816a64a752d9c54:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int water_type = 0
+
+Species kept as water, or 0.
+
+.. index:: pair: variable; ion_type
+.. _doxid-structseams_1_1_brine_options_1a98ad1095b5623c558cc6e7b3a2222ba0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int ion_type = 0
+
+Species kept as ions, or 0 for none.
+
+.. index:: pair: variable; bins
+.. _doxid-structseams_1_1_brine_options_1a80be947d339929a793fe6ef68869fae1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int bins = 0
+
+Bins along the axis.
+
+Zero selects 20.
+
+.. index:: pair: variable; axis
+.. _doxid-structseams_1_1_brine_options_1ae24ed7385d7fd449a53514d1842caa9d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Axis<doxid-group__seams__cpp_1gab0a343eee2fee14066d1e497e54cfb82>` axis = :ref:`Axis::Z<doxid-group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5>`
+
+Front axis.
+

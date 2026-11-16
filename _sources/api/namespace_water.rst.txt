@@ -1,0 +1,85 @@
+.. index:: pair: namespace; water
+.. _doxid-namespacewater:
+
+namespace water
+===============
+
+.. toctree::
+	:hidden:
+
+	enum_water_MolMode.rst
+	struct_water_IonReport.rst
+	struct_water_IonSite.rst
+	struct_water_Request.rst
+	struct_water_Selection.rst
+
+Overview
+~~~~~~~~
+
+Water-oxygen selection for a mixed frame. :ref:`More...<details-namespacewater>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace water {
+
+	// enums
+
+	enum :ref:`MolMode<doxid-namespacewater_1a81f5dd0c1d071693a18e6ceb202925b0>`;
+
+	// structs
+
+	struct :ref:`IonReport<doxid-structwater_1_1_ion_report>`;
+	struct :ref:`IonSite<doxid-structwater_1_1_ion_site>`;
+	struct :ref:`Request<doxid-structwater_1_1_request>`;
+	struct :ref:`Selection<doxid-structwater_1_1_selection>`;
+
+	// global functions
+
+	bool :target:`hasMultiAtomMolecule<doxid-namespacewater_1a7f462298e12eda6ff5d74d58c39f294e>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud);
+	:ref:`Selection<doxid-structwater_1_1_selection>` :target:`selectOxygens<doxid-namespacewater_1ad8f1372ae986788085f488dc1191c300>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const :ref:`Request<doxid-structwater_1_1_request>`& request);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`subsetCloud<doxid-namespacewater_1af1e8dd08f17d67b93da6688e508209cd>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const :ref:`Selection<doxid-structwater_1_1_selection>`& selection);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`keepHistoricalOxygen<doxid-namespacewater_1a96d8a115335adeddf742b5009a4f3798>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud);
+	std::vector<:ref:`IonSite<doxid-structwater_1_1_ion_site>`> :target:`collectIons<doxid-namespacewater_1a69cdb97f6034ebb799c46973a75a05fd>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const :ref:`Selection<doxid-structwater_1_1_selection>`& selection);
+	:ref:`IonReport<doxid-structwater_1_1_ion_report>` :ref:`ionFront<doxid-namespacewater_1a39efb9161b577ad0caf0a174d06d4799>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& oxygen, const std::vector<:ref:`IonSite<doxid-structwater_1_1_ion_site>`>& ions);
+	bool :target:`iceLabel<doxid-namespacewater_1a553fec1f945055306f2f96fd32250b2a>`(:ref:`molSys::atom_state_type<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>` label);
+
+	} // namespace water
+.. _details-namespacewater:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Water-oxygen selection for a mixed frame.
+
+Neighbours, CHILL, CHILL+, rings and cages run on the oxygen atoms. Ions and hydrogens stay out of that graph. A requested type or molecule that is not in the frame is an error, as is a selection that keeps nothing. The messages are the strings the tests match.
+
+Global Functions
+----------------
+
+.. index:: pair: function; keepHistoricalOxygen
+.. _doxid-namespacewater_1a96d8a115335adeddf742b5009a4f3798:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> keepHistoricalOxygen(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud)
+
+Historical dump guess: type 2 when any atom has it, otherwise type 1.
+
+A miss leaves an empty cloud and keeps the box.
+
+.. index:: pair: function; ionFront
+.. _doxid-namespacewater_1a39efb9161b577ad0caf0a174d06d4799:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`IonReport<doxid-structwater_1_1_ion_report>` ionFront(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& oxygen, const std::vector<:ref:`IonSite<doxid-structwater_1_1_ion_site>`>& ions)
+
+oxygen is the labeled water subset.
+
+front is the nearest ice oxygen, in the box units, or -1 when no ion sits next to ice.
+

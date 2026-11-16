@@ -20,5 +20,6 @@ Membership of the neighbour rows after the leading self entry.
 		// methods
 	
 		void :target:`build<doxid-classring_1_1_neigh_bond_1adede93d18467191b18db5a9960a3dcfa>`(const std::vector<std::vector<int>>& nList);
+		void :target:`row<doxid-classring_1_1_neigh_bond_1a7a76d39976a7d0b0c1248aa26e7ea486>`(int i, const int*& begin, const int*& end) const;
 		bool :target:`operator()<doxid-classring_1_1_neigh_bond_1ae05df58a91640cf5f7e93a70e45563f5>`(int i, int j) const;
 	};

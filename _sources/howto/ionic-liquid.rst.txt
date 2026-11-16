@@ -23,6 +23,14 @@ type of the species you want.
     seams chill-plus FILE --type 2
     seams cages FILE --type 2
 
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams read input/traj/il_tiny.lammpstrj
+    seams chill-plus input/traj/il_tiny.lammpstrj --type 2
+    seams cages input/traj/il_tiny.lammpstrj --type 2
+
 Unlike-type neighbours
 ----------------------
 
@@ -39,6 +47,14 @@ Partial g(r)
     seams rdf FILE --pair-types 1,2 --cutoff 6.0
     seams rdf FILE --pair-types 1,2 --cutoff 6.0 --bins 60
     seams rdf FILE --type 2 --cutoff 6.0
+
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+    seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0 --bins 60
+    seams rdf input/traj/il_tiny.lammpstrj --type 2 --cutoff 6.0
 
 ``--pair-types I,J`` selects the pair. The default is ``I = J = --type``.
 ``--types`` is a deprecated exact alias of ``--pair-types`` and prints a warning.
@@ -83,12 +99,19 @@ Polar and apolar domains
     seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
     seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset apolar
 
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+    seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset apolar
+
 ``seams domains`` builds the mask from ``site::indicesOf`` and walks
 Stoddard's clusters on that subset. It does not run CHILL or
 ``q_6``. Neighbours are the dump-MIC cutoff list (``--cutoff``).
 Stdout is ``subset polar n N largest L P P_inf`` with
 ``P_inf = L / N``. Missing ``--site`` exits 2. ``--family`` still only
-gates ice scores.
+applies to ice scores.
 
 Confined layers
 ---------------
@@ -100,6 +123,14 @@ A slit or slab dump needs type-resolved :math:`\rho(z)`, not bulk CHILL.
     seams density-z FILE
     seams density-z FILE --type 1 --bins 80
     seams density-z FILE --type 2 --axis z
+
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams density-z input/traj/il_tiny.lammpstrj
+    seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
+    seams density-z input/traj/il_tiny.lammpstrj --type 2 --axis z
 
 ``--type 0`` (default) histograms every atom. ``--type I`` keeps one
 LAMMPS type. ``--axis`` is the Cartesian coordinate (``x``, ``y``, or
@@ -130,8 +161,8 @@ triclinic (``box.size() >= 6``), the tilt ``xy xz yz``. Bound spans
 are not edge lengths; see `Sheared
 cells <sheared-cells.rst>`_.
 
-Family gate
------------
+Family names
+------------
 
 ``--family`` names the material. The default is ``waterIce``.
 ``seams chill``, ``chill-plus``, and ``cages`` refuse (exit 2) when
@@ -149,6 +180,18 @@ water path and is not an IL classifier.
     seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
     seams density-z FILE --type 1 --bins 80
     seams chill FILE --family ionicLiquid   # exits 2
+
+The same flags on the bundled multi-type frame:
+
+.. code:: bash
+
+    seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+    seams cn input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+    seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion'
+    seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+    seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+    seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
+    seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid   # exits 2
 
 Flags and the rest of the surface live on
 `seams CLI <../reference/cli.rst>`_. Formats live on

@@ -12,6 +12,17 @@ Overview
 
 This contains a complex vector of length :math:`2l+1`. :ref:`More...<details-structchill_1_1_ylm_atom>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct YlmAtom {
+		// fields
+	
+		std::vector<std::complex<double>> :target:`ylm<doxid-structchill_1_1_ylm_atom_1a3eb7d9180c409702925c3ac48c79bb7a>`;
+	};
 .. _details-structchill_1_1_ylm_atom:
 
 Detailed Documentation

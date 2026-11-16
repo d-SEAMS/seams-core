@@ -12,6 +12,17 @@ Overview
 
 This is the local orientational bond order parameter :math:`q_{lm}`, of length :math:`2l+1`. :ref:`More...<details-structchill_1_1_qlm_atom>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct QlmAtom {
+		// fields
+	
+		std::vector<:ref:`YlmAtom<doxid-structchill_1_1_ylm_atom>`> :target:`ptq<doxid-structchill_1_1_qlm_atom_1a4449b8cb7345b6dec04dcb5aa155e676>`;
+	};
 .. _details-structchill_1_1_qlm_atom:
 
 Detailed Documentation

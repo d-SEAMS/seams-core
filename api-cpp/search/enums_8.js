@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['reduction_0',['Reduction',['../namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d',1,'seams::product']]]
+  ['label_0',['Label',['../group__seams__cpp.html#ga68f2414148f093b5d3e3676e20980573',1,'seams']]]
 ];

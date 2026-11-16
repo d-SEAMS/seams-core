@@ -243,20 +243,24 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacesinp.
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gac551295f82cf12446912941d5f32000e" id="r_gac551295f82cf12446912941d5f32000e"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#gac551295f82cf12446912941d5f32000e">getInpFileList</a> (std::string inputFolder)</td></tr>
-<tr class="memdesc:gac551295f82cf12446912941d5f32000e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get file list inside the input folder.  <br /></td></tr>
-<tr class="memitem:ga44da8ec94e25ebe6ffcce36128c31f89" id="r_ga44da8ec94e25ebe6ffcce36128c31f89"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#ga44da8ec94e25ebe6ffcce36128c31f89">nLammpsFrames</a> (const std::string &amp;filename)</td></tr>
-<tr class="memitem:gaefac4aaf94bf39771d4c45f352f8615e" id="r_gaefac4aaf94bf39771d4c45f352f8615e"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#gaefac4aaf94bf39771d4c45f352f8615e">dropLammpsDumpIndex</a> (const std::string &amp;filename)</td></tr>
-<tr class="memdesc:gaefac4aaf94bf39771d4c45f352f8615e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop a cached dump session (tests that rewrite a path in place).  <br /></td></tr>
-<tr class="memitem:ga7830353a092ad93a805dea34a07e7804" id="r_ga7830353a092ad93a805dea34a07e7804"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#ga7830353a092ad93a805dea34a07e7804">forEachLammpsFrame</a> (const std::string &amp;filename, int first, int last, int typeFilter, const std::function&lt; void(int, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;)&gt; &amp;fn, int nThreads=0, int part=0, int parts=1)</td></tr>
-<tr class="memitem:ga27548bfe885e92777ee50738245e38d4" id="r_ga27548bfe885e92777ee50738245e38d4"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#ga27548bfe885e92777ee50738245e38d4">readLammpsTrj</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
-<tr class="memitem:gac788ef30628b292dec2a1b903dbdfe5e" id="r_gac788ef30628b292dec2a1b903dbdfe5e"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#gac788ef30628b292dec2a1b903dbdfe5e">readLammpsTrjO</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeO, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
-<tr class="memitem:gaaf3e97603a0f784f271d01efd5aa9060" id="r_gaaf3e97603a0f784f271d01efd5aa9060"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#gaaf3e97603a0f784f271d01efd5aa9060">readLammpsTrjreduced</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
-<tr class="memitem:ga9aeec41b2c3fea17e5e54fd266b71f0a" id="r_ga9aeec41b2c3fea17e5e54fd266b71f0a"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a">readXYZ</a> (std::string filename)</td></tr>
-<tr class="memdesc:ga9aeec41b2c3fea17e5e54fd266b71f0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for reading in atom coordinates from an XYZ file.  <br /></td></tr>
-<tr class="memitem:gada34d9d30df182a408a6b69ba7310509" id="r_gada34d9d30df182a408a6b69ba7310509"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#gada34d9d30df182a408a6b69ba7310509">readBonds</a> (std::string filename)</td></tr>
-<tr class="memdesc:gada34d9d30df182a408a6b69ba7310509"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads bonds into a vector of vectors from a file with a specific format.  <br /></td></tr>
-<tr class="memitem:gad5a8c377d8ed78c413c13d80ac8261ac" id="r_gad5a8c377d8ed78c413c13d80ac8261ac"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac">atomInSlice</a> (double x, double y, double z, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh)</td></tr>
+<tr class="memitem:ac551295f82cf12446912941d5f32000e" id="r_ac551295f82cf12446912941d5f32000e"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac551295f82cf12446912941d5f32000e">getInpFileList</a> (std::string inputFolder)</td></tr>
+<tr class="memdesc:ac551295f82cf12446912941d5f32000e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get file list inside the input folder.  <br /></td></tr>
+<tr class="memitem:a44da8ec94e25ebe6ffcce36128c31f89" id="r_a44da8ec94e25ebe6ffcce36128c31f89"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a44da8ec94e25ebe6ffcce36128c31f89">nLammpsFrames</a> (const std::string &amp;filename)</td></tr>
+<tr class="memitem:aefac4aaf94bf39771d4c45f352f8615e" id="r_aefac4aaf94bf39771d4c45f352f8615e"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#aefac4aaf94bf39771d4c45f352f8615e">dropLammpsDumpIndex</a> (const std::string &amp;filename)</td></tr>
+<tr class="memdesc:aefac4aaf94bf39771d4c45f352f8615e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Drop a cached dump session (tests that rewrite a path in place).  <br /></td></tr>
+<tr class="memitem:a0899a01c97adc7103a891288b37e066f" id="r_a0899a01c97adc7103a891288b37e066f"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a0899a01c97adc7103a891288b37e066f">currentExceptionText</a> ()</td></tr>
+<tr class="memitem:a7830353a092ad93a805dea34a07e7804" id="r_a7830353a092ad93a805dea34a07e7804"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7830353a092ad93a805dea34a07e7804">forEachLammpsFrame</a> (const std::string &amp;filename, int first, int last, int typeFilter, const std::function&lt; void(int, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;)&gt; &amp;fn, int nThreads=0, int part=0, int parts=1)</td></tr>
+<tr class="memitem:a56e21fa520d625329c01d6462aa3f971" id="r_a56e21fa520d625329c01d6462aa3f971"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a56e21fa520d625329c01d6462aa3f971">readDefaultOxygen</a> (const std::string &amp;filename, int frame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a27548bfe885e92777ee50738245e38d4" id="r_a27548bfe885e92777ee50738245e38d4"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a27548bfe885e92777ee50738245e38d4">readLammpsTrj</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
+<tr class="memitem:ac788ef30628b292dec2a1b903dbdfe5e" id="r_ac788ef30628b292dec2a1b903dbdfe5e"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac788ef30628b292dec2a1b903dbdfe5e">readLammpsTrjO</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeO, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
+<tr class="memitem:aaf3e97603a0f784f271d01efd5aa9060" id="r_aaf3e97603a0f784f271d01efd5aa9060"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aaf3e97603a0f784f271d01efd5aa9060">readLammpsTrjreduced</a> (std::string filename, int targetFrame, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, bool isSlice=false, std::array&lt; double, 3 &gt; coordLow=std::array&lt; double, 3 &gt;{0, 0, 0}, std::array&lt; double, 3 &gt; coordHigh=std::array&lt; double, 3 &gt;{0, 0, 0})</td></tr>
+<tr class="memitem:a9aeec41b2c3fea17e5e54fd266b71f0a" id="r_a9aeec41b2c3fea17e5e54fd266b71f0a"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9aeec41b2c3fea17e5e54fd266b71f0a">readXYZ</a> (std::string filename)</td></tr>
+<tr class="memdesc:a9aeec41b2c3fea17e5e54fd266b71f0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for reading in atom coordinates from an XYZ file.  <br /></td></tr>
+<tr class="memitem:ada34d9d30df182a408a6b69ba7310509" id="r_ada34d9d30df182a408a6b69ba7310509"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ada34d9d30df182a408a6b69ba7310509">readBonds</a> (std::string filename)</td></tr>
+<tr class="memdesc:ada34d9d30df182a408a6b69ba7310509"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads bonds into a vector of vectors from a file with a specific format.  <br /></td></tr>
+<tr class="memitem:aabe10d8377f02540f425d750aa3c0a4f" id="r_aabe10d8377f02540f425d750aa3c0a4f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aabe10d8377f02540f425d750aa3c0a4f">chemfilesSteps</a> (const std::string &amp;filename)</td></tr>
+<tr class="memitem:a718ffdbbb2101465eda4c73dddcb1e21" id="r_a718ffdbbb2101465eda4c73dddcb1e21"><td class="memItemLeft"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a718ffdbbb2101465eda4c73dddcb1e21">openFrame</a> (const std::string &amp;filename, int frame, int typeI, const std::string &amp;selection={})</td></tr>
+<tr class="memitem:ad5a8c377d8ed78c413c13d80ac8261ac" id="r_ad5a8c377d8ed78c413c13d80ac8261ac"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ad5a8c377d8ed78c413c13d80ac8261ac">atomInSlice</a> (double x, double y, double z, std::array&lt; double, 3 &gt; coordLow, std::array&lt; double, 3 &gt; coordHigh)</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for the d-SEAMS readers. </p>
@@ -267,7 +271,454 @@ Changelog</h3>
 <li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span class="obfuscator">.nosp@m.</span>a16t<span class="obfuscator">.nosp@m.</span>haug6<span class="obfuscator">.nosp@m.</span>46@g<span class="obfuscator">.nosp@m.</span>mail.<span class="obfuscator">.nosp@m.</span>com</a>]; date modified: Dec 26, 2019</li>
 <li>Rohit Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'rog'+'32'+'@hi'+'.i'+'s'; return false;">rog32<span class="obfuscator">.nosp@m.</span>@hi.<span class="obfuscator">.nosp@m.</span>is</a>]; date modified: Mar 20, 2021 </li>
 </ul>
-</div></div><!-- contents -->
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ad5a8c377d8ed78c413c13d80ac8261ac" name="ad5a8c377d8ed78c413c13d80ac8261ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5a8c377d8ed78c413c13d80ac8261ac">&#9670;&#160;</a></span>atomInSlice()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool sinp::atomInSlice </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>x</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>y</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>z</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordLow</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordHigh</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>True when each component lies in [lo, hi], or that axis has lo == hi (unconstrained). ([0,0,0], [50,0,0]) is x in [0, 50], y and z open. </p>
+<p>If this is 3 then the particle is inside the volume slice</p>
+
+<p class="definition">Definition at line <a class="el" href="seams__input_8hpp_source.html#l00224">224</a> of file <a class="el" href="seams__input_8hpp_source.html">seams_input.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  226</span>                                                       {</div>
+<div class="line"><span class="lineno">  227</span>  <span class="keywordtype">int</span> flag = 0; </div>
+<div class="line"><span class="lineno">  228</span> </div>
+<div class="line"><span class="lineno">  229</span>  <span class="keywordflow">if</span> (((x &gt;= coordLow[0]) &amp;&amp; (x &lt;= coordHigh[0])) ||</div>
+<div class="line"><span class="lineno">  230</span>      coordLow[0] == coordHigh[0]) {</div>
+<div class="line"><span class="lineno">  231</span>    flag++;</div>
+<div class="line"><span class="lineno">  232</span>  }</div>
+<div class="line"><span class="lineno">  233</span>  <span class="keywordflow">if</span> (((y &gt;= coordLow[1]) &amp;&amp; (y &lt;= coordHigh[1])) ||</div>
+<div class="line"><span class="lineno">  234</span>      coordLow[1] == coordHigh[1]) {</div>
+<div class="line"><span class="lineno">  235</span>    flag++;</div>
+<div class="line"><span class="lineno">  236</span>  }</div>
+<div class="line"><span class="lineno">  237</span>  <span class="keywordflow">if</span> (((z &gt;= coordLow[2]) &amp;&amp; (z &lt;= coordHigh[2])) ||</div>
+<div class="line"><span class="lineno">  238</span>      coordLow[2] == coordHigh[2]) {</div>
+<div class="line"><span class="lineno">  239</span>    flag++;</div>
+<div class="line"><span class="lineno">  240</span>  }</div>
+<div class="line"><span class="lineno">  241</span> </div>
+<div class="line"><span class="lineno">  242</span>  <span class="keywordflow">if</span> (flag == 3) {</div>
+<div class="line"><span class="lineno">  243</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  244</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  245</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  246</span>  }</div>
+<div class="line"><span class="lineno">  247</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="aabe10d8377f02540f425d750aa3c0a4f" name="aabe10d8377f02540f425d750aa3c0a4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aabe10d8377f02540f425d750aa3c0a4f">&#9670;&#160;</a></span>chemfilesSteps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sinp::chemfilesSteps </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Number of steps chemfiles can read, or -1 when chemfiles is off or the file is not a trajectory it knows. seams_lang calls this with or without chemfiles. </p>
+
+</div>
+</div>
+<a id="a0899a01c97adc7103a891288b37e066f" name="a0899a01c97adc7103a891288b37e066f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0899a01c97adc7103a891288b37e066f">&#9670;&#160;</a></span>currentExceptionText()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string sinp::currentExceptionText </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Text of the exception currently being handled. Call from a catch clause. A std::exception yields what(); anything else is unnamed. </p>
+
+</div>
+</div>
+<a id="aefac4aaf94bf39771d4c45f352f8615e" name="aefac4aaf94bf39771d4c45f352f8615e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aefac4aaf94bf39771d4c45f352f8615e">&#9670;&#160;</a></span>dropLammpsDumpIndex()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sinp::dropLammpsDumpIndex </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Drop a cached dump session (tests that rewrite a path in place). </p>
+
+</div>
+</div>
+<a id="a7830353a092ad93a805dea34a07e7804" name="a7830353a092ad93a805dea34a07e7804"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7830353a092ad93a805dea34a07e7804">&#9670;&#160;</a></span>forEachLammpsFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sinp::forEachLammpsFrame </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>first</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>last</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeFilter</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::function&lt; void(int, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;)&gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>fn</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nThreads</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>part</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>parts</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Call fn(frame, cloud) for each frame from max(first, 1) to last (1-based, inclusive) that falls to part of parts. last &lt;= 0 means every ITEM: TIMESTEP. Frames are dealt in rounds of parts, in serpentine order (part p takes slot p of even rounds and slot parts - 1 - p of odd ones), so a cost that drifts or alternates along the run reaches every part. typeFilter &lt;= 0 keeps every atom. nThreads &lt;= 0 uses the OpenMP default; 1 is serial. Each worker opens its own handle and seeks the shared offset table. Incremental RingUpdater / AffiliationUpdater state cannot be shared across workers: with nThreads 1 the frames arrive in order on one thread and may carry it, otherwise use the batch classifiers. </p>
+
+</div>
+</div>
+<a id="ac551295f82cf12446912941d5f32000e" name="ac551295f82cf12446912941d5f32000e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac551295f82cf12446912941d5f32000e">&#9670;&#160;</a></span>getInpFileList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::string &gt; sinp::getInpFileList </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>inputFolder</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get file list inside the input folder. </p>
+
+</div>
+</div>
+<a id="a44da8ec94e25ebe6ffcce36128c31f89" name="a44da8ec94e25ebe6ffcce36128c31f89"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44da8ec94e25ebe6ffcce36128c31f89">&#9670;&#160;</a></span>nLammpsFrames()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int sinp::nLammpsFrames </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Number of ITEM: TIMESTEP frames in a LAMMPS dump, or 0 if the file cannot be read. The first full count per path walks the file once and later reads seek, matching chemfiles Trajectory::nsteps and readcon's frame-offset table. Sequential load_frame walks reuse a live read position the way LAMMPS ReaderNative does on rerun. </p>
+
+</div>
+</div>
+<a id="a718ffdbbb2101465eda4c73dddcb1e21" name="a718ffdbbb2101465eda4c73dddcb1e21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a718ffdbbb2101465eda4c73dddcb1e21">&#9670;&#160;</a></span>openFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::openFrame </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>frame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>selection</em></span><span class="paramdefsep"> = </span><span class="paramdefval">{}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Postprocessing entry. CON stays on readcon. Every other file goes through chemfiles when that library is linked. typeI follows the CLI: negative keeps every atom, positive keeps one species, zero guesses oxygen. </p>
+
+</div>
+</div>
+<a id="ada34d9d30df182a408a6b69ba7310509" name="ada34d9d30df182a408a6b69ba7310509"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ada34d9d30df182a408a6b69ba7310509">&#9670;&#160;</a></span>readBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; sinp::readBonds </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reads bonds into a vector of vectors from a file with a specific format. </p>
+
+</div>
+</div>
+<a id="a56e21fa520d625329c01d6462aa3f971" name="a56e21fa520d625329c01d6462aa3f971"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56e21fa520d625329c01d6462aa3f971">&#9670;&#160;</a></span>readDefaultOxygen()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool sinp::readDefaultOxygen </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>frame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Function for reading in a specified frame (frame number and not timestep value) One id/type/x/y/z frame of the default oxygen selection: type 2 when any atom has that type, otherwise type 1. Returns false for any other column layout, leaving the cloud untouched by a successful read. </p>
+
+</div>
+</div>
+<a id="a27548bfe885e92777ee50738245e38d4" name="a27548bfe885e92777ee50738245e38d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27548bfe885e92777ee50738245e38d4">&#9670;&#160;</a></span>readLammpsTrj()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readLammpsTrj </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>targetFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordLow</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::array&lt;&#160;double,&#160;3&#160;&gt;{0,&#160;0,&#160;0}</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordHigh</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::array&lt;&#160;double,&#160;3&#160;&gt;{0,&#160;0,&#160;0}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac788ef30628b292dec2a1b903dbdfe5e" name="ac788ef30628b292dec2a1b903dbdfe5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac788ef30628b292dec2a1b903dbdfe5e">&#9670;&#160;</a></span>readLammpsTrjO()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readLammpsTrjO </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>targetFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeO</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordLow</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::array&lt;&#160;double,&#160;3&#160;&gt;{0,&#160;0,&#160;0}</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordHigh</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::array&lt;&#160;double,&#160;3&#160;&gt;{0,&#160;0,&#160;0}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>One LAMMPS dump frame, one atom type. The type argument is any LAMMPS type (the O in the name is historical). If isSlice is true, each kept point gets inSlice set; atoms outside the box stay in the cloud. nop is the type-filtered count. </p>
+
+</div>
+</div>
+<a id="aaf3e97603a0f784f271d01efd5aa9060" name="aaf3e97603a0f784f271d01efd5aa9060"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf3e97603a0f784f271d01efd5aa9060">&#9670;&#160;</a></span>readLammpsTrjreduced()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readLammpsTrjreduced </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>targetFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordLow</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::array&lt;&#160;double,&#160;3&#160;&gt;{0,&#160;0,&#160;0}</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>coordHigh</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::array&lt;&#160;double,&#160;3&#160;&gt;{0,&#160;0,&#160;0}</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>One LAMMPS dump frame, one atom type, dropping atoms outside the slice when isSlice is true. nop is the kept count. An axis with lo == hi is unconstrained. </p>
+
+</div>
+</div>
+<a id="a9aeec41b2c3fea17e5e54fd266b71f0a" name="a9aeec41b2c3fea17e5e54fd266b71f0a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aeec41b2c3fea17e5e54fd266b71f0a">&#9670;&#160;</a></span>readXYZ()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; sinp::readXYZ </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>filename</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Function for reading in atom coordinates from an XYZ file. </p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

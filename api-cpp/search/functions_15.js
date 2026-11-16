@@ -1,7 +1,9 @@
 var searchData=
 [
-  ['vnniavailable_0',['vnniAvailable',['../namespaceseams_1_1product.html#aff92d3adb921e5b30fd79cf9c129d287',1,'seams::product']]],
-  ['voronoifacetweights_1',['voronoiFacetWeights',['../namespacechill.html#a99f37a13584cd3861607a78d8a4e10eb',1,'chill']]],
-  ['voronoifeature_2',['voronoiFeature',['../namespacechill.html#af9780d7bcf4a3a4436a2d59cc26606bb',1,'chill']]],
-  ['voronoifeatures_3',['voronoiFeatures',['../namespacechill.html#a0e8f53a909d946d418fb28cc3cb4b082',1,'chill']]]
+  ['version_0',['version',['../group__seams__cpp.html#ga7bb2300e5f3cc519b8e9663109654212',1,'seams']]],
+  ['vertices_1',['vertices',['../classseams_1_1Rings.html#ab64a4d0b73b2a9ead71b3e9963fa2220',1,'seams::Rings']]],
+  ['vnniavailable_2',['vnniAvailable',['../namespaceseams_1_1product.html#aff92d3adb921e5b30fd79cf9c129d287',1,'seams::product']]],
+  ['voronoifacetweights_3',['voronoiFacetWeights',['../namespacechill.html#a99f37a13584cd3861607a78d8a4e10eb',1,'chill']]],
+  ['voronoifeature_4',['voronoiFeature',['../namespacechill.html#af9780d7bcf4a3a4436a2d59cc26606bb',1,'chill']]],
+  ['voronoifeatures_5',['voronoiFeatures',['../namespacechill.html#a0e8f53a909d946d418fb28cc3cb4b082',1,'chill']]]
 ];

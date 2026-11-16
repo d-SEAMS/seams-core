@@ -1,0 +1,29 @@
+.. index:: pair: struct; science::ClusterPart
+.. _doxid-structscience_1_1_cluster_part:
+
+struct science::ClusterPart
+===========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct ClusterPart {
+		// fields
+	
+		int :target:`size<doxid-structscience_1_1_cluster_part_1a8faf1f60027585d218d7c3f76395e0ad>` = 0;
+		int :target:`cubic<doxid-structscience_1_1_cluster_part_1ad12f473910961c62ffcb8b09de6c545a>` = 0;
+		int :target:`hexagonal<doxid-structscience_1_1_cluster_part_1a6d41f35f9085acc315fc0e9b155a6b0f>` = 0;
+		int :target:`interfacial<doxid-structscience_1_1_cluster_part_1a81bb51f3382c509a224f0653c618dee1>` = 0;
+		int :target:`shellCubic<doxid-structscience_1_1_cluster_part_1a5d0d5de851d73a7dbd56c661740c0001>` = 0;
+		int :target:`shellHex<doxid-structscience_1_1_cluster_part_1a475d2312808a1d99088038f689e09e1c>` = 0;
+		int :target:`shellStack<doxid-structscience_1_1_cluster_part_1a76d11cf1623fc7bda03f7b6f4f7509a1>` = 0;
+		int :target:`shellOther<doxid-structscience_1_1_cluster_part_1a24982e096ba3904c8cc246c22ffb9812>` = 0;
+	};

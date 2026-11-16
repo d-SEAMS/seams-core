@@ -1,0 +1,27 @@
+.. index:: pair: struct; site::FrontSnapshot
+.. _doxid-structsite_1_1_front_snapshot:
+
+struct site::FrontSnapshot
+==========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct FrontSnapshot {
+		// fields
+	
+		:ref:`ConcentrationProfile<doxid-structsite_1_1_concentration_profile>` :target:`profile<doxid-structsite_1_1_front_snapshot_1a551850df66dd636be53f5f88d740bc8e>`;
+		:ref:`FrontPair<doxid-structsite_1_1_front_pair>` :target:`fronts<doxid-structsite_1_1_front_snapshot_1ab76fc83f217bab8627c3a6e184378e76>`;
+		:ref:`RejectionCoefficient<doxid-structsite_1_1_rejection_coefficient>` :target:`rejection<doxid-structsite_1_1_front_snapshot_1a5e024bc0c06efa3c39e9efc4cd620565>`;
+		:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` :target:`ions<doxid-structsite_1_1_front_snapshot_1a8c13b41520c3d10aa8d4acf009c87159>`;
+		:ref:`PocketCensus<doxid-structsite_1_1_pocket_census>` :target:`pockets<doxid-structsite_1_1_front_snapshot_1a4c5a444701614a042706cb3a58ab90ac>`;
+		:ref:`FrontLayerReport<doxid-structsite_1_1_front_layer_report>` :target:`layer<doxid-structsite_1_1_front_snapshot_1abb9b80bc90e97ff511081378c323ef72>`;
+	};

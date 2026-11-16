@@ -1,0 +1,112 @@
+.. index:: pair: class; seams::Fingerprint
+.. _doxid-classseams_1_1_fingerprint:
+
+class seams::Fingerprint
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Owned topological fingerprint. :ref:`More...<details-classseams_1_1_fingerprint>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class Fingerprint: public :ref:`seams::detail::Handle<doxid-classseams_1_1detail_1_1_handle>` {
+	public:
+		// methods
+	
+		std::string :ref:`key<doxid-classseams_1_1_fingerprint_1ab36b4b1933cef81dbde200281ea308a1>`() const;
+		std::string :ref:`atom<doxid-classseams_1_1_fingerprint_1a4ff1af04976915efa048379f260c18f7>`(int index) const;
+		std::vector<int> :ref:`rings<doxid-classseams_1_1_fingerprint_1a6c3bd990e14850b966b9bfec8bfc7941>`() const;
+	};
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-inherited-code-block
+
+	public:
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:ref:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+
+.. _details-classseams_1_1_fingerprint:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Owned topological fingerprint.
+
+Methods
+-------
+
+.. index:: pair: function; key
+.. _doxid-classseams_1_1_fingerprint_1ab36b4b1933cef81dbde200281ea308a1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string key() const
+
+Frame fingerprint text.
+
+
+
+.. rubric:: Returns:
+
+The key, without a trailing NUL.
+
+.. index:: pair: function; atom
+.. _doxid-classseams_1_1_fingerprint_1a4ff1af04976915efa048379f260c18f7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string atom(int index) const
+
+Local key of one atom.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- index
+
+		- Atom index in the frame.
+
+
+
+.. rubric:: Returns:
+
+The local key.
+
+.. index:: pair: function; rings
+.. _doxid-classseams_1_1_fingerprint_1a6c3bd990e14850b966b9bfec8bfc7941:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> rings() const
+
+Primitive-ring census stored on the fingerprint.
+
+
+
+.. rubric:: Returns:
+
+``counts[k]`` is the number of rings of size k. Length 13.
+

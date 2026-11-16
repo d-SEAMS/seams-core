@@ -1,0 +1,76 @@
+.. index:: pair: struct; science::NucleusFrame
+.. _doxid-structscience_1_1_nucleus_frame:
+
+struct science::NucleusFrame
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct NucleusFrame {
+		// fields
+	
+		int :target:`frame<doxid-structscience_1_1_nucleus_frame_1ae24819f5b91d93001cc9de31de1f27ed>` = 0;
+		int :target:`nop<doxid-structscience_1_1_nucleus_frame_1ab92ddf6fb9f277813ea2efc722abbaa2>` = 0;
+		int :target:`chillCubic<doxid-structscience_1_1_nucleus_frame_1ac6f3132ac61922aa6271362fb6b25da9>` = 0;
+		int :target:`chillHex<doxid-structscience_1_1_nucleus_frame_1a036e28171c1aa635a82e49eee43f6c3c>` = 0;
+		int :target:`chillInter<doxid-structscience_1_1_nucleus_frame_1ae1b5b15f30e00deee49210ca8f069f69>` = 0;
+		int :target:`chillLiquid<doxid-structscience_1_1_nucleus_frame_1acb3af6eb9ee0c807fcb3b1be208479b6>` = 0;
+		int :target:`shellCubic<doxid-structscience_1_1_nucleus_frame_1a667faf32288c7eced3afb2bae8c67619>` = 0;
+		int :target:`shellHex<doxid-structscience_1_1_nucleus_frame_1a9793bcf3f6eeac967a5a4587273f1b2f>` = 0;
+		int :target:`shellStack<doxid-structscience_1_1_nucleus_frame_1a865540b3457e7a49b2034f75db045bc7>` = 0;
+		int :target:`shellOther<doxid-structscience_1_1_nucleus_frame_1ac4da89facc1476eb8c8fcf336772b41c>` = 0;
+		int :target:`q6Ice<doxid-structscience_1_1_nucleus_frame_1a744200ee9860e40329e7a6c263ac6c8d>` = 0;
+		double :target:`q6barMean<doxid-structscience_1_1_nucleus_frame_1ab1fc7c219945cc64edc68528b8f45e0a>` = 0;
+		int :ref:`stackAsCubic<doxid-structscience_1_1_nucleus_frame_1a9e7e493f259de3886cf32e9751b66965>` = 0;
+		int :target:`stackAsHex<doxid-structscience_1_1_nucleus_frame_1a1ace7f774f3978ba559bd0fa91413c07>` = 0;
+		int :target:`stackAsInter<doxid-structscience_1_1_nucleus_frame_1a745906ca39180dc42a1ae25e62384f64>` = 0;
+		int :target:`stackAsLiquid<doxid-structscience_1_1_nucleus_frame_1a7d2e68f7a3c5704fb0d9a0f068dfdda1>` = 0;
+		int :ref:`polytypeBoth<doxid-structscience_1_1_nucleus_frame_1a437fca100fa2411e90cff226a8d49b77>` = 0;
+		int :target:`polytypeAgree<doxid-structscience_1_1_nucleus_frame_1af8010fe56c17cd8bc7c20200f371601b>` = 0;
+		:ref:`ClusterPart<doxid-structscience_1_1_cluster_part>` :target:`core<doxid-structscience_1_1_nucleus_frame_1a7ca0eb39a72a1fe2ab060d7678aefd83>`;
+		:ref:`ClusterPart<doxid-structscience_1_1_cluster_part>` :target:`extended<doxid-structscience_1_1_nucleus_frame_1a6f959fb9700cb59f2443ca2f2bbedf6a>`;
+		:ref:`ClusterPart<doxid-structscience_1_1_cluster_part>` :target:`shell<doxid-structscience_1_1_nucleus_frame_1abe866c183a8781bf15d39285db7efdbc>`;
+		:ref:`ClusterPart<doxid-structscience_1_1_cluster_part>` :target:`q6<doxid-structscience_1_1_nucleus_frame_1a0dbe95e9b89faf68160a97be510ca56b>`;
+	};
+.. _details-structscience_1_1_nucleus_frame:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; stackAsCubic
+.. _doxid-structscience_1_1_nucleus_frame_1a9e7e493f259de3886cf32e9751b66965:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int stackAsCubic = 0
+
+Shell-stacking molecules, split by the published CHILL+ label.
+
+.. index:: pair: variable; polytypeBoth
+.. _doxid-structscience_1_1_nucleus_frame_1a437fca100fa2411e90cff226a8d49b77:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int polytypeBoth = 0
+
+Molecules that both the shell and CHILL+ call cubic or hexagonal, and the subset whose polytype agrees.
+

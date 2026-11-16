@@ -1,0 +1,33 @@
+.. index:: pair: struct; science::LayerRow
+.. _doxid-structscience_1_1_layer_row:
+
+struct science::LayerRow
+========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/science_front.hpp>
+	
+	struct LayerRow {
+		// fields
+	
+		double :target:`mid<doxid-structscience_1_1_layer_row_1a4e47da3f3a44375e15f9a4f747b312ba>` = 0;
+		int :target:`n<doxid-structscience_1_1_layer_row_1afcbb629e281d9704dc40c7781f8d3561>` = 0;
+		int :target:`cubic<doxid-structscience_1_1_layer_row_1ac6bcd0ae4cf1dd69d313076a6f595620>` = 0;
+		int :target:`hexagonal<doxid-structscience_1_1_layer_row_1aa4e5b21bbaf9b95546745d60b65afa89>` = 0;
+		int :target:`interfacial<doxid-structscience_1_1_layer_row_1a7399d56f6ef938b0f8c7e000f5cdd2eb>` = 0;
+		int :target:`liquid<doxid-structscience_1_1_layer_row_1a0a63afa78b26dc83a91055a706ac4e00>` = 0;
+		int :target:`shellCubic<doxid-structscience_1_1_layer_row_1a392a3fe7157c69de2d4bf6598d7755a8>` = 0;
+		int :target:`shellHex<doxid-structscience_1_1_layer_row_1aa32337b9f94433bef0fe4c352a9681b4>` = 0;
+		int :target:`shellStack<doxid-structscience_1_1_layer_row_1aa31cf0cca1e6e0b300e996a9d43cd198>` = 0;
+		int :target:`shellOther<doxid-structscience_1_1_layer_row_1a0e3403ef3d651dd3d628a2a422859aa8>` = 0;
+		double :target:`q6<doxid-structscience_1_1_layer_row_1ad396011ab5bb2569dab5f9d1184468bf>` = 0;
+		double :target:`q6bar<doxid-structscience_1_1_layer_row_1a567b76b683788bc82f4c72d9ef994f18>` = 0;
+	};

@@ -12,6 +12,19 @@ Overview
 
 This is a collection of elements, for each point, required for graph traversal. :ref:`More...<details-structprimitive_1_1_vertex>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/franzblau.hpp>
+	
+	struct Vertex {
+		// fields
+	
+		int :target:`atomIndex<doxid-structprimitive_1_1_vertex_1aead86b6d47e9f9a77949fef59b8de27f>`;
+		std::vector<int> :ref:`neighListIndex<doxid-structprimitive_1_1_vertex_1abbf40e41b84205035d4053be2180f6b2>`;
+		bool :ref:`inGraph<doxid-structprimitive_1_1_vertex_1a932b6ae4efc838d407deed5ee11b8afe>`          = true;
+	};
 .. _details-structprimitive_1_1_vertex:
 
 Detailed Documentation
@@ -26,4 +39,27 @@ Contains specifically the members:
 * **neighListIndex** : A vector of indices (not IDs) of the neighboring vertices.
 
 * **inGraph** : Bool qualifier, which is true by default. Setting it to false removes the vertex from the graph.
+
+Fields
+------
+
+.. index:: pair: variable; neighListIndex
+.. _doxid-structprimitive_1_1_vertex_1abbf40e41b84205035d4053be2180f6b2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> neighListIndex
+
+This is the index according to pointCloud.
+
+.. index:: pair: variable; inGraph
+.. _doxid-structprimitive_1_1_vertex_1a932b6ae4efc838d407deed5ee11b8afe:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool inGraph          = true
+
+Contains the INDICES (not the atomIDs) of the neighbouring vertices
 

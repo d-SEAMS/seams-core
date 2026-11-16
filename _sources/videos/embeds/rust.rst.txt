@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-rust" src="https://odysee.com/$/embed/dseams-rust:687055b1ac9dfe7596006cb4f2fa466de9492ca5" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/rust.vtt">docs/videos/rust/captions.vtt</a></p>
+   <p>Rust on ice Ih.</p>

@@ -7,13 +7,8 @@ Gen
 .. toctree::
 	:hidden:
 
-	group_ring.rst
 	namespace_gen.rst
-	struct_gen_FracBox.rst
 
-
-
-|	:ref:`Ring<doxid-group__ring>`
 
 
 
@@ -25,8 +20,4 @@ Gen
 
 	namespace :ref:`gen<doxid-namespacegen>`;
 		namespace :ref:`gen::mic<doxid-namespacegen_1_1mic>`;
-
-	// structs
-
-	struct :ref:`gen::FracBox<doxid-structgen_1_1_frac_box>`;
 

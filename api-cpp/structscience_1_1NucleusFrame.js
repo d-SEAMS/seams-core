@@ -1,0 +1,25 @@
+var structscience_1_1NucleusFrame =
+[
+    [ "chillCubic", "structscience_1_1NucleusFrame.html#ac6f3132ac61922aa6271362fb6b25da9", null ],
+    [ "chillHex", "structscience_1_1NucleusFrame.html#a036e28171c1aa635a82e49eee43f6c3c", null ],
+    [ "chillInter", "structscience_1_1NucleusFrame.html#ae1b5b15f30e00deee49210ca8f069f69", null ],
+    [ "chillLiquid", "structscience_1_1NucleusFrame.html#acb3af6eb9ee0c807fcb3b1be208479b6", null ],
+    [ "core", "structscience_1_1NucleusFrame.html#a7ca0eb39a72a1fe2ab060d7678aefd83", null ],
+    [ "extended", "structscience_1_1NucleusFrame.html#a6f959fb9700cb59f2443ca2f2bbedf6a", null ],
+    [ "frame", "structscience_1_1NucleusFrame.html#ae24819f5b91d93001cc9de31de1f27ed", null ],
+    [ "nop", "structscience_1_1NucleusFrame.html#ab92ddf6fb9f277813ea2efc722abbaa2", null ],
+    [ "polytypeAgree", "structscience_1_1NucleusFrame.html#af8010fe56c17cd8bc7c20200f371601b", null ],
+    [ "polytypeBoth", "structscience_1_1NucleusFrame.html#a437fca100fa2411e90cff226a8d49b77", null ],
+    [ "q6", "structscience_1_1NucleusFrame.html#a0dbe95e9b89faf68160a97be510ca56b", null ],
+    [ "q6barMean", "structscience_1_1NucleusFrame.html#ab1fc7c219945cc64edc68528b8f45e0a", null ],
+    [ "q6Ice", "structscience_1_1NucleusFrame.html#a744200ee9860e40329e7a6c263ac6c8d", null ],
+    [ "shell", "structscience_1_1NucleusFrame.html#abe866c183a8781bf15d39285db7efdbc", null ],
+    [ "shellCubic", "structscience_1_1NucleusFrame.html#a667faf32288c7eced3afb2bae8c67619", null ],
+    [ "shellHex", "structscience_1_1NucleusFrame.html#a9793bcf3f6eeac967a5a4587273f1b2f", null ],
+    [ "shellOther", "structscience_1_1NucleusFrame.html#ac4da89facc1476eb8c8fcf336772b41c", null ],
+    [ "shellStack", "structscience_1_1NucleusFrame.html#a865540b3457e7a49b2034f75db045bc7", null ],
+    [ "stackAsCubic", "structscience_1_1NucleusFrame.html#a9e7e493f259de3886cf32e9751b66965", null ],
+    [ "stackAsHex", "structscience_1_1NucleusFrame.html#a1ace7f774f3978ba559bd0fa91413c07", null ],
+    [ "stackAsInter", "structscience_1_1NucleusFrame.html#a745906ca39180dc42a1ae25e62384f64", null ],
+    [ "stackAsLiquid", "structscience_1_1NucleusFrame.html#a7d2e68f7a3c5704fb0d9a0f068dfdda1", null ]
+];

@@ -1,0 +1,67 @@
+.. index:: pair: struct; seams::DomainOptions
+.. _doxid-structseams_1_1_domain_options:
+
+struct seams::DomainOptions
+===========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a domain search. :ref:`More...<details-structseams_1_1_domain_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DomainOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_domain_options_1a637b2440660655191bc9ab1b3427e5d9>` = 3.5;
+		std::string :ref:`spec<doxid-structseams_1_1_domain_options_1ab963c7d6c613cc140334286499f4dc3c>`;
+		:ref:`DomainSubset<doxid-group__seams__cpp_1gaa26c5e09631ed2e863d7ba9069e64683>` :ref:`subset<doxid-structseams_1_1_domain_options_1acbf5b9f490a2a8e6579197658f4c73b0>` = :ref:`DomainSubset::Apolar<doxid-group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d>`;
+	};
+.. _details-structseams_1_1_domain_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a domain search.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_domain_options_1a637b2440660655191bc9ab1b3427e5d9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; spec
+.. _doxid-structseams_1_1_domain_options_1ab963c7d6c613cc140334286499f4dc3c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::string spec
+
+Site-table text, for example ``1=waterO``.
+
+.. index:: pair: variable; subset
+.. _doxid-structseams_1_1_domain_options_1acbf5b9f490a2a8e6579197658f4c73b0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DomainSubset<doxid-group__seams__cpp_1gaa26c5e09631ed2e863d7ba9069e64683>` subset = :ref:`DomainSubset::Apolar<doxid-group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d>`
+
+Which subset to measure.
+

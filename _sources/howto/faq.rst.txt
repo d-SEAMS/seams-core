@@ -13,7 +13,7 @@ Where is Python?
 ----------------
 
 `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
-``pip install pydseamslib``. ``import pydseams``. ``import pydseamslib``
+``pip install 'pydseamslib==2.14.0'``. ``import pydseams``. ``import pydseamslib``
 is an alias. The compiled module is ``yoda``.
 
 Where is Lua / Fennel?
@@ -71,9 +71,10 @@ How do I view a classified dump?
 --------------------------------
 
 solvis, through ``pydseamslib[solvis]`` (``frame.to_solvis()``). That is
-the viewer for this release. See
-`View a classified frame <solvis.rst>`_. OVITO still opens the
-LAMMPS text the engine writes; it is not the documented path.
+the viewer for this release; the
+`PydSEAMSlib documentation <https://d-seams.github.io/PydSEAMSlib/>`_
+has the how-to. OVITO still opens the LAMMPS text the engine writes; it
+is not the documented path.
 
 How do I cite this?
 -------------------

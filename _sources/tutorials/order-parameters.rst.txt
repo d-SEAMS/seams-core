@@ -6,7 +6,7 @@ Bond-orientational order parameters
 ``Frame.steinhardt(l)`` returns the local ``q_l`` and the Lechner-Dellago average for every atom.
 The neighbour list is the cutoff list.
 Degrees 3, 4, 6, 8, and 12 are computed.
-``seams steinhardt`` uses the mutual four-nearest list, so its means on the mixed frame are not these means.
+``seams steinhardt`` reports the means of the degrees given to ``--l`` (default :math:`q_4` and :math:`q_6`, from the solid-harmonic kernel). ``--l 3,4,6,8,12`` asks for every degree the library computes.
 
 The runnable copy is ``docs/tutorials/test_order_parameters.py``.
 
@@ -16,6 +16,9 @@ The runnable copy is ``docs/tutorials/test_order_parameters.py``.
 
     frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
     q3 = frame.steinhardt(3)
+    assert len(q3["ql"]) == 250
+    assert round(float(sum(q3["ql"]) / len(q3["ql"])), 6) == 0.374897
+    assert round(float(sum(q3["ql_bar"]) / len(q3["ql_bar"])), 6) == 0.187542
 
 ``q3["ql"]`` and ``q3["ql_bar"]`` are the per-atom arrays.
 On this frame the finite means are about 0.374897 and 0.187542.

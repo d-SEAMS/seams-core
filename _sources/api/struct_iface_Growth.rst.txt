@@ -1,0 +1,49 @@
+.. index:: pair: struct; iface::Growth
+.. _doxid-structiface_1_1_growth:
+
+struct iface::Growth
+====================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct Growth {
+		// fields
+	
+		std::vector<:ref:`GrowthFrame<doxid-structiface_1_1_growth_frame>`> :target:`frames<doxid-structiface_1_1_growth_1aa000031f2bd4dfa8230fa7b5eb0108ac>`;
+		double :target:`rateSolidPub<doxid-structiface_1_1_growth_1acfd12c3ee1f5a3af0a0147f3e58f49b3>` = 0;
+		double :ref:`rateSolidOvi<doxid-structiface_1_1_growth_1aa8a12cba9213aad87689c995c64ab729>` = 0;
+		double :target:`rateCrystalPub<doxid-structiface_1_1_growth_1a614f0421755fd97d0eb208488d828200>` = 0;
+		double :target:`rateCrystalOvi<doxid-structiface_1_1_growth_1a458eabbca08c50b487b12b63af95a108>` = 0;
+	};
+.. _details-structiface_1_1_growth:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; rateSolidOvi
+.. _doxid-structiface_1_1_growth_1aa8a12cba9213aad87689c995c64ab729:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double rateSolidOvi = 0
+
+d(thickness)/dt in A/ps
+

@@ -1,0 +1,80 @@
+.. index:: pair: struct; seams::ChillOptions
+.. _doxid-structseams_1_1_chill_options:
+
+struct seams::ChillOptions
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for CHILL and CHILL+. :ref:`More...<details-structseams_1_1_chill_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct ChillOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_chill_options_1ac6dfaf9d558c9247b3343f5bba23bf26>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_chill_options_1ad00c218a58fd73792a9198cfe83ba454>` = 0;
+		:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` :ref:`graph<doxid-structseams_1_1_chill_options_1a3f6c0a863f31249a9d6b23d553e22a89>` = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`;
+		:ref:`ChillRule<doxid-group__seams__cpp_1ga67eb3c576e152683e1fb0b0092e753c0>` :ref:`rule<doxid-structseams_1_1_chill_options_1a002e9b304a5f7951913a07d896989e73>` = :ref:`ChillRule::Published<doxid-group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5>`;
+	};
+.. _details-structseams_1_1_chill_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for CHILL and CHILL+.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_chill_options_1ac6dfaf9d558c9247b3343f5bba23bf26:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_chill_options_1ad00c218a58fd73792a9198cfe83ba454:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+Zero keeps every atom.
+
+.. index:: pair: variable; graph
+.. _doxid-structseams_1_1_chill_options_1a3f6c0a863f31249a9d6b23d553e22a89:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` graph = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`
+
+Neighbour graph.
+
+.. index:: pair: variable; rule
+.. _doxid-structseams_1_1_chill_options_1a002e9b304a5f7951913a07d896989e73:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChillRule<doxid-group__seams__cpp_1ga67eb3c576e152683e1fb0b0092e753c0>` rule = :ref:`ChillRule::Published<doxid-group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5>`
+
+Threshold table.
+

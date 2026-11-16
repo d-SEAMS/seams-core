@@ -10,21 +10,26 @@ var namespaces_dup =
       [ "quat2RotMatrix", "namespaceabsor.html#af4cf6d8d2d3c0041e995922c3569fc95", null ]
     ] ],
     [ "bond", "namespacebond.html", [
-      [ "createBondsFromCages", "group__bond.html#ga41156a4dd14e84d45a1f6f22ba3a4b41", null ],
-      [ "donatedHydrogenBond", "group__bond.html#ga6da2515806a7ed8d96d2dfdcfcafd352", null ],
-      [ "getHbondDistanceOH", "group__bond.html#gad59cd4a5d8b517b98e0352d28609a892", null ],
-      [ "populateBonds", "group__bond.html#ga8f1473246e183fb78fc3ceef0ef1c363", null ],
-      [ "populateBonds", "group__bond.html#ga0014dcec62d33a21212d98067bfeec5d", null ],
-      [ "populateHbonds", "group__bond.html#ga0d2c82ff243a829941715b0932a784a5", null ],
-      [ "populateHbondsFromDonors", "group__bond.html#ga9f06dd103536f428975d2d74b6ca76aa", null ],
-      [ "populateHbondsWithInputClouds", "group__bond.html#gae349d52bd4fcad7dfc379793b3318f90", null ],
-      [ "trimBonds", "group__bond.html#ga4dc0b40b8a6510d7a0e48303302e9c41", null ]
+      [ "createBondsFromCages", "namespacebond.html#a41156a4dd14e84d45a1f6f22ba3a4b41", null ],
+      [ "donatedHydrogenBond", "namespacebond.html#a6da2515806a7ed8d96d2dfdcfcafd352", null ],
+      [ "getHbondDistanceOH", "namespacebond.html#ad59cd4a5d8b517b98e0352d28609a892", null ],
+      [ "populateBonds", "namespacebond.html#a8f1473246e183fb78fc3ceef0ef1c363", null ],
+      [ "populateBonds", "namespacebond.html#a0014dcec62d33a21212d98067bfeec5d", null ],
+      [ "populateHbonds", "namespacebond.html#a0d2c82ff243a829941715b0932a784a5", null ],
+      [ "populateHbondsFromDonors", "namespacebond.html#a9f06dd103536f428975d2d74b6ca76aa", null ],
+      [ "populateHbondsWithInputClouds", "namespacebond.html#ae349d52bd4fcad7dfc379793b3318f90", null ],
+      [ "trimBonds", "namespacebond.html#a4dc0b40b8a6510d7a0e48303302e9c41", null ]
     ] ],
     [ "cage", "namespacecage.html", "namespacecage" ],
     [ "chill", "namespacechill.html", "namespacechill" ],
+    [ "chordless", "namespacechordless.html", [
+      [ "cycles", "namespacechordless.html#a61fb5456e1264db500b35965cdbc1a52", null ],
+      [ "kMaxSize", "namespacechordless.html#ac5266f3c5c206379ebf9adc0f9604b0b", null ]
+    ] ],
     [ "clump", "namespaceclump.html", "namespaceclump" ],
     [ "gen", "namespacegen.html", "namespacegen" ],
     [ "gpu", "namespacegpu.html", "namespacegpu" ],
+    [ "iface", "namespaceiface.html", "namespaceiface" ],
     [ "ira", "namespaceira.html", "namespaceira" ],
     [ "match", "namespacematch.html", [
       [ "matchPrism", "namespacematch.html#af3c2ebe9ccd146ee0ce293609fef7761", null ],
@@ -35,6 +40,7 @@ var namespaces_dup =
     ] ],
     [ "molSys", "namespacemolSys.html", "namespacemolSys" ],
     [ "nneigh", "namespacenneigh.html", "namespacenneigh" ],
+    [ "nucleation", "namespacenucleation.html", "namespacenucleation" ],
     [ "phase", "namespacephase.html", "namespacephase" ],
     [ "pntToPnt", "namespacepntToPnt.html", [
       [ "changeDiaCageOrder", "namespacepntToPnt.html#a76f40693a1710a7a2d065a211de8b033", null ],
@@ -61,25 +67,30 @@ var namespaces_dup =
     ] ],
     [ "rdf", "namespacerdf.html", "namespacerdf" ],
     [ "rdf2", "namespacerdf2.html", [
-      [ "getPlaneArea", "group__rdf2.html#ga309f282dffeee8083437a95aab29f51b", null ],
-      [ "getSystemLengths", "group__rdf2.html#gadeebcb414f512ab8d99db14addb4506c", null ],
-      [ "normalizeRDF", "group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98", null ],
-      [ "rdf2Danalysis_AA", "group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd", null ],
-      [ "sampleRDF_AA", "group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef", null ]
+      [ "getPlaneArea", "namespacerdf2.html#a309f282dffeee8083437a95aab29f51b", null ],
+      [ "getSystemLengths", "namespacerdf2.html#adeebcb414f512ab8d99db14addb4506c", null ],
+      [ "normalizeRDF", "namespacerdf2.html#a7f3e0b969a3ad28ce57dc8e7e74b6b98", null ],
+      [ "rdf2Danalysis_AA", "namespacerdf2.html#aa861f048b84783c91eb1fb21f5c827cd", null ],
+      [ "sampleRDF_AA", "namespacerdf2.html#ae37c30b0c6e6c8d63f2471450b9b26ef", null ]
     ] ],
     [ "ring", "namespacering.html", "namespacering" ],
+    [ "science", "namespacescience.html", "namespacescience" ],
     [ "seams", "namespaceseams.html", "namespaceseams" ],
     [ "sinp", "namespacesinp.html", [
-      [ "atomInSlice", "group__sinp.html#gad5a8c377d8ed78c413c13d80ac8261ac", null ],
-      [ "dropLammpsDumpIndex", "group__sinp.html#gaefac4aaf94bf39771d4c45f352f8615e", null ],
-      [ "forEachLammpsFrame", "group__sinp.html#ga7830353a092ad93a805dea34a07e7804", null ],
-      [ "getInpFileList", "group__sinp.html#gac551295f82cf12446912941d5f32000e", null ],
-      [ "nLammpsFrames", "group__sinp.html#ga44da8ec94e25ebe6ffcce36128c31f89", null ],
-      [ "readBonds", "group__sinp.html#gada34d9d30df182a408a6b69ba7310509", null ],
-      [ "readLammpsTrj", "group__sinp.html#ga27548bfe885e92777ee50738245e38d4", null ],
-      [ "readLammpsTrjO", "group__sinp.html#gac788ef30628b292dec2a1b903dbdfe5e", null ],
-      [ "readLammpsTrjreduced", "group__sinp.html#gaaf3e97603a0f784f271d01efd5aa9060", null ],
-      [ "readXYZ", "group__sinp.html#ga9aeec41b2c3fea17e5e54fd266b71f0a", null ]
+      [ "atomInSlice", "namespacesinp.html#ad5a8c377d8ed78c413c13d80ac8261ac", null ],
+      [ "chemfilesSteps", "namespacesinp.html#aabe10d8377f02540f425d750aa3c0a4f", null ],
+      [ "currentExceptionText", "namespacesinp.html#a0899a01c97adc7103a891288b37e066f", null ],
+      [ "dropLammpsDumpIndex", "namespacesinp.html#aefac4aaf94bf39771d4c45f352f8615e", null ],
+      [ "forEachLammpsFrame", "namespacesinp.html#a7830353a092ad93a805dea34a07e7804", null ],
+      [ "getInpFileList", "namespacesinp.html#ac551295f82cf12446912941d5f32000e", null ],
+      [ "nLammpsFrames", "namespacesinp.html#a44da8ec94e25ebe6ffcce36128c31f89", null ],
+      [ "openFrame", "namespacesinp.html#a718ffdbbb2101465eda4c73dddcb1e21", null ],
+      [ "readBonds", "namespacesinp.html#ada34d9d30df182a408a6b69ba7310509", null ],
+      [ "readDefaultOxygen", "namespacesinp.html#a56e21fa520d625329c01d6462aa3f971", null ],
+      [ "readLammpsTrj", "namespacesinp.html#a27548bfe885e92777ee50738245e38d4", null ],
+      [ "readLammpsTrjO", "namespacesinp.html#ac788ef30628b292dec2a1b903dbdfe5e", null ],
+      [ "readLammpsTrjreduced", "namespacesinp.html#aaf3e97603a0f784f271d01efd5aa9060", null ],
+      [ "readXYZ", "namespacesinp.html#a9aeec41b2c3fea17e5e54fd266b71f0a", null ]
     ] ],
     [ "site", "namespacesite.html", "namespacesite" ],
     [ "sout", "namespacesout.html", [
@@ -113,32 +124,33 @@ var namespaces_dup =
       [ "writeXYZcluster", "namespacesout.html#a2b208dcfe7724d9af7b158dfd15c808d", null ]
     ] ],
     [ "sph", "namespacesph.html", [
-      [ "lookupTableQ3", "group__chill.html#gaccbcfa30cf3762a55c59e7b632117af5", null ],
-      [ "lookupTableQ3Vec", "group__chill.html#ga08491bfa3fa2f6bacdf997be433508c4", null ],
-      [ "lookupTableQ4", "group__chill.html#gaf85e8aaa32c95aae99c0824db59e3f6f", null ],
-      [ "lookupTableQ4Vec", "group__chill.html#ga453c3de59a751a26cad5e01a7cb26ed0", null ],
-      [ "lookupTableQ6", "group__chill.html#ga63be01f86931b2a45e70606f5b8f545d", null ],
-      [ "lookupTableQ6Vec", "group__chill.html#ga004e7b144d261654c556c7e66fdd9b2e", null ],
-      [ "lookupTableQ8", "group__chill.html#gac7a53e67f5244c83d541c78d7d7bf710", null ],
-      [ "lookupTableQ8Vec", "group__chill.html#gadf0ba61f373430a782cbee2886628211", null ],
-      [ "radialCoord", "group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d", null ],
-      [ "spheriHarmo", "group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a", null ],
-      [ "spheriHarmoInto", "group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0", null ]
+      [ "lookupTableQ3", "namespacesph.html#accbcfa30cf3762a55c59e7b632117af5", null ],
+      [ "lookupTableQ3Vec", "namespacesph.html#a08491bfa3fa2f6bacdf997be433508c4", null ],
+      [ "lookupTableQ4", "namespacesph.html#af85e8aaa32c95aae99c0824db59e3f6f", null ],
+      [ "lookupTableQ4Vec", "namespacesph.html#a453c3de59a751a26cad5e01a7cb26ed0", null ],
+      [ "lookupTableQ6", "namespacesph.html#a63be01f86931b2a45e70606f5b8f545d", null ],
+      [ "lookupTableQ6Vec", "namespacesph.html#a004e7b144d261654c556c7e66fdd9b2e", null ],
+      [ "lookupTableQ8", "namespacesph.html#ac7a53e67f5244c83d541c78d7d7bf710", null ],
+      [ "lookupTableQ8Vec", "namespacesph.html#adf0ba61f373430a782cbee2886628211", null ],
+      [ "radialCoord", "namespacesph.html#a514fadfbfeabee5d144ef4102fb3004d", null ],
+      [ "spheriHarmo", "namespacesph.html#aa9220b76da7400c9d934fa08ceeeba7a", null ],
+      [ "spheriHarmoInto", "namespacesph.html#a54a26a87d40f9d1be9253f71ecac02c0", null ]
     ] ],
     [ "symm", "namespacesymm.html", "namespacesymm" ],
     [ "topo", "namespacetopo.html", "namespacetopo" ],
     [ "topoparam", "namespacetopoparam.html", "namespacetopoparam" ],
     [ "tum", "namespacetum.html", "namespacetum" ],
     [ "tum3", "namespacetum3.html", [
-      [ "atomsFromCages", "group__ring.html#ga11cd9029a926adccce0454064cfb9e45", null ],
-      [ "averageRMSDatom", "group__ring.html#gaeb733184d3f90032143304cf1c7b4b2e", null ],
-      [ "buildRefDDC", "group__ring.html#gacd0b5f204636469350cdfe95fcbf93a2", null ],
-      [ "buildRefHC", "group__ring.html#gaac86950b6c131788671cf63fbea860e4", null ],
-      [ "clusterCages", "group__ring.html#ga856113410d761d31f1eb70aa98b92653", null ],
-      [ "shapeMatchDDC", "group__ring.html#gadc7a460ce02d21cf58026ba2d835580b", null ],
-      [ "shapeMatchHC", "group__ring.html#ga6a40063c694390318235689274078616", null ],
-      [ "topoBulkCriteria", "group__ring.html#ga06d8b598b9f99e8d02a842e6565e80fd", null ],
-      [ "topoUnitMatchingBulk", "group__ring.html#gae5c6de5de1ef8c8d35823e447d491818", null ],
-      [ "updateRMSDatom", "group__ring.html#ga5b92b22edb21a60b985ad3305de53988", null ]
-    ] ]
+      [ "atomsFromCages", "namespacetum3.html#a11cd9029a926adccce0454064cfb9e45", null ],
+      [ "averageRMSDatom", "namespacetum3.html#aeb733184d3f90032143304cf1c7b4b2e", null ],
+      [ "buildRefDDC", "namespacetum3.html#acd0b5f204636469350cdfe95fcbf93a2", null ],
+      [ "buildRefHC", "namespacetum3.html#aac86950b6c131788671cf63fbea860e4", null ],
+      [ "clusterCages", "namespacetum3.html#a856113410d761d31f1eb70aa98b92653", null ],
+      [ "shapeMatchDDC", "namespacetum3.html#adc7a460ce02d21cf58026ba2d835580b", null ],
+      [ "shapeMatchHC", "namespacetum3.html#a6a40063c694390318235689274078616", null ],
+      [ "topoBulkCriteria", "namespacetum3.html#a06d8b598b9f99e8d02a842e6565e80fd", null ],
+      [ "topoUnitMatchingBulk", "namespacetum3.html#ae5c6de5de1ef8c8d35823e447d491818", null ],
+      [ "updateRMSDatom", "namespacetum3.html#a5b92b22edb21a60b985ad3305de53988", null ]
+    ] ],
+    [ "water", "namespacewater.html", "namespacewater" ]
 ];

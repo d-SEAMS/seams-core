@@ -238,23 +238,24 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('diamond__cna_8
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// Diamond common-neighbour test. A clean cubic shell is 1 and a clean</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// hexagonal shell is 0. Anything the test cannot decide is -1. The twelve</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// second-shell vectors are read from the cutoff CSR, not from a second search.</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span> </div>
-<div class="foldopen" id="foldopen00015" data-start="{" data-end="}">
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="namespacesymm.html">   15</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesymm.html">symm</a> {</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="namespacesymm.html#a5d864afaa9e8bdf2e975d2fa3ac4d85d">   17</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacesymm.html#a5d864afaa9e8bdf2e975d2fa3ac4d85d">diamondFromCsr</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>                    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;offsets, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;cols,</div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>                    std::vector&lt;int&gt; &amp;kind);</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>} <span class="comment">// namespace symm</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// Per-atom ice label from the shell kernel. A clean cubic shell is 1</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// (ice Ic), a clean hexagonal shell is 0 (ice Ih), stacking-disordered</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">// ice is 2, and anything else is -1. The cutoff CSR is accepted so older</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// callers keep their signature; the kernel builds the 3.5 A shell itself.</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00016" data-start="{" data-end="}">
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno"><a class="line" href="namespacesymm.html">   16</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacesymm.html">symm</a> {</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span> </div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="namespacesymm.html#a5d864afaa9e8bdf2e975d2fa3ac4d85d">   18</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespacesymm.html#a5d864afaa9e8bdf2e975d2fa3ac4d85d">diamondFromCsr</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>                    <span class="keyword">const</span> std::vector&lt;int&gt; &amp;offsets, <span class="keyword">const</span> std::vector&lt;int&gt; &amp;cols,</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>                    std::vector&lt;int&gt; &amp;kind);</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>} <span class="comment">// namespace symm</span></div>
 </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
-<div class="ttc" id="anamespacesymm_html"><div class="ttname"><a href="namespacesymm.html">symm</a></div><div class="ttdef"><b>Definition</b> <a href="#l00015">diamond_cna.hpp:15</a></div></div>
+<div class="ttc" id="anamespacesymm_html"><div class="ttname"><a href="namespacesymm.html">symm</a></div><div class="ttdef"><b>Definition</b> <a href="#l00016">diamond_cna.hpp:16</a></div></div>
 <div class="ttc" id="anamespacesymm_html_a5d864afaa9e8bdf2e975d2fa3ac4d85d"><div class="ttname"><a href="namespacesymm.html#a5d864afaa9e8bdf2e975d2fa3ac4d85d">symm::diamondFromCsr</a></div><div class="ttdeci">void diamondFromCsr(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, std::vector&lt; int &gt; &amp;kind)</div></div>
 <div class="ttc" id="astructmolSys_1_1PointCloud_html"><div class="ttname"><a href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a></div><div class="ttdoc">This contains a collection of points; contains information for a particular frame.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00173">mol_sys.hpp:173</a></div></div>
 <div class="ttc" id="astructmolSys_1_1Point_html"><div class="ttname"><a href="structmolSys_1_1Point.html">molSys::Point</a></div><div class="ttdoc">This contains per-particle information.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00152">mol_sys.hpp:152</a></div></div>

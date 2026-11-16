@@ -1,0 +1,26 @@
+.. index:: pair: struct; nucleation::HalfRise
+.. _doxid-structnucleation_1_1_half_rise:
+
+struct nucleation::HalfRise
+===========================
+
+.. toctree::
+	:hidden:
+
+First sample at which the series has covered half of its rise from the first sample to the maximum. A series that never rises has ok false. This is the operational marker used for induction on one noisy growth window. It is not a committor.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/nucleation_pathway.hpp>
+	
+	struct HalfRise {
+		// fields
+	
+		bool :target:`ok<doxid-structnucleation_1_1_half_rise_1a1615ddaa62260eb138b06ba738f7a558>` = false;
+		int :target:`index<doxid-structnucleation_1_1_half_rise_1acf7d0863f46e8f0b00cfd6064043e49f>` = -1;
+		double :target:`start<doxid-structnucleation_1_1_half_rise_1adfca7258b76c1b185fa1c00c76773973>` = 0;
+		double :target:`level<doxid-structnucleation_1_1_half_rise_1ab537094a68e4c90ecc642967e5c94535>` = 0;
+		double :target:`maximum<doxid-structnucleation_1_1_half_rise_1a00828436b70c6306f53d0986d741160a>` = 0;
+	};

@@ -38,17 +38,17 @@ Overview
 	int :ref:`writeLAMMPSdumpCages<doxid-namespacesout_1a1f96c3a3ef2e7d902c4f183320bd6151>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<double>& rmsdPerAtom, const std::vector<int>& atomTypes, std::string path, int firstFrame);
 	int :ref:`writeLAMMPSdataAllPrisms<doxid-namespacesout_1a4bc27d1a493f6ac1baea341587486142>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<int>& atomTypes, int maxDepth, std::string path, bool doShapeMatching = false);
 	int :ref:`writeLAMMPSdataAllRings<doxid-namespacesout_1abddd6a343317271ce30245c88e4ed66c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<int>& atomTypes, int maxDepth, std::string path, bool isMonolayer = true);
-	int :ref:`writeLAMMPSdataTopoBulk<doxid-namespacesout_1a0955d323d41c351af8a878c29acb0248>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<:ref:`cage::iceType<doxid-group__cage_1gaaac41828990e32b9d6e7db4426b61529>`>& atomTypes, std::string path, bool bondsBetweenDummy = false);
+	int :ref:`writeLAMMPSdataTopoBulk<doxid-namespacesout_1a0955d323d41c351af8a878c29acb0248>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<:ref:`cage::iceType<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529>`>& atomTypes, std::string path, bool bondsBetweenDummy = false);
 	int :ref:`writeLAMMPSdataPrisms<doxid-namespacesout_1af0da7bd8c480ab8e9fb74cd634fb8877>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, bool useBondFile, std::string bondFile, const std::vector<int>& listPrism, const std::vector<std::vector<int>>& nList, std::string filename = "system-prisms.data");
-	int :ref:`writeLAMMPSdataCages<doxid-namespacesout_1afad3207fe70a1e45c079465f1ac44104>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type, int numCages, std::string filename = "system-cages.data");
+	int :ref:`writeLAMMPSdataCages<doxid-namespacesout_1afad3207fe70a1e45c079465f1ac44104>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type, int numCages, std::string filename = "system-cages.data");
 	int :ref:`writeAllCages<doxid-namespacesout_1aa6dec898d176414e84433fb08318db4f>`(std::string path, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int currentFrame);
-	int :ref:`writeEachCage<doxid-namespacesout_1aa4a162332246b965cde05f838e068f2c>`(const std::vector<int>& currentCage, int cageNum, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type, const std::vector<std::vector<int>>& rings, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	int :ref:`writeEachCage<doxid-namespacesout_1aa4a162332246b965cde05f838e068f2c>`(const std::vector<int>& currentCage, int cageNum, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type, const std::vector<std::vector<int>>& rings, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
 	int :ref:`writeBasalRingsHex<doxid-namespacesout_1a37163ab84cced80535282af04a7b6238>`(const std::vector<int>& currentCage, int cageNum, const std::vector<std::vector<int>>& nList, const std::vector<std::vector<int>>& rings);
 	int :ref:`writeBasalRingsPrism<doxid-namespacesout_1aae3f9c739ed902feed13bf1572dbf619>`(std::vector<int>& basal1, std::vector<int>& basal2, int prismNum, const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, bool isDeformed);
 	int :ref:`writeDump<doxid-namespacesout_1a6cc62aedecc8a19b34725616fbb8bdab>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string path, std::string outFile);
 	int :ref:`writeHisto<doxid-namespacesout_1a27fa17268ba7c153cb879ff53022eee7>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<double>& avgQ6);
 	int :ref:`writeCluster<doxid-namespacesout_1abf5ebc975df1bd370e73d7390cd30f68>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string fileName = "cluster.txt", bool isSlice = false, int largestIceCluster = 0);
-	int :ref:`writeXYZcluster<doxid-namespacesout_1a2b208dcfe7724d9af7b158dfd15c808d>`(std::string path, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms, int clusterID, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type);
+	int :ref:`writeXYZcluster<doxid-namespacesout_1a2b208dcfe7724d9af7b158dfd15c808d>`(std::string path, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms, int clusterID, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type);
 
 	} // namespace sout
 .. _details-namespacesout:
@@ -257,7 +257,7 @@ Write a data file for rings of every type for a monolayer.
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	int writeLAMMPSdataTopoBulk(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<:ref:`cage::iceType<doxid-group__cage_1gaaac41828990e32b9d6e7db4426b61529>`>& atomTypes, std::string path, bool bondsBetweenDummy = false)
+	int writeLAMMPSdataTopoBulk(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const std::vector<:ref:`cage::iceType<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529>`>& atomTypes, std::string path, bool bondsBetweenDummy = false)
 
 Write a data file for a particular frame, writing out topological bulk ice structures (DDCs/HCs)
 
@@ -277,7 +277,7 @@ Write a data file for prisms of a single type.
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	int writeLAMMPSdataCages(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type, int numCages, std::string filename = "system-cages.data")
+	int writeLAMMPSdataCages(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type, int numCages, std::string filename = "system-cages.data")
 
 Write out a lammps data file for DDCs or HCs, assuming that there is no slice
 
@@ -297,7 +297,7 @@ Write out all cages of all types into a folder called cages inside the output di
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	int writeEachCage(const std::vector<int>& currentCage, int cageNum, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type, const std::vector<std::vector<int>>& rings, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+	int writeEachCage(const std::vector<int>& currentCage, int cageNum, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type, const std::vector<std::vector<int>>& rings, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
 
 Write out a particular cage to a file.
 
@@ -357,7 +357,7 @@ Function for printing the largest ice cluster.
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	int writeXYZcluster(std::string path, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms, int clusterID, :ref:`cage::cageType<doxid-group__cage_1ga5787314f51b5927c213db48b81c21d95>` type)
+	int writeXYZcluster(std::string path, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms, int clusterID, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type)
 
 Function for writing out the XYZ files for each cluster.
 

@@ -1,0 +1,31 @@
+.. index:: pair: struct; site::FrontOptions
+.. _doxid-structsite_1_1_front_options:
+
+struct site::FrontOptions
+=========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct FrontOptions {
+		// fields
+	
+		int :target:`nBins<doxid-structsite_1_1_front_options_1ae40c4d21cc007e5675ec046cc679a331>` = 20;
+		int :target:`axis<doxid-structsite_1_1_front_options_1aa4ae7bb58f1d50fc046bdd92cc2b7e38>` = 2;
+		double :target:`frontCut<doxid-structsite_1_1_front_options_1a8a1836a8985984523c275ae6f7f0fc60>` = 0.5;
+		double :target:`bulkIce<doxid-structsite_1_1_front_options_1a670795328a80dbf57e252cb41bbfbfda>` = 0.85;
+		double :target:`bulkLiquid<doxid-structsite_1_1_front_options_1aac30a1bdcb63ef718fc195b39da9bfc7>` = 0.15;
+		int :target:`ionsPerFormula<doxid-structsite_1_1_front_options_1aad8324c08451340200a8f561c9da18db>` = 2;
+		double :target:`shellCutoff<doxid-structsite_1_1_front_options_1a614a3fcacf0da6d6b1bfa7ac65b23583>` = 3.5;
+		double :target:`layerHalfWidth<doxid-structsite_1_1_front_options_1a72737ccc6526295fbb84e84adc436cec>` = 3.5;
+		int :target:`maxRing<doxid-structsite_1_1_front_options_1a0545192b2da82be566c8f1ac1e0ea44d>` = 6;
+		int :target:`coordHist<doxid-structsite_1_1_front_options_1a84b1ce9f4048bcc37e7d0d51e9ba098f>` = 8;
+	};

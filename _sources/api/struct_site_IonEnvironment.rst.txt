@@ -68,7 +68,7 @@ water molecules within the cutoff
 
 	std::vector<double> iceFraction
 
-labelled share of that shell
+labeled share of that shell
 
 .. index:: pair: variable; members
 .. _doxid-structsite_1_1_ion_environment_1a34ba0e96160a91395416185d4c3dfb94:

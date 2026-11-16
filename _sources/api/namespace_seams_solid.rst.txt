@@ -1,0 +1,24 @@
+.. index:: pair: namespace; seams::solid
+.. _doxid-namespaceseams_1_1solid:
+
+namespace seams::solid
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace solid {
+
+	// global functions
+
+	template <class T>
+	void :target:`eval<doxid-namespaceseams_1_1solid_1a9d3cecdc07cecf1f07a3a2405e75781a>`(int orderL, T x, T y, T z, T r2, T inv, const double* norm, T* re, T* im);
+
+	} // namespace solid

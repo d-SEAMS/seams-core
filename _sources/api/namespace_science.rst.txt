@@ -1,0 +1,149 @@
+.. index:: pair: namespace; science
+.. _doxid-namespacescience:
+
+namespace science
+=================
+
+.. toctree::
+	:hidden:
+
+	struct_science_AtomRow.rst
+	struct_science_ClusterPart.rst
+	struct_science_CriticalSize.rst
+	struct_science_Front.rst
+	struct_science_LayerRow.rst
+	struct_science_Layers.rst
+	struct_science_NucleusFrame.rst
+	struct_science_SlopeInterval.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace science {
+
+	// structs
+
+	struct :ref:`AtomRow<doxid-structscience_1_1_atom_row>`;
+	struct :ref:`ClusterPart<doxid-structscience_1_1_cluster_part>`;
+	struct :ref:`CriticalSize<doxid-structscience_1_1_critical_size>`;
+	struct :ref:`Front<doxid-structscience_1_1_front>`;
+	struct :ref:`LayerRow<doxid-structscience_1_1_layer_row>`;
+	struct :ref:`Layers<doxid-structscience_1_1_layers>`;
+	struct :ref:`NucleusFrame<doxid-structscience_1_1_nucleus_frame>`;
+	struct :ref:`SlopeInterval<doxid-structscience_1_1_slope_interval>`;
+
+	// global variables
+
+	double :ref:`kCutoffA<doxid-namespacescience_1a4265e3dae21d9282de551a92878cf3c4>` = 3.5;
+	double :ref:`kQ6BarIceCut<doxid-namespacescience_1a79583fa3d937434e60aa8c5ef148fcc4>` = 0.36;
+
+	// global functions
+
+	:ref:`Layers<doxid-structscience_1_1_layers>` :ref:`fitSolidFraction<doxid-namespacescience_1a105602143bae7cd2d11889a0e7a2d1bb>`(const std::vector<double>& phi, const std::vector<double>& mid, double span);
+	:ref:`Layers<doxid-structscience_1_1_layers>` :ref:`layersOf<doxid-namespacescience_1a68c06cf75ea7e1ef11bd086da5fc7200>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, int axis = -1, double binWidth = 1.0);
+	:ref:`SlopeInterval<doxid-structscience_1_1_slope_interval>` :ref:`bootstrapSlope<doxid-namespacescience_1a2e413671d9ebb6ec52d1ec85a7c096b6>`(const std::vector<double>& x, const std::vector<double>& y, int nDraw, std::uint64_t seed);
+	:ref:`CriticalSize<doxid-structscience_1_1_critical_size>` :ref:`criticalSize<doxid-namespacescience_1a21db86e2aeac93ea0cf3e9352f85f3a7>`(const std::vector<double>& series, int nDraw, std::uint64_t seed);
+	:ref:`NucleusFrame<doxid-structscience_1_1_nucleus_frame>` :ref:`nucleusOf<doxid-namespacescience_1af0103ac816ca2fa049be4e527341ee32>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, int frame, double q6Cut = :ref:`kQ6BarIceCut<doxid-namespacescience_1a79583fa3d937434e60aa8c5ef148fcc4>`);
+	std::vector<:ref:`AtomRow<doxid-structscience_1_1_atom_row>`> :ref:`labelAtoms<doxid-namespacescience_1aebd5220a6244946102e19a27a7771635>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> cloud, double q6Cut = :ref:`kQ6BarIceCut<doxid-namespacescience_1a79583fa3d937434e60aa8c5ef148fcc4>`);
+
+	} // namespace science
+.. _details-namespacescience:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Variables
+----------------
+
+.. index:: pair: variable; kCutoffA
+.. _doxid-namespacescience_1a4265e3dae21d9282de551a92878cf3c4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kCutoffA = 3.5
+
+Published CHILL+ cutoff, in angstrom. Not a fitted parameter.
+
+.. index:: pair: variable; kQ6BarIceCut
+.. _doxid-namespacescience_1a79583fa3d937434e60aa8c5ef148fcc4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kQ6BarIceCut = 0.36
+
+Lechner-Dellago q6-bar ice cut used for the cluster mask. The same gap as the nucleation census, not refitted here.
+
+Global Functions
+----------------
+
+.. index:: pair: function; fitSolidFraction
+.. _doxid-namespacescience_1a105602143bae7cd2d11889a0e7a2d1bb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Layers<doxid-structscience_1_1_layers>` fitSolidFraction(const std::vector<double>& phi, const std::vector<double>& mid, double span)
+
+10-90 fronts of a binned solid fraction. ``span`` is the axis length. A flat crystal, with no fall through 0.5, is undefined.
+
+.. index:: pair: function; layersOf
+.. _doxid-namespacescience_1a68c06cf75ea7e1ef11bd086da5fc7200:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Layers<doxid-structscience_1_1_layers>` layersOf(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, int axis = -1, double binWidth = 1.0)
+
+CHILL+, the shell label and q6 binned along ``axis`` (0, 1 or 2). A negative axis uses the longest box edge.
+
+.. index:: pair: function; bootstrapSlope
+.. _doxid-namespacescience_1a2e413671d9ebb6ec52d1ec85a7c096b6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SlopeInterval<doxid-structscience_1_1_slope_interval>` bootstrapSlope(const std::vector<double>& x, const std::vector<double>& y, int nDraw, std::uint64_t seed)
+
+Ordinary-least-squares slope, with a percentile bootstrap. A draw whose x values have no spread is dropped.
+
+.. index:: pair: function; criticalSize
+.. _doxid-namespacescience_1a21db86e2aeac93ea0cf3e9352f85f3a7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`CriticalSize<doxid-structscience_1_1_critical_size>` criticalSize(const std::vector<double>& series, int nDraw, std::uint64_t seed)
+
+Critical size of one cluster-size series. See the file comment.
+
+.. index:: pair: function; nucleusOf
+.. _doxid-namespacescience_1af0103ac816ca2fa049be4e527341ee32:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`NucleusFrame<doxid-structscience_1_1_nucleus_frame>` nucleusOf(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, int frame, double q6Cut = :ref:`kQ6BarIceCut<doxid-namespacescience_1a79583fa3d937434e60aa8c5ef148fcc4>`)
+
+One frame. The published CHILL+ label is left on the cloud.
+
+.. index:: pair: function; labelAtoms
+.. _doxid-namespacescience_1aebd5220a6244946102e19a27a7771635:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`AtomRow<doxid-structscience_1_1_atom_row>`> labelAtoms(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> cloud, double q6Cut = :ref:`kQ6BarIceCut<doxid-namespacescience_1a79583fa3d937434e60aa8c5ef148fcc4>`)
+
+Per-molecule labels. ``inExtended`` marks the largest CHILL+ cluster of cubic, hexagonal and interfacial molecules.
+

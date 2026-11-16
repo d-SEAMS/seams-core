@@ -1,0 +1,24 @@
+.. index:: pair: namespace; symm::generic
+.. _doxid-namespacesymm_1_1generic:
+
+namespace symm::generic
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace generic {
+
+	// global functions
+
+	void :target:`classifyPrepared<doxid-namespacesymm_1_1generic_1a38e6a9e2a00776dcfb188e2a32959100>`(const double* x, const double* y, const double* z, int n, const double lat[3][3], const :ref:`CanonShell<doxid-structsymm_1_1_canon_shell>`& canon, double gate, int* kind, double thermalQ, double bondRatio, bool openFace);
+	int :target:`diamondCna<doxid-namespacesymm_1_1generic_1a5585f406605ef334b8af2605b96478ba>`(const double* sx, const double* sy, const double* sz, int ambiguous, int* n421, int* n422, int* nGood);
+
+	} // namespace generic

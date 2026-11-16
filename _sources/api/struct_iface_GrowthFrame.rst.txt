@@ -1,0 +1,24 @@
+.. index:: pair: struct; iface::GrowthFrame
+.. _doxid-structiface_1_1_growth_frame:
+
+struct iface::GrowthFrame
+=========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct GrowthFrame {
+		// fields
+	
+		int :target:`frame<doxid-structiface_1_1_growth_frame_1a1964ec73b6ee72c963a190256e75b221>` = 0;
+		double :target:`timePs<doxid-structiface_1_1_growth_frame_1a21ff9273d7b5b264935e9424880559ab>` = 0;
+		:ref:`Study<doxid-structiface_1_1_study>` :target:`study<doxid-structiface_1_1_growth_frame_1a32990a9920273c184100193778eaa185>`;
+	};

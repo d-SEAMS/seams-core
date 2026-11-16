@@ -1,0 +1,47 @@
+.. index:: pair: struct; site::TrapEvent
+.. _doxid-structsite_1_1_trap_event:
+
+struct site::TrapEvent
+======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct TrapEvent {
+		// fields
+	
+		int :ref:`ion<doxid-structsite_1_1_trap_event_1ad81200671099239500463e887953538f>` = -1;
+		:ref:`IonState<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791>` :target:`from<doxid-structsite_1_1_trap_event_1a2a968f0249fd687d38355f4cac532edc>` = :ref:`IonState::liquid<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c>`;
+		:ref:`IonState<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791>` :target:`to<doxid-structsite_1_1_trap_event_1aa544758f2e02919d6acf4de66cb0c7c9>` = :ref:`IonState::liquid<doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791af80b6383d767feb24333c7d460bed98c>`;
+	};
+.. _details-structsite_1_1_trap_event:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; ion
+.. _doxid-structsite_1_1_trap_event_1ad81200671099239500463e887953538f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int ion = -1
+
+index into the ion list, not the cloud
+

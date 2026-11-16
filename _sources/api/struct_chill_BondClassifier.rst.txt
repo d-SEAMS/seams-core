@@ -12,6 +12,20 @@ Overview
 
 One rule set for classifying bond correlations :math:`c_{ij}`. :ref:`More...<details-structchill_1_1_bond_classifier>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/bop.hpp>
+	
+	struct BondClassifier {
+		// fields
+	
+		double :target:`staggeredMax<doxid-structchill_1_1_bond_classifier_1a146b6b87ef413723796680f70c8ecca5>`;
+		double :ref:`eclipsedMin<doxid-structchill_1_1_bond_classifier_1a02940fdda8b90a912eda29b5d48a4bc3>`;
+		double :ref:`eclipsedMax<doxid-structchill_1_1_bond_classifier_1aa9f8b29d2f9ab31e7cda7a399f2b4466>`;
+		int :ref:`coordinationNumber<doxid-structchill_1_1_bond_classifier_1a85100f5928056281b3c93e4dca7a1d5b>`;
+	};
 .. _details-structchill_1_1_bond_classifier:
 
 Detailed Documentation
@@ -20,4 +34,37 @@ Detailed Documentation
 One rule set for classifying bond correlations :math:`c_{ij}`.
 
 A bond is staggered when :math:`c_{ij} \le` staggeredMax, eclipsed when it falls in [eclipsedMin, eclipsedMax], and out of range otherwise. The CHILL and CHILL+ water rules are two instances; other hydrogen-bonded or tetrahedral materials register their own thresholds and coordination.
+
+Fields
+------
+
+.. index:: pair: variable; eclipsedMin
+.. _doxid-structchill_1_1_bond_classifier_1a02940fdda8b90a912eda29b5d48a4bc3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double eclipsedMin
+
+Inclusive staggered edge, c_ij <= staggeredMax.
+
+.. index:: pair: variable; eclipsedMax
+.. _doxid-structchill_1_1_bond_classifier_1aa9f8b29d2f9ab31e7cda7a399f2b4466:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double eclipsedMax
+
+Inclusive lower edge of the eclipsed band.
+
+.. index:: pair: variable; coordinationNumber
+.. _doxid-structchill_1_1_bond_classifier_1a85100f5928056281b3c93e4dca7a1d5b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int coordinationNumber
+
+Inclusive upper edge of the eclipsed band.
 

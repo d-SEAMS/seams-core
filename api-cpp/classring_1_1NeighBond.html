@@ -246,12 +246,13 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('classring_1_1N
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:adede93d18467191b18db5a9960a3dcfa" id="r_adede93d18467191b18db5a9960a3dcfa"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#adede93d18467191b18db5a9960a3dcfa">build</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memitem:a7a76d39976a7d0b0c1248aa26e7ea486" id="r_a7a76d39976a7d0b0c1248aa26e7ea486"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7a76d39976a7d0b0c1248aa26e7ea486">row</a> (int i, const int *&amp;begin, const int *&amp;end) const</td></tr>
 <tr class="memitem:ae05df58a91640cf5f7e93a70e45563f5" id="r_ae05df58a91640cf5f7e93a70e45563f5"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae05df58a91640cf5f7e93a70e45563f5">operator()</a> (int i, int j) const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Membership of the neighbour rows after the leading self entry. </p>
 
-<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00244">244</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00257">257</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
 <a id="adede93d18467191b18db5a9960a3dcfa" name="adede93d18467191b18db5a9960a3dcfa"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adede93d18467191b18db5a9960a3dcfa">&#9670;&#160;</a></span>build()</h2>
@@ -292,11 +293,68 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00272">272</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  272</span>                                                    {</div>
+<div class="line"><span class="lineno">  273</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *begin = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  274</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> *end = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  275</span>    <a class="code hl_function" href="#a7a76d39976a7d0b0c1248aa26e7ea486">row</a>(i, begin, end);</div>
+<div class="line"><span class="lineno">  276</span>    <span class="keywordflow">if</span> (begin == <span class="keyword">nullptr</span>) {</div>
+<div class="line"><span class="lineno">  277</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  278</span>    }</div>
+<div class="line"><span class="lineno">  279</span>    <span class="keywordflow">return</span> std::binary_search(begin, end, j);</div>
+<div class="line"><span class="lineno">  280</span>  }</div>
+<div class="ttc" id="aclassring_1_1NeighBond_html_a7a76d39976a7d0b0c1248aa26e7ea486"><div class="ttname"><a href="#a7a76d39976a7d0b0c1248aa26e7ea486">ring::NeighBond::row</a></div><div class="ttdeci">void row(int i, const int *&amp;begin, const int *&amp;end) const</div><div class="ttdef"><b>Definition</b> <a href="topo__bulk_8hpp_source.html#l00262">topo_bulk.hpp:262</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a7a76d39976a7d0b0c1248aa26e7ea486" name="a7a76d39976a7d0b0c1248aa26e7ea486"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7a76d39976a7d0b0c1248aa26e7ea486">&#9670;&#160;</a></span>row()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ring::NeighBond::row </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>i</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *&amp;</td>          <td class="paramname"><span class="paramname"><em>begin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *&amp;</td>          <td class="paramname"><span class="paramname"><em>end</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00262">262</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  262</span>                                                            {</div>
+<div class="line"><span class="lineno">  263</span>    <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(i) &gt;= <span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(n_) || off_.empty()) {</div>
+<div class="line"><span class="lineno">  264</span>      begin = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  265</span>      end = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  266</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  267</span>    }</div>
+<div class="line"><span class="lineno">  268</span>    begin = cols_.data() + off_[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><span class="lineno">  269</span>    end = cols_.data() + off_[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i + 1)];</div>
+<div class="line"><span class="lineno">  270</span>  }</div>
+</div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>

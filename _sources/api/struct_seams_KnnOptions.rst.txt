@@ -1,0 +1,80 @@
+.. index:: pair: struct; seams::KnnOptions
+.. _doxid-structseams_1_1_knn_options:
+
+struct seams::KnnOptions
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a k-nearest neighbour list. :ref:`More...<details-structseams_1_1_knn_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct KnnOptions {
+		// fields
+	
+		int :ref:`k<doxid-structseams_1_1_knn_options_1a1981ef95578c9c64e92f9403ed457561>` = 4;
+		double :ref:`cutoff<doxid-structseams_1_1_knn_options_1a2428006bacbc41a4bb5d69b374d02f59>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_knn_options_1a38f49715496943c232fe550e7d140ce8>` = 0;
+		bool :ref:`mutual<doxid-structseams_1_1_knn_options_1ad77f995416c41e571ef2c819a51a09b6>` = false;
+	};
+.. _details-structseams_1_1_knn_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a k-nearest neighbour list.
+
+Fields
+------
+
+.. index:: pair: variable; k
+.. _doxid-structseams_1_1_knn_options_1a1981ef95578c9c64e92f9403ed457561:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int k = 4
+
+Positive neighbour count.
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_knn_options_1a2428006bacbc41a4bb5d69b374d02f59:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Nominal cutoff, Angstrom.
+
+Candidates lie inside cutoff + 1.5.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_knn_options_1a38f49715496943c232fe550e7d140ce8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; mutual
+.. _doxid-structseams_1_1_knn_options_1ad77f995416c41e571ef2c819a51a09b6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool mutual = false
+
+Keep only pairs that name each other.
+

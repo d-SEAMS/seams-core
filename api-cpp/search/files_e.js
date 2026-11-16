@@ -1,15 +1,19 @@
 var searchData=
 [
-  ['seams_5fc_5fapi_2eh_0',['seams_c_api.h',['../seams__c__api_8h.html',1,'']]],
-  ['seams_5fconfig_2ehpp_1',['seams_config.hpp',['../seams__config_8hpp.html',1,'']]],
-  ['seams_5finput_2ehpp_2',['seams_input.hpp',['../seams__input_8hpp.html',1,'']]],
-  ['seams_5foutput_2ehpp_3',['seams_output.hpp',['../seams__output_8hpp.html',1,'']]],
-  ['selection_2ehpp_4',['selection.hpp',['../selection_8hpp.html',1,'']]],
-  ['shapematch_2ehpp_5',['shapeMatch.hpp',['../shapeMatch_8hpp.html',1,'']]],
-  ['shell_5fhot_2ehpp_6',['shell_hot.hpp',['../shell__hot_8hpp.html',1,'']]],
-  ['simd_5fdistance_2ehpp_7',['simd_distance.hpp',['../simd__distance_8hpp.html',1,'']]],
-  ['site_2ehpp_8',['site.hpp',['../site_8hpp.html',1,'']]],
-  ['sphericart_5fylm_2ehpp_9',['sphericart_ylm.hpp',['../sphericart__ylm_8hpp.html',1,'']]],
-  ['steinhardt_5fdevice_2ehpp_10',['steinhardt_device.hpp',['../steinhardt__device_8hpp.html',1,'']]],
-  ['structure_5fdesc_2ehpp_11',['structure_desc.hpp',['../structure__desc_8hpp.html',1,'']]]
+  ['science_5ffront_2ehpp_0',['science_front.hpp',['../science__front_8hpp.html',1,'']]],
+  ['seams_2eh_1',['seams.h',['../seams_8h.html',1,'']]],
+  ['seams_2ehpp_2',['seams.hpp',['../seams_8hpp.html',1,'']]],
+  ['seams_5fc_5fapi_2eh_3',['seams_c_api.h',['../seams__c__api_8h.html',1,'']]],
+  ['seams_5fconfig_2ehpp_4',['seams_config.hpp',['../seams__config_8hpp.html',1,'']]],
+  ['seams_5finput_2ehpp_5',['seams_input.hpp',['../seams__input_8hpp.html',1,'']]],
+  ['seams_5foutput_2ehpp_6',['seams_output.hpp',['../seams__output_8hpp.html',1,'']]],
+  ['selection_2ehpp_7',['selection.hpp',['../selection_8hpp.html',1,'']]],
+  ['shapematch_2ehpp_8',['shapeMatch.hpp',['../shapeMatch_8hpp.html',1,'']]],
+  ['shell_5fhot_2ehpp_9',['shell_hot.hpp',['../shell__hot_8hpp.html',1,'']]],
+  ['simd_5fdistance_2ehpp_10',['simd_distance.hpp',['../simd__distance_8hpp.html',1,'']]],
+  ['site_2ehpp_11',['site.hpp',['../site_8hpp.html',1,'']]],
+  ['solid_5fylm_2ehpp_12',['solid_ylm.hpp',['../solid__ylm_8hpp.html',1,'']]],
+  ['sphericart_5fylm_2ehpp_13',['sphericart_ylm.hpp',['../sphericart__ylm_8hpp.html',1,'']]],
+  ['steinhardt_5fdevice_2ehpp_14',['steinhardt_device.hpp',['../steinhardt__device_8hpp.html',1,'']]],
+  ['structure_5fdesc_2ehpp_15',['structure_desc.hpp',['../structure__desc_8hpp.html',1,'']]]
 ];

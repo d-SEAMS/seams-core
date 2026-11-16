@@ -1,0 +1,128 @@
+.. index:: pair: enum; atom_state_type
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5:
+
+enum molSys::atom_state_type
+============================
+
+Overview
+~~~~~~~~
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <mol_sys.hpp>
+
+	enum atom_state_type {
+	    :ref:`cubic<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843>`,
+	    :ref:`hexagonal<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac>`,
+	    :ref:`water<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c>`,
+	    :ref:`interfacial<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428>`,
+	    :ref:`clathrate<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5>`,
+	    :ref:`interClathrate<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa>`,
+	    :ref:`unclassified<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4>`,
+	    :ref:`reCubic<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b>`,
+	    :ref:`reHex<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5>`,
+	};
+
+.. _details-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Enum Values
+-----------
+
+.. index:: pair: enumvalue; cubic
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a7ab93feeb36d98e584d10de2e2f68843:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	cubic
+
+Ic, or particle type signifying Cubic Ice.
+
+.. index:: pair: enumvalue; hexagonal
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a1839c642bbb4a69963fcb822d209d5ac:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	hexagonal
+
+Ih, or particle type signifying Hexagonal Ice.
+
+.. index:: pair: enumvalue; water
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a9460370bb0ca1c98a779b1bcc6861c2c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	water
+
+Liquid/amorphous phase.
+
+.. index:: pair: enumvalue; interfacial
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a59efaf6a5e576d4e93fb285c00dbd428:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	interfacial
+
+Interfacial ice: ice-like molecules which do not fulfill the strict criteria of the Ic or Ih phases.
+
+.. index:: pair: enumvalue; clathrate
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5abf2e20bcb148b586d01ecb98cc701fb5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	clathrate
+
+Clathrate ice phase.
+
+.. index:: pair: enumvalue; interClathrate
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a7cc309cdf3bce661fa160b370b7bd8fa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	interClathrate
+
+Interfacial clathrate ice phase.
+
+.. index:: pair: enumvalue; unclassified
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	unclassified
+
+Not classified into any other category.
+
+.. index:: pair: enumvalue; reCubic
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5a4d7144359266dc2d0eb957ddeaed8b9b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	reCubic
+
+Reclassified as cubic ice, according to the :math:`q_6` order parameter.
+
+.. index:: pair: enumvalue; reHex
+.. _doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5aba57d7df3e2abf6f2b88fa8e278db9c5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	reHex
+
+Reclassified as hexagonal ice, according to the :math:`q_6` order parameter.
+

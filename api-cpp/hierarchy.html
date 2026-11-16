@@ -1,0 +1,451 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Class Hierarchy</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.14.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('hierarchy.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Class Hierarchy</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="textblock">This inheritance list is sorted roughly, but not completely, alphabetically:</div><div class="directory">
+<div class="levels">[detail level <span onclick="javascript:dynsection.toggleLevel(1);">1</span><span onclick="javascript:dynsection.toggleLevel(2);">2</span><span onclick="javascript:dynsection.toggleLevel(3);">3</span>]</div><table class="directory">
+<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classring_1_1AffiliationUpdater.html" target="_self">ring::AffiliationUpdater</a></td><td class="desc">Exact incremental affiliation across frames </td></tr>
+<tr id="row_1_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1AnalysisPhases.html" target="_self">chill::AnalysisPhases</a></td><td class="desc">Rebuild, local kernel, halo exchange, and the write-back to the frame </td></tr>
+<tr id="row_2_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1Ascent.html" target="_self">nucleation::Ascent</a></td><td class="desc"></td></tr>
+<tr id="row_3_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1AtomRow.html" target="_self">science::AtomRow</a></td><td class="desc"></td></tr>
+<tr id="row_4_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structgpu_1_1BatchResult.html" target="_self">gpu::BatchResult</a></td><td class="desc"></td></tr>
+<tr id="row_5_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1Bin.html" target="_self">iface::Bin</a></td><td class="desc"></td></tr>
+<tr id="row_6_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1BondClassifier.html" target="_self">chill::BondClassifier</a></td><td class="desc">One rule set for classifying bond correlations \(c_{ij}\) </td></tr>
+<tr id="row_7_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1BondOptions.html" target="_self">seams::BondOptions</a></td><td class="desc">Knobs for a hydrogen-bond count </td></tr>
+<tr id="row_8_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1BondOrder.html" target="_self">chill::BondOrder</a></td><td class="desc"></td></tr>
+<tr id="row_9_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1BootstrapInterval.html" target="_self">iface::BootstrapInterval</a></td><td class="desc"></td></tr>
+<tr id="row_10_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1BrineFronts.html" target="_self">seams::BrineFronts</a></td><td class="desc">The two planar crossings of an ice slab </td></tr>
+<tr id="row_11_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1BrineOptions.html" target="_self">seams::BrineOptions</a></td><td class="desc">Knobs for a planar ice front </td></tr>
+<tr id="row_12_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1BrinePocket.html" target="_self">site::BrinePocket</a></td><td class="desc"></td></tr>
+<tr id="row_13_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1BrineProfile.html" target="_self">seams::BrineProfile</a></td><td class="desc">Concentration profile along the brine axis </td></tr>
+<tr id="row_14_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structcage_1_1Cage.html" target="_self">cage::Cage</a></td><td class="desc">This contains a cage, with the constituent rings </td></tr>
+<tr id="row_15_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1CageAffiliation.html" target="_self">ring::CageAffiliation</a></td><td class="desc">Per-ring affiliation flags, indexed like the input ring vector </td></tr>
+<tr id="row_16_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1CageCounts.html" target="_self">seams::CageCounts</a></td><td class="desc">Disjoint cage populations </td></tr>
+<tr id="row_17_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtum_1_1CageCounts.html" target="_self">tum::CageCounts</a></td><td class="desc"></td></tr>
+<tr id="row_18_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1CageOptions.html" target="_self">seams::CageOptions</a></td><td class="desc">Knobs for hexagonal and double-diamond cages </td></tr>
+<tr id="row_19_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structcage_1_1CageShape.html" target="_self">cage::CageShape</a></td><td class="desc">IRA/SOFI result for one cage </td></tr>
+<tr id="row_20_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsymm_1_1CanonShell.html" target="_self">symm::CanonShell</a></td><td class="desc"></td></tr>
+<tr id="row_21_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1ChillOptions.html" target="_self">seams::ChillOptions</a></td><td class="desc">Knobs for CHILL and CHILL+ </td></tr>
+<tr id="row_22_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1ChillPlusResult.html" target="_self">chill::ChillPlusResult</a></td><td class="desc"></td></tr>
+<tr id="row_23_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1ChordlessCycles.html" target="_self">seams::ChordlessCycles</a></td><td class="desc">Chordless cycles of one length </td></tr>
+<tr id="row_24_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1product_1_1Cij.html" target="_self">seams::product::Cij</a></td><td class="desc"></td></tr>
+<tr id="row_25_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Classification.html" target="_self">seams::Classification</a></td><td class="desc">CHILL or CHILL+ labels and the nine population counts </td></tr>
+<tr id="row_26_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1ClusterPart.html" target="_self">science::ClusterPart</a></td><td class="desc"></td></tr>
+<tr id="row_27_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1CommittorCall.html" target="_self">nucleation::CommittorCall</a></td><td class="desc"></td></tr>
+<tr id="row_28_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1product_1_1ComplexDot.html" target="_self">seams::product::ComplexDot</a></td><td class="desc"></td></tr>
+<tr id="row_29_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1ConcentrationBin.html" target="_self">site::ConcentrationBin</a></td><td class="desc"></td></tr>
+<tr id="row_30_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1ConcentrationProfile.html" target="_self">site::ConcentrationProfile</a></td><td class="desc"></td></tr>
+<tr id="row_31_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Contacts.html" target="_self">seams::Contacts</a></td><td class="desc">Mutual nearest unlike contacts of a site table </td></tr>
+<tr id="row_32_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1CriticalSize.html" target="_self">science::CriticalSize</a></td><td class="desc"></td></tr>
+<tr id="row_33_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classnneigh_1_1CutoffSkin.html" target="_self">nneigh::CutoffSkin</a></td><td class="desc">In-situ cutoff list </td></tr>
+<tr id="row_34_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1DdcSplit.html" target="_self">ring::DdcSplit</a></td><td class="desc"></td></tr>
+<tr id="row_35_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1DensityOptions.html" target="_self">seams::DensityOptions</a></td><td class="desc">Knobs for the axial number density </td></tr>
+<tr id="row_36_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1DensityProfile.html" target="_self">seams::DensityProfile</a></td><td class="desc">Number density along one cell axis </td></tr>
+<tr id="row_37_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1DensityZ.html" target="_self">site::DensityZ</a></td><td class="desc"></td></tr>
+<tr id="row_38_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structgpu_1_1DeviceInfo.html" target="_self">gpu::DeviceInfo</a></td><td class="desc"></td></tr>
+<tr id="row_39_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Distribution.html" target="_self">seams::Distribution</a></td><td class="desc">Partial radial distribution </td></tr>
+<tr id="row_40_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1DistributionOptions.html" target="_self">seams::DistributionOptions</a></td><td class="desc">Knobs for a partial RDF, its running coordination, or the integral </td></tr>
+<tr id="row_41_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structclump_1_1Domain.html" target="_self">clump::Domain</a></td><td class="desc"></td></tr>
+<tr id="row_42_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1DomainOptions.html" target="_self">seams::DomainOptions</a></td><td class="desc">Knobs for a domain search </td></tr>
+<tr id="row_43_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1DomainReport.html" target="_self">seams::DomainReport</a></td><td class="desc">Largest polar or apolar domain </td></tr>
+<tr id="row_44_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1EdgeSet.html" target="_self">seams::EdgeSet</a></td><td class="desc"></td></tr>
+<tr id="row_45_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structcage_1_1EdgeWindow.html" target="_self">cage::EdgeWindow</a></td><td class="desc">Inclusive length window on each face edge, in the coordinate units of the frame </td></tr>
+<tr id="row_46_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1EquatorChoice.html" target="_self">ring::EquatorChoice</a></td><td class="desc"></td></tr>
+<tr id="row_47_" class="odd"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_47_" class="arrow" onclick="dynsection.toggleFolder('47_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><b>std::exception</b></td><td class="desc">STL class </td></tr>
+<tr id="row_47_0_" class="even" style="display:none;"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span id="arr_47_0_" class="arrow" onclick="dynsection.toggleFolder('47_0_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><b>std::runtime_error</b></td><td class="desc">STL class </td></tr>
+<tr id="row_47_0_0_" class="even" style="display:none;"><td class="entry"><span style="width:48px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Error.html" target="_self">seams::Error</a></td><td class="desc">Failure from the C API, or from a rejected argument </td></tr>
+<tr id="row_48_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1FairState.html" target="_self">seams::FairState</a></td><td class="desc"></td></tr>
+<tr id="row_49_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1FairWidth.html" target="_self">seams::FairWidth</a></td><td class="desc"></td></tr>
+<tr id="row_50_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1cpu_1_1Features.html" target="_self">seams::cpu::Features</a></td><td class="desc"></td></tr>
+<tr id="row_51_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1FingerprintOptions.html" target="_self">seams::FingerprintOptions</a></td><td class="desc">Knobs for a topological fingerprint </td></tr>
+<tr id="row_52_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structgpu_1_1Footprint.html" target="_self">gpu::Footprint</a></td><td class="desc"></td></tr>
+<tr id="row_53_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structcage_1_1FormerRow.html" target="_self">cage::FormerRow</a></td><td class="desc">One network-former atom: coordination, same-species bonds, and the primitive rings that pass through it </td></tr>
+<tr id="row_54_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structcage_1_1FoundCage.html" target="_self">cage::FoundCage</a></td><td class="desc">One cage matching a signature, closed or incomplete </td></tr>
+<tr id="row_55_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structgen_1_1FracBox.html" target="_self">gen::FracBox</a></td><td class="desc"></td></tr>
+<tr id="row_56_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtopo_1_1FrameFingerprint.html" target="_self">topo::FrameFingerprint</a></td><td class="desc"></td></tr>
+<tr id="row_57_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1FrameRecord.html" target="_self">nucleation::FrameRecord</a></td><td class="desc"></td></tr>
+<tr id="row_58_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1Front.html" target="_self">iface::Front</a></td><td class="desc"></td></tr>
+<tr id="row_59_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1Front.html" target="_self">science::Front</a></td><td class="desc"></td></tr>
+<tr id="row_60_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1FrontLayerReport.html" target="_self">site::FrontLayerReport</a></td><td class="desc">Waters within <span class="tt">halfWidth</span> of either front, their primitive-ring census, and the coordination defects (a water whose oxygen neighbour count is not 4) </td></tr>
+<tr id="row_61_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1FrontOptions.html" target="_self">site::FrontOptions</a></td><td class="desc"></td></tr>
+<tr id="row_62_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1FrontPair.html" target="_self">site::FrontPair</a></td><td class="desc">Two planar fronts of one ice slab in a periodic box </td></tr>
+<tr id="row_63_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1FrontSnapshot.html" target="_self">site::FrontSnapshot</a></td><td class="desc"></td></tr>
+<tr id="row_64_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1product_1_1GemmInfo.html" target="_self">seams::product::GemmInfo</a></td><td class="desc"></td></tr>
+<tr id="row_65_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structprimitive_1_1Graph.html" target="_self">primitive::Graph</a></td><td class="desc">This is a per-frame object, containing all the vertices for the particular frame, along with the vector of rings generated </td></tr>
+<tr id="row_66_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsymm_1_1Group.html" target="_self">symm::Group</a></td><td class="desc"></td></tr>
+<tr id="row_67_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1GrowBasin.html" target="_self">nucleation::GrowBasin</a></td><td class="desc"></td></tr>
+<tr id="row_68_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1Growth.html" target="_self">iface::Growth</a></td><td class="desc"></td></tr>
+<tr id="row_69_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1GrowthFrame.html" target="_self">iface::GrowthFrame</a></td><td class="desc"></td></tr>
+<tr id="row_70_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1GuestOccupancy.html" target="_self">site::GuestOccupancy</a></td><td class="desc">Guests read against enumerated cages </td></tr>
+<tr id="row_71_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1HalfRise.html" target="_self">nucleation::HalfRise</a></td><td class="desc"></td></tr>
+<tr id="row_72_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; T, Destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_73_" class="odd"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_73_" class="arrow" onclick="dynsection.toggleFolder('73_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; seams_brine, seams_brine_destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_73_0_" class="even" style="display:none;"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Brine.html" target="_self">seams::Brine</a></td><td class="desc">Owned planar ice-front measurement </td></tr>
+<tr id="row_74_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_74_" class="arrow" onclick="dynsection.toggleFolder('74_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; seams_cage_set, seams_cages_destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_74_0_" class="odd" style="display:none;"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Cages.html" target="_self">seams::Cages</a></td><td class="desc">Owned hexagonal and double-diamond membership </td></tr>
+<tr id="row_75_" class="odd"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_75_" class="arrow" onclick="dynsection.toggleFolder('75_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; seams_neighbours, seams_neighbours_destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_75_0_" class="even" style="display:none;"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Neighbours.html" target="_self">seams::Neighbours</a></td><td class="desc">Owned neighbour list </td></tr>
+<tr id="row_76_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_76_" class="arrow" onclick="dynsection.toggleFolder('76_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; seams_rings, seams_rings_destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_76_0_" class="odd" style="display:none;"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Rings.html" target="_self">seams::Rings</a></td><td class="desc">Owned primitive-ring set </td></tr>
+<tr id="row_77_" class="odd"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_77_" class="arrow" onclick="dynsection.toggleFolder('77_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; seams_system, seams_system_destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_77_0_" class="even" style="display:none;"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1System.html" target="_self">seams::System</a></td><td class="desc">One frame: coordinates, a cell, and the analyses that read them </td></tr>
+<tr id="row_78_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_78_" class="arrow" onclick="dynsection.toggleFolder('78_')"><span class="arrowhead closed"></span></span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1detail_1_1Handle.html" target="_self">seams::detail::Handle&lt; seams_topo, seams_fingerprint_destroy &gt;</a></td><td class="desc"></td></tr>
+<tr id="row_78_0_" class="odd" style="display:none;"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Fingerprint.html" target="_self">seams::Fingerprint</a></td><td class="desc">Owned topological fingerprint </td></tr>
+<tr id="row_79_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1IceClusterIons.html" target="_self">site::IceClusterIons</a></td><td class="desc">Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within <span class="tt">cutoff</span> </td></tr>
+<tr id="row_80_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structphase_1_1IceXXIHit.html" target="_self">phase::IceXXIHit</a></td><td class="desc"></td></tr>
+<tr id="row_81_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1InsideTrace.html" target="_self">site::InsideTrace</a></td><td class="desc"></td></tr>
+<tr id="row_82_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1IonEnvironment.html" target="_self">site::IonEnvironment</a></td><td class="desc"></td></tr>
+<tr id="row_83_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structwater_1_1IonReport.html" target="_self">water::IonReport</a></td><td class="desc"></td></tr>
+<tr id="row_84_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structwater_1_1IonSite.html" target="_self">water::IonSite</a></td><td class="desc"></td></tr>
+<tr id="row_85_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classseams_1_1Rings_1_1iterator.html" target="_self">seams::Rings::iterator</a></td><td class="desc">Input iterator </td></tr>
+<tr id="row_86_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtopo_1_1KeyLibrary.html" target="_self">topo::KeyLibrary</a></td><td class="desc">A dictionary from local keys to labels: the keys of reference structures (a polymorph library), so any molecule whose rooted neighbourhood matches a reference gets that reference's name </td></tr>
+<tr id="row_87_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1KnnOptions.html" target="_self">seams::KnnOptions</a></td><td class="desc">Knobs for a k-nearest neighbour list </td></tr>
+<tr id="row_88_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsymm_1_1Lattice.html" target="_self">symm::Lattice</a></td><td class="desc"></td></tr>
+<tr id="row_89_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1LayerRow.html" target="_self">science::LayerRow</a></td><td class="desc"></td></tr>
+<tr id="row_90_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1Layers.html" target="_self">science::Layers</a></td><td class="desc"></td></tr>
+<tr id="row_91_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtopoparam_1_1LayerStack.html" target="_self">topoparam::LayerStack</a></td><td class="desc"></td></tr>
+<tr id="row_92_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1Lead.html" target="_self">nucleation::Lead</a></td><td class="desc"></td></tr>
+<tr id="row_93_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtopo_1_1LibraryMatch.html" target="_self">topo::LibraryMatch</a></td><td class="desc"></td></tr>
+<tr id="row_94_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1LinearClassifier.html" target="_self">chill::LinearClassifier</a></td><td class="desc">One-versus-rest ridge classifier on a dense feature matrix </td></tr>
+<tr id="row_95_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1LinearFit.html" target="_self">site::LinearFit</a></td><td class="desc"></td></tr>
+<tr id="row_96_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtopo_1_1LocalKey.html" target="_self">topo::LocalKey</a></td><td class="desc"></td></tr>
+<tr id="row_97_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structira_1_1Match.html" target="_self">ira::Match</a></td><td class="desc"></td></tr>
+<tr id="row_98_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classring_1_1NeighBond.html" target="_self">ring::NeighBond</a></td><td class="desc">Membership of the neighbour rows after the leading self entry </td></tr>
+<tr id="row_99_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1NeighbourOptions.html" target="_self">seams::NeighbourOptions</a></td><td class="desc">Knobs for a neighbour list </td></tr>
+<tr id="row_100_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1NucleusFrame.html" target="_self">science::NucleusFrame</a></td><td class="desc"></td></tr>
+<tr id="row_101_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1OrderOptions.html" target="_self">seams::OrderOptions</a></td><td class="desc">Knobs for q_l on a named graph </td></tr>
+<tr id="row_102_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsymm_1_1Overlay.html" target="_self">symm::Overlay</a></td><td class="desc"></td></tr>
+<tr id="row_103_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1PackingCertificate.html" target="_self">ring::PackingCertificate</a></td><td class="desc">Proof that the reported number of equatorial rings is maximum </td></tr>
+<tr id="row_104_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1PackParts.html" target="_self">ring::PackParts</a></td><td class="desc"></td></tr>
+<tr id="row_105_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structrdf_1_1PartialRdf.html" target="_self">rdf::PartialRdf</a></td><td class="desc"></td></tr>
+<tr id="row_106_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structgpu_1_1Plan.html" target="_self">gpu::Plan</a></td><td class="desc"></td></tr>
+<tr id="row_107_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1PocketCensus.html" target="_self">site::PocketCensus</a></td><td class="desc"></td></tr>
+<tr id="row_108_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Pockets.html" target="_self">seams::Pockets</a></td><td class="desc"><a class="el" href="classseams_1_1Brine.html" title="Owned planar ice-front measurement.">Brine</a> pockets trapped in the ice </td></tr>
+<tr id="row_109_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structmolSys_1_1Point.html" target="_self">molSys::Point&lt; T &gt;</a></td><td class="desc">This contains per-particle information </td></tr>
+<tr id="row_110_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structmolSys_1_1PointCloud.html" target="_self">molSys::PointCloud&lt; S, T &gt;</a></td><td class="desc">This contains a collection of points; contains information for a particular frame </td></tr>
+<tr id="row_111_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structira_1_1PointGroup.html" target="_self">ira::PointGroup</a></td><td class="desc"></td></tr>
+<tr id="row_112_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1PrismCensus.html" target="_self">seams::PrismCensus</a></td><td class="desc">Perfect and imperfect prism counts by ring size </td></tr>
+<tr id="row_113_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1PrismOptions.html" target="_self">seams::PrismOptions</a></td><td class="desc">Knobs for prism stacks </td></tr>
+<tr id="row_114_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1Profile.html" target="_self">iface::Profile</a></td><td class="desc"></td></tr>
+<tr id="row_115_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Q4Q6.html" target="_self">seams::Q4Q6</a></td><td class="desc">Local q4 and q6 on the cutoff shell </td></tr>
+<tr id="row_116_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Q6Bar.html" target="_self">seams::Q6Bar</a></td><td class="desc">Lechner-Dellago q6-bar and the ice count above a cut </td></tr>
+<tr id="row_117_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Q6BarOptions.html" target="_self">seams::Q6BarOptions</a></td><td class="desc">Knobs for the q6-bar ice summary </td></tr>
+<tr id="row_118_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1QlCutoffStages.html" target="_self">chill::QlCutoffStages</a></td><td class="desc"></td></tr>
+<tr id="row_119_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1QlmAtom.html" target="_self">chill::QlmAtom</a></td><td class="desc">This is the local orientational bond order parameter \(q_{lm}\), of length \(2l+1\) </td></tr>
+<tr id="row_120_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1product_1_1RealDot.html" target="_self">seams::product::RealDot</a></td><td class="desc"></td></tr>
+<tr id="row_121_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Rejection.html" target="_self">seams::Rejection</a></td><td class="desc">Molal rejection coefficient </td></tr>
+<tr id="row_122_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1RejectionCoefficient.html" target="_self">site::RejectionCoefficient</a></td><td class="desc">K = c_ice / c_liquid, both molalities of formula units </td></tr>
+<tr id="row_123_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structwater_1_1Request.html" target="_self">water::Request</a></td><td class="desc"></td></tr>
+<tr id="row_124_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structmolSys_1_1Result.html" target="_self">molSys::Result</a></td><td class="desc">This contains the bond classifier of enum class type <a class="el" href="namespacemolSys.html#a1c858200c3d088bf02839453d0f46328">bond_type</a>, and the bond correlation factor </td></tr>
+<tr id="row_125_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1RingOptions.html" target="_self">seams::RingOptions</a></td><td class="desc">Knobs for primitive rings </td></tr>
+<tr id="row_126_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1domain_1_1RingPhases.html" target="_self">seams::domain::RingPhases</a></td><td class="desc"></td></tr>
+<tr id="row_127_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1RingSearchIndex.html" target="_self">ring::RingSearchIndex</a></td><td class="desc">Inverted index from an atom to the rings that contain it </td></tr>
+<tr id="row_128_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structprimitive_1_1RingSearchSplit.html" target="_self">primitive::RingSearchSplit</a></td><td class="desc"></td></tr>
+<tr id="row_129_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1domain_1_1RingSummary.html" target="_self">seams::domain::RingSummary</a></td><td class="desc">What the ring analyses read off a frame's primitive rings </td></tr>
+<tr id="row_130_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classprimitive_1_1RingUpdater.html" target="_self">primitive::RingUpdater</a></td><td class="desc">Exact frame-to-frame maintenance of the primitive ring network </td></tr>
+<tr id="row_131_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1RunningCoordination.html" target="_self">seams::RunningCoordination</a></td><td class="desc">Running coordination number along a partial RDF </td></tr>
+<tr id="row_132_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1cfg_1_1Runtime.html" target="_self">seams::cfg::Runtime</a></td><td class="desc"></td></tr>
+<tr id="row_133_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1SeededAtomLabels.html" target="_self">ring::SeededAtomLabels</a></td><td class="desc">Per-atom cage flags from seeded (hysteresis) affiliation </td></tr>
+<tr id="row_134_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structwater_1_1Selection.html" target="_self">water::Selection</a></td><td class="desc"></td></tr>
+<tr id="row_135_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1domain_1_1Share.html" target="_self">seams::domain::Share</a></td><td class="desc">One rank's share of a frame </td></tr>
+<tr id="row_136_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1SheetOptions.html" target="_self">seams::SheetOptions</a></td><td class="desc">Knobs for a monolayer ring histogram </td></tr>
+<tr id="row_137_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsymm_1_1Shell17.html" target="_self">symm::Shell17</a></td><td class="desc"></td></tr>
+<tr id="row_138_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnucleation_1_1Shift.html" target="_self">nucleation::Shift</a></td><td class="desc"></td></tr>
+<tr id="row_139_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structcage_1_1Signature.html" target="_self">cage::Signature</a></td><td class="desc">Ring-size census of a polyhedral cage: size -&gt; number of faces </td></tr>
+<tr id="row_140_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1SignatureMatch.html" target="_self">seams::SignatureMatch</a></td><td class="desc">Closed cages whose ring census matches a signature </td></tr>
+<tr id="row_141_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1SignatureOptions.html" target="_self">seams::SignatureOptions</a></td><td class="desc">Knobs for a signature cage census </td></tr>
+<tr id="row_142_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="classnneigh_1_1SkinNeighborList.html" target="_self">nneigh::SkinNeighborList</a></td><td class="desc">Persistent neighbour list with a LAMMPS skin </td></tr>
+<tr id="row_143_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structscience_1_1SlopeInterval.html" target="_self">science::SlopeInterval</a></td><td class="desc"></td></tr>
+<tr id="row_144_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1tsan_1_1Slot.html" target="_self">seams::tsan::Slot</a></td><td class="desc"></td></tr>
+<tr id="row_145_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsymm_1_1Space.html" target="_self">symm::Space</a></td><td class="desc"></td></tr>
+<tr id="row_146_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structtum_1_1SpecializedCaps.html" target="_self">tum::SpecializedCaps</a></td><td class="desc">Initial buffer sizes of the hop-bound path </td></tr>
+<tr id="row_147_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structring_1_1StackingPlanes.html" target="_self">ring::StackingPlanes</a></td><td class="desc">Six-rings that are ice-I stacking planes </td></tr>
+<tr id="row_148_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1Steinhardt.html" target="_self">seams::Steinhardt</a></td><td class="desc">Local <a class="el" href="structseams_1_1Steinhardt.html" title="Local Steinhardt parameter, and the average when it was asked for.">Steinhardt</a> parameter, and the average when it was asked for </td></tr>
+<tr id="row_149_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1SteinhardtOptions.html" target="_self">seams::SteinhardtOptions</a></td><td class="desc">Knobs for a local <a class="el" href="structseams_1_1Steinhardt.html" title="Local Steinhardt parameter, and the average when it was asked for.">Steinhardt</a> parameter on the cutoff shell </td></tr>
+<tr id="row_150_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1SteinhardtQl.html" target="_self">chill::SteinhardtQl</a></td><td class="desc">Per-particle Steinhardt order parameters of a single degree \(l\) </td></tr>
+<tr id="row_151_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1Study.html" target="_self">iface::Study</a></td><td class="desc"></td></tr>
+<tr id="row_152_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1Table.html" target="_self">site::Table</a></td><td class="desc"></td></tr>
+<tr id="row_153_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structseams_1_1TeamWidth.html" target="_self">seams::TeamWidth</a></td><td class="desc"></td></tr>
+<tr id="row_154_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1TemplateHit.html" target="_self">chill::TemplateHit</a></td><td class="desc"></td></tr>
+<tr id="row_155_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structsite_1_1TrapEvent.html" target="_self">site::TrapEvent</a></td><td class="desc"></td></tr>
+<tr id="row_156_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structprimitive_1_1Vertex.html" target="_self">primitive::Vertex</a></td><td class="desc">This is a collection of elements, for each point, required for graph traversal </td></tr>
+<tr id="row_157_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1VoronoiWeights.html" target="_self">chill::VoronoiWeights</a></td><td class="desc">The Voronoi facet neighbours of one particle and their area weights </td></tr>
+<tr id="row_158_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structiface_1_1WillardChandler.html" target="_self">iface::WillardChandler</a></td><td class="desc"></td></tr>
+<tr id="row_159_" class="odd"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structchill_1_1YlmAtom.html" target="_self">chill::YlmAtom</a></td><td class="desc">This contains a complex vector of length \(2l+1\) </td></tr>
+</table>
+</div><!-- directory -->
+</div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

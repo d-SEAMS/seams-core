@@ -1,0 +1,25 @@
+.. index:: pair: struct; water::IonReport
+.. _doxid-structwater_1_1_ion_report:
+
+struct water::IonReport
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/water_select.hpp>
+	
+	struct IonReport {
+		// fields
+	
+		int :target:`ice<doxid-structwater_1_1_ion_report_1adbed025d7275cad335206afab70263d8>` = 0;
+		int :target:`liquid<doxid-structwater_1_1_ion_report_1a326ee8e456711ca25b90e661c7669884>` = 0;
+		double :target:`front<doxid-structwater_1_1_ion_report_1aa50bdec70b39dea2e8dfbda719a7fb89>` = -1;
+		bool :target:`any<doxid-structwater_1_1_ion_report_1a437c0bceaa19a47bddb124a6c2d0d181>` = false;
+	};

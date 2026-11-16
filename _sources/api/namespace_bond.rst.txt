@@ -12,6 +12,26 @@ Overview
 
 Functions for bond-related analyses. :ref:`More...<details-namespacebond>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace bond {
+
+	// global functions
+
+	std::vector<std::vector<int>> :ref:`populateHbonds<doxid-namespacebond_1a0d2c82ff243a829941715b0932a784a5>`(std::string filename, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int targetFrame, int Htype, double distCutoff = 2.42, double angleCutoff = 30.0);
+	std::vector<std::vector<int>> :ref:`populateHbondsWithInputClouds<doxid-namespacebond_1ae349d52bd4fcad7dfc379793b3318f90>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, const std::vector<std::vector<int>>& nList, double distCutoff = 2.42, double angleCutoff = 30.0);
+	bool :ref:`donatedHydrogenBond<doxid-namespacebond_1a6da2515806a7ed8d96d2dfdcfcafd352>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, int acceptorIndex, int donorIndex, const std::vector<int>& donorHs, double distCutoff = 2.42, double angleCutoff = 30.0);
+	std::vector<std::vector<int>> :ref:`populateHbondsFromDonors<doxid-namespacebond_1a9f06dd103536f428975d2d74b6ca76aa>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, const std::vector<std::vector<int>>& nList, const std::vector<int>& donorHs, double distCutoff = 2.42, double angleCutoff = 30.0);
+	double :ref:`getHbondDistanceOH<doxid-namespacebond_1ad59cd4a5d8b517b98e0352d28609a892>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& oCloud, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, int oAtomIndex, int hAtomIndex);
+	std::vector<std::vector<int>> :ref:`populateBonds<doxid-namespacebond_1a8f1473246e183fb78fc3ceef0ef1c363>`(const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	std::vector<std::vector<int>> :ref:`populateBonds<doxid-namespacebond_1a0014dcec62d33a21212d98067bfeec5d>`(const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<:ref:`cage::iceType<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529>`>& atomTypes);
+	std::vector<std::vector<int>> :ref:`createBondsFromCages<doxid-namespacebond_1a41156a4dd14e84d45a1f6f22ba3a4b41>`(const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type, int& nRings);
+	std::vector<std::vector<int>> :ref:`trimBonds<doxid-namespacebond_1a4dc0b40b8a6510d7a0e48303302e9c41>`(std::vector<std::vector<int>> bonds);
+
+	} // namespace bond
 .. _details-namespacebond:
 
 Detailed Documentation
@@ -55,4 +75,97 @@ Changelog
 * Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 13, 2019
 
 * Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; populateHbonds
+.. _doxid-namespacebond_1a0d2c82ff243a829941715b0932a784a5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> populateHbonds(std::string filename, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int targetFrame, int Htype, double distCutoff = 2.42, double angleCutoff = 30.0)
+
+Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O O and O H vectors from the neighbour list already constructed. The geometric criterion defaults to the water values (acceptor H distance below 2.42 Angstrom, O-O-H angle below 30 degrees); other hydrogen-bonded systems pass their own thresholds
+
+.. index:: pair: function; populateHbondsWithInputClouds
+.. _doxid-namespacebond_1ae349d52bd4fcad7dfc379793b3318f90:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> populateHbondsWithInputClouds(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, const std::vector<std::vector<int>>& nList, double distCutoff = 2.42, double angleCutoff = 30.0)
+
+Create a vector of vectors (similar to the neighbour list conventions) containing the hydrogen bond connectivity information. Decides the existence of the hydrogen bond depending on the O O and O H vectors from the neighbour list already constructed, taking a PointCloud for the H atoms as input
+
+.. index:: pair: function; donatedHydrogenBond
+.. _doxid-namespacebond_1a6da2515806a7ed8d96d2dfdcfcafd352:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool donatedHydrogenBond(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, int acceptorIndex, int donorIndex, const std::vector<int>& donorHs, double distCutoff = 2.42, double angleCutoff = 30.0)
+
+Geometric test for one donor-acceptor assignment. donorHs are hCloud indices on the donor. O-O is gen::relDist(yCloud, acceptor, donor). O-H uses :ref:`gen::relDistFromPoint <doxid-namespacegen_1a2fbd5127b1fdc22c99f5cd6d57d4bf86>` (dump MIC).
+
+.. index:: pair: function; populateHbondsFromDonors
+.. _doxid-namespacebond_1a9f06dd103536f428975d2d74b6ca76aa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> populateHbondsFromDonors(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, const std::vector<std::vector<int>>& nList, const std::vector<int>& donorHs, double distCutoff = 2.42, double angleCutoff = 30.0)
+
+Hydrogen-bond network from an explicit donor-H set. donorHs are hCloud indices; each is paired with the heavy atom that shares its molID. Water callers build donorHs from hAtomMolList (two H per molecule).
+
+.. index:: pair: function; getHbondDistanceOH
+.. _doxid-namespacebond_1ad59cd4a5d8b517b98e0352d28609a892:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double getHbondDistanceOH(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& oCloud, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, int oAtomIndex, int hAtomIndex)
+
+Calculates the distance of the hydrogen bond between O and H (of different atoms), given the respective pointClouds and the indices to each atom
+
+.. index:: pair: function; populateBonds
+.. _doxid-namespacebond_1a8f1473246e183fb78fc3ceef0ef1c363:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> populateBonds(const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Create a vector of vectors containing bond connectivity information. May contain duplicates! Gets the bond information from the vector of vectors containing the neighbour list by index
+
+.. index:: pair: function; populateBonds
+.. _doxid-namespacebond_1a0014dcec62d33a21212d98067bfeec5d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> populateBonds(const std::vector<std::vector<int>>& nList, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<:ref:`cage::iceType<doxid-namespacecage_1aaac41828990e32b9d6e7db4426b61529>`>& atomTypes)
+
+Create a vector of vectors containing bond connectivity information Gets the bond information from the vector of vectors containing the neighbour list by index. Bonds between dummy atoms are not filled.
+
+.. index:: pair: function; createBondsFromCages
+.. _doxid-namespacebond_1a41156a4dd14e84d45a1f6f22ba3a4b41:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> createBondsFromCages(const std::vector<std::vector<int>>& rings, std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, :ref:`cage::cageType<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95>` type, int& nRings)
+
+Creates a vector of vectors containing bond connectivity information from the rings vector of vectors and cage information
+
+.. index:: pair: function; trimBonds
+.. _doxid-namespacebond_1a4dc0b40b8a6510d7a0e48303302e9c41:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> trimBonds(std::vector<std::vector<int>> bonds)
+
+Remove duplicate bonds.
 

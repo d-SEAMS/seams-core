@@ -1,0 +1,131 @@
+.. index:: pair: class; seams::Neighbours
+.. _doxid-classseams_1_1_neighbours:
+
+class seams::Neighbours
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Owned neighbour list. :ref:`More...<details-classseams_1_1_neighbours>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	class Neighbours: public :ref:`seams::detail::Handle<doxid-classseams_1_1detail_1_1_handle>` {
+	public:
+		// methods
+	
+		std::size_t :ref:`nnz<doxid-classseams_1_1_neighbours_1abd527879d1fe10c5c111a7d9bbdd9d96>`() const;
+		std::vector<int> :ref:`degrees<doxid-classseams_1_1_neighbours_1a37d5bc28acddb1f0011ff398a81cd1db>`() const;
+		std::vector<std::pair<int, int>> :ref:`pairs<doxid-classseams_1_1_neighbours_1a791751da6ff0a3728f76715180b12887>`() const;
+		:ref:`ChordlessCycles<doxid-structseams_1_1_chordless_cycles>` :ref:`chordless<doxid-classseams_1_1_neighbours_1a13edfc37618cf2779867c27eb72ed1fd>`(int size) const;
+	};
+
+Inherited Members
+-----------------
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-inherited-code-block
+
+	public:
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :ref:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:ref:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+
+.. _details-classseams_1_1_neighbours:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Owned neighbour list.
+
+Move-only. Destruction frees the C handle. The self entry is omitted. A neighbour list is not safe to share across threads.
+
+Methods
+-------
+
+.. index:: pair: function; nnz
+.. _doxid-classseams_1_1_neighbours_1abd527879d1fe10c5c111a7d9bbdd9d96:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t nnz() const
+
+Number of neighbour pairs, omitting self.
+
+
+
+.. rubric:: Returns:
+
+The pair count.
+
+.. index:: pair: function; degrees
+.. _doxid-classseams_1_1_neighbours_1a37d5bc28acddb1f0011ff398a81cd1db:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> degrees() const
+
+Degree of each atom.
+
+
+
+.. rubric:: Returns:
+
+One integer per atom. The self entry is not counted.
+
+.. index:: pair: function; pairs
+.. _doxid-classseams_1_1_neighbours_1a791751da6ff0a3728f76715180b12887:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::pair<int, int>> pairs() const
+
+Directed pairs ``(atom, neighbour)``.
+
+
+
+.. rubric:: Returns:
+
+One pair per stored column. Self is omitted.
+
+.. index:: pair: function; chordless
+.. _doxid-classseams_1_1_neighbours_1a13edfc37618cf2779867c27eb72ed1fd:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChordlessCycles<doxid-structseams_1_1_chordless_cycles>` chordless(int size) const
+
+Chordless cycles of one length on this graph.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- size
+
+		- Cycle length, from 3 through 12.
+
+
+
+.. rubric:: Returns:
+
+The rows and the per-atom counts of seams_rings_chordless.
+

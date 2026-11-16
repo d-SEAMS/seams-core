@@ -243,37 +243,272 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacesph.h
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaa9220b76da7400c9d934fa08ceeeba7a" id="r_gaa9220b76da7400c9d934fa08ceeeba7a"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a">spheriHarmo</a> (int orderL, std::array&lt; double, 2 &gt; radialCoord)</td></tr>
-<tr class="memitem:ga54a26a87d40f9d1be9253f71ecac02c0" id="r_ga54a26a87d40f9d1be9253f71ecac02c0"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0">spheriHarmoInto</a> (int orderL, std::array&lt; double, 2 &gt; radialCoord, std::vector&lt; std::complex&lt; double &gt; &gt; &amp;out)</td></tr>
-<tr class="memdesc:ga54a26a87d40f9d1be9253f71ecac02c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill <span class="tt">out</span> with Y_lm, m = -l .. +l. Reuses <span class="tt">out</span> capacity.  <br /></td></tr>
-<tr class="memitem:ga514fadfbfeabee5d144ef4102fb3004d" id="r_ga514fadfbfeabee5d144ef4102fb3004d"><td class="memItemLeft">std::array&lt; double, 2 &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga514fadfbfeabee5d144ef4102fb3004d">radialCoord</a> (std::array&lt; double, 3 &gt; cartCoord)</td></tr>
-<tr class="memitem:ga08491bfa3fa2f6bacdf997be433508c4" id="r_ga08491bfa3fa2f6bacdf997be433508c4"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga08491bfa3fa2f6bacdf997be433508c4">lookupTableQ3Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:ga08491bfa3fa2f6bacdf997be433508c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q3.  <br /></td></tr>
-<tr class="memitem:gaccbcfa30cf3762a55c59e7b632117af5" id="r_gaccbcfa30cf3762a55c59e7b632117af5"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaccbcfa30cf3762a55c59e7b632117af5">lookupTableQ3</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:gaccbcfa30cf3762a55c59e7b632117af5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q3 (m=0 to m=6).  <br /></td></tr>
-<tr class="memitem:ga453c3de59a751a26cad5e01a7cb26ed0" id="r_ga453c3de59a751a26cad5e01a7cb26ed0"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga453c3de59a751a26cad5e01a7cb26ed0">lookupTableQ4Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:ga453c3de59a751a26cad5e01a7cb26ed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q4.  <br /></td></tr>
-<tr class="memitem:gaf85e8aaa32c95aae99c0824db59e3f6f" id="r_gaf85e8aaa32c95aae99c0824db59e3f6f"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaf85e8aaa32c95aae99c0824db59e3f6f">lookupTableQ4</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:gaf85e8aaa32c95aae99c0824db59e3f6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q4 (m=0 to m=8).  <br /></td></tr>
-<tr class="memitem:ga004e7b144d261654c556c7e66fdd9b2e" id="r_ga004e7b144d261654c556c7e66fdd9b2e"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga004e7b144d261654c556c7e66fdd9b2e">lookupTableQ6Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:ga004e7b144d261654c556c7e66fdd9b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q6.  <br /></td></tr>
-<tr class="memitem:gadf0ba61f373430a782cbee2886628211" id="r_gadf0ba61f373430a782cbee2886628211"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gadf0ba61f373430a782cbee2886628211">lookupTableQ8Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:gadf0ba61f373430a782cbee2886628211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q8.  <br /></td></tr>
-<tr class="memitem:gac7a53e67f5244c83d541c78d7d7bf710" id="r_gac7a53e67f5244c83d541c78d7d7bf710"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gac7a53e67f5244c83d541c78d7d7bf710">lookupTableQ8</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:gac7a53e67f5244c83d541c78d7d7bf710"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q8 (m=0 to m=16).  <br /></td></tr>
-<tr class="memitem:ga63be01f86931b2a45e70606f5b8f545d" id="r_ga63be01f86931b2a45e70606f5b8f545d"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga63be01f86931b2a45e70606f5b8f545d">lookupTableQ6</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
-<tr class="memdesc:ga63be01f86931b2a45e70606f5b8f545d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q6 (m=0 to m=12).  <br /></td></tr>
+<tr class="memitem:aa9220b76da7400c9d934fa08ceeeba7a" id="r_aa9220b76da7400c9d934fa08ceeeba7a"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#aa9220b76da7400c9d934fa08ceeeba7a">spheriHarmo</a> (int orderL, std::array&lt; double, 2 &gt; radialCoord)</td></tr>
+<tr class="memitem:a54a26a87d40f9d1be9253f71ecac02c0" id="r_a54a26a87d40f9d1be9253f71ecac02c0"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a54a26a87d40f9d1be9253f71ecac02c0">spheriHarmoInto</a> (int orderL, std::array&lt; double, 2 &gt; radialCoord, std::vector&lt; std::complex&lt; double &gt; &gt; &amp;out)</td></tr>
+<tr class="memdesc:a54a26a87d40f9d1be9253f71ecac02c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill <span class="tt">out</span> with Y_lm, m = -l .. +l. Reuses <span class="tt">out</span> capacity.  <br /></td></tr>
+<tr class="memitem:a514fadfbfeabee5d144ef4102fb3004d" id="r_a514fadfbfeabee5d144ef4102fb3004d"><td class="memItemLeft">std::array&lt; double, 2 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a514fadfbfeabee5d144ef4102fb3004d">radialCoord</a> (std::array&lt; double, 3 &gt; cartCoord)</td></tr>
+<tr class="memitem:a08491bfa3fa2f6bacdf997be433508c4" id="r_a08491bfa3fa2f6bacdf997be433508c4"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a08491bfa3fa2f6bacdf997be433508c4">lookupTableQ3Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a08491bfa3fa2f6bacdf997be433508c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q3.  <br /></td></tr>
+<tr class="memitem:accbcfa30cf3762a55c59e7b632117af5" id="r_accbcfa30cf3762a55c59e7b632117af5"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#accbcfa30cf3762a55c59e7b632117af5">lookupTableQ3</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:accbcfa30cf3762a55c59e7b632117af5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q3 (m=0 to m=6).  <br /></td></tr>
+<tr class="memitem:a453c3de59a751a26cad5e01a7cb26ed0" id="r_a453c3de59a751a26cad5e01a7cb26ed0"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a453c3de59a751a26cad5e01a7cb26ed0">lookupTableQ4Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a453c3de59a751a26cad5e01a7cb26ed0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q4.  <br /></td></tr>
+<tr class="memitem:af85e8aaa32c95aae99c0824db59e3f6f" id="r_af85e8aaa32c95aae99c0824db59e3f6f"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af85e8aaa32c95aae99c0824db59e3f6f">lookupTableQ4</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:af85e8aaa32c95aae99c0824db59e3f6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q4 (m=0 to m=8).  <br /></td></tr>
+<tr class="memitem:a004e7b144d261654c556c7e66fdd9b2e" id="r_a004e7b144d261654c556c7e66fdd9b2e"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a004e7b144d261654c556c7e66fdd9b2e">lookupTableQ6Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a004e7b144d261654c556c7e66fdd9b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q6.  <br /></td></tr>
+<tr class="memitem:adf0ba61f373430a782cbee2886628211" id="r_adf0ba61f373430a782cbee2886628211"><td class="memItemLeft">std::vector&lt; std::complex&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#adf0ba61f373430a782cbee2886628211">lookupTableQ8Vec</a> (std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:adf0ba61f373430a782cbee2886628211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q8.  <br /></td></tr>
+<tr class="memitem:ac7a53e67f5244c83d541c78d7d7bf710" id="r_ac7a53e67f5244c83d541c78d7d7bf710"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ac7a53e67f5244c83d541c78d7d7bf710">lookupTableQ8</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:ac7a53e67f5244c83d541c78d7d7bf710"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q8 (m=0 to m=16).  <br /></td></tr>
+<tr class="memitem:a63be01f86931b2a45e70606f5b8f545d" id="r_a63be01f86931b2a45e70606f5b8f545d"><td class="memItemLeft">std::complex&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a63be01f86931b2a45e70606f5b8f545d">lookupTableQ6</a> (int m, std::array&lt; double, 2 &gt; angles)</td></tr>
+<tr class="memdesc:a63be01f86931b2a45e70606f5b8f545d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup table for Q6 (m=0 to m=12).  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions used for spherical harmonics. </p>
-<p>The recommended function for calculating the spherical-harmonics based complex vector is <a class="el" href="group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a">sph::spheriHarmo</a>. This function uses the <a href="https://www.boost.org/">Boost</a> libraries.</p>
+<p>The recommended function for calculating the spherical-harmonics based complex vector is <a class="el" href="#aa9220b76da7400c9d934fa08ceeeba7a">sph::spheriHarmo</a>. This function uses the <a href="https://www.boost.org/">Boost</a> libraries.</p>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md2"></a>
 Changelog</h3>
 <ul>
 <li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span class="obfuscator">.nosp@m.</span>a16t<span class="obfuscator">.nosp@m.</span>haug6<span class="obfuscator">.nosp@m.</span>46@g<span class="obfuscator">.nosp@m.</span>mail.<span class="obfuscator">.nosp@m.</span>com</a>]; date modified: Sept 19, 2019</li>
 <li>Rohit Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'rog'+'32'+'@hi'+'.i'+'s'; return false;">rog32<span class="obfuscator">.nosp@m.</span>@hi.<span class="obfuscator">.nosp@m.</span>is</a>]; date modified: Mar 20, 2021 </li>
 </ul>
-</div></div><!-- contents -->
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="accbcfa30cf3762a55c59e7b632117af5" name="accbcfa30cf3762a55c59e7b632117af5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accbcfa30cf3762a55c59e7b632117af5">&#9670;&#160;</a></span>lookupTableQ3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::complex&lt; double &gt; sph::lookupTableQ3 </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>m</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q3 (m=0 to m=6). </p>
+
+</div>
+</div>
+<a id="a08491bfa3fa2f6bacdf997be433508c4" name="a08491bfa3fa2f6bacdf997be433508c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a08491bfa3fa2f6bacdf997be433508c4">&#9670;&#160;</a></span>lookupTableQ3Vec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::complex&lt; double &gt; &gt; sph::lookupTableQ3Vec </td>
+          <td>(</td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q3. </p>
+
+</div>
+</div>
+<a id="af85e8aaa32c95aae99c0824db59e3f6f" name="af85e8aaa32c95aae99c0824db59e3f6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af85e8aaa32c95aae99c0824db59e3f6f">&#9670;&#160;</a></span>lookupTableQ4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::complex&lt; double &gt; sph::lookupTableQ4 </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>m</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q4 (m=0 to m=8). </p>
+
+</div>
+</div>
+<a id="a453c3de59a751a26cad5e01a7cb26ed0" name="a453c3de59a751a26cad5e01a7cb26ed0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a453c3de59a751a26cad5e01a7cb26ed0">&#9670;&#160;</a></span>lookupTableQ4Vec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::complex&lt; double &gt; &gt; sph::lookupTableQ4Vec </td>
+          <td>(</td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q4. </p>
+
+</div>
+</div>
+<a id="a63be01f86931b2a45e70606f5b8f545d" name="a63be01f86931b2a45e70606f5b8f545d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63be01f86931b2a45e70606f5b8f545d">&#9670;&#160;</a></span>lookupTableQ6()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::complex&lt; double &gt; sph::lookupTableQ6 </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>m</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q6 (m=0 to m=12). </p>
+
+</div>
+</div>
+<a id="a004e7b144d261654c556c7e66fdd9b2e" name="a004e7b144d261654c556c7e66fdd9b2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a004e7b144d261654c556c7e66fdd9b2e">&#9670;&#160;</a></span>lookupTableQ6Vec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::complex&lt; double &gt; &gt; sph::lookupTableQ6Vec </td>
+          <td>(</td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q6. </p>
+
+</div>
+</div>
+<a id="ac7a53e67f5244c83d541c78d7d7bf710" name="ac7a53e67f5244c83d541c78d7d7bf710"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7a53e67f5244c83d541c78d7d7bf710">&#9670;&#160;</a></span>lookupTableQ8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::complex&lt; double &gt; sph::lookupTableQ8 </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>m</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q8 (m=0 to m=16). </p>
+
+</div>
+</div>
+<a id="adf0ba61f373430a782cbee2886628211" name="adf0ba61f373430a782cbee2886628211"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf0ba61f373430a782cbee2886628211">&#9670;&#160;</a></span>lookupTableQ8Vec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::complex&lt; double &gt; &gt; sph::lookupTableQ8Vec </td>
+          <td>(</td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>angles</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Lookup table for Q8. </p>
+
+</div>
+</div>
+<a id="a514fadfbfeabee5d144ef4102fb3004d" name="a514fadfbfeabee5d144ef4102fb3004d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a514fadfbfeabee5d144ef4102fb3004d">&#9670;&#160;</a></span>radialCoord()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::array&lt; double, 2 &gt; sph::radialCoord </td>
+          <td>(</td>
+          <td class="paramtype">std::array&lt; double, 3 &gt;</td>          <td class="paramname"><span class="paramname"><em>cartCoord</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aa9220b76da7400c9d934fa08ceeeba7a" name="aa9220b76da7400c9d934fa08ceeeba7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9220b76da7400c9d934fa08ceeeba7a">&#9670;&#160;</a></span>spheriHarmo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::complex&lt; double &gt; &gt; sph::spheriHarmo </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>radialCoord</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a54a26a87d40f9d1be9253f71ecac02c0" name="a54a26a87d40f9d1be9253f71ecac02c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54a26a87d40f9d1be9253f71ecac02c0">&#9670;&#160;</a></span>spheriHarmoInto()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void sph::spheriHarmoInto </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>orderL</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::array&lt; double, 2 &gt;</td>          <td class="paramname"><span class="paramname"><em>radialCoord</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::complex&lt; double &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Fill <span class="tt">out</span> with Y_lm, m = -l .. +l. Reuses <span class="tt">out</span> capacity. </p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">
 <div id="page-nav-resize-handle"></div>

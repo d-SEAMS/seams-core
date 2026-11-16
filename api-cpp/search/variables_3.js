@@ -2,9 +2,22 @@ var searchData=
 [
   ['danglingedges_0',['danglingEdges',['../structcage_1_1FoundCage.html#a9ef2755df5d9fa2bb11e5543b0f02004',1,'cage::FoundCage']]],
   ['ddc_1',['ddc',['../structring_1_1CageAffiliation.html#a62e4f552cead2f3be6c2de3cc23e4952',1,'ring::CageAffiliation::ddc'],['../structring_1_1SeededAtomLabels.html#a850d14e4cf97556a4d09c6260a626b40',1,'ring::SeededAtomLabels::ddc']]],
-  ['density_2',['density',['../structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e',1,'phase::IceXXIHit']]],
-  ['depth_3',['depth',['../structtopo_1_1LibraryMatch.html#ade4b4a551af0a37500a5f67bd6452e1c',1,'topo::LibraryMatch']]],
-  ['device_4',['device',['../structgpu_1_1Plan.html#a51255a1bbc92f0f62657f764bd44fe29',1,'gpu::Plan']]],
-  ['downloadms_5',['downloadMs',['../structgpu_1_1BatchResult.html#ad4ba81e3f6d6bb265a5e689aee0de4fc',1,'gpu::BatchResult']]],
-  ['dropped_6',['dropped',['../structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f',1,'ring::PackingCertificate']]]
+  ['defined_2',['defined',['../structsite_1_1RejectionCoefficient.html#a32d741a29d36faf7a950d0551458dd95',1,'site::RejectionCoefficient::defined'],['../structiface_1_1Front.html#a16d6f11e37b90eceb761644b350f3328',1,'iface::Front::defined'],['../structiface_1_1Profile.html#a0c5da37eff6b9622425e537e4e51f260',1,'iface::Profile::defined'],['../structiface_1_1WillardChandler.html#a19b25781c0272c17f766504c193193b7',1,'iface::WillardChandler::defined'],['../structscience_1_1Front.html#a3225164eefddc154c7dbf7e4591f4d2b',1,'science::Front::defined'],['../structscience_1_1Layers.html#a14a51a9eeacc250bb71e4b4ee40448f0',1,'science::Layers::defined'],['../structscience_1_1CriticalSize.html#ad56f939d1b3e9a4a1145ef98d906921c',1,'science::CriticalSize::defined'],['../structseams_1_1Rejection.html#a2593a0d352eecc7a67d1ab0e2f1be88a',1,'seams::Rejection::defined']]],
+  ['density_3',['density',['../structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e',1,'phase::IceXXIHit::density'],['../structseams_1_1DensityProfile.html#a95186a4fbcd7f20f255c6006c4dc8b8e',1,'seams::DensityProfile::density']]],
+  ['densitywidth_4',['densityWidth',['../structiface_1_1WillardChandler.html#aa5291bdc63998373f8c85270d8ac87ee',1,'iface::WillardChandler']]],
+  ['depth_5',['depth',['../structtopo_1_1LibraryMatch.html#ade4b4a551af0a37500a5f67bd6452e1c',1,'topo::LibraryMatch']]],
+  ['depthagree_6',['depthAgree',['../structiface_1_1Study.html#a360994b36b17763bb185bcd82a45a22d',1,'iface::Study']]],
+  ['depthagreen_7',['depthAgreeN',['../structiface_1_1Study.html#a650724652de17ba7517a0512afc53245',1,'iface::Study']]],
+  ['depthdisagree_8',['depthDisagree',['../structiface_1_1Study.html#a48e96760472e8a1f45d6dcff189c9a69',1,'iface::Study']]],
+  ['depthdisagreen_9',['depthDisagreeN',['../structiface_1_1Study.html#a15b4a45ed794541f7f5655e34a9fb151',1,'iface::Study']]],
+  ['device_10',['device',['../structgpu_1_1Plan.html#a51255a1bbc92f0f62657f764bd44fe29',1,'gpu::Plan']]],
+  ['dframe_11',['dFrame',['../structnucleation_1_1Shift.html#a43e2bc9f99230f24ed434557dea6728a',1,'nucleation::Shift']]],
+  ['diamondcubic_12',['diamondCubic',['../structiface_1_1Study.html#a4f29c357a4bb69f36bfd18e0dea38e2a',1,'iface::Study']]],
+  ['diamondhex_13',['diamondHex',['../structiface_1_1Study.html#a35198c3867d2893e49121862d8c72809',1,'iface::Study']]],
+  ['diamondother_14',['diamondOther',['../structiface_1_1Study.html#a79bf381313f1515fea338f3565200477',1,'iface::Study']]],
+  ['disagree_15',['disagree',['../structiface_1_1Bin.html#aa2119088056a27cd6a0ff09bf9301dcd',1,'iface::Bin']]],
+  ['distance_16',['distance',['../structseams_1_1BondOptions.html#ad9c5670dd6b74ec871da289542e704fe',1,'seams::BondOptions']]],
+  ['downloadms_17',['downloadMs',['../structgpu_1_1BatchResult.html#ad4ba81e3f6d6bb265a5e689aee0de4fc',1,'gpu::BatchResult']]],
+  ['dropped_18',['dropped',['../structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f',1,'ring::PackingCertificate']]],
+  ['dsize_19',['dSize',['../structnucleation_1_1Shift.html#a1e8b191c1a9a48d90b3c548220c5b81f',1,'nucleation::Shift']]]
 ];

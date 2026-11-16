@@ -16,6 +16,10 @@ var namespacephase =
     [ "hydrogenMSD", "namespacephase.html#ac8231bd6a050a06d0f6c90f15aafb0fb", null ],
     [ "iceXXILibrary", "namespacephase.html#aabcf1d0b33a4557dbe42262621400d5f", null ],
     [ "localDensity", "namespacephase.html#a51566a8a99570b9169d7046326bc9544", null ],
+    [ "numberDensity", "namespacephase.html#a083e89f93fde59a75b4170104e235ddf", null ],
     [ "openChannelCount", "namespacephase.html#a896a28798e9ac2e9e32e8807ca720cc1", null ],
-    [ "protonKey", "namespacephase.html#a42af4d330d8e1ad0aeb8da9ffea7cfaa", null ]
+    [ "protonKey", "namespacephase.html#a42af4d330d8e1ad0aeb8da9ffea7cfaa", null ],
+    [ "kIceIhMassDensity", "namespacephase.html#a1093758960f53ee03ad27ab01ac8961b", null ],
+    [ "kIceNumberDensityMax", "namespacephase.html#a0eedbca606ffe470017521f827850d0c", null ],
+    [ "kIceVIMassDensity", "namespacephase.html#a4d70567f43ed91b21c2cf23364150a42", null ]
 ];

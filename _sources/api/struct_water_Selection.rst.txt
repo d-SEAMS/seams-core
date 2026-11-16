@@ -1,0 +1,25 @@
+.. index:: pair: struct; water::Selection
+.. _doxid-structwater_1_1_selection:
+
+struct water::Selection
+=======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/water_select.hpp>
+	
+	struct Selection {
+		// fields
+	
+		std::vector<char> :target:`keep<doxid-structwater_1_1_selection_1a0be3f95c1424671cd951804b31469d90>`;
+		std::vector<int> :target:`index<doxid-structwater_1_1_selection_1a9c69d41794e1951f7f10b97dcc763c91>`;
+		std::vector<int> :target:`oxygen_types<doxid-structwater_1_1_selection_1a4e07566e2023a60ecf0b36f990dc0608>`;
+		int :target:`n_oxygen<doxid-structwater_1_1_selection_1ae9ec4266f83370847af98942c311db44>` = 0;
+	};

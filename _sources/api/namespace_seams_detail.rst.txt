@@ -1,0 +1,33 @@
+.. index:: pair: namespace; seams::detail
+.. _doxid-namespaceseams_1_1detail:
+
+namespace seams::detail
+=======================
+
+.. toctree::
+	:hidden:
+
+	class_seams_detail_Handle.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace detail {
+
+	// classes
+
+	template <class T, void(*)(T*) Destroy>
+	class :ref:`Handle<doxid-classseams_1_1detail_1_1_handle>`;
+
+	// global functions
+
+	void :target:`check<doxid-namespaceseams_1_1detail_1a2318c07d1ce9ec1e7b770df041fda676>`(int status, const void* handle);
+
+	template <class Call>
+	std::string :target:`copy_text<doxid-namespaceseams_1_1detail_1a680106de2d898c9ebfc695bbbff7844b>`(Call call, const void* handle);
+
+	} // namespace detail

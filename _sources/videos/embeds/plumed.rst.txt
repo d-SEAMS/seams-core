@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-plumed" src="https://odysee.com/$/embed/dseams-plumed:ddd2f9e27e0a126ef3feba3bb6da8378464e57df" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/plumed.vtt">docs/videos/plumed/captions.vtt</a></p>
+   <p>PLUMED driver.</p>

@@ -1,0 +1,168 @@
+.. index:: pair: namespace; nucleation
+.. _doxid-namespacenucleation:
+
+namespace nucleation
+====================
+
+.. toctree::
+	:hidden:
+
+	enum_nucleation_CommittorFate.rst
+	struct_nucleation_Ascent.rst
+	struct_nucleation_CommittorCall.rst
+	struct_nucleation_FrameRecord.rst
+	struct_nucleation_GrowBasin.rst
+	struct_nucleation_HalfRise.rst
+	struct_nucleation_Lead.rst
+	struct_nucleation_Shift.rst
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace nucleation {
+
+	// enums
+
+	enum :ref:`CommittorFate<doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842>`;
+
+	// structs
+
+	struct :ref:`Ascent<doxid-structnucleation_1_1_ascent>`;
+	struct :ref:`CommittorCall<doxid-structnucleation_1_1_committor_call>`;
+	struct :ref:`FrameRecord<doxid-structnucleation_1_1_frame_record>`;
+	struct :ref:`GrowBasin<doxid-structnucleation_1_1_grow_basin>`;
+	struct :ref:`HalfRise<doxid-structnucleation_1_1_half_rise>`;
+	struct :ref:`Lead<doxid-structnucleation_1_1_lead>`;
+	struct :ref:`Shift<doxid-structnucleation_1_1_shift>`;
+
+	// global variables
+
+	double :ref:`kCutoffA<doxid-namespacenucleation_1a3bc244ef7bf44479500a58d1387a0373>` = 3.5;
+	int :ref:`kRingDepth<doxid-namespacenucleation_1a64fc5d22d7f2818a0d819ee1a947f087>` = 7;
+	double :ref:`kQ6BarIceCut<doxid-namespacenucleation_1af2f1477e5e5f99cbe98f4ab5b95091ae>` = 0.36;
+	double :ref:`kQ6SolidCutoffA<doxid-namespacenucleation_1ae22c8a1c01ef593e140430321e5e0408>` = 3.2;
+	double :target:`kQ6SolidCut<doxid-namespacenucleation_1af73c2233ed742db47c5be20f42681db7>` = 0.5;
+
+	// global functions
+
+	std::vector<double> :ref:`q6DotScore<doxid-namespacenucleation_1a047d583af8b7c503376f262d63dc9ade>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& offsets, const std::vector<int>& cols);
+	:ref:`FrameRecord<doxid-structnucleation_1_1_frame_record>` :ref:`analyzeFrame<doxid-namespacenucleation_1a64e04b196b84bc47a828f2875823e5b8>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, double cutoff, int ringDepth, int typeI, double q6Cut, int frame);
+	double :ref:`stackFraction<doxid-namespacenucleation_1a536f149502c3e4e03088aa2287700cb2>`(int cubic, int hexagonal);
+	:ref:`Ascent<doxid-structnucleation_1_1_ascent>` :target:`finalAscent<doxid-namespacenucleation_1a262df71b584718ece21536f3c0235c1c>`(const std::vector<double>& series);
+	:ref:`GrowBasin<doxid-structnucleation_1_1_grow_basin>` :target:`growBasin<doxid-namespacenucleation_1af17120d989b41a986f036b3ff5e3fb1b>`(const std::vector<double>& series);
+	:ref:`CommittorCall<doxid-structnucleation_1_1_committor_call>` :target:`committorOf<doxid-namespacenucleation_1a6ab0c778ff2e5e2e9e6ccd004131da2f>`(const std::vector<double>& series, int molecules);
+	:ref:`HalfRise<doxid-structnucleation_1_1_half_rise>` :target:`halfRise<doxid-namespacenucleation_1aa82d23fac82576f11e89429522c25ba8>`(const std::vector<double>& series);
+	:ref:`Lead<doxid-structnucleation_1_1_lead>` :ref:`ringLead<doxid-namespacenucleation_1a24db8d7542dd5836a3e8026d591accd9>`(const std::vector<double>& ringFraction, const std::vector<double>& iceFraction);
+	:ref:`Shift<doxid-structnucleation_1_1_shift>` :ref:`definitionShift<doxid-namespacenucleation_1a607b48d72ffc919887fa6243d2eb4e9d>`(int sizeA, int frameA, int sizeB, int frameB);
+
+	} // namespace nucleation
+.. _details-namespacenucleation:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Variables
+----------------
+
+.. index:: pair: variable; kCutoffA
+.. _doxid-namespacenucleation_1a3bc244ef7bf44479500a58d1387a0373:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kCutoffA = 3.5
+
+Published CHILL+ cutoff. Not a fitted parameter.
+
+.. index:: pair: variable; kRingDepth
+.. _doxid-namespacenucleation_1a64fc5d22d7f2818a0d819ee1a947f087:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int kRingDepth = 7
+
+Primitive rings through this size. Depth 7 is the adjacency-row search.
+
+.. index:: pair: variable; kQ6BarIceCut
+.. _doxid-namespacenucleation_1af2f1477e5e5f99cbe98f4ab5b95091ae:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kQ6BarIceCut = 0.36
+
+Lechner-Dellago :math:`\bar{q}_6` above this value is an ice-like environment. Set from the gap between a perfect mW Ic crystal and a liquid reference, not from the nucleation trajectory.
+
+.. index:: pair: variable; kQ6SolidCutoffA
+.. _doxid-namespacenucleation_1ae22c8a1c01ef593e140430321e5e0408:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kQ6SolidCutoffA = 3.2
+
+q6 solid criterion of ten Wolde, Ruiz-Montero and Frenkel, J. Chem. Phys. 104, 9932 (1996), in the mW form of Haji-Akbari and Debenedetti, PNAS 112(34) (2015), doi:10.1073/pnas.1509267112, SI Table S1: neighbours within 3.2 A (the first minimum of the mW g(r)), and a molecule is solid when the mean over its neighbours of the normalised q6(i).q6\*(j) exceeds 0.5. The solid cluster is the largest component of solid molecules on the same 3.2 A graph. The Reinhardt chain exclusion is not applied.
+
+Global Functions
+----------------
+
+.. index:: pair: function; q6DotScore
+.. _doxid-namespacenucleation_1a047d583af8b7c503376f262d63dc9ade:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> q6DotScore(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& offsets, const std::vector<int>& cols)
+
+Per-molecule ten Wolde q6 score: the mean over neighbours within cutoff of ``Re q6(i).q6*(j) / (|q6(i)| |q6(j)|)``. A molecule without neighbours scores 0. The box is orthorhombic.
+
+.. index:: pair: function; analyzeFrame
+.. _doxid-namespacenucleation_1a64e04b196b84bc47a828f2875823e5b8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`FrameRecord<doxid-structnucleation_1_1_frame_record>` analyzeFrame(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, double cutoff, int ringDepth, int typeI, double q6Cut, int frame)
+
+Label one frame. Leaves iceType as the published CHILL+ label. typeI selects the molecules passed to q6-bar. q6Cut is the ice cut on :math:`\bar{q}_6`.
+
+.. index:: pair: function; stackFraction
+.. _doxid-namespacenucleation_1a536f149502c3e4e03088aa2287700cb2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double stackFraction(int cubic, int hexagonal)
+
+Cubic / (cubic + hexagonal). Quiet NaN when the denominator is 0.
+
+.. index:: pair: function; ringLead
+.. _doxid-namespacenucleation_1a24db8d7542dd5836a3e8026d591accd9:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Lead<doxid-structnucleation_1_1_lead>` ringLead(const std::vector<double>& ringFraction, const std::vector<double>& iceFraction)
+
+Ring signal is n6 / (n5 + n6). Ice signal is the ice-like count divided by the molecule count. Both are intensive.
+
+.. index:: pair: function; definitionShift
+.. _doxid-namespacenucleation_1a607b48d72ffc919887fa6243d2eb4e9d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Shift<doxid-structnucleation_1_1_shift>` definitionShift(int sizeA, int frameA, int sizeB, int frameB)
+
+How far definition b moves the onset size and the onset frame relative to definition a. dSize = b.size - a.size at each onset.
+

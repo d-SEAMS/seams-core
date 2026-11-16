@@ -7,6 +7,12 @@ namespace molSys
 .. toctree::
 	:hidden:
 
+	enum_molSys_atom_state_type.rst
+	enum_molSys_bond_type.rst
+	struct_molSys_Point.rst
+	struct_molSys_PointCloud.rst
+	struct_molSys_Result.rst
+
 Overview
 ~~~~~~~~
 
@@ -19,6 +25,11 @@ Bare-bones structs used throughout the architecture. :ref:`More...<details-names
 	
 	namespace molSys {
 
+	// enums
+
+	enum :ref:`atom_state_type<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>`;
+	enum :ref:`bond_type<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328>`;
+
 	// structs
 
 	template <CoordinateScalar T>
@@ -28,6 +39,14 @@ Bare-bones structs used throughout the architecture. :ref:`More...<details-names
 	struct :ref:`PointCloud<doxid-structmol_sys_1_1_point_cloud>`;
 
 	struct :ref:`Result<doxid-structmol_sys_1_1_result>`;
+
+	// global functions
+
+	std::unordered_map<int, int> :ref:`createIDMolIDmap<doxid-namespacemol_sys_1ad236d6a772972d62643eb5d135e3d50d>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	std::unordered_multimap<int, int> :ref:`createMolIDAtomIDMultiMap<doxid-namespacemol_sys_1afb65f01cfbb0d80cfa7b311d68d9c109>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	std::vector<std::vector<int>> :ref:`hAtomMolList<doxid-namespacemol_sys_1aafb58fd2a00105ec154c18116cdea9ae>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& oCloud);
+	int :ref:`searchMolList<doxid-namespacemol_sys_1a4c1de58730efe0454ce4a92f1a96231b>`(const std::vector<std::vector<int>>& molList, int molIDtoFind);
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :ref:`clearPointCloud<doxid-namespacemol_sys_1a68c5a77ae0efb6cbc02686676f2125c6>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
 
 	} // namespace molSys
 .. _details-namespacemol_sys:
@@ -63,4 +82,57 @@ Changelog
 * Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Sept 19, 2019
 
 * Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; createIDMolIDmap
+.. _doxid-namespacemol_sys_1ad236d6a772972d62643eb5d135e3d50d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::unordered_map<int, int> createIDMolIDmap(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Creates an unordered map, with the atomIDs as keys and molecular IDs as the values
+
+.. index:: pair: function; createMolIDAtomIDMultiMap
+.. _doxid-namespacemol_sys_1afb65f01cfbb0d80cfa7b311d68d9c109:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::unordered_multimap<int, int> createMolIDAtomIDMultiMap(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+Creates an multimap with molecule IDs of the atoms as the keys and the atom IDs as the values. More than one atom can have the same molecule ID
+
+.. index:: pair: function; hAtomMolList
+.. _doxid-namespacemol_sys_1aafb58fd2a00105ec154c18116cdea9ae:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> hAtomMolList(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& hCloud, :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& oCloud)
+
+Returns a vector of vectors, which contains the molIDs in the first column, and the hydrogen atom indices (not atom IDs) in the row
+
+.. index:: pair: function; searchMolList
+.. _doxid-namespacemol_sys_1a4c1de58730efe0454ce4a92f1a96231b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int searchMolList(const std::vector<std::vector<int>>& molList, int molIDtoFind)
+
+This function searches a vector of vectors molList, for a particular molecular ID, and returns the index in molList
+
+.. index:: pair: function; clearPointCloud
+.. _doxid-namespacemol_sys_1a68c5a77ae0efb6cbc02686676f2125c6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> clearPointCloud(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
+
+//! Function for clearing vectors in :ref:`PointCloud <doxid-structmol_sys_1_1_point_cloud>` after multiple usage
 

@@ -1,0 +1,67 @@
+.. index:: pair: struct; seams::BrineProfile
+.. _doxid-structseams_1_1_brine_profile:
+
+struct seams::BrineProfile
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Concentration profile along the brine axis. :ref:`More...<details-structseams_1_1_brine_profile>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct BrineProfile {
+		// fields
+	
+		std::vector<double> :ref:`coordinate<doxid-structseams_1_1_brine_profile_1a32bbb86fe544222f10d15c7a63d4c45c>`;
+		std::vector<double> :ref:`molality<doxid-structseams_1_1_brine_profile_1a200249f563768c927d27ecc9c4b9bc04>`;
+		std::vector<double> :ref:`ice_fraction<doxid-structseams_1_1_brine_profile_1a2a11d68d0fa81121bc65983c32ff7550>`;
+	};
+.. _details-structseams_1_1_brine_profile:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Concentration profile along the brine axis.
+
+Fields
+------
+
+.. index:: pair: variable; coordinate
+.. _doxid-structseams_1_1_brine_profile_1a32bbb86fe544222f10d15c7a63d4c45c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> coordinate
+
+Bin centers, Angstrom.
+
+.. index:: pair: variable; molality
+.. _doxid-structseams_1_1_brine_profile_1a200249f563768c927d27ecc9c4b9bc04:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> molality
+
+mol/kg.
+
+.. index:: pair: variable; ice_fraction
+.. _doxid-structseams_1_1_brine_profile_1a2a11d68d0fa81121bc65983c32ff7550:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> ice_fraction
+
+Dimensionless.
+

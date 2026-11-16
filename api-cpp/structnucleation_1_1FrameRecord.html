@@ -1,0 +1,1020 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: nucleation::FrameRecord Struct Reference</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.14.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('structnucleation_1_1FrameRecord.html','','structnucleation_1_1FrameRecord-members'); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">nucleation::FrameRecord Struct Reference</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p><code>#include &lt;<a class="el" href="nucleation__pathway_8hpp_source.html">src/include/internal/nucleation_pathway.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a361b7fd80ffc66fd55d24fe46e2d7c8b" id="r_a361b7fd80ffc66fd55d24fe46e2d7c8b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a361b7fd80ffc66fd55d24fe46e2d7c8b">frame</a> = 0</td></tr>
+<tr class="memitem:a0f0c1f60bbb1a7c4d352cd82b5c093b3" id="r_a0f0c1f60bbb1a7c4d352cd82b5c093b3"><td class="memItemLeft">long long&#160;</td><td class="memItemRight"><a class="el" href="#a0f0c1f60bbb1a7c4d352cd82b5c093b3">timestep</a> = 0</td></tr>
+<tr class="memitem:a726a5d69d146d7cd2558ae2c3cbf3d38" id="r_a726a5d69d146d7cd2558ae2c3cbf3d38"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a726a5d69d146d7cd2558ae2c3cbf3d38">nop</a> = 0</td></tr>
+<tr class="memitem:aa860e6255e88e382e4d32ee462e2ab39" id="r_aa860e6255e88e382e4d32ee462e2ab39"><td class="memItemLeft">long long&#160;</td><td class="memItemRight"><a class="el" href="#aa860e6255e88e382e4d32ee462e2ab39">ringCount</a> [8] = {}</td></tr>
+<tr class="memdesc:aa860e6255e88e382e4d32ee462e2ab39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Primitive rings of each size. Index is the ring size. 0 and 1 stay 0.  <br /></td></tr>
+<tr class="memitem:ad085e3ee3ce53381bc1120181b6a4135" id="r_ad085e3ee3ce53381bc1120181b6a4135"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ad085e3ee3ce53381bc1120181b6a4135">chillCubic</a> = 0</td></tr>
+<tr class="memitem:ac486c61b5fb9792804184d9755181a5e" id="r_ac486c61b5fb9792804184d9755181a5e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac486c61b5fb9792804184d9755181a5e">chillHex</a> = 0</td></tr>
+<tr class="memitem:ad4430aad94e3425b463c229a674785d7" id="r_ad4430aad94e3425b463c229a674785d7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ad4430aad94e3425b463c229a674785d7">chillInter</a> = 0</td></tr>
+<tr class="memitem:a32949cee9e6626019b6c26544550a980" id="r_a32949cee9e6626019b6c26544550a980"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a32949cee9e6626019b6c26544550a980">chillClath</a> = 0</td></tr>
+<tr class="memitem:ab9e4b19bff8a79a8d54c772f92d59848" id="r_ab9e4b19bff8a79a8d54c772f92d59848"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab9e4b19bff8a79a8d54c772f92d59848">chillInterClath</a> = 0</td></tr>
+<tr class="memitem:adf4c60fa57cda08898d63d00d2d617ca" id="r_adf4c60fa57cda08898d63d00d2d617ca"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#adf4c60fa57cda08898d63d00d2d617ca">chillWater</a> = 0</td></tr>
+<tr class="memitem:a87d28f0d62c5bccd8e422e33b494f832" id="r_a87d28f0d62c5bccd8e422e33b494f832"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a87d28f0d62c5bccd8e422e33b494f832">ovitoCubic</a> = 0</td></tr>
+<tr class="memitem:a4d92d4425cddd1f960b12252baa21fd8" id="r_a4d92d4425cddd1f960b12252baa21fd8"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4d92d4425cddd1f960b12252baa21fd8">ovitoHex</a> = 0</td></tr>
+<tr class="memitem:a910d2bc380d31d978654ea3923ac67a1" id="r_a910d2bc380d31d978654ea3923ac67a1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a910d2bc380d31d978654ea3923ac67a1">ovitoInter</a> = 0</td></tr>
+<tr class="memitem:ae8d146450ea369c4dace47717165e778" id="r_ae8d146450ea369c4dace47717165e778"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae8d146450ea369c4dace47717165e778">ovitoClath</a> = 0</td></tr>
+<tr class="memitem:a53512557e94460cb3b60d4c94e91ab55" id="r_a53512557e94460cb3b60d4c94e91ab55"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a53512557e94460cb3b60d4c94e91ab55">ovitoInterClath</a> = 0</td></tr>
+<tr class="memitem:af0d80e996e397ad75a5e6f136f1edf9e" id="r_af0d80e996e397ad75a5e6f136f1edf9e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af0d80e996e397ad75a5e6f136f1edf9e">ovitoWater</a> = 0</td></tr>
+<tr class="memitem:a9443aacb9ca52493d4ec9ad6fa9a592d" id="r_a9443aacb9ca52493d4ec9ad6fa9a592d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9443aacb9ca52493d4ec9ad6fa9a592d">symCubic</a> = 0</td></tr>
+<tr class="memitem:aa1d3e714650ce473976dbc7553f9b82e" id="r_aa1d3e714650ce473976dbc7553f9b82e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa1d3e714650ce473976dbc7553f9b82e">symHex</a> = 0</td></tr>
+<tr class="memitem:a549a24b459b68027343c9a29b919ae0e" id="r_a549a24b459b68027343c9a29b919ae0e"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a549a24b459b68027343c9a29b919ae0e">q6barMean</a> = 0</td></tr>
+<tr class="memitem:af154d34d36f13feb34973251968fa215" id="r_af154d34d36f13feb34973251968fa215"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#af154d34d36f13feb34973251968fa215">q6barP50</a> = 0</td></tr>
+<tr class="memitem:ab6629222f4d6f0455e34e126ddfd0169" id="r_ab6629222f4d6f0455e34e126ddfd0169"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab6629222f4d6f0455e34e126ddfd0169">q6barIce</a> = 0</td></tr>
+<tr class="memitem:a6cd74e949e22133d8200f1ad404afffa" id="r_a6cd74e949e22133d8200f1ad404afffa"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6cd74e949e22133d8200f1ad404afffa">nChillCore</a> = 0</td></tr>
+<tr class="memitem:a5a1ec6e925b2ac452d4a87102a23879a" id="r_a5a1ec6e925b2ac452d4a87102a23879a"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5a1ec6e925b2ac452d4a87102a23879a">cChillCore</a> = 0</td></tr>
+<tr class="memitem:a6f0ea23563bf7661b2faaa173d59ada4" id="r_a6f0ea23563bf7661b2faaa173d59ada4"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6f0ea23563bf7661b2faaa173d59ada4">hChillCore</a> = 0</td></tr>
+<tr class="memitem:a30a34109d9972284cb706d7c1288e20b" id="r_a30a34109d9972284cb706d7c1288e20b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a30a34109d9972284cb706d7c1288e20b">nChillExt</a> = 0</td></tr>
+<tr class="memitem:ae108d2ebebd6aae9425c092b2b666d60" id="r_ae108d2ebebd6aae9425c092b2b666d60"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae108d2ebebd6aae9425c092b2b666d60">cChillExt</a> = 0</td></tr>
+<tr class="memitem:a9d95e2b0b82df4cf50e985f495511a05" id="r_a9d95e2b0b82df4cf50e985f495511a05"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9d95e2b0b82df4cf50e985f495511a05">hChillExt</a> = 0</td></tr>
+<tr class="memitem:a6aab0d669e14c872f1938966538869ff" id="r_a6aab0d669e14c872f1938966538869ff"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6aab0d669e14c872f1938966538869ff">nOvitoCore</a> = 0</td></tr>
+<tr class="memitem:a192494834dd17325ff2408532d17eb09" id="r_a192494834dd17325ff2408532d17eb09"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a192494834dd17325ff2408532d17eb09">cOvitoCore</a> = 0</td></tr>
+<tr class="memitem:a5d6f75be8cd680b04b71c9b6d57bf35b" id="r_a5d6f75be8cd680b04b71c9b6d57bf35b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5d6f75be8cd680b04b71c9b6d57bf35b">hOvitoCore</a> = 0</td></tr>
+<tr class="memitem:a3565bce56f8d7bf24c759b9a353f3f66" id="r_a3565bce56f8d7bf24c759b9a353f3f66"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3565bce56f8d7bf24c759b9a353f3f66">nOvitoExt</a> = 0</td></tr>
+<tr class="memitem:a0949ce58c20c8388fccaadce9738933c" id="r_a0949ce58c20c8388fccaadce9738933c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0949ce58c20c8388fccaadce9738933c">cOvitoExt</a> = 0</td></tr>
+<tr class="memitem:abbcb93e9558d8f7cb40f28109f5d6d17" id="r_abbcb93e9558d8f7cb40f28109f5d6d17"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#abbcb93e9558d8f7cb40f28109f5d6d17">hOvitoExt</a> = 0</td></tr>
+<tr class="memitem:a32a1add9b985d7f19e45722e3ae5b85f" id="r_a32a1add9b985d7f19e45722e3ae5b85f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a32a1add9b985d7f19e45722e3ae5b85f">nQ6</a> = 0</td></tr>
+<tr class="memitem:a1db5185a6e64185b71e2a9297900d781" id="r_a1db5185a6e64185b71e2a9297900d781"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a1db5185a6e64185b71e2a9297900d781">cQ6</a> = 0</td></tr>
+<tr class="memitem:a0d74de83c8a67df58b9e16ef82e4ed09" id="r_a0d74de83c8a67df58b9e16ef82e4ed09"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0d74de83c8a67df58b9e16ef82e4ed09">hQ6</a> = 0</td></tr>
+<tr class="memitem:a0a0a0f95f888315189a81efadd098a45" id="r_a0a0a0f95f888315189a81efadd098a45"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0a0a0f95f888315189a81efadd098a45">nSym</a> = 0</td></tr>
+<tr class="memitem:afa9207e9993ea6199d342cfd0507b3dd" id="r_afa9207e9993ea6199d342cfd0507b3dd"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#afa9207e9993ea6199d342cfd0507b3dd">cSym</a> = 0</td></tr>
+<tr class="memitem:a7d6b5614187992dffc4eb36cc66591e8" id="r_a7d6b5614187992dffc4eb36cc66591e8"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a7d6b5614187992dffc4eb36cc66591e8">hSym</a> = 0</td></tr>
+<tr class="memitem:a5360897dacffa563dc9c750db938a950" id="r_a5360897dacffa563dc9c750db938a950"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5360897dacffa563dc9c750db938a950">nQ6Solid</a> = 0</td></tr>
+<tr class="memitem:a4fa7cc32a5eaacf6533293e98270045d" id="r_a4fa7cc32a5eaacf6533293e98270045d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4fa7cc32a5eaacf6533293e98270045d">cQ6Solid</a> = 0</td></tr>
+<tr class="memitem:aea7c3129353e1888d3336b3de5ea2039" id="r_aea7c3129353e1888d3336b3de5ea2039"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aea7c3129353e1888d3336b3de5ea2039">hQ6Solid</a> = 0</td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock">
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00067">67</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a5a1ec6e925b2ac452d4a87102a23879a" name="a5a1ec6e925b2ac452d4a87102a23879a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a1ec6e925b2ac452d4a87102a23879a">&#9670;&#160;</a></span>cChillCore</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cChillCore = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00094">94</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae108d2ebebd6aae9425c092b2b666d60" name="ae108d2ebebd6aae9425c092b2b666d60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae108d2ebebd6aae9425c092b2b666d60">&#9670;&#160;</a></span>cChillExt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cChillExt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00097">97</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a32949cee9e6626019b6c26544550a980" name="a32949cee9e6626019b6c26544550a980"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32949cee9e6626019b6c26544550a980">&#9670;&#160;</a></span>chillClath</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::chillClath = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00076">76</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad085e3ee3ce53381bc1120181b6a4135" name="ad085e3ee3ce53381bc1120181b6a4135"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad085e3ee3ce53381bc1120181b6a4135">&#9670;&#160;</a></span>chillCubic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::chillCubic = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00073">73</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ac486c61b5fb9792804184d9755181a5e" name="ac486c61b5fb9792804184d9755181a5e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac486c61b5fb9792804184d9755181a5e">&#9670;&#160;</a></span>chillHex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::chillHex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00074">74</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ad4430aad94e3425b463c229a674785d7" name="ad4430aad94e3425b463c229a674785d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4430aad94e3425b463c229a674785d7">&#9670;&#160;</a></span>chillInter</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::chillInter = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00075">75</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab9e4b19bff8a79a8d54c772f92d59848" name="ab9e4b19bff8a79a8d54c772f92d59848"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9e4b19bff8a79a8d54c772f92d59848">&#9670;&#160;</a></span>chillInterClath</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::chillInterClath = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00077">77</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="adf4c60fa57cda08898d63d00d2d617ca" name="adf4c60fa57cda08898d63d00d2d617ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf4c60fa57cda08898d63d00d2d617ca">&#9670;&#160;</a></span>chillWater</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::chillWater = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00078">78</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a192494834dd17325ff2408532d17eb09" name="a192494834dd17325ff2408532d17eb09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a192494834dd17325ff2408532d17eb09">&#9670;&#160;</a></span>cOvitoCore</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cOvitoCore = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00100">100</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0949ce58c20c8388fccaadce9738933c" name="a0949ce58c20c8388fccaadce9738933c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0949ce58c20c8388fccaadce9738933c">&#9670;&#160;</a></span>cOvitoExt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cOvitoExt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00103">103</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a1db5185a6e64185b71e2a9297900d781" name="a1db5185a6e64185b71e2a9297900d781"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1db5185a6e64185b71e2a9297900d781">&#9670;&#160;</a></span>cQ6</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cQ6 = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00106">106</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a4fa7cc32a5eaacf6533293e98270045d" name="a4fa7cc32a5eaacf6533293e98270045d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fa7cc32a5eaacf6533293e98270045d">&#9670;&#160;</a></span>cQ6Solid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cQ6Solid = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00114">114</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="afa9207e9993ea6199d342cfd0507b3dd" name="afa9207e9993ea6199d342cfd0507b3dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afa9207e9993ea6199d342cfd0507b3dd">&#9670;&#160;</a></span>cSym</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::cSym = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00109">109</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a361b7fd80ffc66fd55d24fe46e2d7c8b" name="a361b7fd80ffc66fd55d24fe46e2d7c8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a361b7fd80ffc66fd55d24fe46e2d7c8b">&#9670;&#160;</a></span>frame</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::frame = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00068">68</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6f0ea23563bf7661b2faaa173d59ada4" name="a6f0ea23563bf7661b2faaa173d59ada4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f0ea23563bf7661b2faaa173d59ada4">&#9670;&#160;</a></span>hChillCore</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hChillCore = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00095">95</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a9d95e2b0b82df4cf50e985f495511a05" name="a9d95e2b0b82df4cf50e985f495511a05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d95e2b0b82df4cf50e985f495511a05">&#9670;&#160;</a></span>hChillExt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hChillExt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00098">98</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a5d6f75be8cd680b04b71c9b6d57bf35b" name="a5d6f75be8cd680b04b71c9b6d57bf35b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d6f75be8cd680b04b71c9b6d57bf35b">&#9670;&#160;</a></span>hOvitoCore</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hOvitoCore = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00101">101</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="abbcb93e9558d8f7cb40f28109f5d6d17" name="abbcb93e9558d8f7cb40f28109f5d6d17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abbcb93e9558d8f7cb40f28109f5d6d17">&#9670;&#160;</a></span>hOvitoExt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hOvitoExt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00104">104</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0d74de83c8a67df58b9e16ef82e4ed09" name="a0d74de83c8a67df58b9e16ef82e4ed09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d74de83c8a67df58b9e16ef82e4ed09">&#9670;&#160;</a></span>hQ6</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hQ6 = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00107">107</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aea7c3129353e1888d3336b3de5ea2039" name="aea7c3129353e1888d3336b3de5ea2039"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea7c3129353e1888d3336b3de5ea2039">&#9670;&#160;</a></span>hQ6Solid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hQ6Solid = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00115">115</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a7d6b5614187992dffc4eb36cc66591e8" name="a7d6b5614187992dffc4eb36cc66591e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d6b5614187992dffc4eb36cc66591e8">&#9670;&#160;</a></span>hSym</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::hSym = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00110">110</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6cd74e949e22133d8200f1ad404afffa" name="a6cd74e949e22133d8200f1ad404afffa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cd74e949e22133d8200f1ad404afffa">&#9670;&#160;</a></span>nChillCore</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nChillCore = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Largest cluster. c and h are cubic and hexagonal members. For the q6-bar cluster, c and h are diamond-symmetry labels, because q6-bar does not separate Ic from Ih. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00093">93</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a30a34109d9972284cb706d7c1288e20b" name="a30a34109d9972284cb706d7c1288e20b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30a34109d9972284cb706d7c1288e20b">&#9670;&#160;</a></span>nChillExt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nChillExt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00096">96</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a726a5d69d146d7cd2558ae2c3cbf3d38" name="a726a5d69d146d7cd2558ae2c3cbf3d38"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a726a5d69d146d7cd2558ae2c3cbf3d38">&#9670;&#160;</a></span>nop</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nop = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00070">70</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a6aab0d669e14c872f1938966538869ff" name="a6aab0d669e14c872f1938966538869ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6aab0d669e14c872f1938966538869ff">&#9670;&#160;</a></span>nOvitoCore</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nOvitoCore = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00099">99</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a3565bce56f8d7bf24c759b9a353f3f66" name="a3565bce56f8d7bf24c759b9a353f3f66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3565bce56f8d7bf24c759b9a353f3f66">&#9670;&#160;</a></span>nOvitoExt</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nOvitoExt = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00102">102</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a32a1add9b985d7f19e45722e3ae5b85f" name="a32a1add9b985d7f19e45722e3ae5b85f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32a1add9b985d7f19e45722e3ae5b85f">&#9670;&#160;</a></span>nQ6</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nQ6 = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00105">105</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a5360897dacffa563dc9c750db938a950" name="a5360897dacffa563dc9c750db938a950"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5360897dacffa563dc9c750db938a950">&#9670;&#160;</a></span>nQ6Solid</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nQ6Solid = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Largest q6 solid cluster (kQ6SolidCutoffA, kQ6SolidCut). c and h are diamond-symmetry labels, as for the q6-bar cluster. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00113">113</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0a0a0f95f888315189a81efadd098a45" name="a0a0a0f95f888315189a81efadd098a45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a0a0f95f888315189a81efadd098a45">&#9670;&#160;</a></span>nSym</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::nSym = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00108">108</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae8d146450ea369c4dace47717165e778" name="ae8d146450ea369c4dace47717165e778"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8d146450ea369c4dace47717165e778">&#9670;&#160;</a></span>ovitoClath</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::ovitoClath = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00082">82</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a87d28f0d62c5bccd8e422e33b494f832" name="a87d28f0d62c5bccd8e422e33b494f832"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87d28f0d62c5bccd8e422e33b494f832">&#9670;&#160;</a></span>ovitoCubic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::ovitoCubic = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00079">79</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a4d92d4425cddd1f960b12252baa21fd8" name="a4d92d4425cddd1f960b12252baa21fd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d92d4425cddd1f960b12252baa21fd8">&#9670;&#160;</a></span>ovitoHex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::ovitoHex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00080">80</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a910d2bc380d31d978654ea3923ac67a1" name="a910d2bc380d31d978654ea3923ac67a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a910d2bc380d31d978654ea3923ac67a1">&#9670;&#160;</a></span>ovitoInter</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::ovitoInter = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00081">81</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a53512557e94460cb3b60d4c94e91ab55" name="a53512557e94460cb3b60d4c94e91ab55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53512557e94460cb3b60d4c94e91ab55">&#9670;&#160;</a></span>ovitoInterClath</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::ovitoInterClath = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00083">83</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af0d80e996e397ad75a5e6f136f1edf9e" name="af0d80e996e397ad75a5e6f136f1edf9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0d80e996e397ad75a5e6f136f1edf9e">&#9670;&#160;</a></span>ovitoWater</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::ovitoWater = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00084">84</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ab6629222f4d6f0455e34e126ddfd0169" name="ab6629222f4d6f0455e34e126ddfd0169"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6629222f4d6f0455e34e126ddfd0169">&#9670;&#160;</a></span>q6barIce</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::q6barIce = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00089">89</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a549a24b459b68027343c9a29b919ae0e" name="a549a24b459b68027343c9a29b919ae0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a549a24b459b68027343c9a29b919ae0e">&#9670;&#160;</a></span>q6barMean</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::FrameRecord::q6barMean = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00087">87</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="af154d34d36f13feb34973251968fa215" name="af154d34d36f13feb34973251968fa215"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af154d34d36f13feb34973251968fa215">&#9670;&#160;</a></span>q6barP50</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double nucleation::FrameRecord::q6barP50 = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00088">88</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aa860e6255e88e382e4d32ee462e2ab39" name="aa860e6255e88e382e4d32ee462e2ab39"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa860e6255e88e382e4d32ee462e2ab39">&#9670;&#160;</a></span>ringCount</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long nucleation::FrameRecord::ringCount[8] = {}</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Primitive rings of each size. Index is the ring size. 0 and 1 stay 0. </p>
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00072">72</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   72</span>{};</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a9443aacb9ca52493d4ec9ad6fa9a592d" name="a9443aacb9ca52493d4ec9ad6fa9a592d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9443aacb9ca52493d4ec9ad6fa9a592d">&#9670;&#160;</a></span>symCubic</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::symCubic = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00085">85</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="aa1d3e714650ce473976dbc7553f9b82e" name="aa1d3e714650ce473976dbc7553f9b82e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1d3e714650ce473976dbc7553f9b82e">&#9670;&#160;</a></span>symHex</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nucleation::FrameRecord::symHex = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00086">86</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a0f0c1f60bbb1a7c4d352cd82b5c093b3" name="a0f0c1f60bbb1a7c4d352cd82b5c093b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0f0c1f60bbb1a7c4d352cd82b5c093b3">&#9670;&#160;</a></span>timestep</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">long long nucleation::FrameRecord::timestep = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="nucleation__pathway_8hpp_source.html#l00069">69</a> of file <a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/include/internal/<a class="el" href="nucleation__pathway_8hpp_source.html">nucleation_pathway.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="namespacenucleation.html">nucleation</a></li><li class="navelem"><a href="structnucleation_1_1FrameRecord.html">FrameRecord</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

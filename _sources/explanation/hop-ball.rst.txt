@@ -1,0 +1,67 @@
+==============================
+Carried rings and the hop ball
+==============================
+
+
+A path under ``benchmarks/`` on this page names a record of the d-SEAMS 2.0
+benchmark campaign. The records and the Snakemake rules that write them
+are in the private paper repository and the Hugging Face dataset
+``d-SEAMS/dseams2-benchmark-records`` (``docs/records/README.md`` names the
+revision); the scripts under ``scripts/`` that time a run stay here.
+
+A trajectory frame shares almost every bond with the frame before it.
+``primitive::RingUpdater`` recomputes only the rings that can have
+changed, and the result equals ``primitive::ringNetwork`` on that frame.
+The measured speedups are the how-to
+`Linkcell neighbours and carried updates <../howto/linkcell-carried.rst>`_.
+
+What can change
+---------------
+
+Let :math:`G` and :math:`G'` be the neighbour graphs of two consecutive frames,
+and let :math:`C` be the vertices whose adjacency row differs. Those
+vertices are the endpoints of every added or removed edge. Write :math:`D`
+for the deepest ring the search keeps, and
+
+
+
+.. math::
+
+    L = \lfloor D/2 \rfloor, \qquad
+    r = \lfloor (L - 2)/2 \rfloor.
+
+A cycle of at most :math:`D` members is a primitive ring of one graph and
+not of the other only if it contains a changed edge, or a changed edge
+lies on a shortcut between two of its members. One endpoint of that
+shortcut then lies within :math:`r` edges of a ring member. Every ring that
+differs therefore meets :math:`T`, the set of vertices within distance :math:`r`
+of :math:`C` in the union of :math:`G` and :math:`G'`.
+
+For :math:`D \le 7`, :math:`r = 0`, so :math:`T = C`. The update drops the stored
+rings that meet :math:`T` and adds the rings of :math:`G'` that meet :math:`T`. Each
+new ring is enumerated once, from its lowest-indexed member in :math:`T`.
+Rings stay in the canonical order of ``ringNetwork``, so the lists compare
+equal element by element.
+
+The balls used by the longer primitive test are refreshed only when an
+edge within :math:`L - 1` of a vertex changes. ``--rebuild``, a single frame,
+and a worker pool above one thread turn the carry off and call
+``ringNetwork`` on every frame.
+
+When the carry stays on, enumerating the changed sources uses
+``sourceTeam``. That search stays on the calling thread until those
+sources fill the workers, about 80 sources for each thread. A few
+hundred changed vertices are still one thread. That width is not
+``teamFor``. On one thread the update then copies the new rings and
+sorts them directly, and merges the rings that stay with a direct
+walk. Several threads sort the indices, scan for rings that meet
+:math:`T`, and merge the kept rings with ``teamFor``. Dropped ring buffers
+are kept for the next update. The timed carried update is the hop
+kernel on `the thread-control page <trace-threads.rst>`_, retimed
+in ``benchmarks/pool-audit.csv`` at ``1ce3be3b``.
+
+``seams_frame_chill_rings`` is the language call that can keep a neighbour
+list across frames when a skin is set. The ring carry itself is the
+updater above, used by a sequential ``seams`` frame walk.
+
+The ring calls are on :doc:`/stable/c` and :doc:`/stable/cpp`.

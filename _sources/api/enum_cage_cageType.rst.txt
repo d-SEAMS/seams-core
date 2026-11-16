@@ -1,0 +1,51 @@
+.. index:: pair: enum; cageType
+.. _doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95:
+
+enum cage::cageType
+===================
+
+Overview
+~~~~~~~~
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <cage.hpp>
+
+	enum cageType {
+	    :ref:`HexC<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477>`,
+	    :ref:`DoubleDiaC<doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73>`,
+	};
+
+.. _details-namespacecage_1a5787314f51b5927c213db48b81c21d95:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Enum Values
+-----------
+
+.. index:: pair: enumvalue; HexC
+.. _doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95a642a6c140874b1f45791fed27e266477:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	HexC
+
+The type for a hexagonal cage.
+
+.. index:: pair: enumvalue; DoubleDiaC
+.. _doxid-namespacecage_1a5787314f51b5927c213db48b81c21d95aaad57806cd9cd90f11a5ca800094ff73:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	DoubleDiaC
+
+The type for a double-diamond cage.
+

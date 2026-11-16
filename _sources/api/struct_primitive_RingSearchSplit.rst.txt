@@ -9,3 +9,19 @@ struct primitive::RingSearchSplit
 
 
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/franzblau.hpp>
+	
+	struct RingSearchSplit {
+		// fields
+	
+		double :target:`balls_ms<doxid-structprimitive_1_1_ring_search_split_1a0e6ab106bff4d946013fa746d558ea1d>` = 0;
+		double :target:`enumerate_ms<doxid-structprimitive_1_1_ring_search_split_1ae3b07f71cb0775b885fc67b91fef9f42>` = 0;
+		double :target:`merge_ms<doxid-structprimitive_1_1_ring_search_split_1a4466d57ddb02055de9c3ebb2aa5cf274>` = 0;
+		double :target:`adj_ms<doxid-structprimitive_1_1_ring_search_split_1aeabfd49266f3f2249efdba794ffe6f9d>` = 0;
+		double :target:`ball_count_ms<doxid-structprimitive_1_1_ring_search_split_1a96c5404f51682855bd20f1caccb4a6c9>` = 0;
+		double :target:`ball_fill_ms<doxid-structprimitive_1_1_ring_search_split_1a554a37fa145adbd506dab889e438be7f>` = 0;
+	};

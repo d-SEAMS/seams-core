@@ -1,0 +1,25 @@
+.. index:: pair: struct; water::IonSite
+.. _doxid-structwater_1_1_ion_site:
+
+struct water::IonSite
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/water_select.hpp>
+	
+	struct IonSite {
+		// fields
+	
+		double :target:`x<doxid-structwater_1_1_ion_site_1a2db5a42dbe98f390c154ede3c9ce0c22>` = 0;
+		double :target:`y<doxid-structwater_1_1_ion_site_1a126e7807b8dc33ef6bba7866f4a32408>` = 0;
+		double :target:`z<doxid-structwater_1_1_ion_site_1ad1f6d3c41ed1f1685a9cdcc5b40770fb>` = 0;
+		int :target:`type<doxid-structwater_1_1_ion_site_1a9568f7162c0331634f7258aaad3b3548>` = 0;
+	};

@@ -1,0 +1,80 @@
+.. index:: pair: struct; seams::SheetOptions
+.. _doxid-structseams_1_1_sheet_options:
+
+struct seams::SheetOptions
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a monolayer ring histogram. :ref:`More...<details-structseams_1_1_sheet_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct SheetOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_sheet_options_1aefd2d03881e70d88a139aad07e7ea0c3>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_sheet_options_1a32d914f56f72212088a2dbb006efb42c>` = 0;
+		int :ref:`max_size<doxid-structseams_1_1_sheet_options_1aef8eebd3259f24a52c6848ad37fa0c1e>` = 6;
+		double :ref:`sheet_area<doxid-structseams_1_1_sheet_options_1af138b59fdcacf970c5483a623ca59f95>` = 0;
+	};
+.. _details-structseams_1_1_sheet_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a monolayer ring histogram.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_sheet_options_1aefd2d03881e70d88a139aad07e7ea0c3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_sheet_options_1a32d914f56f72212088a2dbb006efb42c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; max_size
+.. _doxid-structseams_1_1_sheet_options_1aef8eebd3259f24a52c6848ad37fa0c1e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int max_size = 6
+
+Largest ring size.
+
+.. index:: pair: variable; sheet_area
+.. _doxid-structseams_1_1_sheet_options_1af138b59fdcacf970c5483a623ca59f95:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double sheet_area = 0
+
+Sheet area, square Angstrom.
+
+Must be positive.
+

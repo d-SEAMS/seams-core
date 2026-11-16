@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['glasskind_0',['GlassKind',['../namespacephase.html#a45206ea8c1350d175974e9a54cde9c71',1,'phase']]]
+  ['family_0',['Family',['../namespacesite.html#aa3661d15289b4b8576f48217ed337ca3',1,'site']]]
 ];

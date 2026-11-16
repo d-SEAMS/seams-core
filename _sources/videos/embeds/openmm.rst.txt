@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-openmm" src="https://odysee.com/$/embed/dseams-openmm:da6666299d8adc7b00cba6ad57499b5590503e42" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/openmm.vtt">docs/videos/openmm/captions.vtt</a></p>
+   <p>OpenMM on ice Ih.</p>

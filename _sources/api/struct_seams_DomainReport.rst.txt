@@ -1,0 +1,67 @@
+.. index:: pair: struct; seams::DomainReport
+.. _doxid-structseams_1_1_domain_report:
+
+struct seams::DomainReport
+==========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Largest polar or apolar domain. :ref:`More...<details-structseams_1_1_domain_report>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DomainReport {
+		// fields
+	
+		int :ref:`subset<doxid-structseams_1_1_domain_report_1a32dcc210e9ff9161ad7beb41e30051b4>` = 0;
+		int :ref:`largest<doxid-structseams_1_1_domain_report_1afa2d0de71780fcd4aefdf8f4a47f0a5f>` = 0;
+		double :ref:`percolation<doxid-structseams_1_1_domain_report_1a64516bd0b7828ae9ad242345c5a0b736>` = 0;
+	};
+.. _details-structseams_1_1_domain_report:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Largest polar or apolar domain.
+
+Fields
+------
+
+.. index:: pair: variable; subset
+.. _doxid-structseams_1_1_domain_report_1a32dcc210e9ff9161ad7beb41e30051b4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int subset = 0
+
+Atoms in the requested subset.
+
+.. index:: pair: variable; largest
+.. _doxid-structseams_1_1_domain_report_1afa2d0de71780fcd4aefdf8f4a47f0a5f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int largest = 0
+
+Largest connected component.
+
+.. index:: pair: variable; percolation
+.. _doxid-structseams_1_1_domain_report_1a64516bd0b7828ae9ad242345c5a0b736:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double percolation = 0
+
+Percolation measure, dimensionless.
+

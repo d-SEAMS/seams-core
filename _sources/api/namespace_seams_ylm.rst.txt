@@ -19,11 +19,17 @@ namespace seams::ylm
 	// global variables
 
 	double :target:`N3<doxid-namespaceseams_1_1ylm_1a0ea7855115022b2e51dfeec3257e2f7c>`[4]                            = {     0x1.7e21efc0768b0p-2,      0x1.4aefbf05f1305p-2,      0x1.05a0d7164496dp+0,      0x1.ab3cb8d675a30p-2   };
+	double :target:`N4<doxid-namespaceseams_1_1ylm_1a9b678ea543b31f0d3d76299a3ded6719>`[5]                            = {     0x1.b14c2f863e924p-4,      0x1.e471027d29b68p-2,      0x1.568d44c02929cp-2,      0x1.406d8aa0d83a4p+0,      0x1.c5274a45d91d8p-2   };
 	double :target:`N6<doxid-namespaceseams_1_1ylm_1a44d8f6d018716f5e2a02a91658d7d10e>`[7]                            = {     0x1.046123cc5b3b1p-4,       0x1.a5dce8e510806p-2,       0x1.4d830dc3746c6p-2,       0x1.4d830dc3746c6p-1,       0x1.6d58113f224e2p-2,       0x1.ac67615af3632p+0,       0x1.eead9a142c943p-2    };
 
 	// global functions
 
+	bool :target:`avx512Kernels<doxid-namespaceseams_1_1ylm_1a9e3c01fa4c665466cb3d807b7707a30e>`();
+	void :target:`ylm12AddBonds<doxid-namespaceseams_1_1ylm_1a0ce7622bbc3da121cbc903331be0e462>`(const double* dx, const double* dy, const double* dz, int n, double* qlmInterleaved);
 	void :target:`ylmBatch<doxid-namespaceseams_1_1ylm_1aa0a1875983d8c0603569eb020f43fde2>`(int orderL, const double* dx, const double* dy, const double* dz, int n, double* re, double* im);
+	void :target:`ylmAdd8<doxid-namespaceseams_1_1ylm_1a004730d0b4797b67aaddb74c91538585>`(int orderL, const double* dx, const double* dy, const double* dz, double* accA, double* accB);
+	bool :target:`ylmSumRows4<doxid-namespaceseams_1_1ylm_1a3c7c6ad669d101400691c9c3fe345db3>`(int orderL, const double* dx, const double* dy, const double* dz, double* rows, int stride, int nKeep);
+	bool :target:`ylmLocalQl<doxid-namespaceseams_1_1ylm_1a923509f7c9fcfd004cdd496090ea7a3d>`(int orderL, const double* dx, const double* dy, const double* dz, int nbonds, const int* nUsed, double prefactor, double* ql);
 
 	template <class T>
 	T :target:`legendrePoly<doxid-namespaceseams_1_1ylm_1a07e9327f44f07111da94f5f121da27f6>`(int orderL, int absM, const T* zpow);

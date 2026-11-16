@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('seams__c__api_
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a4aa681772840118e245156666761a0ac" id="r_a4aa681772840118e245156666761a0ac"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4aa681772840118e245156666761a0ac">seams_chill_plus</a> (const double *xyz, int n, const double *box, int *labels)</td></tr>
+<tr class="memitem:a4779c3619c307b0e9f4aa8b82f01e73d" id="r_a4779c3619c307b0e9f4aa8b82f01e73d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4779c3619c307b0e9f4aa8b82f01e73d">seams_chill_plus_flat</a> (const double *xyz, int n, const double *box, int *labels)</td></tr>
 <tr class="memitem:a3cdbb04d3443c73b4f3067360bea8bf7" id="r_a3cdbb04d3443c73b4f3067360bea8bf7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3cdbb04d3443c73b4f3067360bea8bf7">seams_chill_plus_graph</a> (const double *xyz, int n, const double *box, double cutoff, const char *graph, int *labels)</td></tr>
 <tr class="memitem:a15b8a71d8194a40d3a495a6d6103dd7b" id="r_a15b8a71d8194a40d3a495a6d6103dd7b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a15b8a71d8194a40d3a495a6d6103dd7b">seams_chill_plus_rule</a> (const double *xyz, int n, const double *box, double cutoff, const char *graph, const char *rule, int *labels)</td></tr>
 <tr class="memitem:a905d0436a8fd534e4177ff7627143e04" id="r_a905d0436a8fd534e4177ff7627143e04"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a905d0436a8fd534e4177ff7627143e04">seams_chill_plus_graph_lammps</a> (const double *xyz, int n, const double *box9, double cutoff, const char *graph, int *labels)</td></tr>
@@ -254,16 +254,61 @@ Functions</h2></td></tr>
 <tr class="memitem:a286fe6a9075c6439ef46ed62e24e3418" id="r_a286fe6a9075c6439ef46ed62e24e3418"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a286fe6a9075c6439ef46ed62e24e3418">seams_symmetry_backend</a> (char *name, int name_len)</td></tr>
 <tr class="memitem:af1a71a01de96262b637c4f96281db221" id="r_af1a71a01de96262b637c4f96281db221"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af1a71a01de96262b637c4f96281db221">seams_symmetry_classify</a> (const double *xyz, int n, const double *lattice9, int *labels)</td></tr>
 <tr class="memitem:a2a8ad5ce8d5997725826f2b0d81d000f" id="r_a2a8ad5ce8d5997725826f2b0d81d000f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a2a8ad5ce8d5997725826f2b0d81d000f">seams_symmetry_classify_tol</a> (const double *xyz, int n, const double *lattice9, double shell_rmsd, int *labels)</td></tr>
+<tr class="memitem:aed9cb6f8a05fb3491f6fab4f5794724f" id="r_aed9cb6f8a05fb3491f6fab4f5794724f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aed9cb6f8a05fb3491f6fab4f5794724f">seams_symmetry_classify_gates</a> (const double *xyz, int n, const double *lattice9, double shell_rmsd, double thermal_q, double bond_ratio, int *labels)</td></tr>
+<tr class="memitem:a2b8636a1c0255423098b356dfbaa2b50" id="r_a2b8636a1c0255423098b356dfbaa2b50"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a2b8636a1c0255423098b356dfbaa2b50">seams_chill_plus_species</a> (const double *xyz, int n, const double *box9, const int *types, const int *mols, int oxygen_type, int mol_mode, const int *mol_ids, int n_mol_ids, double cutoff, const char *graph, int *labels, int *ion_ice, int *ion_liquid, double *ion_front)</td></tr>
+<tr class="memitem:a945ab239fc029a7acbe76f72121ec83e" id="r_a945ab239fc029a7acbe76f72121ec83e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a945ab239fc029a7acbe76f72121ec83e">seams_oxygen_cutoff_degree</a> (const double *xyz, int n, const double *box9, const int *types, const int *mols, int oxygen_type, int mol_mode, const int *mol_ids, int n_mol_ids, double cutoff, int *degree)</td></tr>
+<tr class="memitem:ae2efe84c8d250d2fce58fb7da028484d" id="r_ae2efe84c8d250d2fce58fb7da028484d"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#ae2efe84c8d250d2fce58fb7da028484d">seams_c_error</a> (void)</td></tr>
+<tr class="memitem:a0c793871e8522bd91c910effc9decde7" id="r_a0c793871e8522bd91c910effc9decde7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a0c793871e8522bd91c910effc9decde7">seams_q4_q6</a> (const double *xyz, int n, const double *box, double cutoff, double *q4, double *q6, double *q4bar, double *q6bar)</td></tr>
+<tr class="memitem:aaf35eae4a6cfbc834ef146ed56555b45" id="r_aaf35eae4a6cfbc834ef146ed56555b45"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aaf35eae4a6cfbc834ef146ed56555b45">seams_q4_q6_lammps</a> (const double *xyz, int n, const double *box9, double cutoff, double *q4, double *q6, double *q4bar, double *q6bar)</td></tr>
+<tr class="memitem:a050628a119d97a5fd5070aef345853ee" id="r_a050628a119d97a5fd5070aef345853ee"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a050628a119d97a5fd5070aef345853ee">seams_cutoff_csr</a> (const double *xyz, int n, const double *box9, double cutoff, int *offsets, int *cols, int cols_cap, int *n_cols)</td></tr>
+<tr class="memitem:a61177c6e29fbc9f4431662d7b77f6b3b" id="r_a61177c6e29fbc9f4431662d7b77f6b3b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a61177c6e29fbc9f4431662d7b77f6b3b">seams_ql_cutoff</a> (const double *xyz, int n, const double *box9, double cutoff, int order_l, double *ql)</td></tr>
+<tr class="memitem:adfe45483219fd9882d34d16c74fbca43" id="r_adfe45483219fd9882d34d16c74fbca43"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#adfe45483219fd9882d34d16c74fbca43">seams_c_last_stages</a> (double seconds[4])</td></tr>
+<tr class="memitem:af044fde824bc475804a89763c9a74120" id="r_af044fde824bc475804a89763c9a74120"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af044fde824bc475804a89763c9a74120">seams_diamond_cna</a> (const double *xyz, int n, const double *box9, double cutoff, int *labels)</td></tr>
+<tr class="memitem:a84bdcf96e064a16b174b7a8a8392b49b" id="r_a84bdcf96e064a16b174b7a8a8392b49b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a84bdcf96e064a16b174b7a8a8392b49b">seams_primitive_rings</a> (const double *xyz, int n, const double *box9, double cutoff, int max_depth, int *counts, int counts_len)</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
-<a id="a4aa681772840118e245156666761a0ac" name="a4aa681772840118e245156666761a0ac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4aa681772840118e245156666761a0ac">&#9670;&#160;</a></span>seams_chill_plus()</h2>
+<a id="ae2efe84c8d250d2fce58fb7da028484d" name="ae2efe84c8d250d2fce58fb7da028484d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2efe84c8d250d2fce58fb7da028484d">&#9670;&#160;</a></span>seams_c_error()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int seams_chill_plus </td>
+          <td class="memname">const char * seams_c_error </td>
+          <td>(</td>
+          <td class="paramtype">void</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="adfe45483219fd9882d34d16c74fbca43" name="adfe45483219fd9882d34d16c74fbca43"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfe45483219fd9882d34d16c74fbca43">&#9670;&#160;</a></span>seams_c_last_stages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams_c_last_stages </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>seconds</em></span>[4]</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a4779c3619c307b0e9f4aa8b82f01e73d" name="a4779c3619c307b0e9f4aa8b82f01e73d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4779c3619c307b0e9f4aa8b82f01e73d">&#9670;&#160;</a></span>seams_chill_plus_flat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_chill_plus_flat </td>
           <td>(</td>
           <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
         </tr>
@@ -415,6 +460,434 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a2b8636a1c0255423098b356dfbaa2b50" name="a2b8636a1c0255423098b356dfbaa2b50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b8636a1c0255423098b356dfbaa2b50">&#9670;&#160;</a></span>seams_chill_plus_species()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_chill_plus_species </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>types</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>oxygen_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>mol_mode</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mol_ids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n_mol_ids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>ion_ice</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>ion_liquid</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>ion_front</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a050628a119d97a5fd5070aef345853ee" name="a050628a119d97a5fd5070aef345853ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a050628a119d97a5fd5070aef345853ee">&#9670;&#160;</a></span>seams_cutoff_csr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_cutoff_csr </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cols_cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af044fde824bc475804a89763c9a74120" name="af044fde824bc475804a89763c9a74120"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af044fde824bc475804a89763c9a74120">&#9670;&#160;</a></span>seams_diamond_cna()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_diamond_cna </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a945ab239fc029a7acbe76f72121ec83e" name="a945ab239fc029a7acbe76f72121ec83e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a945ab239fc029a7acbe76f72121ec83e">&#9670;&#160;</a></span>seams_oxygen_cutoff_degree()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_oxygen_cutoff_degree </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>types</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>oxygen_type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>mol_mode</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int *</td>          <td class="paramname"><span class="paramname"><em>mol_ids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n_mol_ids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>degree</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a84bdcf96e064a16b174b7a8a8392b49b" name="a84bdcf96e064a16b174b7a8a8392b49b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84bdcf96e064a16b174b7a8a8392b49b">&#9670;&#160;</a></span>seams_primitive_rings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_primitive_rings </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>max_depth</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>counts</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>counts_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a0c793871e8522bd91c910effc9decde7" name="a0c793871e8522bd91c910effc9decde7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c793871e8522bd91c910effc9decde7">&#9670;&#160;</a></span>seams_q4_q6()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_q4_q6 </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q4</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q4bar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q6bar</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aaf35eae4a6cfbc834ef146ed56555b45" name="aaf35eae4a6cfbc834ef146ed56555b45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf35eae4a6cfbc834ef146ed56555b45">&#9670;&#160;</a></span>seams_q4_q6_lammps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_q4_q6_lammps </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q4</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q6</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q4bar</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>q6bar</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a61177c6e29fbc9f4431662d7b77f6b3b" name="a61177c6e29fbc9f4431662d7b77f6b3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61177c6e29fbc9f4431662d7b77f6b3b">&#9670;&#160;</a></span>seams_ql_cutoff()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_ql_cutoff </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>order_l</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>ql</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a286fe6a9075c6439ef46ed62e24e3418" name="a286fe6a9075c6439ef46ed62e24e3418"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a286fe6a9075c6439ef46ed62e24e3418">&#9670;&#160;</a></span>seams_symmetry_backend()</h2>
 
@@ -456,6 +929,52 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>lattice9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aed9cb6f8a05fb3491f6fab4f5794724f" name="aed9cb6f8a05fb3491f6fab4f5794724f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aed9cb6f8a05fb3491f6fab4f5794724f">&#9670;&#160;</a></span>seams_symmetry_classify_gates()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_classify_gates </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>lattice9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shell_rmsd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>thermal_q</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>bond_ratio</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>

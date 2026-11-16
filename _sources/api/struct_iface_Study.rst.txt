@@ -1,0 +1,129 @@
+.. index:: pair: struct; iface::Study
+.. _doxid-structiface_1_1_study:
+
+struct iface::Study
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct Study {
+		// fields
+	
+		int :target:`n<doxid-structiface_1_1_study_1a4a5a8c3051bc35f9be5d457c08263b60>` = 0;
+		int :target:`nDisagree<doxid-structiface_1_1_study_1a14898b7c04b362144ec8ae7d25319625>` = 0;
+		int :target:`causeCount<doxid-structiface_1_1_study_1a099c157e423b188add797c5909bf58a9>`[5] = {};
+		int :target:`countPub<doxid-structiface_1_1_study_1af461f007cd947e708b0f3ab33f53272b>`[9] = {};
+		int :target:`countOvi<doxid-structiface_1_1_study_1a66130754bbdb2628aaf90627c58bdbb5>`[9] = {};
+		int :target:`transition<doxid-structiface_1_1_study_1a1ffe0f010f9cc15fa9b3136fd67523c8>`[9][9] = {};
+		int :target:`shellDisagree<doxid-structiface_1_1_study_1add6faf5db5ff24e27cefe1eb8f60e85e>`[8] = {};
+		int :ref:`shellAgree<doxid-structiface_1_1_study_1aa1e44a579e9232a2efd9fd1c35ba619f>`[8] = {};
+		int :target:`ringDisagree<doxid-structiface_1_1_study_1a13c931580fcd57994b8c01ac23ccbbba>`[3] = {};
+		int :ref:`ringAgree<doxid-structiface_1_1_study_1af8d96e9fb849520d932c5917ff17f3db>`[3] = {};
+		int :target:`prismAtoms<doxid-structiface_1_1_study_1a4381152a880f99ae7329144b753e7cca>` = 0;
+		int :target:`prismBlocks<doxid-structiface_1_1_study_1a6aa92c8b615e49f589c9fe0d6607c63d>` = 0;
+		int :target:`bilayerAtoms<doxid-structiface_1_1_study_1a98508f616b45d1279d3228974a4f4f65>` = 0;
+		int :target:`polygonAtoms<doxid-structiface_1_1_study_1ad825a8163744dc6b84ba939a6aff243e>` = 0;
+		int :target:`thinSheets<doxid-structiface_1_1_study_1ae692ea13d88798005a2d32f883419908>` = 0;
+		int :target:`diamondOther<doxid-structiface_1_1_study_1a79bf381313f1515fea338f3565200477>` = 0;
+		int :target:`diamondCubic<doxid-structiface_1_1_study_1a4f29c357a4bb69f36bfd18e0dea38e2a>` = 0;
+		int :target:`diamondHex<doxid-structiface_1_1_study_1a35198c3867d2893e49121862d8c72809>` = 0;
+		int :target:`cnaOther<doxid-structiface_1_1_study_1af7dd4a39146a3ac06b77d419f04ec2a1>` = 0;
+		int :target:`cnaCrystal<doxid-structiface_1_1_study_1a02f7cf4c604ee77f16fc31ff0011a539>` = 0;
+		int :ref:`ptmPass<doxid-structiface_1_1_study_1ab5b1acc67cba6d7bf4188801222cfd3a>` = 0;
+		int :target:`ptmPassDisagree<doxid-structiface_1_1_study_1a86e1f3d52ae6304ba2cc34413001fc5d>` = 0;
+		double :target:`q6Disagree<doxid-structiface_1_1_study_1a4b928032f56ee6665b51c0553f6b4f2c>` = 0;
+		double :target:`q6Agree<doxid-structiface_1_1_study_1a2148a46548ca3b37650dcd525323168a>` = 0;
+		double :target:`depthDisagree<doxid-structiface_1_1_study_1a48e96760472e8a1f45d6dcff189c9a69>` = 0;
+		double :ref:`depthAgree<doxid-structiface_1_1_study_1a360994b36b17763bb185bcd82a45a22d>` = 0;
+		int :target:`depthDisagreeN<doxid-structiface_1_1_study_1a15b4a45ed794541f7f5655e34a9fb151>` = 0;
+		int :target:`depthAgreeN<doxid-structiface_1_1_study_1a650724652de17ba7517a0512afc53245>` = 0;
+		:ref:`Kind<doxid-namespaceiface_1a3b2d1ed3ca7f783de29e8fde851b5395>` :target:`kind<doxid-structiface_1_1_study_1a9c9bd20630f3111a3406b01fcb1cb324>` = :ref:`Kind::nucleus<doxid-namespaceiface_1a3b2d1ed3ca7f783de29e8fde851b5395a91c7e4ea85be233a81041a3eefedc8ad>`;
+		int :target:`axis<doxid-structiface_1_1_study_1a6fac2d95f344ebcbe25700059572679f>` = 2;
+		:ref:`Profile<doxid-structiface_1_1_profile>` :target:`solidPub<doxid-structiface_1_1_study_1ac92f03a72b3ceeea09a82315fefe5cbb>`;
+		:ref:`Profile<doxid-structiface_1_1_profile>` :ref:`crystalPub<doxid-structiface_1_1_study_1a68ff8d5293ad3ca88acec7f4a200c45e>`;
+		:ref:`Profile<doxid-structiface_1_1_profile>` :ref:`solidOvi<doxid-structiface_1_1_study_1a5a7f2c730e012eaf0616bb68efbd4bd7>`;
+		:ref:`Profile<doxid-structiface_1_1_profile>` :target:`crystalOvi<doxid-structiface_1_1_study_1a374b1003a41309c4a86a9b0049425367>`;
+		std::vector<:ref:`Bin<doxid-structiface_1_1_bin>`> :target:`bins<doxid-structiface_1_1_study_1ada37224d2abb541c5c124ae043b5bc4f>`;
+	};
+.. _details-structiface_1_1_study:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; shellAgree
+.. _doxid-structiface_1_1_study_1aa1e44a579e9232a2efd9fd1c35ba619f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int shellAgree[8] = {}
+
+0..6 and 7 meaning 7 or more
+
+.. index:: pair: variable; ringAgree
+.. _doxid-structiface_1_1_study_1af8d96e9fb849520d932c5917ff17f3db:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int ringAgree[3] = {}
+
+atoms in at least one ring of size 4, 5, 6
+
+.. index:: pair: variable; ptmPass
+.. _doxid-structiface_1_1_study_1ab5b1acc67cba6d7bf4188801222cfd3a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int ptmPass = 0
+
+FCC, HCP, icosahedral or BCC under adaptive CNA.
+
+.. index:: pair: variable; depthAgree
+.. _doxid-structiface_1_1_study_1a360994b36b17763bb185bcd82a45a22d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double depthAgree = 0
+
+mean distance to the nearest front
+
+.. index:: pair: variable; crystalPub
+.. _doxid-structiface_1_1_study_1a68ff8d5293ad3ca88acec7f4a200c45e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Profile<doxid-structiface_1_1_profile>` crystalPub
+
+cubic + hexagonal + interfacial
+
+.. index:: pair: variable; solidOvi
+.. _doxid-structiface_1_1_study_1a5a7f2c730e012eaf0616bb68efbd4bd7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Profile<doxid-structiface_1_1_profile>` solidOvi
+
+cubic + hexagonal
+

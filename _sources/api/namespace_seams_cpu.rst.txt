@@ -1,0 +1,32 @@
+.. index:: pair: namespace; seams::cpu
+.. _doxid-namespaceseams_1_1cpu:
+
+namespace seams::cpu
+====================
+
+.. toctree::
+	:hidden:
+
+	struct_seams_cpu_Features.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace cpu {
+
+	// structs
+
+	struct :ref:`Features<doxid-structseams_1_1cpu_1_1_features>`;
+
+	// global functions
+
+	:ref:`Features<doxid-structseams_1_1cpu_1_1_features>` :target:`detectFeatures<doxid-namespaceseams_1_1cpu_1a19d5d2cbbd4f38ae22e577ac1edf50ce>`();
+	const :ref:`Features<doxid-structseams_1_1cpu_1_1_features>`& :target:`features<doxid-namespaceseams_1_1cpu_1a01fc9a7b0f0e28ec5963836adb7b0859>`();
+	void :target:`allowSimdKernels<doxid-namespaceseams_1_1cpu_1aa29e660317d9b6adb8637b8dd770da5f>`(bool allow);
+	bool :target:`simdKernelsAllowed<doxid-namespaceseams_1_1cpu_1a6bfc9ee1c65fe1ebe734ddc7012701a6>`();
+
+	} // namespace cpu

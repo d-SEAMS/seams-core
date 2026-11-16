@@ -12,6 +12,26 @@ Overview
 
 This contains per-particle information. :ref:`More...<details-structmol_sys_1_1_point>`
 
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/mol_sys.hpp>
+	
+	template <CoordinateScalar T>
+	struct Point {
+		// fields
+	
+		int :target:`type<doxid-structmol_sys_1_1_point_1a4ffe5d88981575daa2adcd36cab0ce9f>` = 0;
+		int :target:`molID<doxid-structmol_sys_1_1_point_1aeed1df09b79527444ceb1bc0836f4f1a>` = 0;
+		int :target:`atomID<doxid-structmol_sys_1_1_point_1afbcfc945f41267043cddfd9bae8c10a2>` = 0;
+		T :ref:`x<doxid-structmol_sys_1_1_point_1a25dff2dc0e4cd802b9057d90b3c08d76>` = 0;
+		T :target:`y<doxid-structmol_sys_1_1_point_1a364150fed66ad63fd2d3995909d43fe0>` = 0;
+		T :target:`z<doxid-structmol_sys_1_1_point_1a47e132eb01596124477945fbe4345d73>` = 0;
+		std::vector<:ref:`Result<doxid-structmol_sys_1_1_result>`> :ref:`c_ij<doxid-structmol_sys_1_1_point_1aa15249b70d3c7504f751092e3454b4c6>`;
+		:ref:`atom_state_type<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>` :ref:`iceType<doxid-structmol_sys_1_1_point_1a3b139c528b716173634931897dd13f73>`                     = :ref:`atom_state_type::unclassified<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4>`;
+		bool :ref:`inSlice<doxid-structmol_sys_1_1_point_1a825e22e4d171aea51998d585c925c897>` = true;
+	};
 .. _details-structmol_sys_1_1_point:
 
 Detailed Documentation
@@ -33,7 +53,50 @@ Specifically
 
 * Bond correlation type of type :ref:`Result <doxid-structmol_sys_1_1_result>`
 
-* Type of :ref:`atom_state_type <doxid-group__mol_sys_1ga13ffe3a39a0816627553f195e102abb5>` iceType
+* Type of :ref:`atom_state_type <doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>` iceType
 
 * In slice bool
+
+Fields
+------
+
+.. index:: pair: variable; x
+.. _doxid-structmol_sys_1_1_point_1a25dff2dc0e4cd802b9057d90b3c08d76:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	T x = 0
+
+type ID, molID, atomID
+
+.. index:: pair: variable; c_ij
+.. _doxid-structmol_sys_1_1_point_1aa15249b70d3c7504f751092e3454b4c6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`Result<doxid-structmol_sys_1_1_result>`> c_ij
+
+coordinates
+
+.. index:: pair: variable; iceType
+.. _doxid-structmol_sys_1_1_point_1a3b139c528b716173634931897dd13f73:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`atom_state_type<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>` iceType                     = :ref:`atom_state_type::unclassified<doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5af8c13bb601e2113b166ef926763585b4>`
+
+Results (contains bond correlation type).
+
+.. index:: pair: variable; inSlice
+.. _doxid-structmol_sys_1_1_point_1a825e22e4d171aea51998d585c925c897:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool inSlice = true
+
+Type of ice/water etc based on cij.
 

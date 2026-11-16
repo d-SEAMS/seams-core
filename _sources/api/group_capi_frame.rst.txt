@@ -1,0 +1,11 @@
+.. index:: pair: group; Frames
+.. _doxid-group__capi__frame:
+
+Frames
+======
+
+.. toctree::
+	:hidden:
+
+Create, fill, read, and free a :ref:`seams_system <doxid-group__capi__types_1gaf3cef135f90d3f656144f0f819e8f831>`.
+

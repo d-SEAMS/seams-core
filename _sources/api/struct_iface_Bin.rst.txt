@@ -1,0 +1,28 @@
+.. index:: pair: struct; iface::Bin
+.. _doxid-structiface_1_1_bin:
+
+struct iface::Bin
+=================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct Bin {
+		// fields
+	
+		double :target:`mid<doxid-structiface_1_1_bin_1a2b154e582b5aa2838fd5560e4fada26b>` = 0;
+		int :target:`n<doxid-structiface_1_1_bin_1a1510e3cb48555d036cc20824a3b1c058>` = 0;
+		int :target:`disagree<doxid-structiface_1_1_bin_1aa2119088056a27cd6a0ff09bf9301dcd>` = 0;
+		double :target:`crystalPub<doxid-structiface_1_1_bin_1af9db603e1cad1bd6e4787db51d06552e>` = 0;
+		double :target:`solidPub<doxid-structiface_1_1_bin_1ab887e7117cb9c73dccf9402cc60629bd>` = 0;
+		double :target:`crystalOvi<doxid-structiface_1_1_bin_1a07727eafa84ac11c31ce06e8e0c73ea0>` = 0;
+		double :target:`solidOvi<doxid-structiface_1_1_bin_1a45732dc246ec22216c1ce798ec77b7c8>` = 0;
+	};

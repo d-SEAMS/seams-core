@@ -1,0 +1,11 @@
+.. index:: pair: group; Library metadata and errors
+.. _doxid-group__capi__meta:
+
+Library metadata and errors
+===========================
+
+.. toctree::
+	:hidden:
+
+Version, names, error strings, and the thread team.
+

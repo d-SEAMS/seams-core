@@ -1,0 +1,102 @@
+.. index:: pair: struct; seams::FingerprintOptions
+.. _doxid-structseams_1_1_fingerprint_options:
+
+struct seams::FingerprintOptions
+================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Knobs for a topological fingerprint. :ref:`More...<details-structseams_1_1_fingerprint_options>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct FingerprintOptions {
+		// fields
+	
+		double :ref:`cutoff<doxid-structseams_1_1_fingerprint_options_1ac8fe389d563d7aae6517d89bbb645817>` = 3.5;
+		int :ref:`species<doxid-structseams_1_1_fingerprint_options_1a7321bcd363cd8f3a178f2a7075437ff0>` = 0;
+		int :ref:`k<doxid-structseams_1_1_fingerprint_options_1a5dfddd0d0ce98239d468c6490292428d>` = 4;
+		:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` :ref:`graph<doxid-structseams_1_1_fingerprint_options_1ab7fe14b8cafadf7ff5f5df613b88f84a>` = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`;
+		int :ref:`hops<doxid-structseams_1_1_fingerprint_options_1ae830c268019fb4bb69b73f1b619e3dbb>` = 2;
+		bool :ref:`color_types<doxid-structseams_1_1_fingerprint_options_1a52c674da36edd07b9ccd528edccd2572>` = false;
+	};
+.. _details-structseams_1_1_fingerprint_options:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Knobs for a topological fingerprint.
+
+Fields
+------
+
+.. index:: pair: variable; cutoff
+.. _doxid-structseams_1_1_fingerprint_options_1ac8fe389d563d7aae6517d89bbb645817:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double cutoff = 3.5
+
+Positive cutoff, Angstrom.
+
+.. index:: pair: variable; species
+.. _doxid-structseams_1_1_fingerprint_options_1a7321bcd363cd8f3a178f2a7075437ff0:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int species = 0
+
+Species filter.
+
+.. index:: pair: variable; k
+.. _doxid-structseams_1_1_fingerprint_options_1a5dfddd0d0ce98239d468c6490292428d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int k = 4
+
+Neighbour count on the bonded graph.
+
+.. index:: pair: variable; graph
+.. _doxid-structseams_1_1_fingerprint_options_1ab7fe14b8cafadf7ff5f5df613b88f84a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`Graph<doxid-group__seams__cpp_1gaadb6ab84dae1fdc4c8b8c9808622abab>` graph = :ref:`Graph::Cutoff<doxid-group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084>`
+
+Neighbour graph.
+
+.. index:: pair: variable; hops
+.. _doxid-structseams_1_1_fingerprint_options_1ae830c268019fb4bb69b73f1b619e3dbb:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int hops = 2
+
+Neighbourhood depth.
+
+Zero selects 2.
+
+.. index:: pair: variable; color_types
+.. _doxid-structseams_1_1_fingerprint_options_1a52c674da36edd07b9ccd528edccd2572:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool color_types = false
+
+Color vertices by LAMMPS type.
+

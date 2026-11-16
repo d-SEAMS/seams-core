@@ -27,5 +27,5 @@ Detailed Documentation
 
 Ions read against a per-atom ice assignment.
 
-Ions are not part of the hydrogen-bond network; the assignment is computed on the water and each ion is classed by its first water shell: every shell molecule labelled is ``ice``, none is ``liquid``, otherwise ``front``. An ion with an empty shell is liquid.
+Ions are not part of the hydrogen-bond network; the assignment is computed on the water and each ion is classed by its first water shell: every shell molecule labeled is ``ice``, none is ``liquid``, otherwise ``front``. An ion with an empty shell is liquid.
 

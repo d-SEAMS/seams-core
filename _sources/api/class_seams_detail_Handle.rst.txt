@@ -1,0 +1,34 @@
+.. index:: pair: class; seams::detail::Handle
+.. _doxid-classseams_1_1detail_1_1_handle:
+
+template class seams::detail::Handle
+====================================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	template <class T, void(*)(T*) Destroy>
+	class Handle {
+	public:
+		// construction
+	
+		:target:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`();
+		:target:`Handle<doxid-classseams_1_1detail_1_1_handle_1a0c104d13fa1b0822a22740bfaf99a837>`(T* ptr);
+		:target:`Handle<doxid-classseams_1_1detail_1_1_handle_1ae5eca8ef6b2c151a4789981e473dad3f>`(const Handle&);
+		:target:`Handle<doxid-classseams_1_1detail_1_1_handle_1a1a5457ee3afa519eef0fc5715599544e>`(Handle&& other);
+		:target:`~Handle<doxid-classseams_1_1detail_1_1_handle_1ac44646bcdb18568576350cd63d2e18d4>`();
+
+		// methods
+	
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :target:`operator=<doxid-classseams_1_1detail_1_1_handle_1a0dd2050fdf4ea17474fcfd3297824dab>`(const :ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&);
+		:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`& :target:`operator=<doxid-classseams_1_1detail_1_1_handle_1aca8fcb7f880767384894fc88094d262f>`(:ref:`Handle<doxid-classseams_1_1detail_1_1_handle_1a70fca214a6d43d58a4219a108e82f91d>`&& other);
+		:target:`operator bool<doxid-classseams_1_1detail_1_1_handle_1ae58d780619badcc49127f4b5e6e78d4e>`() const;
+	};

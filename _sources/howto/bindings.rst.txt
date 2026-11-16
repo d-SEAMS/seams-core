@@ -1,59 +1,154 @@
-=========================
-Build the language fronts
-=========================
+======================
+Use a language binding
+======================
 
 
-Python is not built in this repository.
-R and Julia call ``libseams_lang``, which is built with the engine and does not reimplement the classifiers.
+This repository builds the engine, the C API ``libseams`` (``include/seams.h``),
+the C ABI ``libseams_lang`` (``bindings/cxx/seams_lang.h``) and the ``seams``
+command. :doc:\`/stable/c\` and :doc:\`/stable/cpp\` document those. Every other language is its own repository with its
+own documentation, tests and releases:
+
+.. table::
+
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+    | Language    | Repository                                                            | Package                                                  | Links                           |
+    +=============+=======================================================================+==========================================================+=================================+
+    | Python      | `d-SEAMS/PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_       | ``pydseamslib`` (``import dseams``, ``import pydseams``) | ``libseams``, ``libseams_lang`` |
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+    | Lua, Fennel | `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_         | LuaRocks ``dseams``                                      | ``libseams``                    |
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+    | R           | `d-SEAMS/dseams-r <https://github.com/d-SEAMS/dseams-r>`_             | ``dseams``                                               | ``libseams_lang``               |
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+    | Julia       | `d-SEAMS/Dseams.jl <https://github.com/d-SEAMS/Dseams.jl>`_           | ``Dseams``, ``libseams_jll``                             | ``libseams``, ``libseams_lang`` |
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+    | Rust        | `d-SEAMS/dseams-rs <https://github.com/d-SEAMS/dseams-rs>`_           | crates ``dseams-sys``, ``dseams``                        | ``libseams``                    |
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+    | Fortran     | `d-SEAMS/dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_ | fpm ``dseams``                                           | ``libseams``                    |
+    +-------------+-----------------------------------------------------------------------+----------------------------------------------------------+---------------------------------+
+
+A binding release carries the seams-core version it was built against, so
+``pydseamslib==2.14.0`` calls the 2.14.0 engine. Each repository's README
+gives its install command. `The
+repository map <../contributing/repositories.rst>`_ describes how the bindings pin and test against a
+seams-core tag, the release order, and how to develop a binding against a
+local seams-core checkout.
 
 Python
 ------
 
-.. code:: bash
+``pip install 'pydseamslib==2.14.0'`` installs ``import dseams`` (array
+calls into the engine) and ``import pydseams`` (the Frame API on the
+`Python Frame <../reference/python-frame.rst>`_ page). The cubic ice
+frame in this tree gives the counts the other languages and the CLI print:
 
-    pip install pydseamslib
-    pip install 'pydseamslib[ase]'
-    python -c 'import pydseams as ds; print(ds.__version__)'
+.. code:: python
 
-The package is `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
-The compiled module is ``pydseams.yoda``.
-``import pydseamslib`` is an alias.
-Do not add a second Python extension to seams-core.
+    >>> import numpy as np
+    >>> import dseams
+    >>> def ice():
+    ...     xyz, edges, reading = [], [], False
+    ...     handle = open("input/traj/ice1h.lammpstrj")
+    ...     try:
+    ...         while True:
+    ...             line = handle.readline()
+    ...             if line == "":
+    ...                 break
+    ...             if line.startswith("ITEM: BOX BOUNDS"):
+    ...                 edges = []
+    ...                 for _ in range(3):
+    ...                     lo, hi = handle.readline().split()[:2]
+    ...                     edges.append(float(hi) - float(lo))
+    ...             elif line.startswith("ITEM: ATOMS"):
+    ...                 reading = True
+    ...             elif reading:
+    ...                 parts = line.split()
+    ...                 if len(parts) < 5:
+    ...                     break
+    ...                 xyz.append([float(v) for v in parts[2:5]])
+    ...     finally:
+    ...         handle.close()
+    ...     return xyz, edges
+    >>> xyz, edges = ice()
+    >>> frame = dseams.Frame()
+    >>> frame.set_frame(np.asarray(xyz), np.asarray(edges))
+    >>> frame.count()
+    128
+    >>> int(frame.neighbours(3.5)[0][-1])
+    512
+    >>> int(frame.rings(3.5, 6)[2][6])
+    256
+    >>> round(float(frame.q4q6(3.5)[1].mean()), 6)
+    0.625855
+    >>> int(frame.chill_plus()[1][1])
+    128
+    >>> from ase import Atoms
+    >>> pos, box = dseams.from_ase(Atoms(symbols=["O"] * len(xyz), positions=xyz, cell=edges, pbc=True))
+    >>> frame.set_frame(pos, box)
+    >>> int(frame.chill_plus()[1][1])
+    128
 
-R
--
+What the bindings share
+-----------------------
 
-.. code:: bash
-
-    export SEAMS_INCLUDE="$PWD/bindings/cxx"
-    export SEAMS_LIBDIR="$PWD/bbdir/bindings"
-    export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-    R CMD INSTALL bindings/r/dseams
-
-The package needs ``cpp11``.
-``configure`` refuses to run without the two paths.
-The engine is not a CRAN system library, so this is a source package you build against a seams-core checkout.
-
-Julia
------
-
-CxxWrap is not linked.
-``libcxxwrap_julia`` is not in the pixi or Nix closure, and building it pulls a Julia sysimage into the link.
-The front that ships is ``ccall``:
-
-.. code:: bash
-
-    export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
-    export DSEAMS_ROOT="$PWD"
-    julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
-    julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
+The classifiers run in the engine; no binding reimplements one. The
+cutoff-shell solid-harmonic kernel is ``seams_q4q6`` in ``seams.h`` and
+``seams_frame_q4_q6`` in ``libseams_lang``; the flat name ``seams_q4_q6`` lives in
+``src/include/internal/seams_c_api.h`` and is not installed. The CLI command
+is ``seams steinhardt``. ``--l`` names the degrees (default ``4,6``). ``--l 3,12``
+asks for the hydrate pair.
 
 Tests
 -----
 
 .. code:: bash
 
-    meson test -C bbdir seams_lang_fixtures
+    meson test -C bbdir seams_lang_fixtures seams_lang_frames
 
-The Python checks live in PydSEAMSlib.
-``docs/tutorials`` reruns one cubic-ice count against an installed ``pydseamslib``.
+These check the C ABI the bindings link. Each binding repository runs its
+own suite against a seams-core tag.
+
+Recordings
+----------
+
+The language recordings use the same embed.txt as the videos page.
+A page without a claim includes no player.
+
+C
+~
+
+.. include:: ../videos/embeds/c.rst
+
+C++
+~~~
+
+.. include:: ../videos/embeds/cpp.rst
+
+Fortran
+~~~~~~~
+
+.. include:: ../videos/embeds/fortran.rst
+
+Python
+~~~~~~
+
+.. include:: ../videos/embeds/python.rst
+
+Rust
+~~~~
+
+.. include:: ../videos/embeds/rust.rst
+
+Julia
+~~~~~
+
+.. include:: ../videos/embeds/julia.rst
+
+R
+~
+
+.. include:: ../videos/embeds/r.rst
+
+Lua and Fennel
+~~~~~~~~~~~~~~
+
+.. include:: ../videos/embeds/lua.rst

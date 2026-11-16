@@ -7,5 +7,68 @@ struct rdf::PartialRdf
 .. toctree::
 	:hidden:
 
+Overview
+~~~~~~~~
 
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/rdf.hpp>
+	
+	struct PartialRdf {
+		// fields
+	
+		std::vector<double> :target:`r<doxid-structrdf_1_1_partial_rdf_1aec5a7e75ae025bde9974dd620ada435f>`;
+		std::vector<double> :ref:`g<doxid-structrdf_1_1_partial_rdf_1ab1536dc69bcf2e6823250188f98150aa>`;
+		std::vector<int> :ref:`count<doxid-structrdf_1_1_partial_rdf_1a6a7fe8ab4c2603482500fc57a2b132b1>`;
+		double :ref:`rmax<doxid-structrdf_1_1_partial_rdf_1af633cbb773b23a72ae1e070d691c76ec>` {0.0};
+		double :target:`binwidth<doxid-structrdf_1_1_partial_rdf_1ab024931b1238e545b2eacaa3c0ca7579>` {0.0};
+		double :target:`volume<doxid-structrdf_1_1_partial_rdf_1a6846695e7bf8c92b5ee1c994d337853c>` {0.0};
+		int :target:`typeI<doxid-structrdf_1_1_partial_rdf_1a268d127ca25d1b47d9e4a56a1ab5c000>` {0};
+		int :target:`typeJ<doxid-structrdf_1_1_partial_rdf_1aefba3c29678218e93d84ce4252b469f7>` {0};
+		int :target:`nI<doxid-structrdf_1_1_partial_rdf_1a71a5ed9266ea41b597649fba59a6c699>` {0};
+		int :target:`nJ<doxid-structrdf_1_1_partial_rdf_1ad206f2047add393eb6e1c3a95b0da7b5>` {0};
+	};
+.. _details-structrdf_1_1_partial_rdf:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; g
+.. _doxid-structrdf_1_1_partial_rdf_1ab1536dc69bcf2e6823250188f98150aa:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> g
+
+Bin centers.
+
+.. index:: pair: variable; count
+.. _doxid-structrdf_1_1_partial_rdf_1a6a7fe8ab4c2603482500fc57a2b132b1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> count
+
+g_IJ at each bin
+
+.. index:: pair: variable; rmax
+.. _doxid-structrdf_1_1_partial_rdf_1af633cbb773b23a72ae1e070d691c76ec:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double rmax {0.0}
+
+Unordered pair counts.
 

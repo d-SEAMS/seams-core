@@ -10,12 +10,23 @@ namespace site
 	enum_site_Family.rst
 	enum_site_IonState.rst
 	enum_site_Kind.rst
+	struct_site_BrinePocket.rst
+	struct_site_ConcentrationBin.rst
+	struct_site_ConcentrationProfile.rst
 	struct_site_DensityZ.rst
+	struct_site_FrontLayerReport.rst
+	struct_site_FrontOptions.rst
+	struct_site_FrontPair.rst
+	struct_site_FrontSnapshot.rst
 	struct_site_GuestOccupancy.rst
 	struct_site_IceClusterIons.rst
 	struct_site_InsideTrace.rst
 	struct_site_IonEnvironment.rst
+	struct_site_LinearFit.rst
+	struct_site_PocketCensus.rst
+	struct_site_RejectionCoefficient.rst
 	struct_site_Table.rst
+	struct_site_TrapEvent.rst
 
 Overview
 ~~~~~~~~
@@ -37,19 +48,39 @@ Overview
 
 	// structs
 
+	struct :ref:`BrinePocket<doxid-structsite_1_1_brine_pocket>`;
+	struct :ref:`ConcentrationBin<doxid-structsite_1_1_concentration_bin>`;
+	struct :ref:`ConcentrationProfile<doxid-structsite_1_1_concentration_profile>`;
 	struct :ref:`DensityZ<doxid-structsite_1_1_density_z>`;
+	struct :ref:`FrontLayerReport<doxid-structsite_1_1_front_layer_report>`;
+	struct :ref:`FrontOptions<doxid-structsite_1_1_front_options>`;
+	struct :ref:`FrontPair<doxid-structsite_1_1_front_pair>`;
+	struct :ref:`FrontSnapshot<doxid-structsite_1_1_front_snapshot>`;
 	struct :ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>`;
 	struct :ref:`IceClusterIons<doxid-structsite_1_1_ice_cluster_ions>`;
 	struct :ref:`InsideTrace<doxid-structsite_1_1_inside_trace>`;
 	struct :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`;
+	struct :ref:`LinearFit<doxid-structsite_1_1_linear_fit>`;
+	struct :ref:`PocketCensus<doxid-structsite_1_1_pocket_census>`;
+	struct :ref:`RejectionCoefficient<doxid-structsite_1_1_rejection_coefficient>`;
 	struct :ref:`Table<doxid-structsite_1_1_table>`;
+	struct :ref:`TrapEvent<doxid-structsite_1_1_trap_event>`;
 
 	// global variables
 
+	double :target:`kWaterMolarMassKg<doxid-namespacesite_1a830c5d5e28d9456dcc61abd3d558ab7f>` = 0.01801528;
 	double :ref:`kInsideRelTol<doxid-namespacesite_1a17c7ad054eafa92f5e5238e14109b97a>` = 1e-9;
 
 	// global functions
 
+	:ref:`ConcentrationProfile<doxid-structsite_1_1_concentration_profile>` :target:`concentrationProfile<doxid-namespacesite_1ad2c663055abfccc0db54cad890f6865c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<bool>& iceFlag, const std::vector<int>& waterIndices, const std::vector<int>& ionIndices, int nBins, int axis = 2, int ionsPerFormula = 2);
+	:ref:`FrontPair<doxid-structsite_1_1_front_pair>` :target:`locateFronts<doxid-namespacesite_1a03abaa05da31ce30d440505f4507a8d8>`(const :ref:`ConcentrationProfile<doxid-structsite_1_1_concentration_profile>`& profile, double cut = 0.5);
+	:ref:`RejectionCoefficient<doxid-structsite_1_1_rejection_coefficient>` :target:`rejectionCoefficient<doxid-namespacesite_1a7b0b14e15325d993b4acdd83ff8014a4>`(const :ref:`ConcentrationProfile<doxid-structsite_1_1_concentration_profile>`& profile, double bulkIce = 0.85, double bulkLiquid = 0.15);
+	:ref:`LinearFit<doxid-structsite_1_1_linear_fit>` :target:`linearFit<doxid-namespacesite_1ab5e571561bc356c66fac347d8f8924e2>`(const std::vector<double>& time, const std::vector<double>& value);
+	:ref:`PocketCensus<doxid-structsite_1_1_pocket_census>` :target:`brinePockets<doxid-namespacesite_1a50195ca7ff3fd7ab4e2e251f4b4aaccf>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<bool>& iceFlag, const std::vector<int>& waterIndices, const std::vector<int>& ionIndices, double cutoff);
+	:ref:`FrontLayerReport<doxid-structsite_1_1_front_layer_report>` :target:`frontLayer<doxid-namespacesite_1a7694aef3e4594497247dfece31f0285b>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<int>& waterIndices, const :ref:`FrontPair<doxid-structsite_1_1_front_pair>`& fronts, double halfWidth, double cutoff, int maxRing, int axis = 2);
+	std::vector<:ref:`TrapEvent<doxid-structsite_1_1_trap_event>`> :ref:`trappingTransitions<doxid-namespacesite_1ad9acb3de62cc0af6b28a6f8197f2d24c>`(const :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`& before, const :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`& after);
+	:ref:`FrontSnapshot<doxid-structsite_1_1_front_snapshot>` :target:`analyseFront<doxid-namespacesite_1a55dc246b8a7c6b02d1a57349bdbf98a8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& cloud, const std::vector<bool>& iceFlag, const std::vector<int>& waterIndices, const std::vector<int>& ionIndices, const :ref:`FrontOptions<doxid-structsite_1_1_front_options>`& options = {});
 	:ref:`DensityZ<doxid-structsite_1_1_density_z>` :ref:`densityZ<doxid-namespacesite_1a75c8588cd72dda60fecb01240009ca6c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int nbin, int axis);
 	:ref:`DensityZ<doxid-structsite_1_1_density_z>` :ref:`densityZ<doxid-namespacesite_1a0e086c58b6a8de67c895bd1e034f58e6>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind, int nbin, int axis);
 	bool :target:`iceScoreAllowed<doxid-namespacesite_1a05342583b5b8258d5347b3f18983d4b2>`(:ref:`Family<doxid-namespacesite_1aa3661d15289b4b8576f48217ed337ca3>` f);
@@ -60,6 +91,7 @@ Overview
 	int :target:`lammpsTypeOfKind<doxid-namespacesite_1a1dd96ee4ccc36bc86f348ec029859b53>`(const :ref:`Table<doxid-structsite_1_1_table>`& table, :ref:`Kind<doxid-namespacesite_1adda3a91ca98e5b5e1ffb889ae6440c90>` kind);
 	:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double> :target:`ionCloud<doxid-namespacesite_1a55a0dd31fcceddabfa6cda601eeb807c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& src, const :ref:`Table<doxid-structsite_1_1_table>`& table);
 	:ref:`Table<doxid-structsite_1_1_table>` :target:`parseSiteSpec<doxid-namespacesite_1ab556d24c5f6d7d7be9ba2e4d975259be>`(std::string_view spec);
+	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` :ref:`ionEnvironment<doxid-namespacesite_1aff6bc7a17064a71c1ca2e4b210b72d3f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, const std::vector<int>& waterTypes, double cutoff);
 	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` :ref:`ionEnvironment<doxid-namespacesite_1a59c0f056c026caebb259d8c8e0d032e1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff);
 	std::vector<int> :ref:`shellRingCensus<doxid-namespacesite_1a3327b0f82b57a80d113b241dec0eb711>`(const std::vector<std::vector<int>>& rings, const std::vector<int>& shell, int maxRingSize);
 	std::vector<std::vector<int>> :ref:`cappedRings<doxid-namespacesite_1a99a4e8b8fb177f7fea900ac24f145d45>`(const std::vector<std::vector<int>>& rings, const std::vector<int>& shell, int maxRingSize);
@@ -67,8 +99,8 @@ Overview
 	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` :ref:`guestOccupancy<doxid-namespacesite_1adf97b42407e86bc9d067855b19397ac8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& cages, const std::vector<int>& guestIndices, double radius);
 	std::array<double, 3> :ref:`periodicCentroid<doxid-namespacesite_1a208c6e1f8e6106530d6c75bb16dccaad>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms);
 	const std::vector<std::array<double, 3>>& :ref:`insideRayDirections<doxid-namespacesite_1a9231f841816296c279bcf08186f332de>`();
-	:ref:`InsideTrace<doxid-structsite_1_1_inside_trace>` :ref:`pointInFacesTrace<doxid-namespacesite_1afc9315591f9625e0013b8ed56887297f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* centre = nullptr);
-	bool :target:`pointInFaces<doxid-namespacesite_1a040c7a9f8809cf0b1fb82b9294df197c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* centre = nullptr);
+	:ref:`InsideTrace<doxid-structsite_1_1_inside_trace>` :ref:`pointInFacesTrace<doxid-namespacesite_1aeeb8b9fec48dcc2b70f40cafe705a0c2>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* center = nullptr);
+	bool :target:`pointInFaces<doxid-namespacesite_1a5e215d2d1aaa78e5e54c511d3617ea1d>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* center = nullptr);
 	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` :ref:`guestOccupancyInside<doxid-namespacesite_1a84113178c851924869bd3fee27af749b>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& cageFaces, const std::vector<int>& guestIndices);
 	:ref:`IceClusterIons<doxid-structsite_1_1_ice_cluster_ions>` :target:`iceClusterIonCensus<doxid-namespacesite_1a2c1ad7bff89d54bbb4c2a22f93e3eeaf>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& ice, const std::vector<std::vector<int>>& nListByIndex, const std::vector<int>& ionIndices, double cutoff);
 
@@ -96,6 +128,18 @@ Relative tolerance of the inside test, in units of the largest distance from c_F
 Global Functions
 ----------------
 
+.. index:: pair: function; trappingTransitions
+.. _doxid-namespacesite_1ad9acb3de62cc0af6b28a6f8197f2d24c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`TrapEvent<doxid-structsite_1_1_trap_event>`> trappingTransitions(const :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`& before, const :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`& after)
+
+A trapping event is a change of :ref:`IonState <doxid-namespacesite_1a7cdb003964d40a8454361db4b34b4791>` into ice.
+
+A release is a change out of ice. Other changes are recorded as well; the caller filters on ``to``.
+
 .. index:: pair: function; densityZ
 .. _doxid-namespacesite_1a75c8588cd72dda60fecb01240009ca6c:
 
@@ -117,6 +161,18 @@ Histogram Point::{x,y,z} for typeI (0 = every atom). axis is 0, 1, or 2.
 Same histogram, restricted to atoms whose :ref:`Table <doxid-structsite_1_1_table>` kind matches.
 
 .. index:: pair: function; ionEnvironment
+.. _doxid-namespacesite_1aff6bc7a17064a71c1ca2e4b210b72d3f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` ionEnvironment(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, const std::vector<int>& waterTypes, double cutoff)
+
+``iceFlag`` is indexed like ``yCloud.pts``.
+
+An empty ``waterTypes`` accepts every atom that is not an ion. A non-empty list keeps every named type, the same union ``cutoffWater`` uses. ``cutoff`` is the first shell radius in the cloud's length unit.
+
+.. index:: pair: function; ionEnvironment
 .. _doxid-namespacesite_1a59c0f056c026caebb259d8c8e0d032e1:
 
 .. ref-code-block:: cpp
@@ -124,7 +180,7 @@ Same histogram, restricted to atoms whose :ref:`Table <doxid-structsite_1_1_tabl
 
 	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` ionEnvironment(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff)
 
-``iceFlag`` is indexed like ``yCloud.pts``; ``waterType`` selects the water oxygens (0 accepts every atom that is not an ion); ``cutoff`` is the first shell radius in the cloud's length unit.
+``waterType`` 0 accepts every non-ion. Any other value is that one type.
 
 .. index:: pair: function; shellRingCensus
 .. _doxid-namespacesite_1a3327b0f82b57a80d113b241dec0eb711:
@@ -193,16 +249,16 @@ Periodic centroid of a set of atoms: every atom is unwrapped to its minimum imag
 The fixed, ordered unit directions the inside test casts rays along.
 
 .. index:: pair: function; pointInFacesTrace
-.. _doxid-namespacesite_1afc9315591f9625e0013b8ed56887297f:
+.. _doxid-namespacesite_1aeeb8b9fec48dcc2b70f40cafe705a0c2:
 
 .. ref-code-block:: cpp
 	:class: doxyrest-title-code-block
 
-	:ref:`InsideTrace<doxid-structsite_1_1_inside_trace>` pointInFacesTrace(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* centre = nullptr)
+	:ref:`InsideTrace<doxid-structsite_1_1_inside_trace>` pointInFacesTrace(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* center = nullptr)
 
 The inside predicate for one cage.
 
-The face vertices and the guest are unwrapped about c_F (``centre``, or the periodic centroid of the distinct face vertices when null) and each face is fan-triangulated from its own centroid. The guest is inside when it lies on a triangle within ``:ref:`kInsideRelTol <doxid-namespacesite_1a17c7ad054eafa92f5e5238e14109b97a>```; otherwise a ray is cast along the first direction of ``:ref:`insideRayDirections() <doxid-namespacesite_1a9231f841816296c279bcf08186f332de>``` that passes no triangle edge or vertex within that tolerance, and the guest is inside when the ray meets an odd number of triangles. When every direction grazes, the one with the widest clearance decides.
+The face vertices and the guest are unwrapped about c_F (``center``, or the periodic centroid of the distinct face vertices when null) and each face is fan-triangulated from its own centroid. The guest is inside when it lies on a triangle within ``:ref:`kInsideRelTol <doxid-namespacesite_1a17c7ad054eafa92f5e5238e14109b97a>```; otherwise a ray is cast along the first direction of ``:ref:`insideRayDirections() <doxid-namespacesite_1a9231f841816296c279bcf08186f332de>``` that passes no triangle edge or vertex within that tolerance, and the guest is inside when the ray meets an odd number of triangles. When every direction grazes, the one with the widest clearance decides.
 
 .. index:: pair: function; guestOccupancyInside
 .. _doxid-namespacesite_1a84113178c851924869bd3fee27af749b:
@@ -212,7 +268,7 @@ The face vertices and the guest are unwrapped about c_F (``centre``, or the peri
 
 	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` guestOccupancyInside(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& cageFaces, const std::vector<int>& guestIndices)
 
-Occupancy by the inside predicate (``:ref:`pointInFaces <doxid-namespacesite_1a040c7a9f8809cf0b1fb82b9294df197c>```) on every cage.
+Occupancy by the inside predicate (``:ref:`pointInFaces <doxid-namespacesite_1a5e215d2d1aaa78e5e54c511d3617ea1d>```) on every cage.
 
 Among cages that contain the guest the nearest centroid wins. ``rings`` is the ring list the cage faces index; ``cageFaces[c]`` is the face indices of cage c.
 

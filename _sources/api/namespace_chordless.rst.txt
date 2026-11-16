@@ -1,0 +1,103 @@
+.. index:: pair: namespace; chordless
+.. _doxid-namespacechordless:
+
+namespace chordless
+===================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace chordless {
+
+	// global variables
+
+	int :ref:`kMaxSize<doxid-namespacechordless_1ac5266f3c5c206379ebf9adc0f9604b0b>` = 12;
+
+	// global functions
+
+	std::size_t :ref:`cycles<doxid-namespacechordless_1a61fb5456e1264db500b35965cdbc1a52>`(const std::vector<int>& offsets, const std::vector<int>& cols, int size, std::vector<int>* rings, int* per_atom);
+
+	} // namespace chordless
+.. _details-namespacechordless:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Global Variables
+----------------
+
+.. index:: pair: variable; kMaxSize
+.. _doxid-namespacechordless_1ac5266f3c5c206379ebf9adc0f9604b0b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int kMaxSize = 12
+
+Largest cycle the meet-in-the-middle search takes. A half is at most six steps.
+
+Global Functions
+----------------
+
+.. index:: pair: function; cycles
+.. _doxid-namespacechordless_1a61fb5456e1264db500b35965cdbc1a52:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::size_t cycles(const std::vector<int>& offsets, const std::vector<int>& cols, int size, std::vector<int>* rings, int* per_atom)
+
+Chordless cycles of one size on a CSR graph.
+
+A cycle is chordless when no edge joins two of its vertices that are not neighbours on the cycle. Each cycle is listed once, starting at its lowest vertex, in the direction whose second vertex is the smaller of that vertex's two cycle neighbours. The list is sorted lexicographically, so it does not depend on the thread count.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- offsets
+
+		- n + 1 row offsets.
+
+	*
+		- cols
+
+		- Column indices. Self entries must not appear.
+
+	*
+		- size
+
+		- Cycle length, from 3 through kMaxSize.
+
+	*
+		- rings
+
+		- When not null, receives count \* size vertex indices.
+
+	*
+		- per_atom
+
+		- When not null, n counts of cycles through each vertex.
+
+
+
+.. rubric:: Returns:
+
+The number of cycles.
+

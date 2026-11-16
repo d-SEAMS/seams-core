@@ -51,25 +51,74 @@
 Overview
 --------
 
+d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
+``libseams`` is the library: CHILL+, cages, primitive rings, and :math:`q_6` share one cutoff neighbour list.
+The ``seams`` command, the C and C++ APIs, and the language bindings call that library.
+
+Install the engine with one line.
+
+.. code:: bash
+
+    meson setup build && meson compile -C build
+
+Ten lines classify the cubic cell shipped in ``input/traj``.
+
+.. code:: bash
+
+    dump=input/traj/mW_cubic.lammpstrj
+    seams read "$dump" --type 1
+    seams chill-plus "$dump" --type 1 --cutoff 3.5
+    seams ovito-chill+ "$dump" --type 1 --cutoff 3.5
+    seams rings "$dump" --type 1 --cutoff 3.5
+    seams steinhardt "$dump" --type 1 --l 6
+    seams cages "$dump" --type 1
+    seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge none
+    seams rdf "$dump" --pair-types 1,1 --cutoff 6 --bins 4
+    seams prisms "$dump" --type 1
+
+The `videos <videos/index.rst>`_, the
+`1.x migration <howto/migrate-1x.rst>`_, the
+`performance tables <explanation/performance-h2h.rst>`_, and the
+`2.14.0 notes <reference/release-2.14.rst>`_ are the rest of this
+release.
+
 d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
 Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (``libyodaLib``) and the ``seams`` CLI.
 
+The first classification is five lines. Install with
+``pip install 'pydseamslib==2.14.0'`` for the Frame package, with conda-forge's
+Meson toolchain, or with ``meson setup build && meson compile -C build``,
+then run the Python and C programs on
+`the quick start <quickstart.rst>`_. Both report 8 cubic molecules.
+
 .. code:: bash
 
-    seams read water.lammpstrj
-    seams chill-plus water.lammpstrj --cutoff 3.5
-    seams cages water.lammpstrj
+    seams read input/traj/ice1h.lammpstrj
+    seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
+    seams cages input/traj/ice1h.lammpstrj
 
-Scripting front ends are separate packages:
+2.14.0 ships ``libseams`` (``seams.h``), ``libseams_lang``, the C and C++
+APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines.
+``gmx-seams`` reads the trajectory after ``gmx mdrun``.
+Each language binding is its own repository, released with the same
+version against this tag:
 
-- Python: ``pydseams`` (`Python docs <https://d-seams.github.io/PydSEAMSlib/>`_,
-  `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_), compiled
-  module ``yoda``
+- Python: ``pydseamslib`` (``import dseams``, ``import pydseams``),
+  `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_
 
-- Lua/Fennel: ``dseams`` (`Lua docs <https://d-seams.github.io/yodaStruct/>`_,
-  `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_),
-  ``require("dseams")``
+- Lua and Fennel: LuaRocks ``dseams``, `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
+
+- R: ``dseams``, `dseams-r <https://github.com/d-SEAMS/dseams-r>`_
+
+- Julia: ``Dseams``, `Dseams.jl <https://github.com/d-SEAMS/Dseams.jl>`_
+
+- Rust: ``dseams-sys`` and ``dseams``, `dseams-rs <https://github.com/d-SEAMS/dseams-rs>`_
+
+- Fortran: fpm ``dseams``, `dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_
+
+`The repository map <contributing/repositories.rst>`_ says what
+lives where.
 
 The header **Ecosystem** menu on every page jumps between the engine,
 the bindings, and linkcell.
@@ -82,23 +131,13 @@ Suite stack
 
 .. mermaid::
 
-   flowchart TB
-     subgraph engine["seams-core"]
-       LIB[libyodaLib]
-       CLI[seams CLI]
-     end
-     subgraph fronts["Front ends"]
-       PY[pydseams Frame]
-       LUA["require(\"dseams\")"]
-     end
-     LC[linkcell]
-     DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
-     LC --> LIB
-     LIB --> CLI
-     LIB --> PY
-     LIB --> LUA
-     CLI --> OUT[stdout counts]
-     PY --> ASE[ASE / solvis extras]
+   flowchart TD
+     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
+     LC[linkcell] --> LIB
+     LIB --> API[libseams]
+     API --> CLI["seams command"]
+     CLI --> OUT["stdout counts"]
+     API --> LANG["C and C++ here<br/>Python, Lua, R, Julia,<br/>Rust, Fortran repositories"]
 
 Documentation structure
 -----------------------
@@ -106,48 +145,229 @@ Documentation structure
 This documentation follows the `Diataxis <https://diataxis.fr/>`_
 framework.
 
+.. grid:: 1 2 3 3
+   :gutter: 2
+
+   .. grid-item-card:: Tutorials
+      :link: tutorials/index
+      :link-type: doc
+
+      Ice, clathrates, brine, and nucleation, each with a runnable check.
+
+   .. grid-item-card:: How-to
+      :link: howto/index
+      :link-type: doc
+
+      Cutoff, neighbours, CHILL+, rings, and the engine builds.
+
+   .. grid-item-card:: Reference
+      :link: reference/index
+      :link-type: doc
+
+      :doc:`C <capi/index>`, :doc:`C++ <stable/cpp>`,
+      :doc:`CLI <reference/cli>`, and the
+      :doc:`language bindings <howto/bindings>`.
+
+   .. grid-item-card:: Engines
+      :link: engines/index
+      :link-type: doc
+
+      :doc:`LAMMPS <engines/lammps>`, :doc:`GROMACS <engines/gromacs>`,
+      :doc:`OpenMM <engines/openmm>`, :doc:`PLUMED <engines/plumed>`.
+
+   .. grid-item-card:: Comparisons
+      :link: comparisons
+      :link-type: doc
+
+      OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED, next to the tests that recompute them.
+
+   .. grid-item-card:: Videos
+      :link: videos/index
+      :link-type: doc
+
+      Odysee recordings of the bindings and the tutorials.
+
 .. toctree::
-   :maxdepth: 2
-   :caption: Getting Started
+   :hidden:
+   :maxdepth: 1
+   :caption: Getting started
 
    quickstart
+   howto/install
+   videos/index
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
+   :maxdepth: 1
    :caption: Tutorials
 
    tutorials/index
+   tutorials/clathrate
+   tutorials/interface
+   tutorials/nucleation
+   tutorials/brine
+   tutorials/insitu-run
+   tutorials/bulk-ice
+   tutorials/ice-and-clathrate
+   tutorials/rings
+   tutorials/order-parameters
+   tutorials/confined-water
+   tutorials/nanotube
+   tutorials/paper-figures
+   tutorials/paper-interface
+   tutorials/paper-cages
+   tutorials/paper-rings
+   tutorials/paper-brine
+   tutorials/paper-nucleation
+   tutorials/gallery
+   science/index
+   science/interface
+   science/brine
+   science/cages
+   science/gallery
+   fronts/index
+   fronts/c
+   fronts/cpp
+   fronts/fortran
+   fronts/julia
+   fronts/lua
+   fronts/python
+   fronts/r
+   fronts/rust
+   fronts/engines
+   fronts/gromacs
+   fronts/insitu
+   fronts/lammps
+   fronts/openmm
+   fronts/plumed
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
+   :maxdepth: 1
    :caption: How-to
 
    howto/index
+   howto/upgrade-2.14
+   howto/migrate-1x
+   howto/bindings
+   howto/versions
+   howto/benchmarks
+   howto/neighbour-lists
+   howto/openmp-offload
+   howto/classify-cli
+   howto/rings
+   howto/cages-trace
+   howto/q4-q6
+   howto/chill-plus
+   howto/cutoff-padding
+   howto/symmetry-classifier
+   howto/linkcell-carried
+   howto/sheared-cells
+   howto/ionic-liquid
+   howto/confined-ice
+   howto/science-front
+   howto/from-trajectory
+   howto/engine-gromacs
+   howto/engine-lammps
+   howto/engine-openmm
+   howto/engine-plumed
+   howto/engine-insitu
+   howto/faq
+   howto/troubleshooting
+   walkthrough/index
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Explanation
-
-   explanation/index
-
-.. toctree::
-   :maxdepth: 2
+   :hidden:
+   :maxdepth: 1
    :caption: Reference
 
    reference/index
+   reference/python-frame
+   reference/cli
+   reference/data-formats
+   reference/walk-compare
+   reference/api
+   reference/nix
+   reference/cross-language
+   reference/glossary
+   reference/release-2.14
+   stable/index
+   stable/c
+   stable/cpp
+   stable/python
+   stable/fortran
+   stable/julia
+   stable/r
+   stable/lua
+   stable/rust
+   stable/cli
+   stable/science
+   capi/index
+   lang/index
+   api/index
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Engines
+
+   engines/index
+   engines/lammps
+   engines/gromacs
+   engines/openmm
+   engines/plumed
+   engines/insitu
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Comparisons
+
+   comparisons
+   explanation/clavis-trace
+   explanation/sqq
+   explanation/ovito-findrings
+   explanation/performance-h2h
+   howto/literature-h2h
+   howto/literature-reproduce
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Explanation
+
+   explanation/index
+   explanation/architecture
+   explanation/c-api
+   explanation/chill-plus-vs-cages
+   explanation/chill-plus-rules
+   explanation/interface-order
+   explanation/ring-completion
+   explanation/primitive-rings
+   explanation/linkcell-scaling
+   explanation/rings-one-thread
+   explanation/topological-network
+   explanation/symmetry
+   explanation/trace-assembly
+   explanation/stacking-disorder
+   explanation/hop-ball
+   explanation/trace-threads
+   explanation/performance
+   explanation/performance-overview
+   explanation/binding-overhead
+   explanation/performance-range
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Project
+
    changelog
-
-.. toctree::
-   :maxdepth: 2
-   :caption: d-SEAMS 2.0 paper
-
-   paper/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Development
-
    contributing/index
+   contributing/repositories
+   contributing/release
+   contributing/lean
+   explanation/citation
 
 The in-book C++ pages under ``api/`` are Doxygen via doxyrest. A sibling
 doxyYoda HTML tree (inline source, treeview) is at
@@ -157,9 +377,12 @@ doxyYoda HTML tree (inline source, treeview) is at
 d-SEAMS 2.0 paper
 -----------------
 
-The paper describes seams-core v2.12.0. Its component versions,
-current benchmark tables and rerun steps are under
-`d-SEAMS 2.0 paper <paper/index.rst>`_.
+The d-SEAMS 2.0 paper, its benchmark campaign, the record tables and
+the reproduction rules are in a private paper repository. The
+benchmark records and figure data are the Hugging Face datasets
+``d-SEAMS/dseams2-benchmark-records`` and ``d-SEAMS/dseams2-paper-figure-data``.
+The performance pages here show tables rendered from those records
+(``docs/records/README.md`` names the revision).
 
 Related projects
 ----------------
@@ -167,8 +390,8 @@ Related projects
 `pydseams <https://d-seams.github.io/PydSEAMSlib/>`_
     Python Frame API on ``yoda``
 
-`dseams (Lua) <https://d-seams.github.io/yodaStruct/>`_
-    ``require("dseams")`` and Fennel
+`yodaStruct <https://d-seams.github.io/yodaStruct/>`_
+    the Lua and Fennel binding, ``require("dseams")``
 
 `linkcell <https://github.com/d-SEAMS/linkcell>`_
     periodic linked-cell k-nearest neighbours
@@ -182,3 +405,310 @@ License
 MIT. Cite the 2020 JCIM paper (DOI
 `10.1021/acs.jcim.0c00031 <https://doi.org/10.1021/acs.jcim.0c00031>`_).
 See `Citation <explanation/citation.rst>`_.
+
+.. linkcheck-pages-start
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+
+   api/class_nneigh_CutoffSkin
+   api/class_nneigh_SkinNeighborList
+   api/class_primitive_RingUpdater
+   api/class_ring_AffiliationUpdater
+   api/class_ring_NeighBond
+   api/class_seams_Brine
+   api/class_seams_Cages
+   api/class_seams_Error
+   api/class_seams_FairWidth
+   api/class_seams_Fingerprint
+   api/class_seams_Neighbours
+   api/class_seams_Rings
+   api/class_seams_Rings_iterator
+   api/class_seams_System
+   api/class_seams_detail_Handle
+   api/enum_cage_Signature_Kind
+   api/enum_cage_cageType
+   api/enum_cage_iceType
+   api/enum_chill_ChillPlusRule
+   api/enum_chill_CrystalKind
+   api/enum_iface_Cause
+   api/enum_iface_Kind
+   api/enum_molSys_atom_state_type
+   api/enum_molSys_bond_type
+   api/enum_nneigh_BondGraph
+   api/enum_nucleation_CommittorFate
+   api/enum_phase_GlassKind
+   api/enum_primitive_RingRows
+   api/enum_ring_strucType
+   api/enum_seams_product_Int8Backend
+   api/enum_seams_product_Mode
+   api/enum_seams_product_Reduction
+   api/enum_site_Family
+   api/enum_site_IonState
+   api/enum_site_Kind
+   api/enum_symm_Crystal
+   api/enum_symm_Kind
+   api/enum_water_MolMode
+   api/generated_targets
+   api/global
+   api/group_bond
+   api/group_cage
+   api/group_capi_brine
+   api/group_capi_cage
+   api/group_capi_frame
+   api/group_capi_frame_io
+   api/group_capi_meta
+   api/group_capi_more
+   api/group_capi_neigh
+   api/group_capi_order
+   api/group_capi_ring
+   api/group_capi_sized
+   api/group_capi_types
+   api/group_chill
+   api/group_clump
+   api/group_gen
+   api/group_molSys
+   api/group_nneigh
+   api/group_primitive
+   api/group_prism3
+   api/group_rdf
+   api/group_rdf2
+   api/group_ring
+   api/group_seams_cpp
+   api/group_sinp
+   api/namespace_absor
+   api/namespace_bond
+   api/namespace_cage
+   api/namespace_chill
+   api/namespace_chordless
+   api/namespace_clump
+   api/namespace_gen
+   api/namespace_gen_mic
+   api/namespace_gpu
+   api/namespace_iface
+   api/namespace_ira
+   api/namespace_match
+   api/namespace_molSys
+   api/namespace_nneigh
+   api/namespace_nucleation
+   api/namespace_phase
+   api/namespace_pntToPnt
+   api/namespace_primitive
+   api/namespace_prism3
+   api/namespace_rdf
+   api/namespace_rdf2
+   api/namespace_ring
+   api/namespace_science
+   api/namespace_seams
+   api/namespace_seams_cfg
+   api/namespace_seams_cpu
+   api/namespace_seams_detail
+   api/namespace_seams_domain
+   api/namespace_seams_minimax
+   api/namespace_seams_product
+   api/namespace_seams_solid
+   api/namespace_seams_sphericart_ylm
+   api/namespace_seams_steinhardt
+   api/namespace_seams_tsan
+   api/namespace_seams_wigner
+   api/namespace_seams_ylm
+   api/namespace_sinp
+   api/namespace_site
+   api/namespace_sout
+   api/namespace_sph
+   api/namespace_std
+   api/namespace_symm
+   api/namespace_symm_avx2
+   api/namespace_symm_generic
+   api/namespace_topo
+   api/namespace_topoparam
+   api/namespace_tum
+   api/namespace_tum3
+   api/namespace_tum_device
+   api/namespace_water
+   api/struct_cage_Cage
+   api/struct_cage_CageShape
+   api/struct_cage_EdgeWindow
+   api/struct_cage_FormerRow
+   api/struct_cage_FoundCage
+   api/struct_cage_Signature
+   api/struct_chill_AnalysisPhases
+   api/struct_chill_BondClassifier
+   api/struct_chill_BondOrder
+   api/struct_chill_ChillPlusResult
+   api/struct_chill_LinearClassifier
+   api/struct_chill_QlCutoffStages
+   api/struct_chill_QlmAtom
+   api/struct_chill_SteinhardtQl
+   api/struct_chill_TemplateHit
+   api/struct_chill_VoronoiWeights
+   api/struct_chill_YlmAtom
+   api/struct_clump_Domain
+   api/struct_gen_FracBox
+   api/struct_gpu_BatchResult
+   api/struct_gpu_DeviceInfo
+   api/struct_gpu_Footprint
+   api/struct_gpu_Plan
+   api/struct_iface_Bin
+   api/struct_iface_BootstrapInterval
+   api/struct_iface_Front
+   api/struct_iface_Growth
+   api/struct_iface_GrowthFrame
+   api/struct_iface_Profile
+   api/struct_iface_Study
+   api/struct_iface_WillardChandler
+   api/struct_ira_Match
+   api/struct_ira_PointGroup
+   api/struct_molSys_Point
+   api/struct_molSys_PointCloud
+   api/struct_molSys_Result
+   api/struct_nucleation_Ascent
+   api/struct_nucleation_CommittorCall
+   api/struct_nucleation_FrameRecord
+   api/struct_nucleation_GrowBasin
+   api/struct_nucleation_HalfRise
+   api/struct_nucleation_Lead
+   api/struct_nucleation_Shift
+   api/struct_phase_IceXXIHit
+   api/struct_primitive_Graph
+   api/struct_primitive_RingSearchSplit
+   api/struct_primitive_Vertex
+   api/struct_rdf_PartialRdf
+   api/struct_ring_CageAffiliation
+   api/struct_ring_DdcSplit
+   api/struct_ring_EquatorChoice
+   api/struct_ring_PackParts
+   api/struct_ring_PackingCertificate
+   api/struct_ring_RingSearchIndex
+   api/struct_ring_SeededAtomLabels
+   api/struct_ring_StackingPlanes
+   api/struct_science_AtomRow
+   api/struct_science_ClusterPart
+   api/struct_science_CriticalSize
+   api/struct_science_Front
+   api/struct_science_LayerRow
+   api/struct_science_Layers
+   api/struct_science_NucleusFrame
+   api/struct_science_SlopeInterval
+   api/struct_seams_BondOptions
+   api/struct_seams_BrineFronts
+   api/struct_seams_BrineOptions
+   api/struct_seams_BrineProfile
+   api/struct_seams_CageCounts
+   api/struct_seams_CageOptions
+   api/struct_seams_ChillOptions
+   api/struct_seams_ChordlessCycles
+   api/struct_seams_Classification
+   api/struct_seams_Contacts
+   api/struct_seams_DensityOptions
+   api/struct_seams_DensityProfile
+   api/struct_seams_Distribution
+   api/struct_seams_DistributionOptions
+   api/struct_seams_DomainOptions
+   api/struct_seams_DomainReport
+   api/struct_seams_EdgeSet
+   api/struct_seams_FairState
+   api/struct_seams_FingerprintOptions
+   api/struct_seams_KnnOptions
+   api/struct_seams_NeighbourOptions
+   api/struct_seams_OrderOptions
+   api/struct_seams_Pockets
+   api/struct_seams_PrismCensus
+   api/struct_seams_PrismOptions
+   api/struct_seams_Q4Q6
+   api/struct_seams_Q6Bar
+   api/struct_seams_Q6BarOptions
+   api/struct_seams_Rejection
+   api/struct_seams_RingOptions
+   api/struct_seams_RunningCoordination
+   api/struct_seams_SheetOptions
+   api/struct_seams_SignatureMatch
+   api/struct_seams_SignatureOptions
+   api/struct_seams_Steinhardt
+   api/struct_seams_SteinhardtOptions
+   api/struct_seams_TeamWidth
+   api/struct_seams_cfg_Runtime
+   api/struct_seams_cpu_Features
+   api/struct_seams_domain_RingPhases
+   api/struct_seams_domain_RingSummary
+   api/struct_seams_domain_Share
+   api/struct_seams_product_Cij
+   api/struct_seams_product_ComplexDot
+   api/struct_seams_product_GemmInfo
+   api/struct_seams_product_RealDot
+   api/struct_seams_tsan_Slot
+   api/struct_site_BrinePocket
+   api/struct_site_ConcentrationBin
+   api/struct_site_ConcentrationProfile
+   api/struct_site_DensityZ
+   api/struct_site_FrontLayerReport
+   api/struct_site_FrontOptions
+   api/struct_site_FrontPair
+   api/struct_site_FrontSnapshot
+   api/struct_site_GuestOccupancy
+   api/struct_site_IceClusterIons
+   api/struct_site_InsideTrace
+   api/struct_site_IonEnvironment
+   api/struct_site_LinearFit
+   api/struct_site_PocketCensus
+   api/struct_site_RejectionCoefficient
+   api/struct_site_Table
+   api/struct_site_TrapEvent
+   api/struct_symm_CanonShell
+   api/struct_symm_Group
+   api/struct_symm_Lattice
+   api/struct_symm_Overlay
+   api/struct_symm_Shell17
+   api/struct_symm_Space
+   api/struct_topo_FrameFingerprint
+   api/struct_topo_KeyLibrary
+   api/struct_topo_LibraryMatch
+   api/struct_topo_LocalKey
+   api/struct_topoparam_LayerStack
+   api/struct_tum_CageCounts
+   api/struct_tum_SpecializedCaps
+   api/struct_water_IonReport
+   api/struct_water_IonSite
+   api/struct_water_Request
+   api/struct_water_Selection
+   explanation/clavis-trace-tables
+   explanation/comparisons-summary-tables
+   explanation/cutoff-rings-tables
+   explanation/performance-h2h-tables
+   explanation/performance-overview-tables
+   explanation/performance-range-tables
+   explanation/performance-tables
+   explanation/pool-audit-tables
+   explanation/sitting-large-tables
+   explanation/sqq-tables
+   explanation/trace-threads-tables
+   howto/cutoff-padding-tables
+   howto/literature-speed
+   howto/pool-audit-v5-tables
+   reference/release-2.14-notes
+   tutorials/gallery-captions
+   tutorials/molecules
+   videos/embeds/brine
+   videos/embeds/c
+   videos/embeds/cages
+   videos/embeds/cli
+   videos/embeds/cpp
+   videos/embeds/fortran
+   videos/embeds/gromacs
+   videos/embeds/insitu
+   videos/embeds/interface
+   videos/embeds/julia
+   videos/embeds/lammps
+   videos/embeds/lua
+   videos/embeds/migrate
+   videos/embeds/nucleation
+   videos/embeds/openmm
+   videos/embeds/plumed
+   videos/embeds/python
+   videos/embeds/r
+   videos/embeds/rings
+   videos/embeds/rust
+   videos/players
+
+.. linkcheck-pages-end

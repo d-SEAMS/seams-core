@@ -9,10 +9,17 @@ namespace chill
 
 	enum_chill_ChillPlusRule.rst
 	enum_chill_CrystalKind.rst
+	struct_chill_AnalysisPhases.rst
+	struct_chill_BondClassifier.rst
+	struct_chill_BondOrder.rst
 	struct_chill_ChillPlusResult.rst
 	struct_chill_LinearClassifier.rst
+	struct_chill_QlCutoffStages.rst
+	struct_chill_QlmAtom.rst
+	struct_chill_SteinhardtQl.rst
 	struct_chill_TemplateHit.rst
 	struct_chill_VoronoiWeights.rst
+	struct_chill_YlmAtom.rst
 
 Overview
 ~~~~~~~~
@@ -33,10 +40,12 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 
 	// structs
 
+	struct :ref:`AnalysisPhases<doxid-structchill_1_1_analysis_phases>`;
 	struct :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`;
 	struct :ref:`BondOrder<doxid-structchill_1_1_bond_order>`;
 	struct :ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>`;
 	struct :ref:`LinearClassifier<doxid-structchill_1_1_linear_classifier>`;
+	struct :ref:`QlCutoffStages<doxid-structchill_1_1_ql_cutoff_stages>`;
 	struct :ref:`QlmAtom<doxid-structchill_1_1_qlm_atom>`;
 	struct :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`;
 	struct :ref:`TemplateHit<doxid-structchill_1_1_template_hit>`;
@@ -45,6 +54,50 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 
 	// global functions
 
+	:ref:`molSys::bond_type<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328>` :ref:`classifyBond<doxid-namespacechill_1af4ca04aace5b50713081cc6528bc771a>`(double cij, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool closed = true);
+	:ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>` :ref:`chillRule<doxid-namespacechill_1a1bc0f302f0567e60061fd3f82a472b81>`();
+	:ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>` :ref:`chillPlusRule<doxid-namespacechill_1abb43db20557ea73beb0a103a11feb906>`();
+	:ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>` :ref:`bondClassifier<doxid-namespacechill_1ac4ea4fda92a94c624a187858ed83de2f>`(const std::string& name);
+	void :ref:`registerBondClassifier<doxid-namespacechill_1afdbd8e7d77ca3e23619b0073b02a2e05>`(const std::string& name, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule);
+	std::vector<std::string> :ref:`bondClassifierNames<doxid-namespacechill_1a65e947224bbb3fd2082fe94f470e0765>`();
+	void :ref:`classifyBonds<doxid-namespacechill_1a685e260b6bf728585deefc814eb82be1>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice = false);
+	void :ref:`classifyBonds<doxid-namespacechill_1ac0ed780ae63ea9ed490be26139f483e1>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice, bool closed);
+	void :ref:`classifyBondsCsr<doxid-namespacechill_1aca144c74a1021bd03c80cd5787ca8753>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice = false);
+	int :ref:`chillPlusFromCsr<doxid-namespacechill_1a68da69af0ad0bff7e0c2aa3705a354cf>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, bool keepBonds = true);
+	int :ref:`chillPlusOvitoFromCsr<doxid-namespacechill_1aa4dae25c269f70f40ed2ce175b710cbf>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols);
+	int :ref:`chillFromCsr<doxid-namespacechill_1a64bc4e2366a07540c89854cfde5dfeb6>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols);
+	void :target:`bondOrder<doxid-namespacechill_1ab26bf9461b74908aabd6e096546ef883>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, :ref:`BondOrder<doxid-structchill_1_1_bond_order>`& order, const std::vector<char>* which, bool fresh = true);
+	void :ref:`correlFromOrder<doxid-namespacechill_1adce994972bc6a6edaac9ac00a9410827>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`BondOrder<doxid-structchill_1_1_bond_order>`& order, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice, const std::vector<char>* which, bool closed = true);
+	void :ref:`getCorrel<doxid-namespacechill_1a4017efb120fe038acfabec9175e2aef6>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false, int coordinationNumber = 4);
+	void :ref:`getIceTypeNoPrint<doxid-namespacechill_1a6636e09d09e99448ff68eb6533d2e479>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false);
+	void :ref:`getIceType<doxid-namespacechill_1a86fb1f94d087bcc2d0a55f487629ca17>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::string path, int firstFrame, bool isSlice = false, std::string outputFileName = "chill.txt");
+	void :ref:`getCorrelPlus<doxid-namespacechill_1a00437c7dd47b3126a35b5bb410904ee2>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false, int coordinationNumber = 4);
+	void :ref:`getCorrelPlus<doxid-namespacechill_1a3d430e0ac5cc894ab47422cd2dad5e7f>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice, int coordinationNumber, bool closedBounds);
+	bool :ref:`chillPlusPublishedCutoff<doxid-namespacechill_1aa67d698173c16604574479c7ffeccc06>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI);
+	bool :ref:`q4q6ChillPlus<doxid-namespacechill_1a0773fb7ba0d82fc8b8681e034141971b>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI, std::vector<double>& q4, std::vector<double>& q6, std::vector<double>& q4bar, std::vector<double>& q6bar);
+	bool :ref:`chillPlusSymbolicPrefilter<doxid-namespacechill_1a06ede063ce645e06c6ea154a52c9703a>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI);
+	void :ref:`getIceTypePlus<doxid-namespacechill_1af494786ce8fdcfe596b6181ef2a9979f>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::string path, int firstFrame, bool isSlice = false, std::string outputFileName = "chillPlus.txt");
+	void :ref:`getIceTypePlus<doxid-namespacechill_1ade10dbe4d8bea0ae2459cea84f63525b>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::string path, int firstFrame, bool isSlice, std::string outputFileName, bool neighbourTest);
+	void :ref:`getIceTypePlusNoPrint<doxid-namespacechill_1a02005590b436de59a09ab102fd5d78cc>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false);
+	void :ref:`getIceTypePlusNoPrint<doxid-namespacechill_1a439ba1c08661531c9e90cfc8818e6b22>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice, bool neighbourTest);
+	void :ref:`clearIceTypesExcept<doxid-namespacechill_1a6c253832dc8e20f4450ed81d1edc7bf7>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& types);
+	std::vector<double> :ref:`getq6<doxid-namespacechill_1aa4cd8fa09ced6b06f44bf2258304a5e3>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false);
+	void :ref:`reclassifyWater<doxid-namespacechill_1aaad5ad6884511e350e8b2cda1baeaea2>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::vector<double>& q6);
+	int :ref:`printIceType<doxid-namespacechill_1a0981b3101b04cacd525c2b5dc52f8a96>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string path, int firstFrame, bool isSlice = false, std::string outputFileName = "superChill.txt");
+	bool :ref:`isInterfacial<doxid-namespacechill_1a87291ed1a8fe073028ce4de34ff38da2>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int iatom, int num_staggrd, int num_eclipsd, bool chillPlus = false);
+	int :ref:`numStaggered<doxid-namespacechill_1aba97c889c36d860a4842f43a3f81a6b5>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int jatom);
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` :ref:`steinhardtQl<doxid-namespacechill_1ad60f25b03dc9b26dc62d80fd3fac53c3>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int orderL);
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` :ref:`steinhardtQlCutoff<doxid-namespacechill_1a2a25a9b94dbeb2999ffbe11d709821ff>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int orderL, int typeI, bool average, bool invariants = false);
+	:ref:`QlCutoffStages<doxid-structchill_1_1_ql_cutoff_stages>`& :target:`lastQlCutoffStages<doxid-namespacechill_1a28009823939d7ea34c17394ba5f3fc43>`();
+	bool :ref:`localCutoffQ4Q6<doxid-namespacechill_1a54c2a4268860a308ff4d4747aed1f639>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI, std::vector<double>& q4, std::vector<double>& q6);
+	bool :ref:`steinhardtQ4Q6Cutoff<doxid-namespacechill_1a2edabdc2c991910b7f55ea97e3764f8d>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI, bool average, :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`& q4, :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`& q6);
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` :ref:`steinhardtQlMutual<doxid-namespacechill_1abb306f05fb97b73078f1f036eb3cac36>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, int orderL);
+	void :ref:`setSteinhardtAtomSplit<doxid-namespacechill_1a794193ca26ae29cc438c91471a0cb3d5>`(bool split);
+	:ref:`AnalysisPhases<doxid-structchill_1_1_analysis_phases>` :target:`lastChillPhases<doxid-namespacechill_1aa21221b501fe7bbf35fa664416cdc2d3>`();
+	:ref:`AnalysisPhases<doxid-structchill_1_1_analysis_phases>` :target:`lastSteinhardtPhases<doxid-namespacechill_1a5b07478b8a490e3c8272e23fdc3da49e>`();
+	int :ref:`steinhardtQlmWidth<doxid-namespacechill_1acf09e172dbd2b204fb6470c65ee38257>`(int orderL);
+	void :ref:`writeSteinhardtQlm<doxid-namespacechill_1a5eb8eb075ca96976d2992150cfcfed5d>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int orderL, std::vector<double>& qlm, const std::vector<char>* which);
+	void :ref:`readSteinhardtQl<doxid-namespacechill_1a7b9094a4f11e908dcb0d0c3987bebea3>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int orderL, const std::vector<double>& qlm, std::vector<double>& ql, std::vector<double>& qlBar, const std::vector<char>* which);
 	bool :target:`preferOffload<doxid-namespacechill_1ac3eb9f55035d401247072181b24b563a>`();
 	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :ref:`hostChillPlus<doxid-namespacechill_1a2d5243660db62c90ccdad3bb9cda319e>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
 	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :ref:`specializedChillPlus<doxid-namespacechill_1a30ed8d4d44a99044fddf3ea0b7f0ee0c>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
@@ -123,8 +176,8 @@ The CHILL+ algorithm, which is a modified version of CHILL, additionally identif
 	Phase                  E    S    Neighbours  Description
 	Cubic                  0    4    4           no change was made to the staggered :ref:`bond <doxid-namespacebond>` criterion from CHILL
 	Hexagonal              1    3    4           wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K
-	Interfacial            any  2    4           must have at least one first neighbor water with more than two staggered bonds
-	                       0    3    4           must have at least one first neighbor water with more than one staggered :ref:`bond <doxid-namespacebond>`
+	Interfacial            any  2    4           must have at least one first neighbor :ref:`water <doxid-namespacewater>` with more than two staggered bonds
+	                       0    3    4           must have at least one first neighbor :ref:`water <doxid-namespacewater>` with more than one staggered :ref:`bond <doxid-namespacebond>`
 	Clathrate              4    0    4           bulk clathrate and part of the interface of clathrates can be identified with four eclipsed bonds
 	Interfacial clathrate  3    any  4           partial clathrate cages and threads of clathrate-like order
 	Liquid                 N/A  N/A  any         classifies as liquid if none of the above criteria are fulfilled
@@ -154,6 +207,496 @@ Changelog
 
 Global Functions
 ----------------
+
+.. index:: pair: function; classifyBond
+.. _doxid-namespacechill_1af4ca04aace5b50713081cc6528bc771a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`molSys::bond_type<doxid-namespacemol_sys_1a1c858200c3d088bf02839453d0f46328>` classifyBond(double cij, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool closed = true)
+
+Staggered, eclipsed, or out of range. *closed* selects inclusive edges (c <= staggeredMax, eclipsedMin <= c <= eclipsedMax), the Nguyen and Molinero rule and the 2.13 behavior. Open edges match OVITO 3.17.2 (c < staggeredMax, eclipsedMin < c < eclipsedMax). The flag is an argument so :ref:`BondClassifier <doxid-structchill_1_1_bond_classifier>` stays three doubles and one int. A caller that passes the struct by value does not carry a fifth field.
+
+.. index:: pair: function; chillRule
+.. _doxid-namespacechill_1a1bc0f302f0567e60061fd3f82a472b81:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>` chillRule()
+
+The CHILL rule set (Moore et al., PCCP 12, 4124, 2010): strict staggered bound, narrow eclipsed band, four nearest neighbours
+
+.. index:: pair: function; chillPlusRule
+.. _doxid-namespacechill_1abb43db20557ea73beb0a103a11feb906:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>` chillPlusRule()
+
+The CHILL+ rule set (Nguyen and Molinero, JPCB 119, 9369, 2015): wider eclipsed band for interfacial and clathrate recognition
+
+.. index:: pair: function; bondClassifier
+.. _doxid-namespacechill_1ac4ea4fda92a94c624a187858ed83de2f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>` bondClassifier(const std::string& name)
+
+Look up a registered rule set by name. "CHILL" and "CHILL+" are always present; registerBondClassifier adds more. Throws std::out_of_range for unknown names.
+
+.. index:: pair: function; registerBondClassifier
+.. _doxid-namespacechill_1afdbd8e7d77ca3e23619b0073b02a2e05:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void registerBondClassifier(const std::string& name, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule)
+
+Register (or replace) a named rule set at runtime, making the material's thresholds available to every front end by name
+
+.. index:: pair: function; bondClassifierNames
+.. _doxid-namespacechill_1a65e947224bbb3fd2082fe94f470e0765:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::string> bondClassifierNames()
+
+Names of every registered rule set.
+
+.. index:: pair: function; classifyBonds
+.. _doxid-namespacechill_1a685e260b6bf728585deefc814eb82be1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void classifyBonds(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice = false)
+
+Compute and classify the bond correlations c_ij under an arbitrary rule set, filling yCloud.pts[i].c_ij. getCorrel and getCorrelPlus are this engine under their canonical water rules.
+
+.. index:: pair: function; classifyBonds
+.. _doxid-namespacechill_1ac0ed780ae63ea9ed490be26139f483e1:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void classifyBonds(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice, bool closed)
+
+Same classification as the four-argument form. *closed* false uses the open OVITO edges. The four-argument form stays the 2.13 symbol and keeps inclusive edges.
+
+.. index:: pair: function; classifyBondsCsr
+.. _doxid-namespacechill_1aca144c74a1021bd03c80cd5787ca8753:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void classifyBondsCsr(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice = false)
+
+CHILL/CHILL+ bonds from a CSR of cloud indices.
+
+.. index:: pair: function; chillPlusFromCsr
+.. _doxid-namespacechill_1a68da69af0ad0bff7e0c2aa3705a354cf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int chillPlusFromCsr(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, bool keepBonds = true)
+
+Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count. *keepBonds* false still writes iceType and skips the per-atom bond vectors. The labels are the same either way. The vectors are what a caller that reads c_ij needs.
+
+.. index:: pair: function; chillPlusOvitoFromCsr
+.. _doxid-namespacechill_1aa4dae25c269f70f40ed2ce175b710cbf:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int chillPlusOvitoFromCsr(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols)
+
+OVITO Chill+ from a cutoff CSR. q_lm is the sum over every neighbour in the row, not the four closest. Edges are open and the Table 1 neighbour test is off, which is the Chill+ modifier. A crystal row still needs exactly four neighbours. Bond vectors are not stored. Returns the cubic count.
+
+.. index:: pair: function; chillFromCsr
+.. _doxid-namespacechill_1a64bc4e2366a07540c89854cfde5dfeb6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int chillFromCsr(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols)
+
+Published CHILL labels from a cutoff CSR. Correlations are the four nearest neighbours in the list. Bond vectors are not stored. Returns the cubic count. Thresholds are :ref:`chillRule() <doxid-namespacechill_1a1bc0f302f0567e60061fd3f82a472b81>`.
+
+.. index:: pair: function; correlFromOrder
+.. _doxid-namespacechill_1adce994972bc6a6edaac9ac00a9410827:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void correlFromOrder(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const :ref:`BondOrder<doxid-structchill_1_1_bond_order>`& order, const :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`& rule, bool isSlice, const std::vector<char>* which, bool closed = true)
+
+c_ij for atoms *which* selects, from a bond-order vector that already holds every neighbour the bond reads. Atoms outside *which* are left untouched, including a ghost's bond list.
+
+.. index:: pair: function; getCorrel
+.. _doxid-namespacechill_1a4017efb120fe038acfabec9175e2aef6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getCorrel(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false, int coordinationNumber = 4)
+
+Function for getting the bond order correlations :math:`c_{ij}` (or :math:`a_{ij}` in some treatments) according to the CHILL algorithm.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The output :ref:`molSys::PointCloud <doxid-structmol_sys_1_1_point_cloud>`
+
+	*
+		- nList
+
+		- The row-ordered neighbour list, by ID. The first element of each row is the particle ID, followed by the IDs of the neighbours
+
+	*
+		- isSlice
+
+		- This decides whether there is a slice or not
+
+	*
+		- coordinationNumber
+
+		- How many nearest neighbours the bond sum runs over. The default of four is the coordination CHILL is defined and validated against (tetrahedral water); other values reuse the c_ij machinery for differently coordinated systems, and a non-positive value gives each atom its own count from its neighbour-list row. The ice-classification tables in getIceType remain four-bond rules
+
+.. index:: pair: function; getIceTypeNoPrint
+.. _doxid-namespacechill_1a6636e09d09e99448ff68eb6533d2e479:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getIceTypeNoPrint(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false)
+
+Function that classifies every particle's :ref:`molSys::atom_state_type <doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>` ice type, according to the CHILL algorithm.
+
+Does not print out the information.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The output :ref:`molSys::PointCloud <doxid-structmol_sys_1_1_point_cloud>`
+
+	*
+		- isSlice
+
+		- This decides whether there is a slice or not
+
+	*
+		- nList
+
+		- Row-ordered neighbour list by atom ID
+
+.. index:: pair: function; getIceType
+.. _doxid-namespacechill_1a86fb1f94d087bcc2d0a55f487629ca17:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getIceType(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::string path, int firstFrame, bool isSlice = false, std::string outputFileName = "chill.txt")
+
+Function that classifies every particle's :ref:`molSys::atom_state_type <doxid-namespacemol_sys_1a13ffe3a39a0816627553f195e102abb5>` ice type, according to the CHILL algorithm.
+
+
+
+.. rubric:: Parameters:
+
+.. list-table::
+	:widths: 20 80
+
+	*
+		- yCloud
+
+		- The output :ref:`molSys::PointCloud <doxid-structmol_sys_1_1_point_cloud>`
+
+	*
+		- nList
+
+		- Row-ordered neighbour list by atom ID
+
+	*
+		- path
+
+		- Path to the output directory to which ice types are written out to
+
+	*
+		- firstFrame
+
+		- First frame to be analyzed
+
+	*
+		- isSlice
+
+		- This decides whether there is a slice or not
+
+	*
+		- outputFileName
+
+		- Name of the output file, to which the ice types will be written out.
+
+.. index:: pair: function; getCorrelPlus
+.. _doxid-namespacechill_1a00437c7dd47b3126a35b5bb410904ee2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getCorrelPlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false, int coordinationNumber = 4)
+
+Gets c_ij and then classifies bond types according to the CHILL+ algorithm. coordinationNumber as in getCorrel: four is the validated CHILL+ water scheme, non-positive keeps each atom's whole neighbour row. This is the 2.13 symbol: inclusive edges (closedBounds true).
+
+.. index:: pair: function; getCorrelPlus
+.. _doxid-namespacechill_1a3d430e0ac5cc894ab47422cd2dad5e7f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getCorrelPlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice, int coordinationNumber, bool closedBounds)
+
+Same classification. closedBounds false uses the open OVITO edges.
+
+.. index:: pair: function; chillPlusPublishedCutoff
+.. _doxid-namespacechill_1aa67d698173c16604574479c7ffeccc06:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool chillPlusPublishedCutoff(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI)
+
+Published CHILL+ on the cutoff shell. The pair rows are read inside this call; the shared neighbour-list builder is not modified. Returns false when that search is not available.
+
+.. index:: pair: function; q4q6ChillPlus
+.. _doxid-namespacechill_1a0773fb7ba0d82fc8b8681e034141971b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool q4q6ChillPlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI, std::vector<double>& q4, std::vector<double>& q6, std::vector<double>& q4bar, std::vector<double>& q6bar)
+
+One cutoff list and one bond pass for local q4, local q6, their Lechner-Dellago averages, and the published CHILL+ labels. The four q arrays match steinhardtQlCutoff with averaging on. Returns false when the atoms are not one type or the cutoff list is not available, and then writes nothing.
+
+.. index:: pair: function; chillPlusSymbolicPrefilter
+.. _doxid-namespacechill_1a06ede063ce645e06c6ea154a52c9703a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool chillPlusSymbolicPrefilter(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI)
+
+Cubic pre-filter from discovery/pysr_prefilter.py. The selected expression is cmean^4. It writes cubic and returns true only when every atom has a cutoff shell of four and a negative mean correlation whose fourth power sits above the highest non-cubic score in that search. That forces every bond below -0.84, which the published rule labels staggered, so the atom is cubic. Otherwise it returns false and leaves the cloud unchanged. The default published call does not use it.
+
+.. index:: pair: function; getIceTypePlus
+.. _doxid-namespacechill_1af494786ce8fdcfe596b6181ef2a9979f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getIceTypePlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::string path, int firstFrame, bool isSlice = false, std::string outputFileName = "chillPlus.txt")
+
+Classifies each atom according to the CHILL+ algorithm. This is the 2.13 symbol: the published neighbour test stays on.
+
+.. index:: pair: function; getIceTypePlus
+.. _doxid-namespacechill_1ade10dbe4d8bea0ae2459cea84f63525b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getIceTypePlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, std::string path, int firstFrame, bool isSlice, std::string outputFileName, bool neighbourTest)
+
+neighbourTest false is the OVITO interfacial rule.
+
+.. index:: pair: function; getIceTypePlusNoPrint
+.. _doxid-namespacechill_1a02005590b436de59a09ab102fd5d78cc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getIceTypePlusNoPrint(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false)
+
+CHILL+ ice types on the cloud. Does not write a file. This is the 2.13 symbol: the published neighbour test stays on.
+
+.. index:: pair: function; getIceTypePlusNoPrint
+.. _doxid-namespacechill_1a439ba1c08661531c9e90cfc8818e6b22:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void getIceTypePlusNoPrint(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice, bool neighbourTest)
+
+neighbourTest false is the OVITO interfacial rule (two staggered bonds, or three staggered and no eclipsed bond, with no neighbour lookup). Either rule still requires a cutoff shell of four.
+
+.. index:: pair: function; clearIceTypesExcept
+.. _doxid-namespacechill_1a6c253832dc8e20f4450ed81d1edc7bf7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void clearIceTypesExcept(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& types)
+
+Set iceType to unclassified for atoms whose LAMMPS type is not in types. Empty types leaves the cloud unchanged. Used after a water-type k-NN so substrate and ions are not scored as water.
+
+.. index:: pair: function; getq6
+.. _doxid-namespacechill_1aa4cd8fa09ced6b06f44bf2258304a5e3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> getq6(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, bool isSlice = false)
+
+q6 can distinguish between water and ice. Use this for the largest ice cluster
+
+.. index:: pair: function; reclassifyWater
+.. _doxid-namespacechill_1aaad5ad6884511e350e8b2cda1baeaea2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void reclassifyWater(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::vector<double>& q6)
+
+'Test' condition for classifying hexagonal ice using averaged q6 and q3 Checks water According to `https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a <https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a>`__ Gets c_ij and then classifies bond types according to the CHILL+ algorithm
+
+.. index:: pair: function; printIceType
+.. _doxid-namespacechill_1a0981b3101b04cacd525c2b5dc52f8a96:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int printIceType(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, std::string path, int firstFrame, bool isSlice = false, std::string outputFileName = "superChill.txt")
+
+Prints out the iceType for a particular frame onto the terminal.
+
+.. index:: pair: function; isInterfacial
+.. _doxid-namespacechill_1a87291ed1a8fe073028ce4de34ff38da2:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool isInterfacial(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int iatom, int num_staggrd, int num_eclipsd, bool chillPlus = false)
+
+Interfacial ice. Moore CHILL uses a neighbour with exactly two staggered bonds; Nguyen CHILL+ uses a neighbour with more than one. Pass chillPlus=true for the latter.
+
+.. index:: pair: function; numStaggered
+.. _doxid-namespacechill_1aba97c889c36d860a4842f43a3f81a6b5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int numStaggered(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int jatom)
+
+Finds the number of staggered bonds for a given atom of index jatom.
+
+.. index:: pair: function; steinhardtQl
+.. _doxid-namespacechill_1ad60f25b03dc9b26dc62d80fd3fac53c3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` steinhardtQl(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int orderL)
+
+Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6, 8, or 12. Local ql is Steinhardt, Nelson and Ronchetti; qlBar is the Lechner-Dellago average of q_lm over the particle and its neighbours. l=12 is host-only (associated Legendre, or sphericart when linked) for the Zeron hydrate pair with l=3; the device Ylm path has no l=12. Other degrees return zeros. The compute path flattens the neighbour list to CSR so the same kernel can run on the host (OpenMP), across MPI ranks (atom split plus Allgatherv of q_lm), or under OpenMP target offload when the build provides a device.
+
+.. index:: pair: function; steinhardtQlCutoff
+.. _doxid-namespacechill_1a2a25a9b94dbeb2999ffbe11d709821ff:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` steinhardtQlCutoff(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int orderL, int typeI, bool average, bool invariants = false)
+
+Local :math:`q_l` on the cutoff list.
+
+Neighbours are orthoFullCsr, not a four-nearest rebuild, and the kernel reads that CSR directly. Lechner-Dellago :math:`\bar{q}_l` is filled only when *average* is true. Otherwise ``qlBar`` stays zero. *invariants* fills ``wl`` with the normalized Steinhardt :math:`\hat{w}_l` for l = 4 or 6.
+
+.. index:: pair: function; localCutoffQ4Q6
+.. _doxid-namespacechill_1a54c2a4268860a308ff4d4747aed1f639:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool localCutoffQ4Q6(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI, std::vector<double>& q4, std::vector<double>& q6)
+
+Local q4 and q6 from one cutoff list. Same values as two steinhardtQlCutoff calls with averaging off. Returns false when the shared shell cannot be built.
+
+.. index:: pair: function; steinhardtQ4Q6Cutoff
+.. _doxid-namespacechill_1a2edabdc2c991910b7f55ea97e3764f8d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool steinhardtQ4Q6Cutoff(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, int typeI, bool average, :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`& q4, :ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>`& q6)
+
+q4 and q6 from one cutoff list. The bond vectors are wrapped once. Each degree then uses the same harmonic as steinhardtQlCutoff, so the values match two separate calls. Returns false when that list is not available; the outputs are left untouched.
+
+.. index:: pair: function; steinhardtQlMutual
+.. _doxid-namespacechill_1abb306f05fb97b73078f1f036eb3cac36:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`SteinhardtQl<doxid-structchill_1_1_steinhardt_ql>` steinhardtQlMutual(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, int orderL)
+
+Mutual k-nearest Steinhardt parameters. The coordinate buffer built for the nomination is the one the harmonics read, and the neighbour rows stay in one packed array. l is 3, 4 or 6; other degrees return the result of building the mutual graph and calling steinhardtQl.
+
+.. index:: pair: function; setSteinhardtAtomSplit
+.. _doxid-namespacechill_1a794193ca26ae29cc438c91471a0cb3d5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void setSteinhardtAtomSplit(bool split)
+
+Whether steinhardtQl splits atoms over the ranks of an initialised MPI_COMM_WORLD (true unless set). A driver that gives each rank whole frames of its own turns it off.
+
+.. index:: pair: function; steinhardtQlmWidth
+.. _doxid-namespacechill_1acf09e172dbd2b204fb6470c65ee38257:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int steinhardtQlmWidth(int orderL)
+
+Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.
+
+.. index:: pair: function; writeSteinhardtQlm
+.. _doxid-namespacechill_1a5eb8eb075ca96976d2992150cfcfed5d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void writeSteinhardtQlm(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int orderL, std::vector<double>& qlm, const std::vector<char>* which)
+
+q_lm for atoms *which* selects. Other atoms are left zero.
+
+.. index:: pair: function; readSteinhardtQl
+.. _doxid-namespacechill_1a7b9094a4f11e908dcb0d0c3987bebea3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void readSteinhardtQl(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int orderL, const std::vector<double>& qlm, std::vector<double>& ql, std::vector<double>& qlBar, const std::vector<char>* which)
+
+ql and qlBar for atoms *which* selects, reading q_lm of their neighbours.
 
 .. index:: pair: function; hostChillPlus
 .. _doxid-namespacechill_1a2d5243660db62c90ccdad3bb9cda319e:

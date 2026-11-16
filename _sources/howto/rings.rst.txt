@@ -1,0 +1,49 @@
+===============
+Primitive rings
+===============
+
+
+Count primitive rings on a frame you already have. The definition is
+on `Primitive rings <../explanation/primitive-rings.rst>`_. The
+learning path is `the rings tutorial <../tutorials/rings.rst>`_.
+
+One frame
+---------
+
+``seams rings`` prints ``nop``, the ring count, and one histogram row per
+size. The neighbour list is the cutoff CSR. ``--type`` selects the
+oxygen. ``--max-ring`` is the deepest ring (default 6).
+
+.. code:: bash
+
+    seams rings input/traj/exampleTraj.lammpstrj --type 2
+
+On that mixed TIP4P frame the six-ring line is \`6 167\`. The same argv is
+what ``tests/cli_surface.py`` runs:
+
+.. code:: python
+
+    # excerpt: tests/cli_surface.py
+            ["rings", tip, "--type", "2"],
+
+From the C API
+--------------
+
+``seams_rings_find`` then ``seams_rings_histogram`` is the same census.
+``meson test seams_c_api`` runs it on the 64-atom cubic cell and requires
+a positive six-ring count.
+
+.. code:: c
+
+    // excerpt: tests/test_seams_api.c
+      expect(seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK, "rings");
+      int hist[7];
+      expect(seams_rings_histogram(rings, hist, 7) == SEAMS_OK, "histogram");
+
+A trajectory
+------------
+
+A sequential ``--frame`` / ``--last`` walk with ``--jobs 1`` carries rings
+whose bonds did not change. ``--rebuild`` turns that carry off. The
+measured speedups are on
+`Linkcell neighbours and carried updates <linkcell-carried.rst>`_.

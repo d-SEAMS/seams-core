@@ -1,0 +1,72 @@
+.. index:: pair: struct; iface::WillardChandler
+.. _doxid-structiface_1_1_willard_chandler:
+
+struct iface::WillardChandler
+=============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct WillardChandler {
+		// fields
+	
+		double :target:`xi<doxid-structiface_1_1_willard_chandler_1aea0ff84abb2c360c282fb2b84bc81f8f>` = 2.4;
+		double :target:`meanRadius<doxid-structiface_1_1_willard_chandler_1a43b066cc850d59fbb014c49d9b14e4d0>` = 0;
+		double :target:`surfaceRms<doxid-structiface_1_1_willard_chandler_1a8bbeefb1fdd49b031bd88770af4e131e>` = 0;
+		double :ref:`densityWidth<doxid-structiface_1_1_willard_chandler_1aa5291bdc63998373f8c85270d8ac87ee>` = 0;
+		double :ref:`solidWidthPub<doxid-structiface_1_1_willard_chandler_1a6c0ae6c5564e0e887bc7eea3a5b2e1ff>` = 0;
+		double :ref:`solidWidthOvi<doxid-structiface_1_1_willard_chandler_1a40d9dc21c7e9b44f37dae6571ce1af7a>` = 0;
+		int :target:`nRays<doxid-structiface_1_1_willard_chandler_1a2f58f5e82ecbc2fd0eb0a2a0343875a9>` = 0;
+		bool :target:`defined<doxid-structiface_1_1_willard_chandler_1a19b25781c0272c17f766504c193193b7>` = false;
+	};
+.. _details-structiface_1_1_willard_chandler:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; densityWidth
+.. _doxid-structiface_1_1_willard_chandler_1aa5291bdc63998373f8c85270d8ac87ee:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double densityWidth = 0
+
+rms of the instantaneous surface about its mean
+
+.. index:: pair: variable; solidWidthPub
+.. _doxid-structiface_1_1_willard_chandler_1a6c0ae6c5564e0e887bc7eea3a5b2e1ff:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double solidWidthPub = 0
+
+10-90 of the coarse density normal to that surface
+
+.. index:: pair: variable; solidWidthOvi
+.. _doxid-structiface_1_1_willard_chandler_1a40d9dc21c7e9b44f37dae6571ce1af7a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double solidWidthOvi = 0
+
+10-90 of the 2015 solid fraction on the same coordinate
+

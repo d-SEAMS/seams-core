@@ -1,0 +1,19 @@
+.. index:: pair: enum; CommittorFate
+.. _doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842:
+
+enum nucleation::CommittorFate
+==============================
+
+Outcome of one replica. committed means the final size is still strictly above that replica's own grow-basin barrier. truncated means the series ends on the cap 2N while that cap is also its maximum: the run was cut there and is not a committor sample. The barrier is never 2N itself.
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <nucleation_pathway.hpp>
+
+	enum CommittorFate {
+	    :target:`uncommitted<doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842a7d31dc34e7a4f20fac4dc7fed395ac45>`,
+	    :target:`committed<doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842afebbaa1b242d391642fb9eddfb06ff83>`,
+	    :target:`truncated<doxid-namespacenucleation_1ab77482862038cd733af94a8bc4802842aac273a9aa2a7a6e63ef477fa7f6d1980>`,
+	};
+

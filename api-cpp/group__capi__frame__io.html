@@ -1,0 +1,590 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: Frame reload and read-back</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+window.MathJax = {
+  options: {
+    ignoreHtmlClass: 'tex2jax_ignore',
+    processHtmlClass: 'tex2jax_process'
+  }
+};
+</script>
+<script type="text/javascript" id="MathJax-script" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.14.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('group__capi__frame__io.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Frame reload and read-back </div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>Overwrite coordinates in place and copy the stored frame out.  
+<a href="#details">More...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:ga7b5da55261945dc14d74aab160f14f8c" id="r_ga7b5da55261945dc14d74aab160f14f8c"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga7b5da55261945dc14d74aab160f14f8c">seams_system_set_positions</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, const double *xyz, size_t n, const double *box9, size_t box_len)</td></tr>
+<tr class="memdesc:ga7b5da55261945dc14d74aab160f14f8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Overwrite the coordinates, and optionally the cell, of the stored frame.  <br /></td></tr>
+<tr class="memitem:gafd9d62e4de0402afaa787a610d25be17" id="r_gafd9d62e4de0402afaa787a610d25be17"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#gafd9d62e4de0402afaa787a610d25be17">seams_system_stage_positions</a> (<a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int enable)</td></tr>
+<tr class="memdesc:gafd9d62e4de0402afaa787a610d25be17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trade memory for a single pass in <a class="el" href="#ga7b5da55261945dc14d74aab160f14f8c" title="Overwrite the coordinates, and optionally the cell, of the stored frame.">seams_system_set_positions()</a>.  <br /></td></tr>
+<tr class="memitem:ga7b17ccb495b95692e7579d5b38f6aea9" id="r_ga7b17ccb495b95692e7579d5b38f6aea9"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga7b17ccb495b95692e7579d5b38f6aea9">seams_system_box</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double *box9, size_t box_len)</td></tr>
+<tr class="memdesc:ga7b17ccb495b95692e7579d5b38f6aea9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the stored cell out as nine LAMMPS numbers.  <br /></td></tr>
+<tr class="memitem:ga9c09246c404648a3504ef6c93ded7dbb" id="r_ga9c09246c404648a3504ef6c93ded7dbb"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga9c09246c404648a3504ef6c93ded7dbb">seams_system_positions</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, double *xyz, size_t len)</td></tr>
+<tr class="memdesc:ga9c09246c404648a3504ef6c93ded7dbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the stored coordinates out.  <br /></td></tr>
+<tr class="memitem:ga5c40e0575b9abf86db8f1d908fe5082e" id="r_ga5c40e0575b9abf86db8f1d908fe5082e"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga5c40e0575b9abf86db8f1d908fe5082e">seams_system_types</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int *types, size_t len)</td></tr>
+<tr class="memdesc:ga5c40e0575b9abf86db8f1d908fe5082e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the stored atom types out.  <br /></td></tr>
+<tr class="memitem:ga41976cdc6664e8a7e93cb97bb2fae905" id="r_ga41976cdc6664e8a7e93cb97bb2fae905"><td class="memItemLeft"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga41976cdc6664e8a7e93cb97bb2fae905">seams_system_ids</a> (const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *sys, int *ids, size_t len)</td></tr>
+<tr class="memdesc:ga41976cdc6664e8a7e93cb97bb2fae905"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copy the stored atom ids out.  <br /></td></tr>
+</table>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Overwrite coordinates in place and copy the stored frame out. </p>
+<p>There is no borrowed-pointer load. Every analysis reads the library's per-atom records, so a view onto caller memory would be copied on each analysis call instead of once per frame. A trajectory loop calls <a class="el" href="group__capi__frame.html#ga73b0c2b2e4843095e3be0147e8e2f92c" title="Store points and a general cell.">seams_system_set_atoms()</a> once and <a class="el" href="#ga7b5da55261945dc14d74aab160f14f8c" title="Overwrite the coordinates, and optionally the cell, of the stored frame.">seams_system_set_positions()</a> for each later frame, which writes only the coordinates. </p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ga7b17ccb495b95692e7579d5b38f6aea9" name="ga7b17ccb495b95692e7579d5b38f6aea9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7b17ccb495b95692e7579d5b38f6aea9">&#9670;&#160;</a></span>seams_system_box()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_box </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>box_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the stored cell out as nine LAMMPS numbers. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">box9</td><td>Caller buffer: ox, oy, oz, lx, ly, lz, xy, xz, yz. The values match the cell that was stored, to rounding. </td></tr>
+    <tr><td class="paramname">box_len</td><td>Must be 9. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a> when box_len != 9; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns box9. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">double</span> cell[9];</div>
+<div class="line"><a class="code hl_function" href="#ga7b17ccb495b95692e7579d5b38f6aea9">seams_system_box</a>(sys, cell, 9);</div>
+<div class="ttc" id="agroup__capi__frame__io_html_ga7b17ccb495b95692e7579d5b38f6aea9"><div class="ttname"><a href="#ga7b17ccb495b95692e7579d5b38f6aea9">seams_system_box</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_box(const seams_system *sys, double *box9, size_t box_len)</div><div class="ttdoc">Copy the stored cell out as nine LAMMPS numbers.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga41976cdc6664e8a7e93cb97bb2fae905" name="ga41976cdc6664e8a7e93cb97bb2fae905"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga41976cdc6664e8a7e93cb97bb2fae905">&#9670;&#160;</a></span>seams_system_ids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_ids </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>ids</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the stored atom ids out. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">ids</td><td>Caller buffer for n ints, in stored order. </td></tr>
+    <tr><td class="paramname">len</td><td>Length of ids. Must be at least n. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a> for a short buffer. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns ids. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga41976cdc6664e8a7e93cb97bb2fae905">seams_system_ids</a>(sys, ids, n);</div>
+<div class="ttc" id="agroup__capi__frame__io_html_ga41976cdc6664e8a7e93cb97bb2fae905"><div class="ttname"><a href="#ga41976cdc6664e8a7e93cb97bb2fae905">seams_system_ids</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_ids(const seams_system *sys, int *ids, size_t len)</div><div class="ttdoc">Copy the stored atom ids out.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga9c09246c404648a3504ef6c93ded7dbb" name="ga9c09246c404648a3504ef6c93ded7dbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9c09246c404648a3504ef6c93ded7dbb">&#9670;&#160;</a></span>seams_system_positions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_positions </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the stored coordinates out. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">xyz</td><td>Caller buffer for 3 n doubles, Angstrom, in stored order. </td></tr>
+    <tr><td class="paramname">len</td><td>Length of xyz in doubles. Must be at least 3 n. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a> for a short buffer. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns xyz. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><span class="keywordtype">size_t</span> n = 0;</div>
+<div class="line"><a class="code hl_function" href="group__capi__sized.html#gadf78621a50ec69c4db03b3e9f01f8c07">seams_system_natoms</a>(sys, &amp;n);</div>
+<div class="line"><span class="keywordtype">double</span> *xyz = malloc(3 * n * <span class="keyword">sizeof</span> *xyz);</div>
+<div class="line"><a class="code hl_function" href="#ga9c09246c404648a3504ef6c93ded7dbb">seams_system_positions</a>(sys, xyz, 3 * n);</div>
+<div class="line">free(xyz);</div>
+<div class="ttc" id="agroup__capi__frame__io_html_ga9c09246c404648a3504ef6c93ded7dbb"><div class="ttname"><a href="#ga9c09246c404648a3504ef6c93ded7dbb">seams_system_positions</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_positions(const seams_system *sys, double *xyz, size_t len)</div><div class="ttdoc">Copy the stored coordinates out.</div></div>
+<div class="ttc" id="agroup__capi__sized_html_gadf78621a50ec69c4db03b3e9f01f8c07"><div class="ttname"><a href="group__capi__sized.html#gadf78621a50ec69c4db03b3e9f01f8c07">seams_system_natoms</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_natoms(const seams_system *sys, size_t *n)</div><div class="ttdoc">Number of points in the frame.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga7b5da55261945dc14d74aab160f14f8c" name="ga7b5da55261945dc14d74aab160f14f8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7b5da55261945dc14d74aab160f14f8c">&#9670;&#160;</a></span>seams_system_set_positions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_set_positions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>box_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Overwrite the coordinates, and optionally the cell, of the stored frame. </p>
+<p>Types and ids stay as stored. Per-atom labels written by an earlier <a class="el" href="group__capi__order.html#ga4658c82b60171ca44ff5bfaa1a287b00" title="Original CHILL labels, published or OVITO edges.">seams_chill()</a> or <a class="el" href="group__capi__order.html#gaac628ae6d69d41baadc60a67cdd4e28f" title="CHILL+ labels, without a buffer length.">seams_chill_plus()</a> are reset. On failure the frame is unchanged.</p>
+<p>By default the call checks every coordinate first and then writes them in place, which reads xyz twice and needs no extra memory. After seams_system_stage_positions(sys, 1) it reads xyz once instead (see there).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle with a stored frame. </td></tr>
+    <tr><td class="paramname">xyz</td><td>n times 3 Cartesian coordinates, Angstrom. Every value must be finite. </td></tr>
+    <tr><td class="paramname">n</td><td>Atom count. Must equal the stored count. </td></tr>
+    <tr><td class="paramname">box9</td><td>New cell (ox, oy, oz, lx, ly, lz, xy, xz, yz), or NULL to keep the stored cell. </td></tr>
+    <tr><td class="paramname">box_len</td><td>9 when box9 is not NULL; ignored otherwise. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> for a NULL sys or xyz; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a> when n differs from the stored count or box_len != 9; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da40e67dcc1865ada3d030821f24354322" title="The cell is missing, non-finite, or has no volume.">SEAMS_ERR_BOX</a> for a non-finite cell or a non-positive edge; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0daa83d04e9bf4177cbca654bc2062fbf79" title="A caller argument is the wrong shape, or a coordinate is not finite.">SEAMS_ERR_ARG</a> for a non-finite coordinate; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2c9a8dca4b1d16acf08546871ee940d7" title="An allocation failed.">SEAMS_ERR_NOMEM</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da422d39321a0a63b27ba9bdcf1e13b12c" title="The library hit an internal failure.">SEAMS_ERR_INTERNAL</a>. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const: replaces the stored coordinates and cell. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The library copies xyz and box9. The caller keeps them and may reuse the buffers as soon as the call returns. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="group__capi__frame.html#ga73b0c2b2e4843095e3be0147e8e2f92c">seams_system_set_atoms</a>(sys, frame0, n, box9, 9, types, NULL);</div>
+<div class="line"><span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> f = 1; f &lt; nframes; ++f) {</div>
+<div class="line">  <a class="code hl_function" href="#ga7b5da55261945dc14d74aab160f14f8c">seams_system_set_positions</a>(sys, frames[f], n, NULL, 0);</div>
+<div class="line">  <a class="code hl_function" href="group__capi__sized.html#ga337540a5832d8181ab1143ae18de1ee6">seams_chill_plus_n</a>(sys, 3.5, 0, <a class="code hl_enumvalue" href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a>, <a class="code hl_enumvalue" href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a>,</div>
+<div class="line">                     labels, n, NULL);</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__capi__frame__io_html_ga7b5da55261945dc14d74aab160f14f8c"><div class="ttname"><a href="#ga7b5da55261945dc14d74aab160f14f8c">seams_system_set_positions</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_set_positions(seams_system *sys, const double *xyz, size_t n, const double *box9, size_t box_len)</div><div class="ttdoc">Overwrite the coordinates, and optionally the cell, of the stored frame.</div></div>
+<div class="ttc" id="agroup__capi__frame_html_ga73b0c2b2e4843095e3be0147e8e2f92c"><div class="ttname"><a href="group__capi__frame.html#ga73b0c2b2e4843095e3be0147e8e2f92c">seams_system_set_atoms</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t n, const double *box9, size_t box_len, const int *types, const int *ids)</div><div class="ttdoc">Store points and a general cell.</div></div>
+<div class="ttc" id="agroup__capi__sized_html_ga337540a5832d8181ab1143ae18de1ee6"><div class="ttname"><a href="group__capi__sized.html#ga337540a5832d8181ab1143ae18de1ee6">seams_chill_plus_n</a></div><div class="ttdeci">SEAMS_API seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int type, int graph, int rule, int *labels, size_t labels_len, int counts9[9])</div><div class="ttdoc">CHILL+ labels into a buffer of known length.</div></div>
+<div class="ttc" id="agroup__capi__types_html_ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d"><div class="ttname"><a href="group__capi__types.html#ggab74282bf5785b8e09271a9841bfe1a1ea901208749b8e234b535162d73e6a104d">SEAMS_CHILL_PUBLISHED</a></div><div class="ttdeci">@ SEAMS_CHILL_PUBLISHED</div><div class="ttdoc">Nguyen and Molinero, four closest neighbours.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00202">seams.h:202</a></div></div>
+<div class="ttc" id="agroup__capi__types_html_ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d"><div class="ttname"><a href="group__capi__types.html#ggaeee5406b3ad13ed94cce7636c1b6de58a4b0b89e687e7d3ceb2a5f030f72bd48d">SEAMS_GRAPH_CUTOFF</a></div><div class="ttdeci">@ SEAMS_GRAPH_CUTOFF</div><div class="ttdoc">Every neighbour inside the cutoff.</div><div class="ttdef"><b>Definition</b> <a href="seams_8h_source.html#l00208">seams.h:208</a></div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gafd9d62e4de0402afaa787a610d25be17" name="gafd9d62e4de0402afaa787a610d25be17"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafd9d62e4de0402afaa787a610d25be17">&#9670;&#160;</a></span>seams_system_stage_positions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_stage_positions </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>enable</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Trade memory for a single pass in <a class="el" href="#ga7b5da55261945dc14d74aab160f14f8c" title="Overwrite the coordinates, and optionally the cell, of the stored frame.">seams_system_set_positions()</a>. </p>
+<p>With enable nonzero the handle keeps a second set of per-atom records, about 72 bytes per atom. <a class="el" href="#ga7b5da55261945dc14d74aab160f14f8c" title="Overwrite the coordinates, and optionally the cell, of the stored frame.">seams_system_set_positions()</a> then checks and writes the coordinates into that set in one pass and swaps it with the stored frame when every value was finite, so a failed call still leaves the frame unchanged. The first reload after each load fills the second set from the frame. With enable 0, the default, the second set is freed. The setting survives loads.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle, with or without a stored frame. </td></tr>
+    <tr><td class="paramname">enable</td><td>Nonzero to keep the second set, 0 to free it. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a> for a NULL sys. </dd></dl>
+<dl class="section user"><dt>Handle access</dt><dd>Non-const: changes how later reloads use memory. The stored frame is not touched. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The library owns the second set and frees it with enable 0 or <a class="el" href="group__capi__frame.html#gaf907563fb294d1d8cc97faa4ff2f64b4" title="Free a frame.">seams_system_destroy()</a>. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Exclusive use of sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#gafd9d62e4de0402afaa787a610d25be17">seams_system_stage_positions</a>(sys, 1);</div>
+<div class="line"><span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> f = 1; f &lt; nframes; ++f) {</div>
+<div class="line">  <a class="code hl_function" href="#ga7b5da55261945dc14d74aab160f14f8c">seams_system_set_positions</a>(sys, frames[f], n, NULL, 0);</div>
+<div class="line">}</div>
+<div class="ttc" id="agroup__capi__frame__io_html_gafd9d62e4de0402afaa787a610d25be17"><div class="ttname"><a href="#gafd9d62e4de0402afaa787a610d25be17">seams_system_stage_positions</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_stage_positions(seams_system *sys, int enable)</div><div class="ttdoc">Trade memory for a single pass in seams_system_set_positions().</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="ga5c40e0575b9abf86db8f1d908fe5082e" name="ga5c40e0575b9abf86db8f1d908fe5082e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5c40e0575b9abf86db8f1d908fe5082e">&#9670;&#160;</a></span>seams_system_types()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="seams_8h.html#a7b6e907d1aec143f224d85fdbdf57605">SEAMS_API</a> <a class="el" href="group__capi__types.html#gac77ff4b4eced39c40520bb71495b0b0d">seams_status</a> seams_system_types </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__capi__types.html#gaf3cef135f90d3f656144f0f819e8f831">seams_system</a> *</td>          <td class="paramname"><span class="paramname"><em>sys</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>types</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copy the stored atom types out. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sys</td><td>Frame handle. </td></tr>
+    <tr><td class="paramname">types</td><td>Caller buffer for n ints, in stored order. </td></tr>
+    <tr><td class="paramname">len</td><td>Length of types. Must be at least n. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0dab757d8abcc819eef054476cb4e46c3de" title="The call succeeded.">SEAMS_OK</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da2e567092f8cf32c0ef0d47cf05a0dfd9" title="A required pointer is null.">SEAMS_ERR_NULL</a>; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da37b2eb290a365fdd3e71664bfef4f818" title="The handle has no frame yet.">SEAMS_ERR_STATE</a> when no frame is stored; <a class="el" href="group__capi__types.html#ggac77ff4b4eced39c40520bb71495b0b0da0c7737409a557fdbb1a0b219e7bdc129" title="A number or a buffer length is outside the accepted range.">SEAMS_ERR_RANGE</a> for a short buffer. </dd></dl>
+<dl class="section user"><dt>Ownership</dt><dd>The caller owns types. </dd></dl>
+<dl class="section user"><dt>Thread safety</dt><dd>Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. </dd></dl>
+<dl class="section user"><dt>Example</dt><dd><div class="fragment"><div class="line"><a class="code hl_function" href="#ga5c40e0575b9abf86db8f1d908fe5082e">seams_system_types</a>(sys, types, n);</div>
+<div class="ttc" id="agroup__capi__frame__io_html_ga5c40e0575b9abf86db8f1d908fe5082e"><div class="ttname"><a href="#ga5c40e0575b9abf86db8f1d908fe5082e">seams_system_types</a></div><div class="ttdeci">SEAMS_API seams_status seams_system_types(const seams_system *sys, int *types, size_t len)</div><div class="ttdoc">Copy the stored atom types out.</div></div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<div id="page-nav" class="page-nav-panel">
+<div id="page-nav-resize-handle"></div>
+<div id="page-nav-tree">
+<div id="page-nav-contents">
+</div><!-- page-nav-contents -->
+</div><!-- page-nav-tree -->
+</div><!-- page-nav -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

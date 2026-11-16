@@ -234,29 +234,451 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacetum3.
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">tum3 Namespace Reference<div class="ingroups"><a class="el" href="group__gen.html">Gen</a> &raquo; <a class="el" href="group__ring.html">Ring</a></div></div></div>
+  <div class="headertitle"><div class="title">tum3 Namespace Reference<div class="ingroups"><a class="el" href="group__ring.html">Ring</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gae5c6de5de1ef8c8d35823e447d491818" id="r_gae5c6de5de1ef8c8d35823e447d491818"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gae5c6de5de1ef8c8d35823e447d491818">topoUnitMatchingBulk</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, bool printClusters, bool onlyTetrahedral, std::string templatePath=&quot;templates&quot;)</td></tr>
-<tr class="memitem:gaac86950b6c131788671cf63fbea860e4" id="r_gaac86950b6c131788671cf63fbea860e4"><td class="memItemLeft">Eigen::MatrixXd&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gaac86950b6c131788671cf63fbea860e4">buildRefHC</a> (const std::string &amp;fileName)</td></tr>
-<tr class="memdesc:gaac86950b6c131788671cf63fbea860e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a reference Hexagonal cage, reading in from a template XYZ file.  <br /></td></tr>
-<tr class="memitem:gacd0b5f204636469350cdfe95fcbf93a2" id="r_gacd0b5f204636469350cdfe95fcbf93a2"><td class="memItemLeft">Eigen::MatrixXd&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gacd0b5f204636469350cdfe95fcbf93a2">buildRefDDC</a> (const std::string &amp;fileName)</td></tr>
-<tr class="memdesc:gacd0b5f204636469350cdfe95fcbf93a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a reference Double-Diamond cage, reading in from a template XYZ file.  <br /></td></tr>
-<tr class="memitem:ga6a40063c694390318235689274078616" id="r_ga6a40063c694390318235689274078616"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga6a40063c694390318235689274078616">shapeMatchHC</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const Eigen::MatrixXd &amp;refPoints, <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> cageUnit, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; double &gt; &amp;quat, double &amp;rmsd)</td></tr>
-<tr class="memdesc:ga6a40063c694390318235689274078616"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shape-matching for a target HC.  <br /></td></tr>
-<tr class="memitem:gadc7a460ce02d21cf58026ba2d835580b" id="r_gadc7a460ce02d21cf58026ba2d835580b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gadc7a460ce02d21cf58026ba2d835580b">shapeMatchDDC</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const Eigen::MatrixXd &amp;refPoints, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, int cageIndex, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; double &gt; &amp;quat, double &amp;rmsd)</td></tr>
-<tr class="memdesc:gadc7a460ce02d21cf58026ba2d835580b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shape-matching for a target DDC.  <br /></td></tr>
-<tr class="memitem:ga5b92b22edb21a60b985ad3305de53988" id="r_ga5b92b22edb21a60b985ad3305de53988"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga5b92b22edb21a60b985ad3305de53988">updateRMSDatom</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> cageUnit, double rmsd, std::vector&lt; double &gt; &amp;rmsdPerAtom, std::vector&lt; int &gt; &amp;noOfCommonAtoms, const std::vector&lt; <a class="el" href="group__cage.html#gaaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;atomTypes)</td></tr>
-<tr class="memitem:gaeb733184d3f90032143304cf1c7b4b2e" id="r_gaeb733184d3f90032143304cf1c7b4b2e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gaeb733184d3f90032143304cf1c7b4b2e">averageRMSDatom</a> (std::vector&lt; double &gt; &amp;rmsdPerAtom, std::vector&lt; int &gt; &amp;noOfCommonAtoms)</td></tr>
-<tr class="memdesc:gaeb733184d3f90032143304cf1c7b4b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average the RMSD per atom.  <br /></td></tr>
-<tr class="memitem:ga06d8b598b9f99e8d02a842e6565e80fd" id="r_ga06d8b598b9f99e8d02a842e6565e80fd"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga06d8b598b9f99e8d02a842e6565e80fd">topoBulkCriteria</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, int &amp;numHC, int &amp;numDDC, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;ringType)</td></tr>
-<tr class="memitem:ga856113410d761d31f1eb70aa98b92653" id="r_ga856113410d761d31f1eb70aa98b92653"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga856113410d761d31f1eb70aa98b92653">clusterCages</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, int numHC, int numDDC)</td></tr>
-<tr class="memitem:ga11cd9029a926adccce0454064cfb9e45" id="r_ga11cd9029a926adccce0454064cfb9e45"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga11cd9029a926adccce0454064cfb9e45">atomsFromCages</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const std::vector&lt; int &gt; &amp;clusterCages)</td></tr>
-<tr class="memdesc:ga11cd9029a926adccce0454064cfb9e45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the atoms in the cages of a given cluster.  <br /></td></tr>
+<tr class="memitem:ae5c6de5de1ef8c8d35823e447d491818" id="r_ae5c6de5de1ef8c8d35823e447d491818"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ae5c6de5de1ef8c8d35823e447d491818">topoUnitMatchingBulk</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, bool printClusters, bool onlyTetrahedral, std::string templatePath=&quot;templates&quot;)</td></tr>
+<tr class="memitem:aac86950b6c131788671cf63fbea860e4" id="r_aac86950b6c131788671cf63fbea860e4"><td class="memItemLeft">Eigen::MatrixXd&#160;</td><td class="memItemRight"><a class="el" href="#aac86950b6c131788671cf63fbea860e4">buildRefHC</a> (const std::string &amp;fileName)</td></tr>
+<tr class="memdesc:aac86950b6c131788671cf63fbea860e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a reference Hexagonal cage, reading in from a template XYZ file.  <br /></td></tr>
+<tr class="memitem:acd0b5f204636469350cdfe95fcbf93a2" id="r_acd0b5f204636469350cdfe95fcbf93a2"><td class="memItemLeft">Eigen::MatrixXd&#160;</td><td class="memItemRight"><a class="el" href="#acd0b5f204636469350cdfe95fcbf93a2">buildRefDDC</a> (const std::string &amp;fileName)</td></tr>
+<tr class="memdesc:acd0b5f204636469350cdfe95fcbf93a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Build a reference Double-Diamond cage, reading in from a template XYZ file.  <br /></td></tr>
+<tr class="memitem:a6a40063c694390318235689274078616" id="r_a6a40063c694390318235689274078616"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a6a40063c694390318235689274078616">shapeMatchHC</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const Eigen::MatrixXd &amp;refPoints, <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> cageUnit, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; double &gt; &amp;quat, double &amp;rmsd)</td></tr>
+<tr class="memdesc:a6a40063c694390318235689274078616"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shape-matching for a target HC.  <br /></td></tr>
+<tr class="memitem:adc7a460ce02d21cf58026ba2d835580b" id="r_adc7a460ce02d21cf58026ba2d835580b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#adc7a460ce02d21cf58026ba2d835580b">shapeMatchDDC</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const Eigen::MatrixXd &amp;refPoints, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, int cageIndex, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; double &gt; &amp;quat, double &amp;rmsd)</td></tr>
+<tr class="memdesc:adc7a460ce02d21cf58026ba2d835580b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shape-matching for a target DDC.  <br /></td></tr>
+<tr class="memitem:a5b92b22edb21a60b985ad3305de53988" id="r_a5b92b22edb21a60b985ad3305de53988"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a5b92b22edb21a60b985ad3305de53988">updateRMSDatom</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> cageUnit, double rmsd, std::vector&lt; double &gt; &amp;rmsdPerAtom, std::vector&lt; int &gt; &amp;noOfCommonAtoms, const std::vector&lt; <a class="el" href="namespacecage.html#aaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;atomTypes)</td></tr>
+<tr class="memitem:aeb733184d3f90032143304cf1c7b4b2e" id="r_aeb733184d3f90032143304cf1c7b4b2e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aeb733184d3f90032143304cf1c7b4b2e">averageRMSDatom</a> (std::vector&lt; double &gt; &amp;rmsdPerAtom, std::vector&lt; int &gt; &amp;noOfCommonAtoms)</td></tr>
+<tr class="memdesc:aeb733184d3f90032143304cf1c7b4b2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Average the RMSD per atom.  <br /></td></tr>
+<tr class="memitem:a06d8b598b9f99e8d02a842e6565e80fd" id="r_a06d8b598b9f99e8d02a842e6565e80fd"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a06d8b598b9f99e8d02a842e6565e80fd">topoBulkCriteria</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, int &amp;numHC, int &amp;numDDC, std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;ringType)</td></tr>
+<tr class="memitem:a856113410d761d31f1eb70aa98b92653" id="r_a856113410d761d31f1eb70aa98b92653"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a856113410d761d31f1eb70aa98b92653">clusterCages</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, int numHC, int numDDC)</td></tr>
+<tr class="memitem:a11cd9029a926adccce0454064cfb9e45" id="r_a11cd9029a926adccce0454064cfb9e45"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a11cd9029a926adccce0454064cfb9e45">atomsFromCages</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const std::vector&lt; int &gt; &amp;clusterCages)</td></tr>
+<tr class="memdesc:a11cd9029a926adccce0454064cfb9e45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the atoms in the cages of a given cluster.  <br /></td></tr>
 </table>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a11cd9029a926adccce0454064cfb9e45" name="a11cd9029a926adccce0454064cfb9e45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a11cd9029a926adccce0454064cfb9e45">&#9670;&#160;</a></span>atomsFromCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; tum3::atomsFromCages </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>clusterCages</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets the atoms in the cages of a given cluster. </p>
+
+</div>
+</div>
+<a id="aeb733184d3f90032143304cf1c7b4b2e" name="aeb733184d3f90032143304cf1c7b4b2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb733184d3f90032143304cf1c7b4b2e">&#9670;&#160;</a></span>averageRMSDatom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum3::averageRMSDatom </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsdPerAtom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>noOfCommonAtoms</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Average the RMSD per atom. </p>
+
+</div>
+</div>
+<a id="acd0b5f204636469350cdfe95fcbf93a2" name="acd0b5f204636469350cdfe95fcbf93a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd0b5f204636469350cdfe95fcbf93a2">&#9670;&#160;</a></span>buildRefDDC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd tum3::buildRefDDC </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>fileName</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Build a reference Double-Diamond cage, reading in from a template XYZ file. </p>
+
+</div>
+</div>
+<a id="aac86950b6c131788671cf63fbea860e4" name="aac86950b6c131788671cf63fbea860e4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac86950b6c131788671cf63fbea860e4">&#9670;&#160;</a></span>buildRefHC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd tum3::buildRefHC </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>fileName</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Build a reference Hexagonal cage, reading in from a template XYZ file. </p>
+
+</div>
+</div>
+<a id="a856113410d761d31f1eb70aa98b92653" name="a856113410d761d31f1eb70aa98b92653"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a856113410d761d31f1eb70aa98b92653">&#9670;&#160;</a></span>clusterCages()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum3::clusterCages </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numHC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>numDDC</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Clustering Clusters cages using the Stillinger algorithm and prints out individual XYZ files of clusters. </p>
+
+</div>
+</div>
+<a id="adc7a460ce02d21cf58026ba2d835580b" name="adc7a460ce02d21cf58026ba2d835580b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adc7a460ce02d21cf58026ba2d835580b">&#9670;&#160;</a></span>shapeMatchDDC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum3::shapeMatchDDC </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXd &amp;</td>          <td class="paramname"><span class="paramname"><em>refPoints</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cageList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cageIndex</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>quat</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsd</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Shape-matching for a target DDC. </p>
+
+</div>
+</div>
+<a id="a6a40063c694390318235689274078616" name="a6a40063c694390318235689274078616"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a40063c694390318235689274078616">&#9670;&#160;</a></span>shapeMatchHC()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum3::shapeMatchHC </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Eigen::MatrixXd &amp;</td>          <td class="paramname"><span class="paramname"><em>refPoints</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcage_1_1Cage.html">cage::Cage</a></td>          <td class="paramname"><span class="paramname"><em>cageUnit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>quat</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsd</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Shape-matching for a target HC. </p>
+
+</div>
+</div>
+<a id="a06d8b598b9f99e8d02a842e6565e80fd" name="a06d8b598b9f99e8d02a842e6565e80fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06d8b598b9f99e8d02a842e6565e80fd">&#9670;&#160;</a></span>topoBulkCriteria()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; tum3::topoBulkCriteria </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;</td>          <td class="paramname"><span class="paramname"><em>numHC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int &amp;</td>          <td class="paramname"><span class="paramname"><em>numDDC</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="namespacering.html#a301cfdc88452cfe51bd4f745d223a7e1">ring::strucType</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>ringType</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Topological network methods Finds the HCs and DDCs for the system </p>
+
+</div>
+</div>
+<a id="ae5c6de5de1ef8c8d35823e447d491818" name="ae5c6de5de1ef8c8d35823e447d491818"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5c6de5de1ef8c8d35823e447d491818">&#9670;&#160;</a></span>topoUnitMatchingBulk()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum3::topoUnitMatchingBulk </td>
+          <td>(</td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>path</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>firstFrame</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>printClusters</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>onlyTetrahedral</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string</td>          <td class="paramname"><span class="paramname"><em>templatePath</em></span><span class="paramdefsep"> = </span><span class="paramdefval">&quot;templates&quot;</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Topological unit matching for bulk water. If printClusters is true, individual clusters of connected cages are printed. </p>
+
+</div>
+</div>
+<a id="a5b92b22edb21a60b985ad3305de53988" name="a5b92b22edb21a60b985ad3305de53988"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b92b22edb21a60b985ad3305de53988">&#9670;&#160;</a></span>updateRMSDatom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int tum3::updateRMSDatom </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structcage_1_1Cage.html">cage::Cage</a></td>          <td class="paramname"><span class="paramname"><em>cageUnit</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rmsd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rmsdPerAtom</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>noOfCommonAtoms</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="namespacecage.html#aaac41828990e32b9d6e7db4426b61529">cage::iceType</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>atomTypes</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Calulate the RMSD for each ring, using RMSD values (rmsd) obtained from the shape-matching of each cage </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <div id="page-nav" class="page-nav-panel">

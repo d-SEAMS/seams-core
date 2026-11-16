@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::Q4Q6
+.. _doxid-structseams_1_1_q4_q6:
+
+struct seams::Q4Q6
+==================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Local q4 and q6 on the cutoff shell. :ref:`More...<details-structseams_1_1_q4_q6>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct Q4Q6 {
+		// fields
+	
+		std::vector<double> :ref:`q4<doxid-structseams_1_1_q4_q6_1a2618d5b3c54942039252340df3ddf684>`;
+		std::vector<double> :ref:`q6<doxid-structseams_1_1_q4_q6_1a481fb323b98ae5ce78b5f43d603f6966>`;
+	};
+.. _details-structseams_1_1_q4_q6:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Local q4 and q6 on the cutoff shell.
+
+Fields
+------
+
+.. index:: pair: variable; q4
+.. _doxid-structseams_1_1_q4_q6_1a2618d5b3c54942039252340df3ddf684:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> q4
+
+One local q4 per atom.
+
+.. index:: pair: variable; q6
+.. _doxid-structseams_1_1_q4_q6_1a481fb323b98ae5ce78b5f43d603f6966:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> q6
+
+One local q6 per atom.
+

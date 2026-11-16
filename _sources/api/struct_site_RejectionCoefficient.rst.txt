@@ -1,0 +1,41 @@
+.. index:: pair: struct; site::RejectionCoefficient
+.. _doxid-structsite_1_1_rejection_coefficient:
+
+struct site::RejectionCoefficient
+=================================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+k = c_ice / c_liquid, both molalities of formula units. :ref:`More...<details-structsite_1_1_rejection_coefficient>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct RejectionCoefficient {
+		// fields
+	
+		double :target:`cIce<doxid-structsite_1_1_rejection_coefficient_1ae3adcfe812379b1f20ec5d0b1c5c1979>` = 0;
+		double :target:`cLiquid<doxid-structsite_1_1_rejection_coefficient_1a2c63e67d6e7e1f62fadaaf0eebed4589>` = 0;
+		double :target:`k<doxid-structsite_1_1_rejection_coefficient_1a1a10c8c734bd79f98682d878d1e0b1ce>` = 0;
+		int :target:`nIceWater<doxid-structsite_1_1_rejection_coefficient_1a75e4cfa6aaac5d8340b9da91b0d98a48>` = 0;
+		int :target:`nLiquidWater<doxid-structsite_1_1_rejection_coefficient_1a4281c420c7cbd3ba4970889b87fd1c6a>` = 0;
+		int :target:`nIceIon<doxid-structsite_1_1_rejection_coefficient_1a731e7110eb46be8adfd928bbec684351>` = 0;
+		int :target:`nLiquidIon<doxid-structsite_1_1_rejection_coefficient_1ab12bb3223c536cff0bfa882e32b8e009>` = 0;
+		bool :target:`defined<doxid-structsite_1_1_rejection_coefficient_1a32d741a29d36faf7a950d0551458dd95>` = false;
+	};
+.. _details-structsite_1_1_rejection_coefficient:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+k = c_ice / c_liquid, both molalities of formula units.
+
+``:ref:`defined <doxid-structsite_1_1_rejection_coefficient_1a32d741a29d36faf7a950d0551458dd95>``` is false when the liquid bulk contains no salt and the ice bulk does, because the ratio is then unbounded.
+

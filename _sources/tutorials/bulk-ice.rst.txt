@@ -4,7 +4,7 @@ Classify ice on the mixed TIP4P example
 
 
 You classify one in-tree frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
-The result is a labelled oxygen set and a reason the two scores disagree.
+The result is a labeled oxygen set and a reason the two scores disagree.
 
 Prerequisites
 -------------
@@ -16,9 +16,8 @@ Prerequisites
 
 - The in-tree dump ``input/traj/exampleTraj.lammpstrj`` (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
 
-Python and Lua are not required.
-The Frame tutorial lives in `pydseams <https://d-seams.github.io/PydSEAMSlib/>`_.
-Lua is `dseams <https://d-seams.github.io/yodaStruct/>`_.
+Python is only needed for Step 6, which uses the pydseamslib package.
+The Frame tutorial lives in `PydSEAMSlib <https://d-seams.github.io/PydSEAMSlib/>`_.
 
 Learning Objectives
 -------------------
@@ -139,7 +138,7 @@ It is ice Ic only when it belongs to a double-diamond cage.
 Otherwise it is water.
 Partial ice-like order is water on that score.
 
-On this mixed frame the cutoff list labels 12 oxygens interfacial clathrate, and the mutual four-neighbour list labels one clathrate and seven interfacial clathrate.
+On this mixed frame the cutoff list labels 9 oxygens interClathrate, and the mutual four-neighbour list labels one clathrate and seven interClathrate.
 TUM finds no complete HC or DDC.
 A three-eclipsed star is not cage membership.
 
@@ -161,12 +160,13 @@ The mixed TIP4P frame is the one that separates the two scores.
 Step 6: Python, the same lists
 ------------------------------
 
-Python is not built in this repository.
-Install the package the paper uses:
+The Python binding is the pydseamslib package from
+`d-SEAMS/PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_. It
+provides ``import pydseams`` (the Frame API) and ``import dseams``:
 
 .. code:: bash
 
-    pip install pydseamslib
+    pip install 'pydseamslib==2.14.0'
 
 .. code:: python
 
@@ -175,6 +175,8 @@ Install the package the paper uses:
     frame = ds.read("input/traj/exampleTraj.lammpstrj")
     print(frame.chill_plus())
     print(frame.cages())
+    assert str(frame.chill_plus()) == "IceCounts(interClathrate=9, water=241)"
+    assert str(frame.cages()) == "CageScore(n_ih=0, n_ic=0, n_water=250)"
 
 ``Frame.chill_plus`` defaults to the cutoff list, as ``seams chill-plus`` does; ``frame.chill_plus(graph="mutual")`` is the mutual list.
 On this dump the default prints:
@@ -184,11 +186,8 @@ On this dump the default prints:
     IceCounts(interClathrate=9, water=241)
     CageScore(n_ih=0, n_ic=0, n_water=250)
 
-The cage score matches the CLI.
-The CHILL+ histogram does not, because the neighbour lists differ.
-``import pydseamslib`` is the same package.
-The Frame walkthrough is `pydseams <https://d-seams.github.io/PydSEAMSlib/>`_.
-Lua is `require("dseams") <https://d-seams.github.io/yodaStruct/>`_.
+Those counts are the cutoff list, the same list as Step 2.
+The Frame walkthrough is in the `PydSEAMSlib documentation <https://d-seams.github.io/PydSEAMSlib/>`_.
 
 Troubleshooting
 ---------------
@@ -200,10 +199,8 @@ Troubleshooting
 - Unknown command, exit 2: the binary is ``seams``, not ``yodaStruct``.
   Commands are ``read``, ``chill``, ``chill-plus``, and ``cages``.
 
-- ``ModuleNotFoundError: pydseams``: this repo does not install Python.
-  ``pip install pydseamslib``.
-
-- Lua ``require("dseams")``: that module lives in yodaStruct.
+- ``ModuleNotFoundError: pydseams``: install the binding with
+  ``pip install 'pydseamslib==2.14.0'``.
 
 Next steps
 ----------
@@ -214,7 +211,7 @@ Next steps
 
 - `pydseams Frame tutorial <https://d-seams.github.io/PydSEAMSlib/>`_
 
-- `Lua read-and-classify <https://d-seams.github.io/yodaStruct/>`_
+- `The other language bindings <../howto/bindings.rst>`_
 
 Summary
 -------

@@ -1,5 +1,13 @@
 var namespacesymm =
 [
+    [ "generic", "namespacesymm_1_1generic.html", [
+      [ "classifyPrepared", "namespacesymm_1_1generic.html#a38e6a9e2a00776dcfb188e2a32959100", null ],
+      [ "diamondCna", "namespacesymm_1_1generic.html#a5585f406605ef334b8af2605b96478ba", null ]
+    ] ],
+    [ "avx2", "namespacesymm_1_1avx2.html", [
+      [ "classifyPrepared", "namespacesymm_1_1avx2.html#afead2370bcc49b889bedf2cdeea18886", null ],
+      [ "diamondCna", "namespacesymm_1_1avx2.html#a70ad08c7e1e9569c61faabf4a914530f", null ]
+    ] ],
     [ "CanonShell", "structsymm_1_1CanonShell.html", "structsymm_1_1CanonShell" ],
     [ "Group", "structsymm_1_1Group.html", "structsymm_1_1Group" ],
     [ "Lattice", "structsymm_1_1Lattice.html", "structsymm_1_1Lattice" ],
@@ -21,12 +29,16 @@ var namespacesymm =
       [ "ring5", "namespacesymm.html#ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d", null ],
       [ "ring6", "namespacesymm.html#ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b", null ]
     ] ],
+    [ "avx2Kernels", "namespacesymm.html#a4c144bb9fe1a2e1fe40be391f0768659", null ],
     [ "best", "namespacesymm.html#a5374e93c778190fce896be8d6567421f", null ],
     [ "bondCosines", "namespacesymm.html#ae51b664e84ac3e7a8894b417fa4b3722", null ],
-    [ "classifyIce", "namespacesymm.html#af71c213f390254bf77878c72b46a59d7", null ],
-    [ "classifyIceArrays", "namespacesymm.html#ad48a534521657a581174759a81c719fc", null ],
-    [ "classifyPrepared", "namespacesymm.html#ad14a718db3378b22d4f2b24eb109aae6", null ],
+    [ "classifyIce", "namespacesymm.html#a39cefe5661a6b7f5dbe0d2feb8aaa548", null ],
+    [ "classifyIceArrays", "namespacesymm.html#a437c457f731c3312b875fd2737849e8a", null ],
+    [ "classifyIceCloud", "namespacesymm.html#aa3851ae81522496cab6227d627163045", null ],
+    [ "classifyPrepared", "namespacesymm.html#a3b5774dafdae3a0c18d9837dadc12671", null ],
+    [ "conventionalCrystalSpace", "namespacesymm.html#afdc0e8052af03457c269c74d841c77f1", null ],
     [ "crystal", "namespacesymm.html#aa2ec5ea19b218e462ab5cbff03d5ca7c", null ],
+    [ "diamondCna", "namespacesymm.html#aa92a0bdaa68a6b24e5de15494a40c731", null ],
     [ "diamondFromCsr", "namespacesymm.html#a5d864afaa9e8bdf2e975d2fa3ac4d85d", null ],
     [ "iceShell", "namespacesymm.html#adec5164471ac99128cb3f7dab6020956", null ],
     [ "iceTemplateRmsd", "namespacesymm.html#a477f6563ad722b78e21afebe10bc0000", null ],
@@ -43,5 +55,7 @@ var namespacesymm =
     [ "spglibLinked", "namespacesymm.html#a9b45faa173064de84c512b815e839985", null ],
     [ "kEclipsedCosine", "namespacesymm.html#a9b4cf619ad5f42deea89aaf87b58bf71", null ],
     [ "kShellRmsd", "namespacesymm.html#a441a4b9599216d4ec218f599ecbe87fa", null ],
-    [ "kTemplateCount", "namespacesymm.html#a18b4f207cb89fa68c9b88b737243452b", null ]
+    [ "kTemplateCount", "namespacesymm.html#a18b4f207cb89fa68c9b88b737243452b", null ],
+    [ "kThermalBondRatio", "namespacesymm.html#a498288d747baf3e7673fcfb9c8060422", null ],
+    [ "kThermalQ", "namespacesymm.html#a2ff84fc4b3aa66d032b694e9228aa59a", null ]
 ];

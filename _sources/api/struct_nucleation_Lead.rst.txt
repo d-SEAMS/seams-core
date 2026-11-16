@@ -1,0 +1,26 @@
+.. index:: pair: struct; nucleation::Lead
+.. _doxid-structnucleation_1_1_lead:
+
+struct nucleation::Lead
+=======================
+
+.. toctree::
+	:hidden:
+
+Positive lag means the ring series moves before the ice series. halfFrames is the ice half-rise index minus the ring half-rise index.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/nucleation_pathway.hpp>
+	
+	struct Lead {
+		// fields
+	
+		bool :target:`ok<doxid-structnucleation_1_1_lead_1a04b19b8c2019025d462f8d711491ca28>` = false;
+		int :target:`ascentFrames<doxid-structnucleation_1_1_lead_1ab74ff2b4d9a6d17ba87b45f46b92eb27>` = 0;
+		int :target:`halfFrames<doxid-structnucleation_1_1_lead_1a8d6b8e15917279b4158b644a16c8b0d8>` = 0;
+		int :target:`corrLag<doxid-structnucleation_1_1_lead_1ad7e0c99fb6f338f03b07bcdb25f842c9>` = 0;
+		double :target:`corr<doxid-structnucleation_1_1_lead_1acb43858c82a90b9acf24275cbbca9e78>` = 0;
+	};

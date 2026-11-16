@@ -3,6 +3,59 @@ Quickstart
 ==========
 
 
+Install the engine, then classify one cubic cell. The C program below
+is ``meson test docs_quickstart_c``, and the five Python lines are a
+snippet test against the installed pydseamslib. Both expect 8 cubic
+molecules.
+
+Install
+-------
+
+Meson builds the engine, ``libseams`` and the ``seams`` command from this
+tree. conda-forge has the toolchain:
+
+.. code:: bash
+
+    conda install -c conda-forge meson ninja pkg-config eigen
+    meson setup build
+    meson compile -C build
+
+The same two Meson lines are the install when the compilers are already
+on ``PATH``. The Python binding is a separate package, built from
+`d-SEAMS/PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ against
+the same engine version:
+
+.. code:: bash
+
+    pip install 'pydseamslib==2.14.0'
+
+Five lines of Python
+--------------------
+
+.. code:: python
+
+    import dseams
+    a = 2.75 * 4 / 3**0.5
+    sites = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5), (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75))
+    xyz = [[x * a, y * a, z * a] for x, y, z in sites]
+    assert dseams.chill_plus(xyz, [a, a, a])[1][0] == 8
+
+``chill_plus`` returns labels and the nine counts. Index 0 is cubic.
+
+Five calls in C
+---------------
+
+.. code:: c
+
+    seams_system *sys = seams_system_create();
+    seams_system_set_ortho(sys, xyz, 8, 0, 0, 0, a, a, a, NULL, NULL);
+    seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts);
+    printf("cubic %d\n", counts[0]);
+    seams_system_destroy(sys);
+
+``docs/examples/quickstart.c`` is that call on the eight-atom diamond.
+The program prints ``cubic 8``.
+
 Build the engine, read a frame, and print what this binary linked.
 
 The in-tree mixed TIP4P dump is ``input/traj/exampleTraj.lammpstrj`` (750 atoms, 250 waters; type 2 is oxygen).
@@ -26,8 +79,7 @@ pixi:
     pixi run build
     ./bbdir/seams --help
 
-Either path produces ``libyodaLib`` and the ``seams`` CLI.
-This repository does not install Python or Lua.
+Either path produces ``libyodaLib``, ``libseams``, ``libseams_lang``, and the ``seams`` CLI.
 
 Read a frame
 ------------
@@ -70,7 +122,7 @@ CLI flags win over the environment.
 The same values can be ``SEAMS_FRAME``, ``SEAMS_LAST``, ``SEAMS_JOBS``, ``SEAMS_TYPE``, ``SEAMS_CUTOFF``, ``SEAMS_CAGE_EDGE``, ``SEAMS_K``, ``SEAMS_GRAPH``, plus ``SEAMS_RESIDENT``, ``SEAMS_CELL``, ``SEAMS_OFFLOAD``, ``LINKCELL_TPP``, ``LINKCELL_BLOCK``.
 ``SEAMS_CAGE_EDGE`` defaults to ``2.65,3.15`` (coordinate units of the file). ``none`` leaves a signature cage bound to the face census.
 ``OMP_NUM_THREADS`` and ``CUDA_VISIBLE_DEVICES`` keep their usual meaning.
-Analysis choice (which ``seams`` command, which ``pydseams`` call, which ``require("dseams")`` script) is not this table.
+Analysis choice (which ``seams`` command, which binding call) is not this table.
 
 CHILL+ and cages
 ----------------
@@ -86,17 +138,45 @@ The default cage graph is ``--graph seeded`` (mutual four-nearest seeds, union c
 This mixed frame has no complete HC or DDC.
 Cage membership is not the CHILL+ star.
 
-Python and Lua
---------------
+One analysis at a time
+----------------------
 
-The engine CLI is not a scripting host.
-Install `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ (``pip install pydseamslib``, compiled module ``yoda``) or
-`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
-(``require("dseams")``).
-``import pydseamslib`` is an alias of ``pydseams``.
+.. table::
 
-The Frame tutorial is `pydseams docs <https://d-seams.github.io/PydSEAMSlib/>`_.
-Lua is `dseams docs <https://d-seams.github.io/yodaStruct/>`_.
+    +------------+------------------------------------+------------------------------------------------------------+
+    | goal       | command                            | how-to                                                     |
+    +============+====================================+============================================================+
+    | rings      | ``seams rings FILE --type 2``      | `Primitive rings <howto/rings.rst>`_                       |
+    +------------+------------------------------------+------------------------------------------------------------+
+    | cages      | ``seams cages FILE --type 2``      | `Cages and TRACE <howto/cages-trace.rst>`_                 |
+    +------------+------------------------------------+------------------------------------------------------------+
+    | q4 and q6  | ``seams steinhardt FILE --type 2`` | `Local q4 and q6 <howto/q4-q6.rst>`_                       |
+    +------------+------------------------------------+------------------------------------------------------------+
+    | CHILL+     | ``seams chill-plus FILE --type 2`` | `CHILL+ <howto/chill-plus.rst>`_                           |
+    +------------+------------------------------------+------------------------------------------------------------+
+    | symmetry   | ``seams symmetry FILE --type 1``   | `Symmetry classifier <howto/symmetry-classifier.rst>`_     |
+    +------------+------------------------------------+------------------------------------------------------------+
+    | neighbours | cutoff CSR, carried rings          | `Linkcell and carried rings <howto/linkcell-carried.rst>`_ |
+    +------------+------------------------------------+------------------------------------------------------------+
+
+The same commands on bundled frames:
+
+.. code:: bash
+
+    seams rings input/traj/exampleTraj.lammpstrj --type 2
+    seams cages input/traj/exampleTraj.lammpstrj --type 2
+    seams steinhardt input/traj/exampleTraj.lammpstrj --type 2
+    seams chill-plus input/traj/exampleTraj.lammpstrj --type 2
+    seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+
+Language bindings
+-----------------
+
+Python (``pydseamslib``, ``import dseams`` and ``import pydseams``), Lua and
+Fennel, R, Julia, Rust, and Fortran each live in their own repository and
+release against the seams-core tag with the same version.
+`Use a language binding <howto/bindings.rst>`_ lists them. The
+Frame tutorial is in the `PydSEAMSlib documentation <https://d-seams.github.io/PydSEAMSlib/>`_.
 
 The full install matrix is `Install <howto/install.rst>`_.
 The mixed-frame walkthrough is `Classify ice on the mixed TIP4P example <tutorials/bulk-ice.rst>`_.

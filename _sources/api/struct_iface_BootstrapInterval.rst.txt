@@ -1,0 +1,58 @@
+.. index:: pair: struct; iface::BootstrapInterval
+.. _doxid-structiface_1_1_bootstrap_interval:
+
+struct iface::BootstrapInterval
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/interface_order.hpp>
+	
+	struct BootstrapInterval {
+		// fields
+	
+		double :target:`mean<doxid-structiface_1_1_bootstrap_interval_1a91ed3508a29787ed0310e90a09ce9d87>` = 0;
+		double :target:`lo<doxid-structiface_1_1_bootstrap_interval_1aba5d3f85d573232a38cbd10954ed2ab4>` = 0;
+		double :ref:`hi<doxid-structiface_1_1_bootstrap_interval_1a56d8887eee4888597872f8edab783b00>` = 0;
+		bool :ref:`excludesZero<doxid-structiface_1_1_bootstrap_interval_1a8cb977cd85041a93beb5a66944fe7b04>` = false;
+	};
+.. _details-structiface_1_1_bootstrap_interval:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Fields
+------
+
+.. index:: pair: variable; hi
+.. _doxid-structiface_1_1_bootstrap_interval_1a56d8887eee4888597872f8edab783b00:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double hi = 0
+
+2.5 percentile, Hyndman-Fan type 7
+
+.. index:: pair: variable; excludesZero
+.. _doxid-structiface_1_1_bootstrap_interval_1a8cb977cd85041a93beb5a66944fe7b04:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool excludesZero = false
+
+97.5 percentile
+

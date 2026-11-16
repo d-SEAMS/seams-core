@@ -1,0 +1,56 @@
+.. index:: pair: struct; seams::DensityProfile
+.. _doxid-structseams_1_1_density_profile:
+
+struct seams::DensityProfile
+============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Number density along one cell axis. :ref:`More...<details-structseams_1_1_density_profile>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <include/seams.hpp>
+	
+	struct DensityProfile {
+		// fields
+	
+		std::vector<double> :ref:`coordinate<doxid-structseams_1_1_density_profile_1aec798399b1f00133e3f4cfe276d86566>`;
+		std::vector<double> :ref:`density<doxid-structseams_1_1_density_profile_1a95186a4fbcd7f20f255c6006c4dc8b8e>`;
+	};
+.. _details-structseams_1_1_density_profile:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Number density along one cell axis.
+
+Fields
+------
+
+.. index:: pair: variable; coordinate
+.. _doxid-structseams_1_1_density_profile_1aec798399b1f00133e3f4cfe276d86566:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> coordinate
+
+Bin centers, Angstrom.
+
+.. index:: pair: variable; density
+.. _doxid-structseams_1_1_density_profile_1a95186a4fbcd7f20f255c6006c4dc8b8e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<double> density
+
+Number density.
+

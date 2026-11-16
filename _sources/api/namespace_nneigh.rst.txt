@@ -7,6 +7,10 @@ namespace nneigh
 .. toctree::
 	:hidden:
 
+	enum_nneigh_BondGraph.rst
+	class_nneigh_CutoffSkin.rst
+	class_nneigh_SkinNeighborList.rst
+
 Overview
 ~~~~~~~~
 
@@ -19,10 +23,57 @@ Functions for building neighbour lists. :ref:`More...<details-namespacenneigh>`
 	
 	namespace nneigh {
 
+	// enums
+
+	enum :ref:`BondGraph<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26>`;
+
 	// classes
 
 	class :ref:`CutoffSkin<doxid-classnneigh_1_1_cutoff_skin>`;
 	class :ref:`SkinNeighborList<doxid-classnneigh_1_1_skin_neighbor_list>`;
+
+	// global functions
+
+	void :ref:`dumpBoundsToH<doxid-namespacenneigh_1a342ae6a7675f0a32caf8087f43d679d8>`(const std::vector<double>& box, const std::vector<double>& boxLow, double H[3][3], double origin[3]);
+	void :ref:`dumpCellLengths<doxid-namespacenneigh_1a4b7e08068d9fba7d981793100b62de6c>`(const std::vector<double>& box, const std::vector<double>& boxLow, double lengths[3]);
+	int :ref:`dumpAxialDim<doxid-namespacenneigh_1a87d0da315b8e67fc843f91099dceb349>`(const std::vector<double>& box, const std::vector<double>& boxLow);
+	int :target:`dumpAxialDim<doxid-namespacenneigh_1af4937ef59938a2569258cdf136fd33ec>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	void :ref:`dumpToFrac<doxid-namespacenneigh_1a7819f2f15dde85f94bf6a4f6632780b8>`(const double H[3][3], const double origin[3], double x, double y, double z, double s[3]);
+	void :ref:`dumpFromFrac<doxid-namespacenneigh_1a60335297e92e0bd73fba7bfdaca28a26>`(const double H[3][3], const double origin[3], const double s[3], double r[3]);
+	double :ref:`dumpVolume<doxid-namespacenneigh_1ad17e972366865905372aa796e946a351>`(const std::vector<double>& box, const std::vector<double>& boxLow);
+	double :target:`dumpVolume<doxid-namespacenneigh_1a786c8abbd20d2751403eb4f2c603cd95>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
+	bool :ref:`setBoxFromLammpsEdges<doxid-namespacenneigh_1ad960860059d8e9d9fdee48c679e1c446>`(std::vector<double>& box, std::vector<double>& boxLow, double xlo, double ylo, double zlo, double lx, double ly, double lz, double xy, double xz, double yz);
+	bool :ref:`setBoxFromLengthsAngles<doxid-namespacenneigh_1a77b70b894f0e7a72a980001e076f2a73>`(std::vector<double>& box, std::vector<double>& boxLow, double a, double b, double c, double alphaDeg, double betaDeg, double gammaDeg);
+	std::vector<std::vector<int>> :ref:`neighList<doxid-namespacenneigh_1a9566a384474993ea7356e7abc414e40e>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ);
+	std::vector<std::vector<int>> :ref:`neighListPair<doxid-namespacenneigh_1add6ed18f0c7e2e5fbd10d7cdbf6af429>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ);
+	const std::vector<std::vector<int>>& :ref:`reusedShellList<doxid-namespacenneigh_1a4f12746b56fe9e1c8cfb7d2af32b64ba>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<char>* source);
+	bool :ref:`blockWindowRows<doxid-namespacenneigh_1a2e8dc456dfee46923a3701c3c4d88038>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double rcutoff, const std::vector<char>* source, std::vector<std::vector<int>>& rows, bool byId = true, bool everyRow = false);
+	bool :target:`cellListRowsThreaded<doxid-namespacenneigh_1a8f5dd92092f5be635273a1ea18b57cb7>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& subset, double rcutoff, std::vector<std::vector<int>>& rows);
+	void :ref:`preferSerialCutoff<doxid-namespacenneigh_1a668b0917bd0df1568398d83989e26e4c>`(bool on);
+	bool :ref:`orthoFullCsr<doxid-namespacenneigh_1adddaf455a07261396213ebf2a9dc097d>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>* subset, double rcutoff, std::vector<int>& offsets, std::vector<int>& cols, bool half = false, std::vector<std::vector<int>>* directRows = nullptr, const int* indexToID = nullptr, bool* wroteRows = nullptr, bool branchy = false);
+	bool :ref:`refillNeighListO<doxid-namespacenneigh_1ac2ed84e835e8b6949281c88e4d11f43b>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, std::vector<std::vector<int>>& rows);
+	bool :ref:`refillIndexRows<doxid-namespacenneigh_1aa5180c143af9fe9fa47f393e7518bf9b>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, std::vector<std::vector<int>>& rows);
+	bool :ref:`directedKNearestCsr<doxid-namespacenneigh_1a151b16c1d342dbde343e98c91be8f6c7>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, std::vector<int>& offsets, std::vector<int>& cols);
+	std::vector<std::vector<int>> :ref:`idRowsFromCsr<doxid-namespacenneigh_1a054007bfd5ef4ba81d50851c1eca6d61>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& indexToID, const std::vector<int>& offsets, const std::vector<int>& cols);
+	std::vector<std::vector<int>> :ref:`indexRowsFromCsr<doxid-namespacenneigh_1a607468766af5b066de4b646601fcf0b4>`(int nop, const std::vector<int>& offsets, const std::vector<int>& cols);
+	std::vector<std::vector<int>> :ref:`halfIdRowsFromCsr<doxid-namespacenneigh_1acb3f8226a248f4d7399707c779e91867>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& indexToID, const std::vector<int>& offsets, const std::vector<int>& cols);
+	std::vector<std::vector<int>> :ref:`neighListO<doxid-namespacenneigh_1afaf0f0ff09cef581076f99a68018b023>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI);
+	std::vector<std::vector<int>> :ref:`neighListLinkcell<doxid-namespacenneigh_1a809f9e0a2a56c0162cdb70ebb64804a7>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI);
+	std::vector<std::vector<int>> :ref:`halfNeighList<doxid-namespacenneigh_1a651839704a066d725b22212c13c74327>`(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI = 1);
+	std::vector<std::vector<int>> :ref:`neighbourListByIndex<doxid-namespacenneigh_1acf46d8c4b42f15e634ff0076ac83c012>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
+	std::vector<std::vector<int>> :ref:`getNewNeighbourListByIndex<doxid-namespacenneigh_1a97ad6e2c7bfaa504c7e021a527effe73>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff);
+	std::vector<std::vector<int>> :ref:`kNearestNeighbourList<doxid-namespacenneigh_1a18cda509d1fc5e680abf22e36348fc61>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, bool mutual = true);
+	void :ref:`kNearestCsr<doxid-namespacenneigh_1ac3d73f19a9a16def5e4b6571c9a2b1d5>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, bool mutual, std::vector<int>& offsets, std::vector<int>& cols, bool park = true);
+	void :ref:`kNearestPacked<doxid-namespacenneigh_1a50b9380030492980b6f8540c213d8098>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, std::vector<double>& xyz, std::vector<int>& nom);
+	std::vector<std::vector<int>> :ref:`kNearestNeighbourList<doxid-namespacenneigh_1a5aeb17070b1a13a028fdcc5d3e7470b6>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, const std::vector<int>& types, bool mutual = true);
+	std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> :ref:`kNearestNeighbourPair<doxid-namespacenneigh_1a553a0b3d4dddd477c0dcb06d93361eae>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI);
+	std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> :target:`kNearestNeighbourPair<doxid-namespacenneigh_1ae83921eb2fdda24a0dcda3638c8a2ebc>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, const std::vector<int>& types);
+	std::pair<double, double> :ref:`shellSeparation<doxid-namespacenneigh_1a139165088e10b53a5efa6034434c9423>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, int typeI);
+	std::vector<std::tuple<int, int, double>> :ref:`nearestUnlike<doxid-namespacenneigh_1a57e7804488c926a85c21131b895b6491>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ);
+	std::vector<std::pair<int, int>> :ref:`mutualNearestUnlike<doxid-namespacenneigh_1a68ba6195c59b7a1b7c8bb17ec31314a3>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ);
+	int :ref:`clearNeighbourList<doxid-namespacenneigh_1a752d3e4cbd98fa454a6dc36a4307b75a>`(std::vector<std::vector<int>>& nList);
+	:ref:`BondGraph<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26>` :target:`bondGraphFromName<doxid-namespacenneigh_1ad285ff1c2c0bd1ca8495f3972faebb8c>`(const std::string& name);
+	const char* :target:`bondGraphName<doxid-namespacenneigh_1a1c78a7396b0353d674abb0290e85d0ec>`(:ref:`BondGraph<doxid-namespacenneigh_1ae70187f6d039fe332d7f59be0112ff26>` graph);
 
 	} // namespace nneigh
 .. _details-namespacenneigh:
@@ -60,4 +111,379 @@ Changelog
 * Amrita Goswami [`amrita16thaug646@gmail.com <mailto:amrita16thaug646@gmail.com>`__]; date modified: Nov 14, 2019
 
 * Rohit Goswami [`rog32@hi.is <mailto:rog32@hi.is>`__]; date modified: Mar 20, 2021
+
+Global Functions
+----------------
+
+.. index:: pair: function; dumpBoundsToH
+.. _doxid-namespacenneigh_1a342ae6a7675f0a32caf8087f43d679d8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void dumpBoundsToH(const std::vector<double>& box, const std::vector<double>& boxLow, double H[3][3], double origin[3])
+
+LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).
+
+``box[0..2]`` are ``xhi_bound - xlo_bound`` etc. Optional ``box[3..5]`` are tilt ``xy, xz, yz``. ``boxLow`` is the bound lo. Inverse of ``xlo_bound = xlo + min(0, xy, xz, xy+xz)``.
+
+.. index:: pair: function; dumpCellLengths
+.. _doxid-namespacenneigh_1a4b7e08068d9fba7d981793100b62de6c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void dumpCellLengths(const std::vector<double>& box, const std::vector<double>& boxLow, double lengths[3])
+
+Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).
+
+.. index:: pair: function; dumpAxialDim
+.. _doxid-namespacenneigh_1a87d0da315b8e67fc843f91099dceb349:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int dumpAxialDim(const std::vector<double>& box, const std::vector<double>& boxLow)
+
+Longest recovered length: 0 = x, 1 = y, 2 = z.
+
+.. index:: pair: function; dumpToFrac
+.. _doxid-namespacenneigh_1a7819f2f15dde85f94bf6a4f6632780b8:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void dumpToFrac(const double H[3][3], const double origin[3], double x, double y, double z, double s[3])
+
+Cartesian to fractional coordinates via dump H.
+
+.. index:: pair: function; dumpFromFrac
+.. _doxid-namespacenneigh_1a60335297e92e0bd73fba7bfdaca28a26:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void dumpFromFrac(const double H[3][3], const double origin[3], const double s[3], double r[3])
+
+Fractional to cartesian coordinates via dump H.
+
+.. index:: pair: function; dumpVolume
+.. _doxid-namespacenneigh_1ad17e972366865905372aa796e946a351:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double dumpVolume(const std::vector<double>& box, const std::vector<double>& boxLow)
+
+Triclinic dump-cell volume, the absolute value of det(H), from dumpBoundsToH.
+
+Bound spans Lx\*Ly\*Lz are not the cell volume when tilt is present.
+
+.. index:: pair: function; setBoxFromLammpsEdges
+.. _doxid-namespacenneigh_1ad960860059d8e9d9fdee48c679e1c446:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool setBoxFromLammpsEdges(std::vector<double>& box, std::vector<double>& boxLow, double xlo, double ylo, double zlo, double lx, double ly, double lz, double xy, double xz, double yz)
+
+LAMMPS edge origin and edge lengths, plus tilt, as a dump box.
+
+``lx, ly, lz`` are ``xhi - xlo`` and not the bound spans. A zero tilt stays three spans so the orthorhombic pair loop is unchanged. Returns false when an edge is not positive.
+
+.. index:: pair: function; setBoxFromLengthsAngles
+.. _doxid-namespacenneigh_1a77b70b894f0e7a72a980001e076f2a73:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool setBoxFromLengthsAngles(std::vector<double>& box, std::vector<double>& boxLow, double a, double b, double c, double alphaDeg, double betaDeg, double gammaDeg)
+
+Crystallographic lengths and angles in degrees, stored as a dump box.
+
+``alpha`` is between b and c, ``beta`` between a and c, ``gamma`` between a and b. The basis is the reduced triclinic frame: a along x, b in the xy plane. Returns false when the cell is not a positive volume.
+
+.. index:: pair: function; neighList
+.. _doxid-namespacenneigh_1a9566a384474993ea7356e7abc414e40e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> neighList(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ)
+
+All these functions use atom IDs and not indices.
+
+Full neighbour list for pairs of type I and type J (vesin cell list, brute-force fallback). The neighbour list does not differentiate between the types of atoms
+
+.. index:: pair: function; neighListPair
+.. _doxid-namespacenneigh_1add6ed18f0c7e2e5fbd10d7cdbf6af429:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> neighListPair(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ)
+
+I-J neighbour list (I==J is like-type and reuses neighListO). Unlike-type pairs use the same dump MIC as neighListO.
+
+.. index:: pair: function; reusedShellList
+.. _doxid-namespacenneigh_1a4f12746b56fe9e1c8cfb7d2af32b64ba:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	const std::vector<std::vector<int>>& reusedShellList(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<char>* source)
+
+Threaded cell-list neighbour rows. ``rows[k]`` holds the indices within ``rcutoff`` of ``subset[k]`` under the minimum image convention, ascending and without the atom itself. Atoms are binned in fractional coordinates of the recovered triclinic cell H; every axis needs at least three cells of perpendicular width ``rcutoff``, so that the nearest image of every neighbour sits in one of the 27 surrounding cells. Returns false, with ``rows`` untouched, when the cell is too small for that, and the caller takes the vesin or brute-force path. Each row is built by one thread. Cutoff rows by atom ID, self first, for every atom or only the atoms marked in *source*. The cell counts and the row storage stay allocated on the calling thread and are refilled in place, so overlapping calls do not share them. The returned reference is valid on this thread until the next call on this thread. Same partners as neighListO for the rows that are filled.
+
+.. index:: pair: function; blockWindowRows
+.. _doxid-namespacenneigh_1a2e8dc456dfee46923a3701c3c4d88038:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool blockWindowRows(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double rcutoff, const std::vector<char>* source, std::vector<std::vector<int>>& rows, bool byId = true, bool everyRow = false)
+
+Neighbour rows on a cell grid that covers the owned block plus its halo. Anchors are folded onto the first owned atom. Every atom, ghosts included, is shifted by a box length so it sits against that block. An axis whose empty gap is wider than the cutoff does not wrap, and the fused cutoff list runs on that window rather than on the periodic box. Returns false when the atoms fill the box or the box is not orthorhombic. Rows are atom IDs when *byId* is set, and cloud indices otherwise. Self is first, then partners in ascending order, matching neighListO. A null source marks every atom as an anchor; otherwise only marked atoms receive partners. With *everyRow* the source still places the window, and every atom in it receives partners.
+
+.. index:: pair: function; preferSerialCutoff
+.. _doxid-namespacenneigh_1a668b0917bd0df1568398d83989e26e4c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void preferSerialCutoff(bool on)
+
+When set, neighListO stays on the one-thread builder even if the OpenMP team is wider.
+
+The team is left in place for the caller.
+
+.. index:: pair: function; orthoFullCsr
+.. _doxid-namespacenneigh_1adddaf455a07261396213ebf2a9dc097d:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool orthoFullCsr(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>* subset, double rcutoff, std::vector<int>& offsets, std::vector<int>& cols, bool half = false, std::vector<std::vector<int>>* directRows = nullptr, const int* indexToID = nullptr, bool* wroteRows = nullptr, bool branchy = false)
+
+Full cutoff list as CSR of cloud indices.
+
+Orthorhombic, or a restricted triclinic cell stored as bound spans plus xy, xz, yz.
+
+Orthorhombic boxes (``box.size() == 3``) and restricted triclinic dump boxes (``box.size() >= 6``) both use the parallel cell sort. A null *subset* is every atom. ``cols[offsets[i] .. offsets[i + 1]]`` is sorted and has no self entry. A neighbour is kept when the squared minimum image is strictly below the cutoff squared. *half* keeps the pair only on the lower cloud index. The pair set does not depend on the thread count. Scratch buffers stay allocated and are refilled on the next call. Returns false when the box is not usable.
+
+.. index:: pair: function; refillNeighListO
+.. _doxid-namespacenneigh_1ac2ed84e835e8b6949281c88e4d11f43b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool refillNeighListO(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, std::vector<std::vector<int>>& rows)
+
+Same rows as neighListO, written into *rows*. A row keeps the capacity of the previous call, so a repeated frame does not allocate per atom.
+
+.. index:: pair: function; refillIndexRows
+.. _doxid-namespacenneigh_1aa5180c143af9fe9fa47f393e7518bf9b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool refillIndexRows(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff, std::vector<std::vector<int>>& rows)
+
+Same rows as getNewNeighbourListByIndex, written into *rows*.
+
+.. index:: pair: function; directedKNearestCsr
+.. _doxid-namespacenneigh_1a151b16c1d342dbde343e98c91be8f6c7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	bool directedKNearestCsr(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, std::vector<int>& offsets, std::vector<int>& cols)
+
+Directed k nearest neighbours as a CSR of cloud indices, no self entry.
+
+``candidateCutoff`` is the cell-size hint used by the k-nearest search. Rows are nearest first. Returns false when the cloud has no box.
+
+.. index:: pair: function; idRowsFromCsr
+.. _doxid-namespacenneigh_1a054007bfd5ef4ba81d50851c1eca6d61:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> idRowsFromCsr(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& indexToID, const std::vector<int>& offsets, const std::vector<int>& cols)
+
+Atom-ID rows, self first, from a CSR of cloud indices.
+
+.. index:: pair: function; indexRowsFromCsr
+.. _doxid-namespacenneigh_1a607468766af5b066de4b646601fcf0b4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> indexRowsFromCsr(int nop, const std::vector<int>& offsets, const std::vector<int>& cols)
+
+Index rows, self first, from a CSR of cloud indices.
+
+.. index:: pair: function; halfIdRowsFromCsr
+.. _doxid-namespacenneigh_1acb3f8226a248f4d7399707c779e91867:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> halfIdRowsFromCsr(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& indexToID, const std::vector<int>& offsets, const std::vector<int>& cols)
+
+Half list by atom ID. The lower cloud index owns the pair.
+
+.. index:: pair: function; neighListO
+.. _doxid-namespacenneigh_1afaf0f0ff09cef581076f99a68018b023:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> neighListO(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI)
+
+Full neighbour list for one type (threaded cell list from 2048 atoms when OpenMP is compiled, vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type
+
+.. index:: pair: function; neighListLinkcell
+.. _doxid-namespacenneigh_1a809f9e0a2a56c0162cdb70ebb64804a7:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> neighListLinkcell(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI)
+
+Cutoff rows from the threaded linkcell list. Empty when linkcell is not built or the call fails; the caller then uses neighListO. The width is the OpenMP team, and the OpenMP team is left running.
+
+.. index:: pair: function; halfNeighList
+.. _doxid-namespacenneigh_1a651839704a066d725b22212c13c74327:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> halfNeighList(double rcutoff, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI = 1)
+
+Half neighbour list for one type (vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type
+
+.. index:: pair: function; neighbourListByIndex
+.. _doxid-namespacenneigh_1acf46d8c4b42f15e634ff0076ac83c012:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> neighbourListByIndex(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList)
+
+The following function outputs a neighbour list using indices and NOT atom IDs
+
+Converts the neighbour list build with atom IDs into a neighbour list of atom indices, according to the pointCloud
+
+.. index:: pair: function; getNewNeighbourListByIndex
+.. _doxid-namespacenneigh_1a97ad6e2c7bfaa504c7e021a527effe73:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> getNewNeighbourListByIndex(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double cutoff)
+
+Gets a neighbour list by index, according to a pointCloud given as the input. Assume no slices or other skullduggery
+
+.. index:: pair: function; kNearestNeighbourList
+.. _doxid-namespacenneigh_1a18cda509d1fc5e680abf22e36348fc61:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> kNearestNeighbourList(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, bool mutual = true)
+
+Bonded graph from the k nearest neighbours of each particle rather than a distance cutoff.
+
+The default intersection symmetrization (mutual = true) bonds i and j only when each lists the other among its k nearest; the union alternative bonds on either nomination. In a crystal the first shell is mutual and the two coincide; on disordered packings the mutual graph is sparser, which starves accidental ring structure measured on the dense null, mutual scores zero false crystal where union reaches 2.5%. Nominations are a periodic linked-cell k-nearest search via linkcell (Allen and Tildesley): vesin is cutoff-only and KD-trees have no minimum-image convention. candidateCutoff is only a cell-size hint. On an undistorted tetrahedral lattice with k = 4 this graph equals the first-shell cutoff graph. Rows are by atom ID with the leading self entry, like neighListO.
+
+.. index:: pair: function; kNearestCsr
+.. _doxid-namespacenneigh_1ac3d73f19a9a16def5e4b6571c9a2b1d5:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void kNearestCsr(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, bool mutual, std::vector<int>& offsets, std::vector<int>& cols, bool park = true)
+
+Same neighbours as kNearestNeighbourList, as a CSR of cloud indices with no self entry. Column order matches that list after the atom-id rows are mapped back to indices.
+
+.. index:: pair: function; kNearestPacked
+.. _doxid-namespacenneigh_1a50b9380030492980b6f8540c213d8098:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void kNearestPacked(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI, std::vector<double>& xyz, std::vector<int>& nom)
+
+Packed nominations from the same search as kNearestNeighbourList. ``xyz`` is n by 3 and ``nom`` is n by k cloud indices, nearest first, with unused slots set to -1. The rows are not symmetrized.
+
+.. index:: pair: function; kNearestNeighbourList
+.. _doxid-namespacenneigh_1a5aeb17070b1a13a028fdcc5d3e7470b6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> kNearestNeighbourList(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, const std::vector<int>& types, bool mutual = true)
+
+k-nearest graph on a type set (water oxygens).
+
+Substrate, ions and other species never appear as neighbours. An empty set is no atoms.
+
+.. index:: pair: function; kNearestNeighbourPair
+.. _doxid-namespacenneigh_1a553a0b3d4dddd477c0dcb06d93361eae:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> kNearestNeighbourPair(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, double candidateCutoff, int typeI)
+
+Mutual and union k-nearest graphs from one candidate search.
+
+Seeded affiliation needs both; building them separately repeats the cell list.
+
+.. index:: pair: function; shellSeparation
+.. _doxid-namespacenneigh_1a139165088e10b53a5efa6034434c9423:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::pair<double, double> shellSeparation(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int k, int typeI)
+
+The shell-separation certificate for the exact reduction of the k-nearest graph to the cutoff graph: returns {max_i d_k(i), min_i d\_{k+1}(i)} over particles of the type.
+
+When max_i d_k(i) <= rcutoff <= min_i d\_{k+1}(i), the two graphs coincide edge for edge and every downstream graph predicate is identical. Brute force, intended for validation. A particle of the type with fewer than k others of that type returns {infinity, 0}: no cutoff gives it k neighbours.
+
+.. index:: pair: function; nearestUnlike
+.. _doxid-namespacenneigh_1a57e7804488c926a85c21131b895b6491:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::tuple<int, int, double>> nearestUnlike(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ)
+
+Nearest unlike image of each typeI particle among typeJ particles.
+
+Returns cloud-index pairs (i, j) and the MIC distance (sqrt of :ref:`gen::periodicDistSq <doxid-namespacegen_1ac55d45ba7b50cb75763412f158ecd713>`). On an ion cloud, typeI = 1 (cation vertex) and typeJ = 2 (anion vertex). This is the nearest unlike neighbour, not a coordination number.
+
+.. index:: pair: function; mutualNearestUnlike
+.. _doxid-namespacenneigh_1a68ba6195c59b7a1b7c8bb17ec31314a3:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::pair<int, int>> mutualNearestUnlike(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int typeI, int typeJ)
+
+Subset of nearestUnlike where j's nearest typeI is i (mutual).
+
+A contact pair is this mutual edge, not first-shell membership.
+
+.. index:: pair: function; clearNeighbourList
+.. _doxid-namespacenneigh_1a752d3e4cbd98fa454a6dc36a4307b75a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int clearNeighbourList(std::vector<std::vector<int>>& nList)
+
+Erases memory for a vector of vectors for the neighbour list.
 

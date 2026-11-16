@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('classnneigh_1_
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">nneigh::SkinNeighborList Class Reference<div class="ingroups"><a class="el" href="group__nneigh.html">Nneigh</a></div></div></div>
+  <div class="headertitle"><div class="title">nneigh::SkinNeighborList Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
@@ -245,20 +245,193 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('classnneigh_1_
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ga80f555acadad22b5edcc4af8285006ed" id="r_ga80f555acadad22b5edcc4af8285006ed"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed">SkinNeighborList</a> (double cutoff, double skin, int typeI, <a class="el" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph=<a class="el" href="group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>, int k=4)</td></tr>
-<tr class="memitem:ga97e81664c1e98dd63263c6724f5c8514" id="r_ga97e81664c1e98dd63263c6724f5c8514"><td class="memItemLeft"><a class="el" href="group__nneigh.html#gae70187f6d039fe332d7f59be0112ff26">BondGraph</a>&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#ga97e81664c1e98dd63263c6724f5c8514">graph</a> () const</td></tr>
-<tr class="memitem:ga81af9074f6b9311b1cba1321b64f21d7" id="r_ga81af9074f6b9311b1cba1321b64f21d7"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7">update</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
-<tr class="memitem:gaaca057f10435740a240ca275e619e16e" id="r_gaaca057f10435740a240ca275e619e16e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#gaaca057f10435740a240ca275e619e16e">lastRebuilt</a> () const</td></tr>
-<tr class="memitem:gaadc8965e902b0b2a599c75ac338d15af" id="r_gaadc8965e902b0b2a599c75ac338d15af"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#gaadc8965e902b0b2a599c75ac338d15af">lastChangedAtoms</a> () const</td></tr>
-<tr class="memdesc:gaadc8965e902b0b2a599c75ac338d15af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atoms whose cutoff bond set changed on the last update.  <br /></td></tr>
-<tr class="memitem:gab621667477b3b610de9af803a925f574" id="r_gab621667477b3b610de9af803a925f574"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#gab621667477b3b610de9af803a925f574">bonds</a> () const</td></tr>
+<tr class="memitem:a80f555acadad22b5edcc4af8285006ed" id="r_a80f555acadad22b5edcc4af8285006ed"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a80f555acadad22b5edcc4af8285006ed">SkinNeighborList</a> (double cutoff, double skin, int typeI, <a class="el" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> graph=<a class="el" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a>, int k=4)</td></tr>
+<tr class="memitem:a97e81664c1e98dd63263c6724f5c8514" id="r_a97e81664c1e98dd63263c6724f5c8514"><td class="memItemLeft"><a class="el" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a>&#160;</td><td class="memItemRight"><a class="el" href="#a97e81664c1e98dd63263c6724f5c8514">graph</a> () const</td></tr>
+<tr class="memitem:a81af9074f6b9311b1cba1321b64f21d7" id="r_a81af9074f6b9311b1cba1321b64f21d7"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a81af9074f6b9311b1cba1321b64f21d7">update</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:aaca057f10435740a240ca275e619e16e" id="r_aaca057f10435740a240ca275e619e16e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aaca057f10435740a240ca275e619e16e">lastRebuilt</a> () const</td></tr>
+<tr class="memitem:aadc8965e902b0b2a599c75ac338d15af" id="r_aadc8965e902b0b2a599c75ac338d15af"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aadc8965e902b0b2a599c75ac338d15af">lastChangedAtoms</a> () const</td></tr>
+<tr class="memdesc:aadc8965e902b0b2a599c75ac338d15af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atoms whose cutoff bond set changed on the last update.  <br /></td></tr>
+<tr class="memitem:ab621667477b3b610de9af803a925f574" id="r_ab621667477b3b610de9af803a925f574"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#ab621667477b3b610de9af803a925f574">bonds</a> () const</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Persistent neighbour list with a LAMMPS skin. </p>
 <p>Vesin (or the brute-force fallback) builds candidates at cutoff+skin, which is the ghost halo: periodic images already sit in that shell. The cell list is rebuilt only when some atom has moved more than skin/2 from the last rebuild, the Verlet trigger. The bond graph for rings is the candidate pairs whose current distance is inside the analysis cutoff. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00563">563</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-</div><hr/>The documentation for this class was generated from the following file:<ul>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00614">614</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+</div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a80f555acadad22b5edcc4af8285006ed" name="a80f555acadad22b5edcc4af8285006ed"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80f555acadad22b5edcc4af8285006ed">&#9670;&#160;</a></span>SkinNeighborList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">nneigh::SkinNeighborList::SkinNeighborList </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>skin</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>typeI</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a></td>          <td class="paramname"><span class="paramname"><em>graph</em></span><span class="paramdefsep"> = </span><span class="paramdefval"><a class="el" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">BondGraph::KnnMutual</a></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span><span class="paramdefsep"> = </span><span class="paramdefval">4</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>graph selects cutoff vs k-nearest (mutual or union). k is the neighbour count for the knn graphs (default 4). </p>
+
+</div>
+</div>
+<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="ab621667477b3b610de9af803a925f574" name="ab621667477b3b610de9af803a925f574"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab621667477b3b610de9af803a925f574">&#9670;&#160;</a></span>bonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; nneigh::SkinNeighborList::bonds </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00631">631</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  631</span>                                                               {</div>
+<div class="line"><span class="lineno">  632</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  633</span>  }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a97e81664c1e98dd63263c6724f5c8514" name="a97e81664c1e98dd63263c6724f5c8514"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97e81664c1e98dd63263c6724f5c8514">&#9670;&#160;</a></span>graph()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacenneigh.html#ae70187f6d039fe332d7f59be0112ff26">BondGraph</a> nneigh::SkinNeighborList::graph </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00621">621</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  621</span>{ <span class="keywordflow">return</span> graph_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="aadc8965e902b0b2a599c75ac338d15af" name="aadc8965e902b0b2a599c75ac338d15af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadc8965e902b0b2a599c75ac338d15af">&#9670;&#160;</a></span>lastChangedAtoms()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int nneigh::SkinNeighborList::lastChangedAtoms </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Atoms whose cutoff bond set changed on the last update. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00630">630</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  630</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="aaca057f10435740a240ca275e619e16e" name="aaca057f10435740a240ca275e619e16e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaca057f10435740a240ca275e619e16e">&#9670;&#160;</a></span>lastRebuilt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::SkinNeighborList::lastRebuilt </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00628">628</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  628</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a81af9074f6b9311b1cba1321b64f21d7" name="a81af9074f6b9311b1cba1321b64f21d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81af9074f6b9311b1cba1321b64f21d7">&#9670;&#160;</a></span>update()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; nneigh::SkinNeighborList::update </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Refresh from a new frame. The returned list is ID-keyed with a leading self entry, the same shape as neighListO. </p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/include/internal/<a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a></li>
 </ul>
 </div><!-- contents -->

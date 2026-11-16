@@ -4,5 +4,6 @@ var ylm__cartesian_8hpp =
     [ "seams::ylm::legendrePoly", "namespaceseams_1_1ylm.html#a07e9327f44f07111da94f5f121da27f6", null ],
     [ "seams::ylm::ylmReal", "namespaceseams_1_1ylm.html#a9911ab8bbf1f648f47f0a6657a659d03", null ],
     [ "seams::ylm::N3", "namespaceseams_1_1ylm.html#a0ea7855115022b2e51dfeec3257e2f7c", null ],
+    [ "seams::ylm::N4", "namespaceseams_1_1ylm.html#a9b678ea543b31f0d3d76299a3ded6719", null ],
     [ "seams::ylm::N6", "namespaceseams_1_1ylm.html#a44d8f6d018716f5e2a02a91658d7d10e", null ]
 ];

@@ -1,0 +1,6 @@
+.. raw:: html
+
+   <iframe title="dseams-migrate" src="https://odysee.com/$/embed/dseams-migrate:ca1381615800e95d41cc8a379d62abd324800e59" width="960" height="540" allowfullscreen></iframe>
+   <p>Captions are burned into the upload.</p>
+   <p>Transcript: <a href="/_static/captions/migrate.vtt">docs/videos/migrate/captions.vtt</a></p>
+   <p>Migrate from 1.x.</p>

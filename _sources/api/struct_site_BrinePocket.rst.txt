@@ -1,0 +1,23 @@
+.. index:: pair: struct; site::BrinePocket
+.. _doxid-structsite_1_1_brine_pocket:
+
+struct site::BrinePocket
+========================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/brine_front.hpp>
+	
+	struct BrinePocket {
+		// fields
+	
+		std::vector<int> :target:`waters<doxid-structsite_1_1_brine_pocket_1a46ca0c8d14f2c03094aad90d2a908537>`;
+		int :target:`nIons<doxid-structsite_1_1_brine_pocket_1ab4fe63aed2b9fd2181aa8292bcd2f830>` = 0;
+	};

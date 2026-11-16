@@ -2,12 +2,19 @@ var searchData=
 [
   ['faces_0',['faces',['../structcage_1_1FoundCage.html#a195d96130e05b294524772d8d5a1572d',1,'cage::FoundCage']]],
   ['family_1',['family',['../structseams_1_1cfg_1_1Runtime.html#ab7e771317b68e4aafa46cac28b25a526',1,'seams::cfg::Runtime::family'],['../structsite_1_1Table.html#a38cfa99bc45bda42c6e76b2f48eb39dc',1,'site::Table::family']]],
-  ['fennel_2',['fennel',['../structseams_1_1cfg_1_1Runtime.html#ad8b5f283520f2569e2b88a6425217e03',1,'seams::cfg::Runtime']]],
-  ['first_3',['first',['../structsymm_1_1CanonShell.html#a59f7799a99b1a6933580bd988fd02893',1,'symm::CanonShell']]],
-  ['foot_4',['foot',['../structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af',1,'gpu::Plan']]],
-  ['forcetarget_5',['forceTarget',['../structtum_1_1SpecializedCaps.html#a5e817f9b4151b0b3d73c0fb7a6b9ee53',1,'tum::SpecializedCaps']]],
-  ['frame_6',['frame',['../structseams_1_1cfg_1_1Runtime.html#a7cfcb2f861268d8aa7b218f97f2b83fe',1,'seams::cfg::Runtime']]],
-  ['frames_7',['frames',['../structgpu_1_1Plan.html#ad96d06fdc72c18378dd452832a70ea83',1,'gpu::Plan']]],
-  ['free_8',['free',['../structsite_1_1GuestOccupancy.html#aca1af9a15208a80f6ddb598fa3a2c3bd',1,'site::GuestOccupancy']]],
-  ['freebytes_9',['freeBytes',['../structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be',1,'gpu::DeviceInfo']]]
+  ['fate_2',['fate',['../structnucleation_1_1CommittorCall.html#a7409b97c45a308034b5b633d29fa899d',1,'nucleation::CommittorCall']]],
+  ['fennel_3',['fennel',['../structseams_1_1cfg_1_1Runtime.html#ad8b5f283520f2569e2b88a6425217e03',1,'seams::cfg::Runtime']]],
+  ['first_4',['first',['../structsymm_1_1CanonShell.html#a59f7799a99b1a6933580bd988fd02893',1,'symm::CanonShell']]],
+  ['fma_5',['fma',['../structseams_1_1cpu_1_1Features.html#ad4399043fb7c48a81df09b229cbf22c1',1,'seams::cpu::Features']]],
+  ['foot_6',['foot',['../structgpu_1_1Plan.html#a1086b17671aa3043e3228c29c0c783af',1,'gpu::Plan']]],
+  ['forcetarget_7',['forceTarget',['../structtum_1_1SpecializedCaps.html#a5e817f9b4151b0b3d73c0fb7a6b9ee53',1,'tum::SpecializedCaps']]],
+  ['found_8',['found',['../structsite_1_1FrontPair.html#af96a77e91420c6c8d514c3a6d6294863',1,'site::FrontPair::found'],['../structseams_1_1BrineFronts.html#a52002c4e7df840366e5b41234dc319e9',1,'seams::BrineFronts::found']]],
+  ['frame_9',['frame',['../structiface_1_1GrowthFrame.html#a1964ec73b6ee72c963a190256e75b221',1,'iface::GrowthFrame::frame'],['../structnucleation_1_1FrameRecord.html#a361b7fd80ffc66fd55d24fe46e2d7c8b',1,'nucleation::FrameRecord::frame'],['../structscience_1_1NucleusFrame.html#ae24819f5b91d93001cc9de31de1f27ed',1,'science::NucleusFrame::frame'],['../structseams_1_1cfg_1_1Runtime.html#a7cfcb2f861268d8aa7b218f97f2b83fe',1,'seams::cfg::Runtime::frame']]],
+  ['frames_10',['frames',['../structgpu_1_1Plan.html#ad96d06fdc72c18378dd452832a70ea83',1,'gpu::Plan::frames'],['../structiface_1_1Growth.html#aa000031f2bd4dfa8230fa7b5eb0108ac',1,'iface::Growth::frames']]],
+  ['free_11',['free',['../structsite_1_1GuestOccupancy.html#aca1af9a15208a80f6ddb598fa3a2c3bd',1,'site::GuestOccupancy']]],
+  ['freebytes_12',['freeBytes',['../structgpu_1_1DeviceInfo.html#ac316ae8f9bd37bee8327159b7d06e1be',1,'gpu::DeviceInfo']]],
+  ['from_13',['from',['../structsite_1_1TrapEvent.html#a2a968f0249fd687d38355f4cac532edc',1,'site::TrapEvent']]],
+  ['front_14',['front',['../structwater_1_1IonReport.html#aa50bdec70b39dea2e8dfbda719a7fb89',1,'water::IonReport']]],
+  ['frontcut_15',['frontCut',['../structsite_1_1FrontOptions.html#a8a1836a8985984523c275ae6f7f0fc60',1,'site::FrontOptions']]],
+  ['fronts_16',['fronts',['../structsite_1_1FrontSnapshot.html#ab76fc83f217bab8627c3a6e184378e76',1,'site::FrontSnapshot::fronts'],['../structiface_1_1Profile.html#ab77ce65569d6ed1411a986f007b337a5',1,'iface::Profile::fronts'],['../structscience_1_1Layers.html#a079447bace7ece4fd08c059f9f8a35c2',1,'science::Layers::fronts']]]
 ];

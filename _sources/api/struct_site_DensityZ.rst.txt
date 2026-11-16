@@ -43,7 +43,7 @@ Fields
 
 	std::vector<double> rho
 
-Bin centres along the chosen axis.
+Bin centers along the chosen axis.
 
 .. index:: pair: variable; type
 .. _doxid-structsite_1_1_density_z_1a292387f47ba3c8ef2afed2934537ea4f:

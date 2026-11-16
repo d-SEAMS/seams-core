@@ -1,0 +1,25 @@
+.. index:: pair: struct; seams::domain::RingPhases
+.. _doxid-structseams_1_1domain_1_1_ring_phases:
+
+struct seams::domain::RingPhases
+================================
+
+.. toctree::
+	:hidden:
+
+Phases of the last ringsOf on this rank. Rebuild is the neighbour rows of this rank's share. Search is the path enumeration. Primitive is the shortest-path test. Reduce is the local index map.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/domain.hpp>
+	
+	struct RingPhases {
+		// fields
+	
+		double :target:`rebuildMs<doxid-structseams_1_1domain_1_1_ring_phases_1a9895158cd4674f5332204a2514da4444>` = 0;
+		double :target:`searchMs<doxid-structseams_1_1domain_1_1_ring_phases_1a3e02701dafc5db9447d9d29651c35910>` = 0;
+		double :target:`primitiveMs<doxid-structseams_1_1domain_1_1_ring_phases_1a5fe1d759006871a7ecfb7ddc33b1a897>` = 0;
+		double :target:`reduceMs<doxid-structseams_1_1domain_1_1_ring_phases_1a112fd37750a8a9586133427c3a2fe80d>` = 0;
+	};
