@@ -15,7 +15,7 @@ index 1111111..2222222 100644
  #include "chemfiles/FormatMetadata.hpp"
  #include "chemfiles/files/MemoryBuffer.hpp"
  
-@@ -277,3 +279,83 @@ optional<span<const char>> Trajectory::memory_buffer() const {
+@@ -277,3 +279,85 @@ optional<span<const char>> Trajectory::memory_buffer() const {
  
      return span<const char>(buffer_->data(), buffer_->data() + buffer_->size());
  }
@@ -84,7 +84,9 @@ index 1111111..2222222 100644
 +        }
 +        const size_t nsteps = trajectory.nsteps();
 +        for (size_t step = first; step < nsteps && step <= last; ++step) {
-+            Frame frame = step == first ? trajectory.read_step(step) : trajectory.read();
++            // read_step for every step: a format's own cursor need not follow
++            // a read_step, so read() after it can return another step.
++            Frame frame = trajectory.read_step(step);
 +            if (visit != nullptr && visit(frame, step, user) != 0) {
 +                break;
 +            }
