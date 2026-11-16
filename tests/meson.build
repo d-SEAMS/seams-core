@@ -784,7 +784,14 @@ test('chill_mixed',
   env: _test_env,
   timeout: 120)
 
-dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
+# shared_module is a Mach-O bundle on Darwin, and DYLD_INSERT_LIBRARIES
+# loads only a dylib. LD_PRELOAD takes the module as built.
+if host_machine.system() == 'darwin'
+  dump_faults = shared_library('dump_faults', 'dump_faults_preload.c',
+    dependencies: dependency('dl', required: false))
+else
+  dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
+endif
 dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',
   dependencies: [yds_dep],
   include_directories: _incdirs,
