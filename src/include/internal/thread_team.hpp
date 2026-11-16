@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <mutex>
@@ -126,9 +127,10 @@ struct TeamWidth {
       // before the workers are created, so they inherit that mask.
       if (want > 0 && want < saved &&
           sched_getaffinity(0, sizeof(oldMask), &oldMask) == 0) {
-        int cpus[256];
+        // CPU_ISSET and CPU_SET take the cpu number as a size_t.
+        std::size_t cpus[256];
         int ncpu = 0;
-        for (int cpu = 0; cpu < CPU_SETSIZE && ncpu < want && ncpu < 256; ++cpu) {
+        for (std::size_t cpu = 0; cpu < CPU_SETSIZE && ncpu < want && ncpu < 256; ++cpu) {
           if (CPU_ISSET(cpu, &oldMask)) {
             cpus[ncpu++] = cpu;
           }

@@ -13,6 +13,7 @@
 #include <bop.hpp>
 #include <domain.hpp>
 #include <generic.hpp>
+#include <index_cast.hpp>
 #include <neighbours.hpp>
 #include <ozaki.hpp>
 #include <sphericart_ylm.hpp>
@@ -349,6 +350,7 @@ void runPass1Host12(const NeighbourCSR &g, int begin, int end,
 void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
                         std::vector<double> &qlm) {
   const int nComp = 2 * orderL + 1;
+  const size_t comps = static_cast<size_t>(nComp);
   int nBonds = 0;
   for (int i = begin; i < end; i++) {
     nBonds += g.offsets[static_cast<size_t>(i) + 1] - g.offsets[static_cast<size_t>(i)];
@@ -375,7 +377,7 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
       b++;
     }
   }
-  std::vector<double> ylm(static_cast<size_t>(b) * nComp * 2, 0.0);
+  std::vector<double> ylm(static_cast<size_t>(b) * comps * 2, 0.0);
   if (seams::sphericart_ylm::ylmCartesian(orderL, cart.data(), b, ylm.data()) !=
       0) {
     if (orderL == 12) {
@@ -393,8 +395,8 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
   if (!pairwise) {
     for (int k = 0; k < b; k++) {
       const int i = owner[static_cast<size_t>(k)];
-      const size_t row = static_cast<size_t>(i) * nComp;
-      const double *src = ylm.data() + static_cast<size_t>(k) * nComp * 2;
+      const size_t row = static_cast<size_t>(i) * comps;
+      const double *src = ylm.data() + static_cast<size_t>(k) * comps * 2;
       for (int m = 0; m < nComp; m++) {
         qlm[2 * (row + static_cast<size_t>(m))] += src[2 * m];
         qlm[2 * (row + static_cast<size_t>(m)) + 1] += src[2 * m + 1];
@@ -410,18 +412,18 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
       }
       const int cnt = k1 - k;
       std::vector<double> comp(static_cast<size_t>(cnt));
-      const size_t row = static_cast<size_t>(i) * nComp;
+      const size_t row = static_cast<size_t>(i) * comps;
       for (int m = 0; m < nComp; m++) {
         for (int t = 0; t < cnt; t++) {
           const double *src =
-              ylm.data() + static_cast<size_t>(k + t) * nComp * 2;
+              ylm.data() + static_cast<size_t>(k + t) * comps * 2;
           comp[static_cast<size_t>(t)] = src[2 * m];
         }
         qlm[2 * (row + static_cast<size_t>(m))] = seams::product::reduce(
             comp.data(), cnt, seams::product::reduction());
         for (int t = 0; t < cnt; t++) {
           const double *src =
-              ylm.data() + static_cast<size_t>(k + t) * nComp * 2;
+              ylm.data() + static_cast<size_t>(k + t) * comps * 2;
           comp[static_cast<size_t>(t)] = src[2 * m + 1];
         }
         qlm[2 * (row + static_cast<size_t>(m)) + 1] = seams::product::reduce(
@@ -441,7 +443,7 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
       continue;
     }
     const double inv = 1.0 / static_cast<double>(nUsed);
-    const size_t row = static_cast<size_t>(i) * nComp;
+    const size_t row = static_cast<size_t>(i) * comps;
     for (int m = 0; m < nComp; m++) {
       qlm[2 * (row + static_cast<size_t>(m))] *= inv;
       qlm[2 * (row + static_cast<size_t>(m)) + 1] *= inv;
@@ -903,20 +905,21 @@ void runOffload(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
 #ifdef SEAMS_HAS_MPI
 void allgathervDoubles(std::vector<double> &buf, int nAtoms, int perAtom,
                        int rank, int nranks) {
-  std::vector<int> counts(nranks);
-  std::vector<int> displs(nranks);
+  const std::size_t me = seams::toIndex(rank);
+  std::vector<int> counts(seams::toIndex(nranks));
+  std::vector<int> displs(seams::toIndex(nranks));
   int disp = 0;
-  for (int r = 0; r < nranks; r++) {
+  for (std::size_t r = 0; r < counts.size(); r++) {
     int b = 0;
     int e = 0;
-    atomRange(nAtoms, r, nranks, b, e);
+    atomRange(nAtoms, static_cast<int>(r), nranks, b, e);
     counts[r] = (e - b) * perAtom;
     displs[r] = disp;
     disp += counts[r];
   }
-  std::vector<double> send(buf.begin() + displs[rank],
-                           buf.begin() + displs[rank] + counts[rank]);
-  MPI_Allgatherv(send.data(), counts[rank], MPI_DOUBLE, buf.data(),
+  std::vector<double> send(buf.begin() + displs[me],
+                           buf.begin() + displs[me] + counts[me]);
+  MPI_Allgatherv(send.data(), counts[me], MPI_DOUBLE, buf.data(),
                  counts.data(), displs.data(), MPI_DOUBLE, MPI_COMM_WORLD);
 }
 

@@ -228,7 +228,7 @@ bool finite_box(const double *box9) {
 // which leaves the start of the input in cache for a write pass that walks
 // forward. The explicit prefetch 8 KiB ahead cut the reload of a 21 MB
 // input by about 4%.
-template <int Lanes> inline bool finite_scan(const double *v, std::size_t count) {
+template <std::size_t Lanes> inline bool finite_scan(const double *v, std::size_t count) {
   constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
   constexpr std::uint64_t carry = 0x0010000000000000ULL;
   constexpr std::size_t ahead = 1024;
@@ -243,12 +243,12 @@ template <int Lanes> inline bool finite_scan(const double *v, std::size_t count)
 #endif
     std::uint64_t bits[Lanes];
     std::memcpy(bits, v + k, sizeof bits);
-    for (int l = 0; l < Lanes; ++l) {
+    for (std::size_t l = 0; l < Lanes; ++l) {
       acc[l] |= (bits[l] & exponent) + carry;
     }
   }
   std::uint64_t bad = 0;
-  for (int l = 0; l < Lanes; ++l) {
+  for (std::size_t l = 0; l < Lanes; ++l) {
     bad |= acc[l];
   }
   while (k > 0) {

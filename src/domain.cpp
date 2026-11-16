@@ -1515,12 +1515,13 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int k = 0; k < nLocalCopy; k++) {
-    const int frame = work.share.local[k];
+    const std::size_t slot = static_cast<std::size_t>(k);
+    const int frame = work.share.local[slot];
     if (frame < 0 || frame >= cloud.nop) {
       continue;
     }
     const auto &src = cloud.pts[static_cast<std::size_t>(frame)];
-    auto &dst = work.cloud.pts[k];
+    auto &dst = work.cloud.pts[slot];
     dst.x = src.x;
     dst.y = src.y;
     dst.z = src.z;
@@ -1678,7 +1679,7 @@ std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
   std::partial_sum(first.begin(), first.end(), first.begin());
   const int nRings = static_cast<int>(at.size());
   std::vector<std::size_t> slot(at.size());
-  for (int r = 0; r < nRings; r++) {
+  for (std::size_t r = 0; r < at.size(); r++) {
     slot[r] = first[static_cast<std::size_t>(all[at[r] + 1])]++;
   }
   std::vector<std::vector<int>> out(at.size());
@@ -1686,8 +1687,9 @@ std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
 #pragma omp parallel for schedule(static) if (nRings >= kParallelMin && !omp_in_parallel())
 #endif
   for (int r = 0; r < nRings; r++) {
-    const auto begin = all.begin() + static_cast<std::ptrdiff_t>(at[r]) + 1;
-    out[slot[r]].assign(begin, begin + all[at[r]]);
+    const std::size_t ring = static_cast<std::size_t>(r);
+    const auto begin = all.begin() + static_cast<std::ptrdiff_t>(at[ring]) + 1;
+    out[slot[ring]].assign(begin, begin + all[at[ring]]);
   }
   return out;
 }

@@ -15,6 +15,7 @@
 // Internal Libraries
 #include <bond.hpp>
 #include <generic.hpp>
+#include <index_cast.hpp>
 
 #include <cmath>
 #include <unordered_map>
@@ -363,8 +364,8 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
     std::cerr << "There are no rings in the system!\n";
     return bonds;
   }
-  int ringSize = static_cast<int>(rings[0].size());
-  int currentRing; // (vector) index of the current ring in a particular cage
+  // The closing bond of every ring uses the size of the first ring.
+  const std::size_t ringSize = rings[0].size();
 
   // Form of the bonds vector of vectors:
   // 272    214
@@ -376,23 +377,23 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
   nRings = 0; // init
 
   // Loop through all the cages
-  for (int icage = 0; icage < cageList.size(); icage++) {
+  for (const cage::Cage &cage : cageList) {
     // Skip if the cage is of a different type
-    if (cageList[static_cast<std::size_t>(icage)].type != type) {
+    if (cage.type != type) {
       continue;
     }
-    nRings += cageList[static_cast<std::size_t>(icage)].rings.size(); // Add to the number of rings
+    nRings += seams::checkedCast<int>(cage.rings.size()); // Add to the number of rings
     //
     // Now loop through a particular ring inside the i^th cage
-    for (int iring = 0; iring < cageList[static_cast<std::size_t>(icage)].rings.size(); iring++) {
-      currentRing = cageList[static_cast<std::size_t>(icage)].rings[static_cast<std::size_t>(iring)]; // Current ring index
-      // Get the first atom of each pair inside currentRing
-      for (int k = 0; k < rings[static_cast<std::size_t>(currentRing)].size() - 1; k++) {
+    for (const int ringIndex : cage.rings) {
+      const std::vector<int> &ring = rings[seams::toIndex(ringIndex)];
+      // Get the first atom of each pair inside the ring
+      for (std::size_t k = 0; k + 1 < ring.size(); k++) {
         // Clear the current bond vector
         currentBond.clear();
         // Fill the current bond vector
-        currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][static_cast<std::size_t>(k)]);
-        currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][static_cast<std::size_t>(k + 1)]);
+        currentBond.push_back(ring[k]);
+        currentBond.push_back(ring[k + 1]);
         std::sort(currentBond.begin(), currentBond.end());
         // Add to the bonds vector of vectors
         bonds.push_back(currentBond);
@@ -400,8 +401,8 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
       // The last pair is with the last element and the first element
       // Fill currentBond and update bonds
       currentBond.clear();
-      currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][static_cast<std::size_t>(ringSize - 1)]);
-      currentBond.push_back(rings[static_cast<std::size_t>(currentRing)][0]);
+      currentBond.push_back(ring[ringSize - 1]);
+      currentBond.push_back(ring[0]);
       std::sort(currentBond.begin(), currentBond.end());
       bonds.push_back(currentBond);
     } // end of loop through a particular ring

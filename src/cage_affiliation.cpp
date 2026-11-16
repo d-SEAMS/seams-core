@@ -1423,11 +1423,11 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
   st.flags(ctx, evaluated);
   // The equatorial flag is set only together with the pairs flag,
   // so the pairs flag already counts every ring that test will rerun.
-  std::size_t touched = 0;
-  for (int i = 0; i < nR; i++) {
-    touched += isDirty[static_cast<std::size_t>(i)] ? 1 : 0;
+  int touched = 0;
+  for (const char dirty : isDirty) {
+    touched += dirty != 0 ? 1 : 0;
   }
-  st.lastReclassified = static_cast<int>(touched);
+  st.lastReclassified = touched;
   st.rememberRings(rings);
   std::swap(st.prevPack, st.nextPack);
   st.answersValid = true;

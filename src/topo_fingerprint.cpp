@@ -143,7 +143,7 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
     const std::uint64_t deg = static_cast<std::uint64_t>(adjacency[static_cast<std::size_t>(i)].size());
     std::uint64_t h = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
     if (colored) {
-      h = mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) + 1ULL);
+      h = mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) + std::uint64_t{1});
     }
     color[static_cast<std::size_t>(i)] = h;
   }
@@ -220,7 +220,7 @@ std::uint64_t wlHashWide(const std::vector<std::vector<int>> &adjacency, int roo
     if (colored) {
       h = mix(h, static_cast<std::uint64_t>(
                      static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) +
-                     1ULL);
+                     std::uint64_t{1});
     }
     color[static_cast<std::size_t>(i)] = h;
   }
@@ -421,7 +421,7 @@ std::uint64_t wlHashCount(const std::vector<std::vector<int>> &adjacency, int ro
     if (colored) {
       h = mix(h, static_cast<std::uint64_t>(
                      static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) +
-                     1ULL);
+                     std::uint64_t{1});
     }
     color[static_cast<std::size_t>(i)] = h;
   }
