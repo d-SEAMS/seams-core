@@ -265,12 +265,17 @@ void timeOne(Cloud &cloud, int reps) {
 
 void printCores() {
   const long online = sysconf(_SC_NPROCESSORS_ONLN);
+  int affinity = 0;
+#ifdef __linux__
   cpu_set_t set;
   CPU_ZERO(&set);
-  int affinity = 0;
   if (sched_getaffinity(0, sizeof(set), &set) == 0) {
     affinity = CPU_COUNT(&set);
   }
+#else
+  // macOS has no per-process cpu mask; the process may run on every online cpu.
+  affinity = static_cast<int>(online);
+#endif
 #ifdef _OPENMP
   const int threads = omp_get_max_threads();
 #else
