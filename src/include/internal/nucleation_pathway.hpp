@@ -116,7 +116,7 @@ struct FrameRecord {
 };
 
 //! Per-molecule ten Wolde q6 score: the mean over neighbours within
-//! cutoff of Re q6(i).q6*(j) / (|q6(i)| |q6(j)|). A molecule without
+//! cutoff of `Re q6(i).q6*(j) / (|q6(i)| |q6(j)|)`. A molecule without
 //! neighbours scores 0. The box is orthorhombic.
 [[nodiscard]] std::vector<double>
 q6DotScore(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
