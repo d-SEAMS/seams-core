@@ -14,6 +14,8 @@ import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from shared_library import require_library  # noqa: E402
 DATA = pathlib.Path(__file__).resolve().parent / "tutorial" / "ice.data"
 CUTOFF = 3.5
 CUBIC = 0
@@ -51,9 +53,7 @@ def read_data(path):
 
 
 def load_library(build):
-    lib = pathlib.Path(build) / "src" / "libseams.so"
-    if not lib.is_file():
-        raise SystemExit("libseams.so is not at {}".format(lib))
+    lib = require_library(pathlib.Path(build) / "src", "seams", "SEAMS_LIB")
     handle = ctypes.CDLL(str(lib))
     handle.seams_system_create.restype = ctypes.c_void_p
     handle.seams_system_set_ortho.argtypes = [

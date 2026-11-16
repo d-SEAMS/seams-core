@@ -11,6 +11,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from shared_library import built_library, require_library  # noqa: E402
 
 HEXAGONAL = 128
 SIX_RINGS = 256
@@ -161,7 +163,7 @@ def run_lammps(root, build, work):
 
 def mean_q6(build, positions, box9):
     os.environ["LD_LIBRARY_PATH"] = env_libs(build)["LD_LIBRARY_PATH"]
-    lib = ctypes.CDLL(str(Path(build) / "bindings" / "libseams_lang.so"))
+    lib = ctypes.CDLL(str(require_library(Path(build) / "bindings", "seams_lang", "SEAMS_LANG_LIB")))
     lib.seams_frame_from_arrays.argtypes = [
         ctypes.POINTER(ctypes.c_double),
         ctypes.c_int,
@@ -213,7 +215,7 @@ def run_openmm(root, build, work):
     from dseams_insitu.engine import InSitu
     from dseams_insitu.openmm import DseamsReporter
 
-    os.environ["SEAMS_LANG_LIB"] = str(Path(build) / "bindings" / "libseams_lang.so")
+    os.environ["SEAMS_LANG_LIB"] = str(require_library(Path(build) / "bindings", "seams_lang", "SEAMS_LANG_LIB"))
     os.environ["LD_LIBRARY_PATH"] = env_libs(build)["LD_LIBRARY_PATH"]
     atoms, bounds = read_dump(root / "input" / "traj" / "ice1h.lammpstrj")
     pos = np.asarray(atoms, dtype=np.float64)
@@ -305,9 +307,9 @@ def run_plumed(root, build, work):
 
 
 def run_insitu(root, build, work):
-    libpath = Path(build) / "bindings" / "libseams_lang.so"
-    if not libpath.is_file():
-        skip("insitu skipped: libseams_lang.so was not built")
+    libpath = built_library(Path(build) / "bindings", "seams_lang", "SEAMS_LANG_LIB")
+    if libpath is None:
+        skip("insitu skipped: libseams_lang was not built")
     os.environ["LD_LIBRARY_PATH"] = env_libs(build)["LD_LIBRARY_PATH"]
     lib = ctypes.CDLL(str(libpath))
     lib.seams_frame_read.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int]

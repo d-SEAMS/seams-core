@@ -1,0 +1,1 @@
+A macOS build finds `libomp`, the shared library Meson produced, and an open dump after `unlink`. Apple ld is not passed `-rpath-link`, Apple nm reads the exported C ABI, and the TIP4P overhead test skips when OpenMM cannot be imported.

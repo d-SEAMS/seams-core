@@ -10,7 +10,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from tape_parse import parse_tape  # noqa: E402
+from shared_library import built_library  # noqa: E402
 
 NUMBER = re.compile(r"(?<![\d.])(\d+(?:\.\d+)?)(?![\d.])")
 def leaked(text):
@@ -118,7 +120,9 @@ def prepare(root, seams, libdir, langdir, build):
     env["SEAMS_LANGDIR"] = str(langdir)
     env["VIDEO_OUT"] = str(out)
     env["DSEAMS_ROOT"] = str(root)
-    env["SEAMS_LANG_LIB"] = str(Path(langdir) / "libseams_lang.so")
+    lang = built_library(langdir, "seams_lang", "SEAMS_LANG_LIB")
+    if lang is not None:
+        env["SEAMS_LANG_LIB"] = str(lang)
     env["SEAMS_LIB_DIR"] = str(libdir)
     env["SEAMS_INCLUDE"] = str(root / "bindings" / "cxx")
     env["LD_LIBRARY_PATH"] = os.pathsep.join(

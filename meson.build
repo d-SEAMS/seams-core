@@ -125,7 +125,11 @@ if flexiblas_dep.found()
     _fb_path = _fb_file.stdout().strip()
     if _fb_path != '' and _fb_path != 'libflexiblas.so'
       _fb_dir = import('fs').parent(_fb_path)
-      _link_args += ['-Wl,-rpath,' + _fb_dir, '-Wl,-rpath-link,' + _fb_dir]
+      _link_args += ['-Wl,-rpath,' + _fb_dir]
+      # -rpath-link is a GNU ld option. Apple ld64 rejects it.
+      if host_machine.system() != 'darwin'
+        _link_args += ['-Wl,-rpath-link,' + _fb_dir]
+      endif
     endif
   endif
 elif not blas_opt.disabled()
@@ -185,10 +189,32 @@ if openmp_dep_ok
     # names it. A runpath to a directory the loader searches anyway is
     # harmless.
     if cpp_id == 'clang'
-      _omp_so = run_command(cppc.cmd_array() + ['-print-file-name=libomp.so'],
-                            check: false).stdout().strip()
-      if _omp_so.startswith('/') and import('fs').exists(_omp_so)
-        _omp_libdir = import('fs').parent(_omp_so)
+      # Linux clang prints libomp.so. Apple clang links libomp.dylib, and
+      # -print-file-name=libomp.so then returns the bare name, so the
+      # runpath was never recorded and dyld aborted on @rpath/libomp.dylib.
+      _omp_names = ['libomp.so']
+      if host_machine.system() == 'darwin'
+        _omp_names = ['libomp.dylib']
+      endif
+      foreach _omp_name : _omp_names
+        if _omp_libdir == ''
+          _omp_file = run_command(cppc.cmd_array() + ['-print-file-name=' + _omp_name],
+                                  check: false).stdout().strip()
+          if _omp_file.startswith('/') and import('fs').exists(_omp_file)
+            _omp_libdir = import('fs').parent(_omp_file)
+          endif
+        endif
+      endforeach
+      # conda's clang resource directory does not hold libomp.dylib. The
+      # pixi prefix lib directory does, and that is what -fopenmp loads.
+      if _omp_libdir == '' and host_machine.system() == 'darwin'
+        _conda_omp = run_command('sh', '-c', 'printf %s "${CONDA_PREFIX:-}"',
+                                 check: false).stdout().strip()
+        if _conda_omp != '' and import('fs').exists(_conda_omp / 'lib' / 'libomp.dylib')
+          _omp_libdir = _conda_omp / 'lib'
+        endif
+      endif
+      if _omp_libdir != ''
         _omp_rpath = '-Wl,-rpath,' + _omp_libdir
         _omp_rpath_dep = [declare_dependency(link_args: [_omp_rpath])]
         _deps += _omp_rpath_dep
@@ -741,7 +767,12 @@ if not sphericart_opt.disabled()
         sph_rpath += ['-Wl,-rpath,' + d]
         # A cross-prefixed ld (conda's) does not follow libyodaLib's
         # RPATH to libsphericart.so, so a consumer names the folder.
-        sphericart_consumer_args += ['-Wl,-rpath-link,' + d]
+        # -rpath-link is ELF-only. Apple ld records a runtime rpath.
+        if host_machine.system() == 'darwin'
+          sphericart_consumer_args += ['-Wl,-rpath,' + d]
+        else
+          sphericart_consumer_args += ['-Wl,-rpath-link,' + d]
+        endif
       endforeach
       sph_cflags = []
       foreach d : sph_inc_dirs
@@ -854,6 +885,7 @@ _incdirs += include_directories([
 
 # Library
 subdir('src')
+_snippet_env.set('SEAMS_LIB', seams_api_lib.full_path())
 
 # LAMMPS and GROMACS drivers. They link the C API.
 subdir('engines')
@@ -1046,6 +1078,16 @@ if get_option('with_cli') and get_option('with_tests')
     timeout: 60)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  tutorial_env.set('SEAMS_LIB', seams_api_lib.full_path())
+  # bindings/ is not configured yet. The filename is the one shared_library()
+  # will write; the loader uses it only when that file exists.
+  _lang_file = 'libseams_lang.so'
+  if host_machine.system() == 'darwin'
+    _lang_file = 'libseams_lang.dylib'
+  elif host_machine.system() == 'windows'
+    _lang_file = 'libseams_lang.dll'
+  endif
+  tutorial_env.set('SEAMS_LANG_LIB', meson.project_build_root() / 'bindings' / _lang_file)
   tutorial_env.set('CC', _snippet_cc)
   tutorial_env.set('CXX', _snippet_cxx)
   if _asan_wrap
@@ -1477,6 +1519,7 @@ if get_option('with_cli') and get_option('with_tests')
 endif
 
 subdir('bindings')
+_snippet_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
 
 if get_option('with_cli') and get_option('with_tests')
   # check_installed.py installs with --no-rebuild, because a rebuild here
@@ -1616,6 +1659,8 @@ if get_option('with_cli') and get_option('with_tests')
   binding_env = environment()
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
+  binding_env.set('SEAMS_LIB', seams_api_lib.full_path())
+  binding_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
   binding_env.set('CC', _snippet_cc)
   binding_env.set('CXX', _snippet_cxx)
   if _asan_wrap
@@ -2234,8 +2279,10 @@ if get_option('with_tests')
           seams_api_lib.full_path(),
         ] + _fuzz_args + [
           '-Wl,-rpath,' + meson.current_build_dir() / 'src',
+        ] + (_omp_rpath != '' ? [_omp_rpath] : []) + [
           # libseams is passed as a file, so the driver does not add the
-          # OpenMP runtime it was built with. The harness needs it.
+          # OpenMP runtime it was built with. The harness needs it, and on
+          # Darwin that runtime is @rpath/libomp.dylib.
           '-fopenmp',
           '-lstdc++', '-lpthread', '-lm',
         ],

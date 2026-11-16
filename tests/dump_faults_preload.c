@@ -1,6 +1,8 @@
 /* Copyright (c) d-SEAMS developers */
 /* Test-side faults for pread and fstat. The library keeps calling libc. */
+#if !defined(__APPLE__)
 #define _GNU_SOURCE
+#endif
 #include <dlfcn.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -16,7 +18,30 @@ static int pread_faults_left(void) {
   return atoi(n);
 }
 
-ssize_t pread(int fd, void *buf, size_t count, off_t offset) {
+static int fstat_seen = 0;
+
+static int fstat_fault(void) {
+  fstat_seen += 1;
+  /* The parse records one successful stat, then the change check fails. */
+  if (getenv("DUMP_FSTAT_EIO") != NULL && fstat_seen > 1) {
+    errno = EIO;
+    return -1;
+  }
+  return 0;
+}
+
+#if defined(__APPLE__)
+/* DYLD_INSERT_LIBRARIES does not override two-level libSystem bindings.
+ * The __interpose section does. fstat in the macOS 11 SDK is the symbol
+ * fstat$INODE64, which is what the engine calls. */
+#define SEAMS_INTERPOSE(repl, orig)                                                            \
+  __attribute__((used)) static const struct {                                                 \
+    const void *repl;                                                                          \
+    const void *orig;                                                                          \
+  } _seams_interpose_##repl __attribute__((section("__DATA,__interpose"))) = {                 \
+      (const void *)(unsigned long)&(repl), (const void *)(unsigned long)&(orig)}
+
+static ssize_t seams_pread(int fd, void *buf, size_t count, off_t offset) {
   static ssize_t (*real_pread)(int, void *, size_t, off_t) = NULL;
   static int left = -1;
   if (real_pread == NULL) {
@@ -37,16 +62,42 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset) {
   return real_pread(fd, buf, count, offset);
 }
 
-static int fstat_seen = 0;
+static int seams_fstat(int fd, struct stat *buf) {
+  static int (*real_fstat)(int, struct stat *) = NULL;
+  if (real_fstat == NULL) {
+    real_fstat = dlsym(RTLD_NEXT, "fstat$INODE64");
+    if (real_fstat == NULL) {
+      real_fstat = dlsym(RTLD_NEXT, "fstat");
+    }
+  }
+  if (fstat_fault() != 0) {
+    return -1;
+  }
+  return real_fstat(fd, buf);
+}
 
-static int fstat_fault(void) {
-  fstat_seen += 1;
-  /* The parse records one successful stat, then the change check fails. */
-  if (getenv("DUMP_FSTAT_EIO") != NULL && fstat_seen > 1) {
+SEAMS_INTERPOSE(seams_pread, pread);
+SEAMS_INTERPOSE(seams_fstat, fstat);
+#else
+ssize_t pread(int fd, void *buf, size_t count, off_t offset) {
+  static ssize_t (*real_pread)(int, void *, size_t, off_t) = NULL;
+  static int left = -1;
+  if (real_pread == NULL) {
+    real_pread = dlsym(RTLD_NEXT, "pread");
+  }
+  if (left < 0) {
+    left = pread_faults_left();
+  }
+  if (getenv("DUMP_PREAD_EIO") != NULL) {
     errno = EIO;
     return -1;
   }
-  return 0;
+  if (left > 0) {
+    left -= 1;
+    errno = EINTR;
+    return -1;
+  }
+  return real_pread(fd, buf, count, offset);
 }
 
 int fstat(int fd, struct stat *buf) {
@@ -71,3 +122,4 @@ int __fxstat64(int ver, int fd, struct stat64 *buf) {
   }
   return real_fxstat(ver, fd, buf);
 }
+#endif

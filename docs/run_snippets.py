@@ -27,6 +27,8 @@ import textwrap
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from shared_library import built_library  # noqa: E402
 DOCS = ROOT / "docs"
 FIXTURE = ROOT / "input" / "traj" / "genice_sI.lammpstrj"
 LANGS = {"python", "py", "c", "cpp", "c++", "cxx", "rust", "julia", "lua", "fortran", "f90", "r"}
@@ -190,12 +192,14 @@ def base_env(build):
     env["DSEAMS_ROOT"] = str(ROOT)
     env["LD_LIBRARY_PATH"] = library_path(build)
     env["OMP_NUM_THREADS"] = "1"
-    lang = build / "bindings" / "libseams_lang.so"
-    if lang.is_file():
+    lang = built_library(build / "bindings", "seams_lang", "SEAMS_LANG_LIB")
+    if lang is not None:
         env["SEAMS_LANG_LIB"] = str(lang)
     env["SEAMS_LIB_DIR"] = str(build / "src")
     env["SEAMS_LIBDIR"] = str(build / "src")
-    env["SEAMS_LIB"] = str(build / "src" / "libseams.so")
+    lib = built_library(build / "src", "seams", "SEAMS_LIB")
+    if lib is not None:
+        env["SEAMS_LIB"] = str(lib)
     env["SEAMS_BUILD"] = str(build)
     oracle = build / "bindings" / "binding_oracle"
     if oracle.is_file():
@@ -221,6 +225,8 @@ def run(cmd, env, cwd=ROOT):
             raise Skip(tail.strip().splitlines()[-1] if tail.strip() else "skipped")
         if "PackageNotFoundError" in tail or "No package metadata was found" in tail:
             raise Skip("an optional package named by the snippet is not installed")
+        if "No module named 'openmm'" in tail or 'No module named "openmm"' in tail:
+            raise Skip("openmm is not installed")
         if "usage: science_tutorials brine" in tail:
             raise Skip("the brine frames are not in this checkout")
         raise Fail(tail or "command failed")
@@ -445,13 +451,18 @@ def which(name):
 
 
 def vendored_links(build):
-    """-rpath-link for the patched chemfiles meson builds into the build tree.
+    """Link path for the patched chemfiles meson builds into the build tree.
 
     A cross-prefixed ld such as conda's does not follow libyodaLib.so's RPATH
     to libseams-chemfiles.so, so the snippet link has to name the folder.
+    -rpath-link is an ELF option. Apple ld rejects it and takes -rpath.
     """
     lib = build / "chemfiles-prefix" / "lib"
-    return ["-Wl,-rpath-link," + str(lib)] if lib.is_dir() else []
+    if not lib.is_dir():
+        return []
+    if sys.platform == "darwin":
+        return ["-L" + str(lib), "-Wl,-rpath," + str(lib)]
+    return ["-Wl,-rpath-link," + str(lib)]
 
 
 def compile_c_family(build, env, source, out, extra=None, more_sources=None):

@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
+from shared_library import built_library  # noqa: E402
 sys.path.insert(0, str(ROOT / "docs" / "examples"))
 sys.path.insert(0, str(ROOT / "docs" / "scripts"))
 
@@ -89,19 +90,19 @@ int main(void) {
 
 
 def check_lang():
-    libdir = os.environ.get("SEAMS_LIBDIR")
-    if libdir and not (Path(libdir) / "libseams_lang.so").is_file():
-        libdir = None
-    if not libdir:
+    found = built_library(".", "seams_lang", "SEAMS_LANG_LIB") if os.environ.get("SEAMS_LANG_LIB") else None
+    if found is None:
         candidates = [ROOT / "bbdir" / "bindings"]
-        candidates.extend(Path(item) for item in os.environ.get("LD_LIBRARY_PATH", "").split(":") if item)
+        if os.environ.get("SEAMS_LIBDIR"):
+            candidates.insert(0, Path(os.environ["SEAMS_LIBDIR"]))
+        candidates.extend(Path(item) for item in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep) if item)
         for candidate in candidates:
-            if (candidate / "libseams_lang.so").is_file():
-                libdir = str(candidate)
+            found = built_library(candidate, "seams_lang")
+            if found is not None:
                 break
-    if not libdir:
-        raise SystemExit("libseams_lang.so is required for the language reader")
-    lib = ctypes.CDLL(str(Path(libdir) / "libseams_lang.so"))
+    if found is None:
+        raise SystemExit("libseams_lang is required for the language reader")
+    lib = ctypes.CDLL(str(found))
     lib.seams_frame_read.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
     lib.seams_frame_read.restype = ctypes.c_void_p
     lib.seams_frame_nop.argtypes = [ctypes.c_void_p]

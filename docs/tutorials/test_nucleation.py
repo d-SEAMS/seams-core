@@ -10,6 +10,9 @@ import ctypes
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from shared_library import require_library  # noqa: E402
+
 # cubic, hexagonal, largest crystal cluster
 EXPECT = ((47, 62, 59), (50, 60, 64), (44, 69, 70))
 CRYSTAL = {0, 1, 7, 8}
@@ -52,7 +55,7 @@ def one_frame(body):
 
 
 def cluster(libdir, box, atoms):
-    lib = ctypes.CDLL(str(Path(libdir) / "libseams.so"))
+    lib = ctypes.CDLL(str(require_library(libdir, "seams", "SEAMS_LIB")))
     lib.seams_system_create.restype = ctypes.c_void_p
     lib.seams_system_set_ortho.restype = ctypes.c_int
     lib.seams_system_set_ortho.argtypes = [

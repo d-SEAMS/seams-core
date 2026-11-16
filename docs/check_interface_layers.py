@@ -16,6 +16,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "docs" / "examples"))
+from shared_library import built_library  # noqa: E402
 
 import science_render as render
 from render_scenes import basal_bilayers, centres_outside_outline, wrap_into_cell
@@ -78,14 +79,17 @@ def main():
     import os
     import science_tutorials as tutorials
 
-    libdir = os.environ.get("SEAMS_LIBDIR")
-    if not libdir:
-        for item in os.environ.get("LD_LIBRARY_PATH", "").split(":"):
-            if item and (Path(item) / "libseams.so").is_file():
-                libdir = item
+    found = built_library(".", "seams", "SEAMS_LIB") if os.environ.get("SEAMS_LIB") else None
+    if found is None:
+        for item in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep):
+            if not item:
+                continue
+            found = built_library(item, "seams")
+            if found is not None:
                 break
-    if not libdir:
-        raise SystemExit("libseams.so is required for the interface layer test")
+    if found is None:
+        raise SystemExit("libseams is required for the interface layer test")
+    libdir = found.parent
     path = ROOT / "input" / "traj" / "interface_f0.lammpstrj"
     positions = tutorials.read_dump(path)
     labels, _counts = tutorials.chill_file(tutorials._lib(Path(libdir)), path)

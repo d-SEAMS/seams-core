@@ -14,7 +14,9 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "docs" / "examples"))
+from shared_library import built_library  # noqa: E402
 
 from render_scenes import assert_cage_edges  # noqa: E402
 
@@ -32,15 +34,16 @@ def check_predicate():
 
 
 def _libseams():
-    named = os.environ.get("SEAMS_LIB")
-    if named and Path(named).is_file():
-        return Path(named)
+    if os.environ.get("SEAMS_LIB"):
+        named = built_library(".", "seams", "SEAMS_LIB")
+        if named is not None:
+            return named
     for entry in os.environ.get("LD_LIBRARY_PATH", "").split(os.pathsep):
         if not entry:
             continue
-        candidate = Path(entry) / "libseams.so"
-        if candidate.is_file():
-            return candidate
+        found = built_library(entry, "seams")
+        if found is not None:
+            return found
     return None
 
 

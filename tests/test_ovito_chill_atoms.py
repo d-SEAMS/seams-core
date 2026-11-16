@@ -136,7 +136,7 @@ def main() -> None:
         print("ovito is not importable", file=sys.stderr)
         raise SystemExit(77)
     if len(sys.argv) < 2:
-        print("usage: test_ovito_chill_atoms.py libseams.so", file=sys.stderr)
+        print("usage: test_ovito_chill_atoms.py LIBSEAMS", file=sys.stderr)
         raise SystemExit(2)
     lib = load_seams(Path(sys.argv[1]))
     if lib.seams_set_num_threads(1) != 0:

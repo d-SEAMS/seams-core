@@ -29,12 +29,66 @@ case $0 in
 esac
 include=$(cd "$_abi_dir/../include" && pwd)
 
+# The file Meson wrote. The baseline headings stay lib*.so so the text
+# matches the ELF dump; only the path changes.
+lib_file() {
+  stem=$1
+  if [ -f "${stem}.so" ]; then
+    printf '%s\n' "${stem}.so"
+  elif [ -f "${stem}.dylib" ]; then
+    printf '%s\n' "${stem}.dylib"
+  elif [ -f "${stem}.dll" ]; then
+    printf '%s\n' "${stem}.dll"
+  else
+    printf '%s\n' "${stem}.so"
+  fi
+}
+
+# Address-free, stable text. C linkage only: C++ symbols start with _Z.
+# GNU nm -D is the dynamic symbol table. On Darwin, llvm-nm -D reads the
+# export trie the same way; Apple nm -gU is the defined global symbols.
+nm_defined() {
+  lib=$1
+  if [ "$(uname -s)" != Darwin ]; then
+    nm -D --defined-only "$lib" | awk '{print $2, $3}' | awk '$2 !~ /^_Z/ && $2 ~ /^seams_/ {print}' | LC_ALL=C sort
+    return
+  fi
+  nm_bin=$(command -v nm || true)
+  llvm=""
+  if [ -n "$nm_bin" ] && [ -x "${nm_bin%/*}/llvm-nm" ]; then
+    llvm=${nm_bin%/*}/llvm-nm
+  elif command -v llvm-nm >/dev/null 2>&1; then
+    llvm=$(command -v llvm-nm)
+  fi
+  raw=$build/nm-defined.txt
+  if [ -n "$llvm" ] && "$llvm" -D --defined-only "$lib" >"$raw" 2>/dev/null; then
+    :
+  else
+    nm -gU "$lib" >"$raw"
+  fi
+  # Mach-O prefixes every C symbol with one underscore. llvm-nm
+  # sometimes prints the C spelling already; strip only when the
+  # extra underscore is in the listing.
+  awk '{
+    name[NR] = $3
+    type[NR] = $2
+    n = NR
+    if ($3 ~ /^_seams_/ || $3 ~ /^__Z/) macho = 1
+  }
+  END {
+    for (i = 1; i <= n; i++) {
+      sym = name[i]
+      if (macho && sym ~ /^_/) sub(/^_/, "", sym)
+      if (sym ~ /^seams_/ && sym !~ /^_Z/) print type[i], sym
+    }
+  }' "$raw" | LC_ALL=C sort
+}
+
 dump_lib() {
   lib=$1
   title=$2
   echo "### $title"
-  # Address-free, stable text. C linkage only: C++ symbols start with _Z.
-  nm -D --defined-only "$lib" | awk '{print $2, $3}' | awk '$2 !~ /^_Z/ && $2 ~ /^seams_/ {print}' | LC_ALL=C sort
+  nm_defined "$lib"
 }
 
 {
@@ -42,9 +96,9 @@ dump_lib() {
   echo "# reference: 2dbefa97d10db3fbacea04bca935b65d21ce8a6f"
   echo "# libseams.so and libseams_lang.so are new since that commit."
   echo "# libyodaLib.so lists the seams_* C symbols still exported from the core library."
-  dump_lib "$build/src/libseams.so" libseams.so
-  dump_lib "$build/bindings/libseams_lang.so" libseams_lang.so
-  dump_lib "$build/src/libyodaLib.so" libyodaLib.so
+  dump_lib "$(lib_file "$build/src/libseams")" libseams.so
+  dump_lib "$(lib_file "$build/bindings/libseams_lang")" libseams_lang.so
+  dump_lib "$(lib_file "$build/src/libyodaLib")" libyodaLib.so
   if [ -n "${SEAMS_ABI_OLD:-}" ] && [ -f "$SEAMS_ABI_OLD" ]; then
     echo "### abidiff libyodaLib against ${SEAMS_ABI_REF:-2dbefa97}"
     abidiff --no-added-syms "$SEAMS_ABI_OLD" "$build/src/libyodaLib.so" || true

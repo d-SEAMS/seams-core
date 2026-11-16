@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from lammps_box import cell_from_bounds
+from shared_library import require_library
 
 
 def _load_dump(path):
@@ -77,7 +78,7 @@ def check(libdir=None):
     libdir = libdir or os.environ.get("SEAMS_LIBDIR", "")
     if not libdir:
         raise SystemExit("set SEAMS_LIBDIR to the directory that holds libseams.so")
-    lib = ctypes.CDLL(os.path.join(libdir, "libseams.so"))
+    lib = ctypes.CDLL(str(require_library(libdir, "seams", "SEAMS_LIB")))
     lib.seams_system_create.restype = ctypes.c_void_p
     lib.seams_system_set_frame.argtypes = [
         ctypes.c_void_p,

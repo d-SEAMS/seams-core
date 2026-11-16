@@ -14,9 +14,13 @@ if importlib.util.find_spec("openmm") is None:
 build = Path(os.environ.get("DSEAMS_BUILD", "build"))
 src = Path(os.environ.get("DSEAMS_SRC", Path(__file__).resolve().parents[2]))
 
-libs = list(build.rglob("libseams_lang.so"))
+libs = []
+for _name in ("libseams_lang.so", "libseams_lang.dylib"):
+    libs = list(build.rglob(_name))
+    if libs:
+        break
 if not libs:
-    print("openmm is installed but libseams_lang.so was not built")
+    print("openmm is installed but libseams_lang was not built")
     sys.exit(1)
 
 if os.environ.get("DSEAMS_PY_READY") != "1":

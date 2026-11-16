@@ -25,6 +25,9 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <libproc.h>
+#endif
 
 namespace fs = std::filesystem;
 
@@ -686,6 +689,47 @@ void writeDumpLines(const fs::path &path, int declared, int lines) {
 
 std::vector<int> fdsForPath(const std::string &path) {
   std::vector<int> ids;
+#if defined(__APPLE__)
+  // There is no /proc/self/fd. directory_iterator throws filesystem_error,
+  // and that exception leaving the unlinker thread calls std::terminate.
+  // proc_pidinfo lists the same open vnodes. /var is a symlink of
+  // /private/var, so the path dyld records may not be a string prefix of
+  // the path passed to open; the inode is.
+  const int pid = ::getpid();
+  int bytes = ::proc_pidinfo(pid, PROC_PIDLISTFDS, 0, nullptr, 0);
+  if (bytes <= 0) {
+    return ids;
+  }
+  std::vector<proc_fdinfo> fds(
+      static_cast<std::size_t>(bytes / static_cast<int>(sizeof(proc_fdinfo))) + 8);
+  bytes = ::proc_pidinfo(pid, PROC_PIDLISTFDS, 0, fds.data(),
+                         static_cast<int>(fds.size() * sizeof(proc_fdinfo)));
+  if (bytes <= 0) {
+    return ids;
+  }
+  const int count = bytes / static_cast<int>(sizeof(proc_fdinfo));
+  struct stat want {};
+  const bool haveWant = ::stat(path.c_str(), &want) == 0;
+  for (int i = 0; i < count; ++i) {
+    if (fds[static_cast<std::size_t>(i)].proc_fdtype != PROX_FDTYPE_VNODE) {
+      continue;
+    }
+    char got[PROC_PIDPATHINFO_MAXSIZE];
+    const int fd = fds[static_cast<std::size_t>(i)].proc_fd;
+    if (::proc_pidfdpath(pid, fd, got, sizeof got) <= 0) {
+      continue;
+    }
+    const std::string link(got);
+    bool match = link.rfind(path, 0) == 0;
+    if (!match && haveWant) {
+      struct stat st {};
+      match = ::stat(link.c_str(), &st) == 0 && st.st_dev == want.st_dev && st.st_ino == want.st_ino;
+    }
+    if (match) {
+      ids.push_back(fd);
+    }
+  }
+#else
   for (const auto &ent : fs::directory_iterator("/proc/self/fd")) {
     std::error_code ec;
     const auto link = fs::read_symlink(ent.path(), ec);
@@ -696,6 +740,7 @@ std::vector<int> fdsForPath(const std::string &path) {
       ids.push_back(std::stoi(ent.path().filename().string()));
     }
   }
+#endif
   std::sort(ids.begin(), ids.end());
   return ids;
 }

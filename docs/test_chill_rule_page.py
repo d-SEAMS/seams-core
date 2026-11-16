@@ -8,6 +8,9 @@ import sys
 from ctypes import CDLL, POINTER, c_char_p, c_double, c_int, c_void_p
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from shared_library import require_library  # noqa: E402
+
 NAMES = (
     "cubic",
     "hexagonal",
@@ -134,7 +137,7 @@ def main():
     os.environ["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(libdir), str(langdir), os.environ.get("LD_LIBRARY_PATH", "")]
     )
-    lang = CDLL(str(Path(langdir) / "libseams_lang.so"))
+    lang = CDLL(str(require_library(langdir, "seams_lang", "SEAMS_LANG_LIB")))
     published = c_labels(lang, box, coords, "chill+")
     ovito = c_labels(lang, box, coords, "ovito-chill+")
     if published[focus] == ovito[focus]:

@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from mixed_phase_frames import interface
+from shared_library import built_library
 
 WITNESS = frozenset((123, 298, 260, 337, 383))
 
@@ -21,18 +22,20 @@ WITNESS = frozenset((123, 298, 260, 337, 383))
 def library_path() -> Path:
     if len(sys.argv) > 1:
         return Path(sys.argv[1])
-    for candidate in (
-        ROOT / "bbdir-release" / "src" / "libseams.so",
-        ROOT / "build" / "src" / "libseams.so",
+    for directory in (
+        ROOT / "bbdir-release" / "src",
+        ROOT / "build" / "src",
+        ROOT / "bbdir" / "src",
     ):
-        if candidate.is_file():
-            return candidate
-    raise SystemExit("libseams.so was not found")
+        found = built_library(directory, "seams", "SEAMS_LIB")
+        if found is not None:
+            return found
+    raise SystemExit("libseams was not built")
 
 
 def main() -> None:
     path = library_path()
-    yoda = path.with_name("libyodaLib.so")
+    yoda = path.with_name("libyodaLib" + path.suffix)
     if yoda.is_file():
         ctypes.CDLL(str(yoda), mode=ctypes.RTLD_GLOBAL)
     lib = ctypes.CDLL(str(path))

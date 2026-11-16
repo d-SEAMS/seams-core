@@ -18,6 +18,8 @@ from ctypes import (
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+from shared_library import require_library  # noqa: E402
 from migrate_map import LUA_RELEASES, PAIRS, V1_GLOBALS, V1_TAG, table_rows
 
 LABELS = (
@@ -74,8 +76,8 @@ def load(libdir, langdir):
     os.environ["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(libdir), str(langdir), os.environ.get("LD_LIBRARY_PATH", "")]
     )
-    api = CDLL(str(Path(libdir) / "libseams.so"))
-    lang = CDLL(str(Path(langdir) / "libseams_lang.so"))
+    api = CDLL(str(require_library(libdir, "seams", "SEAMS_LIB")))
+    lang = CDLL(str(require_library(langdir, "seams_lang", "SEAMS_LANG_LIB")))
     lang.seams_frame_read.restype = c_void_p
     lang.seams_frame_read.argtypes = [c_char_p, c_int, c_int]
     lang.seams_frame_free.argtypes = [c_void_p]

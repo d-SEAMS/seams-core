@@ -11,6 +11,15 @@ import tempfile
 from pathlib import Path
 
 
+def installed_seams(stage):
+    """The installed libseams. .so is tried first, so Linux finds that file."""
+    for name in ("libseams.so", "libseams.dylib", "seams.dll"):
+        found = [path for path in stage.rglob(name) if path.is_file()]
+        if found:
+            return found
+    return []
+
+
 def pkg_config_program():
     """The conda pkg-config wrapper applies PKG_CONFIG_SYSROOT_DIR twice."""
     found = shutil.which("pkg-config")
@@ -59,8 +68,37 @@ def scratch(build, prefix):
 
 
 
+def darwin_library_dirs(binary, env, search):
+    """Same as library_dirs, using otool. dyld reads DYLD_LIBRARY_PATH."""
+    listed = subprocess.check_output(["otool", "-L", str(binary)], text=True, env=env)
+    missing = []
+    for line in listed.splitlines()[1:]:
+        text = line.strip()
+        if not text:
+            continue
+        name = text.split(" (", 1)[0].strip()
+        base = os.path.basename(name)
+        if name.startswith("@rpath/") or name.startswith("@loader_path/") or not os.path.isfile(name):
+            missing.append(base)
+    found = dict(env)
+    extra = []
+    for base in missing:
+        for root in search:
+            for candidate in Path(root).rglob(base):
+                if candidate.is_file():
+                    extra.append(str(candidate.parent))
+                    break
+    path = found.get("DYLD_LIBRARY_PATH", found.get("LD_LIBRARY_PATH", ""))
+    if extra or path:
+        found["DYLD_LIBRARY_PATH"] = os.pathsep.join(extra + ([path] if path else []))
+        found["LD_LIBRARY_PATH"] = found["DYLD_LIBRARY_PATH"]
+    return found
+
+
 def library_dirs(binary, env, search):
     """Add directories that hold shared libraries ldd cannot yet see."""
+    if sys.platform == "darwin":
+        return darwin_library_dirs(binary, env, search)
     missing = []
     listed = subprocess.check_output(["ldd", str(binary)], text=True, env=env)
     for line in listed.splitlines():
@@ -97,9 +135,9 @@ def main():
     if len(pc_files) != 1 or len(configs) != 1:
         raise SystemExit("install did not produce seams.pc and seams-config.cmake")
     pc = pc_files[0]
-    libs_on_disk = list(stage.rglob("libseams.so"))
+    libs_on_disk = installed_seams(stage)
     if not libs_on_disk:
-        raise SystemExit("install did not produce libseams.so")
+        raise SystemExit("install did not produce libseams")
     libdir = libs_on_disk[0].parent
     prefix = prefix_of(build)
     installed = stage / Path(prefix).relative_to("/")
@@ -130,6 +168,8 @@ def main():
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(libdir), str(build / "src"), env.get("LD_LIBRARY_PATH", "")]
     )
+    if sys.platform == "darwin":
+        env["DYLD_LIBRARY_PATH"] = env["LD_LIBRARY_PATH"]
     env = library_dirs(binary, env, [stage, build])
     sample = source / "input" / "traj" / "agi_water_tiny.lammpstrj"
     run([str(binary), str(sample)], env=env)

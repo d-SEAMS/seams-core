@@ -18,6 +18,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+
+def installed_seams(stage):
+    for name in ("libseams.so", "libseams.dylib", "seams.dll"):
+        found = [path for path in stage.rglob(name) if path.is_file()]
+        if found:
+            return found
+    return []
+
 FAMILIES = ("neighbours", "rings", "chill_plus", "q4q6", "cages", "errors")
 WARN = ["-std=c11", "-Wall", "-Wextra", "-Wpedantic", "-Werror"]
 
@@ -30,15 +38,26 @@ def helpers(source):
     return module
 
 
-def run_examples(label, binaries, env, source, search, help_mod):
+def assert_loads_installed(label, family, binary, run_env, stage, libname):
+    if sys.platform == "darwin":
+        listed = subprocess.check_output(["otool", "-L", str(binary)], env=run_env, text=True)
+        load = subprocess.check_output(["otool", "-l", str(binary)], env=run_env, text=True)
+        named = [line for line in listed.splitlines() if libname in line]
+        if len(named) != 1 or str(stage) not in load:
+            raise SystemExit("{} {} does not load the installed libseams:\n{}".format(label, family, listed + load))
+        return
+    listed = subprocess.check_output(["ldd", str(binary)], env=run_env, text=True)
+    resolved = [line for line in listed.splitlines() if line.strip().startswith(libname)]
+    if len(resolved) != 1 or str(stage) not in resolved[0]:
+        raise SystemExit("{} {} does not load the installed libseams:\n{}".format(label, family, listed))
+
+
+def run_examples(label, binaries, env, source, search, help_mod, libname):
     stage = search[0]
     for family, binary in binaries:
         args = [str(binary)] if family == "errors" else [str(binary), str(source)]
         run_env = help_mod.library_dirs(binary, env, search)
-        listed = subprocess.check_output(["ldd", str(binary)], env=run_env, text=True)
-        resolved = [line for line in listed.splitlines() if line.strip().startswith("libseams.so")]
-        if len(resolved) != 1 or str(stage) not in resolved[0]:
-            raise SystemExit("{} {} does not load the installed libseams:\n{}".format(label, family, listed))
+        assert_loads_installed(label, family, binary, run_env, stage, libname)
         done = subprocess.run(args, env=run_env, capture_output=True, text=True)
         if done.returncode != 0:
             raise SystemExit("{} {} exit {}\n{}{}".format(label, family, done.returncode, done.stdout, done.stderr))
@@ -62,9 +81,9 @@ def main(argv):
 
     pc_files = list(stage.rglob("seams.pc"))
     configs = list(stage.rglob("seams-config.cmake"))
-    libs = list(stage.rglob("libseams.so"))
+    libs = installed_seams(stage)
     if len(pc_files) != 1 or len(configs) != 1 or not libs:
-        raise SystemExit("install did not produce one seams.pc, seams-config.cmake and libseams.so")
+        raise SystemExit("install did not produce one seams.pc, seams-config.cmake and libseams")
     env = os.environ.copy()
     env["PKG_CONFIG_PATH"] = str(pc_files[0].parent)
     env["PKG_CONFIG_SYSROOT_DIR"] = str(stage)
@@ -72,10 +91,15 @@ def main(argv):
     # staged libyodaLib and then want its dependencies, which are not staged.
     run_env = dict(env)
     run_env["LD_LIBRARY_PATH"] = os.pathsep.join([str(libs[0].parent), env.get("LD_LIBRARY_PATH", "")])
+    if sys.platform == "darwin":
+        run_env["DYLD_LIBRARY_PATH"] = run_env["LD_LIBRARY_PATH"]
+        link_line = shlex.split(os.environ.get("SEAMS_OPENMP_LINK", ""))
+        link_line = link_line + ["-Wl,-rpath," + str(libs[0].parent)]
+    else:
+        link_line = shlex.split(os.environ.get("SEAMS_OPENMP_LINK", ""))
     search = [stage, build]
     cc = shlex.split(os.environ.get("CC", "cc"))
-    # The consumer link line the snippet tests use with this build.
-    link_line = shlex.split(os.environ.get("SEAMS_OPENMP_LINK", ""))
+    libname = libs[0].name
 
     pkg_config = help_mod.pkg_config_program()
     flags = subprocess.check_output([pkg_config, "--cflags", "--libs", "seams"], env=env, text=True).split()
@@ -88,7 +112,7 @@ def main(argv):
             env=env,
         )
         binaries.append((family, binary))
-    run_examples("pkg-config", binaries, run_env, source, search, help_mod)
+    run_examples("pkg-config", binaries, run_env, source, search, help_mod, libname)
 
     installed = stage / Path(help_mod.prefix_of(build)).relative_to("/")
     cmake_build = work / "cmake"
@@ -104,7 +128,7 @@ def main(argv):
         env=env,
     )
     subprocess.check_call(["cmake", "--build", str(cmake_build)], env=env)
-    run_examples("cmake", [(family, cmake_build / family) for family in FAMILIES], run_env, source, search, help_mod)
+    run_examples("cmake", [(family, cmake_build / family) for family in FAMILIES], run_env, source, search, help_mod, libname)
     print("installed family examples ok")
     return 0
 

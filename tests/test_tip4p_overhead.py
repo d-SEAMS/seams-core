@@ -8,12 +8,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "adapters" / "python"))
 sys.path.insert(0, str(ROOT / "engines" / "openmm"))
 
-from bench_overhead import hinges, time_insitu, time_plain  # noqa: E402
-from dseams_insitu.engine import InSitu  # noqa: E402
-from water import build_simulation, save_state  # noqa: E402
-
 
 def main() -> int:
+    try:
+        from bench_overhead import hinges, time_insitu, time_plain  # noqa: E402
+        from dseams_insitu.engine import InSitu  # noqa: F401, E402
+        from water import build_simulation, save_state  # noqa: E402
+    except ModuleNotFoundError as exc:
+        if getattr(exc, "name", "") == "openmm" or "openmm" in str(exc):
+            print("openmm is not installed", file=sys.stderr)
+            return 77
+        raise
     median, hinge = hinges([1.0, 2.0, 3.0, 4.0])
     if median != 2.5 or abs(hinge - 2.0) > 1e-12:
         print(f"hinges {median} {hinge}", file=sys.stderr)
@@ -36,12 +41,16 @@ def main() -> int:
 def os_lib() -> str:
     import os
 
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from shared_library import built_library
+
     env = os.environ.get("SEAMS_LANG_LIB")
     if env:
         return env
-    built = ROOT / "build" / "bindings" / "libseams_lang.so"
-    if built.is_file():
-        return str(built)
+    for directory in (ROOT / "build" / "bindings", ROOT / "bbdir" / "bindings"):
+        found = built_library(directory, "seams_lang")
+        if found is not None:
+            return str(found)
     return "libseams_lang"
 
 
