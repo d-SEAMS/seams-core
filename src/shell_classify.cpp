@@ -1287,6 +1287,86 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
   return bestK;
 }
 
+// An open face leaves a bonded neighbour with fewer than four bonds, so
+// that arm has fewer than three real second neighbours. The missing ones
+// are the rest of the tetrahedron around the bond, at the diamond length.
+// A neighbour that already has four bonds is not padded: that gap is the
+// liquid pattern, not a missing surface atom.
+bool padOpenFace(const Bond &bond, double *fx, double *fy, double *fz, int &nf, int have) {
+  const double len = std::sqrt(bond.dx * bond.dx + bond.dy * bond.dy + bond.dz * bond.dz);
+  if (!(len > 1e-8) || have >= 3) {
+    return have >= 3;
+  }
+  const double ux = bond.dx / len;
+  const double uy = bond.dy / len;
+  const double uz = bond.dz / len;
+  double ax = 0.0;
+  double ay = 0.0;
+  double az = 1.0;
+  if (std::fabs(uz) > 0.9) {
+    ax = 1.0;
+    az = 0.0;
+  }
+  double n1x = uy * az - uz * ay;
+  double n1y = uz * ax - ux * az;
+  double n1z = ux * ay - uy * ax;
+  const double n1 = std::sqrt(n1x * n1x + n1y * n1y + n1z * n1z);
+  if (!(n1 > 1e-8)) {
+    return false;
+  }
+  n1x /= n1;
+  n1y /= n1;
+  n1z /= n1;
+  const double n2x = uy * n1z - uz * n1y;
+  const double n2y = uz * n1x - ux * n1z;
+  const double n2z = ux * n1y - uy * n1x;
+  double phase = 0.0;
+  if (have > 0) {
+    const int s = nf - have;
+    double vx = fx[s] - bond.dx;
+    double vy = fy[s] - bond.dy;
+    double vz = fz[s] - bond.dz;
+    const double along = vx * ux + vy * uy + vz * uz;
+    vx -= along * ux;
+    vy -= along * uy;
+    vz -= along * uz;
+    phase = std::atan2(vx * n2x + vy * n2y + vz * n2z, vx * n1x + vy * n1y + vz * n1z);
+  }
+  const double axial = len / 3.0;
+  const double radial = len * std::sqrt(8.0 / 9.0);
+  int added = 0;
+  for (int m = 0; m < 3 && have + added < 3; m++) {
+    const double ang = phase + 2.0 * 3.141592653589793 * static_cast<double>(m) / 3.0;
+    const double c = std::cos(ang);
+    const double s = std::sin(ang);
+    const double x = bond.dx + axial * ux + radial * (c * n1x + s * n2x);
+    const double y = bond.dy + axial * uy + radial * (c * n1y + s * n2y);
+    const double z = bond.dz + axial * uz + radial * (c * n1z + s * n2z);
+    bool duplicate = false;
+    for (int t = nf - have; t < nf; t++) {
+      const double ex = x - fx[t];
+      const double ey = y - fy[t];
+      const double ez = z - fz[t];
+      if (ex * ex + ey * ey + ez * ez < 0.36) {
+        duplicate = true;
+        break;
+      }
+    }
+    if (duplicate) {
+      continue;
+    }
+    if (nf >= 12) {
+      return false;
+    }
+    fx[nf] = x;
+    fy[nf] = y;
+    fz[nf] = z;
+    nf++;
+    added++;
+  }
+  return have + added >= 3;
+}
+
 bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon, bool wide, double *fx,
                   double *fy, double *fz) {
   int nf = 0;
@@ -1333,7 +1413,9 @@ bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon
       taken++;
     }
     if (taken < 3) {
-      return false;
+      if (na >= 4 || !padOpenFace(mine[k], fx, fy, fz, nf, taken)) {
+        return false;
+      }
     }
   }
   return nf == 12;

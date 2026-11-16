@@ -278,7 +278,9 @@ int main(int argc, char **argv) {
   std::cout << "periodic_complete " << (periodicShort == 0 ? "yes" : "no") << " short "
             << periodicShort << " interior " << nInterior << " of " << ice.nop << "\n";
   const Score inside = score(truth, kernel, &interior);
-  if (periodicShort != 0 || inside.fn != 0) {
+  const Score everyone = score(truth, kernel, nullptr);
+  if (periodicShort != 0 || inside.fn != 0 || everyone.precision < 1.0 - 1e-9 ||
+      everyone.recall < 0.875 - 1e-9) {
     return 3;
   }
   return 0;

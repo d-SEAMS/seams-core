@@ -314,16 +314,46 @@ def merge_shot_dir(directory: Path) -> list[tuple[float, str]]:
     return shots
 
 
+def coverage_note(directory: Path | None) -> str:
+    if directory is None or not directory.is_dir():
+        return ""
+    present: dict[int, Path] = {}
+    quiet: list[int] = []
+    width = None
+    for path in sorted(directory.glob("shot-*-of-*.csv")):
+        parts = path.stem.split("-")
+        if len(parts) != 4 or parts[0] != "shot" or parts[2] != "of":
+            continue
+        k = int(parts[1])
+        width = int(parts[3])
+        present[k] = path
+        head = "\n".join(path.read_text().splitlines()[:8])
+        if "# nucleation no" in head:
+            quiet.append(k)
+    if width is None:
+        return ""
+    missing = [i for i in range(width) if i not in present]
+    return (
+        f"# shards present {sorted(present)} of {width}; "
+        f"missing {missing}; nucleation_none {sorted(quiet)}\n"
+    )
+
+
 def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], commit: str,
-                 command: str) -> None:
+                 command: str, directory: Path | None = None) -> None:
     if not shots:
         write_pending(table, summary)
         return
-    note = f"# commit {commit}\n# command {command}\n"
+    note = f"# commit {commit}\n# command {command}\n" + coverage_note(directory)
     points = p_of_n(shots)
-    n_star, lo, hi = bootstrap_nstar(shots)
+    usable = [(n, p) for n, p, _c, resolved in points if resolved > 0 and p == p]
     unresolved = sum(fate == "unresolved" for _n, fate in shots)
     resolved = sum(fate != "unresolved" for _n, fate in shots)
+    if len(usable) < 2:
+        star_s = lo_s = hi_s = ""
+    else:
+        n_star, lo, hi = bootstrap_nstar(shots)
+        star_s, lo_s, hi_s = f"{n_star:.3f}", f"{lo:.3f}", f"{hi:.3f}"
     table.parent.mkdir(parents=True, exist_ok=True)
     with table.open("w", newline="") as handle:
         handle.write(note)
@@ -341,9 +371,7 @@ def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], com
         handle.write(note)
         writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(["n_star", "n_star_lo", "n_star_hi", "n_resolved", "n_unresolved", "commit"])
-        writer.writerow([
-            f"{n_star:.3f}", f"{lo:.3f}", f"{hi:.3f}", resolved, unresolved, commit,
-        ])
+        writer.writerow([star_s, lo_s, hi_s, resolved, unresolved, commit])
 
 
 def self_test() -> None:
@@ -402,7 +430,8 @@ def self_test() -> None:
         )
         table = folder / "table.csv"
         summary = folder / "summary.csv"
-        write_merged(table, summary, merge_shot_dir(folder), "abc", "$LMP -in input/nucleation/in.homogeneous")
+        write_merged(table, summary, merge_shot_dir(folder), "abc",
+                     "$LMP -in input/nucleation/in.homogeneous", folder)
         text = summary.read_text()
         if "$LMP" not in text or "n_star" not in text:
             raise SystemExit("merge did not record n*")
@@ -418,6 +447,35 @@ def self_test() -> None:
     for name in ("committor-table.csv", "committor-summary.csv"):
         if (paper / name).read_text() != PENDING:
             raise SystemExit(f"{name} is not the pending header")
+    fixture = ROOT / "data" / "committor-merge-fixture"
+    banner = "# synthetic test fixture: hand-constructed, not simulation output"
+    for name in ("shot-0-of-3.csv", "shot-1-of-3.csv"):
+        if not (fixture / name).read_text().startswith(banner):
+            raise SystemExit(f"{name} is not labelled as a synthetic fixture")
+    if "# nucleation no" not in (fixture / "shot-1-of-3.csv").read_text():
+        raise SystemExit("the empty climb is not marked")
+    merged = merge_shot_dir(fixture)
+    if not any(fate == "unresolved" for _n, fate in merged):
+        raise SystemExit("the fixture's unresolved shot was dropped")
+    if any(size == 0 for size, _fate in merged):
+        raise SystemExit("the no-nucleation shard contributed a shot")
+    note = coverage_note(fixture)
+    if "missing [2]" not in note or "nucleation_none [1]" not in note:
+        raise SystemExit(f"partial shards were not reported: {note}")
+    with tempfile.TemporaryDirectory() as merged_tmp:
+        out_table = Path(merged_tmp) / "table.csv"
+        out_summary = Path(merged_tmp) / "summary.csv"
+        write_merged(out_table, out_summary, merged, "fixture", "$LMP", fixture)
+        text = out_summary.read_text()
+        if "missing [2]" not in text or "nucleation_none [1]" not in text:
+            raise SystemExit(f"partial merge dropped the shard note: {text}")
+        row = text.strip().splitlines()[-1].split(",")
+        if row[0] == "" or row[4] == "0":
+            raise SystemExit(f"partial merge did not fit n*: {text}")
+    only_quiet = ROOT / "data" / "committor-merge-fixture"
+    quiet_dir_shots = read_shot_shard(only_quiet / "shot-1-of-3.csv")
+    if quiet_dir_shots:
+        raise SystemExit("a no-nucleation shard yielded shots")
     print("self-test ok")
 
 
@@ -482,7 +540,7 @@ def main() -> None:
             raise SystemExit("--merge needs --table and --summary")
         shots = merge_shot_dir(args.merge) if args.merge.is_dir() else []
         command = "$LMP -in input/nucleation/in.homogeneous -var n 16 --seeds 20261111-20261130"
-        write_merged(args.table, args.summary, shots, commit, command)
+        write_merged(args.table, args.summary, shots, commit, command, args.merge)
         return
     if args.out is None or args.quench_steps is None or args.quench_seconds is None:
         raise SystemExit("need --out, --quench-steps and --quench-seconds")

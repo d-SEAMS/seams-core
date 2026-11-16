@@ -1,0 +1,7 @@
+# synthetic test fixture: hand-constructed, not simulation output
+# shard 0/3
+seed,shoot_n,shot,fate
+20261111,20,0,uncommitted
+20261111,20,1,unresolved
+20261111,80,0,committed
+20261111,80,1,committed
