@@ -2240,9 +2240,36 @@ if get_option('with_tests')
   # without coverage, when one is installed.
   _fuzz_cc = meson.get_compiler('c')
   _fuzz_args = []
+  # b_sanitize=thread instruments libseams. This custom link does not
+  # inherit that flag. Clang accepts -fsanitize=thread,fuzzer.
+  _fuzz_thread = get_option('b_sanitize').contains('thread') or _capi_san.contains('thread')
   if _fuzz_cc.get_id() == 'clang' and _fuzz_cc.has_argument('-fsanitize=fuzzer-no-link')
-    _fuzz_args = ['-fsanitize=fuzzer' + (_capi_san == 'none' ? '' : ',' + _capi_san)]
-  elif _capi_san == 'none'
+    _fuzz_extra = _capi_san == 'none' ? '' : (',' + _capi_san)
+    if _fuzz_thread and not _capi_san.contains('thread')
+      _fuzz_extra += ',thread'
+    endif
+    _fuzz_args = ['-fsanitize=fuzzer' + _fuzz_extra]
+    if _fuzz_thread
+      _fuzz_args += ['-shared-libsan']
+      _tsan_rt = run_command(
+        _fuzz_cc.cmd_array()[0], '-print-file-name=libclang_rt.tsan-x86_64.so',
+        check: false).stdout().strip()
+      if _tsan_rt != '' and _tsan_rt != 'libclang_rt.tsan-x86_64.so'
+        _fuzz_args += ['-Wl,-rpath,' + run_command(
+          'sh', '-c', 'dirname "$1"', '_', _tsan_rt, check: false).stdout().strip()]
+      endif
+      # -print-file-name=libomp.so does not search LIBRARY_PATH. The
+      # suite names Archer in OMP_TOOL_LIBRARIES.
+      _omp_tool = run_command(
+        'sh', '-c', 'printf %s "${OMP_TOOL_LIBRARIES:-}"',
+        check: false).stdout().strip()
+      if _omp_tool != ''
+        _omp_dir = run_command(
+          'sh', '-c', 'dirname "$1"', '_', _omp_tool, check: false).stdout().strip()
+        _fuzz_args += ['-L' + _omp_dir, '-Wl,-rpath,' + _omp_dir]
+      endif
+    endif
+  elif _capi_san == 'none' and not _fuzz_thread
     foreach _cand : [
       '/usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.fuzzer-x86_64.a',
       '/usr/lib/llvm-19/lib/clang/19/lib/linux/libclang_rt.fuzzer-x86_64.a',
