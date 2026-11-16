@@ -138,10 +138,16 @@ def _write_molecules():
         status = exc.code if isinstance(exc.code, int) else 1
     if status in (0, None):
         return
+    pictures = os.path.join(_source, "tutorials", "molecules")
     if _sphinx_builder() in ("linkcheck", "doctest"):
+        # The gallery page includes the figure list, so it is written even
+        # when no still was drawn; it then lists only the stills on disk.
+        from pathlib import Path
+
+        os.makedirs(pictures, exist_ok=True)
+        module.write_pages(Path(pictures))
         print("sphinx: molecule stills are not part of this builder", file=sys.stderr)
         return
-    pictures = os.path.join(_source, "tutorials", "molecules")
     if _docs_ci() or not os.path.isdir(pictures):
         raise SystemExit("molecule stills failed")
     print("sphinx: molecule stills left as committed", file=sys.stderr)
