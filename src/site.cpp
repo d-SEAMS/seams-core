@@ -8,6 +8,7 @@
 #include <franzblau.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
+#include <neighbours.hpp>
 
 #include <algorithm>
 #include <array>
@@ -316,20 +317,62 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   }
   const double cut2 = cutoff * cutoff;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-  for (int i : ionIndices) {
+  // The waters are collected once. A box at least three cells wide gives
+  // each ion its candidates from a cell list, built a hair past the
+  // cutoff; the same distance test as the full scan then keeps a water,
+  // and the members stay in index order.
+  std::vector<char> isWater(static_cast<std::size_t>(std::max(n, 0)), 0);
+  std::vector<int> waters;
+  waters.reserve(static_cast<std::size_t>(std::max(n, 0)));
+  for (int j = 0; j < n; ++j) {
+    if (isIon[static_cast<std::size_t>(j)]) {
+      continue;
+    }
+    if (!waterTypes.empty() &&
+        std::find(waterTypes.begin(), waterTypes.end(),
+                  yCloud.pts[static_cast<std::size_t>(j)].type) == waterTypes.end()) {
+      continue;
+    }
+    isWater[static_cast<std::size_t>(j)] = 1;
+    waters.push_back(j);
+  }
+  std::vector<int> subset;
+  std::vector<int> ionRow(ionIndices.size(), -1);
+  for (std::size_t k = 0; k < ionIndices.size(); ++k) {
+    const int i = ionIndices[k];
+    if (i >= 0 && i < n) {
+      ionRow[k] = static_cast<int>(subset.size());
+      subset.push_back(i);
+    }
+  }
+  subset.insert(subset.end(), waters.begin(), waters.end());
+  std::vector<std::vector<int>> rows;
+  const bool haveCells =
+      cutoff > 0.0 && !ionIndices.empty() && !waters.empty() &&
+      nneigh::cellListRowsThreaded(yCloud, subset, cutoff * (1.0 + 1e-9) + 1e-9, rows);
+  std::vector<int> candidates;
+  for (std::size_t k = 0; k < ionIndices.size(); ++k) {
+    const int i = ionIndices[k];
     if (i < 0 || i >= n) {
       continue;
     }
     int shell = 0;
     int labeled = 0;
     std::vector<int> members;
-    for (int j = 0; j < n; j++) {
-      if (j == i || isIon[static_cast<std::size_t>(j)]) {
-        continue;
+    const std::vector<int> *scan = &waters;
+    if (haveCells) {
+      candidates.clear();
+      for (const int j : rows[static_cast<std::size_t>(ionRow[k])]) {
+        if (j >= 0 && j < n && isWater[static_cast<std::size_t>(j)]) {
+          candidates.push_back(j);
+        }
       }
-      if (!waterTypes.empty() &&
-          std::find(waterTypes.begin(), waterTypes.end(),
-                    yCloud.pts[static_cast<std::size_t>(j)].type) == waterTypes.end()) {
+      std::sort(candidates.begin(), candidates.end());
+      candidates.erase(std::unique(candidates.begin(), candidates.end()), candidates.end());
+      scan = &candidates;
+    }
+    for (const int j : *scan) {
+      if (j == i) {
         continue;
       }
       if (gen::periodicDistSq(frame, yCloud, i, j) >= cut2) {
@@ -956,6 +999,14 @@ iceClusterIonCensus(const molSys::PointCloud<molSys::Point<double>, double> &yCl
   }
   out.ionsInCluster.assign(static_cast<std::size_t>(out.nClusters), 0);
   const double r2max = cutoff * cutoff;
+  // Only atoms in a cluster can be the nearest one. Same ascending order
+  // as the full scan, so ties still go to the last atom at that distance.
+  std::vector<int> iceAtoms;
+  for (int a = 0; a < n; a++) {
+    if (out.clusterOf[static_cast<std::size_t>(a)] >= 0) {
+      iceAtoms.push_back(a);
+    }
+  }
   for (std::size_t k = 0; k < ionIndices.size(); k++) {
     const int g = ionIndices[k];
     if (g < 0 || g >= n) {
@@ -963,10 +1014,7 @@ iceClusterIonCensus(const molSys::PointCloud<molSys::Point<double>, double> &yCl
     }
     int best = -1;
     double bestSq = r2max;
-    for (int a = 0; a < n; a++) {
-      if (out.clusterOf[static_cast<std::size_t>(a)] < 0) {
-        continue;
-      }
+    for (const int a : iceAtoms) {
       const auto dr = gen::relDist(yCloud, g, a);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (d2 <= bestSq) {
