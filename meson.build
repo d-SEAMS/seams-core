@@ -1009,6 +1009,18 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'release_versions',
+    python3,
+    args: [meson.project_source_root() / 'scripts' / 'check_release_version.py'],
+    suite: 'release',
+    timeout: 60)
+  test(
+    'release_versions_selftest',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'check_release_version.py'],
+    suite: 'release',
+    timeout: 60)
+  test(
     'docs_llms_txt',
     python3,
     args: [meson.project_source_root() / 'scripts' / 'gen_llms_txt.py', '--check'],
