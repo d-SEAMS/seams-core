@@ -1280,8 +1280,13 @@ TEST_CASE("a second reader closes a clone that is no longer a timestep",
           static_cast<ssize_t>(sizeof junk - 1));
   ::close(w);
   struct timespec ts[2];
+#ifdef __APPLE__
+  ts[0] = st.st_atimespec;
+  ts[1] = st.st_mtimespec;
+#else
   ts[0] = st.st_atim;
   ts[1] = st.st_mtim;
+#endif
   REQUIRE(::utimensat(AT_FDCWD, path.c_str(), ts, 0) == 0);
   cloud = sinp::readLammpsTrj(path, 1, cloud);
   REQUIRE(cloud.nop == 0);
