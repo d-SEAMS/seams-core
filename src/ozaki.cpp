@@ -952,7 +952,7 @@ const char *reductionName(Reduction r) {
 
 bool amxAvailable() {
 #if defined(__x86_64__) && defined(__linux__)
-  static const bool ok = requestAmx();
+  static const bool ok = seams::cpu::features().amxInt8 && requestAmx();
   return ok;
 #else
   return false;
@@ -1192,7 +1192,7 @@ namespace {
 void fp64Gemm(int m, int n, int k, const double *A, int lda, const double *B,
               int ldb, double *C, int ldc) {
 #if defined(__x86_64__)
-  if (seams::cpu::features().avx512f) {
+  if (seams::cpu::features().avx512f && seams::cpu::features().fma) {
     gemmAvx512Rows(m, n, k, A, lda, B, ldb, C, ldc);
     return;
   }

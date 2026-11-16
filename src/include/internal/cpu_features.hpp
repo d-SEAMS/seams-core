@@ -35,6 +35,7 @@ struct Features {
   bool avx512f = false;
   bool avx512dq = false;
   bool avx512vnni = false;
+  bool amxInt8 = false;
 };
 
 inline Features detectFeatures() {
@@ -86,6 +87,9 @@ inline Features detectFeatures() {
   out.avx512f = zmm && (b & (1u << 16)) != 0;
   out.avx512dq = out.avx512f && (b & (1u << 17)) != 0;
   out.avx512vnni = out.avx512f && (c & (1u << 11)) != 0;
+  // AMX-TILE and AMX-INT8, and the OS saves TILECFG and TILEDATA
+  // (bits 17, 18). Linux still has to grant TILEDATA per process.
+  out.amxInt8 = (d & (3u << 24)) == (3u << 24) && (xlo & 0x60000u) == 0x60000u;
 #endif
   return out;
 }
