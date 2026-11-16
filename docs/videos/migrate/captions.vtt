@@ -1,12 +1,50 @@
 WEBVTT
 
-NOTE
-Draft cues converted from captions.srt. Final wording and timing are recorded later.
-
 1
-00:00:00.300 --> 00:00:24.270 line:95% align:center size:80%
-The migration check uses input/traj/exampleTraj.lammpstrj. The v1.0.1 global for hydrogen bonds is getHbondNetwork, and seams hbonds prints nop 250 hbonds 460. Coordination is new in 2.x: v1.0.1 has no global for it, and calcCN first shipped in yodaStruct 2.4.1. seams cn for the 1,2 pair at cutoff 4.5 prints cn 9.144. docs_migrate requires both lines.
+00:00:05.030 --> 00:00:11.450 line:95% align:center size:80%
+This migration check uses input traj exampleTraj dot lammpstrj.
 
 2
-00:00:24.770 --> 00:00:49.570 line:95% align:center size:80%
-Fingerprint, pairs, and domains are new in 2.x. v1.0.1 has no global for any of them. topologyFingerprint first shipped in yodaStruct 2.8.0, and contactPairs and domainStats in yodaStruct 2.7.0. seams fingerprint prints classes 89. seams pairs prints count 0. seams domains on the polar subset prints largest 750. docs_migrate requires classes 89, count 0, and largest 750.
+00:00:11.450 --> 00:00:25.290 line:95% align:center size:80%
+The 1.0.1 global for hydrogen bonds is getHbondNetwork, and seams hbonds prints nop 250 hbonds 460.
+
+3
+00:00:25.290 --> 00:00:36.030 line:95% align:center size:80%
+Coordination is new in 2.x. The earlier version had no global for it, and calcCN first shipped in yodaStruct 2.4.1.
+
+4
+00:00:36.030 --> 00:00:45.130 line:95% align:center size:80%
+seams cn for the 1-2 pair at cutoff 4.5 prints cn 9.1.
+
+5
+00:00:45.130 --> 00:00:48.810 line:95% align:center size:80%
+docs migrate requires both lines.
+
+6
+00:00:48.810 --> 00:00:53.830 line:95% align:center size:80%
+Fingerprint, pairs and domains are all new to 2.x.
+
+7
+00:00:53.830 --> 00:00:59.050 line:95% align:center size:80%
+v1.0 had no global for any of them.
+
+8
+00:00:59.050 --> 00:01:08.750 line:95% align:center size:80%
+topologyFingerprint first shipped in yodaStruct 2.8.0, and contactPairs and domainStats in 2.7.0.
+
+9
+00:01:08.750 --> 00:01:12.150 line:95% align:center size:80%
+seams fingerprint prints classes 89.
+
+10
+00:01:12.150 --> 00:01:15.930 line:95% align:center size:80%
+seams pairs prints count zero.
+
+11
+00:01:15.930 --> 00:01:21.250 line:95% align:center size:80%
+seams domains on the polar subset prints largest 750.
+
+12
+00:01:21.250 --> 00:01:27.050 line:95% align:center size:80%
+docs migrate requires classes 89, count zero, and largest 750.
+
