@@ -371,7 +371,8 @@ linkcell_dep = dependency('linkcell', version: '>=0.4.0', required: get_option('
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
 if linkcell_dep.found()
-  _deps += [linkcell_dep]
+  # Headers only; libyodaLib links the library (src/meson.build).
+  _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
   _args += ['-DSEAMS_HAS_LINKCELL=1']
 endif
 

@@ -107,9 +107,14 @@ else
   ydslib_sources += files('shell_classify.cpp')
 endif
 
+# libyodaLib holds the process's one copy of linkcell and exports its lc_
+# symbols. A consumer that linked the archive again carried a second copy,
+# and that copy's lc_set_threads won the dynamic lookup, so the width never
+# reached the searches libyodaLib runs. yds_dep therefore passes the
+# linkcell headers alone.
 ydslib = library('yodaLib',
   ydslib_sources,
-  dependencies: _deps,
+  dependencies: _deps + (linkcell_dep.found() ? [linkcell_dep] : []),
   cpp_args: _args,
   link_with: _shell_link + _ylm_link,
   link_args: _lib_link_args,
