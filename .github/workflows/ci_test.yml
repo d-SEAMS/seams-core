@@ -49,6 +49,31 @@ jobs:
       - run: pixi run test
       - run: pixi run install
 
+  # Plain char is unsigned on aarch64, ppc64le and s390x. The x86_64
+  # runner gets the same semantics from -funsigned-char, so a char used
+  # as a signed value fails here without an ARM runner. The heavy suite
+  # runs for hours and stays on build-test.
+  unsigned-char:
+    runs-on: ubuntu-latest
+    env:
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-unsigned-char-
+      - name: Install EGL for OVITO
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      - name: Configure with an unsigned plain char
+        run: |
+          pixi run bash -c 'CFLAGS="$CFLAGS -funsigned-char" CXXFLAGS="$CXXFLAGS -funsigned-char" meson setup build-uchar -Dwith_tests=true'
+          grep -q -- '-funsigned-char' build-uchar/compile_commands.json
+      - run: pixi run ninja -C build-uchar
+      - run: pixi run meson test -C build-uchar --print-errorlogs --no-suite heavy
+
   mpi:
     runs-on: ubuntu-latest
     env:
