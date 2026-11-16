@@ -5,6 +5,7 @@
 #include <mol_sys.hpp>
 #include <seams_input.hpp>
 
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -38,17 +39,24 @@ int main(int argc, char **argv) {
     return n == 1 ? 0 : 1;
   }
   if (mode == "fstat") {
+    // The fault library fails every fstat after the first while
+    // DUMP_FSTAT_EIO is set. libc++'s remove_all calls fstat, so the
+    // fault is cleared before the directory is removed.
+    const auto cleanup = [&dir] {
+      ::unsetenv("DUMP_FSTAT_EIO");
+      fs::remove_all(dir);
+    };
     writeDump(dump, 4, 1);
     molSys::PointCloud<molSys::Point<double>, double> cloud;
     try {
       cloud = sinp::readLammpsTrj(dump.string(), 1, cloud);
     } catch (const std::exception &) {
-      fs::remove_all(dir);
+      cleanup();
       return 1;
     }
     sinp::dropLammpsDumpIndex(dump.string());
     const bool ok = cloud.pts.size() == 1;
-    fs::remove_all(dir);
+    cleanup();
     return ok ? 0 : 1;
   }
   return 2;
