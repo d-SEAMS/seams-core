@@ -110,7 +110,7 @@ version against this tag:
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
-- Lua and Fennel: LuaRocks ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+- Lua and Fennel: LuaRocks ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]
 - R: ~dseams~, [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
 - Julia: ~Dseams~, [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
 - Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
