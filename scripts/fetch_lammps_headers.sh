@@ -30,7 +30,9 @@ for tag in $tags; do
   rm -rf "$dest"
   if git clone -q --depth 1 --branch "$tag" --filter=blob:none --sparse \
       https://github.com/lammps/lammps.git "$dest" 2>/dev/null; then
-    git -C "$dest" sparse-checkout set --no-cone '/src/*.h' '/src/fmt/' '/src/STUBS/' >/dev/null
+    # Since 2025, atom.h and molecule.h include json_fwd.h, which takes the
+    # bundled nlohmann/json_fwd.hpp.
+    git -C "$dest" sparse-checkout set --no-cone '/src/*.h' '/src/fmt/' '/src/nlohmann/' '/src/STUBS/' >/dev/null
     (cd "$dest/src" && pwd)
     exit 0
   fi
