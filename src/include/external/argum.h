@@ -330,7 +330,7 @@ namespace Argum {
     #undef ARGUM_DEFINE_CHAR_CONSTANTS
     
     inline auto CharConstants<char>::isSpace(char c) -> bool { return isspace(c); }
-    inline auto CharConstants<wchar_t>::isSpace(wchar_t c) -> bool { return iswspace(static_cast<unsigned>(c)); }
+    inline auto CharConstants<wchar_t>::isSpace(wchar_t c) -> bool { return iswspace(static_cast<wint_t>(c)); }
 
     inline auto CharConstants<char>::toLong(const char * str, char ** str_end, int base) -> long {
         return strtol(str, str_end, base);
