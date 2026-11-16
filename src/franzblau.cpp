@@ -1660,87 +1660,6 @@ struct alignas(64) RingPool {
   iterator begin() { return storage.begin(); }
   iterator end() { return storage.begin() + static_cast<std::ptrdiff_t>(n); }
 };
-  std::vector<std::uint8_t> sizes;
-  std::size_t n = 0;
-
-  void reset() {
-    n = 0;
-    verts.clear();
-    sizes.clear();
-    offsets.clear();
-    offsets.push_back(0);
-  }
-  void release() {
-    std::vector<std::uint32_t>().swap(verts);
-    std::vector<std::uint8_t>().swap(sizes);
-    std::vector<std::uint32_t>().swap(offsets);
-    offsets.push_back(0);
-    n = 0;
-  }
-  std::size_t size() const { return n; }
-
-  void push_back(const std::vector<int> &ring) {
-    const auto k = static_cast<std::uint32_t>(ring.size());
-    const std::size_t next = verts.size() + ring.size();
-    if (next > static_cast<std::size_t>(std::numeric_limits<std::uint32_t>::max())) {
-      throw std::bad_alloc();
-    }
-    sizes.push_back(static_cast<std::uint8_t>(k));
-    const auto base = static_cast<std::uint32_t>(verts.size());
-    verts.resize(next);
-    for (std::uint32_t i = 0; i < k; i++) {
-      verts[static_cast<std::size_t>(base) + i] =
-          static_cast<std::uint32_t>(ring[static_cast<std::size_t>(i)]);
-    }
-    offsets.push_back(static_cast<std::uint32_t>(verts.size()));
-    ++n;
-  }
-
-  void copyRing(std::size_t i, std::vector<int> &dst) const {
-    const std::uint32_t b = offsets[i];
-    const int s = static_cast<int>(sizes[i]);
-    dst.resize(static_cast<std::size_t>(s));
-    for (int k = 0; k < s; k++) {
-      dst[static_cast<std::size_t>(k)] =
-          static_cast<int>(verts[static_cast<std::size_t>(b) + static_cast<std::size_t>(k)]);
-    }
-  }
-
-  // Lexicographic order of the rings appended since `first`, the same order
-  // as sorting the rings as vectors of ints.
-  void sortFrom(std::size_t first) {
-    if (first >= n) {
-      return;
-    }
-    std::vector<std::uint32_t> order(n - first);
-    std::iota(order.begin(), order.end(), static_cast<std::uint32_t>(first));
-    std::sort(order.begin(), order.end(), [&](std::uint32_t a, std::uint32_t b) {
-      const std::uint32_t *ap = verts.data() + offsets[a];
-      const std::uint32_t *bp = verts.data() + offsets[b];
-      const int as = static_cast<int>(sizes[a]);
-      const int bs = static_cast<int>(sizes[b]);
-      return std::lexicographical_compare(ap, ap + as, bp, bp + bs);
-    });
-    std::vector<std::uint32_t> nv;
-    std::vector<std::uint8_t> ns;
-    nv.reserve(verts.size() - static_cast<std::size_t>(offsets[first]));
-    ns.reserve(n - first);
-    for (const std::uint32_t id : order) {
-      const int s = static_cast<int>(sizes[id]);
-      const std::uint32_t *p = verts.data() + offsets[id];
-      nv.insert(nv.end(), p, p + s);
-      ns.push_back(static_cast<std::uint8_t>(s));
-    }
-    verts.resize(static_cast<std::size_t>(offsets[first]));
-    verts.insert(verts.end(), nv.begin(), nv.end());
-    sizes.resize(first);
-    sizes.insert(sizes.end(), ns.begin(), ns.end());
-    offsets.resize(first + 1);
-    for (std::size_t i = first; i < n; i++) {
-      offsets.push_back(offsets.back() + static_cast<std::uint32_t>(sizes[i]));
-    }
-  }
-};
 
 //! A full-graph search can walk through a vertex below src. That vertex is
 //! not a member of a ring this source is allowed to emit.
@@ -2676,7 +2595,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
             const std::vector<char> &sources, bool legacy,
             primitive::RingRows rows = primitive::RingRows::Auto, int minSize = 3,
             std::vector<int> *hist = nullptr, int forcedCap = -1,
-            int *perAtom = nullptr, int perStride = 0) {
+            int *perAtomCounts = nullptr, int perStride = 0) {
   const auto adjStart = std::chrono::steady_clock::now();
   const int nVertices = static_cast<int>(nList.size());
   int use = 1;
@@ -2702,7 +2621,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
                                   (serial && rows != primitive::RingRows::Packed) ? 1 : use);
   gRingSplit.adj_ms = millisSince(adjStart);
   return searchPacked(std::move(adjacency), maxDepth, sources, legacy, {}, minSize,
-                      hist, forcedCap, perAtom, perStride);
+                      hist, forcedCap, perAtomCounts, perStride);
 }
 
 std::vector<std::vector<int>>
@@ -2915,10 +2834,24 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       from.push_back(v);
     }
   }
+  // Ice and the other sparse frames never enter the cap pass.
+  const RingCall call{hist, forcedCap < 0 ? capForGraph(adjacency) : forcedCap, perAtom,
+                      perStride};
+  // One shell width for the whole frame. Three words is the dense crystal;
+  // a narrower frame keeps the general five-ring loop.
+  int shellWords = 0;
+  if (forcedCap < 0 && call.cap > 0) {
+    std::size_t maxDeg = 0;
+    for (std::size_t i = 0; i < adjacency.size(); i++) {
+      const auto row = adjacency[i];
+      maxDeg = std::max(maxDeg, static_cast<std::size_t>(row.end() - row.begin()));
+    }
+    shellWords = static_cast<int>((maxDeg + 63) >> 6);
+  }
   // One bit image per thread, not one per source and not one shared by
   // the team. A shared image is reread from every core; a fresh image
   // per source repeats the same walk hundreds of times.
-  if (cap > 0 && nVertices > 0 && nVertices <= 4096) {
+  if (call.cap > 0 && nVertices > 0 && nVertices <= 4096) {
     int next = gChordEpoch.load(std::memory_order_relaxed) + 1;
     if (next == 0) {
       next = 1;
@@ -3016,20 +2949,6 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       balls.fillList(adjacency, radius, reached);
     }
     gRingSplit.balls_ms = millisSince(ballStart);
-  }
-  // Ice and the other sparse frames never enter the cap pass.
-  const RingCall call{hist, forcedCap < 0 ? capForGraph(adjacency) : forcedCap, perAtom,
-                      perStride};
-  // One shell width for the whole frame. Three words is the dense crystal;
-  // a narrower frame keeps the general five-ring loop.
-  int shellWords = 0;
-  if (forcedCap < 0 && call.cap > 0) {
-    std::size_t maxDeg = 0;
-    for (std::size_t i = 0; i < adjacency.size(); i++) {
-      const auto row = adjacency[i];
-      maxDeg = std::max(maxDeg, static_cast<std::size_t>(row.end() - row.begin()));
-    }
-    shellWords = static_cast<int>((maxDeg + 63) >> 6);
   }
   DistOracle oracle;
   oracle.adj = &adjacency;
