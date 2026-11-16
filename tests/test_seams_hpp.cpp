@@ -202,6 +202,37 @@ int main(int argc, char **argv) {
       return 1;
     }
     close(mean(tri.steinhardt(seams::SteinhardtOptions{3.5, 0, 6, false}).local), want.at("tri q6")[0]);
+    // Chordless six-cycles through the wrapper match the C call, and every
+    // cycle row is counted once on each of its atoms.
+    auto water = read_frame(root + "/input/traj/exampleTraj.lammpstrj", 2);
+    const auto cycles = water.rings_chordless(seams::NeighbourOptions{3.5, 0}, 6);
+    {
+      auto nb = water.neighbours(seams::NeighbourOptions{3.5, 0});
+      std::size_t n_c = 0;
+      if (seams_rings_chordless(nb.get(), 6, nullptr, 0, &n_c, nullptr, 0) != SEAMS_OK ||
+          n_c != cycles.count() || n_c == 0) {
+        return 1;
+      }
+      std::vector<int> rows(n_c * 6);
+      if (seams_rings_chordless(nb.get(), 6, rows.data(), rows.size(), &n_c, nullptr, 0) !=
+              SEAMS_OK ||
+          rows != cycles.atoms) {
+        return 1;
+      }
+    }
+    std::vector<int> tally(cycles.per_atom.size(), 0);
+    for (std::size_t c = 0; c < cycles.count(); ++c) {
+      const auto row = cycles.cycle(c);
+      if (row.size() != 6) {
+        return 1;
+      }
+      for (const int atom : row) {
+        tally[static_cast<std::size_t>(atom)] += 1;
+      }
+    }
+    if (tally != cycles.per_atom) {
+      return 1;
+    }
   } catch (const std::exception &ex) {
     std::cerr << ex.what() << "\n";
     return 1;

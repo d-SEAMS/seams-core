@@ -606,6 +606,31 @@ inline std::string copy_text(Call call, const void *handle) {
 }  // namespace detail
 
 /**
+ * @brief Chordless cycles of one length.
+ * @ingroup seams_cpp
+ *
+ * `atoms` holds count() rows of `size` atom indices, in the order
+ * seams_rings_chordless writes them. `per_atom` is the number of cycles
+ * through each atom.
+ */
+struct ChordlessCycles {
+  int size = 0;                /**< Cycle length. */
+  std::vector<int> atoms;      /**< count() rows of `size` indices. */
+  std::vector<int> per_atom;   /**< Cycles through each atom. */
+
+  /** @brief Number of cycles. */
+  [[nodiscard]] std::size_t count() const {
+    return size > 0 ? atoms.size() / static_cast<std::size_t>(size) : 0;
+  }
+  /** @brief Atom indices of one cycle. */
+  [[nodiscard]] std::vector<int> cycle(std::size_t index) const {
+    const auto first =
+        atoms.begin() + static_cast<std::ptrdiff_t>(index * static_cast<std::size_t>(size));
+    return std::vector<int>(first, first + size);
+  }
+};
+
+/**
  * @brief Owned neighbour list.
  * @ingroup seams_cpp
  *
@@ -673,6 +698,26 @@ class Neighbours : public detail::Handle<seams_neighbours, seams_neighbours_dest
         }
       }
     }
+    return out;
+  }
+
+  /**
+   * @brief Chordless cycles of one length on this graph.
+   * @param size Cycle length, from 3 through 12.
+   * @return The rows and the per-atom counts of seams_rings_chordless.
+   */
+  [[nodiscard]] ChordlessCycles chordless(int size) const {
+    ChordlessCycles out;
+    out.size = size;
+    out.per_atom.resize(static_cast<std::size_t>(seams_neighbours_count(get())));
+    std::size_t count = 0;
+    detail::check(seams_rings_chordless(get(), size, nullptr, 0, &count, out.per_atom.data(),
+                                        out.per_atom.size()),
+                  get());
+    out.atoms.resize(count * static_cast<std::size_t>(size));
+    detail::check(seams_rings_chordless(get(), size, out.atoms.data(), out.atoms.size(), &count,
+                                        nullptr, 0),
+                  get());
     return out;
   }
 };
@@ -1073,6 +1118,16 @@ class System : public detail::Handle<seams_system, seams_system_destroy> {
                                          static_cast<int>(options.graph), &out),
                   get());
     return Neighbours(out);
+  }
+
+  /**
+   * @brief Chordless cycles of one length on a neighbour graph.
+   * @param options Graph of the cycles.
+   * @param size Cycle length, from 3 through 12.
+   * @return Neighbours::chordless on that graph.
+   */
+  [[nodiscard]] ChordlessCycles rings_chordless(const NeighbourOptions &options, int size) {
+    return neighbours(options).chordless(size);
   }
 
   /** @brief k-nearest neighbour list. */
