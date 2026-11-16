@@ -126,9 +126,10 @@ std::vector<int> atomRingSizeCounts(const std::vector<std::vector<int>> &nList,
                                     int maxDepth);
 
 //! Primitive rings whose size is at least @a minDepth and at most
-//! @a maxDepth. ringNetwork(nList, maxDepth) is minDepth 3.
-std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
-                                          int maxDepth, int minDepth);
+//! @a maxDepth. ringNetwork(nList, maxDepth) is minDepth 3. A separate
+//! name keeps ringNetwork(nList, maxDepth, {}) the empty source mask.
+std::vector<std::vector<int>> ringNetworkMinSize(const std::vector<std::vector<int>> &nList,
+                                                 int maxDepth, int minDepth);
 
 //! Which adjacency the ring search packs before it walks. Auto uses one
 //! sorted array per row: a single pass on one thread, a team on several.

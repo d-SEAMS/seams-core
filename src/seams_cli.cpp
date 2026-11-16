@@ -892,7 +892,7 @@ public:
   const Rows &hexRings(GraphSlot slot, const Rows &idx) {
     const int key = static_cast<int>(slot) + 8;
     if (!carry_) {
-      return scratchRings_[key] = primitive::ringNetwork(idx, 6, 6);
+      return scratchRings_[key] = primitive::ringNetworkMinSize(idx, 6, 6);
     }
     return scratchRings_[key] = sixRings(rings(slot, idx, 6));
   }

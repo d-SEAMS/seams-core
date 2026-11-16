@@ -2226,8 +2226,8 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
 }
 
 std::vector<std::vector<int>>
-primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
-                       int minDepth) {
+primitive::ringNetworkMinSize(const std::vector<std::vector<int>> &nList, int maxDepth,
+                              int minDepth) {
   if (minDepth < 3) {
     minDepth = 3;
   }
