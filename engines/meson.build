@@ -94,12 +94,14 @@ if lammps_opt.allowed()
       build_rpath: lammps_rpath,
       install_rpath: lammps_rpath,
       install: true)
-    test(
-      'lammps_hook',
-      find_program('skip_missing_lib.sh'),
-      args: [run_hook.full_path(), 'in.dseams'],
-      workdir: meson.project_source_root() / 'engines/lammps',
-      timeout: 120)
+    if get_option('with_tests')
+      test(
+        'lammps_hook',
+        find_program('skip_missing_lib.sh'),
+        args: [run_hook.full_path(), 'in.dseams'],
+        workdir: meson.project_source_root() / 'engines/lammps',
+        timeout: 120)
+    endif
     # compute dseams as a `plugin load` module. The LAMMPS class headers
     # include mpi.h, from the MPI library or from the serial STUBS.
     # The host lmp already holds libmpi, so the module takes the headers only.
@@ -228,11 +230,13 @@ if gromacs_opt.allowed()
       build_rpath: gromacs_rpath,
       install_rpath: gromacs_rpath,
       install: true)
-    test(
-      'gromacs_mdrun',
-      find_program('gromacs/run_mdrun.sh'),
-      args: [gmx_seams.full_path(), fs.parent(seams_api_lib.full_path())],
-      timeout: 180)
+    if get_option('with_tests')
+      test(
+        'gromacs_mdrun',
+        find_program('gromacs/run_mdrun.sh'),
+        args: [gmx_seams.full_path(), fs.parent(seams_api_lib.full_path())],
+        timeout: 180)
+    endif
   endif
 endif
 
@@ -292,11 +296,13 @@ if openmm_opt.allowed()
       build_rpath: openmm_rpath,
       install_rpath: openmm_rpath,
       install: true)
-    test(
-      'openmm_plugin',
-      find_program('skip_missing_lib.sh'),
-      args: [openmm_plugin.full_path()],
-      timeout: 120)
+    if get_option('with_tests')
+      test(
+        'openmm_plugin',
+        find_program('skip_missing_lib.sh'),
+        args: [openmm_plugin.full_path()],
+        timeout: 120)
+    endif
   endif
 endif
 
@@ -388,11 +394,13 @@ if plumed_opt.allowed()
   endif
 endif
 
-triclinic_box_test = executable(
-  'test_triclinic_box',
-  files('../tests/test_triclinic_box.cpp'),
-  cpp_args: _args)
-test('triclinic_box', triclinic_box_test, timeout: 30)
+if get_option('with_tests')
+  triclinic_box_test = executable(
+    'test_triclinic_box',
+    files('../tests/test_triclinic_box.cpp'),
+    cpp_args: _args)
+  test('triclinic_box', triclinic_box_test, timeout: 30)
+endif
 
 python3_engines = find_program('python3', required: false)
 if python3_engines.found() and get_option('with_tests')

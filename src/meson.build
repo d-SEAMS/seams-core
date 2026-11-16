@@ -250,55 +250,58 @@ configure_file(
   install: true,
   install_dir: get_option('libdir') / 'cmake' / 'seams')
 
-seams_api_test = executable(
-  'test_seams_api',
-  files('../tests/test_seams_api.c'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('../include'),
-  c_args: ['-I' + meson.current_build_dir()])
+# Test programs. A subproject build with -Dwith_tests=false skips them.
+if get_option('with_tests')
+  seams_api_test = executable(
+    'test_seams_api',
+    files('../tests/test_seams_api.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    c_args: ['-I' + meson.current_build_dir()])
 
-_capi_env = environment()
-_capi_env.set('SEAMS_SAMPLE', meson.project_source_root() / 'input' / 'traj' / 'agi_water_tiny.lammpstrj')
-_capi_env.set('SEAMS_XYZ', meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz')
-_capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con')
-test('seams_c_api', seams_api_test, timeout: 180, env: _capi_env)
+  _capi_env = environment()
+  _capi_env.set('SEAMS_SAMPLE', meson.project_source_root() / 'input' / 'traj' / 'agi_water_tiny.lammpstrj')
+  _capi_env.set('SEAMS_XYZ', meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz')
+  _capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con')
+  test('seams_c_api', seams_api_test, timeout: 180, env: _capi_env)
 
-docs_ice_example = executable(
-  'docs_ice_example',
-  files('../docs/examples/ice.c'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('../include'),
-  c_args: ['-I' + meson.current_build_dir()],
-  link_args: ['-lm'])
-test('docs_ice_example', docs_ice_example, suite: 'docs', timeout: 60)
+  docs_ice_example = executable(
+    'docs_ice_example',
+    files('../docs/examples/ice.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    c_args: ['-I' + meson.current_build_dir()],
+    link_args: ['-lm'])
+  test('docs_ice_example', docs_ice_example, suite: 'docs', timeout: 60)
 
-docs_api_cpp = executable(
-  'docs_api_cpp',
-  files('../docs/examples/ice.cpp'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('../include'),
-  cpp_args: ['-I' + meson.current_build_dir()],
-  link_args: ['-lm'])
-test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
+  docs_api_cpp = executable(
+    'docs_api_cpp',
+    files('../docs/examples/ice.cpp'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    cpp_args: ['-I' + meson.current_build_dir()],
+    link_args: ['-lm'])
+  test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
 
-docs_api_hpp = executable(
-  'docs_api_hpp',
-  files('../docs/examples/cpp_api.cpp'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('../include'),
-  cpp_args: ['-I' + meson.current_build_dir()])
-test(
-  'docs_api_hpp',
-  docs_api_hpp,
-  args: [meson.project_source_root()],
-  suite: 'docs',
-  timeout: 120)
+  docs_api_hpp = executable(
+    'docs_api_hpp',
+    files('../docs/examples/cpp_api.cpp'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    cpp_args: ['-I' + meson.current_build_dir()])
+  test(
+    'docs_api_hpp',
+    docs_api_hpp,
+    args: [meson.project_source_root()],
+    suite: 'docs',
+    timeout: 120)
 
-docs_quickstart_c = executable(
-  'docs_quickstart_c',
-  files('../docs/examples/quickstart.c'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('../include'),
-  c_args: ['-I' + meson.current_build_dir()],
-  link_args: ['-lm'])
-test('docs_quickstart_c', docs_quickstart_c, suite: 'docs', timeout: 60)
+  docs_quickstart_c = executable(
+    'docs_quickstart_c',
+    files('../docs/examples/quickstart.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    c_args: ['-I' + meson.current_build_dir()],
+    link_args: ['-lm'])
+  test('docs_quickstart_c', docs_quickstart_c, suite: 'docs', timeout: 60)
+endif

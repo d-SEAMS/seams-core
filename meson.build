@@ -862,6 +862,11 @@ if get_option('with_cli')
     link_args: seams_cli_link,
     build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
     install: true)
+endif
+
+# Tests on the CLI. A consumer that builds seams-core as a subproject
+# with -Dwith_tests=false registers none of them.
+if get_option('with_cli') and get_option('with_tests')
   test(
     'seams_read',
     seams_exe,
@@ -1457,7 +1462,7 @@ endif
 
 subdir('bindings')
 
-if get_option('with_cli')
+if get_option('with_cli') and get_option('with_tests')
   # check_installed.py installs with --no-rebuild, because a rebuild here
   # would relink libyodaLib and libseams under the tests that load them.
   # Every installed target is therefore built before the test starts.
@@ -1814,334 +1819,336 @@ if get_option('with_cli')
     timeout: 60)
 endif
 
-# C API proof. Sanitizers and valgrind are separate configure options.
-# clang-cl rejects a raw -std=c11. override_options lets meson emit /std:c11.
-# libm is in the C runtime on Windows.
-_libm = host_machine.system() == 'windows' ? [] : ['-lm']
-capi_suite = executable(
-  'capi_suite',
-  files('tests/capi_suite.c'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('include'),
-  override_options: ['c_std=c11'],
-  c_args: ['-Wall', '-Wextra', '-Werror', '-I' + meson.current_build_dir() / 'src'],
-  link_args: _libm)
-capi_cpp_ref = executable(
-  'capi_cpp_ref',
-  files('tests/capi_cpp_ref.cpp'),
-  dependencies: [yds_dep],
-  include_directories: _incdirs,
-  cpp_args: _args,
-  link_args: _link_args,
-  build_rpath: meson.current_build_dir() / 'src')
-_capi_env = environment()
-_capi_env.prepend('LD_LIBRARY_PATH', meson.current_build_dir() / 'src')
-if _capi_san == 'thread'
-  # libgomp here is not TSan-instrumented, so the barrier between two
-  # parallel loops is invisible and reported as a race. The suite still
-  # fails when q6 at 1, 2, 4 and 8 threads disagrees.
-  _capi_env.set('TSAN_OPTIONS', 'halt_on_error=0:exitcode=0')
-endif
-if _capi_san.contains('address')
-  _capi_env.set('LSAN_OPTIONS',
-                'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
-endif
-_capi_args = [
-  meson.project_source_root(),
-  capi_cpp_ref.full_path(),
-  meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
-  meson.current_build_dir() / 'capi-work',
-]
-test(
-  'capi_suite',
-  capi_suite,
-  args: _capi_args,
-  env: _capi_env,
-  depends: [capi_cpp_ref, seams_api_lib],
-  timeout: 3600,
-  is_parallel: false)
-_cross_env = environment()
-_cross_env.prepend('LD_LIBRARY_PATH', meson.current_build_dir() / 'src')
-_cross_env.set('SEAMS_LIB', seams_api_lib.full_path())
-_cross_env.set('OMP_NUM_THREADS', '1')
-_cross_env.set('RAYON_NUM_THREADS', '1')
-_cross_env.set('OVITO_THREAD_COUNT', '1')
-test(
-  'capi_crosscheck',
-  find_program('python3', required: true),
-  args: [
-    meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
-    '--root', meson.project_source_root(),
-  ],
-  env: _cross_env,
-  depends: [seams_api_lib],
-  timeout: 900,
-  is_parallel: false)
-if get_option('capi_valgrind')
-  test(
-    'capi_valgrind',
-    find_program('valgrind', required: true),
-    args: [
-      '--leak-check=full', '--show-leak-kinds=definite',
-      '--errors-for-leak-kinds=definite', '--error-exitcode=1',
-      capi_suite.full_path(),
-    ] + _capi_args,
-    env: _capi_env,
-    depends: [capi_suite, capi_cpp_ref],
-    timeout: 7200,
-    is_parallel: false)
-endif
-
-_capi_warn = ['-Wall', '-Wextra', '-Wpedantic', '-Werror']
-_capi_headers = [
-  ['seams_h', 'seams.h',
-   ['-I' + meson.project_source_root() / 'include',
-    '-I' + meson.current_build_dir() / 'src']],
-  ['seams_version_h', 'seams_version.h',
-   ['-I' + meson.current_build_dir() / 'src']],
-  ['seams_lang_h', 'seams_lang.h',
-   ['-I' + meson.project_source_root() / 'bindings' / 'cxx']],
-]
-foreach _hdr : _capi_headers
-  test('capi_header_c99_' + _hdr[0],
-    executable('capi_header_c99_' + _hdr[0], files('tests/capi_header_unit.c'),
-      override_options: ['c_std=c99'],
-      c_args: ['-include', _hdr[1]] + _capi_warn + _hdr[2]))
-  test('capi_header_cxx17_' + _hdr[0],
-    executable('capi_header_cxx17_' + _hdr[0], files('tests/capi_header_unit.cpp'),
-      override_options: ['cpp_std=c++17'],
-      cpp_args: ['-include', _hdr[1]] + _capi_warn + _hdr[2]))
-endforeach
-
-capi_contract = executable(
-  'capi_contract',
-  files('tests/capi_contract.c'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('include'),
-  override_options: ['c_std=c11'],
-  c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
-  link_args: _libm)
-test(
-  'capi_contract',
-  capi_contract,
-  args: [
-    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+if get_option('with_tests')
+  # C API proof. Sanitizers and valgrind are separate configure options.
+  # clang-cl rejects a raw -std=c11. override_options lets meson emit /std:c11.
+  # libm is in the C runtime on Windows.
+  _libm = host_machine.system() == 'windows' ? [] : ['-lm']
+  capi_suite = executable(
+    'capi_suite',
+    files('tests/capi_suite.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('include'),
+    override_options: ['c_std=c11'],
+    c_args: ['-Wall', '-Wextra', '-Werror', '-I' + meson.current_build_dir() / 'src'],
+    link_args: _libm)
+  capi_cpp_ref = executable(
+    'capi_cpp_ref',
+    files('tests/capi_cpp_ref.cpp'),
+    dependencies: [yds_dep],
+    include_directories: _incdirs,
+    cpp_args: _args,
+    link_args: _link_args,
+    build_rpath: meson.current_build_dir() / 'src')
+  _capi_env = environment()
+  _capi_env.prepend('LD_LIBRARY_PATH', meson.current_build_dir() / 'src')
+  if _capi_san == 'thread'
+    # libgomp here is not TSan-instrumented, so the barrier between two
+    # parallel loops is invisible and reported as a race. The suite still
+    # fails when q6 at 1, 2, 4 and 8 threads disagrees.
+    _capi_env.set('TSAN_OPTIONS', 'halt_on_error=0:exitcode=0')
+  endif
+  if _capi_san.contains('address')
+    _capi_env.set('LSAN_OPTIONS',
+                  'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
+  endif
+  _capi_args = [
     meson.project_source_root(),
-  ],
-  env: _capi_env,
-  timeout: 300)
-foreach _family : ['neighbours', 'rings', 'chill_plus', 'q4q6', 'cages', 'errors']
+    capi_cpp_ref.full_path(),
+    meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
+    meson.current_build_dir() / 'capi-work',
+  ]
   test(
-    'capi_example_' + _family,
-    executable(
+    'capi_suite',
+    capi_suite,
+    args: _capi_args,
+    env: _capi_env,
+    depends: [capi_cpp_ref, seams_api_lib],
+    timeout: 3600,
+    is_parallel: false)
+  _cross_env = environment()
+  _cross_env.prepend('LD_LIBRARY_PATH', meson.current_build_dir() / 'src')
+  _cross_env.set('SEAMS_LIB', seams_api_lib.full_path())
+  _cross_env.set('OMP_NUM_THREADS', '1')
+  _cross_env.set('RAYON_NUM_THREADS', '1')
+  _cross_env.set('OVITO_THREAD_COUNT', '1')
+  test(
+    'capi_crosscheck',
+    find_program('python3', required: true),
+    args: [
+      meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
+      '--root', meson.project_source_root(),
+    ],
+    env: _cross_env,
+    depends: [seams_api_lib],
+    timeout: 900,
+    is_parallel: false)
+  if get_option('capi_valgrind')
+    test(
+      'capi_valgrind',
+      find_program('valgrind', required: true),
+      args: [
+        '--leak-check=full', '--show-leak-kinds=definite',
+        '--errors-for-leak-kinds=definite', '--error-exitcode=1',
+        capi_suite.full_path(),
+      ] + _capi_args,
+      env: _capi_env,
+      depends: [capi_suite, capi_cpp_ref],
+      timeout: 7200,
+      is_parallel: false)
+  endif
+
+  _capi_warn = ['-Wall', '-Wextra', '-Wpedantic', '-Werror']
+  _capi_headers = [
+    ['seams_h', 'seams.h',
+     ['-I' + meson.project_source_root() / 'include',
+      '-I' + meson.current_build_dir() / 'src']],
+    ['seams_version_h', 'seams_version.h',
+     ['-I' + meson.current_build_dir() / 'src']],
+    ['seams_lang_h', 'seams_lang.h',
+     ['-I' + meson.project_source_root() / 'bindings' / 'cxx']],
+  ]
+  foreach _hdr : _capi_headers
+    test('capi_header_c99_' + _hdr[0],
+      executable('capi_header_c99_' + _hdr[0], files('tests/capi_header_unit.c'),
+        override_options: ['c_std=c99'],
+        c_args: ['-include', _hdr[1]] + _capi_warn + _hdr[2]))
+    test('capi_header_cxx17_' + _hdr[0],
+      executable('capi_header_cxx17_' + _hdr[0], files('tests/capi_header_unit.cpp'),
+        override_options: ['cpp_std=c++17'],
+        cpp_args: ['-include', _hdr[1]] + _capi_warn + _hdr[2]))
+  endforeach
+
+  capi_contract = executable(
+    'capi_contract',
+    files('tests/capi_contract.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('include'),
+    override_options: ['c_std=c11'],
+    c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+    link_args: _libm)
+  test(
+    'capi_contract',
+    capi_contract,
+    args: [
+      meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+      meson.project_source_root(),
+    ],
+    env: _capi_env,
+    timeout: 300)
+  foreach _family : ['neighbours', 'rings', 'chill_plus', 'q4q6', 'cages', 'errors']
+    test(
       'capi_example_' + _family,
-      files('docs/examples/c/' + _family + '.c'),
+      executable(
+        'capi_example_' + _family,
+        files('docs/examples/c/' + _family + '.c'),
+        link_with: seams_api_lib,
+        include_directories: include_directories('include'),
+        override_options: ['c_std=c11'],
+        c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
+      args: _family == 'errors' ? [] : [meson.project_source_root()],
+      env: _capi_env,
+      timeout: 300)
+  endforeach
+  test(
+    'capi_const_threads',
+    executable(
+      'capi_const_threads',
+      files('tests/capi_const_threads.c'),
+      link_with: seams_api_lib,
+      include_directories: include_directories('include'),
+      override_options: ['c_std=c11'],
+      c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+      dependencies: dependency('threads'),
+      link_args: _libm),
+    env: _capi_env,
+    timeout: 300)
+  # GCC marks only ASan and TSan builds; clang reports every sanitizer.
+  _signal_mode = (_capi_san.contains('address') or _capi_san.contains('thread') or
+                  (cppc.get_id() == 'clang' and _capi_san != 'none')) ? 'sanitized' : 'plain'
+  test(
+    'capi_signal_owner',
+    executable(
+      'capi_signal_owner',
+      files('tests/capi_signal_owner.c'),
       link_with: seams_api_lib,
       include_directories: include_directories('include'),
       override_options: ['c_std=c11'],
       c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
-    args: _family == 'errors' ? [] : [meson.project_source_root()],
+    args: [_signal_mode],
+    env: _capi_env,
+    timeout: 60)
+  test(
+    'capi_q_threads',
+    executable(
+      'capi_q_threads',
+      files('tests/capi_q_threads.c'),
+      link_with: seams_api_lib,
+      include_directories: include_directories('include'),
+      override_options: ['c_std=c11'],
+      c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+      dependencies: dependency('threads'),
+      link_args: _libm),
     env: _capi_env,
     timeout: 300)
-endforeach
-test(
-  'capi_const_threads',
   executable(
-    'capi_const_threads',
-    files('tests/capi_const_threads.c'),
+    'bench_capi_rss',
+    files('tests/bench_capi_rss.c'),
     link_with: seams_api_lib,
     include_directories: include_directories('include'),
     override_options: ['c_std=c11'],
     c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
-    dependencies: dependency('threads'),
-    link_args: _libm),
-  env: _capi_env,
-  timeout: 300)
-# GCC marks only ASan and TSan builds; clang reports every sanitizer.
-_signal_mode = (_capi_san.contains('address') or _capi_san.contains('thread') or
-                (cppc.get_id() == 'clang' and _capi_san != 'none')) ? 'sanitized' : 'plain'
-test(
-  'capi_signal_owner',
-  executable(
-    'capi_signal_owner',
-    files('tests/capi_signal_owner.c'),
-    link_with: seams_api_lib,
-    include_directories: include_directories('include'),
-    override_options: ['c_std=c11'],
-    c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
-  args: [_signal_mode],
-  env: _capi_env,
-  timeout: 60)
-test(
-  'capi_q_threads',
-  executable(
-    'capi_q_threads',
-    files('tests/capi_q_threads.c'),
-    link_with: seams_api_lib,
-    include_directories: include_directories('include'),
-    override_options: ['c_std=c11'],
-    c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
-    dependencies: dependency('threads'),
-    link_args: _libm),
-  env: _capi_env,
-  timeout: 300)
-executable(
-  'bench_capi_rss',
-  files('tests/bench_capi_rss.c'),
-  link_with: seams_api_lib,
-  include_directories: include_directories('include'),
-  override_options: ['c_std=c11'],
-  c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
-  link_args: _libm)
-test(
-  'capi_symbols',
-  find_program('python3', required: true),
-  args: [
-    meson.project_source_root() / 'tests' / 'capi_symbols.py',
-    meson.project_source_root() / 'include' / 'seams.h',
-    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
-    seams_api_lib.full_path(),
-  ],
-  depends: [seams_api_lib],
-  timeout: 60)
-test(
-  'capi_symbols_selftest',
-  find_program('python3', required: true),
-  args: [
-    meson.project_source_root() / 'tests' / 'capi_symbols_selftest.py',
-    meson.project_source_root() / 'include' / 'seams.h',
-    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
-    seams_api_lib.full_path(),
-  ],
-  depends: [seams_api_lib],
-  timeout: 60)
-_capi_docs_args = [
-  meson.project_source_root() / 'include' / 'seams.h',
-  meson.project_source_root() / 'tests' / 'capi_symbols.txt',
-  meson.project_source_root() / 'docs' / 'api' / 'c.md',
-]
-test(
-  'capi_docs_complete',
-  find_program('python3', required: true),
-  args: [meson.project_source_root() / 'docs' / 'capi_docs.py'] + _capi_docs_args,
-  timeout: 60)
-test(
-  'capi_docs_selftest',
-  find_program('python3', required: true),
-  args: [meson.project_source_root() / 'docs' / 'capi_docs_selftest.py'] + _capi_docs_args,
-  timeout: 60)
-_doxygen = find_program('doxygen', required: false)
-if _doxygen.found()
-  _doxy_data = configuration_data()
-  _doxy_data.set('VERSION', meson.project_version())
-  _doxy_data.set('SRCDIR', meson.project_source_root())
-  _doxy_data.set('BUILDDIR', meson.project_build_root())
-  _doxy_data.set('OUTDIR', meson.current_build_dir() / 'capi-doxygen')
-  _doxyfile = configure_file(
-    input: 'docs/Doxyfile.capi.in',
-    output: 'Doxyfile.capi',
-    configuration: _doxy_data)
+    link_args: _libm)
   test(
-    'capi_doxygen',
-    _doxygen,
-    args: [_doxyfile],
-    workdir: meson.current_build_dir(),
-    timeout: 120)
-endif
-
-_abi_env = environment()
-_abi_depends = [seams_api_lib]
-if _abidiff.found()
-  _abi_env.set('SEAMS_ABIDIFF', _abidiff.full_path())
-  _abi_env.set('SEAMS_ABI_DEBUG_LIB', seams_abi_lib.full_path())
-  _abi_depends += seams_abi_lib
-endif
-test(
-  'capi_abi',
-  find_program('sh'),
-  args: [
-    meson.project_source_root() / 'scripts' / 'abi_check.sh',
-    meson.current_build_dir(),
-    meson.project_source_root() / 'scripts' / 'abi_baseline.txt',
-  ],
-  env: _abi_env,
-  depends: _abi_depends,
-  timeout: 300)
-
-# libFuzzer harnesses. Under clang they are built with -fsanitize=fuzzer,
-# plus the capi_sanitize sanitizer, so libFuzzer gets coverage from the
-# harness; capi_fuzz_coverage instruments libseams as well. Other
-# compilers link a clang fuzzer runtime from the usual Debian path,
-# without coverage, when one is installed.
-_fuzz_cc = meson.get_compiler('c')
-_fuzz_args = []
-if _fuzz_cc.get_id() == 'clang' and _fuzz_cc.has_argument('-fsanitize=fuzzer-no-link')
-  _fuzz_args = ['-fsanitize=fuzzer' + (_capi_san == 'none' ? '' : ',' + _capi_san)]
-elif _capi_san == 'none'
-  foreach _cand : [
-    '/usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.fuzzer-x86_64.a',
-    '/usr/lib/llvm-19/lib/clang/19/lib/linux/libclang_rt.fuzzer-x86_64.a',
-    '/usr/lib/llvm-20/lib/clang/20/lib/linux/libclang_rt.fuzzer-x86_64.a',
+    'capi_symbols',
+    find_program('python3', required: true),
+    args: [
+      meson.project_source_root() / 'tests' / 'capi_symbols.py',
+      meson.project_source_root() / 'include' / 'seams.h',
+      meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+      seams_api_lib.full_path(),
+    ],
+    depends: [seams_api_lib],
+    timeout: 60)
+  test(
+    'capi_symbols_selftest',
+    find_program('python3', required: true),
+    args: [
+      meson.project_source_root() / 'tests' / 'capi_symbols_selftest.py',
+      meson.project_source_root() / 'include' / 'seams.h',
+      meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+      seams_api_lib.full_path(),
+    ],
+    depends: [seams_api_lib],
+    timeout: 60)
+  _capi_docs_args = [
+    meson.project_source_root() / 'include' / 'seams.h',
+    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+    meson.project_source_root() / 'docs' / 'api' / 'c.md',
   ]
-    if _fuzz_args.length() == 0 and import('fs').exists(_cand)
-      _fuzz_args = [_cand]
-    endif
-  endforeach
-endif
-if _fuzz_args.length() > 0
-  _fuzz_env = environment()
-  _fuzz_env.set('LSAN_OPTIONS',
-                'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
-  # The compiler invokes whichever `ld` is first on PATH. A conda prefix
-  # puts its sysroot ld there. That ld links the prefix's libpthread and
-  # libdl, whose GLIBC_PRIVATE symbols are not in the host libc this
-  # compiler was built against. -B names the host linker when the
-  # compiler itself is not the conda one.
-  _fuzz_bindir = []
-  _conda_prefix = run_command('sh', '-c', 'printf %s "${CONDA_PREFIX:-}"', check: false).stdout().strip()
-  _cc_path = find_program(_fuzz_cc.cmd_array()[0], required: false)
-  if _cc_path.found() and host_machine.system() == 'linux' and import('fs').exists('/usr/bin/ld')
-    _cc_full = _cc_path.full_path()
-    if _conda_prefix == '' or not _cc_full.startswith(_conda_prefix + '/')
-      _fuzz_bindir = ['-B/usr/bin/']
-    endif
-  endif
-  foreach _fuzz : [
-    ['capi_fuzzer', 'capi_read_fuzzer'],
-    ['capi_array_fuzzer', 'capi_array_fuzzer'],
-    ['capi_reload_fuzzer', 'capi_reload_fuzzer'],
-  ]
-    _fuzz_exe = custom_target(
-      _fuzz[1],
-      output: _fuzz[1],
-      command: _fuzz_cc.cmd_array() + _fuzz_bindir + [
-        _fuzz_cc.get_id() == 'clang-cl' ? '/std:c11' : '-std=c11', '-g', '-O1',
-        '-I' + meson.project_source_root() / 'include',
-        '-I' + meson.current_build_dir() / 'src',
-        meson.project_source_root() / 'fuzz' / (_fuzz[1] + '.c'),
-        # The Debian libFuzzer archive is built against the host glibc.
-        # A conda gcc links an older libc, which has no __isoc23_strto*.
-        meson.project_source_root() / 'fuzz' / 'glibc_isoc23.c',
-        '-o', '@OUTPUT@',
-        seams_api_lib.full_path(),
-      ] + _fuzz_args + [
-        '-Wl,-rpath,' + meson.current_build_dir() / 'src',
-        # libseams is passed as a file, so the driver does not add the
-        # OpenMP runtime it was built with. The harness needs it.
-        '-fopenmp',
-        '-lstdc++', '-lpthread', '-lm',
-      ],
-      depends: [seams_api_lib],
-      build_by_default: true)
+  test(
+    'capi_docs_complete',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'docs' / 'capi_docs.py'] + _capi_docs_args,
+    timeout: 60)
+  test(
+    'capi_docs_selftest',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'docs' / 'capi_docs_selftest.py'] + _capi_docs_args,
+    timeout: 60)
+  _doxygen = find_program('doxygen', required: false)
+  if _doxygen.found()
+    _doxy_data = configuration_data()
+    _doxy_data.set('VERSION', meson.project_version())
+    _doxy_data.set('SRCDIR', meson.project_source_root())
+    _doxy_data.set('BUILDDIR', meson.project_build_root())
+    _doxy_data.set('OUTDIR', meson.current_build_dir() / 'capi-doxygen')
+    _doxyfile = configure_file(
+      input: 'docs/Doxyfile.capi.in',
+      output: 'Doxyfile.capi',
+      configuration: _doxy_data)
     test(
-      _fuzz[0],
-      _fuzz_exe,
-      env: _fuzz_env,
-      args: [
-        '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
-        '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
-      ],
-      timeout: get_option('capi_fuzz_seconds') + 180,
-      is_parallel: false)
-  endforeach
+      'capi_doxygen',
+      _doxygen,
+      args: [_doxyfile],
+      workdir: meson.current_build_dir(),
+      timeout: 120)
+  endif
+
+  _abi_env = environment()
+  _abi_depends = [seams_api_lib]
+  if _abidiff.found()
+    _abi_env.set('SEAMS_ABIDIFF', _abidiff.full_path())
+    _abi_env.set('SEAMS_ABI_DEBUG_LIB', seams_abi_lib.full_path())
+    _abi_depends += seams_abi_lib
+  endif
+  test(
+    'capi_abi',
+    find_program('sh'),
+    args: [
+      meson.project_source_root() / 'scripts' / 'abi_check.sh',
+      meson.current_build_dir(),
+      meson.project_source_root() / 'scripts' / 'abi_baseline.txt',
+    ],
+    env: _abi_env,
+    depends: _abi_depends,
+    timeout: 300)
+
+  # libFuzzer harnesses. Under clang they are built with -fsanitize=fuzzer,
+  # plus the capi_sanitize sanitizer, so libFuzzer gets coverage from the
+  # harness; capi_fuzz_coverage instruments libseams as well. Other
+  # compilers link a clang fuzzer runtime from the usual Debian path,
+  # without coverage, when one is installed.
+  _fuzz_cc = meson.get_compiler('c')
+  _fuzz_args = []
+  if _fuzz_cc.get_id() == 'clang' and _fuzz_cc.has_argument('-fsanitize=fuzzer-no-link')
+    _fuzz_args = ['-fsanitize=fuzzer' + (_capi_san == 'none' ? '' : ',' + _capi_san)]
+  elif _capi_san == 'none'
+    foreach _cand : [
+      '/usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.fuzzer-x86_64.a',
+      '/usr/lib/llvm-19/lib/clang/19/lib/linux/libclang_rt.fuzzer-x86_64.a',
+      '/usr/lib/llvm-20/lib/clang/20/lib/linux/libclang_rt.fuzzer-x86_64.a',
+    ]
+      if _fuzz_args.length() == 0 and import('fs').exists(_cand)
+        _fuzz_args = [_cand]
+      endif
+    endforeach
+  endif
+  if _fuzz_args.length() > 0
+    _fuzz_env = environment()
+    _fuzz_env.set('LSAN_OPTIONS',
+                  'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
+    # The compiler invokes whichever `ld` is first on PATH. A conda prefix
+    # puts its sysroot ld there. That ld links the prefix's libpthread and
+    # libdl, whose GLIBC_PRIVATE symbols are not in the host libc this
+    # compiler was built against. -B names the host linker when the
+    # compiler itself is not the conda one.
+    _fuzz_bindir = []
+    _conda_prefix = run_command('sh', '-c', 'printf %s "${CONDA_PREFIX:-}"', check: false).stdout().strip()
+    _cc_path = find_program(_fuzz_cc.cmd_array()[0], required: false)
+    if _cc_path.found() and host_machine.system() == 'linux' and import('fs').exists('/usr/bin/ld')
+      _cc_full = _cc_path.full_path()
+      if _conda_prefix == '' or not _cc_full.startswith(_conda_prefix + '/')
+        _fuzz_bindir = ['-B/usr/bin/']
+      endif
+    endif
+    foreach _fuzz : [
+      ['capi_fuzzer', 'capi_read_fuzzer'],
+      ['capi_array_fuzzer', 'capi_array_fuzzer'],
+      ['capi_reload_fuzzer', 'capi_reload_fuzzer'],
+    ]
+      _fuzz_exe = custom_target(
+        _fuzz[1],
+        output: _fuzz[1],
+        command: _fuzz_cc.cmd_array() + _fuzz_bindir + [
+          _fuzz_cc.get_id() == 'clang-cl' ? '/std:c11' : '-std=c11', '-g', '-O1',
+          '-I' + meson.project_source_root() / 'include',
+          '-I' + meson.current_build_dir() / 'src',
+          meson.project_source_root() / 'fuzz' / (_fuzz[1] + '.c'),
+          # The Debian libFuzzer archive is built against the host glibc.
+          # A conda gcc links an older libc, which has no __isoc23_strto*.
+          meson.project_source_root() / 'fuzz' / 'glibc_isoc23.c',
+          '-o', '@OUTPUT@',
+          seams_api_lib.full_path(),
+        ] + _fuzz_args + [
+          '-Wl,-rpath,' + meson.current_build_dir() / 'src',
+          # libseams is passed as a file, so the driver does not add the
+          # OpenMP runtime it was built with. The harness needs it.
+          '-fopenmp',
+          '-lstdc++', '-lpthread', '-lm',
+        ],
+        depends: [seams_api_lib],
+        build_by_default: true)
+      test(
+        _fuzz[0],
+        _fuzz_exe,
+        env: _fuzz_env,
+        args: [
+          '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
+          '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
+        ],
+        timeout: get_option('capi_fuzz_seconds') + 180,
+        is_parallel: false)
+    endforeach
+  endif
 endif
