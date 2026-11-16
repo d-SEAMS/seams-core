@@ -4,7 +4,7 @@ Neighbours
 
 Build a neighbour list and read it back.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 84 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 85 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_neighbours.c
    :language: c
@@ -148,7 +148,7 @@ Copy the neighbour CSR into caller buffers.
 
 Returns: ::SEAMS_OK when every non-NULL buffer was filled, or when both buffers were NULL and the lengths were written. ::SEAMS_ERR_RANGE when a non-NULL buffer is short. ::SEAMS_ERR_NULL when nb, n_offsets, or nnz is NULL.
 
-@par Ownership The caller owns the buffers. The handle is not modified. @par Thread safety Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb. @par Example @code size_t n_off = 0, nnz = 0; seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz); int \*off = malloc(n_off \* sizeof \*off), \*cols = malloc(nnz \* sizeof \*cols); seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz); @endcode
+@par Ownership The caller owns the buffers. The handle is not modified. @par Thread safety Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb. @par Example @code size_t n_off = 0, nnz = 0; seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz); int \*off = malloc(n_off \* sizeof \*off), \*cols = malloc(nnz \* sizeof \*cols); seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz); free(off); free(cols); @endcode
 
 .. _capi-seams_neighbours_knn:
 

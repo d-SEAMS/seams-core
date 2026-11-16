@@ -1087,7 +1087,7 @@ seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *ri
     return fail(SEAMS_ERR_RANGE, "per_atom is short");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     std::vector<int> found;
     const std::size_t count = chordless::cycles(nb->offsets, nb->cols, size,
                                                 rings != nullptr ? &found : nullptr, per_atom);

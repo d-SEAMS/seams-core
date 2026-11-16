@@ -953,6 +953,44 @@ static void neighbours_contract(void) {
 #endif
   free(cols);
 
+  fn = "seams_rings_chordless";
+  size_t n_six = 0;
+  expect(seams_rings_chordless(NULL, 6, NULL, 0, &n_six, NULL, 0), SEAMS_ERR_NULL, fn,
+         "NULL handle");
+  expect(seams_rings_chordless(nb, 6, NULL, 0, NULL, NULL, 0), SEAMS_ERR_NULL, fn,
+         "every output NULL");
+  expect(seams_rings_chordless(nb, 6, g_ibuf, 6, NULL, NULL, 0), SEAMS_ERR_NULL, fn,
+         "rows without a count");
+  expect(seams_rings_chordless(nb, 2, NULL, 0, &n_six, NULL, 0), SEAMS_ERR_RANGE, fn, "size 2");
+  expect(seams_rings_chordless(nb, 13, NULL, 0, &n_six, NULL, 0), SEAMS_ERR_RANGE, fn, "size 13");
+  int *per = malloc(sizeof(int) * (size_t)(g_n > 0 ? g_n : 1));
+  if (g_n > 0) {
+    expect(seams_rings_chordless(nb, 6, NULL, 0, &n_six, per, (size_t)g_n - 1), SEAMS_ERR_RANGE,
+           fn, "short per_atom");
+  }
+  expect(seams_rings_chordless(nb, 6, NULL, 0, &n_six, per, (size_t)g_n), SEAMS_OK, fn, "count");
+  truth(n_six > 0, fn, "ice Ic has six-cycles");
+  long through = 0;
+  for (int i = 0; i < g_n; ++i) {
+    through += per[i];
+  }
+  truth(through == (long)n_six * 6, fn, "each cycle counts once on each of its six atoms");
+  int *six = malloc(sizeof(int) * (n_six > 0 ? n_six * 6 : 1));
+  size_t n_short = 0;
+  expect(seams_rings_chordless(nb, 6, six, n_six * 6 - 1, &n_short, NULL, 0), SEAMS_ERR_RANGE, fn,
+         "short rows");
+  truth(n_short == n_six, fn, "a short buffer still reports the count");
+  expect(seams_rings_chordless(nb, 6, six, n_six * 6, &n_short, NULL, 0), SEAMS_OK, fn, "rows");
+  int lowest_first = 1;
+  for (size_t c = 0; c < n_six; ++c) {
+    for (int k = 1; k < 6; ++k) {
+      lowest_first = lowest_first && six[c * 6] < six[c * 6 + (size_t)k];
+    }
+  }
+  truth(lowest_first, fn, "each row starts at its lowest atom");
+  free(six);
+  free(per);
+
   fn = "seams_neighbours_destroy";
   seams_neighbours_destroy(NULL);
   cover(fn);

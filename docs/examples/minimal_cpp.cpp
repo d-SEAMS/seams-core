@@ -37,6 +37,23 @@ int main(int argc, char **argv) {
   if (seams_frame_rings(frame, 3.5, 0, "cutoff", 6, rings, 7) != 0) {
     return 1;
   }
+  int n_five = 0;
+  int per_atom[46];
+  if (seams_frame_chordless(frame, 3.5, 0, "cutoff", 5, nullptr, 0, &n_five, per_atom) != 0) {
+    return 1;
+  }
+  int five[48 * 5];
+  if (n_five != 48 ||
+      seams_frame_chordless(frame, 3.5, 0, "cutoff", 5, five, 48 * 5, &n_five, nullptr) != 0) {
+    return 1;
+  }
+  int through = 0;
+  for (int n : per_atom) {
+    through += n;
+  }
+  if (through != 5 * 48 || five[0] != 0) {
+    return 1;
+  }
   int n_cages = 0;
   int n_sig_atoms = 0;
   int n_vertices = 0;

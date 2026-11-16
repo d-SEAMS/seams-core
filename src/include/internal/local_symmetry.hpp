@@ -95,17 +95,17 @@ inline constexpr double kShellRmsd = 0.15;
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
                  std::vector<int> &kind, double shellRmsd = kShellRmsd,
                  double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio,
-                 bool openFace = true);
+                 bool openFace = false);
 
 // Column SoA coordinates. The canon shell is built once. kind is written in full.
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
                        int *kind, double shellRmsd = kShellRmsd, double thermalQ = kThermalQ,
-                       double bondRatio = kThermalBondRatio, bool openFace = true);
+                       double bondRatio = kThermalBondRatio, bool openFace = false);
 
 // Same labels as classifyIceArrays, packed from a point cloud. On ideal
 // cubic ice the codes match diamondFromCsr (0 hexagonal, 1 cubic, -1 other).
 void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                      std::vector<int> &kind, bool openFace = true);
+                      std::vector<int> &kind, bool openFace = false);
 
 // Azimuthal cosine of each tetrahedral bond, largest first. The value is
 // the best alignment of an outer neighbour with one of the other three

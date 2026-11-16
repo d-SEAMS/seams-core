@@ -530,7 +530,7 @@ FrameRecord analyzeFrame(molSys::PointCloud<molSys::Point<double>, double> &clou
   }
 
   std::vector<int> kind;
-  symm::classifyIceCloud(cloud, kind);
+  symm::classifyIceCloud(cloud, kind, true);
   std::vector<Tag> symTag(static_cast<std::size_t>(cloud.nop));
   std::vector<char> symMask(static_cast<std::size_t>(cloud.nop), 0);
   for (int i = 0; i < cloud.nop; ++i) {

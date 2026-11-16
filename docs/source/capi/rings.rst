@@ -4,7 +4,7 @@ Rings
 
 Primitive rings and their histogram.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 84 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 85 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_rings.c
    :language: c
@@ -185,6 +185,43 @@ Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
 
 @par Ownership The caller owns atoms. Indices are positions in the frame. @par Thread safety Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. @par Example @code int atoms[12]; size_t len = 0; seams_rings_vertices(rings, 0, atoms, 12, &len); @endcode
 
+.. _capi-seams_rings_chordless:
+
+seams_rings_chordless
+---------------------
+
+
+.. code-block:: c
+
+   seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len)
+
+Chordless cycles of one size.
+
+``nb``
+    Graph from seams_neighbours_build().
+
+``size``
+    Cycle length, from 3 through 12.
+
+``rings``
+    Caller buffer of size times the cycle count ints, or NULL to skip the list.
+
+``rings_len``
+    Length of rings in ints. Ignored when rings is NULL.
+
+``n_rings``
+    Receives the cycle count. Required when rings is not NULL.
+
+``per_atom``
+    Caller buffer of one int per atom, or NULL. Receives the number of cycles through each atom.
+
+``per_atom_len``
+    Length of per_atom. Ignored when per_atom is NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL. rings, n_rings and per_atom may not all be NULL. A short rings buffer returns ::SEAMS_ERR_RANGE after n_rings and per_atom are written.
+
+A cycle is chordless when no edge of the graph joins two of its vertices that are not next to each other on the cycle. Every primitive ring is chordless; a chordless cycle need not be primitive. Each cycle is written once as size atom indices: it starts at its lowest index and runs towards the smaller of that atom's two cycle neighbours. Cycles are sorted lexicographically, so the list does not depend on the thread count. @par Ownership The caller owns rings and per_atom. Indices are positions in the frame. @par Thread safety Exclusive use of nb. @par Example @code size_t n_six = 0; seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0); @endcode
+
 .. _capi-seams_rings_fraction:
 
 seams_rings_fraction
@@ -261,7 +298,7 @@ Size and symmetry of each ring into buffers of known length.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE when a buffer is shorter than the ring count, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-@par Ownership The caller owns both arrays. @par Thread safety Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. @par Example @code size_t nr = 0; seams_rings_nrings(rings, &nr); int \*sym = malloc(nr \* sizeof \*sym); seams_rings_labels_n(rings, NULL, 0, sym, nr); @endcode
+@par Ownership The caller owns both arrays. @par Thread safety Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. @par Example @code size_t nr = 0; seams_rings_nrings(rings, &nr); int \*sym = malloc(nr \* sizeof \*sym); seams_rings_labels_n(rings, NULL, 0, sym, nr); free(sym); @endcode
 
 .. _capi-seams_rings_histogram_n:
 

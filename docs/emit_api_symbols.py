@@ -201,6 +201,7 @@ def cxx_rows():
     add("seams_frame_rdf2d_nbin", "Number of bins in the monolayer RDF.", "cutoff; binwidth", "cutoff and binwidth in angstrom; result is a dimensionless count")
     add("seams_frame_rdf_nbins", "Number of bins in the bulk RDF.", "rmax; nbins", "rmax in angstrom; nbins is a dimensionless count")
     add("seams_frame_read", "Read one frame from a trajectory path.", "path; frame; type_filter", "frame index is dimensionless; coordinates in the file are angstrom")
+    add("seams_frame_chordless", "Chordless cycles of one size on a frame.", "frame; cutoff; type; graph; size; rings; rings_len; n_rings; per_atom", "cutoff in angstrom; size and indices are dimensionless, indices 0-based")
     add("seams_frame_rings", "Histogram of primitive rings.", "frame; cutoff; type; graph; max_depth; counts; counts_len", cut + "; counts[k] is a dimensionless ring count")
     add("seams_frame_select", "Keep selected oxygens for later classifiers.", "frame; type; mols; nmol", "type and molecule ids are dimensionless")
     add("seams_frame_set_positions", "Replace coordinates on an array-built frame.", "frame; xyz; n; box9", "coordinates and box lengths in angstrom")

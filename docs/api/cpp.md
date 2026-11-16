@@ -271,6 +271,22 @@ Units: cutoff in angstrom; coordinates in angstrom; skin in angstrom; phase time
 
 Example: `docs/examples/minimal_cpp.cpp`
 
+### seams_frame_chordless
+
+Purpose: Chordless cycles of one size on a frame.
+
+Parameters: frame; cutoff; type; graph; size; rings; rings_len; n_rings; per_atom
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
+Units: cutoff in angstrom; size and indices are dimensionless, indices 0-based
+
+Example: `docs/examples/minimal_cpp.cpp`
+
 ### seams_frame_free
 
 Purpose: Free a language-binding frame.

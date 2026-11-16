@@ -35,6 +35,7 @@ seams_rings_count
 seams_rings_histogram
 seams_rings_labels
 seams_rings_vertices
+seams_rings_chordless
 seams_rings_fraction
 seams_rings_nrings
 seams_rings_labels_n

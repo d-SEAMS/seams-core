@@ -243,7 +243,7 @@ int main(int argc, char **argv) {
                                                                                                 : 0;
   }
   std::vector<int> shell;
-  symm::classifyIceCloud(cloud, shell);
+  symm::classifyIceCloud(cloud, shell, true);
   std::vector<char> kernel(static_cast<std::size_t>(cloud.nop), 0);
   for (int i = 0; i < cloud.nop; ++i) {
     kernel[static_cast<std::size_t>(i)] = shell[static_cast<std::size_t>(i)] >= 0 ? 1 : 0;

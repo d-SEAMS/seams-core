@@ -4,7 +4,7 @@ Cages
 
 Hexagonal, cubic, and signature cages.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 84 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 85 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_cages.c
    :language: c

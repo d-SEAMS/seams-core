@@ -707,6 +707,14 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_rings_vertices 6
 ```
 
+### seams_rings_chordless
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_chordless 256
+```
+
 ### seams_rings_fraction
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -5267,6 +5275,43 @@ The tour call is in `docs/examples/c_api_tour.c`.
 Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_chordless
+
+Purpose: Chordless cycles of one size.
+
+A cycle is chordless when no edge of the graph joins two of its vertices that are not next to each other on the cycle. Every primitive ring is chordless; a chordless cycle need not be primitive. Each cycle is written once as size atom indices: it starts at its lowest index and runs towards the smaller of that atom's two cycle neighbours. Cycles are sorted lexicographically, so the list does not depend on the thread count.
+
+```c
+seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len);
+```
+
+Parameters: `nb`, `size`, `rings`, `rings_len`, `n_rings`, `per_atom`, `per_atom_len`.
+
+- `nb`: Graph from seams_neighbours_build().
+- `size`: Cycle length, from 3 through 12.
+- `rings`: Caller buffer of size times the cycle count ints, or NULL to skip the list.
+- `rings_len`: Length of rings in ints. Ignored when rings is NULL.
+- `n_rings`: Receives the cycle count. Required when rings is not NULL.
+- `per_atom`: Caller buffer of one int per atom, or NULL. Receives the number of cycles through each atom.
+- `per_atom_len`: Length of per_atom. Ignored when per_atom is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL. rings, n_rings and per_atom may not all be NULL. A short rings buffer returns SEAMS_ERR_RANGE after n_rings and per_atom are written.
+
+Ownership: The caller owns rings and per_atom. Indices are positions in the frame.
+
+Thread safety: Exclusive use of nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_six = 0;
+seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:
