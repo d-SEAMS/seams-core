@@ -437,6 +437,7 @@ paper/data/brine-frames/.dry-run/
 /d-SEAMS/
 .tip_sha
 /.lammps-src
+/.lammps-serial/
 /docs/nucleation/mw4096-leads.png
 
 # Benchmark outputs

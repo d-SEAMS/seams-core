@@ -32,6 +32,16 @@ for tool in "$root"/scripts/asan-path/*; do
 done
 # Resolved before meson setup so find_program('cargo') records the wrapper.
 export PATH="$wrap:$PATH"
+# run_hook links LAMMPS and is built with the sanitizer. The environment's
+# LAMMPS initializes Open MPI, whose allocations outlive MPI_Finalize, so
+# the hook is linked to a serial LAMMPS that loads no MPI library.
+# SEAMS_LAMMPS_SERIAL names an existing install; CI caches .lammps-serial.
+lammps_serial=${SEAMS_LAMMPS_SERIAL:-$root/.lammps-serial}
+lammps_pc=$(sh "$root/scripts/build_lammps_serial.sh" "$lammps_serial")
+export PKG_CONFIG_PATH="$lammps_pc${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+# The environment's LDFLAGS put its own lib first in every rpath, and that
+# lib has the Open MPI liblammps.so.0. The serial lib holds only LAMMPS.
+export LDFLAGS="-Wl,-rpath,$lammps_serial/lib${LDFLAGS:+ $LDFLAGS}"
 reconfigure=
 if [ "${1:-}" = "--reconfigure" ]; then
   reconfigure=--reconfigure
