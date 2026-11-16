@@ -757,6 +757,21 @@ test('omp_threads',
   env: _test_env,
   timeout: 120)
 
+# One-thread runs under taskset keep one cpu and one thread; see the driver.
+if host_machine.system() == 'linux'
+  test('serial_affinity', find_program('python3'),
+    args: [files('test_serial_affinity.py'),
+           executable('test_serial_affinity', 'test_serial_affinity.cpp',
+             dependencies: [yds_dep],
+             link_with: seams_api_lib,
+             cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+             link_args: _test_link_args,
+             include_directories: [_incdirs, include_directories('../include')],
+             build_rpath: _test_rpath)],
+    env: _test_env,
+    timeout: 300)
+endif
+
 test('chill_mixed',
   executable('test_chill_mixed', 'test_chill_mixed.cpp',
     dependencies: [yds_dep, catch2_dep],
