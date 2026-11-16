@@ -4,6 +4,7 @@
 #include <bond.hpp>
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <chordless.hpp>
 #include <cage_affiliation.hpp>
 #include <cage_enum.hpp>
 #include <franzblau.hpp>
@@ -1011,6 +1012,151 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
     std::fill(counts, counts + counts_len, 0);
     for (const auto &ring : rings) {
       counts[static_cast<int>(ring.size())] += 1;
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+namespace {
+
+// The graph seams_neighbours_build makes, so the cycles carry the same
+// indices as seams_rings_chordless on the same frame. A type <= 0 on a
+// frame with more than one species bonds every atom.
+void chordless_graph(const Cloud &cloud, double cutoff, int type,
+                     const std::string &graph, std::vector<int> &offsets,
+                     std::vector<int> &cols) {
+  if (graph == "cutoff") {
+    std::vector<int> subset;
+    const std::vector<int> *sub = nullptr;
+    if (type > 0) {
+      bool uniform = cloud.nop > 0;
+      for (int i = 0; i < cloud.nop && uniform; ++i) {
+        uniform = cloud.pts[static_cast<std::size_t>(i)].type == type;
+      }
+      if (!uniform) {
+        for (int i = 0; i < cloud.nop; ++i) {
+          if (cloud.pts[static_cast<std::size_t>(i)].type == type) {
+            subset.push_back(i);
+          }
+        }
+        sub = &subset;
+      }
+    }
+    if (nneigh::orthoFullCsr(cloud, sub, cutoff, offsets, cols, false)) {
+      return;
+    }
+  }
+  Cloud work = cloud;
+  int typ = type;
+  if (type <= 0) {
+    typ = work.nop > 0 && work.pts[0].type > 0 ? work.pts[0].type : 1;
+    bool mixed = work.nop > 0 && work.pts[0].type <= 0;
+    for (int i = 1; i < work.nop && !mixed; ++i) {
+      mixed = work.pts[static_cast<std::size_t>(i)].type != work.pts[0].type;
+    }
+    if (mixed) {
+      typ = 1;
+    }
+    for (auto &point : work.pts) {
+      point.type = typ;
+    }
+  }
+  const auto rows =
+      graph == "mutual"
+          ? nneigh::kNearestNeighbourList(work, 4, cutoff + 1.5, typ, true)
+          : nneigh::neighListO(cutoff, work, typ);
+  auto idx = nneigh::neighbourListByIndex(work, rows);
+  const int n = work.nop;
+  idx.resize(static_cast<std::size_t>(std::max(n, 0)));
+  offsets.assign(static_cast<std::size_t>(n + 1), 0);
+  cols.clear();
+  for (int i = 0; i < n; ++i) {
+    for (int id : idx[static_cast<std::size_t>(i)]) {
+      if (id != i) {
+        cols.push_back(id);
+      }
+    }
+    offsets[static_cast<std::size_t>(i + 1)] = static_cast<int>(cols.size());
+  }
+}
+
+} // namespace
+
+int seams_frame_chordless(seams_frame *frame, double cutoff, int type,
+                          const char *graph, int size, int *rings,
+                          int rings_len, int *n_rings, int *per_atom) {
+  clear_error();
+  if (frame == nullptr) {
+    set_error("frame is null");
+    return 1;
+  }
+  if (rings != nullptr && n_rings == nullptr) {
+    set_error("rings needs n_rings");
+    return 1;
+  }
+  if (rings == nullptr && n_rings == nullptr && per_atom == nullptr) {
+    set_error("rings, n_rings and per_atom are all null");
+    return 1;
+  }
+  if (size < 3 || size > chordless::kMaxSize) {
+    set_error("size must be from 3 to 12");
+    return 1;
+  }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("cutoff must be positive");
+    return 1;
+  }
+  try {
+    const std::string which =
+        (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
+    if (which != "cutoff" && which != "mutual" && which != "knn") {
+      throw std::invalid_argument("unknown chordless graph '" + which +
+                                  "' (use cutoff or mutual)");
+    }
+    const std::string kind = which == "knn" ? "mutual" : which;
+    const bool selected = drops_atoms(frame);
+    seams_frame sub;
+    if (selected) {
+      sub = oxygen_subframe(frame);
+    }
+    const Cloud &work = selected ? sub.cloud : frame->cloud;
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    chordless_graph(work, cutoff, type, kind, offsets, cols);
+    std::vector<int> found;
+    std::vector<int> local(static_cast<std::size_t>(std::max(work.nop, 0)), 0);
+    const std::size_t count = chordless::cycles(
+        offsets, cols, size, rings != nullptr ? &found : nullptr,
+        per_atom != nullptr ? local.data() : nullptr);
+    if (selected) {
+      // oxygen_index is ascending, so the mapped rows stay canonical and
+      // sorted.
+      for (int &vertex : found) {
+        vertex = frame->oxygen_index[static_cast<std::size_t>(vertex)];
+      }
+    }
+    if (per_atom != nullptr) {
+      const int n = frame->cloud.nop;
+      std::fill(per_atom, per_atom + std::max(n, 0), 0);
+      for (std::size_t k = 0; k < local.size(); ++k) {
+        const int atom =
+            selected ? frame->oxygen_index[k] : static_cast<int>(k);
+        per_atom[atom] = local[k];
+      }
+    }
+    if (n_rings != nullptr) {
+      *n_rings = static_cast<int>(count);
+    }
+    if (rings != nullptr) {
+      if (rings_len < 0 ||
+          static_cast<std::size_t>(rings_len) < found.size()) {
+        set_error("rings buffer is short");
+        return 1;
+      }
+      std::copy(found.begin(), found.end(), rings);
     }
     return 0;
   } catch (...) {

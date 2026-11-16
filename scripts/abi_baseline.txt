@@ -95,6 +95,7 @@ T seams_frame_chill
 T seams_frame_chill_plus
 T seams_frame_chill_plus_rule
 T seams_frame_chill_rings
+T seams_frame_chordless
 T seams_frame_free
 T seams_frame_from_arrays
 T seams_frame_from_species
