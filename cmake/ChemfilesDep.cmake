@@ -72,5 +72,10 @@ if(SEAMS_WITH_CHEMFILES)
     set(CHFL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(CHFL_BUILD_DOCUMENTATION OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(chemfiles)
+    # A conda environment already holds the unpatched libchemfiles.so.0.10,
+    # and the conda compiler puts that lib directory first on the RPATH.
+    # Under the upstream name the loader opens that copy, which lacks
+    # seams_with_frame. The patched library needs a soname of its own.
+    set_target_properties(chemfiles PROPERTIES OUTPUT_NAME seams-chemfiles)
   endif()
 endif()

@@ -82,10 +82,10 @@ probe before it accepts an installed copy.
 ~SEAMS_CHEMFILES_FORCE_VENDORED~ skips the installed copy. The Meson
 fallback sets it after the probe has already failed. The conda
 compiler puts its own lib directory first on the RPATH, and that
-directory already has ~libchemfiles.so.0.10~. When ~patchelf~ is on
-~PATH~, the patched library is given the soname
-~libseams-chemfiles.so.0.10~ so the loader does not open the
-unpatched file.
+directory already has ~libchemfiles.so.0.10~. The patched library is
+built as ~libseams-chemfiles~, with the soname
+~libseams-chemfiles.so.0.10~, so the loader does not open the
+unpatched file. That file has no ~seams_with_frame~.
 
 * Nix flake
 

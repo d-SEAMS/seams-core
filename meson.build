@@ -420,17 +420,19 @@ else
   if not chemfiles_dep.found()
     chem_prefix = meson.project_build_root() / 'chemfiles-prefix'
     cmake_bin = find_program('cmake', required: chemfiles_opt)
-    # The prefix records the patches it was built with. A changed patch
-    # set refetches the source, since the patch step runs only on a fetch.
+    # The prefix records the patches and the CMake files it was built
+    # with. A change to either refetches the source, since the patch step
+    # runs only on a fetch.
     _chem_patch_ids = []
-    foreach _patch : ['chemfiles-0.10.4-mmcif.patch', 'chemfiles-0.10.4-mol2.patch',
-                      'chemfiles-0.10.4-frame-visit.patch',
-                      'chemfiles-0.10.4-zlib-apple.sh', 'chemfiles-0.10.4-fmt-libcxx.sh']
-      _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / 'patches' / _patch, 'sha256')]
+    foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
+                      'patches/chemfiles-0.10.4-frame-visit.patch',
+                      'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
+                      'CMakeLists.txt', 'ChemfilesDep.cmake']
+      _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]
     endforeach
     _chem_patch_text = '\n'.join(_chem_patch_ids)
     _chem_stamp = chem_prefix / 'seams-patches.txt'
-    _chem_current = fs.exists(chem_prefix / 'lib' / 'libchemfiles.so') and fs.exists(_chem_stamp)
+    _chem_current = fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so') and fs.exists(_chem_stamp)
     if _chem_current
       # fs.read() refuses a path in the build tree.
       _chem_current = run_command('cat', _chem_stamp, check: false).stdout().strip() == _chem_patch_text
@@ -454,30 +456,12 @@ else
       run_command('sh', '-c', 'printf "%s\\n" "$1" > "$2"', 'sh', _chem_patch_text, _chem_stamp,
                   check: true)
     endif
-    # The conda driver puts its lib directory first on the RPATH, and
-    # that directory already contains libchemfiles.so.0.10. A later
-    # rpath entry is never consulted. Give the patched library its own
-    # soname so the loader cannot satisfy it with the unpatched copy.
-    _chem_real = chem_prefix / 'lib' / 'libchemfiles.so.0.10.4'
-    _chem_soname_now = ''
-    if fs.exists(_chem_real)
-      _chem_soname_now = 'libchemfiles.so.0.10'
-      patchelf = find_program('patchelf', required: false)
-      if patchelf.found()
-        _chem_soname_now = 'libseams-chemfiles.so.0.10'
-        _chem_soname = run_command(patchelf, '--print-soname', _chem_real,
-                                   check: false).stdout().strip()
-        if _chem_soname != 'libseams-chemfiles.so.0.10'
-          run_command(patchelf, '--set-soname', 'libseams-chemfiles.so.0.10',
-                      _chem_real, check: true)
-        endif
-        run_command(find_program('ln'), '-sfn', 'libchemfiles.so.0.10.4',
-                    chem_prefix / 'lib' / 'libseams-chemfiles.so.0.10',
-                    check: true)
-      endif
-    endif
-    if fs.exists(chem_prefix / 'lib' / 'libchemfiles.so')
-      chemfiles_dep = cppc.find_library('chemfiles',
+    # cmake/ChemfilesDep.cmake names the patched library seams-chemfiles,
+    # so its soname cannot be satisfied by the unpatched libchemfiles.so.0.10
+    # in the conda lib directory the conda driver puts first on the RPATH.
+    _chem_real = chem_prefix / 'lib' / 'libseams-chemfiles.so.0.10.4'
+    if fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so')
+      chemfiles_dep = cppc.find_library('seams-chemfiles',
                                         dirs: chem_prefix / 'lib',
                                         required: chemfiles_opt)
       if chemfiles_dep.found()
@@ -488,8 +472,8 @@ else
         _chem_vendored = true
         # The installed libyodaLib finds this copy through its $ORIGIN
         # rpath, under the soname it was linked against.
-        if _chem_soname_now != ''
-          install_data(_chem_real, rename: _chem_soname_now,
+        if fs.exists(_chem_real)
+          install_data(_chem_real, rename: 'libseams-chemfiles.so.0.10',
                        install_dir: get_option('libdir'),
                        install_mode: 'rwxr-xr-x')
         endif
