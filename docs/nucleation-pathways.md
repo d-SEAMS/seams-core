@@ -394,12 +394,12 @@ A climb has nucleated when `n_chill_core` passes 300 and stays at or
 above 300 for 1 ns. A passage that the end of the run cuts short is
 not an onset; that climb is `not nucleated, extend`. Only nucleated
 climbs are shot. Shots start at the last crossing of 50, 75, 100,
-150, 200 and 300 before the onset and run, for at most 5 ns, until
-they reach a basin. Basin A, uncommitted, is liquid of the same age:
+150, 200, 225, 250, 275 and 300 before the onset and run until they
+reach a basin, for at most the shot window, 20 ns by default. Basin A, uncommitted, is liquid of the same age:
 the 95th percentile of `n_chill_core` over the climb's last 2 ns
 before it first reaches 100. Basin B, committed, is `n_chill_core` at
 or above 400 held for 200 ps, for every n. A shot in neither basin at
-5 ns is unresolved and has no fate. The climb table records basin A,
+the end of its window is unresolved and has no fate. The climb table records basin A,
 when the climb itself enters basin B and its lowest `n_chill_core`
 after that, and the 95th percentile of a fresh 2 ns liquid as a
 reference only. On seed 20261111 a fresh liquid gives 14 against 83
@@ -423,9 +423,26 @@ snakemake -j1 data/committor-shards/climb-0-of-20.csv \
   --config seeds=20261111-20261130 shard=0/20
 snakemake -j1 data/committor-shards/extend-0-of-20.3.log \
   --config seeds=20261111-20261130 shard=0/20
-snakemake -j1 data/committor-shards/shot-0-of-20.csv \
-  --config seeds=20261111-20261130 shard=0/20
+snakemake -j1 data/committor-shards/pb-0-of-20.csv \
+  --config seeds=20261111-20261130 shard=0/20 window_ns=20
 ```
+
+`pb-<k>-of-<K>.csv` is p_commit per n with its Wilson score interval,
+committed over resolved shots; unresolved shots are counted beside it
+and never given a fate. `nstar-<k>-of-<K>.csv` is n* from a logistic
+fit, against the nominal n and against `n_chill_core` of the shooting
+frame, when both fates appear. The report reads the extended tables
+`shot-<k>-of-<K>[.n<sizes>].w<window_ps>.csv`. Extending continues
+every unresolved shot of a shot table to the window or its first
+basin from its saved state: the restart that its last segment wrote
+at the end of its window. A shot from before restarts were written is
+rebuilt by replaying its first segment with the same velocity seed,
+deck and launcher. The replay counts only if every thermo line equals
+the shot's log and its last frame gives the traced sizes. From the
+restart on, a continuation shares the state but not the roundoff of an
+uninterrupted run. `sizes=225,250,275` shoots only those sizes, into
+`shot-<k>-of-<K>.n225-250-275.csv`. The merge takes each shot from its
+table with the longest window.
 
 The extension continues each climb that has not nucleated by 10 ns,
 up to 40 ns, from its restart. A climb from before the restart was

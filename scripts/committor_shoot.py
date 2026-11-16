@@ -29,18 +29,26 @@ the same for every n. The climb table records when the climb itself
 first enters basin B and the lowest n_chill_core after that, so a
 basin B that is not past the barrier shows in the numbers.
 
-Shooting points. For n in 50, 75, 100, 150, 200 and 300, the last
-frame at or before the onset where n_chill_core crosses up to n.
+Shooting points. For n in 50, 75, 100, 150, 200, 225, 250, 275 and
+300, the last frame at or before the onset where n_chill_core crosses
+up to n. --sizes shoots a subset into its own table.
 Sizes inside basin A are kept: p_B there should be near 0.
 
 Shots. 20 per point, fresh Maxwell-Boltzmann velocities at 180 K from
 a seed derived from (climb seed, n, shot index). n_chill_core is read
 every 10 ps and the shot runs until it reaches a basin, for at most
-5 ns. A shot still in neither basin at 5 ns is unresolved and is never
-given a fate. eta_hours counts every shot at 5 ns, an upper bound.
+the window, 20 ns unless --window-ps says otherwise. A shot still in
+neither basin at the end of its window is unresolved and is never
+given a fate; it leaves a restart. --extend-shots continues the
+unresolved shots of a table from that saved state to a longer window,
+or rebuilds the state by an exact replay when the shot has no
+restart. eta_hours counts every shot at the full window, an upper
+bound.
 
 p_B(n) is the committed fraction among resolved shots that started at
-size n. n* is the size where a logistic fit of p_B crosses one half.
+size n, with its Wilson score interval (--pb). n* is the size where a
+logistic fit of p_B crosses one half, fitted only when both fates
+appear.
 The 64-molecule deck is a fixture for the driver, not this table.
 
 One VM runs one shard. Shard k of K is the seeds whose index modulo K
@@ -55,8 +63,8 @@ the target comes first:
     export SEAMS_LIB=$PWD/bbdir/src
     snakemake -j1 data/committor-shards/climb-0-of-20.csv \\
         --config seeds=20261111-20261130 shard=0/20
-    snakemake -j1 data/committor-shards/shot-0-of-20.csv \\
-        --config seeds=20261111-20261130 shard=0/20
+    snakemake -j1 data/committor-shards/pb-0-of-20.csv \\
+        --config seeds=20261111-20261130 shard=0/20 window_ns=20
 
 A climb that has not nucleated is continued 10 ns at a time, up to
 40 ns, by the extension rule, which rewrites the same climb table.
@@ -78,6 +86,7 @@ import hashlib
 import math
 import os
 import random
+import re
 import shutil
 import signal
 import subprocess
@@ -96,23 +105,24 @@ BASIN_B_HOLD_PS = 200.0
 PLATEAU_MARK = 100
 PLATEAU_PS = 2000.0
 LIQUID_PERCENTILE = 95.0
-SHOT_NS = 5.0
+SHOT_NS = 20.0
+WILSON_Z = 1.959963984540054
 N_SHOTS = 20
 BOOT_DRAWS = 10000
 BOOT_SEED = 20261111
 
 # Published homogeneous lane, input/nucleation/in.homogeneous.
-# 10 fs steps. 10 ns is 1e6 steps. The longest shot, 5 ns, is 5e5 steps.
+# 10 fs steps. 10 ns is 1e6 steps. The default shot window, 20 ns, is 2e6 steps.
 TIMESTEP_FS = 10.0
 CLIMB_STEPS = 1_000_000
-SHOT_STEPS = 500_000
+SHOT_STEPS = 2_000_000
 N_SEEDS = 20
 
 ORDER = "n_chill_core"
 SERIES = ("n_chill_core", "n_chill_ext", "n_q6solid")
 NUCLEUS_CUT = 300
 HOLD_PS = 1000.0
-SHOOT_SIZES = (50, 75, 100, 150, 200, 300)
+SHOOT_SIZES = (50, 75, 100, 150, 200, 225, 250, 275, 300)
 N_SHOOT_SIZES = len(SHOOT_SIZES)
 EQUIL_PS = 1000.0
 TEMPERATURE = 180.0
@@ -154,26 +164,46 @@ def core_p95(nmax: list[float]) -> float:
     return ordered[lo] * (1.0 - weight) + ordered[hi] * weight
 
 
-def shot_fate(series: list[float], basin_a: float, times_ps: list[float] | None = None,
+def basin_hit(series: list[float], basin_a: float, times_ps: list[float] | None = None,
               basin_b: float = BASIN_B,
-              hold_ps: float = BASIN_B_HOLD_PS) -> tuple[str, int | None]:
+              hold_ps: float = BASIN_B_HOLD_PS) -> tuple[str, int | None, int | None]:
     """Walk one shot from its first check to the first basin it reaches.
     Uncommitted at the first frame at or below basin_a; committed once
     the series has stayed at or above basin_b for hold_ps. Otherwise
-    unresolved, which is never turned into a fate. Returns the fate and
-    the frame that decided it."""
+    unresolved, which is never turned into a fate. Returns the fate, the
+    frame where the shot entered that basin, and the frame that decided
+    it. The two frames differ only for basin B, by the hold."""
     times = times_ps if times_ps is not None else [FRAME_PS * (i + 1) for i in range(len(series))]
     start = None
     for i, size in enumerate(series):
         if size <= basin_a:
-            return "uncommitted", i
+            return "uncommitted", i, i
         if size >= basin_b:
             start = i if start is None else start
             if times[i] - times[start] >= hold_ps:
-                return "committed", i
+                return "committed", start, i
         else:
             start = None
-    return "unresolved", None
+    return "unresolved", None, None
+
+
+def shot_fate(series: list[float], basin_a: float, times_ps: list[float] | None = None,
+              basin_b: float = BASIN_B,
+              hold_ps: float = BASIN_B_HOLD_PS) -> tuple[str, int | None]:
+    """The fate and the frame that decided it; see basin_hit."""
+    fate, _hit, decided = basin_hit(series, basin_a, times_ps, basin_b, hold_ps)
+    return fate, decided
+
+
+def wilson(committed: int, resolved: int, z: float = WILSON_Z) -> tuple[float, float]:
+    """Wilson score interval of committed out of resolved shots."""
+    if resolved == 0:
+        return float("nan"), float("nan")
+    p = committed / resolved
+    denom = 1.0 + z * z / resolved
+    centre = (p + z * z / (2.0 * resolved)) / denom
+    half = z * math.sqrt(p * (1.0 - p) / resolved + z * z / (4.0 * resolved * resolved)) / denom
+    return max(0.0, centre - half), min(1.0, centre + half)
 
 
 def basin_b_entry(series: list[float], times_ps: list[float], basin_b: float = BASIN_B,
@@ -483,19 +513,61 @@ def write_pending(table: Path, summary: Path) -> None:
 
 
 def read_shot_shard(path: Path) -> list[tuple[float, str]]:
-    shots = []
+    return [(float(row["shoot_n"]), row["fate"]) for row in read_shot_rows(path)]
+
+
+def read_shot_rows(path: Path) -> list[dict[str, str]]:
+    lines = [line for line in path.read_text().splitlines() if line and not line.startswith("#")]
+    return list(csv.DictReader(lines))
+
+
+SHOT_TABLE = re.compile(r"shot-(\d+)-of-(\d+)(\.n\d+(?:-\d+)*)?(?:\.w(\d+))?\.csv")
+
+
+def table_window(path: Path) -> float:
+    """The shot window of a table in ps: its '# window_ps' line, or the
+    'after N ps' of an older note, or 0 for a table that states none."""
     for line in path.read_text().splitlines():
-        if not line or line.startswith("#") or line.startswith("seed,"):
-            continue
-        parts = line.split(",")
-        shots.append((float(parts[1]), parts[3]))
-    return shots
+        if not line.startswith("#"):
+            break
+        if line.startswith("# window_ps "):
+            return float(line.split()[2])
+        found = re.search(r"unresolved(?:, with no fate,)? after (\d+) ps", line)
+        if found:
+            return float(found.group(1))
+    return 0.0
+
+
+def shard_tables(directory: Path) -> dict[tuple[int, int], list[Path]]:
+    tables: dict[tuple[int, int], list[Path]] = {}
+    for path in sorted(directory.glob("shot-*-of-*.csv")):
+        found = SHOT_TABLE.fullmatch(path.name)
+        if found:
+            tables.setdefault((int(found.group(1)), int(found.group(2))), []).append(path)
+    return tables
+
+
+def union_rows(paths: list[Path]) -> list[dict[str, str]]:
+    """Every shot once. A shot in several tables, such as a table and its
+    extension, is taken from the table with the longest window."""
+    best: dict[tuple[str, str, str], tuple[float, Path]] = {}
+    tables = [(path, table_window(path), read_shot_rows(path)) for path in paths]
+    for path, window, rows in tables:
+        for row in rows:
+            key = (row["seed"], row["shoot_n"], row["shot"])
+            if key not in best or window > best[key][0]:
+                best[key] = (window, path)
+    out = []
+    for path, _window, rows in tables:
+        out.extend(row for row in rows
+                   if best[(row["seed"], row["shoot_n"], row["shot"])][1] == path)
+    return out
 
 
 def merge_shot_dir(directory: Path) -> list[tuple[float, str]]:
     shots: list[tuple[float, str]] = []
-    for path in sorted(directory.glob("shot-*-of-*.csv")):
-        shots.extend(read_shot_shard(path))
+    for _shard, paths in sorted(shard_tables(directory).items()):
+        shots.extend((float(row["shoot_n"]), row["fate"]) for row in union_rows(paths))
     return shots
 
 
@@ -538,14 +610,9 @@ def coverage_note(directory: Path | None) -> str:
     present: dict[int, Path] = {}
     quiet: list[int] = []
     width = None
-    for path in sorted(directory.glob("shot-*-of-*.csv")):
-        parts = path.stem.split("-")
-        if len(parts) != 4 or parts[0] != "shot" or parts[2] != "of":
-            continue
-        k = int(parts[1])
-        width = int(parts[3])
-        present[k] = path
-        head = "\n".join(path.read_text().splitlines()[:8])
+    for (k, width), paths in sorted(shard_tables(directory).items()):
+        present[k] = paths[0]
+        head = "\n".join(line for path in paths for line in path.read_text().splitlines()[:8])
         climb = directory / f"climb-{k}-of-{width}.csv"
         outcomes = read_climb_outcomes(climb) if climb.is_file() else {}
         if "# nucleation no" in head or (
@@ -626,13 +693,19 @@ def self_test_rules() -> None:
         raise SystemExit("a held passage is nucleated")
     climb = [1, 30, 60, 40, 55, 80, 70, 49, 51, 90, 120, 160, 210, 320] + [480] * 100
     onset = nucleation_onset(climb)
-    points = dict(shooting_points(climb, onset))
+    six = (50, 75, 100, 150, 200, 300)
+    points = dict(shooting_points(climb, onset, six))
     want = {50: 8, 75: 9, 100: 10, 150: 11, 200: 12, 300: 13}
     if onset != 13 or points != want:
         raise SystemExit(f"last crossings {points} onset {onset}")
-    if shooting_points([1, 30, 301, 650], 2) != [(50, 2), (75, 2), (100, 2), (150, 2),
-                                                  (200, 2), (300, 2)]:
+    if shooting_points([1, 30, 301, 650], 2, six) != [(50, 2), (75, 2), (100, 2), (150, 2),
+                                                       (200, 2), (300, 2)]:
         raise SystemExit("a jump crosses every size at once")
+    # Shard 0: 165 to 267 crosses 200 and 225 on one frame.
+    between = [150, 165, 267, 238, 297, 267, 443, 294, 340]
+    if dict(shooting_points(between, 8, (200, 225, 250, 275, 300))) != {
+            200: 2, 225: 2, 250: 4, 275: 6, 300: 8}:
+        raise SystemExit("the sizes between 200 and 300 left the last-crossing rule")
     if derived_seed(20261125, 50, 0) != derived_seed(20261125, 50, 0):
         raise SystemExit("a derived seed moved")
     seeds = {derived_seed(20261125, n, k) for n in SHOOT_SIZES for k in range(N_SHOTS)}
@@ -757,8 +830,8 @@ def self_test() -> None:
     if not (1.5 < hours["one_climb_h"] < 2.0 and hours["shooting_h"] > hours["twenty_climbs_h"]):
         raise SystemExit(f"eta {hours}")
     want = N_SEEDS * len(SHOOT_SIZES) * N_SHOTS * SHOT_STEPS / 160.0 / 3600.0
-    if N_SHOOT_SIZES != 6 or abs(hours["shooting_h"] - want) > 1e-9:
-        raise SystemExit(f"eta shooting {hours['shooting_h']} is not six sizes")
+    if N_SHOOT_SIZES != 9 or abs(hours["shooting_h"] - want) > 1e-9:
+        raise SystemExit(f"eta shooting {hours['shooting_h']} is not nine sizes")
     seeds = parse_seed_list("20261111-20261130")
     if len(seeds) != 20:
         raise SystemExit("the published seed list is not 20 long")
@@ -827,7 +900,88 @@ def self_test() -> None:
     quiet_dir_shots = read_shot_shard(only_quiet / "shot-1-of-3.csv")
     if quiet_dir_shots:
         raise SystemExit("a no-nucleation shard yielded shots")
+    self_test_extension()
     print("self-test ok")
+
+
+def self_test_extension() -> None:
+    if basin_hit([150, 380] + [400] * 21, 83) != ("committed", 2, 22):
+        raise SystemExit("the hit of basin B is the start of its held stay")
+    if basin_hit([150, 120, 80, 500], 83) != ("uncommitted", 2, 2):
+        raise SystemExit("the hit of basin A is its frame")
+    if basin_hit([340] * 50, 83) != ("unresolved", None, None):
+        raise SystemExit("an unresolved shot has a hit")
+    lo, hi = wilson(9, 9)
+    if abs(hi - 1.0) > 1e-12 or abs(lo - 0.7008) > 1e-4:
+        raise SystemExit(f"Wilson 9 of 9 is {lo} {hi}")
+    lo, hi = wilson(10, 20)
+    if abs(lo - 0.2993) > 1e-4 or abs(hi - 0.7007) > 1e-4:
+        raise SystemExit(f"Wilson 10 of 20 is {lo} {hi}")
+    if wilson(0, 0) == wilson(0, 0):
+        raise SystemExit("no resolved shot has a Wilson interval")
+    for name, want in (("shot-0-of-20.csv", ("0", "20", None, None)),
+                       ("shot-0-of-20.w20000.csv", ("0", "20", None, "20000")),
+                       ("shot-3-of-20.n225-250-275.w20000.csv",
+                        ("3", "20", ".n225-250-275", "20000")),
+                       ("shot-3-of-20.n250.csv", ("3", "20", ".n250", None))):
+        found = SHOT_TABLE.fullmatch(name)
+        if found is None or found.groups() != want:
+            raise SystemExit(f"{name} parsed as {found and found.groups()}")
+    if SHOT_TABLE.fullmatch("shot-0-of-20.csv.partial") or SHOT_TABLE.fullmatch("pb-0-of-20.csv"):
+        raise SystemExit("a partial or report file was taken as a shot table")
+    if parse_sizes("225,250,275") != (225, 250, 275) or parse_sizes("") != SHOOT_SIZES:
+        raise SystemExit("sizes were not parsed")
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        head = "seed,shoot_n,shot,fate,t_end_ps,wall_s,t_hit_ps,start_core,replay_s\n"
+        (folder / "shot-0-of-2.csv").write_text(
+            "# commit a\n# a shot runs to its first basin: ...; check every 10 ps; "
+            "unresolved, with no fate, after 5000 ps\n" + head +
+            "1,200,0,unresolved,5000,450,,267,\n1,200,1,uncommitted,40,4,40,267,\n"
+            "1,300,0,committed,2530,230,2330,340,\n")
+        (folder / "shot-0-of-2.w20000.csv").write_text(
+            "# commit b\n# window_ps 20000\n" + head +
+            "1,200,0,committed,9000,1000,8800,267,400\n1,200,1,uncommitted,40,4,40,267,\n"
+            "1,300,0,committed,2530,230,2330,340,\n")
+        (folder / "shot-0-of-2.n250.w20000.csv").write_text(
+            "# commit c\n# window_ps 20000\n" + head +
+            "1,250,0,unresolved,20000,2000,,297,\n1,250,1,committed,700,90,500,297,\n")
+        (folder / "shot-1-of-2.csv").write_text(
+            "# commit d\n" + head + "2,200,0,uncommitted,30,3,30,201,\n")
+        if table_window(folder / "shot-0-of-2.csv") != 5000.0 or \
+                table_window(folder / "shot-1-of-2.csv") != 0.0:
+            raise SystemExit("table windows were not read")
+        tables = shard_tables(folder)
+        if sorted(tables) != [(0, 2), (1, 2)] or len(tables[(0, 2)]) != 3:
+            raise SystemExit(f"shard tables {tables}")
+        rows = union_rows(tables[(0, 2)])
+        keys = sorted((r["shoot_n"], r["shot"], r["fate"]) for r in rows)
+        if keys != [("200", "0", "committed"), ("200", "1", "uncommitted"),
+                    ("250", "0", "unresolved"), ("250", "1", "committed"),
+                    ("300", "0", "committed")]:
+            raise SystemExit(f"the union kept {keys}")
+        if sorted(merge_shot_dir(folder)) != sorted(
+                [(200.0, "committed"), (200.0, "uncommitted"), (250.0, "unresolved"),
+                 (250.0, "committed"), (300.0, "committed"), (200.0, "uncommitted")]):
+            raise SystemExit("the merge did not take each shot from its longest window")
+        if "present [0, 1] of 2; missing []" not in coverage_note(folder):
+            raise SystemExit(f"suffixed tables counted as missing: {coverage_note(folder)}")
+        out = folder / "pb-0-of-2.csv"
+        write_pb(out, tables[(0, 2)], "e")
+        pb = {row["shoot_n"]: row for row in read_shot_rows(out)}
+        if (pb["200"]["p_commit"], pb["200"]["resolved"], pb["250"]["unresolved"],
+                pb["250"]["p_commit"], pb["250"]["start_core"]) != ("0.500", "2", "1", "1", "297"):
+            raise SystemExit(f"p_commit rows {pb}")
+        if pb["200"]["replay_total_h"] != "0.111" or pb["300"]["wilson_hi"] != "1":
+            raise SystemExit(f"p_commit rows {pb}")
+        nstar = read_shot_rows(folder / "nstar-0-of-2.csv")
+        if [row["x"] for row in nstar] != ["shoot_n", "start_core"]:
+            raise SystemExit(f"n* rows {nstar}")
+        write_pb(out, [folder / "shot-0-of-2.n250.w20000.csv"], "f")
+        if read_shot_rows(folder / "nstar-0-of-2.csv") or \
+                "one fate only" not in (folder / "nstar-0-of-2.csv").read_text():
+            raise SystemExit("n* was fitted from one fate")
 
 
 def head_commit() -> str:
@@ -871,7 +1025,12 @@ class Plan:
 
 PAPER = Plan()
 SHOT_FIELDS = ["seed", "shoot_n", "shot", "fate", "t_end_ps", "nmax_end",
-               "n_chill_ext_end", "n_q6solid_end", "wall_s"]
+               "n_chill_ext_end", "n_q6solid_end", "wall_s", "t_hit_ps", "start_core",
+               "extension", "replay_s"]
+PB_FIELDS = ["shoot_n", "start_core", "shots", "committed", "uncommitted", "unresolved",
+             "resolved", "p_commit", "wilson_lo", "wilson_hi", "t_hit_median_ps",
+             "wall_mean_s", "wall_total_h", "replay_total_h"]
+NSTAR_FIELDS = ["x", "points", "n_star", "width", "boot_lo", "boot_hi", "draws"]
 BASIN_FIELDS = ["seed", "basin_a", "basin_a_lo_ps", "basin_a_hi_ps", "basin_a_frames",
                 "first_passage_ps", "basin_b", "basin_b_hold_ps", "onset_ps",
                 "liquid_2ns_ref", "liquid_seed"]
@@ -1236,7 +1395,8 @@ def extend_seed(seed: int, directory: Path, lmp: list[str], pathway: str, thread
     return f"{source} {steps} steps"
 
 
-def wait_frame(path: Path, molecules: int, proc: subprocess.Popen) -> None:
+def wait_frame(path: Path, molecules: int, proc: subprocess.Popen,
+               log: Path | None = None) -> None:
     need = 9 + molecules
     while True:
         if path.is_file():
@@ -1248,7 +1408,7 @@ def wait_frame(path: Path, molecules: int, proc: subprocess.Popen) -> None:
                 data = path.read_bytes()
                 if data.endswith(b"\n") and data.count(b"\n") >= need:
                     return
-            log = path.parent / "log.lammps"
+            log = log or path.parent / "log.lammps"
             tail = log.read_text(errors="replace")[-1500:] if log.is_file() else ""
             raise SystemExit(f"LAMMPS stopped before {path.name} in {path.parent}\n{tail}")
         time.sleep(0.2)
@@ -1269,46 +1429,91 @@ def stop(proc: subprocess.Popen) -> None:
             continue
 
 
-def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, basin_a: float,
-             pathway: str, threads: int = 1, plan: Plan = PAPER) -> dict[str, str]:
-    """One shot. LAMMPS runs the whole window; it is stopped as soon as the
-    10 ps frames put the shot in a basin."""
-    started = time.monotonic()
-    if work.exists():
-        shutil.rmtree(work)
-    stage(work, "in.shot")
-    shutil.copy(data, work / "shot.data")
-    variables = {"datafile": "shot.data", "nrun": plan.shot_steps, "ndump": plan.dump_steps,
-                 "Tq": plan.temperature, "seed": velocity_seed}
-    trace: list[tuple[float, dict[str, float]]] = []
-    fate = "unresolved"
-    with (work / "lammps.out").open("w") as handle:
-        proc = subprocess.Popen(lmp_args(lmp, "in.shot", variables, "log.lammps"), cwd=work,
+def read_trace(path: Path) -> list[tuple[float, dict[str, float]]]:
+    rows = read_frames(path)
+    return [(float(row["t_ps"]), {name: float(row[name]) for name in SERIES}) for row in rows]
+
+
+def write_trace(path: Path, trace: list[tuple[float, dict[str, float]]]) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    with tmp.open("w") as handle:
+        handle.write("t_ps\t" + "\t".join(SERIES) + "\n")
+        for t_ps, values in trace:
+            handle.write(fmt(t_ps) + "\t" + "\t".join(fmt(values[n]) for n in SERIES) + "\n")
+    tmp.replace(path)
+
+
+def trace_hit(trace: list[tuple[float, dict[str, float]]], basin_a: float,
+              plan: Plan = PAPER) -> tuple[str, int | None, int | None]:
+    return basin_hit([v[ORDER] for _t, v in trace], basin_a, [t for t, _v in trace],
+                     plan.basin_b, plan.basin_b_hold_ps)
+
+
+def step_of(t_ps: float) -> int:
+    return int(round(t_ps * 1000.0 / TIMESTEP_FS))
+
+
+def thermo_rows(log: Path) -> list[str]:
+    """The thermo lines of a LAMMPS log, whitespace normalised."""
+    rows: list[str] = []
+    inside = False
+    for line in log.read_text(errors="replace").splitlines():
+        words = line.split()
+        if words[:1] == ["Step"]:
+            inside = True
+            continue
+        if inside and words[:2] == ["Loop", "time"]:
+            inside = False
+            continue
+        if inside and words and words[0].isdigit():
+            rows.append(" ".join(words))
+    return rows
+
+
+def advance(lmp: list[str], work: Path, variables: dict[str, object], step0: int,
+            trace: list[tuple[float, dict[str, float]]], basin_a: float, pathway: str,
+            threads: int, plan: Plan, log: str) -> str:
+    """Run one segment of in.shot from step0 for variables['nrun'] steps.
+    Each frame is read as soon as LAMMPS writes it and appended to
+    trace. The run is stopped once the whole trace is in a basin; a
+    segment that ends unresolved runs to its end and writes its
+    restart."""
+    nrun = int(variables["nrun"])
+    fate = trace_hit(trace, basin_a, plan)[0] if trace else "unresolved"
+    if fate != "unresolved":
+        return fate
+    with (work / (Path(log).stem + ".out")).open("w") as handle:
+        proc = subprocess.Popen(lmp_args(lmp, "in.shot", variables, log), cwd=work,
                                 env=lmp_env(), stdout=handle, stderr=subprocess.STDOUT,
                                 start_new_session=True)
         try:
-            for k in range(1, plan.shot_steps // plan.dump_steps + 1):
-                step = k * plan.dump_steps
+            for k in range(1, nrun // plan.dump_steps + 1):
+                step = step0 + k * plan.dump_steps
                 frame = work / f"frame.{step}.lammpstrj"
-                wait_frame(frame, plan.molecules, proc)
+                wait_frame(frame, plan.molecules, proc, work / log)
                 row = census(pathway, frame, work / "check.tsv", threads)[-1]
                 values = {name: float(row[name]) for name in SERIES}
                 check_nmax(values[ORDER], plan.molecules)
                 trace.append((step * TIMESTEP_FS / 1000.0, values))
                 frame.unlink()
-                fate, _frame = shot_fate([v[ORDER] for _t, v in trace], basin_a,
-                                         [t for t, _v in trace], plan.basin_b,
-                                         plan.basin_b_hold_ps)
+                fate = trace_hit(trace, basin_a, plan)[0]
                 if fate != "unresolved":
                     break
+            if fate == "unresolved":
+                code = proc.wait()
+                if code != 0 or not (work / str(variables["out"])).is_file():
+                    tail = (work / log).read_text(errors="replace")[-1500:]
+                    raise SystemExit(f"LAMMPS did not write {variables['out']} in {work}\n{tail}")
         finally:
             stop(proc)
     for leftover in work.glob("frame.*.lammpstrj"):
         leftover.unlink()
-    with (work / "trace.tsv").open("w") as handle:
-        handle.write("t_ps\t" + "\t".join(SERIES) + "\n")
-        for t_ps, values in trace:
-            handle.write(fmt(t_ps) + "\t" + "\t".join(fmt(values[n]) for n in SERIES) + "\n")
+    return fate
+
+
+def shot_result(trace: list[tuple[float, dict[str, float]]], basin_a: float, plan: Plan,
+                wall_s: float) -> dict[str, str]:
+    fate, hit, _decided = trace_hit(trace, basin_a, plan)
     t_end, last = trace[-1]
     return {
         "fate": fate,
@@ -1316,8 +1521,111 @@ def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, basin_a
         "nmax_end": fmt(last[ORDER]),
         "n_chill_ext_end": fmt(last["n_chill_ext"]),
         "n_q6solid_end": fmt(last["n_q6solid"]),
-        "wall_s": f"{time.monotonic() - started:.1f}",
+        "wall_s": f"{wall_s:.1f}",
+        "t_hit_ps": "" if hit is None else fmt(trace[hit][0]),
     }
+
+
+def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, basin_a: float,
+             pathway: str, threads: int = 1, plan: Plan = PAPER) -> dict[str, str]:
+    """One shot. LAMMPS runs the whole window; it is stopped as soon as the
+    10 ps frames put the shot in a basin. A shot still unresolved at the
+    end of the window leaves shot.{step}.restart for extend_shot."""
+    started = time.monotonic()
+    if work.exists():
+        shutil.rmtree(work)
+    stage(work, "in.shot")
+    shutil.copy(data, work / "shot.data")
+    variables = {"source": "data", "datafile": "shot.data", "nrun": plan.shot_steps,
+                 "ndump": plan.dump_steps, "Tq": plan.temperature, "seed": velocity_seed,
+                 "out": f"shot.{plan.shot_steps}.restart"}
+    trace: list[tuple[float, dict[str, float]]] = []
+    advance(lmp, work, variables, 0, trace, basin_a, pathway, threads, plan, "log.lammps")
+    write_trace(work / "trace.tsv", trace)
+    return {**shot_result(trace, basin_a, plan, time.monotonic() - started),
+            "extension": "", "replay_s": ""}
+
+
+def replay_shot(lmp: list[str], work: Path, velocity_seed: int, steps: int,
+                trace: list[tuple[float, dict[str, float]]], pathway: str, threads: int,
+                plan: Plan) -> float:
+    """Rebuild the state of a shot at step steps when its segment left no
+    restart: run the first segment again from shot.data with the same
+    velocity seed, deck and launcher. The replay counts only if every
+    thermo line equals the original log and its last frame gives the
+    traced cluster sizes; then its restart is the saved state."""
+    started = time.monotonic()
+    original = thermo_rows(work / "log.lammps")
+    if len(original) < steps // 1000 + 1:
+        raise SystemExit(f"{work}/log.lammps does not reach step {steps}; "
+                         "a shot is only replayed within its first segment")
+    replay = work / "replay"
+    if replay.exists():
+        shutil.rmtree(replay)
+    stage(replay, "in.shot")
+    shutil.copy(work / "shot.data", replay / "shot.data")
+    restart = f"shot.{steps}.restart"
+    run_lammps(lmp, replay, "in.shot", {
+        "source": "data", "datafile": "shot.data", "nrun": steps, "ndump": steps,
+        "Tq": plan.temperature, "seed": velocity_seed, "out": restart,
+    })
+    rows = thermo_rows(replay / "log.lammps")
+    if len(rows) != steps // 1000 + 1 or rows != original[:len(rows)]:
+        first = next((i for i, (a, b) in enumerate(zip(rows, original)) if a != b), len(rows))
+        raise SystemExit(f"replay of {work} left the original trajectory at thermo line "
+                         f"{first}; the state at step {steps} cannot be rebuilt")
+    row = census(pathway, replay / f"frame.{steps}.lammpstrj", replay / "check.tsv",
+                 threads)[-1]
+    want = trace[-1][1]
+    if any(float(row[name]) != want[name] for name in SERIES):
+        raise SystemExit(f"replay of {work} gives {[row[n] for n in SERIES]} at step {steps}, "
+                         f"the trace has {[want[n] for n in SERIES]}")
+    (replay / restart).replace(work / restart)
+    (replay / "log.lammps").replace(work / "log.replay.lammps")
+    shutil.rmtree(replay)
+    return time.monotonic() - started
+
+
+def extend_shot(lmp: list[str], work: Path, velocity_seed: int, basin_a: float,
+                window_steps: int, row: dict[str, str], pathway: str, threads: int = 1,
+                plan: Plan = PAPER, replay_ok: bool = True) -> dict[str, str]:
+    """Continue an unresolved shot from its saved state, the restart its
+    last segment wrote, up to window_steps or its first basin. Without
+    that restart the state is rebuilt by replay_shot. The trace and the
+    wall time carry on from the shot's own; replay_s is the rebuild."""
+    trace = read_trace(work / "trace.tsv")
+    if fmt(trace[-1][0]) != row["t_end_ps"]:
+        raise SystemExit(f"{work}/trace.tsv ends at {fmt(trace[-1][0])} ps, "
+                         f"the table at {row['t_end_ps']} ps")
+    if trace_hit(trace, basin_a, plan)[0] != "unresolved":
+        raise SystemExit(f"{work} is in a basin already; it is not extended")
+    steps_done = step_of(trace[-1][0])
+    if steps_done >= window_steps:
+        return dict(row)
+    extension = [part for part in row.get("extension", "").split(";") if part]
+    replay_s = float(row.get("replay_s") or 0.0)
+    restart = work / f"shot.{steps_done}.restart"
+    if not restart.is_file():
+        if not replay_ok:
+            raise SystemExit(f"{restart} is missing and the launcher differs from the one "
+                             "that ran the shot; it cannot be replayed exactly")
+        replay_s += replay_shot(lmp, work, velocity_seed, steps_done, trace, pathway,
+                                threads, plan)
+        extension.append("replay")
+    stage(work, "in.shot")
+    started = time.monotonic()
+    variables = {"source": "restart", "restart": restart.name,
+                 "nrun": window_steps - steps_done, "ndump": plan.dump_steps,
+                 "Tq": plan.temperature, "out": f"shot.{window_steps}.restart"}
+    advance(lmp, work, variables, steps_done, trace, basin_a, pathway, threads, plan,
+            f"log.{steps_done}.lammps")
+    write_trace(work / "trace.tsv", trace)
+    extension.append("restart")
+    wall = float(row["wall_s"]) + time.monotonic() - started
+    return {**{key: row[key] for key in ("seed", "shoot_n", "shot")},
+            **shot_result(trace, basin_a, plan, wall),
+            "start_core": row.get("start_core", ""),
+            "extension": ";".join(extension), "replay_s": fmt(round(replay_s, 1))}
 
 
 def liquid_reference(frames_tsv: Path, plan: Plan = PAPER) -> tuple[float, list[float]]:
@@ -1381,6 +1689,23 @@ def sibling(path: Path, stem: str) -> Path:
     return path.with_name(f"{stem}-{tag}")
 
 
+def launcher_line(lmp: list[str]) -> str:
+    return f"# launcher {' '.join(Path(w).name if '/' in w else w for w in lmp)}"
+
+
+def shot_note(plan: Plan) -> str:
+    return (f"# a shot runs to its first basin: uncommitted at or below basin A, committed at "
+            f"or above {fmt(plan.basin_b)} for {fmt(plan.basin_b_hold_ps)} ps; "
+            f"check every {fmt(plan.dump_steps * TIMESTEP_FS / 1000.0)} ps; "
+            f"unresolved, with no fate, at the end of the window; t_hit_ps is the entry "
+            f"into the basin, the start of the held stay for basin B")
+
+
+def sizes_flag(plan: Plan) -> str:
+    return "" if plan.sizes == SHOOT_SIZES else \
+        " --sizes " + ",".join(str(n) for n in plan.sizes)
+
+
 def write_rows(path: Path, note: list[str], fields: list[str], rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as handle:
@@ -1398,17 +1723,17 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
     chosen = take_shard(parse_seed_list(seeds), shard)
     basins_out = basins_out or sibling(out, "basins")
     points_out = points_out or sibling(out, "points")
+    window_ps = plan.shot_steps * TIMESTEP_FS / 1000.0
     note = [
         f"# commit {commit}",
         f"# command python3 scripts/committor_shoot.py --write-shot {rel(out)} "
-        f"--frames {rel(frames_root)} --seeds {seeds} --shard {shard}",
+        f"--frames {rel(frames_root)} --seeds {seeds} --shard {shard}{sizes_flag(plan)} "
+        f"--window-ps {fmt(window_ps)}",
         f"# shard {shard}",
         *rule_note(plan),
-        f"# a shot runs to its first basin: uncommitted at or below basin A, committed at "
-        f"or above {fmt(plan.basin_b)} for {fmt(plan.basin_b_hold_ps)} ps; "
-        f"check every {fmt(plan.dump_steps * TIMESTEP_FS / 1000.0)} ps; "
-        f"unresolved, with no fate, after {fmt(plan.shot_steps * TIMESTEP_FS / 1000.0)} ps",
-        f"# launcher {' '.join(Path(w).name if '/' in w else w for w in lmp)}",
+        shot_note(plan),
+        f"# window_ps {fmt(window_ps)}",
+        launcher_line(lmp),
     ]
     partial = out.with_name(out.name + ".partial")
     done: set[tuple[int, int, int]] = set()
@@ -1455,13 +1780,187 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
                                   pathway, threads, plan)
                 with partial.open("a", newline="") as handle:
                     csv.DictWriter(handle, fieldnames=SHOT_FIELDS, lineterminator="\n").writerow(
-                        {"seed": seed, "shoot_n": n_shoot, "shot": shot, **result})
+                        {"seed": seed, "shoot_n": n_shoot, "shot": shot,
+                         "start_core": row[ORDER], **result})
                 print(f"seed {seed} n {n_shoot} shot {shot} {result['fate']} "
                       f"t {result['t_end_ps']} ps nmax {result['nmax_end']} "
                       f"wall {result['wall_s']} s", flush=True)
-    write_rows(basins_out, note[:-2], BASIN_FIELDS, basins)
+    write_rows(basins_out, note[:-3], BASIN_FIELDS, basins)
     write_rows(points_out, note[:4], POINT_FIELDS, points)
     partial.replace(out)
+
+
+def read_note(path: Path) -> list[str]:
+    note = []
+    for line in path.read_text().splitlines():
+        if not line.startswith("#"):
+            break
+        note.append(line)
+    return note
+
+
+def note_value(note: list[str], key: str) -> str:
+    for line in note:
+        if line.startswith(f"# {key} "):
+            return line[len(key) + 3:]
+    return ""
+
+
+def done_keys(partial: Path) -> set[tuple[str, str, str]]:
+    return {(row["seed"], row["shoot_n"], row["shot"]) for row in read_shot_rows(partial)}
+
+
+def extend_shots(table: Path, out: Path, window_ps: float, frames_root: Path, commit: str,
+                 lmp: list[str], pathway: str, threads: int = 1, plan: Plan = PAPER) -> None:
+    """Continue every unresolved shot of a shot table to window_ps or its
+    first basin and write the whole table again. Resolved shots are
+    copied after their trace is checked against the row. Rows go to a
+    .partial file as each shot ends, so a stopped run resumes."""
+    window_steps = step_of(window_ps)
+    if window_steps % plan.dump_steps:
+        raise SystemExit(f"the window {fmt(window_ps)} ps is not a whole number of frames")
+    source = read_note(table)
+    basins = {row["seed"]: row for row in read_shot_rows(sibling(table, "basins"))}
+    points = {(row["seed"], row["shoot_n"]): row
+              for row in read_shot_rows(sibling(table, "points"))}
+    replay_ok = note_value(source, "launcher") == launcher_line(lmp)[len("# launcher "):]
+    note = [
+        f"# commit {commit}",
+        f"# command python3 scripts/committor_shoot.py --extend-shots {rel(table)} "
+        f"--out {rel(out)} --frames {rel(frames_root)} --window-ps {fmt(window_ps)}",
+        f"# source {rel(table)} commit {note_value(source, 'commit')}",
+        f"# shard {note_value(source, 'shard')}",
+        *rule_note(plan),
+        shot_note(plan),
+        "# extension: an unresolved shot continues from the restart its last segment "
+        "wrote; without one, its first segment is replayed with the same seed, deck and "
+        "launcher and must give every thermo line of its log and the traced sizes",
+        f"# window_ps {fmt(window_ps)}",
+        launcher_line(lmp),
+    ]
+    partial = out.with_name(out.name + ".partial")
+    if partial.is_file():
+        done = done_keys(partial)
+    else:
+        done = set()
+        write_rows(partial, note, SHOT_FIELDS, [])
+    for row in read_shot_rows(table):
+        key = (row["seed"], row["shoot_n"], row["shot"])
+        if key in done:
+            continue
+        point = points[(row["seed"], row["shoot_n"])]
+        work = (seed_dir(frames_root, int(row["seed"]), plan) / "shots" /
+                f"n{row['shoot_n']}-step{point['timestep']}" / f"shot-{row['shot']}")
+        basin_a = float(basins[row["seed"]]["basin_a"])
+        row = {**row, "start_core": row.get("start_core") or point["n_chill_core"]}
+        trace = read_trace(work / "trace.tsv")
+        fate, hit, _decided = trace_hit(trace, basin_a, plan)
+        if fate != row["fate"] or fmt(trace[-1][0]) != row["t_end_ps"]:
+            raise SystemExit(f"{work}/trace.tsv gives {fate} at {fmt(trace[-1][0])} ps, "
+                             f"the table {row['fate']} at {row['t_end_ps']} ps")
+        if fate == "unresolved":
+            result = extend_shot(lmp, work, derived_seed(int(row["seed"]), int(row["shoot_n"]),
+                                                         int(row["shot"])),
+                                 basin_a, window_steps, row, pathway, threads, plan, replay_ok)
+        else:
+            result = {**row, "t_hit_ps": fmt(trace[hit][0])}
+        with partial.open("a", newline="") as handle:
+            csv.DictWriter(handle, fieldnames=SHOT_FIELDS, lineterminator="\n",
+                           extrasaction="ignore").writerow(result)
+        print(f"seed {row['seed']} n {row['shoot_n']} shot {row['shot']} {result['fate']} "
+              f"t {result['t_end_ps']} ps hit {result.get('t_hit_ps', '')} "
+              f"wall {result['wall_s']} s {result.get('extension', '')}", flush=True)
+    partial.replace(out)
+
+
+def median(values: list[float]) -> float:
+    return type7_unit(values, 0.5) if values else float("nan")
+
+
+def pb_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """p_commit per shooting size. Unresolved shots are counted and left
+    out of p_commit and its Wilson interval."""
+    groups: dict[int, list[dict[str, str]]] = {}
+    for row in rows:
+        groups.setdefault(int(row["shoot_n"]), []).append(row)
+    out = []
+    for n_shoot in sorted(groups):
+        shots = groups[n_shoot]
+        fates = [row["fate"] for row in shots]
+        committed = fates.count("committed")
+        uncommitted = fates.count("uncommitted")
+        resolved = committed + uncommitted
+        lo, hi = wilson(committed, resolved)
+        hits = [float(row["t_hit_ps"]) for row in shots if row.get("t_hit_ps")]
+        walls = [float(row["wall_s"]) for row in shots]
+        replays = [float(row.get("replay_s") or 0.0) for row in shots]
+        cores = sorted({row.get("start_core", "") for row in shots} - {""}, key=float)
+        out.append({
+            "shoot_n": str(n_shoot), "start_core": ";".join(cores), "shots": str(len(shots)),
+            "committed": str(committed), "uncommitted": str(uncommitted),
+            "unresolved": str(fates.count("unresolved")), "resolved": str(resolved),
+            "p_commit": fmt(committed / resolved) if resolved else "",
+            "wilson_lo": fmt(lo), "wilson_hi": fmt(hi),
+            "t_hit_median_ps": fmt(median(hits)),
+            "wall_mean_s": fmt(sum(walls) / len(walls)),
+            "wall_total_h": fmt(sum(walls) / 3600.0),
+            "replay_total_h": fmt(sum(replays) / 3600.0),
+        })
+    return out
+
+
+def nstar_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """n* of a logistic fit to p_commit, against the nominal size and
+    against the size of the shooting frame itself. Only when both fates
+    appear; the bootstrap resamples the resolved shots."""
+    fates = {row["fate"] for row in rows}
+    if not {"committed", "uncommitted"} <= fates:
+        return []
+    out = []
+    for x in ("shoot_n", "start_core"):
+        shots = [(float(row[x]), row["fate"]) for row in rows
+                 if row["fate"] != "unresolved" and row.get(x)]
+        points = [(n, p) for n, p, _c, resolved in p_of_n(shots) if resolved > 0]
+        if len(points) < 2:
+            continue
+        n_star, width = fit_nstar(points)
+        _star, lo, hi = bootstrap_nstar(shots)
+        out.append({"x": x, "points": str(len(points)), "n_star": fmt(n_star),
+                    "width": fmt(width), "boot_lo": fmt(lo), "boot_hi": fmt(hi),
+                    "draws": str(BOOT_DRAWS)})
+    return out
+
+
+def write_pb(out: Path, tables: list[Path], commit: str, nstar_out: Path | None = None) -> None:
+    """p_commit with its Wilson interval per n, and n*, from shot tables
+    of one shard. A shot in several tables is taken from the one with
+    the longest window."""
+    nstar_out = nstar_out or sibling(out, "nstar")
+    rows = union_rows(tables)
+    windows = sorted({fmt(table_window(path)) for path in tables})
+    note = [
+        f"# commit {commit}",
+        f"# command python3 scripts/committor_shoot.py --pb {rel(out)} --tables "
+        + " ".join(rel(path) for path in tables),
+        *[f"# source {rel(path)} commit {note_value(read_note(path), 'commit')}"
+          for path in tables],
+        f"# window_ps {' '.join(windows)}",
+        f"# p_commit is committed over resolved shots; unresolved shots have no fate; "
+        f"Wilson score interval at z {WILSON_Z:.4f}",
+    ]
+    write_rows(out, note, PB_FIELDS, pb_rows(rows))
+    found = nstar_rows(rows)
+    write_rows(nstar_out, note + ([] if found else ["# n* not estimated: one fate only"]),
+               NSTAR_FIELDS, found)
+
+
+def parse_sizes(text: str) -> tuple[int, ...]:
+    if not text:
+        return SHOOT_SIZES
+    sizes = tuple(sorted({int(word) for word in re.split(r"[,\s-]+", text) if word}))
+    if not sizes or min(sizes) <= 0:
+        raise SystemExit(f"bad --sizes {text}")
+    return sizes
 
 
 def main() -> None:
@@ -1485,6 +1984,13 @@ def main() -> None:
                         help="continue every climb of the shard that has not nucleated, "
                              "rewrite the climb table and write this log")
     parser.add_argument("--climb", type=Path, help="climb table of the shard")
+    parser.add_argument("--extend-shots", type=Path,
+                        help="shot table whose unresolved shots continue to --window-ps")
+    parser.add_argument("--pb", type=Path, help="p_commit per n of --tables")
+    parser.add_argument("--tables", type=Path, nargs="*", default=[])
+    parser.add_argument("--sizes", default="", help="shooting sizes, comma separated")
+    parser.add_argument("--window-ps", type=float, default=SHOT_NS * 1000.0,
+                        help="shot window in ps")
     parser.add_argument("--frames", type=Path, help="climb frames, the regenerate.py --dest")
     parser.add_argument("--pathway", default="", help="nucleation-pathway; NUCLEATION_PATHWAY")
     parser.add_argument("--threads", type=int, default=1, help="census threads")
@@ -1497,7 +2003,13 @@ def main() -> None:
         chosen = take_shard(parse_seed_list(args.seeds), args.shard)
         print(",".join(str(seed) for seed in chosen))
         return
-    if args.write_climb is not None or args.write_shot is not None or args.extend_climb:
+    plan = replace(PAPER, sizes=parse_sizes(args.sizes), shot_steps=step_of(args.window_ps))
+    if args.pb is not None:
+        write_pb(args.pb, args.tables, commit)
+        print(args.pb.read_text())
+        return
+    if (args.write_climb is not None or args.write_shot is not None or args.extend_climb
+            or args.extend_shots is not None):
         if args.frames is None:
             raise SystemExit("--frames is the climb directory, the regenerate.py --dest")
     if args.write_climb is not None:
@@ -1523,7 +2035,13 @@ def main() -> None:
     if args.write_shot is not None:
         lmp = lmp_launch.launcher()
         write_shots(args.write_shot, args.seeds, args.shard, args.frames, commit, lmp,
-                    pathway_path(args.pathway), args.threads)
+                    pathway_path(args.pathway), args.threads, plan)
+        return
+    if args.extend_shots is not None:
+        if args.out is None:
+            raise SystemExit("--extend-shots needs --out")
+        extend_shots(args.extend_shots, args.out, args.window_ps, args.frames, commit,
+                     lmp_launch.launcher(), pathway_path(args.pathway), args.threads, plan)
         return
     if args.merge is not None:
         if args.table is None or args.summary is None:

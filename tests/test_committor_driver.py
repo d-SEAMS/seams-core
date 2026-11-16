@@ -3,8 +3,9 @@
 Short LAMMPS runs exercise every stage the 4096-molecule shards use:
 the climb with its restart, the climb table, both kinds of extension,
 basin A from the climb's own plateau beside the fresh-liquid reference,
-and shots that stop at the first basin they reach. Skipped when LMP is unset. NUCLEATION_PATHWAY, or
-bbdir/nucleation-pathway, is the census.
+shots that stop at the first basin they reach, and unresolved shots
+continued from their restart or from an exact replay. Skipped when LMP
+is unset. NUCLEATION_PATHWAY, or bbdir/nucleation-pathway, is the census.
 """
 
 from __future__ import annotations
@@ -141,6 +142,75 @@ def test_shots_stop_when_resolved(climb, tools, tmp_path):
     trace = (tmp_path / "open" / "trace.tsv").read_text().splitlines()
     assert trace[0].split("\t") == ["t_ps", *cs.SERIES]
     assert [line.split("\t")[0] for line in trace[1:]] == ["10", "20", "30"]
+    assert (tmp_path / "open" / "shot.3000.restart").is_file()
+    assert open_window["t_hit_ps"] == "" and committed["t_hit_ps"] == "10"
+    assert quick["t_hit_ps"] == "10"
+
+
+def times_of(work: Path) -> list[str]:
+    return [line.split("\t")[0] for line in (work / "trace.tsv").read_text().splitlines()[1:]]
+
+
+def test_unresolved_shots_continue(climb, tools, tmp_path):
+    lmp, pathway = tools
+    directory = cs.seed_dir(climb, SEED, TINY)
+    data = tmp_path / "shot.data"
+    cs.shooting_frame(directory, int(cs.read_frames(directory / "frames.tsv")[2]["timestep"]),
+                      data)
+    never = replace(TINY, basin_b=1.0e9)
+    whole = cs.run_shot(lmp, tmp_path / "whole", data, 7, -1.0, pathway, 1,
+                        replace(never, shot_steps=6000))
+    assert whole["fate"] == "unresolved" and whole["t_end_ps"] == "60"
+
+    rows = {}
+    for name in ("restart", "replay", "tampered"):
+        rows[name] = {"seed": str(SEED), "shoot_n": "1", "shot": "0", "start_core": "5",
+                      **cs.run_shot(lmp, tmp_path / name, data, 7, -1.0, pathway, 1, never)}
+        assert rows[name]["t_end_ps"] == "30"
+
+    cont = cs.extend_shot(lmp, tmp_path / "restart", 7, -1.0, 6000, rows["restart"], pathway,
+                          1, never)
+    assert cont["fate"] == "unresolved" and cont["t_end_ps"] == "60"
+    assert cont["extension"] == "restart" and cont["replay_s"] == "0"
+    assert float(cont["wall_s"]) > float(rows["restart"]["wall_s"])
+    assert cont["start_core"] == "5"
+    assert times_of(tmp_path / "restart") == ["10", "20", "30", "40", "50", "60"]
+    assert (tmp_path / "restart" / "shot.6000.restart").is_file()
+    assert (tmp_path / "restart" / "log.3000.lammps").is_file()
+    # The restart carries the state at step 3000 exactly; after it the
+    # rebuilt neighbour lists change roundoff, so only that step is shared
+    # with the uninterrupted run.
+    whole_rows = cs.thermo_rows(tmp_path / "whole" / "log.lammps")
+    assert cs.thermo_rows(tmp_path / "restart" / "log.3000.lammps")[0] == whole_rows[3]
+    assert times_of(tmp_path / "whole")[:3] == times_of(tmp_path / "restart")[:3]
+    continued = (tmp_path / "restart" / "trace.tsv").read_text()
+    assert cs.extend_shot(lmp, tmp_path / "restart", 7, -1.0, 6000, cont, pathway, 1,
+                          never) == cont
+
+    (tmp_path / "replay" / "shot.3000.restart").unlink()
+    with pytest.raises(SystemExit, match="launcher differs"):
+        cs.extend_shot(lmp, tmp_path / "replay", 7, -1.0, 6000, rows["replay"], pathway, 1,
+                       never, replay_ok=False)
+    again = cs.extend_shot(lmp, tmp_path / "replay", 7, -1.0, 6000, rows["replay"], pathway,
+                           1, never)
+    assert again["extension"] == "replay;restart" and float(again["replay_s"]) > 0
+    assert (tmp_path / "replay" / "log.replay.lammps").is_file()
+    assert not (tmp_path / "replay" / "replay").exists()
+    assert (tmp_path / "replay" / "trace.tsv").read_text() == continued
+    assert cs.thermo_rows(tmp_path / "replay" / "log.3000.lammps") == \
+        cs.thermo_rows(tmp_path / "restart" / "log.3000.lammps")
+
+    work = tmp_path / "tampered"
+    (work / "shot.3000.restart").unlink()
+    log = (work / "log.lammps").read_text().splitlines()
+    index = next(i for i, line in enumerate(log) if line.split()[:1] == ["2000"])
+    words = log[index].split()
+    words[1] = "999.0"
+    log[index] = " ".join(words)
+    (work / "log.lammps").write_text("\n".join(log) + "\n")
+    with pytest.raises(SystemExit, match="left the original trajectory at thermo line 2"):
+        cs.extend_shot(lmp, work, 7, -1.0, 6000, rows["tampered"], pathway, 1, never)
+    assert times_of(work) == ["10", "20", "30"]
 
 
 def test_shard_end_to_end(climb, tools, tmp_path):
@@ -186,3 +256,35 @@ def test_shard_end_to_end(climb, tools, tmp_path):
     assert (directory / "shots" / f"n{int(top)}-step{rows[onset]['timestep']}" / "shot.data").is_file()
     assert not out.with_name(out.name + ".partial").exists()
     assert cs.merge_shot_dir(tmp_path) == [(float(int(top)), s["fate"]) for s in shots]
+    assert cs.table_window(out) == 30.0
+    for shot in shots:
+        assert shot["start_core"] == rows[onset]["n_chill_core"]
+
+    wide = tmp_path / "shot-0-of-1.w60.csv"
+    cs.extend_shots(out, wide, 60.0, climb, "test", lmp, pathway, 1, plan)
+    assert cs.table_window(wide) == 60.0
+    assert "# source shot-0-of-1.csv commit test" in wide.read_text()
+    longer = cs.read_shot_rows(wide)
+    assert [s["shot"] for s in longer] == ["0", "1"]
+    for before, after in zip(shots, longer):
+        if before["fate"] == "unresolved":
+            assert after["extension"] == "restart"
+            assert 30 < float(after["t_end_ps"]) <= 60
+        else:
+            assert {k: after[k] for k in ("fate", "t_end_ps", "wall_s")} == \
+                {k: before[k] for k in ("fate", "t_end_ps", "wall_s")}
+            assert after["extension"] == ""
+        if after["fate"] != "unresolved":
+            assert 10 <= float(after["t_hit_ps"]) <= float(after["t_end_ps"])
+    assert cs.merge_shot_dir(tmp_path) == [(float(int(top)), s["fate"]) for s in longer]
+
+    pb = tmp_path / "pb-0-of-1.csv"
+    cs.write_pb(pb, [out, wide], "test")
+    got = cs.read_shot_rows(pb)
+    assert len(got) == 1 and got[0]["shots"] == "2"
+    fates = [s["fate"] for s in longer]
+    assert got[0]["committed"] == str(fates.count("committed"))
+    assert got[0]["unresolved"] == str(fates.count("unresolved"))
+    assert got[0]["start_core"] == rows[onset]["n_chill_core"]
+    assert "# window_ps 30 60" in pb.read_text()
+    assert (tmp_path / "nstar-0-of-1.csv").is_file()
