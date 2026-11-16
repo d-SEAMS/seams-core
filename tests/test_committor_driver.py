@@ -2,7 +2,7 @@
 
 Short LAMMPS runs exercise every stage the 4096-molecule shards use:
 the climb with its restart, the climb table, both kinds of extension,
-both baseline sources, and shots that stop as soon as a frame resolves
+the 2 ns liquid baseline, and shots that stop as soon as a frame resolves
 them. Skipped when LMP is unset. NUCLEATION_PATHWAY, or
 bbdir/nucleation-pathway, is the census.
 """
@@ -140,18 +140,16 @@ def test_shard_end_to_end(climb, tools, tmp_path):
     first = core.index(top)
     if top < 1 or first == 0:
         pytest.skip(f"the tiny climb never rose: {core}")
-    # Cuts scaled to the tiny cell: its first visit to its own maximum.
-    plan = replace(TINY, cut=top - 1, grown=top, sizes=(int(top),))
-    onset = cs.nucleation_onset(core, plan.cut, plan.grown)
+    # Cuts scaled to the tiny cell: its first visit to its own maximum,
+    # with no hold, since the tiny climb is only 40 ps long.
+    plan = replace(TINY, cut=top - 1, hold_ps=0.0, sizes=(int(top),))
+    times = cs.frame_times(rows)
+    assert cs.nucleation_onset(core, plan.cut, TINY.hold_ps, times) is None
+    onset = cs.nucleation_onset(core, plan.cut, plan.hold_ps, times)
     assert onset == first
 
-    climb_base = cs.seed_baseline(SEED, rows, onset, directory, lmp, pathway, 1,
-                                  replace(plan, min_pre_onset_ps=0.0))
-    assert climb_base["baseline_source"] == "climb" and climb_base["liquid_seed"] == ""
-
     out = tmp_path / "shot-0-of-1.csv"
-    forced = replace(plan, min_pre_onset_ps=1.0e9)
-    cs.write_shots(out, str(SEED), "0/1", climb, "test", lmp, pathway, 1, forced)
+    cs.write_shots(out, str(SEED), "0/1", climb, "test", lmp, pathway, 1, plan)
     body = [l for l in out.read_text().splitlines() if not l.startswith("#")]
     shots = list(csv.DictReader(body))
     assert [s["shot"] for s in shots] == ["0", "1"]
@@ -164,11 +162,13 @@ def test_shard_end_to_end(climb, tools, tmp_path):
         l for l in (tmp_path / "baseline-0-of-1.csv").read_text().splitlines()
         if not l.startswith("#")))
     assert base[0]["baseline_source"] == "liquid-2ns"
+    assert base[0]["onset_ps"] == cs.fmt(times[onset])
     assert base[0]["liquid_seed"] == str(cs.derived_seed(SEED, "liquid"))
     assert (directory / "liquid-2ns" / "frames.tsv").is_file()
     points = list(csv.DictReader(
         l for l in (tmp_path / "points-0-of-1.csv").read_text().splitlines()
         if not l.startswith("#")))
     assert points[0]["timestep"] == rows[onset]["timestep"]
+    assert (directory / "shots" / f"n{int(top)}-step{rows[onset]['timestep']}" / "shot.data").is_file()
     assert not out.with_name(out.name + ".partial").exists()
     assert cs.merge_shot_dir(tmp_path) == [(float(int(top)), s["fate"]) for s in shots]

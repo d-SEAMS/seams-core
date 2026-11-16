@@ -11,18 +11,17 @@ enters the rules below.
 All cuts are fixed here, before any shot outcome is read.
 
 Nucleation. A climb has nucleated when n_chill_core passes 300 and
-then reaches 600, or the end of the run, without falling below 300.
-The onset is the first frame of that passage. The one rule,
+then stays at or above 300 for 1 ns. The onset is the first frame of
+that passage. A passage that the end of the run cuts short is not an
+onset: the climb is 'not nucleated, extend' and is continued. Any
+other climb that has not nucleated is 'no-nucleation'. The one rule,
 nucleation_onset(), decides the climb outcome and which climbs are
-shot. A climb that has not nucleated is 'no-nucleation' and gets no
-shots.
+shot; only nucleated climbs are shot.
 
-Uncommit cut. The liquid baseline is the 95th percentile of
-n_chill_core over the climb frames from 1 ns up to the onset. The
-first nanosecond is still relaxing from the 350 K melt. A climb with
-less than 1 ns of such frames takes the baseline from a separate 2 ns
-liquid at 180 K, over its frames from 1 ns, with a velocity seed
-derived from the climb seed. The baseline table records which.
+Uncommit cut. The baseline is always the 95th percentile of
+n_chill_core in a separate 2 ns liquid at 180 K, over its frames from
+1 ns, with a velocity seed derived from the climb seed. The climb
+frames before onset are never used: they already hold the growth.
 
 Shooting points. For n in 50, 75, 100, 150, 200 and 300, the last
 frame at or before the onset where n_chill_core crosses up to n.
@@ -54,10 +53,10 @@ the target comes first:
         --config seeds=20261111-20261130 shard=0/20
 
 A climb that has not nucleated is continued 10 ns at a time, up to
-30 ns, by the extension rule, which rewrites the same climb table:
+40 ns, by the extension rule, which rewrites the same climb table.
+Segments run in order, 1 to 3:
 
-    snakemake -j1 --forcerun science_committor_extend \\
-        data/committor-shards/extend-0-of-20.log \\
+    snakemake -j1 data/committor-shards/extend-0-of-20.3.log \\
         --config seeds=20261111-20261130 shard=0/20
 
 science_committor_merge reads every shot shard and writes p_B(n) and
@@ -105,17 +104,17 @@ N_SEEDS = 20
 ORDER = "n_chill_core"
 SERIES = ("n_chill_core", "n_chill_ext", "n_q6solid")
 NUCLEUS_CUT = 300
-GROWN_CUT = 600
+HOLD_PS = 1000.0
 SHOOT_SIZES = (50, 75, 100, 150, 200, 300)
 EQUIL_PS = 1000.0
-MIN_PRE_ONSET_PS = 1000.0
 TEMPERATURE = 180.0
 N_CELL = 16
 MELT_STEPS = 10_000
 DUMP_STEPS = 1000
 LIQUID_STEPS = 200_000
 EXTEND_STEPS = 1_000_000
-CLIMB_LIMIT_STEPS = 3_000_000
+CLIMB_LIMIT_STEPS = 4_000_000
+FRAME_PS = DUMP_STEPS * TIMESTEP_FS / 1000.0
 
 
 def commit_size(n_shoot: float) -> float:
@@ -168,21 +167,46 @@ def check_nmax(nmax: float, molecules: int) -> None:
 
 
 def nucleation_onset(series: list[float], cut: float = NUCLEUS_CUT,
-                     grown: float = GROWN_CUT) -> int | None:
-    """First frame of a passage above cut that reaches grown, or the end
-    of the series, without falling below cut. None when there is none."""
+                     hold_ps: float = HOLD_PS,
+                     times_ps: list[float] | None = None) -> int | None:
+    """First frame of a passage above cut after which the series stays at
+    or above cut for hold_ps. A passage cut short by the end of the run
+    is not an onset. times_ps defaults to frames FRAME_PS apart."""
+    times = times_ps if times_ps is not None else [FRAME_PS * i for i in range(len(series))]
     i = 0
     n = len(series)
     while i < n:
         if series[i] > cut and (i == 0 or series[i - 1] <= cut):
             j = i
-            while j < n and cut <= series[j] < grown:
+            while j < n and series[j] >= cut and times[j] - times[i] < hold_ps:
                 j += 1
-            if j == n or series[j] >= grown:
+            if j < n and series[j] >= cut:
                 return i
             i = j
         i += 1
     return None
+
+
+def open_passage(series: list[float], cut: float = NUCLEUS_CUT) -> bool:
+    """The run ends on a passage above cut that has not yet fallen below."""
+    j = len(series)
+    while j > 0 and series[j - 1] >= cut:
+        j -= 1
+    return any(value > cut for value in series[j:])
+
+
+EXTEND = "not nucleated, extend"
+
+
+def climb_outcome(series: list[float], times_ps: list[float], cut: float = NUCLEUS_CUT,
+                  hold_ps: float = HOLD_PS, limit_ps: float = math.inf) -> str:
+    """nucleated; 'not nucleated, extend' when the run ends inside a passage
+    not yet held for hold_ps and is short of the limit; else no-nucleation."""
+    if nucleation_onset(series, cut, hold_ps, times_ps) is not None:
+        return "nucleated"
+    if open_passage(series, cut) and times_ps[-1] < limit_ps:
+        return EXTEND
+    return "no-nucleation"
 
 
 def shooting_points(series: list[float], onset: int,
@@ -195,12 +219,6 @@ def shooting_points(series: list[float], onset: int,
                 points.append((n, j))
                 break
     return points
-
-
-def pre_onset_window(times_ps: list[float], onset: int) -> tuple[list[int], float]:
-    """Frame indices from EQUIL_PS up to the onset, and the span in ps."""
-    frames = [i for i in range(onset) if times_ps[i] >= EQUIL_PS]
-    return frames, times_ps[onset] - EQUIL_PS
 
 
 def derived_seed(*parts: object) -> int:
@@ -469,7 +487,7 @@ def coverage_note(directory: Path | None) -> str:
         climb = directory / f"climb-{k}-of-{width}.csv"
         outcomes = read_climb_outcomes(climb) if climb.is_file() else {}
         if "# nucleation no" in head or (
-            outcomes and all(row["outcome"] == "no-nucleation" for row in outcomes.values())
+            outcomes and all(row["outcome"] != "nucleated" for row in outcomes.values())
         ):
             quiet.append(k)
     if width is None:
@@ -517,17 +535,34 @@ def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], com
 
 
 def self_test_rules() -> None:
-    if nucleation_onset([1, 100, 301, 450, 610]) != 2:
-        raise SystemExit("a passage from 301 to 610 is nucleation at frame 2")
-    if nucleation_onset([1, 320, 290, 280]) is not None:
-        raise SystemExit("a fall below 300 before 600 is not nucleation")
-    if nucleation_onset([1, 320, 299, 310, 400, 580]) != 3:
-        raise SystemExit("the end of the run counts once above 300 for good")
-    if nucleation_onset([1, 320, 300, 650]) != 1:
+    # Frames are 10 ps apart, so 1 ns of hold is 100 frames past the onset.
+    held = [1, 100] + [301] * 101
+    if nucleation_onset(held) != 2:
+        raise SystemExit("301 held for 1 ns is nucleation at frame 2")
+    if nucleation_onset([1, 100] + [301] * 100) is not None:
+        raise SystemExit("990 ps above 300 is short of the hold")
+    if nucleation_onset([1, 100, 301, 450, 610, 900]) is not None:
+        raise SystemExit("a run that ends above 300 before the hold is not nucleated")
+    if nucleation_onset([1, 320, 290] + [310] * 101) != 3:
+        raise SystemExit("a dip below 300 restarts the hold")
+    if nucleation_onset([1, 320] + [300] * 100) != 1:
         raise SystemExit("300 itself is not below 300")
-    if nucleation_onset([1, 200, 300, 300]) is not None:
+    if nucleation_onset([1, 200] + [300] * 200) is not None:
         raise SystemExit("300 is not past 300")
-    climb = [1, 30, 60, 40, 55, 80, 70, 49, 51, 90, 120, 160, 210, 320, 480, 700]
+    if nucleation_onset([1, 301, 301, 301], times_ps=[0.0, 10.0, 500.0, 1010.0]) != 1:
+        raise SystemExit("the hold is read from the frame times")
+    # Shard 0, seed 20261111 at 30 ns: 274 then 311 on the last frame.
+    end_run = [150, 525, 274, 311]
+    times = [29840.0, 29870.0, 29990.0, 30000.0]
+    if climb_outcome(end_run, times, limit_ps=40000.0) != EXTEND:
+        raise SystemExit("an onset on the last frame was not sent to extend")
+    if climb_outcome(end_run, times, limit_ps=30000.0) != "no-nucleation":
+        raise SystemExit("a climb at the limit was sent to extend")
+    if climb_outcome([1, 90, 160, 120], times, limit_ps=40000.0) != "no-nucleation":
+        raise SystemExit("a climb below 300 at the end is not an open passage")
+    if climb_outcome(held, [10.0 * i for i in range(len(held))]) != "nucleated":
+        raise SystemExit("a held passage is nucleated")
+    climb = [1, 30, 60, 40, 55, 80, 70, 49, 51, 90, 120, 160, 210, 320] + [480] * 100
     onset = nucleation_onset(climb)
     points = dict(shooting_points(climb, onset))
     want = {50: 8, 75: 9, 100: 10, 150: 11, 200: 12, 300: 13}
@@ -536,10 +571,6 @@ def self_test_rules() -> None:
     if shooting_points([1, 30, 301, 650], 2) != [(50, 2), (75, 2), (100, 2), (150, 2),
                                                   (200, 2), (300, 2)]:
         raise SystemExit("a jump crosses every size at once")
-    times = [10.0 * i for i in range(400)]
-    frames, span = pre_onset_window(times, 250)
-    if frames[0] != 100 or frames[-1] != 249 or span != 1500.0:
-        raise SystemExit(f"window {frames[0]} {frames[-1]} {span}")
     if derived_seed(20261125, 50, 0) != derived_seed(20261125, 50, 0):
         raise SystemExit("a derived seed moved")
     seeds = {derived_seed(20261125, n, k) for n in SHOOT_SIZES for k in range(N_SHOTS)}
@@ -561,6 +592,13 @@ def self_test_rules() -> None:
             raise SystemExit(f"climb columns {row}")
         for k in (0, 1):
             (folder / f"shot-{k}-of-3.csv").write_text("seed,shoot_n,shot,fate\n")
+        note = coverage_note(folder)
+        (folder / "climb-1-of-3.csv").write_text(
+            "# commit x\n" + ",".join(CLIMB_FIELDS) + "\n"
+            '20261112,"not nucleated, extend",,311,30000,1779,845,'
+            "311,1779,845,30000,3001,3,restart\n")
+        if read_climb_outcomes(folder / "climb-1-of-3.csv")[20261112]["outcome"] != EXTEND:
+            raise SystemExit("the extend outcome did not survive the csv")
         note = coverage_note(folder)
         if "nucleation_none [0, 1]" not in note:
             raise SystemExit(f"climb outcomes did not reach the merge: {note}")
@@ -618,7 +656,7 @@ def self_test() -> None:
         pass
     else:
         raise SystemExit("nmax above N was accepted")
-    sizes = shooting_sizes([5, 6, 40, 42, 41, 39, 40, 80, 150, 350, 700])
+    sizes = shooting_sizes([5, 6, 40, 42, 41, 39, 40, 80, 150, 350] + [700] * 101)
     if len(sizes) < 3 or min(sizes) < 30 or max(sizes) > 50:
         raise SystemExit(f"shooting sizes left the plateau: {sizes}")
     if shooting_sizes([5, 6, 40, 42, 41, 39, 40, 80, 150, 200]) != []:
@@ -725,7 +763,7 @@ class Plan:
     n_cell: int = N_CELL
     temperature: float = TEMPERATURE
     cut: float = NUCLEUS_CUT
-    grown: float = GROWN_CUT
+    hold_ps: float = HOLD_PS
     sizes: tuple[int, ...] = SHOOT_SIZES
     shots: int = N_SHOTS
     shot_steps: int = SHOT_STEPS
@@ -735,11 +773,14 @@ class Plan:
     extend_steps: int = EXTEND_STEPS
     limit_steps: int = CLIMB_LIMIT_STEPS
     equil_ps: float = EQUIL_PS
-    min_pre_onset_ps: float = MIN_PRE_ONSET_PS
 
     @property
     def molecules(self) -> int:
         return self.n_cell ** 3
+
+    @property
+    def limit_ps(self) -> float:
+        return self.limit_steps * TIMESTEP_FS / 1000.0
 
 
 PAPER = Plan()
@@ -998,7 +1039,7 @@ def climb_row(seed: int, rows: list[dict[str, str]], directory: Path,
     core = column(rows, ORDER)
     for size in core:
         check_nmax(size, plan.molecules)
-    onset = nucleation_onset(core, plan.cut, plan.grown)
+    onset = nucleation_onset(core, plan.cut, plan.hold_ps, times)
     top = max(range(len(core)), key=lambda i: core[i])
     ext = column(rows, "n_chill_ext")
     q6 = column(rows, "n_q6solid")
@@ -1009,7 +1050,7 @@ def climb_row(seed: int, rows: list[dict[str, str]], directory: Path,
     )
     return {
         "seed": str(seed),
-        "outcome": "nucleated" if onset is not None else "no-nucleation",
+        "outcome": climb_outcome(core, times, plan.cut, plan.hold_ps, plan.limit_ps),
         "onset_ps": fmt(times[onset]) if onset is not None else "",
         "n_chill_core_max": fmt(core[top]),
         "t_max_ps": fmt(times[top]),
@@ -1028,8 +1069,9 @@ def climb_row(seed: int, rows: list[dict[str, str]], directory: Path,
 def rule_note(plan: Plan) -> list[str]:
     return [
         f"# order {ORDER}",
-        f"# rule nucleated when {ORDER} passes {fmt(plan.cut)} and reaches {fmt(plan.grown)} "
-        f"or the end without falling below {fmt(plan.cut)}",
+        f"# rule nucleated when {ORDER} passes {fmt(plan.cut)} and stays at or above "
+        f"{fmt(plan.cut)} for {fmt(plan.hold_ps)} ps; a passage cut short by the end of the "
+        f"run is '{EXTEND}' until {fmt(plan.limit_ps)} ps",
     ]
 
 
@@ -1058,7 +1100,7 @@ def extend_seed(seed: int, directory: Path, lmp: list[str], pathway: str, thread
     """Continue one climb that has not nucleated by plan.extend_steps."""
     rows = climb_frames(directory, pathway, threads)
     core = column(rows, ORDER)
-    if nucleation_onset(core, plan.cut, plan.grown) is not None:
+    if nucleation_onset(core, plan.cut, plan.hold_ps, frame_times(rows)) is not None:
         return "nucleated"
     step0 = int(rows[0]["timestep"])
     step_end = int(rows[-1]["timestep"])
@@ -1193,7 +1235,7 @@ def liquid_run(seed: int, directory: Path, lmp: list[str], pathway: str, threads
     rows = read_frames(work / "frames.tsv")
     times = frame_times(rows)
     core = column(rows, ORDER)
-    onset = nucleation_onset(core, plan.cut, plan.grown)
+    onset = nucleation_onset(core, plan.cut, plan.hold_ps, times)
     end = len(core) if onset is None else onset
     frames = [i for i in range(end) if times[i] >= plan.equil_ps]
     if not frames:
@@ -1201,24 +1243,16 @@ def liquid_run(seed: int, directory: Path, lmp: list[str], pathway: str, threads
     return liquid_baseline([core[i] for i in frames]), [times[i] for i in frames], liquid_seed
 
 
-def seed_baseline(seed: int, rows: list[dict[str, str]], onset: int, directory: Path,
-                  lmp: list[str], pathway: str, threads: int,
-                  plan: Plan = PAPER) -> dict[str, str]:
-    times = frame_times(rows)
-    core = column(rows, ORDER)
-    frames = [i for i in range(onset) if times[i] >= plan.equil_ps]
-    span = times[onset] - plan.equil_ps
-    if frames and span >= plan.min_pre_onset_ps:
-        value = liquid_baseline([core[i] for i in frames])
-        used, source, liquid_seed = [times[i] for i in frames], "climb", ""
-    else:
-        value, used, seed_used = liquid_run(seed, directory, lmp, pathway, threads, plan)
-        source, liquid_seed = "liquid-2ns", str(seed_used)
+def seed_baseline(seed: int, onset_ps: float, directory: Path, lmp: list[str],
+                  pathway: str, threads: int, plan: Plan = PAPER) -> dict[str, str]:
+    """The uncommit cut always comes from the separate liquid, never from
+    the climb, whose frames before onset already hold growth."""
+    value, used, liquid_seed = liquid_run(seed, directory, lmp, pathway, threads, plan)
     return {
-        "seed": str(seed), "baseline": fmt(value), "baseline_source": source,
+        "seed": str(seed), "baseline": fmt(value), "baseline_source": "liquid-2ns",
         "window_lo_ps": fmt(used[0]), "window_hi_ps": fmt(used[-1]),
-        "frames_used": str(len(used)), "liquid_seed": liquid_seed,
-        "onset_ps": fmt(times[onset]),
+        "frames_used": str(len(used)), "liquid_seed": str(liquid_seed),
+        "onset_ps": fmt(onset_ps),
     }
 
 
@@ -1284,14 +1318,15 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
         directory = seed_dir(frames_root, seed, plan)
         rows = climb_frames(directory, pathway, threads)
         core = column(rows, ORDER)
-        onset = nucleation_onset(core, plan.cut, plan.grown)
+        times = frame_times(rows)
+        onset = nucleation_onset(core, plan.cut, plan.hold_ps, times)
         if onset is None:
-            print(f"seed {seed} no-nucleation, max {fmt(max(core))}; no shots", flush=True)
+            outcome = climb_outcome(core, times, plan.cut, plan.hold_ps, plan.limit_ps)
+            print(f"seed {seed} {outcome}, max {fmt(max(core))}; no shots", flush=True)
             continue
-        base = seed_baseline(seed, rows, onset, directory, lmp, pathway, threads, plan)
+        base = seed_baseline(seed, times[onset], directory, lmp, pathway, threads, plan)
         baselines.append(base)
         baseline = float(base["baseline"])
-        times = frame_times(rows)
         for n_shoot, index in shooting_points(core, onset, plan.sizes):
             row = rows[index]
             points.append({
@@ -1299,7 +1334,7 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
                 "timestep": row["timestep"], "n_chill_core": row[ORDER],
                 "n_chill_ext": row.get("n_chill_ext", ""), "n_q6solid": row.get("n_q6solid", ""),
             })
-            data = directory / "shots" / f"n{n_shoot}" / "shot.data"
+            data = directory / "shots" / f"n{n_shoot}-step{row['timestep']}" / "shot.data"
             shooting_frame(directory, int(row["timestep"]), data)
             for shot in range(plan.shots):
                 if (seed, n_shoot, shot) in done:
