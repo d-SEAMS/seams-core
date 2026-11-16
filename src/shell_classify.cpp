@@ -1367,8 +1367,8 @@ bool padOpenFace(const Bond &bond, double *fx, double *fy, double *fz, int &nf, 
   return have + added >= 3;
 }
 
-bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon, bool wide, double *fx,
-                  double *fy, double *fz) {
+bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon, bool wide, bool openFace,
+                  double *fx, double *fy, double *fz) {
   int nf = 0;
   for (int k = 0; k < 4; k++) {
     const int f = mine[k].j;
@@ -1413,7 +1413,7 @@ bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon
       taken++;
     }
     if (taken < 3) {
-      if (na >= 4 || !padOpenFace(mine[k], fx, fy, fz, nf, taken)) {
+      if (!openFace || na >= 4 || !padOpenFace(mine[k], fx, fy, fz, nf, taken)) {
         return false;
       }
     }
@@ -1838,7 +1838,7 @@ void fillFastBonds(int ncell, int nx, int ny, int nz, double lx, double ly, doub
 
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       const double lat[3][3], const CanonShell &canon, double gate, int *kind,
-                      double thermalQ, double bondRatio) {
+                      double thermalQ, double bondRatio, bool openFace) {
   if (n <= 0) {
     return;
   }
@@ -2315,7 +2315,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       double fy[12];
       double fz[12];
       const bool wide = la > 12.0 && lb > 12.0 && lc > 12.0;
-      if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wide, fx, fy, fz)) {
+      if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wide, openFace, fx, fy, fz)) {
         kind[i] = -1;
         continue;
       }
@@ -2428,7 +2428,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       double fy[12];
       double fz[12];
       changed = true;
-      if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wideBox, fx, fy, fz)) {
+      if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wideBox, openFace, fx, fy, fz)) {
         kind[i] = -1;
         continue;
       }

@@ -91,19 +91,21 @@ inline constexpr double kShellRmsd = 0.15;
 // Per-atom ice label. kind[i] is iceIh, iceIc, iceIsd, or -1. shellRmsd is
 // the scale-free residual ceiling. The label is the template with the lowest
 // residual after the bond-graph permutation of the tetrahedron.
+// openFace is the second-shell completion for an under-coordinated neighbour.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
                  std::vector<int> &kind, double shellRmsd = kShellRmsd,
-                 double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio);
+                 double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio,
+                 bool openFace = true);
 
 // Column SoA coordinates. The canon shell is built once. kind is written in full.
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
                        int *kind, double shellRmsd = kShellRmsd, double thermalQ = kThermalQ,
-                       double bondRatio = kThermalBondRatio);
+                       double bondRatio = kThermalBondRatio, bool openFace = true);
 
 // Same labels as classifyIceArrays, packed from a point cloud. On ideal
 // cubic ice the codes match diamondFromCsr (0 hexagonal, 1 cubic, -1 other).
 void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                      std::vector<int> &kind);
+                      std::vector<int> &kind, bool openFace = true);
 
 // Azimuthal cosine of each tetrahedral bond, largest first. The value is
 // the best alignment of an outer neighbour with one of the other three
