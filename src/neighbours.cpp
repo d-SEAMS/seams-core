@@ -3544,11 +3544,18 @@ std::pair<double, double> nneigh::shellSeparation(
                                                  pj.y, pj.z)
                                : gen::periodicDistSq(frame, yCloud, i, j));
     }
-    if (static_cast<int>(dists.size()) < k + 1) {
-      continue;
+    // A site with fewer than k others has no k-th neighbour, so no cutoff
+    // reproduces its k-nearest row. The certificate fails rather than
+    // skipping that site.
+    const int nOther = static_cast<int>(dists.size());
+    if (nOther < k) {
+      return {std::numeric_limits<double>::infinity(), 0.0};
     }
-    std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
-    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(k)])) {
+    // With exactly k others the k-th distance still bounds the cutoff from
+    // below; there is no (k+1)-th distance to bound it from above.
+    const int want = nOther < k + 1 ? k : k + 1;
+    std::partial_sort(dists.begin(), dists.begin() + want, dists.end());
+    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(want - 1)])) {
       dists.clear();
       for (int j = 0; j < yCloud.nop; j++) {
         if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {
@@ -3556,7 +3563,11 @@ std::pair<double, double> nneigh::shellSeparation(
         }
         dists.push_back(gen::periodicDistSq(frame, yCloud, i, j));
       }
-      std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
+      std::partial_sort(dists.begin(), dists.begin() + want, dists.end());
+    }
+    if (want == k) {
+      maxKth = std::max(maxKth, std::sqrt(dists[static_cast<std::size_t>(k - 1)]));
+      continue;
     }
     maxKth = std::max(maxKth, std::sqrt(dists[static_cast<std::size_t>(k - 1)]));
     const double next = std::sqrt(dists[static_cast<std::size_t>(k)]);

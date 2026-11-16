@@ -564,7 +564,9 @@ kNearestNeighbourPair(
  *  graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over
  *  particles of the type. When max_i d_k(i) <= rcutoff <= min_i d_{k+1}(i),
  *  the two graphs coincide edge for edge and every downstream graph
- *  predicate is identical. Brute force, intended for validation.
+ *  predicate is identical. Brute force, intended for validation. A
+ *  particle of the type with fewer than k others of that type returns
+ *  {infinity, 0}: no cutoff gives it k neighbours.
  */
 std::pair<double, double> shellSeparation(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,

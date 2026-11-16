@@ -490,6 +490,33 @@ TEST_CASE("neighListO returns empty when the cloud has no atoms",
   REQUIRE(both.second.empty());
 }
 
+TEST_CASE("shellSeparation fails when a site has fewer than k others",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double xs[4] = {1.0, 2.0, 3.0, 4.0};
+  for (int i = 0; i < 4; i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.x = xs[i];
+    p.y = 5.0;
+    p.z = 5.0;
+    cloud.pts.push_back(p);
+  }
+  cloud.nop = 4;
+  // Three others per site: k = 4 has no k-th neighbour.
+  const auto [maxKth, minNext] = nneigh::shellSeparation(cloud, 4, 1);
+  REQUIRE(std::isinf(maxKth));
+  REQUIRE(minNext == 0.0);
+  // k = 3 is exactly the others: the k-th distance is 3 (from an end site),
+  // and with no (k+1)-th distance there is no upper bound either.
+  const auto [maxThird, nextAfter] = nneigh::shellSeparation(cloud, 3, 1);
+  REQUIRE_THAT(maxThird, Catch::Matchers::WithinAbs(3.0, 1e-12));
+  REQUIRE(nextAfter == 0.0);
+}
+
 TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
           "shell-separation certificate holds",
           "[neighbours]") {
