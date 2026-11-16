@@ -116,10 +116,10 @@ public:
   //! the first call reports every ring.
   [[nodiscard]] int lastReclassified() const;
 
-  //! Above this fraction of dirty rings, update runs one sweep on the index
-  //! it keeps from the previous frame instead of remapping stored pairs
-  //! (default 0.25; 1 never takes that sweep). The next frame still diffs.
-  //! An unchanged graph returns the stored flags.
+  //! Above this fraction of dirty rings, update runs one sweep instead of
+  //! remapping stored pairs. The default is 1, so a transition keeps every
+  //! ring outside the changed region. A smaller fraction opts into the
+  //! sweep. An unchanged graph returns the stored flags.
   void setBatchFraction(double fraction);
 
 private:

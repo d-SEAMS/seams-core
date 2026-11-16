@@ -293,5 +293,5 @@ phase::GlassKind phase::glassFromDensity(double rho, double iceMax,
 }
 
 phase::GlassKind phase::glassFromDensity(double rho) {
-  return glassFromDensity(rho, 0.028, 0.040, 0.070);
+  return glassFromDensity(rho, phase::kIceNumberDensityMax, 0.040, 0.070);
 }

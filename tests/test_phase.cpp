@@ -287,8 +287,51 @@ TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",
   REQUIRE(meanN > meanI);
   REQUIRE(phase::glassFromDensity(meanI) == phase::GlassKind::ice);
   REQUIRE(phase::glassFromDensity(meanN) == phase::GlassKind::hda);
-  REQUIRE(phase::glassFromDensity(0.033) == phase::GlassKind::lda);
+  // Between the Ih/ice-VI midpoint and the LDA ceiling.
+  REQUIRE(phase::glassFromDensity(0.039) == phase::GlassKind::lda);
   REQUIRE(phase::glassFromDensity(0.050) == phase::GlassKind::mda);
+}
+
+TEST_CASE("ideal ice Ih is inside the ice window and ice VI is not", "[phase]") {
+  const double d = 2.75;
+  const double z = 1.0 / 16.0;
+  const double c = d / 0.375;
+  const double a = c / std::sqrt(8.0 / 3.0);
+  const int nx = 4;
+  const int ny = 4;
+  const int nz = 2;
+  const double basis[4][3] = {{1.0 / 3.0, 2.0 / 3.0, z},
+                              {2.0 / 3.0, 1.0 / 3.0, 0.5 + z},
+                              {2.0 / 3.0, 1.0 / 3.0, 1.0 - z},
+                              {1.0 / 3.0, 2.0 / 3.0, 0.5 - z}};
+  const double lx = nx * a;
+  const double ly = ny * a * std::sqrt(3.0) / 2.0;
+  const double lz = nz * c;
+  const double xy = ny * (-0.5 * a);
+  std::vector<std::array<double, 3>> xyz;
+  for (int i = 0; i < nx; ++i) {
+    for (int j = 0; j < ny; ++j) {
+      for (int k = 0; k < nz; ++k) {
+        for (int b = 0; b < 4; ++b) {
+          const double sx = (i + basis[b][0]) / nx;
+          const double sy = (j + basis[b][1]) / ny;
+          const double sz = (k + basis[b][2]) / nz;
+          xyz.push_back({sx * lx + sy * xy, sy * ly, sz * lz});
+        }
+      }
+    }
+  }
+  auto ih = cloudFrom(xyz, {lx, ly, lz});
+  const double volume = nneigh::dumpVolume(ih);
+  REQUIRE(volume > 0.0);
+  const double rho = static_cast<double>(ih.nop) / volume;
+  // The old ceiling, 0.028 1/A^3, sits below this crystal.
+  REQUIRE(rho > 0.028);
+  REQUIRE(rho < phase::kIceNumberDensityMax);
+  REQUIRE(phase::glassFromDensity(rho) == phase::GlassKind::ice);
+  const double iceVI = phase::numberDensity(phase::kIceVIMassDensity);
+  REQUIRE(iceVI > phase::kIceNumberDensityMax);
+  REQUIRE(phase::glassFromDensity(iceVI) != phase::GlassKind::ice);
 }
 
 TEST_CASE("static ice has zero hydrogen MSD; a wrap hop is unwrapped",

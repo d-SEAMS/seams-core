@@ -877,7 +877,10 @@ struct ring::AffiliationUpdater::Impl {
   std::vector<std::size_t> periOffset;
   CageAffiliation current;
   int lastReclassified = 0;
-  double batchFraction = 0.25;
+  // 1 keeps the incremental path. A smaller fraction opts into one sweep
+  // on a frame whose dirty rings exceed it. The sweep stores its pairs,
+  // so the next frame diffs instead of repeating the sweep.
+  double batchFraction = 1.0;
   // The back-off of RingUpdater: after a frame that went to batch on churn,
   // the next `skip` frames run cageAffiliation with no diff state, the wait
   // doubling from 1 to kMaxBackoff while frames keep going to batch
@@ -1256,15 +1259,12 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
     st.skip = 0;
     return st.current;
   }
-  // A whole-frame sweep does not store pairs. The next frame still diffs,
-  // and an unchanged graph returns above. Rebuilding the pair table here
-  // was a second full sweep and made every later transition pay it.
+  // A previous sweep left no pair table. Rebuild it once, then the next
+  // frame diffs. An unchanged graph already returned above.
   if (!st.answersValid) {
-    st.fastAffiliation(rings, nList);
-    st.rememberRings(rings);
+    st.batch(rings, nList);
     std::swap(st.prevPack, st.nextPack);
-    st.answersValid = false;
-    st.primed = true;
+    st.answersValid = true;
     return st.current;
   }
 
@@ -1339,10 +1339,9 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
   // ball. A warm sweep reuses the index from the previous frame. Pairs are
   // not stored, and the next frame is not latched onto this sweep.
   if (dirtyPairs.size() > batchLimit) {
-    st.fastAffiliation(rings, nList);
-    st.rememberRings(rings);
+    st.batch(rings, nList);
     std::swap(st.prevPack, st.nextPack);
-    st.answersValid = false;
+    st.answersValid = true;
     st.primed = true;
     st.batchHot = false;
     // Before the return. A call after it never ran, so the backoff stayed

@@ -6,7 +6,7 @@
 ** Cage-stage bench against the pre-index findHC/findDDC signatures, so the
 ** baseline tree of a two-tree comparison can be timed with the same driver
 ** shape as bench_cages. Compiled directly against the baseline library by
-** scripts/elja_paper_benches.sh rather than through the meson test setup,
+** the paper bench script rather than through the meson test setup,
 ** since the baseline tree predates the bench targets.
 **
 ** Run from the input/ directory.

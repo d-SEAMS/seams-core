@@ -323,6 +323,18 @@ Ascent finalAscent(const std::vector<double> &series) {
   return out;
 }
 
+GrowBasin growBasin(const std::vector<double> &series) {
+  GrowBasin out;
+  const Ascent climb = finalAscent(series);
+  if (!climb.climbed) {
+    return out;
+  }
+  out.occupied = true;
+  out.barrier = climb.baseline;
+  out.index = climb.index;
+  return out;
+}
+
 Lead ringLead(const std::vector<double> &ringFraction,
               const std::vector<double> &iceFraction) {
   Lead out;

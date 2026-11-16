@@ -101,6 +101,20 @@ TEST_CASE("final ascent stops at the last point before the strict climb",
   REQUIRE(flat.index == 0);
 }
 
+TEST_CASE("each label takes its grow basin from its own climb", "[nucleation]") {
+  const nucleation::GrowBasin core = nucleation::growBasin({2, 2, 8});
+  const nucleation::GrowBasin extended = nucleation::growBasin({20, 15, 40});
+  const nucleation::GrowBasin flat = nucleation::growBasin({4, 4, 4});
+  REQUIRE(core.occupied);
+  REQUIRE(extended.occupied);
+  REQUIRE_FALSE(flat.occupied);
+  REQUIRE(core.index == 1);
+  REQUIRE(extended.index == 1);
+  REQUIRE_THAT(core.barrier, Catch::Matchers::WithinAbs(2, 1e-12));
+  REQUIRE_THAT(extended.barrier, Catch::Matchers::WithinAbs(15, 1e-12));
+  REQUIRE(core.barrier != extended.barrier);
+}
+
 TEST_CASE("ring fraction leads ice by the constructed lag", "[nucleation]") {
   // The ring differences are the ice differences shifted three samples earlier.
   std::vector<double> rings = {0.20, 0.20, 0.25, 0.45, 0.55, 0.57, 0.57,

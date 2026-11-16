@@ -121,6 +121,18 @@ struct Ascent {
 
 [[nodiscard]] Ascent finalAscent(const std::vector<double> &series);
 
+//! Grow basin of one label. The barrier is the cluster size at the foot
+//! of that label's own final strict climb to its maximum. A series that
+//! never climbs has occupied false: it never enters the basin. The
+//! barrier is not a shared multiple of the molecule count.
+struct GrowBasin {
+  bool occupied = false;
+  double barrier = 0;
+  int index = -1;
+};
+
+[[nodiscard]] GrowBasin growBasin(const std::vector<double> &series);
+
 //! First sample at which the series has covered half of its rise from
 //! the first sample to the maximum. A series that never rises has
 //! ok false. This is the operational marker used for induction on one

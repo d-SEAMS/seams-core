@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Assemble the Elja paper-bench outputs into one JSON object.
+"""Assemble paper-bench text outputs into one JSON object.
 
-Usage: elja_bench_json.py <out_dir>
+Usage: python3 <this-script> <out_dir>
 
-Reads the text outputs written by elja_paper_benches.sh and emits the JSON
-shape the campaign spec asks for on stdout. Missing files become nulls rather
+Reads the text outputs of the paper bench script and emits the JSON shape
+the campaign spec asks for on stdout. Missing files become nulls rather
 than errors, so a partial run still yields an inspectable object.
 """
 import json

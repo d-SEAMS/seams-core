@@ -13,9 +13,10 @@ excludes zero when both ends sit on the same side of zero.
 
 The post-critical stacking fraction is the cubic share inside the
 largest cluster at the half-rise of that cluster. It is reported only
-when the run starts as a liquid and the largest cluster later reaches
-POST_CRITICAL molecules. That size is an operational mark above the
-liquid fluctuation band. It is not an MFPT critical size.
+when the run starts as a liquid and that label's own size series
+climbs. The barrier is the size at the foot of the final strict climb.
+A series that never climbs does not enter the basin. It is not an
+MFPT critical size.
 
 The per-frame largest-cluster columns are copied to one table so a
 later mean-first-passage fit can reuse them.
@@ -35,12 +36,6 @@ from pathlib import Path
 LIQUID_CORE_MAX = 5
 LIQUID_CRYSTAL_MAX = 20
 LIQUID_SHARE_MAX = 0.50
-
-# Largest published core cluster required before a half-rise stacking
-# fraction is called post-critical. Fifty molecules is ten times the
-# liquid gate and was not reached by the fluctuating patches in the
-# short 180 K scouts.
-POST_CRITICAL = 50
 
 N_BOOT = 10000
 BOOT_SEED = 20261111
@@ -174,6 +169,29 @@ def bootstrap_mean(values: list[float], n_boot: int, rng_seed: int) -> dict[str,
     }
 
 
+def grow_barrier(series: list[float]) -> float | None:
+    """Size at the foot of the final strict climb, or None if it never climbs."""
+    if not series:
+        return None
+    imax = max(range(len(series)), key=lambda i: series[i])
+    foot = imax
+    while foot > 0 and series[foot - 1] < series[foot]:
+        foot -= 1
+    if not series[imax] > series[foot]:
+        return None
+    return series[foot]
+
+
+SIZE_COLUMN = {
+    "chill_core": "n_chill_core",
+    "chill_ext": "n_chill_ext",
+    "ovito_core": "n_ovito_core",
+    "ovito_ext": "n_ovito_ext",
+    "q6bar": "n_q6",
+    "symmetry": "n_sym",
+}
+
+
 def fnum(text: str) -> float:
     try:
         return float(text)
@@ -207,10 +225,14 @@ def collect(seed_dirs: list[Path]) -> tuple[list[dict], list[str], list[dict]]:
         liquid = is_liquid(frames[0])
         max_core = max(int(row["n_chill_core"]) for row in frames)
         final_core = int(frames[-1]["n_chill_core"])
-        # Post-critical on this window: the largest core reached the
-        # operational mark and was still there at the last frame, so the
-        # cluster had not fallen back into the liquid band.
-        grown = max_core >= POST_CRITICAL and final_core >= POST_CRITICAL
+        barriers = {
+            name: grow_barrier([float(row[column]) for row in frames])
+            for name, column in SIZE_COLUMN.items()
+        }
+        # The core occupies its basin when its own series climbs and the
+        # last frame is still at or above that barrier.
+        core_barrier = barriers["chill_core"]
+        grown = core_barrier is not None and final_core >= core_barrier
         rises = {
             "chill_core": max(int(r["chill_cubic"]) + int(r["chill_hex"]) for r in frames)
             - (int(frames[0]["chill_cubic"]) + int(frames[0]["chill_hex"])),
@@ -279,18 +301,20 @@ def collect(seed_dirs: list[Path]) -> tuple[list[dict], list[str], list[dict]]:
         cross_ps = float("nan")
         cross_stack = float("nan")
         cross_size = float("nan")
-        for row in frames:
-            if int(row["n_chill_core"]) >= POST_CRITICAL:
-                cross_ps = (int(row["frame"]) - t0) * ps
-                cubic = int(row["c_chill_core"])
-                hexagonal = int(row["h_chill_core"])
-                den = cubic + hexagonal
-                cross_stack = cubic / den if den else float("nan")
-                cross_size = int(row["n_chill_core"])
-                break
+        if core_barrier is not None:
+            for row in frames:
+                if float(row["n_chill_core"]) >= core_barrier:
+                    cross_ps = (int(row["frame"]) - t0) * ps
+                    cubic = int(row["c_chill_core"])
+                    hexagonal = int(row["h_chill_core"])
+                    den = cubic + hexagonal
+                    cross_stack = cubic / den if den else float("nan")
+                    cross_size = int(row["n_chill_core"])
+                    break
         for name in ("chill_core", "chill_ext", "ovito_core", "ovito_ext", "q6bar", "symmetry"):
             fields = summary.get(f"nucleus:{name}", {})
-            half_ok = fields.get("half_ok") == "1" and liquid and int(fields.get("max_size", "0") or 0) >= POST_CRITICAL
+            barrier = barriers[name]
+            half_ok = fields.get("half_ok") == "1" and liquid and barrier is not None
             stacking.append(
                 {
                     "seed": seed,
