@@ -37,7 +37,7 @@ jobs:
           pixi run -e default ninja -j2 -C bbdir
       - name: Xvfb and software Vulkan
         run: |
-          sudo apt-get update && sudo apt-get install -y xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
+          sudo apt-get update && sudo apt-get install -y xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
           Xvfb :99 -screen 0 1280x1024x24 >/dev/null 2>&1 &
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           echo "QT_QPA_PLATFORM=xcb" >> "$GITHUB_ENV"
@@ -129,7 +129,7 @@ jobs:
           cache-key: pixi-default-
 
       - name: Docs runtimes
-        run: sudo apt-get update && sudo apt-get install -y pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
+        run: sudo apt-get update && sudo apt-get install -y pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-shape0 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
 
       - run: pixi run -e default setup
       - run: pixi run -e default ninja -j2 -C bbdir
