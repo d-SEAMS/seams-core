@@ -42,6 +42,17 @@ jobs:
           ninja -C build-pkg
           meson install -C build-pkg
           tar -C "$SEAMS_PREFIX" -czf libseams-prefix.tar.gz .
+      # The loader path stays unset: the installed programs and libraries
+      # find each other by runpath, as a downstream package uses them.
+      - name: Run the installed libseams
+        run: |
+          version=$(python3 scripts/check_release_version.py --print)
+          test "$(env -u LD_LIBRARY_PATH "$SEAMS_PREFIX/bin/seams" --version)" = "seams ${version}"
+          export PKG_CONFIG_PATH="$SEAMS_PREFIX/lib/pkgconfig"
+          test "$(pkg-config --modversion seams)" = "${version}"
+          read -ra seams_flags <<< "$(pkg-config --cflags --libs seams)"
+          cc docs/examples/quickstart.c "${seams_flags[@]}" -lm -Wl,-rpath,"$SEAMS_PREFIX/lib" -o "$RUNNER_TEMP/quickstart"
+          env -u LD_LIBRARY_PATH "$RUNNER_TEMP/quickstart"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: libseams-prefix
