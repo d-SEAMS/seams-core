@@ -1,1 +1,1 @@
-Primitive rings are stored as one index buffer of 32-bit vertex ids, with a byte per ring size. A fingerprint and a per-atom count tally rings while searching and do not keep the list. A dense frame lists on the team below the sparse cutoff.
+A fingerprint and a per-atom ring count tally rings while searching and do not keep the list. `seams fingerprint --by-atom` reads those per-atom counts.

@@ -1,1 +1,1 @@
-A cold cage frame searches six-rings only. The equatorial 14-atom check counts with a generation stamp, and the six triplet walks share each atom's ring row.
+A cold cage frame searches six-rings only, and the six triplet walks of the equatorial check share one read of each atom's ring row.
