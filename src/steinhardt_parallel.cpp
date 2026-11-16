@@ -176,7 +176,6 @@ void atomRange(int n, int rank, int nranks, int &begin, int &end) {
 }
 
 
-#ifndef SEAMS_YLM_AVX512
 static const int kInvPow[13] = {0,1,1,2,2,3,3,4,4,5,5,6,6};
 static const int kOdd[13] = {0,1,0,1,0,1,0,1,0,1,0,1,0};
 inline double poly12(int m, double u) {
@@ -273,11 +272,13 @@ void qlmAddBond12(double dx, double dy, double dz, double *qlmInterleaved,
   }
   nUsed++;
 }
-#endif
 
 void runPass1Host12(const NeighbourCSR &g, int begin, int end,
                     std::vector<double> &qlm) {
   constexpr int nComp = 25;
+#ifdef SEAMS_YLM_AVX512
+  const bool wide = seams::cpu::features().avx512f;
+#endif
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
 #pragma omp parallel for schedule(static) if (useThreads)
@@ -292,6 +293,9 @@ void runPass1Host12(const NeighbourCSR &g, int begin, int end,
     const int j1 = g.offsets[static_cast<size_t>(i) + 1];
     int nUsed = 0;
 #ifdef SEAMS_YLM_AVX512
+    // The eight-bond kernel is AVX-512. A CPU without it, or a valgrind
+    // that cannot decode it, takes the one-bond loop.
+    if (wide) {
     double xs[8];
     double ys[8];
     double zs[8];
@@ -321,14 +325,16 @@ void runPass1Host12(const NeighbourCSR &g, int begin, int end,
       }
     }
     flush();
-#else
-    for (int p = j0; p < j1; p++) {
-      qlmAddBond12(g.dr[static_cast<size_t>(3 * p)],
-                   g.dr[static_cast<size_t>(3 * p + 1)],
-                   g.dr[static_cast<size_t>(3 * p + 2)], qlm.data(), row,
-                   nUsed);
-    }
+    } else
 #endif
+    {
+      for (int p = j0; p < j1; p++) {
+        qlmAddBond12(g.dr[static_cast<size_t>(3 * p)],
+                     g.dr[static_cast<size_t>(3 * p + 1)],
+                     g.dr[static_cast<size_t>(3 * p + 2)], qlm.data(), row,
+                     nUsed);
+      }
+    }
     if (nUsed == 0) {
       continue;
     }
