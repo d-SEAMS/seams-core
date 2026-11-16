@@ -1989,7 +1989,8 @@ struct DdcSplitTimes {
   double search_ms = 0;
   double write_ms = 0;
 };
-DdcSplitTimes gDdcSplit;
+// findDDC is called from several threads in the cage fuzzer.
+thread_local DdcSplitTimes gDdcSplit;
 // Cycle keys built by the last findDDC order. Ideal ice distinguishes rings
 // by their atoms, so this stays zero when the comparator can stop early.
 std::atomic<std::uint64_t> gDdcCycleEvals{0};

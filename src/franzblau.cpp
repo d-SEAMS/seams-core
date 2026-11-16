@@ -42,8 +42,8 @@ int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
 namespace {
 
 std::atomic<std::uint64_t> gPrimCycles{0};
-bool gTimePrimitive = false;
-double gTscPerMs = 0;
+thread_local bool gTimePrimitive = false;
+thread_local double gTscPerMs = 0;
 
 // Ring enumeration wants about 80 sources per thread, and a team is
 // not started until those sources fill every worker. A few hundred
@@ -96,30 +96,42 @@ struct RingSplitTimes {
   double ball_fill_ms = 0;
 };
 
-RingSplitTimes gRingSplit;
-int gUsedBalls = 0;
-double *gSourceWorkPtr = nullptr;
+// One search per thread. Concurrent callers (domain shares, the cage
+// fuzzer) used to race on these process globals. OpenMP workers copy
+// the calling thread's flags at the start of a team; the timing slots
+// stay on the thread that lastRingSearchSplit reads.
+thread_local RingSplitTimes gRingSplit;
+thread_local int gUsedBalls = 0;
+thread_local double *gSourceWorkPtr = nullptr;
 struct alignas(64) PhaseSlot {
   double levels = 0;
   double paths = 0;
   double pairs = 0;
   double sort = 0;
 };
-PhaseSlot gPhase[64];
-bool gProfile = false;
-double gProfLevels = 0;
-double gProfPaths = 0;
-double gProfPairs = 0;
-double gProfTestMs = 0;
-double gProfOdd = 0;
-long long gProfPathPairs = 0;
-long long gProfTestN = 0;
-long long gProfOddPairs = 0;
-long long gProfSumP = 0;
-int gProfMaxP = 0;
-long long gProfLp3 = 0;
-long long gProfLp4 = 0;
-long long gOpen2 = 0;
+thread_local PhaseSlot gPhase[64];
+thread_local bool gProfile = false;
+thread_local double gProfLevels = 0;
+thread_local double gProfPaths = 0;
+thread_local double gProfPairs = 0;
+thread_local double gProfTestMs = 0;
+thread_local double gProfOdd = 0;
+thread_local long long gProfPathPairs = 0;
+thread_local long long gProfTestN = 0;
+thread_local long long gProfOddPairs = 0;
+thread_local long long gProfSumP = 0;
+thread_local int gProfMaxP = 0;
+thread_local long long gProfLp3 = 0;
+thread_local long long gProfLp4 = 0;
+thread_local long long gOpen2 = 0;
+
+// Workers in a ring-search team read the calling thread's flags. Each
+// has its own thread_local copy, so the team copies them on entry.
+static void adoptSearchFlags(bool profile, bool timePrimitive, double *sourceWork) {
+  gProfile = profile;
+  gTimePrimitive = timePrimitive;
+  gSourceWorkPtr = sourceWork;
+}
 
 double millisSince(std::chrono::steady_clock::time_point start) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start)
@@ -3024,8 +3036,12 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       perSource[static_cast<std::size_t>(k)].reset();
     }
     auto *pools = &perSource;
+    const bool profileNow = gProfile;
+    const bool timeNow = gTimePrimitive;
+    double *const sourceNow = gSourceWorkPtr;
 #pragma omp parallel num_threads(sourceUse)
     {
+      adoptSearchFlags(profileNow, timeNow, sourceNow);
       // Kept by each worker for the next search, so the level and path
       // tables are not faulted in again on every call.
       thread_local RingScratch scratch;
@@ -3849,8 +3865,12 @@ struct primitive::RingUpdater::Impl {
     const RingCall call{nullptr, capForGraph(adj)};
 #ifdef SEAMS_HAS_OPENMP
     if (nThreads > 1) {
+    const bool profileNow = gProfile;
+    const bool timeNow = gTimePrimitive;
+    double *const sourceNow = gSourceWorkPtr;
 #pragma omp parallel num_threads(nThreads)
       {
+        adoptSearchFlags(profileNow, timeNow, sourceNow);
         RingScratch &scratch = scratches[static_cast<std::size_t>(omp_get_thread_num())];
         // Guided chunks: a nucleus and a partial shell put much heavier
         // sources next to empty ones, and a static share leaves the last
@@ -3923,8 +3943,12 @@ struct primitive::RingUpdater::Impl {
     }
 #ifdef SEAMS_HAS_OPENMP
     if (nThreads > 1) {
+    const bool profileNow = gProfile;
+    const bool timeNow = gTimePrimitive;
+    double *const sourceNow = gSourceWorkPtr;
 #pragma omp parallel num_threads(nThreads)
       {
+        adoptSearchFlags(profileNow, timeNow, sourceNow);
         RingScratch &scratch =
             scratches[static_cast<std::size_t>(omp_get_thread_num())];
         DistOracle oracle;
