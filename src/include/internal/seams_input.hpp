@@ -157,6 +157,15 @@ readChemfiles(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               int typeFilter = -1);
 
+//! Steps [first, last] (1-based, inclusive; last <= 0 is the end) of one
+//! open chemfiles trajectory, in order. typeFilter -1 keeps every atom.
+//! Each cloud matches readChemfiles(filename, frame, cloud, typeFilter).
+//! A file chemfiles cannot read gives one empty cloud at frame first.
+void forEachChemfilesStep(
+    const std::string &filename, int first, int last, int typeFilter,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn);
+
 //! Walk [first, last] through a chemfiles trajectory. Returns false for a
 //! CON path or a file chemfiles does not open, so the caller can use
 //! another reader. part/parts keep one slice of the range.
@@ -182,6 +191,14 @@ openFrame(const std::string &filename, int frame, int typeI,
 molSys::PointCloud<molSys::Point<double>, double>
 readCon(std::string filename, int targetFrame,
         molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! Frames [first, last] (1-based, inclusive; last <= 0 is the end) of one
+//! open readcon iterator, in order. Each cloud matches readCon for that
+//! frame. A file readcon cannot open gives one empty cloud at frame first.
+void forEachConFrame(
+    const std::string &filename, int first, int last,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn);
 
 #ifdef SEAMS_HAS_READCON_DB
 //! Append one CON path to a readcon-db corpus. A directory that holds

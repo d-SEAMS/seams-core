@@ -15,7 +15,7 @@ index 1111111..2222222 100644
  #include "chemfiles/FormatMetadata.hpp"
  #include "chemfiles/files/MemoryBuffer.hpp"
  
-@@ -277,3 +279,54 @@ optional<span<const char>> Trajectory::memory_buffer() const {
+@@ -277,3 +279,83 @@ optional<span<const char>> Trajectory::memory_buffer() const {
  
      return span<const char>(buffer_->data(), buffer_->data() + buffer_->size());
  }
@@ -69,4 +69,33 @@ index 1111111..2222222 100644
 +    }
 +}
 +
++
++// Visit steps [first, last] of one open trajectory in order. The frames
++// are read and destroyed here, like seams_with_frame, and the trajectory
++// is opened once for the whole range. visit returns nonzero to stop.
++int __attribute__((visibility("default"))) seams_each_frame(const std::string& path, const std::string& format,
++                     size_t first, size_t last, const std::string& topology,
++                     int (*visit)(const Frame& frame, size_t step, void* user),
++                     void* user, std::string& error) {
++    try {
++        Trajectory trajectory(path, 'r', format);
++        if (!topology.empty()) {
++            trajectory.set_topology(topology);
++        }
++        const size_t nsteps = trajectory.nsteps();
++        for (size_t step = first; step < nsteps && step <= last; ++step) {
++            Frame frame = step == first ? trajectory.read_step(step) : trajectory.read();
++            if (visit != nullptr && visit(frame, step, user) != 0) {
++                break;
++            }
++        }
++        return 0;
++    } catch (const Error& err) {
++        error = err.what();
++        return 4;
++    } catch (const std::exception& err) {
++        error = err.what();
++        return 5;
++    }
++}
 +} // namespace chemfiles

@@ -25,6 +25,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <iostream>
 #include <mutex>
 #include <string>
@@ -188,6 +189,10 @@ int seams_with_frame(const std::string &path, const std::string &format,
                      int (*visit)(const Frame &frame, const std::size_t *ids,
                                   std::size_t nids, void *user),
                      void *user, std::string &error, std::size_t &nsteps);
+int seams_each_frame(const std::string &path, const std::string &format,
+                     std::size_t first, std::size_t last, const std::string &topology,
+                     int (*visit)(const Frame &frame, std::size_t step, void *user),
+                     void *user, std::string &error);
 }
 
 int sinp::chemfilesSteps(const std::string &filename) {
@@ -368,6 +373,58 @@ sinp::readChemfiles(std::string filename,
     return yCloud;
   }
   return yCloud;
+}
+
+struct ChemRange {
+  sinp::ChemfilesRead request;
+  const std::function<void(int, molSys::PointCloud<molSys::Point<double>, double> &)> *fn;
+  int visited = 0;
+};
+
+int visitChemRange(const chemfiles::Frame &frame, std::size_t step, void *user) {
+  auto *range = static_cast<ChemRange *>(user);
+  range->request.frame = static_cast<int>(step) + 1;
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  ChemVisit ctx{&range->request, &cloud};
+  visitChemFrame(frame, nullptr, static_cast<std::size_t>(-1), &ctx);
+  range->visited += 1;
+  (*range->fn)(range->request.frame, cloud);
+  return 0;
+}
+
+void sinp::forEachChemfilesStep(
+    const std::string &filename, int first, int last, int typeFilter,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn) {
+  std::string topology;
+  if (extensionOf(filename) == "dcd") {
+    const auto dot = filename.find_last_of('.');
+    const auto pdb = filename.substr(0, dot) + ".pdb";
+    std::ifstream probe(pdb);
+    if (probe) {
+      topology = pdb;
+    }
+  }
+  ChemRange range;
+  range.request.typeFilter = typeFilter;
+  range.fn = &fn;
+  const std::size_t from = static_cast<std::size_t>(std::max(first, 1) - 1);
+  const std::size_t to = last > 0 ? static_cast<std::size_t>(last - 1)
+                                  : std::numeric_limits<std::size_t>::max();
+  std::string error;
+  int rc = 0;
+  if (mmcifHasData(filename)) {
+    rc = chemfiles::seams_each_frame(filename, forcedFormat(filename), from, to, topology,
+                                     visitChemRange, &range, error);
+  } else {
+    rc = 4;
+  }
+  // An unreadable file gives the first frame as an empty cloud, as one
+  // readChemfiles call per frame did.
+  if (rc != 0 && range.visited == 0) {
+    molSys::PointCloud<molSys::Point<double>, double> empty;
+    fn(std::max(first, 1), empty);
+  }
 }
 
 bool sinp::forEachChemfilesFrame(

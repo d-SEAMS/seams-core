@@ -343,6 +343,43 @@ TEST_CASE("a MOL2 molecule with no counts line is an error", "[chemfiles]") {
 }
 #endif
 
+TEST_CASE("one open chemfiles trajectory gives the clouds of single reads",
+          "[chemfiles]") {
+  const auto path = dseams_test::freshFile("dseams_chem_live.xyz");
+  {
+    std::ofstream out(path);
+    out << "2\n\nO 0 0 0\nH 1 0 0\n2\n\nO 1 0 0\nH 2 0 0\n2\n\nO 2 0 0\nH 3 0 0\n";
+  }
+  for (const int type : {-1, 8}) {
+    std::vector<int> seen;
+    sinp::forEachChemfilesStep(path.string(), 2, 3, type, [&](int frame, Cloud &cloud) {
+      seen.push_back(frame);
+      Cloud one;
+      one = sinp::readChemfiles(path.string(), frame, one, type);
+      REQUIRE(cloud.nop == one.nop);
+      REQUIRE(cloud.currentFrame == frame);
+      for (int i = 0; i < cloud.nop; ++i) {
+        REQUIRE(cloud.pts[static_cast<std::size_t>(i)].type ==
+                one.pts[static_cast<std::size_t>(i)].type);
+        REQUIRE(cloud.pts[static_cast<std::size_t>(i)].x ==
+                one.pts[static_cast<std::size_t>(i)].x);
+      }
+    });
+    REQUIRE(seen == std::vector<int>{2, 3});
+  }
+  std::vector<int> toEnd;
+  sinp::forEachChemfilesStep(path.string(), 1, 0, -1,
+                             [&](int frame, Cloud &) { toEnd.push_back(frame); });
+  REQUIRE(toEnd == std::vector<int>{1, 2, 3});
+  std::vector<int> missing;
+  sinp::forEachChemfilesStep((path.string() + ".absent.xyz"), 1, 2, -1,
+                             [&](int frame, Cloud &cloud) {
+                               missing.push_back(frame);
+                               REQUIRE(cloud.nop == 0);
+                             });
+  REQUIRE(missing == std::vector<int>{1});
+}
+
 TEST_CASE("a range walks every chemfiles step and skips CON", "[chemfiles]") {
   const auto path = dseams_test::freshFile("dseams_chem_range.xyz");
   {

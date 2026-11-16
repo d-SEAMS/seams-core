@@ -701,6 +701,43 @@ std::vector<int> fdsForPath(const std::string &path) {
 }
 
 #ifdef SEAMS_HAS_READCON
+TEST_CASE("one open readcon iterator gives the clouds of single reads",
+          "[seams_input]") {
+  const std::string path = "eon/tiny_multi_cuh2.con";
+  std::vector<int> seen;
+  sinp::forEachConFrame(path, 1, 0,
+                        [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+                          seen.push_back(frame);
+                          molSys::PointCloud<molSys::Point<double>, double> one;
+                          one = sinp::readCon(path, frame, one);
+                          REQUIRE(cloud.nop > 0);
+                          REQUIRE(cloud.nop == one.nop);
+                          REQUIRE(cloud.box == one.box);
+                          for (int i = 0; i < cloud.nop; ++i) {
+                            REQUIRE(cloud.pts[static_cast<std::size_t>(i)].x ==
+                                    one.pts[static_cast<std::size_t>(i)].x);
+                            REQUIRE(cloud.pts[static_cast<std::size_t>(i)].atomID ==
+                                    one.pts[static_cast<std::size_t>(i)].atomID);
+                          }
+                        });
+  REQUIRE(seen.size() >= 2);
+  std::vector<int> tail;
+  sinp::forEachConFrame(path, 2, 2,
+                        [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &) {
+                          tail.push_back(frame);
+                        });
+  REQUIRE(tail == std::vector<int>{2});
+  std::vector<int> past;
+  sinp::forEachConFrame(path, 99, 99,
+                        [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+                          past.push_back(frame);
+                          REQUIRE(cloud.nop == 0);
+                        });
+  REQUIRE(past == std::vector<int>{99});
+}
+#endif
+
+#ifdef SEAMS_HAS_READCON
 std::string conText(const char *cell, const char *angles, const char *ids) {
   return std::string("Random Number Seed\n{\"con_spec_version\":2}\n") + cell +
          "\n" + angles +

@@ -1838,6 +1838,36 @@ sinp::readCon(std::string filename, int targetFrame,
   return yCloud;
 }
 
+void sinp::forEachConFrame(
+    const std::string &filename, int first, int last,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn) {
+  const int begin = std::max(first, 1);
+  int visited = 0;
+  try {
+    readcon::ConFrameIterator frames(filename);
+    // nth consumes the frames it skips, so nth(0) is the next frame.
+    std::optional<readcon::ConFrame> frame =
+        frames.nth(static_cast<std::size_t>(begin - 1));
+    for (int at = begin; frame && (last <= 0 || at <= last); ++at) {
+      molSys::PointCloud<molSys::Point<double>, double> cloud;
+      if (!cloudFromHandle(frame->get_handle(), at, cloud)) {
+        std::cerr << "Cannot extract frame " << at << " from " << filename << "\n";
+        cloud = molSys::clearPointCloud(cloud);
+      }
+      visited += 1;
+      fn(at, cloud);
+      frame = frames.nth(0);
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Cannot open .con file " << filename << ": " << e.what() << "\n";
+  }
+  if (visited == 0) {
+    molSys::PointCloud<molSys::Point<double>, double> empty;
+    fn(begin, empty);
+  }
+}
+
 #ifdef SEAMS_HAS_READCON_DB
 int sinp::ingestConCorpus(const std::string &corpus, std::uint64_t trajId,
                           const std::string &conPath) {

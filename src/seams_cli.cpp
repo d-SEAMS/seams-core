@@ -174,6 +174,49 @@ bool forEachInputFrame(const std::string &path, int first, int last,
   }
 
   if (source == FrameSource::serial) {
+    // One open reader walks the range. Opening the file again for every
+    // frame read every earlier frame again.
+    const auto dot = path.find_last_of('.');
+    const std::string ext = dot == std::string::npos ? "" : path.substr(dot + 1);
+    // An empty range reads nothing: an MPI rank other than 0 passes one.
+    if (last < std::max(1, first)) {
+      return true;
+    }
+    const int lastFrame = last;
+    if (ext == "con") {
+#ifdef SEAMS_HAS_READCON
+      if (!gen::file_exists(path)) {
+        throw std::runtime_error("cannot read " + path);
+      }
+      bool stopped = false;
+      sinp::forEachConFrame(path, first, lastFrame, [&](int frame, Cloud &cloud) {
+        if (stopped || (cloud.nop == 0 && frame != std::max(1, first))) {
+          stopped = true;
+          return;
+        }
+        fn(frame, cloud);
+        stopped = cloud.nop == 0;
+      });
+      return true;
+#else
+      throw std::runtime_error("readcon-core is not in this build; CON input needs it");
+#endif
+    }
+#ifdef SEAMS_HAS_CHEMFILES
+    {
+      const int filter = typeFilter > 0 ? typeFilter : -1;
+      bool stopped = false;
+      sinp::forEachChemfilesStep(path, first, lastFrame, filter, [&](int frame, Cloud &cloud) {
+        if (stopped || (cloud.nop == 0 && frame != std::max(1, first))) {
+          stopped = true;
+          return;
+        }
+        fn(frame, cloud);
+        stopped = cloud.nop == 0;
+      });
+      return true;
+    }
+#endif
     const int stop = last;
     for (int frame = std::max(1, first); frame <= stop; ++frame) {
       Cloud cloud = load(path, frame, typeFilter);
