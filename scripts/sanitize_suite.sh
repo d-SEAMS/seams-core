@@ -39,15 +39,19 @@ ninja -C "$build"
 # Python, Lua, and the engine hosts are not linked with the sanitizer.
 # A sanitized libseams loaded into them aborts with "ASan runtime does
 # not come first" unless this runtime is already mapped.
-if [ -z "${LD_PRELOAD:-}" ]; then
+# The runtime is preloaded for meson test only. A host tool this script
+# runs itself (mkdir, cat) is not built with the sanitizer, and a preloaded
+# LeakSanitizer reports that tool's own allocations at its exit.
+_preload=${LD_PRELOAD:-}
+if [ -z "$_preload" ]; then
   asan=$(${CC:-cc} -print-file-name=libasan.so 2>/dev/null || true)
   if [ -n "$asan" ] && [ "$asan" != "libasan.so" ] && [ -f "$asan" ]; then
-    export LD_PRELOAD="$asan"
+    _preload=$asan
   fi
 fi
 # The cargo wrapper reads this and hands it to the test runner only.
-if [ -n "${LD_PRELOAD:-}" ]; then
-  export ASAN_TEST_PRELOAD=${LD_PRELOAD%%:*}
+if [ -n "$_preload" ]; then
+  export ASAN_TEST_PRELOAD=${_preload%%:*}
 fi
 # LeakSanitizer stays on and honors one suppressions= file. A second
 # suppressions= key replaces the first. scripts/lsan.supp names unsanitized
@@ -112,4 +116,8 @@ if [ -n "${FC:-}" ]; then
   export REAL_FC=$FC
   export FC=$root/scripts/asan-path/gfortran
 fi
-meson test -C "$build" --print-errorlogs
+if [ -n "$_preload" ]; then
+  LD_PRELOAD=$_preload meson test -C "$build" --print-errorlogs
+else
+  meson test -C "$build" --print-errorlogs
+fi
