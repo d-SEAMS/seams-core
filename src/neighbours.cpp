@@ -3247,11 +3247,11 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
     std::vector<int> deg(static_cast<std::size_t>(n), 0);
     CsrSlabs job{&nom, &deg, &cols, &offsets, n, k, 0};
 #ifdef SEAMS_HAS_LINKCELL
-    struct DropContinuation {
-      ~DropContinuation() { lc_set_continuation(nullptr, nullptr); }
-    } drop;
-    lc_set_continuation(&job, csrContinue);
-    if (nominateByLinkcell(yCloud, k, typeI, hint, nom) && job.done) {
+    // The continuation used to run on the Rayon pool before every knn
+    // task had stored its row. The degree scan then raced those stores.
+    // knearest_into joins the pool; the scan starts after that join.
+    if (nominateByLinkcell(yCloud, k, typeI, hint, nom)) {
+      csrContinue(&job);
       return;
     }
 #endif
