@@ -33,6 +33,7 @@
 
 #include <csetjmp>
 #include <csignal>
+#include <sched.h>
 #include <unistd.h>
 
 #include <algorithm>
@@ -371,7 +372,18 @@ int main(int argc, char **argv) {
   // it to OMP_NUM_THREADS made a coverage run walk every frame serially.
   omp_set_num_threads(1);
 #endif
+  // hardware_concurrency reports the host, not the CPUs this process
+  // may run on. A trial pool larger than the affinity set spends the
+  // run in the scheduler. The pool stays one thread per allowed CPU.
   unsigned nThreads = std::max(1u, std::thread::hardware_concurrency());
+  cpu_set_t allowed;
+  CPU_ZERO(&allowed);
+  if (sched_getaffinity(0, sizeof(allowed), &allowed) == 0) {
+    const int n = CPU_COUNT(&allowed);
+    if (n > 0) {
+      nThreads = static_cast<unsigned>(n);
+    }
+  }
   if (const char *env = std::getenv("SEAMS_FUZZ_THREADS")) {
     char *end = nullptr;
     const long requested = std::strtol(env, &end, 10);
