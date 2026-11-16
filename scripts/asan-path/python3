@@ -1,0 +1,61 @@
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
+# Clang links the thread runtime into executables only. A host that
+# dlopens libseams has to preload libclang_rt.tsan or the __tsan_*
+# symbols stay undefined. An executable already linked with the runtime
+# must not see that preload, so only this interpreter sets it.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+# Meson builds crates with `python3 -c` and cargo helper scripts. Those
+# shells crash if libclang_rt.tsan is already preloaded. Test programs
+# are real files and do want the runtime.
+# The shebang drops LD_PRELOAD so this shell can start. The address
+# suite still has to map libasan before Python, or an instrumented
+# extension aborts with "ASan runtime does not come first".
+if [ -n "${ASAN_TEST_PRELOAD:-}" ] && [ -f "$ASAN_TEST_PRELOAD" ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *"$ASAN_TEST_PRELOAD"*) ;;
+    *) LD_PRELOAD=$ASAN_TEST_PRELOAD${LD_PRELOAD:+:$LD_PRELOAD} ;;
+  esac
+  export LD_PRELOAD
+fi
+preload_tsan=0
+if [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
+  # python3 -c is how Meson drives cargo. python3 -m pytest is a test
+  # and has to map the runtime.
+  case "${1:-}" in
+    -c) ;;
+    *meson_cargo*|*copy-cargo*) ;;
+    *) preload_tsan=1 ;;
+  esac
+fi
+if [ "$preload_tsan" = 1 ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *"$TSAN_RUNTIME"*) ;;
+    *) LD_PRELOAD=$TSAN_RUNTIME${LD_PRELOAD:+:$LD_PRELOAD} ;;
+  esac
+  export LD_PRELOAD
+fi
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/python3" ]; then
+    found=$dir/python3
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "python3 is not on PATH" >&2
+  exit 1
+fi
+if [ "$preload_tsan" = 1 ] || [ -n "${ASAN_TEST_PRELOAD:-}" ]; then
+  # sitecustomize drops the thread runtime after the loader maps it.
+  # ldd and an explicit `sh script` are shells and segfault if that
+  # runtime is still in the environment. libasan stays, so an ASan
+  # child still maps it first. A re-exec that imports libseams sets
+  # the thread runtime again from TSAN_RUNTIME.
+  PYTHONPATH=$here${PYTHONPATH:+:$PYTHONPATH}
+  export PYTHONPATH
+fi
+exec "$found" "$@"

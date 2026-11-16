@@ -217,7 +217,28 @@ def base_env(build):
     return env
 
 
+def tsan_host(env):
+    """Environment for a binary we just compiled against the sanitized libseams.
+
+    That binary is not itself instrumented, so the thread runtime is not
+    in its link. Preloading it resolves __tsan_*. An executable the build
+    already linked with -fsanitize=thread must not use this.
+    """
+    runtime = os.environ.get("TSAN_RUNTIME", "")
+    if not runtime or not os.path.isfile(runtime):
+        return env
+    out = dict(env)
+    prior = out.get("LD_PRELOAD", "")
+    if runtime not in prior.split(":"):
+        out["LD_PRELOAD"] = runtime if not prior else runtime + ":" + prior
+    return out
+
+
 def run(cmd, env, cwd=ROOT):
+    # A nested interpreter does not go through the asan-path wrapper, so
+    # it does not map the thread runtime unless this environment does.
+    if Path(cmd[0]).name.startswith("python"):
+        env = tsan_host(env)
     done = subprocess.run(cmd, env=env, cwd=cwd, text=True, capture_output=True)
     if done.returncode != 0:
         tail = (done.stderr + done.stdout)[-1200:]
@@ -412,7 +433,7 @@ def python_with(module, env):
     """True when this interpreter imports ``module`` from the snippet path."""
     probe = subprocess.run(
         [sys.executable, "-c", "import " + module],
-        env=env,
+        env=tsan_host(env),
         capture_output=True,
         text=True,
     )

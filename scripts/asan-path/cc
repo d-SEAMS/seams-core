@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
 # Compilers abort or spend the test budget inside LeakSanitizer when the
 # suite has preloaded libasan for Python. Drop it for this process only.
 # Do not spawn dirname. Under the preloaded sanitizer that coreutils
@@ -26,4 +26,29 @@ if [ -z "$real" ]; then
   exit 1
 fi
 unset LD_PRELOAD
+# libseams built with clang -fsanitize=thread has undefined __tsan_*
+# symbols. gcc cannot satisfy them. Link the clang runtime the library
+# was built with.
+if [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
+  rtdir=$(dirname "$TSAN_RUNTIME")
+  link=1
+  for arg in "$@"; do
+    case $arg in
+      -c|-E|-M|-MM) link=0 ;;
+    esac
+  done
+  if [ "$link" = 1 ]; then
+    # clang -fopenmp asks for libomp, which lives next to Archer.
+    omplib=
+    if [ -n "${OMP_TOOL_LIBRARIES:-}" ] && [ -f "$OMP_TOOL_LIBRARIES" ]; then
+      omplib=$(dirname "$OMP_TOOL_LIBRARIES")
+    fi
+    if [ -n "$omplib" ]; then
+      exec clang -fsanitize=thread -shared-libsan -Wl,-rpath,"$rtdir" \
+        -L"$omplib" -Wl,-rpath,"$omplib" "$@"
+    fi
+    exec clang -fsanitize=thread -shared-libsan -Wl,-rpath,"$rtdir" "$@"
+  fi
+  exec clang -fsanitize=thread "$@"
+fi
 exec "$real" "$@"
