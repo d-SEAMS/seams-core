@@ -96,6 +96,18 @@ def prepare(root, seams, libdir, langdir, build):
             link.chmod(0o755)
         else:
             link.symlink_to(target)
+    # The C and C++ scenes type gcc and g++. Replayed, those are the
+    # compilers that built the library, with the consumer link line the
+    # snippet tests use, not whatever the environment puts first on PATH.
+    link_line = os.environ.get("SEAMS_OPENMP_LINK", "")
+    for name, var in (("gcc", "CC"), ("g++", "CXX")):
+        wrapper = shim / name
+        if wrapper.is_symlink() or wrapper.exists():
+            wrapper.unlink()
+        real = os.environ.get(var, "").strip()
+        if real:
+            wrapper.write_text('#!/bin/sh\nexec {} "$@" {}\n'.format(real, link_line))
+            wrapper.chmod(0o755)
     env = os.environ.copy()
     env["PATH"] = str(shim) + os.pathsep + env.get("PATH", "")
     env["NO_COLOR"] = "1"

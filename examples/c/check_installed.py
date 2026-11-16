@@ -148,7 +148,7 @@ def main():
     find_check = source / "examples" / "c" / "find_check"
     version_bin = work / "version-pkg"
     run(
-        [cc, str(find_check / "version.c"), "-o", str(version_bin), *cflags, *libs],
+        [cc, str(find_check / "version.c"), "-o", str(version_bin), *cflags, *libs, *omp],
         env=compile_env,
     )
     env = library_dirs(version_bin, env, [stage, build])
