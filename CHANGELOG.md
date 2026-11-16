@@ -198,7 +198,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The in-plane RDF builds an explicit grid whose cells are the cutoff and bins packed coordinates from the neighbouring cells. Each thread keeps its own histogram until the frame finishes.
 - The landing page hides the root toctree and replaces that dump with cards for Tutorials, How-to, the language reference, the engines, Comparisons, and the paper reproductions. The suite-stack diagram fills the article column.
 - The language bindings move to their own repositories, each released with the seams-core version it binds: Python to d-SEAMS/PydSEAMSlib (`pydseamslib`, `import dseams` and `import pydseams`), Lua and Fennel to d-SEAMS/yodaStruct (LuaRocks `dseams`), R to d-SEAMS/dseams-r, Julia to d-SEAMS/Dseams.jl, Rust to d-SEAMS/dseams-rs (crates `dseams-sys` and `dseams`), and Fortran to d-SEAMS/dseams-fortran (fpm `dseams`). seams-core builds the engine, the C API `libseams`, the C ABI `libseams_lang`, the `seams` CLI and the engine drivers, and releases conda `libseams` and the Yggdrasil recipe for `libseams_jll`. The Meson options `with_python`, `with_lua`, `fennel_lua`, `with_fortran`, `julia_wrap`, `r_libs_user` and `system_libseams` are removed with the bindings they built. The docs run their Python snippets against the installed `pydseamslib` of the same version. `docs/orgmode/contributing/repositories.org` maps the repositories, the pins and the release order.
-- The linkcell wrap names the v0.4.0 tag and carries no patches.
+- The linkcell wrap names the v0.4.1 tag and carries no patches.
 - The minimage wrap names the v0.1.4 tag. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
 - The one-thread carried ring update copies and sorts its rings directly again. Several threads still sort indices and merge in parallel. A team narrower than the process is bound once to that many cores of the allowed set. Interior cells of the orthorhombic cutoff skip the periodic-shift arithmetic. One-thread and several-thread results still match.
 - The one-thread ring search packs sorted neighbour rows in one pass, and interior cells of a triclinic cutoff skip the image-wrap branches. Both stencils keep the same directed pairs as the branchy walk.
@@ -246,6 +246,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- A Clang build loads one OpenMP runtime. linkcell compiled its OpenMP k-nearest region with the environment's GCC and linked libgomp next to Clang's libomp, and the two runtimes disagreed on thread numbers, so neighbour, ring, CHILL+ and C API calls indexed past their per-thread buffers and aborted. linkcell 0.4.1 compiles that region with the C compiler Meson chose and links that compiler's runtime.
 - A LAMMPS dump that grows while it is read is kept. The language fronts follow the build Python and skip a library mismatch.
 - A LAMMPS dump whose `NUMBER OF ATOMS` line comes after `ITEM: ATOMS` no longer indexes past the id table, which was sized for the previous count. Found by `capi_read_fuzzer`.
 - A MOL2 molecule whose counts line is empty no longer crashes `seams_path_nframes`. The vendored chemfiles 0.10.4 indexed the first count of an empty line; the build now applies `cmake/patches/chemfiles-0.10.4-mol2.patch` and refetches chemfiles when the patch set changes. Found by `capi_read_fuzzer`.

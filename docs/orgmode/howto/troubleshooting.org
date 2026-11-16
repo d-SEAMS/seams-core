@@ -16,7 +16,7 @@
 | Looking for ~yodaStruct -c lua_inputs/config.yml~ | 2020 executable | ~seams~ here; Lua library in yodaStruct |
 | ~seams: command not found~ | Binary not on ~PATH~ | After ~pixi run build~ / ~meson compile -C bbdir~ the binary is ~./bbdir/seams~. Install with ~pixi run install~ or ~meson install~ |
 | ~require("dseams")~ fails to load | The Lua binding is not installed | Install the LuaRocks rock ~dseams~ from [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
-| Wrap pin / ~nodownload~ miss | Flake does not fetch wrap-git | Pins live in ~subprojects/~ (~linkcell~ v0.4.0, ~vesin~ v0.5.7, ~readcon-core~ 0.16.2, ~gpulite~). The flake uses ~mesonAutoFeatures=disabled~ and wrap ~nodownload~ |
+| Wrap pin / ~nodownload~ miss | Flake does not fetch wrap-git | Pins live in ~subprojects/~ (~linkcell~ v0.4.1, ~vesin~ v0.5.7, ~readcon-core~ 0.16.2, ~gpulite~). The flake uses ~mesonAutoFeatures=disabled~ and wrap ~nodownload~ |
 
 The two command shapes on bundled frames:
 

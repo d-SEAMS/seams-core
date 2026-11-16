@@ -1,8 +1,7 @@
 [wrap-git]
 url = https://github.com/d-SEAMS/linkcell.git
-revision = v0.4.0
+revision = v0.4.1
 depth = 1
-diff_files = linkcell-one-thread-width.patch
 
 [provide]
 linkcell = linkcell_dep
