@@ -95,4 +95,10 @@ inline const Features &features() {
   return cached;
 }
 
+// false holds the kernels behind seams::ylm::avx512Kernels and
+// symm::avx2Kernels on their generic path; true leaves the choice to the
+// CPU again. For tests.
+void allowSimdKernels(bool allow);
+bool simdKernelsAllowed();
+
 } // namespace seams::cpu

@@ -3,26 +3,33 @@
 
 #include <bop.hpp>
 #include <cpu_features.hpp>
+#include <local_symmetry.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <shell_hot.hpp>
 #include <ylm_batch.hpp>
+
+#include <Eigen/Dense>
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <random>
 #include <vector>
 
 // Every call into the AVX-512 kernel archive goes through
-// seams::ylm::avx512Kernels. With the kernels turned off the scalar path
-// runs on any CPU, and each value it gives must match the kernel's.
+// seams::ylm::avx512Kernels, and every call into the AVX2 shell archive
+// through symm::avx2Kernels. With the kernels turned off the generic path
+// runs on any CPU. Its values must match the kernel's, and its labels must
+// be the same.
 
 namespace {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
 struct ScalarOnly {
-  ScalarOnly() { seams::ylm::allowAvx512Kernels(false); }
-  ~ScalarOnly() { seams::ylm::allowAvx512Kernels(true); }
+  ScalarOnly() { seams::cpu::allowSimdKernels(false); }
+  ~ScalarOnly() { seams::cpu::allowSimdKernels(true); }
   ScalarOnly(const ScalarOnly &) = delete;
   ScalarOnly &operator=(const ScalarOnly &) = delete;
 };
@@ -207,4 +214,132 @@ TEST_CASE("neighbour-list q12 matches on the scalar path", "[ylm][avx512]") {
     scalar = chill::steinhardtQl(cloud, rows, 12);
   }
   requireCloseQl(kernel, scalar);
+}
+
+TEST_CASE("the AVX2 shell kernels need AVX2 and FMA together", "[symmetry][avx2]") {
+  const auto &cpu = seams::cpu::features();
+#if defined(SEAMS_SHELL_AVX2)
+  const bool both = cpu.avx2 && cpu.fma;
+  REQUIRE(symm::avx2Kernels() == both);
+  if (!both) {
+    WARN("this CPU lacks AVX2 or FMA; both sides of the comparisons are generic");
+  }
+#else
+  (void)cpu;
+  REQUIRE_FALSE(symm::avx2Kernels());
+#endif
+  {
+    ScalarOnly generic;
+    REQUIRE_FALSE(symm::avx2Kernels());
+  }
+#if defined(SEAMS_SHELL_AVX2)
+  REQUIRE(symm::avx2Kernels() == both);
+#endif
+}
+
+TEST_CASE("ice labels match on the generic shell path", "[symmetry][avx2]") {
+  const Cloud clouds[] = {iceIc(3), jittered(3, 0.15, 52021), jittered(3, 0.35, 52023),
+                          liquid(240, 16.0, 91001)};
+  for (const Cloud &cloud : clouds) {
+    for (bool openFace : {false, true}) {
+      std::vector<int> kernel;
+      std::vector<int> generic;
+      symm::classifyIceCloud(cloud, kernel, openFace);
+      {
+        ScalarOnly off;
+        symm::classifyIceCloud(cloud, generic, openFace);
+      }
+      REQUIRE(kernel == generic);
+    }
+  }
+
+  // The thermal TIP4P/2005 slab of test_local_symmetry, under the default
+  // gates and the earlier 0.12, 0.94, 1.15.
+  std::ifstream in;
+  for (const char *path : {"tests/data/tip4p252-oxygens.txt",
+                           "../tests/data/tip4p252-oxygens.txt"}) {
+    in.open(path);
+    if (in) {
+      break;
+    }
+    in.clear();
+  }
+  REQUIRE(in);
+  int n = 0;
+  double lx = 0, ly = 0, lz = 0;
+  in >> n >> lx >> ly >> lz;
+  REQUIRE(n == 4096);
+  Eigen::MatrixXd xyz(n, 3);
+  for (int i = 0; i < n; i++) {
+    in >> xyz(i, 0) >> xyz(i, 1) >> xyz(i, 2);
+  }
+  REQUIRE(in);
+  Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
+  box(0, 0) = lx;
+  box(1, 1) = ly;
+  box(2, 2) = lz;
+  struct Gates {
+    double rmsd, q, ratio;
+    bool openFace;
+  };
+  const Gates gates[] = {{symm::kShellRmsd, symm::kThermalQ, symm::kThermalBondRatio, false},
+                         {symm::kShellRmsd, symm::kThermalQ, symm::kThermalBondRatio, true},
+                         {0.12, 0.94, 1.15, false}};
+  for (const Gates &g : gates) {
+    std::vector<int> kernel;
+    std::vector<int> generic;
+    symm::classifyIce(xyz, box, kernel, g.rmsd, g.q, g.ratio, g.openFace);
+    {
+      ScalarOnly off;
+      symm::classifyIce(xyz, box, generic, g.rmsd, g.q, g.ratio, g.openFace);
+    }
+    REQUIRE(kernel == generic);
+  }
+}
+
+TEST_CASE("diamond signatures match on the generic shell path", "[symmetry][avx2]") {
+  // FCC and HCP second shells, nearest-neighbour length sqrt(2), with
+  // growing noise so every return of diamondCna comes up.
+  const double fcc[12][3] = {
+      {-1, -1, 0}, {-1, 1, 0}, {1, -1, 0}, {1, 1, 0}, {-1, 0, -1}, {-1, 0, 1},
+      {1, 0, -1},  {1, 0, 1},  {0, -1, -1}, {0, -1, 1}, {0, 1, -1}, {0, 1, 1},
+  };
+  const double r3 = std::sqrt(3.0);
+  const double h = 2.0 / std::sqrt(3.0);
+  const double hcp[12][3] = {
+      {std::sqrt(2.0), 0, 0},       {-std::sqrt(2.0), 0, 0},
+      {std::sqrt(0.5), r3 / std::sqrt(2.0), 0},  {-std::sqrt(0.5), r3 / std::sqrt(2.0), 0},
+      {std::sqrt(0.5), -r3 / std::sqrt(2.0), 0}, {-std::sqrt(0.5), -r3 / std::sqrt(2.0), 0},
+      {0, std::sqrt(2.0 / 3.0), h},  {std::sqrt(0.5), -std::sqrt(1.0 / 6.0), h},
+      {-std::sqrt(0.5), -std::sqrt(1.0 / 6.0), h}, {0, std::sqrt(2.0 / 3.0), -h},
+      {std::sqrt(0.5), -std::sqrt(1.0 / 6.0), -h}, {-std::sqrt(0.5), -std::sqrt(1.0 / 6.0), -h},
+  };
+  std::mt19937 rng(60311);
+  for (const auto *shell : {fcc, hcp}) {
+    for (double amplitude : {0.0, 0.05, 0.12, 0.2, 0.3}) {
+      for (int trial = 0; trial < 64; trial++) {
+        std::normal_distribution<double> noise(0.0, amplitude > 0.0 ? amplitude : 1.0);
+        double sx[12], sy[12], sz[12];
+        for (int i = 0; i < 12; i++) {
+          sx[i] = shell[i][0] + (amplitude > 0.0 ? noise(rng) : 0.0);
+          sy[i] = shell[i][1] + (amplitude > 0.0 ? noise(rng) : 0.0);
+          sz[i] = shell[i][2] + (amplitude > 0.0 ? noise(rng) : 0.0);
+        }
+        for (int ambiguous : {9, 12}) {
+          int k421 = -1, k422 = -1, kGood = -1;
+          int g421 = -1, g422 = -1, gGood = -1;
+          const int kernel = symm::diamondCna(sx, sy, sz, ambiguous, &k421, &k422, &kGood);
+          int generic = 0;
+          {
+            ScalarOnly off;
+            generic = symm::diamondCna(sx, sy, sz, ambiguous, &g421, &g422, &gGood);
+          }
+          REQUIRE(kernel == generic);
+          REQUIRE(k421 == g421);
+          REQUIRE(k422 == g422);
+          REQUIRE(kGood == gGood);
+        }
+      }
+    }
+  }
 }

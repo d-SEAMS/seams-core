@@ -63,7 +63,7 @@ Python is `dseams.symmetry(positions, box, shell_rmsd=0.12)` in pydseamslib (d-S
 
 `with_csm` is a feature option, `disabled` by default. The continuous shape measure program is GPL-2.0. It is an external executable (`csm_shape` or `shape`), it is not vendored, and it is not linked into `libyodaLib`. The Catch2 case that compares the in-tree measure with that program runs only when `CSM_SHAPE` is set. `with_spglib` stays `auto` and links libsymspg when it is present.
 
-On GCC and Clang the shell translation unit is a separate static library built with `-mavx2 -mfma`. Other compilers compile it into `libyodaLib` with the ordinary flags. A release build is `-O3`.
+The shell translation unit is compiled into `libyodaLib` with the ordinary flags. On x86-64 with GCC or Clang it is also built as a separate static library whose functions carry `target("avx2,fma")`, and each call takes that copy only when the CPU reports AVX2 and FMA. A release build is `-O3`.
 
 ## Held-out protocol
 

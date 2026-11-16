@@ -10,11 +10,25 @@
 #include <cstddef>
 
 namespace seams {
+
+namespace cpu {
+namespace {
+
+std::atomic<bool> gSimdAllowed{true};
+
+} // namespace
+
+// The hook lives in a source that every build of the library compiles,
+// dseams-r's vendored file list included.
+void allowSimdKernels(bool allow) { gSimdAllowed.store(allow, std::memory_order_relaxed); }
+
+bool simdKernelsAllowed() { return gSimdAllowed.load(std::memory_order_relaxed); }
+
+} // namespace cpu
+
 namespace ylm {
 
 namespace {
-
-std::atomic<bool> gAvx512Allowed{true};
 
 void ylmBatchScalar(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
@@ -31,15 +45,10 @@ void ylmBatchScalar(int orderL, const double *dx, const double *dy,
 bool avx512Kernels() {
 #if defined(SEAMS_YLM_AVX512)
   const seams::cpu::Features &cpu = seams::cpu::features();
-  return cpu.avx512f && cpu.avx512dq && cpu.fma &&
-         gAvx512Allowed.load(std::memory_order_relaxed);
+  return cpu.avx512f && cpu.avx512dq && cpu.fma && seams::cpu::simdKernelsAllowed();
 #else
   return false;
 #endif
-}
-
-void allowAvx512Kernels(bool allow) {
-  gAvx512Allowed.store(allow, std::memory_order_relaxed);
 }
 
 #if defined(SEAMS_YLM_AVX512)

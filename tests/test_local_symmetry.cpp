@@ -22,11 +22,6 @@
 #include <unistd.h>
 #include <vector>
 
-namespace symm {
-int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421 = nullptr,
-               int *n422 = nullptr, int *nGood = nullptr);
-}
-
 namespace {
 
 Eigen::MatrixXd rotatePermute(const Eigen::MatrixXd &src, double degrees, bool swap) {

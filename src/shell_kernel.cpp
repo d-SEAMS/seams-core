@@ -13,6 +13,7 @@
 // continuous shape measure is the scaled residual of Alvarez et al. 2005
 // after that alignment (Pinsky and Avnir 1998).
 
+#include <cpu_features.hpp>
 #include <local_symmetry.hpp>
 #include <shell_hot.hpp>
 
@@ -1363,8 +1364,39 @@ double shellGate(double shellRmsd) {
   return std::isfinite(shellRmsd) && shellRmsd > 0.0 ? shellRmsd : kShellRmsd;
 }
 
+bool avx2Kernels() {
+#if defined(SEAMS_SHELL_AVX2)
+  const seams::cpu::Features &cpu = seams::cpu::features();
+  return cpu.avx2 && cpu.fma && seams::cpu::simdKernelsAllowed();
+#else
+  return false;
+#endif
+}
+
+void classifyPrepared(const double *x, const double *y, const double *z, int n,
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ, double bondRatio, bool openFace) {
+#if defined(SEAMS_SHELL_AVX2)
+  if (avx2Kernels()) {
+    avx2::classifyPrepared(x, y, z, n, lat, canon, gate, kind, thermalQ, bondRatio, openFace);
+    return;
+  }
+#endif
+  generic::classifyPrepared(x, y, z, n, lat, canon, gate, kind, thermalQ, bondRatio, openFace);
+}
+
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421,
+               int *n422, int *nGood) {
+#if defined(SEAMS_SHELL_AVX2)
+  if (avx2Kernels()) {
+    return avx2::diamondCna(sx, sy, sz, ambiguous, n421, n422, nGood);
+  }
+#endif
+  return generic::diamondCna(sx, sy, sz, ambiguous, n421, n422, nGood);
+}
+
 // The per-atom search lives in shell_classify.cpp, which does not include
-// Eigen and is built with AVX2. This wrapper only copies the coordinates.
+// Eigen. This wrapper only copies the coordinates.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
                  std::vector<int> &kind, double shellRmsd, double thermalQ, double bondRatio,
                  bool openFace) {

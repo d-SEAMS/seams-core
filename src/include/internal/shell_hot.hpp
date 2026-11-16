@@ -48,6 +48,37 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio,
                       bool openFace = false);
 
+// Common-neighbour signatures of one atom's twelve second neighbours, given
+// relative to the atom: 1 for twelve (4,2,1), 0 for six (4,2,1) and six
+// (4,2,2), 3 or 4 for a mostly cubic or mostly hexagonal shell with eight
+// good signatures, -2 for at least `ambiguous` good ones, -1 otherwise.
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous,
+               int *n421 = nullptr, int *n422 = nullptr, int *nGood = nullptr);
+
+// True when the AVX2 build of shell_classify.cpp is linked in, the CPU
+// reports AVX2 and FMA, and seams::cpu::allowSimdKernels has not turned it
+// off. classifyPrepared and diamondCna call symm::avx2 only then, and
+// symm::generic otherwise.
+bool avx2Kernels();
+
+// The two builds of shell_classify.cpp. Call them through the functions
+// above; symm::avx2 exists only where avx2Kernels() can be true.
+namespace generic {
+void classifyPrepared(const double *x, const double *y, const double *z, int n,
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ, double bondRatio, bool openFace);
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421,
+               int *n422, int *nGood);
+} // namespace generic
+
+namespace avx2 {
+void classifyPrepared(const double *x, const double *y, const double *z, int n,
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ, double bondRatio, bool openFace);
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421,
+               int *n422, int *nGood);
+} // namespace avx2
+
 } // namespace symm
 
 #endif

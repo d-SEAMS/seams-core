@@ -87,13 +87,17 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _lib_link_args += ['-Wl,-soname,libyodaLib.so']
 endif
 
-# The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
-# One shell_avx archive is linked into both the shell path and the Ylm path.
+# shell_classify.cpp is built for every CPU (symm::generic) and, on x86-64,
+# again as symm::avx2. That copy takes AVX2 and FMA from a target pragma
+# below its includes, not from -mavx2 -mfma, so the inline and template code
+# of the headers stays baseline and cannot replace the generic copies
+# elsewhere in the library. symm::avx2Kernels picks the copy per call.
+ydslib_sources += files('shell_classify.cpp')
 _shell_link = []
 _ylm_link = []
 if (cpp_id == 'gcc' or cpp_id == 'clang') and host_machine.cpu_family() == 'x86_64'
   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
-    cpp_args: _args + ['-mavx2', '-mfma'],
+    cpp_args: _args + ['-DSEAMS_SHELL_AVX2_VARIANT=1'],
     include_directories: _incdirs,
     dependencies: _deps)
   _shell_link += _shell_avx
@@ -101,10 +105,8 @@ if (cpp_id == 'gcc' or cpp_id == 'clang') and host_machine.cpu_family() == 'x86_
     cpp_args: _args + ['-mavx512f', '-mavx512dq', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
-  _ylm_link += [_ylm_avx, _shell_avx]
-  _args += ['-DSEAMS_YLM_AVX512=1']
-else
-  ydslib_sources += files('shell_classify.cpp')
+  _ylm_link += _ylm_avx
+  _args += ['-DSEAMS_YLM_AVX512=1', '-DSEAMS_SHELL_AVX2=1']
 endif
 
 # libyodaLib holds the process's one copy of linkcell and exports its lc_
