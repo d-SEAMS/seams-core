@@ -230,6 +230,15 @@ if openmp_found
     _snippet_omp += [_omp_rpath]
   endif
 endif
+# A snippet program links against libseams with the compiler meson used,
+# and the linker on PATH may be the environment's, whose sysroot is older
+# than the host compiler's C and C++ runtimes. libseams then names symbol
+# versions that sysroot cannot show at link time; the loader resolves them
+# from the host libraries at run time. The library's own executables are
+# linked the same way through the environment's LDFLAGS.
+if host_machine.system() == 'linux'
+  _snippet_omp += ['-Wl,--allow-shlib-undefined']
+endif
 _snippet_env = environment()
 _snippet_env.set('CC', _snippet_cc)
 _snippet_env.set('CXX', _snippet_cxx)
