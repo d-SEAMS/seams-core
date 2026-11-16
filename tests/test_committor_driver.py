@@ -2,8 +2,8 @@
 
 Short LAMMPS runs exercise every stage the 4096-molecule shards use:
 the climb with its restart, the climb table, both kinds of extension,
-the 2 ns liquid baseline, and shots that stop as soon as a frame resolves
-them. Skipped when LMP is unset. NUCLEATION_PATHWAY, or
+basin A from the climb's own plateau beside the fresh-liquid reference,
+and shots that stop at the first basin they reach. Skipped when LMP is unset. NUCLEATION_PATHWAY, or
 bbdir/nucleation-pathway, is the census.
 """
 
@@ -84,13 +84,18 @@ def test_climb_table_and_both_extensions(climb, tools, tmp_path):
     directory = cs.seed_dir(climb, SEED, TINY)
     table = tmp_path / "climb-0-of-1.csv"
     cs.write_climb(table, str(SEED), "0/1", climb, "test", pathway, plan=TINY)
-    assert "outcome" in table.read_text().splitlines()[5].split(",")
+    header = next(l for l in table.read_text().splitlines() if not l.startswith("#"))
+    assert header.split(",") == cs.CLIMB_FIELDS
     row = climb_table(table)
     assert row["outcome"] == "no-nucleation"
     assert row["t_end_ps"] == "40" and row["frames"] == "5" and row["segments"] == "1"
     core = cs.column(cs.read_frames(directory / "frames.tsv"), "n_chill_core")
     assert float(row["n_chill_core_max"]) == max(core)
     assert row["n_q6solid_max"] != "" and row["n_chill_ext_max"] != ""
+    times = cs.frame_times(cs.read_frames(directory / "frames.tsv"))
+    want = cs.basin_a_row(core, times, TINY.plateau_mark, TINY.plateau_ps, TINY.equil_ps)
+    assert {key: row[key] for key in want} == want
+    assert row["basin_b_ps"] == "" and row["liquid_2ns_ref"] == ""
 
     assert cs.extend_seed(SEED, directory, lmp, pathway, 1, TINY) == "restart 2000 steps"
     assert (directory / "extend-1.restart").is_file()
@@ -118,13 +123,20 @@ def test_shots_stop_when_resolved(climb, tools, tmp_path):
                       data)
     long = replace(TINY, shot_steps=100_000)
     started = time.perf_counter()
-    quick = cs.run_shot(lmp, tmp_path / "quick", data, 7, 50, 1.0e9, pathway, 1, long)
+    quick = cs.run_shot(lmp, tmp_path / "quick", data, 7, 1.0e9, pathway, 1, long)
     assert quick["fate"] == "uncommitted" and quick["t_end_ps"] == "10"
+    assert 0.0 < float(quick["wall_s"]) < 120
     assert "Total wall time" not in (tmp_path / "quick" / "log.lammps").read_text()
     assert not list((tmp_path / "quick").glob("frame.*.lammpstrj"))
     assert time.perf_counter() - started < 120
 
-    open_window = cs.run_shot(lmp, tmp_path / "open", data, 7, 50, -1.0, pathway, 1, TINY)
+    held = replace(long, basin_b=0.0, basin_b_hold_ps=20.0)
+    committed = cs.run_shot(lmp, tmp_path / "held", data, 7, -1.0, pathway, 1, held)
+    assert committed["fate"] == "committed" and committed["t_end_ps"] == "30"
+    assert "Total wall time" not in (tmp_path / "held" / "log.lammps").read_text()
+
+    never = replace(TINY, basin_b=1.0e9)
+    open_window = cs.run_shot(lmp, tmp_path / "open", data, 7, -1.0, pathway, 1, never)
     assert open_window["fate"] == "unresolved" and open_window["t_end_ps"] == "30"
     trace = (tmp_path / "open" / "trace.tsv").read_text().splitlines()
     assert trace[0].split("\t") == ["t_ps", *cs.SERIES]
@@ -142,7 +154,7 @@ def test_shard_end_to_end(climb, tools, tmp_path):
         pytest.skip(f"the tiny climb never rose: {core}")
     # Cuts scaled to the tiny cell: its first visit to its own maximum,
     # with no hold, since the tiny climb is only 40 ps long.
-    plan = replace(TINY, cut=top - 1, hold_ps=0.0, sizes=(int(top),))
+    plan = replace(TINY, cut=top - 1, hold_ps=0.0, sizes=(int(top),), plateau_mark=top)
     times = cs.frame_times(rows)
     assert cs.nucleation_onset(core, plan.cut, TINY.hold_ps, times) is None
     onset = cs.nucleation_onset(core, plan.cut, plan.hold_ps, times)
@@ -159,10 +171,12 @@ def test_shard_end_to_end(climb, tools, tmp_path):
         assert shot["shoot_n"] == str(int(top))
         assert 10 <= float(shot["t_end_ps"]) <= 30
     base = list(csv.DictReader(
-        l for l in (tmp_path / "baseline-0-of-1.csv").read_text().splitlines()
+        l for l in (tmp_path / "basins-0-of-1.csv").read_text().splitlines()
         if not l.startswith("#")))
-    assert base[0]["baseline_source"] == "liquid-2ns"
     assert base[0]["onset_ps"] == cs.fmt(times[onset])
+    assert base[0]["basin_a"] == cs.fmt(cs.core_p95(core[:first]))
+    assert base[0]["first_passage_ps"] == cs.fmt(times[first])
+    assert base[0]["basin_b"] == cs.fmt(plan.basin_b) and base[0]["liquid_2ns_ref"] != ""
     assert base[0]["liquid_seed"] == str(cs.derived_seed(SEED, "liquid"))
     assert (directory / "liquid-2ns" / "frames.tsv").is_file()
     points = list(csv.DictReader(

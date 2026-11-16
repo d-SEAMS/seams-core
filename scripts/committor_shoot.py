@@ -18,20 +18,26 @@ other climb that has not nucleated is 'no-nucleation'. The one rule,
 nucleation_onset(), decides the climb outcome and which climbs are
 shot; only nucleated climbs are shot.
 
-Uncommit cut. The baseline is always the 95th percentile of
-n_chill_core in a separate 2 ns liquid at 180 K, over its frames from
-1 ns, with a velocity seed derived from the climb seed. The climb
-frames before onset are never used: they already hold the growth.
+Basins. Both are fixed in n_chill_core, the standard committor
+setup. Basin A, uncommitted, is liquid of the same age as the shot:
+the 95th percentile of n_chill_core over the climb's own plateau, its
+last 2 ns before it first reaches 100, from 1 ns on. The climb table
+records it per climb. The 95th percentile of a separate fresh 2 ns
+liquid at 180 K is kept beside it as a reference and decides nothing.
+Basin B, committed, is n_chill_core at or above 400 held for 200 ps,
+the same for every n. The climb table records when the climb itself
+first enters basin B and the lowest n_chill_core after that, so a
+basin B that is not past the barrier shows in the numbers.
 
 Shooting points. For n in 50, 75, 100, 150, 200 and 300, the last
 frame at or before the onset where n_chill_core crosses up to n.
-Sizes below the liquid fluctuation ceiling are kept: p_B there should
-be near 0.
+Sizes inside basin A are kept: p_B there should be near 0.
 
 Shots. 20 per point, fresh Maxwell-Boltzmann velocities at 180 K from
 a seed derived from (climb seed, n, shot index). n_chill_core is read
-every 10 ps. A shot commits at max(2n, 300), uncommits at or below
-the baseline, and is unresolved after 1 ns.
+every 10 ps and the shot runs until it reaches a basin, for at most
+5 ns. A shot still in neither basin at 5 ns is unresolved and is never
+given a fate. eta_hours counts every shot at 5 ns, an upper bound.
 
 p_B(n) is the committed fraction among resolved shots that started at
 size n. n* is the size where a logistic fit of p_B crosses one half.
@@ -84,21 +90,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import lmp_launch  # noqa: E402
 
-# Cuts chosen before any shot outcome is known.
-COMMIT_MULTIPLE = 2.0
-COMMIT_FLOOR = 300
+# Basins in n_chill_core, fixed before any shot outcome is known.
+BASIN_B = 400
+BASIN_B_HOLD_PS = 200.0
+PLATEAU_MARK = 100
+PLATEAU_PS = 2000.0
 LIQUID_PERCENTILE = 95.0
-SHOT_NS = 1.0
-N_SHOOT_SIZES = 5
+SHOT_NS = 5.0
 N_SHOTS = 20
 BOOT_DRAWS = 10000
 BOOT_SEED = 20261111
 
 # Published homogeneous lane, input/nucleation/in.homogeneous.
-# 10 fs steps. 10 ns is 1e6 steps. One shot of 1 ns is 1e5 steps.
+# 10 fs steps. 10 ns is 1e6 steps. The longest shot, 5 ns, is 5e5 steps.
 TIMESTEP_FS = 10.0
 CLIMB_STEPS = 1_000_000
-SHOT_STEPS = 100_000
+SHOT_STEPS = 500_000
 N_SEEDS = 20
 
 ORDER = "n_chill_core"
@@ -106,6 +113,7 @@ SERIES = ("n_chill_core", "n_chill_ext", "n_q6solid")
 NUCLEUS_CUT = 300
 HOLD_PS = 1000.0
 SHOOT_SIZES = (50, 75, 100, 150, 200, 300)
+N_SHOOT_SIZES = len(SHOOT_SIZES)
 EQUIL_PS = 1000.0
 TEMPERATURE = 180.0
 N_CELL = 16
@@ -115,10 +123,6 @@ LIQUID_STEPS = 200_000
 EXTEND_STEPS = 1_000_000
 CLIMB_LIMIT_STEPS = 4_000_000
 FRAME_PS = DUMP_STEPS * TIMESTEP_FS / 1000.0
-
-
-def commit_size(n_shoot: float) -> float:
-    return max(COMMIT_MULTIPLE * n_shoot, COMMIT_FLOOR)
 
 
 def type7(values: list[float], p: float) -> float:
@@ -138,8 +142,8 @@ def type7(values: list[float], p: float) -> float:
     return ordered[lo] * (1.0 - weight) + ordered[hi] * weight
 
 
-def liquid_baseline(nmax: list[float]) -> float:
-    """95th percentile of the largest cluster in pure liquid."""
+def core_p95(nmax: list[float]) -> float:
+    """95th percentile of n_chill_core over a liquid window."""
     if not nmax:
         raise ValueError("liquid sample is empty")
     ordered = sorted(nmax)
@@ -150,15 +154,71 @@ def liquid_baseline(nmax: list[float]) -> float:
     return ordered[lo] * (1.0 - weight) + ordered[hi] * weight
 
 
-def shot_fate(series: list[float], n_shoot: float, liquid_p95: float) -> str:
-    """Walk one shot in time. The cuts do not depend on later shots."""
-    goal = commit_size(n_shoot)
-    for size in series:
-        if size >= goal:
-            return "committed"
-        if size <= liquid_p95:
-            return "uncommitted"
-    return "unresolved"
+def shot_fate(series: list[float], basin_a: float, times_ps: list[float] | None = None,
+              basin_b: float = BASIN_B,
+              hold_ps: float = BASIN_B_HOLD_PS) -> tuple[str, int | None]:
+    """Walk one shot from its first check to the first basin it reaches.
+    Uncommitted at the first frame at or below basin_a; committed once
+    the series has stayed at or above basin_b for hold_ps. Otherwise
+    unresolved, which is never turned into a fate. Returns the fate and
+    the frame that decided it."""
+    times = times_ps if times_ps is not None else [FRAME_PS * (i + 1) for i in range(len(series))]
+    start = None
+    for i, size in enumerate(series):
+        if size <= basin_a:
+            return "uncommitted", i
+        if size >= basin_b:
+            start = i if start is None else start
+            if times[i] - times[start] >= hold_ps:
+                return "committed", i
+        else:
+            start = None
+    return "unresolved", None
+
+
+def basin_b_entry(series: list[float], times_ps: list[float], basin_b: float = BASIN_B,
+                  hold_ps: float = BASIN_B_HOLD_PS) -> int | None:
+    """First frame of the first stay at or above basin_b that lasts hold_ps."""
+    start = None
+    for i, size in enumerate(series):
+        if size >= basin_b:
+            start = i if start is None else start
+            if times_ps[i] - times_ps[start] >= hold_ps:
+                return start
+        else:
+            start = None
+    return None
+
+
+def plateau_window(series: list[float], times_ps: list[float], mark: float = PLATEAU_MARK,
+                   span_ps: float = PLATEAU_PS,
+                   equil_ps: float = EQUIL_PS) -> tuple[list[int], int] | None:
+    """Frames of the last span_ps before the first frame at or above mark,
+    from equil_ps on, and that first frame. None when the series never
+    reaches mark."""
+    first = next((i for i, size in enumerate(series) if size >= mark), None)
+    if first is None:
+        return None
+    lo = max(times_ps[first] - span_ps, equil_ps)
+    return [i for i in range(first) if times_ps[i] >= lo], first
+
+
+def basin_a_row(series: list[float], times_ps: list[float], mark: float = PLATEAU_MARK,
+                span_ps: float = PLATEAU_PS, equil_ps: float = EQUIL_PS) -> dict[str, str]:
+    """Basin A of one climb: the 95th percentile of its own pre-onset plateau."""
+    window = plateau_window(series, times_ps, mark, span_ps, equil_ps)
+    if window is None or not window[0]:
+        first = "" if window is None else fmt(times_ps[window[1]])
+        return {"basin_a": "", "basin_a_lo_ps": "", "basin_a_hi_ps": "",
+                "basin_a_frames": "0", "first_passage_ps": first}
+    frames, first = window
+    return {
+        "basin_a": fmt(core_p95([series[i] for i in frames])),
+        "basin_a_lo_ps": fmt(times_ps[frames[0]]),
+        "basin_a_hi_ps": fmt(times_ps[frames[-1]]),
+        "basin_a_frames": str(len(frames)),
+        "first_passage_ps": fmt(times_ps[first]),
+    }
 
 
 def check_nmax(nmax: float, molecules: int) -> None:
@@ -444,6 +504,8 @@ CLIMB_FIELDS = [
     "n_chill_core_max", "t_max_ps", "n_chill_ext_max", "n_q6solid_max",
     "n_chill_core_end", "n_chill_ext_end", "n_q6solid_end",
     "t_end_ps", "frames", "segments", "extension",
+    "basin_a", "basin_a_lo_ps", "basin_a_hi_ps", "basin_a_frames", "first_passage_ps",
+    "basin_b_ps", "n_chill_core_min_after_b", "liquid_2ns_ref",
 ]
 
 
@@ -635,21 +697,38 @@ def self_test_rules() -> None:
 
 
 def self_test() -> None:
-    if commit_size(50) != 300:
-        raise SystemExit("a small seed still has to reach 300")
-    if commit_size(200) != 400:
-        raise SystemExit("twice 200 is 400")
-    if not (1.0 < liquid_baseline([0, 0, 0, 1, 2]) < 2.0):
-        raise SystemExit(f"baseline {liquid_baseline([0, 0, 0, 1, 2])}")
-    base = liquid_baseline([0, 0, 1, 1, 2])
-    if shot_fate([20, 30, 60, 300], 20, base) != "committed":
-        raise SystemExit("300 should commit a shot from 20")
-    if shot_fate([150, 299], 150, base) != "unresolved":
-        raise SystemExit("299 is short of twice 150")
-    if shot_fate([20, 12, base], 20, base) != "uncommitted":
-        raise SystemExit("the liquid baseline should uncommit")
-    if shot_fate([20, 30, 40], 20, base) != "unresolved":
-        raise SystemExit("a shot inside the window is unresolved")
+    if not (1.0 < core_p95([0, 0, 0, 1, 2]) < 2.0):
+        raise SystemExit(f"p95 {core_p95([0, 0, 0, 1, 2])}")
+    # Frames 10 ps apart from the first check: 200 ps at 400 is 21 frames.
+    if shot_fate([150] + [400] * 21, 83) != ("committed", 21):
+        raise SystemExit("400 held for 200 ps should commit")
+    if shot_fate([150] + [400] * 20 + [399], 83)[0] != "unresolved":
+        raise SystemExit("190 ps at 400 is short of the hold")
+    if shot_fate([340, 520, 410, 399] + [450] * 21, 83) != ("committed", 24):
+        raise SystemExit("a dip below 400 restarts the hold")
+    if shot_fate([120, 90, 83, 500], 83) != ("uncommitted", 2):
+        raise SystemExit("basin A is at or below its value")
+    if shot_fate([340] * 500, 83)[0] != "unresolved":
+        raise SystemExit("a shot that reaches neither basin has no fate")
+    if shot_fate([300, 400, 400, 400], 83, [10.0, 20.0, 200.0, 220.0])[0] != "committed":
+        raise SystemExit("the hold is read from the frame times")
+    times = [10.0 * i for i in range(1000)]
+    plateau = [20.0] * 268 + [60.0] * 200 + [103.0] + [200.0] * 531
+    window, first = plateau_window(plateau, times)
+    if first != 468 or window[0] != 268 or window[-1] != 467:
+        raise SystemExit(f"plateau {window[0]}..{window[-1]} first {first}")
+    row = basin_a_row(plateau, times)
+    if row["basin_a"] != "60" or row["basin_a_frames"] != "200" or row["first_passage_ps"] != "4680":
+        raise SystemExit(f"basin A {row}")
+    early = basin_a_row([20.0] * 50 + [100.0] * 10, times[:60])
+    if early["basin_a"] != "" or early["first_passage_ps"] != "500":
+        raise SystemExit(f"a passage before 1 ns has a plateau: {early}")
+    if basin_a_row([20.0] * 300, times[:300])["first_passage_ps"] != "":
+        raise SystemExit("a climb below 100 has a first passage")
+    if basin_b_entry([380, 420] + [410] * 19 + [300], times) is not None:
+        raise SystemExit("190 ps at 400 is not basin B")
+    if basin_b_entry([380, 420, 390] + [410] * 21, times) != 3:
+        raise SystemExit("basin B starts at its held stay")
     try:
         check_nmax(160, 64)
     except ValueError:
@@ -677,6 +756,9 @@ def self_test() -> None:
     hours = eta_hours(160.0)
     if not (1.5 < hours["one_climb_h"] < 2.0 and hours["shooting_h"] > hours["twenty_climbs_h"]):
         raise SystemExit(f"eta {hours}")
+    want = N_SEEDS * len(SHOOT_SIZES) * N_SHOTS * SHOT_STEPS / 160.0 / 3600.0
+    if N_SHOOT_SIZES != 6 or abs(hours["shooting_h"] - want) > 1e-9:
+        raise SystemExit(f"eta shooting {hours['shooting_h']} is not six sizes")
     seeds = parse_seed_list("20261111-20261130")
     if len(seeds) != 20:
         raise SystemExit("the published seed list is not 20 long")
@@ -757,13 +839,17 @@ def head_commit() -> str:
 
 @dataclass(frozen=True)
 class Plan:
-    """Run lengths and the nucleation cuts. The defaults are the paper
-    lane. The commit and uncommit rules are not part of a plan."""
+    """Run lengths, the nucleation cuts and the basins. The defaults are
+    the paper lane; the tests shrink them."""
 
     n_cell: int = N_CELL
     temperature: float = TEMPERATURE
     cut: float = NUCLEUS_CUT
     hold_ps: float = HOLD_PS
+    basin_b: float = BASIN_B
+    basin_b_hold_ps: float = BASIN_B_HOLD_PS
+    plateau_mark: float = PLATEAU_MARK
+    plateau_ps: float = PLATEAU_PS
     sizes: tuple[int, ...] = SHOOT_SIZES
     shots: int = N_SHOTS
     shot_steps: int = SHOT_STEPS
@@ -785,9 +871,10 @@ class Plan:
 
 PAPER = Plan()
 SHOT_FIELDS = ["seed", "shoot_n", "shot", "fate", "t_end_ps", "nmax_end",
-               "n_chill_ext_end", "n_q6solid_end"]
-BASELINE_FIELDS = ["seed", "baseline", "baseline_source", "window_lo_ps", "window_hi_ps",
-                   "frames_used", "liquid_seed", "onset_ps"]
+               "n_chill_ext_end", "n_q6solid_end", "wall_s"]
+BASIN_FIELDS = ["seed", "basin_a", "basin_a_lo_ps", "basin_a_hi_ps", "basin_a_frames",
+                "first_passage_ps", "basin_b", "basin_b_hold_ps", "onset_ps",
+                "liquid_2ns_ref", "liquid_seed"]
 POINT_FIELDS = ["seed", "shoot_n", "t_ps", "timestep", "n_chill_core", "n_chill_ext",
                 "n_q6solid"]
 SEGMENT_FIELDS = ["segment", "source", "velocity_seed", "step0", "steps"]
@@ -1044,6 +1131,8 @@ def climb_row(seed: int, rows: list[dict[str, str]], directory: Path,
     ext = column(rows, "n_chill_ext")
     q6 = column(rows, "n_q6solid")
     segments = read_segments(directory)
+    entry = basin_b_entry(core, times, plan.basin_b, plan.basin_b_hold_ps)
+    liquid = directory / "liquid-2ns" / "frames.tsv"
     extension = ";".join(
         "restart" if seg["source"] == "restart" else f"dump-mb:{seg['velocity_seed']}"
         for seg in segments
@@ -1063,6 +1152,10 @@ def climb_row(seed: int, rows: list[dict[str, str]], directory: Path,
         "frames": str(len(rows)),
         "segments": str(1 + len(segments)),
         "extension": extension,
+        **basin_a_row(core, times, plan.plateau_mark, plan.plateau_ps, plan.equil_ps),
+        "basin_b_ps": fmt(times[entry]) if entry is not None else "",
+        "n_chill_core_min_after_b": fmt(min(core[entry:])) if entry is not None else "",
+        "liquid_2ns_ref": fmt(liquid_reference(liquid, plan)[0]) if liquid.is_file() else "",
     }
 
 
@@ -1072,6 +1165,10 @@ def rule_note(plan: Plan) -> list[str]:
         f"# rule nucleated when {ORDER} passes {fmt(plan.cut)} and stays at or above "
         f"{fmt(plan.cut)} for {fmt(plan.hold_ps)} ps; a passage cut short by the end of the "
         f"run is '{EXTEND}' until {fmt(plan.limit_ps)} ps",
+        f"# basin A the 95th percentile of {ORDER} over the climb's last "
+        f"{fmt(plan.plateau_ps)} ps before it first reaches {fmt(plan.plateau_mark)}, "
+        f"from {fmt(plan.equil_ps)} ps; basin B {ORDER} at or above {fmt(plan.basin_b)} "
+        f"for {fmt(plan.basin_b_hold_ps)} ps; liquid_2ns_ref is a reference only",
     ]
 
 
@@ -1172,11 +1269,11 @@ def stop(proc: subprocess.Popen) -> None:
             continue
 
 
-def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, n_shoot: int,
-             baseline: float, pathway: str, threads: int = 1,
-             plan: Plan = PAPER) -> dict[str, str]:
-    """One shot. LAMMPS runs the whole window; it is stopped as soon as a
-    10 ps frame resolves the shot."""
+def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, basin_a: float,
+             pathway: str, threads: int = 1, plan: Plan = PAPER) -> dict[str, str]:
+    """One shot. LAMMPS runs the whole window; it is stopped as soon as the
+    10 ps frames put the shot in a basin."""
+    started = time.monotonic()
     if work.exists():
         shutil.rmtree(work)
     stage(work, "in.shot")
@@ -1199,7 +1296,9 @@ def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, n_shoot
                 check_nmax(values[ORDER], plan.molecules)
                 trace.append((step * TIMESTEP_FS / 1000.0, values))
                 frame.unlink()
-                fate = shot_fate([values[ORDER]], n_shoot, baseline)
+                fate, _frame = shot_fate([v[ORDER] for _t, v in trace], basin_a,
+                                         [t for t, _v in trace], plan.basin_b,
+                                         plan.basin_b_hold_ps)
                 if fate != "unresolved":
                     break
         finally:
@@ -1217,12 +1316,27 @@ def run_shot(lmp: list[str], work: Path, data: Path, velocity_seed: int, n_shoot
         "nmax_end": fmt(last[ORDER]),
         "n_chill_ext_end": fmt(last["n_chill_ext"]),
         "n_q6solid_end": fmt(last["n_q6solid"]),
+        "wall_s": f"{time.monotonic() - started:.1f}",
     }
 
 
+def liquid_reference(frames_tsv: Path, plan: Plan = PAPER) -> tuple[float, list[float]]:
+    """95th percentile of n_chill_core in the fresh liquid from equil_ps."""
+    rows = read_frames(frames_tsv)
+    times = frame_times(rows)
+    core = column(rows, ORDER)
+    onset = nucleation_onset(core, plan.cut, plan.hold_ps, times)
+    end = len(core) if onset is None else onset
+    frames = [i for i in range(end) if times[i] >= plan.equil_ps]
+    if not frames:
+        raise SystemExit(f"{frames_tsv} has no frames after {plan.equil_ps} ps")
+    return core_p95([core[i] for i in frames]), [times[i] for i in frames]
+
+
 def liquid_run(seed: int, directory: Path, lmp: list[str], pathway: str, threads: int,
-               plan: Plan = PAPER) -> tuple[float, list[float], int]:
-    """Baseline from a separate 2 ns liquid at the climb temperature."""
+               plan: Plan = PAPER) -> tuple[float, int]:
+    """The separate 2 ns liquid at the climb temperature, a reference for
+    basin A only."""
     work = directory / "liquid-2ns"
     liquid_seed = derived_seed(seed, "liquid")
     if not (work / "frames.tsv").is_file():
@@ -1232,27 +1346,19 @@ def liquid_run(seed: int, directory: Path, lmp: list[str], pathway: str, threads
             "ndump": plan.dump_steps, "nskip": 0, "Tq": plan.temperature, "seed": liquid_seed,
         })
         census(pathway, work / "quench.lammpstrj", work / "frames.tsv", threads)
-    rows = read_frames(work / "frames.tsv")
-    times = frame_times(rows)
-    core = column(rows, ORDER)
-    onset = nucleation_onset(core, plan.cut, plan.hold_ps, times)
-    end = len(core) if onset is None else onset
-    frames = [i for i in range(end) if times[i] >= plan.equil_ps]
-    if not frames:
-        raise SystemExit(f"the liquid for seed {seed} has no frames after {plan.equil_ps} ps")
-    return liquid_baseline([core[i] for i in frames]), [times[i] for i in frames], liquid_seed
+    return liquid_reference(work / "frames.tsv", plan)[0], liquid_seed
 
 
-def seed_baseline(seed: int, onset_ps: float, directory: Path, lmp: list[str],
-                  pathway: str, threads: int, plan: Plan = PAPER) -> dict[str, str]:
-    """The uncommit cut always comes from the separate liquid, never from
-    the climb, whose frames before onset already hold growth."""
-    value, used, liquid_seed = liquid_run(seed, directory, lmp, pathway, threads, plan)
+def seed_basins(seed: int, core: list[float], times: list[float], onset: int,
+                directory: Path, lmp: list[str], pathway: str, threads: int,
+                plan: Plan = PAPER) -> dict[str, str]:
+    reference, liquid_seed = liquid_run(seed, directory, lmp, pathway, threads, plan)
     return {
-        "seed": str(seed), "baseline": fmt(value), "baseline_source": "liquid-2ns",
-        "window_lo_ps": fmt(used[0]), "window_hi_ps": fmt(used[-1]),
-        "frames_used": str(len(used)), "liquid_seed": str(liquid_seed),
-        "onset_ps": fmt(onset_ps),
+        "seed": str(seed),
+        **basin_a_row(core, times, plan.plateau_mark, plan.plateau_ps, plan.equil_ps),
+        "basin_b": fmt(plan.basin_b), "basin_b_hold_ps": fmt(plan.basin_b_hold_ps),
+        "onset_ps": fmt(times[onset]),
+        "liquid_2ns_ref": fmt(reference), "liquid_seed": str(liquid_seed),
     }
 
 
@@ -1286,11 +1392,11 @@ def write_rows(path: Path, note: list[str], fields: list[str], rows: list[dict])
 
 def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: str,
                 lmp: list[str], pathway: str, threads: int = 1, plan: Plan = PAPER,
-                baseline_out: Path | None = None, points_out: Path | None = None) -> None:
+                basins_out: Path | None = None, points_out: Path | None = None) -> None:
     """Shoot every nucleated climb of the shard. Rows go to a .partial file
     as each shot ends, so a stopped shard resumes where it was."""
     chosen = take_shard(parse_seed_list(seeds), shard)
-    baseline_out = baseline_out or sibling(out, "baseline")
+    basins_out = basins_out or sibling(out, "basins")
     points_out = points_out or sibling(out, "points")
     note = [
         f"# commit {commit}",
@@ -1298,9 +1404,10 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
         f"--frames {rel(frames_root)} --seeds {seeds} --shard {shard}",
         f"# shard {shard}",
         *rule_note(plan),
-        f"# commit at max({fmt(COMMIT_MULTIPLE)}n, {COMMIT_FLOOR}); uncommit at the baseline; "
+        f"# a shot runs to its first basin: uncommitted at or below basin A, committed at "
+        f"or above {fmt(plan.basin_b)} for {fmt(plan.basin_b_hold_ps)} ps; "
         f"check every {fmt(plan.dump_steps * TIMESTEP_FS / 1000.0)} ps; "
-        f"unresolved after {fmt(plan.shot_steps * TIMESTEP_FS / 1000.0)} ps",
+        f"unresolved, with no fate, after {fmt(plan.shot_steps * TIMESTEP_FS / 1000.0)} ps",
         f"# launcher {' '.join(Path(w).name if '/' in w else w for w in lmp)}",
     ]
     partial = out.with_name(out.name + ".partial")
@@ -1312,7 +1419,7 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
                 done.add((int(parts[0]), int(parts[1]), int(parts[2])))
     else:
         write_rows(partial, note, SHOT_FIELDS, [])
-    baselines = []
+    basins = []
     points = []
     for seed in chosen:
         directory = seed_dir(frames_root, seed, plan)
@@ -1324,9 +1431,13 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
             outcome = climb_outcome(core, times, plan.cut, plan.hold_ps, plan.limit_ps)
             print(f"seed {seed} {outcome}, max {fmt(max(core))}; no shots", flush=True)
             continue
-        base = seed_baseline(seed, times[onset], directory, lmp, pathway, threads, plan)
-        baselines.append(base)
-        baseline = float(base["baseline"])
+        basin = seed_basins(seed, core, times, onset, directory, lmp, pathway, threads, plan)
+        basins.append(basin)
+        if basin["basin_a"] == "":
+            print(f"seed {seed} has no plateau before {fmt(plan.plateau_mark)}; no shots",
+                  flush=True)
+            continue
+        basin_a = float(basin["basin_a"])
         for n_shoot, index in shooting_points(core, onset, plan.sizes):
             row = rows[index]
             points.append({
@@ -1340,14 +1451,15 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
                 if (seed, n_shoot, shot) in done:
                     continue
                 result = run_shot(lmp, data.parent / f"shot-{shot}", data,
-                                  derived_seed(seed, n_shoot, shot), n_shoot, baseline,
+                                  derived_seed(seed, n_shoot, shot), basin_a,
                                   pathway, threads, plan)
                 with partial.open("a", newline="") as handle:
                     csv.DictWriter(handle, fieldnames=SHOT_FIELDS, lineterminator="\n").writerow(
                         {"seed": seed, "shoot_n": n_shoot, "shot": shot, **result})
                 print(f"seed {seed} n {n_shoot} shot {shot} {result['fate']} "
-                      f"t {result['t_end_ps']} ps nmax {result['nmax_end']}", flush=True)
-    write_rows(baseline_out, note[:3], BASELINE_FIELDS, baselines)
+                      f"t {result['t_end_ps']} ps nmax {result['nmax_end']} "
+                      f"wall {result['wall_s']} s", flush=True)
+    write_rows(basins_out, note[:-2], BASIN_FIELDS, basins)
     write_rows(points_out, note[:4], POINT_FIELDS, points)
     partial.replace(out)
 

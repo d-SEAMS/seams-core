@@ -393,12 +393,17 @@ in each climb.
 A climb has nucleated when `n_chill_core` passes 300 and stays at or
 above 300 for 1 ns. A passage that the end of the run cuts short is
 not an onset; that climb is `not nucleated, extend`. Only nucleated
-climbs are shot. The uncommit cut is always the 95th percentile of
-`n_chill_core` from 1 ns in a separate 2 ns liquid at 180 K, never the
-climb itself: on seed 20261111 the climb frames before an onset at
-30 ns put that percentile at 351, above the commit cut. Shots start at the last crossing
-of 50, 75, 100, 150, 200 and 300 before the onset, and commit at
-max(2n, 300).
+climbs are shot. Shots start at the last crossing of 50, 75, 100,
+150, 200 and 300 before the onset and run, for at most 5 ns, until
+they reach a basin. Basin A, uncommitted, is liquid of the same age:
+the 95th percentile of `n_chill_core` over the climb's last 2 ns
+before it first reaches 100. Basin B, committed, is `n_chill_core` at
+or above 400 held for 200 ps, for every n. A shot in neither basin at
+5 ns is unresolved and has no fate. The climb table records basin A,
+when the climb itself enters basin B and its lowest `n_chill_core`
+after that, and the 95th percentile of a fresh 2 ns liquid as a
+reference only. On seed 20261111 a fresh liquid gives 14 against 83
+for the climb's own plateau.
 
 Build the census in release. On seed 20261111 of shard 0 the debug
 and release builds wrote the same frame table, byte for byte, and the
