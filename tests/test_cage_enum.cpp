@@ -1026,6 +1026,8 @@ TEST_CASE("tilted sH edge window keeps every hexagonal hydrate cage",
   REQUIRE(on[1].size() == 4);
   REQUIRE(off[0].size() == on[0].size());
   REQUIRE(off[1].size() == on[1].size());
+}
+
 TEST_CASE("edge bounds and signature edges cover the parser", "[cage_enum]") {
   const auto spaced = cage::parseEdgeWindow("0.5 , 2");
   REQUIRE(spaced.enabled);
