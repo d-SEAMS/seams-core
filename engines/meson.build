@@ -9,7 +9,8 @@ seams_api_args = ['-I' + meson.project_build_root() / 'src']
 
 lammps_opt = get_option('with_lammps')
 if lammps_opt.allowed()
-  lammps_dep = dependency('lammps', required: false)
+  # A LAMMPS CMake install names its pkg-config file liblammps.pc.
+  lammps_dep = dependency('liblammps', 'lammps', required: false)
   if not lammps_dep.found()
     lammps_dep = cppc.find_library('lammps', has_headers: ['lammps/library.h'],
                                   required: false)
@@ -22,8 +23,14 @@ if lammps_opt.allowed()
     # headers in include/lammps, one level below the include path.
     lammps_incs = [seams_inc, include_directories('lammps')]
     lammps_header_dir = ''
+    if lammps_dep.type_name() == 'pkgconfig'
+      lammps_pc_inc = lammps_dep.get_variable('includedir', default_value: '')
+      if lammps_pc_inc != '' and fs.is_file(lammps_pc_inc / 'lammps' / 'library.h')
+        lammps_header_dir = lammps_pc_inc / 'lammps'
+      endif
+    endif
     lammps_py = find_program('python3', required: false)
-    if lammps_py.found()
+    if lammps_py.found() and lammps_header_dir == ''
       lammps_where = run_command(lammps_py, '-c',
         'import os, pathlib, sys\n' +
         'dirs = []\n' +
@@ -123,9 +130,18 @@ if lammps_opt.allowed()
       lammps_plugin_args += ['-I' + get_option('lammps_src_include')]
     endif
     # check_header compiles the include, so a src tree without fmt/ fails here.
-    if cppc.check_header('compute.h', dependencies: lammps_plugin_deps,
-                         include_directories: lammps_incs, args: lammps_plugin_args,
-                         required: false)
+    # A LAMMPS CMake install carries compute.h but not lammpsplugin.h, and
+    # since 2025 its atom.h names a json_fwd.h it does not install.
+    lammps_plugin_headers = true
+    foreach header : ['compute.h', 'atom.h', 'lammpsplugin.h']
+      if lammps_plugin_headers and not cppc.check_header(
+          header, dependencies: lammps_plugin_deps,
+          include_directories: lammps_incs, args: lammps_plugin_args,
+          required: false)
+        lammps_plugin_headers = false
+      endif
+    endforeach
+    if lammps_plugin_headers
       lammps_plugin = shared_module(
         'dseamsplugin',
         files('lammps/compute_dseams.cpp', 'lammps/plugin_dseams.cpp'),

@@ -309,9 +309,12 @@ def library_file(name):
 def sdk_flags(text):
     flags = []
     rpaths = []
+    lammps_pc = False
     if shutil.which("pkg-config"):
-        for spec, needle in (("libgromacs", "gromacs/"), ("plumed", "plumed/"), ("lammps", "library.h")):
-            if needle not in text:
+        # A LAMMPS CMake install names its pkg-config file liblammps.pc.
+        specs = (("libgromacs", "gromacs/"), ("plumed", "plumed/"), ("liblammps", "library.h"), ("lammps", "library.h"))
+        for spec, needle in specs:
+            if needle not in text or (needle == "library.h" and lammps_pc):
                 continue
             done = subprocess.run(
                 ["pkg-config", "--cflags", "--libs", spec],
@@ -321,10 +324,27 @@ def sdk_flags(text):
             )
             if done.returncode == 0:
                 flags.extend(done.stdout.split())
+                if needle == "library.h":
+                    lammps_pc = True
+                    where = {}
+                    for name in ("includedir", "libdir"):
+                        where[name] = subprocess.run(
+                            ["pkg-config", "--variable=" + name, spec],
+                            text=True,
+                            capture_output=True,
+                            env=pkgconfig_env(),
+                        ).stdout.strip()
+                    # Snippets include "library.h", which is under includedir/lammps.
+                    if where["includedir"]:
+                        flags.extend(["-I", str(Path(where["includedir"]) / "lammps")])
+                    # The environment's lib may hold another liblammps.so.0, so
+                    # this one comes first on the runpath.
+                    if where["libdir"]:
+                        rpaths.append(where["libdir"])
     prefix = sdk_prefix()
     if prefix is not None:
         include = prefix / "include"
-        if "library.h" in text and (include / "lammps" / "library.h").is_file():
+        if "library.h" in text and not lammps_pc and (include / "lammps" / "library.h").is_file():
             flags.extend(["-I", str(include / "lammps"), "-llammps", "-lmpi"])
         if "OpenMM.h" in text and (include / "OpenMM.h").is_file():
             flags.append("-lOpenMM")
