@@ -563,8 +563,25 @@ def run_c(root: Path, build: Path, mode: str, extra: list[str]):
         )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = src + os.pathsep + env.get("LD_LIBRARY_PATH", "")
+    runtime = os.environ.get("TSAN_RUNTIME", "")
+    if runtime and os.path.isfile(runtime):
+        env["LD_PRELOAD"] = runtime
     out = subprocess.check_output([str(binary), mode, *extra], cwd=root, env=env, text=True)
     return out
+
+
+def _host_src(libdir: Path) -> Path:
+    """Library directory a Julia or R process can load.
+
+    Those hosts cannot map the sanitizer runtime
+    (benchmarks/logs/asan-julia-r-hosts.txt). When an unsanitized
+    build is named, the language front links that libseams.
+    """
+    prefix = os.environ.get("SEAMS_UNSANITIZED_PREFIX", "")
+    alt = Path(prefix) / "src" if prefix else None
+    if alt is not None and built_library(alt, "seams") is not None:
+        return alt
+    return libdir
 
 
 def _language_env(libdir: Path):
@@ -574,8 +591,12 @@ def _language_env(libdir: Path):
     # seams call, so the language fronts run without that runtime.
     for key in ("ASAN_OPTIONS", "UBSAN_OPTIONS", "MSAN_OPTIONS", "TSAN_OPTIONS", "LD_PRELOAD"):
         env.pop(key, None)
-    env["SEAMS_LIB"] = str(require_library(libdir, "seams", "SEAMS_LIB"))
-    env["LD_LIBRARY_PATH"] = str(libdir) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
+    src = _host_src(libdir)
+    if src == Path(libdir):
+        env["SEAMS_LIB"] = str(require_library(libdir, "seams", "SEAMS_LIB"))
+    else:
+        env["SEAMS_LIB"] = str(require_library(src, "seams"))
+    env["LD_LIBRARY_PATH"] = str(src) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
     return env
 
 

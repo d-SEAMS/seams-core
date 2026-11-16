@@ -21,7 +21,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "engines"))
 from shared_library import require_library  # noqa: E402
+import e2e_common as e2e  # noqa: E402
 
 
 def load(libdir: Path):
@@ -230,7 +232,9 @@ def main():
     hook = built(build, "run_hook")
     if hook is not None:
         try:
-            text = subprocess.check_output([str(hook), str(deck)], cwd=deck.parent, env=env_libs(build), text=True)
+            text = subprocess.check_output(
+                [str(hook), str(deck)], cwd=deck.parent,
+                env=e2e.drop_thread_runtime(env_libs(build)), text=True)
         except subprocess.CalledProcessError as exc:
             print(f"lammps hook binary was not runnable ({exc.returncode})")
         else:
@@ -252,7 +256,7 @@ def main():
             text = subprocess.check_output(
                 [str(gmx), "-f", str(root / "engines" / "gromacs" / "ice.gro"), "-cutoff", "3.5"],
                 cwd=root / "engines" / "gromacs",
-                env=env_libs(build),
+                env=e2e.with_thread_runtime(env_libs(build)),
                 text=True,
             )
         except subprocess.CalledProcessError as exc:
@@ -333,7 +337,7 @@ def main():
         f"hexagonal {got['hexagonal']} six {got['six']}"
     )
     print(line)
-    plugin = built(build, "libSeamsPlumed.so")
+    plugin = e2e.external_library(build, "libSeamsPlumed.so")
     plumed = shutil.which("plumed")
     if plugin is not None and plumed is not None:
         work = build / "docs-engines" / "plumed"
@@ -347,10 +351,12 @@ def main():
             "RESTRAINT ARG=seams.q6 AT=0.5 KAPPA=10.0\n"
             f"PRINT ARG=seams.q6,seams.ice,seams.ring,seams.hexagonal,seams.six FILE={colvar} STRIDE=1\n"
         )
+        plumed_env = e2e.drop_thread_runtime(env_libs(build))
+        plumed_env.pop("LD_PRELOAD", None)
         done = subprocess.run(
             [plumed, "driver", "--plumed", str(deck), "--ixyz", str(xyz_path)],
             cwd=work,
-            env=env_libs(build),
+            env=plumed_env,
             capture_output=True,
             text=True,
         )

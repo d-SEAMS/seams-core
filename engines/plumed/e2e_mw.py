@@ -44,7 +44,7 @@ def main():
     styles = subprocess.run([lmp, "-h"], capture_output=True, text=True).stdout
     if not re.search(r"\bPLUMED\b", styles):
         e2e.skip("this lmp has no PLUMED package")
-    plugin = e2e.find_build_file(args.build, "libSeamsPlumed.so")
+    plugin = e2e.external_library(args.build, "libSeamsPlumed.so")
     if plugin is None:
         e2e.skip("libSeamsPlumed.so was not built")
     cli = e2e.seams_cli(args.build)
@@ -58,8 +58,9 @@ def main():
         deck = (HERE / "plumed.mw.dat").read_text()
         deck = deck.replace("@PLUGIN@", str(plugin)).replace("@NATOMS@", str(natoms))
         (work / "plumed.dat").write_text(deck.replace("@EVERY@", str(args.every)))
-        env = dict(os.environ, OMP_NUM_THREADS="1", PLUMED_NUM_THREADS="1",
-                   PLUMED_KERNEL=kernel)
+        env = e2e.drop_thread_runtime(dict(
+            os.environ, OMP_NUM_THREADS="1", PLUMED_NUM_THREADS="1",
+            PLUMED_KERNEL=kernel))
         cmd = [lmp, "-var", "cells", str(args.cells), "-var", "steps", str(args.steps),
                "-var", "every", str(args.every), "-var", "melt", str(args.melt),
                "-var", "dump", "native.lammpstrj", "-in", "in.mw.lmp", "-log", "log.lammps",
