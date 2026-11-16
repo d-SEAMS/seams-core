@@ -1892,12 +1892,22 @@ if get_option('with_tests')
     meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
     meson.current_build_dir() / 'capi-work',
   ]
+  _capi_run = capi_suite
+  _capi_run_args = _capi_args
+  if _capi_san == 'thread' and host_machine.system() == 'linux'
+    # GCC's libtsan expects the 28-bit mmap randomisation of older kernels.
+    # Under 32 bits it finds the executable inside its shadow range and
+    # stops with "unexpected memory mapping". setarch -R turns address
+    # randomisation off for the suite and the capi_cpp_ref it starts.
+    _capi_run = find_program('setarch', required: true)
+    _capi_run_args = [host_machine.cpu(), '-R', capi_suite.full_path()] + _capi_args
+  endif
   test(
     'capi_suite',
-    capi_suite,
-    args: _capi_args,
+    _capi_run,
+    args: _capi_run_args,
     env: _capi_env,
-    depends: [capi_cpp_ref, seams_api_lib],
+    depends: [capi_suite, capi_cpp_ref, seams_api_lib],
     timeout: 3600,
     is_parallel: false)
   _cross_env = environment()
