@@ -625,6 +625,7 @@ int pairedRows(const double *xs, const double *ys, const double *zs, const int *
   return longest;
 }
 
+#ifdef SEAMS_HAS_OPENMP
 // One z layer of the half stencil. The pair is stored only on the atom
 // in this layer. A forward step in x reaches back one z layer, so two
 // layers of the same parity both touch the atoms between them; the
@@ -684,9 +685,7 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
               if (ni < kStashCap) {
                 rowI[ni] = jj;
               } else {
-#ifdef SEAMS_HAS_OPENMP
 #pragma omp atomic write
-#endif
                 *overflowed = 1;
               }
               ++ni;
@@ -768,9 +767,7 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
             if (ni < kStashCap) {
               rowI[ni] = jj;
             } else {
-#ifdef SEAMS_HAS_OPENMP
 #pragma omp atomic write
-#endif
               *overflowed = 1;
             }
             ++ni;
@@ -809,6 +806,7 @@ void mirrorStash(const int *ids, int nPacked, int *counts, int *stash, int *over
     }
   }
 }
+#endif
 
 SEAMS_CUTOFF_AVX void passFastStashHalf(
     const double *xs, const double *ys, const double *zs, const int *ids, const int *cellStart,

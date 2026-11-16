@@ -2338,19 +2338,16 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
              std::vector<int> *hist = nullptr, int forcedCap = -1,
              int *perAtom = nullptr, int perStride = 0);
 
+#ifdef SEAMS_HAS_OPENMP
 //! Ring sizes held by the per-source pools, summed over the team.
 static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
   for (int i = 0; i < sizes.len; i++) {
     sizes.counts[i] = 0;
   }
-#ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(use) if (use > 1 && !omp_in_parallel())
-#endif
   {
     std::vector<long long> local(static_cast<std::size_t>(sizes.len), 0);
-#ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static) nowait
-#endif
     for (int k = 0; k < nPools; k++) {
       for (const auto &ring : pools[k]) {
         const std::size_t size = ring.size();
@@ -2359,14 +2356,13 @@ static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
         }
       }
     }
-#ifdef SEAMS_HAS_OPENMP
 #pragma omp critical(seams_ring_sizes)
-#endif
     for (int i = 0; i < sizes.len; i++) {
       sizes.counts[i] += static_cast<int>(local[static_cast<std::size_t>(i)]);
     }
   }
 }
+#endif
 
 // A four-ring census. The adjacent pairs among one vertex's arms are a
 // popcount of the shell rows, so the pair walk is not repeated.
@@ -3846,12 +3842,7 @@ struct primitive::RingUpdater::Impl {
     if (static_cast<int>(bySource.size()) != nVertices) {
       bySource.assign(static_cast<std::size_t>(nVertices), {});
     }
-    int nThreads = 1;
-#ifdef SEAMS_HAS_OPENMP
-    if (!omp_in_parallel()) {
-      nThreads = sourceTeam(nVertices);
-    }
-#endif
+    const int nThreads = sourceTeam(nVertices);
     if (static_cast<int>(scratches.size()) < nThreads) {
       scratches.resize(static_cast<std::size_t>(nThreads));
     }
@@ -3925,13 +3916,8 @@ struct primitive::RingUpdater::Impl {
     if (static_cast<int>(bySource.size()) != nVertices) {
       bySource.assign(static_cast<std::size_t>(nVertices), {});
     }
-    int nThreads = 1;
-#ifdef SEAMS_HAS_OPENMP
-    if (!omp_in_parallel()) {
-      // The work is the sources in T, not the whole crystal.
-      nThreads = sourceTeam(n);
-    }
-#endif
+    // The work is the sources in T, not the whole crystal.
+    const int nThreads = sourceTeam(n);
     if (static_cast<int>(scratches.size()) < nThreads) {
       scratches.resize(static_cast<std::size_t>(nThreads));
     }

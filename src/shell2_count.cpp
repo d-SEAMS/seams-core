@@ -114,24 +114,6 @@ inline bool pushUniqueMember(std::vector<int> &ring, int v) {
 }
 
 
-// Called only from the per-atom instantiation, which this file does not
-// make; the two-word shell is a census.
-[[maybe_unused]] inline void tallyRing(const int *ring, int k, std::vector<int> *hist,
-                                        int *perAtom, int perStride) {
-  if (perAtom != nullptr) {
-    for (int i = 0; i < k; i++) {
-      const int a = ring[i];
-      if (a >= 0) {
-        perAtom[static_cast<std::size_t>(a) * static_cast<std::size_t>(perStride) +
-                static_cast<std::size_t>(k)] += 1;
-      }
-    }
-  }
-  if (hist != nullptr && k >= 0 && k < static_cast<int>(hist->size())) {
-    (*hist)[static_cast<std::size_t>(k)]++;
-  }
-}
-
 struct alignas(64) RingScratch {
   std::vector<int> lvl;
   std::vector<int> touched, frontier, next;
@@ -315,12 +297,12 @@ int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
   return c4;
 }
 
-template <typename Graph, typename Out, bool PerAtom, int ShellWords = 0>
+template <typename Graph, typename Out, int ShellWords = 0>
 __attribute__((hot))
 void enumerateChordlessPlain(const Graph &adjacency, const DistOracle &oracle,
                         int src, int maxDepth, int minSize, bool legacy,
                         const std::vector<int> &lvl, Out &out,
-                        std::vector<int> *hist, int *perAtom, int perStride) {
+                        std::vector<int> *hist) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (maxDepth < 3 || nVertices <= 0) {
     return;
@@ -353,10 +335,6 @@ void enumerateChordlessPlain(const Graph &adjacency, const DistOracle &oracle,
   // (and the legacy pair set) go through the shared predicate.
   const bool fast = !legacy && oracle.hop2;
   auto record = [&](const int *r, int k) {
-    if constexpr (PerAtom) {
-      tallyRing(r, k, hist, perAtom, perStride);
-      return;
-    }
     if (hist != nullptr) {
       if (k < static_cast<int>(hist->size())) {
         (*hist)[static_cast<std::size_t>(k)]++;
@@ -438,7 +416,7 @@ void enumerateChordlessPlain(const Graph &adjacency, const DistOracle &oracle,
     // The shell rows answer both censuses. count4 stays on only when those
     // rows will be built, so skipping the pair walk cannot drop a four-ring.
     const bool countShell =
-        !PerAtom && hist != nullptr && fast && minSize <= 5 && !L1.empty();
+        hist != nullptr && fast && minSize <= 5 && !L1.empty();
     const bool count4 = countShell && minSize <= 4;
     const bool count5 = countShell;
     std::vector<std::vector<int>> arms2(static_cast<std::size_t>(nVertices));
@@ -690,7 +668,7 @@ void enumerateChordlessPlain(const Graph &adjacency, const DistOracle &oracle,
         }
       }
     }
-    if (!PerAtom && hist != nullptr && fast) {
+    if (hist != nullptr && fast) {
       // A six-ring fails for every arm pair that leaves the same second-shell
       // vertex, or whose two second-shell vertices are adjacent. Group the
       // arms by that vertex and drop those pairs before walking them.
@@ -812,7 +790,7 @@ void enumerateChordlessPlain(const Graph &adjacency, const DistOracle &oracle,
             }
             rights.push_back(arm);
           }
-          if (!PerAtom && hist != nullptr && fast) {
+          if (hist != nullptr && fast) {
             // Arms that share the far vertex fail or pass together on every
             // test that does not look at the near vertex. The hits are a
             // plain total: one add per source, not one atomic per ring.
@@ -976,8 +954,8 @@ void countOne(const RowView &graph, const DistOracle &oracle, RingScratch &scr, 
   const bool stored = cap > 0 ? shortestPathsFrom<RowView, true>(graph, src, scr, cap)
                               : shortestPathsFrom<RowView, false>(graph, src, scr, 0);
   if (!stored) {
-    enumerateChordlessPlain<RowView, NoPool, false, 0>(
-        graph, oracle, src, maxDepth, minSize, false, scr.lvl, out, hist, nullptr, 0);
+    enumerateChordlessPlain<RowView, NoPool, 0>(graph, oracle, src, maxDepth, minSize, false,
+                                                scr.lvl, out, hist);
     return;
   }
   auto keep = [&](std::vector<int> &r) {

@@ -237,6 +237,7 @@ public:
   FairWidth &operator=(const FairWidth &) = delete;
 
 private:
+#ifdef SEAMS_HAS_OPENMP
   static constexpr double kSlowFork = 1.0e-3;
   static constexpr double kRetry = 1.0;
   int asked_ = 1;
@@ -247,7 +248,6 @@ private:
     return level;
   }
 
-#ifdef SEAMS_HAS_OPENMP
   static double forkSeconds(int width) {
     const double start = omp_get_wtime();
 #pragma omp parallel num_threads(width)

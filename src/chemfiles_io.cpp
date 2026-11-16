@@ -48,13 +48,13 @@ std::string extensionOf(const std::string &path) {
   return path.substr(dot + 1);
 }
 
+#ifdef SEAMS_HAS_CHEMFILES
+
 bool extensionIs(const std::string &path, const char *ext) {
   const auto got = extensionOf(path);
   const auto n = std::char_traits<char>::length(ext);
   return got.size() == n && std::memcmp(got.data(), ext, n) == 0;
 }
-
-#ifdef SEAMS_HAS_CHEMFILES
 
 bool digitsOnly(const std::string &text) {
   return !text.empty() &&
@@ -480,6 +480,7 @@ std::string sinp::currentExceptionText() {
   }
 }
 
+#ifdef SEAMS_HAS_CHEMFILES
 namespace {
 
 // One bit per frame: ids are exactly {1..N} and the box has no tilt.
@@ -724,6 +725,7 @@ bool dumpFrameIsOneToN(const std::string &path, int frame) {
 }
 
 } // namespace
+#endif
 
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::openFrame(const std::string &filename, int frame, int typeI,
