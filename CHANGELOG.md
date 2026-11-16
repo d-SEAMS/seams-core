@@ -123,12 +123,13 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Changed
 
-- A cold cage frame searches six-rings only. The equatorial 14-atom check counts with a generation stamp, and the six triplet walks share each atom's ring row.
+- A cold cage frame searches six-rings only, and the six triplet walks of the equatorial check share one read of each atom's ring row.
 - A dense frame mixes each repeated neighbour-color signature once, instead of once per vertex.
 - A dense neighbourhood counts repeated colors instead of sorting every neighbour list. The frame key is unchanged.
 - A dense ring census counts size-5 rings on the first shell's own bit rows, and size-7 arms that share a far vertex are kept or dropped together. That census uses the team below the sparse cutoff.
 - A dense ring search builds each thread's adjacency bits once, instead of once per atom.
 - A dense size-7 ring drops an arm that already fails on its own, and the frame takes that walk as soon as a vertex has two shortest paths.
+- A fingerprint and a per-atom ring count tally rings while searching and do not keep the list. `seams fingerprint --by-atom` reads those per-atom counts.
 - A five-ring census walks only the arms that belong to one of the two vertices, skipping the arms they share.
 - A five-ring census walks the shorter of the two exclusive arm sets.
 - A four-ring census counts non-adjacent arms from the shell bit rows.
@@ -171,7 +172,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
   CHILL+ then reports `ion-ice`, `ion-liquid` and `ion-front` when ions remain in the frame.
 - Per-atom keys of a frame whose neighbourhood is the whole graph are refined on that one graph, counting repeated neighbour colors instead of sorting them.
 - Per-atom keys on a sparse frame reuse one repeated neighbourhood instead of refining it again, and the atoms of a large frame are refined together.
-- Primitive rings are stored as one index buffer of 32-bit vertex ids, with a byte per ring size. A fingerprint and a per-atom count tally rings while searching and do not keep the list. A dense frame lists on the team below the sparse cutoff.
 - Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
 - Seven-rings share the tests of one near vertex across the arms that leave it.
 - The C API version macros come from the project version at build time. This release is 2.14.0.
@@ -289,12 +289,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `-Dwith_cli=false` configures again; `seams_lang_fixtures` referenced the CLI target unconditionally, so `pip install .` failed.
 - `-Dwith_linkcell=disabled` builds and links again: the k-nearest neighbour list merges its rows on the OpenMP team instead of calling linkcell's slab walk, and the GPU batch helpers build under `-Werror` without linkcell.
 - `bench_rings_h2h --repl` answered every sample with the ring search on a graph built before the clock, so the inside row repeated the prebuilt one. An `in` line now times the neighbour list, its index and the ring search as one call, and `scripts/rings_one_thread.py` records the prebuilt and inside rows side by side and writes them to a CSV next to the JSON. The one-thread table on the Rings on one thread page is the prebuilt row and does not change.
+- `c_api_installed` and `capi_installed_examples` install into a fresh directory under `install-stages` in the build tree and remove it on exit, so `meson test --repeat` can run two copies at once.
 - `capi_fuzzer` writes its per-format scratch files under names that include the process id. `-fork` jobs and parallel test runs shared fixed names in one working directory, so one process could truncate a file another had mapped and die with SIGBUS. The fuzz targets also rebuild when their source changes.
 - `capi_symbols`, which holds the exported functions of `libseams` to `tests/capi_symbols.txt`, reads the exports with `readelf` when `nm` is missing and reports a skip when neither exists; it used to pass without checking. `capi_symbols_selftest` proves that the check rejects an unlisted export and a listed function the library no longer exports, and that `nm` and `readelf` agree.
 - `compute dseams` on several MPI ranks classified each rank's own atoms as a separate cell, so atoms near a subdomain boundary lost neighbours. On two ranks, 8312 of 86016 labels over 21 frames of 4096-molecule mW ice and liquid differed from `seams chill-plus` on the same dump. The compute now gathers every atom to rank 0, classifies the whole cell once, and returns each rank its labels; all 86016 match. `meson test lammps_e2e_np2` is the regression.
 - `docs/howto/test_engines.py` runs each engine how-to in a temporary directory under `build/docs-examples` and removes it afterwards. `docs_engine_<engine>` and the `docs_video_tapes` scenes ran the same engine at once in one fixed directory, and PLUMED, which renames every `colvar` it finds to a numbered backup, refused to run once 101 backups had built up over repeated `meson test` runs.
 - `docs_brine_cli` fetches the 230 K brine frame itself, through the same checked download as the science tutorials, and no longer skips on a clone where no other test has fetched it yet. The download takes a lock and lands through a `.part` file, so tests that start together do not read a partial frame.
-- `docs_c_api_tour`, `c_api_installed` and `capi_installed_examples` install into a fresh directory under `install-stages` in the build tree and remove it on exit, so `meson test --repeat` can run two copies at once.
 - `docs_video_tapes` treats a step that exits 77 as an absent engine or frame. That scene is skipped, each scene of the folder that ran still has to match its own section of `recorded.txt`, the narration check of that folder is left out, and the remaining tapes still run; the test then exits 77 with the reasons. Any other exit is still a failure.
 - `dseams-sys` declares the C functions that return nothing without `-> ()`, so `cargo clippy --all-targets` with warnings denied passes on the 1.85 MSRV toolchain as well as on current stable. `gen_sys.py` writes the declarations that way.
 - `dump_index_eintr`, `dump_index_eio` and `dump_fstat_keeps_atoms` each write their dump under a directory of their own. The three run one driver in parallel and shared a fixed temporary directory, so one test's cleanup could remove the other's file and abort it with `filesystem error: cannot remove`.
