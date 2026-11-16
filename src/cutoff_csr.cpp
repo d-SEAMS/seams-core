@@ -129,7 +129,12 @@ struct Scratch {
   int overflowed = 0;
 };
 
-constexpr int kStashCap = 48;
+// Slots kept beside each molecule during the half-stencil walk. Ice at
+// the 3.5 A cutoff has four neighbours, and a stride of 48 ints touched
+// three cache lines per molecule to store those four. Eight slots keep a
+// molecular shell on this path. A longer shell sets the overflow flag and
+// the caller recounts with the full stencil, which writes the same CSR.
+constexpr int kStashCap = 8;
 
 
 Scratch &scratch() {
@@ -823,25 +828,15 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
                    int *counts, int *stash, int *overflowed) {
   *overflowed = 0;
 #ifdef SEAMS_HAS_OPENMP
-  if (ncz >= 2 && omp_get_max_threads() > 1) {
-    // Each layer stores a pair only on its own atoms. The last layer's +z
-    // wraps onto layer 0 when the length is odd, which is the same parity,
-    // so that layer runs alone after the others have stopped.
-    const int lastWraps = (ncz % 2) == 1;
-    const int nEven = ncz / 2;
+  if (ncz >= 1 && omp_get_max_threads() > 1) {
+    // One team over consecutive z layers. Each layer stores a pair only on
+    // its own atoms and only reads the neighbouring cells, and mirrorStash
+    // fills the partner rows after the team has stopped. Splitting even
+    // and odd layers made neighbouring molecules, whose ids follow z,
+    // bounce a cache line between cores.
 #pragma omp parallel for schedule(static)
-    for (int k = 0; k < nEven; ++k) {
-      halfZLayer(k * 2, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
-                 counts, stash, overflowed);
-    }
-    if (lastWraps) {
-      halfZLayer(ncz - 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
-                 counts, stash, overflowed);
-    }
-    const int nOdd = ncz / 2;
-#pragma omp parallel for schedule(static)
-    for (int k = 0; k < nOdd; ++k) {
-      halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+    for (int cz = 0; cz < ncz; ++cz) {
+      halfZLayer(cz, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
                  counts, stash, overflowed);
     }
     mirrorStash(ids, cellStart[ncx * ncy * ncz], counts, stash, overflowed);
