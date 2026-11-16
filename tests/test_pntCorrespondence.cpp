@@ -10,6 +10,9 @@
 #include <seams_input.hpp>
 #include <topo_bulk.hpp>
 
+#include <array>
+#include <cmath>
+
 #include <Eigen/Dense>
 #include <vector>
 
@@ -92,6 +95,82 @@ TEST_CASE("getPointSetRefRing with different axial dimensions",
 }
 
 // -- getRadiusFromRings tests --
+
+namespace {
+molSys::PointCloud<molSys::Point<double>, double>
+wrappedCloud(const std::vector<std::array<double, 3>> &coords, double box) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {box, box, box};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  molSys::Point<double> pt;
+  pt.type = 1;
+  for (std::size_t i = 0; i < coords.size(); ++i) {
+    pt.atomID = static_cast<int>(i);
+    pt.x = coords[i][0];
+    pt.y = coords[i][1];
+    pt.z = coords[i][2];
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[static_cast<int>(i)] = static_cast<int>(i);
+  }
+  cloud.nop = static_cast<int>(coords.size());
+  return cloud;
+}
+} // namespace
+
+TEST_CASE("fillPointSetPrismRing unwraps a ring that straddles PBC",
+          "[pntCorrespondence]") {
+  // A 2x2 square from x = 9 to x = 11 in a box of 10; the dump wraps the
+  // x = 11 corners to x = 1.
+  const auto cloud = wrappedCloud({{9, 0, 0}, {1, 0, 0}, {1, 2, 0}, {9, 2, 0}}, 10.0);
+  const auto pts = pntToPnt::fillPointSetPrismRing(cloud, {0, 1, 2, 3}, 0);
+  REQUIRE(pts.rows() == 4);
+  REQUIRE_THAT(pts(0, 0), Catch::Matchers::WithinAbs(9.0, 1e-8));
+  REQUIRE_THAT(pts(1, 0), Catch::Matchers::WithinAbs(11.0, 1e-8));
+  REQUIRE_THAT(pts(2, 0), Catch::Matchers::WithinAbs(11.0, 1e-8));
+  REQUIRE_THAT(pts(3, 0), Catch::Matchers::WithinAbs(9.0, 1e-8));
+}
+
+TEST_CASE("fillPointSetPrismBlock unwraps both rings against one origin",
+          "[pntCorrespondence]") {
+  // The same square at z = 0 and z = 9.5 in a box of 10: the second ring
+  // is 0.5 below the first across the z face.
+  const auto cloud = wrappedCloud({{9, 0, 0}, {1, 0, 0}, {1, 2, 0}, {9, 2, 0},
+                                   {9, 0, 9.5}, {1, 0, 9.5}, {1, 2, 9.5}, {9, 2, 9.5}},
+                                  10.0);
+  const auto pts =
+      pntToPnt::fillPointSetPrismBlock(cloud, {0, 1, 2, 3}, {4, 5, 6, 7}, 0);
+  REQUIRE(pts.rows() == 8);
+  for (int i = 0; i < 4; ++i) {
+    REQUIRE_THAT(pts(i, 2), Catch::Matchers::WithinAbs(0.0, 1e-8));
+    REQUIRE_THAT(pts(i + 4, 2), Catch::Matchers::WithinAbs(-0.5, 1e-8));
+  }
+  REQUIRE_THAT(pts(1, 0), Catch::Matchers::WithinAbs(11.0, 1e-8));
+  REQUIRE_THAT(pts(5, 0), Catch::Matchers::WithinAbs(11.0, 1e-8));
+}
+
+TEST_CASE("changeHexCageOrder places every point at its own position",
+          "[pntCorrespondence]") {
+  // Two hexagons far from any face: the unwrapped points are the points.
+  std::vector<std::array<double, 3>> coords;
+  for (int ring = 0; ring < 2; ++ring) {
+    for (int k = 0; k < 6; ++k) {
+      const double t = 1.0471975511965976 * k;
+      coords.push_back({20.0 + 2.0 * std::cos(t), 20.0 + 2.0 * std::sin(t),
+                        20.0 + 3.0 * ring});
+    }
+  }
+  const auto cloud = wrappedCloud(coords, 40.0);
+  const std::vector<int> b1 = {0, 1, 2, 3, 4, 5};
+  const std::vector<int> b2 = {6, 7, 8, 9, 10, 11};
+  const auto pts = pntToPnt::changeHexCageOrder(cloud, b1, b2, 0);
+  REQUIRE(pts.rows() == 12);
+  for (int i = 0; i < 6; ++i) {
+    for (int d = 0; d < 3; ++d) {
+      REQUIRE_THAT(pts(i, d), Catch::Matchers::WithinAbs(coords[static_cast<std::size_t>(i)][static_cast<std::size_t>(d)], 1e-8));
+      REQUIRE_THAT(pts(i + 6, d), Catch::Matchers::WithinAbs(coords[static_cast<std::size_t>(i + 6)][static_cast<std::size_t>(d)], 1e-8));
+    }
+  }
+}
 
 TEST_CASE("getRadiusFromRings computes radius for tetragonal prism",
           "[pntCorrespondence]") {

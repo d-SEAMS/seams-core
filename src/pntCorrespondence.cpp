@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <pntCorrespondence.hpp>
+#include <generic.hpp>
 #include <neighbours.hpp>
 
 /**
@@ -488,9 +489,13 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
     // -------------------
     // Basal ring points
     index = basalRing[static_cast<std::size_t>(currentPosition)];    // Index of the current point
-    pointSet(i, 0) = yCloud.pts[static_cast<std::size_t>(index)].x; // x coord
-    pointSet(i, 1) = yCloud.pts[static_cast<std::size_t>(index)].y; // y coord
-    pointSet(i, 2) = yCloud.pts[static_cast<std::size_t>(index)].z; // z coord
+    // Unwrapped against the first point, so a ring across the box edge
+    // stays one polygon.
+    const auto xyz = gen::unwrappedXYZ(
+        yCloud, basalRing[static_cast<std::size_t>(startingIndex)], index);
+    pointSet(i, 0) = xyz[0];
+    pointSet(i, 1) = xyz[1];
+    pointSet(i, 2) = xyz[2];
   } // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
@@ -538,17 +543,27 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
     iatomIndex =
         basal1[static_cast<std::size_t>(currentPosition)]; // Index of the current point in basal1
     iatom = i;                   // index in the point set being filled
-    pointSet(iatom, 0) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].x; // x coord
-    pointSet(iatom, 1) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].y; // y coord
-    pointSet(iatom, 2) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].z; // z coord
+    {
+      // Both basal rings are unwrapped against one basal1 point.
+      const auto xyz = gen::unwrappedXYZ(
+          yCloud, basal1[static_cast<std::size_t>(startingIndex)], iatomIndex);
+      pointSet(iatom, 0) = xyz[0];
+      pointSet(iatom, 1) = xyz[1];
+      pointSet(iatom, 2) = xyz[2];
+    }
     // -------------------
     // Basal2 ring points
     jatomIndex =
         basal2[static_cast<std::size_t>(currentPosition)]; // Index of the current point in basal2
     jatom = i + ringSize;        // index in the point set being filled
-    pointSet(jatom, 0) = yCloud.pts[static_cast<std::size_t>(jatomIndex)].x; // x coord
-    pointSet(jatom, 1) = yCloud.pts[static_cast<std::size_t>(jatomIndex)].y; // y coord
-    pointSet(jatom, 2) = yCloud.pts[static_cast<std::size_t>(jatomIndex)].z; // z coord
+    {
+      // Both basal rings are unwrapped against one basal1 point.
+      const auto xyz = gen::unwrappedXYZ(
+          yCloud, basal1[static_cast<std::size_t>(startingIndex)], jatomIndex);
+      pointSet(jatom, 0) = xyz[0];
+      pointSet(jatom, 1) = xyz[1];
+      pointSet(jatom, 2) = xyz[2];
+    }
   } // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
@@ -755,9 +770,9 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   dr = gen::relDist(yCloud, iatomOne, jatomIndex);
 
   // basal2
-  pointSet(6, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x + dr[0];
-  pointSet(6, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y + dr[1];
-  pointSet(6, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z + dr[2];
+  pointSet(6, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x - dr[0];
+  pointSet(6, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y - dr[1];
+  pointSet(6, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z - dr[2];
   //
   // Loop through the rest of the points
   for (int i = 1; i < 6; i++) {
@@ -768,16 +783,16 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, iatomIndex);
     //
-    pointSet(i, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x + dr[0];
-    pointSet(i, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y + dr[1];
-    pointSet(i, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z + dr[2];
+    pointSet(i, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x - dr[0];
+    pointSet(i, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y - dr[1];
+    pointSet(i, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z - dr[2];
     //
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, jatomIndex);
     // basal2
-    pointSet(i + 6, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x + dr[0];
-    pointSet(i + 6, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y + dr[1];
-    pointSet(i + 6, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z + dr[2];
+    pointSet(i + 6, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x - dr[0];
+    pointSet(i + 6, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y - dr[1];
+    pointSet(i + 6, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z - dr[2];
     //
   } // end of loop
 

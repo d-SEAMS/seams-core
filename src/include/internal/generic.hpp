@@ -620,6 +620,17 @@ relDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iat
                           yCloud.pts[static_cast<std::size_t>(jatom)].y, yCloud.pts[static_cast<std::size_t>(jatom)].z);
 }
 
+// The image of atom nearest origin. relDist(i, j) is wrap(i - j), so that
+// image is origin - relDist(origin, atom). A ring or cage unwrapped this
+// way keeps one origin, which a per-edge minimum image does not.
+inline std::array<double, 3> unwrappedXYZ(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int origin,
+    int atom) {
+  const auto dr = relDist(yCloud, origin, atom);
+  const auto &o = yCloud.pts[static_cast<std::size_t>(origin)];
+  return {o.x - dr[0], o.y - dr[1], o.z - dr[2]};
+}
+
 // Function for sorting according to atom ID
 // Comparator for std::sort
 /**
