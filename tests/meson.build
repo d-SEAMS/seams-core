@@ -781,15 +781,16 @@ test('dump_fstat_keeps_atoms', _fault_wrap,
   env: _fault_fstat, depends: dump_faults)
 
 # A consumer of libyodaLib linked without --allow-shlib-undefined and
-# without sphericart on its own link line: the library that the probe
-# accepted has to resolve through libyodaLib alone.
+# without sphericart on its own link line. The library the probe accepted
+# has to resolve through libyodaLib plus sphericart_consumer_args, the
+# -rpath-link that yds_dep also carries for a pip wheel's folder.
 if sphericart_found
   _strict = cppc.has_link_argument('-Wl,--no-allow-shlib-undefined') ? ['-Wl,--no-allow-shlib-undefined'] : []
   test('sphericart_consumer',
     executable('sphericart_consumer', 'sphericart_consumer.cpp',
       link_with: ydslib,
       include_directories: include_directories('../src/include/internal'),
-      link_args: _strict,
+      link_args: _strict + sphericart_consumer_args,
       build_rpath: meson.project_build_root() / 'src'),
     timeout: 30)
 endif

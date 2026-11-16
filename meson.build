@@ -673,6 +673,9 @@ endif
 
 sphericart_opt = get_option('with_sphericart')
 sphericart_found = false
+# Link arguments a program that links libyodaLib, but not sphericart
+# itself, needs to resolve libyodaLib's sphericart dependency.
+sphericart_consumer_args = []
 if not sphericart_opt.disabled()
   sph_lib_dirs = []
   sph_inc_dirs = []
@@ -708,6 +711,9 @@ if not sphericart_opt.disabled()
       sph_rpath = []
       foreach d : sph_lib_dirs
         sph_rpath += ['-Wl,-rpath,' + d]
+        # A cross-prefixed ld (conda's) does not follow libyodaLib's
+        # RPATH to libsphericart.so, so a consumer names the folder.
+        sphericart_consumer_args += ['-Wl,-rpath-link,' + d]
       endforeach
       sph_cflags = []
       foreach d : sph_inc_dirs
@@ -715,7 +721,7 @@ if not sphericart_opt.disabled()
       endforeach
       sphericart_dep = declare_dependency(dependencies: [sph_lib],
                                           compile_args: sph_cflags,
-                                          link_args: sph_rpath)
+                                          link_args: sph_rpath + sphericart_consumer_args)
     endif
   endif
   # The probe calls what src/sphericart_ylm.cpp calls, and links without
