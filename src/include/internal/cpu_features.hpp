@@ -95,9 +95,9 @@ inline const Features &features() {
   return cached;
 }
 
-// false holds the kernels behind seams::ylm::avx512Kernels and
-// symm::avx2Kernels on their generic path; true leaves the choice to the
-// CPU again. For tests.
+// false holds the kernels behind seams::ylm::avx512Kernels,
+// symm::avx2Kernels and the AVX2 cutoff stash scan on their generic path;
+// true leaves the choice to the CPU again. For tests.
 void allowSimdKernels(bool allow);
 bool simdKernelsAllowed();
 

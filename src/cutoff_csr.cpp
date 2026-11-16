@@ -29,9 +29,6 @@
 #if defined(__x86_64__) || defined(__i386__)
 #include <immintrin.h>
 #define SEAMS_CUTOFF_X86 1
-#define SEAMS_CUTOFF_AVX __attribute__((target("avx2,fma")))
-#else
-#define SEAMS_CUTOFF_AVX
 #endif
 
 #ifdef SEAMS_HAS_OPENMP
@@ -808,10 +805,10 @@ void mirrorStash(const int *ids, int nPacked, int *counts, int *stash, int *over
 }
 #endif
 
-SEAMS_CUTOFF_AVX void passFastStashHalf(
-    const double *xs, const double *ys, const double *zs, const int *ids, const int *cellStart,
-    int ncx, int ncy, int ncz, const double *shx, const double *shy, const double *shz, double rc2,
-    int *counts, int *stash, int *overflowed, bool branchy = false);
+void passFastStashHalf(const double *xs, const double *ys, const double *zs, const int *ids,
+                       const int *cellStart, int ncx, int ncy, int ncz, const double *shx,
+                       const double *shy, const double *shz, double rc2, int *counts, int *stash,
+                       int *overflowed, bool branchy = false);
 
 // Count pass that also keeps the neighbour ids. A shell longer than
 // kStashCap sets *overflowed and the caller repeats the geometry fill.
@@ -846,7 +843,7 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
 }
 
 #ifdef SEAMS_CUTOFF_X86
-inline __attribute__((target("avx2,fma"), always_inline)) void stashScanAvx(
+inline __attribute__((target("avx2,fma"))) void stashScanAvx(
     double xi, double yi, double zi, const double *xs, const double *ys, const double *zs,
     const int *ids, const int *begin, const int *endn, int nn, double rc2, int ii, int *rowI,
     int *counts, int *stash, int *overflowed) {
@@ -928,15 +925,16 @@ inline __attribute__((target("avx2,fma"), always_inline)) void stashScanAvx(
 }
 #endif
 
-SEAMS_CUTOFF_AVX void passFastStashHalf(
-    const double *xs, const double *ys, const double *zs, const int *ids, const int *cellStart,
-    int ncx, int ncy, int ncz, const double *shx, const double *shy, const double *shz, double rc2,
-    int *counts, int *stash, int *overflowed, bool branchy) {
+// Avx is true only inside passFastStashHalfAvx, whose target the body
+// inherits once inlined.
+template <bool Avx>
+SEAMS_ALWAYS_INLINE void stashHalf(const double *xs, const double *ys, const double *zs,
+                                   const int *ids, const int *cellStart, int ncx, int ncy,
+                                   int ncz, const double *shx, const double *shy,
+                                   const double *shz, double rc2, int *counts, int *stash,
+                                   int *overflowed, bool branchy) {
   const int nCells = ncx * ncy * ncz;
   *overflowed = 0;
-#ifdef SEAMS_CUTOFF_X86
-  const bool avx = seams::cpu::features().avx2 && seams::cpu::features().fma;
-#endif
   for (int c = 0; c < nCells; ++c) {
     const int b = cellStart[c];
     const int e = cellStart[c + 1];
@@ -980,7 +978,7 @@ SEAMS_CUTOFF_AVX void passFastStashHalf(
         int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
         begin[0] = i + 1;
 #ifdef SEAMS_CUTOFF_X86
-        if (avx) {
+        if constexpr (Avx) {
           stashScanAvx(xi, yi, zi, xs, ys, zs, ids, begin, end, nn, rc2, ii, rowI, counts, stash,
                        overflowed);
           continue;
@@ -1105,6 +1103,33 @@ SEAMS_CUTOFF_AVX void passFastStashHalf(
       }
     }
   }
+}
+
+#ifdef SEAMS_CUTOFF_X86
+__attribute__((target("avx2,fma"))) void
+passFastStashHalfAvx(const double *xs, const double *ys, const double *zs, const int *ids,
+                     const int *cellStart, int ncx, int ncy, int ncz, const double *shx,
+                     const double *shy, const double *shz, double rc2, int *counts, int *stash,
+                     int *overflowed, bool branchy) {
+  stashHalf<true>(xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2, counts, stash,
+                  overflowed, branchy);
+}
+#endif
+
+void passFastStashHalf(const double *xs, const double *ys, const double *zs, const int *ids,
+                       const int *cellStart, int ncx, int ncy, int ncz, const double *shx,
+                       const double *shy, const double *shz, double rc2, int *counts, int *stash,
+                       int *overflowed, bool branchy) {
+#ifdef SEAMS_CUTOFF_X86
+  const seams::cpu::Features &cpu = seams::cpu::features();
+  if (cpu.avx2 && cpu.fma && seams::cpu::simdKernelsAllowed()) {
+    passFastStashHalfAvx(xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2, counts,
+                         stash, overflowed, branchy);
+    return;
+  }
+#endif
+  stashHalf<false>(xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2, counts, stash,
+                   overflowed, branchy);
 }
 
 void scatterStash(const int *stash, const int *counts, const int *offsets, int *cols,

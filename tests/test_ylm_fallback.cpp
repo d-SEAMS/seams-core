@@ -17,10 +17,15 @@
 #include <random>
 #include <vector>
 
+#if defined(SEAMS_HAS_OPENMP)
+#include <omp.h>
+#endif
+
 // Every call into the AVX-512 kernel archive goes through
-// seams::ylm::avx512Kernels, and every call into the AVX2 shell archive
-// through symm::avx2Kernels. With the kernels turned off the generic path
-// runs on any CPU. Its values must match the kernel's, and its labels must
+// seams::ylm::avx512Kernels, every call into the AVX2 shell archive through
+// symm::avx2Kernels, and the AVX2 cutoff stash scan checks the same CPU
+// bits. With the kernels turned off the generic path runs on any CPU. Its
+// values must match the kernel's, and its labels and neighbour lists must
 // be the same.
 
 namespace {
@@ -103,6 +108,46 @@ Cloud liquid(int n, double side, unsigned seed) {
   }
   return cloud;
 }
+
+// Cartesian points from fractional ones in a cell with every tilt set, so
+// the full cutoff list takes the triclinic stash scan.
+Cloud tiltedLiquid(int n, double side, unsigned seed) {
+  const double xy = 1.5;
+  const double xz = 0.8;
+  const double yz = 1.0;
+  Cloud cloud;
+  cloud.box = {side + xy + xz, side + yz, side, xy, xz, yz};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  std::mt19937 rng(seed);
+  std::uniform_real_distribution<double> u(0.0, 1.0);
+  for (int i = 0; i < n; i++) {
+    const double fa = u(rng);
+    const double fb = u(rng);
+    const double fc = u(rng);
+    molSys::Point<double> p;
+    p.x = fa * side + fb * xy + fc * xz;
+    p.y = fb * side + fc * yz;
+    p.z = fc * side;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    cloud.idIndexMap[p.atomID] = cloud.nop;
+    cloud.pts.push_back(p);
+    ++cloud.nop;
+  }
+  return cloud;
+}
+
+struct OneThread {
+#if defined(SEAMS_HAS_OPENMP)
+  int saved = omp_get_max_threads();
+  OneThread() { omp_set_num_threads(1); }
+  ~OneThread() { omp_set_num_threads(saved); }
+#endif
+  OneThread(const OneThread &) = delete;
+  OneThread &operator=(const OneThread &) = delete;
+};
 
 void requireClose(const std::vector<double> &kernel, const std::vector<double> &scalar) {
   REQUIRE(kernel.size() == scalar.size());
@@ -338,6 +383,30 @@ TEST_CASE("diamond signatures match on the generic shell path", "[symmetry][avx2
           REQUIRE(k421 == g421);
           REQUIRE(k422 == g422);
           REQUIRE(kGood == gGood);
+        }
+      }
+    }
+  }
+}
+
+TEST_CASE("triclinic cutoff lists match on the generic stash scan", "[neighbours][avx2]") {
+  OneThread one;
+  for (unsigned seed : {17011u, 17013u}) {
+    for (int nAtoms : {240, 900}) {
+      const Cloud cloud = tiltedLiquid(nAtoms, 16.0, seed);
+      for (double rc : {3.2, 3.5}) {
+        for (bool branchy : {false, true}) {
+          std::vector<int> kOffsets, kCols, gOffsets, gCols;
+          REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, rc, kOffsets, kCols, false, nullptr,
+                                       nullptr, nullptr, branchy));
+          {
+            ScalarOnly off;
+            REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, rc, gOffsets, gCols, false, nullptr,
+                                         nullptr, nullptr, branchy));
+          }
+          REQUIRE_FALSE(kCols.empty());
+          REQUIRE(kOffsets == gOffsets);
+          REQUIRE(kCols == gCols);
         }
       }
     }
