@@ -137,13 +137,6 @@ def main():
     (OUT / "index.html").write_text("\n".join(parts))
     import importlib.util
 
-    sitting = DOCS / "render_sitting.py"
-    spec = importlib.util.spec_from_file_location("render_sitting", sitting)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    code = module.main(["--check"])
-    if code != 0:
-        return code
     checker = DOCS / "check_examples.py"
     spec = importlib.util.spec_from_file_location("check_examples", checker)
     module = importlib.util.module_from_spec(spec)

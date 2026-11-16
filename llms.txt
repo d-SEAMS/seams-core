@@ -62,8 +62,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Migrate from d-SEAMS 1.x](https://docs.dseams.info/howto/migrate-1x.html): 1.x was a Lua script plus yodaStruct -c lua_inputs/config.yml.
 - [Use a language binding](https://docs.dseams.info/howto/bindings.html): This repository builds the engine, the C API libseams (include/seams.h), the C ABI libseams_lang (bindings/cxx/seams_lang.h) and the seams command.
 - [Version pins](https://docs.dseams.info/howto/versions.html): The version of a checkout is one string, written in six places.
-- [Benchmarks](https://docs.dseams.info/howto/benchmarks.html): Timings belong on the docs site of the commit that produced them.
-- [Paper tables](https://docs.dseams.info/howto/paper-tables.html): Each table is one Snakemake target.
+- [Benchmarks](https://docs.dseams.info/howto/benchmarks.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Cutoff neighbour lists](https://docs.dseams.info/howto/neighbour-lists.html): Build the cutoff list, choose the thread count, and read the pinned session that compared it with vesin, freud, matscipy, mdapy, and OVITO.
 - [OpenMP target offload](https://docs.dseams.info/howto/openmp-offload.html): Build the Steinhardt kernel and the TUM ice score (hop-bound six-rings and cage affiliation) for an NVIDIA GPU.
 - [Classify a dump](https://docs.dseams.info/howto/classify-cli.html): You have a LAMMPS water dump and want counts.
@@ -73,7 +72,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [CHILL+](https://docs.dseams.info/howto/chill-plus.html): Label every oxygen with the published CHILL+ star, or with the OVITO rule.
 - [Choosing a cutoff and padding](https://docs.dseams.info/howto/cutoff-padding.html): The neighbour cutoff is the --cutoff of seams chill-plus.
 - [The symmetry classifier](https://docs.dseams.info/howto/symmetry-classifier.html): Name the ice shell of each oxygen.
-- [Linkcell neighbours and carried updates](https://docs.dseams.info/howto/linkcell-carried.html): Build the cutoff neighbour list, then keep rings when only part of the next frame moved.
+- [Linkcell neighbours and carried updates](https://docs.dseams.info/howto/linkcell-carried.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Sheared cells](https://docs.dseams.info/howto/sheared-cells.html): You have a triclinic LAMMPS dump and want the engine to use the real cell, not a diagonal of bound spans.
 - [Ionic-liquid dumps](https://docs.dseams.info/howto/ionic-liquid.html): A multi-type dump is not an ice frame.
 - [Confined ice](https://docs.dseams.info/howto/confined-ice.html): Classify ice in a nanotube or a monolayer.
@@ -129,9 +128,8 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [SQQ](https://docs.dseams.info/explanation/sqq.html): SQQ against d-SEAMS. The census and the ratios are written from the vendored CSVs at build time.
 - [Primitive rings and OVITO FindRings](https://docs.dseams.info/explanation/ovito-findrings.html): A ring is primitive when every pair of its vertices is as close along the ring as it is through the rest of the graph.
 - [Performance](https://docs.dseams.info/explanation/performance-h2h.html): Head-to-head times for the neighbour list, primitive rings, local q_6, CHILL+, cages, and PTM.
-- [Literature head-to-head](https://docs.dseams.info/howto/literature-h2h.html): Cutoff neighbours, local q_4 and q_6, the diamond common-neighbour labels, metal CNA, primitive rings, local ice symmetry, 5^{12} cages and coordination, against mdapy, pyscal3, vesin, IRA, SQQ,...
-- [Reproduce the literature head-to-head](https://docs.dseams.info/howto/literature-reproduce.html): scripts/h2h_rc3_sitting.py writes benchmarks/rc3-sitting.csv.
-- [Reproduce a head-to-head](https://docs.dseams.info/howto/reproduce-h2h.html): Each head-to-head is a Snakemake rule and, where a one-call arm exists, an Airspeed Velocity benchmark.
+- [Literature head-to-head](https://docs.dseams.info/howto/literature-h2h.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Reproduce the literature head-to-head](https://docs.dseams.info/howto/literature-reproduce.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 
 ## Explanation
 
@@ -149,16 +147,12 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Local symmetry](https://docs.dseams.info/explanation/symmetry.html): The engine names a local environment as ice Ih, ice Ic, stacking-disordered ice, a hydrate cage, or a five- or six-ring, and it labels every oxygen in a cell.
 - [TRACE and signature cages](https://docs.dseams.info/explanation/trace-assembly.html): TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) assembles hydrate cages from a hydrogen-bond graph.
 - [Stacking disorder](https://docs.dseams.info/explanation/stacking-disorder.html): Cubic ice and hexagonal ice are the same puckered hexagons stacked in two orders.
-- [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.html): A trajectory frame shares almost every bond with the frame before it.
-- [Signature-search thread controls](https://docs.dseams.info/explanation/trace-threads.html): Commit 9896a478 on perf/trace-threads retimes the hydrate signature search at 1, 2, 4 and 8 threads, after the pool and the row placement changed.
-- [Release-candidate sitting](https://docs.dseams.info/explanation/performance.html): The numbers below are benchmarks/rc3-sitting.csv, written by scripts/h2h_rc3_sitting.py.
-- [Performance overview](https://docs.dseams.info/explanation/performance-overview.html): Four sittings sit next to each other.
+- [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Signature-search thread controls](https://docs.dseams.info/explanation/trace-threads.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Release-candidate sitting](https://docs.dseams.info/explanation/performance.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Performance overview](https://docs.dseams.info/explanation/performance-overview.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Binding overhead](https://docs.dseams.info/explanation/binding-overhead.html): Ice Ih at 4096, 32768, and 110592 molecules.
 - [Performance, 4096 to 110592](https://docs.dseams.info/explanation/performance-range.html): Neighbour lists and primitive rings against freud, OVITO, mdapy, pyscal3, vesin, IRA, PTM, cycless, and every other code that has a neighbour or ring row in benchmarks/*.csv.
-- [d-SEAMS 2.0 paper](https://docs.dseams.info/paper/index.html): The paper is "d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis".
-- [Versions](https://docs.dseams.info/paper/versions.html): Versions recorded for seams-core 2.14.0 in this repository.
-- [Benchmarks](https://docs.dseams.info/paper/benchmarks.html): Benchmark records of seams-core 2.14.0 stored in this repository.
-- [Reproduce](https://docs.dseams.info/paper/reproduce.html): Install seams-core 2.14.0 and regenerate the benchmark files in this repository.
 
 ## Project
 

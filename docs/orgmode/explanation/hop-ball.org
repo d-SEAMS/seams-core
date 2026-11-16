@@ -1,6 +1,12 @@
 #+TITLE: Carried rings and the hop ball
 #+OPTIONS: toc:nil num:nil
 
+A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
+benchmark campaign. The records and the Snakemake rules that write them
+are in the private paper repository and the Hugging Face dataset
+=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
+revision); the scripts under =scripts/= that time a run stay here.
+
 A trajectory frame shares almost every bond with the frame before it.
 ~primitive::RingUpdater~ recomputes only the rings that can have
 changed, and the result equals ~primitive::ringNetwork~ on that frame.

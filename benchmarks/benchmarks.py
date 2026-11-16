@@ -1,4 +1,4 @@
-"""Airspeed Velocity benchmarks for the paper's timed arms.
+"""Airspeed Velocity benchmarks for the timed arms of the engine.
 
 Imports and frame setup run outside the timed region. Each timed method
 is one serial call of the arm on one core.
@@ -49,16 +49,37 @@ class NeighbourArm:
         _run(self.cmd)
 
 
+def _write_ideal_ic(path, repetitions, bond=2.75):
+    """Ideal ice Ic oxygens, 8 m^3 sites for m cubic cells per edge, as a dump."""
+    lattice = 4.0 * bond / 3.0 ** 0.5
+    fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+    basis = fcc + tuple((x + 0.25, y + 0.25, z + 0.25) for x, y, z in fcc)
+    side = repetitions * lattice
+    points = [
+        (((i + x) * lattice) % side, ((j + y) * lattice) % side, ((k + z) * lattice) % side)
+        for i in range(repetitions)
+        for j in range(repetitions)
+        for k in range(repetitions)
+        for x, y, z in basis
+    ]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w") as handle:
+        handle.write("ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n")
+        handle.write(f"{len(points)}\nITEM: BOX BOUNDS pp pp pp\n")
+        for _ in range(3):
+            handle.write(f"0.0 {side:.12f}\n")
+        handle.write("ITEM: ATOMS id type x y z\n")
+        for index, (x, y, z) in enumerate(points, 1):
+            handle.write(f"{index} 1 {x:.12f} {y:.12f} {z:.12f}\n")
+
+
 class DdcArm:
     """findDDC on 1,000-molecule ideal ice Ic. One warm-up, one timed call."""
 
     def setup(self):
         frame = ROOT / "bbdir" / "ddc-regression" / "frames" / "ic-1000.lammpstrj"
         if not frame.is_file():
-            subprocess.run(
-                ["python3", "paper/tex/figures/ladder_frames.py",
-                 str(frame.parent), "5"],
-                cwd=ROOT, check=True)
+            _write_ideal_ic(frame, 5)
         self.cmd = CORE + [
             str(ROOT / "bbdir/tests/bench_ddc_ladder"),
             str(frame),

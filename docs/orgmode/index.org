@@ -181,12 +181,6 @@ framework.
 
       OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED, next to the tests that recompute them.
 
-   .. grid-item-card:: Paper reproductions
-      :link: paper/index
-      :link-type: doc
-
-      Versions, benchmark files, and rerun steps for seams-core 2.14.0.
-
    .. grid-item-card:: Videos
       :link: videos/index
       :link-type: doc
@@ -258,7 +252,6 @@ framework.
    howto/bindings
    howto/versions
    howto/benchmarks
-   howto/paper-tables
    howto/neighbour-lists
    howto/openmp-offload
    howto/classify-cli
@@ -337,7 +330,6 @@ framework.
    explanation/performance-h2h
    howto/literature-h2h
    howto/literature-reproduce
-   howto/reproduce-h2h
 
 .. toctree::
    :hidden:
@@ -364,10 +356,6 @@ framework.
    explanation/performance-overview
    explanation/binding-overhead
    explanation/performance-range
-   paper/index
-   paper/versions
-   paper/benchmarks
-   paper/reproduce
 
 .. toctree::
    :hidden:
@@ -389,10 +377,12 @@ doxyYoda HTML tree (inline source, treeview) is at
 
 * d-SEAMS 2.0 paper
 
-seams-core 2.14.0 records for the v2 engine paper are under
-[[file:paper/index.org][d-SEAMS 2.0 paper]]: the pins, the files in
-=benchmarks/paper-cells/=, =bench/=, and =data/=, and the Snakemake
-rules that write them.
+The d-SEAMS 2.0 paper, its benchmark campaign, the record tables and
+the reproduction rules are in a private paper repository. The
+benchmark records and figure data are the Hugging Face datasets
+=d-SEAMS/dseams2-benchmark-records= and =d-SEAMS/dseams2-paper-figure-data=.
+The performance pages here show tables rendered from those records
+(=docs/records/README.md= names the revision).
 
 * Related projects
 

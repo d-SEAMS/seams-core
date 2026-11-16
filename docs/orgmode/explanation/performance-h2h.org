@@ -15,14 +15,11 @@ rounding gap, PLUMED is a rational-switch gap, and CHILL+ matches a
 counted subset of the molecules. The generated note prints those three
 CSV tokens.
 
-The figure is drawn when the book is built. It is an SVG of median
+The figure is an SVG of median
 time against thread count, ice and liquid side by side.
 
-~docs/render_h2h.py~ writes the tables from the CSVs when the book is
-built. ~--check~ fails when a cell is missing from its CSV. The script
-also reads ~benchmarks/one-sitting-v3.csv~ when that file is in the
-tree, and adds a section for it. Until the file lands, the tables are
-the sittings already recorded.
+The tables are the frozen tables in =docs/records=, rendered from the
+benchmark records dataset (=docs/records/README.md= names the revision).
 
 #+begin_export rst
 .. figure:: sitting-large-threads.svg

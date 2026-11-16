@@ -33,7 +33,7 @@ namespace {
 struct Args {
   std::string cmd;
   std::string dump;
-  std::string outDir = "paper/tex/figures/data/science";
+  std::string outDir = "science-out";
   double ps = 10.0;
   double bin = 1.0;
   int threads = 0;

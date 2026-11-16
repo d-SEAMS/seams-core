@@ -232,11 +232,16 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - q12 is the Cartesian solid harmonic, eight bonds at a time. The value matches the associated-Legendre form.
 - q4 and q6 share one cutoff list. A multi-thread cutoff walk records each pair once. Seeded cages with identical neighbour rows search rings and cages once, and the k-nearest nomination uses the same thread count as the rest of the command.
 
+### Removed
+
+- The d-SEAMS 2.0 manuscript, its benchmark campaign, the record tables and logs under `benchmarks/`, and the paper reproduction pages leave this repository for the private paper repository; the records and figure data are the `d-SEAMS/dseams2-benchmark-records` and `d-SEAMS/dseams2-paper-figure-data` datasets. The performance pages show tables rendered once from those records (`docs/records`), and the asv harness and the timing scripts stay.
+
 ### Fixed
 
 - A LAMMPS dump that grows while it is read is kept. The language fronts follow the build Python and skip a library mismatch.
 - A LAMMPS dump whose `NUMBER OF ATOMS` line comes after `ITEM: ATOMS` no longer indexes past the id table, which was sized for the previous count. Found by `capi_read_fuzzer`.
 - A MOL2 molecule whose counts line is empty no longer crashes `seams_path_nframes`. The vendored chemfiles 0.10.4 indexed the first count of an empty line; the build now applies `cmake/patches/chemfiles-0.10.4-mol2.patch` and refetches chemfiles when the patch set changes. Found by `capi_read_fuzzer`.
+- A build with `-Dwith_tests=false`, including seams-core as a Meson subproject, registers no tests: the CLI, docs, C API, C ABI and engine plugin checks and their test programs follow `with_tests`, and the wrapped linkcell and minimage get the same `with_tests` and `with_examples`.
 - A cage ring is filled only when the cycle closes on a bond. A six-cycle that winds the periodic box is left unfilled, so the still is not a sheet the size of the cell.
 - A call that narrows the OpenMP team below the caller's width, such as `seams_prisms` on a few thousand molecules at eight threads, pinned the calling thread to one cpu for the rest of the process. Every OpenMP worker and Rayon thread created afterwards inherited that cpu, so on 21 frames of 4096 mW molecules `seams_rings_find` after `seams_prisms` took 0.590 s per frame at eight threads instead of 0.0182 s. The caller now keeps its mask; one thread is unchanged at 0.035 s.
 - A chemfiles LAMMPS dump keeps the reduced cell edge. The bound span was being padded by the tilt a second time, so genice sH reported 31.05 Å instead of 24.84 Å. OVITO FindRings is compared as a subset of the primitive-ring census: K2,3 has three chordless 4-rings and FindRings reports two.
@@ -310,6 +315,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   are unchanged.
 - `seams_status_string` reads its argument as an `int`, so a code outside `seams_status` returns "unknown status" without undefined behaviour in the C++ library; clang's UBSan enum check aborted on it.
 - `topo_bulk` calls `omp_get_thread_num` only when OpenMP is on.
+- `with_sphericart=auto` takes sphericart only from pkg-config or CMake. The library inside a pip wheel is used only with `-Dwith_sphericart=enabled`, and then `yds_dep` carries the `-rpath-link` a consumer of `libyodaLib` needs. The probe calls the constructor and `compute` the engine uses and links without `--allow-shlib-undefined`, and `sphericart_consumer` links a program against `libyodaLib` alone the same way.
 - q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.
 
 ## [2.13.0] - 2026-11-06

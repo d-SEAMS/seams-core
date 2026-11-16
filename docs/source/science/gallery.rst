@@ -2,9 +2,8 @@ Science figures
 ===============
 
 The four renders used by the science tutorials. Each caption is written
-from ``paper/tex/figures/data/science/figure-census.csv``. The sII cage
-counts are the same numbers as ``dsv@w@sII`` in
-``paper/tex/figures/data/macros.tex``.
+from ``docs/data/science/figure-census.csv``, the census the science
+tutorials check.
 
 .. figure:: figures/interface.png
    :alt: Interface slab. 352 hexagonal, 434 liquid, 49 interfacial, 3 clathrate, 25 interfacial clathrate, and 1 cubic.

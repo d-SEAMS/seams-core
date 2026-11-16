@@ -15,8 +15,8 @@ The classifier, polyhedral template matching, and IRA rows are
 the ratio of medians. ~ratio_lo~ and ~ratio_hi~ are the interval
 stored in that file. ~source_commit~ is the commit column.
 
-~docs/render_performance_range.py~ writes the tables. ~--check~
-fails when a number on this page is not a token in one of the files.
+The tables are rendered from those files in the benchmark records
+dataset (=docs/records/README.md= names the revision).
 
 #+begin_export rst
 .. include:: performance-range-tables.rst

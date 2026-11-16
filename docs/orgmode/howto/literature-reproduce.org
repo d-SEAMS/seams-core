@@ -1,6 +1,12 @@
 #+TITLE: Reproduce the literature head-to-head
 #+OPTIONS: toc:nil num:nil
 
+A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
+benchmark campaign. The records and the Snakemake rules that write them
+are in the private paper repository and the Hugging Face dataset
+=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
+revision); the scripts under =scripts/= that time a run stay here.
+
 ~scripts/h2h_rc3_sitting.py~ writes ~benchmarks/rc3-sitting.csv~.
 One warm-up, then six timed calls. The median and the type-7
 interquartile range are the columns on

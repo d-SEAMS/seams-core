@@ -1,8 +1,14 @@
 #+TITLE: Performance overview
 #+OPTIONS: toc:nil num:nil
 
-Four sittings sit next to each other. ~docs/render_sitting.py~ writes
-every number on this page from the CSVs when the book is built. A
+A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
+benchmark campaign. The records and the Snakemake rules that write them
+are in the private paper repository and the Hugging Face dataset
+=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
+revision); the scripts under =scripts/= that time a run stay here.
+
+Four sittings sit next to each other. Every number on this page is
+from the frozen tables in =docs/records=, rendered from the benchmark records dataset. A
 ratio is the threads=1 median divided by the threads=8 median. The
 script marks a row flat when that ratio is between 0.95 and 1.05.
 A PLUMED row in the release-candidate table was measured on one
@@ -65,9 +71,8 @@ templates and with only the diamond templates), and
 rings-statistics-matter.
 ~scripts/plot_sitting_large_time.py~ draws time against threads on a
 log axis, one panel per operation. The PDF is not stored.
-~docs/render_sitting.py~ writes the tables from the CSV, and
-~meson test docs_sitting_large~ recomputes each median and checks that
-the agreement notes are present. ~docs_table_csv~ checks the copied
+The tables recompute each median from the samples and carry the
+agreement notes. ~docs_table_csv~ checks the copied
 numbers. The rings row is still the full cutoff call. The separate
 ~cad887b2~ table times that call with the cell-list builder.
 

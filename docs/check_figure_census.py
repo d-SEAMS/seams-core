@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""The science gallery and the paper use one census."""
+"""The science gallery and the science tutorials use one census."""
 
-import re
 import sys
 from pathlib import Path
 
@@ -44,20 +43,12 @@ def main():
                 return fail(f"science_tutorials.py is missing {token}")
     if "brine tend hexagonal 741 water 621 interfacial 89 cubic 0" not in tutorials:
         return fail("the brine tutorial census does not match the CSV")
-    macros = (ROOT / "paper" / "tex" / "figures" / "data" / "macros.tex").read_text()
-    for cage, count in (("512", 16), ("51264", 8)):
-        match = re.search(
-            rf"dsv@w@sII@cages@{cage}\\endcsname\{{\\num\{{(\d+)}}\}}",
-            macros,
-        )
-        if match is None or int(match.group(1)) != count:
-            return fail(f"paper sII {cage} is not {count}")
     if (ROOT / "docs" / "write_science_gallery.py").read_text() and __name__:
         from write_science_gallery import main as write_main
 
         if write_main(["--check"]) != 0:
             return 1
-    print(f"figure census matches the tutorials and the sII paper macros ({len(rows)} rows)")
+    print(f"figure census matches the tutorials ({len(rows)} rows)")
     return 0
 
 
