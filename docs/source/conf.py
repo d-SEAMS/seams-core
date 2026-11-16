@@ -17,34 +17,27 @@ _source = os.path.dirname(os.path.abspath(__file__))
 _docs = os.path.dirname(_source)
 
 
-def _write_sitting_tables():
-    """Fill the performance tables from the CSV before Sphinx reads pages."""
-    import importlib.util
+def _stage_records():
+    """Copy the frozen benchmark tables and figures into the Sphinx tree.
 
-    script = os.path.join(_docs, "render_sitting.py")
-    spec = importlib.util.spec_from_file_location("render_sitting", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main([]) != 0:
-        raise SystemExit("rc3 sitting tables do not match the CSV")
+    The d-SEAMS 2.0 benchmark records moved to a dataset; docs/records
+    holds the tables rendered from them. docs/records/README.md names
+    the dataset and revision.
+    """
+    import shutil
 
-
-_write_sitting_tables()
-
-
-def _write_h2h():
-    """Fill the performance head-to-head from the benchmark CSVs."""
-    import importlib.util
-
-    script = os.path.join(_docs, "render_h2h.py")
-    spec = importlib.util.spec_from_file_location("render_h2h", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main(["--check"]) != 0:
-        raise SystemExit("performance head-to-head does not match the CSVs")
+    records = os.path.join(_docs, "records")
+    for folder, _dirs, files in os.walk(records):
+        rel = os.path.relpath(folder, records)
+        for name in files:
+            if name == "README.md":
+                continue
+            dest = os.path.join(_source, rel, name)
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
+            shutil.copyfile(os.path.join(folder, name), dest)
 
 
-_write_h2h()
+_stage_records()
 
 
 def _write_comparisons():
@@ -60,21 +53,6 @@ def _write_comparisons():
 
 
 _write_comparisons()
-
-
-def _write_performance_range():
-    """Fill the 4096 to 110592 neighbour and ring tables from the CSVs."""
-    import importlib.util
-
-    script = os.path.join(_docs, "render_performance_range.py")
-    spec = importlib.util.spec_from_file_location("render_performance_range", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main(["--check"]) != 0:
-        raise SystemExit("performance range does not match the CSVs")
-
-
-_write_performance_range()
 
 
 def _write_science_gallery():
@@ -195,36 +173,6 @@ def _write_video_players():
 
 
 _write_video_players()
-
-
-def _write_pool_v5():
-    """Fill the pool-audit v5 tables before Sphinx reads the benchmarks page."""
-    import importlib.util
-
-    script = os.path.join(_docs, "render_pool_v5.py")
-    spec = importlib.util.spec_from_file_location("render_pool_v5", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main([]) != 0:
-        raise SystemExit("pool-audit v5 tables do not match the log")
-
-
-_write_pool_v5()
-
-
-def _write_binding_overhead():
-    """Draw the binding-overhead figure before Sphinx reads the page."""
-    import importlib.util
-
-    script = os.path.join(_docs, "render_binding_overhead.py")
-    spec = importlib.util.spec_from_file_location("render_binding_overhead", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main([]) != 0:
-        raise SystemExit("binding overhead page failed")
-
-
-_write_binding_overhead()
 
 
 def _write_release_notes():

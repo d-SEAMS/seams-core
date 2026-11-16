@@ -975,48 +975,6 @@ if get_option('with_cli') and get_option('with_tests')
     args: [meson.project_source_root() / 'docs' / 'check_api_coverage.py'],
     suite: 'docs',
     timeout: 60)
-  test(
-    'docs_sitting',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_trace_threads',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-trace'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_pool_audit',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_pool_v5',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_pool_v5.py', '--check'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_cutoff_rings',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-cutoff'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_sitting_large',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-large'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_h2h_threads',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-h2h'],
-    suite: 'docs',
-    timeout: 60)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   tutorial_env.set('CC', _snippet_cc)
@@ -1073,20 +1031,6 @@ if get_option('with_cli') and get_option('with_tests')
   if get_option('paper_full')
     paper_env.set('SEAMS_PAPER_FULL', '1')
   endif
-  test(
-    'docs_paper_reproduce',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'check_paper_reproduce.py',
-      meson.project_source_root(),
-      seams_exe.full_path(),
-      meson.project_build_root() / 'src',
-      meson.project_build_root(),
-    ],
-    env: tutorial_env,
-    depends: [seams_exe],
-    suite: 'docs',
-    timeout: 900)
   foreach _paper : ['interface', 'cages', 'rings', 'brine', 'nucleation']
     test(
       'docs_paper_' + _paper + '_full',
@@ -1105,38 +1049,11 @@ if get_option('with_cli') and get_option('with_tests')
       timeout: 900)
   endforeach
   test(
-    'docs_paper_reproduce_full',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'check_paper_reproduce.py',
-      '--full',
-      meson.project_source_root(),
-      seams_exe.full_path(),
-      meson.project_build_root() / 'src',
-      meson.project_build_root(),
-    ],
-    env: paper_env,
-    depends: [seams_exe],
-    suite: 'slow',
-    timeout: 900)
-  test(
     'docs_towncrier',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_towncrier.py'],
     suite: 'docs',
     timeout: 120)
-  test(
-    'docs_h2h_tables',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_h2h.py', '--check'],
-    suite: 'docs',
-    timeout: 60)
-  test(
-    'docs_performance_range',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'render_performance_range.py', '--check'],
-    suite: 'docs',
-    timeout: 60)
   test(
     'docs_frame_tutorials',
     python3,
