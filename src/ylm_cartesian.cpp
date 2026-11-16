@@ -6,12 +6,15 @@
 #include <cpu_features.hpp>
 #include <ylm_batch.hpp>
 
+#include <atomic>
 #include <cstddef>
 
 namespace seams {
 namespace ylm {
 
 namespace {
+
+std::atomic<bool> gAvx512Allowed{true};
 
 void ylmBatchScalar(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
@@ -24,6 +27,20 @@ void ylmBatchScalar(int orderL, const double *dx, const double *dy,
 }
 
 } // namespace
+
+bool avx512Kernels() {
+#if defined(SEAMS_YLM_AVX512)
+  const seams::cpu::Features &cpu = seams::cpu::features();
+  return cpu.avx512f && cpu.avx512dq && cpu.fma &&
+         gAvx512Allowed.load(std::memory_order_relaxed);
+#else
+  return false;
+#endif
+}
+
+void allowAvx512Kernels(bool allow) {
+  gAvx512Allowed.store(allow, std::memory_order_relaxed);
+}
 
 #if defined(SEAMS_YLM_AVX512)
 void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
@@ -41,7 +58,7 @@ bool ylmLocalQl(int orderL, const double *dx, const double *dy, const double *dz
     return false;
   }
 #if defined(SEAMS_YLM_AVX512)
-  if (seams::cpu::features().avx512dq) {
+  if (avx512Kernels()) {
     return ylmLocalQlAvx(orderL, dx, dy, dz, nbonds, nUsed, prefactor, ql);
   }
 #endif
@@ -83,7 +100,7 @@ void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz,
     return;
   }
 #if defined(SEAMS_YLM_AVX512)
-  if (seams::cpu::features().avx512dq) {
+  if (avx512Kernels()) {
     ylmBatchAvx512(orderL, dx, dy, dz, n, re, im);
     return;
   }

@@ -8,7 +8,6 @@
 // the Open Source Initiative.
 //-----------------------------------------------------------------------------------
 
-#include <cpu_features.hpp>
 #include <chrono>
 
 #include <bop.hpp>
@@ -277,7 +276,7 @@ void runPass1Host12(const NeighbourCSR &g, int begin, int end,
                     std::vector<double> &qlm) {
   constexpr int nComp = 25;
 #ifdef SEAMS_YLM_AVX512
-  const bool wide = seams::cpu::features().avx512f;
+  const bool wide = seams::ylm::avx512Kernels();
 #endif
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
@@ -1355,7 +1354,7 @@ SteinhardtQl cutoffSolid(
     }
   }
 #if defined(SEAMS_YLM_AVX512)
-  const bool simd8 = quad && seams::cpu::features().avx512dq;
+  const bool simd8 = quad && seams::ylm::avx512Kernels();
 #else
   const bool simd8 = false;
   (void)quad;
@@ -1571,7 +1570,7 @@ SteinhardtQl cutoffSolid(
       }
     }
 #if defined(SEAMS_YLM_AVX512)
-    if (rows && !seams::cpu::features().avx512f) {
+    if (rows && !seams::ylm::avx512Kernels()) {
       rows = false;
     }
     if (rows) {

@@ -6,6 +6,17 @@
 namespace seams {
 namespace ylm {
 
+// ylm_cartesian_avx512.cpp is compiled with -mavx512f -mavx512dq -mfma, so
+// any instruction in it may need all three. True when the build has that
+// file, the CPU reports all three and allowAvx512Kernels has not turned
+// it off. ylm12AddBonds, ylmAdd8 and ylmSumRows4 are called only after
+// this returns true; ylmBatch and ylmLocalQl ask it themselves.
+bool avx512Kernels();
+
+// false keeps every caller on the scalar path, which gives the same
+// values; true leaves the choice to the CPU again. For tests.
+void allowAvx512Kernels(bool allow);
+
 // Add up to eight l = 12 bonds into one interleaved q_lm row (real, imag).
 // n is 1..8. Shorter tails do not contribute. Same values as the scalar
 // solid harmonic.

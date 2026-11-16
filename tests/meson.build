@@ -77,6 +77,7 @@ test_sources = {
   'ddc_copies': 'test_ddc_copies.cpp',
   'hc_template': 'test_hc_template.cpp',
   'avx_gemm': 'test_avx_gemm.cpp',
+  'ylm_fallback': 'test_ylm_fallback.cpp',
 }
 
 if readcon_dep.found()
