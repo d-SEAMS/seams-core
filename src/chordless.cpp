@@ -134,11 +134,11 @@ void fromSource(const Search &g, Scratch &scr, int s) {
   const std::vector<int> &shortHalves = p == q ? scr.longHalves : scr.shortHalves;
   const int nShort = static_cast<int>(shortHalves.size()) / p;
   for (int i = 0; i < nShort; ++i) {
-    const int *hp = shortHalves.data() + static_cast<std::size_t>(i) * p;
+    const int *hp = shortHalves.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(p);
     const int c = hp[p - 1];
     for (int j = scr.head[static_cast<std::size_t>(c)]; j >= 0;
          j = scr.link[static_cast<std::size_t>(j)]) {
-      const int *hq = scr.longHalves.data() + static_cast<std::size_t>(j) * q;
+      const int *hq = scr.longHalves.data() + static_cast<std::size_t>(j) * static_cast<std::size_t>(q);
       if (hp[0] >= hq[0]) {
         continue;
       }
