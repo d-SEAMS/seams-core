@@ -30,6 +30,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   attach through optional adapters.
   -Dplumed=enabled now errors. Live analysis does not use PLUMED.
 - A top-level Comparisons page links the OVITO FindRings, freud, SQQ, and PLUMED head-to-head results already recorded in this book.
+- Add `seams_rings_chordless`, which lists every chordless cycle of one size (3 to 12) in a neighbour graph as sorted canonical rows, the same for any thread count, with per-atom counts. It meets two induced half-paths in the middle, and the six-ring census in `bench/ring_ice.c` now calls it: 3.1 ms instead of 20.6 ms on 4096 mW molecules, one thread.
 - Add a pinned head-to-head of cutoff neighbours, q4, q6, diamond, rings and local symmetry against mdapy, pyscal3, vesin, IRA and SQQ.
 - Add optional IRA, SOFI and spglib symmetry reports for ice shells, hydrate cages and rings.
 - Add pinned head-to-heads of 5^12 cages against ClavisCage TRACE and of q4, q6 and coordination against PLUMED.
@@ -245,6 +246,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - A cage ring is filled only when the cycle closes on a bond. A six-cycle that winds the periodic box is left unfilled, so the still is not a sheet the size of the cell.
 - A call that narrows the OpenMP team below the caller's width, such as `seams_prisms` on a few thousand molecules at eight threads, pinned the calling thread to one cpu for the rest of the process. Every OpenMP worker and Rayon thread created afterwards inherited that cpu, so on 21 frames of 4096 mW molecules `seams_rings_find` after `seams_prisms` took 0.590 s per frame at eight threads instead of 0.0182 s. The caller now keeps its mask; one thread is unchanged at 0.035 s.
 - A chemfiles LAMMPS dump keeps the reduced cell edge. The bound span was being padded by the tilt a second time, so genice sH reported 31.05 Å instead of 24.84 Å. OVITO FindRings is compared as a subset of the primitive-ring census: K2,3 has three chordless 4-rings and FindRings reports two.
+- A ring with no edge throws.
+  An empty species pattern throws.
+  A vertex at the minimum integer throws.
+  The sphere test checks tiling before the closed test.
 - A sanitized build does not preload AddressSanitizer into Julia, R, or `nm`. Those hosts abort in their own startup. The runtime is mapped when they load `libseams`.
 - A short LAMMPS frame no longer returns from the reading rank before `MPI_Gatherv`. Both ranks gather, and the frames that did read still print. On the 11-frame dump cut short, frames 1-10 stay whole and frame 11 keeps its header and two atoms.
 - A tilted cell's cage edge window uses the lattice minimum image, so a GenIce sH dump keeps every 5^12, 4^3 5^6 6^3 and 5^12 6^8 cage. The head-to-head against ClavisCage and cycless is benchmarks/cage-h2h-v8.txt.
