@@ -44,8 +44,8 @@ jobs:
           echo "LIBGL_ALWAYS_SOFTWARE=1" >> "$GITHUB_ENV"
       - name: Install pydseamslib
         run: |
-          pixi run -e default python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
-          pixi run -e docs python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
+          pixi run -e default sh scripts/install_pydseamslib.sh
+          pixi run -e docs sh scripts/install_pydseamslib.sh
       - name: Publish the book
         env:
           DOCS_CI: "1"
@@ -140,9 +140,9 @@ jobs:
         run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
       # The Python snippets import dseams and pydseams from pydseamslib,
-      # built from d-SEAMS/PydSEAMSlib at the tag that matches this release.
+      # built from d-SEAMS/PydSEAMSlib against this checkout of the engine.
       - name: Install pydseamslib
-        run: pixi run -e default python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
+        run: pixi run -e default sh scripts/install_pydseamslib.sh
 
       - name: Every documented snippet
         run: |
@@ -162,7 +162,7 @@ jobs:
         run: pixi run -e docs mkrst
 
       - name: Install pydseamslib for the doctest
-        run: pixi run -e docs python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
+        run: pixi run -e docs sh scripts/install_pydseamslib.sh
 
       - name: Python doctest
         run: |
