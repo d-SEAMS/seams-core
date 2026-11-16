@@ -46,7 +46,7 @@ From =nix/package.nix= (~pname = "seams"~, ~version = "2.14.0"~):
 The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
 =input=, =templates=, and the wraps =readcon-core.wrap=,
 =readcon-db.wrap=, =linkcell.wrap=, =minimage.wrap=, =vesin.wrap=,
-=robin-map.wrap=, =subprojects/packagefiles=.
+=subprojects/packagefiles=, and =bindings= (the C ABI in =bindings/cxx=).
 
 * What stays off
 

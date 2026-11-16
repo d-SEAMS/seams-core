@@ -33,7 +33,6 @@ stdenv.mkDerivation (finalAttrs: {
       ../subprojects/linkcell.wrap
       ../subprojects/minimage.wrap
       ../subprojects/vesin.wrap
-      ../subprojects/robin-map.wrap
       ../subprojects/packagefiles
     ];
   };
