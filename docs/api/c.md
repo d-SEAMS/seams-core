@@ -266,7 +266,7 @@ capi seams_abi 1
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version 134656
+capi seams_version 134657
 ```
 
 ### seams_version_major
@@ -290,7 +290,7 @@ capi seams_version_minor 14
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_patch 0
+capi seams_version_patch 1
 ```
 
 ### seams_version_string
@@ -298,7 +298,7 @@ capi seams_version_patch 0
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_string 2.14.0
+capi seams_version_string 2.14.1
 ```
 
 ### seams_status_string

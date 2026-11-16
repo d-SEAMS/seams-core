@@ -51,4 +51,19 @@ if [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
   fi
   exec clang -fsanitize=thread "$@"
 fi
+# A snippet that links the sanitized libseams has to be instrumented
+# too. Otherwise the address runtime faults while binding C++ symbols.
+if [ -n "${ASAN_TEST_PRELOAD:-}" ] && [ -f "$ASAN_TEST_PRELOAD" ]; then
+  link=1
+  needs=0
+  for arg in "$@"; do
+    case $arg in
+      -c|-E|-M|-MM) link=0 ;;
+      -lseams|-lseams_lang|-llammps) needs=1 ;;
+    esac
+  done
+  if [ "$link" = 1 ] && [ "$needs" = 1 ]; then
+    exec "$real" -fsanitize=address,undefined "$@"
+  fi
+fi
 exec "$real" "$@"
