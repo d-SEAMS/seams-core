@@ -14,7 +14,7 @@ Picture: 1920x1080, 30 fps, crf 16, one vhs scene file per shot so the lead-in c
 
 ## Scene 1. Hydrogen bonds and coordination
 
-Lead-in: 0.30 s. Segment length: 13.17 s.
+Lead-in: 0.30 s. Segment length: 24.42 s.
 
 Tests: `docs_video_tapes`, `docs_migrate`.
 
@@ -35,11 +35,11 @@ cutoff 4.5
 
 Draft narration:
 
-The migration check uses input/traj/exampleTraj.lammpstrj. seams hbonds prints nop 250 hbonds 460. seams cn for the 1,2 pair at cutoff 4.5 prints cn 9.144. docs_migrate requires both lines.
+The migration check uses input/traj/exampleTraj.lammpstrj. The v1.0.1 global for hydrogen bonds is getHbondNetwork, and seams hbonds prints nop 250 hbonds 460. Coordination is new in 2.x: v1.0.1 has no global for it, and calcCN first shipped in yodaStruct 2.4.1. seams cn for the 1,2 pair at cutoff 4.5 prints cn 9.144. docs_migrate requires both lines.
 
 ## Scene 2. Fingerprint, pairs, domains
 
-Lead-in: 0.35 s. Segment length: 20.30 s.
+Lead-in: 0.35 s. Segment length: 25.30 s.
 
 Tests: `docs_video_tapes`, `docs_migrate`.
 
@@ -61,7 +61,7 @@ largest 750
 
 Draft narration:
 
-seams fingerprint prints classes 89. seams pairs prints count 0. seams domains on the polar subset prints largest 750. docs_migrate requires classes 89, count 0, and largest 750. The old name and the current command in the guide are the two sides of that check.
+Fingerprint, pairs, and domains are new in 2.x. v1.0.1 has no global for any of them. topologyFingerprint first shipped in yodaStruct 2.8.0, and contactPairs and domainStats in yodaStruct 2.7.0. seams fingerprint prints classes 89. seams pairs prints count 0. seams domains on the polar subset prints largest 750. docs_migrate requires classes 89, count 0, and largest 750.
 
 ## End card
 

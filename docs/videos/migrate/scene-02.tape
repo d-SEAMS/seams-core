@@ -5,7 +5,7 @@ Set Height 1080
 Set Framerate 30
 Set Padding 0
 # lead 0.35
-# duration 20.30
+# duration 25.30
 # test docs_video_tapes
 # test docs_migrate
 # expect classes 89
@@ -25,4 +25,4 @@ Sleep 1s
 Type 'seams domains input/traj/exampleTraj.lammpstrj --site 1=cationHead,2=anion --subset polar'
 Enter
 Sleep 1s
-Sleep 16950ms
+Sleep 21950ms
