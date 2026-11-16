@@ -260,6 +260,35 @@ std::vector<double> firstDifference(const std::vector<double> &series) {
   return out;
 }
 
+// std::sph_legendre: (-1)^m sqrt((2l+1)/(4 pi) (l-m)!/(l+m)!) P_l^m(cos
+// theta). libc++ does not ship the C++17 special functions, so there the
+// normalized three-term recurrence in l computes the same value.
+double sphLegendre(int l, int m, double theta) {
+#ifdef __cpp_lib_math_special_functions
+  return std::sph_legendre(static_cast<unsigned>(l), static_cast<unsigned>(m), theta);
+#else
+  const double x = std::cos(theta);
+  const double s = std::sin(theta);
+  double pmm = 0.28209479177387814; // 1 / sqrt(4 pi)
+  for (int k = 1; k <= m; ++k) {
+    pmm *= -std::sqrt((2.0 * k + 1.0) / (2.0 * k)) * s;
+  }
+  if (l == m) {
+    return pmm;
+  }
+  double pmm1 = x * std::sqrt(2.0 * m + 3.0) * pmm;
+  for (int ll = m + 2; ll <= l; ++ll) {
+    const double a = std::sqrt((4.0 * ll * ll - 1.0) / (static_cast<double>(ll) * ll - m * m));
+    const double b = std::sqrt((static_cast<double>(ll - 1) * (ll - 1) - m * m) /
+                               (4.0 * (ll - 1) * (ll - 1) - 1.0));
+    const double pll = a * (x * pmm1 - b * pmm);
+    pmm = pmm1;
+    pmm1 = pll;
+  }
+  return pmm1;
+#endif
+}
+
 } // namespace
 
 double stackFraction(int cubic, int hexagonal) {
@@ -466,7 +495,7 @@ q6DotScore(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
       const double theta = std::acos(std::clamp(dz / r, -1.0, 1.0));
       const double phi = std::atan2(dy, dx);
       for (int m = 0; m <= kL; ++m) {
-        const double y = std::sph_legendre(static_cast<unsigned>(kL), static_cast<unsigned>(m), theta);
+        const double y = sphLegendre(kL, m, theta);
         q[m] += std::complex<double>(y * std::cos(m * phi), y * std::sin(m * phi));
       }
     }
