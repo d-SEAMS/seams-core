@@ -1,5 +1,8 @@
 // Internal
 #include <franzblau.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
+#include <seams_input.hpp>
 
 // Standard
 #include <algorithm>
@@ -221,4 +224,46 @@ TEST_CASE("A hexagon through a vertex of degree 62 is one primitive ring", "[rin
   REQUIRE(primitive::ringNetwork(nList, 6, primitive::RingRows::Packed) == want);
   REQUIRE(primitive::ringNetwork(offsets, cols, 6) == want);
   REQUIRE(primitive::ringNetworkBalls(nList, 6) == want);
+}
+
+// The search skips odd rings only when a two-coloring of the graph
+// succeeds. The color buffer starts at -1, which a target with an
+// unsigned plain char (aarch64, or -funsigned-char) reads as 255: every
+// graph then looked bipartite and the sII host lost all its pentagons.
+TEST_CASE("The sII hydrate host keeps its five-membered rings", "[ring]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrjO("traj/genice_sII.lammpstrj", 1, cloud, 1);
+  REQUIRE(cloud.nop == 136);
+  const auto nList =
+      nneigh::neighbourListByIndex(cloud, nneigh::neighListO(3.5, cloud, 1));
+
+  std::vector<int> offsets{0};
+  std::vector<int> cols;
+  for (const auto &row : nList) {
+    cols.insert(cols.end(), row.begin() + 1, row.end());
+    offsets.push_back(static_cast<int>(cols.size()));
+  }
+
+  auto requireSizes = [](const char *search, const std::vector<std::vector<int>> &rings) {
+    INFO(search);
+    int five = 0;
+    int six = 0;
+    for (const auto &ring : rings) {
+      REQUIRE((ring.size() == 5 || ring.size() == 6));
+      (ring.size() == 5 ? five : six)++;
+    }
+    CHECK(five == 144);
+    CHECK(six == 16);
+  };
+
+  requireSizes("ringNetwork", primitive::ringNetwork(nList, 6));
+  requireSizes("ringNetwork Vectors",
+               primitive::ringNetwork(nList, 6, primitive::RingRows::Vectors));
+  requireSizes("ringNetwork Packed",
+               primitive::ringNetwork(nList, 6, primitive::RingRows::Packed));
+  requireSizes("ringNetwork CSR", primitive::ringNetwork(offsets, cols, 6));
+  requireSizes("ringNetworkBalls", primitive::ringNetworkBalls(nList, 6));
+
+  primitive::RingUpdater updater(6);
+  requireSizes("RingUpdater", updater.update(nList));
 }
