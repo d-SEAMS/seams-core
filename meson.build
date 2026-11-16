@@ -1985,7 +1985,8 @@ if get_option('with_tests')
       meson.project_build_root(),
       meson.project_source_root(),
     ],
-    env: {'CC': ' '.join(meson.get_compiler('c').cmd_array())},
+    env: {'CC': ' '.join(meson.get_compiler('c').cmd_array()),
+          'SEAMS_OPENMP_LINK': ' '.join(_snippet_omp)},
     depends: [seams_api_lib, ydslib],
     timeout: 600)
   test(

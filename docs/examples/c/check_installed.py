@@ -74,6 +74,8 @@ def main(argv):
     run_env["LD_LIBRARY_PATH"] = os.pathsep.join([str(libs[0].parent), env.get("LD_LIBRARY_PATH", "")])
     search = [stage, build]
     cc = shlex.split(os.environ.get("CC", "cc"))
+    # The consumer link line the snippet tests use with this build.
+    link_line = shlex.split(os.environ.get("SEAMS_OPENMP_LINK", ""))
 
     pkg_config = help_mod.pkg_config_program()
     flags = subprocess.check_output([pkg_config, "--cflags", "--libs", "seams"], env=env, text=True).split()
@@ -81,7 +83,10 @@ def main(argv):
     binaries = []
     for family in FAMILIES:
         binary = work / ("pkg-" + family)
-        subprocess.check_call([*cc, *WARN, str(examples / (family + ".c")), "-o", str(binary), *flags], env=env)
+        subprocess.check_call(
+            [*cc, *WARN, str(examples / (family + ".c")), "-o", str(binary), *flags, *link_line],
+            env=env,
+        )
         binaries.append((family, binary))
     run_examples("pkg-config", binaries, run_env, source, search, help_mod)
 
@@ -94,6 +99,7 @@ def main(argv):
             "-DCMAKE_PREFIX_PATH=" + str(installed),
             "-Dseams_DIR=" + str(configs[0].parent),
             "-DCMAKE_BUILD_TYPE=Release",
+            "-DCMAKE_EXE_LINKER_FLAGS=" + " ".join(link_line),
         ],
         env=env,
     )
