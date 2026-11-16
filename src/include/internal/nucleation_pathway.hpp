@@ -133,6 +133,20 @@ struct GrowBasin {
 
 [[nodiscard]] GrowBasin growBasin(const std::vector<double> &series);
 
+//! Outcome of one replica. committed means the final size is still at or
+//! above that replica's own grow-basin barrier. truncated means the series
+//! ends on the cap 2N while that cap is also its maximum: the run was cut
+//! there and is not a committor sample. The barrier is never 2N itself.
+enum class CommittorFate { uncommitted, committed, truncated };
+
+struct CommittorCall {
+  CommittorFate fate = CommittorFate::uncommitted;
+  GrowBasin basin;
+  bool cutAtTwiceN = false;
+};
+
+[[nodiscard]] CommittorCall committorOf(const std::vector<double> &series, int molecules);
+
 //! First sample at which the series has covered half of its rise from
 //! the first sample to the maximum. A series that never rises has
 //! ok false. This is the operational marker used for induction on one

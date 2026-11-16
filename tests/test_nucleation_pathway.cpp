@@ -115,6 +115,30 @@ TEST_CASE("each label takes its grow basin from its own climb", "[nucleation]") 
   REQUIRE(core.barrier != extended.barrier);
 }
 
+TEST_CASE("a committor is the grow basin and is not cut at 2N", "[nucleation]") {
+  const nucleation::CommittorCall grown = nucleation::committorOf({2, 2, 8, 40}, 100);
+  REQUIRE(grown.fate == nucleation::CommittorFate::committed);
+  REQUIRE_FALSE(grown.cutAtTwiceN);
+  REQUIRE_THAT(grown.basin.barrier, Catch::Matchers::WithinAbs(2, 1e-12));
+  REQUIRE(grown.basin.barrier != 200);
+
+  const nucleation::CommittorCall past =
+      nucleation::committorOf({10, 20, 100, 250, 400}, 100);
+  REQUIRE(past.fate == nucleation::CommittorFate::committed);
+  REQUIRE_FALSE(past.cutAtTwiceN);
+  REQUIRE(past.basin.barrier < 200);
+  REQUIRE(past.basin.barrier != 200);
+
+  const nucleation::CommittorCall cut =
+      nucleation::committorOf({10, 40, 80, 200}, 100);
+  REQUIRE(cut.fate == nucleation::CommittorFate::truncated);
+  REQUIRE(cut.cutAtTwiceN);
+
+  const nucleation::CommittorCall flat = nucleation::committorOf({4, 4, 4}, 100);
+  REQUIRE(flat.fate == nucleation::CommittorFate::uncommitted);
+  REQUIRE_FALSE(flat.basin.occupied);
+}
+
 TEST_CASE("ring fraction leads ice by the constructed lag", "[nucleation]") {
   // The ring differences are the ice differences shifted three samples earlier.
   std::vector<double> rings = {0.20, 0.20, 0.25, 0.45, 0.55, 0.57, 0.57,

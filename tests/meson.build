@@ -473,6 +473,13 @@ executable('bench_hop_stride', 'bench_hop_stride.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('recall_construction', 'recall_construction.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_lammps_io', 'bench_lammps_io.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

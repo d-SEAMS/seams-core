@@ -335,6 +335,32 @@ GrowBasin growBasin(const std::vector<double> &series) {
   return out;
 }
 
+CommittorCall committorOf(const std::vector<double> &series, int molecules) {
+  CommittorCall out;
+  out.basin = growBasin(series);
+  if (series.empty() || molecules <= 0) {
+    return out;
+  }
+  const double cap = 2.0 * static_cast<double>(molecules);
+  double maximum = series[0];
+  for (double value : series) {
+    if (value > maximum) {
+      maximum = value;
+    }
+  }
+  // A series that stops on 2N, and never goes past it, was cut by the
+  // old wall. It is not evidence that the nucleus committed.
+  out.cutAtTwiceN = series.back() == cap && maximum == cap;
+  if (out.cutAtTwiceN) {
+    out.fate = CommittorFate::truncated;
+    return out;
+  }
+  if (out.basin.occupied && series.back() >= out.basin.barrier) {
+    out.fate = CommittorFate::committed;
+  }
+  return out;
+}
+
 Lead ringLead(const std::vector<double> &ringFraction,
               const std::vector<double> &iceFraction) {
   Lead out;
