@@ -162,6 +162,12 @@ endforeach
 # not survive the install, let alone reach another machine. yodaLib is
 # shared and carries its own dependencies, so the consumer needs the
 # link line and nothing more.
+#
+# meson-uninstalled/ gets those strings unchanged, and there ${libdir} is
+# a lib directory under the build root that nothing is built into. The
+# -L goes through a variable that the uninstalled file sets to this build
+# directory. It drops subdirs too, and takes its -I from the
+# include-only dependency instead.
 pkgconfig = import('pkgconfig')
 pkgconfig.generate(
   name: 'seams-core',
@@ -170,8 +176,14 @@ pkgconfig.generate(
   version: meson.project_version(),
   subdirs: ['seams'],
   requires: ['eigen3 >= 3.4.0'],
-  libraries: ['-L${libdir}', '-lyodaLib'],
-  extra_cflags: _public_defines)
+  libraries: [declare_dependency(include_directories: include_directories('include/internal')),
+              '-L${yodalib_libdir}', '-lyodaLib'],
+  extra_cflags: _public_defines,
+  variables: ['yodalib_libdir=${libdir}'],
+  uninstalled_variables: [
+    'yodalib_libdir=${prefix}/' + import('fs').relative_to(meson.current_build_dir(),
+                                                            meson.global_build_root()),
+  ])
 
 # Stable C ABI. Language bindings and engine plugins link this library
 # and include seams.h. They do not include the C++ headers.

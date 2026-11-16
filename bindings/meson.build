@@ -48,14 +48,17 @@ seams_lang_dep = declare_dependency(
 
 install_headers('cxx/seams_lang.h', subdir: 'seams')
 
+# Naming the target gives meson-uninstalled/seams-lang-uninstalled.pc the
+# build-tree -L and -I. seams_lang is a shared_library(), so meson does
+# not walk its dependencies into Libs.private.
 pkg = import('pkgconfig')
 pkg.generate(
+  seams_lang,
   name: 'seams-lang',
   filebase: 'seams-lang',
   description: 'C ABI for the d-SEAMS language fronts',
   version: meson.project_version(),
   subdirs: ['seams'],
-  libraries: ['-L${libdir}', '-lseams_lang'],
   requires: ['seams-core'],
 )
 
