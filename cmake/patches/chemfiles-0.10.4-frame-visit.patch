@@ -15,7 +15,7 @@ index 1111111..2222222 100644
  #include "chemfiles/FormatMetadata.hpp"
  #include "chemfiles/files/MemoryBuffer.hpp"
  
-@@ -277,3 +279,52 @@ optional<span<const char>> Trajectory::memory_buffer() const {
+@@ -277,3 +279,54 @@ optional<span<const char>> Trajectory::memory_buffer() const {
  
      return span<const char>(buffer_->data(), buffer_->data() + buffer_->size());
  }
