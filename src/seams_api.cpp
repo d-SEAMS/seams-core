@@ -1832,7 +1832,18 @@ seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, i
   try {
     const auto fair = use_threads();
     int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
+    // A positive type already names the atoms. Copying the cloud also
+    // copies the atom-id map, which is the bulk of a q6 call at 1e5
+    // molecules and does not change the harmonics.
+    Cloud owned;
+    const Cloud *view = &sys->cloud;
+    if (type > 0) {
+      typ = type;
+    } else {
+      owned = unified_copy(sys->cloud, type, typ);
+      view = &owned;
+    }
+    const Cloud &work = *view;
     chill::SteinhardtQl result;
     if (graph == SEAMS_GRAPH_CUTOFF) {
       result = chill::steinhardtQlCutoff(work, cutoff, order_l, typ, qlbar != nullptr);
