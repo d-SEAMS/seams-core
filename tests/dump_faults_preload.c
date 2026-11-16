@@ -60,8 +60,20 @@ static ssize_t seams_pread(int fd, void *buf, size_t count, off_t offset) {
   return pread(fd, buf, count, offset);
 }
 
+/* __interpose also rebinds libSystem's and libc++'s own fstat calls, which
+ * glibc makes internally and LD_PRELOAD never sees. Only calls from the
+ * reader count: libyodaLib, or the driver when libyodaLib is static. */
+static int from_reader(const void *caller) {
+  Dl_info info;
+  if (dladdr(caller, &info) == 0 || info.dli_fname == NULL) {
+    return 0;
+  }
+  return strstr(info.dli_fname, "yodaLib") != NULL ||
+         strstr(info.dli_fname, "dump_fault_driver") != NULL;
+}
+
 static int seams_fstat(int fd, struct stat *buf) {
-  if (fstat_fault() != 0) {
+  if (from_reader(__builtin_return_address(0)) && fstat_fault() != 0) {
     return -1;
   }
   return fstat(fd, buf);
