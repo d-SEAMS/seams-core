@@ -1,4 +1,0 @@
-GPU_REQUIRED
-Host-device ladder n=1000 to 32000 was not run.
-nvidia-smi is absent and /dev/nvidia* is absent.
-No device times were invented.

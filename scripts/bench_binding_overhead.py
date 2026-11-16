@@ -671,8 +671,6 @@ def main(argv=None):
     if args.reps < 8:
         raise SystemExit("reps must be at least 8")
     campaign(args.reps, args.out, args.log)
-    render = ROOT / "docs" / "render_binding_overhead.py"
-    subprocess.run([sys.executable, str(render)], cwd=ROOT, check=True)
     return 0
 
 

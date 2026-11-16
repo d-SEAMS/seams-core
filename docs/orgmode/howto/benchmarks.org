@@ -1,6 +1,12 @@
 #+TITLE: Benchmarks
 #+OPTIONS: toc:nil num:nil
 
+A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
+benchmark campaign. The records and the Snakemake rules that write them
+are in the private paper repository and the Hugging Face dataset
+=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
+revision); the scripts under =scripts/= that time a run stay here.
+
 Timings belong on the docs site of the commit that produced them.
 The ice table below is one such session: eight cores, one thread per
 core, cpus 0–7. It names no machine.

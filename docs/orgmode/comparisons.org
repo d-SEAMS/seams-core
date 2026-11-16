@@ -54,8 +54,8 @@ literature numbers, are in the
 SQQ ring times are a row of the
 [[file:explanation/performance-h2h.org][performance tables]] and of
 [[file:howto/literature-h2h.org][the literature codes]]. The benchmark
-CSVs under ~benchmarks/~ are the source of those cells.
-~docs/render_h2h.py --check~ fails when a cell is missing from its CSV.
+records in the =d-SEAMS/dseams2-benchmark-records= dataset are the
+source of those cells; =docs/records/README.md= names the revision.
 The vendored SQQ census and the chordless and whole-tool ratios are on
 [[file:explanation/sqq.org][the SQQ page]].
 

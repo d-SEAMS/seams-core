@@ -14,4 +14,4 @@ freud and OVITO are separate programs, timed in the same session on the same oxy
 
 At 8 threads the seams neighbour, q6, and CHILL calls take longer than the one-thread calls, on every language at once. freud and OVITO move the other way and get faster. The bindings are following the library, not adding a cost of their own.
 
-The Sphinx page is docs/source/explanation/binding-overhead.rst. The figure is drawn when the docs are built.
+The Sphinx page is docs/source/explanation/binding-overhead.rst. The figure is rendered from the benchmark records dataset.

@@ -119,9 +119,9 @@ seams --features
 #+end_src
 
 Engine hooks follow ~-Dwith_lammps=auto~, ~-Dwith_gromacs=auto~,
-~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~. The LAMMPS compute and
-the PLUMED module install as in [[file:../paper/reproduce.org][Reproduce]],
-which also pins the release of the d-SEAMS 2.0 paper.
+~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~. The engine pages
+([[file:engine-lammps.org][LAMMPS]], [[file:engine-plumed.org][PLUMED]]) build
+the LAMMPS compute and the PLUMED module.
 
 * Language bindings
 

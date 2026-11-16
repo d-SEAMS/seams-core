@@ -671,10 +671,6 @@ test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),
   timeout: 30)
-test('cpc_logs', find_program('python3'),
-  args: [files('test_cpc_logs.py')],
-  workdir: meson.project_source_root(),
-  timeout: 60)
 test('h2h_harness', find_program('python3'),
   args: [files('test_h2h_harness.py'),
          meson.project_build_root() / 'tests' / 'bench_h2h_cpc'],
