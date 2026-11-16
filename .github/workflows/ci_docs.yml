@@ -35,13 +35,31 @@ jobs:
         run: |
           pixi run -e default setup
           pixi run -e default ninja -j2 -C bbdir
-      - name: Xvfb
+      - name: Xvfb and software Vulkan
         run: |
-          sudo apt-get update && sudo apt-get install -y xvfb
+          sudo apt-get update && sudo apt-get install -y xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
           Xvfb :99 -screen 0 1280x1024x24 >/dev/null 2>&1 &
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           echo "QT_QPA_PLATFORM=xcb" >> "$GITHUB_ENV"
           echo "LIBGL_ALWAYS_SOFTWARE=1" >> "$GITHUB_ENV"
+          echo "GALLIUM_DRIVER=llvmpipe" >> "$GITHUB_ENV"
+          echo "VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
+          echo "VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
+      - name: Cache the brine frames and the renderer wheels
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            docs/.cache/brine-front-230K
+            ~/.cache/pip
+          key: docs-xvfb-ovito-${{ runner.os }}-brine-4828e33ecf419c70643b2d466bfa4f283b4138dc
+      - name: Headless molecule renderer and OpenMM
+        run: pixi run -e default python -m pip install ovito pillow openmm
+      # The science and walkthrough pages read docs/source/science/figures
+      # and docs/source/walkthrough/figures. These tests draw them. conf.py
+      # writes blank stand-ins for any that are missing, and the book
+      # would publish those.
+      - name: Science and engine figures
+        run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
       - name: Install pydseamslib
         run: |
           pixi run -e default sh scripts/install_pydseamslib.sh
