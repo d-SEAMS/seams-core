@@ -398,8 +398,10 @@ has less than 1 ns of such frames. Shots start at the last crossing
 of 50, 75, 100, 150, 200 and 300 before the onset, and commit at
 max(2n, 300).
 
-Build the census in release. A debug build gives the same series and
-is several times slower. `LMP` is a launcher command line and may
+Build the census in release. On seed 20261111 of shard 0 the debug
+and release builds wrote the same frame table, byte for byte, and the
+debug census of the 1001 frames took 330 s against 185 s on four
+threads. `LMP` is a launcher command line and may
 include `mpirun`. `LMP_NP` adds `mpirun -np LMP_NP` in front of a bare
 `LMP`. Use `nproc --all`: the drivers set `OMP_NUM_THREADS=1`, and
 plain `nproc` then returns 1. Snakemake 9 reads every word after

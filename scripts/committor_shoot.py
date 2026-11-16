@@ -41,8 +41,8 @@ The 64-molecule deck is a fixture for the driver, not this table.
 One VM runs one shard. Shard k of K is the seeds whose index modulo K
 equals k, with k starting at 0. LMP is a launcher command line and
 LMP_NP adds mpirun (scripts/lmp_launch.py). Build the census in
-release; a debug build is several times slower and gives the same
-series. Snakemake 9 reads every word after --config as a value, so
+release; a debug build writes the same frames about twice as
+slowly. Snakemake 9 reads every word after --config as a value, so
 the target comes first:
 
     meson setup bbdir --buildtype=release && ninja -C bbdir nucleation-pathway
