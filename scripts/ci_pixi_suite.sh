@@ -44,10 +44,6 @@ optional = {
     "docs_paper_nucleation_full",
     "docs_paper_reproduce_full",
     "docs_render_molecules",
-    # libabigail's abidiff is in the abi pixi environment only. The C API
-    # workflow's capi-abi job runs both there.
-    "capi_abi_2_13",
-    "capi_abi_2_13_selftest",
 }
 
 def count(name):

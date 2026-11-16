@@ -127,8 +127,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
-          # cycles is the bpy interpreter for the molecule stills.
-          environments: default cycles
+          # cycles is the bpy interpreter for the molecule stills. abi
+          # carries libabigail, whose abidiff the capi_abi_2_13 checks need.
+          environments: default abi cycles
           cache-key: pixi-suite-
       # The locked OVITO wheel matches the locked PySide6 and Qt; a newer
       # wheel needs a newer Qt and import ovito fails.
@@ -139,5 +140,13 @@ jobs:
         run: pixi run sh scripts/install_pydseamslib.sh
       - name: Install EGL for OVITO
         run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      # abi is solved apart from default and resolves other LAMMPS, PLUMED
+      # and compiler builds, so the suite stays in default and takes only
+      # abidiff from abi.
       - name: Build and run the full suite
-        run: pixi run bash scripts/ci_pixi_suite.sh
+        run: |
+          set -euo pipefail
+          abidiff=$(pixi run -e abi bash -c 'command -v abidiff')
+          test -x "$abidiff"
+          printf "[binaries]\nabidiff = '%s'\n" "$abidiff" > "$RUNNER_TEMP/abidiff.ini"
+          SEAMS_MESON_ARGS="--native-file $RUNNER_TEMP/abidiff.ini" pixi run bash scripts/ci_pixi_suite.sh
