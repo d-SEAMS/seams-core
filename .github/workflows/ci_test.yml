@@ -44,6 +44,9 @@ jobs:
       - name: Install EGL for OVITO
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
       - run: pixi run setup
       - run: pixi run build
       - run: pixi run test
@@ -67,6 +70,9 @@ jobs:
           cache-key: pixi-unsigned-char-
       - name: Install EGL for OVITO
         run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
       - name: Configure with an unsigned plain char
         run: |
           pixi run bash -c 'CFLAGS="$CFLAGS -funsigned-char" CXXFLAGS="$CXXFLAGS -funsigned-char" meson setup build-uchar -Dwith_tests=true'
