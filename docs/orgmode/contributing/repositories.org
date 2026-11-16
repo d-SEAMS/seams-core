@@ -74,8 +74,25 @@ pixi run setup
 pixi run build
 #+end_src
 
-~bbdir/src~ holds ~libseams.so~, ~bbdir/bindings~ holds ~libseams_lang.so~,
-and =include/= and =bindings/cxx/= hold the headers. For each binding:
+~bbdir/src~ holds ~libseams.so~, ~libyodaLib.so~ and the generated
+=seams_version.h=, ~bbdir/bindings~ holds ~libseams_lang.so~, and
+=include/= and =bindings/cxx/= hold the other headers.
+~bbdir/meson-uninstalled~ has a pkg-config file for each of ~seams~,
+~seams-core~ and ~seams-lang~ that names those directories. With
+~PKG_CONFIG_PATH~ there, pkg-config resolves the three packages to the
+build tree and the source headers:
+
+#+begin_src bash
+export PKG_CONFIG_PATH=$PWD/bbdir/meson-uninstalled
+cc consumer.c $(pkg-config --cflags --libs seams-lang) \
+  -Wl,-rpath,$PWD/bbdir/bindings -Wl,-rpath,$PWD/bbdir/src
+#+end_src
+
+The libraries find each other and the patched chemfiles in
+~bbdir/chemfiles-prefix/lib~ through their own rpath. The consumer only
+needs a runpath, or ~LD_LIBRARY_PATH~, for the directories pkg-config
+names with ~-L~. ~meson test seams_lang_pkgconfig~ builds a consumer this
+way and against an install. For each binding:
 
 - PydSEAMSlib and yodaStruct: replace =subprojects/seams-core= with a
   symlink to the checkout (Meson uses an existing subproject directory
@@ -88,8 +105,10 @@ and =include/= and =bindings/cxx/= hold the headers. For each binding:
   ~julia --project=. dev/develop_jll.jl~, then ~Pkg.test~.
 - dseams-rs: set ~SEAMS_LIB_DIR~ to =bbdir/src= and run ~cargo test~.
 - dseams-fortran: set ~FPM_LDFLAGS~ to
-  ~-L$SEAMS_LIB_DIR -Wl,-rpath,$SEAMS_LIB_DIR~ with ~SEAMS_LIB_DIR~ at
-  =bbdir/src=, then run ~fpm test~.
+  ~-L$SC/src -L$SC/bindings -Wl,-rpath,$SC/src -Wl,-rpath,$SC/bindings~
+  with ~SC~ at =bbdir=, then run ~fpm test~; its ~lang_tasks~ test links
+  ~libseams_lang~. Its Meson build finds both libraries with
+  ~PKG_CONFIG_PATH=$SC/meson-uninstalled~.
 
 When the binding needs a seams-core change, land it here first, then move
 the binding's pin to the commit that carries it.
