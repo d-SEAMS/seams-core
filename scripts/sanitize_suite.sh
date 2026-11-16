@@ -19,14 +19,25 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 build=$root/build-san
+# A wrapper on PATH answers find_program and shutil.which even when the host
+# lacks the program, so a test that skips an absent tool would run the
+# wrapper and fail. Only wrappers whose program exists are linked in.
+wrap=$build/asan-path
+mkdir -p "$wrap"
+rm -f "$wrap"/*
+for tool in "$root"/scripts/asan-path/*; do
+  if command -v "${tool##*/}" >/dev/null 2>&1; then
+    ln -s "$tool" "$wrap/${tool##*/}"
+  fi
+done
 # Resolved before meson setup so find_program('cargo') records the wrapper.
-export PATH="$root/scripts/asan-path:$PATH"
+export PATH="$wrap:$PATH"
 reconfigure=
 if [ "${1:-}" = "--reconfigure" ]; then
   reconfigure=--reconfigure
   shift
 fi
-if [ -d "$build" ] && [ -z "$reconfigure" ]; then
+if [ -f "$build/meson-private/coredata.dat" ] && [ -z "$reconfigure" ]; then
   reconfigure=--reconfigure
 fi
 meson setup "$build" $reconfigure \
