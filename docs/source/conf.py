@@ -429,7 +429,13 @@ def _include_orphan_pages():
         with open(index, "w", encoding="utf-8") as handle:
             handle.write(text)
     included = _toctree_docnames()
-    skip_prefixes = ("science/figures/", "xml/", "doxygen-include/")
+    skip_prefixes = (
+        "science/figures/",
+        "xml/",
+        "doxygen-include/",
+        "videos/players.rst",
+        "videos/embeds/",
+    )
     orphans = []
     for dirpath, dirnames, filenames in os.walk(_source):
         dirnames[:] = [name for name in dirnames if name not in {"_static", "_templates"}]
@@ -598,7 +604,9 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
     breathe_default_project = "seams"
 
 templates_path = ["_templates"]
-exclude_patterns = ["science/figures/**"]
+# players.rst and embeds/*.rst are untitled fragments that pages pull in
+# with ``.. include::``. They are not documents.
+exclude_patterns = ["science/figures/**", "videos/players.rst", "videos/embeds/**"]
 # A warning is a failed book. Sphinx stops instead of publishing it.
 warningiserror = True
 
