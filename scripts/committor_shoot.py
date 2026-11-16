@@ -11,6 +11,19 @@ that has done neither after 1 ns is unresolved.
 p_B(n) is the committed fraction among resolved shots that started at
 size n. n* is the size where a logistic fit of p_B crosses one half.
 The 64-molecule deck is a fixture for the driver, not this table.
+
+One VM runs one shard of the climbs. Shard k of K is the seeds whose
+index modulo K equals k, with k starting at 0:
+
+    export LMP=/path/to/lmp
+    export SEAMS_LIB=/path/to/lib
+    snakemake -j1 --config seeds=20261111-20261130 shard=0/20 \\
+        data/committor-shards/climb-0-of-20.csv
+
+The matching shot shard is data/committor-shards/shot-0-of-20.csv with
+the same --config. science_committor_merge reads every shot shard and
+writes p_B(n) and n*. Until those shards exist, the paper tables stay
+the single line 'pending: 4096-molecule p_B(n)'.
 """
 
 from __future__ import annotations
@@ -18,6 +31,7 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+import os
 import random
 import subprocess
 import sys
@@ -206,6 +220,42 @@ def type7_unit(values: list[float], p: float) -> float:
     return ordered[lo] * (1.0 - weight) + ordered[hi] * weight
 
 
+def parse_seed_list(text: str) -> list[int]:
+    seeds: list[int] = []
+    for piece in text.split(","):
+        piece = piece.strip()
+        if not piece:
+            continue
+        if "-" in piece:
+            lo, hi = piece.split("-", 1)
+            seeds.extend(range(int(lo), int(hi) + 1))
+        else:
+            seeds.append(int(piece))
+    if len(seeds) != len(set(seeds)):
+        raise ValueError(f"repeated seed in {text}")
+    return seeds
+
+
+def parse_shard(text: str) -> tuple[int, int]:
+    if text.count("/") != 1:
+        raise ValueError(f"shard must be k/K, not {text}")
+    k_text, n_text = text.split("/", 1)
+    k, n = int(k_text), int(n_text)
+    if n < 1 or k < 0 or k >= n:
+        raise ValueError(f"shard {text} is outside 0..{n - 1}")
+    return k, n
+
+
+def take_shard(items: list, shard: str) -> list:
+    k, n = parse_shard(shard)
+    return [item for index, item in enumerate(items) if index % n == k]
+
+
+def shard_tag(shard: str) -> str:
+    k, n = parse_shard(shard)
+    return f"{k}-of-{n}"
+
+
 def eta_hours(steps_per_s: float) -> dict[str, float]:
     if steps_per_s <= 0.0:
         raise ValueError("steps/s must be positive")
@@ -236,6 +286,63 @@ def write_rate(path: Path, steps: int, seconds: float, commit: str) -> None:
             4096, steps, f"{seconds:.4f}", f"{rate:.3f}",
             f"{hours['one_climb_h']:.3f}", f"{hours['twenty_climbs_h']:.3f}",
             f"{hours['shooting_h']:.3f}", commit,
+        ])
+
+
+PENDING = "pending: 4096-molecule p_B(n)\n"
+
+
+def write_pending(table: Path, summary: Path) -> None:
+    table.write_text(PENDING)
+    summary.write_text(PENDING)
+
+
+def read_shot_shard(path: Path) -> list[tuple[float, str]]:
+    shots = []
+    for line in path.read_text().splitlines():
+        if not line or line.startswith("#") or line.startswith("seed,"):
+            continue
+        parts = line.split(",")
+        shots.append((float(parts[1]), parts[3]))
+    return shots
+
+
+def merge_shot_dir(directory: Path) -> list[tuple[float, str]]:
+    shots: list[tuple[float, str]] = []
+    for path in sorted(directory.glob("shot-*-of-*.csv")):
+        shots.extend(read_shot_shard(path))
+    return shots
+
+
+def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], commit: str,
+                 command: str) -> None:
+    if not shots:
+        write_pending(table, summary)
+        return
+    note = f"# commit {commit}\n# command {command}\n"
+    points = p_of_n(shots)
+    n_star, lo, hi = bootstrap_nstar(shots)
+    unresolved = sum(fate == "unresolved" for _n, fate in shots)
+    resolved = sum(fate != "unresolved" for _n, fate in shots)
+    table.parent.mkdir(parents=True, exist_ok=True)
+    with table.open("w", newline="") as handle:
+        handle.write(note)
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["shoot_n", "p_B", "committed", "resolved", "commit"])
+        for n_shoot, p, committed, n_resolved in points:
+            writer.writerow([
+                f"{n_shoot:.0f}",
+                "" if p != p else f"{p:.6f}",
+                committed,
+                n_resolved,
+                commit,
+            ])
+    with summary.open("w", newline="") as handle:
+        handle.write(note)
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["n_star", "n_star_lo", "n_star_hi", "n_resolved", "n_unresolved", "commit"])
+        writer.writerow([
+            f"{n_star:.3f}", f"{lo:.3f}", f"{hi:.3f}", resolved, unresolved, commit,
         ])
 
 
@@ -273,6 +380,44 @@ def self_test() -> None:
     hours = eta_hours(160.0)
     if not (1.5 < hours["one_climb_h"] < 2.0 and hours["shooting_h"] > hours["twenty_climbs_h"]):
         raise SystemExit(f"eta {hours}")
+    seeds = parse_seed_list("20261111-20261130")
+    if len(seeds) != 20:
+        raise SystemExit("the published seed list is not 20 long")
+    parts = [take_shard(seeds, f"{k}/20") for k in range(20)]
+    if any(len(part) != 1 for part in parts):
+        raise SystemExit("a 20-way shard is not one seed")
+    flat = [seed for part in parts for seed in part]
+    if sorted(flat) != seeds or len(set(flat)) != 20:
+        raise SystemExit("shards overlap or drop a seed")
+    if set(take_shard(seeds, "0/4")) & set(take_shard(seeds, "1/4")):
+        raise SystemExit("shard 0/4 meets shard 1/4")
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        folder = Path(tmp)
+        (folder / "shot-0-of-2.csv").write_text(
+            "seed,shoot_n,shot,fate\n20261111,20,0,uncommitted\n20261111,80,0,committed\n"
+        )
+        (folder / "shot-1-of-2.csv").write_text(
+            "seed,shoot_n,shot,fate\n20261112,20,0,uncommitted\n20261112,80,0,committed\n"
+        )
+        table = folder / "table.csv"
+        summary = folder / "summary.csv"
+        write_merged(table, summary, merge_shot_dir(folder), "abc", "$LMP -in input/nucleation/in.homogeneous")
+        text = summary.read_text()
+        if "$LMP" not in text or "n_star" not in text:
+            raise SystemExit("merge did not record n*")
+        if "/cvmfs" in text:
+            raise SystemExit("merge wrote a library path")
+    try:
+        parse_shard("5/4")
+    except ValueError:
+        pass
+    else:
+        raise SystemExit("shard 5/4 was accepted")
+    paper = ROOT / "data"
+    for name in ("committor-table.csv", "committor-summary.csv"):
+        if (paper / name).read_text() != PENDING:
+            raise SystemExit(f"{name} is not the pending header")
     print("self-test ok")
 
 
@@ -283,17 +428,65 @@ def head_commit() -> str:
     return done.stdout.strip()
 
 
+def write_climb_manifest(path: Path, seeds: str, shard: str, commit: str) -> None:
+    chosen = take_shard(parse_seed_list(seeds), shard)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    command = (
+        "$LMP -in input/nucleation/in.homogeneous -var n 16 "
+        f"--seeds {seeds} --shard {shard}"
+    )
+    lines = [f"# commit {commit}", f"# command {command}", f"# shard {shard}", "seed"]
+    lines.extend(str(seed) for seed in chosen)
+    path.write_text("\n".join(lines) + "\n")
+
+
 def main() -> None:
     if "--self-test" in sys.argv:
         self_test()
         return
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--quench-steps", type=int, required=True)
-    parser.add_argument("--quench-seconds", type=float, required=True)
+    parser.add_argument("--out", type=Path)
+    parser.add_argument("--quench-steps", type=int)
+    parser.add_argument("--quench-seconds", type=float)
+    parser.add_argument("--merge", type=Path)
+    parser.add_argument("--table", type=Path)
+    parser.add_argument("--summary", type=Path)
+    parser.add_argument("--print-shard", action="store_true")
+    parser.add_argument("--write-climb", type=Path)
+    parser.add_argument("--write-shot", type=Path)
+    parser.add_argument("--seeds", default="20261111-20261130")
+    parser.add_argument("--shard", default="0/1")
     parser.add_argument("--commit", default="")
     args = parser.parse_args()
-    write_rate(args.out, args.quench_steps, args.quench_seconds, args.commit or head_commit())
+    commit = args.commit or head_commit()
+    if args.print_shard:
+        chosen = take_shard(parse_seed_list(args.seeds), args.shard)
+        print(",".join(str(seed) for seed in chosen))
+        return
+    if args.write_climb is not None:
+        write_climb_manifest(args.write_climb, args.seeds, args.shard, commit)
+        return
+    if args.write_shot is not None:
+        lmp = os.environ.get("LMP", "")
+        lib = os.environ.get("SEAMS_LIB", "")
+        if not lmp:
+            raise SystemExit("LMP is unset")
+        if not lib:
+            raise SystemExit("SEAMS_LIB is unset")
+        raise SystemExit(
+            "shot shard waits on finished 4096 climbs; "
+            f"no fates are invented for shard {args.shard}"
+        )
+    if args.merge is not None:
+        if args.table is None or args.summary is None:
+            raise SystemExit("--merge needs --table and --summary")
+        shots = merge_shot_dir(args.merge) if args.merge.is_dir() else []
+        command = "$LMP -in input/nucleation/in.homogeneous -var n 16 --seeds 20261111-20261130"
+        write_merged(args.table, args.summary, shots, commit, command)
+        return
+    if args.out is None or args.quench_steps is None or args.quench_seconds is None:
+        raise SystemExit("need --out, --quench-steps and --quench-seconds")
+    write_rate(args.out, args.quench_steps, args.quench_seconds, commit)
     print(args.out.read_text())
 
 

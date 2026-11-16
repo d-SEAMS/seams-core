@@ -5,8 +5,8 @@ A replica that ends on 2N, and never passes it, was cut by the old wall.
 It is marked truncated and left out of the committed fraction. The
 barrier is the size at the foot of the climb, not 2N.
 
-The series live in data/committor-series.tsv. The table is
-data/committor-table.csv.
+data/committor-series.tsv is a hand-constructed fixture for tests.
+It is not simulation output and it is not the paper table.
 """
 
 from __future__ import annotations
@@ -55,8 +55,13 @@ def committor(series: list[float], molecules: int) -> dict[str, str]:
 def load_series(path: Path) -> list[tuple[str, int, list[float]]]:
     groups: dict[str, tuple[int, list[float]]] = {}
     with path.open() as handle:
-        header = handle.readline().rstrip("\n").split("\t")
-        idx = {name: i for i, name in enumerate(header)}
+        header = ""
+        for line in handle:
+            if not line.strip() or line.startswith("#"):
+                continue
+            header = line.rstrip("\n")
+            break
+        idx = {name: i for i, name in enumerate(header.split("\t"))}
         for line in handle:
             if not line.strip():
                 continue
@@ -93,7 +98,28 @@ def self_test() -> None:
     melted = committor([0, 1, 0], 64)
     if melted["fate"] != "uncommitted":
         raise SystemExit(f"melted {melted}")
+    fixture = ROOT / "data" / "committor-series.tsv"
+    lines = fixture.read_text().splitlines()
+    if lines[0] != "# synthetic test fixture: hand-constructed, not simulation output":
+        raise SystemExit("the fixture is not marked as hand-constructed")
+    rows = load_series(fixture)
+    by = {name: series for name, _n, series in rows}
+    if 80 not in by["r4"] or 110 not in by["r5"]:
+        raise SystemExit("the hand-constructed sizes were rewritten")
+    try:
+        main_refuse_fixture(fixture)
+    except SystemExit as exc:
+        if "synthetic" not in str(exc):
+            raise
+    else:
+        raise SystemExit("the fixture was accepted as paper input")
     print("self-test ok")
+
+
+def main_refuse_fixture(path: Path) -> None:
+    first = path.read_text().splitlines()[0]
+    if first.startswith("# synthetic test fixture"):
+        raise SystemExit("refusing to write the paper table from the synthetic fixture")
 
 
 def main() -> None:
@@ -106,6 +132,7 @@ def main() -> None:
     parser.add_argument("--commit", default="")
     args = parser.parse_args()
     commit = args.commit or head_commit()
+    main_refuse_fixture(args.series)
     rows = []
     used = 0
     committed = 0

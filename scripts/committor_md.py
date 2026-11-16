@@ -21,30 +21,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import committor_basin as basin
 
-BRINE_LMP = (
-    "/cvmfs/software.eessi.io/versions/2023.06/software/linux/x86_64/"
-    "intel/sapphirerapids/software/LAMMPS/"
-    "2Aug2023_update2-foss-2023a-kokkos/bin/lmp"
-)
-CENSUS_LIB = (
-    "/cvmfs/software.eessi.io/versions/2026.06/compat/linux/x86_64/lib64"
-)
 Z95 = 1.959963984540054
 SEEDS = list(range(20261111, 20261131))
 
 
 def find_lmp(explicit: str) -> str:
-    if explicit:
-        return explicit
-    env = os.environ.get("LAMMPS_BIN", "")
-    if env:
-        return env
-    found = shutil.which("lmp")
-    if found:
-        return found
-    if Path(BRINE_LMP).is_file():
-        return BRINE_LMP
-    raise SystemExit("lmp not found; the brine-lane binary is absent")
+    chosen = explicit or os.environ.get("LMP", "")
+    if not chosen:
+        raise SystemExit("LMP is unset")
+    if not Path(chosen).is_file() and shutil.which(chosen) is None:
+        raise SystemExit(f"LMP not found: {chosen}")
+    return chosen
 
 
 def wilson(successes: int, n: int, z: float = Z95) -> tuple[float, float]:
@@ -65,21 +52,11 @@ def lmp_env() -> dict[str, str]:
 
 
 def census_env(pathway: Path) -> dict[str, str]:
+    lib = os.environ.get("SEAMS_LIB", "")
+    if not lib:
+        raise SystemExit("SEAMS_LIB is unset")
     env = os.environ.copy()
-    origin = pathway.resolve().parent
-    libs = [
-        Path(CENSUS_LIB),
-        origin / "src",
-        origin / "chemfiles-prefix" / "lib",
-        origin / "subprojects" / "readcon-core",
-        origin / "subprojects" / "readcon-db",
-        Path("/lib/x86_64-linux-gnu"),
-    ]
-    parts = [str(path) for path in libs if path.is_dir()]
-    old = env.get("LD_LIBRARY_PATH", "")
-    if old:
-        parts.append(old)
-    env["LD_LIBRARY_PATH"] = ":".join(parts)
+    env["LD_LIBRARY_PATH"] = lib
     env["OMP_NUM_THREADS"] = "1"
     return env
 
@@ -249,6 +226,28 @@ def self_test() -> None:
     lo, hi = wilson(20, 20)
     if not (0.8 < lo < 1.0 and hi == 1.0):
         raise SystemExit(f"wilson one {lo} {hi}")
+    saved = os.environ.pop("LMP", None)
+    try:
+        find_lmp("")
+    except SystemExit as exc:
+        if "unset" not in str(exc):
+            raise
+    else:
+        raise SystemExit("an unset LMP was accepted")
+    finally:
+        if saved is not None:
+            os.environ["LMP"] = saved
+    saved_lib = os.environ.pop("SEAMS_LIB", None)
+    try:
+        census_env(ROOT / "bbdir" / "nucleation-pathway")
+    except SystemExit as exc:
+        if "unset" not in str(exc):
+            raise
+    else:
+        raise SystemExit("an unset SEAMS_LIB was accepted")
+    finally:
+        if saved_lib is not None:
+            os.environ["SEAMS_LIB"] = saved_lib
     deck = (ROOT / "input" / "nucleation" / "in.committor").read_text()
     body = deck.split("read_data", 1)[-1]
     if "2N" in body or "halt" in body:
@@ -342,7 +341,7 @@ def main() -> None:
     command = " ".join(
         [
             "python3 scripts/committor_md.py",
-            f"--lmp {lmp}",
+            "--lmp $LMP",
             f"--pathway {args.pathway}",
             f"--replicas {args.replicas}",
             f"--nrun {args.nrun}",
