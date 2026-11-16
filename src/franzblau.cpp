@@ -2864,7 +2864,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   // must not change which ring parities this one enumerates.
   bool skipOdd = false;
   if (!legacy) {
-    std::vector<char> color(static_cast<std::size_t>(nVertices), -1);
+    std::vector<std::int8_t> color(static_cast<std::size_t>(nVertices), -1);
     std::vector<int> queue;
     bool bipartite = true;
     for (int s = 0; bipartite && s < nVertices; s++) {
@@ -2875,14 +2875,14 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       queue.assign(1, s);
       for (std::size_t q = 0; bipartite && q < queue.size(); q++) {
         const int u = queue[q];
-        const char cu = color[static_cast<std::size_t>(u)];
+        const std::int8_t cu = color[static_cast<std::size_t>(u)];
         for (const int w : adjacency[static_cast<std::size_t>(u)]) {
           if (w < 0 || w >= nVertices) {
             continue;
           }
-          char &cw = color[static_cast<std::size_t>(w)];
+          std::int8_t &cw = color[static_cast<std::size_t>(w)];
           if (cw < 0) {
-            cw = static_cast<char>(1 - cu);
+            cw = static_cast<std::int8_t>(1 - cu);
             queue.push_back(w);
           } else if (cw == cu) {
             bipartite = false;
@@ -3798,7 +3798,7 @@ struct primitive::RingUpdater::Impl {
   // update reads it from the graph it is about to walk.
   template <typename Graph> static bool skipsOddRings(const Graph &adjacency) {
     const int nVertices = static_cast<int>(adjacency.size());
-    std::vector<char> color(static_cast<std::size_t>(std::max(nVertices, 0)), -1);
+    std::vector<std::int8_t> color(static_cast<std::size_t>(std::max(nVertices, 0)), -1);
     std::vector<int> queue;
     for (int s = 0; s < nVertices; s++) {
       if (color[static_cast<std::size_t>(s)] >= 0) {
@@ -3808,14 +3808,14 @@ struct primitive::RingUpdater::Impl {
       queue.assign(1, s);
       for (std::size_t q = 0; q < queue.size(); q++) {
         const int u = queue[q];
-        const char cu = color[static_cast<std::size_t>(u)];
+        const std::int8_t cu = color[static_cast<std::size_t>(u)];
         for (const int w : adjacency[static_cast<std::size_t>(u)]) {
           if (w < 0 || w >= nVertices) {
             continue;
           }
-          char &cw = color[static_cast<std::size_t>(w)];
+          std::int8_t &cw = color[static_cast<std::size_t>(w)];
           if (cw < 0) {
-            cw = static_cast<char>(1 - cu);
+            cw = static_cast<std::int8_t>(1 - cu);
             queue.push_back(w);
           } else if (cw == cu) {
             return false;
