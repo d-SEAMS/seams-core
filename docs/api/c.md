@@ -5312,6 +5312,11 @@ seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:
