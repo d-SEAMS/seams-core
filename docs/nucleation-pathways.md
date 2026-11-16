@@ -441,8 +441,13 @@ deck and launcher. The replay counts only if every thermo line equals
 the shot's log and its last frame gives the traced sizes. From the
 restart on, a continuation shares the state but not the roundoff of an
 uninterrupted run. `sizes=225,250,275` shoots only those sizes, into
-`shot-<k>-of-<K>.n225-250-275.csv`. The merge takes each shot from its
-table with the longest window.
+`shot-<k>-of-<K>.n225-250-275.csv`; `sizes=250` on its own VM writes
+`shot-<k>-of-<K>.n250.csv`, and `size_groups=225/250/275` reads one
+table per group into the report. A shot's velocity seed depends only on
+the climb seed, n and its index, so a size shot twice gives the same
+shot, and the merge and the report count it once, from its table with
+the longest window. Every table cites `source_tree`, the tree of the
+code that wrote it (`git rev-parse HEAD^{tree}`), not a commit.
 
 The extension continues each climb that has not nucleated by 10 ns,
 up to 40 ns, from its restart. A climb from before the restart was

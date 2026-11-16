@@ -480,7 +480,7 @@ def eta_hours(steps_per_s: float) -> dict[str, float]:
     return {"one_climb_h": one, "twenty_climbs_h": climbs, "shooting_h": shots}
 
 
-def write_rate(path: Path, steps: int, seconds: float, commit: str) -> None:
+def write_rate(path: Path, steps: int, seconds: float, tree: str) -> None:
     rate = steps / seconds
     hours = eta_hours(rate)
     command = (
@@ -490,17 +490,17 @@ def write_rate(path: Path, steps: int, seconds: float, commit: str) -> None:
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as handle:
-        handle.write(f"# commit {commit}\n")
+        handle.write(f"# source_tree {tree}\n")
         handle.write(f"# command {command}\n")
         writer = csv.writer(handle, lineterminator="\n")
         writer.writerow([
             "molecules", "quench_steps", "loop_s", "steps_per_s",
-            "eta_10ns_h", "eta_20climbs_h", "eta_shooting_h", "commit",
+            "eta_10ns_h", "eta_20climbs_h", "eta_shooting_h", "source_tree",
         ])
         writer.writerow([
             4096, steps, f"{seconds:.4f}", f"{rate:.3f}",
             f"{hours['one_climb_h']:.3f}", f"{hours['twenty_climbs_h']:.3f}",
-            f"{hours['shooting_h']:.3f}", commit,
+            f"{hours['shooting_h']:.3f}", tree,
         ])
 
 
@@ -628,12 +628,12 @@ def coverage_note(directory: Path | None) -> str:
     )
 
 
-def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], commit: str,
+def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], tree: str,
                  command: str, directory: Path | None = None) -> None:
     if not shots:
         write_pending(table, summary)
         return
-    note = f"# commit {commit}\n# command {command}\n" + coverage_note(directory)
+    note = f"# source_tree {tree}\n# command {command}\n" + coverage_note(directory)
     points = p_of_n(shots)
     usable = [(n, p) for n, p, _c, resolved in points if resolved > 0 and p == p]
     unresolved = sum(fate == "unresolved" for _n, fate in shots)
@@ -647,20 +647,21 @@ def write_merged(table: Path, summary: Path, shots: list[tuple[float, str]], com
     with table.open("w", newline="") as handle:
         handle.write(note)
         writer = csv.writer(handle, lineterminator="\n")
-        writer.writerow(["shoot_n", "p_B", "committed", "resolved", "commit"])
+        writer.writerow(["shoot_n", "p_B", "committed", "resolved", "source_tree"])
         for n_shoot, p, committed, n_resolved in points:
             writer.writerow([
                 f"{n_shoot:.0f}",
                 "" if p != p else f"{p:.6f}",
                 committed,
                 n_resolved,
-                commit,
+                tree,
             ])
     with summary.open("w", newline="") as handle:
         handle.write(note)
         writer = csv.writer(handle, lineterminator="\n")
-        writer.writerow(["n_star", "n_star_lo", "n_star_hi", "n_resolved", "n_unresolved", "commit"])
-        writer.writerow([star_s, lo_s, hi_s, resolved, unresolved, commit])
+        writer.writerow(["n_star", "n_star_lo", "n_star_hi", "n_resolved", "n_unresolved",
+                         "source_tree"])
+        writer.writerow([star_s, lo_s, hi_s, resolved, unresolved, tree])
 
 
 def self_test_rules() -> None:
@@ -715,11 +716,11 @@ def self_test_rules() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)
         old = folder / "climb-1-of-3.csv"
-        old.write_text("# commit x\n# nucleation no\nseed\n20261112\n")
+        old.write_text("# source_tree x\n# nucleation no\nseed\n20261112\n")
         if read_climb_outcomes(old)[20261112]["outcome"] != "no-nucleation":
             raise SystemExit("the old comment form was not read")
         new = folder / "climb-0-of-3.csv"
-        new.write_text("# commit x\n" + ",".join(CLIMB_FIELDS) + "\n"
+        new.write_text("# source_tree x\n" + ",".join(CLIMB_FIELDS) + "\n"
                        "20261111,no-nucleation,,160,9000,1069,349,"
                        "120,1000,300,10000,1001,1,\n")
         row = read_climb_outcomes(new)[20261111]
@@ -729,7 +730,7 @@ def self_test_rules() -> None:
             (folder / f"shot-{k}-of-3.csv").write_text("seed,shoot_n,shot,fate\n")
         note = coverage_note(folder)
         (folder / "climb-1-of-3.csv").write_text(
-            "# commit x\n" + ",".join(CLIMB_FIELDS) + "\n"
+            "# source_tree x\n" + ",".join(CLIMB_FIELDS) + "\n"
             '20261112,"not nucleated, extend",,311,30000,1779,845,'
             "311,1779,845,30000,3001,3,restart\n")
         if read_climb_outcomes(folder / "climb-1-of-3.csv")[20261112]["outcome"] != EXTEND:
@@ -931,24 +932,33 @@ def self_test_extension() -> None:
         raise SystemExit("a partial or report file was taken as a shot table")
     if parse_sizes("225,250,275") != (225, 250, 275) or parse_sizes("") != SHOOT_SIZES:
         raise SystemExit("sizes were not parsed")
+    tree = source_tree()
+    if note_tree(["# source_tree abc"]) != "abc" or note_tree([]) != "unknown":
+        raise SystemExit("the cited tree was not read")
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
+                          capture_output=True).stdout.strip()
+    if tree and note_tree([f"# commit {head}"]) != tree:
+        raise SystemExit("an older table's commit did not resolve to its tree")
+    if note_tree(["# commit 0000000000000000000000000000000000000000"]) != "unknown":
+        raise SystemExit("an unknown commit was cited")
     import tempfile
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp)
         head = "seed,shoot_n,shot,fate,t_end_ps,wall_s,t_hit_ps,start_core,replay_s\n"
         (folder / "shot-0-of-2.csv").write_text(
-            "# commit a\n# a shot runs to its first basin: ...; check every 10 ps; "
+            "# source_tree a\n# a shot runs to its first basin: ...; check every 10 ps; "
             "unresolved, with no fate, after 5000 ps\n" + head +
             "1,200,0,unresolved,5000,450,,267,\n1,200,1,uncommitted,40,4,40,267,\n"
             "1,300,0,committed,2530,230,2330,340,\n")
         (folder / "shot-0-of-2.w20000.csv").write_text(
-            "# commit b\n# window_ps 20000\n" + head +
+            "# source_tree b\n# window_ps 20000\n" + head +
             "1,200,0,committed,9000,1000,8800,267,400\n1,200,1,uncommitted,40,4,40,267,\n"
             "1,300,0,committed,2530,230,2330,340,\n")
         (folder / "shot-0-of-2.n250.w20000.csv").write_text(
-            "# commit c\n# window_ps 20000\n" + head +
+            "# source_tree c\n# window_ps 20000\n" + head +
             "1,250,0,unresolved,20000,2000,,297,\n1,250,1,committed,700,90,500,297,\n")
         (folder / "shot-1-of-2.csv").write_text(
-            "# commit d\n" + head + "2,200,0,uncommitted,30,3,30,201,\n")
+            "# source_tree d\n" + head + "2,200,0,uncommitted,30,3,30,201,\n")
         if table_window(folder / "shot-0-of-2.csv") != 5000.0 or \
                 table_window(folder / "shot-1-of-2.csv") != 0.0:
             raise SystemExit("table windows were not read")
@@ -984,11 +994,23 @@ def self_test_extension() -> None:
             raise SystemExit("n* was fitted from one fate")
 
 
-def head_commit() -> str:
+def source_tree(rev: str = "HEAD") -> str:
+    """The tree of rev. Data files cite the tree, never a commit hash, so
+    the same code gives the same citation however it is re-stamped."""
     done = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, capture_output=True, check=True
+        ["git", "rev-parse", f"{rev}^{{tree}}"], cwd=ROOT, text=True, capture_output=True,
     )
-    return done.stdout.strip()
+    return done.stdout.strip() if done.returncode == 0 else ""
+
+
+def note_tree(note: list[str]) -> str:
+    """The source tree a data file cites. An older file cites a commit;
+    its tree stands in when the commit is in this repository."""
+    tree = note_value(note, "source_tree")
+    if tree:
+        return tree
+    commit = note_value(note, "commit")
+    return (source_tree(commit) if commit else "") or "unknown"
 
 
 @dataclass(frozen=True)
@@ -1331,7 +1353,7 @@ def rule_note(plan: Plan) -> list[str]:
     ]
 
 
-def write_climb(path: Path, seeds: str, shard: str, frames_root: Path, commit: str,
+def write_climb(path: Path, seeds: str, shard: str, frames_root: Path, tree: str,
                 pathway: str | None = None, threads: int = 1, plan: Plan = PAPER) -> None:
     chosen = take_shard(parse_seed_list(seeds), shard)
     rows = []
@@ -1344,7 +1366,7 @@ def write_climb(path: Path, seeds: str, shard: str, frames_root: Path, commit: s
     )
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as handle:
-        handle.write(f"# commit {commit}\n# command {command}\n# shard {shard}\n")
+        handle.write(f"# source_tree {tree}\n# command {command}\n# shard {shard}\n")
         handle.write("\n".join(rule_note(plan)) + "\n")
         writer = csv.DictWriter(handle, fieldnames=CLIMB_FIELDS, lineterminator="\n")
         writer.writeheader()
@@ -1715,7 +1737,7 @@ def write_rows(path: Path, note: list[str], fields: list[str], rows: list[dict])
         writer.writerows(rows)
 
 
-def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: str,
+def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, tree: str,
                 lmp: list[str], pathway: str, threads: int = 1, plan: Plan = PAPER,
                 basins_out: Path | None = None, points_out: Path | None = None) -> None:
     """Shoot every nucleated climb of the shard. Rows go to a .partial file
@@ -1725,7 +1747,7 @@ def write_shots(out: Path, seeds: str, shard: str, frames_root: Path, commit: st
     points_out = points_out or sibling(out, "points")
     window_ps = plan.shot_steps * TIMESTEP_FS / 1000.0
     note = [
-        f"# commit {commit}",
+        f"# source_tree {tree}",
         f"# command python3 scripts/committor_shoot.py --write-shot {rel(out)} "
         f"--frames {rel(frames_root)} --seeds {seeds} --shard {shard}{sizes_flag(plan)} "
         f"--window-ps {fmt(window_ps)}",
@@ -1810,7 +1832,7 @@ def done_keys(partial: Path) -> set[tuple[str, str, str]]:
     return {(row["seed"], row["shoot_n"], row["shot"]) for row in read_shot_rows(partial)}
 
 
-def extend_shots(table: Path, out: Path, window_ps: float, frames_root: Path, commit: str,
+def extend_shots(table: Path, out: Path, window_ps: float, frames_root: Path, tree: str,
                  lmp: list[str], pathway: str, threads: int = 1, plan: Plan = PAPER) -> None:
     """Continue every unresolved shot of a shot table to window_ps or its
     first basin and write the whole table again. Resolved shots are
@@ -1825,10 +1847,10 @@ def extend_shots(table: Path, out: Path, window_ps: float, frames_root: Path, co
               for row in read_shot_rows(sibling(table, "points"))}
     replay_ok = note_value(source, "launcher") == launcher_line(lmp)[len("# launcher "):]
     note = [
-        f"# commit {commit}",
+        f"# source_tree {tree}",
         f"# command python3 scripts/committor_shoot.py --extend-shots {rel(table)} "
         f"--out {rel(out)} --frames {rel(frames_root)} --window-ps {fmt(window_ps)}",
-        f"# source {rel(table)} commit {note_value(source, 'commit')}",
+        f"# source {rel(table)} source_tree {note_tree(source)}",
         f"# shard {note_value(source, 'shard')}",
         *rule_note(plan),
         shot_note(plan),
@@ -1931,7 +1953,7 @@ def nstar_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     return out
 
 
-def write_pb(out: Path, tables: list[Path], commit: str, nstar_out: Path | None = None) -> None:
+def write_pb(out: Path, tables: list[Path], tree: str, nstar_out: Path | None = None) -> None:
     """p_commit with its Wilson interval per n, and n*, from shot tables
     of one shard. A shot in several tables is taken from the one with
     the longest window."""
@@ -1939,10 +1961,10 @@ def write_pb(out: Path, tables: list[Path], commit: str, nstar_out: Path | None 
     rows = union_rows(tables)
     windows = sorted({fmt(table_window(path)) for path in tables})
     note = [
-        f"# commit {commit}",
+        f"# source_tree {tree}",
         f"# command python3 scripts/committor_shoot.py --pb {rel(out)} --tables "
         + " ".join(rel(path) for path in tables),
-        *[f"# source {rel(path)} commit {note_value(read_note(path), 'commit')}"
+        *[f"# source {rel(path)} source_tree {note_tree(read_note(path))}"
           for path in tables],
         f"# window_ps {' '.join(windows)}",
         f"# p_commit is committed over resolved shots; unresolved shots have no fate; "
@@ -1996,16 +2018,16 @@ def main() -> None:
     parser.add_argument("--threads", type=int, default=1, help="census threads")
     parser.add_argument("--seeds", default="20261111-20261130")
     parser.add_argument("--shard", default="0/1")
-    parser.add_argument("--commit", default="")
+    parser.add_argument("--source-tree", default="", help="tree to cite; HEAD^{tree}")
     args = parser.parse_args()
-    commit = args.commit or head_commit()
+    tree = args.source_tree or source_tree()
     if args.print_shard:
         chosen = take_shard(parse_seed_list(args.seeds), args.shard)
         print(",".join(str(seed) for seed in chosen))
         return
     plan = replace(PAPER, sizes=parse_sizes(args.sizes), shot_steps=step_of(args.window_ps))
     if args.pb is not None:
-        write_pb(args.pb, args.tables, commit)
+        write_pb(args.pb, args.tables, tree)
         print(args.pb.read_text())
         return
     if (args.write_climb is not None or args.write_shot is not None or args.extend_climb
@@ -2013,7 +2035,7 @@ def main() -> None:
         if args.frames is None:
             raise SystemExit("--frames is the climb directory, the regenerate.py --dest")
     if args.write_climb is not None:
-        write_climb(args.write_climb, args.seeds, args.shard, args.frames, commit,
+        write_climb(args.write_climb, args.seeds, args.shard, args.frames, tree,
                     pathway_path(args.pathway), args.threads)
         print(args.write_climb.read_text())
         return
@@ -2027,20 +2049,20 @@ def main() -> None:
             result = extend_seed(seed, seed_dir(args.frames, seed), lmp, pathway, args.threads)
             lines.append(f"seed {seed} {result}")
             print(lines[-1], flush=True)
-        write_climb(args.climb, args.seeds, args.shard, args.frames, commit, pathway,
+        write_climb(args.climb, args.seeds, args.shard, args.frames, tree, pathway,
                     args.threads)
         args.extend_climb.parent.mkdir(parents=True, exist_ok=True)
-        args.extend_climb.write_text(f"# commit {commit}\n" + "\n".join(lines) + "\n")
+        args.extend_climb.write_text(f"# source_tree {tree}\n" + "\n".join(lines) + "\n")
         return
     if args.write_shot is not None:
         lmp = lmp_launch.launcher()
-        write_shots(args.write_shot, args.seeds, args.shard, args.frames, commit, lmp,
+        write_shots(args.write_shot, args.seeds, args.shard, args.frames, tree, lmp,
                     pathway_path(args.pathway), args.threads, plan)
         return
     if args.extend_shots is not None:
         if args.out is None:
             raise SystemExit("--extend-shots needs --out")
-        extend_shots(args.extend_shots, args.out, args.window_ps, args.frames, commit,
+        extend_shots(args.extend_shots, args.out, args.window_ps, args.frames, tree,
                      lmp_launch.launcher(), pathway_path(args.pathway), args.threads, plan)
         return
     if args.merge is not None:
@@ -2048,11 +2070,11 @@ def main() -> None:
             raise SystemExit("--merge needs --table and --summary")
         shots = merge_shot_dir(args.merge) if args.merge.is_dir() else []
         command = "$LMP -in input/nucleation/in.homogeneous -var n 16 --seeds 20261111-20261130"
-        write_merged(args.table, args.summary, shots, commit, command, args.merge)
+        write_merged(args.table, args.summary, shots, tree, command, args.merge)
         return
     if args.out is None or args.quench_steps is None or args.quench_seconds is None:
         raise SystemExit("need --out, --quench-steps and --quench-seconds")
-    write_rate(args.out, args.quench_steps, args.quench_seconds, commit)
+    write_rate(args.out, args.quench_steps, args.quench_seconds, tree)
     print(args.out.read_text())
 
 

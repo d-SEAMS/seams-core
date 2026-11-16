@@ -263,7 +263,8 @@ def test_shard_end_to_end(climb, tools, tmp_path):
     wide = tmp_path / "shot-0-of-1.w60.csv"
     cs.extend_shots(out, wide, 60.0, climb, "test", lmp, pathway, 1, plan)
     assert cs.table_window(wide) == 60.0
-    assert "# source shot-0-of-1.csv commit test" in wide.read_text()
+    assert "# source shot-0-of-1.csv source_tree test" in wide.read_text()
+    assert "# source_tree test" in wide.read_text() and "# commit" not in wide.read_text()
     longer = cs.read_shot_rows(wide)
     assert [s["shot"] for s in longer] == ["0", "1"]
     for before, after in zip(shots, longer):
