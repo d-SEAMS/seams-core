@@ -54,7 +54,7 @@ pyscal3 rows.
 | dependency | constraint | option |
 |------------+------------+--------|
 | Eigen | >= 3.4.0 | required |
-| linkcell | >= 0.3.11 | =with_linkcell= auto |
+| linkcell | >= 0.4.0 | =with_linkcell= auto |
 | minimage | >= 0.1.4 | =with_minimage= auto |
 | readcon-core | >= 0.16.2 | =with_readcon= auto |
 | readcon-db | >= 0.1.8 | follows readcon |
@@ -73,18 +73,16 @@ pyscal3 rows.
 | Catch2 | v3.14.0 |
 | eigen | 3.4.0 |
 | gpulite | =1e90edb6d573289a7678c18d25b5dbf62f374abe= |
-| linkcell | =349e893c0c3984d98b1f43de8730a9f78e22380d= |
-| minimage | =ce6dfb175f32459de1ee06dfeb70e8a718f61876= |
-| nanobind | v2.14.0 |
-| readcon-core | =91181ef2699ef4c46fd7827cee1127776a32aa55= |
-| readcon-db | =0001a2c5a931bdde6bc8fe9b308f666dc28f4fe5= |
-| robin-map | v1.4.0 |
-| vesin | =56a790f90d5831904fcc1fd16ad28798a29788ba= |
+| linkcell | v0.4.0 |
+| minimage | v0.1.4 |
+| readcon-core | v0.16.2 |
+| readcon-db | v0.1.8 |
+| vesin | v0.5.7 |
 
 * Pixi environment
 
 =pixi.toml= pins eigen ~3.4.0.*~, Python ~3.12.*~, compilers
-~>=1.9.0,<2~, Catch2 ~>=3.6.0,<4~, nanobind ~>=2.14~,
+~>=1.9.0,<2~, Catch2 ~>=3.6.0,<4~,
 Highway ~>=1.3.0~, chemfiles ~>=0.10~, and Meson ~>=1.3.0~.
 
 * Other repositories

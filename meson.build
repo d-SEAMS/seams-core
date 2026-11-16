@@ -337,7 +337,7 @@ _linkcell_opts = []
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 endif
-linkcell_dep = dependency('linkcell', version: '>=0.3.11', required: get_option('with_linkcell'),
+linkcell_dep = dependency('linkcell', version: '>=0.4.0', required: get_option('with_linkcell'),
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
 if linkcell_dep.found()
