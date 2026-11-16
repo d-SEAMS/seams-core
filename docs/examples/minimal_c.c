@@ -71,6 +71,7 @@ int main(int argc, char **argv) {
   int labels[kMax], counts[9], hist[13];
   int n = 0, nnz = 0, n_offsets = 0, i;
   double lx, ly, lz;
+  size_t n_six = 0;
   const int *offsets = NULL;
   const int *cols = NULL;
   seams_system *sys;
@@ -100,6 +101,9 @@ int main(int argc, char **argv) {
   if (seams_neighbours_csr(nb, &offsets, &n_offsets, &cols, &nnz) != SEAMS_OK || nnz < 150) {
     return 1;
   }
+  if (seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0) != SEAMS_OK) {
+    return 1;
+  }
   seams_neighbours_destroy(nb);
   if (seams_q4q6(sys, 3.5, 0, q4, q6) != SEAMS_OK) {
     return 1;
@@ -125,7 +129,7 @@ int main(int argc, char **argv) {
   if (seams_rings_fraction(rings, 6, &fraction) != SEAMS_OK) {
     return 1;
   }
-  if (hist[5] != 48 || hist[6] != 54 || seams_rings_count(rings) != 102) {
+  if (hist[5] != 48 || hist[6] != 54 || seams_rings_count(rings) != 102 || n_six < 54) {
     return 1;
   }
   printf("%s atoms %d clathrate %d q6 %.3f rings %d\n", seams_version_string(), n,

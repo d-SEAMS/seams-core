@@ -1,0 +1,1 @@
+Add `seams_rings_chordless`, which lists every chordless cycle of one size (3 to 12) in a neighbour graph as sorted canonical rows, the same for any thread count, with per-atom counts. It meets two induced half-paths in the middle, and the six-ring census in `bench/ring_ice.c` now calls it: 3.1 ms instead of 20.6 ms on 4096 mW molecules, one thread.

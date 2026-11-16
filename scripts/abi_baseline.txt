@@ -50,6 +50,7 @@ T seams_q6bar
 T seams_ql
 T seams_rdf
 T seams_ring_symmetry_name
+T seams_rings_chordless
 T seams_rings_count
 T seams_rings_destroy
 T seams_rings_find

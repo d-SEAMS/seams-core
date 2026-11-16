@@ -1135,6 +1135,44 @@ SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index,
                                             int *atoms, size_t cap, size_t *n_out);
 
 /**
+ * @brief Chordless cycles of one size.
+ *
+ * A cycle is chordless when no edge of the graph joins two of its
+ * vertices that are not next to each other on the cycle. Every primitive
+ * ring is chordless; a chordless cycle need not be primitive. Each cycle
+ * is written once as size atom indices: it starts at its lowest index
+ * and runs towards the smaller of that atom's two cycle neighbours.
+ * Cycles are sorted lexicographically, so the list does not depend on
+ * the thread count.
+ * @param nb Graph from seams_neighbours_build().
+ * @param size Cycle length, from 3 through 12.
+ * @param rings Caller buffer of size times the cycle count ints, or
+ *        NULL to skip the list.
+ * @param rings_len Length of rings in ints. Ignored when rings is NULL.
+ * @param n_rings Receives the cycle count. Required when rings is not
+ *        NULL.
+ * @param per_atom Caller buffer of one int per atom, or NULL. Receives
+ *        the number of cycles through each atom.
+ * @param per_atom_len Length of per_atom. Ignored when per_atom is NULL.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE,
+ *         ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL. rings, n_rings and
+ *         per_atom may not all be NULL. A short rings buffer returns
+ *         ::SEAMS_ERR_RANGE after n_rings and per_atom are written.
+ * @par Ownership
+ * The caller owns rings and per_atom. Indices are positions in the frame.
+ * @par Thread safety
+ * Exclusive use of nb.
+ * @par Example
+ * @code
+ * size_t n_six = 0;
+ * seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0);
+ * @endcode
+ */
+SEAMS_API seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings,
+                                             size_t rings_len, size_t *n_rings,
+                                             int *per_atom, size_t per_atom_len);
+
+/**
  * @brief Fraction of atoms that sit on a ring.
  * @param rings Ring handle.
  * @param size Ring size to count. Zero counts atoms that sit on any ring.

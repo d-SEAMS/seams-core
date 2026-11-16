@@ -156,6 +156,7 @@ RAW = {
         ("seams_q6bar", "Write Lechner-Dellago q6-bar and the ice count above a cut.", "sys; cutoff; type; ice_cut; q6bar; q6bar_len; mean; median; n_ice", "cutoff in angstrom; q6-bar is dimensionless"),
         ("seams_ql", "Write local q_l and, on request, its neighbour average.", "sys; cutoff; type; order_l; graph; ql; ql_len; qlbar; qlbar_len", "cutoff in angstrom; q_l is dimensionless"),
         ("seams_rings_vertices", "Copy the atom indices of one ring.", "rings; index; atoms; cap; n_out", "dimensionless indices"),
+        ("seams_rings_chordless", "List the chordless cycles of one size.", "nb; size; rings; rings_len; n_rings; per_atom; per_atom_len", "dimensionless indices and counts; a null rings buffer skips the list"),
         ("seams_system_read", "Read one frame from a trajectory path.", "sys; path; frame; type_filter", "frame index is 1-based; coordinates in angstrom"),
         ("seams_system_set_atoms", "Store points and a cell, with size_t lengths.", "sys; xyz; n; box9; box_len; types; ids", "coordinates and box lengths in angstrom"),
         ("seams_system_symmetry", "Write one ice-shell label per atom.", "sys; shell_rmsd; labels; labels_len", "shell_rmsd is a dimensionless residual; labels are dimensionless codes"),

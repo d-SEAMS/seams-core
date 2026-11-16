@@ -238,6 +238,9 @@ int main(int argc, char **argv) {
   int *verts = calloc(nv ? nv : 1, sizeof(int));
   need("vv", seams_rings_vertices(rings, 0, verts, nv, &nv), rings);
   printf("capi seams_rings_vertices %zu\n", nv);
+  size_t n_six = 0;
+  need("chordless", seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0), ih);
+  printf("capi seams_rings_chordless %zu\n", n_six);
   double fraction = 0;
   need("frac", seams_rings_fraction(rings, 6, &fraction), rings);
   printf("capi seams_rings_fraction %.6f\n", fraction);

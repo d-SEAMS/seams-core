@@ -19,6 +19,7 @@
 #include <cpu_features.hpp>
 #include <bop.hpp>
 #include <brine_front.hpp>
+#include <chordless.hpp>
 #include <cluster.hpp>
 #include <density.hpp>
 #include <cage_affiliation.hpp>
@@ -1053,6 +1054,54 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
       }
     }
     *out = static_cast<seams_neighbours *>(track(nb.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings,
+                                   size_t rings_len, size_t *n_rings, int *per_atom,
+                                   size_t per_atom_len) {
+  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  clear_error();
+  if (nb == nullptr) {
+    return fail(SEAMS_ERR_NULL, "neighbours handle is null");
+  }
+  if (rings != nullptr && n_rings == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings needs n_rings");
+  }
+  if (rings == nullptr && n_rings == nullptr && per_atom == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings, n_rings and per_atom are all null");
+  }
+  if (size < 3 || size > chordless::kMaxSize) {
+    return fail(SEAMS_ERR_RANGE, "size must be from 3 to 12");
+  }
+  const std::size_t n = nb->offsets.empty() ? 0 : nb->offsets.size() - 1;
+  if (per_atom != nullptr && per_atom_len < n) {
+    return fail(SEAMS_ERR_RANGE, "per_atom is short");
+  }
+  try {
+    use_threads();
+    std::vector<int> found;
+    const std::size_t count = chordless::cycles(nb->offsets, nb->cols, size,
+                                                rings != nullptr ? &found : nullptr, per_atom);
+    if (n_rings != nullptr) {
+      *n_rings = count;
+    }
+    if (rings != nullptr) {
+      if (rings_len < found.size()) {
+        return fail(SEAMS_ERR_RANGE, "rings buffer is short");
+      }
+      if (!found.empty()) {
+        std::memcpy(rings, found.data(), found.size() * sizeof(int));
+      }
+    }
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
