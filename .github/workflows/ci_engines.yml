@@ -202,6 +202,7 @@ jobs:
         with:
           path: |
             .lammps-plumed210/bin
+            .lammps-plumed210/include
             .lammps-plumed210/lib
             .lammps-plumed210/src
             .lammps-plumed210/.lammps-tag

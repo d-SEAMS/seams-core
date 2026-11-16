@@ -31,10 +31,10 @@ src=${LAMMPS_SRC:-$dest/src}
 headers="$src/src"
 tag=${LAMMPS_TAG:-stable_22Jul2025_update1}
 stamp="$dest/.lammps-tag"
-# A restored CI cache already has this install. Rebuild when the tag
-# or the binary is missing. Build logs stay on stderr so the only
+# A restored CI cache already has this install. Rebuild when the tag,
+# the binary or the installed headers are missing. Build logs stay on stderr so the only
 # stdout is the header directory.
-if [ -x "$dest/bin/lmp" ] && [ -f "$headers/library.h" ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$tag" ]; then
+if [ -x "$dest/bin/lmp" ] && [ -f "$headers/library.h" ] && [ -f "$dest/include/lammps/library.h" ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$tag" ]; then
   printf '%s\n' "$headers"
   exit 0
 fi
