@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CSV = ROOT / "paper" / "tex" / "figures" / "data" / "science" / "figure-census.csv"
+CSV = ROOT / "docs" / "data" / "science" / "figure-census.csv"
 PAGE = ROOT / "docs" / "source" / "science" / "gallery.rst"
 
 
@@ -58,9 +58,8 @@ def page_text(rows):
 ===============
 
 The four renders used by the science tutorials. Each caption is written
-from ``paper/tex/figures/data/science/figure-census.csv``. The sII cage
-counts are the same numbers as ``dsv@w@sII`` in
-``paper/tex/figures/data/macros.tex``.
+from ``docs/data/science/figure-census.csv``, the census the science
+tutorials check.
 
 .. figure:: figures/interface.png
    :alt: Interface slab. {interface}
