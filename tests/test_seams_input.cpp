@@ -692,7 +692,8 @@ std::vector<int> fdsForPath(const std::string &path) {
 #if defined(__APPLE__)
   // There is no /proc/self/fd. directory_iterator throws filesystem_error,
   // and that exception leaving the unlinker thread calls std::terminate.
-  // proc_pidinfo lists the same open vnodes. /var is a symlink of
+  // proc_pidinfo lists the same open vnodes and fcntl(F_GETPATH) reads
+  // each one's path. /var is a symlink of
   // /private/var, so the path dyld records may not be a string prefix of
   // the path passed to open; the inode is.
   const int pid = ::getpid();
@@ -716,7 +717,7 @@ std::vector<int> fdsForPath(const std::string &path) {
     }
     char got[PROC_PIDPATHINFO_MAXSIZE];
     const int fd = fds[static_cast<std::size_t>(i)].proc_fd;
-    if (::proc_pidfdpath(pid, fd, got, sizeof got) <= 0) {
+    if (::fcntl(fd, F_GETPATH, got) == -1) {
       continue;
     }
     const std::string link(got);
