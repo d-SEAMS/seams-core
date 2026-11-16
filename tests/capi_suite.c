@@ -941,7 +941,7 @@ int main(int argc, char **argv) {
       xyz_path[1024], con_path[1024];
   snprintf(ice_path, sizeof ice_path, "%s/input/traj/ice1h.lammpstrj", argv[1]);
   snprintf(si_path, sizeof si_path, "%s/input/traj/genice_sI.lammpstrj", argv[1]);
-  snprintf(liquid_path, sizeof liquid_path, "%s/benchmarks/paper-cells/tip4pice-liquid-4096.txt",
+  snprintf(liquid_path, sizeof liquid_path, "%s/tests/data/tip4pice-liquid-4096.txt",
            argv[1]);
   snprintf(brine_path, sizeof brine_path, "%s/input/traj/nacl_front.lammpstrj", argv[1]);
   snprintf(nuc_path, sizeof nuc_path, "%s/input/traj/nucleation_f1.lammpstrj", argv[1]);

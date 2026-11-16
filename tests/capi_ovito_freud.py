@@ -514,7 +514,7 @@ def frames_of(root: Path) -> list[tuple[str, np.ndarray, np.ndarray]]:
         ("ice_ih", *load_dump(root / "input/traj/ice1h.lammpstrj")),
         ("ice_ic", *ice_ic()),
         ("si", *load_dump(root / "input/traj/genice_sI.lammpstrj")),
-        ("liquid", *load_oxygen_text(root / "benchmarks/paper-cells/tip4pice-liquid-4096.txt")),
+        ("liquid", *load_oxygen_text(root / "tests/data/tip4pice-liquid-4096.txt")),
         ("brine", *load_dump(root / "input/traj/nacl_front.lammpstrj")),
         ("nucleation", *load_dump(root / "input/traj/nucleation_f1.lammpstrj")),
     ]
