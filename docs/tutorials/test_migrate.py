@@ -18,7 +18,7 @@ from ctypes import (
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from migrate_map import PAIRS
+from migrate_map import LUA_RELEASES, PAIRS, V1_GLOBALS, V1_TAG, table_rows
 
 LABELS = (
     "cubic",
@@ -196,11 +196,7 @@ def main():
     root, seams, libdir, langdir = sys.argv[1:5]
     root = Path(root)
     page = root / "docs" / "orgmode" / "howto" / "migrate-1x.org"
-    page_text = page.read_text()
-    for pair in PAIRS:
-        for name in (pair["old"], *pair["also"], pair["cli"], pair["c_api"]):
-            if name not in page_text:
-                fail("migration page omits {}".format(name))
+    check_page(page.read_text())
     api, lang = load(libdir, langdir)
     cubic = root / "input" / "traj" / "mW_cubic.lammpstrj"
     tip = root / "input" / "traj" / "exampleTraj.lammpstrj"
@@ -243,6 +239,35 @@ def main():
     if missing:
         fail("unrun mappings {}".format(sorted(missing)))
     print("migrate {} mappings".format(len(PAIRS)))
+
+
+def check_page(page_text):
+    lines = set(page_text.splitlines())
+    header = "| 1.x global ({}) | {} | 2.14 command | 2.14 C call |".format(
+        V1_TAG, " | ".join("yodaStruct " + release for release in LUA_RELEASES)
+    )
+    if header not in lines:
+        fail("migration page omits the header {}".format(header))
+    for pair in PAIRS:
+        stray = [name for name in pair["v1"] if name not in V1_GLOBALS]
+        if stray:
+            fail("{} did not register {}".format(V1_TAG, stray))
+        if not pair["v1"] and not pair["lua"]:
+            fail("{} has neither a 1.x global nor a later Lua name".format(pair["kind"]))
+        later = []
+        for release, names in pair["lua"].items():
+            if release not in LUA_RELEASES:
+                fail("{} names unknown release {}".format(pair["kind"], release))
+            for name in names:
+                if name in V1_GLOBALS:
+                    fail("{} is a {} global, not new in yodaStruct {}".format(name, V1_TAG, release))
+                later.append(name)
+        row = "| " + " | ".join(table_rows(pair)) + " |"
+        if row not in lines:
+            fail("migration page omits the row {}".format(row))
+        for name in (*pair["v1"], *later, pair["cli"], pair["c_api"]):
+            if name not in page_text:
+                fail("migration page omits {}".format(name))
 
 
 def check_read(seams, lang, path):
