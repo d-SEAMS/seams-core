@@ -672,8 +672,12 @@ sphericart_found = false
 if not sphericart_opt.disabled()
   sph_lib_dirs = []
   sph_inc_dirs = []
+  # The library inside a pip sphericart wheel (often a user site) is only
+  # taken when with_sphericart=enabled. In auto mode it made libyodaLib
+  # depend on a library that consumers building seams-core as a subproject
+  # could not resolve, so auto accepts only pkg-config and CMake packages.
   python_for_sph = find_program('python3', required: false)
-  if python_for_sph.found()
+  if python_for_sph.found() and sphericart_opt.enabled()
     sph_dir_cmd = run_command(
       python_for_sph, '-c',
       'import pathlib, sys\n' +
@@ -710,17 +714,28 @@ if not sphericart_opt.disabled()
                                           link_args: sph_rpath)
     endif
   endif
+  # The probe calls what src/sphericart_ylm.cpp calls, and links without
+  # --allow-shlib-undefined (conda's default LDFLAGS carry it), so a
+  # library that leaves those symbols or its own dependencies unresolved
+  # fails here instead of in a consumer of libyodaLib.
   sphericart_probe = '''
     #include <sphericart.hpp>
+    #include <vector>
     int main() {
-      sphericart::SphericalHarmonics<double> s(2);
-      return 0;
+      sphericart::SphericalHarmonics<double> s(6);
+      std::vector<double> xyz{1.0, 0.0, 0.0};
+      std::vector<double> out;
+      s.compute(xyz, out);
+      return out.empty() ? 1 : 0;
     }
   '''
   sph_probe_args = []
   foreach d : sph_inc_dirs
     sph_probe_args += ['-I' + d]
   endforeach
+  if cppc.has_link_argument('-Wl,--no-allow-shlib-undefined')
+    sph_probe_args += ['-Wl,--no-allow-shlib-undefined']
+  endif
   if sphericart_dep.found() and cppc.links(sphericart_probe,
                                           dependencies: [sphericart_dep],
                                           args: sph_probe_args,
