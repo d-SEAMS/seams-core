@@ -53,6 +53,17 @@ jobs:
           read -ra seams_flags <<< "$(pkg-config --cflags --libs seams)"
           cc docs/examples/quickstart.c "${seams_flags[@]}" -lm -Wl,-rpath,"$SEAMS_PREFIX/lib" -o "$RUNNER_TEMP/quickstart"
           env -u LD_LIBRARY_PATH "$RUNNER_TEMP/quickstart"
+          test "$(pkg-config --modversion seams-lang)" = "${version}"
+          read -ra lang_flags <<< "$(pkg-config --cflags --libs seams-lang)"
+          cc -std=c11 -Wall -Wextra -Wpedantic -Werror tests/lang_pkgconfig_consumer.c "${lang_flags[@]}" \
+            -Wl,-rpath,"$SEAMS_PREFIX/lib" -o "$RUNNER_TEMP/lang-consumer"
+          test "$(env -u LD_LIBRARY_PATH LD_BIND_NOW=1 "$RUNNER_TEMP/lang-consumer" "${version}" input/xyz/configuration.xyz)" \
+            = "seams-lang ${version} frames 1 atoms 256"
+      # A binding developed against a checkout sets PKG_CONFIG_PATH to
+      # build-pkg/meson-uninstalled. The same consumer has to link and run
+      # from there and from a staged install of this build.
+      - name: Link a seams-lang consumer against the build tree and an install
+        run: CC=cc python3 tests/check_lang_pkgconfig.py build-pkg .
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: libseams-prefix

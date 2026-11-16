@@ -6,8 +6,8 @@ meson test runs tests in parallel against one build directory. A test
 that calls ``meson install`` without ``--no-rebuild``, ``meson compile``
 or ``ninja`` on that directory can relink libyodaLib.so or libseams.so
 while another test has it mapped. This check fails when a test script
-does that, and when c_api_installed installs a target that meson test
-would not have built first. A test that reads BUILD/docs-r-lib has to
+does that, and when c_api_installed or seams_lang_pkgconfig installs a
+target that meson test would not have built first. A test that reads BUILD/docs-r-lib has to
 depend on the docs-r-lib target, so no test installs the R package
 while another test loads it.
 
@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 CALL = re.compile(r"""["']?\bmeson["']?\s*,?\s*["']?(install|compile)\b|["']ninja["']|\bninja\s+-C\b""")
-INSTALL_TEST = "c_api_installed"
+INSTALL_TESTS = ("c_api_installed", "seams_lang_pkgconfig")
 R_LIB = "docs-r-lib"
 
 
@@ -102,8 +102,8 @@ def ninja_inputs(build, outputs):
     return {str((build / line.strip()).resolve()) for line in done.stdout.splitlines() if line.strip()}
 
 
-def install_problems(build, targets, tests):
-    rows = [test for test in tests if test["name"] == INSTALL_TEST]
+def install_problems(build, targets, tests, name):
+    rows = [test for test in tests if test["name"] == name]
     if not rows:
         return []
     by_id = {target["id"]: target for target in targets}
@@ -160,14 +160,15 @@ def main():
         for number, line in call_problems(script.read_text(encoding="utf-8", errors="replace")):
             rel = script.relative_to(source)
             failures.append(f"{rel}:{number} rebuilds the tree under {', '.join(sorted(set(names)))}: {line}")
-    for name in install_problems(build, targets, tests):
-        failures.append(f"{INSTALL_TEST} installs {name} but does not depend on it")
+    for install_test in INSTALL_TESTS:
+        for name in install_problems(build, targets, tests, install_test):
+            failures.append(f"{install_test} installs {name} but does not depend on it")
     for name in r_lib_problems(targets, tests, source):
         failures.append(f"{name} reads {R_LIB} but does not depend on it")
     if failures:
         print("\n".join(failures))
         return 1
-    print(f"no test rebuilds the tree; {INSTALL_TEST} depends on every installed target")
+    print(f"no test rebuilds the tree; {' and '.join(INSTALL_TESTS)} depend on every installed target")
     return 0
 
 

@@ -1500,6 +1500,20 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     depends: _installed_targets,
     timeout: 600)
+  # ldd and LD_BIND_NOW are the ELF loader's.
+  if host_machine.system() == 'linux'
+    test(
+      'seams_lang_pkgconfig',
+      python3,
+      args: [
+        meson.project_source_root() / 'tests' / 'check_lang_pkgconfig.py',
+        meson.project_build_root(),
+        meson.project_source_root(),
+      ],
+      env: _snippet_env,
+      depends: _installed_targets,
+      timeout: 600)
+  endif
   test(
     'tests_do_not_rebuild',
     python3,
