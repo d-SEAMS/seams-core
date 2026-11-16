@@ -1,0 +1,1 @@
+`lammps_hook` and the other engine tests run through `skip_missing_lib.sh` fail when the engine program fails. The wrapper read the exit status after its `if` block, where it is always 0, so a crashing `run_hook` was reported as passing.
