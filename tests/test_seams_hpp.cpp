@@ -207,16 +207,23 @@ int main(int argc, char **argv) {
     auto water = read_frame(root + "/input/traj/exampleTraj.lammpstrj", 2);
     const auto cycles = water.rings_chordless(seams::NeighbourOptions{3.5, 0}, 6);
     {
-      auto nb = water.neighbours(seams::NeighbourOptions{3.5, 0});
+      // The same frame through the C calls the wrapper sits on.
+      seams_system *raw = seams_system_create();
+      seams_neighbours *nb = nullptr;
       std::size_t n_c = 0;
-      if (seams_rings_chordless(nb.get(), 6, nullptr, 0, &n_c, nullptr, 0) != SEAMS_OK ||
-          n_c != cycles.count() || n_c == 0) {
-        return 1;
+      std::vector<int> rows;
+      bool ok = raw != nullptr &&
+                seams_system_read(raw, (root + "/input/traj/exampleTraj.lammpstrj").c_str(), 1,
+                                  2) == SEAMS_OK &&
+                seams_neighbours_build(raw, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb) == SEAMS_OK &&
+                seams_rings_chordless(nb, 6, nullptr, 0, &n_c, nullptr, 0) == SEAMS_OK;
+      if (ok) {
+        rows.resize(n_c * 6);
+        ok = seams_rings_chordless(nb, 6, rows.data(), rows.size(), &n_c, nullptr, 0) == SEAMS_OK;
       }
-      std::vector<int> rows(n_c * 6);
-      if (seams_rings_chordless(nb.get(), 6, rows.data(), rows.size(), &n_c, nullptr, 0) !=
-              SEAMS_OK ||
-          rows != cycles.atoms) {
+      seams_neighbours_destroy(nb);
+      seams_system_destroy(raw);
+      if (!ok || n_c == 0 || n_c != cycles.count() || rows != cycles.atoms) {
         return 1;
       }
     }
