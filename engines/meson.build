@@ -88,8 +88,10 @@ if lammps_opt.allowed()
     # needs the MPI library and not only the LAMMPS wrapper.
     lammps_mpi = dependency('mpi', language: 'cpp', required: false)
     run_hook_deps = [lammps_dep]
+    run_hook_args = []
     if lammps_mpi.found()
       run_hook_deps += [lammps_mpi]
+      run_hook_args += ['-DSEAMS_HOOK_MPI']
     endif
     run_hook = executable(
       'run_hook',
@@ -97,7 +99,7 @@ if lammps_opt.allowed()
       dependencies: run_hook_deps,
       link_with: seams_api_lib,
       include_directories: lammps_incs,
-      cpp_args: _args + lammps_args + seams_api_args,
+      cpp_args: _args + lammps_args + seams_api_args + run_hook_args,
       build_rpath: lammps_rpath,
       install_rpath: lammps_rpath,
       install: true)

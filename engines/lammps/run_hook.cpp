@@ -6,7 +6,9 @@
 #include "seams.h"
 #include "../frame_census.hpp"
 
+#ifdef SEAMS_HOOK_MPI
 #include <mpi.h>
+#endif
 
 #include <chrono>
 #include <cstdio>
@@ -118,6 +120,8 @@ int main(int argc, char **argv) {
   // lammps_close leaves MPI initialized. Open MPI then leaks its
   // singleton state at process exit. Finalize it when this process
   // started it.
+  // A LAMMPS built on the serial MPI stubs has no MPI library to finalize.
+#ifdef SEAMS_HOOK_MPI
   int mpi_inited = 0;
   MPI_Initialized(&mpi_inited);
   if (mpi_inited) {
@@ -127,6 +131,7 @@ int main(int argc, char **argv) {
       MPI_Finalize();
     }
   }
+#endif
   bool spaced = hook.steps.size() == 1;
   if (hook.steps.size() >= 2) {
     spaced = true;
