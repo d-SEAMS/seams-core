@@ -103,6 +103,42 @@ the same slice (~lc_set_places~) instead of inheriting the caller's
 single cpu. A pool that has already started keeps the cpus it was built
 with.
 
+* Calls on a crowded machine
+
+~seams::team::run~ (~src/include/internal/team_run.hpp~) runs a call as
+stages of chunks in one parallel region. Every chunk of a stage returns
+before the next stage starts. The orthorhombic cutoff list, cutoff
+\(q_4\) and \(q_6\), the CHILL+ bonds and labels, and the shell match
+use it. The k-nearest graph runs all of its passes in one linkcell
+search region.
+
+On a machine the caller has to itself the region is one OpenMP team,
+one static loop per stage, each thread on one contiguous run of chunks.
+Linkcell's pool is not started. A stage has one chunk per OpenMP
+thread.
+
+While other processes keep half of the caller's cpus busy or more, the
+region is linkcell's ~lc_team_run~. The caller is one of the workers, a
+chunk is claimed from a counter, and a stage closes when its last
+claimed chunk returns, so a worker the scheduler has not run holds up
+nothing it has not claimed. A stage has two chunks per worker.
+
+The load is read from ~/proc/stat~: the busy time of the caller's cpus
+less this process's own cpu time, averaged over at least 0.1 s. The
+first look counts runnable threads instead. A count that would narrow a
+full team is taken three times, 2 ms apart, and the lowest kept. One
+count in a few on an idle machine read a thread that was runnable for a
+moment, and the team ran on seven of eight cpus.
+
+The contended rows of the omp-scaling sitting (~scripts/omp_scaling.py~,
+source tree ~1c41a929~) run beside ~scripts/omp_spinner.c~ on all eight
+cpus. Each row is 8 processes of 10 samples. At 110592 molecules the
+k-nearest graph takes 20.0 ms bound and 19.1 ms unbound, against OVITO's
+28.2 and 28.3 ms. \(q_6\) takes 12.2 ms and 11.1 ms against OVITO's 23.6
+and 23.2 ms. CHILL+ takes 17.1 ms and the shell match 18.2 ms.
+Hartigan's dip test on the 8 per-process medians of each contended row
+gives p above 0.09.
+
 * Every kernel
 
 Commit ~848426f9~ sizes the team on every kernel. ~caeb71f8~ puts the

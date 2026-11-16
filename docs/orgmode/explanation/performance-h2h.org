@@ -27,8 +27,8 @@ outside the launch mask.
 Concurrent copies of the program share the mask in disjoint slices
 instead of stacking on the same cpus. The threading page records the
 rule. On 8 cores the unbound 110592-molecule C API, one fresh process,
-three warm-ups and one timed call, is about 1.7 ms for neighbours and
-about 2.6 ms for \(q_6\).
+three warm-ups and one timed call, is about 2.4 ms for neighbours and
+about 2.4 ms for \(q_6\).
 
 The tables are the frozen tables in =docs/records=, rendered from the
 benchmark records dataset (=docs/records/README.md= names the revision).
