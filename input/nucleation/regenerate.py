@@ -10,6 +10,9 @@ n=46 is 97336 molecules. n=100 is 1000000 molecules. n=16 is 4096.
 The deck is input/nucleation/in.homogeneous. The integrator step is
 10 fs. Temperature defaults to 180 K.
 
+--lmp and LMP are a launcher command line, such as "mpirun -np 8 lmp".
+LMP_NP adds the mpirun prefix; see scripts/lmp_launch.py.
+
 A seeded run passes --seeds. Each seed is the LAMMPS velocity seed of
 an independent 350 K liquid that is then quenched. One picosecond is
 100 steps. The coordinate dumps are recorded by md5 in a DVC-style
@@ -28,11 +31,14 @@ import hashlib
 import os
 import shutil
 import subprocess
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+import lmp_launch  # noqa: E402
 DECK = Path(__file__).resolve().parent
 SW = ROOT / "input" / "mw215" / "mW.sw"
 
@@ -61,10 +67,10 @@ def md5_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def lammps_command(lmp: str, n: int, melt: int, quench: int, dump_every: int,
+def lammps_command(lmp: list[str], n: int, melt: int, quench: int, dump_every: int,
                    temperature: float, seed: int, nskip: int) -> list[str]:
     return [
-        lmp,
+        *lmp,
         "-in",
         "in.homogeneous",
         "-var",
@@ -95,7 +101,7 @@ def lammps_command(lmp: str, n: int, melt: int, quench: int, dump_every: int,
     ]
 
 
-def run_one(lmp: str, n: int, melt: int, quench: int, dump_every: int,
+def run_one(lmp: list[str], n: int, melt: int, quench: int, dump_every: int,
             temperature: float, seed: int, nskip: int, work: Path, seams: str,
             threads: int, skip_md: bool) -> dict:
     work.mkdir(parents=True, exist_ok=True)
@@ -211,9 +217,7 @@ def main() -> int:
     args = parser.parse_args()
     dest = Path(args.dest)
     dest.mkdir(parents=True, exist_ok=True)
-    lmp = shutil.which(args.lmp) or args.lmp
-    if not args.skip_md and not Path(lmp).is_file() and shutil.which(lmp) is None:
-        raise SystemExit(f"LAMMPS executable not found: {args.lmp}")
+    lmp = [] if args.skip_md else lmp_launch.launcher(args.lmp)
     seeds = parse_seeds(args.seeds) if args.seeds else []
     if seeds:
         sizes = args.n or [16]
