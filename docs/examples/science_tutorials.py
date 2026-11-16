@@ -3,6 +3,8 @@
 """Science tutorials: interface, brine front, and hydrate cages.
 
 Python and the C program in science_tutorials.c both call libseams.
+With julia or Rscript on PATH, the Julia and R tutorials run too, from
+the Dseams.jl and dseams installs that carry them.
 Layer period, layer kind, and cubicity follow scripts/science_render.py
 at 702d85b2454e459dd14d9ec5fa3bd6b331e73862.
 
@@ -598,12 +600,23 @@ def run_julia(root: Path, libdir: Path, frames):
     if julia is None:
         print("julia tutorial skipped: julia was not found")
         return
-    args = [julia, str(root / "docs" / "examples" / "science_tutorials.jl"), str(root)]
+    env = _language_env(libdir)
+    # find_package locates a developed Dseams without loading libseams_jll.
+    package = subprocess.check_output(
+        [julia, "-e", 'p = Base.find_package("Dseams"); p === nothing || print(dirname(dirname(p)))'],
+        cwd=root,
+        env=env,
+        text=True,
+    ).strip()
+    script = Path(package) / "examples" / "science_tutorials.jl"
+    expect(
+        package and script.is_file(),
+        "julia is on PATH but has no Dseams with examples/science_tutorials.jl; develop d-SEAMS/Dseams.jl",
+    )
+    args = [julia, str(script), str(root)]
     if frames is not None:
         args.extend(str(path) for path in frames)
-    proc = subprocess.run(
-        args, cwd=root, env=_language_env(libdir), text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    proc = subprocess.run(args, cwd=root, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     text = proc.stdout
     # Julia 1.13 can fault in ijl_process_events after the script has
     # printed. The census is the result; a later teardown signal is not.
@@ -613,38 +626,28 @@ def run_julia(root: Path, libdir: Path, frames):
     print("julia tutorials ok")
 
 
-def run_r(root: Path, build: Path, libdir: Path, frames):
+def run_r(root: Path, libdir: Path, frames):
     rscript = shutil.which("Rscript")
     if rscript is None:
         print("r tutorial skipped: Rscript was not found")
         return
-    cc = c_compiler()
-    work = build / "docs-science"
-    work.mkdir(parents=True, exist_ok=True)
-    shared = work / "science_r.so"
-    subprocess.check_call(
-        link_command(
-            cc,
-            [
-                "-shared",
-                "-fPIC",
-                "-I",
-                str(root / "include"),
-                "-I",
-                str(libdir),
-                str(root / "docs" / "examples" / "science_r.c"),
-                "-L" + str(libdir),
-                "-lseams",
-                "-Wl,-rpath," + str(libdir),
-                "-o",
-                str(shared),
-            ],
-        )
+    env = _language_env(libdir)
+    script = subprocess.check_output(
+        [rscript, "-e", 'cat(system.file("examples", "science_tutorials.R", package = "dseams"))'],
+        cwd=root,
+        env=env,
+        text=True,
+    ).strip()
+    expect(
+        script,
+        "Rscript is on PATH but has no dseams package with examples/science_tutorials.R; install d-SEAMS/dseams-r",
     )
-    args = [rscript, str(root / "docs" / "examples" / "science_tutorials.R"), str(root), str(shared)]
+    env["DSEAMS_ROOT"] = str(root)
+    for key in ("DSEAMS_BRINE_T0", "DSEAMS_BRINE_TEND"):
+        env.pop(key, None)
     if frames is not None:
-        args.extend(str(path) for path in frames)
-    text = subprocess.check_output(args, cwd=root, env=_language_env(libdir), text=True)
+        env["DSEAMS_BRINE_T0"], env["DSEAMS_BRINE_TEND"] = (str(path) for path in frames)
+    text = subprocess.check_output([rscript, script], cwd=root, env=env, text=True)
     _expect_languages(text, frames)
     print("r tutorials ok")
 
@@ -767,7 +770,7 @@ def tutorials(root: Path, build: Path):
             expect("k 0.0" in c_brine, c_brine)
         print("c tutorials ok")
     run_julia(root, libdir, frames)
-    run_r(root, build, libdir, frames)
+    run_r(root, libdir, frames)
     sys.path.insert(0, str(root / "docs"))
     from check_contact_sheet import check
 
