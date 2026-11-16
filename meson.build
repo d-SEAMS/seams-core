@@ -333,7 +333,10 @@ if vesin_dep.found()
   _args += ['-DSEAMS_HAS_VESIN=1']
 endif
 
-_linkcell_opts = []
+# The wrapped linkcell and minimage register their own tests; they follow
+# this project's with_tests.
+_sub_tests = 'with_tests=' + (get_option('with_tests') ? 'true' : 'false')
+_linkcell_opts = [_sub_tests]
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 endif
@@ -346,7 +349,8 @@ if linkcell_dep.found()
 endif
 
 minimage_dep = dependency('minimage', version: '>=0.1.4', required: get_option('with_minimage'),
-                          fallback: ['minimage', 'minimage_dep'])
+                          fallback: ['minimage', 'minimage_dep'],
+                          default_options: [_sub_tests])
 if minimage_dep.found()
   _deps += [minimage_dep]
   _args += ['-DSEAMS_HAS_MINIMAGE=1']
