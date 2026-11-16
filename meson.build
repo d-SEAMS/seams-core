@@ -1924,8 +1924,11 @@ if get_option('with_tests')
   if _capi_san == 'thread'
     # libgomp here is not TSan-instrumented, so the barrier between two
     # parallel loops is invisible and reported as a race. The suite still
-    # fails when q6 at 1, 2, 4 and 8 threads disagrees.
-    _capi_env.set('TSAN_OPTIONS', 'halt_on_error=0:exitcode=0')
+    # fails when q6 at 1, 2, 4 and 8 threads disagrees. exitcode=0 keeps
+    # those reports from failing a capi_cpp_ref run, and would also turn a
+    # ThreadSanitizer death into exit 0; abort_on_error=1 makes the death
+    # SIGABRT. tests/capi_tsan_gate.py fails anything but those races.
+    _capi_env.set('TSAN_OPTIONS', 'halt_on_error=0:exitcode=0:abort_on_error=1')
   endif
   if _capi_san.contains('address')
     _capi_env.set('LSAN_OPTIONS',
@@ -1939,13 +1942,18 @@ if get_option('with_tests')
   ]
   _capi_run = capi_suite
   _capi_run_args = _capi_args
-  if _capi_san == 'thread' and host_machine.system() == 'linux'
-    # GCC's libtsan expects the 28-bit mmap randomisation of older kernels.
-    # Under 32 bits it finds the executable inside its shadow range and
-    # stops with "unexpected memory mapping". setarch -R turns address
-    # randomisation off for the suite and the capi_cpp_ref it starts.
-    _capi_run = find_program('setarch', required: true)
-    _capi_run_args = [host_machine.cpu(), '-R', capi_suite.full_path()] + _capi_args
+  if _capi_san == 'thread'
+    _capi_run = find_program('python3', required: true)
+    _capi_run_args = [meson.project_source_root() / 'tests' / 'capi_tsan_gate.py']
+    if host_machine.system() == 'linux'
+      # GCC's libtsan expects the 28-bit mmap randomisation of older kernels.
+      # Under 32 bits it finds the executable inside its shadow range and
+      # stops with "unexpected memory mapping". setarch -R turns address
+      # randomisation off for the suite and the capi_cpp_ref it starts.
+      _capi_run_args += [find_program('setarch', required: true).full_path(),
+                         host_machine.cpu(), '-R']
+    endif
+    _capi_run_args += [capi_suite.full_path()] + _capi_args
   endif
   test(
     'capi_suite',
@@ -2143,6 +2151,11 @@ if get_option('with_tests')
       seams_api_lib.full_path(),
     ],
     depends: [seams_api_lib],
+    timeout: 60)
+  test(
+    'capi_tsan_gate_selftest',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'capi_tsan_gate_selftest.py'],
     timeout: 60)
   _capi_docs_args = [
     meson.project_source_root() / 'include' / 'seams.h',
