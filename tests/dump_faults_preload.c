@@ -33,7 +33,9 @@ static int fstat_fault(void) {
 #if defined(__APPLE__)
 /* DYLD_INSERT_LIBRARIES does not override two-level libSystem bindings.
  * The __interpose section does. fstat in the macOS 11 SDK is the symbol
- * fstat$INODE64, which is what the engine calls. */
+ * fstat$INODE64, which is what the engine calls. dyld does not apply an
+ * image's interposing to that image's own calls, so pread and fstat below
+ * reach libSystem without a dlsym lookup inside the replacement. */
 #define SEAMS_INTERPOSE(repl, orig)                                                            \
   __attribute__((used)) static const struct {                                                 \
     const void *repl;                                                                          \
@@ -42,11 +44,7 @@ static int fstat_fault(void) {
       (const void *)(unsigned long)&(repl), (const void *)(unsigned long)&(orig)}
 
 static ssize_t seams_pread(int fd, void *buf, size_t count, off_t offset) {
-  static ssize_t (*real_pread)(int, void *, size_t, off_t) = NULL;
   static int left = -1;
-  if (real_pread == NULL) {
-    real_pread = dlsym(RTLD_NEXT, "pread");
-  }
   if (left < 0) {
     left = pread_faults_left();
   }
@@ -59,21 +57,14 @@ static ssize_t seams_pread(int fd, void *buf, size_t count, off_t offset) {
     errno = EINTR;
     return -1;
   }
-  return real_pread(fd, buf, count, offset);
+  return pread(fd, buf, count, offset);
 }
 
 static int seams_fstat(int fd, struct stat *buf) {
-  static int (*real_fstat)(int, struct stat *) = NULL;
-  if (real_fstat == NULL) {
-    real_fstat = dlsym(RTLD_NEXT, "fstat$INODE64");
-    if (real_fstat == NULL) {
-      real_fstat = dlsym(RTLD_NEXT, "fstat");
-    }
-  }
   if (fstat_fault() != 0) {
     return -1;
   }
-  return real_fstat(fd, buf);
+  return fstat(fd, buf);
 }
 
 SEAMS_INTERPOSE(seams_pread, pread);
