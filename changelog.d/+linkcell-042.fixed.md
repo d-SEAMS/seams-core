@@ -1,0 +1,1 @@
+A one-thread bond-order search no longer starts Rayon's global pool at the CPU count. linkcell 0.4.2 fills the columns of `lc_pairs_within` on the width set with `lc_set_threads`. A Clang build also finds a libomp that only `LIBRARY_PATH` reaches, such as the Archer runtime of the ThreadSanitizer job, instead of stopping on "finding libomp failed".
