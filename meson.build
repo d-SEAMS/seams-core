@@ -890,6 +890,23 @@ nucleation_pathway_exe = executable(
   install: true,
   install_tag: 'bin')
 
+# Committor driver on a 512-molecule mW cell. It skips when LMP is unset.
+if get_option('with_tests')
+  _pytest = find_program('pytest', required: false)
+  if _pytest.found()
+    committor_env = environment()
+    committor_env.set('NUCLEATION_PATHWAY', nucleation_pathway_exe.full_path())
+    committor_env.set('PYTHONDONTWRITEBYTECODE', '1')
+    test('committor_driver', _pytest,
+      args: ['-q', '-rs', '-p', 'no:cacheprovider',
+             meson.project_source_root() / 'tests' / 'test_committor_driver.py'],
+      env: committor_env,
+      depends: nucleation_pathway_exe,
+      suite: 'committor',
+      timeout: 1800)
+  endif
+endif
+
 # Timing driver (bench/analyse.cpp). Outputs stay out of the tree.
 subdir('bench')
 
