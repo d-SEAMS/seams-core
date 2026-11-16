@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <complex>
 #include <limits>
 #include <numeric>
 #include <stdexcept>
@@ -433,6 +434,76 @@ Shift definitionShift(int sizeA, int frameA, int sizeB, int frameB) {
   return out;
 }
 
+std::vector<double>
+q6DotScore(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+           const std::vector<int> &offsets, const std::vector<int> &cols) {
+  constexpr int kL = 6;
+  const int n = cloud.nop;
+  // m = 0..6 only. Y_6^{-m} = (-1)^m conj(Y_6^m), so the negative orders
+  // double the real part of each positive-order product.
+  std::vector<std::complex<double>> qlm(static_cast<std::size_t>(n) * (kL + 1));
+  std::vector<double> norm(static_cast<std::size_t>(n), 0);
+  const double lx = cloud.box[0];
+  const double ly = cloud.box[1];
+  const double lz = cloud.box[2];
+  for (int i = 0; i < n; ++i) {
+    const auto &pi = cloud.pts[static_cast<std::size_t>(i)];
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    std::complex<double> *q = &qlm[static_cast<std::size_t>(i) * (kL + 1)];
+    for (int k = a; k < b; ++k) {
+      const auto &pj = cloud.pts[static_cast<std::size_t>(cols[static_cast<std::size_t>(k)])];
+      double dx = pj.x - pi.x;
+      double dy = pj.y - pi.y;
+      double dz = pj.z - pi.z;
+      dx -= lx * std::round(dx / lx);
+      dy -= ly * std::round(dy / ly);
+      dz -= lz * std::round(dz / lz);
+      const double r = std::sqrt(dx * dx + dy * dy + dz * dz);
+      if (r <= 0) {
+        continue;
+      }
+      const double theta = std::acos(std::clamp(dz / r, -1.0, 1.0));
+      const double phi = std::atan2(dy, dx);
+      for (int m = 0; m <= kL; ++m) {
+        const double y = std::sph_legendre(kL, m, theta);
+        q[m] += std::complex<double>(y * std::cos(m * phi), y * std::sin(m * phi));
+      }
+    }
+    double s = std::norm(q[0]);
+    for (int m = 1; m <= kL; ++m) {
+      s += 2.0 * std::norm(q[m]);
+    }
+    norm[static_cast<std::size_t>(i)] = std::sqrt(s);
+  }
+  std::vector<double> score(static_cast<std::size_t>(n), 0);
+  for (int i = 0; i < n; ++i) {
+    const double ni = norm[static_cast<std::size_t>(i)];
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    if (ni <= 0 || b <= a) {
+      continue;
+    }
+    const std::complex<double> *qi = &qlm[static_cast<std::size_t>(i) * (kL + 1)];
+    double sum = 0;
+    for (int k = a; k < b; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      const double nj = norm[static_cast<std::size_t>(j)];
+      if (nj <= 0) {
+        continue;
+      }
+      const std::complex<double> *qj = &qlm[static_cast<std::size_t>(j) * (kL + 1)];
+      double dot = (qi[0] * std::conj(qj[0])).real();
+      for (int m = 1; m <= kL; ++m) {
+        dot += 2.0 * (qi[m] * std::conj(qj[m])).real();
+      }
+      sum += dot / (ni * nj);
+    }
+    score[static_cast<std::size_t>(i)] = sum / static_cast<double>(b - a);
+  }
+  return score;
+}
+
 FrameRecord analyzeFrame(molSys::PointCloud<molSys::Point<double>, double> &cloud,
                          double cutoff, int ringDepth, int typeI, double q6Cut,
                          int frame) {
@@ -500,6 +571,22 @@ FrameRecord analyzeFrame(molSys::PointCloud<molSys::Point<double>, double> &clou
   rec.q6barP50 = medianOf(std::move(finite));
   storeComponent(rec.nQ6, rec.cQ6, rec.hQ6,
                  largestComponent(cloud.nop, offsets, cols, qMask, symTag));
+
+  {
+    std::vector<int> solidOffsets;
+    std::vector<int> solidCols;
+    if (!nneigh::orthoFullCsr(cloud, nullptr, kQ6SolidCutoffA, solidOffsets, solidCols,
+                              false)) {
+      throw std::runtime_error("q6 solid neighbour list failed");
+    }
+    const auto score = q6DotScore(cloud, solidOffsets, solidCols);
+    std::vector<char> solid(static_cast<std::size_t>(cloud.nop), 0);
+    for (int i = 0; i < cloud.nop; ++i) {
+      solid[static_cast<std::size_t>(i)] = score[static_cast<std::size_t>(i)] > kQ6SolidCut;
+    }
+    storeComponent(rec.nQ6Solid, rec.cQ6Solid, rec.hQ6Solid,
+                   largestComponent(cloud.nop, solidOffsets, solidCols, solid, symTag));
+  }
 
   std::vector<int> indexToID(static_cast<std::size_t>(cloud.nop));
   for (int i = 0; i < cloud.nop; ++i) {

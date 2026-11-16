@@ -53,6 +53,17 @@ inline constexpr int kRingDepth = 7;
 //! liquid reference, not from the nucleation trajectory.
 inline constexpr double kQ6BarIceCut = 0.36;
 
+//! q6 solid criterion of ten Wolde, Ruiz-Montero and Frenkel,
+//! J. Chem. Phys. 104, 9932 (1996), in the mW form of Haji-Akbari and
+//! Debenedetti, PNAS 112(34) (2015), doi:10.1073/pnas.1509267112, SI
+//! Table S1: neighbours within 3.2 A
+//! (the first minimum of the mW g(r)), and a molecule is solid when the
+//! mean over its neighbours of the normalised q6(i).q6*(j) exceeds 0.5.
+//! The solid cluster is the largest component of solid molecules on the
+//! same 3.2 A graph. The Reinhardt chain exclusion is not applied.
+inline constexpr double kQ6SolidCutoffA = 3.2;
+inline constexpr double kQ6SolidCut = 0.5;
+
 struct FrameRecord {
   int frame = 0;
   long long timestep = 0;
@@ -97,7 +108,19 @@ struct FrameRecord {
   int nSym = 0;
   int cSym = 0;
   int hSym = 0;
+  //! Largest q6 solid cluster (kQ6SolidCutoffA, kQ6SolidCut). c and h
+  //! are diamond-symmetry labels, as for the q6-bar cluster.
+  int nQ6Solid = 0;
+  int cQ6Solid = 0;
+  int hQ6Solid = 0;
 };
+
+//! Per-molecule ten Wolde q6 score: the mean over neighbours within
+//! cutoff of Re q6(i).q6*(j) / (|q6(i)| |q6(j)|). A molecule without
+//! neighbours scores 0. The box is orthorhombic.
+[[nodiscard]] std::vector<double>
+q6DotScore(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+           const std::vector<int> &offsets, const std::vector<int> &cols);
 
 //! Label one frame. Leaves iceType as the published CHILL+ label.
 //! typeI selects the molecules passed to q6-bar. q6Cut is the ice cut

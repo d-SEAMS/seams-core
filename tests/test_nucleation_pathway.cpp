@@ -15,6 +15,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <neighbours.hpp>
 #include <nucleation_pathway.hpp>
 
 #include <cmath>
@@ -173,6 +174,19 @@ TEST_CASE("definition shift is the difference of onset size and frame",
   REQUIRE(shift.dFrame == 2);
 }
 
+TEST_CASE("the q6 dot score of a perfect diamond is one", "[nucleation]") {
+  auto crystal = diamond(2);
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  REQUIRE(nneigh::orthoFullCsr(crystal, nullptr, nucleation::kQ6SolidCutoffA, offsets,
+                               cols, false));
+  REQUIRE(offsets.back() == 4 * 64);
+  const auto score = nucleation::q6DotScore(crystal, offsets, cols);
+  for (double s : score) {
+    REQUIRE_THAT(s, Catch::Matchers::WithinAbs(1.0, 1e-9));
+  }
+}
+
 TEST_CASE("a periodic diamond is cubic ice under both CHILL+ rules",
           "[nucleation]") {
   auto crystal = diamond(2);
@@ -187,12 +201,15 @@ TEST_CASE("a periodic diamond is cubic ice under both CHILL+ rules",
   REQUIRE(ice.nChillCore == 64);
   REQUIRE(ice.q6barMean > nucleation::kQ6BarIceCut);
   REQUIRE(ice.q6barIce == 64);
+  REQUIRE(ice.nQ6Solid == 64);
+  REQUIRE(ice.cQ6Solid == 64);
   REQUIRE_THAT(nucleation::stackFraction(ice.cChillCore, ice.hChillCore),
                Catch::Matchers::WithinAbs(1.0, 1e-12));
 
   auto gas = dilute(64);
   const auto bare =
       nucleation::analyzeFrame(gas, 3.5, 6, 1, nucleation::kQ6BarIceCut, 1);
+  REQUIRE(bare.nQ6Solid == 0);
   REQUIRE(bare.q6barMean < ice.q6barMean);
   REQUIRE(bare.chillCubic < ice.chillCubic);
   REQUIRE(bare.symCubic < ice.symCubic);

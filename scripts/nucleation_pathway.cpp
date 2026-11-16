@@ -128,7 +128,8 @@ const char *kHeader =
     "n_ovito_core\tc_ovito_core\th_ovito_core\t"
     "n_ovito_ext\tc_ovito_ext\th_ovito_ext\t"
     "n_q6\tc_q6\th_q6\t"
-    "n_sym\tc_sym\th_sym\n";
+    "n_sym\tc_sym\th_sym\t"
+    "n_q6solid\tc_q6solid\th_q6solid\n";
 
 void writeRow(std::ostream &os, const Record &r) {
   os << r.frame << '\t' << r.timestep << '\t' << r.nop << '\t' << r.ringCount[4]
@@ -143,7 +144,8 @@ void writeRow(std::ostream &os, const Record &r) {
      << r.hChillExt << '\t' << r.nOvitoCore << '\t' << r.cOvitoCore << '\t'
      << r.hOvitoCore << '\t' << r.nOvitoExt << '\t' << r.cOvitoExt << '\t'
      << r.hOvitoExt << '\t' << r.nQ6 << '\t' << r.cQ6 << '\t' << r.hQ6 << '\t'
-     << r.nSym << '\t' << r.cSym << '\t' << r.hSym << '\n';
+     << r.nSym << '\t' << r.cSym << '\t' << r.hSym << '\t' << r.nQ6Solid << '\t'
+     << r.cQ6Solid << '\t' << r.hQ6Solid << '\n';
 }
 
 double fraction(int num, int den) {
