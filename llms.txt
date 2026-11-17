@@ -139,7 +139,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [walk_compare](https://docs.dseams.info/reference/walk-compare.md): tests/walk_compare walks a LAMMPS dump and prints one row per frame.
 - [API map](https://docs.dseams.info/reference/api.md): Lookup for the C++ identifiers in src/include/internal.
 - [Nix flake](https://docs.dseams.info/reference/nix.md): The flake builds libyodaLib and the seams CLI with Meson. It does not build Python or Lua. There are no overlays.
-- [One task, four fronts](https://docs.dseams.info/reference/cross-language.md): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
+- [One task on every front](https://docs.dseams.info/reference/cross-language.md): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
 - [Glossary](https://docs.dseams.info/reference/glossary.md)
 - [2.14.0 release notes](https://docs.dseams.info/reference/release-2.14.md): These notes are built from the fragments in changelog.d/.
 - [C API](https://docs.dseams.info/capi/index.md): Every SEAMS_API function in include/seams.h.
