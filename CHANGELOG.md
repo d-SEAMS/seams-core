@@ -24,6 +24,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The fused k-nearest graph and linkcell's stage runner are used when that library provides `lc_knearest_csr` and `lc_team_run`. A linkcell 0.4.2 build keeps the in-tree graph and the OpenMP stages.
 - `docs_video_tapes` compares the seams census and the rest of the recording, and no longer treats a LAMMPS warning or its docs URL as part of that result.
 - `docs_sh_cell` compiles its header snippet with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
+- The sanitizer suite does not preload libasan into the meson test process. Interpreter wrappers and the cargo test runner map it for the process that hosts libseams. Host shells and compilers do not inherit it.
 
 ## [2.14.0] - 2026-11-15
 

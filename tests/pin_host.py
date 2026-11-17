@@ -321,9 +321,14 @@ def mpi_check() -> None:
         path = Path(tmp)
         (path / "pin_mpi.c").write_text(src)
         exe = path / "pin_mpi"
+        # mpicc calls gcc by its real path, so a cc wrapper on PATH never
+        # sees it. The address runtime is for the process that dlopens
+        # libseams, which is the mpirun child below, not the compiler.
+        compile_env = os.environ.copy()
+        compile_env.pop("LD_PRELOAD", None)
         build = subprocess.run(
             ["mpicc", "-O2", str(path / "pin_mpi.c"), "-o", str(exe), "-ldl"],
-            capture_output=True, text=True, check=False)
+            env=compile_env, capture_output=True, text=True, check=False)
         if build.returncode != 0:
             print(build.stderr[-1500:])
             raise SystemExit("mpicc failed")

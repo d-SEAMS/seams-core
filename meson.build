@@ -2226,9 +2226,8 @@ if get_option('with_tests')
   endif
   test(
     'capi_abi',
-    find_program('sh'),
+    find_program(meson.project_source_root() / 'scripts' / 'abi_check.sh'),
     args: [
-      meson.project_source_root() / 'scripts' / 'abi_check.sh',
       meson.current_build_dir(),
       meson.project_source_root() / 'scripts' / 'abi_baseline.txt',
     ],

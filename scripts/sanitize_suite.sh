@@ -137,8 +137,9 @@ if [ -n "${FC:-}" ]; then
   export REAL_FC=$FC
   export FC=$root/scripts/asan-path/gfortran
 fi
-if [ -n "$_preload" ]; then
-  LD_PRELOAD=$_preload meson test -C "$build" --print-errorlogs
-else
-  meson test -C "$build" --print-errorlogs
-fi
+# Do not map libasan into the meson test process. That preload is
+# inherited by host shells and compilers (abi_check's bash, mpicc's gcc),
+# and LeakSanitizer then reports their allocations. ASAN_TEST_PRELOAD is
+# already exported: the interpreter wrappers and the cargo test runner
+# map the runtime only for the process that hosts libseams.
+meson test -C "$build" --print-errorlogs
