@@ -32,10 +32,7 @@ PROCESS_PATTERNS = (
     ("base versus tip", re.compile(r"\bBase [0-9a-f]{7,}\s+vs\b", re.I)),
     ("molecule rendering command", re.compile(r"\brender_molecules\.py\b|--out\s+docs/", re.I)),
     ("missing-player process", re.compile(r"\brenders? no player\b", re.I)),
-    ("documentation test command", re.compile(
-        r"\bmeson test\b[^\n]*\bdocs_[a-z0-9_]+\b|\bdocs_[a-z0-9_]+\b",
-        re.I,
-    )),
+    ("documentation test command", re.compile(r"\bmeson test\b|\bdocs_[a-z0-9_]+\b", re.I)),
     ("continuous-integration process", re.compile(
         r"\bCI (?:executes|runs|mode)\b|\bin CI\b|\bcontinuous integration\b",
         re.I,
@@ -79,6 +76,19 @@ PROCESS_PATTERNS = (
         r"\braw lines\b|\bSource file\s+``|\bRendered from\b",
         re.I,
     )),
+    ("registry publication status", re.compile(r"\bregistry publication\b", re.I)),
+    ("unpublished LuaRocks package", re.compile(
+        r"\bLuaRocks\s+(?:[`~]+\s*)?dseams\b",
+        re.I,
+    )),
+    ("build status badge", re.compile(
+        r"\bBuild Status\b|\bbuilt with nix\b|\bCheck our build status\b",
+        re.I,
+    )),
+)
+
+README_PATTERNS = tuple(
+    item for item in PROCESS_PATTERNS if item[0] != "documentation test command"
 )
 
 SKIP_PARTS = {
@@ -331,7 +341,8 @@ def main() -> int:
         if text == "players.html must not be published":
             errors.append(f"html/{rel}: internal fragment was published")
             continue
-        for label, pattern in PROCESS_PATTERNS:
+        patterns = README_PATTERNS if rel == "README.md" else PROCESS_PATTERNS
+        for label, pattern in patterns:
             for match in pattern.finditer(text):
                 line = text.count("\n", 0, match.start()) + 1
                 errors.append(f"{rel}:{line}: {label}: {match.group(0)}")

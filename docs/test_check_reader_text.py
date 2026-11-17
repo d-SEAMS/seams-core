@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Tests for reader-only text patterns."""
+
+import unittest
+
+from check_reader_text import PROCESS_PATTERNS, README_PATTERNS
+
+
+def labels(text, patterns):
+    return {label for label, pattern in patterns if pattern.search(text)}
+
+
+class ReaderTextPatterns(unittest.TestCase):
+    def test_book_rejects_meson_test(self):
+        self.assertIn(
+            "documentation test command",
+            labels("meson test -C bbdir", PROCESS_PATTERNS),
+        )
+
+    def test_book_rejects_docs_test_name(self):
+        self.assertIn(
+            "documentation test command",
+            labels("docs_reader_text", PROCESS_PATTERNS),
+        )
+
+    def test_readme_allows_build_commands(self):
+        self.assertNotIn(
+            "documentation test command",
+            labels("meson test -C bbdir", README_PATTERNS),
+        )
+
+    def test_rejects_registry_publication_status(self):
+        self.assertIn(
+            "registry publication status",
+            labels("Registry publication may follow the release.", PROCESS_PATTERNS),
+        )
+
+    def test_rejects_luarocks_dseams(self):
+        self.assertIn(
+            "unpublished LuaRocks package",
+            labels("LuaRocks ~dseams~", PROCESS_PATTERNS),
+        )
+
+    def test_rejects_build_status_badges(self):
+        for text in (
+            "![Build Status](badge.svg)",
+            "![built with nix](badge.svg)",
+            "Check our build status here",
+        ):
+            with self.subTest(text=text):
+                self.assertIn(
+                    "build status badge",
+                    labels(text, README_PATTERNS),
+                )
+
+
+if __name__ == "__main__":
+    unittest.main()
