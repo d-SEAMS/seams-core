@@ -89,6 +89,7 @@ jobs:
             --index-files index.html
             --root-dir ${{ github.workspace }}/docs/build
             --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
+            --remap "https://github.com/d-SEAMS/seams-core/blob/main file://${{ github.workspace }}"
             --max-retries 5
             --retry-wait-time 10
             --timeout 30
@@ -193,6 +194,7 @@ jobs:
             --timeout 30
             --max-concurrency 4
             --accept 200,202,206,429
+            --remap "https://github.com/d-SEAMS/seams-core/blob/main file://${{ github.workspace }}"
             --extensions rst,md,org,txt
             --exclude-path docs/source/api
             docs/source README.md CHANGELOG.md

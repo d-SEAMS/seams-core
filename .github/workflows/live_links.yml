@@ -41,5 +41,6 @@ jobs:
             --timeout 30
             --max-concurrency 8
             --accept 200,202,206,429,503
+            --remap "https://github.com/d-SEAMS/seams-core/blob/main file://${{ github.workspace }}"
             --files-from pages.txt
           token: ${{ secrets.GITHUB_TOKEN }}
