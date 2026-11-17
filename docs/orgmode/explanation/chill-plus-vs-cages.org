@@ -12,7 +12,7 @@ the published CHILL+ call (~seams chill-plus~, ~chill::getCorrelPlus~
 / ~getIceTypePlusNoPrint~) read the bond star of an oxygen.
 
 CHILL is Moore et al., /Phys. Chem. Chem. Phys./ 2010, 12, 4124
-(doi:10.1039/b919724a). It averages
+(DOI 10.1039/b919724a). It averages
 \(q_3\) over the four nearest neighbours. A staggered bond is
 \(c(i,j) \le -0.8\). An eclipsed bond lies on
 \(-0.2 \le c(i,j) \le -0.05\). The label is read from those four
