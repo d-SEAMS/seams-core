@@ -16,10 +16,9 @@ meson setup build -Dwith_tests=true
 meson compile -C build
 ```
 
-CI runs an 8-atom `InSitu.observe` check. The box is three edge lengths,
-stored as `0,0,0,lx,ly,lz,0,0,0`. Every label on that cell is cubic (0).
-The test skips when `libseams_lang.so` or NumPy is missing, and fails if a
-box that is neither 3 nor 9 numbers is accepted:
+`meson test -C build insitu_observe` calls `InSitu.observe` on an 8-atom
+cubic cell. Every label is cubic (0). A box that is neither 3 nor 9 numbers
+is rejected.
 
 ```bash
 meson test -C build insitu_observe docs_engine_insitu --print-errorlogs
