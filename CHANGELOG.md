@@ -23,6 +23,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `docs_science_tutorials` keeps a 180 s timeout, and allows 900 s when `b_sanitize` is set. Alone under AddressSanitizer the tutorial takes about 24 s; in the full sanitizer suite it shares the cores and takes more than 180 s.
 - The fused k-nearest graph and linkcell's stage runner are used when that library provides `lc_knearest_csr` and `lc_team_run`. A linkcell 0.4.2 build keeps the in-tree graph and the OpenMP stages.
 - `docs_video_tapes` compares the seams census and the rest of the recording, and no longer treats a LAMMPS warning or its docs URL as part of that result.
+- `docs_sh_cell` compiles its header snippet with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
 
 ## [2.14.0] - 2026-11-15
 
