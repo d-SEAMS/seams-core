@@ -10,15 +10,14 @@ The config named the trajectory and switched analyses on. 2.14 is one
 ~seams~ subcommand, or one call in ~seams.h~ / ~seams_lang.h~, for
 each of those switches.
 
-1.x Lua had plain globals only. v1.0.1 registers them in ~src/main.cpp~
-with ~lua.set_function~. It has no ~dseams~ table and no
-~require("dseams")~. The other Lua names on this page first shipped in
+1.x Lua had plain globals only. It has no ~dseams~ table and no
+~require("dseams")~. v1.0.0 and v1.0.1 register the same globals.
+Later Lua names first shipped in
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] 2.x, which calls
-~seams.h~. No seams-core 2.x release registers Lua names.
+~seams.h~. This repository does not register Lua names.
 
-The same input is used on both sides of a row. ~docs/tutorials/test_migrate.py~
-runs that pair and requires the same counts. ~meson test docs_migrate~
-is that check. It exits when a count differs.
+Each row is one analysis. Where the row has both a command and a C
+call, they read the same trajectory.
 
 * yodaStyle config
 
@@ -29,20 +28,20 @@ is that check. It exits when a count differs.
 | ~topoOneDim~ | ~seams prisms~ | ~seams_frame_prisms~ |
 | ~topoTwoDim~ | ~seams_frame_monolayer~ | ~seams_frame_monolayer~ |
 
-~topoTwoDim~ has no separate subcommand. The monolayer census is
-~seams_frame_monolayer~. The test calls it twice on the mixed TIP4P
-dump and requires the same eight counts.
+~topoTwoDim~ has no ~seams~ subcommand. The monolayer census is
+~seams_frame_monolayer~ (language frame) and ~seams_monolayer~
+(~seams.h~). The counts buffer is indexed by ring size and must hold
+at least ~max_depth + 1~ integers.
+On the mixed TIP4P dump ~input/traj/exampleTraj.lammpstrj~ the call
+takes oxygen type 2.
 
 * Lua globals and later Lua names
 
-The first column holds the exact v1.0.1 globals; v1.0.0 registers the
-same set. A row with no 1.x global is an analysis 1.x did not have; it
-says so and names the yodaStruct release that first shipped it. Each
-yodaStruct column holds the Lua names that release first registered:
-the 2.0.0 globals (also run by ~example_lua/full_api~), the
-~require("dseams")~ table from 2.2.0 (~require("yoda")~, a separate
-helper table in 2.1.0, resolves to it from 2.2.0), and the later
-additions. Each row ends in the 2.14 replacement.
+The first column is the v1.0.1 global. v1.0.0 registers the same
+names. A row marked new in 2.x had no 1.x global; the parenthetical
+is the yodaStruct release that added the Lua names. Each later column
+is the name that release first registered. ~require("dseams")~ starts
+at yodaStruct 2.2.0. The last two columns are the 2.14 replacement.
 
 | 1.x global (v1.0.1) | yodaStruct 2.0.0 | yodaStruct 2.2.0 | yodaStruct 2.4.1 | yodaStruct 2.7.0 | yodaStruct 2.8.0 | yodaStruct 2.9.0 | 2.14 command | 2.14 C call |
 |---------------------+------------------+------------------+------------------+------------------+------------------+------------------+--------------+-------------|
@@ -65,34 +64,60 @@ additions. Each row ends in the 2.14 replacement.
 | new in 2.x (yodaStruct 2.7.0) |  |  |  | ~contactPairs~ / ~dseams.pairs~ |  |  | ~seams pairs~ | ~seams pairs~ |
 | new in 2.x (yodaStruct 2.7.0) |  |  |  | ~domainStats~ / ~dseams.domain~ |  |  | ~seams domains~ | ~seams domains~ |
 
-~readLammpsTrjO~, ~getCorrelPlus~, ~ringNetwork~, ~neighListO~ and the
-other 2.0.0 names are the C++ functions behind the 1.x globals; v1.0.1
-bound them under the names in the first column. ~calcRDF~ in 1.x is the
-in-plane RDF of the monolayer script (~rdf2Danalysis_AA~). The 3D RDF
-that ~seams rdf~ prints first reached Lua as ~calcRDF3D~.
+The 2.0.0 column names C++ functions in this tree (~readLammpsTrjO~,
+~getCorrelPlus~, ~ringNetwork~, ~neighListO~, and the others). 1.x
+called them under the globals in the first column.
+~calcRDF~ in 1.x is the in-plane RDF of the monolayer script
+(~rdf2Danalysis_AA~). The 3D RDF that ~seams rdf~ prints first reached
+Lua as ~calcRDF3D~.
 ~ringAnalysis~ is the 1.x ~topoTwoDim~ ring census and ~prismAnalysis~
-the 1.x ~topoOneDim~ one; both kept their names in yodaStruct.
-~bulkPrimitiveRings~ and ~shapeMatching~ are yodaStruct example folders,
-not Lua names.
+the 1.x ~topoOneDim~ one. No later column registers a new Lua name
+for either.
 
-The 2015 rule and the OVITO rule are selected with ~--rule~, and in
-Python with pydseamslib's ~dseams.PUBLISHED~ or ~dseams.OVITO~. The
-walk-through is
+The 2015 rule and the OVITO rule are selected with ~--rule~.
+The walk-through is
 [[file:../../explanation/chill-plus-rules.org][the published rule and the OVITO rule]].
 
-Neighbours are the one row with two C calls and no text command.
+Neighbours have no ~seams~ subcommand. There are two rows.
 ~seams_frame_neighbours~ counts the directed pairs on the language
-frame. ~seams_neighbours_build~ builds the same list through
-~seams.h~. The cutoff row uses graph ~cutoff~. The k-NN row uses
-graph ~mutual~. The test requires the two pair counts to be equal.
+frame. ~seams_neighbours_build~ builds that list through ~seams.h~.
+The cutoff row uses graph ~cutoff~. The k-nearest row uses graph
+~mutual~. The two calls report the same pair count.
 
-Hydrogen bonds, coordination, the density profile, the topology key,
-contact pairs, and domains are the command itself. The test runs each
-command on ~input/traj/exampleTraj.lammpstrj~ and checks the printed
-line: 460 hydrogen bonds, coordination 9.144, the first density bin,
-89 fingerprint classes, pair count 0, and a polar domain of 750.
+Hydrogen bonds, coordination, the density profile, the fingerprint,
+contact pairs, and domains repeat the command in the last column.
+The functions in ~seams.h~ are ~seams_hbonds~, ~seams_coordination~,
+~seams_density_axis~, ~seams_fingerprint~, ~seams_contact_pairs~, and
+~seams_domains~.
+
+On ~input/traj/exampleTraj.lammpstrj~:
+
+#+begin_src bash
+seams hbonds input/traj/exampleTraj.lammpstrj --type 2 --htype 1
+seams cn input/traj/exampleTraj.lammpstrj --pair-types 1,2 --cutoff 4.5
+seams density-z input/traj/exampleTraj.lammpstrj --type 2 --bins 4
+seams fingerprint input/traj/exampleTraj.lammpstrj --type 2
+seams pairs input/traj/exampleTraj.lammpstrj --site 1=cationHead,2=anion
+seams domains input/traj/exampleTraj.lammpstrj --site 1=cationHead,2=anion --subset polar
+#+end_src
+
+The lines are ~nop 250 hbonds 460~,
+~# types 1 2 cutoff 4.5 cn 9.144 nI 500 nJ 250 volume 288324~,
+~classes 89~, ~contact-pair count 0 nCation 0 nAnion 250~, and
+~subset polar n 750 largest 750 P 1~.
+~density-z~ starts:
+
+#+begin_src text
+# z rho
+29.557 0.000887889
+#+end_src
 
 CHILL+ and rings use the cubic cell ~input/traj/mW_cubic.lammpstrj~,
-type 1, cutoff 3.5 Å. The signature row uses ~input/traj/genice_sI.lammpstrj~
-with ~--cage-edge none~. A published CHILL+ count has to match
-~seams_frame_chill_plus~ on that file, name by name.
+type 1, cutoff 3.5 Å, graph ~cutoff~.
+~seams chill-plus --rule published~ prints ~nop 4096 cubic 4096~.
+~seams rings~ prints ~nop 4096 rings 8192~ and ~6 8192~.
+~seams_frame_chill_plus~ and ~seams_frame_rings~ take that same frame.
+The signature row is ~seams cages --signature 512 --cage-edge none~ on
+~input/traj/genice_sI.lammpstrj~. That command prints
+~nop 46 graph seeded signature 5:12 cages 2 atoms 40~.
+~seams_frame_signature_edge~ takes that same frame.
