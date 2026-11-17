@@ -12,6 +12,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ## [2.14.1] - 2026-11-16
 
+### Added
+
+- The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, and the GCC runtime objects in its binaries.
+
 ### Fixed
 
 - Ring and cage search diagnostics stay on the calling thread. Concurrent searches no longer share the process-global profile, phase and split records, and an OpenMP team copies the calling thread's flags when it starts.
