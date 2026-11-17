@@ -84,7 +84,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Primitive rings and the shortest-path test](https://docs.dseams.info/user/tutorials/paper-rings.md): A ring search first walks every simple cycle up to a chosen size.
 - [Ice growing into brine](https://docs.dseams.info/user/tutorials/paper-brine.md): The front is the height where the crystal slabs stop.
 - [Ice-likeness along a short nucleation run](https://docs.dseams.info/user/tutorials/paper-nucleation.md): Ice-likeness here is the mean Lechner-Dellago \bar q_6.
-- [Science gallery](https://docs.dseams.info/user/tutorials/gallery.md): The pictures are drawn when the book is built, from the same full runs the slow tutorial tests check.
+- [Science gallery](https://docs.dseams.info/user/tutorials/gallery.md): The six pictures are the full paper runs, drawn again by pixi run meson test -C bbdir docs_gallery.
 - [Science tutorials](https://docs.dseams.info/science/index.md): Three calculations from the papers, each run on a small input and checked in the docs job.
 - [Ice/liquid interface and nucleation](https://docs.dseams.info/science/interface.md): The interface dump is input/traj/interface_f0.lammpstrj, 864 waters in a cell 23 by 22 by 53 angstrom.
 - [Brine freezing front](https://docs.dseams.info/science/brine.md): The frames are the 20-pair loading of d-SEAMS/brine-front-230K at revision 4828e33ecf419c70643b2d466bfa4f283b4138dc.
