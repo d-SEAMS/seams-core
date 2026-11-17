@@ -53,6 +53,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The release recipe enables the .con reader when `SEAMS_WITH_READCON=enabled`. A checkout that already contains the readcon wrap leaves the reader off, as does the conda-forge archive.
 - The four-process placement check runs on a four-cpu mask. Each process keeps one cpu, and a sample counts that cpu. A lone process still has to show two cpus in the same sample.
 - The docs workflow check reads `contents: write` from the build-deploy job and stops at the next job.
+- d-SEAMS builds against an installed chemfiles 0.10.4 or a later 0.10 release, including the copy in Chemfiles_jll. The build finds it through `-Dchemfiles_dir`, pkg-config or the CMake package. A cross build with `-Dwith_chemfiles=auto` that finds no chemfiles stops with an error that lists the places it searched, and never builds a copy for the build machine. The option `-Duse_vendored_chemfiles` takes `auto`, `enabled` or `disabled`. CMake builds take `SEAMS_CHEMFILES_DIR` and `SEAMS_USE_VENDORED_CHEMFILES`. With an installed chemfiles 0.10.4, d-SEAMS refuses a MOL2 file with no counts line and an mmCIF file with no `label_entity_id` column and an unset `label_seq_id`. Each gives a message where it used to crash.
 
 ## [2.14.0] - 2026-11-15
 

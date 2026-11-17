@@ -55,11 +55,13 @@ fetches the optional subprojects whose options are ~auto~. Rust
 (~cargo~) is needed for linkcell, minimage and readcon. Options that
 only package builders use:
 
-| Option                    | Effect                                                         |
-|---------------------------+----------------------------------------------------------------|
-| ~-Dwith_blas=disabled~    | Do not link BLAS or LAPACK; nothing calls them yet             |
-| ~-Dwith_readcon=disabled~ | Leave out the readcon-core and readcon-db ~.con~ readers       |
-| ~--wrap-mode=nodownload~  | Fail instead of fetching a subproject                          |
+| Option                              | Effect                                                   |
+|-------------------------------------+----------------------------------------------------------|
+| ~-Dwith_blas=disabled~              | Do not link BLAS or LAPACK; nothing calls them yet       |
+| ~-Dwith_readcon=disabled~           | Leave out the readcon-core and readcon-db ~.con~ readers |
+| ~--wrap-mode=nodownload~            | Fail instead of fetching a subproject                    |
+| ~-Dchemfiles_dir=PREFIX~            | Use the chemfiles installed under PREFIX, and no other   |
+| ~-Duse_vendored_chemfiles=disabled~ | Never fetch and patch chemfiles; see Finding chemfiles   |
 
 * pixi
 
@@ -74,25 +76,68 @@ The default pixi lock includes Highway and chemfiles. Optional pixi
 environments: ~ira~, ~sphericart~, ~nauty~, ~mpi~, ~docs~,
 ~formalanalysis~, ~repro~.
 
+** Finding chemfiles
+
+Meson accepts an installed chemfiles 0.10.4 or a later 0.10 release. It
+searches in this order and keeps the first copy that passes: the prefix
+named by ~-Dchemfiles_dir=PREFIX~, pkg-config, the CMake package, and last
+a ~chemfiles-config.cmake~ under the install prefix or ~CMAKE_PREFIX_PATH~.
+A ~chemfiles_dir~ is searched alone, and an unusable one is an error. The
+last step needs no CMake binary. chemfiles has no ~.pc~ file, and Meson
+trusts a CMake binary for a cross build only when the cross file names
+one, so a cross build reaches the library by that step or by
+~chemfiles_dir~. The version comes from ~chemfiles/config.h~ as well, since
+the engine compiles against that header.
+
+~-Duse_vendored_chemfiles~ takes ~auto~, ~enabled~ or ~disabled~.
+
+- ~auto~ builds the patched copy described below when no installed copy
+  passes. A cross build never does this: with ~-Dwith_chemfiles=auto~
+  it stops with an error that lists what was tried, so a copy built for
+  the build machine cannot end up in a target package and a target package
+  cannot lose the readers unnoticed. ~-Dwith_chemfiles=disabled~ builds
+  without chemfiles on purpose.
+- ~enabled~ always builds the patched copy. A cross build needs the
+  ~cmake_toolchain_file~ property in its cross file.
+- ~disabled~ never builds it. With no installed copy that passes, Meson
+  stops with an error when ~with_chemfiles~ is ~enabled~ or the build is a
+  cross build. A native build with ~with_chemfiles=auto~ goes on without
+  chemfiles and prints the reason. ~cmake/ChemfilesDep.cmake~ always
+  stops with an error here.
+
+A cross build accepts an installed copy on its version alone and prints a
+warning, since the probe below cannot run. ~src/chemfiles_io.cpp~ carries
+its own frame visitor and two guards for such a copy, so the library need
+not carry the ~seams_with_frame~ patch. The guards refuse a MOL2 molecule
+with no counts line. They also refuse an mmCIF ~_atom_site~ loop with no
+~label_entity_id~ column and a ~label_seq_id~ of ~.~ or ~?~. Both give
+error code 4 before chemfiles opens the file, and the read returns an
+empty frame, as for any file chemfiles cannot read. The patched library
+reads the mmCIF file, so it does not need the second guard.
+
 conda-forge chemfiles 0.10.4 writes an mmCIF atom with no residue as
-~label_seq_id~ ~.~ and does not write ~label_entity_id~. The reader
-treats ~.~ as an entity id and dereferences that missing column. A
-read of the written file fails, and a write followed by a read in the
-same process segfaults inside ~mmCIFFormat::read~. Meson compiles
-~cmake/chemfiles_mmcif_probe.cpp~ and reads
-~cmake/mmcif_no_entity.mmcif~, the one-oxygen file that release
-writes. A library that does not return the oxygen at (1, 2, 3) in a
-10 by 11 by 12 cell is left unused. The build then fetches tag 0.10.4
-and applies ~cmake/patches/chemfiles-0.10.4-mmcif.patch~. A library
-that reads the file is kept. ~cmake/ChemfilesDep.cmake~ runs the same
-probe before it accepts an installed copy.
-~SEAMS_CHEMFILES_FORCE_VENDORED~ skips the installed copy. The Meson
-fallback sets it after the probe has already failed. The conda
-compiler puts its own lib directory first on the RPATH, and that
-directory already has ~libchemfiles.so.0.10~. The patched library is
-built as ~libseams-chemfiles~, with the soname
-~libseams-chemfiles.so.0.10~, so the loader does not open the
-unpatched file. That file has no ~seams_with_frame~.
+~label_seq_id~ ~.~ and does not write ~label_entity_id~. The reader then
+treats ~.~ as an entity id and dereferences that missing column. Reading
+the written file fails, and a write followed by a read in the same process
+segfaults inside ~mmCIFFormat::read~.
+
+Meson compiles ~cmake/chemfiles_mmcif_probe.cpp~ and reads
+~cmake/mmcif_no_entity.mmcif~, the one-oxygen file that release writes. A
+library that does not return the oxygen at (1, 2, 3) in a 10 by 11 by 12
+cell is left unused. A native build under ~auto~ then fetches tag 0.10.4
+and applies ~cmake/patches/chemfiles-0.10.4-mmcif.patch~. A library that
+reads the file is kept.
+
+~cmake/ChemfilesDep.cmake~ takes the same choices as
+~SEAMS_USE_VENDORED_CHEMFILES=AUTO|ON|OFF~ and ~SEAMS_CHEMFILES_DIR~, and
+runs the same probe before it accepts an installed copy.
+~SEAMS_CHEMFILES_FORCE_VENDORED~ is the older spelling of
+~SEAMS_USE_VENDORED_CHEMFILES=ON~. The Meson fallback sets it after the
+probe has already failed. The conda compiler puts its own lib directory first on the RPATH, and that
+directory already has ~libchemfiles.so.0.10~. The patched library is built
+as ~libseams-chemfiles~, with the soname ~libseams-chemfiles.so.0.10~, so
+the loader does not open the unpatched file. That file has no
+~seams_with_frame~.
 
 * Nix flake
 
