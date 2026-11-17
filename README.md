@@ -123,7 +123,10 @@ The corresponding `bibtex` entry is:
 The live builds are `pixi` + meson, or the Nix flake. This repository
 builds `libyodaLib`, `libseams`, `libseams_lang`, and the `seams` CLI.
 The package it releases is conda-forge `libseams` (`recipe/`); the Julia
-`libseams_jll` is built from `packaging/yggdrasil`. The language packages
+`libseams_jll` is built from `packaging/yggdrasil`. The linux-x86_64
+archive needs glibc 2.28 or newer and the system OpenMP runtime.
+Debian and Ubuntu ship that runtime as `libgomp1`. RHEL ships it as
+`libgomp`. The language packages
 (`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
 Julia packages) are built and released by their own repositories, listed
 above. `docs/orgmode/howto/install.org` has every install line.
