@@ -159,7 +159,7 @@ seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion'
 seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
 seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
 seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
-seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid
+seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid  # exits 2
 #+end_src
 
 The coordination line is ~# types 1 2 cutoff 6 cn 1.75 nI 4 nJ 4 volume 13824~.

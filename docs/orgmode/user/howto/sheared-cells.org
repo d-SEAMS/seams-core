@@ -80,6 +80,11 @@ hard-wired first minimum.
 
 ~box.size() < 3~ yields an empty neighbour list. A length-3 box
 is orthorhombic. An extended XYZ whose comment carries ~Lattice=~
-is read as that cell: ~seams read templates/hc.xyz~ prints
-~nop 12 frame 1 box 53.969 54.529 51.257~. A triclinic H, with tilt
-~xy xz yz~, comes from a LAMMPS dump.
+is read as that cell.
+
+#+begin_src bash
+seams read templates/hc.xyz
+#+end_src
+
+That prints ~nop 12 frame 1 box 53.969 54.529 51.257~. A triclinic H,
+with tilt ~xy xz yz~, comes from a LAMMPS dump.
