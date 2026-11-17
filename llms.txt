@@ -49,7 +49,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Sheared cells](https://docs.dseams.info/user/howto/sheared-cells.md): You have a triclinic LAMMPS dump and want the engine to use the real cell, not a diagonal of bound spans.
 - [Engines](https://docs.dseams.info/user/engines.md): Read a trajectory from LAMMPS, GROMACS, OpenMM, or PLUMED, or label the frame inside the run.
 - [Run in situ](https://docs.dseams.info/user/tutorials/insitu-run.md): The cubic cell is engines/lammps/ice.data, 64 atoms.
-- [LAMMPS](https://docs.dseams.info/user/howto/engine-lammps.md): The build below used conda-forge LAMMPS 2022.06.23.
+- [LAMMPS](https://docs.dseams.info/user/howto/engine-lammps.md): Build run_hook against conda-forge LAMMPS from 2024.8.29 up through the 2025 releases.
 - [GROMACS](https://docs.dseams.info/user/howto/engine-gromacs.md): Build gmx-seams against conda-forge GROMACS 2026.3, or a later 2026 release.
 - [OpenMM](https://docs.dseams.info/user/howto/engine-openmm.md): The build below used conda-forge OpenMM 8.6.0.
 - [PLUMED](https://docs.dseams.info/user/howto/engine-plumed.md): The thread count comes from PLUMED_NUM_THREADS.
