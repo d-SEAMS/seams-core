@@ -31,7 +31,7 @@ against. Registry publication is independent of the engine release:
 | R | none | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ |
 | Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~, over ~libseams_jll~ |
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
-| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
+| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ |
 
 A Python script keeps working after
 ~pip install -U 'pydseamslib==2.14.0'~.

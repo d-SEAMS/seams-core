@@ -31,6 +31,14 @@ the front undefined.
 
 * The 148-frame mW census
 
+The trajectory is figshare
+[[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]],
+148 frames of 4096 molecules, md5
+~c28fc209a2854d2ba49e8f9b55accbe8~.
+~input/traj/nucleation_three.lammpstrj~ contains its first three
+frames. Save the full trajectory as
+~data/science-frames/nucleation.lammpstrj~, then run:
+
 #+begin_src bash
 science-front nucleation data/science-frames/nucleation.lammpstrj --out-dir science-out
 #+end_src

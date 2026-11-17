@@ -11,6 +11,16 @@ scientific methods, and its results.
 
 * 2.14.1
 
+Linux x86-64 archives require glibc 2.28 or newer, carry their license
+texts, use the system OpenMP runtime, and provide relocatable
+pkg-config files. The archive can read ~.con~ files.
+
+Repeated library calls reuse large allocations by default. Set
+~SEAMS_MALLOC_TUNE=0~ to keep the allocator settings unchanged.
+The k-nearest graph and ring search scale across OpenMP threads, and
+thread placement now cooperates with other processes that share the
+same cores. Set ~SEAMS_PIN=0~ to leave placement to the host.
+
 * 2.14.0
 
 We cut 2.14.0 from tag v2.13.0. The bullets are
@@ -49,6 +59,13 @@ after rotation and scale, and we can attach an IRA, SOFI, or spglib
 report.
 
 * 2.13.0
+
+Decimal options parse without ~std::from_chars~.
+R installs into the user library, where the engine paths are visible.
+The ring search reads one offset and column table, and one thread
+writes the output list. The rings of one atom are one block of that
+list. A cage search is reused only when the undirected edge sets
+match. Bond rows contain sorted neighbour ids.
 
 * 2.12.0
 

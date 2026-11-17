@@ -16,6 +16,14 @@ CHILL+ and the neighbour list against OVITO are rows of the
 
 * freud
 
+Per-atom \(q_4\), \(q_6\), their Lechner-Dellago averages, and their
+means are compared on ideal ice Ih, ideal ice Ic, and a liquid frame.
+All three codes use a strict 3.5 Å minimum-image cutoff. Values for
+atoms with neighbours match pyscal3 to \(10^{-10}\). freud stores
+\(q_l\) as float32, so crystals differ by a few units in the last
+place and a disordered shell has a larger residual. An empty shell is
+0 in d-SEAMS and NaN in freud and pyscal3.
+
 The same cutoff \(q_6\) on the large sitting, and the published
 literature numbers, are in the
 [[file:explanation/performance-h2h.org][performance tables]] and
@@ -23,7 +31,21 @@ literature numbers, are in the
 
 * SQQ
 
+SQQ ring times appear in the
+[[file:explanation/performance-h2h.org][performance tables]] and the
+[[file:howto/literature-h2h.org][literature comparison]]. The
+[[file:explanation/sqq.org][SQQ page]] compares the chordless census
+and the whole-tool timings.
+
 * PLUMED
+
+The [[file:howto/engine-plumed.org][PLUMED engine page]] shows the
+colvar. Its \(q_6\) timing appears in the
+[[file:explanation/performance-h2h.org][performance tables]]. On the
+liquid frame, the difference comes from PLUMED's rational switching
+function rather than the hard cutoff. The
+[[file:howto/literature-reproduce.org][literature reproduction]]
+compares the same quantity with freud.
 
 * ClavisCage TRACE
 

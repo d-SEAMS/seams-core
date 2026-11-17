@@ -213,7 +213,9 @@ CHILL+ uses the 2015 rule, cutoff 3.5 Å: four nearest neighbours, the staggered
 It is not the OVITO Chill+ modifier.
 
 The interface frame is ~interface_f0.lammpstrj~, with 864 mW molecules in a slab.
-The nucleation trajectory is figshare [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]], with 148 frames of 4096 molecules.
+The nucleation trajectory is figshare [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]], md5
+~c28fc209a2854d2ba49e8f9b55accbe8~, with 148 frames of 4096
+molecules.
 Its first frame is the shipped ~input/traj/nucleation_f1.lammpstrj~.
 
 #+CAPTION: Crystal, neighbour-tag and interfacial counts on the interface slab and the first nucleation frame, and the same crystal counts across the 148-frame trajectory. Diamond on the right-hand panel is cubic or hexagonal only.

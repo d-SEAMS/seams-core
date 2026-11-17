@@ -12,7 +12,7 @@ Python, Lua and Fennel, R, Julia, Rust, and Fortran.
 | R            | [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]]             | ~dseams~                         | =libseams_lang= |
 | Julia        | [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]]           | ~Dseams~, ~libseams_jll~         | =libseams=, =libseams_lang= |
 | Rust         | [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]]           | crates ~dseams-sys~, ~dseams~    | =libseams=     |
-| Fortran      | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm ~dseams~                     | =libseams=     |
+| Fortran      | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm Git dependency ~dseams~      | =libseams=     |
 
 Choose the binding for your language from the table below. Each project
 documents its source installation route as well as its package-manager

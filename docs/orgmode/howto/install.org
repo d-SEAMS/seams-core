@@ -57,6 +57,12 @@ only package builders use:
 | ~-Dchemfiles_dir=PREFIX~            | Use the chemfiles installed under PREFIX, and no other   |
 | ~-Duse_vendored_chemfiles=disabled~ | Never fetch and patch chemfiles; see Finding chemfiles   |
 
+| Option                    | Effect                                                   |
+|---------------------------+----------------------------------------------------------|
+| ~-Dwith_blas=disabled~    | Build without BLAS or LAPACK                             |
+| ~-Dwith_readcon=disabled~ | Build without the readcon-core and readcon-db readers    |
+| ~--wrap-mode=nodownload~  | Fail instead of downloading a missing source dependency |
+
 * pixi
 
 #+begin_src bash

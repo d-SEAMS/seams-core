@@ -1,6 +1,6 @@
 # Fortran
 
-The Fortran binding is the fpm package `dseams`.
+The Fortran binding is the fpm Git dependency `dseams`.
 
 ```toml
 [dependencies]

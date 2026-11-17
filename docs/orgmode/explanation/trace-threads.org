@@ -114,6 +114,16 @@ full team is taken three times, 2 ms apart, and the lowest kept. One
 count in a few on an idle machine read a thread that was runnable for a
 moment, and the team ran on seven of eight cpus.
 
+* Contended cores
+
+With all eight cores shared by an eight-thread competing process,
+each result uses eight processes of ten samples. At 110592 molecules,
+the k-nearest graph takes 20.0 ms bound and 19.1 ms unbound, against
+OVITO at 28.2 and 28.3 ms. \(q_6\) takes 12.2 and 11.1 ms against
+OVITO at 23.6 and 23.2 ms. CHILL+ takes 17.1 ms and the shell match
+takes 18.2 ms. Hartigan's dip test on the eight per-process medians
+of each row gives \(p > 0.09\).
+
 * Every kernel
 
 The rings kernel is ~primitive::ringNetwork~ on a neighbour graph built

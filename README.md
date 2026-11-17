@@ -31,19 +31,16 @@ seams cages water.lammpstrj
 
 C and C++ are documented here, as are the GROMACS, LAMMPS, OpenMM, PLUMED
 and in-situ engine drivers. Each other language binding is its own
-repository, released with the same version against the seams-core tag:
+repository:
 
 | Language | Repository | Package |
 |----------|------------|---------|
 | Python | [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) | `pydseamslib` on PyPI (`import dseams`, `import pydseams`) |
-| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | LuaRocks `dseams` (`require("dseams")`) |
-| R | [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r) | `dseams` |
-| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams`, over `libseams_jll` |
+| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | Git source (`require("dseams")`) |
+| R | [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r) | GitHub source |
+| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | Git dependency `Dseams` |
 | Rust | [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs) | crates `dseams-sys`, `dseams` |
-| Fortran | [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran) | fpm `dseams` |
-
-`docs/orgmode/contributing/repositories.org` says what lives where and how
-to develop seams-core and a binding together.
+| Fortran | [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran) | fpm Git dependency `dseams` |
 
 Periodic k-nearest neighbour search is
 [linkcell](https://github.com/d-SEAMS/linkcell).
@@ -51,9 +48,7 @@ Periodic k-nearest neighbour search is
 Build with `pixi run setup && pixi run build && pixi run test`, or with
 the Nix flake: `nix build` and `nix develop`.
 
-Released versions live in [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog).
-Unreleased notes are files under `changelog.d/`. The cut is
-`towncrier build --version X.Y.Z`.
+Released versions live in [CHANGELOG.md](CHANGELOG.md).
 
 # Runtime configuration
 
@@ -122,14 +117,12 @@ The corresponding `bibtex` entry is:
 
 The live builds are `pixi` + meson, or the Nix flake. This repository
 builds `libyodaLib`, `libseams`, `libseams_lang`, and the `seams` CLI.
-The package it releases is conda-forge `libseams` (`recipe/`); the Julia
-`libseams_jll` is built from `packaging/yggdrasil`. The linux-x86_64
-archive needs glibc 2.28 or newer and the system OpenMP runtime.
+The linux-x86_64 archive needs glibc 2.28 or newer and the system
+OpenMP runtime.
 Debian and Ubuntu ship that runtime as `libgomp1`. RHEL ships it as
-`libgomp`. The language packages
-(`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
-Julia packages) are built and released by their own repositories, listed
-above. `docs/orgmode/howto/install.org` has every install line.
+`libgomp`. The binding repositories and their install routes are
+listed above. The [install guide](https://docs.dseams.info/howto/install.html)
+has every install line.
 
 ```bash
 pixi run setup && pixi run build && pixi run test
@@ -357,11 +350,11 @@ The libraries used are:
 - [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
 - [icecream-cpp](https://github.com/renatoGarcia/icecream-cpp) for pretty-printing and debugging
 
-# docs/videos
+# Videos
 
-Picture tracks for the bindings and the tutorials are in `docs/videos`.
-The channel page is [d-SEAMS on Odysee](https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d).
-A player on a docs page uses `https://odysee.com/$/embed/<claim-name>:<claim-id>` after `embed.txt` names that claim.
+Watch the binding and tutorial recordings on the
+[d-SEAMS videos page](https://docs.dseams.info/videos/index.html) or
+[d-SEAMS Odysee channel](https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d).
 
 # Language bindings
 

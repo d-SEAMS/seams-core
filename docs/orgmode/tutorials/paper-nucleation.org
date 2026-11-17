@@ -27,7 +27,8 @@ The mean rises at each stage. The molecular view shows the last frame.
 
 The paper trajectory is figshare
 [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]]:
-148 frames of 4096 molecules.
+148 frames of 4096 molecules, md5
+~c28fc209a2854d2ba49e8f9b55accbe8~.
 Run ~seams steinhardt~ on every frame.
 
 #+begin_src text

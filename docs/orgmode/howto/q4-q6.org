@@ -47,3 +47,8 @@ count and store NaN.
 would put a non-number into every mean, into CHILL+, and into the
 nucleation \(\bar q_6\). The neighbour list already names the empty
 shell: a count of zero is that atom. There is no NaN option.
+
+On a liquid frame, every atom with a non-empty shell matches pyscal3
+to \(10^{-10}\). freud stores \(q_l\) as float32, so its values differ
+by float32 rounding. For an empty shell d-SEAMS returns 0, while freud
+and pyscal3 return NaN.

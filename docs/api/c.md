@@ -52,6 +52,17 @@ behavior.
 
 ## Linking
 
+libseams uses hidden visibility and exports only the `seams_*`
+functions declared in `seams.h`. `SEAMS_API` marks those declarations.
+The library build defines `SEAMS_BUILDING`, which selects `dllexport`
+on Windows; consumers receive `dllimport`. Define `SEAMS_STATIC`
+before including `seams.h` when linking a static archive.
+
+After installing libseams, build the examples out of tree with the
+compiler and linker flags from `pkg-config seams`, or use
+`find_package(seams)` from CMake. The resulting program loads the
+installed libseams.
+
 The 2.13.0 release had no libseams. Its C interface was `seams_lang.h` in
 libseams_lang, which the R and Julia packages still use. `capi_abi_2_13` builds
 libseams_lang with debug info and compares its `seams_*` functions with the 2.13.0
