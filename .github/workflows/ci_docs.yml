@@ -23,6 +23,9 @@ concurrency:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+    # The book renders every still on the CPU. Two hours is enough for
+    # that work; a stuck Cycles or Qt process should fail the job.
+    timeout-minutes: 120
     permissions:
       contents: write
     steps:

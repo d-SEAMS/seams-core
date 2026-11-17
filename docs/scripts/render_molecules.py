@@ -49,7 +49,10 @@ COLUMN_MM = 85.0
 # 8 pt at 85 mm on the 2048-wide still. The scale bar and the legend share it.
 CAPTION_PX = int(round(8.0 / 72.0 * (WIDTH / (COLUMN_MM / 25.4))))
 CAPTION_MARGIN = 128
-RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "2")))
+# The book stores a WIDTH-by-HEIGHT still. A 2x supersample at 256 samples
+# held Publish the book for hours on a 4-core runner. Denoised 64-sample
+# frames at the delivered size stay within a few levels of those stills.
+RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "1")))
 WEB = (960, 720)
 
 # Colors come from scripts/chill_palette.py. Guest colors stay here and
@@ -884,7 +887,7 @@ def orient(positions, view, center):
     return pos
 
 
-CYCLES_SAMPLES = 256
+CYCLES_SAMPLES = 64
 RENDER_ENGINE = "cycles"
 PANEL_NAME = "panel"
 

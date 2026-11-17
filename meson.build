@@ -1620,8 +1620,8 @@ if get_option('with_cli') and get_option('with_tests')
     timeout: 120)
   molecule_env = environment()
   molecule_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
-  # Full publication stills are 4096 px and 256 samples. The test checks
-  # the frame and the palette, which a 2048 px, 64-sample draw already shows.
+  # Publication stills are 2048 px and 64 denoised samples. The test
+  # draws that same frame and checks the palette.
   molecule_env.set('MOLECULES_SCALE', '1')
   molecule_env.set('MOLECULES_SAMPLES', '64')
   test(
