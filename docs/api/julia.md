@@ -6,7 +6,7 @@ tests and release notes. It links the engine through the C API
 (`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
 (`bindings/cxx/seams_lang.h`) that this repository builds and installs.
 
-The binding documentation is at <https://julia.dseams.info/>, and the Julia walkthrough is [on Odysee](https://odysee.com/dseams-julia:ec237bd28c57b7bdfa2996ccc420c16d9799176f).
+The binding documentation is at <https://julia.dseams.info/>, and the Julia walkthrough is [on the video page](https://docs.dseams.info/videos/embeds/julia.html).
 
 Install the current source as a Git dependency:
 
