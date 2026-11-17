@@ -69,6 +69,15 @@ def stable(text):
     text = re.sub(r"(?m)^((?:Pair|Neigh|Comm|Output|Modify|Other)\s+\|).*$", r"\1 TIME", text)
     # LAMMPS notes an unset OMP_NUM_THREADS; the thread count line follows.
     text = re.sub(r"(?m)^OMP_NUM_THREADS environment is not set\..*\n", "", text)
+    # LAMMPS warning text is the build's, not the census. A later LAMMPS
+    # splits "atoms won't move" into that warning plus a docs URL. The
+    # seams lines (lammps calls / hexagonal / six-rings / q6) stay exact.
+    text = re.sub(
+        r"(?m)^For more information see https://docs\.lammps\.org/\S*[^\n]*\n",
+        "",
+        text,
+    )
+    text = re.sub(r"(?m)^WARNING:.*\n", "", text)
     # gmx grompp draws a quote and a seed, and mdrun's timer row moves.
     text = re.sub(r"Setting the LD random seed to \S+", "Setting the LD random seed to SEED", text)
     text = re.sub(r"GROMACS reminds you:.*", "GROMACS reminds you: QUOTE", text)
