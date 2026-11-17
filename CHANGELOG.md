@@ -15,18 +15,20 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Changed
 
 - Public documentation now contains reader instructions and scientific results only. Maintainer workflows, repository policy, provenance pins, and video-production notes have moved out of the published manual.
-- Any skipped test now fails the pixi full-suite CI job. The suite
-  requires `sqq_sh_triclinic`, the six `docs_paper_*_full` checks, and
-  `docs_render_molecules` once it installs their dependencies and
-  enables `paper_full`.
-- `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for `compute dseams`; Meson errors unless `lammps_src_include` points to matching sources. CI jobs that enable LAMMPS now provide that include path.
+- The pixi full-suite now fails whenever a test is skipped, so a passing
+  run confirms that the required analyses and documentation checks all ran.
+- `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
+  `compute dseams`; Meson errors unless `lammps_src_include` points to
+  matching sources.
 
 ### Added
 
 - The release upload waits until fresh Ubuntu 22.04, Rocky Linux 9, and Debian 12 containers have unpacked the linux-x86_64 tarball, compiled `docs/examples/quickstart.c` with the flags `pkg-config` prints for `seams`, and run that program on an eight-molecule ice frame.
 ### Fixed
 
-- Source archives carry every subproject, patched chemfiles source, and pinned tutorial inputs, so the test suite builds and runs without network access.
+- Source archives now include every subproject, the patched chemfiles
+  source, and pinned tutorial inputs, so users can build and test in
+  offline environments.
 - The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
 - The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
 ## [2.14.1] - 2026-11-16

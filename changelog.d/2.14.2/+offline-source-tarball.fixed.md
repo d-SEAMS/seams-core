@@ -1,1 +1,3 @@
-Source archives carry every subproject, patched chemfiles source, and pinned tutorial inputs, so the test suite builds and runs without network access.
+Source archives now include every subproject, the patched chemfiles source,
+and pinned tutorial inputs, so users can build and test in offline
+environments.
