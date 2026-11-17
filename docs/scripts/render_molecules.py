@@ -892,6 +892,68 @@ RENDER_ENGINE = "cycles"
 PANEL_NAME = "panel"
 
 
+def cycles_cache_dir():
+    """Where finished Cycles stills are kept, keyed by their inputs."""
+    chosen = os.environ.get("MOLECULES_CACHE")
+    return Path(chosen) if chosen else ROOT / "docs" / ".cache" / "cycles"
+
+
+def cycles_digest(payload, program):
+    """sha256 of everything a Cycles render reads.
+
+    The child process runs this file, so its bytes stand for the scene
+    code. Each array contributes its name, dtype, shape and bytes.
+    """
+    import hashlib
+
+    import numpy as np
+
+    digest = hashlib.sha256()
+    digest.update(Path(__file__).resolve().read_bytes())
+    digest.update(os.path.realpath(program).encode())
+    for name in sorted(payload):
+        value = np.ascontiguousarray(payload[name])
+        digest.update(name.encode())
+        digest.update(str(value.dtype).encode())
+        digest.update(repr(value.shape).encode())
+        digest.update(value.tobytes())
+    return digest.hexdigest()
+
+
+def cycles_cached(digest):
+    """The stored still and world size for digest, or None."""
+    folder = cycles_cache_dir()
+    picture = folder / (digest + ".png")
+    world = folder / (digest + ".world")
+    if not picture.is_file() or not world.is_file():
+        return None
+    from PIL import Image
+
+    try:
+        image = Image.open(picture).convert("RGBA")
+        image.load()
+        size = float(world.read_text().strip())
+    except (OSError, ValueError):
+        return None
+    # The mtime marks the entry as used by this build; CI drops the rest.
+    os.utime(picture)
+    os.utime(world)
+    print("engine CYCLES cached {}".format(digest[:12]), flush=True)
+    return image, size
+
+
+def cycles_store(digest, image, size):
+    folder = cycles_cache_dir()
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        part = folder / (digest + ".png.part")
+        image.save(part, format="PNG")
+        os.replace(part, folder / (digest + ".png"))
+        (folder / (digest + ".world")).write_text(repr(size) + "\n")
+    except OSError as exc:
+        print("cycles cache not written: {}".format(exc), file=sys.stderr)
+
+
 def cycles_env(base=None):
     """Library path that can load bpy's X11 dependencies.
 
@@ -1446,6 +1508,15 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         payload["mesh_faces_{}".format(slot)] = np.asarray(mesh["faces"], dtype=np.int32)
         payload["mesh_color_{}".format(slot)] = np.asarray(mesh["color"], dtype=np.float64)
         payload["mesh_alpha_{}".format(slot)] = np.float64(mesh.get("alpha", 0.42))
+    digest = cycles_digest(payload, program)
+    cached = cycles_cached(digest)
+    if cached is not None:
+        for path in (handle.name, picture.name):
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+        return cached
     np.savez(handle.name, **payload)
     env = cycles_env()
     env["MOLECULES_CYCLES"] = "1"
@@ -1474,6 +1545,7 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         image = Image.open(picture.name).convert("RGBA")
         image = image.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
         image.load()
+        cycles_store(digest, image, world)
         return image, world
     except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
         print(str(exc), file=sys.stderr)

@@ -67,6 +67,17 @@ jobs:
         run: |
           pixi run -e default sh scripts/install_pydseamslib.sh
           pixi run -e docs sh scripts/install_pydseamslib.sh
+      # render_molecules.py keeps each Cycles still under the sha256 of
+      # its inputs and the script, so a restored still is reused only for
+      # the same scene. The key moves when the stills' inputs do.
+      - name: Cache the Cycles stills
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: docs/.cache/cycles
+          key: docs-cycles-${{ runner.os }}-${{ hashFiles('docs/scripts/render_molecules.py', 'scripts/*.py', 'input/traj/**', 'pixi.lock') }}
+          restore-keys: docs-cycles-${{ runner.os }}-
+      - name: Mark the start of the book build
+        run: mkdir -p docs/.cache/cycles && touch docs/.cache/cycles.stamp
       - name: Publish the book
         env:
           DOCS_CI: "1"
@@ -77,6 +88,9 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${PATH}"
           pixi run -e docs docbld
+      # A still that this build neither drew nor reused is not saved again.
+      - name: Drop Cycles stills this build did not use
+        run: find docs/.cache/cycles -type f ! -newer docs/.cache/cycles.stamp -delete
       - name: Mermaid render
         run: python3 docs/check_mermaid.py
       - name: Lychee
