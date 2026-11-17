@@ -39,7 +39,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Ice-water interface](https://docs.dseams.info/user/tutorials/interface.md): The recording labels this basal frame with published CHILL+: hexagonal 352, water 434, and the stack HHHHHHHH....C.
 - [Nucleation](https://docs.dseams.info/user/tutorials/nucleation.md): The recording reports mean q6-bar on the 148-frame mW trajectory.
 - [Brine and NaCl](https://docs.dseams.info/user/tutorials/brine.md): The recording follows an ice front through a short brine run, then this 864-water frame with nine ions.
-- [Basal profiles and the nucleation census](https://docs.dseams.info/user/howto/science-front.md): science-front walks a LAMMPS dump with the threaded CHILL+, q6 and shell kernels from science/interface-nucleation at 55192e3d.
+- [Basal profiles and the nucleation census](https://docs.dseams.info/user/howto/science-front.md): science-front reads a LAMMPS dump and writes either a basal layer profile or a single-trajectory nucleation census.
 - [From a trajectory to the ice front](https://docs.dseams.info/user/howto/from-trajectory.md): You have a trajectory and want CHILL+ labels, the primitive rings, and the position of the ice front.
 - [Ionic-liquid dumps](https://docs.dseams.info/user/howto/ionic-liquid.md): An ionic-liquid dump is a multi-type frame, and CHILL is the wrong score for the ions.
 - [Confined ice](https://docs.dseams.info/user/confined.md): Ice in a nanotube or a monolayer, and a triclinic cell whose edge lengths are not the bound spans.
