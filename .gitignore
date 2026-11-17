@@ -37,6 +37,12 @@ spack.yml
 subprojects/nanobind-*/
 subprojects/robin-map-*/
 subprojects/packagecache/
+subprojects/Catch2-*/
+subprojects/gpulite/
+subprojects/linkcell/
+subprojects/minimage/
+subprojects/readcon-core/
+subprojects/readcon-db/
 subprojects/vesin/
 
 # Prerequisites

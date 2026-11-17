@@ -129,12 +129,22 @@ if(SEAMS_WITH_CHEMFILES)
   if(NOT _seams_chemfiles_system_ok)
     include(FetchContent)
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-    FetchContent_Declare(
-      chemfiles
-      GIT_REPOSITORY https://github.com/chemfiles/chemfiles.git
-      GIT_TAG 0.10.4
-      GIT_SHALLOW TRUE
-      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+    set(_seams_chemfiles_archive
+      ${CMAKE_CURRENT_LIST_DIR}/vendor/chemfiles-0.10.4.tar.gz)
+    if(EXISTS ${_seams_chemfiles_archive})
+      FetchContent_Declare(
+        chemfiles
+        URL ${_seams_chemfiles_archive}
+        URL_HASH SHA256=b8232ddaae2953538274982838aa6c2df87d300f7e2f80e92c171581e06325ba
+        PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+    else()
+      FetchContent_Declare(
+        chemfiles
+        GIT_REPOSITORY https://github.com/chemfiles/chemfiles.git
+        GIT_TAG 0.10.4
+        GIT_SHALLOW TRUE
+        PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+    endif()
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(CHFL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(CHFL_BUILD_DOCUMENTATION OFF CACHE BOOL "" FORCE)

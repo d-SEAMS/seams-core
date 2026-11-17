@@ -44,8 +44,27 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ meson ninja-build pkg-config libeigen3-dev git curl ca-certificates
+          rustup_sha256=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+          curl --proto '=https' --tlsv1.2 -fsS \
+            -o "$RUNNER_TEMP/rustup-init" \
+            https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init
+          echo "${rustup_sha256}  $RUNNER_TEMP/rustup-init" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/rustup-init"
+          export CARGO_HOME="$RUNNER_TEMP/cargo"
+          export RUSTUP_HOME="$RUNNER_TEMP/rustup"
+          "$RUNNER_TEMP/rustup-init" -y --default-toolchain none --profile minimal
+          . "$CARGO_HOME/env"
+          rustup toolchain install 1.88.0 --profile minimal
+          rustup default 1.88.0
+          meson subprojects download
+          meson setup build-dist -Dwith_tests=false -Dwith_chemfiles=disabled
+          meson dist -C build-dist --include-subprojects --formats gztar --no-tests
           mkdir -p dist
-          git archive --format=tar --prefix="seams-core-${VERSION}/" HEAD | gzip -9n > "dist/seams-core-${VERSION}.tar.gz"
+          cp "build-dist/meson-dist/seams-core-${VERSION}.tar.gz" dist/
       - name: Linux archive on glibc 2.28
         env:
           OUT_DIR: ${{ github.workspace }}/dist
