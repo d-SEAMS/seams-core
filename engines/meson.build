@@ -154,6 +154,9 @@ if lammps_opt.allowed()
         install_rpath: lammps_rpath,
         install: true)
     else
+      if lammps_opt.enabled()
+        error('with_lammps is enabled but LAMMPS class headers are not installed; set lammps_src_include to the matching LAMMPS src directory')
+      endif
       message('LAMMPS class headers are not installed; set lammps_src_include to build compute dseams')
     endif
   endif
