@@ -1,55 +1,54 @@
 #+TITLE: Release-candidate sitting
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
+The tables are the release-candidate sitting of d-SEAMS 2.14.0.
+Ideal ice Ic supplies the neighbour list, \(q_4\), \(q_6\), CHILL+,
+the ring search, and the row stored as PTM, at 110592 and 884736
+molecules. Cages are GenIce sI (46 molecules), sII (136), and the
+sI 2x2x2 cell (368). King's shortest-path count is the fastatomstruct
+table.
 
-The numbers below are ~benchmarks/rc3-sitting.csv~, written by
-~scripts/h2h_rc3_sitting.py~, in the benchmark records dataset. The
-tables below are rendered from that file, with each stored median and
-interquartile range checked against the samples.
+One warm-up is discarded. ~n~ is 6 on every row. The median of an even
+count is the mean of the two central samples. The interquartile range
+is the type-7 gap: the linear quantile at 0.75 minus the linear
+quantile at 0.25.
 
-* Methods
+~threads~ is the width of that row. The worker starts with
+~OMP_NUM_THREADS~ set to that width and ~OMP_DYNAMIC=FALSE~. One
+thread is pinned with ~taskset -c 0~. Eight threads are pinned with
+~taskset -c 0-7~. ~cores~ is the affinity list recorded for the timed
+process. freud, mdapy, vesin, OVITO, and rings-statistics-matter then
+receive that width through their own setters. The PLUMED worker sets
+~OMP_NUM_THREADS~ and does not set ~PLUMED_NUM_THREADS~. Its observable
+is \(Q_l\) with a rational switch, ~R_0~ 0.35, ~D_MAX~ 0.35, ~NN~ 100
+and ~MM~ 200, multiplied by the square root of \(4\pi/(2l+1)\).
 
-One warm-up is discarded. The column ~n~ is the number of timed calls
-that remain. In this file it is 6 on every row. ~samples_ms~ lists
-those calls, in milliseconds, to three decimal places.
+The d-SEAMS rings call is ~seams_frame_rings~ on the cutoff graph, depth
+6, so the neighbour list and the search are one timed call. The rows at
+1000, 4096, 10648, 21952, 32768 and 64000 molecules are the reference
+stored beside King's count. A King size is stored only when the call
+returns inside 600 seconds. At 110592 molecules the rings block stores
+two d-SEAMS rows, both with ~n~ of 6. The table does not mark which of
+those two is the head-to-head call and which is the King reference.
+The 884736-molecule rings row is the head-to-head call.
 
-The median of an even count is the mean of the two central samples
-after sorting. The interquartile range is the type-7 gap: the linear
-quantile at position \(q(n-1)\), with \(q = 0.75\) minus \(q = 0.25\),
-which is ~quantile_linear~ in ~scripts/h2h_protocol.py~. ~median_ms~
-and ~iqr_ms~ are that pair, written to three decimal places.
+The d-SEAMS row stored as PTM is ~seams_frame_symmetry~ with shell RMSD
+0.12. The OVITO row stored as PTM is ~PolyhedralTemplateMatchingModifier~
+with structure ids 6 and 7 enabled.
 
-~threads~ is the width requested for that row. The worker is started
-with ~OMP_NUM_THREADS~ set to that width and ~OMP_DYNAMIC=FALSE~.
-One thread is pinned with ~taskset -c 0~. Eight threads are pinned
-with ~taskset -c 0-7~. Each guest code then receives the same width
-through its own setter (~set_num_threads~, ~OVITO_THREAD_COUNT~,
-~num_threads~ on the Rust ring call, ~n_threads~ for vesin).
-
-~cores~ is ~Cpus_allowed_list~ from ~/proc/self/status~, read in the
-worker. It is the cpu affinity of the timed process, not a model name.
-The host name is not in the file. A one-thread guest that does not
-change its mask reports ~0~. d-SEAMS calls ~seams::widenAffinity~
-before the timed work, which puts back every cpu the kernel still
-allows, so some one-thread d-SEAMS rows report ~0-7~ while OpenMP
-itself was one thread. Every eight-thread row reports ~0-7~.
-
-Ideal ice Ic at 110592 and 884736 molecules is the neighbour, \(q_4\),
-\(q_6\), CHILL+, ring, and PTM block. Cages are the GenIce cells, where
-cages exist. King's shortest-path count is included only at sizes whose
-first call returned within 10 minutes.
+Ice and a TIP4P/ice liquid at 884736 molecules, with widths 1, 2, 4
+and 8, are [[file:performance-h2h.org][the head-to-head]].
+Neighbour and ring rows from the other records are
+[[file:performance-range.org][the size range]].
+What each sitting measures is
+[[file:performance-overview.org][the overview]].
 
 The algorithm pages are
 [[file:primitive-rings.org][primitive rings]],
 [[file:trace-assembly.org][TRACE and signature cages]],
 [[file:symmetry.org][the symmetry classifier]], and
 [[file:hop-ball.org][carried rings]].
-The signature-search widths, and the kernel teams from ~848426f9~, are
+The signature-search widths are
 [[file:trace-threads.org][thread controls]].
 
 #+begin_export rst

@@ -116,7 +116,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Interface and confined ice](https://docs.dseams.info/explanation/interface-order.md): Two published CHILL+ rules, on the same coordinates, with the thresholds left alone.
 - [Linkcell strong scaling](https://docs.dseams.info/explanation/linkcell-scaling.md): An orthorhombic frame is cut across ranks by linkcell's weighted recursive coordinate bisection of the periodic cell grid.
 - [Primitive rings and OVITO FindRings](https://docs.dseams.info/explanation/ovito-findrings.md): A ring is primitive when every pair of its vertices is as close along the ring as it is through the rest of the graph.
-- [Release-candidate sitting](https://docs.dseams.info/explanation/performance.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Release-candidate sitting](https://docs.dseams.info/explanation/performance.md): The tables are the release-candidate sitting of d-SEAMS 2.14.0.
 - [Performance](https://docs.dseams.info/explanation/performance-h2h.md): Head-to-head times for the neighbour list, primitive rings, local q_6, CHILL+, cages, and PTM.
 - [Performance overview](https://docs.dseams.info/explanation/performance-overview.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Performance, 4096 to 110592](https://docs.dseams.info/explanation/performance-range.md): Neighbour lists and primitive rings against freud, OVITO, mdapy, pyscal3, vesin, IRA, PTM, cycless, and every other code that has a neighbour or ring row in benchmarks/*.csv.
