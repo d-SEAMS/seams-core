@@ -43,7 +43,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [From a trajectory to the ice front](https://docs.dseams.info/user/howto/from-trajectory.md): You have a trajectory and want CHILL+ labels, the primitive rings, and the position of the ice front.
 - [Ionic-liquid dumps](https://docs.dseams.info/user/howto/ionic-liquid.md): A multi-type dump is not an ice frame.
 - [Confined ice](https://docs.dseams.info/user/confined.md): Ice in a nanotube or a monolayer, and a triclinic cell whose edge lengths are not the bound spans.
-- [Confined water](https://docs.dseams.info/user/tutorials/confined-water.md): Quasi-one-dimensional ice is a stack of prism blocks (Frame.find_prisms).
+- [Confined water](https://docs.dseams.info/user/tutorials/confined-water.md): Quasi-one-dimensional ice is a stack of prism blocks.
 - [Quasi-one-dimensional ice](https://docs.dseams.info/user/tutorials/nanotube.md): The seams CLI has no prism command.
 - [Confined ice](https://docs.dseams.info/user/howto/confined-ice.md): Classify ice in a nanotube or a monolayer.
 - [Sheared cells](https://docs.dseams.info/user/howto/sheared-cells.md): You have a triclinic LAMMPS dump and want the engine to use the real cell, not a diagonal of bound spans.
