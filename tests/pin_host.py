@@ -184,7 +184,7 @@ if gate:
 threading.Thread(target=sample, daemon=True).start()
 time.sleep(0.02)
 seen.clear()
-end = time.time() + 0.3
+end = time.time() + float(os.environ.get("SEAMS_RUN_S", "0.3"))
 while time.time() < end:
     call()
 stop = True
@@ -262,16 +262,19 @@ def one_placed(env: dict[str, str], prefix: list[str] | None = None) -> tuple[se
     return singles, after, team, cpus
 
 
-def concurrent(n: int) -> list[set[int]]:
+def concurrent(n: int, seconds: list[str] | None = None) -> list[set[int]]:
     env = child_env()
     env["SEAMS_ROOT"] = str(ROOT)
     gate = tempfile.mkdtemp()
     env["SEAMS_WAIT_DIR"] = gate
     env["SEAMS_WAIT_N"] = str(n)
     procs = []
-    for _ in range(n):
+    for k in range(n):
+        child = dict(env)
+        if seconds is not None:
+            child["SEAMS_RUN_S"] = seconds[k]
         procs.append(subprocess.Popen(
-            [sys.executable, "-c", WORKER], env=env,
+            [sys.executable, "-c", WORKER], env=child,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
     sets = []
     for proc in procs:
@@ -424,6 +427,13 @@ def main() -> int:
         stop_copy(flapper)
     print(f"{group} processes beside a part-time copy", flush=True)
     assert_disjoint(beside, f"{group} processes beside a part-time copy")
+
+    # One process of the group finishes first while the others still run.
+    # The others keep the slices they were given; a finished sibling's cpu
+    # is not handed to one of them while another still uses its own.
+    staggered = concurrent(group, ["0.1"] + ["0.6"] * (group - 1))
+    print(f"{group} processes, one finishing first", flush=True)
+    assert_disjoint(staggered, f"{group} processes, one finishing first")
 
     # Narrower process mask. The requested threads must stay inside it.
     narrow = narrow_cpus(mask_cpus())
