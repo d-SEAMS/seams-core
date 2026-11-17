@@ -5,7 +5,7 @@ These pages are for understanding. They are not recipes.
 
 | page | question |
 |------+----------|
-| [[file:architecture.org][Three repositories]] | Why the engine, Python, and Lua are three packages |
+| [[file:architecture.org][Repositories]] | What seams-core, the language packages, and linkcell each build |
 | [[file:c-api.org][The C API]] | Opaque handles, errors, and the analyses libseams exports |
 | [[file:chill-plus-vs-cages.org][CHILL+ versus cages]] | Why the two scores disagree |
 | [[file:chill-plus-rules.org][CHILL+: the published rule and the OVITO rule]] | Four-nearest q3, the neighbour test, and the OVITO shell |
@@ -13,7 +13,7 @@ These pages are for understanding. They are not recipes.
 | [[file:ring-completion.org][Ring-adjacent completion]] | ~ringAdjacentCompletion~ and the seeded flag |
 | [[file:primitive-rings.org][Primitive rings and the full graph]] | Distances on the whole graph, then levels below the source |
 | [[file:ovito-findrings.org][Primitive rings and OVITO FindRings]] | K2,3 has three primitive 4-rings; FindRings reports two |
-| [[file:linkcell-scaling.org][Linkcell strong scaling]] | The weighted cell bisection, its halo, and the measured speedups |
+| [[file:linkcell-scaling.org][Linkcell strong scaling]] | The rank bisection, its halo, and the column split inside one process |
 | [[file:rings-one-thread.org][Rings on one thread]] | ~ringNetwork~ against OVITO FindRings |
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
 | [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
