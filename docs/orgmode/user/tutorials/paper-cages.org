@@ -8,14 +8,20 @@ tell sI from sII from sH. GenIce builds the empty host. Guests would
 sit in the cages and are left out here, because the census is of the
 water rings.
 
-The test writes only the oxygen sites into a LAMMPS dump. Hydrogens
+The run writes only the oxygen sites into a LAMMPS dump. Hydrogens
 and the massless site would change the neighbour list. sI and sII are
-orthogonal. sH is skewed, so the dump keeps the tilt. A window that
-measured bond lengths as if the box were a rectangle would drop the
-long faces. ~--cage-edge none~ is why every primitive ring stays
-eligible.
+orthogonal. Their commands use the default face-edge window,
+~2.65,3.15~ in the angstroms of the dump. sH is skewed. The GenIce
+HS3 cell has a tilt, and the dump keeps it. The sH command passes
+~--cage-edge none~, so a face is kept from its ring census and is not
+filtered by edge length. sI and sII do not pass that flag.
 
-~meson test docs_paper_cages~ checks
+From the repository root, after a pixi build (=bbdir/seams= and
+=bbdir/src=):
+
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py cages bbdir/seams bbdir/src out/cages
+#+end_src
 
 #+begin_src text
 cages sI 2 6
@@ -26,31 +32,42 @@ cages sH 6 4 2
 sI, one cell, 46 waters: 2 of \(5^{12}\) and 6 of \(5^{12}6^{2}\).
 sII, 136 waters: 16 of \(5^{12}\) and 8 of \(5^{12}6^{4}\).
 sH, the GenIce HS3 cell, 68 waters: 6 of \(5^{12}\), 4 of
-\(4^{3}5^{6}6^{3}\), and 2 of \(5^{12}6^{8}\). OVITO draws the sI
-oxygens. The test exits 77 when GenIce or OVITO is absent.
+\(4^{3}5^{6}6^{3}\), and 2 of \(5^{12}6^{8}\). The picture is
+=out/cages/cages.png=, the sI oxygens. The script exits 77 when
+GenIce or OVITO is absent. =pixi run meson test -C bbdir docs_paper_cages= runs the
+same script and checks the three lines. That picture is
+=paper-tutorials/cages/cages.png= in the Meson build directory.
 
 * Full run
 
 The unit cell is already the right cage. A larger host has to hold
 that census times the number of cells, or the count is wrong.
-=snakemake -s docs/tutorials/Snakefile cages= builds sI as 2 by 2 by
-2, eight cells and 368 waters, and sII and sH as 2 by 2 by 1, four
-cells, 544 and 272 waters. sH keeps its tilt. ~--cage-edge none~
-still leaves every primitive ring eligible.
+The full script builds sI as 2 by 2 by 2, eight cells and 368 waters,
+and sII and sH as 2 by 2 by 1, four cells, 544 and 272 waters. sH
+keeps its tilt. ~--cage-edge none~ is still only the sH command.
 
-=meson test --suite slow docs_paper_cages_full= checks
-
-#+begin_src text
-cages full sI 16 48
-cages full sII 64 32
-cages full sH 24 16 8
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py cages-full bbdir/seams bbdir/src out/cages-full
 #+end_src
 
-The run prints 368, 544 and 272 waters, which are eight sI cells and
-four sII and sH cells. The paper unit cells are 46, 136 and 68
-waters. Eight sI cells hold 16 of \(5^{12}\) and 48 of \(5^{12}6^{2}\). Four
+#+begin_src text
+cages full input sI molecules 368 frames 1 file sI-full.lammpstrj
+cages full sI 16 48
+cages full input sII molecules 544 frames 1 file sII-full.lammpstrj
+cages full sII 64 32
+cages full input sH molecules 272 frames 1 file sH-full.lammpstrj
+cages full sH 24 16 8
+cages full paper unit sI molecules 46 cages 2 6
+cages full paper unit sII molecules 136 cages 16 8
+cages full paper unit sH molecules 68 cages 6 4 2
+#+end_src
+
+Eight sI cells hold 16 of \(5^{12}\) and 48 of \(5^{12}6^{2}\). Four
 sII cells hold 64 of \(5^{12}\) and 32 of \(5^{12}6^{4}\). Four sH
 cells hold 24 of \(5^{12}\), 16 of \(4^{3}5^{6}6^{3}\), and 8 of
 \(5^{12}6^{8}\). Each number is the unit-cell count times the number
-of cells. OVITO draws the sI repeat. The test exits 77 when GenIce,
-OVITO, or Snakemake is absent.
+of cells. The picture is =out/cages-full/cages-full.png=, the sI
+repeat. The script exits 77 when GenIce or OVITO is absent.
+=pixi run meson test -C bbdir --suite slow docs_paper_cages_full= checks the same lines
+when the build was configured with =-Dpaper_full=true=. Without that
+option, or when Snakemake is absent, the test exits 77.
