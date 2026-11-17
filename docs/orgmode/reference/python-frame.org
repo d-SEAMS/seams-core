@@ -6,18 +6,19 @@
 #+end_export
 
 ~dseams.userframe.read~ in pydseamslib 2.14.0 returns a ~Frame~ over
-~libseams_lang~. The examples import it under the name ~pydseams~; the
-top-level ~import pydseams~ is the 2.11 ~yoda~ Frame, whose reference
-is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
-Each call below is the example the suite runs, and the line under it is
-the output. The frame is
-~input/traj/ice1h.lammpstrj~, 128 oxygens.
+~libseams_lang~. Install with ~pip install 'pydseamslib==2.14.0'~.
+~import pydseams~ loads ~pydseams.frame.Frame~.
+That class has no ~graph~ argument on ~chill_plus~ and no ~edge~
+argument on ~cages_by_signature~.
+The calls below use ~userframe~. The frame is
+~input/traj/ice1h.lammpstrj~, 128 oxygens, and the line under each
+call is the result on that cell.
 
 * read
 
 #+begin_src python
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> frame.n_atoms
 128
 #+end_src
@@ -25,9 +26,11 @@ the output. The frame is
 * steinhardt
 
 #+begin_src python
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> q = frame.steinhardt(6)
+>>> sorted(q)
+['ql', 'ql_bar']
 >>> len(q["ql"])
 128
 >>> round(sum(q["ql"]) / len(q["ql"]), 6)
@@ -37,8 +40,8 @@ the output. The frame is
 * ring_census
 
 #+begin_src python
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> frame.ring_census(6)
 {6: 256}
 #+end_src
@@ -47,21 +50,22 @@ the output. The frame is
 
 #+begin_src python
 >>> import tempfile
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> radius, values = frame.rdf_2d(tempfile.mkdtemp(), cutoff=6.0, binwidth=0.5)
 >>> len(radius)
 12
->>> round(max(values), 6)
-1.814601
 #+end_src
+
+~len(radius)~ is ~int(cutoff / binwidth)~, here ~int(6.0 / 0.5)~.
+~values~ is ~g(r)~ on those bin centers.
 
 * monolayer_rings
 
 #+begin_src python
 >>> import tempfile
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> sheet = frame.monolayer_rings(tempfile.mkdtemp(), sheet_area=1.0, max_depth=6)
 >>> sheet[6]["count"]
 256
@@ -71,17 +75,20 @@ the output. The frame is
 
 #+begin_src python
 >>> import tempfile
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> frame.find_prisms(output_dir=tempfile.mkdtemp(), max_depth=4)
 [{'size': 3, 'perfect': 0, 'imperfect': 0}, {'size': 4, 'perfect': 0, 'imperfect': 0}]
 #+end_src
 
+~max_depth=4~ asks for prism sizes 3 and 4.
+This cell's primitive rings are the 256 six-rings, so both sizes are empty and both counts stay 0.
+
 * to_ase
 
 #+begin_src python
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> atoms = frame.to_ase()
 >>> len(atoms)
 128
@@ -89,20 +96,26 @@ the output. The frame is
 
 * to_solvis
 
+~to_solvis~ needs solvis-tools. It returns ~solvis.system.System~.
+
 #+begin_src python
->>> from dseams import userframe as pydseams
->>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> type(frame.to_solvis()).__name__
 'System'
 #+end_src
 
-* In-tree ~dseams.Frame~
+* ~dseams.Frame~
 
-~import dseams~ is the module built in this tree. ~dseams.Frame~ stores
-a coordinate array. ~dseams.from_ase~ returns positions and a LAMMPS
-cell, which ~set_frame~ accepts. The calls below are the ice Ih cell
-from the Python recording: 128 waters, 512 neighbour entries, 256
-six-rings, mean q6 0.625855, and 128 hexagonal labels.
+~import dseams~ is the array module in the same pydseamslib wheel.
+This repository does not build it. ~dseams.Frame~ stores a coordinate
+array and calls =include/seams.h=. ~dseams.from_ase~ returns positions
+and a LAMMPS cell, which ~set_frame~ accepts. ~q4q6~ returns the local
+~q4~ and ~q6~ arrays. ~chill_plus()~ returns labels and nine counts;
+index 1 is hexagonal. ~neighbours~ returns a CSR, and the last offset
+is the pair count. On this ice Ih cell that is 128 waters, 512
+neighbour entries, 256 six-rings, mean q6 0.625855, and 128 hexagonal
+labels.
 
 #+begin_src python
 >>> import numpy as np
