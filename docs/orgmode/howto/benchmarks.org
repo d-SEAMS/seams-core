@@ -27,8 +27,8 @@ Say so.
 
 The cutoff is 3.5 Å, and every sample includes the neighbour build.
 Two warm-ups precede ten timed samples. The median is the linear
-percentile at one half, at position \(0.5(n-1)\). The interquartile
-range uses the same estimator at one quarter and three quarters.
+percentile at one half, at position \(0.5(n-1)\).
+The interquartile range is the same estimator at three quarters minus the one at one quarter.
 OVITO's \(q_6\) call also computes degrees 2 through 5 because
 ~max_l~ is the highest requested degree. pyscal3 has no CHILL+
 classifier.

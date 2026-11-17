@@ -148,8 +148,7 @@ seams symmetry input/traj/mW_cubic.lammpstrj --type 1
 
 Python (~pydseamslib~, ~import dseams~ and ~import pydseams~), Lua and
 Fennel, R, Julia, Rust, and Fortran each live in their own repository and
-record the seams-core revision they build against. Registry publication is
-separate and may follow the engine release.
+record the seams-core revision they build against.
 [[file:howto/bindings.org][Use a language binding]] lists them. The
 Frame tutorial is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 

@@ -9,7 +9,7 @@ vesin is the fallback when linkcell is not built.
 |------------+---------+------|
 | [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~, ~libseams~, ~libseams_lang~ | Engine, CLI, C API, language ABI, engine plugins |
 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ | Python: ~import dseams~ and ~import pydseams~ |
-| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ | Lua and Fennel: ~require("dseams")~ |
+| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source | Lua and Fennel: ~require("dseams")~ |
 | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ | R package |
 | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | Julia packages over ~libseams_jll~ |
 | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | ~dseams-sys~, ~dseams~ | Rust crates |
