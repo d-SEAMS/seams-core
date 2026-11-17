@@ -5,17 +5,17 @@ A ring is primitive when every pair of its vertices is as close along
 the ring as it is through the rest of the graph. That is Franzblau's
 shortest-path test (Phys. Rev. B 44, 4925, 1991). OVITO's
 =FindRingsModifier= is a shortest-path census of the same kind of
-ring, and on the frames where both searches stop at six-membered
-rings the two counts agree. It is not a complete primitive census.
-=FindRings= can drop a chordless ring that the Franzblau test keeps.
+ring. On the frames where both searches stop at six-membered rings
+the two counts agree. =FindRings= can also drop a chordless ring that
+the Franzblau test keeps.
 
 * The same bond graph
 
 Both searches on this page use one cutoff, 3.5 Å, and the minimum
 image of the periodic cell. A pair is a bond when its squared
-distance is strictly below the squared cutoff. The comparison is the
-bond list, then the rings. A count that differs while the bond list
-differs is a neighbour-list mismatch, not a ring-definition mismatch.
+distance is strictly below the squared cutoff. Compare the bond lists
+first. The ring counts are a comparison of the ring definitions when
+the two bond lists are the same.
 
 * K2,3
 
@@ -32,8 +32,8 @@ Each pair of opposite vertices on those cycles is at distance 2 in
 the graph, which is the ring distance. All three cycles are
 primitive. =ringNetwork= with maximum size 4 returns the three.
 =FindRings= with the same six bonds and maximum size 4 returns two.
-The missing cycle is primitive, so the smaller count is not a
-stricter definition. It is a ring the search did not emit.
+The missing cycle is primitive. The smaller count is a ring the
+search did not emit.
 
 =tests/test_franzblau_extra.cpp= builds this adjacency and requires
 the three primitive 4-rings. =tests/test_ovito_ring_counts.py= places
@@ -43,23 +43,29 @@ six edges, and checks the OVITO count of 2.
 * The interface frame
 
 =input/traj/interface_f0.lammpstrj= is orthorhombic, 864 atoms, all
-of one type. At 3.5 Å the cutoff graph has 1929 bonds on both sides.
+of type 1. At 3.5 Å the cutoff graph has 1929 bonds.
 =ringNetwork= with maximum size 10 returns 2662 rings. Every one of
 them passes the Franzblau test: for every pair, the shorter arc is a
-breadth-first distance in that 1929-bond graph. =FindRings= on the
-same bonds, with the same maximum size, returns fewer rings at each
-size from 4 through 10. Those missing rings are among the 2662, so
-each of them is primitive.
+breadth-first distance in that 1929-bond graph.
 
-The counts that agree with OVITO elsewhere stop at hexagonal rings
-and use other frames. They do not contradict this frame. A search
-that stopped at size 6 never walks the shortcuts that make a larger
-primitive ring visible, and K2,3 is already a counterexample at size 4.
+| size | rings |
+|------+-------|
+| 3 | 142 |
+| 4 | 188 |
+| 5 | 377 |
+| 6 | 1143 |
+| 7 | 257 |
+| 8 | 54 |
+| 9 | 52 |
+| 10 | 449 |
 
-* What the test asserts
+=tests/test_franzblau_extra.cpp= requires that histogram and requires
+every listed ring to be primitive. The same file's depth-6 bins are
+188, 377 and 1143. =markdown/rings-ic-timing-v4.txt= records
+=FindRings= on this frame at maximum size 6 with those three counts.
 
-=tests/test_ovito_ring_counts.py= does not require the two histograms
-to be equal. It requires the bond counts to match, every d-SEAMS ring
-to be primitive, and each OVITO bin to be at most the primitive bin.
-The K2,3 case is the strict subset: 3 primitive 4-rings, and
-=FindRings= reports 2.
+=tests/test_ovito_ring_counts.py= requires the bond counts to match,
+every d-SEAMS ring to be primitive, and each OVITO bin from size 4
+through 10 to be at most the primitive bin. K2,3 is the strict
+subset: 3 primitive 4-rings, and =FindRings= reports 2. Agreement at
+size 6 on this frame leaves the larger bins to that inequality.
