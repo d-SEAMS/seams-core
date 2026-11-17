@@ -176,8 +176,24 @@ jobs:
       - name: Export the org book
         run: pixi run -e docs mkrst
 
+      # lychee reads the exported sources and the top-level Markdown, with
+      # the same ignore list and retries as the published-site check. A
+      # slow publisher host is retried instead of failing the job.
       - name: Link check
-        run: pixi run -e docs sphinx-build -W --keep-going -j 2 -b linkcheck -d docs/doctrees docs/source docs/linkcheck
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --no-progress
+            --max-retries 3
+            --retry-wait-time 5
+            --timeout 30
+            --max-concurrency 4
+            --accept 200,206,429
+            --extensions rst,md,org,txt
+            --exclude-path docs/source/api
+            docs/source docs/orgmode README.md CHANGELOG.md
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Export the org book for doctest
         run: pixi run -e docs mkrst
