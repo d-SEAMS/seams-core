@@ -2361,11 +2361,21 @@ if get_option('with_tests')
         ],
         depends: [seams_api_lib],
         build_by_default: true)
+      # Under scripts/sanitize_suite.sh only the process that hosts libseams
+      # gets the sanitizer runtime. The harness is that process, so the
+      # shell sets LD_PRELOAD for the exec and is not mapped itself.
       test(
         _fuzz[0],
-        _fuzz_exe,
+        find_program('sh'),
         env: _fuzz_env,
+        depends: _fuzz_exe,
         args: [
+          '-c',
+          'if [ -n "${ASAN_TEST_PRELOAD:-}" ]; then ' +
+            'LD_PRELOAD="$ASAN_TEST_PRELOAD${LD_PRELOAD:+:$LD_PRELOAD}"; export LD_PRELOAD; fi; ' +
+            'exec "$@"',
+          'fuzz',
+          _fuzz_exe.full_path(),
           '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
           '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
         ],
