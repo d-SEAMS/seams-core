@@ -86,7 +86,8 @@ jobs:
             --index-files index.html
             --root-dir ${{ github.workspace }}/docs/build
             --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
-            --max-retries 2
+            --max-retries 5
+            --retry-wait-time 10
             --timeout 30
             --max-concurrency 4
             --extensions html
