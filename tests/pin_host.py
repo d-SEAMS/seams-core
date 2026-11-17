@@ -222,8 +222,13 @@ def main() -> int:
 
     two = concurrent(2)
     assert_disjoint(two, "2 processes")
-    four = concurrent(4)
-    assert_disjoint(four, "4 processes")
+    # Four processes get two cpus each only with eight cpus in the mask.
+    # On fewer, each process holds one cpu, which is not a pinned team.
+    if len(os.sched_getaffinity(0)) >= 8:
+        four = concurrent(4)
+        assert_disjoint(four, "4 processes")
+    else:
+        print(f"4 processes: not run, {len(os.sched_getaffinity(0))} cpus in the mask", flush=True)
 
     # Narrower process mask. Eight requested threads must stay inside it.
     narrow_env = child_env()
@@ -236,10 +241,11 @@ def main() -> int:
     # Host already bound the caller to one cpu. Do not spread.
     bound = child_env()
     bound["SEAMS_ROOT"] = str(ROOT)
-    code = "import os\nos.sched_setaffinity(0, {5})\n" + WORKER
+    host_cpu = max(os.sched_getaffinity(0))
+    code = f"import os\nos.sched_setaffinity(0, {{{host_cpu}}})\n" + WORKER
     singles, _after = parse_pin(run_worker(code, bound))
     print(f"prebound singles={sorted(singles)}", flush=True)
-    if singles - {5}:
+    if singles - {host_cpu}:
         raise SystemExit(f"spread off the host cpu: {singles}")
 
     # Runtime placement is the host's. KMP_AFFINITY is not libgomp's, so
