@@ -21,6 +21,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
   enables `paper_full`.
 - `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for `compute dseams`; Meson errors unless `lammps_src_include` points to matching sources. CI jobs that enable LAMMPS now provide that include path.
 
+### Added
+
+- The release upload waits until fresh Ubuntu 22.04, Rocky Linux 9, and Debian 12 containers have unpacked the linux-x86_64 tarball, compiled `docs/examples/quickstart.c` with the flags `pkg-config` prints for `seams`, and run that program on an eight-molecule ice frame.
 ## [2.14.1] - 2026-11-16
 
 ### Added

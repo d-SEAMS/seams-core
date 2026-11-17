@@ -5,7 +5,10 @@ name: Release
 # containers test that archive before it is uploaded: a C quickstart
 # linked through pkg-config on Debian 12, the same program on the
 # archive rpath, dseams from crates.io on rust:1.85, and
-# dseams-fortran `fpm test` on Ubuntu 24.04.
+# dseams-fortran `fpm test` on Ubuntu 24.04. Ubuntu 22.04, Rocky Linux 9
+# and Debian 12 each unpack that same tarball, compile
+# docs/examples/quickstart.c with pkg-config, and run it on an ice frame.
+# The upload waits for both jobs.
 # GITHUB_TOKEN is the only credential;
 # nothing is published to a package registry.
 on:
@@ -150,8 +153,48 @@ jobs:
             ubuntu:24.04 \
             bash -s < scripts/test_libseams_tarball.sh
 
+  test-distros:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Quickstart on Ubuntu 22.04, Rocky Linux 9 and Debian 12
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
+        run: |
+          set -euo pipefail
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          got=$(sha256sum "$file")
+          got=${got%% *}
+          if [[ -z $TARBALL_SHA256 || $got != "$TARBALL_SHA256" ]]; then
+            printf '%s\n' "artifact sha256 ${got} does not match the build output ${TARBALL_SHA256}" >&2
+            exit 1
+          fi
+          printf '%s\n' "tarball sha256 ${got}"
+          for image in ubuntu:22.04 rockylinux:9 debian:12; do
+            printf '%s\n' "testing ${image} C quickstart on an ice frame"
+            docker run --rm -i \
+              -e VERSION \
+              -e CHECK=c \
+              -e QUICKSTART="$GITHUB_WORKSPACE/quickstart.c" \
+              -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
+              -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+              -v "$GITHUB_WORKSPACE/docs/examples/quickstart.c:$GITHUB_WORKSPACE/quickstart.c:ro" \
+              -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
+              -w "$GITHUB_WORKSPACE" \
+              "$image" \
+              bash -s < scripts/test_libseams_tarball.sh
+          done
+
   publish:
-    needs: [build, test-tarball]
+    needs: [build, test-tarball, test-distros]
     runs-on: ubuntu-latest
     permissions:
       contents: write

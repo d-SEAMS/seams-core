@@ -30,6 +30,8 @@ case $CHECK in
       export DEBIAN_FRONTEND=noninteractive
       apt-get update
       apt-get install -y --no-install-recommends build-essential pkg-config ca-certificates
+    elif command -v dnf; then
+      dnf install -y gcc pkgconf-pkg-config binutils ca-certificates
     else
       printf '%s\n' "no supported package manager" >&2
       exit 1

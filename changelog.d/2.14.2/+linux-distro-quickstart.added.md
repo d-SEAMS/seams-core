@@ -1,0 +1,1 @@
+The release upload waits until fresh Ubuntu 22.04, Rocky Linux 9, and Debian 12 containers have unpacked the linux-x86_64 tarball, compiled `docs/examples/quickstart.c` with the flags `pkg-config` prints for `seams`, and run that program on an eight-molecule ice frame.
