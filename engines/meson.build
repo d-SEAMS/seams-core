@@ -432,6 +432,11 @@ endif
 
 python3_engines = find_program('python3', required: false)
 if python3_engines.found() and get_option('with_tests')
+  test(
+    'openmm_reporter_contract',
+    python3_engines,
+    args: [meson.project_source_root() / 'engines/openmm/test_reporter_contract.py'],
+    timeout: 30)
   openmm_env = environment()
   openmm_env.set('DSEAMS_BUILD', meson.project_build_root())
   openmm_env.set('DSEAMS_SRC', meson.project_source_root())
