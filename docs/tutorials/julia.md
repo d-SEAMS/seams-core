@@ -8,9 +8,8 @@ tests and release notes. It links the engine through the C API
 
 Install the current source as a Git dependency:
 
-```julia
-using Pkg
-Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")
+```bash
+julia -e 'using Pkg; Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")'
 ```
 
 Registration in Julia General and the matching `libseams_jll` release are

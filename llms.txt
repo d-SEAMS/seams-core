@@ -40,6 +40,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Brine freezing front](https://docs.dseams.info/science/brine.html): The frames are the 20-pair loading of d-SEAMS/brine-front-230K at revision 4828e33ecf419c70643b2d466bfa4f283b4138dc.
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.html): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
 - [Science figures](https://docs.dseams.info/science/gallery.html): The four renders used by the science tutorials.
+- [Language tutorials](https://docs.dseams.info/fronts/index.html)
 - [C tutorial](https://docs.dseams.info/fronts/c.html): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): test_seams_api is the seams_c_api test.
 - [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
@@ -99,6 +100,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
 - [2.14.1 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes are built from the fragments in changelog.d/.
+- [Stable API](https://docs.dseams.info/stable/index.html)
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
 - [Python](https://docs.dseams.info/stable/python.html): The Python binding is the pydseamslib distribution, with import dseams.
@@ -111,6 +113,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Science front](https://docs.dseams.info/stable/science.html): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
 - [C API](https://docs.dseams.info/capi/index.html): Every SEAMS_API function in include/seams.h.
 - [Language APIs](https://docs.dseams.info/lang/index.html): seams-core documents the C API and the C++ front here.
+- [API Reference](https://docs.dseams.info/api/index.html): generated_targets.rst group_bond.rst group_prism3.rst group_seams_cpp.rst group_cage.rst group_capi_cage.rst group_chill.rst group_clump.rst group_capi_frame_io.rst group_capi_frame.rst...
 
 ## Engines
 
