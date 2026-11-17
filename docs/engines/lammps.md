@@ -3,11 +3,11 @@
 Meson builds `run_hook`, the in-run hook. It links `liblammps` and registers a
 `fix external` callback. Every step the callback calls the same C API as
 `seams chill-plus`. `engines/lammps/compute_dseams.cpp` is a per-atom style.
-When the LAMMPS class headers are installed, as in EESSI, Meson builds it as
-`dseamsplugin.so` for `plugin load`. conda-forge LAMMPS installs `library.h`
-only; `scripts/fetch_lammps_headers.sh DEST` checks out `src` of the release
-that `lmp` reports and prints its path, and `-Dlammps_src_include=` that path
-builds the plugin. Otherwise copy the file into a LAMMPS source tree. On several MPI ranks the compute gathers every
+When `compute.h`, `atom.h`, and `lammpsplugin.h` are installed, Meson builds
+it as `dseamsplugin.so` for `plugin load`. conda-forge LAMMPS installs
+`library.h` only; `scripts/fetch_lammps_headers.sh DEST` checks out `src` of
+the release that `lmp` reports and prints its path, and `-Dlammps_src_include=`
+that path builds the plugin. Otherwise copy the file into a LAMMPS source tree. On several MPI ranks the compute gathers every
 atom to rank 0, classifies the whole cell once, and returns each rank its
 own labels, so the result does not depend on the domain decomposition.
 
