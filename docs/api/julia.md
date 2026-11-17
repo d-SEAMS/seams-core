@@ -1,14 +1,10 @@
 # Julia
 
-The Julia binding is the Julia package `Dseams`. It lives in its own repository,
-[d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+| package | calls | library |
+| --- | --- | --- |
+| `Dseams` | the language ABI | `libseams_lang` (`bindings/cxx/seams_lang.h`) |
+| `Seams` | the C API | `libseams` (`include/seams.h`) |
 
-The [README](https://github.com/d-SEAMS/Dseams.jl#user-content-a-local-engine-build) of that repository
-gives the install command and a first example.
+Both live in [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl). Neither is in the General registry. The README's local-engine section names `SEAMS_LANG_LIB` and `SEAMS_LIB`.
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/development/repositories.org`
-describes how the repositories fit together.
+The first classification is the {doc}`Julia tutorial </fronts/julia>`.
