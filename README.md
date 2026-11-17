@@ -107,7 +107,7 @@ If you use this software please cite the following:
 The corresponding `bibtex` entry is:
 
     @Article{Goswami2020,
-    author={Goswami, Rohit and Goswami, Amrita and Singh, Jayant Kumar},
+    author={Goswami, Rohit and Goswami, Amrita and Singh, Jayant K.},
     title={d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations},
     journal={Journal of Chemical Information and Modeling},
     year={2020},
