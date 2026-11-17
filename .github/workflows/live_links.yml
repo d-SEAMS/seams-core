@@ -1,0 +1,45 @@
+name: Live links
+# The published book, as readers get it. Every page in the live sitemap is
+# a lychee input, so relative links resolve against the page they are on.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_run:
+    workflows: [Docs]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    if: github.repository == 'd-SEAMS/seams-core'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # docs.dseams.info picks up a deploy a few minutes after the Docs
+      # workflow finishes.
+      - name: Wait for the published build
+        if: github.event_name == 'workflow_run'
+        run: sleep 300
+      - name: Page list from the sitemap
+        run: |
+          curl -fsSL https://docs.dseams.info/sitemap.xml \
+            | grep -oE '<loc>[^<]+</loc>' | sed -E 's#</?loc>##g' > pages.txt
+          test -s pages.txt
+          wc -l pages.txt
+      - name: Lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --no-progress
+            --max-retries 3
+            --retry-wait-time 5
+            --timeout 30
+            --max-concurrency 8
+            --accept 200,202,206,429,503
+            --files-from pages.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
