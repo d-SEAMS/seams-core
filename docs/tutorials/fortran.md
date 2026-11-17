@@ -1,16 +1,20 @@
 # Fortran
 
-The Fortran binding is the fpm package `dseams`. It lives in its own repository,
-[d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+Classify ice Ih from Fortran. The recording uses `input/traj/ice1h.lammpstrj`: `seams read` prints `nop 128`, and published CHILL+ at a 3.5 angstrom cutoff prints `nop 128 hexagonal 128`.
 
-```toml
-[dependencies]
-dseams = { git = "https://github.com/d-SEAMS/dseams-fortran", tag = "v2.14.0" }
+```{eval-rst}
+.. include:: ../videos/embeds/fortran.rst
 ```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/development/repositories.org`
-describes how the repositories fit together.
+The binding is the fpm package `dseams` in [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran). Programs use the module `seams`. `seams_c` is the `iso_c_binding` image of `include/seams.h`. The package links an installed `libseams` and does not build the engine.
+
+The README's fpm dependency names the git tag `v2.14.0`. That tag is not on the repository, so the dependency line does not resolve. The README is the install once the tag exists.
+
+The same two engine commands, without the package:
+
+```bash
+seams read input/traj/ice1h.lammpstrj
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+Module names are the {doc}`Fortran API </stable/fortran>`.

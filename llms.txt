@@ -65,7 +65,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Language walkthroughs](https://docs.dseams.info/user/languages.md): The same ice cell from C, C++, and each binding, and from each engine driver.
 - [C tutorial](https://docs.dseams.info/fronts/c.md): Label the eight-atom cubic cell with seams.h and print the library version.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.md): Classify the eight-atom cubic cell with include/seams.hpp, then the ice Ih dump.
-- [Fortran](https://docs.dseams.info/fronts/fortran.md): The Fortran binding is the fpm package dseams.
+- [Fortran](https://docs.dseams.info/fronts/fortran.md): Classify ice Ih from Fortran. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
 - [Julia](https://docs.dseams.info/fronts/julia.md): Classify ice Ih from Julia. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
 - [Lua and Fennel](https://docs.dseams.info/fronts/lua.md): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
 - [Python](https://docs.dseams.info/fronts/python.md): Classify ice Ih from Python. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
