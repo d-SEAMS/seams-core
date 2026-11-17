@@ -41,7 +41,7 @@ def pages():
         rel = path.relative_to(ROOT / "docs")
         if rel.parts[:1] == ("source",) and (len(rel.parts) < 2 or rel.parts[1] != "lang"):
             continue
-        if "videos" in rel.parts:
+        if "videos" in rel.parts or ".cache" in rel.parts:
             continue
         found.append(path)
     return sorted(found)

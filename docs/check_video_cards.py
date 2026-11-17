@@ -33,6 +33,8 @@ def pages():
     for path in docs.rglob("*"):
         if not path.is_file() or path.resolve() == SELF:
             continue
+        if ".cache" in path.relative_to(docs).parts:
+            continue
         if path.suffix in {".md", ".org", ".rst", ".py"}:
             found.append(path)
     return found
