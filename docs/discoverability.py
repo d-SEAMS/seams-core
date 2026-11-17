@@ -846,6 +846,72 @@ def _llms_full(outdir):
     (outdir / "llms.txt").write_text(text, encoding="utf-8")
 
 
+def full_manual_problems(text):
+    """Problems with a concatenated manual. Empty when the text is one."""
+    problems = []
+    if len(text) < 1000:
+        problems.append("llms-full.txt is too small to be the manual")
+    if "docs.dseams.info/getting-started/quickstart.md" not in text:
+        problems.append("llms-full.txt does not contain the quickstart page")
+    return problems
+
+
+def write_manual_for_linkcheck(directory):
+    """Write ``llms-full.txt`` for the linkcheck builder.
+
+    The assistants page links ``https://docs.dseams.info/llms-full.txt``.
+    The HTML build writes that file from the Markdown twins after it
+    renders each page. Linkcheck does not render those twins, and the
+    published site does not have the file until this book is deployed,
+    so a request to the live URL is a 404. The same writer runs here
+    on the source of each page ``llms.txt`` names. Sphinx then checks
+    the absolute path as a local file.
+    """
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    module = _llms()
+    seen = set()
+    for match in re.finditer(
+        r"\((https://docs\.dseams\.info/[^)\s]+\.md)\)", module.render()
+    ):
+        url = match.group(1)
+        if url in seen:
+            continue
+        seen.add(url)
+        rel = urlsplit(url).path.lstrip("/")
+        name = rel[:-3] if rel.endswith(".md") else rel
+        source = module.source_of(name)
+        if source is None:
+            continue
+        twin = directory / rel
+        twin.parent.mkdir(parents=True, exist_ok=True)
+        twin.write_text(
+            "<!-- {} -->\n\n{}\n".format(url, source.read_text(encoding="utf-8").rstrip()),
+            encoding="utf-8",
+        )
+    _llms_full(directory)
+    manual = directory / "llms-full.txt"
+    problems = full_manual_problems(manual.read_text(encoding="utf-8"))
+    if problems:
+        raise RuntimeError("llms-full.txt is not the manual: " + "; ".join(problems))
+    return manual
+
+
+def _on_linkcheck_uri(app, uri):
+    """Resolve the one-file manual to the file this build writes."""
+    if uri.split("#", 1)[0] != SITE + "/llms-full.txt":
+        return None
+    builder = getattr(app, "builder", None)
+    if builder is not None and getattr(builder, "name", None) != "linkcheck":
+        return None
+    cached = getattr(_on_linkcheck_uri, "path", None)
+    if cached is None:
+        manual = write_manual_for_linkcheck(ROOT / "docs" / ".cache" / "llms-linkcheck")
+        cached = str(manual.resolve())
+        _on_linkcheck_uri.path = cached
+    return cached
+
+
 def _on_finished(app, exception):
     if exception is not None or getattr(app.builder, "format", None) != "html":
         return
@@ -865,3 +931,4 @@ def connect(app):
     app.connect("doctree-resolved", _on_doctree)
     app.connect("html-page-context", _on_page, priority=800)
     app.connect("build-finished", _on_finished, priority=800)
+    app.connect("linkcheck-process-uri", _on_linkcheck_uri)

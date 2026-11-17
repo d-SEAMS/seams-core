@@ -635,10 +635,9 @@ def build_problems():
     full = BUILD / "llms-full.txt"
     if not full.is_file():
         problems.append("llms-full.txt is missing")
-    elif full.stat().st_size < 1000:
-        problems.append("llms-full.txt is too small to be the manual")
-    elif "docs.dseams.info/getting-started/quickstart.md" not in full.read_text(encoding="utf-8", errors="replace"):
-        problems.append("llms-full.txt does not contain the quickstart page")
+    else:
+        problems.extend(pub.full_manual_problems(
+            full.read_text(encoding="utf-8", errors="replace")))
     return problems
 
 
@@ -716,10 +715,33 @@ def source_problems():
     return problems
 
 
+def linkcheck_manual_problems():
+    """The linkcheck stand-in is a real manual, and other URLs stay remote."""
+    problems = []
+
+    class Html:
+        class builder:
+            name = "html"
+
+    if pub._on_linkcheck_uri(None, pub.SITE + "/llms.txt") is not None:
+        problems.append("linkcheck rewrote llms.txt")
+    if pub._on_linkcheck_uri(Html(), pub.SITE + "/llms-full.txt") is not None:
+        problems.append("the HTML builder rewrote llms-full.txt")
+    resolved = pub._on_linkcheck_uri(None, pub.SITE + "/llms-full.txt")
+    if not resolved or not Path(resolved).is_file():
+        return problems + ["linkcheck did not resolve llms-full.txt to a file"]
+    text = Path(resolved).read_text(encoding="utf-8")
+    problems.extend(pub.full_manual_problems(text))
+    if "#+TITLE:" not in text:
+        problems.append("linkcheck manual is not assembled from the Org sources")
+    return problems
+
+
 def self_test():
     problems = []
     problems.extend(source_problems())
     problems.extend(fixture_problems())
+    problems.extend(linkcheck_manual_problems())
     # conf.py still parses. The book imports it; a syntax error fails the build.
     ast.parse((DOCS / "source" / "conf.py").read_text(encoding="utf-8"))
     return problems
