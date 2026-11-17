@@ -5,37 +5,56 @@
 .. include:: ../../videos/embeds/rings.rst
 #+end_export
 
-A primitive ring is a cycle that survives the Franzblau shortest-path test.
-For every pair of vertices on the cycle, a shortest path between them lies on the cycle.
-Distances are read on the whole graph, and only then are levels below the source cleared.
-The hexagon with vertex 0 joined to vertices 1 and 4 is the worked example on the primitive-rings page.
-~pydseams.band.ring_census~ counts those rings on the frame's default graph.
-A type-2 read of this dump uses the hydrogen-bond list: one three-ring, 230 four-rings, four five-rings, and 192 six-rings.
-~dseams.userframe~ ~Frame.ring_census(8, graph="cutoff")~ uses the neighbour list inside 3.5 angstrom: 37 three-rings, 273 four-rings, 34 five-rings, and 167 six-rings.
+The recording counts primitive rings on the mixed TIP4P frame, 511
+rings, then the 256 six-rings of ice Ih.
 
-The runnable copy of the hydrogen-bond census is =docs/tutorials/test_rings.py=.
+A primitive ring is a cycle that passes Franzblau's shortest-path test.
+For every pair of vertices on the cycle, a shortest path between them
+lies on the cycle. The worked example is on
+[[file:../../explanation/primitive-rings.org][Primitive rings and the full graph]].
 
-#+begin_src python
-import pydseams as ds
-from pydseams.band import ring_census
+~seams rings~ counts those rings on the cutoff neighbour list. The
+default cutoff is 3.5 Å. The default deepest ring is 6.
 
-frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
-print(ring_census(frame, max_size=8))
-assert ring_census(frame, max_size=8) == {3: 1, 4: 230, 5: 4, 6: 192}
-from dseams import userframe
+* The mixed frame
 
-cutoff = userframe.read("input/traj/exampleTraj.lammpstrj", atom_type=2).ring_census(8, graph="cutoff")
-print(cutoff)
-assert cutoff == {3: 37, 4: 273, 5: 34, 6: 167}
+=input/traj/exampleTraj.lammpstrj= has 750 atoms. Type 2 is the 250
+oxygens. Type 1 is hydrogen.
+
+#+begin_src bash
+seams rings input/traj/exampleTraj.lammpstrj --type 2 --cutoff 3.5
 #+end_src
 
-The CLI CHILL+ graph is the mutual four-nearest list, so a census of that graph is a different number.
+#+begin_example
+nop 250 rings 511
+3 37
+4 273
+5 34
+6 167
+#+end_example
+
+The histogram is 37 three-rings, 273 four-rings, 34 five-rings, and 167
+six-rings. ~--max-ring 8~ prints the same histogram.
+
+* Ice Ih
+
+#+begin_src bash
+seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5
+#+end_src
+
+#+begin_example
+nop 128 rings 256
+6 256
+#+end_example
+
+The default census stops at six-membered rings. This cell has 256 of
+them. A deeper ~--max-ring~ also reports larger rings. With
+~--max-ring 12~ the extra lines are ~8 352~, ~10 512~, and ~12 512~.
 
 #+begin_export rst
 .. figure:: molecules/rings/overlay-web.png
    :width: 480px
-   :alt: Five- and six-rings on the sI host.
+   :alt: Five-rings and six-rings of the sI host.
 
-   Five- and six-rings on the sI host. ``python docs/scripts/render_molecules.py --slug rings`` writes the 2400 by 1800 still.
+   Five-rings and six-rings of the sI host, drawn on the oxygen cell.
 #+end_export
-

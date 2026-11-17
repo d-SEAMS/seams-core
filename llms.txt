@@ -27,7 +27,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [CHILL+](https://docs.dseams.info/user/howto/chill-plus.md): Label every oxygen with the published CHILL+ rule, or with the OVITO rule.
 - [The symmetry classifier](https://docs.dseams.info/user/howto/symmetry-classifier.md): Name the ice shell of each oxygen.
 - [Rings, cages, and order](https://docs.dseams.info/user/order.md): Primitive rings, cage signatures, Steinhardt parameters, and the neighbour list they share.
-- [Primitive rings](https://docs.dseams.info/user/tutorials/rings.md): A primitive ring is a cycle that survives the Franzblau shortest-path test.
+- [Primitive rings](https://docs.dseams.info/user/tutorials/rings.md): The recording counts primitive rings on the mixed TIP4P frame, 511 rings, then the 256 six-rings of ice Ih.
 - [Bond-orientational order parameters](https://docs.dseams.info/user/tutorials/order-parameters.md): The local Steinhardt parameter of atom i is
 - [Primitive rings](https://docs.dseams.info/user/howto/rings.md): Count primitive rings on a frame you already have.
 - [Cages and TRACE](https://docs.dseams.info/user/howto/cages-trace.md): Ask which molecules sit in a complete ice cage, or which polyhedra match a ring-size signature.
