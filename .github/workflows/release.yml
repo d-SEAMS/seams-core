@@ -106,8 +106,10 @@ jobs:
             -e VERSION \
             -e CHECK=c \
             -e QUICKSTART="$GITHUB_WORKSPACE/quickstart.c" \
+            -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
             -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
             -v "$GITHUB_WORKSPACE/docs/examples/quickstart.c:$GITHUB_WORKSPACE/quickstart.c:ro" \
+            -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
             -w "$GITHUB_WORKSPACE" \
             debian:12 \
             bash -s < scripts/test_libseams_tarball.sh
@@ -115,7 +117,9 @@ jobs:
           docker run --rm -i \
             -e VERSION \
             -e CHECK=rust \
+            -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
             -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
             -w "$GITHUB_WORKSPACE" \
             rust:1.85 \
             bash -s < scripts/test_libseams_tarball.sh
@@ -123,7 +127,9 @@ jobs:
           docker run --rm -i \
             -e VERSION \
             -e CHECK=fortran \
+            -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
             -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
             -w "$GITHUB_WORKSPACE" \
             ubuntu:24.04 \
             bash -s < scripts/test_libseams_tarball.sh

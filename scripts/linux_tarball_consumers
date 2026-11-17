@@ -1,0 +1,4 @@
+# Binding versions installed by scripts/test_libseams_tarball.sh.
+# dseams is the crates.io version. dseams_fortran is the git tag.
+dseams=2.14.0
+dseams_fortran=v2.14.0

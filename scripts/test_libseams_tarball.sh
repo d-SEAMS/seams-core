@@ -4,14 +4,25 @@
 # does not have the build tree. CHECK selects one of three runs:
 #   c        compile docs/examples/quickstart.c with pkg-config,
 #            then again with the archive rpath and no library path
-#   rust     cargo add dseams@2.14.0, without the bundled feature
-#   fortran  dseams-fortran v2.14.0 `fpm test`
+#   rust     cargo add dseams, without the bundled feature
+#   fortran  dseams-fortran `fpm test`
 set -euo pipefail
 
-if [[ -z ${VERSION:-} || -z ${CHECK:-} ]]; then
-  printf '%s\n' "VERSION and CHECK are required" >&2
+if [[ -z ${VERSION:-} || -z ${CHECK:-} || -z ${CONSUMERS:-} ]]; then
+  printf '%s\n' "VERSION, CHECK and CONSUMERS are required" >&2
   exit 1
 fi
+if [[ ! -f $CONSUMERS ]]; then
+  printf '%s\n' "CONSUMERS file is missing" >&2
+  exit 1
+fi
+dseams_version=$(awk -F= '$1 == "dseams" { print $2 }' "$CONSUMERS")
+dseams_fortran=$(awk -F= '$1 == "dseams_fortran" { print $2 }' "$CONSUMERS")
+if [[ -z $dseams_version || -z $dseams_fortran ]]; then
+  printf '%s\n' "CONSUMERS file has no dseams or dseams_fortran version" >&2
+  exit 1
+fi
+printf '%s\n' "tarball ${VERSION} is tested against dseams ${dseams_version} and dseams-fortran ${dseams_fortran}"
 
 case $CHECK in
   c|rust)
@@ -142,7 +153,7 @@ case $CHECK in
       cd "$rdir"
       cargo new readme_example
       cd readme_example
-      cargo add dseams@2.14.0
+      cargo add "dseams@${dseams_version}"
       if grep -q bundled Cargo.toml; then
         printf '%s\n' "dseams was added with the bundled feature" >&2
         exit 1
@@ -187,7 +198,7 @@ EOF
     curl -fsSL -o "$stage/fpm.F90" \
       https://github.com/fortran-lang/fpm/releases/download/current/fpm.F90
     gfortran -o "$stage/fpm" "$stage/fpm.F90"
-    git clone --depth 1 --branch v2.14.0 \
+    git clone --depth 1 --branch "$dseams_fortran" \
       https://github.com/d-SEAMS/dseams-fortran.git \
       "$stage/dseams-fortran"
     export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
