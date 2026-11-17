@@ -10,6 +10,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.1] - 2026-11-17
+
+### Fixed
+
+- A build without the AVX-512 kernels, which is every non-x86_64 host, compiles out the eight-bond `ylmAdd8` path in `cutoffSolid`. An unoptimized clang build on macOS arm64 or Linux aarch64 failed to link with an undefined `seams::ylm::ylmAdd8`. A macOS arm64 CI job links the libraries at `-O0`.
+
 ## [2.14.0] - 2026-11-15
 
 ### Added
