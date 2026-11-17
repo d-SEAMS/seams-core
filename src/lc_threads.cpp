@@ -137,6 +137,14 @@ double gBegan = 0.0;
 double gBusyAt = -1.0e9;
 int gNarrow = 0;
 bool gCrowded = false;
+// The sharers and the slice of the last split. A family that only loses
+// members keeps it: re-splitting while the others still run their
+// current calls moves ranks, and two of them meet on one cpu.
+int gHeldIds[68];
+int gHeldN = 0;
+int gHeldPlan[kMaxCpu];
+int gHeldPlanN = 0;
+int gHeldParts = 1;
 bool gPinned = false;
 bool gMarked = false;
 constexpr double kCalm = 1.0;
@@ -462,6 +470,24 @@ void choosePlan(int width) {
         ids[nids++] = owners[i];
       }
   }
+  std::sort(ids, ids + nids);
+  if (gHeldN > 1 && nids <= gHeldN) {
+    bool subset = true;
+    for (int i = 0; i < nids && subset; ++i) {
+      subset = std::binary_search(gHeldIds, gHeldIds + gHeldN, ids[i]);
+    }
+    if (subset) {
+      for (int i = 0; i < gHeldPlanN; ++i) {
+        gPlan[i] = gHeldPlan[i];
+      }
+      gPlanN = gHeldPlanN;
+      gParts = gHeldParts;
+      gDecided = true;
+      gRescan = false;
+      return;
+    }
+  }
+  gHeldN = 0;
   if (nids < 2) {
     // Only a look that would narrow a full team is taken again, so a
     // crowded process does not sleep on the timed call that looks.
@@ -504,7 +530,6 @@ void choosePlan(int width) {
   if (parts > gAllowedN) {
     parts = gAllowedN;
   }
-  std::sort(ids, ids + nids);
   int rank = static_cast<int>(static_cast<unsigned>(getpid()) % static_cast<unsigned>(parts));
   for (int i = 0; i < nids; ++i) {
     if (ids[i] == static_cast<int>(getpid())) {
@@ -529,9 +554,16 @@ void choosePlan(int width) {
   }
   for (int i = 0; i < nslice; ++i) {
     gPlan[i] = slice[i];
+    gHeldPlan[i] = slice[i];
   }
   gPlanN = nslice;
   gParts = parts;
+  gHeldPlanN = nslice;
+  gHeldParts = parts;
+  for (int i = 0; i < nids; ++i) {
+    gHeldIds[i] = ids[i];
+  }
+  gHeldN = nids;
   gDecided = true;
   gRescan = false;
 }
