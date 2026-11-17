@@ -19,3 +19,6 @@ https://doi\.org/10\.1103/
 # The Wilf notes host returns 403, including to a browser user agent.
 https://www\.math\.upenn\.edu/~wilf/
 https://www2\.math\.upenn\.edu/~wilf/
+
+# Source templates: meson fills @PROJECT_VERSION@ when it configures.
+@PROJECT_VERSION@
