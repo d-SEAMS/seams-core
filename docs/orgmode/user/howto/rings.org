@@ -7,38 +7,42 @@ learning path is [[file:../tutorials/rings.org][the rings tutorial]].
 
 * One frame
 
-~seams rings~ prints ~nop~, the ring count, and one histogram row per
-size. The neighbour list is the cutoff CSR. ~--type~ selects the
-oxygen. ~--max-ring~ is the deepest ring (default 6).
+~seams rings~ prints ~nop~, the number of primitive rings, and one
+histogram row for each size that occurs. The neighbour list is the
+cutoff list (default 3.5 Å). An orthorhombic cell uses the full CSR
+of that list. ~--type~ keeps one LAMMPS type. On the mixed TIP4P dump
+the oxygen is type 2. ~--max-ring~ is the largest ring (default 6).
 
 #+begin_src bash
+# excerpt: docs/orgmode/getting-started/quickstart.org
 seams rings input/traj/exampleTraj.lammpstrj --type 2
 #+end_src
 
-On that mixed TIP4P frame the six-ring line is `6 167`. The same argv is
-what ~tests/cli_surface.py~ runs:
-
-#+begin_src python
-# excerpt: tests/cli_surface.py
-        ["rings", tip, "--type", "2"],
-#+end_src
+#+begin_example
+nop 250 rings 511
+3 37
+4 273
+5 34
+6 167
+#+end_example
 
 * From the C API
 
 ~seams_rings_find~ then ~seams_rings_histogram~ is the same census.
-~meson test seams_c_api~ runs it on the 64-atom cubic cell and requires
-a positive six-ring count.
+~counts[k]~ is the number of primitive rings of size ~k~. The buffer
+must be longer than the largest ring. On a 64-atom cubic cell the
+six-ring count is positive.
 
 #+begin_src c
-// excerpt: tests/test_seams_api.c
-  expect(seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK, "rings");
-  int hist[7];
-  expect(seams_rings_histogram(rings, hist, 7) == SEAMS_OK, "histogram");
+seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings);
+seams_rings_histogram(rings, counts, 13);
 #+end_src
 
 * A trajectory
 
-A sequential ~--frame~ / ~--last~ walk with ~--jobs 1~ carries rings
-whose bonds did not change. ~--rebuild~ turns that carry off. The
+A ~--frame~ / ~--last~ walk on one worker (~--jobs 1~, the default)
+keeps one ring updater. A bond that did not change keeps its rings. A
+changed bond recomputes the sources next to it. The census matches a
+full search of that frame. ~--rebuild~ recomputes every frame. The
 measured speedups are on
 [[file:linkcell-carried.org][Linkcell neighbours and carried updates]].
