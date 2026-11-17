@@ -25,10 +25,10 @@ Each one links ``libseams`` or ``libseams_lang``.
      - ``dseams-sys``, ``dseams``
    * - Fortran
      - `d-SEAMS/dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_
-     - fpm ``dseams``
+     - fpm Git dependency ``dseams``
    * - Lua, Fennel
      - `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
-     - LuaRocks package ``dseams``
+     - Git source; ``require("dseams")``
 
 .. toctree::
    :maxdepth: 1

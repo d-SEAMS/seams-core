@@ -3,7 +3,7 @@
 
 import unittest
 
-from check_reader_text import PROCESS_PATTERNS, README_PATTERNS
+from check_reader_text import PROCESS_PATTERNS, README_PATTERNS, source_pages
 
 
 def labels(text, patterns):
@@ -36,10 +36,28 @@ class ReaderTextPatterns(unittest.TestCase):
         )
 
     def test_rejects_luarocks_dseams(self):
+        for text in ("LuaRocks ~dseams~", "LuaRocks package ``dseams``"):
+            with self.subTest(text=text):
+                self.assertIn(
+                    "unpublished LuaRocks package",
+                    labels(text, PROCESS_PATTERNS),
+                )
+
+    def test_rejects_fpm_registry_dseams(self):
         self.assertIn(
-            "unpublished LuaRocks package",
-            labels("LuaRocks ~dseams~", PROCESS_PATTERNS),
+            "unpublished fpm package",
+            labels("fpm package ``dseams``", PROCESS_PATTERNS),
         )
+        self.assertNotIn(
+            "unpublished fpm package",
+            labels("fpm Git dependency ``dseams``", PROCESS_PATTERNS),
+        )
+
+    def test_scans_clean_language_index(self):
+        pages = {rel: path for path, rel in source_pages()}
+        self.assertIn("lang/index.rst", pages)
+        text = pages["lang/index.rst"].read_text(encoding="utf-8")
+        self.assertFalse(labels(text, PROCESS_PATTERNS))
 
     def test_rejects_build_status_badges(self):
         for text in (

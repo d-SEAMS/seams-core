@@ -78,7 +78,11 @@ PROCESS_PATTERNS = (
     )),
     ("registry publication status", re.compile(r"\bregistry publication\b", re.I)),
     ("unpublished LuaRocks package", re.compile(
-        r"\bLuaRocks\s+(?:[`~]+\s*)?dseams\b",
+        r"\bLuaRocks\b[^\n]{0,80}\bdseams\b",
+        re.I,
+    )),
+    ("unpublished fpm package", re.compile(
+        r"\bfpm\b(?:(?!\bGit\s+dependency\b)[^\n]){0,80}\bdseams\b",
         re.I,
     )),
     ("build status badge", re.compile(
