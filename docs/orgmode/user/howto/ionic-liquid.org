@@ -1,32 +1,37 @@
 #+TITLE: Ionic-liquid dumps
 #+OPTIONS: toc:nil num:nil
 
-A multi-type dump is not an ice frame. Keep CHILL and cages on
-water with ~--water-types T~ (the neighbour mask; ~--type~ is
-only a load filter). Use ~seams rdf~ for a partial
+An ionic-liquid dump is a multi-type frame, and CHILL is the wrong
+score for the ions.
+Keep CHILL and cages on water with ~--water-types T~ (the neighbour
+mask). ~--type~ is the load filter. Use ~seams rdf~ for a partial
 g_IJ(r) under the dump minimum image. Use ~seams density-z~
 for a type-resolved \(\rho(z)\) in a slit.
 
-* Pick one type
+The bundled frame ~input/traj/il_tiny.lammpstrj~ has 12 atoms of
+LAMMPS types 1, 2, 3 and 4 in a 24 Å cube. When ~--family~ is omitted
+and the loaded frame has more than two types, stderr prints
 
-~--type~ / ~-t~ is unchanged. ~0~ guesses type 2 then type 1.
-Classification still filters the cloud to that type. A dump
-whose interesting species is not that guess needs the integer
-type of the species you want.
-
-#+begin_src bash
-seams read FILE
-seams chill-plus FILE --type 2
-seams cages FILE --type 2
+#+begin_src text
+hint: more than two LAMMPS types; set --family (default waterIce)
 #+end_src
 
-The same flags on the bundled multi-type frame:
+and the command still exits 0.
+
+* Pick one type
+
+~--type~ / ~-t~ selects the loaded type. ~0~, the default, keeps type
+2 when that type is present, and type 1 when it is absent.
+~density-z~ is the exception: ~0~ keeps every atom.
+A dump whose species is not that guess needs the integer type.
 
 #+begin_src bash
 seams read input/traj/il_tiny.lammpstrj
-seams chill-plus input/traj/il_tiny.lammpstrj --type 2
-seams cages input/traj/il_tiny.lammpstrj --type 2
+seams read input/traj/il_tiny.lammpstrj --type 3
 #+end_src
+
+The first command keeps type 2 and prints ~nop 4 frame 1 box 24 24 24~.
+~--type 3~ keeps two atoms and prints ~nop 2 frame 1 box 24 24 24~.
 
 * Unlike-type neighbours
 
@@ -38,61 +43,52 @@ MIC as the ice neighbour lists.
 * Partial g(r)
 
 #+begin_src bash
-seams rdf FILE --pair-types 1,2 --cutoff 6.0
-seams rdf FILE --pair-types 1,2 --cutoff 6.0 --bins 60
-seams rdf FILE --type 2 --cutoff 6.0
-#+end_src
-
-The same flags on the bundled multi-type frame:
-
-#+begin_src bash
 seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
 seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0 --bins 60
 seams rdf input/traj/il_tiny.lammpstrj --type 2 --cutoff 6.0
 #+end_src
 
-~--pair-types I,J~ selects the pair. The default is ~I = J = --type~.
-~--types~ is a deprecated exact alias of ~--pair-types~ and prints a warning.
-(a like-type g(r) of the guessed or requested species).
-~--cutoff~ is rmax. ~--bins~ is optional (default ~rmax / 0.1~).
+~--pair-types I,J~ selects the pair. The default is ~I = J = --type~,
+a like-type g(r) of the guessed or requested species.
+~--types~ is a deprecated exact alias of ~--pair-types~ and prints
+~--types is deprecated; use --pair-types~.
+~--cutoff~ is rmax. ~--bins~ is optional (default ~rmax / 0.1~, so
+60 bins at 6 Å).
 
-Stdout is a comment header then ~r g count~ rows. The
-normalization volume is ~det(H)~ from the dump box, not the
-product of bound spans. Tilt ~xy xz yz~ is included when the
-dump carries it.
+Stdout is ~# r g count~, then ~# types I J rmax R bins N volume V~,
+then one ~r g count~ row per bin. The normalization volume is
+~det(H)~ from the dump box. On this orthorhombic frame that volume
+is 13824. Tilt ~xy xz yz~ enters H when the dump carries it. The
+unlike-pair header is
 
-~seams rdf~ is not an ice score. Do not run CHILL or cages on
-the ions.
+#+begin_src text
+# types 1 2 rmax 6 bins 60 volume 13824
+#+end_src
+
+~seams rdf~ is a pair histogram. CHILL and cages stay on water.
 
 * Site kinds and ion vertices
 
-LAMMPS ~type~ is not chemistry: type 1 is oxygen in water and a
-cation head in an IL. Hold a ~site::Table~ of type-to-kind (and
-optional atom-ID overrides). ~Table::of~ looks up the override
-first, then the type, else ~unspecified~. ~indicesOf(polar)~ is
-the union of ~cationHead~, ~anion~, and explicit ~polar~;
-~indicesOf(apolar)~ is ~tail~ plus explicit ~apolar~.
-~site::ionCloud~ emits one vertex per ~molID~ that carries a
-cation head or anion: the unweighted COM of those tagged atoms,
-unwrapped with ~gen::relDist~ to the first atom of the group, with
-~Point::type~ 1 (cation) or 2 (anion). A long-chain cation COM
-sits on the polar head, not halfway down the tail. Family is an
-input on the table; it is not inferred from types.
+LAMMPS ~type~ is a column, and the chemistry lives in a
+~site::Table~ of type-to-kind (and optional atom-ID overrides).
+~Table::of~ looks up the override first, then the type, else
+~unspecified~. ~indicesOf(polar)~ is the union of ~cationHead~,
+~anion~, and explicit ~polar~; ~indicesOf(apolar)~ is ~tail~ plus
+explicit ~apolar~. ~site::ionCloud~ emits one vertex per ~molID~
+that carries a cation head or anion: the unweighted COM of those
+tagged atoms, unwrapped with ~gen::relDist~ to the first atom of
+the group, with ~Point::type~ 1 (cation) or 2 (anion). A long-chain
+cation COM sits on the polar head, because the tail atoms are not
+in that average. Family is an input on the table. Types do not
+set it.
 
 On that ion cloud, ~nneigh::nearestUnlike(cloud, 1, 2)~ is each
 ion's nearest unlike neighbour and the MIC distance.
 ~nneigh::mutualNearestUnlike~ keeps the mutual edges. Those
-are contact pairs. They are not first-shell membership and
-not a coordination number.
+are contact pairs. ~seams cn~ is the coordination number, from
+the integral of \(g(r)\).
 
 * Polar and apolar domains
-
-#+begin_src bash
-seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
-seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset apolar
-#+end_src
-
-The same flags on the bundled multi-type frame:
 
 #+begin_src bash
 seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
@@ -100,23 +96,17 @@ seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' 
 #+end_src
 
 ~seams domains~ builds the mask from ~site::indicesOf~ and walks
-Stoddard's clusters on that subset. It does not run CHILL or
-~q_6~. Neighbours are the dump-MIC cutoff list (~--cutoff~).
-Stdout is ~subset polar n N largest L P P_inf~ with
-~P_inf = L / N~. Missing ~--site~ exits 2. ~--family~ still only
-applies to ice scores.
+Stoddard's clusters on that subset.
+Neighbours are the dump-MIC cutoff list (~--cutoff~, default
+3.5 Å). Stdout is ~subset NAME n N largest L P~, and ~P = L / N~.
+On this frame the lines are ~subset polar n 8 largest 4 P 0.5~ and
+~subset apolar n 2 largest 1 P 0.5~. Missing ~--site~ prints
+~domains needs --site~ and exits 2. ~--family~ applies to ice
+scores. Domains ignore it.
 
 * Confined layers
 
-A slit or slab dump needs type-resolved \(\rho(z)\), not bulk CHILL.
-
-#+begin_src bash
-seams density-z FILE
-seams density-z FILE --type 1 --bins 80
-seams density-z FILE --type 2 --axis z
-#+end_src
-
-The same flags on the bundled multi-type frame:
+A slit or slab dump needs type-resolved \(\rho(z)\).
 
 #+begin_src bash
 seams density-z input/traj/il_tiny.lammpstrj
@@ -127,17 +117,17 @@ seams density-z input/traj/il_tiny.lammpstrj --type 2 --axis z
 ~--type 0~ (default) histograms every atom. ~--type I~ keeps one
 LAMMPS type. ~--axis~ is the Cartesian coordinate (~x~, ~y~, or
 ~z~; default ~z~). ~--bins~ is optional (default the bound span
-over \(0.1\)).
+over \(0.1\), 240 bins on this 24 Å cube).
 
 Stdout is ~# z rho~ then one row per bin. The slice volume is
 \(A_\perp \times dz\). \(A_\perp\) comes from dump H (~ly*lz~
 for ~x~, ~lx*lz~ for ~y~, ~lx*ly~ for ~z~) using the recovered
-edge lengths, not bound spans. This is not a 2-periodic MIC.
-The integral of ~rho * A * dz~ is the number of selected atoms.
+edge lengths. The integral of ~rho * A * dz~ is the number of
+selected atoms.
 
-Confined IL work is this histogram plus the existing in-plane
-~rdf2::rdf2Danalysis_AA~ sampler. Do not run CHILL on
-~--family confinedIL~.
+Confined IL work is this histogram plus the in-plane
+~rdf2::rdf2Danalysis_AA~ sampler.
+~seams chill input/traj/il_tiny.lammpstrj --family confinedIL~ exits 2.
 
 Molten salt is ~seams rdf~ / ~cn~ plus ~ionCloud~ when the melt
 is multi-site. DES adds explicit donor H-bonds. Electrolyte is
@@ -147,31 +137,20 @@ cation (~steinhardtQlVoronoi~ otherwise).
 
 * Read the box
 
-~seams read FILE~ prints ~box Lx Ly Lz~ and, when the dump is
-triclinic (~box.size() >= 6~), the tilt ~xy xz yz~. Bound spans
-are not edge lengths; see [[file:sheared-cells.org][Sheared
-cells]].
+~seams read FILE~ prints ~nop N frame F box Lx Ly Lz~ and, when the
+dump is triclinic (~box.size() >= 6~), the tilt ~xy xz yz~. On
+~il_tiny.lammpstrj~ the default load prints ~nop 4 frame 1 box 24 24 24~.
+Bound spans are the edge lengths on this orthorhombic frame. A sheared
+dump carries tilt as well. See [[file:sheared-cells.org][Sheared cells]].
 
 * Family names
 
 ~--family~ names the material. The default is ~waterIce~.
-~seams chill~, ~chill-plus~, and ~cages~ refuse (exit 2) when
-~--family~ is ~ionicLiquid~, ~moltenSalt~, ~des~, ~electrolyte~,
-~confinedIL~, ~confinedWater~, or ~networkFormer~. The message
-names the family. Unflagged ~seams chill~ stays the historical
-water path and is not an IL classifier.
-
-#+begin_src bash
-seams rdf FILE --pair-types 1,2 --cutoff 6.0
-seams cn FILE --pair-types 1,2 --cutoff 6.0
-seams cn FILE --ions --site '1=cationHead,2=anion'
-seams pairs FILE --site '1=cationHead,2=anion'
-seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
-seams density-z FILE --type 1 --bins 80
-seams chill FILE --family ionicLiquid   # exits 2
-#+end_src
-
-The same flags on the bundled multi-type frame:
+~seams chill~, ~chill-plus~, and ~cages~ exit 2 when ~--family~ is
+~ionicLiquid~, ~moltenSalt~, ~des~, ~electrolyte~, ~confinedIL~,
+~confinedWater~, or ~networkFormer~. The message names the family.
+For ~ionicLiquid~ it is ~CHILL/TUM refused for family ionicLiquid~.
+Unflagged ~seams chill~ stays the historical water path.
 
 #+begin_src bash
 seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
@@ -180,8 +159,13 @@ seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion'
 seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
 seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
 seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
-seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid   # exits 2
+seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid
 #+end_src
+
+The coordination line is ~# types 1 2 cutoff 6 cn 1.75 nI 4 nJ 4 volume 13824~.
+The ion coordination line is ~cage ionCloud types 1 2 cutoff 3.5 degree 1.5 nCation 4 nAnion 4~.
+The contact line is ~contact-pair count 4 nCation 4 nAnion 4~.
+The last command exits 2.
 
 Flags and the rest of the surface live on
 [[file:../../reference/cli.org][seams CLI]]. Formats live on

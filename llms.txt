@@ -41,7 +41,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Brine and NaCl](https://docs.dseams.info/user/tutorials/brine.md): The recording follows an ice front through a short brine run, then this 864-water frame with nine ions.
 - [Basal profiles and the nucleation census](https://docs.dseams.info/user/howto/science-front.md): science-front walks a LAMMPS dump with the threaded CHILL+, q6 and shell kernels from science/interface-nucleation at 55192e3d.
 - [From a trajectory to the ice front](https://docs.dseams.info/user/howto/from-trajectory.md): You have a trajectory and want CHILL+ labels, the primitive rings, and the position of the ice front.
-- [Ionic-liquid dumps](https://docs.dseams.info/user/howto/ionic-liquid.md): A multi-type dump is not an ice frame.
+- [Ionic-liquid dumps](https://docs.dseams.info/user/howto/ionic-liquid.md): An ionic-liquid dump is a multi-type frame, and CHILL is the wrong score for the ions.
 - [Confined ice](https://docs.dseams.info/user/confined.md): Ice in a nanotube or a monolayer, and a triclinic cell whose edge lengths are not the bound spans.
 - [Confined water](https://docs.dseams.info/user/tutorials/confined-water.md): Quasi-one-dimensional ice is a stack of prism blocks.
 - [Quasi-one-dimensional ice](https://docs.dseams.info/user/tutorials/nanotube.md): A nanotube ice is a stack of prism blocks of one ring size.
