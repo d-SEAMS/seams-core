@@ -25,6 +25,13 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 
    c-api
    cpp-api
+   python-api
+   julia-api
+   r-api
+   rust-api
+   fortran-api
+   lua-api
+   cli-api
    python-frame
    cli
    data-formats

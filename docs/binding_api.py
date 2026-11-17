@@ -36,7 +36,13 @@ def c_names():
 
 def _rst(text):
     """Escape characters that reStructuredText treats as markup."""
-    return text.replace("\\", "\\\\").replace("*", "\\*").replace("`", "\\`")
+    return (
+        text.replace("\\", "\\\\")
+        .replace("*", "\\*")
+        .replace("`", "\\`")
+        .replace("_", "\\_")
+        .replace("|", "\\|")
+    )
 
 
 def _heading(title, level):
@@ -304,6 +310,11 @@ LANGUAGES = {
 }
 
 
+import binding_langs  # noqa: E402
+
+LANGUAGES.update(binding_langs.languages())
+
+
 def write_pages(selected):
     OUT.mkdir(parents=True, exist_ok=True)
     written = {}
@@ -332,7 +343,7 @@ def problems(selected, written=None):
         names = [item["name"] for item in symbols]
         if len(names) != len(set(names)):
             errors.append("{} has a repeated symbol".format(slug))
-        documented = re.findall(r"(?m)^\.\. api-symbol: (\S+)\s*$", fresh)
+        documented = re.findall(r"(?m)^\.\. api-symbol: (.+?)\s*$", fresh)
         if documented != names:
             errors.append("{} symbol block does not match the source list".format(slug))
         for item in symbols:
@@ -347,7 +358,7 @@ def problems(selected, written=None):
             have = path.read_text(encoding="utf-8")
             if have != fresh:
                 errors.append("{} is stale; regenerate it".format(path.name))
-            on_disk = re.findall(r"(?m)^\.\. api-symbol: (\S+)\s*$", have)
+            on_disk = re.findall(r"(?m)^\.\. api-symbol: (.+?)\s*$", have)
             for name in on_disk:
                 if name not in names:
                     errors.append("documented symbol does not exist: {}: {}".format(slug, name))
