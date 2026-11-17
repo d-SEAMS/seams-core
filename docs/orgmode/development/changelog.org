@@ -1,320 +1,571 @@
 #+TITLE: Changelog
 #+OPTIONS: toc:nil num:nil
 
-The C++ engine, ~libseams~, ~libseams_lang~ and the ~seams~ CLI are this
-repository. Each language binding is its own repository; the
-[[file:repositories.org][repository map]] lists them.
-
-The release history is [[file:../../../CHANGELOG.md][CHANGELOG.md]]
-(Keep a Changelog, assembled by towncrier). This page is the
-narrative cut used in the book.
+Release notes for the d-SEAMS engine. This repository builds
+~libyodaLib~, the C library ~libseams~ (=include/seams.h=), the
+language ABI ~libseams_lang~, and the ~seams~ command. Each language
+binding is its own package. The
+[[file:repositories.org][repository map]] lists the
+repositories and the release order. The current release is 2.14.0.
 
 * 2.14.0
 
-We cut 2.14.0 from tag v2.13.0. The bullets are
-[[file:../../../CHANGELOG.md][CHANGELOG.md]]. This is the short form.
+Released 15 November 2026. ~seams.h~ is ABI 1. Callers moving from
+2.13 follow the [[file:../user/howto/upgrade-2.14.org][upgrade guide]].
 
-~seams.h~ is ABI 1. A frame carries an orthorhombic or triclinic
-cell, and we return neighbours, both CHILL+ rules, q4 and q6,
-primitive rings, and ring symmetry labels. C and C++ call that header
-here, and the Python, Fortran, Julia, Rust, R and Lua bindings call it
-from their own repositories.
-~seams_set_num_threads(0)~ restores the OpenMP width we captured at
-first use. ~seams_system_set_positions~ overwrites the coordinates
-of a stored frame, and the const readers copy the frame back out.
+** Highlights
 
-2.14.0 moves every language binding to its own repository, released
-with the same version against this tag. Python on PyPI is
-~pydseamslib~ 2.14.0 from PydSEAMSlib (~import dseams~ and
-~import pydseams~). The Rust crates ~dseams-sys~ and ~dseams~ come from
-dseams-rs, the fpm package ~dseams~ from dseams-fortran, the LuaRocks
-rock ~dseams~ from yodaStruct, the R package ~dseams~ from dseams-r,
-and Julia ~Dseams~ from Dseams.jl. This repository releases conda
-~libseams~ from ~recipe/recipe.yaml~ and the Yggdrasil recipe for
-~libseams_jll~.
+- A frame carries an orthorhombic or triclinic cell. The C API returns
+  neighbours, the published CHILL+ rule and the OVITO rule, q4 and q6,
+  primitive rings, and ring symmetry labels.
+- CHILL+ defaults to the cutoff neighbour list. ~--graph mutual~ is the
+  mutual four-nearest list.
+- LAMMPS, GROMACS, and OpenMM call the library on the frames a running
+  calculation chooses. The report is the primitive ring census, the
+  published CHILL labels, and the hexagonal and double-diamond cage
+  flags.
+- The ice label is the scale-free residual of the seventeen-atom shell
+  after the optimal rotation and scale. The shell is the central atom,
+  its four bonded neighbours, and the atoms bonded to those four.
+- IRA, SOFI, and spglib reports for ice shells, hydrate cages, and
+  rings are optional. The build links them when ~-Dwith_ira~ and
+  ~-Dwith_spglib~ find the libraries.
 
-LAMMPS, GROMACS, and OpenMM call the library on the frames a running
-calculation chooses. We report the primitive ring census, the
-published CHILL labels, and the hexagonal and double-diamond cage
-flags. Live analysis does not use PLUMED, and ~-Dplumed=enabled~
-errors. The PLUMED ~SEAMS~ action is separate: it reports q6, the
-CHILL+ ice fraction, and the six-ring fraction.
+** C API
+
+~seams_set_num_threads(0)~ restores the OpenMP width captured at first
+use. That width is ~omp_get_max_threads()~ when OpenMP is linked, and 1
+otherwise. A negative width returns ~SEAMS_ERR_RANGE~.
+
+~seams_system_set_positions~ overwrites the coordinates, and optionally
+the cell, of a stored frame. ~seams_system_box~,
+~seams_system_positions~, ~seams_system_types~, and ~seams_system_ids~
+copy the stored frame out through a const handle.
+
+Length-checked calls are ~seams_chill_plus_n~, ~seams_q4q6_n~,
+~seams_rings_labels_n~, and ~seams_rings_histogram_n~. The counts are
+~seams_system_natoms~, ~seams_neighbours_nrows~, and
+~seams_rings_nrings~. ~seams_last_error_message~ names the last
+failure. ~seams_rings_chordless~ lists every chordless cycle of one
+size from 3 to 12, as sorted canonical rows. On 4096 mW molecules, one
+thread, the six-ring census that calls it takes 3.1 ms. The census it
+replaces took 20.6 ms.
+
+Every public call returns a ~seams_status~. The library does not call
+~exit~.
+
+** Packages
+
+Each binding is version 2.14.0, released against this tag.
+
+| Language | Package | Repository |
+|----------+---------+------------|
+| Python | ~pydseamslib~ (~import dseams~ and ~import pydseams~) | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
+| Rust | crates ~dseams-sys~ and ~dseams~ | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
+| Fortran | fpm package ~dseams~ | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
+| Lua, Fennel | LuaRocks ~dseams~, ~require("dseams")~ | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
+| R | package ~dseams~ | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
+| Julia | ~Dseams~ (over ~libseams_lang~) and ~Seams~ (over ~libseams~) | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
+
+This repository publishes the conda package ~libseams~ and the
+Yggdrasil recipe for ~libseams_jll~. The Meson options that built the
+bindings in-tree are removed: ~with_python~, ~with_lua~, ~fennel_lua~,
+~with_fortran~, ~julia_wrap~, ~r_libs_user~, and ~system_libseams~.
+
+~pydseams~ 2.14.0 has a Frame handle. ~read~, ~from_ase~, ~to_ase~,
+~to_solvis~, ~chill_plus~, ~cages~, ~cages_by_signature~, ~steinhardt~,
+~rdf_2d~, ~monolayer_rings~, ~find_prisms~, and
+~pydseams.band.ring_census~ call ~libseams_lang~. Saved trajectories
+other than CON are read with chemfiles when that library is linked.
+The formats include xyz, a LAMMPS dump, gro, pdb, dcd, xtc, and Amber
+NetCDF.
+
+** Engines
+
+LAMMPS loads ~compute dseams~ as ~dseamsplugin.so~ (~plugin load~), or
+from the copy-in sources in =extras/lammps=. The plugin accepts
+~cutoff~, ~graph cutoff~ or ~graph mutual~, ~rule published~ or
+~rule ovito~, ~type I~, and ~mol water~. The copy-in sources accept
+~cutoff~, ~graph~, ~type~, and ~mol~. ~type~ and ~mol water~ score
+only the named oxygens. GROMACS uses a module inside ~mdrun~. OpenMM
+uses a reporter.
+
+The PLUMED ~SEAMS~ collective variable is a separate plugin. Meson
+builds it when ~-Dwith_plumed~ finds PLUMED. The option defaults to
+~auto~. ~seams.q6~ is the mean local q6, ~seams.ice~ is the CHILL+
+cubic fraction, and ~seams.ring~ is the fraction of atoms on a
+primitive six-ring. ~MODE=all~, the default, also reports the
+hexagonal count and the six-ring count. ~MODE=q6~ and ~MODE=q6bar~
+compute only the mean local q6 or the mean Lechner-Dellago q6-bar.
+~DUMP=file~ appends a LAMMPS dump of the coordinates handed to d-SEAMS
+and the per-atom value. A restraint can bias q6. Positions are read in
+PLUMED's length unit and converted to angstroms.
+
+** Neighbour lists and CHILL+
 
 The cutoff list covers restricted triclinic boxes. The orthorhombic
-list is a parallel cell sort, and each OpenMP thread owns a block of
-the linkcell cut. On ~input/traj/exampleTraj.lammpstrj~ (oxygen, type
-2) the cutoff list is 9 interClathrate and 241 water. The mutual
-list is 1 clathrate, 7 interClathrate, and 242 water.
-~--pair-types~ names the site-site pair. Neighbour, CHILL+, ring,
-and cage calls can keep water oxygens by type and leave ions out.
+list is a parallel cell sort. Each thread counts its atoms, a prefix
+sum places them, and the pairs are written into one CSR. The pair set
+does not depend on the thread count. Each OpenMP thread also owns a
+block of the linkcell weighted cell cut.
 
-We name an ice shell from the residual of the seventeen-atom shell
-after rotation and scale, and we can attach an IRA, SOFI, or spglib
-report. The book is this Org tree. The videos page links the
-d-SEAMS Odysee channel, and a player is the embed URL of one of our
-claims.
+On ~input/traj/exampleTraj.lammpstrj~, 250 TIP4P oxygens of LAMMPS type
+2:
+
+#+begin_src bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2 --graph mutual
+#+end_src
+
+The cutoff command prints ~nop 250 interClathrate 9 water 241~. The
+mutual command prints ~nop 250 clathrate 1 interClathrate 7 water 242~.
+
+Those cutoff counts are a shell-count fix on this frame. The previous
+cutoff classification reported 12 interClathrate and 238 water, because
+bonds were counted after the list had been cut to four. A crystal row
+needs four neighbours inside the cutoff. ~seams ovito-chill+~ averages
+q3 on the full shell and skips that neighbour test. Plain CHILL keeps
+the four closest neighbours and Moore's test. A failure to read the
+input returns exit status 2.
+
+~--pair-types I,J~ names the site-site pair for ~seams rdf~ and
+~seams cn~. Neighbour, CHILL, CHILL+, ring, and cage calls keep water
+oxygens with ~--water-types~ or ~--mol~ (~water~, or a molecule-id
+list such as ~1,5-12~) and leave ions out of that graph. A type or
+molecule id that is absent from the frame is an error.
+
+** Cages and symmetry
+
+A signature cage is kept when its faces tile a sphere: every vertex
+lies on at least three faces that close around it, and \(V - E + F = 2\).
+~--cage-edge~ and ~SEAMS_CAGE_EDGE~ set the face-edge window, in the
+coordinate units of the file. The default is ~2.65,3.15~. ~none~ leaves
+the cage bound to the face census. ~Frame.cages_by_signature~ and the
+Lua ~edge~ option take the same window.
+
+~seams rings~ prints the primitive-ring census by size. Primitive rings
+are the Franzblau shortest-path census. ~seams prisms~ counts perfect
+and imperfect prisms of sizes 3 to 6.
+
+** Performance
+
+On 110592-molecule ice Ic, 8 OpenMP threads run the cutoff list 4.8
+times, q4 5.8 times, q6 5.9 times, and the primitive-ring census 6.1
+times faster than 1 thread. The CSR, the \(q_l\) values, and the ring
+counts match at 1, 2, 4, and 8 threads.
+
+When an idle 8-thread OpenMP team is already resident, 8-thread CHILL+
+on that ice Ic frame takes 7 ms and the shell match takes 9 ms. The
+same calls took 74 ms and 76 ms before the library narrowed its team
+to the free cores. ~SEAMS_FAIR_WIDTH=0~ keeps the requested width.
+Times on an idle machine are unchanged.
+
+** Deprecations
+
+~--types~ is a deprecated alias of ~--pair-types~. Both names bind.
+Using ~--types~ prints a one-line warning on stderr.
+
+~seams fingerprint --color-types~ is the spelling ~--help~ shows.
+~--colour-types~ remains a hidden alias of that option. A key library
+writes ~colors~ in its header and still reads a 2.13 file that says
+~colours~.
 
 * 2.13.0
 
-v2.12.0 was tagged on a tree whose CI was red.
-The pixi environment provides mpfr and gmp for the Ozaki tests.
-Decimal options parse without std::from_chars.
-Julia is fetched from the published archive, and its test file is run.
-The Python test checks the cutoff list and builds the mutual list.
-Coverage counters stay on one thread, inside the existing time limit.
-R installs into the user library, where the engine paths are visible.
-The ring search reads one offset and column table.
-One thread writes that output list.
-The rings of one atom are one block of a single list.
-A cage search is reused only when the undirected edge sets match.
-Bond rows are the sorted neighbour ids.
-The paper records the one-core comparison of that tree.
+Released 6 November 2026.
+
+- Each bond row is the sorted neighbour ids.
+- ~seams cages~ reuses a search only when the undirected edge sets
+  match. Differing lists are searched on their own.
+- Cage-edge windows and other decimal options parse in the C locale, so
+  the same decimal text is accepted on every supported toolchain,
+  including a libc++ with no floating ~std::from_chars~.
+- ~pydseamslib~ ~chill_plus~ takes no graph argument. The call labels
+  the cutoff neighbour list.
 
 * 2.12.0
 
-Double-diamond cages are a maximum non-conflicting set. A component
-whose neighbourhoods are the two cliques of a bipartite line graph is
-a König matching; every other component is a branch-and-bound
-independent set certified by a clique partition. A degree-one vertex is
-kept and only its neighbour is dropped. A peripheral set is
-kept only when the seven rings span 14 molecules and each peripheral
-shares three atoms with the equator. When the product of those
-triplets exceeds 256, the same test is built from the share graph.
-The orthorhombic cutoff list is a one-pass cell walk, and the default
-CHILL+ path evaluates the \(l=3\) harmonics as real and imaginary
-parts. Of the deposited main-text counts, cubic mW double-diamond
-cages go from 2040 to 2048 and nucleation frame 148 double-diamond
-cages go from 122 to 121. On the all-site niu2f1 frame one thread
-spends 176.4 s in one run of ~findHC~, ~findDDC~ and ~findBySignatures~
-together; TRACE spends 1762.064 s. ~findDDC~ on that frame returns 0
-under the 14-molecule rule. ~--cage-edge~ and ~SEAMS_CAGE_EDGE~ set
-the face-edge window (default ~2.65,3.15~); ~none~ turns it off.
-R and Julia call ~libseams_lang~. A closed cage has to tile a sphere.
+Released 1 November 2026.
+
+Double-diamond cages are a maximum non-conflicting set.
+~findDDC~ builds the mutual-conflict graph once. A one-cage component
+is kept. A component whose neighbourhoods are the two cliques of a
+bipartite line graph is a maximum matching, certified by a König
+cover. Any other component is a branch-and-bound maximum independent
+set, certified by a clique partition. A degree-one candidate is kept,
+and only that one conflict is dropped.
+
+A peripheral set is kept when the seven rings span 14 molecules and
+each peripheral shares exactly three atoms with the equator. When the
+product of rings through the even or odd triplets exceeds 256, the
+chains are built from edges that share at least three atoms, and the
+lexicographically least assignment that meets the same test is kept.
+
+On cubic mW, 4096 molecules, the certified double-diamond count is
+2048, one cage for every two molecules. The search before this
+certificate reported 2040. On nucleation frame 148 the double-diamond
+count is 121 and the hexagonal count is 102. The search before the
+certificate reported 122 double-diamond cages.
+
+On the all-site niu2f1 frame, one thread spends 176.4 s in one run of
+~findHC~, ~findDDC~, and ~findBySignatures~ together. TRACE on that
+frame spends 1762.064 s. On the mixed-site frame ~findDDC~ returns 0.
+The search before the 14-molecule rule returned 605243 cages there,
+and every hexagon of that frame fails the rule.
+
+The clathrate face-edge window is ~--cage-edge~ and ~SEAMS_CAGE_EDGE~,
+default ~2.65,3.15~ in the coordinate units of the file. ~none~ turns
+the window off.
+
+~cages --signature~ counts a face set as a cage when its faces tile a
+sphere: every vertex lies on at least three faces that close around
+it, and \(V - E + F = 2\). Rings whose minimum-image bonds add up to a
+lattice vector wind through the periodic cell and are dropped first.
+On the GenIce structure I unit cell the search reports 2 \(5^{12}\)
+cages and 6 \(5^{12}6^{2}\) cages. The search before that test reported
+90 \(5^{12}6^{2}\), 4248 \(5^{12}6^{4}\), and 218305 \(5^{12}6^{8}\).
+
+The orthorhombic cutoff list folds coordinates into the cell, bins
+them one cutoff wide, and shares the 27-cell stencil across the atoms
+in a cell. Interior cells skip the periodic wrap. CHILL and CHILL+ on
+the default left-to-right fp64 path evaluate the \(l = 3\) harmonics
+as real and imaginary parts.
+
+CHILL and CHILL+ default to the cutoff list on the command line, in
+the C API, in R, in Julia, and in ~compute dseams~. The mutual
+four-nearest list is ~--graph mutual~ under that name on each of those
+fronts. Those fronts used the mutual list by default before this
+release.
+
+This release adds the R package and the Julia package. Both call
+~libseams_lang~.
 
 * 2.11.0
 
-Cutoff rows and cage affiliation run across host threads. The MPI CLI
-assigns complete frames to ranks and preserves frame order in its output.
-Periodic geometry uses minimage 0.1.4 and linkcell 0.3.10. The library
-exports can coexist in a static application.
+Released 9 October 2026.
+
+- Cutoff neighbour rows and hexagonal and double-diamond cage
+  affiliation run across host threads.
+- Under ~mpiexec~, an MPI build shares the ~--frame~ / ~--last~ range
+  of a LAMMPS dump across ranks. Rank 0 prints every frame in order.
+  A run without a launcher, or with ~SEAMS_MPI=0~, stays on one
+  process.
+- Periodic distances use minimage 0.1.4. The linked-cell neighbour
+  search uses linkcell 0.3.10.
+- The ice XXI library matches the Lee et al. 2026 I-42d oxygen cell
+  (space group \(I\bar{4}2d\), Z = 152, a = b = 20.197 Å, c = 7.891 Å).
+  A hit also requires a tetrahedral four-nearest graph, mean
+  coordination in [3.5, 4.5], and a six-ring census near 112.
 
 * 2.10.0
 
-Rodger F4 and host \(q_{12}\) are CLI fields. CHILL and CHILL+ use
-the mutual four-nearest graph and an optional water-type mask.
-Incomplete cups sit next to closed signatures. TUM stacking planes
-sit next to the CHILL+ \(I_{sd}\) bins; ~SEAMS_OFFLOAD=1~ runs the
-hop-bound TUM cages (host when there is no device). Ice XXI is the
-Lee 2026 BCT cell plus a tetrahedral six-ring graph. Hexagonal
-channels are stacked six-ring prisms. ~compute dseams~ writes
-CHILL+ from the C ABI and ships ~water.data~.
+Released 6 September 2026.
+
+- Rodger F4 and host \(q_{12}\) are per-atom fields, so the Zeron
+  q3/q12 hydrate pair can be read from the command line.
+- CHILL and CHILL+ default to the mutual four-nearest graph.
+  ~--water-types~ keeps the four-neighbour list on the named water
+  types, so substrate and ions stay out of it.
+- Cups and incomplete cages are enumerated on the ring graph. Closed
+  signature counts stay on the closed path. ~seams cages --signature
+  --incomplete~ reports the open cages.
+- Stacking planes of the topological unit matching (HC-basal and
+  DDC-equatorial) are reported beside the CHILL+ \(I_{sd}\) bins.
+  ~SEAMS_OFFLOAD=1~ runs those hop-bound cages on a device when one is
+  present, and on the host when none is. ~SEAMS_OFFLOAD=0~ stays on
+  the host. CHILL+ itself stays on the host.
+- Hexagonal channels are stacked six-ring prisms. Ice XXI (Lee et al.,
+  Nat. Mater. 25, 302, 2026) also requires a tetrahedral 3.5 Å graph
+  and a primitive six-ring on the Z = 152 cell.
+- ~compute dseams~ writes per-atom CHILL+ from the C API. The example
+  deck =extras/lammps/in.dseams= reads =extras/lammps/water.data= with
+  ~pair_style zero~.
 
 * 2.9.2
 
-Every host stage of the ring pipeline threads. The cutoff neighbour
-list and the index-ordered list come from a threaded cell list that
-bins molecules in fractional coordinates of the recovered triclinic
-cell and builds each row on one thread, equal row for row to the
-minimum-image reference; the ID-to-index conversion threads too.
-~bench_strong~ times every stage and their sum as the best of five
-pinned runs. On a 16-core workstation the 65536-molecule pipeline
-falls from 906 to 99 ms.
+Released 2 September 2026.
+
+Every host stage of the ring pipeline runs under OpenMP. From 2048
+atoms, when OpenMP is compiled in, the cutoff neighbour list and the
+index-ordered list come from ~nneigh::cellListRowsThreaded~. Atoms are
+binned in fractional coordinates of the recovered triclinic cell, every
+axis needs three cells of perpendicular width one cutoff, and each row
+is one thread's task. The rows equal the minimum-image reference.
+~neighbourListByIndex~ runs one row per thread. ~bench_strong~ times
+every host stage and their sum and keeps the best of five runs.
 
 * 2.9.1
 
-The OpenMP target offload of the Steinhardt kernel compiles with
-nvc++ 23.7 against CUDA 12.2 on an A100 and matches the serial and
-threaded host results bit for bit; ~SEAMS_OFFLOAD=0~ keeps the host
-path.
+Released 2 September 2026.
+
+The OpenMP target offload of the Steinhardt kernel compiles with nvc++
+23.7 (~-mp=gpu~) against CUDA 12.2 on an NVIDIA A100. The device path
+matches the serial and threaded host paths bit for bit on the FCC
+lattice and on ~input/traj/mW_cubic.lammpstrj~. ~SEAMS_OFFLOAD=0~
+forces the host path.
 
 * 2.9.0
 
-~cage::findBySignature~ enumerates closed polyhedra by their
-ring-size census (~seams cages --signature~), key libraries stack
-across hop counts with the depth that named each atom
-(~topo::matchLibraries~), guests are placed in enumerated cages by
-periodic centroids (~site::guestOccupancy~, ~--guest-types~), ion
-environments list their shell and ~site::shellRingCensus~ counts the
-rings through it, and ~--per-atom FILE~ writes a LAMMPS dump with the
-engine's per-atom decision for OVITO or VMD.
+Released 2 September 2026.
+
+~cage::findBySignature~ enumerates closed polyhedra from a ring-size
+census. ~seams cages --signature~ takes a census such as ~4:6,6:8~ or
+a name (~sodalite~, ~alpha~, ~512~, ~51262~, ~hc~, ~ddc~). Named ~hc~
+and ~ddc~ call ~findHC~ and ~findDDC~, so the vertex sets match those
+finders.
+
+~topo::matchLibraries~ names atoms against key libraries at several hop
+counts. The deepest library that holds an atom's key wins, and the
+report includes the depth that named the atom. ~seams fingerprint
+--library~ accepts a comma-separated list.
+
+~site::guestOccupancy~ places guests in enumerated cages by the
+periodic centroid of the cage vertices and counts occupied, multiply
+occupied, and free cages. ~--guest-types~ names the guest LAMMPS types.
+~site::shellRingCensus~ counts, by size, the water-network rings that
+pass through an ion's shell. ~--per-atom FILE~ on ~cages~,
+~fingerprint~, and ~ions~ appends a LAMMPS dump frame with the engine's
+per-atom decision, for OVITO or VMD.
 
 * 2.8.0
 
-Topology keys (~topo::localKey~, ~topo::fingerprint~, nauty
-certificate or Weisfeiler-Leman hash), key libraries
-(~seams fingerprint --emit-library~, ~--library~), ions read against
-the cage assignment (~seams ions~), vertex colors by species, the
-embedded CON reader, and a refusal of CON and chemfiles input when
-their reader is absent. The CLI preserves frame order for parallel
-LAMMPS ranges, dispatches ranges for XYZ, chemfiles, and readcon
-inputs, and offers versioned JSONL output through ~--format json~.
-~--strict-input~ makes empty-frame handling an explicit error. XYZ
-input accepts coordinate-only rows and records its single frame as
-frame 1. ~seams cages --graph seeded --complete~ turns on the ring
-completion.
+Released 2 September 2026.
+
+~topo::localKey~ names the isomorphism class of an atom's rooted
+bonded neighbourhood. With nauty linked, the key is the nauty
+certificate. Otherwise it is a Weisfeiler-Leman hash.
+~topo::fingerprint~ keys a frame by the sorted hashes and the primitive
+ring census, so a relabelled configuration shares the key.
+~--color-types~ partitions keys by LAMMPS type.
+
+~seams fingerprint --emit-library~ writes a frame's keys as library
+lines. ~--library~ names the atoms of a later frame from that file.
+~seams ions~ classes ions by their first water shell against the cage
+assignment. ~--hops~, ~--ion-types~, and ~--ion-cutoff~ are the new
+options.
+
+~seams cages --graph seeded --complete~ turns on ring-adjacent
+completion. The CLI keeps frame order for a parallel LAMMPS range,
+dispatches ranges for XYZ, chemfiles, and readcon input, and writes
+versioned JSONL with ~--format json~. ~--strict-input~ makes an empty
+frame an error. XYZ input accepts coordinate-only rows and records
+that frame as frame 1.
+
+CON input uses the embedded readcon reader when the engine is built
+with it. CON or chemfiles input with the reader absent is refused, and
+the call does not return an empty frame in its place.
 
 * 2.7.0
 
+Released 2 September 2026.
+
 ~ring::seededCageAffiliation~ takes an optional completion flag.
 ~ring::ringAdjacentCompletion~ fills the last vertex of any six-ring
-whose other vertices carry a cage label, iterated to a fixed point,
-separately for the hexagonal cage (HC) and double-diamond cage (DDC)
-labels. The rule is stated and proven in =lean/= (Mathlib): the
-completion is the least fixed point above the seed, empty on an empty
-seed, sound, and independent of visiting order; the edge-sharing
-rule it replaces is shown unsound on a five-vertex instance.
-~tests/walk_compare~ walks a trajectory and prints per-frame
-CHILL+ and cage labels with their largest clusters. The
-reproducibility workflow moved to the ~dseams2_repro~ package.
+whose other vertices carry a cage label, and repeats to a fixed point.
+Hexagonal-cage labels and double-diamond-cage labels are two separate
+walks. The rule is stated and proved in =lean/= with Mathlib: the
+completion is the least fixed point above the seed, it is empty on an
+empty seed, and it does not depend on the visiting order.
+
+The reproducibility workflow for the 2.0 paper lives in the
+[[https://github.com/d-SEAMS/dseams2_repro][dseams2_repro]] package.
 
 * 2.6.0
 
-Meson links FlexiBLAS when pkg-config or ~libflexiblas~ is present,
-and falls back to the conda-forge ~libblas~ / ~liblapack~ ABI
-packages. The reproducibility campaign no longer configures in-tree
-Python; bindings come from ~pydseamslib~ on PyPI. The nucleation
-notebook reads ~CageScore~ fields. Figshare Lua demos resolve
-~example_lua~ from yodaStruct.
+Released 17 August 2026.
+
+Meson links FlexiBLAS when pkg-config or ~libflexiblas~ is present, and
+otherwise the conda-forge ~libblas~ and ~liblapack~ packages. Python
+callers use ~pydseamslib~ from PyPI. The nucleation notebook reads
+~CageScore~ fields. The Figshare Lua demos load ~example_lua~ from
+yodaStruct.
 
 * 2.5.0
 
-~--family~ (default ~waterIce~) is an input. Ice scores refuse
-non-water families and name the family. ~seams cn --ions~ is cage
-degree on ~site::ionCloud~; ~seams pairs~ is the mutual-nearest
-contact-pair count, not ionicity. ~seams domains~ is the largest
-polar or apolar Stoddard component. ~seams density-z~ is
-type-resolved \(\rho(z)\) with slab volume from dump H. Running CN
-and the first minimum of \(g_{IJ}\) come from ~rdf::runningCN~ /
-~firstMinimumBin~. Dump writers emit ~xy, xz, yz~ when the cloud
-carries tilt.
+Released 16 August 2026.
+
+~--family~ selects the chemistry. The default is ~waterIce~. ~chill~,
+~chill-plus~, ~cages~, and ~ions~ on any other family print the family
+name and return exit status 2. ~seams cn
+--ions~ is the cage degree on ~site::ionCloud~. ~seams pairs~ counts
+mutual-nearest contact pairs. ~seams domains~ is the largest polar or
+apolar Stoddard component. ~seams density-z~ is the type-resolved
+\(\rho(z)\), with the slab volume taken from the dump cell matrix.
+Running coordination numbers and the first minimum of \(g_{IJ}\) come
+from ~rdf::runningCN~ and ~rdf::firstMinimumBin~. Dump writers emit
+~xy~, ~xz~, and ~yz~ when the cloud carries tilt.
 
 * 2.4.0
 
-Partial 3D site-site \(g_{IJ}(r)\) and coordination numbers under
-the dump MIC, via ~seams rdf~ and ~seams cn~. Site chemistry is a
-~site::Table~ of LAMMPS types and optional atom-ID overrides;
-~site::ionCloud~ collapses each ion ~molID~ to one unwrapped COM
-vertex. Hydrogen bonds accept an explicit donor-H index set
-(~populateHbondsFromDonors~). ~seams hbonds --donors~ uses every
-hydrogen as a donor candidate; water cutoffs stay on that command
-and are not an ionic-liquid criterion. In-plane RDF normalization
-uses the dump-cell volume \(|\det H|\) and the restricted-triclinic
-in-plane area \(lx \times ly\), not the particle AABB or bound-span
-product.
+Released 16 August 2026.
+
+~seams rdf~ and ~seams cn~ compute partial three-dimensional site-site
+\(g_{IJ}(r)\) and coordination numbers under the dump minimum image.
+Site chemistry is a ~site::Table~ of LAMMPS types, with optional
+atom-id overrides. ~site::ionCloud~ collapses each ion molecule id to
+one unwrapped center-of-mass vertex. Hydrogen bonds accept an explicit
+donor-hydrogen index set through ~populateHbondsFromDonors~. ~seams
+hbonds --donors~ treats every hydrogen as a donor candidate. The water
+cutoffs on that command are the water criterion.
+
+In-plane RDF normalization uses the dump-cell volume \(|\det H|\) and
+the restricted-triclinic in-plane area \(l_x \times l_y\).
 
 * 2.3.4
 
-Steinhardt, hydrogen-bond, and cluster wraps use the dump
-minimum image, not an independent-axis wrap on bound spans.
+Released 16 August 2026.
+
+Steinhardt parameters, hydrogen bonds, and cluster wraps use the dump
+minimum image.
 
 * 2.3.3
 
-Cutoff fallbacks and the skin Verlet refresh use the dump 3x3
-minimum image, not a diagonal of bound spans.
+Released 16 August 2026.
+
+Cutoff fallbacks and the skin Verlet refresh use the dump 3 by 3
+minimum image.
 
 * 2.3.2
 
-Cutoff lists take the LAMMPS dump 3x3, not a diagonal of bound
-spans. Device ice-score batches pass ~lammpsBoxToLinkcell~ when
-the dump tilt is present. ~linkcell~ wrap pin is v0.3.1.
+Released 16 August 2026.
+
+Cutoff lists take the LAMMPS dump 3 by 3 cell. Device ice-score batches
+pass ~lammpsBoxToLinkcell~ when the dump carries tilt. This release
+uses linkcell v0.3.1.
 
 * 2.3.1
 
-~neighList~, ~halfNeighList~, and the in-plane RDF sampler use
-the vesin cell list (same helper as ~neighListO~). Brute force
-remains the fallback. The GPU ice-score workspace is unchanged.
+Released 16 August 2026.
+
+~neighList~, ~halfNeighList~, and the in-plane RDF sampler use the
+vesin cell list, the same helper as ~neighListO~. Brute force remains
+the fallback. The GPU ice-score workspace is unchanged.
 
 * 2.3.0
 
-The TUM ice score (mutual four-nearest graph, primitive hexagons,
-HC/DDC) runs as a device-resident frame batch when gpulite and
-~linkcell~ 0.3.0 are present. CHILL and \(q_{lm}\) stay on the
-host. Runtime knobs are twelve-factor: ~SEAMS_CONFIG~ or
-~./seams.env~, then the environment, then CLI flags.
-~seams --print-config~ dumps the table. Examples and the README
-use ~seams~ / ~pydseams~ / ~require("dseams")~; the 2020
-~yodaStruct -c~ / ~conf.yaml~ surface is gone.
+Released 16 August 2026.
 
-The C++ API in the book is Doxygen via doxyrest (=api/index=).
+The topological unit-matching ice score (mutual four-nearest graph,
+primitive hexagons, hexagonal and double-diamond cages) runs as a
+device-resident batch of frames when gpulite and linkcell 0.3.0 are
+present. CHILL and \(q_{lm}\) stay on the host.
+
+Runtime settings are read from ~SEAMS_CONFIG~ or from ~./seams.env~ in
+the working directory, then from the environment, then from
+command-line flags. ~seams --print-config~ prints the resolved table.
+Examples call ~seams~, ~pydseams~, and ~require("dseams")~. The 2020
+~yodaStruct -c~ and ~conf.yaml~ surface is removed in this release.
 
 * 2.2.5
 
-~subprojects/linkcell.wrap~ is v0.2.4. A static ~libyodaLib.a~
-no longer passes ~liblinkcell.so~ to ~ar~. Wrap consumers link
-the static archive. Dump doubles parse with ~strtod~ on Apple libc++.
+Released 16 August 2026.
+
+This release uses linkcell v0.2.4. A static ~libyodaLib~ links the static
+linkcell archive, so a consumer of that archive does not need
+~liblinkcell.so~ at link time. Dump floating-point fields parse with
+~strtod~, including on Apple libc++.
 
 * 2.2.4
 
-Periodic /k/-nearest graphs via [[https://github.com/d-SEAMS/linkcell][d-SEAMS/linkcell]] v0.2.2.
-~kNearestNeighbourList~ / ~kNearestNeighbourPair~ write packed
-~n*k~ nominations. Mutual and union come from one walk. The LAMMPS
-dump box is bound spans plus ~xy, xz, yz~; ~periodicDistSq~ recovers
-H. Empty frames no longer abort the walker.
+Released 16 August 2026.
 
-Docs orgmode covers the ~seams~ CLI, the Nix flake, and the
-three-repo split.
+Periodic /k/-nearest graphs come from
+[[https://github.com/d-SEAMS/linkcell][linkcell]] v0.2.2.
+~kNearestNeighbourList~ and ~kNearestNeighbourPair~ write packed
+\(n \times k\) nominations. The mutual graph and the union graph come
+from one walk. The LAMMPS dump box is the bound spans plus ~xy~, ~xz~,
+and ~yz~. ~periodicDistSq~ recovers the cell matrix from that box. An
+empty frame no longer stops the walker.
 
 * 2.2.3
 
-The ~seams~ CLI uses Argum. Help, errors, ice-type counts, and
-~--features~ are colorized. ~NO_COLOR~ turns the colors off.
+Released 15 August 2026.
+
+Help, errors, ice-type counts, and ~--features~ are colorized.
+~NO_COLOR~ turns the color off.
 
 * 2.2.2
 
-The compiled Python surface is ~pydseams.yoda~. ~_core~ remains an
-alias.
+Released 15 August 2026.
+
+The compiled Python module in this release is ~pydseams.yoda~.
+~pydseams._core~ remains an alias.
 
 * 2.2.1
 
-- Flake package for ~libyodaLib~ and ~seams~ (Meson, not the
-  CMake-era ~yodaStruct~ derivation).
-- Live LAMMPS dump session (~nLammpsFrames~,
-  ~forEachLammpsFrame~): ~seams --frame N --last M --jobs J~.
-- ~BondGraph~ at runtime: ~cutoff~, ~knn~, ~knn-union~. ~seams cages
-  --graph~ adds ~seeded~.
-- LAMMPS readers bind ~xu~/~yu~/~zu~ and ~xs~/~ys~/~zs~ when ~x y z~
-  are absent.
+Released 15 August 2026.
+
+- The Nix flake packages ~libyodaLib~ and ~seams~. The package is the
+  Meson build.
+- A live LAMMPS dump session, ~nLammpsFrames~ and
+  ~forEachLammpsFrame~, supports ~seams --frame N --last M --jobs J~.
+  Each worker opens its own handle.
+- The bond graph is chosen at runtime: ~cutoff~, ~knn~, or
+  ~knn-union~. ~seams cages --graph~ adds ~seeded~.
+- LAMMPS readers bind ~xu~, ~yu~, ~zu~ and ~xs~, ~ys~, ~zs~ when ~x~,
+  ~y~, and ~z~ are absent.
 
 * 2.2.0
 
-~seams~ CLI: ~read~, ~chill~, ~chill-plus~, ~cages~. This is the
-engine command line.
+Released 15 August 2026.
+
+The engine command line is ~seams~, with ~read~, ~chill~,
+~chill-plus~, and ~cages~. Lua callers use the ~dseams~ library from
+yodaStruct. Python callers use ~pydseams~.
 
 * 2.1.2
 
-Removed CMake-era Nix entrypoints that still named the product
-~yodaStruct~. Build with pixi or ~nix build~.
+Released 15 August 2026.
+
+The CMake-era Nix entry points (~default.nix~, ~shell.nix~, and
+~nix/yodaStruct.nix~) are removed. They still named the product
+~yodaStruct~. This release builds with pixi.
 
 * 2.1.1
 
-CHILL interfacial walk uses the same four-neighbour star as ~c_ij~.
-Atoms without four recorded bonds go to water. Seeded affiliation
-floods HC and DDC separately.
+Released 15 August 2026.
+
+The CHILL interfacial walk uses the same four-neighbour star as
+~c_ij~. Atoms without four recorded bonds are labelled water, matching
+CHILL+. Seeded affiliation floods the hexagonal cage and the
+double-diamond cage as separate components, so a hexagonal seed does
+not keep a double-diamond-only atom.
 
 * 2.1.0
 
-The C++ engine is this repository. Front ends are not.
+Released 15 August 2026.
 
-- The ~yodaStruct~ Lua/Fennel CLI moved to
-  https://github.com/d-SEAMS/yodaStruct . ~-Dwith_lua=enabled~ is an
-  error that names that repository.
-- Python bindings remain in
-  https://github.com/d-SEAMS/PydSEAMSlib (moved in 2.0.1).
-- C++ ~getCorrel~ / ~getIceType~ family and ~reclassifyWater~ return
-  ~void~.
+This repository is the C++ engine.
+
+- The ~yodaStruct~ Lua and Fennel command line moves to
+  https://github.com/d-SEAMS/yodaStruct . This release rejects
+  ~-Dwith_lua=enabled~ and names that repository. The option itself is
+  removed in 2.14.0.
+- Python bindings stay in
+  https://github.com/d-SEAMS/PydSEAMSlib , where they moved in 2.0.1.
+- ~getCorrel~, ~getCorrelPlus~, ~getIceType~, ~getIceTypeNoPrint~,
+  ~getIceTypePlus~, ~getIceTypePlusNoPrint~, and ~reclassifyWater~
+  return ~void~.
 
 * 2.0.1
 
-Python bindings moved to PydSEAMSlib. This repository is the C++
-engine.
+Released 7 April 2026.
+
+The Python bindings move to
+https://github.com/d-SEAMS/PydSEAMSlib . This repository is the C++
+engine. macOS wheels in this release target deployment 14, and macOS
+x86_64 wheels are no longer built.
 
 * 2.0.0
 
-Meson replaces CMake. License is MIT. Optional vesin neighbour lists,
-Highway SIMD, chemfiles, and readcon-core. Catch2 suite for the
-engine.
+Released 22 March 2026.
+
+Meson replaces CMake. The license changes from GPL to MIT. Optional
+dependencies are vesin neighbour lists, Highway SIMD, chemfiles, and
+readcon-core. The engine tests are a Catch2 suite.
 
 * 1.0.0
 
-Initial release. See Goswami et al., J. Chem. Inf. Model. 2020, 60,
-2169-2177.
+Initial release. Goswami, Goswami, and Singh, J. Chem. Inf. Model.
+2020, 60, 2169-2177,
+[[https://doi.org/10.1021/acs.jcim.0c00031][10.1021/acs.jcim.0c00031]].

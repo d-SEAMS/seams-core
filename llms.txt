@@ -161,7 +161,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Repository map](https://docs.dseams.info/development/repositories.md): d-SEAMS is seven repositories.
 - [Release process](https://docs.dseams.info/development/release.md): This is the maintainer cut. .github/workflows/release.yml only runs gh release create when a v* tag is pushed.
 - [Lean proofs](https://docs.dseams.info/development/lean.md): lean/ is a Lean 4 (Mathlib) model of ring::ringAdjacentCompletion.
-- [Changelog](https://docs.dseams.info/development/changelog.md): The C++ engine, libseams, libseams_lang and the seams CLI are this repository.
+- [Changelog](https://docs.dseams.info/development/changelog.md): Release notes for the d-SEAMS engine.
 
 ## Language bindings
 

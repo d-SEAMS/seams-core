@@ -44,7 +44,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
   C and Fortran snippets link against the patched chemfiles meson builds when the system one is rejected.
 - Direct-coexistence mW growth is scored on basal and secondary-prism slabs of 8064 molecules at 1 bar.
   The 2015 CHILL+ thresholds are unchanged.
-- Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk. On 884736 molecules, eight threads build the neighbour rows in 5.72 times the one-thread time.
 - Each language front reports rings, cages, signature cages and symmetry, and the binding CI runs those calls.
 - Every target also builds under GCC 15 in release mode with `-Dwerror=true`, and a `gcc15-all` CI job next to `clang21-all` builds that configuration and runs the suite on it.
 - Every target, tests, benchmarks, bindings, engines and subproject examples included, builds under Clang 21 with `-Dwerror=true`, and a CI job builds that configuration and runs the suite on it.
@@ -61,7 +60,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Meson options `-Dwith_blas`, `-Dwith_readcon`, and `-Dsystem_libseams`. The last builds only the `dseams` module against an installed `libseams`.
 - One sitting pairs ice Ic at 884736 molecules with freud, mdapy, vesin, OVITO PTM and CHILL+, and rings-statistics-matter, at 1, 2, 4 and 8 threads. The detail column records the agreement check on that frame. The rings row is the cutoff list and the ring search together. The pool-audit rings kernel is ringNetwork alone.
 - One sitting retimes neighbours, q4, q6, CHILL+, rings, symmetry and hydrate cages at 110592 and 884736 molecules on one thread and on eight. The raw lines are benchmarks/rc3-sitting.csv.
-- OpenMM, rings, and cages each have a video slug next to the existing rings-cages slug. Topic pages embed the recording from the same embed.txt as the gallery, using an Odysee /$/embed/ URL when a claim is present and the words video coming soon when it is not.
+- OpenMM, rings, and cages each have a recording beside the rings and cages recording.
 - Orthorhombic frames are cut by linkcell's weighted recursive coordinate bisection of the cell grid. The halo is the stencil painted while walking the cells a rank owns, and the same cut is reused on the next frame of that size. Neighbour rows, CHILL+, q6 and primitive rings keep their scratch across that repeat, and the ring search answers a length-2 shortcut that passes below the source.
 - Primitive rings are the Franzblau shortest-path census. OVITO FindRings is a subset: K2,3 has three chordless 4-rings and FindRings reports two, and every ring on the 864-atom interface frame at 3.5 Å is primitive.
 - Python, Julia, Rust and Fortran call the C API. Python reads NumPy arrays in place and accepts ASE and MDAnalysis frames. Julia uses ccall. Rust splits the raw FFI from the safe crate. Fortran binds the same symbols with iso_c_binding.
