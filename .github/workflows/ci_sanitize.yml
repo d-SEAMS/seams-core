@@ -33,6 +33,9 @@ jobs:
             .lammps-serial/lib
             .lammps-serial/.lammps-tag
           key: lammps-serial-${{ env.LAMMPS_TAG }}-${{ hashFiles('scripts/build_lammps_serial.sh') }}
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
       # scripts/sanitize_suite.sh is the same configure and the whole meson
       # suite. AddressSanitizer and UndefinedBehaviorSanitizer together.
       # Julia and R cannot host that runtime; the Python front is in the suite.

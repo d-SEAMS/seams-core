@@ -34,3 +34,14 @@ leak:pybind11_exec__image
 #   #6 _PyEval_EvalFrameDefault  Python/bytecodes.c
 # No seams, libyodaLib, or dseams frame.
 leak:default_calloc
+# import numpy, from every docs snippet that imports dseams or pydseams.
+# Fast unwinding stops at default_malloc, the malloc twin of the frame
+# above. A slow unwind of the 8 bytes / 1 allocation is the ufunc table
+# NumPy builds at import:
+#   #1 PyUFunc_FromFuncAndDataAndSignatureAndIdentity  numpy/_core/_multiarray_umath
+#   #2 InitOperators             numpy/_core/_multiarray_umath
+#   #3 initumath                 numpy/_core/_multiarray_umath
+#   #4 _multiarray_umath_exec    numpy/_core/_multiarray_umath
+#   #5 PyModule_ExecDef          Objects/moduleobject.c
+# No seams, libyodaLib, or dseams frame.
+leak:default_malloc
