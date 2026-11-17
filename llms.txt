@@ -126,7 +126,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [SQQ](https://docs.dseams.info/explanation/sqq.md): SQQ 0.5.8 counts shortest-path chordless rings of size 4, 5 and 6.
 - [Stacking disorder](https://docs.dseams.info/explanation/stacking-disorder.md): Cubic ice and hexagonal ice are the same puckered hexagons stacked in two orders.
 - [Local symmetry](https://docs.dseams.info/explanation/symmetry.md): The classifier names each oxygen as ice Ih, ice Ic, stacking-disordered ice, or unmatched, and it can name a hydrate cage or a five- or six-ring when one cluster is passed in.
-- [Topological network criteria](https://docs.dseams.info/explanation/topological-network.md): This page is the definitions. The runnable checks that the implementations still return the documented counts live under Tutorials.
+- [Topological network criteria](https://docs.dseams.info/explanation/topological-network.md): These are the criteria the classifiers use.
 - [TRACE and signature cages](https://docs.dseams.info/explanation/trace-assembly.md): TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) finds hydrate cages on a hydrogen-bond graph.
 - [Signature-search thread controls](https://docs.dseams.info/explanation/trace-threads.md): The signature search reads one OpenMP width, and the neighbour list may narrow it.
 
