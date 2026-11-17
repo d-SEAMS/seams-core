@@ -50,7 +50,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Engines](https://docs.dseams.info/user/engines.md): Read a trajectory from LAMMPS, GROMACS, OpenMM, or PLUMED, or label the frame inside the run.
 - [Run in situ](https://docs.dseams.info/user/tutorials/insitu-run.md): The cubic cell is engines/lammps/ice.data, 64 atoms.
 - [LAMMPS](https://docs.dseams.info/user/howto/engine-lammps.md): The build below used conda-forge LAMMPS 2022.06.23.
-- [GROMACS](https://docs.dseams.info/user/howto/engine-gromacs.md): The build below used conda-forge GROMACS 2026.3, with the compiler and Eigen already on the path.
+- [GROMACS](https://docs.dseams.info/user/howto/engine-gromacs.md): Build gmx-seams against conda-forge GROMACS 2026.3, or a later 2026 release.
 - [OpenMM](https://docs.dseams.info/user/howto/engine-openmm.md): The build below used conda-forge OpenMM 8.6.0.
 - [PLUMED](https://docs.dseams.info/user/howto/engine-plumed.md): The thread count comes from PLUMED_NUM_THREADS.
 - [In-situ CHILL+](https://docs.dseams.info/user/howto/engine-insitu.md): InSitu in adapters/python/dseams_insitu/engine.py is the in-run classifier.
