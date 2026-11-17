@@ -1,10 +1,20 @@
 #+TITLE: Version pins
 #+OPTIONS: toc:nil num:nil
 
-The version of a checkout is one string, written in six places.
-They move together.
-=seams --version= prints the meson value.
-The Sphinx book prints =release=.
+~seams --version~ prints the version of that binary. The text is the
+program name, a space, and the Meson project version. On this release
+the line is:
+
+#+begin_src text
+seams 2.14.0
+#+end_src
+
+~seams_version_string()~ in ~seams.h~ returns that version.
+~seams_lang_version()~ in ~libseams_lang~ returns it as well. This book
+prints the same string as the Sphinx ~version~ and ~release~.
+
+A source checkout writes the version in six places. On this tree every
+one of them is 2.14.0, except the Doxygen field, which is ~v2.14.0~.
 
 | file | field |
 |------+-------|
@@ -12,16 +22,10 @@ The Sphinx book prints =release=.
 | =pixi.toml= | =[workspace] version= |
 | =CITATION.cff= | =version= |
 | =nix/package.nix= | =version= |
-| =docs/source/Doxyfile_seams.cfg= | =PROJECT_NUMBER= |
+| =docs/source/Doxyfile_seams.cfg= | =PROJECT_NUMBER= (=v2.14.0=) |
 | =docs/source/conf.py= | =version= and =release= |
 
-On this tree that string is 2.14.0.
-A release that bumps one of them and leaves the others is a broken pin.
-The docs site should show the string from the commit it was built from, not a number copied into a paragraph that will go stale.
-
-=libseams_lang= reports the meson version from =seams_lang_version=.
-The Python, R, and Julia packages carry the same number in their own metadata.
-If you cut a release, change those too.
-
-Notes for the next cut are files under =changelog.d/=.
-The cut is =towncrier build --version X.Y.Z=.
+The language packages built for this tag are versioned 2.14.0.
+Match the package to the string from ~seams --version~.
+The repositories are on
+[[file:upgrade-2.14.org][the upgrade from 2.13]].
