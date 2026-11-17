@@ -701,12 +701,15 @@ test('ion_shell_rings', find_program('python3'),
   workdir: meson.project_source_root(),
   env: _test_env,
   timeout: 120)
-test('pin_host', find_program('python3'),
-  args: [files('pin_host.py')],
-  workdir: meson.project_source_root(),
-  env: {'SEAMS_LIB': meson.project_build_root() / 'src' / 'libyodaLib.so'},
-  timeout: 180,
-  is_parallel: false)
+# Placement is sched_setaffinity, /proc/self/task and taskset: Linux only.
+if host_machine.system() == 'linux'
+  test('pin_host', find_program('python3'),
+    args: [files('pin_host.py')],
+    workdir: meson.project_source_root(),
+    env: {'SEAMS_LIB': meson.project_build_root() / 'src' / 'libyodaLib.so'},
+    timeout: 180,
+    is_parallel: false)
+endif
 test('docs_sources', find_program('python3'),
   args: [files('docs_sources.py')],
   workdir: meson.project_source_root(),
