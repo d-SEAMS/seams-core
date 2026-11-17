@@ -87,6 +87,17 @@ fi
 sysroot_arg=
 if [ -n "${CONDA_PREFIX:-}" ] && [ -d "$CONDA_PREFIX/x86_64-conda-linux-gnu/sysroot" ]; then
   sysroot_arg="-Wl,--sysroot=$CONDA_PREFIX/x86_64-conda-linux-gnu/sysroot"
+  # The conda sysroot's libdl wants GLIBC_PRIVATE symbols from its own
+  # libc. When the clang driver links the host libc, that link fails, so
+  # the sysroot is passed only if a thread-sanitized program links with it.
+  probe_dir=$(mktemp -d)
+  printf 'int main(void) { return 0; }\n' > "$probe_dir/probe.c"
+  # shellcheck disable=SC2086
+  if ! clang ${CFLAGS:-} -fsanitize=thread -shared-libsan "$sysroot_arg" \
+      "$probe_dir/probe.c" ${LDFLAGS:-} -o "$probe_dir/probe" >/dev/null 2>&1; then
+    sysroot_arg=
+  fi
+  rm -rf "$probe_dir"
 fi
 link_args="['-shared-libsan','-Wl,--allow-multiple-definition','-Wl,-rpath,$prefix/lib'"
 if [ -n "$tsan_rpath" ]; then
