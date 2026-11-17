@@ -1362,6 +1362,9 @@ SteinhardtQl cutoffSolid(
   const bool simd8 = false;
   (void)quad;
 #endif
+#if defined(SEAMS_YLM_AVX512)
+  // ylmAdd8 is built only with the AVX-512 library. An unoptimized build
+  // keeps this block even when simd8 is false, so it is compiled out.
   if (!wroteLocal && simd8) {
     auto oneAtom = [&](int atom) {
       const int a = scratch.offsets[static_cast<std::size_t>(atom)];
@@ -1506,6 +1509,7 @@ SteinhardtQl cutoffSolid(
       }
     }
   }
+#endif
   if (!wroteLocal && !simd8) {
   const int nTiles = (n + 7) / 8;
 #ifdef SEAMS_HAS_OPENMP
