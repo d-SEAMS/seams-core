@@ -13,7 +13,7 @@
 
 #include "thread_team.hpp"
 
-#ifdef SEAMS_HAS_LINKCELL
+#if defined(SEAMS_HAS_LINKCELL) && defined(SEAMS_HAS_LINKCELL_TEAM)
 extern "C" int lc_team_run(std::size_t nstages, const std::size_t *chunks,
                            void (*fn)(void *, std::size_t, std::size_t, std::size_t),
                            void *ctx);
@@ -141,7 +141,7 @@ template <class F> void run(const std::vector<std::size_t> &sizes, F &&fn) {
   }
   detail::Call<std::remove_reference_t<F>> call;
   call.fn = &fn;
-#ifdef SEAMS_HAS_LINKCELL
+#if defined(SEAMS_HAS_LINKCELL) && defined(SEAMS_HAS_LINKCELL_TEAM)
   bool nested = false;
 #ifdef SEAMS_HAS_OPENMP
   nested = omp_in_parallel() != 0;

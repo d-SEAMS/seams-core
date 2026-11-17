@@ -400,6 +400,28 @@ if linkcell_dep.found()
   # Headers only; libyodaLib links the library (src/meson.build).
   _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
   _args += ['-DSEAMS_HAS_LINKCELL=1']
+  # 0.4.3 adds the fused CSR query and the stage runner. A 0.4.2
+  # library keeps the in-tree graph and the OpenMP stages. A subproject
+  # dependency cannot be passed to has_header_symbol, so that probe uses
+  # the wrap's include directory.
+  if linkcell_dep.type_name() == 'internal'
+    _lc_inc = include_directories('subprojects/linkcell/include')
+    _lc_csr = cppc.has_header_symbol('linkcell.h', 'lc_knearest_csr',
+                                     include_directories: _lc_inc)
+    _lc_team = cppc.has_header_symbol('linkcell.h', 'lc_team_run',
+                                      include_directories: _lc_inc)
+  else
+    _lc_csr = cppc.has_header_symbol('linkcell.h', 'lc_knearest_csr',
+                                     dependencies: linkcell_dep)
+    _lc_team = cppc.has_header_symbol('linkcell.h', 'lc_team_run',
+                                      dependencies: linkcell_dep)
+  endif
+  if _lc_csr
+    _args += ['-DSEAMS_HAS_LINKCELL_CSR=1']
+  endif
+  if _lc_team
+    _args += ['-DSEAMS_HAS_LINKCELL_TEAM=1']
+  endif
 endif
 
 minimage_dep = dependency('minimage', version: '>=0.1.4', required: get_option('with_minimage'),

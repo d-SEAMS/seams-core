@@ -3264,12 +3264,13 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
     return;
   }
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
-#ifdef SEAMS_HAS_LINKCELL
+#if defined(SEAMS_HAS_LINKCELL) && defined(SEAMS_HAS_LINKCELL_CSR)
   // Linkcell builds the graph from its nominations in the search's own
   // region: the rows are those fillGraphFromNom and csrFromRows give
   // (mutual: lower partners ascending, then higher ones nearest first;
   // otherwise each edge in the order of the nomination slot that adds
-  // it). No OpenMP team is started for the call.
+  // it). No OpenMP team is started for the call. A linkcell without
+  // that query keeps the in-tree graph below.
   {
     std::vector<double> xyz;
     std::vector<int> mask;
