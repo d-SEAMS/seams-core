@@ -15,6 +15,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Fixed
 
 - `brine_front` keeps each loaded frame from a multi-frame LAMMPS dump. It stops at the indexed frame count and reports those frames without probing past the end.
+- `find_build_file` returns an absolute path. Engine checks can still load a plugin after they change directory.
 
 ## [2.14.1] - 2026-11-16
 

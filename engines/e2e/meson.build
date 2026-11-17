@@ -12,6 +12,9 @@ if e2e_py.found()
   if _omp_libdir != ''
     e2e_env.prepend('LD_LIBRARY_PATH', _omp_libdir)
   endif
+  test('engines_e2e_common', e2e_py,
+    args: [meson.current_source_dir() / 'test_common.py'],
+    suite: 'engines-e2e', timeout: 30)
   e2e_deps = [seams_exe, seams_api_lib]
   foreach name : ['lammps_plugin', 'gmx_seams', 'seams_plumed']
     if is_variable(name)
