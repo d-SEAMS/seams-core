@@ -9,4 +9,4 @@ luarocks make
 ```
 
 Read the [Lua and Fennel binding documentation](https://lua.dseams.info/)
-or watch the [Lua and Fennel walkthrough](https://docs.dseams.info/videos/embeds/lua.html).
+or watch the [Lua and Fennel walkthrough](https://docs.dseams.info/videos/index.html).

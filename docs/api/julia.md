@@ -9,4 +9,4 @@ julia -e 'using Pkg; Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")'
 ```
 
 Read the [Julia binding documentation](https://julia.dseams.info/) or
-watch the [Julia walkthrough](https://docs.dseams.info/videos/embeds/julia.html).
+watch the [Julia walkthrough](https://docs.dseams.info/videos/index.html).
