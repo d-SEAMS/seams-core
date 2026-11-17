@@ -189,7 +189,7 @@ jobs:
             --retry-wait-time 5
             --timeout 30
             --max-concurrency 4
-            --accept 200,206,429
+            --accept 200,202,206,429
             --extensions rst,md,org,txt
             --exclude-path docs/source/api
             docs/source docs/orgmode README.md CHANGELOG.md
