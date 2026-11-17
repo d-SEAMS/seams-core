@@ -27,6 +27,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Fixed
 
 - Source archives carry every subproject, patched chemfiles source, and pinned tutorial inputs, so the test suite builds and runs without network access.
+- The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
+- The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
 ## [2.14.1] - 2026-11-16
 
 ### Added
