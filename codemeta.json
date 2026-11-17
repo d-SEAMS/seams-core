@@ -1,0 +1,41 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "d-SEAMS",
+  "identifier": "https://github.com/d-SEAMS/seams-core",
+  "description": "d-SEAMS reads molecular-dynamics trajectories and names the ice in them: CHILL+, topological cages, primitive rings, and Steinhardt parameters, on one shared neighbour list.",
+  "version": "2.14.0",
+  "datePublished": "2026-11-15",
+  "license": "https://spdx.org/licenses/MIT",
+  "codeRepository": "https://github.com/d-SEAMS/seams-core",
+  "url": "https://docs.dseams.info",
+  "programmingLanguage": ["C++", "C"],
+  "runtimePlatform": ["Linux", "macOS", "Windows"],
+  "applicationCategory": "Computational chemistry",
+  "citation": "https://doi.org/10.1021/acs.jcim.0c00031",
+  "referencePublication": "https://doi.org/10.1021/acs.jcim.0c00031",
+  "relatedLink": [
+    "https://dseams.info",
+    "https://figshare.com/projects/d-SEAMS_Datasets/73545"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Amrita",
+      "familyName": "Goswami",
+      "identifier": "https://orcid.org/0000-0001-8706-2383"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Rohit",
+      "familyName": "Goswami",
+      "email": "rgoswami@ieee.org",
+      "identifier": "https://orcid.org/0000-0002-2393-8056"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Ruhila",
+      "familyName": "S"
+    }
+  ]
+}
