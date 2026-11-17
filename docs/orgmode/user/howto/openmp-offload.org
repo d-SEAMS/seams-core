@@ -1,109 +1,132 @@
 #+TITLE: OpenMP target offload
-#+OPTIONS: toc:nil num:nil
+#+OPTIONS: toc:nil num:nil ^:nil
 
 Build the Steinhardt kernel and the TUM ice score (hop-bound
-six-rings and cage affiliation) for an NVIDIA GPU. This is not the
-gpulite resident-batch path and it is not the host-only pixi
-environment. Device CHILL+ is not in this build.
+six-rings and cage affiliation) for an NVIDIA GPU. This build is
+separate from the gpulite resident-batch path and from the host-only
+pixi environment.
 
-The Meson option is ~-Dwith_openmp_offload=enabled~. Configure
-probes a real ~target teams distribute parallel for~ and records
-~OpenMP target offload: YES~ only when that link succeeds. nvc++
-is tried first (~-mp=gpu~, then ~-gpu=cc80~, then
-~-gpu=cuda12.2~ / ~-gpu=cuda11.6~ so an HPC SDK that does not
-ship a toolkit matching the driver can still use a bundled
-release). clang with libomptarget is the fallback (~-fopenmp
--fopenmp-targets=nvptx64-nvidia-cuda~).
+The Meson option is ~-Dwith_openmp_offload=enabled~. Configure links
+a real ~target teams distribute parallel for~. The summary line
+~OpenMP target offload~ is YES only when that link succeeds. The probe
+tries, in order, ~-mp=gpu~, then ~-mp=gpu -gpu=cc80~, then
+~-mp=gpu -gpu=cuda12.2~, then ~-mp=gpu -gpu=cc80,cuda12.2~, then
+~-mp=gpu -gpu=cuda11.6~, then ~-mp=gpu -gpu=cc80,cuda11.6~, then
+~-fopenmp -fopenmp-targets=~ plus the ~offload_triple~ option (default
+~nvptx64-nvidia-cuda~). The first set that links is used on the compile
+line and the link line. An HPC SDK that does not ship a toolkit
+matching the driver still links when a ~-gpu=cudaX.Y~ set names a
+bundled release. The 22.3 SDK ships CUDA 11.6. The 23.7 SDK ships
+CUDA 12.2.
 
 * Elja A100
 
 GPU partitions: ~gpu-1xA100~, ~gpu-2xA100~, ~gpu-long~. Account:
-~chem-ui~. Do not compile on the login node.
+~chem-ui~. Compile on a GPU node. The batch script is
+~scripts/elja_gpu_job.sh~. Its headers request ~gpu-2xA100~, two GPUs,
+the ~chem-ui~ account, and two hours.
 
-GPU batch shells do not have Lmod on ~PATH~. Use EasyBuild NVHPC
-23.7-CUDA-12.2.0 (the A100 driver is 12.2; OpenHPC nvc++ 22.3
-ships only CUDA 11.6 and refuses ~-mp=gpu~ against that driver
-unless ~-gpu=cuda11.6~ is set) and the GCCcore-13.3.0 EasyBuild
-prefixes for Meson, Ninja, Eigen, FlexiBLAS, and Python 3.12.
-Cluster Catch2 is 2.x; the tree carries a Catch2 3 wrap. CUDA
-12.4 supplies ~nsys~ 2023.4.
+GPU batch shells do not have Lmod on ~PATH~. Export ~SEAMS_EASYBUILD~
+to the EasyBuild software root before submit. The script uses NVHPC
+23.7-CUDA-12.2.0 under that root, which matches an A100 driver of
+12.2. OpenHPC nvc++ 22.3 is the next try when ~SEAMS_NVHPC_22~ points
+at that prefix. It ships CUDA 11.6, and the probe then needs
+~-gpu=cuda11.6~. Clang 17 in the same tree is the last try. That Clang
+has libomptarget bitcode and no NVPTX codegen, so a failed nvc++ probe
+stays failed.
+
+Before ~sbatch~, from a login node, copy the C runtime objects and
+headers the GPU image does not ship:
 
 #+begin_src bash
-EB=/hpcapps/lib-edda/easybuild/software
-NVHPC_ROOT=$EB/NVHPC/23.7-CUDA-12.2.0/Linux_x86_64/23.7
-export NVHPC_CUDA_HOME=$NVHPC_ROOT/cuda/12.2
-export PATH=$EB/CUDA/12.4.0/bin:$NVHPC_ROOT/compilers/bin:$EB/Meson/1.4.0-GCCcore-13.3.0/bin:$EB/Ninja/1.12.1-GCCcore-13.3.0/bin:$EB/Python/3.12.3-GCCcore-13.3.0/bin:$PATH
-export PKG_CONFIG_PATH=$EB/Eigen/3.4.0-GCCcore-13.3.0/share/pkgconfig:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib/pkgconfig
-export LD_LIBRARY_PATH=$EB/Python/3.12.3-GCCcore-13.3.0/lib:$NVHPC_ROOT/compilers/lib:$NVHPC_ROOT/cuda/12.2/lib64:$NVHPC_ROOT/math_libs/12.2/lib64:$EB/GCCcore/13.3.0/lib64:$EB/FlexiBLAS/3.4.4-GCC-13.3.0/lib:$EB/Z3/4.13.0-GCCcore-13.2.0/lib:$EB/hwloc/2.9.2-GCCcore-13.2.0/lib
-export PYTHONPATH=$EB/Meson/1.4.0-GCCcore-13.3.0/lib/python3.12/site-packages
-# GPU nodes lack glibc-devel. Before sbatch, from a login node:
-#   cp /usr/lib64/crt1.o crti.o crtn.o Scrt1.o elja-crt/
-#   rsync -a /usr/include/ elja-sysroot/usr/include/
-export LIBRARY_PATH=$PWD/elja-crt:/lib64
-export CFLAGS="-B$PWD/elja-crt"
-export CXXFLAGS="-B$PWD/elja-crt"
-export LDFLAGS="-B$PWD/elja-crt -L$PWD/elja-crt -L/lib64 -L$EB/hwloc/2.9.2-GCCcore-13.2.0/lib -lhwloc"
+mkdir -p elja-crt elja-sysroot/usr
+cp /usr/lib64/crt1.o /usr/lib64/crti.o /usr/lib64/crtn.o /usr/lib64/Scrt1.o elja-crt/
+rsync -a /usr/include/ elja-sysroot/usr/include/
+#+end_src
 
-# nvc++ 23.7 accepts -mp=gpu against driver 12.2. Meson does not
-# list C++20 for this release, so setup uses -Dcpp_std=none and
-# -std=c++20 (the tree uses concepts).
-export CC=$EB/GCCcore/13.3.0/bin/gcc
-export CXX=nvc++
-export CFLAGS="-idirafter $PWD/elja-sysroot/usr/include"
-export CXXFLAGS="-std=c++20 -idirafter $PWD/elja-sysroot/usr/include"
-meson setup build-offload --buildtype=debugoptimized \
+The script checks ~elja-crt/crt1.o~ and
+~elja-sysroot/usr/include/features.h~, then re-enters under a
+user-namespace overlay because nvc++ looks up ~/usr/lib64/crt1.o~.
+For nvc++ it configures with ~-Dcpp_std=none~ and adds ~-std=c++20~,
+because Meson 1.4 does not list C++20 for that compiler and the
+sources use concepts:
+
+#+begin_src bash
+meson setup "$BUILD" --buildtype=debugoptimized \
   -Dcpp_std=none \
   -Dwith_openmp_offload=enabled \
   -Dwith_mpi=disabled \
   -Dwith_gpulite=disabled \
   -Dcatch2:tests=false
-meson compile -C build-offload
-meson test -C build-offload --print-errorlogs
 #+end_src
 
-~meson setup~ / ~compile~ / ~test~ run under ~srun~ or ~sbatch~
-on a GPU node, for example:
+The repository wrap is Catch2 3.14.0, and ~-Dcatch2:tests=false~
+configures that wrap. Eigen, FlexiBLAS, Meson,
+and Ninja come from the EasyBuild prefixes, not from pixi.
+
+~gpu-1xA100~ nodes do not advertise GRES, so ~--gres=gpu:1~ is
+rejected there. ~gpu-2xA100~ advertises ~gpu:2~. An interactive shell
+on that partition is:
 
 #+begin_src bash
 srun --partition=gpu-2xA100 --gres=gpu:2 --account=chem-ui \
   --time=02:00:00 --pty bash
-# gpu-1xA100 nodes do not advertise GRES, so --gres=gpu:1 is
-# rejected. gpu-2xA100 advertises gpu:2.
 #+end_src
-
-Eigen, Catch2, FlexiBLAS, Meson, and Ninja come from the
-~GCC/13.3.0~ EasyBuild toolchain on this cluster (~module spider~
-the name if a version is missing). They do not come from pixi.
-
-If nvc++ refuses the sources, swap the compiler to a clang that
-ships libomptarget and keep ~-Dwith_openmp_offload=enabled~. The
-probe then takes ~-fopenmp-targets=nvptx64-nvidia-cuda~.
 
 * Runtime
 
-~SEAMS_OFFLOAD=0~ forces the host path in an offload build.
-Unset, or any value other than ~0~, uses the device when
-~omp_get_num_devices() > 0~.
+Steinhardt, the TUM cage count, and CHILL+ each read ~SEAMS_OFFLOAD~
+with their own rule. ~seams~ loads the variable first and writes it
+back before the command. Unset is written as ~0~. The value ~0~, and a
+value whose first letter is ~f~ or ~n~, stay off. Any other value,
+including the word ~off~, is written back as ~1~.
 
-~seams --features~ prints whether the binary was compiled with
-the offload define.
+A library caller that sets the variable itself sees the raw text:
+
+- Steinhardt (~wantOffload~ inside ~steinhardtQl~ and
+  ~steinhardtQlCutoff~) uses the device when
+  ~omp_get_num_devices() > 0~ and the value does not start with ~0~.
+  Unset, seen directly, also uses the device. ~l = 12~ has no device
+  harmonics and stays on the host. After ~seams~ rewrites the
+  variable, unset therefore stays on the host. ~seams steinhardt~
+  reaches the device when that write is ~1~ and a device is present.
+- TUM (~tum::preferOffload~) uses the hop-bound target kernels only
+  when the variable is set, non-empty, and does not start with ~0~,
+  and a device is present. Otherwise ~tum::cageCounts~ stays on host
+  ~ringNetwork~ (Franzblau) and ~cageAffiliation~. ~seams cages~ on a
+  cutoff graph or a mutual graph calls that path. The seeded graph
+  stays on the host.
+- CHILL+ (~chill::preferOffload~) is on when the variable is set and
+  is not exactly ~0~. ~chill::chillPlus~ then runs the flattened
+  four-nearest tables, in a target region when a device is present.
+  ~seams chill-plus~ does not call ~chill::chillPlus~. Published
+  cutoff CHILL+ stays on the host cell list.
+
+~seams --features~ prints the compile-time backends: OpenMP,
+~linkcell pairs_within~, ~vesin cutoff fallback~, and the rest of that
+list. It does not print the offload define. The Meson summary line is
+the record of the probe.
 
 The Catch2 case ~steinhardtQl offload matches serial and threaded
 bit for bit~ compiles only when the probe succeeded. It compares
 the device path to one-thread and four-thread host paths on the
-FCC lattice and on ~input/traj/mW_cubic.lammpstrj~, and it checks
-the FCC ~q4~ / ~q6~ reference values.
+FCC lattice and on ~input/traj/mW_cubic.lammpstrj~, opened as
+~traj/mW_cubic.lammpstrj~ with the test working directory ~input/~.
+It checks the FCC ~q4~ / ~q6~ reference values. The case requires
+~omp_get_num_devices() > 0~.
 
 The case ~SEAMS_OFFLOAD TUM cage counts match host on mW cubic~
 (~[bulkTUM][offload]~) compares hop-bound six-ring and HC/DDC
-affiliation counts to host ~ringNetwork~ plus ~cageAffiliation~
-on the same cutoff graph. ~SEAMS_OFFLOAD=1~ selects that path;
-~SEAMS_OFFLOAD=0~ stays on Franzblau. When the probe succeeded
-and a device is present the TUM kernels run in a target region.
+affiliation counts from ~tum::specializedCageCounts~ with host
+~ringNetwork~ plus ~cageAffiliation~ on the same cutoff graph.
+The test sets ~SEAMS_OFFLOAD=1~ for the hop-bound call.
+When the probe succeeded and a device is present, that call must
+report ~usedDevice~.
 
 * Profile
 
-~scripts/elja_gpu_job.sh~ is the sbatch body: it configures the
-offload build, runs the test suite, then ~nsys profile~ and
-~nsys stats --force-export=true~. The stats file must be
-non-empty.
+~scripts/elja_gpu_job.sh~ configures the offload build, runs
+~meson test~, then times ~tests/bench_strong~ with ~SEAMS_OFFLOAD~
+set to 0 and to 1. It then runs ~nsys profile~ on that benchmark
+and ~nsys stats --force-export=true~. The script exits when the
+stats file is empty.
