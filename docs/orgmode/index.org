@@ -108,12 +108,14 @@ APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines.
 Install the language interface you want:
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
-  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
-- Lua and Fennel: source package ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]; ~luarocks install dseams 2.14.0-1~
-- R: ~dseams~, [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
-- Julia: ~Dseams~, [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
-- Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
-- Fortran: fpm ~dseams~, [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
+  with ~pip install 'pydseamslib==2.14.0'~
+- Lua and Fennel: clone [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+  and run ~luarocks make~ in the checkout
+- R: ~remotes::install_github("d-SEAMS/dseams-r")~
+- Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~
+- Rust: ~cargo add dseams@2.14.0~
+- Fortran: add [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
+  as an fpm Git dependency
 
 The header *Ecosystem* menu on every page jumps between the engine,
 the bindings, and linkcell.
