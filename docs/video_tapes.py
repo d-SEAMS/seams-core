@@ -266,21 +266,39 @@ def check_folder(folder, env, root, record, absent):
 
 
 def check_embeds(root):
-    """A claim in embed.txt is an /$/embed/ iframe. No claim renders nothing."""
-    from video_page import CLAIMS, players_rst, read_claim, slugs
+    """A claim in embed.txt is an /$/embed/ iframe. No claim renders nothing.
+
+    The VTT file stays in the tree and is named in docs/videos/README.md.
+    The reader page does not link it.
+    """
+    from video_page import (
+        CARDS,
+        CLAIMS,
+        CUTS,
+        check_player_markup,
+        check_reader_copy,
+        players_rst,
+        read_claim,
+        slugs,
+    )
 
     videos = root / "docs" / "videos"
     if (videos / "lua-fennel").exists():
         fail("lua-fennel should be the lua slug")
     page = (root / "docs" / "orgmode" / "videos" / "index.org").read_text()
+    readme = (videos / "README.md").read_text()
+    bindings = (root / "docs" / "orgmode" / "user" / "howto" / "bindings.org").read_text()
     if "huggingface.co/datasets/d-SEAMS/docs-videos" in page:
         fail("videos page still points at the old dataset")
+    check_reader_copy(page, readme, bindings)
     html = players_rst(videos)
-    if "huggingface.co" in html or "video coming soon" in html:
-        fail("video player html still has a placeholder")
-    if "odysee.com" in html.replace("odysee.com/$/embed/", ""):
-        fail("video player html has an Odysee URL that is not /$/embed/")
-    for slug in slugs(videos):
+    check_player_markup(html)
+    found = slugs(videos)
+    if set(found) != set(CUTS):
+        fail("video cuts are {}, reader list is {}".format(
+            ", ".join(found), ", ".join(CUTS)))
+    claimed = 0
+    for slug in found:
         folder = videos / slug
         if not (folder / "captions.vtt").is_file():
             fail("{} is missing captions.vtt".format(slug))
@@ -293,15 +311,27 @@ def check_embeds(root):
             name, claim_id = expected.split(":", 1)
             if claim != (name, claim_id):
                 fail("{} embed.txt is not {}".format(slug, expected))
+        marker = 'id="video-{}"'.format(slug)
         if claim is None:
-            if "docs/videos/{}/captions.vtt".format(slug) in html:
+            if marker in html:
                 fail("{} has no claim and should render nothing".format(slug))
-        else:
-            src = "https://odysee.com/$/embed/{}:{}".format(claim[0], claim[1])
-            if src not in html:
-                fail("{} iframe is missing".format(slug))
-            if "docs/videos/{}/captions.vtt".format(slug) not in html:
-                fail("{} transcript link is missing".format(slug))
+            continue
+        claimed += 1
+        src = "https://odysee.com/$/embed/{}:{}".format(claim[0], claim[1])
+        title, sentence = CARDS[slug]
+        if src not in html:
+            fail("{} iframe is missing".format(slug))
+        if marker not in html:
+            fail("{} card is missing".format(slug))
+        if "<h2>{}</h2>".format(title) not in html:
+            fail("{} title is missing".format(slug))
+        if "<p>{}</p>".format(sentence) not in html:
+            fail("{} description is missing".format(slug))
+        if 'title="{}"'.format(title) not in html:
+            fail("{} player title is missing".format(slug))
+    if html.count('id="video-') != claimed:
+        fail("player count {} does not match {} claims".format(
+            html.count('id="video-'), claimed))
     print("video embeds ok")
 
 

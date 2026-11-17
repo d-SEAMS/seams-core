@@ -95,8 +95,8 @@ own suite against a seams-core tag.
 
 * Recordings
 
-The language recordings use the same embed.txt as the videos page.
-A page without a claim includes no player.
+Each binding below has a short screencast.
+The full set is on the [[file:../../videos/index.org][videos]] page.
 
 ** C
 

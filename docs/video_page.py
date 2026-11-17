@@ -2,9 +2,10 @@
 # Copyright (c) d-SEAMS developers
 """Build the videos page from per-slug Odysee claim files.
 
-docs/videos/<slug>/embed.txt holds one line, claim-name:full-claim-id,
-when that recording has been uploaded. A missing file, or a file with
-only comments, renders no player. Claim ids are never invented here.
+A slug with one claim line renders a title, one sentence, and an
+/$/embed/ player. A missing file, or a file with only comments, renders
+nothing. Claim ids are never invented here. The line format, the
+resolution, and the caption file are documented in docs/videos/README.md.
 
 Odysee documents autoplay=true and t= on the embed URL. It does not
 document a query parameter that hides related videos or autoplay-next,
@@ -13,33 +14,138 @@ so the iframe src is the bare /$/embed/ URL.
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
 CLAIM = re.compile(r"^([^:\s]+):([A-Za-z0-9]+)$")
-BLURB = {
-    "c": "C on ice Ih.",
-    "cpp": "C++ on ice Ih.",
-    "python": "Python on ice Ih.",
-    "fortran": "Fortran on ice Ih.",
-    "rust": "Rust on ice Ih.",
-    "julia": "Julia on ice Ih.",
-    "r": "R on ice Ih.",
-    "cli": "The seams command on ice Ih.",
-    "interface": "CHILL+ on the basal interface.",
-    "rings-cages": "Rings and sI, sII cages.",
-    "brine": "The brine front.",
-    "nucleation": "Nucleation q6bar.",
-    "insitu": "LAMMPS, GROMACS, OpenMM, and PLUMED.",
-    "lammps": "LAMMPS run_hook.",
-    "gromacs": "GROMACS gmx-seams.",
-    "plumed": "PLUMED driver.",
-    "lua": "Lua and Fennel.",
-    "migrate": "Migrate from 1.x.",
-    "openmm": "OpenMM on ice Ih.",
-    "rings": "Primitive rings on exampleTraj, then ice Ih.",
-    "cages": "Ice Ih hexagonal cages, cubic double-diamond cages, then the clathrate cells.",
+CHANNEL = "https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d"
+# Title and one sentence for each cut that has an upload. The gallery
+# prints both. A topic page prints the player only.
+CARDS = {
+    "c": (
+        "C",
+        "The C program reads ice Ih and prints the neighbour count, q6, published CHILL+, and the six-ring count.",
+    ),
+    "cpp": (
+        "C++",
+        "The C++ program reads ice Ih and prints the neighbour pairs, q6, published CHILL+, and the six-ring count.",
+    ),
+    "fortran": (
+        "Fortran",
+        "The Fortran recording runs the ice Ih census, then the Fortran example on the sI cell.",
+    ),
+    "python": (
+        "Python",
+        "The Python program reads ice Ih and prints the neighbour count, q6, published CHILL+, and the six-ring count.",
+    ),
+    "rust": (
+        "Rust",
+        "The Rust example reads ice Ih and prints the neighbour count, q6, published CHILL+, and the six-ring count.",
+    ),
+    "julia": (
+        "Julia",
+        "The Julia recording runs the ice Ih census, then the Julia example on the sI cell.",
+    ),
+    "r": (
+        "R",
+        "The R recording runs the ice Ih census, then the R example on the sI cell.",
+    ),
+    "lua": (
+        "Lua and Fennel",
+        "Lua and Fennel print the ice Ih census, the cage counts, and the basal-interface CHILL+ labels.",
+    ),
+    "cli": (
+        "The seams command",
+        "The seams command reads ice Ih and prints the neighbour count, q6, published CHILL+, and the six-ring count.",
+    ),
+    "lammps": (
+        "LAMMPS",
+        "LAMMPS run_hook scores five calls on the cubic cell, then one step on the ice Ih dump.",
+    ),
+    "gromacs": (
+        "GROMACS",
+        "gmx-seams reads the trajectory written by gmx mdrun and prints the ice census.",
+    ),
+    "openmm": (
+        "OpenMM",
+        "OpenMM scores the ice Ih dump and prints the hexagonal count, the six-ring count, and q6.",
+    ),
+    "plumed": (
+        "PLUMED",
+        "The PLUMED driver scores the ice Ih dump and prints the hexagonal count, the six-ring count, and q6.",
+    ),
+    "insitu": (
+        "In situ",
+        "The OpenMM how-to and the in-situ call score the ice Ih dump.",
+    ),
+    "interface": (
+        "Basal interface",
+        "Published CHILL+ on the basal interface frame prints hexagonal 352 and water 434.",
+    ),
+    "rings": (
+        "Primitive rings",
+        "The recording counts primitive rings on exampleTraj, then the six-rings of ice Ih.",
+    ),
+    "cages": (
+        "Cages",
+        "The recording counts hexagonal cages on ice Ih, double-diamond cages on the cubic cell, and the sI, sII, and sH cages.",
+    ),
+    "brine": (
+        "Brine front",
+        "The brine tutorial prints the ice front on three frames, then the paper frame of 864 waters and 9 ions.",
+    ),
+    "nucleation": (
+        "Nucleation",
+        "The recording prints q6bar for frame 1 and frame 148 of the nucleation trajectory.",
+    ),
+    "migrate": (
+        "Migrate from 1.x",
+        "The recording runs the 2.x hydrogen-bond, coordination, fingerprint, pair, and domain commands on exampleTraj.",
+    ),
 }
+# Facts that belong in docs/videos/README.md, and strings that must stay
+# off the reader pages. The README phrases are the old page sentences.
+PAGE_BANNED = (
+    "embed.txt",
+    "claim-name",
+    "1920",
+    "captions.vtt",
+    "aac_coder",
+    "VTT",
+    "render_molecules",
+    "no player",
+    "coming soon",
+    "huggingface.co",
+    "terminal session",
+    "burned",
+)
+README_REQUIRED = (
+    "docs/videos/<slug>/embed.txt",
+    "claim-name:full-claim-id",
+    "1920 by 1080",
+    "captions.vtt",
+    "renders no player",
+    "-c:a aac -aac_coder fast",
+    "Captions are burned into the upload",
+)
+BINDINGS_BANNED = (
+    "embed.txt",
+    "claim-name",
+    "no player",
+    "captions.vtt",
+    "coming soon",
+)
+HTML_BANNED = (
+    "huggingface.co",
+    "video coming soon",
+    "docs/videos/",
+    "captions.vtt",
+    "Captions are burned",
+    "embed.txt",
+    "aac_coder",
+    "claim-name",
+)
 
 # The twenty cuts. rings-cages keeps its shot list on disk and is not a
 # gallery video.
@@ -64,6 +170,29 @@ CUTS = (
     "r",
     "rings",
     "rust",
+)
+# Gallery order: languages, the command, the engines, then the tutorials.
+READER = (
+    "c",
+    "cpp",
+    "fortran",
+    "python",
+    "rust",
+    "julia",
+    "r",
+    "lua",
+    "cli",
+    "lammps",
+    "gromacs",
+    "openmm",
+    "plumed",
+    "insitu",
+    "interface",
+    "rings",
+    "cages",
+    "brine",
+    "nucleation",
+    "migrate",
 )
 NOTES = ("rings-cages",)
 # claim-name:claim-id, checked against the d-SEAMS channel.
@@ -160,40 +289,72 @@ def read_claim(folder):
     return claim
 
 
-def iframe(name, claim_id):
+def xml(text):
+    return (
+        text.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
+def iframe(title, name, claim_id):
     src = "https://odysee.com/$/embed/{}:{}".format(name, claim_id)
     return (
         '<iframe title="{}" src="{}" width="960" height="540" '
         'allowfullscreen></iframe>'
-    ).format(name, src)
+    ).format(xml(title), src)
 
 
-def block(slug, claim):
+def card(slug):
+    try:
+        return CARDS[slug]
+    except KeyError:
+        fail("no reader card for {}".format(slug))
+
+
+def gallery_block(slug, claim):
+    """Title, one sentence, and the player. No claim renders nothing."""
     if claim is None:
         return ""
-    blurb = BLURB.get(slug, slug)
-    transcript = (
-        '<p>Transcript: <a href="/_static/captions/{}.vtt">'
-        "docs/videos/{}/captions.vtt</a></p>"
-    ).format(slug, slug)
-    body = (
-        iframe(claim[0], claim[1])
-        + "\n   <p>Captions are burned into the upload.</p>\n   "
-        + transcript
-    )
-    return "   {}\n   <p>{}</p>".format(body, blurb)
+    title, sentence = card(slug)
+    lines = [
+        '<div id="video-{}">'.format(slug),
+        "<h2>{}</h2>".format(xml(title)),
+        "<p>{}</p>".format(xml(sentence)),
+        iframe(title, claim[0], claim[1]),
+        "</div>",
+    ]
+    return "\n".join("   " + line for line in lines)
+
+
+def topic_block(slug, claim):
+    """The player alone. The topic page already names the subject."""
+    if claim is None:
+        return ""
+    title, _sentence = card(slug)
+    return "   " + iframe(title, claim[0], claim[1])
 
 
 def embed_rst(slug, claim):
-    """One player, or an empty page when embed.txt has no claim."""
-    body = block(slug, claim)
+    """One player, or an empty fragment when embed.txt has no claim."""
+    body = topic_block(slug, claim)
     if not body:
         return ""
     return ".. raw:: html\n\n{}\n".format(body)
 
 
-def include_line(slug):
-    return ".. include:: ../videos/embeds/{}.rst".format(slug)
+def include_line(slug, page=None):
+    """The include a topic page uses for this recording.
+
+    Pages under docs/orgmode/user sit one directory deeper than the
+    reference pages, so the relative path is not the same on every page.
+    """
+    if page is None:
+        return ".. include:: ../videos/embeds/{}.rst".format(slug)
+    dest = Path("docs/orgmode/videos/embeds") / (slug + ".rst")
+    rel = os.path.relpath(dest, Path(page).parent)
+    return ".. include:: {}".format(rel.replace(os.sep, "/"))
 
 
 def write_topic_embeds(videos, dest):
@@ -204,15 +365,49 @@ def write_topic_embeds(videos, dest):
     return dest
 
 
+def shown(videos):
+    ready = slugs(videos)
+    if set(READER) != set(CUTS):
+        fail("reader order does not match the cuts")
+    missing = [name for name in ready if name not in READER]
+    if missing:
+        fail("reader order misses {}".format(", ".join(missing)))
+    return [name for name in READER if name in set(ready)]
+
+
 def players_rst(videos):
     bodies = []
-    for slug in slugs(videos):
-        body = block(slug, read_claim(videos / slug))
+    for slug in shown(videos):
+        body = gallery_block(slug, read_claim(videos / slug))
         if body:
             bodies.append(body)
     if not bodies:
         return ""
     return ".. raw:: html\n\n" + "\n".join(bodies) + "\n"
+
+
+def check_reader_copy(page, readme, bindings):
+    """The reader pages stay free of build notes. The README keeps them."""
+    if CHANNEL not in page:
+        fail("videos page is missing the Odysee channel")
+    for banned in PAGE_BANNED:
+        if banned in page:
+            fail("videos page still has maintainer text ({})".format(banned))
+    for required in README_REQUIRED:
+        if required not in readme:
+            fail("videos README is missing ({})".format(required))
+    for banned in BINDINGS_BANNED:
+        if banned in bindings:
+            fail("bindings page still has maintainer text ({})".format(banned))
+
+
+def check_player_markup(html):
+    """A player is an /$/embed/ iframe. Build notes and placeholders are not."""
+    for banned in HTML_BANNED:
+        if banned in html:
+            fail("player html still has maintainer text ({})".format(banned))
+    if "odysee.com" in html.replace("odysee.com/$/embed/", ""):
+        fail("player html has an Odysee URL that is not /$/embed/")
 
 
 def write_players(videos, dest):

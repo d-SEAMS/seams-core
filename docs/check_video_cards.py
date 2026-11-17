@@ -67,6 +67,13 @@ def main():
                 continue
             fail("{} has an Odysee URL that is not the channel or an embed: {}".format(
                 path.relative_to(ROOT), url))
+    sys.path.insert(0, str(ROOT / "docs"))
+    from video_page import check_reader_copy  # noqa: E402
+
+    page = (ROOT / "docs" / "orgmode" / "videos" / "index.org").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "videos" / "README.md").read_text(encoding="utf-8")
+    bindings = (ROOT / "docs" / "orgmode" / "user" / "howto" / "bindings.org").read_text(encoding="utf-8")
+    check_reader_copy(page, readme, bindings)
     print("video cards ok ({} scripts)".format(len(scripts)))
     return 0
 
