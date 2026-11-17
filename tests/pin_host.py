@@ -313,11 +313,15 @@ def mpi_check() -> None:
           }
           double box[9] = {0,0,0, 8,8,8, 0,0,0};
           int off[25], cols[256], count = 0;
+          cpu_set_t start;
+          CPU_ZERO(&start);
+          sched_getaffinity(0, sizeof(start), &start);
           for (int k = 0; k < 4; ++k) fn(xyz, n, box, 3.5, off, cols, 256, &count);
           cpu_set_t set;
           CPU_ZERO(&set);
           sched_getaffinity(0, sizeof(set), &set);
-          printf("MPI rank=%d restored=%d\n", rank, CPU_COUNT(&set));
+          printf("MPI rank=%d start=%d restored=%d same=%d\n", rank, CPU_COUNT(&start),
+                 CPU_COUNT(&set), CPU_EQUAL(&start, &set) ? 1 : 0);
           fflush(stdout);
           MPI_Finalize();
           return 0;
@@ -357,7 +361,7 @@ def mpi_check() -> None:
                 "-x", "LD_PRELOAD=" + preload,
                 "-x", "LSAN_OPTIONS=detect_leaks=0",
             ]
-        def ranks(bind: str) -> list[int]:
+        def ranks(bind: str) -> list[tuple[int, int, bool]]:
             done = subprocess.run(
                 ["mpirun", *forward, "--bind-to", bind, "-n", "2", str(exe), str(LIB)],
                 env=env, capture_output=True, text=True, check=False)
@@ -367,12 +371,15 @@ def mpi_check() -> None:
             rows = [line for line in done.stdout.splitlines() if line.startswith("MPI ")]
             if len(rows) != 2:
                 raise SystemExit(f"expected 2 ranks, got {rows}")
-            return [int(line.split("restored=", 1)[1]) for line in rows]
+            fields = [dict(p.split("=", 1) for p in line.split()[1:]) for line in rows]
+            return [(int(f["start"]), int(f["restored"]), f["same"] == "1") for f in fields]
         wide = ranks("none")
-        if any(n < 2 for n in wide):
+        if any(restored < 2 for _start, restored, _same in wide):
             raise SystemExit(f"bind-to none did not restore a wide mask: {wide}")
+        # mpirun binds a rank to one core, which is one or more hardware
+        # threads. The call must leave that mask as it found it.
         tight = ranks("core")
-        if any(n != 1 for n in tight):
+        if any(not same for _start, _restored, same in tight):
             raise SystemExit(f"bind-to core was widened: {tight}")
 
 
