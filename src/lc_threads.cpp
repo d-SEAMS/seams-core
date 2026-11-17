@@ -302,6 +302,8 @@ bool sameName(const char *text, const char *want) {
 
 void scanOthers(int *owners, int *nowners) {
   *nowners = 0;
+  int copies[64];
+  int ncopies = 0;
   DIR *proc = opendir("/proc");
   if (proc == nullptr) {
     return;
@@ -335,11 +337,23 @@ void scanOthers(int *owners, int *nowners) {
     // helpers and one-shot tools do not take a slice.
     const bool sibling = parent > 0 && ppidValue == parent && sameName(buf, mine);
     const bool runningCopy = state != nullptr && state[0] == 'R' && sameName(buf, mine);
-    if ((sibling || runningCopy) && *nowners < 64) {
+    if (sibling && *nowners < 64) {
       owners[(*nowners)++] = pid;
+    } else if (runningCopy && ncopies < 64) {
+      copies[ncopies++] = pid;
     }
   }
   closedir(proc);
+  // Siblings split the mask among themselves. A running copy outside the
+  // family is runnable only part of the time, and counting it would move
+  // every sibling's rank each time it came and went, so two siblings
+  // would land on one cpu. Running copies count only for a process with
+  // no siblings.
+  if (*nowners == 0) {
+    for (int i = 0; i < ncopies; ++i) {
+      owners[(*nowners)++] = copies[i];
+    }
+  }
 }
 
 // The cpus the caller's team may use: every OpenMP place under a host
