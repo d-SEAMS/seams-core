@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Reject maintainer process text and unrecorded package promises."""
+"""Reject maintainer process text and package claims absent from live registries."""
 
 from __future__ import annotations
 
-import csv
 import html.parser
+import json
 import re
 import shlex
 import sys
+import urllib.error
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "docs" / "source"
-VERSIONS = ROOT / "docs" / "data" / "published-versions.tsv"
+USER_AGENT = "d-SEAMS-reader-text-check/1.0 (+https://docs.dseams.info/)"
 
 PROCESS_PATTERNS = (
     ("video claim file", re.compile(r"\bembed\.txt\b", re.I)),
@@ -91,16 +94,101 @@ SKIP_FILES = {
 }
 
 
-def published_versions() -> set[tuple[str, str, str]]:
-    with VERSIONS.open(newline="", encoding="utf-8") as handle:
-        rows = csv.DictReader(handle, delimiter="\t")
-        required = {"manager", "package", "version"}
-        if set(rows.fieldnames or ()) != required:
-            raise ValueError(f"{VERSIONS}: expected columns {sorted(required)}")
+class RegistryError(RuntimeError):
+    """A live registry could not be checked."""
+
+
+def fetch(url: str, *, missing_ok: bool = False) -> bytes | None:
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            return response.read()
+    except urllib.error.HTTPError as error:
+        if missing_ok and error.code == 404:
+            return None
+        raise RegistryError(f"{url}: HTTP {error.code}") from error
+    except (OSError, urllib.error.URLError) as error:
+        raise RegistryError(f"{url}: {error}") from error
+
+
+def fetch_json(url: str, *, missing_ok: bool = False):
+    payload = fetch(url, missing_ok=missing_ok)
+    if payload is None:
+        return None
+    try:
+        return json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise RegistryError(f"{url}: invalid JSON: {error}") from error
+
+
+def live_versions(manager: str, package: str) -> set[str]:
+    """Return versions published by the registry used by an install command."""
+    quoted = urllib.parse.quote(package)
+    if manager == "pip":
+        data = fetch_json(f"https://pypi.org/pypi/{quoted}/json", missing_ok=True)
+        return set(data.get("releases", ())) if data else set()
+    if manager == "cargo":
+        data = fetch_json(f"https://crates.io/api/v1/crates/{quoted}", missing_ok=True)
         return {
-            (row["manager"].lower(), row["package"].lower(), row["version"])
-            for row in rows
+            item["num"]
+            for item in (data or {}).get("versions", ())
+            if not item.get("yanked") and item.get("num")
         }
+    if manager == "conda":
+        data = fetch_json(
+            f"https://api.anaconda.org/package/conda-forge/{quoted}",
+            missing_ok=True,
+        )
+        if not data:
+            return set()
+        versions = set(data.get("versions", ()))
+        versions.update(
+            item["version"] for item in data.get("files", ()) if item.get("version")
+        )
+        return versions
+    if manager == "luarocks":
+        search = fetch(
+            "https://luarocks.org/search?q=" + urllib.parse.quote_plus(package)
+        ).decode("utf-8", errors="replace")
+        module = re.search(
+            r'href=["\'](/modules/[^/"\']+/' + re.escape(package) + r')["\']',
+            search,
+            re.IGNORECASE,
+        )
+        if not module:
+            return set()
+        page = fetch("https://luarocks.org" + module.group(1)).decode(
+            "utf-8", errors="replace"
+        )
+        return set(re.findall(re.escape(module.group(1)) + r'/([^/"\']+)["\']', page))
+    if manager == "julia":
+        initial = urllib.parse.quote(package[:1].upper())
+        data = fetch(
+            "https://raw.githubusercontent.com/JuliaRegistries/General/master/"
+            f"{initial}/{quoted}/Versions.toml",
+            missing_ok=True,
+        )
+        if data is None:
+            return set()
+        return set(re.findall(r'^\["([^"]+)"\]', data.decode(), re.MULTILINE))
+    if manager == "r":
+        versions = set()
+        description = fetch(
+            f"https://cran.r-project.org/web/packages/{quoted}/DESCRIPTION",
+            missing_ok=True,
+        )
+        if description:
+            match = re.search(r"^Version:\s*(\S+)", description.decode(), re.MULTILINE)
+            if match:
+                versions.add(match.group(1))
+        data = fetch_json(
+            f"https://d-seams.r-universe.dev/api/packages/{quoted}",
+            missing_ok=True,
+        )
+        if data and data.get("Version"):
+            versions.add(data["Version"])
+        return versions
+    raise RegistryError(f"unsupported package manager: {manager}")
 
 
 def claims(line: str):
@@ -131,12 +219,13 @@ def claims(line: str):
     for match in re.finditer(r"\bluarocks\s+install\s+([A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9_.+-]+))?", plain):
         yield "luarocks", match.group(1), match.group(2) or "*"
 
-    for match in re.finditer(
-        r"\bcargo\s+add(?:\s+--\S+(?:\s+\S+)?)?\s+([A-Za-z0-9_.-]+)"
-        r"(?:@([A-Za-z0-9_.+-]+))?",
-        plain,
-    ):
-        yield "cargo", match.group(1), match.group(2) or "*"
+    if not re.search(r"\bcargo\s+add\b[^\n]*\s--git(?:\s|=)", plain):
+        for match in re.finditer(
+            r"\bcargo\s+add(?:\s+--\S+(?:\s+\S+)?)?\s+([A-Za-z0-9_.-]+)"
+            r"(?:@([A-Za-z0-9_.+-]+))?",
+            plain,
+        ):
+            yield "cargo", match.group(1), match.group(2) or "*"
 
     for call in re.finditer(r"\bPkg\.add\(([^)]*)\)", plain):
         body = call.group(1)
@@ -195,12 +284,13 @@ def html_pages(build):
         rel = path.relative_to(build).as_posix()
         parser = VisibleHTML()
         parser.feed(path.read_text(encoding="utf-8", errors="replace"))
-        yield path, rel, "\n".join(parser.parts)
+        yield path, rel, " ".join(parser.parts)
 
 
 def main() -> int:
-    allowed = published_versions()
     errors = []
+    registry_cache = {}
+    registry_claims = 0
     source_count = 0
     html_count = 0
     scanned = []
@@ -222,16 +312,32 @@ def main() -> int:
                 errors.append(f"{rel}:{line}: {label}: {match.group(0)}")
         for number, line in enumerate(text.splitlines(), 1):
             for manager, package, version in claims(line):
-                key = (manager, package.lower(), version)
-                if key not in allowed:
+                registry_claims += 1
+                key = (manager, package.lower())
+                if key not in registry_cache:
+                    try:
+                        registry_cache[key] = live_versions(*key)
+                    except RegistryError as error:
+                        registry_cache[key] = error
+                available = registry_cache[key]
+                if isinstance(available, RegistryError):
                     errors.append(
-                        f"{rel}:{number}: unrecorded install claim: "
+                        f"{rel}:{number}: live registry check failed for "
+                        f"{manager} {package}: {available}"
+                    )
+                elif not available or (version != "*" and version not in available):
+                    errors.append(
+                        f"{rel}:{number}: unpublished install claim: "
                         f"{manager} {package} {version}"
                     )
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print(f"reader text ok ({source_count} exported sources, {html_count} HTML pages)")
+    print(
+        f"reader text ok ({source_count} exported sources, {html_count} HTML pages; "
+        f"{registry_claims} registry claims checked live across "
+        f"{len(registry_cache)} packages)"
+    )
     return 0
 
 
