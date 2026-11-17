@@ -9,6 +9,7 @@ and again after it returns.
 
 from __future__ import annotations
 
+import inspect
 import os
 import shutil
 import subprocess
@@ -21,6 +22,75 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 LIB = Path(os.environ.get("SEAMS_LIB", ROOT / "bbdir-release/src/libyodaLib.so"))
 sys.path.insert(0, str(ROOT / "scripts"))
+
+
+def pin_need(mask_n: int, nprocs: int) -> int:
+    """Singleton cpus a sample must show before that slice counts.
+
+    Several processes share the mask in slices of mask // processes,
+    and a one-cpu slice still has to register. A lone process keeps the
+    whole mask, so the count stays at two and one sample has to hold a
+    real team.
+    """
+    parts = nprocs if nprocs > 0 else 1
+    if mask_n > 0 and parts > mask_n:
+        parts = mask_n
+    if parts < 1:
+        parts = 1
+    share = mask_n // parts if mask_n > 0 else 1
+    if share < 1:
+        share = 1
+    return 2 if share > 2 else share
+
+
+def pin_from_samples(seen, need: int):
+    """Return counted cpus, the largest team in one sample, and every singleton."""
+    singles: set[int] = set()
+    every: set[int] = set()
+    team = 0
+    for item in seen:
+        if not isinstance(item, tuple):
+            continue
+        ones: set[int] = set()
+        for part in item:
+            if isinstance(part, str) and part.isdigit():
+                ones.add(int(part))
+        if len(ones) > team:
+            team = len(ones)
+        every.update(ones)
+        if len(ones) >= need:
+            singles.update(ones)
+    return singles, team, every
+
+
+def mask_cpus() -> list[int]:
+    return sorted(os.sched_getaffinity(0))
+
+
+def cpu_spec(cpus: list[int]) -> str:
+    return ",".join(str(cpu) for cpu in cpus)
+
+
+def narrow_cpus(cpus: list[int]) -> list[int]:
+    """A subset of the current mask, still wide enough for a team of two."""
+    if len(cpus) <= 2:
+        return list(cpus)
+    width = len(cpus) // 2
+    if width < 2:
+        width = 2
+    if width >= len(cpus):
+        width = len(cpus) - 1
+    return cpus[:width]
+
+
+def place_pair(cpus: list[int], odd: bool) -> list[int]:
+    """Two cpus from the current mask. The odd pair is the other stride."""
+    if len(cpus) < 2:
+        return list(cpus)
+    picked = cpus[1::2] if odd else cpus[0::2]
+    if len(picked) < 2:
+        picked = cpus[:2]
+    return [picked[0], picked[1]]
 
 
 def masks() -> list[str]:
@@ -67,7 +137,7 @@ def run_worker(code: str, env: dict[str, str], prefix: list[str] | None = None) 
     return lines[-1]
 
 
-WORKER = r"""
+_WORKER_HEAD = r"""
 import os, sys, threading, time
 sys.path.insert(0, os.environ["SEAMS_ROOT"] + "/scripts")
 import h2h_protocol as proto
@@ -125,48 +195,71 @@ for tid in os.listdir("/proc/self/task"):
     for line in text.splitlines():
         if line.startswith("Cpus_allowed_list:"):
             after.add(line.split(":",1)[1].strip())
-# singletons observed while the call was running
-singles=set()
-for item in seen:
-    if not isinstance(item, tuple):
-        continue
-    ones=[p for p in item if p.isdigit()]
-    if len(ones) >= 2:
-        singles.update(int(p) for p in ones)
-print("PIN pid=%d singles=%s after=%s" % (os.getpid(), ",".join(str(c) for c in sorted(singles)), ",".join(sorted(after))), flush=True)
 """
 
+_WORKER_TAIL = r"""
+mask_n = len(os.sched_getaffinity(0))
+nwait = int(os.environ.get("SEAMS_WAIT_N", "1"))
+need = pin_need(mask_n, nwait)
+singles, team, every = pin_from_samples(seen, need)
+def join_nums(nums):
+    return ",".join(str(c) for c in sorted(nums))
+print("PIN pid=%d singles=%s team=%d cpus=%s after=%s" % (
+    os.getpid(), join_nums(singles), team, join_nums(every), ";".join(sorted(after))), flush=True)
+"""
 
-def parse_pin(line: str) -> tuple[set[int], set[str]]:
-    singles = set()
-    after = set()
+WORKER = (
+    _WORKER_HEAD
+    + inspect.getsource(pin_need)
+    + "\n"
+    + inspect.getsource(pin_from_samples)
+    + "\n"
+    + _WORKER_TAIL
+)
+
+
+def parse_pin(line: str) -> tuple[set[int], set[str], int, set[int]]:
+    singles: set[int] = set()
+    after: set[str] = set()
+    cpus: set[int] = set()
+    team = 0
     for part in line.split():
         if part.startswith("singles="):
             body = part.split("=", 1)[1]
             if body:
                 singles = {int(x) for x in body.split(",") if x}
+        elif part.startswith("team="):
+            team = int(part.split("=", 1)[1])
+        elif part.startswith("cpus="):
+            body = part.split("=", 1)[1]
+            if body:
+                cpus = {int(x) for x in body.split(",") if x}
         elif part.startswith("after="):
             body = part.split("=", 1)[1]
             if body:
-                after = set(body.split(","))
-    return singles, after
+                after = set(body.split(";"))
+    return singles, after, team, cpus
 
 
-def one(env: dict[str, str], prefix: list[str] | None = None) -> tuple[set[int], set[str]]:
+def one(env: dict[str, str], prefix: list[str] | None = None) -> tuple[set[int], set[str], int, set[int]]:
     env = dict(env)
     env["SEAMS_ROOT"] = str(ROOT)
     return parse_pin(run_worker(WORKER, env, prefix))
 
 
-def one_placed(env: dict[str, str], prefix: list[str] | None = None) -> tuple[set[int], set[str]]:
+def one_placed(env: dict[str, str], prefix: list[str] | None = None) -> tuple[set[int], set[str], int, set[int]]:
     # A lone process beside other runnable threads is left unplaced on
     # purpose. Look again before failing.
+    singles: set[int] = set()
+    after: set[str] = set()
+    team = 0
+    cpus: set[int] = set()
     for _ in range(8):
-        singles, after = one(env, prefix)
-        if len(singles) >= 2:
+        singles, after, team, cpus = one(env, prefix)
+        if team >= 2:
             break
         time.sleep(0.5)
-    return singles, after
+    return singles, after, team, cpus
 
 
 def concurrent(n: int) -> list[set[int]]:
@@ -186,7 +279,7 @@ def concurrent(n: int) -> list[set[int]]:
         if proc.returncode != 0:
             raise RuntimeError(err[-2000:] or out[-2000:])
         line = [ln for ln in out.splitlines() if ln.startswith("PIN ")][-1]
-        singles, _after = parse_pin(line)
+        singles, _after, _team, _cpus = parse_pin(line)
         sets.append(singles)
         print(line, flush=True)
     shutil.rmtree(gate, ignore_errors=True)
@@ -194,6 +287,8 @@ def concurrent(n: int) -> list[set[int]]:
 
 
 def assert_disjoint(sets: list[set[int]], label: str) -> None:
+    if not sets or not any(sets):
+        raise SystemExit(f"{label}: no pinning at all {sets}")
     for i in range(len(sets)):
         if not sets[i]:
             raise SystemExit(f"{label}: process {i} pinned no cpus {sets}")
@@ -203,80 +298,141 @@ def assert_disjoint(sets: list[set[int]], label: str) -> None:
                 raise SystemExit(f"{label}: cpus {both} shared by {sets}")
 
 
+def _must_fail(fn, needle: str) -> None:
+    try:
+        fn()
+    except SystemExit as exc:
+        if needle not in str(exc):
+            raise SystemExit(f"self-test wanted {needle} in {exc}") from exc
+        return
+    raise SystemExit(f"self-test: {needle} did not fail")
+
+
+def self_test() -> None:
+    """The checker fails for an empty pin, an overlap, and no pinning."""
+    host = mask_cpus()
+    if len(host) < 2:
+        raise SystemExit("self-test needs two cpus in the mask")
+    if pin_need(4, 4) != 1 or pin_need(8, 4) != 2 or pin_need(2, 2) != 1:
+        raise SystemExit(
+            f"self-test: slice need is wrong {pin_need(4, 4)} {pin_need(8, 4)} {pin_need(2, 2)}")
+    if pin_need(len(host), 1) < 2:
+        raise SystemExit("self-test: a lone process must require a team")
+    first, last = host[0], host[-1]
+    wide = f"{first}-{last}"
+    one_slice, one_team, _one_every = pin_from_samples([(str(first), wide)], pin_need(4, 4))
+    if one_slice != {first} or one_team < 1:
+        raise SystemExit(f"self-test: a one-cpu slice did not register {one_slice} {one_team}")
+    split_cpus, split_team, _split_every = pin_from_samples(
+        [(str(first), wide), (str(last), wide)], pin_need(len(host), 1))
+    if split_cpus or split_team >= 2:
+        raise SystemExit(f"self-test: split samples counted as a team {split_cpus} {split_team}")
+    joined, joined_team, _joined_every = pin_from_samples(
+        [(str(first), str(last), wide)], pin_need(len(host), 1))
+    if joined_team < 2 or first not in joined or last not in joined:
+        raise SystemExit(f"self-test: a real team was missed {joined} {joined_team}")
+    unbound, unbound_team, unbound_every = pin_from_samples(
+        [(wide, wide)], pin_need(len(host), 1))
+    if unbound or unbound_team or unbound_every:
+        raise SystemExit("self-test: an unbound sample registered cpus")
+    _must_fail(lambda: assert_disjoint([{first}, set(), {last}], "gap"), "pinned no cpus")
+    _must_fail(lambda: assert_disjoint([{first, last}, {last}], "over"), "shared")
+    _must_fail(lambda: assert_disjoint([unbound, unbound], "none"), "no pinning")
+    base = host[-1] + 1
+    assert_disjoint([{base + i} for i in range(4)], "four slices")
+    print("pin host self-test passed", flush=True)
+
+
 def main() -> int:
+    self_test()
+    if sys.argv[1:] == ["--self-test"]:
+        return 0
     if not LIB.is_file():
         raise SystemExit(f"library missing: {LIB}")
+    ncpu = len(mask_cpus())
     base = child_env()
-    singles, after = one_placed(base)
-    print(f"solo singles={sorted(singles)} after={sorted(after)}", flush=True)
-    if len(singles) < 2:
+    singles, after, team, _cpus = one_placed(base)
+    print(f"solo singles={sorted(singles)} team={team} after={sorted(after)}", flush=True)
+    if team < 2:
         raise SystemExit(f"solo run did not pin a team: {singles}")
     if not any("-" in item or "," in item for item in after):
         raise SystemExit(f"affinity was not restored: {after}")
 
-    if len(os.sched_getaffinity(0)) > 2:
-        singles, after = one(child_env(OMP_NUM_THREADS="2"))
-        print(f"2 threads singles={sorted(singles)} after={sorted(after)}", flush=True)
-        if len(singles) >= 2:
-            raise SystemExit(f"pinned a team narrower than the mask: {singles}")
+    # Two threads fill a two-cpu mask and must pin. On a wider mask they
+    # are narrower than the mask and must stay unpinned.
+    if ncpu <= 2:
+        singles, after, team, _cpus = one_placed(child_env(OMP_NUM_THREADS="2"))
+    else:
+        singles, after, team, _cpus = one(child_env(OMP_NUM_THREADS="2"))
+    print(f"2 threads singles={sorted(singles)} team={team} after={sorted(after)}", flush=True)
+    if ncpu > 2 and team >= 2:
+        raise SystemExit(f"pinned a team narrower than the mask: {singles}")
+    if ncpu <= 2 and team < 2:
+        raise SystemExit(f"2 threads on a {ncpu}-cpu mask did not pin: {singles}")
 
     two = concurrent(2)
     assert_disjoint(two, "2 processes")
-    # Four processes get two cpus each only with eight cpus in the mask.
-    # On fewer, each process holds one cpu, which is not a pinned team.
-    if len(os.sched_getaffinity(0)) >= 8:
-        four = concurrent(4)
-        assert_disjoint(four, "4 processes")
-    else:
-        print(f"4 processes: not run, {len(os.sched_getaffinity(0))} cpus in the mask", flush=True)
+    # Four processes on four cpus take one cpu each. A smaller mask cannot
+    # give four processes disjoint cpus, so the same check uses one
+    # process per cpu there.
+    group = 4 if ncpu >= 4 else ncpu
+    if group < 2:
+        raise SystemExit(f"mask has {ncpu} cpus")
+    pinned = concurrent(group)
+    print(f"{group} processes on {ncpu} cpus", flush=True)
+    assert_disjoint(pinned, f"{group} processes")
 
-    # Narrower process mask. Eight requested threads must stay inside it.
+    # Narrower process mask. The requested threads must stay inside it.
+    narrow = narrow_cpus(mask_cpus())
     narrow_env = child_env()
     narrow_env["SEAMS_ROOT"] = str(ROOT)
-    singles, after = one_placed(narrow_env, ["taskset", "-c", "0-3"])
-    print(f"taskset 0-3 singles={sorted(singles)} after={sorted(after)}", flush=True)
-    if not singles or not singles <= {0, 1, 2, 3}:
-        raise SystemExit(f"left the taskset mask: {singles}")
+    _singles, after, team, seen = one_placed(
+        narrow_env, ["taskset", "-c", cpu_spec(narrow)])
+    print(f"taskset {cpu_spec(narrow)} cpus={sorted(seen)} team={team} after={sorted(after)}", flush=True)
+    if team < 2 or not seen or not seen <= set(narrow):
+        raise SystemExit(f"left the taskset mask: {seen}")
 
     # Host already bound the caller to one cpu. Do not spread.
     bound = child_env()
     bound["SEAMS_ROOT"] = str(ROOT)
-    host_cpu = max(os.sched_getaffinity(0))
-    code = f"import os\nos.sched_setaffinity(0, {{{host_cpu}}})\n" + WORKER
-    singles, _after = parse_pin(run_worker(code, bound))
-    print(f"prebound singles={sorted(singles)}", flush=True)
-    if singles - {host_cpu}:
-        raise SystemExit(f"spread off the host cpu: {singles}")
+    host_cpu = mask_cpus()[-1]
+    code = "import os\nos.sched_setaffinity(0, {" + str(host_cpu) + "})\n" + WORKER
+    _singles, _after, _team, seen = parse_pin(run_worker(code, bound))
+    print(f"prebound cpus={sorted(seen)}", flush=True)
+    if seen - {host_cpu}:
+        raise SystemExit(f"spread off the host cpu: {seen}")
 
     # Runtime placement is the host's. KMP_AFFINITY is not libgomp's, so
     # the opt-out is "do not pin"; masks stay wider than one cpu.
     kmp = child_env(KMP_AFFINITY="scatter")
     kmp["SEAMS_ROOT"] = str(ROOT)
-    singles, after = one(kmp)
-    print(f"KMP_AFFINITY singles={sorted(singles)} after={sorted(after)}", flush=True)
-    if len(singles) >= 2:
-        raise SystemExit(f"pinned despite KMP_AFFINITY: {singles}")
+    _singles, after, team, _cpus = one(kmp)
+    print(f"KMP_AFFINITY team={team} after={sorted(after)}", flush=True)
+    if team >= 2:
+        raise SystemExit(f"pinned despite KMP_AFFINITY: {_singles}")
 
-    places = child_env(OMP_PROC_BIND="close", OMP_PLACES="0,2")
+    pair = place_pair(mask_cpus(), False)
+    places = child_env(OMP_PROC_BIND="close", OMP_PLACES=cpu_spec(pair))
     places["SEAMS_ROOT"] = str(ROOT)
-    singles, _after = one(places)
-    print(f"OMP_PLACES singles={sorted(singles)}", flush=True)
-    if singles - {0, 2}:
-        raise SystemExit(f"left OMP_PLACES: {singles}")
+    _singles, _after, _team, seen = one(places)
+    print(f"OMP_PLACES {cpu_spec(pair)} cpus={sorted(seen)}", flush=True)
+    if seen - set(pair):
+        raise SystemExit(f"left OMP_PLACES: {seen}")
 
-    gomp = child_env(GOMP_CPU_AFFINITY="1,3")
+    odd = place_pair(mask_cpus(), True)
+    gomp = child_env(GOMP_CPU_AFFINITY=cpu_spec(odd))
     gomp["SEAMS_ROOT"] = str(ROOT)
-    singles, _after = one(gomp)
-    print(f"GOMP_CPU_AFFINITY singles={sorted(singles)}", flush=True)
-    if singles - {1, 3}:
-        raise SystemExit(f"left GOMP_CPU_AFFINITY: {singles}")
+    _singles, _after, _team, seen = one(gomp)
+    print(f"GOMP_CPU_AFFINITY {cpu_spec(odd)} cpus={sorted(seen)}", flush=True)
+    if seen - set(odd):
+        raise SystemExit(f"left GOMP_CPU_AFFINITY: {seen}")
 
     off = child_env(SEAMS_PIN="0")
     off["SEAMS_ROOT"] = str(ROOT)
-    singles, after = one(off)
-    print(f"SEAMS_PIN=0 singles={sorted(singles)} after={sorted(after)}", flush=True)
-    if len(singles) >= 2:
-        raise SystemExit(f"SEAMS_PIN=0 still pinned: {singles}")
+    _singles, after, team, _cpus = one(off)
+    print(f"SEAMS_PIN=0 team={team} after={sorted(after)}", flush=True)
+    if team >= 2:
+        raise SystemExit(f"SEAMS_PIN=0 still pinned: {_singles}")
 
     if shutil.which("mpicc") and shutil.which("mpirun"):
         mpi_check()
@@ -374,13 +530,14 @@ def mpi_check() -> None:
             fields = [dict(p.split("=", 1) for p in line.split()[1:]) for line in rows]
             return [(int(f["start"]), int(f["restored"]), f["same"] == "1") for f in fields]
         wide = ranks("none")
-        if any(restored < 2 for _start, restored, _same in wide):
+        if any(restored < 2 or not same for _start, restored, same in wide):
             raise SystemExit(f"bind-to none did not restore a wide mask: {wide}")
-        # mpirun binds a rank to one core, which is one or more hardware
-        # threads. The call must leave that mask as it found it.
+        # mpirun --bind-to core gives a rank one core. On an SMT host that
+        # core is more than one cpu, so the check compares the mask the
+        # rank started with, not a fixed cpu count.
         tight = ranks("core")
         if any(not same for _start, _restored, same in tight):
-            raise SystemExit(f"bind-to core was widened: {tight}")
+            raise SystemExit(f"bind-to core changed the mask the rank started with: {tight}")
 
 
 if __name__ == "__main__":
