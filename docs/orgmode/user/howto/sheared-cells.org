@@ -45,10 +45,6 @@ coordinates relative to that origin, wrap the fractional
 difference, map back through H. A length-3 ~box~ stays an
 independent-axis wrap of the three spans.
 
-Catch2: ~LAMMPS dump bounds convert to lattice H~, ~relDist mixed
-image disagrees with span wrap~, ~relDistFromPoint uses dump H on
-a mixed image~, ~formatDumpBox prints tilt when box.size() is 6~.
-
 * Neighbour lists
 
 Cutoff lists (~nneigh::neighListO~, ~neighList~, ~halfNeighList~,
@@ -63,36 +59,18 @@ A pair that is only close across the ~a~ image of a sheared cell
 is a neighbour at cutoff 1.0. Treating the bound span 15 as ~lx~
 misses that pair.
 
-Catch2: ~tilt dump cutoff list finds the a-image pair~, ~sheared
-box k-nearest uses the periodic image~, ~residentFrameCell uses
-dump H when nBox is 6~, ~residentFrameCell stays ortho for three
-lengths~.
-
 * Other MIC users
 
 The same dump H feeds Steinhardt flattening, hydrogen-bond
 distances, cluster unwrap, and the in-plane RDF sampler.
 
-Catch2: ~steinhardtQl flatten uses dump H not span minImage~,
-~getHbondDistanceOH uses dump H on a mixed image~,
-~populateHbondsWithInputClouds accepts a mixed-image dump-H
-bond~, ~populateHbondsFromDonors~ on that same sheared OH,
-~recenterClusterCloud unwraps a mixed image on dump H~,
-~recenterClusterCloud unwraps a three-atom mixed-image chain~,
-~sampleRDF_AA histograms the tilt a-image pair~.
-
 ~seams rdf FILE --cutoff RMAX~ is the 3D partial \(g_{IJ}(r)\).
-
-The same command on the bundled multi-type frame:
 
 #+begin_src bash
 seams rdf input/traj/il_tiny.lammpstrj --cutoff 6.0
 #+end_src
-Catch2: ~dumpVolume uses det H not bound spans~, ~partial RDF
-first bin sees the sheared a-image pair~, ~partial RDF like-type
-does not count the unlike neighbour~, ~runningCN at rmax is one
-for a single I-J pair~, ~firstMinimumBin finds the valley after
-the first peak~. The in-plane sampler remains
+
+The in-plane sampler remains
 ~rdf2::sampleRDF_AA~ on a ~PointCloud~. ~rdf::runningCN~ and
 ~rdf::coordinationNumber~ integrate ~4 pi rho_J s^2 g ds~ with
 ~rho_J = nJ / volume~; the cutoff is a caller input, not a
@@ -101,5 +79,7 @@ hard-wired first minimum.
 * Empty or ortho clouds
 
 ~box.size() < 3~ yields an empty neighbour list. A length-3 box
-is treated as ortho. XYZ files in this tree do not carry a
-periodic cell; use a LAMMPS dump when the true H matters.
+is orthorhombic. An extended XYZ whose comment carries ~Lattice=~
+is read as that cell: ~seams read templates/hc.xyz~ prints
+~nop 12 frame 1 box 53.969 54.529 51.257~. A triclinic H, with tilt
+~xy xz yz~, comes from a LAMMPS dump.
