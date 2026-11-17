@@ -69,7 +69,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Julia](https://docs.dseams.info/fronts/julia.md): Classify ice Ih from Julia. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
 - [Lua and Fennel](https://docs.dseams.info/fronts/lua.md): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
 - [Python](https://docs.dseams.info/fronts/python.md): Classify ice Ih from Python. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
-- [R](https://docs.dseams.info/fronts/r.md): The R binding is the R package dseams.
+- [R](https://docs.dseams.info/fronts/r.md): Classify ice Ih from R. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
 - [Rust](https://docs.dseams.info/fronts/rust.md): The Rust binding is the crates dseams-sys and dseams.
 - [Engines tutorial](https://docs.dseams.info/fronts/engines.md): Eight molecules of cubic ice are engines/tutorial/ice.data.
 - [GROMACS tutorial](https://docs.dseams.info/fronts/gromacs.md): gmx-seams is the trajectory-analysis tool.

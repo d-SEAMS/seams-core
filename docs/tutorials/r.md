@@ -1,14 +1,24 @@
 # R
 
-The R binding is the R package `dseams`. It lives in its own repository,
-[d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+Classify ice Ih from R. The recording uses `input/traj/ice1h.lammpstrj`: `seams read` prints `nop 128`, and published CHILL+ at a 3.5 angstrom cutoff prints `nop 128 hexagonal 128`.
 
-The [README](https://github.com/d-SEAMS/dseams-r#user-content-installation) of that repository
-gives the install command and a first example.
+```{eval-rst}
+.. include:: ../videos/embeds/r.rst
+```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/development/repositories.org`
-describes how the repositories fit together.
+The binding is the R package `dseams` in [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r). From that README, the install is:
+
+```text
+remotes::install_github("d-SEAMS/dseams-r")
+```
+
+The package compiles the seams-core sources pinned in `tools/seams-core.ref`. It links `libseams_lang` (`bindings/cxx/seams_lang.h`).
+
+The same two engine commands, without the package:
+
+```bash
+seams read input/traj/ice1h.lammpstrj
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+The package name is the {doc}`R API </stable/r>`.
