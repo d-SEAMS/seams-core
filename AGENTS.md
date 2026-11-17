@@ -89,6 +89,17 @@ Do not weaken, skip or delete a test to make the suite pass. Fix the code
 under test. A test is removed only when its subject moved to a binding
 repository, and the commit says which.
 
+## For coding agents
+
+`skills/d-seams/SKILL.md` is the user-facing skill: install, the `seams`
+command, Python, the C API, and the usual mistakes. `llms.txt` is the
+index of the published manual. The docs build also writes `llms-full.txt`
+and a `.md` file beside each HTML page. `context7.json` names the folders
+Context7 should index.
+
+Read this file before editing the repository. Do not weaken, skip, or
+delete a test to make the suite pass.
+
 ## Documentation
 
 Edit the Org sources under `docs/orgmode/` and the Markdown pages under

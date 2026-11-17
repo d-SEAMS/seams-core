@@ -7,14 +7,16 @@ one section per top-level caption. Nested toctrees in those pages are
 walked in order, so a section index contributes its children. A page is
 an Org file under docs/orgmode, a Markdown page under docs/api,
 docs/engines or docs/tutorials (published as stable/, engines/ and
-fronts/), or an rst page under docs/source. Each line links the published
-HTML on https://docs.dseams.info with the page title and the first
-sentence of its prose. A last section links the language binding
-repositories.
+fronts/), or a tracked rst page under docs/source. Rst that the build
+writes and git does not track is ignored, so the file is the same before
+and after a build. Each line links the Markdown twin of that page on
+https://docs.dseams.info (the file served beside the HTML) with the page
+title and the first sentence of its prose. A later section links the
+language binding repositories. An Optional section links the one-file manual.
 
-llms.txt is committed at the repository root and Sphinx copies it to the
-site root. ``--check`` exits 1 when the committed file differs from a
-fresh generation.
+llms.txt is committed at the repository root. The docs build writes the
+same text to the site root. ``--check`` exits 1 when the committed file
+differs from a fresh generation.
 
 >>> plain("Run ~seams rings~ on [[file:x.org][a frame]].")
 'Run seams rings on a frame.'
@@ -267,7 +269,7 @@ def walk_pages(name, seen, items):
         return
     seen.add(name)
     title, summary = title_and_paragraph(path)
-    entry = "- [{}]({}/{}.html)".format(title, SITE, name)
+    entry = "- [{}]({}/{}.md)".format(title, SITE, name)
     items.append(entry + (": " + summary if summary else ""))
     if path.suffix != ".org":
         return
@@ -281,14 +283,15 @@ def render():
     index = (ORG / "index.org").read_text(encoding="utf-8")
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
     lines.append(
-        "Each link below is a page of the published manual on {}. "
-        "Contributor instructions are on the Contributing and Repository "
-        "map pages.".format(SITE)
+        "Each link below is the Markdown twin of a page on {}, "
+        "served beside the HTML. Fetch this index first, then the pages "
+        "a question needs. Contributor instructions are on the "
+        "Contributing and Repository map pages.".format(SITE)
     )
     lines.append("")
     seen = set()
     home_title, home_summary = title_and_paragraph(ORG / "index.org")
-    lines.extend(["## Start", "", "- [{}]({}/index.html): {}".format(home_title, SITE, home_summary), ""])
+    lines.extend(["## Start", "", "- [{}]({}/index.md): {}".format(home_title, SITE, home_summary), ""])
     seen.add("index")
     for caption, names in toctrees(index):
         items = []
@@ -301,6 +304,14 @@ def render():
     lines.extend(["## Language bindings", ""])
     for name, url, summary in BINDINGS:
         lines.append("- [{}]({}): {}".format(name, url, summary))
+    lines.append("")
+    lines.extend([
+        "## Optional",
+        "",
+        "- [Full manual in one file]({}/llms-full.txt): "
+        "Every page of the manual, concatenated, for a long context.".format(SITE),
+        "- [Project site](https://dseams.info): The d-SEAMS project page.",
+    ])
     return "\n".join(lines).rstrip() + "\n"
 
 
