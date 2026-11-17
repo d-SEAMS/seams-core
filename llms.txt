@@ -150,7 +150,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Julia](https://docs.dseams.info/stable/julia.md): Both live in d-SEAMS/Dseams.jl.
 - [R](https://docs.dseams.info/stable/r.md): The R package dseams is d-SEAMS/dseams-r.
 - [Lua and Fennel](https://docs.dseams.info/stable/lua.md): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
-- [Rust](https://docs.dseams.info/stable/rust.md): The Rust binding is the crates dseams-sys and dseams.
+- [Rust](https://docs.dseams.info/stable/rust.md): Both live in d-SEAMS/dseams-rs.
 - [Command line](https://docs.dseams.info/stable/cli.md): seams reads a trajectory and prints one result.
 - [Science front](https://docs.dseams.info/stable/science.md): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
 - [Language APIs](https://docs.dseams.info/lang/index.md): seams-core documents the C API and the C++ front here.
