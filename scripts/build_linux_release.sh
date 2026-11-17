@@ -169,7 +169,7 @@ if [[ $resolved != "$(realpath -- "$prefix/lib")" ]]; then
 fi
 printf '%s\n' "pkg-config: $(pkg-config --cflags --libs seams)"
 
-python3 - "$prefix" <<'PY'
+python3 - "$prefix" <<'PY' | tee "$work/symbol-scan.txt"
 import re
 import subprocess
 import sys
@@ -226,11 +226,14 @@ for soname in (
     provided |= defined(path)
 
 highest = {}
+needs_gomp = False
 elfs = [path for path in prefix.joinpath("bin").iterdir() if path.is_file()]
 elfs += list(prefix.joinpath("lib").glob("*.so"))
 for elf in sorted(elfs):
     dynamic = readelf(elf, "-d")
     for line in dynamic.splitlines():
+        if "NEEDED" in line and "[libgomp.so.1]" in line:
+            needs_gomp = True
         if "RPATH" in line or "RUNPATH" in line:
             found = re.search(r"\[(.+)\]", line)
             if found is None or found.group(1) not in {"$ORIGIN", "$ORIGIN/../lib"}:
@@ -245,7 +248,37 @@ for elf in sorted(elfs):
 
 for kind, ver in sorted(highest.items()):
     print(kind + "_" + ".".join(str(piece) for piece in ver))
+print("libgomp=" + ("yes" if needs_gomp else "no"))
 PY
+glibc=$(sed -n 's/^GLIBC_//p' "$work/symbol-scan.txt")
+gomp=$(sed -n 's/^libgomp=//p' "$work/symbol-scan.txt")
+if [[ -z $glibc || -z $gomp ]]; then
+  printf '%s\n' "symbol scan did not report glibc and libgomp" >&2
+  exit 1
+fi
+dseams_version=$(awk -F= '$1 == "dseams" { print $2 }' "$root/scripts/linux_tarball_consumers")
+dseams_fortran=$(awk -F= '$1 == "dseams_fortran" { print $2 }' "$root/scripts/linux_tarball_consumers")
+if [[ -z $dseams_version || -z $dseams_fortran ]]; then
+  printf '%s\n' "binding version file is incomplete" >&2
+  exit 1
+fi
+pc_line=$(grep '^prefix=' "$prefix/lib/pkgconfig/seams.pc")
+{
+  printf '%s\n' "The linux-x86_64 archive from this build needs glibc ${glibc} or newer."
+  if [[ $gomp == yes ]]; then
+    printf '%s\n' "It loads libgomp.so.1 from the system. Debian and Ubuntu ship that runtime as libgomp1, and RHEL ships it as libgomp."
+  fi
+  printf '%s\n' "seams.pc records ${pc_line}."
+  if [[ -f $prefix/LICENSE && -d $prefix/licenses ]]; then
+    printf '%s\n' "The archive includes LICENSE and the licence texts of the code compiled into the binaries."
+  fi
+  if [[ -f $prefix/lib/libreadcon_core.so ]]; then
+    printf '%s\n' "The .con reader is included."
+  fi
+  printf '%s\n' "The release test installs dseams ${dseams_version} from crates.io and dseams-fortran ${dseams_fortran}."
+} > "$out/linux-archive-note.md"
+printf '%s\n' "linux archive note:"
+cat "$out/linux-archive-note.md"
 
 got=$(env -u LD_LIBRARY_PATH "$prefix/bin/seams" --version)
 printf '%s\n' "seams: $got"

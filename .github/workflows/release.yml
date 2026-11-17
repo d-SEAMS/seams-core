@@ -67,16 +67,15 @@ jobs:
           start = text.index(f"## [{ver}]")
           nxt = text.find("\n## [", start + 1)
           body = text[start:] if nxt < 0 else text[start:nxt]
-          note = (
-              "The linux-x86_64 archive is built on glibc 2.28 and needs "
-              "glibc 2.28 or newer, including RHEL 8, RHEL 9, and Ubuntu "
-              "20.04 or newer. Its pkg-config files keep "
-              "`prefix=${pcfiledir}/../..`, the archive includes LICENSE "
-              "plus the licenses of the third-party code compiled into the "
-              "binaries, and the .con reader is included.\n"
-          )
+          note_path = pathlib.Path("dist/linux-archive-note.md")
+          note = note_path.read_text().strip()
+          if not note:
+              raise SystemExit("linux archive note is empty")
+          for required in ("glibc", "seams.pc", "dseams"):
+              if required not in note:
+                  raise SystemExit("linux archive note is missing " + required)
           pathlib.Path("dist/release-notes.md").write_text(
-              body.strip() + "\n\n" + note
+              body.strip() + "\n\n" + note + "\n"
           )
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
