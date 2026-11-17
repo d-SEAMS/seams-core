@@ -44,6 +44,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   C and Fortran snippets link against the patched chemfiles meson builds when the system one is rejected.
 - Direct-coexistence mW growth is scored on basal and secondary-prism slabs of 8064 molecules at 1 bar.
   The 2015 CHILL+ thresholds are unchanged.
+- Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk.
 - Each language front reports rings, cages, signature cages and symmetry, and the binding CI runs those calls.
 - Every target also builds under GCC 15 in release mode with `-Dwerror=true`, and a `gcc15-all` CI job next to `clang21-all` builds that configuration and runs the suite on it.
 - Every target, tests, benchmarks, bindings, engines and subproject examples included, builds under Clang 21 with `-Dwerror=true`, and a CI job builds that configuration and runs the suite on it.
@@ -76,6 +77,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The Rust, Fortran, and Python ctypes bindings call the analyses `seams.h` now exports, including frame reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer.
 - The Snakemake rule `h2h_plumed_q6` runs PLUMED's `Q6`, `LOCAL_AVERAGE` and `LOCAL_Q6` and d-SEAMS `q6` and `q6bar` through `SEAMS` in `plumed driver` on the same mW ice/liquid frames at 4096 and 110592 molecules, serial and with 8 threads, and writes the per-atom agreement and the seconds per frame to `benchmarks/h2h-plumed-q6.csv`. The asv benchmark `h2h_plumed_q6` times the same decks.
 - The binding-overhead session times each language wrapper of read, k-nearest neighbours, q6 with q6bar, CHILL, and primitive rings on ice Ih, and records the median and interquartile range.
+- The docs build writes a description, a social card, and JSON-LD on each page, plus sitemap dates, robots.txt, a 404 page, a Markdown file beside each HTML page, and llms-full.txt.
 - The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
 - The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
 - The installed C library reads frames from arrays and files. Callers can build neighbour lists and primitive rings, evaluate q3, q4, q6, and q6-bar, and run CHILL, CHILL+, cages, the shell classifier, and the brine front. `seams.pc` and `seams-config.cmake` ship with the library, and `examples/c` builds against that install.
@@ -84,6 +86,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   Equation 2 is unchanged.
 - The mW one-front speed was measured on the basal, primary-prism and secondary-prism faces from 220 K to 265 K.
   A Wilson-Frenkel curve is fit to the count-slope estimator on each face.
+- The manual has a Use with AI assistants page. skills/d-seams/SKILL.md tells an agent how to install the engine and call it, and llms.txt links the Markdown twin of each page.
 - The rings recording uses the 250-oxygen exampleTraj census and the ice Ih six-ring count. The Rust recording prints the ice Ih census. The GROMACS recording runs gmx-seams after gmx mdrun. A slug with no Odysee claim renders no player. End cards invite questions, issues, discussions, and pull requests. The Python pages show dseams.Frame next to pydseams.
 - The secondary-prism speed is reported under equation 2 and under the solid-count slope, on the 4000-molecule cell.
   The 2015 CHILL+ thresholds are unchanged.
@@ -119,6 +122,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `seams chill` and `seams chill-plus` take `--per-atom FILE` and append a LAMMPS dump frame with a `label` column, the CHILL or CHILL+ class of each site. Workers under `--jobs` append whole frames.
 - `seams_c_last_stages` returns the wall seconds of the last `seams_cutoff_csr` or `seams_ql_cutoff` call on the calling thread, split into point-cloud conversion, cutoff-list build, q_l and copy-out.
 - `seams_frame_chordless` lists the chordless cycles of one size on a `libseams_lang` frame, with the same rows as `seams_rings_chordless` on that frame. `seams.hpp` returns them from `Neighbours::chordless` and `rings_chordless`.
+- codemeta.json records the release beside CITATION.cff, and context7.json names the documentation folders an index should read.
 - science::layersOf bins published CHILL+, the shell label and q6 along the interface normal. science::criticalSize is the mean size of the band around the smallest largest cluster. That number is an upper bound when the minimum falls in the first two frames. It is not a committor.
 - seams rings prints the primitive-ring census by size. seams prisms counts perfect and imperfect prisms of size 3 to 6. seams cluster prints the largest domain, the subset, and whether it percolates.
 - seams.h is ABI 1. A frame carries an orthorhombic or triclinic cell, and the library returns neighbours, both CHILL+ rules, q4 and q6, primitive rings, and ring symmetry labels.
