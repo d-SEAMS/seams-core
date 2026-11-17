@@ -24,7 +24,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Ice and clathrate labels](https://docs.dseams.info/user/tutorials/ice-and-clathrate.md): You label one frame two ways. CHILL+ reads a staggered or eclipsed star.
 - [Classify a clathrate](https://docs.dseams.info/user/tutorials/clathrate.md): GenIce builds the three clathrate ices without guests.
 - [Classify a dump](https://docs.dseams.info/user/howto/classify-cli.md): You have a LAMMPS water dump and want counts.
-- [CHILL+](https://docs.dseams.info/user/howto/chill-plus.md): Label every oxygen with the published CHILL+ star, or with the OVITO rule.
+- [CHILL+](https://docs.dseams.info/user/howto/chill-plus.md): Label every oxygen with the published CHILL+ rule, or with the OVITO rule.
 - [The symmetry classifier](https://docs.dseams.info/user/howto/symmetry-classifier.md): Name the ice shell of each oxygen.
 - [Rings, cages, and order](https://docs.dseams.info/user/order.md): Primitive rings, cage signatures, Steinhardt parameters, and the neighbour list they share.
 - [Primitive rings](https://docs.dseams.info/user/tutorials/rings.md): A primitive ring is a cycle that survives the Franzblau shortest-path test.
