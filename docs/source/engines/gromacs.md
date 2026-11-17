@@ -11,8 +11,9 @@ gmx-seams -f engines/gromacs/ice.gro -cutoff 3.5
 ```
 
 `meson test gromacs_mdrun` runs `engines/gromacs/run_mdrun.sh`, and
-`meson test docs_engine_gromacs` runs this `-f` / `-cutoff` invocation on
-`input/traj/ice1h.lammpstrj`. `run_mdrun.sh`
+`meson test docs_engine_gromacs` writes a one-frame `.gro` from
+`input/traj/ice1h.lammpstrj` and runs `gmx-seams -f` on that file with
+`-cutoff 3.5`. `run_mdrun.sh`
 classifies the trajectory `gmx mdrun` just wrote. Positions are multiplied
 by 10 on the way into `seams_chill_plus`. The box conversion is
 `gromacs_box_to_lammps` with the same scale.
