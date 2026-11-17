@@ -41,8 +41,20 @@ sha256sum seams-core-2.14.0.tar.gz
 Write that digest into `recipe/recipe.yaml` (`source.sha256`). Then:
 
 ```sh
-rattler-build build --recipe recipe -c conda-forge
+cat > variants.yaml <<'YAML'
+c_compiler: [gcc]
+c_compiler_version: ["14"]
+cxx_compiler: [gxx]
+cxx_compiler_version: ["14"]
+c_stdlib: [sysroot]
+c_stdlib_version: ["2.17"]
+YAML
+rattler-build build --recipe recipe -m variants.yaml -c conda-forge
 ```
+
+`stdlib('c')` needs `c_stdlib` from a variant file. conda-forge's
+pinning supplies it on the build farm; `variants.yaml` stands in for it
+locally.
 
 `rattler-build build` is the local proof. Copy `recipe/` into a
 conda-forge/staged-recipes pull request (or the feedstock, once it
