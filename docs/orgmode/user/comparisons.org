@@ -1,75 +1,498 @@
 #+TITLE: Head-to-head
 #+OPTIONS: toc:nil num:nil
 
-Head-to-head results that are already in this tree. Each link is the
-page that records the numbers. The suite tests named here are the ones
-that recompute them.
+Measured comparisons of d-SEAMS 2.14.0 with other structure codes.
+Each timing table copies fields from the file named in the sentence
+above it. The cage census is read out of the agreement text of the
+cage file.
 
-The summary table is written at build time from the CSVs under
-~docs/data/comparisons/~. Those files are copies of the benchmark
-commits named above the table. A timed row names the comparator
-version, the thread count, the repeat count and the core count.
+A time in the summary and cage tables is the median of =n= repeats.
+The ratio is that file's =ratio= field: the other median divided by
+the d-SEAMS median. In those two files every stored ratio is greater
+than 1: the other median is the larger time. Where a table has an
+agreement column, that column is the stored agreement text through
+the first semicolon. The cage timing table's last column is the
+cage name. The census under it is the rest of the agreement text.
+Notes about serial calls are in the section prose.
 
-#+begin_export rst
-.. include:: ../explanation/comparisons-summary-tables.rst
-#+end_export
+* The three records
 
-* OVITO
+The summary medians are ~docs/data/comparisons/h2h-summary.csv~.
+The cage medians are ~docs/data/comparisons/h2h-clavis-cages.csv~,
+and the same cage rows are also in the summary file.
+~docs/data/comparisons/SOURCE.txt~ names both as
+~benchmarks/h2h-summary.csv~ and ~benchmarks/h2h-clavis-cages.csv~
+at commit ~323bfd3872e726b3fa384a67c6b1bedf627ce6a0~. The version
+column is the =version= field. A slash, when present, separates the
+d-SEAMS version from the other code. Every summary row records
+=cores= 8. A one-thread summary row records =cpus= 0. An
+eight-thread summary row records =cpus= 0-7.
 
-[[file:../explanation/ovito-findrings.org][OVITO FindRings]] is a subset of
-the primitive-ring census. On K2,3, d-SEAMS reports three chordless
-4-rings and FindRings reports two. On the 864-atom interface frame at
-3.5 Å every d-SEAMS ring through size 10 is primitive, and each OVITO
-bin is no larger than that census. ~meson test ovito_ring_counts~ and
-the K2,3 case in ~tests/test_franzblau_extra.cpp~ recompute both.
+SQQ means and the ring census are
+~docs/data/comparisons/h2h-sqq.csv~ and
+~docs/data/comparisons/h2h-sqq-agree.csv~. ~SOURCE.txt~ names them
+as ~benchmarks/h2h-sqq.csv~ and ~benchmarks/h2h-sqq-agree.csv~ at
+commit ~c7f71310f27c5ce62d11e97fd82f9757fa4e8628~. Each timing row
+records d-SEAMS 2.14.0 at commit
+~2ef127758d00922621e0e4696abfa89544c2ffc0~ and SQQ 0.5.8 at commit
+~17cf76f9a2fc18848321025674a0f4d4adfa26e8~. Those rows store
+means. The summary tables store medians. The SQQ ratio is
+=ratio_sqq_over_dseams=.
 
-OVITO 3.15 has no Steinhardt modifier. Local \(q_4\) and \(q_6\), and
-the Lechner-Dellago averages, are compared with freud and pyscal3
-instead. ~meson test q4_q6_equal~ runs that comparison.
+The 884736-molecule sitting of ice and a TIP4P/ice liquid is a
+third file, ~docs/records/explanation/performance-h2h-tables.rst~,
+from ~benchmarks/paper-cells/sitting-large.csv~.
+~docs/records/README.md~ names the dataset
+~d-SEAMS/dseams2-benchmark-records~ at revision
+~3246502bec7bb0df04a9bb1855eac06efab0b7e7~.
+[[file:../explanation/performance-h2h.org][Performance]] prints that
+table. On the TIP4P/ice liquid the table states a freud \(q_6\) gap
+of 1.525e-04, called hard-cutoff rounding there, and a PLUMED
+\(q_6\) gap of 1.679e-01, also written 0.168, called the rational
+switch there. CHILL+ agrees on 830736 of 884736 molecules. The
+\(q_6\) table on this page is the summary file. Its agreement
+column is the maximum absolute gap stored for that size.
 
-CHILL+ and the neighbour list against OVITO are rows of the
-[[file:../explanation/performance-h2h.org][performance tables]].
+Four tests recompute a comparison instead of reading a median:
 
-* freud
+- ~meson test ovito_ring_counts~ runs ~tests/test_ovito_ring_counts.py~
+- ~meson test franzblau_extra~ runs ~tests/test_franzblau_extra.cpp~
+- ~meson test q4_q6_equal~ runs ~tests/test_q4_q6_equal.py~
+- ~meson test docs_engine_plumed~ runs the PLUMED section of
+  ~docs/howto/test_engines.py~
 
-~meson test q4_q6_equal~ compares per-atom \(q_4\) and \(q_6\), the
-Lechner-Dellago averages, and the mean of each, on ideal ice Ih, ideal
-ice Ic, and one liquid. The neighbour rule is the same in all three
-codes: a pair counts when its minimum-image distance is strictly below
-3.5 Å. pyscal3 matches to \(10^{-10}\). freud stores \(q_l\) as
-float32, so a crystal agrees to a few units in the last place and a
-disordered shell keeps a larger residual. An empty shell is 0 in
-d-SEAMS and NaN in freud and pyscal3. The
-[[file:howto/q4-q6.org][q4 and q6 how-to]] records why that 0 stays:
-the empty accumulator is the result, and a NaN switch would enter
-every mean and every CHILL+ label.
+* Neighbour lists
 
-The same cutoff \(q_6\) on the large sitting, and the published
-literature numbers, are in the
-[[file:../explanation/performance-h2h.org][performance tables]] and
-[[file:howto/literature-reproduce.org][the literature reproduction]].
+vesin 0.6.2 and freud 3.6.1. The agreement text is the matching
+pair count.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| freud | 2.14.0/3.6.1 | neighbours | 4096 | 1 | 8 | 8 | 0.2809 | 2.9465 | 10.4886 | pairs 8192 equal |
+| vesin | 2.14.0/0.6.2 | neighbours | 4096 | 1 | 8 | 8 | 0.2524 | 1.7137 | 6.7902 | pairs 8192 equal |
+| freud | 2.14.0/3.6.1 | neighbours | 4096 | 8 | 8 | 8 | 0.3054 | 0.8688 | 2.8444 | pairs 8192 equal |
+| vesin | 2.14.0/0.6.2 | neighbours | 4096 | 8 | 8 | 8 | 0.2509 | 0.5761 | 2.2961 | pairs 8192 equal |
+| freud | 2.14.0/3.6.1 | neighbours | 110592 | 1 | 8 | 8 | 6.4788 | 91.8476 | 14.1766 | pairs 221184 equal |
+| vesin | 2.14.0/0.6.2 | neighbours | 110592 | 1 | 8 | 8 | 6.4962 | 45.9557 | 7.0742 | pairs 221184 equal |
+| freud | 2.14.0/3.6.1 | neighbours | 110592 | 8 | 8 | 8 | 3.8882 | 31.5433 | 8.1125 | pairs 221184 equal |
+| vesin | 2.14.0/0.6.2 | neighbours | 110592 | 8 | 8 | 8 | 4.0501 | 14.9654 | 3.6950 | pairs 221184 equal |
+| freud | 2.14.0/3.6.1 | neighbours | 884736 | 1 | 8 | 8 | 102.7091 | 930.3372 | 9.0580 | pairs 1769472 equal |
+| vesin | 2.14.0/0.6.2 | neighbours | 884736 | 1 | 8 | 8 | 82.4432 | 1140.5612 | 13.8345 | pairs 1769472 equal |
+| freud | 2.14.0/3.6.1 | neighbours | 884736 | 8 | 8 | 8 | 49.5928 | 343.2560 | 6.9215 | pairs 1769472 equal |
+| vesin | 2.14.0/0.6.2 | neighbours | 884736 | 8 | 8 | 8 | 41.3136 | 209.6075 | 5.0736 | pairs 1769472 equal |
+
+* Local q6
+
+mdapy 2.0.0, pyscal3 4.1.0, and PLUMED 2.10.0. For a given code and
+size the stored gap is the same at one thread and at eight. mdapy
+and pyscal3 also store the Lechner-Dellago average, =q6bar_max_abs=,
+equal to the local gap on these rows. PLUMED stores only
+=q6_max_abs=. These gaps are \(10^{-16}\) and \(10^{-15}\). The
+liquid sitting's 1.679e-01 PLUMED gap is the other record, above.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| PLUMED | 2.14.0/2.10.0 | q6 | 4096 | 1 | 8 | 8 | 0.7230 | 121.5863 | 168.1621 | q6_max_abs 2.220e-16 |
+| mdapy | 2.14.0/2.0.0 | q6 | 4096 | 1 | 8 | 8 | 0.7256 | 4.6527 | 6.4123 | q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16 |
+| pyscal3 | 2.14.0/4.1.0 | q6 | 4096 | 1 | 8 | 8 | 0.7415 | 3.5078 | 4.7306 | q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16 |
+| PLUMED | 2.14.0/2.10.0 | q6 | 4096 | 8 | 8 | 8 | 0.6326 | 109.1420 | 172.5345 | q6_max_abs 2.220e-16 |
+| mdapy | 2.14.0/2.0.0 | q6 | 4096 | 8 | 8 | 8 | 0.5273 | 0.8488 | 1.6098 | q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16 |
+| pyscal3 | 2.14.0/4.1.0 | q6 | 4096 | 8 | 8 | 8 | 0.3900 | 1.9000 | 4.8712 | q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16 |
+| PLUMED | 2.14.0/2.10.0 | q6 | 110592 | 1 | 8 | 8 | 19.2551 | 3006.8135 | 156.1569 | q6_max_abs 5.551e-16 |
+| mdapy | 2.14.0/2.0.0 | q6 | 110592 | 1 | 8 | 8 | 18.7583 | 108.5550 | 5.7870 | q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15 |
+| pyscal3 | 2.14.0/4.1.0 | q6 | 110592 | 1 | 8 | 8 | 18.7787 | 99.5513 | 5.3013 | q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15 |
+| PLUMED | 2.14.0/2.10.0 | q6 | 110592 | 8 | 8 | 8 | 8.9858 | 3028.2786 | 337.0065 | q6_max_abs 5.551e-16 |
+| mdapy | 2.14.0/2.0.0 | q6 | 110592 | 8 | 8 | 8 | 5.3935 | 15.2391 | 2.8254 | q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15 |
+| pyscal3 | 2.14.0/4.1.0 | q6 | 110592 | 8 | 8 | 8 | 5.3208 | 18.3291 | 3.4448 | q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15 |
+| PLUMED | 2.14.0/2.10.0 | q6 | 884736 | 1 | 8 | 8 | 240.7382 | 23208.5792 | 96.4059 | q6_max_abs 6.661e-16 |
+| mdapy | 2.14.0/2.0.0 | q6 | 884736 | 1 | 8 | 8 | 237.0502 | 1039.0684 | 4.3833 | q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15 |
+| pyscal3 | 2.14.0/4.1.0 | q6 | 884736 | 1 | 8 | 8 | 237.9653 | 927.0447 | 3.8957 | q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15 |
+| PLUMED | 2.14.0/2.10.0 | q6 | 884736 | 8 | 8 | 8 | 91.1466 | 23631.1588 | 259.2655 | q6_max_abs 6.661e-16 |
+| mdapy | 2.14.0/2.0.0 | q6 | 884736 | 8 | 8 | 8 | 71.0785 | 149.8983 | 2.1089 | q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15 |
+| pyscal3 | 2.14.0/4.1.0 | q6 | 884736 | 8 | 8 | 8 | 71.7527 | 177.4625 | 2.4733 | q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15 |
+
+* CHILL+
+
+mdapy 2.0.0 matches the label on every molecule and stores the same
+=q6_max_abs= as its q6 rows. ClavisCage 0.3.18 matches the label on
+every molecule. The agreement text on the ClavisCage rows states
+that this CHILL+ path is a serial loop. The table is the measured
+time: the eight-thread ClavisCage median stays with the one-thread
+median at each size.
+
+pyscal3 4.1.0 has no finished CHILL+ row. The agreement text says
+that version exports no CHILL or CHILL+ name, that
+=common_neighbor_analysis= is adaptive CNA and returns fcc, hcp,
+bcc, ico, and other, and that =diamond_structure= is extended CNA.
+The same text says neither function is the Nguyen and Molinero
+CHILL+ rule, and that PyPI's latest pyscal3 is this same 4.1.0.
+The rows are
+recorded at one thread and at eight, with an empty molecule count.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ClavisCage | 2.14.0/0.3.18 | chill_plus | 4096 | 1 | 8 | 8 | 0.7255 | 4.5952 | 6.3335 | labels 4096 equal |
+| mdapy | 2.14.0/2.0.0 | chill_plus | 4096 | 1 | 8 | 8 | 0.7184 | 2.6670 | 3.7122 | labels 4096 equal q6_max_abs 4.441e-16 |
+| ClavisCage | 2.14.0/0.3.18 | chill_plus | 4096 | 8 | 8 | 8 | 0.4711 | 4.5363 | 9.6285 | labels 4096 equal |
+| mdapy | 2.14.0/2.0.0 | chill_plus | 4096 | 8 | 8 | 8 | 0.5076 | 0.5913 | 1.1649 | labels 4096 equal q6_max_abs 4.441e-16 |
+| ClavisCage | 2.14.0/0.3.18 | chill_plus | 110592 | 1 | 8 | 8 | 18.4099 | 113.8680 | 6.1851 | labels 110592 equal |
+| mdapy | 2.14.0/2.0.0 | chill_plus | 110592 | 1 | 8 | 8 | 18.5351 | 56.9564 | 3.0729 | labels 110592 equal q6_max_abs 1.776e-15 |
+| ClavisCage | 2.14.0/0.3.18 | chill_plus | 110592 | 8 | 8 | 8 | 5.2050 | 113.8816 | 21.8794 | labels 110592 equal |
+| mdapy | 2.14.0/2.0.0 | chill_plus | 110592 | 8 | 8 | 8 | 7.5892 | 10.3904 | 1.3691 | labels 110592 equal q6_max_abs 1.776e-15 |
+| ClavisCage | 2.14.0/0.3.18 | chill_plus | 884736 | 1 | 8 | 8 | 208.1052 | 1007.4027 | 4.8408 | labels 884736 equal |
+| mdapy | 2.14.0/2.0.0 | chill_plus | 884736 | 1 | 8 | 8 | 203.1011 | 585.3079 | 2.8819 | labels 884736 equal q6_max_abs 2.331e-15 |
+| ClavisCage | 2.14.0/0.3.18 | chill_plus | 884736 | 8 | 8 | 8 | 59.4890 | 1008.0481 | 16.9451 | labels 884736 equal |
+| mdapy | 2.14.0/2.0.0 | chill_plus | 884736 | 8 | 8 | 8 | 66.4798 | 115.4407 | 1.7365 | labels 884736 equal q6_max_abs 2.331e-15 |
+
+* Diamond structure
+
+OVITO 3.17.2 =identify_diamond=. At each size the agreement text
+is =hexagonal= followed by the molecule count and =equal=: every
+molecule is hexagonal on both sides.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OVITO | 2.14.0/3.17.2 | identify_diamond | 4096 | 1 | 8 | 8 | 0.7306 | 4.7155 | 6.4542 | hexagonal 4096 equal |
+| OVITO | 2.14.0/3.17.2 | identify_diamond | 4096 | 8 | 8 | 8 | 0.5566 | 1.9548 | 3.5122 | hexagonal 4096 equal |
+| OVITO | 2.14.0/3.17.2 | identify_diamond | 110592 | 1 | 8 | 8 | 20.7730 | 136.5008 | 6.5711 | hexagonal 110592 equal |
+| OVITO | 2.14.0/3.17.2 | identify_diamond | 110592 | 8 | 8 | 8 | 8.3309 | 29.5160 | 3.5430 | hexagonal 110592 equal |
+| OVITO | 2.14.0/3.17.2 | identify_diamond | 884736 | 1 | 8 | 8 | 248.1369 | 1136.5466 | 4.5803 | hexagonal 884736 equal |
+| OVITO | 2.14.0/3.17.2 | identify_diamond | 884736 | 8 | 8 | 8 | 62.1147 | 262.3612 | 4.2238 | hexagonal 884736 equal |
+
+* Rings
+
+OVITO 3.17.2 FindRings, rings-statistics-matter 0.3.0, and cycless
+0.7, on the rows that finished. The agreement text is the matching
+hexagon count: 8192, 221184, and 1769472 at 4096, 110592, and
+884736 molecules.
+
+The cycless rows state that =cycles_iter= has no thread argument.
+At 884736 molecules the cycless rows did not finish. The version
+field on those rows is 0.7, one sample exceeded 600 s, and the
+agreement text stores a fit labelled "Fit, not a measurement."
+There is no measured time for that size.
+
+freud has no ring row. The agreement text names freud 3.6.1, lists
+its modules, and states that there is no ring or cycle module. The
+citation in that text is Ramasubramani and others, Comput. Phys.
+Commun. 254, 107275 (2020). The version field on those rows is
+2.14.0. The sizes are 4096, 110592, and 884736, at one thread and
+at eight.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OVITO | 2.14.0/3.17.2 | rings | 4096 | 1 | 8 | 8 | 4.5301 | 15.8206 | 3.4923 | hexagons 8192 equal |
+| cycless | 2.14.0/0.7 | rings | 4096 | 1 | 8 | 8 | 5.0379 | 12678.2659 | 2516.5770 | hexagons 8192 equal |
+| rings-statistics-matter | 2.14.0/0.3.0 | rings | 4096 | 1 | 8 | 8 | 4.5552 | 56.9215 | 12.4961 | hexagons 8192 equal |
+| OVITO | 2.14.0/3.17.2 | rings | 4096 | 8 | 8 | 8 | 2.6129 | 17.6346 | 6.7491 | hexagons 8192 equal |
+| cycless | 2.14.0/0.7 | rings | 4096 | 8 | 8 | 8 | 2.9191 | 12516.1838 | 4287.6594 | hexagons 8192 equal |
+| rings-statistics-matter | 2.14.0/0.3.0 | rings | 4096 | 8 | 8 | 8 | 2.2476 | 12.5984 | 5.6052 | hexagons 8192 equal |
+| OVITO | 2.14.0/3.17.2 | rings | 110592 | 1 | 8 | 8 | 119.4383 | 503.1571 | 4.2127 | hexagons 221184 equal |
+| cycless | 2.14.0/0.7 | rings | 110592 | 1 | 8 | 8 | 136.3856 | 341558.2557 | 2504.3573 | hexagons 221184 equal |
+| rings-statistics-matter | 2.14.0/0.3.0 | rings | 110592 | 1 | 8 | 8 | 116.2389 | 1327.4966 | 11.4204 | hexagons 221184 equal |
+| OVITO | 2.14.0/3.17.2 | rings | 110592 | 8 | 8 | 8 | 48.3409 | 323.8505 | 6.6993 | hexagons 221184 equal |
+| cycless | 2.14.0/0.7 | rings | 110592 | 8 | 8 | 8 | 65.8726 | 337108.4778 | 5117.5843 | hexagons 221184 equal |
+| rings-statistics-matter | 2.14.0/0.3.0 | rings | 110592 | 8 | 8 | 8 | 47.2318 | 307.1093 | 6.5022 | hexagons 221184 equal |
+| OVITO | 2.14.0/3.17.2 | rings | 884736 | 1 | 8 | 8 | 1046.5149 | 4542.0060 | 4.3401 | hexagons 1769472 equal |
+| rings-statistics-matter | 2.14.0/0.3.0 | rings | 884736 | 1 | 8 | 8 | 1032.6158 | 13012.7347 | 12.6017 | hexagons 1769472 equal |
+| OVITO | 2.14.0/3.17.2 | rings | 884736 | 8 | 8 | 8 | 484.2037 | 2917.3354 | 6.0250 | hexagons 1769472 equal |
+| rings-statistics-matter | 2.14.0/0.3.0 | rings | 884736 | 8 | 8 | 8 | 476.9637 | 2967.7415 | 6.2222 | hexagons 1769472 equal |
+
+* FindRings and the primitive census
+
+The hexagon counts above are one check. The subset result is
+another, and it is what the tests recompute.
+
+On K2,3, d-SEAMS reports three primitive 4-rings and OVITO
+FindRings reports two. ~tests/test_ovito_ring_counts.py~ builds the
+graph so a 3.5 Å cutoff has six edges, and it requires three
+d-SEAMS 4-rings, two FindRings 4-rings, and those six edges.
+~tests/test_franzblau_extra.cpp~ requires the three primitive
+4-rings and requires each of them to pass the Franzblau test. The
+case name is "K2,3 has three primitive 4-rings".
+[[file:../explanation/ovito-findrings.org][Primitive rings and OVITO FindRings]]
+lists the three cycles.
+
+On the 864-atom frame ~input/traj/interface_f0.lammpstrj~, cutoff
+3.5 Å, the C++ test requires 1929 bonds and this primitive census:
+142 of size 3, 188 of size 4, 377 of size 5, 1143 of size 6, 257 of
+size 7, 54 of size 8, 52 of size 9, and 449 of size 10. It requires
+every one of those rings to pass the Franzblau test. The sum of
+those bins is 2662. The Python test loads the same trajectory,
+requires the bond count to match on both sides, requires every
+listed d-SEAMS ring to be primitive, and requires each FindRings
+bin from size 4 through 10 to be at most the primitive bin.
+~meson test ovito_ring_counts~ runs the Python test. ~meson test
+franzblau_extra~ runs the C++ test.
+
+* Polyhedral template matching
+
+OVITO 3.17.2 PTM and the PTM code named 162cc834. Both label every
+molecule hexagonal. The PTM rows also store =rmsd_max= 4.337e-08 at
+every size and both thread counts.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OVITO | 2.14.0/3.17.2 | ptm | 4096 | 1 | 8 | 8 | 0.7264 | 105.0304 | 144.5805 | hexagonal 4096 equal |
+| PTM | 2.14.0/162cc834 | ptm | 4096 | 1 | 8 | 8 | 0.7334 | 189.4989 | 258.3907 | hexagonal 4096 equal rmsd_max 4.337e-08 |
+| OVITO | 2.14.0/3.17.2 | ptm | 4096 | 8 | 8 | 8 | 0.5204 | 28.3374 | 54.4549 | hexagonal 4096 equal |
+| PTM | 2.14.0/162cc834 | ptm | 4096 | 8 | 8 | 8 | 0.2783 | 24.0122 | 86.2705 | hexagonal 4096 equal rmsd_max 4.337e-08 |
+| OVITO | 2.14.0/3.17.2 | ptm | 110592 | 1 | 8 | 8 | 21.0405 | 2903.9205 | 138.0160 | hexagonal 110592 equal |
+| PTM | 2.14.0/162cc834 | ptm | 110592 | 1 | 8 | 8 | 21.8284 | 4855.0064 | 222.4168 | hexagonal 110592 equal rmsd_max 4.337e-08 |
+| OVITO | 2.14.0/3.17.2 | ptm | 110592 | 8 | 8 | 8 | 8.5196 | 387.5268 | 45.4867 | hexagonal 110592 equal |
+| PTM | 2.14.0/162cc834 | ptm | 110592 | 8 | 8 | 8 | 8.2662 | 613.5692 | 74.2262 | hexagonal 110592 equal rmsd_max 4.337e-08 |
+| OVITO | 2.14.0/3.17.2 | ptm | 884736 | 1 | 8 | 8 | 259.8032 | 23247.5896 | 89.4815 | hexagonal 884736 equal |
+| PTM | 2.14.0/162cc834 | ptm | 884736 | 1 | 8 | 8 | 255.8396 | 38381.2306 | 150.0207 | hexagonal 884736 equal rmsd_max 4.337e-08 |
+| OVITO | 2.14.0/3.17.2 | ptm | 884736 | 8 | 8 | 8 | 63.6214 | 3062.3280 | 48.1336 | hexagonal 884736 equal |
+| PTM | 2.14.0/162cc834 | ptm | 884736 | 8 | 8 | 8 | 59.6748 | 4823.9120 | 80.8367 | hexagonal 884736 equal rmsd_max 4.337e-08 |
+
+* Shape matching
+
+IRA 2.2.0 on 4096 molecules. The agreement text is =hexagonal 4096
+equal= at one thread and at eight. The version field is
+2.14.0/2.2.0.
+
+At 110592 molecules one sample exceeded 600 s. The version field on
+that row, and on the 884736-molecule row, is 2.2.0. The
+884736-molecule row was not started because 110592 molecules
+exceeded 600 s. Both unfinished rows store a fit labelled "Fit,
+not a measurement" and state that =classify_serial= has no thread
+argument.
+
+Rows of ~docs/data/comparisons/h2h-summary.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | agreement |
+|---|---|---|---|---|---|---|---|---|---|---|
+| IRA | 2.14.0/2.2.0 | shape | 4096 | 1 | 8 | 8 | 0.7481 | 1302.6695 | 1741.2294 | hexagonal 4096 equal |
+| IRA | 2.14.0/2.2.0 | shape | 4096 | 8 | 8 | 8 | 1.2898 | 1299.2780 | 1007.3679 | hexagonal 4096 equal |
+
+* Adaptive common-neighbour analysis
+
+Three OVITO rows in ~docs/data/comparisons/h2h-summary.csv~,
+operation =cna=, version field 2.14.0, 4096 molecules, one thread,
+=cores= 8, =n= 1. The version field does not name an OVITO
+release. There is no stored time. The agreement text says the
+modifier's structure types are Other, FCC, HCP, BCC, and ICO, and
+that an FCC control is 256 of 256 FCC.
+
+Ice Ih: 4096 of 4096 molecules labelled =hexagonal_ice= by CHILL+
+are Other. Coordination 4, 3 staggered and 1 eclipsed, on all 4096.
+
+Ice Ic: 4096 of 4096 molecules labelled =cubic_ice= are Other.
+Coordination 4, 4 staggered and 0 eclipsed, on all 4096.
+
+Liquid: 222 of 4096 disagree. One =hexagonal_ice= molecule is
+Other at coordination 4, with 3 staggered and 1 eclipsed. Forty-nine
+=hydrate= molecules are Other at coordination 4, with 4 eclipsed
+and 0 staggered. One hundred sixty-eight =interfacial_hydrate=
+molecules are Other at coordination 4, with 3 eclipsed. Four
+=interfacial_ice= molecules are Other at coordination 4, with 2
+staggered, or 3 staggered and 0 eclipsed.
+
+The same liquid text names four shifted-ice waters with 12
+neighbours inside 3.5 Å: 690 at (4.490, 15.864, 50.345), 1673 at
+(16.865, 18.399, 11.795), 1675 at (15.210, 17.036, 12.464), and
+2304 at (16.902, 34.179, 1.355). An independent minimum-image count
+in that text gives the same 12 ids. The nearest pair is 0.183 Å,
+from the Gaussian shift.
+
+* ClavisCage TRACE cages
+
+ClavisCage 0.3.18 against the d-SEAMS cage census. The one-thread
+and eight-thread rows of a cell store the same census. The record
+writes 512, 51262, and 51264 for the \(5^{12}\), \(5^{12}6^{2}\),
+and \(5^{12}6^{4}\) cages. =both= is the count found by both
+codes. The other two columns are cages found by only one code.
+TRACE-only is 0 on every signature below.
+
+On the 46-molecule sI cell, cage 512-0 has 18 of 30 bonds across
+the periodic cell, and the six 51262 cages have 10 to 15. The
+\(5^{12}\) cage TRACE returns has none.
+The 2x2x2 tile matches. The record's conclusion on that cell is
+that d-SEAMS is right.
+
+On the 110160-molecule rows the agreement text states that TRACE
+is serial and that =analyze_waters= has no thread argument. The
+TRACE median is 61962.4841 ms at one thread and 61956.9697 ms at
+eight. The d-SEAMS median is 955.8314 ms at one thread and
+303.0753 ms at eight.
+
+[[file:../explanation/clavis-trace.org][ClavisCage TRACE]] is the
+same census.
+
+Rows of ~docs/data/comparisons/h2h-clavis-cages.csv~.
+
+| comparator | version | operation | molecules | threads | cores | n | d-SEAMS ms | other ms | ratio | cage |
+|---|---|---|---|---|---|---|---|---|---|---|
+| ClavisCage | 2.14.0/0.3.18 | cages | 46 | 1 | 8 | 8 | 0.5796 | 50.3899 | 86.9321 | sI |
+| ClavisCage | 2.14.0/0.3.18 | cages | 46 | 8 | 8 | 8 | 0.5947 | 50.2893 | 84.5632 | sI |
+| ClavisCage | 2.14.0/0.3.18 | cages | 136 | 1 | 8 | 8 | 1.4924 | 68.3007 | 45.7666 | sII |
+| ClavisCage | 2.14.0/0.3.18 | cages | 136 | 8 | 8 | 8 | 1.5655 | 68.2571 | 43.6016 | sII |
+| ClavisCage | 2.14.0/0.3.18 | cages | 368 | 1 | 8 | 8 | 3.7222 | 297.6070 | 79.9538 | sI-222 |
+| ClavisCage | 2.14.0/0.3.18 | cages | 368 | 8 | 8 | 8 | 2.9243 | 297.9639 | 101.8907 | sI-222 |
+| ClavisCage | 2.14.0/0.3.18 | cages | 1088 | 1 | 8 | 8 | 10.7150 | 697.6882 | 65.1132 | sII-222 |
+| ClavisCage | 2.14.0/0.3.18 | cages | 1088 | 8 | 8 | 8 | 4.7284 | 697.7931 | 147.5752 | sII-222 |
+| ClavisCage | 2.14.0/0.3.18 | cages | 110160 | 1 | 8 | 8 | 955.8314 | 61962.4841 | 64.8257 | sII-9x9x10 |
+| ClavisCage | 2.14.0/0.3.18 | cages | 110160 | 8 | 8 | 8 | 303.0753 | 61956.9697 | 204.4277 | sII-9x9x10 |
+
+Census parsed from the agreement text of those rows. The
+eight-thread text matches the one-thread text on each cell.
+
+| cell | molecules | signature | both | d-SEAMS only | TRACE only |
+|---|---|---|---|---|---|
+| sI | 46 | 512 | 1 | 1 | 0 |
+| sI | 46 | 51262 | 0 | 6 | 0 |
+| sI | 46 | 51264 | 0 | 0 | 0 |
+| sII | 136 | 512 | 16 | 0 | 0 |
+| sII | 136 | 51262 | 0 | 0 | 0 |
+| sII | 136 | 51264 | 8 | 0 | 0 |
+| sI-222 | 368 | 512 | 16 | 0 | 0 |
+| sI-222 | 368 | 51262 | 48 | 0 | 0 |
+| sI-222 | 368 | 51264 | 0 | 0 | 0 |
+| sII-222 | 1088 | 512 | 128 | 0 | 0 |
+| sII-222 | 1088 | 51262 | 0 | 0 | 0 |
+| sII-222 | 1088 | 51264 | 64 | 0 | 0 |
+| sII-9x9x10 | 110160 | 512 | 12960 | 0 | 0 |
+| sII-9x9x10 | 110160 | 51262 | 0 | 0 | 0 |
+| sII-9x9x10 | 110160 | 51264 | 6480 | 0 | 0 |
 
 * SQQ
 
-SQQ ring times are a row of the
-[[file:../explanation/performance-h2h.org][performance tables]] and of
-[[file:howto/literature-h2h.org][the literature codes]]. The benchmark
-records in the =d-SEAMS/dseams2-benchmark-records= dataset are the
-source of those cells; =docs/records/README.md= names the revision.
-The vendored SQQ census and the chordless and whole-tool ratios are on
-[[file:../explanation/sqq.org][the SQQ page]].
+SQQ cage rows in the summary file did not run. The version field is
+0.5.8. At 4096 molecules the agreement text says 512 molecules
+exceeded 600 s, so that size was not started. At 110592 and at
+884736 molecules it says 4096 molecules exceeded 600 s, so that
+size was not started. The rows are recorded at one thread and at
+eight. There is no cage time.
 
-* PLUMED
+The ring and ice comparison is the SQQ file. Frames in that file
+are Ic-4096, Ih-4096, mw-liquid-4096, tip4p2005-4096, Ic-110592,
+Ih-110592, mw-liquid-110592, and tip4p-o-250. Operations are
+=rings=, =ice=, =ice-primitive=, and =ice-chordless=. The tables
+here are the 4096-molecule TIP4P/2005 frame. The other frames are
+in the CSV. [[file:../explanation/sqq.org][SQQ]] prints the full set.
 
-The colvar is [[file:howto/engine-plumed.org][the PLUMED engine]]. Its
-\(q_6\) on the large sitting is a row of the
-[[file:../explanation/performance-h2h.org][performance tables]]: on the
-liquid the gap is the rational switch, not the hard cutoff. The
-literature reproduction records the same comparison next to freud.
-~meson test docs_engine_plumed~ runs the engine page.
+On tip4p2005-4096 the edge and ring counts match. The record's
+resolution on the chordless 6-ring row says every primitive 6-ring
+is inside that count, and that the reference enumeration is 4045.
 
-* ClavisCage TRACE
+The merged ice-label row stores d-SEAMS 4, SQQ 1129, both 2969,
+agreement 0.724854. Its resolution text says CHILL+ reproduced
+4096/4096 by scipy, the SQQ rule reproduced 4096/4096 from the
+reference graph, and the mismatches are 1127.
 
-[[file:../explanation/clavis-trace.org][ClavisCage TRACE]] is the cage
-census and the serial TRACE timing against d-SEAMS at one and eight
-threads. The cells are the vendored ClavisCage CSV, not a typed table.
+The primitive-rule row stores d-SEAMS 1075, SQQ 1129, both 4042,
+agreement 0.986816. Its resolution text says the rule reproduced
+4096/4096 from the reference graph, and that each mismatch has a
+primitive and a chordless six-ring count that differ on the
+molecule or a neighbour: 54/54.
+
+The chordless-rule row stores d-SEAMS 1129, SQQ 1129, both 4096,
+agreement 1.000000. Its resolution text says the mismatches on or
+next to an edge SQQ lacks are 0/0.
+
+Rows of ~docs/data/comparisons/h2h-sqq-agree.csv~.
+
+| frame | molecules | quantity | d-SEAMS | SQQ | both | agreement |
+|---|---|---|---|---|---|---|
+| tip4p2005-4096 | 4096 | O-O edges | 10495 | 10495 | 10495 | 1.000000 |
+| tip4p2005-4096 | 4096 | 4-rings | 1758 | 1758 | 1758 | 1.000000 |
+| tip4p2005-4096 | 4096 | 5-rings | 2763 | 2763 | 2763 | 1.000000 |
+| tip4p2005-4096 | 4096 | 6-rings | 2485 | 2485 | 2485 | 1.000000 |
+| tip4p2005-4096 | 4096 | chordless 6-rings | 4045 | 4045 | 4045 | 1.000000 |
+| tip4p2005-4096 | 4096 | ice label (merged) | 4 | 1129 | 2969 | 0.724854 |
+| tip4p2005-4096 | 4096 | ice label, SQQ rule on d-SEAMS primitive 6-rings | 1075 | 1129 | 4042 | 0.986816 |
+| tip4p2005-4096 | 4096 | ice label, SQQ rule on d-SEAMS chordless 6-rings | 1129 | 1129 | 4096 | 1.000000 |
+
+The timing notes in the CSV, for this frame:
+
+- =rings= is d-SEAMS primitive rings of size 3 to 6 against SQQ
+  shortest-path rings of size 4 to 6
+- =ice= is whole tools: d-SEAMS CHILL+ with no rings, against SQQ
+  ice on chordless 6-rings
+- =ice-primitive= is the SQQ rule on d-SEAMS primitive 6-rings,
+  against SQQ ice
+- =ice-chordless= is the SQQ rule on chordless 6-cycles of the
+  d-SEAMS graph, against SQQ ice
+
+The =ice=, =ice-primitive=, and =ice-chordless= notes say the SQQ
+samples are shared, which is why the SQQ mean matches across those
+three operations. One thread records =cores= 1 and =cpus= 0. Eight
+threads record =cores= 8 and =cpus= 0-7. =n= is 8. The ratio is
+the SQQ mean divided by the d-SEAMS mean.
+
+Rows of ~docs/data/comparisons/h2h-sqq.csv~.
+
+| frame | molecules | operation | threads | cores | n | d-SEAMS ms | SQQ ms | SQQ/d-SEAMS | agreement |
+|---|---|---|---|---|---|---|---|---|---|
+| tip4p2005-4096 | 4096 | rings | 1 | 1 | 8 | 22.6026 | 1054.3846 | 46.649 | 1.000000 |
+| tip4p2005-4096 | 4096 | rings | 8 | 8 | 8 | 8.2165 | 1056.0863 | 128.532 | 1.000000 |
+| tip4p2005-4096 | 4096 | ice | 1 | 1 | 8 | 1.7860 | 914.2565 | 511.905 | 0.724854 |
+| tip4p2005-4096 | 4096 | ice | 8 | 8 | 8 | 1.5802 | 916.2551 | 579.849 | 0.724854 |
+| tip4p2005-4096 | 4096 | ice-primitive | 1 | 1 | 8 | 23.3003 | 914.2565 | 39.238 | 0.986816 |
+| tip4p2005-4096 | 4096 | ice-primitive | 8 | 8 | 8 | 8.4130 | 916.2551 | 108.910 | 0.986816 |
+| tip4p2005-4096 | 4096 | ice-chordless | 1 | 1 | 8 | 28.5570 | 914.2565 | 32.015 | 1.000000 |
+| tip4p2005-4096 | 4096 | ice-chordless | 8 | 8 | 8 | 7.9694 | 916.2551 | 114.971 | 1.000000 |
+
+[[file:../explanation/performance-h2h.org][Performance]] also prints
+an SQQ ring median from ~benchmarks/h2h-watch-v6-sqq.csv~, frozen in
+~docs/records/explanation/performance-h2h-tables.rst~: 18234.926 ms
+at one thread and 17907.744 ms at eight threads, 110592 molecules,
+=n= 6. That line is SQQ's time alone. It is a separate file from
+the means above.
+
+* Per-atom q4 and q6
+
+~tests/test_q4_q6_equal.py~ compares per-atom \(q_4\) and \(q_6\),
+the Lechner-Dellago averages, and the mean of each, on three
+frames. Ideal ice Ih is ~input/traj/ice1h.lammpstrj~. Ideal ice Ic
+is a diamond cell with a 2.75 Å bond, four cells on a side. The
+liquid is that cell plus Gaussian noise of 0.9 Å, seed 91001. The
+neighbour rule in the test is the same in d-SEAMS, freud, and
+pyscal3: a pair counts when its minimum-image distance is strictly
+below 3.5 Å. The test runs at one thread and at eight.
+
+pyscal3 is float64. Local \(q_l\), the Lechner-Dellago average, and
+the mean of each over atoms that have a shell must agree to
+\(10^{-10}\). freud stores \(q_l\) as float32. On the two crystals
+the test requires the gap to stay within 8 units in the last place
+of that float32 value. On the liquid the spherical-harmonic sum is
+accumulated in float32, and the test requires the residual to stay
+under \(2 \times 10^{-5}\).
+
+An empty shell is 0 in d-SEAMS and NaN in freud and pyscal3. The
+test requires that split. 0 is the empty accumulator.
+[[file:howto/q4-q6.org][Local q4 and q6]] records why that 0 stays:
+a NaN would enter every mean and every CHILL+ label.
+
+The test does not call OVITO. Its opening statement is that OVITO
+3.15.5 has no =SteinhardtParametersModifier=. OVITO 3.17.2 \(q_4\)
+and \(q_6\) are timed in the 884736-molecule sitting named above,
+in ~docs/records/explanation/performance-h2h-tables.rst~.
+
+* PLUMED on the ice Ih dump
+
+~docs/howto/test_engines.py~ runs the PLUMED engine on
+~input/traj/ice1h.lammpstrj~. It requires the line hexagonal 128,
+six-rings 256, and \(q_6\) within \(5 \times 10^{-7}\) of 0.625855.
+~meson test docs_engine_plumed~ is that check. It exits 77 when
+=plumed= or ~libSeamsPlumed.so~ is absent.
+[[file:howto/engine-plumed.org][PLUMED]] is the engine page.
+
+That check is the ice Ih dump. The summary \(q_6\) table is the
+median comparison with PLUMED 2.10.0, with maximum absolute gaps
+from \(2.220 \times 10^{-16}\) to \(6.661 \times 10^{-16}\). The
+liquid sitting is the 1.679e-01 rational-switch gap. The three
+numbers come from the three records above.

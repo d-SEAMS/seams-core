@@ -94,7 +94,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Benchmarks](https://docs.dseams.info/user/howto/benchmarks.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Literature head-to-head](https://docs.dseams.info/user/howto/literature-h2h.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Reproduce the literature head-to-head](https://docs.dseams.info/user/howto/literature-reproduce.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
-- [Head-to-head](https://docs.dseams.info/user/comparisons.md): Head-to-head results that are already in this tree.
+- [Head-to-head](https://docs.dseams.info/user/comparisons.md): Measured comparisons of d-SEAMS 2.14.0 with other structure codes.
 - [Versions and bindings](https://docs.dseams.info/user/versions.md): Move a 1.x script or a 2.13 install onto this release, and find the catalogue of tutorials and tasks.
 - [Upgrade from 2.13 to 2.14](https://docs.dseams.info/user/howto/upgrade-2.14.md): These notes start from tag v2.13.0 (7f310225).
 - [Migrate from d-SEAMS 1.x](https://docs.dseams.info/user/howto/migrate-1x.md): 1.x was a Lua script plus yodaStruct -c lua_inputs/config.yml.
