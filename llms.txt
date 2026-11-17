@@ -101,7 +101,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Use a language binding](https://docs.dseams.info/user/howto/bindings.md): This repository builds the engine, the C API libseams (include/seams.h), the C ABI libseams_lang (bindings/cxx/seams_lang.h), and the seams command.
 - [Version pins](https://docs.dseams.info/user/howto/versions.md): seams --version prints the version of that binary.
 - [FAQ](https://docs.dseams.info/user/howto/faq.md): Install the engine. From a checkout, pixi run build writes ./bbdir/seams.
-- [Troubleshooting](https://docs.dseams.info/user/howto/troubleshooting.md): The two command shapes on bundled frames:
+- [Troubleshooting](https://docs.dseams.info/user/howto/troubleshooting.md): Two commands on the bundled frames:
 - [Worked examples](https://docs.dseams.info/user/tutorials/index.md): A tutorial is a learning path.
 - [Tasks](https://docs.dseams.info/user/howto/index.md): A how-to solves a goal you already have.
 - [Concepts](https://docs.dseams.info/explanation/index.md): These pages are for understanding.

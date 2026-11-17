@@ -3,22 +3,21 @@
 
 | symptom | cause | fix |
 |---------+-------+-----|
-| ~A command and a trajectory file are required~ / exit 2 | Missing positional | ~seams read FILE~ |
-| ~unknown command~ / exit 2 | Not ~read~ / ~chill~ / ~chill-plus~ / ~cages~ / ~rdf~ | ~chill_plus~ is an alias of ~chill-plus~ |
-| ~bad --pair-types~ / exit 2 | Not ~I,J~ | ~seams rdf FILE --pair-types 1,2~ |
-| ~nop 0~ | Wrong type or empty file | ~--type 2~ on TIP4P, ~--type 1~ on mW; other mixed dumps need the species integer ([[file:ionic-liquid.org][Ionic-liquid dumps]]) |
-| Neighbours miss a pair across a sheared face | Bound spans treated as ~lx, ly, lz~ | The dump tilt is enough; the engine recovers H ([[file:sheared-cells.org][Sheared cells]]) |
-| ~chemfiles: disabled~ and ~.pdb~ fails | Flake / no chemfiles | Default pixi lock, or a Meson build that finds chemfiles |
-| segfault in ~mmCIFFormat::read~ on a conda chemfiles 0.10.4 | The release writes ~label_seq_id~ ~.~ and omits ~label_entity_id~ | Meson and CMake read ~cmake/mmcif_no_entity.mmcif~ and, on failure, build tag 0.10.4 with ~cmake/patches/chemfiles-0.10.4-mmcif.patch~. A hand-linked copy needs that patch |
-| ~.con~ fails | readcon-core off | Enable in a Meson build that can see it; the flake does not fetch the wrap |
-| ~--jobs~ does nothing useful | OpenMP off | ~seams --features~ |
-| ~ModuleNotFoundError: pydseams~ | Wrong repository | PydSEAMSlib, not ~pixi run~ in seams-core |
-| Looking for ~yodaStruct -c lua_inputs/config.yml~ | 2020 executable | ~seams~ here; Lua library in yodaStruct |
-| ~seams: command not found~ | Binary not on ~PATH~ | After ~pixi run build~ / ~meson compile -C bbdir~ the binary is ~./bbdir/seams~. Install with ~pixi run install~ or ~meson install~ |
-| ~require("dseams")~ fails to load | The Lua binding is not installed | Install the LuaRocks rock ~dseams~ from [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
-| Wrap pin / ~nodownload~ miss | Flake does not fetch wrap-git | Pins live in ~subprojects/~ (~linkcell~ v0.4.2, ~vesin~ v0.5.7, ~readcon-core~ 0.16.2, ~gpulite~). The flake uses ~mesonAutoFeatures=disabled~ and wrap ~nodownload~ |
+| ~A command and a trajectory file are required~ / exit 2 | The command, the file, or both were omitted | ~seams read input/traj/ice1h.lammpstrj~ |
+| ~unknown command:~ NAME / exit 2 | NAME is not a command | ~seams --help~. ~chill_plus~ is ~chill-plus~. ~ovito_chill_plus~ is ~ovito-chill+~ |
+| ~bad --pair-types (want I,J)~ / exit 2 | The value is not two integers separated by a comma | ~seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2~ |
+| ~nop 0~, exit 0 | The type filter kept no atoms, or the frame is empty | ~--type 2~ on mixed TIP4P (~exampleTraj.lammpstrj~). ~--type 1~ on single-site dumps (~ice1h.lammpstrj~, ~mW_cubic.lammpstrj~). Another species needs its integer ([[file:ionic-liquid.org][Ionic-liquid dumps]]). ~--strict-input~ makes an empty frame exit 2 |
+| Neighbours miss a pair across a sheared face | Bound spans were used as the edge lengths | The tilt factors in the dump are enough. The engine recovers H ([[file:sheared-cells.org][Sheared cells]]) |
+| ~chemfiles: disabled~, then ~chemfiles is not in this build~ | This binary has no chemfiles. The suffix in the message is ~pdb~, ~gro~, or ~dcd~ | ~pixi run build~ (the default lock enables chemfiles). The nix flake leaves chemfiles out ([[file:../../reference/nix.org][Nix flake]]) |
+| segfault in ~mmCIFFormat::read~ with conda-forge chemfiles 0.10.4 | That release writes ~label_seq_id~ ~.~ and omits ~label_entity_id~ | Use the pixi or Meson build. It rejects that library and builds tag 0.10.4 with ~cmake/patches/chemfiles-0.10.4-mmcif.patch~. A library you linked yourself needs that patch ([[file:../../getting-started/install.org][Install the engine]]) |
+| ~readcon-core is not in this build; CON input needs it~ | ~seams --features~ shows ~readcon-core: disabled~. The nix flake does not include it | A Meson build that finds readcon-core reads ~.con~. ~-Dwith_readcon=disabled~ leaves the reader out |
+| ~--jobs~ stays serial | OpenMP is off, or the file is not a LAMMPS dump | ~seams --features~. ~--jobs~ is the OpenMP worker count on a LAMMPS dump range. ~--jobs 1~ is serial. ~.xyz~, ~.pdb~, ~.gro~, ~.dcd~, and ~.con~ are one frame at a time |
+| ~ModuleNotFoundError: pydseams~ | The Python package is PydSEAMSlib | ~pip install 'pydseamslib==2.14.0'~ ([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]) |
+| Looking for ~yodaStruct -c lua_inputs/config.yml~ | That command is the 1.x driver | ~seams~ in this repository. Lua is ~require("dseams")~ from [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]. See [[file:migrate-1x.org][Migrate from 1.x]] |
+| ~seams: command not found~ | The binary is not on ~PATH~ | After ~pixi run build~ or ~meson compile -C bbdir~ it is ~./bbdir/seams~. ~nix build~ writes ~./result/bin/seams~. ~pixi run install~ or ~meson install~ installs it |
+| ~module 'dseams' not found~ / ~require("dseams")~ fails | Lua cannot see ~dseams.lua~ and ~dseams_core.so~ | Build [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] with meson. Set ~LUA_PATH~ to ~lua/?.lua~ and ~LUA_CPATH~ to the directory that holds ~dseams_core.so~. ~require("yoda")~ returns the same table |
 
-The two command shapes on bundled frames:
+Two commands on the bundled frames:
 
 #+begin_src bash
 seams read input/traj/ice1h.lammpstrj
