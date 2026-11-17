@@ -23,11 +23,11 @@ concurrency:
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    # The book renders every still on the CPU. Two hours is enough for
-    # that work; a stuck Cycles or Qt process should fail the job.
-    timeout-minutes: 120
     permissions:
       contents: write
+    # A still whose digest is not published is rendered on the CPU. Two
+    # hours covers a full render; a stuck Cycles or Qt process fails.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
