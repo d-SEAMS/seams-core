@@ -2,7 +2,8 @@
 # Copyright (c) d-SEAMS developers
 # Install the Linux archive the way a user would, on a machine that
 # does not have the build tree. CHECK selects one of three runs:
-#   c        compile docs/examples/quickstart.c with pkg-config
+#   c        compile docs/examples/quickstart.c with pkg-config,
+#            then again with the archive rpath and no library path
 #   rust     cargo add dseams@2.14.0, without the bundled feature
 #   fortran  dseams-fortran v2.14.0 `fpm test`
 set -euo pipefail
@@ -59,6 +60,15 @@ test -f "$prefix/licenses/readcon-core/LICENSE"
 test -f "$prefix/licenses/readcon-db/LICENSE"
 test -f "$prefix/lib/libreadcon_core.so"
 test -f "$prefix/lib/libreadcon_db.so"
+test -f "$prefix/lib/libyodaLib.so"
+test -f "$prefix/lib/libseams.so"
+test -f "$prefix/lib/libseams_lang.so"
+test -f "$prefix/include/seams.h"
+test -f "$prefix/include/seams_version.h"
+test -f "$prefix/include/seams.hpp"
+test -f "$prefix/include/seams/seams_lang.h"
+test -f "$prefix/lib/cmake/seams/seams-config.cmake"
+test -f "$prefix/lib/cmake/seams/seams-config-version.cmake"
 
 for name in seams.pc seams-core.pc seams-lang.pc readcon-core.pc readcon-db.pc; do
   pc=$prefix/lib/pkgconfig/$name
@@ -111,6 +121,20 @@ case $CHECK in
     "$compiler" "$QUICKSTART" -o "$cdir/quickstart" $(pkg-config --cflags --libs seams) -lm
     "$cdir/quickstart"
     printf '%s\n' "c quickstart ok"
+    libdir=$(pkg-config --variable=libdir seams)
+    "$compiler" "$QUICKSTART" -o "$cdir/quickstart-rpath" \
+      $(pkg-config --cflags --libs seams) -lm -Wl,-rpath,"$libdir"
+    dyn=$(readelf -d "$cdir/quickstart-rpath")
+    printf '%s\n' "$dyn"
+    case $dyn in
+      *"$libdir"*) ;;
+      *)
+        printf '%s\n' "quickstart rpath does not name $libdir" >&2
+        exit 1
+        ;;
+    esac
+    env -u LD_LIBRARY_PATH "$cdir/quickstart-rpath"
+    printf '%s\n' "c quickstart rpath ok"
     ;;
   rust)
     rdir=$(mktemp -d)

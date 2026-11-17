@@ -3,8 +3,9 @@ name: Release
 # the source archive, a Linux libseams prefix built from that archive
 # inside a manylinux_2_28 image, SHA256SUMS, and release notes. Fresh
 # containers test that archive before it is uploaded: a C quickstart
-# linked through pkg-config on Debian 12, dseams from crates.io on
-# rust:1.85, and dseams-fortran `fpm test` on Ubuntu 24.04.
+# linked through pkg-config on Debian 12, the same program on the
+# archive rpath, dseams from crates.io on rust:1.85, and
+# dseams-fortran `fpm test` on Ubuntu 24.04.
 # GITHUB_TOKEN is the only credential;
 # nothing is published to a package registry.
 on:
