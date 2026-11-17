@@ -146,7 +146,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [C](https://docs.dseams.info/stable/c.md): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.md): include/seams.hpp is the header-only C++ API.
 - [Python](https://docs.dseams.info/stable/python.md): pydseamslib provides import dseams and import pydseams.
-- [Fortran](https://docs.dseams.info/stable/fortran.md): The Fortran binding is the fpm package dseams.
+- [Fortran](https://docs.dseams.info/stable/fortran.md): The fpm package dseams is d-SEAMS/dseams-fortran.
 - [Julia](https://docs.dseams.info/stable/julia.md): Both live in d-SEAMS/Dseams.jl.
 - [R](https://docs.dseams.info/stable/r.md): The R package dseams is d-SEAMS/dseams-r.
 - [Lua and Fennel](https://docs.dseams.info/stable/lua.md): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
