@@ -2,9 +2,11 @@ name: Release
 # A v* tag that names the meson.build version gets a GitHub release with
 # the source archive, a Linux libseams prefix built from that archive
 # inside a manylinux_2_28 image, SHA256SUMS, and release notes. Fresh
-# Ubuntu 22.04, Ubuntu 24.04, and Rocky Linux 9 containers test the
-# Linux archive before it is uploaded. GITHUB_TOKEN is the only
-# credential; nothing is published to a package registry.
+# containers test that archive before it is uploaded: a C quickstart
+# linked through pkg-config on Debian 12, dseams from crates.io on
+# rust:1.85, and dseams-fortran `fpm test` on Ubuntu 24.04.
+# GITHUB_TOKEN is the only credential;
+# nothing is published to a package registry.
 on:
   push:
     tags: ["v*"]
@@ -93,20 +95,37 @@ jobs:
         with:
           name: release
           path: dist
-      - name: Install and run the archive on fresh distributions
+      - name: Install and run the archive in fresh containers
         env:
           VERSION: ${{ needs.build.outputs.version }}
         run: |
           set -euo pipefail
-          for image in ubuntu:22.04 ubuntu:24.04 rockylinux:9; do
-            printf 'testing %s\n' "$image"
-            docker run --rm -i \
-              -e VERSION \
-              -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
-              -w "$GITHUB_WORKSPACE" \
-              "$image" \
-              bash -s < scripts/test_libseams_tarball.sh
-          done
+          printf '%s\n' "testing debian:12 C quickstart"
+          docker run --rm -i \
+            -e VERSION \
+            -e CHECK=c \
+            -e QUICKSTART="$GITHUB_WORKSPACE/quickstart.c" \
+            -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -v "$GITHUB_WORKSPACE/docs/examples/quickstart.c:$GITHUB_WORKSPACE/quickstart.c:ro" \
+            -w "$GITHUB_WORKSPACE" \
+            debian:12 \
+            bash -s < scripts/test_libseams_tarball.sh
+          printf '%s\n' "testing rust:1.85 dseams"
+          docker run --rm -i \
+            -e VERSION \
+            -e CHECK=rust \
+            -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -w "$GITHUB_WORKSPACE" \
+            rust:1.85 \
+            bash -s < scripts/test_libseams_tarball.sh
+          printf '%s\n' "testing ubuntu:24.04 dseams-fortran"
+          docker run --rm -i \
+            -e VERSION \
+            -e CHECK=fortran \
+            -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -w "$GITHUB_WORKSPACE" \
+            ubuntu:24.04 \
+            bash -s < scripts/test_libseams_tarball.sh
 
   publish:
     needs: [build, test-tarball]

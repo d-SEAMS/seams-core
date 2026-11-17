@@ -1,26 +1,38 @@
 #!/bin/bash
 # Copyright (c) d-SEAMS developers
 # Install the Linux archive the way a user would, on a machine that
-# does not have the build tree: check the checksum, run the command,
-# compile a C program with pkg-config, and build the published dseams
-# crate against that pkg-config file.
+# does not have the build tree. CHECK selects one of three runs:
+#   c        compile docs/examples/quickstart.c with pkg-config
+#   rust     cargo add dseams@2.14.0, without the bundled feature
+#   fortran  dseams-fortran v2.14.0 `fpm test`
 set -euo pipefail
 
-if [[ -z ${VERSION:-} ]]; then
-  printf '%s\n' "VERSION is required" >&2
+if [[ -z ${VERSION:-} || -z ${CHECK:-} ]]; then
+  printf '%s\n' "VERSION and CHECK are required" >&2
   exit 1
 fi
 
-if command -v apt-get; then
-  export DEBIAN_FRONTEND=noninteractive
-  apt-get update
-  apt-get install -y --no-install-recommends build-essential pkg-config curl ca-certificates
-elif command -v dnf; then
-  dnf install -y gcc pkgconf-pkg-config
-else
-  printf '%s\n' "no supported package manager" >&2
-  exit 1
-fi
+case $CHECK in
+  c|rust)
+    if command -v apt-get; then
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update
+      apt-get install -y --no-install-recommends build-essential pkg-config ca-certificates
+    else
+      printf '%s\n' "no supported package manager" >&2
+      exit 1
+    fi
+    ;;
+  fortran)
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y --no-install-recommends gfortran pkg-config ca-certificates curl git
+    ;;
+  *)
+    printf '%s\n' "unknown CHECK=$CHECK" >&2
+    exit 1
+    ;;
+esac
 
 compiler=$(command -v cc || command -v gcc)
 printf '%s\n' "compiler: $compiler"
@@ -43,20 +55,20 @@ test -f "$prefix/licenses/argum/LICENSE"
 test -f "$prefix/licenses/backward-cpp/LICENSE"
 test -f "$prefix/licenses/gcc-runtime/COPYING3"
 test -f "$prefix/licenses/gcc-runtime/COPYING.RUNTIME"
+test -f "$prefix/licenses/readcon-core/LICENSE"
+test -f "$prefix/licenses/readcon-db/LICENSE"
+test -f "$prefix/lib/libreadcon_core.so"
+test -f "$prefix/lib/libreadcon_db.so"
 
-count=0
-for pc in "$prefix"/lib/pkgconfig/*.pc; do
-  count=$((count + 1))
+for name in seams.pc seams-core.pc seams-lang.pc readcon-core.pc readcon-db.pc; do
+  pc=$prefix/lib/pkgconfig/$name
+  test -f "$pc"
   line=$(grep '^prefix=' "$pc")
   if [[ $line != 'prefix=${pcfiledir}/../..' ]]; then
-    printf '%s\n' "$(basename "$pc") prefix is $line" >&2
+    printf '%s\n' "$name prefix is $line" >&2
     exit 1
   fi
 done
-if [[ $count -ne 3 ]]; then
-  printf '%s\n' "expected 3 pkg-config files, found $count" >&2
-  exit 1
-fi
 
 moved=$(mktemp -d)
 mv "$prefix" "$moved/"
@@ -74,6 +86,7 @@ unset SEAMS_LIB_DIR
 unset SEAMS_SOURCE_DIR
 unset CARGO_FEATURE_BUNDLED
 export PKG_CONFIG_PATH=$prefix/lib/pkgconfig
+export LD_LIBRARY_PATH=$prefix/lib
 pkg-config --exists --print-errors seams
 if [[ $(pkg-config --modversion seams) != "$VERSION" ]]; then
   printf '%s\n' "pkg-config modversion is not $VERSION" >&2
@@ -87,47 +100,31 @@ if [[ $resolved != "$(realpath -- "$prefix/lib")" ]]; then
   exit 1
 fi
 
-cdir=$(mktemp -d)
-cat > "$cdir/consumer.c" <<'EOF'
-#include "seams.h"
-#include <stdio.h>
-int main(void) {
-  seams_system *sys = seams_system_create();
-  if (sys == 0) {
-    return 1;
-  }
-  seams_system_destroy(sys);
-  printf("c-consumer ok\n");
-  return 0;
-}
-EOF
-"$compiler" "$cdir/consumer.c" -o "$cdir/consumer" $(pkg-config --cflags --libs seams)
-c_out=$(env LD_LIBRARY_PATH="$prefix/lib" "$cdir/consumer")
-printf '%s\n' "$c_out"
-if [[ $c_out != "c-consumer ok" ]]; then
-  printf '%s\n' "C consumer failed" >&2
-  exit 1
-fi
-
-export CARGO_HOME=$stage/cargo
-export RUSTUP_HOME=$stage/rustup
-curl --proto '=https' --tlsv1.2 -fsS https://sh.rustup.rs -o "$stage/rustup-init"
-sh "$stage/rustup-init" -y --default-toolchain 1.85.0 --profile minimal
-# rustup writes this file.
-. "$CARGO_HOME/env"
-
-rdir=$(mktemp -d)
-mkdir -p "$rdir/src"
-cat > "$rdir/Cargo.toml" <<'EOF'
-[package]
-name = "readme_example"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-dseams = "=2.14.0"
-EOF
-cat > "$rdir/src/main.rs" <<'EOF'
+case $CHECK in
+  c)
+    if [[ -z ${QUICKSTART:-} || ! -f $QUICKSTART ]]; then
+      printf '%s\n' "QUICKSTART must name quickstart.c" >&2
+      exit 1
+    fi
+    cdir=$(mktemp -d)
+    # sqrt comes from libm. The seams include and link flags come from pkg-config.
+    "$compiler" "$QUICKSTART" -o "$cdir/quickstart" $(pkg-config --cflags --libs seams) -lm
+    "$cdir/quickstart"
+    printf '%s\n' "c quickstart ok"
+    ;;
+  rust)
+    rdir=$(mktemp -d)
+    (
+      cd "$rdir"
+      cargo new readme_example
+      cd readme_example
+      cargo add dseams@2.14.0
+      if grep -q bundled Cargo.toml; then
+        printf '%s\n' "dseams was added with the bundled feature" >&2
+        exit 1
+      fi
+    )
+    cat > "$rdir/readme_example/src/main.rs" <<'EOF'
 fn main() -> Result<(), seams::Error> {
     let a = 2.75 * 4.0 / 3.0_f64.sqrt();
     let sites = [
@@ -145,19 +142,36 @@ fn main() -> Result<(), seams::Error> {
     Ok(())
 }
 EOF
-(
-  cd "$rdir"
-  cargo build
-)
-example=$rdir/target/debug/readme_example
-ldd_out=$(env LD_LIBRARY_PATH="$prefix/lib" ldd "$example")
-printf '%s\n' "$ldd_out"
-case $ldd_out in
-  *"$prefix/lib/libseams.so"*) ;;
-  *)
-    printf '%s\n' "the example is not linked to the archive libseams" >&2
-    exit 1
+    (
+      cd "$rdir/readme_example"
+      cargo build
+    )
+    example=$rdir/readme_example/target/debug/readme_example
+    ldd_out=$(ldd "$example")
+    printf '%s\n' "$ldd_out"
+    case $ldd_out in
+      *"$prefix/lib/libseams.so"*) ;;
+      *)
+        printf '%s\n' "the example is not linked to the archive libseams" >&2
+        exit 1
+        ;;
+    esac
+    "$example"
+    printf '%s\n' "dseams readme example ok"
+    ;;
+  fortran)
+    curl -fsSL -o "$stage/fpm.F90" \
+      https://github.com/fortran-lang/fpm/releases/download/current/fpm.F90
+    gfortran -o "$stage/fpm" "$stage/fpm.F90"
+    git clone --depth 1 --branch v2.14.0 \
+      https://github.com/d-SEAMS/dseams-fortran.git \
+      "$stage/dseams-fortran"
+    export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
+    export OMP_NUM_THREADS=1
+    (
+      cd "$stage/dseams-fortran"
+      "$stage/fpm" test
+    )
+    printf '%s\n' "dseams-fortran fpm test ok"
     ;;
 esac
-env LD_LIBRARY_PATH="$prefix/lib" "$example"
-printf '%s\n' "dseams readme example ok"
