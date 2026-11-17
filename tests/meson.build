@@ -157,15 +157,28 @@ foreach name, src : test_sources
     _timeout = 600
   elif name == 'science_front'
     _timeout = 300
+  elif name == 'thread_invariance' and get_option('b_coverage')
+    # The instrumented 32768-molecule kernels run at widths 1, 2, 4 and 8
+    # on one core so their atomic arc counters stay in one cache.
+    _timeout = 600
   endif
-  test(name,
-    executable('test_' + name, src,
-      dependencies: [yds_dep, catch2_dep],
-      link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
-      cpp_args: _args,
-      link_args: _test_link_args,
-      include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
-      build_rpath: _test_rpath),
+  _case_exe = executable('test_' + name, src,
+    dependencies: [yds_dep, catch2_dep],
+    link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
+    build_rpath: _test_rpath)
+  _case_command = _case_exe
+  _case_args = []
+  if name == 'thread_invariance' and get_option('b_coverage')
+    # Keep the shared coverage environment and add the affinity controls
+    # for this process. The test still creates teams of 1, 2, 4 and 8.
+    _case_command = find_program('env')
+    _case_args = ['OMP_PLACES={0}', 'OMP_PROC_BIND=true', _case_exe]
+  endif
+  test(name, _case_command,
+    args: _case_args,
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
     timeout: _timeout,
