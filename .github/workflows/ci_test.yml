@@ -52,6 +52,29 @@ jobs:
       - run: pixi run test
       - run: pixi run install
 
+  # conda's compiler activation puts -O2 in CXXFLAGS, so build-test never
+  # links an unoptimized library. clang at -O0 keeps code behind a
+  # constant-false branch, and on arm64 a reference there to an x86-only
+  # kernel is an undefined symbol. buildtype=plain takes only the
+  # environment flags, and the trailing -O0 wins.
+  unoptimized-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-default-
+      - name: Install the macOS 11.0 SDK for the conda compilers
+        run: |
+          curl -sLO https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.0.sdk.tar.xz
+          sudo tar -xf MacOSX11.0.sdk.tar.xz -C /opt
+          echo "SDKROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
+          echo "CONDA_BUILD_SYSROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
+      - name: Build the libraries at -O0
+        run: |
+          pixi run bash -c 'CFLAGS="$CFLAGS -O0" CXXFLAGS="$CXXFLAGS -O0" meson setup bbdir-o0 -Dbuildtype=plain -Dwith_tests=false && meson compile -C bbdir-o0'
+
   # Plain char is unsigned on aarch64, ppc64le and s390x. The x86_64
   # runner gets the same semantics from -funsigned-char, so a char used
   # as a signed value fails here without an ARM runner. The heavy suite
