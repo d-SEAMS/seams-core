@@ -1,3 +1,42 @@
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+{% if not sourcename %}
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://docs.dseams.info/{{ pagename|e }}.html">
+<meta property="og:title" content="{{ title|striptags|e }} — d-SEAMS">
+<meta name="twitter:card" content="summary">
+{% endif %}
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="twitter:title" content="{{ title|striptags|e }} — d-SEAMS">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://docs.dseams.info/#application",
+      "name": "d-SEAMS",
+      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
+      "applicationCategory": "ScientificApplication",
+      "operatingSystem": "Linux, macOS",
+      "url": "https://docs.dseams.info/",
+      "softwareVersion": "{{ release|e }}",
+      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://github.com/d-SEAMS/seams-core#source",
+      "name": "seams-core",
+      "codeRepository": "https://github.com/d-SEAMS/seams-core",
+      "programmingLanguage": ["C++", "C", "Python"],
+      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    }
+  ]
+}
+</script>

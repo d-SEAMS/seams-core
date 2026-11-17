@@ -619,6 +619,13 @@ intersphinx_mapping = {
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
+html_title = "d-SEAMS molecular simulation analysis documentation"
+html_meta = {
+    "description": (
+        "Documentation for d-SEAMS, a molecular simulation trajectory analysis "
+        "engine for ice, clathrates, rings, cages, and structural order."
+    ),
+}
 # doi.org is the citation link. These publishers answer the redirect with
 # 403 to the link checker, so a redirect onto them is ignored.
 linkcheck_ignore = [

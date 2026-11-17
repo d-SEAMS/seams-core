@@ -238,7 +238,7 @@ cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-
 [feature.docs.tasks.fix-built-links]
 description = "Repair generated anchor ids the HTML checker follows"
 depends-on = ["sphinxbld", "install-doxyhtml"]
-cmd = "python3 docs/fix_built_links.py"
+cmd = "python3 docs/fix_built_links.py && python3 docs/finalize_seo.py docs/build"
 
 [feature.docs.tasks.docbld]
 depends-on = ["fix-built-links"]
