@@ -54,6 +54,17 @@ def stable(text):
         text,
         flags=re.S,
     )
+    # Older LAMMPS prints the citation banner. Current LAMMPS omits it and
+    # splits the "atoms won't move" warning across a documentation line.
+    text = re.sub(r"\n+CITE BLOCK\n+", "\n", text)
+    text = re.sub(
+        r"WARNING: No fixes with time integration, atoms won't move"
+        r"(?: \(src/verlet\.cpp:\d+\))?\n"
+        r"(?:For more information see https://docs\.lammps\.org/\S+ "
+        r"\(src/verlet\.cpp:\d+\)\n)?",
+        "WARNING: No fixes with time integration, atoms won't move\n",
+        text,
+    )
     text = re.sub(r"overhead_s \S+", "overhead_s TIME", text)
     text = re.sub(r"Loop time of \S+", "Loop time of TIME", text)
     text = re.sub(r"Performance:.*", "Performance: TIME", text)
