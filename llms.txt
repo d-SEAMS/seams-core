@@ -119,7 +119,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Release-candidate sitting](https://docs.dseams.info/explanation/performance.md): The tables are the release-candidate sitting of d-SEAMS 2.14.0.
 - [Performance](https://docs.dseams.info/explanation/performance-h2h.md): Head-to-head times for ice Ic and a TIP4P/ice liquid at 884736 molecules.
 - [Performance overview](https://docs.dseams.info/explanation/performance-overview.md): Each median is printed on one page.
-- [Performance, 4096 to 110592](https://docs.dseams.info/explanation/performance-range.md): Neighbour lists and primitive rings against freud, OVITO, mdapy, pyscal3, vesin, IRA, PTM, cycless, and every other code that has a neighbour or ring row in benchmarks/*.csv.
+- [Performance, 4096 to 110592](https://docs.dseams.info/explanation/performance-range.md): Neighbour lists and primitive rings from the committed tables other than the release-candidate sitting and the 884736-molecule head-to-head.
 - [Primitive rings and the full graph](https://docs.dseams.info/explanation/primitive-rings.md): A ring is primitive when the graph distance between every pair of its vertices equals the shorter distance along the ring.
 - [Ring-adjacent completion](https://docs.dseams.info/explanation/ring-completion.md): ring::ringAdjacentCompletion fills a single vacancy on a labeled six-ring.
 - [Rings on one thread](https://docs.dseams.info/explanation/rings-one-thread.md): primitive::ringNetwork against OVITO 3.17.2 FindRingsModifier.
