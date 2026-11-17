@@ -764,6 +764,33 @@ def _replace_project_version(app, docname, source):
     source[0] = source[0].replace("@PROJECT_VERSION@", release)
 
 
+def _canonical_sitemap(app, exception):
+    """Use the lowercase extensionless URLs served without redirects."""
+    if exception is not None:
+        return
+    import urllib.parse
+    import xml.etree.ElementTree as ET
+
+    path = os.path.join(app.outdir, "sitemap.xml")
+    if not os.path.isfile(path):
+        return
+    tree = ET.parse(path)
+    for element in tree.getroot().iter():
+        if not element.tag.endswith("loc") or not element.text:
+            continue
+        parsed = urllib.parse.urlsplit(element.text)
+        route = parsed.path
+        if route.endswith("/index.html"):
+            route = route[:-10] or "/"
+        elif route.endswith(".html"):
+            route = route[:-5]
+        route = route.lower()
+        element.text = urllib.parse.urlunsplit(
+            (parsed.scheme, parsed.netloc, route, parsed.query, parsed.fragment)
+        )
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+
+
 def _copy_caption_tracks(app, exception):
     """Publish the draft VTT files next to the HTML so <track> can load them."""
     if exception is not None:
@@ -830,5 +857,6 @@ def setup(app):
     app.connect("source-read", _replace_project_version)
     app.connect("doctree-resolved", _relative_rst_links)
     app.connect("html-page-context", _edit_org_source)
+    app.connect("build-finished", _canonical_sitemap)
     app.connect("build-finished", _copy_caption_tracks)
     app.connect("autodoc-skip-member", _skip_attributes)

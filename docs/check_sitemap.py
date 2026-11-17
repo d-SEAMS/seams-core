@@ -65,6 +65,16 @@ def locate(loc):
     return rel, None
 
 
+def canonical_path(rel):
+    """Return the public route for one file in the publish tree."""
+    route = "/" + rel.as_posix()
+    if route.endswith("/index.html"):
+        route = route[:-10] or "/"
+    elif route.endswith(".html"):
+        route = route[:-5]
+    return route.lower()
+
+
 def _urls(url_elem):
     found = []
     for child in list(url_elem):
@@ -133,19 +143,35 @@ def mapped_files(build, locs):
     problems = []
     files = []
     root = build.resolve()
+    routes = {}
+    for path in build.rglob("*.html"):
+        route = canonical_path(path.relative_to(build))
+        if route in routes:
+            problems.append(
+                "{} and {} have the same canonical route {}".format(
+                    routes[route].relative_to(build), path.relative_to(build), route
+                )
+            )
+        routes[route] = path
     for loc in locs:
         rel, err = locate(loc)
         if err:
             problems.append(err)
             continue
-        candidate = build.joinpath(*rel.parts)
+        parsed = urllib.parse.urlsplit(loc.strip())
+        route = urllib.parse.unquote(parsed.path)
+        candidate = routes.get(route)
+        if candidate is None and rel.suffix != ".html":
+            direct = build.joinpath(*rel.parts)
+            if direct.is_file():
+                candidate = direct
+        if candidate is None:
+            problems.append("{} is not a canonical build route".format(loc))
+            continue
         try:
             candidate.resolve().relative_to(root)
         except ValueError:
             problems.append("{} escapes the build tree".format(loc))
-            continue
-        if not candidate.is_file():
-            problems.append("{} does not map to {}".format(loc, rel.as_posix()))
             continue
         files.append(candidate)
     return files, problems
@@ -311,6 +337,10 @@ def workflow_problems():
         problems.append("Lychee check is missing")
     if "python3 docs/check_sitemap.py\n" not in text:
         problems.append("sitemap file check is missing from ci_docs.yml")
+    if text.count("--max-retries 5") != 2 or text.count("--retry-wait-time 10") != 2:
+        problems.append("link checks do not retry transient failures five times")
+    if "keep_files: false" not in text or "force_orphan: true" not in text:
+        problems.append("Pages deploy does not replace the old publish tree")
     return problems
 
 
@@ -357,8 +387,6 @@ def mapper_cases():
         root = Path(tmp)
         build = _case_tree(root)
         good = [
-            "https://docs.dseams.info/index.html",
-            "https://docs.dseams.info/contributing/index.html",
             "https://docs.dseams.info/",
             "https://docs.dseams.info/contributing/",
         ]
@@ -374,6 +402,8 @@ def mapper_cases():
         (build / "CNAME").unlink()
 
         bad_cases = [
+            (["https://docs.dseams.info/index.html"], "canonical"),
+            (["https://docs.dseams.info/contributing/index.html"], "canonical"),
             (["https://docs.dseams.info/en/index.html"], "en/index.html"),
             (["https://example.com/index.html"], "outside"),
             (["https://docs.dseams.info/missing.html"], "missing.html"),
@@ -392,7 +422,7 @@ def mapper_cases():
             problems.append("empty sitemap was accepted")
 
         pages = root / "pages.xml"
-        _write_urlset(pages, ["https://docs.dseams.info/index.html"])
+        _write_urlset(pages, ["https://docs.dseams.info/"])
         # The index entry names a file in the build, so copy it there.
         (build / "pages.xml").write_text(pages.read_text(encoding="utf-8"), encoding="utf-8")
         index = (

@@ -89,7 +89,8 @@ jobs:
             --index-files index.html
             --root-dir ${{ github.workspace }}/docs/build
             --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
-            --max-retries 2
+            --max-retries 5
+            --retry-wait-time 10
             --timeout 30
             --max-concurrency 4
             --extensions html
@@ -108,6 +109,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build
+          keep_files: false
+          force_orphan: true
 
   verify:
     runs-on: ubuntu-latest
@@ -185,8 +188,8 @@ jobs:
           fail: true
           args: >-
             --no-progress
-            --max-retries 3
-            --retry-wait-time 5
+            --max-retries 5
+            --retry-wait-time 10
             --timeout 30
             --max-concurrency 4
             --accept 200,202,206,429
