@@ -68,6 +68,7 @@ def complete_page(path: Path, root: Path) -> str:
     og_values = {
         "og:title": title,
         "og:description": DESCRIPTION,
+        "og:image": "https://dseams.info/images/og-card.png",
         "og:url": url,
         "og:type": "website",
     }
@@ -85,6 +86,11 @@ def complete_page(path: Path, root: Path) -> str:
     if 'name="twitter:description"' not in source:
         additions.append(
             f'<meta name="twitter:description" content="{html.escape(DESCRIPTION, quote=True)}">'
+        )
+    if 'name="twitter:image"' not in source:
+        additions.append(
+            '<meta name="twitter:image" '
+            'content="https://dseams.info/images/og-card.png">'
         )
     if 'type="application/ld+json"' not in source:
         additions.append(f'<script type="application/ld+json">{_json_ld()}</script>')
@@ -120,7 +126,14 @@ def self_test() -> None:
         page.write_text("<html><head><title>C++ API</title></head></html>", encoding="utf-8")
         finalize(root)
         source = page.read_text(encoding="utf-8")
-        required = ("canonical", "og:title", "twitter:card", "application/ld+json")
+        required = (
+            "canonical",
+            "og:title",
+            "og:image",
+            "twitter:card",
+            "twitter:image",
+            "application/ld+json",
+        )
         if not all(item in source for item in required):
             raise ValueError("self-test did not add all metadata")
         tree = ET.parse(root / "sitemap.xml")

@@ -647,8 +647,11 @@ linkcheck_ignore = [
     r"https://huggingface\.co/datasets/d-SEAMS/.*",
 ]
 html_static_path = ["_static"]
-# llms.txt at the site root: a plain-text map of the published pages.
-html_extra_path = [os.path.join(os.path.dirname(_docs), "llms.txt")]
+# Machine-readable discovery files at the site root.
+html_extra_path = [
+    os.path.join(os.path.dirname(_docs), "llms.txt"),
+    os.path.join(_docs, "robots.txt"),
+]
 html_css_files = ["custom.css"]
 html_js_files = []
 html_favicon = "_static/dSeamsLogo.ico"

@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 BASE_URL = "https://docs.dseams.info/"
-REQUIRED_OG = {"og:title", "og:description", "og:url", "og:type"}
+REQUIRED_OG = {"og:title", "og:description", "og:image", "og:url", "og:type"}
 
 
 class MetadataParser(HTMLParser):
@@ -110,6 +110,7 @@ def self_test() -> list[str]:
             """<title>Guide</title><meta name="description" content="Guide page">
 <link rel="canonical" href="https://docs.dseams.info/guide/">
 <meta property="og:title" content="Guide"><meta property="og:description" content="Guide page">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
 <meta property="og:url" content="https://docs.dseams.info/guide/">
 <meta property="og:type" content="website">""",
             encoding="utf-8",
