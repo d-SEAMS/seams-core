@@ -34,11 +34,9 @@ against. Registry publication is independent of the engine release:
 | Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
 
 A Python script keeps working after
-~pip install -U 'pydseamslib==2.14.0'~. For a source build
-reaches PyPI, ~sh scripts/install_pydseamslib.sh~ installs from source.
+~pip install -U 'pydseamslib==2.14.0'~.
 The per-language upgrade notes (new calls, renamed options, the ~SEAMS_LANG_LIB~
-and ~SEAMS_LIB_DIR~ variables) are in each repository's changelog. Paths
-under ~bindings/~ other than =bindings/cxx= no longer exist in the supplied examples.
+and ~SEAMS_LIB_DIR~ variables) are in each binding's changelog.
 
 * Engines
 

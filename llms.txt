@@ -40,15 +40,14 @@ Each link below is a page of the published manual on https://docs.dseams.info.
 - [Brine freezing front](https://docs.dseams.info/science/brine.html): The d-SEAMS/brine-front-230K dataset provides the initial and final frames for a 20-pair loading.
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.html): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
 - [Science figures](https://docs.dseams.info/science/gallery.html): These four molecular views accompany the science tutorials.
-- [Language tutorials](https://docs.dseams.info/fronts/index.html)
 - [C tutorial](https://docs.dseams.info/fronts/c.html): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): A program that classifies one frame links libseams and calls seams_system_create, seams_system_set_frame, and seams_chill_plus.
 - [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
-- [Julia](https://docs.dseams.info/fronts/julia.html): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
+- [Julia](https://docs.dseams.info/fronts/julia.html): The Julia binding is the Julia package Dseams.
 - [Lua and Fennel](https://docs.dseams.info/fronts/lua.html): The Lua and Fennel binding provides require("dseams").
-- [Python](https://docs.dseams.info/fronts/python.html)
+- [Python](https://docs.dseams.info/fronts/python.html): Install the pydseamslib distribution and import it as dseams.
 - [R](https://docs.dseams.info/fronts/r.html): The R binding is the R package dseams.
-- [Rust](https://docs.dseams.info/fronts/rust.html): The Rust binding is the crates dseams-sys and dseams.
+- [Rust](https://docs.dseams.info/fronts/rust.html): The Rust binding provides the crates dseams-sys and dseams.
 - [Engines tutorial](https://docs.dseams.info/fronts/engines.html): LAMMPS run_hook takes the coordinates LAMMPS already stores in angstroms and calls seams_chill_plus.
 - [GROMACS tutorial](https://docs.dseams.info/fronts/gromacs.html): gmx-seams is the trajectory-analysis tool.
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.html): Eight cubic-ice atoms, one observation:
@@ -61,7 +60,7 @@ Each link below is a page of the published manual on https://docs.dseams.info.
 - [Tasks](https://docs.dseams.info/howto/index.html): A how-to solves a goal you already have.
 - [Upgrade from 2.13 to 2.14](https://docs.dseams.info/howto/upgrade-2.14.html): These notes describe the changes from d-SEAMS 2.13 to 2.14.
 - [Migrate from d-SEAMS 1.x](https://docs.dseams.info/howto/migrate-1x.html): 1.x was a Lua script plus yodaStruct -c lua_inputs/config.yml.
-- [Use a language binding](https://docs.dseams.info/howto/bindings.html): This repository builds the engine, the C API libseams (include/seams.h), the C ABI libseams_lang (bindings/cxx/seams_lang.h) and the seams command.
+- [Use a language binding](https://docs.dseams.info/howto/bindings.html): d-SEAMS provides the seams command, C and C++ APIs, and bindings for Python, Lua and Fennel, R, Julia, Rust, and Fortran.
 - [Benchmarks](https://docs.dseams.info/howto/benchmarks.html): Timings belong on the docs site of the commit that produced them.
 - [Cutoff neighbour lists](https://docs.dseams.info/howto/neighbour-lists.html): Build the cutoff list, choose the thread count, and compare it with vesin, freud, matscipy, mdapy, and OVITO.
 - [OpenMP target offload](https://docs.dseams.info/howto/openmp-offload.html): Build the Steinhardt kernel and the TUM ice score for an NVIDIA GPU.
@@ -99,15 +98,14 @@ Each link below is a page of the published manual on https://docs.dseams.info.
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
 - [d-SEAMS 2.14 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes describe the user-visible changes since d-SEAMS 2.13.0.
-- [Stable API](https://docs.dseams.info/stable/index.html)
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
-- [Python](https://docs.dseams.info/stable/python.html)
+- [Python](https://docs.dseams.info/stable/python.html): The Python binding is the pydseamslib distribution.
 - [Fortran](https://docs.dseams.info/stable/fortran.html): The Fortran binding is the fpm package dseams.
-- [Julia](https://docs.dseams.info/stable/julia.html): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
+- [Julia](https://docs.dseams.info/stable/julia.html): The Julia binding is the Julia package Dseams.
 - [R](https://docs.dseams.info/stable/r.html): The R binding is the R package dseams.
 - [Lua and Fennel](https://docs.dseams.info/stable/lua.html): The Lua and Fennel binding provides require("dseams").
-- [Rust](https://docs.dseams.info/stable/rust.html): The Rust binding is the crates dseams-sys and dseams.
+- [Rust](https://docs.dseams.info/stable/rust.html): The Rust binding provides the crates dseams-sys and dseams.
 - [Command line](https://docs.dseams.info/stable/cli.html): seams reads a trajectory and prints one result.
 - [Science front](https://docs.dseams.info/stable/science.html): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
 - [C API](https://docs.dseams.info/capi/index.html): Every SEAMS_API function in include/seams.h.

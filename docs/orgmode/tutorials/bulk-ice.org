@@ -138,9 +138,6 @@ provides ~import pydseams~ (the Frame API) and ~import dseams~:
 pip install 'pydseamslib==2.14.0'
 #+end_src
 
-If that release is not visible on PyPI yet, run
-~sh scripts/install_pydseamslib.sh~ from this checkout instead.
-
 #+begin_src python
 import pydseams as ds
 

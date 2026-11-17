@@ -1,12 +1,11 @@
 # Fortran
 
-The Fortran binding is the fpm package `dseams`. It lives in its own repository,
-[d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+The Fortran binding is the fpm package `dseams`.
 
 ```toml
 [dependencies]
 dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }
 ```
+
+Continue with the [Fortran binding documentation](https://fortran.dseams.info/)
+or watch the [Fortran walkthrough](https://odysee.com/dseams-fortran:e15a82c2f40ff1fdf10c89ff6c9f78b6b3fd583b).

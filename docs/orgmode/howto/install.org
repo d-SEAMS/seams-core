@@ -179,9 +179,7 @@ the LAMMPS compute and the PLUMED module.
 
 Each binding is its own repository. These are the routes available now:
 
-- Python: ~pip install 'pydseamslib==2.14.0'~ or
-  ~sh scripts/install_pydseamslib.sh~ from
-  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+- Python: ~pip install 'pydseamslib==2.14.0'~.
 - Lua and Fennel: ~luarocks install dseams 2.14.0-1~, or install a
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] source checkout.
 - R: ~install.packages("dseams")~, or install a
