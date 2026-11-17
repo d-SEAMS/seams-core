@@ -14,6 +14,17 @@ export LD_LIBRARY_PATH="$prefix/lib:$prefix/lib.AVX2_256${LD_LIBRARY_PATH:+:$LD_
 # headers of the same release.
 scratch=${RUNNER_TEMP:-$(mktemp -d)}
 lammps_src=$(sh scripts/fetch_lammps_headers.sh "$scratch/lammps-src")
+# docs_render_molecules executes from the default environment and needs a
+# Python that imports bpy. Resolve it from the cycles environment explicitly.
+pixi install -e cycles
+cycles_python=$(
+  pixi run -e cycles python - <<'PY'
+import sys
+import bpy
+print(sys.executable)
+PY
+)
+export MOLECULES_BPY="$cycles_python"
 
 meson setup build --buildtype=release \
   -Dwith_tests=true -Dwith_cli=true \
