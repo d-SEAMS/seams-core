@@ -32,7 +32,10 @@ PROCESS_PATTERNS = (
     ("base versus tip", re.compile(r"\bBase [0-9a-f]{7,}\s+vs\b", re.I)),
     ("molecule rendering command", re.compile(r"\brender_molecules\.py\b|--out\s+docs/", re.I)),
     ("missing-player process", re.compile(r"\brenders? no player\b", re.I)),
-    ("documentation test command", re.compile(r"\bmeson test\b|\bdocs_[a-z0-9_]+\b", re.I)),
+    ("documentation test command", re.compile(
+        r"\bmeson test\b[^\n]*\bdocs_[a-z0-9_]+\b|\bdocs_[a-z0-9_]+\b",
+        re.I,
+    )),
     ("continuous-integration process", re.compile(
         r"\bCI (?:executes|runs|mode)\b|\bin CI\b|\bcontinuous integration\b",
         re.I,
@@ -188,6 +191,17 @@ def live_versions(manager: str, package: str) -> set[str]:
         if data and data.get("Version"):
             versions.add(data["Version"])
         return versions
+    if manager == "fpm":
+        data = fetch_json(
+            "https://raw.githubusercontent.com/fortran-lang/"
+            "fpm-registry/master/index.json"
+        )
+        records = data.get("packages", {}).get(package.lower(), {})
+        versions = {key for key in records if key != "latest"}
+        latest = records.get("latest", {})
+        if latest.get("version"):
+            versions.add(latest["version"])
+        return versions
     raise RegistryError(f"unsupported package manager: {manager}")
 
 
@@ -243,6 +257,14 @@ def claims(line: str):
     for match in re.finditer(r"\binstall\.packages\(\s*[\"']([^\"']+)[\"']", plain):
         yield "r", match.group(1), "*"
 
+    for match in re.finditer(
+        r"\bfpm\s+(?:install|package)\s+[`'\"]?([A-Za-z0-9_.-]+)"
+        r"(?:@([A-Za-z0-9_.+-]+))?",
+        plain,
+        re.IGNORECASE,
+    ):
+        yield "fpm", match.group(1).rstrip(".,;:"), (match.group(2) or "*").rstrip(".,;:")
+
 
 class VisibleHTML(html.parser.HTMLParser):
     def __init__(self):
@@ -274,6 +296,9 @@ def source_pages():
     llms = ROOT / "llms.txt"
     if llms.is_file():
         yield llms, "llms.txt"
+    readme = ROOT / "README.md"
+    if readme.is_file():
+        yield readme, "README.md"
 
 
 def html_pages(build):
