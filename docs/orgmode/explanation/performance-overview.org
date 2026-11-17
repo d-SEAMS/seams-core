@@ -1,37 +1,20 @@
 #+TITLE: Performance overview
 #+OPTIONS: toc:nil num:nil
 
-Four sittings sit next to each other. Every number on this page is
-from the frozen tables. A
-ratio is the threads=1 median divided by the threads=8 median. The
-script marks a row flat when that ratio is between 0.95 and 1.05.
+The tables compare one-thread and eight-thread performance. A ratio is
+the one-thread median divided by the eight-thread median. A row is flat
+when that ratio is between 0.95 and 1.05.
 A PLUMED row in the release-candidate table was measured on one
 thread because ~PLUMED_NUM_THREADS~ was unset. The 884736-molecule
 sitting sets that variable, so its PLUMED q6 row is timed at the
 width the column names.
 
-| file | what it times |
-|------+---------------|
-| ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
-| ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
-| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic and a TIP4P/ice liquid at 884736 molecules, paired with freud, mdapy, vesin, pyscal3, PLUMED, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads |
-| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic |
-| ~benchmarks/cutoff-rings.csv~ | The full cutoff ring call at 884736 molecules, linkcell against the cell list |
-
 The full tables are
 [[file:performance.org][the release-candidate sitting]],
 [[file:trace-threads.org][the thread controls]], and
 [[file:../howto/literature-reproduce.org][the literature reproduction]].
-The same operation name is not the same call across files. rc3 \(q_4\)
-is the guest's local parameter. The pool-audit file splits local and
-cutoff. The large-cell file names the call in its ~detail~ column. The
-tables keep the operation string the CSV stored.
-
-The rings row in the large-cell file is the full cutoff call. It is
-~seams_frame_rings~: the cutoff list and the ring search together.
-The rings kernel in the pool-audit file is ~ringNetwork~ alone, and
-that timer starts after the neighbour graph exists. The two numbers
-are not interchangeable.
+The rings row is the full ~seams_frame_rings~ call: the cutoff list and
+the ring search together.
 
 The large-cell ~detail~ column is the agreement check on the ice
 frame and on the TIP4P/ice liquid. q6 is compared with freud and with
@@ -44,12 +27,8 @@ and with pyscal3. OVITO coordination is the same pair sum. Both
 CHILL+ codes are compared on the cubic label. The classifier is
 compared with OVITO PTM restricted to the cubic and hexagonal diamond
 templates, where ice Ic is cubic diamond. The six-ring count is
-compared with rings-statistics-matter. PLUMED q6 in this file set
+compared with rings-statistics-matter. PLUMED q6 in these measurements set
 ~PLUMED_NUM_THREADS~. It is not the one-thread rc3 row.
-
-#+begin_export rst
-.. include:: performance-overview-tables.rst
-#+end_export
 
 * The 884736-molecule sitting
 
@@ -60,8 +39,7 @@ its own process. The rivals are freud, mdapy, vesin, pyscal3
 width, OVITO (CHILL+, q4, q6, coordination, and PTM with the default
 templates and with only the diamond templates), and
 rings-statistics-matter.
- The rings row is still the full cutoff call. The separate
-~cad887b2~ table times that call with the cell-list builder.
+The rings row is the full cutoff call.
 
 #+begin_export rst
 .. include:: sitting-large-tables.rst

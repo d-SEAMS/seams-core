@@ -7,18 +7,11 @@ trajectory released with the paper (``input/traj/nucleation_f1.lammpstrj``,
 4096 atoms, timestep 15677000). Both are labeled with published CHILL+
 at 3.5 angstrom on the cutoff graph.
 
-Layer cubicity is the cubic share of the basal layers. The period, the
-majority class of each layer, and the cubicity follow
-``scripts/science_render.py``. The figure itself is the v12 renderer
-from ``science/interface-nucleation`` at
-``f65657b9b89481e7dd6617b1987bc58b2ec0f01c``, vendored as
-``scripts/science_render.py``. Liquid is blended at 0.40, basal
-layers are numbered, and the image has no baked caption. Tachyon
-draws the raster under Xvfb. An SVG stand-in is logged and fails the
-docs job. On the slab
-the stacking axis is z, the long edge. On the nucleus it is the box
-axis whose crystal atoms have the strongest density wave in that
-period window.
+Layer cubicity is the cubic share of the basal layers. On the slab the
+stacking axis is z, the long edge. On the nucleus it is the box axis
+whose crystal atoms have the strongest density wave in that period
+window. The molecular view numbers the basal layers and shows liquid
+with reduced opacity.
 
 Python and C print the same census:
 

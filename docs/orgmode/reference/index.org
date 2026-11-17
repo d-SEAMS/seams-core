@@ -9,10 +9,10 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:cli.org][seams CLI]] | ~seams~ subcommands, flags, colors |
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
 | [[file:walk-compare.org][walk_compare]] | ~tests/walk_compare~ inputs and columns |
-| [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
+| [[file:api.org][API map]] | Language fronts and C/C++ headers |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
 | [[file:cross-language.org][One task, three languages]] | CHILL+ on the cubic mW frame |
 | [[file:glossary.org][glossary]] | Engine terms |
-| [[file:../explanation/performance.org][Sitting tables]] | Medians from ~benchmarks/rc3-sitting.csv~ |
+| [[file:../explanation/performance.org][Measured performance]] | Medians, distributions, and thread counts |
 | [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
 | [[file:release-2.14.org][2.14.1 release notes]] | API, engines, threads, and deprecations since v2.14.0 |

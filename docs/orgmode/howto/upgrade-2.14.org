@@ -1,7 +1,7 @@
 #+TITLE: Upgrade from 2.13 to 2.14
 #+OPTIONS: toc:nil num:nil
 
-These notes start from tag v2.13.0 (~7f310225~).
+These notes describe the changes from d-SEAMS 2.13 to 2.14.
 The release notes are
 [[file:../reference/release-2.14.org][2.14.1]].
 Rebuild the engine, then relink anything that should call ~libseams~.
@@ -54,10 +54,9 @@ The default for LAMMPS and GROMACS is auto.
 | PLUMED | The ~SEAMS~ collective variable scales internal nanometers to angstroms and returns a q6 derivative per nanometer. |
 
 A head-to-head that times PLUMED's own symfunc has to set
-~PLUMED_NUM_THREADS~. The rows in ~benchmarks/rc3-sitting.csv~ left
-that variable unset, so they were measured on one thread. The q6 rows
-in ~benchmarks/paper-cells/sitting-large.csv~ set it, and that time
-falls as the width grows.
+~PLUMED_NUM_THREADS~. Leaving that variable unset measures one thread.
+When it is set to the requested width, the q6 time falls as the width
+grows.
 
 * Threads
 

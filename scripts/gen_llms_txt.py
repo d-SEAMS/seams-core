@@ -44,8 +44,8 @@ SUMMARY = (
     "libseams (include/seams.h), the C ABI libseams_lang that the language "
     "bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, "
     "PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, "
-    "Julia, Rust and Fortran bindings live in their own repositories and "
-    "record the seams-core revision they build against."
+    "Julia, Rust and Fortran bindings provide the same analyses in their "
+    "respective languages."
 )
 
 BINDINGS = (

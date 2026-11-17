@@ -1,14 +1,9 @@
 #+TITLE: Head-to-head
 #+OPTIONS: toc:nil num:nil
 
-Head-to-head results that are already in the supplied examples. Each link is the
-page that records the numbers. The suite tests named here are the ones
-that recompute them.
-
-The summary table is written at build time from the CSVs under
-~docs/data/comparisons/~. Those files are copies of the benchmark
-commits named above the table. A timed row names the comparator
-version, the thread count, the repeat count and the core count.
+These head-to-head results use the supplied examples. Each timed row
+names the comparator version, thread count, repeat count, core count,
+and measured times.
 
 #+begin_export rst
 .. include:: explanation/comparisons-summary-tables.rst
@@ -34,4 +29,4 @@ literature numbers, are in the
 
 [[file:explanation/clavis-trace.org][ClavisCage TRACE]] is the cage
 census and the serial TRACE timing against d-SEAMS at one and eight
-threads. The cells are the vendored ClavisCage CSV, not a typed table.
+threads.

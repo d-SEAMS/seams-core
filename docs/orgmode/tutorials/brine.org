@@ -26,3 +26,4 @@ hexagonal 352.
 .. figure:: molecules/brine/overlay-web.png
    :width: 480px
    :alt: NaCl front. Water, sodium and chloride.
+#+end_export

@@ -133,9 +133,9 @@ is 59.557 ms at one thread and 15.924 ms at eight, against TRACE at
 do not make TRACE faster. Ice Ih is 59.631 ms and 38.656 ms against
 260.930 ms and 259.011 ms.
 
-****PLUMED.**** The rows in this section are the previous sitting.
+****PLUMED.**** The rows in this section are the first comparison.
 conda-forge plumed 2.10.2 does not build the symfunc module, so Q4 and
-Q6 are absent from that kernel. The release candidate sitting further
+Q6 are absent from that kernel. The broader comparison further
 down builds PLUMED 2.10.2 with every module, including symfunc, and
 remeasures both orders.
 
@@ -144,13 +144,13 @@ steep rational switch cut at 3.5 Å. PLUMED stores the norm of the
 averaged spherical-harmonic vector and omits :math:`\sqrt{4\pi/(2l+1)}`.
 Restoring that factor makes it the local Steinhardt parameter. On ideal
 ice every restored value is within :math:`10^{-6}` of d-SEAMS, and the
-coordination number is 4. The PLUMED rows in that sitting were measured on one thread because
+coordination number is 4. Those PLUMED rows were measured on one thread because
 ``PLUMED_NUM_THREADS`` was unset. On ice Ic of 110592 molecules the
 recorded :math:`q_4` is 57.042 ms against PLUMED 1294.172 ms and :math:`q_6`
 is 48.591 ms against 1671.743 ms. The sharp neighbour count is
 31.356 ms against 161.853 ms. The columns the driver labeled eight
 threads, near 1304 ms, 1692 ms and 163 ms, are that same one-thread
-measurement. The 884736-molecule sitting sets ``PLUMED_NUM_THREADS``,
+measurement. The 884736-molecule comparison sets ``PLUMED_NUM_THREADS``,
 so its q6 rows are not this measurement. On the dense frame and the TIP4P slab some
 neighbours sit on the cutoff, so the continuous switch is a different
 number. The largest :math:`q_4` gap on the dense frame is 0.025 and the
@@ -158,13 +158,8 @@ coordination gap is 6.8. The sharp list is the value that matches
 mdapy, pyscal3 and vesin. The dense-frame :math:`q_4` median is 2.217 ms
 against PLUMED 76.950 ms.
 
-The raw lines, including every sample, are
-``benchmarks/h2h-literature.txt``. The same run writes
-``benchmarks/h2h-literature.png`` from the medians. The image is not
-stored in git.
-
-Release candidate, one sitting
-------------------------------
+Measured comparison
+-------------------
 
 Ideal ice Ic, oxygen bond 2.75 Å, cutoff 3.5 Å. The q4 mean is
 0.50917508 and the q6 mean is 0.62853936. Six-rings are two per
@@ -182,8 +177,7 @@ the requested one thread. q4 and q6 do not widen the mask.
 ****The vesin gap.**** The two published times are the same list.
 vesin 0.6.2, full list, cutoff 3.5 Å, cell list, the copy
 included, 442368 directed pairs, 110592 molecules, cpus 0-7,
-one warm-up dropped, six calls. ``benchmarks/rc3-vesin-gap.txt``
-is the probe.
+one warm-up dropped, six calls.
 
 .. table::
 
@@ -199,8 +193,8 @@ is the probe.
 
 ``n_threads=0`` follows ``OMP_NUM_THREADS``, which is 1 here, so the
 pool stays one thread while eight cpus are allowed. That is the
-50.7 ms sitting. An explicit pool of eight threads is 20.3 ms,
-the other sitting. A half list is 19.831 ms and only 221184
+50.7 ms result. An explicit pool of eight threads is 20.3 ms.
+A half list is 19.831 ms and only 221184
 pairs, so it is not the same answer. Leaving the copy out of the
 timer is 17.667 ms on the same 442368 pairs. A Fortran layout is
 19.216 ms. The automatic algorithm is 19.399 ms. The gap is the
@@ -208,7 +202,7 @@ thread pool. It is not the cell list, the layout, or the warm-up.
 The table below uses the full list. One thread is 28.325 ms
 against 51.194 ms. Eight threads are 6.453 ms against 22.269 ms.
 
-****Numbers that this sitting does not match.**** Primitive rings at
+****Numbers that this comparison does not match.**** Primitive rings at
 110592 molecules and one thread are 86.531 ms against mdapy
 2276.747 ms. Both censuses are 221184 six-rings. The quoted
 0.12 s is not this median. The quoted 2.2 s is the mdapy median.
@@ -239,18 +233,15 @@ both find 16 of 5^{12} and 8 of 5^{12}6^{4}.
 ****Where d-SEAMS is slower.**** On no paired row. The PLUMED q4 and q6
 rows were measured on one thread because ``PLUMED_NUM_THREADS`` was
 unset, so the ``threads`` column is the width the driver requested.
-The 884736-molecule sitting sets the variable. TRACE does not change
+The 884736-molecule comparison sets the variable. TRACE does not change
 from one thread to eight.
 The sI unit-cell census is the disagreement above. The q6
 derivative, checked separately on a symmetry-broken
 eight-molecule cell, matches an independent nanometer difference
 to 3.99e-11.
 
-The table is ``benchmarks/rc3-sitting.csv``: code, version, molecules, operation, threads, cores, n, median, and the type-7 interquartile range.
-
-The non-heavy test suite was run three times on this build:
-128 passed, 2 expected failures, 1 skip, 0 failures. ``seams_input``
-and ``language_fronts`` passed on each run.
+The table reports code, version, molecules, operation, threads, cores,
+sample count, median, and the type-7 interquartile range.
 
 .. table::
 

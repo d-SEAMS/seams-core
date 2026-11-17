@@ -3,10 +3,8 @@
 d-SEAMS 2.14.0.
 
 ```bash
-meson setup build -Dwith_tests=true
-meson compile -C build test_seams_api docs_ice_example
-./build/src/test_seams_api
-./build/src/docs_ice_example
+c++ -std=c++17 core_counts.cpp -o core-counts $(pkg-config --cflags --libs seams)
+./core-counts
 ```
 
 ```{literalinclude} ../../../docs/examples/core_counts.cpp
@@ -24,5 +22,5 @@ A program that classifies one frame links `libseams` and calls
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
+Ice Ih colored by the published CHILL+ rule.
 ```

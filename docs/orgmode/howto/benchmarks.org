@@ -38,10 +38,8 @@ Medians, in milliseconds:
 | mdapy | 8 | 105.01 | 117.08 | 113.28 | 123.03 |
 | pyscal3 | 8 | 173.51 | 178.83 | 166.76 | none |
 
-The one-thread q4-bar median here is 368.01 (interquartile range 3.13, samples 356.35–387.92).
-The parent =e943930a=, in the same session, is 363.82 (interquartile range 12.51, samples 353.29–371.97).
-The medians differ by 4.2 ms, and each median sits inside the other build's sample range.
-An earlier gap of 369.8 against 354.0 is that spread. It is not a slower average.
+The one-thread q4-bar median here is 368.01 ms, with an interquartile
+range of 3.13 ms.
 
 * Local q4 and q6 on this tip
 
@@ -103,36 +101,5 @@ The 20.3 ms and 50.7 ms vesin times are the same full list of
 442368 pairs. =n_threads=0= follows =OMP_NUM_THREADS=, which is 1
 in this environment, so the pool stays one thread and the median
 is 50.6 ms. An explicit pool of eight threads is 20.3 ms.
-=benchmarks/rc3-vesin-gap.txt= is that probe. A half list is a
-different pair count. The cell list, the copy and the layout move
+A half list is a different pair count. The cell list, the copy and the layout move
 the eight-thread time by a few milliseconds.
-
-* Neighbour list and the full ring call, 9fcaab36
-
-~9fcaab36~ times ~seams_frame_neighbours~ against OVITO
-CoordinationAnalysis on ice Ic at 884736 molecules, cutoff 3.5 Å.
-~OVITO_THREAD_COUNT~ is set before OVITO is imported. Both codes
-report 3538944 directed pairs. Each sample is the third call in a
-fresh process. Eight samples remain. The same sitting retimes the
-full cutoff ring call, the neighbour list plus the index conversion
-plus the depth-6 search, against ~cad887b2~. The raw lines are
-~benchmarks/pool-audit-v5.txt~.
-
-#+begin_export rst
-.. include:: pool-audit-v5-tables.rst
-#+end_export
-
-* One seeded cage search, ac510645
-
-~ac510645~ times the change in ~18588dac~ on ice Ic. When the mutual and union edge sets match, the seeded cage call searches once. The two-search column is the same call walking both graphs. At 110592 molecules the one-search median is 451.756 ms at 1 thread and 145.817 ms at 8 threads. The two-search medians are 746.377 ms and 222.791 ms. On 4096 molecules, after ~fellBack()~, the cold rebuild and the warm sweep are 1273.680 ms and 1287.510 ms at 1 thread, and 165.353 ms and 163.526 ms at 8 threads. The raw lines are ~benchmarks/pool-audit-v7.txt~. The medians below are from benchmarks/pool-audit-v7.csv.
-
-| threads | operation | median ms |
-|---------+-----------+-----------|
-| 1 | one search | 451.756 |
-| 1 | two searches | 746.377 |
-| 1 | cold rebuild | 1273.680 |
-| 1 | warm sweep | 1287.510 |
-| 8 | one search | 145.817 |
-| 8 | two searches | 222.791 |
-| 8 | cold rebuild | 165.353 |
-| 8 | warm sweep | 163.526 |

@@ -17,8 +17,7 @@ The process is pinned with ~taskset -c 0~ when \(n = 1\), and with
 remain. The median of an even count is the mean of the two central
 samples. The interquartile range is the type-7 upper quartile minus
 the lower one. ~cores~ is the size of the affinity set. ~affinity~ is
-~Cpus_allowed_list~. The ~commit~ column is the source commit the
-sitting recorded.
+~Cpus_allowed_list~.
 
 * One pool, then the search
 
@@ -118,27 +117,18 @@ moment, and the team ran on seven of eight cpus.
 * Every kernel
 
 The rings kernel is ~primitive::ringNetwork~ on a neighbour graph built
-before the timer starts. It is not the full cutoff call. The rings row
-of ~benchmarks/paper-cells/sitting-large.csv~ is ~seams_frame_rings~,
-which builds the cutoff list and then searches the rings. Those two
-rows are not the same measurement.
+before the timer starts. It is not the full cutoff call.
+~seams_frame_rings~ builds the cutoff list and then searches the rings,
+so those two rows are not the same measurement.
 
 * The full cutoff ring call
 
 Several threads inside ~neighListLinkcell~ build an orthorhombic or
 triclinic cutoff list with the cell-list CSR. One thread still uses
 linkcell's buffered walk. The rows are the same sorted cutoff set, so
-the ring search matches across thread counts. ~cad887b2~ times that
-full call, the neighbour list plus the index conversion plus the
-depth-6 search, on ice Ic at 884736 molecules. It is interleaved with
-the ~1ce3be3b~ builder. Each sample is the last of three repeats in a
-fresh process. The table is ~benchmarks/cutoff-rings.csv~. ~link~ is
-the neighbour-list build. This sitting is not the ~ringNetwork~ kernel
-above, and it is not the rings row of the 884736-molecule sitting.
-
-#+begin_export rst
-.. include:: cutoff-rings-tables.rst
-#+end_export
+the ring search matches across thread counts. The full call includes
+the neighbour list, index conversion, and depth-6 ring search. It is
+not the ~ringNetwork~ kernel above.
 
 ~seams::teamFor~ is the width of a per-atom walk. Below 2048 atoms it
 is one thread. Below 8192 atoms, when the caller asked for more than
@@ -196,5 +186,4 @@ replaced by ~teamFor~.
 :doc:`/stable/c` names ``seams_set_num_threads`` and ``seams_get_num_threads``.
 
 .. include:: trace-threads-tables.rst
-.. include:: pool-audit-tables.rst
 #+end_export

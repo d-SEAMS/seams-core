@@ -20,9 +20,9 @@ These pages are for understanding. They are not recipes.
 | [[file:trace-assembly.org][TRACE and signature cages]] | Hydrogen-bond cages and \(V-E+F=2\) |
 | [[file:stacking-disorder.org][Stacking disorder]] | Why a ring census separates cubic ice from hexagonal ice |
 | [[file:hop-ball.org][Carried rings]] | Which rings a changed bond can touch |
-| [[file:trace-threads.org][Signature thread controls]] | Team size, the OpenMP wait, and the pool-audit kernels |
-| [[file:performance.org][Release-candidate sitting]] | Tables built from ~benchmarks/rc3-sitting.csv~ |
-| [[file:performance-overview.org][Performance overview]] | rc3, the signature search, the large cell, and the pool audit |
+| [[file:trace-threads.org][Signature thread controls]] | Team size and the OpenMP wait |
+| [[file:performance.org][Measured performance]] | Timing distributions and thread counts |
+| [[file:performance-overview.org][Performance overview]] | Neighbours, symmetry, rings, cages, and carried updates |
 | [[file:performance-h2h.org][Performance]] | Neighbours, rings, q6, CHILL+, cages, PTM, and linkcell scaling |
 | [[file:binding-overhead.org][Binding overhead]] | Language wrappers against the C API on ice Ih |
 | [[file:performance-range.org][Performance, 4096 to 110592]] | Neighbour and ring rows, with the stored interval, n, and DNF |

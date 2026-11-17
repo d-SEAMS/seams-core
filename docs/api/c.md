@@ -5293,5 +5293,5 @@ The program those lines come from:
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug c` writes the 2400 by 1800 PNG.
+Ice Ih colored by the published CHILL+ rule.
 ```

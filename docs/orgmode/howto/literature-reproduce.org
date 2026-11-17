@@ -27,8 +27,7 @@ left ~PLUMED_NUM_THREADS~ alone. The installed header
 returns one thread when that variable is unset. That is why the
 ~threads=1~ column and the ~threads=8~ column of these rows are the
 same one-thread measurement.
-~benchmarks/paper-cells/sitting-large.csv~ sets
-~PLUMED_NUM_THREADS~ to the width of the row, and that q6 time falls
+Setting ~PLUMED_NUM_THREADS~ to the width of the row makes the q6 time fall
 from one thread to eight. These rc3 rows are not that measurement.
 
 #+begin_src cpp

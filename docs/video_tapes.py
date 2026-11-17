@@ -344,14 +344,14 @@ def check_embeds(root):
             if claim != (name, claim_id):
                 fail("{} embed.txt is not {}".format(slug, expected))
         if claim is None:
-            if "docs/videos/{}/captions.vtt".format(slug) in html:
+            if "/_static/captions/{}.vtt".format(slug) in html:
                 fail("{} has no claim and should render nothing".format(slug))
         else:
             src = "https://odysee.com/$/embed/{}:{}".format(claim[0], claim[1])
             if src not in html:
                 fail("{} iframe is missing".format(slug))
-            if "docs/videos/{}/captions.vtt".format(slug) not in html:
-                fail("{} transcript link is missing".format(slug))
+            if "/_static/captions/{}.vtt".format(slug) not in html:
+                fail("{} captions link is missing".format(slug))
     print("video embeds ok")
 
 

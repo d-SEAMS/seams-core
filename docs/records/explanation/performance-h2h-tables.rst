@@ -1,9 +1,7 @@
-.. Rendered from the d-SEAMS 2.0 benchmark records.
 
-884736 sitting, ice and liquid
-------------------------------
+Large-system ice and liquid
+---------------------------
 
-The rows are benchmarks/paper-cells/sitting-large.csv.
 
 .. csv-table::
    :header: phase, code, version, operation, molecules, threads, median ms, n
@@ -222,7 +220,6 @@ On the TIP4P/ice liquid, freud q6 differs from d-SEAMS by a maximum absolute gap
 Neighbours
 ----------
 
-The rows are benchmarks/paper-cells/sitting-large.csv.
 
 .. csv-table::
    :header: code, version, phase, operation, molecules, threads, median ms, n
@@ -243,7 +240,6 @@ The rows are benchmarks/paper-cells/sitting-large.csv.
 Rings
 -----
 
-The rows are benchmarks/rc3-sitting.csv.
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, median ms, iqr ms, n
@@ -266,7 +262,6 @@ The rows are benchmarks/rc3-sitting.csv.
 Rings against cycless
 ---------------------
 
-The rows are benchmarks/h2h-watch-v3.csv.
 
 .. csv-table::
    :header: code, operation, molecules, median ms, n
@@ -279,7 +274,6 @@ The rows are benchmarks/h2h-watch-v3.csv.
 Rings against SQQ
 -----------------
 
-The rows are benchmarks/h2h-watch-v6-sqq.csv.
 
 .. csv-table::
    :header: code, operation, molecules, threads, median ms, n
@@ -290,7 +284,6 @@ The rows are benchmarks/h2h-watch-v6-sqq.csv.
 q6
 --
 
-The rows are benchmarks/rc3-sitting.csv.
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, median ms, n
@@ -305,7 +298,6 @@ The rows are benchmarks/rc3-sitting.csv.
 q6 against OVITO
 ----------------
 
-The rows are benchmarks/paper-cells/sitting-large.csv.
 
 .. csv-table::
    :header: code, version, phase, operation, molecules, threads, median ms, n
@@ -322,7 +314,6 @@ The rows are benchmarks/paper-cells/sitting-large.csv.
 CHILL+
 ------
 
-The rows are benchmarks/rc3-sitting.csv.
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, median ms, n
@@ -343,7 +334,6 @@ The rows are benchmarks/rc3-sitting.csv.
 Cages
 -----
 
-The rows are benchmarks/rc3-sitting.csv.
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, median ms, n
@@ -364,7 +354,6 @@ The rows are benchmarks/rc3-sitting.csv.
 PTM
 ---
 
-The rows are benchmarks/rc3-sitting.csv.
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, median ms, n
@@ -381,7 +370,6 @@ The rows are benchmarks/rc3-sitting.csv.
 Linkcell scaling
 ----------------
 
-The rows are benchmarks/cutoff-rings.csv.
 
 .. csv-table::
    :header: code, operation, threads, median ms, iqr ms, n
@@ -394,5 +382,3 @@ The rows are benchmarks/cutoff-rings.csv.
    cell-list, total, 4, 252.877, 1.991, 8
    linkcell, total, 8, 228.632, 5.324, 8
    cell-list, total, 8, 173.215, 2.554, 8
-
-benchmarks/one-sitting-v3.csv is the next one-sitting file. This page adds its table when the file is in the tree.

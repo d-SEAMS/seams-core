@@ -21,8 +21,7 @@ nucleation frame 1 q6bar 0.320504
 nucleation frame 2 q6bar 0.334254
 #+end_src
 
-The mean rises at each stage. OVITO draws the last frame. The test
-exits 77 when GenIce, OpenMM, or OVITO is absent.
+The mean rises at each stage. The molecular view shows the last frame.
 
 * Full run
 
@@ -32,7 +31,6 @@ The paper trajectory is figshare
 Run ~seams steinhardt~ on every frame.
 
 #+begin_src text
-nucleation full input molecules 4096 frames 148 file-frames 148 file docs/.cache/figshare-11448702/nucleation.lammpstrj
 nucleation full paper molecules 4096 frames 148
 nucleation full frame 1 q6bar 0.26063
 nucleation full frame 148 q6bar 0.287256

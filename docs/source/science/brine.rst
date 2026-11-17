@@ -33,17 +33,9 @@ coefficient is the bulk-ice molality divided by the bulk-liquid molality.
 .. figure:: figures/brine.png
    :alt: 5 ns brine front with a color legend. Hexagonal ice is orange, the interface is yellow, liquid is a faint gray, clathrate is green, interfacial clathrate is pink, sodium is violet, and chloride is black.
 
-   The 5 ns frame. Hydrogens are omitted. The cell origin is the lowest hexagonal oxygen, and the coordinates are then wrapped, so the slab is one piece and the periodic image of the brine is not left under the ice. The frame keeps one sphere radius outside the outline, including above the top edge. Liquid oxygens are small and faint. Sodium and chloride use the oxygen scale: Na is 1.0 Å and Cl is 1.8 Å where oxygen is 1.4 Å, drawn at 0.90 for the ice oxygen. The legend writes Na⁺ and Cl⁻ on two balanced rows. Brackets with end ticks mark the brine and the ice Ih slab, with a gap at the front. A dashed line across the cell is the growth front. The axis reads ``depth from lower ice surface (nm)``. The 1 nm bar sits below the legend. CHILL+ on the whole cell is 741 hexagonal, 621 liquid, 89 interfacial, 41 interfacial clathrate, 4 clathrate and no cubic. The picture keeps those non-hexagonal colors only within 1.5 nm of the growth front: 42 interfacial, 37 interfacial clathrate and all 4 clathrate. Farther from the front they are drawn as liquid. Sodium and chloride are not recolored. The engine and the frame column agree. Sodium is violet and interfacial clathrate is pink. Those two are 31 CIEDE2000 apart. Chloride is black. ``feat/brine-science`` at ``80201fa2`` imports ``scripts/chill_palette.py``. The paper's ``render_front.py`` in the private d-SEAMS 2.0 paper repository does too.
-
-Paper Fig 18 and SI Figs 25-26 call the same renderer:
-
-.. code-block:: text
-
-   python docs/examples/render_brine.py --xyz T230_m20_r0_tend.xyz --out brine.png --width-mm 85
-
-``--width-mm`` is the atom panel at 300 ppi. ``--out`` is the png, which
-also includes the depth axis and the legend. The legend is at least 7 pt
-when that png is printed at the width passed to ``--width-mm``.
+   The 5 ns frame. Hydrogens are omitted. CHILL+ reports 741 hexagonal,
+   621 liquid, 89 interfacial, 41 interfacial clathrate, 4 clathrate,
+   and no cubic molecules. Sodium and chloride remain in the liquid.
 
 What this tells you
 -------------------

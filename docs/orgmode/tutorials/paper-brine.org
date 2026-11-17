@@ -27,8 +27,7 @@ brine frame 2 hexagonal 32 water 35 front 7.40
 The front stays at 7.40 Å. The stack remains ~HH...~, so the new
 crystal has not filled another 3.7 Å slab. The hexagonal count still
 rises from 31 to 32, and the water count falls from 38 to 35. One
-molecule has joined the ice. OVITO draws the last frame. The test
-exits 77 when GenIce, packmol, OpenMM, or OVITO is absent.
+molecule has joined the ice. The molecular view shows the last frame.
 
 * Full run
 
