@@ -91,7 +91,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.md): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
 - [Science figures](https://docs.dseams.info/science/gallery.md): The four renders used by the science tutorials.
 - [Performance and comparisons](https://docs.dseams.info/user/performance.md): What to time, how the literature codes were run, and where d-SEAMS sits next to them.
-- [Benchmarks](https://docs.dseams.info/user/howto/benchmarks.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Benchmarks](https://docs.dseams.info/user/howto/benchmarks.md): Time a 2.14.0 build and write down the run.
 - [Literature head-to-head](https://docs.dseams.info/user/howto/literature-h2h.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Reproduce the literature head-to-head](https://docs.dseams.info/user/howto/literature-reproduce.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 - [Head-to-head](https://docs.dseams.info/user/comparisons.md): Measured comparisons of d-SEAMS 2.14.0 with other structure codes.
