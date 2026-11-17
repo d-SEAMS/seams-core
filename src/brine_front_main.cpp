@@ -166,6 +166,7 @@ double medianOf(std::vector<double> values) {
 int main(int argc, char **argv) {
   try {
     const Args args = parse(argc, argv);
+    const int totalFrames = sinp::nLammpsFrames(args.path);
     site::FrontOptions options;
     options.nBins = args.bins;
     options.shellCutoff = args.cutoff;
@@ -181,7 +182,8 @@ int main(int argc, char **argv) {
     int used = 0;
     Cloud timedCloud;
     bool haveTimed = false;
-    for (int frame = 1; args.maxFrames <= 0 || used < args.maxFrames; ++frame) {
+    for (int frame = 1; frame <= totalFrames && (args.maxFrames <= 0 || used < args.maxFrames);
+         ++frame) {
       Cloud cloud;
       cloud = sinp::readLammpsTrj(args.path, frame, cloud);
       if (cloud.nop <= 0 || cloud.pts.empty()) {
