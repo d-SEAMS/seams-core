@@ -303,7 +303,8 @@ TEST_CASE("a numeric dump guesses type 2 and then type 1", "[chemfiles]") {
   REQUIRE_FALSE(sinp::forEachChemfilesFrame(
       "no/such/trajectory.lammpstrj", 1, 1, -1, "", 0, 1,
       [&](int, Cloud &) {}));
-  REQUIRE(sinp::openFrame("noextension", 1, -1).nop == 0);
+  REQUIRE_THROWS_AS(sinp::openFrame("noextension", 1, -1),
+                    std::runtime_error);
   REQUIRE(sinp::chemfilesSteps(path.string()) == 1);
   fs::remove(path);
 }
@@ -340,6 +341,8 @@ TEST_CASE("a MOL2 molecule with no counts line is an error", "[chemfiles]") {
     out << "@<TRIPOS>MOLECULE\nwater\n\n@<TRIPOS>ATOM\n";
   }
   REQUIRE(sinp::chemfilesSteps(mol2.string()) == -1);
+  REQUIRE_THROWS_AS(sinp::openFrame(mol2.string(), 1, -1),
+                    std::runtime_error);
   fs::remove(mol2);
 }
 
@@ -423,6 +426,18 @@ TEST_CASE("an mmCIF atom_site with a label_entity_id column is not refused",
                     "HETATM 1 O O HOH A . 1.000 2.000 3.000 1"));
   REQUIRE(sinp::chemfilesSteps(path.string()) == 1);
   fs::remove(path);
+}
+
+TEST_CASE("an mmCIF file without a data block is an error", "[chemfiles]") {
+  const auto mmcif = dseams_test::freshFile("dseams_chem_no_data.mmcif");
+  {
+    std::ofstream out(mmcif);
+    out << "loop_\n_atom_site.label_atom_id\nO1\n";
+  }
+  REQUIRE(sinp::chemfilesSteps(mmcif.string()) == -1);
+  REQUIRE_THROWS_AS(sinp::openFrame(mmcif.string(), 1, -1),
+                    std::runtime_error);
+  fs::remove(mmcif);
 }
 
 TEST_CASE("one open chemfiles trajectory gives the clouds of single reads",
@@ -766,8 +781,8 @@ TEST_CASE("name checks and the dump fallback take both sides", "[chemfiles]") {
     std::ofstream out(emptyGro);
     out << "";
   }
-  Cloud none = sinp::openFrame(emptyGro.string(), 1, -1);
-  REQUIRE(none.nop == 0);
+  REQUIRE_THROWS_AS(sinp::openFrame(emptyGro.string(), 1, -1),
+                    std::runtime_error);
   int walked = 0;
   sinp::forEachChemfilesFrame(
       emptyGro.string(), 1, 1, -1, "", 0, 1,

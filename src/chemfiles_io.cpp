@@ -1076,8 +1076,10 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
       }
       return cloud;
     }
-    std::cerr << "chemfiles cannot read " << filename << "\n";
-    return molSys::clearPointCloud(cloud);
+    if (chemfilesError.empty()) {
+      throw std::runtime_error("chemfiles cannot read " + filename);
+    }
+    throw std::runtime_error(chemfilesError);
   }
 #else
   (void)selection;
