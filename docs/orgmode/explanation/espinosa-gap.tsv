@@ -1,0 +1,78 @@
+face	temperature	seed	step_fs	liquid_A	slab_A	lz_A	solid0	peak	nfit	u_eq2_095	u_eq2_099	u_eq2_full	u_count	u_thick	u_crystal	u_box_over_2tau	u_box_over_tau	u_slab_over_2tau	u_one_over_2tau	u_tau70	u_tau80	u_tau90	u_q6_mislabel	q6_threshold	q6_gap	u_q6_0p358	u_q6_local_0p5	u_energy	energy_drop_kcal	u_m_per_s	u_cm_per_s	u_sigma_per_ns	printed	printed_over_10	printed_over_4	shi_same_face
+basal	240	1	10	37.771	35.765	73.536	0.5032	0.9972	35	85.842	80.363	36.670	59.966	63.273	57.477	167.127	334.253	81.285	42.921	134.895	99.396	89.930	61.303	0.380	0.0037	60.341	37.375	79.930	2217.9	5.997	599.7	25.064	490.0	49.0	122.5	88.07
+basal	240	2	10	37.768	35.767	73.536	0.5090	0.9955	39	82.105	77.078	74.056	62.294	54.401	53.743	159.860	319.721	77.755	41.053	179.849	104.912	85.837	62.015	0.380	0.0050	61.535	43.186	76.600	2138.5	6.229	622.9	26.037	490.0	49.0	122.5	88.07
+basal	260	1	10	37.831	35.705	73.536	0.5010	0.9995	60	47.887	46.135	43.484	38.806	38.348	38.903	93.083	186.166	45.196	23.944	75.662	58.201	49.131	39.855	0.380	0.0025	39.192	26.844	45.392	2204.9	3.881	388.1	16.220	266.0	26.6	66.5	39.54
+basal	260	2	10	37.880	35.656	73.536	0.4993	0.9995	66	40.298	34.752	34.126	34.060	32.827	31.354	78.229	156.459	37.932	20.149	70.148	50.506	41.626	31.900	0.400	0.0000	33.140	22.367	38.703	2233.9	3.406	340.6	14.236	266.0	26.6	66.5	39.54
+prism1	240	1	10	40.238	37.991	78.228	0.5012	1.0000	24	121.932	118.346	83.828	114.999	99.837	107.909	237.056	474.111	115.124	60.966	191.608	154.760	129.799	121.235	0.360	0.0012	121.235	66.173	111.755	2265.4	11.500	1150.0	48.067	490.0	49.0	122.5	98.29
+prism1	240	2	10	39.017	39.211	78.228	0.5100	0.9950	26	108.381	95.164	33.928	87.524	80.086	117.793	217.301	434.602	108.920	54.191	216.762	134.542	114.756	90.444	0.360	0.0038	90.444	60.054	105.714	2202.8	8.752	875.2	36.582	490.0	49.0	122.5	98.29
+prism1	260	1	10	39.156	39.073	78.228	0.5040	0.9995	47	63.154	61.181	56.747	53.168	61.883	57.652	126.175	252.350	63.021	31.577	97.889	75.299	65.259	54.709	0.360	0.0049	54.709	33.750	62.086	2233.0	5.317	531.7	22.223	266.0	26.6	66.5	62.14
+prism1	260	2	10	39.204	39.025	78.228	0.4978	0.9968	49	63.232	60.314	59.400	49.359	43.845	39.420	126.175	252.350	62.943	31.616	105.956	72.600	64.269	51.496	0.380	0.0050	49.727	32.847	62.086	2169.7	4.936	493.6	20.631	266.0	26.6	66.5	62.14
+prism2	240	1	5	46.412	43.954	90.365	0.4970	1.0000	28	132.605	128.921	128.921	95.965	102.593	121.526	258.186	516.372	125.582	66.302	273.010	165.756	140.641	96.914	0.380	0.0025	98.058	69.842	125.507	2641.2	9.596	959.6	40.111	490.0	49.0	122.5	nan
+prism2	240	1	10	46.228	44.137	90.365	0.5262	0.9975	25	149.124	144.464	132.081	126.501	161.514	149.219	291.501	583.001	142.376	74.562	271.932	200.993	159.409	131.295	0.380	0.0012	127.178	81.424	141.196	2071.2	12.650	1265.0	52.874	490.0	49.0	122.5	nan
+prism2	240	2	10	46.229	44.137	90.365	0.5210	0.9972	24	154.095	135.966	54.387	125.333	97.857	58.808	301.217	602.435	147.122	77.048	308.191	210.130	165.102	127.478	0.380	0.0013	126.483	80.870	145.750	2109.0	12.533	1253.3	52.386	490.0	49.0	122.5	nan
+prism2	240	3	10	44.843	45.522	90.365	0.5155	1.0000	27	135.888	121.198	112.108	106.135	104.937	105.728	273.834	547.668	137.946	67.944	249.129	166.086	140.135	106.982	0.380	0.0049	106.718	70.945	129.093	2164.6	10.613	1061.3	44.362	490.0	49.0	122.5	nan
+prism2	240	4	10	44.608	45.757	90.365	0.5260	1.0000	29	131.200	123.911	123.911	109.741	106.618	109.024	265.780	531.560	134.580	65.600	278.799	178.431	135.175	107.625	0.400	0.0013	109.514	72.853	125.507	2101.8	10.974	1097.4	45.869	490.0	49.0	122.5	nan
+prism2	260	1	10	46.274	44.091	90.365	0.5168	0.9965	44	75.859	73.451	62.533	62.299	59.856	58.615	148.140	296.279	72.280	37.930	140.225	94.437	78.431	62.905	0.400	0.0025	62.376	40.423	72.875	2116.3	6.230	623.0	26.039	266.0	26.6	66.5	nan
+prism2	260	2	10	46.133	44.233	90.365	0.5168	0.9972	41	98.154	69.898	38.444	69.057	74.690	76.888	192.266	384.533	94.112	49.077	219.679	128.146	100.288	67.989	0.400	0.0025	68.796	49.346	92.209	2155.3	6.906	690.6	28.864	266.0	26.6	66.5	nan
+prism2	260	3	10	46.218	44.147	90.365	0.5195	0.9985	47	81.084	66.982	58.503	61.671	60.875	39.323	158.535	317.071	77.452	40.542	165.063	107.483	82.532	61.395	0.400	0.0037	61.420	42.401	77.901	2188.8	6.167	616.7	25.777	266.0	26.6	66.5	nan
+prism2	260	4	10	46.274	44.091	90.365	0.5210	0.9995	46	84.135	81.183	75.860	63.430	28.886	22.121	164.300	328.601	80.165	42.068	144.608	100.597	85.693	66.804	0.400	0.0012	63.630	42.211	79.268	2148.4	6.343	634.3	26.512	266.0	26.6	66.5	nan
+# cores 8
+# analysis_seconds 33.19
+# speeds except the three unit columns are A/ns.
+# u_eq2 is L_liquid/(2 tau). u_count is (dN/dt) Lz/(2 N) on solid fraction 0.55 to 0.90.
+# u_box_over_tau is Lz/tau at solid fraction 0.95, the factor-of-four misreading.
+# u_one_over_2tau divides by two a second time, after taking one interface's travel.
+# u_q6_mislabel uses Lechner-Dellago q6bar, cutoff 3.5 A.
+# The threshold is the low edge of the gap where both mislabel rates are at most 0.5 percent.
+# u_q6_0p358 uses the constant 0.358 quoted for the earlier seeding work.
+# u_energy is (Lz/2)/(2 tau) with tau when the potential has fallen 95 percent of the way to its plateau.
+# 1 A/ns = 0.1 m/s = 10 cm/s. u_sigma_per_ns divides the count slope by sigma = 2.3925 A.
+# printed values are Espinosa et al. Table I. shi_same_face is Figure 3 of Shi et al., J. Chem. Phys. 162, 054714 (2025).
+# summary basal dt 10 T 240 u_liq2_95 n 2 mean 83.974 lo 82.105 hi 85.842 over_printed 0.171 over_corrected 1.714 over_printed_div4 0.685
+# summary basal dt 10 T 240 u_count n 2 mean 61.130 lo 59.966 hi 62.294 over_printed 0.125 over_corrected 1.248 over_printed_div4 0.499
+# summary basal dt 10 T 240 u_thick n 2 mean 58.837 lo 54.401 hi 63.273 over_printed 0.120 over_corrected 1.201 over_printed_div4 0.480
+# summary basal dt 10 T 240 u_q6 n 2 mean 61.659 lo 61.303 hi 62.015 over_printed 0.126 over_corrected 1.258 over_printed_div4 0.503
+# summary basal dt 10 T 240 u_q6_358 n 2 mean 60.938 lo 60.341 hi 61.535 over_printed 0.124 over_corrected 1.244 over_printed_div4 0.497
+# summary basal dt 10 T 240 u_energy n 2 mean 78.265 lo 76.600 hi 79.930 over_printed 0.160 over_corrected 1.597 over_printed_div4 0.639
+# summary basal dt 10 T 240 u_box1_95 n 2 mean 326.987 lo 319.721 hi 334.253 over_printed 0.667 over_corrected 6.673 over_printed_div4 2.669
+# summary basal dt 10 T 240 u_full n 2 mean 55.363 lo 36.670 hi 74.056 over_printed 0.113 over_corrected 1.130 over_printed_div4 0.452
+# summary basal dt 10 T 260 u_liq2_95 n 2 mean 44.093 lo 40.298 hi 47.887 over_printed 0.166 over_corrected 1.658 over_printed_div4 0.663
+# summary basal dt 10 T 260 u_count n 2 mean 36.433 lo 34.060 hi 38.806 over_printed 0.137 over_corrected 1.370 over_printed_div4 0.548
+# summary basal dt 10 T 260 u_thick n 2 mean 35.588 lo 32.827 hi 38.348 over_printed 0.134 over_corrected 1.338 over_printed_div4 0.535
+# summary basal dt 10 T 260 u_q6 n 2 mean 35.878 lo 31.900 hi 39.855 over_printed 0.135 over_corrected 1.349 over_printed_div4 0.540
+# summary basal dt 10 T 260 u_q6_358 n 2 mean 36.166 lo 33.140 hi 39.192 over_printed 0.136 over_corrected 1.360 over_printed_div4 0.544
+# summary basal dt 10 T 260 u_energy n 2 mean 42.048 lo 38.703 hi 45.392 over_printed 0.158 over_corrected 1.581 over_printed_div4 0.632
+# summary basal dt 10 T 260 u_box1_95 n 2 mean 171.313 lo 156.459 hi 186.166 over_printed 0.644 over_corrected 6.440 over_printed_div4 2.576
+# summary basal dt 10 T 260 u_full n 2 mean 38.805 lo 34.126 hi 43.484 over_printed 0.146 over_corrected 1.459 over_printed_div4 0.584
+# summary prism1 dt 10 T 240 u_liq2_95 n 2 mean 115.157 lo 108.381 hi 121.932 over_printed 0.235 over_corrected 2.350 over_printed_div4 0.940
+# summary prism1 dt 10 T 240 u_count n 2 mean 101.261 lo 87.524 hi 114.999 over_printed 0.207 over_corrected 2.067 over_printed_div4 0.827
+# summary prism1 dt 10 T 240 u_thick n 2 mean 89.961 lo 80.086 hi 99.837 over_printed 0.184 over_corrected 1.836 over_printed_div4 0.734
+# summary prism1 dt 10 T 240 u_q6 n 2 mean 105.840 lo 90.444 hi 121.235 over_printed 0.216 over_corrected 2.160 over_printed_div4 0.864
+# summary prism1 dt 10 T 240 u_q6_358 n 2 mean 105.840 lo 90.444 hi 121.235 over_printed 0.216 over_corrected 2.160 over_printed_div4 0.864
+# summary prism1 dt 10 T 240 u_energy n 2 mean 108.734 lo 105.714 hi 111.755 over_printed 0.222 over_corrected 2.219 over_printed_div4 0.888
+# summary prism1 dt 10 T 240 u_box1_95 n 2 mean 454.357 lo 434.602 hi 474.111 over_printed 0.927 over_corrected 9.273 over_printed_div4 3.709
+# summary prism1 dt 10 T 240 u_full n 2 mean 58.878 lo 33.928 hi 83.828 over_printed 0.120 over_corrected 1.202 over_printed_div4 0.481
+# summary prism1 dt 10 T 260 u_liq2_95 n 2 mean 63.193 lo 63.154 hi 63.232 over_printed 0.238 over_corrected 2.376 over_printed_div4 0.950
+# summary prism1 dt 10 T 260 u_count n 2 mean 51.263 lo 49.359 hi 53.168 over_printed 0.193 over_corrected 1.927 over_printed_div4 0.771
+# summary prism1 dt 10 T 260 u_thick n 2 mean 52.864 lo 43.845 hi 61.883 over_printed 0.199 over_corrected 1.987 over_printed_div4 0.795
+# summary prism1 dt 10 T 260 u_q6 n 2 mean 53.102 lo 51.496 hi 54.709 over_printed 0.200 over_corrected 1.996 over_printed_div4 0.799
+# summary prism1 dt 10 T 260 u_q6_358 n 2 mean 52.218 lo 49.727 hi 54.709 over_printed 0.196 over_corrected 1.963 over_printed_div4 0.785
+# summary prism1 dt 10 T 260 u_energy n 2 mean 62.086 lo 62.086 hi 62.086 over_printed 0.233 over_corrected 2.334 over_printed_div4 0.934
+# summary prism1 dt 10 T 260 u_box1_95 n 2 mean 252.350 lo 252.350 hi 252.350 over_printed 0.949 over_corrected 9.487 over_printed_div4 3.795
+# summary prism1 dt 10 T 260 u_full n 2 mean 58.073 lo 56.747 hi 59.400 over_printed 0.218 over_corrected 2.183 over_printed_div4 0.873
+# summary prism2 dt 10 T 240 u_liq2_95 n 4 mean 142.577 lo 133.544 hi 151.610 over_printed 0.291 over_corrected 2.910 over_printed_div4 1.164
+# summary prism2 dt 10 T 240 u_count n 4 mean 116.927 lo 107.938 hi 125.917 over_printed 0.239 over_corrected 2.386 over_printed_div4 0.955
+# summary prism2 dt 10 T 240 u_thick n 4 mean 117.731 lo 100.047 hi 147.369 over_printed 0.240 over_corrected 2.403 over_printed_div4 0.961
+# summary prism2 dt 10 T 240 u_q6 n 4 mean 118.345 lo 107.303 hi 129.386 over_printed 0.242 over_corrected 2.415 over_printed_div4 0.966
+# summary prism2 dt 10 T 240 u_q6_358 n 4 mean 117.473 lo 108.116 hi 126.831 over_printed 0.240 over_corrected 2.397 over_printed_div4 0.959
+# summary prism2 dt 10 T 240 u_energy n 4 mean 135.387 lo 127.300 hi 143.473 over_printed 0.276 over_corrected 2.763 over_printed_div4 1.105
+# summary prism2 dt 10 T 240 u_box1_95 n 4 mean 566.166 lo 539.614 hi 592.718 over_printed 1.155 over_corrected 11.554 over_printed_div4 4.622
+# summary prism2 dt 10 T 240 u_full n 4 mean 105.622 lo 71.768 hi 127.996 over_printed 0.216 over_corrected 2.156 over_printed_div4 0.862
+# summary prism2 dt 10 T 260 u_liq2_95 n 4 mean 84.808 lo 77.928 hi 93.887 over_printed 0.319 over_corrected 3.188 over_printed_div4 1.275
+# summary prism2 dt 10 T 260 u_count n 4 mean 64.114 lo 61.985 hi 67.367 over_printed 0.241 over_corrected 2.410 over_printed_div4 0.964
+# summary prism2 dt 10 T 260 u_thick n 4 mean 56.077 lo 36.883 hi 70.982 over_printed 0.211 over_corrected 2.108 over_printed_div4 0.843
+# summary prism2 dt 10 T 260 u_q6 n 4 mean 64.773 lo 62.150 hi 67.397 over_printed 0.244 over_corrected 2.435 over_printed_div4 0.974
+# summary prism2 dt 10 T 260 u_q6_358 n 4 mean 64.056 lo 61.898 hi 67.191 over_printed 0.241 over_corrected 2.408 over_printed_div4 0.963
+# summary prism2 dt 10 T 260 u_energy n 4 mean 80.563 lo 74.473 hi 88.632 over_printed 0.303 over_corrected 3.029 over_printed_div4 1.211
+# summary prism2 dt 10 T 260 u_box1_95 n 4 mean 331.621 lo 304.360 hi 367.667 over_printed 1.247 over_corrected 12.467 over_printed_div4 4.987
+# summary prism2 dt 10 T 260 u_full n 4 mean 58.835 lo 44.466 hi 71.521 over_printed 0.221 over_corrected 2.212 over_printed_div4 0.885

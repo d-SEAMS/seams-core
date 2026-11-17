@@ -1,0 +1,25 @@
+#!/bin/sh
+# LAMMPS is not a seams binary. libasan preloaded into it raises SIGILL
+# in the conda executable before any seams call.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+unset LD_PRELOAD
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/lmp" ]; then
+    found=$dir/lmp
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "lmp is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

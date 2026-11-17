@@ -1,6 +1,10 @@
 #+TITLE: seams CLI
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/cli.rst
+#+end_export
+
 The engine command is ~seams~. The parser is Argum (the same parser as
 eonclient). Help, errors, ice-type counts, and ~--features~ are
 colorized through Argum's ~environmentColorStatus~.
@@ -21,6 +25,22 @@ seams density-z FILE
 seams domains FILE
 #+end_src
 
+The same commands on the bundled multi-type frame. ~pairs~ and ~domains~
+need ~--site~, so the runnable lines include it:
+
+#+begin_src bash
+seams read input/traj/il_tiny.lammpstrj
+seams chill input/traj/il_tiny.lammpstrj
+seams chill-plus input/traj/il_tiny.lammpstrj
+seams cages input/traj/il_tiny.lammpstrj
+seams rdf input/traj/il_tiny.lammpstrj
+seams cn input/traj/il_tiny.lammpstrj
+seams hbonds input/traj/il_tiny.lammpstrj
+seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+seams density-z input/traj/il_tiny.lammpstrj
+seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+#+end_src
+
 A positional ~command~ and a positional ~file~ are required. Missing
 either, an unknown command, or a parse error exits 2.
 
@@ -34,9 +54,11 @@ frame has no atoms; without it, empty input retains the legacy text output.
 * Commands
 
 The ~command~ positional help string is ~read | chill | chill-plus |
-cages | fingerprint | ions | f4 | steinhardt | rdf | cn | hbonds |
+ovito-chill+ | cages | symmetry | rings | prisms | cluster |
+fingerprint | ions | f4 | steinhardt | rdf | cn | hbonds |
 pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
-~chill-plus~ (not listed in that help string).
+~chill-plus~, and ~ovito_chill_plus~ is an accepted alias of
+~ovito-chill+~ (neither alias is listed in that help string).
 
 | command | action | stdout |
 |---------+--------+--------|
@@ -44,14 +66,18 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~chill~ | CHILL labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | published CHILL+ (shell of 4, four-nearest q3, neighbour test) | same as ~chill~, plus ~--rule~ |
 | ~ovito-chill+~ | OVITO 3.17.2 CHILL+ (shell of 4, full-shell q3, no neighbour test) | same as ~chill-plus~ |
+| ~symmetry~ | space group, one shell overlay, and the ice-label tally | the shell kernel; IRA and SOFI are used only when that build linked them |
+| ~rings~ | primitive rings on the cutoff list. ~--max-ring N~ is the largest size (default 6) | ~nop N rings R~ then one ~size count~ row |
+| ~prisms~ | perfect and imperfect prisms of size 3 to 6 on the mutual four-nearest graph | ~nop N~ then ~size S perfect P imperfect I~ and a total line |
+| ~cluster~ | largest connected component of the loaded atoms | ~nop N largest L subset S percolation P~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
 | ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~; each vertex lies on at least three faces that close around it, V - E + F = 2, and rings that wind the periodic cell are left out | one line per signature, ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
 | ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |
-| ~fingerprint --emit-library LABEL~ | the frame's distinct keys as library lines | ~# method M hops H colours C~ then ~key LABEL~ rows |
+| ~fingerprint --emit-library LABEL~ | the frame's distinct keys as library lines | ~# method M hops H colors C~ then ~key LABEL~ rows |
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
 | ~ions~ | ions classed by their first water shell against the seeded cages | ~nop N ice A ions I in-ice X front Y liquid Z shell S shell-ice F~ |
 | ~f4~ | Rodger F4 on H-O...O-H pairs | ~nop N f4 MEAN n M~ |
-| ~steinhardt~ | host \(q_3\), \(\bar q_3\), \(q_{12}\), \(\bar q_{12}\) | ~nop N q3 A q3bar B q12 C q12bar D~ |
+| ~steinhardt~ | cutoff-shell Steinhardt parameters for the degrees named by ~--l~ (default ~4,6~) and their Lechner-Dellago averages. Degrees 4 and 6 use the solid-harmonic kernel. ~--l 3,4,6,12~ is the former four-degree line | ~nop N~ then ~qL A qLbar B~ for each requested degree, in the order given |
 | ~rdf~ | partial site-site \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
 | ~cn~ | site-site coordination number | ~# site-site~ then ~# types I J cutoff R cn X nI N nJ M volume V~ |
 | ~cn --ions --site~ | cage degree on ~ionCloud~ | ~cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M~ |
@@ -63,9 +89,13 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 ~chill~ / ~chill-plus~ default to ~--graph cutoff~: ~nneigh::neighListO~,
 every pair closer than ~--cutoff~. ~--graph mutual~ (alias ~knn~) calls
 ~nneigh::kNearestNeighbourList~ with ~k = 4~, mutual; there ~--cutoff~
-is only the cell-size hint (~cutoff + 1.5~). Other graphs exit 2. Then
-~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
-~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~.
+is only the cell-size hint (~cutoff + 1.5~). Other graphs exit 2.
+Published cutoff ~chill-plus~ classifies in ~chill::chillPlusPublishedCutoff~
+(one cutoff CSR and the fused \(q_3\)). Every other published call goes
+through ~chill::applyChillPlus~, which builds that same CSR from the
+neighbour rows and calls ~chill::chillPlusFromCsr~. ~ovito-chill+~ stays
+on ~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~ with open
+edges. ~chill~ calls ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~.
 ~--water-types T,U~ is the neighbour mask (OW only); ~--type~ is the
 load filter and is not that mask. Ice names are the
 ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
@@ -81,7 +111,8 @@ load filter and is not that mask. Ice names are the
 is optional. The volume is ~nneigh::dumpVolume~ (det of dump ~H~).
 ~cn~ integrates the site-site RDF to that cutoff
 (~rdf::coordinationNumber~). Help text and the ~cn~ header say
-~site-site~. There is no cage CN and no ~--ions~.
+~site-site~. ~cn --ions --site~ is the cage degree, documented in the
+next paragraph.
 
 ~cn --ions --site SPEC~ builds ~site::ionCloud~ and prints the mean
 unlike degree of type-1 (cation) vertices from
@@ -144,6 +175,7 @@ initializers (Argum does not write defaults into the help).
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
 | ~--ions~ | | ~cn~ on ~ionCloud~ cage degree (needs ~--site~) |
 | ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)~ |
+| ~--l LIST~ | ~4,6~ | ~steinhardt: comma-separated degrees. 4 and 6 use the solid-harmonic kernel. 3, 8 and 12 are computed only when named~ |
 | ~--cage-edge SPEC~ | ~2.65,3.15~ | ~cages --signature: keep a face only when every edge lies in LO,HI, in the coordinate units of the file. ~none~ leaves the cage bound to the face census (~SEAMS_CAGE_EDGE~) |
 | ~--bins N~ | ~rmax / 0.1~ or ~L / 0.1~ | ~Histogram bins (rdf: rmax/0.1; density-z: bound span / 0.1)~ |
 | ~--axis XYZ~ | ~z~ | ~Histogram axis for density-z (x, y, or z)~ |
@@ -153,9 +185,9 @@ initializers (Argum does not write defaults into the help).
 | ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc); join several with + for one line each~. Joined signatures share one ring network and one cage search |
 | ~--incomplete~ | off | ~cages --signature: also report cups and incomplete cages on the ring graph~ |
 | ~--guest-types T,U~ | | ~cages --signature: LAMMPS types of guests (methane, THF, ions) placed in the found cages by their periodic centroids~ |
-| ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage centre within R~ |
-| ~--hops N~ | ~2~ | ~fingerprint: bonds from the centre in each local key~ |
-| ~--colour-types~ | off | ~fingerprint: colour vertices by LAMMPS type, so species never match across types~ |
+| ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage center within R~ |
+| ~--hops N~ | ~2~ | ~fingerprint: bonds from the center in each local key~ |
+| ~--color-types~ | off | ~fingerprint: color vertices by LAMMPS type, so species never match across types~ |
 | ~--library FILE~ | | ~fingerprint: key library (from --emit-library) to name atoms by; several, comma separated, at different hop counts name each atom by the deepest that knows it~ |
 | ~--emit-library LABEL~ | | ~fingerprint: print the frame's distinct keys as library lines under LABEL instead of the summary~ |
 | ~--ion-types I,J~ | | ~ions: LAMMPS types read against the cage assignment~ |
@@ -215,6 +247,14 @@ seams cages FILE --graph seeded --water-types 1
 seams ions FILE --ion-types 3,4 --water-types 1
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams chill-plus input/traj/il_tiny.lammpstrj --water-types 1
+seams cages input/traj/il_tiny.lammpstrj --graph seeded --water-types 1
+seams ions input/traj/il_tiny.lammpstrj --ion-types 3,4 --water-types 1
+#+end_src
+
 * ~--pair-types~
 
 Used by ~rdf~ and ~cn~. The Argum form is ~I,J~ (one comma). A bad
@@ -249,7 +289,12 @@ lz~ for \(A_\perp\), not bound spans. The in-plane sampler remains
 
 * ~--graph~
 
-Used only by ~cages~.
+~chill~ and ~chill-plus~ take ~cutoff~ or ~mutual~.
+The default is ~cutoff~: every pair closer than ~--cutoff~.
+The stored configuration name of that default is ~seeded~, and those two commands map ~seeded~ onto the cutoff list.
+~--graph mutual~ keeps the mutual four nearest neighbours, with candidates inside ~--cutoff + 1.5~.
+
+~cages~ does not make that mapping.
 
 | value | graph |
 |-------+-------|
@@ -278,13 +323,21 @@ The numbers are in the coordinate units of the file.
 The LAMMPS dumps in this tree are angstroms, and the default covers the oxygen-oxygen contacts of the reference cells (about 2.74 to 2.81).
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.
-A file in nanometres uses ~0.265,0.315~, or ~none~ when the contact range is unknown.
+A file in nanometers uses ~0.265,0.315~, or ~none~ when the contact range is unknown.
 Use a comma, a colon, or a slash. ~2.65-3.15~ is rejected.
 
 #+begin_src bash
 seams cages FILE --graph cutoff --signature 512
 seams cages FILE --graph cutoff --signature 512 --cage-edge none
 seams cages FILE --graph cutoff --signature 512 --cage-edge 2.4,3.4
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --signature 512
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --signature 512 --cage-edge none
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --signature 512 --cage-edge 2.4,3.4
 #+end_src
 
 The same string is ~SEAMS_CAGE_EDGE~.
@@ -324,7 +377,7 @@ Analysis choice (which command) is not this table.
 ~seams~ picks a reader from the path suffix
 (~path.find_last_of('.')~):
 
-| suffix | reader | compile-time gate |
+| suffix | reader | included when |
 |--------+--------+-------------------|
 | ~xyz~ | ~sinp::readXYZ~ | always |
 | ~con~ | ~sinp::readCon~ | ~SEAMS_HAS_READCON~ |
@@ -333,7 +386,7 @@ Analysis choice (which command) is not this table.
 
 A build without chemfiles or readcon-core treats ~.pdb~ / ~.gro~ /
 ~.dcd~ / ~.con~ as LAMMPS dumps. ~seams --features~ reports those
-gates.
+readers.
 
 * Frame ranges
 
@@ -359,7 +412,7 @@ slot r of even rounds and slot R-1-r of odd ones, so a cost that steps,
 drifts or alternates along the run reaches every rank. Rank 0 prints every
 frame in order; ranks past the frame count idle. Other readers stay on rank
 0, ~--per-atom~ needs a single rank, ranks that differ in arguments,
-directory or ~SEAMS_~ settings are refused, and colour stays off unless the
+directory or ~SEAMS_~ settings are refused, and color stays off unless the
 environment forces it. Each rank runs ~--jobs~ frame workers, OpenMP threads
 inside a frame, and linkcell's rayon pool; on a launch of several ranks,
 ~OMP_NUM_THREADS~ and ~RAYON_NUM_THREADS~ default to 1 when unset. For
@@ -369,6 +422,12 @@ MPI:
 #+begin_src sh
 mpiexec -n 2 --map-by slot:PE=4 -x OMP_NUM_THREADS=4 -x RAYON_NUM_THREADS=1 \
   seams --jobs 4 --frame 1 --last 100 cages dump.lammpstrj
+#+end_src
+
+The same ~seams~ flags on the bundled multi-type frame, without ~mpiexec~:
+
+#+begin_src bash
+seams --jobs 4 --frame 1 --last 100 cages input/traj/il_tiny.lammpstrj
 #+end_src
 
 On a host without a libfabric network, Open MPI's ~ofi~ transport spends
@@ -388,8 +447,8 @@ line is ~NAME: enabled~ or ~NAME: disabled~.
 | ~OpenMP~ | ~SEAMS_HAS_OPENMP~ |
 | ~MPI~ | ~SEAMS_HAS_MPI~ |
 | ~Highway SIMD~ | ~SEAMS_HAS_HWY~ |
-| ~vesin neighbours~ | ~SEAMS_HAS_VESIN~ |
-| ~linkcell k-nearest~ | ~SEAMS_HAS_LINKCELL~ |
+| ~vesin cutoff fallback~ | ~SEAMS_HAS_VESIN~ |
+| ~linkcell pairs_within~ | ~SEAMS_HAS_LINKCELL~ |
 | ~chemfiles~ | ~SEAMS_HAS_CHEMFILES~ |
 | ~readcon-core~ | ~SEAMS_HAS_READCON~ |
 | ~IRA/SOFI~ | ~SEAMS_HAS_IRA~ |
@@ -449,6 +508,22 @@ seams pairs dump.lammpstrj --site '1=cationHead,2=anion'
 seams hbonds dump.lammpstrj --type 2 --htype 1
 seams hbonds dump.lammpstrj --donors
 seams chill dump.lammpstrj --family ionicLiquid
+#+end_src
+
+The ~dump.lammpstrj~ lines on the bundled multi-type frame:
+
+#+begin_src bash
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff
+seams cages input/traj/il_tiny.lammpstrj --graph knn
+seams cages input/traj/il_tiny.lammpstrj --graph knn-union
+seams chill-plus input/traj/il_tiny.lammpstrj --frame 1 --last 50 --jobs 8
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 10 --bins 100
+seams cn input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 4.5
+seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion' --cutoff 6.0
+seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+seams hbonds input/traj/il_tiny.lammpstrj --type 2 --htype 1
+seams hbonds input/traj/il_tiny.lammpstrj --donors
+seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid   # exits 2
 #+end_src
 
 Lua and Python are not this binary. See

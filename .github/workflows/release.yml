@@ -1,29 +1,117 @@
 name: Release
+# A v* tag that names the meson.build version gets a GitHub release with
+# the source archive, a Linux libseams prefix built from that archive by
+# the conda recipe's script, SHA256SUMS, and the tag's CHANGELOG.md
+# section as notes. GITHUB_TOKEN is the only credential; nothing is
+# published to a package registry.
 on:
   push:
     tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  release:
+  build:
+    if: github.repository == 'd-SEAMS/seams-core'
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Tag names the release version
+        id: version
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          python3 scripts/check_release_version.py --tag "$TAG_NAME"
+          echo "version=$(python3 scripts/check_release_version.py --print)" >> "$GITHUB_OUTPUT"
+      - name: Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ ninja-build pkg-config libeigen3-dev
+          pipx install meson
+      - name: Source archive
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir dist
+          git archive --format=tar --prefix="seams-core-${VERSION}/" HEAD | gzip -9n > "dist/seams-core-${VERSION}.tar.gz"
+      - name: Build libseams from the archive with the conda recipe script
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir "$RUNNER_TEMP/src"
+          tar -C "$RUNNER_TEMP/src" -xzf "dist/seams-core-${VERSION}.tar.gz"
+          cd "$RUNNER_TEMP/src/seams-core-${VERSION}"
+          PREFIX="$RUNNER_TEMP/libseams-${VERSION}" CPU_COUNT="$(nproc)" bash recipe/build-libseams.sh
+      # The recipe's tests, run on the plain install. The loader path stays
+      # unset: the programs and libraries find each other by runpath.
+      - name: Test the installed prefix
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          prefix="$RUNNER_TEMP/libseams-${VERSION}"
+          for f in lib/libseams.so lib/libseams_lang.so lib/libyodaLib.so include/seams.h include/seams_version.h include/seams/seams_lang.h bin/seams lib/pkgconfig/seams.pc lib/pkgconfig/seams-core.pc lib/cmake/seams/seams-config.cmake; do
+            test -e "$prefix/$f" || { echo "missing $f"; exit 1; }
+          done
+          test "$(env -u LD_LIBRARY_PATH "$prefix/bin/seams" --version)" = "seams ${VERSION}"
+          export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
+          test "$(pkg-config --modversion seams)" = "${VERSION}"
+          read -ra seams_flags <<< "$(pkg-config --cflags --libs seams)"
+          cc docs/examples/quickstart.c "${seams_flags[@]}" -lm -Wl,-rpath,"$prefix/lib" -o "$RUNNER_TEMP/quickstart"
+          env -u LD_LIBRARY_PATH "$RUNNER_TEMP/quickstart"
+      - name: Package the prefix
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          tar -C "$RUNNER_TEMP" -czf "dist/libseams-${VERSION}-linux-x86_64.tar.gz" "libseams-${VERSION}"
+          (cd dist && sha256sum -- *.tar.gz > SHA256SUMS)
+          cat dist/SHA256SUMS
+      - name: Release notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          python3 - << 'PY'
+          import os, pathlib
+          ver = os.environ["VERSION"]
+          text = pathlib.Path("CHANGELOG.md").read_text()
+          start = text.index(f"## [{ver}]")
+          nxt = text.find("\n## [", start + 1)
+          body = text[start:] if nxt < 0 else text[start:nxt]
+          pathlib.Path("dist/release-notes.md").write_text(body.strip() + "\n")
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Create GitHub Release
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Create or update the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ github.ref_name }}
+          VERSION: ${{ needs.build.outputs.version }}
         run: |
-          python3 - << 'PY'
-          import pathlib, os
-          tag = os.environ["TAG_NAME"]
-          ver = tag[1:] if tag.startswith("v") else tag
-          text = pathlib.Path("CHANGELOG.md").read_text()
-          marker = f"## [{ver}]"
-          start = text.index(marker)
-          rest = text[start + 1:]
-          nxt = rest.find("\n## [")
-          body = text[start:] if nxt < 0 else text[start:start + 1 + nxt]
-          pathlib.Path("release-notes.md").write_text(body.strip() + "\n")
-          PY
-          gh release create "$TAG_NAME" --repo "${{ github.repository }}" --title "$TAG_NAME" --notes-file release-notes.md
+          assets=("dist/seams-core-${VERSION}.tar.gz" "dist/libseams-${VERSION}-linux-x86_64.tar.gz" dist/SHA256SUMS)
+          if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release upload "$TAG_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG_NAME" --notes-file dist/release-notes.md
+          fi

@@ -110,7 +110,19 @@ def main() -> int:
             return 1
     listed = configured_project_options(build_dir)
     root = Path("subprojects")
+    # Upstream wraps. They are not seams projects and do not carry this
+    # tree's option file.
+    third_party = {
+        "nanobind",
+        "robin-map",
+        "catch2",
+        "eigen",
+        "readcon-core",
+        "readcon-db",
+    }
     for project, options in sorted(listed.items()):
+        if project in third_party:
+            continue
         src = root / project / "meson_options.txt"
         if not src.is_file():
             sys.stderr.write(f"{project} has no meson_options.txt\n")

@@ -20,5 +20,6 @@ def test_version_files_agree(root: Path):
         "doxygen": _field(
             root / "docs/source/Doxyfile_seams.cfg", r'^PROJECT_NUMBER\s+=\s+"v?([^"]+)"'
         ),
+        "sphinx": _field(root / "docs/source/conf.py", r'^release = "([^"]+)"'),
     }
     assert len(set(pins.values())) == 1, pins

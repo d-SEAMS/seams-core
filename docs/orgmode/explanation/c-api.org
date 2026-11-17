@@ -1,0 +1,175 @@
+#+TITLE: The C API
+#+OPTIONS: toc:nil num:nil
+
+=include/seams.h= is ABI 1 of =libseams=. The header is the contract.
+Language bindings and engine plugins include it and link =libseams=.
+They do not include the C++ headers under =src/include/internal=.
+
+* What the first cut already did
+
+The shipped surface had opaque =seams_system=, =seams_neighbours=, and
+=seams_rings= handles, create and destroy pairs, =seams_status= codes,
+a thread-local =seams_last_error=, and =SEAMS_API= on every export.
+=src/meson.build= compiles that library with =-fvisibility=hidden=.
+=SEAMS_VERSION_MAJOR=, =SEAMS_VERSION_MINOR=, =SEAMS_VERSION_PATCH=,
+and =SEAMS_VERSION_STRING= are written from =project().version=.
+
+The same cut stopped short of the libraries it was measured against.
+
+- Lengths on the first functions are =int=. A frame that fits in that
+  width is the ABI 1 frame. New buffers take =size_t=, and a count that
+  does not fit is =SEAMS_ERR_RANGE=.
+- =seams_neighbours_csr= hands back pointers owned by the handle.
+  =seams_neighbours_copy= is the caller-owned copy. A null buffer
+  queries the length. The old function remains, marked
+  =SEAMS_DEPRECATED=, and still returns those pointers until
+  =seams_neighbours_destroy=.
+- =seams_last_error= is the thread-local string, the same shape as
+  =git_error_last=. =seams_handle_error= is the string stored on the
+  handle, the same shape as =sqlite3_errmsg=. A failing call writes
+  both. The handle string survives a later call on a different handle.
+- Every entry that can throw is wrapped. A C caller sees a status code.
+- No public struct has fields. Enumerators keep their numeric values.
+  New enumerators are appended (=SEAMS_GRAPH_SEEDED= is 2). A later
+  struct, if one is added, starts with a =uint32_t= size set by the
+  caller, and the library reads only that prefix. =SEAMS_ABI= stays 1
+  until a shipped signature changes.
+- =seams_version= returns =SEAMS_VERSION_NUMBER=, packed as
+  =(major << 16) | (minor << 8) | patch=.
+
+One handle is used by one thread. Distinct handles may run together,
+except =seams_ql=, =seams_q4q6=, and =seams_q6bar=, which share one
+process-global harmonic scratch. =seams_set_num_threads= is
+process-global and must not run during an analysis. The OpenMP team
+is then the width every handle requests.
+
+* What a caller can run
+
+| call | analysis |
+|------+----------|
+| =seams_system_set_atoms= / =seams_system_set_frame= | frame from arrays |
+| =seams_system_read= / =seams_path_nframes= | XYZ, CON, chemfiles, and triclinic dumps; index 1-based |
+| =seams_neighbours_build= | cutoff list or mutual four-nearest list |
+| =seams_rings_find= | Franzblau rings, depth 3 to 12 |
+| =seams_ql= | local q3, q4, q6 (also 8 and 12) and the Lechner-Dellago average |
+| =seams_q4q6= | the ABI 1 pair, cutoff shell, local values |
+| =seams_q6bar= | averaged q6, mean, median, and the count above the caller's cut |
+| =seams_chill= | original CHILL, published inclusive edges or OVITO open edges |
+| =seams_chill_plus= | CHILL+, published table or the OVITO modifier |
+| =seams_cages= / =seams_signature_cages= | hexagonal, double-diamond, and census cages |
+| =seams_neighbours_knn= | k-nearest list, mutual or one-way |
+| =seams_steinhardt= | cutoff-shell q_l and the Lechner-Dellago average |
+| =seams_rdf= / =seams_running_cn= / =seams_coordination= | partial RDF and its integral |
+| =seams_hbonds= | hydrogen-bond count |
+| =seams_density_axis= | number density along one edge |
+| =seams_fingerprint= | topological key of the bonded graph |
+| =seams_prisms= / =seams_monolayer= | prism stacks and sheet rings |
+| =seams_site_table= / =seams_contact_pairs= / =seams_domains= | site spec, unlike contacts, polar domains |
+| =seams_system_symmetry= | per-atom ice Ih, ice Ic, stacking disorder, or no match |
+| =seams_brine_analyse= | planar front, rejection coefficient, profile, pockets |
+
+A non-positive shell residual selects the library ceiling (0.15 on
+this release). The nucleation q6-bar cut used by the quickstart is
+0.36. Coordinates and cutoffs are Angstrom. The cell is nine doubles:
+origin, edge lengths, then xy, xz, yz.
+
+* OVITO and freud
+
+=tests/capi_ovito_freud.py= calls =libseams= through ctypes. The frames
+are ice Ih, ice Ic, sI, the TIP4P/ice liquid of 4096 oxygens, the brine
+slab, and the nucleation frame. The test exits with an error when
+=freud= or =ovito= cannot be imported. Pixi installs the PyPI packages
+=freud-analysis= and =ovito= into the default environment, and the
+=crosscheck= feature repeats those two pins. The =capi-crosscheck=
+job is the run that installs that feature.
+
+| quantity | agreement |
+|----------+-----------|
+| cutoff neighbours at 3.5 Å | identical rows on all six frames |
+| undirected k nearest, k = 4 | identical rows on all six frames |
+| q4, q6, and q6-bar against OVITO 3.17.2 | at most 2.1e-15 |
+| q4, q6, and q6-bar against freud 3.6.1 | at most 2.2e-5 |
+| CHILL+ against the OVITO modifier | identical labels on all six frames |
+| ice Ih and ice Ic against PTM | identical hexagonal and cubic diamond labels |
+| g(r) against OVITO, multiplied by (N-1)/N | at most 8.7e-15 |
+| cutoff coordination | identical mean degree |
+
+| frame | n | degree | largest freud q | PTM atoms outside the shared label |
+|-------+----+--------+------------------+--------------------------------------|
+| ice Ih | 128 | 4 | 1.7e-7 | 0 |
+| ice Ic | 64 | 4 | 3.7e-8 | 0 |
+| sI | 46 | 4 | 2.0e-6 | 0 |
+| liquid | 4096 | 5.056 | 1.8e-5 | 0 |
+| brine | 873 | 4.550 | 9.4e-6 | 58 |
+| nucleation | 4096 | 4.514 | 2.2e-5 | 27 |
+
+d-SEAMS keeps a neighbour when the minimum-image distance is strictly
+below the cutoff. Freud uses the same open ball. OVITO's uniform bond
+modifier also keeps a pair sitting on the cutoff. Two particles 3.5 Å
+apart are the witness: OVITO records the bond, and d-SEAMS and freud
+record none. A separation of 3.5 Å minus 1e-4 is a neighbour in all
+three. None of the six frames has a pair on that boundary.
+
+=seams_neighbours_knn= writes an undirected row. With the mutual flag
+clear, an edge is kept when either atom lists the other among its k
+nearest. With the flag set, both atoms must list each other. Freud and
+OVITO return the directed k nearest. Closing those directed lists the
+same way reproduces the C rows. On four colinear points with k = 1, the
+second point's one-way row holds both of its adjacent indices, and the
+mutual row holds only the partner that lists it back.
+
+Local q4 and q6 on the cutoff shell match an independent spherical
+harmonic of one liquid shell to 1e-16, and they match OVITO to the
+same scale. q6-bar is the Lechner-Dellago norm of the mean q_6m, with
+the atom itself in the mean. On three oxygens at cutoff 2.5 Å that
+average differs from the mean of the scalar q6 values, and
+=seams_ql= follows the q_6m mean. A single neighbour gives q6 = 1.
+Freud stores q_l in float32. Rounding the same q_6m to float32 before
+the norm accounts for its residual. The largest residual on these
+frames is 2.2e-5, on q6 of the nucleation frame. An empty shell is 0
+here and in OVITO.
+
+=seams_chill_plus= with =SEAMS_CHILL_OVITO= matches OVITO's Chill+
+modifier on every atom. The published 2015 table is a separate rule
+and is left as it stands.
+
+=seams_system_symmetry= and OVITO polyhedral template matching, with
+the cubic and hexagonal diamond structures enabled and an RMSD cutoff
+of 0.1, name the same atoms on ice Ih and on the generated ice Ic
+lattice. Ice Ic has a template RMSD below 1e-6. On the brine slab, 58
+atoms carry only one of the two labels, and on the nucleation frame 27
+do. Each of those atoms sits on a known side of the RMSD cutoff: a
+kernel crystal that PTM calls other has RMSD above 0.1, and a PTM
+diamond that the kernel does not name has RMSD below 0.1. The kernel
+ceiling is the scale-free second-shell residual 0.15. sI and the
+liquid are unlabeled by both.
+
+=seams_rdf= normalises a like-species histogram by N(N-1)/2.
+OVITO and freud's exact mode normalize the directed histogram by N^2.
+The histograms differ by N/(N-1). Multiplying the d-SEAMS values by
+(N-1)/N matches OVITO below 1e-14, including the bin centers.
+On ice Ic the raw integral at 3.5 Å is 4.0635 and the scaled integral
+is 4, the neighbour degree. Freud refuses an r_max past half the
+shortest edge. d-SEAMS still bins minimum-image distances on a 10 Å
+cell out to 6 Å. The comparison uses 0.45 of the shortest edge, inside
+the range freud accepts. Freud's float32 distances move a boundary
+pair by one bin. That residual is 6.9e-4 on the brine g(r) and below
+1e-5 on the three crystals.
+
+A pair placed just inside a cell of origin (2, 2, 2) Å, on opposite
+faces of the 10 Å edge, is a neighbour in all three codes. The
+minimum-image distance is 0.2 Å.
+
+* Install
+
+Meson installs =seams.h=, =seams_version.h=, =libseams.so=,
+=seams.pc=, and =lib/cmake/seams/seams-config.cmake=.
+
+#+begin_src sh
+pkg-config --cflags --libs seams
+#+end_src
+
+=examples/c= is a small C program that builds against that install,
+either with pkg-config or with =find_package(seams)= and the imported
+target =seams::seams=. =meson test c_api_installed= installs into the
+build tree and compiles that program both ways.

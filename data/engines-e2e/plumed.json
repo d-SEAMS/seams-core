@@ -1,0 +1,1 @@
+{"atom_frames": 86016, "engine": "plumed", "frames": 21, "insitu_s_per_frame": 0.03668087605, "label_agreement": "86016/86016", "labels": {"0": 37423, "1": 466, "2": 41189, "3": 5220, "4": 252, "5": 1466}, "native_dump_mismatches": 0, "steps": 200, "system": "mW ice Ic/liquid, 4096 molecules, LAMMPS fix plumed", "version": "2.9.2"}

@@ -1,0 +1,11 @@
+## scene-01.tape
+nop 250 hbonds 460
+
+# site-site
+# types 1 2 cutoff 4.5 cn 9.144 nI 500 nJ 250 volume 288324
+## scene-02.tape
+nop 250 graph cutoff hops 2 method wl key 0a64fbb82d6cab5c classes 89 rings 3:37 4:273 5:34 6:167 7:0 top 32c83244de46d3eb=106 194f10acc42f7367=9 381ff486d2404f3b=8 440c83bf68f13c1d=8 dc647234eb41d861=8
+
+contact-pair count 0 nCation 0 nAnion 250
+
+subset polar n 750 largest 750 P 1

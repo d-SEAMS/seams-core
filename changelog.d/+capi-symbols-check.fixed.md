@@ -1,0 +1,1 @@
+`capi_symbols`, which holds the exported functions of `libseams` to `tests/capi_symbols.txt`, reads the exports with `readelf` when `nm` is missing and reports a skip when neither exists; it used to pass without checking. `capi_symbols_selftest` proves that the check rejects an unlisted export and a listed function the library no longer exports, and that `nm` and `readelf` agree.

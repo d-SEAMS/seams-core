@@ -16,6 +16,30 @@
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
 #endif
+#ifdef __linux__
+#include <sched.h>
+#endif
+
+#if defined(SEAMS_HAS_OPENMP) && defined(__linux__)
+// First in the file: TeamWidth would bind a narrowed team once per process.
+// teamFor keeps the width the caller asked for, so a small frame still
+// gets eight threads and the caller's cpu mask is never rebound.
+TEST_CASE("a team on a small frame keeps the requested width and the caller's cpus", "[thread]") {
+  cpu_set_t before;
+  REQUIRE(sched_getaffinity(0, sizeof(before), &before) == 0);
+  const int saved = omp_get_max_threads();
+  omp_set_num_threads(8);
+  {
+    const seams::TeamWidth team(4096);
+    REQUIRE(omp_get_max_threads() == 8);
+  }
+  REQUIRE(omp_get_max_threads() == 8);
+  omp_set_num_threads(saved);
+  cpu_set_t after;
+  REQUIRE(sched_getaffinity(0, sizeof(after), &after) == 0);
+  REQUIRE(CPU_EQUAL(&before, &after));
+}
+#endif
 
 namespace {
 
@@ -207,9 +231,14 @@ TEST_CASE("spatial ranks match the serial neighbour list, CHILL+ labels and q6",
         std::vector<std::vector<int>> window;
         const bool blocked =
             nneigh::blockWindowRows(local, cutoff, &share.owned, window);
+#ifdef SEAMS_HAS_LINKCELL
         if (nRanks > 1) {
           REQUIRE(blocked);
         }
+#else
+        // The block window is built by linkcell.
+        REQUIRE_FALSE(blocked);
+#endif
         for (std::size_t k = 0; k < share.local.size(); k++) {
           if (!share.owned[k]) {
             continue;

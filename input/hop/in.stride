@@ -1,0 +1,32 @@
+# Continue the equilibrated growth configuration and write one frame
+# every `stride` steps. `ntrans` transitions need stride*ntrans steps
+# after the frame at step 0, which is the equilibrated configuration.
+# Thermostat, barostat and step are those of in.equilibrate. The
+# restart carries the Nose-Hoover state and the velocities.
+
+variable stride index 10
+variable ntrans index 200
+
+units real
+atom_style atomic
+boundary p p p
+atom_modify map array
+
+read_restart equil.restart
+# sw stores no pair coefficients in a restart, and the Nose-Hoover
+# fix is not restored with them. Positions and velocities are.
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+fix bath all npt temp 208.0 208.0 1000.0 iso 1.0 1.0 5000.0
+
+timestep 10.0
+thermo 1000
+thermo_style custom step temp pe press density
+
+reset_timestep 0
+variable nsteps equal ${stride}*${ntrans}
+dump 1 all custom ${stride} prod.lammpstrj id type x y z
+dump_modify 1 sort id
+run ${nsteps}

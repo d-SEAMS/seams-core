@@ -82,6 +82,12 @@ bond~, ~populateHbondsFromDonors~ on that same sheared OH,
 ~sampleRDF_AA histograms the tilt a-image pair~.
 
 ~seams rdf FILE --cutoff RMAX~ is the 3D partial \(g_{IJ}(r)\).
+
+The same command on the bundled multi-type frame:
+
+#+begin_src bash
+seams rdf input/traj/il_tiny.lammpstrj --cutoff 6.0
+#+end_src
 Catch2: ~dumpVolume uses det H not bound spans~, ~partial RDF
 first bin sees the sheared a-image pair~, ~partial RDF like-type
 does not count the unlike neighbour~, ~runningCN at rmax is one

@@ -1,0 +1,1 @@
+A threaded cutoff neighbour list on an orthorhombic cell uses the scaling cell list instead of linkcell's buffered walk. The rows stay the same sorted cutoff set, so the ring search matches the one-thread list.

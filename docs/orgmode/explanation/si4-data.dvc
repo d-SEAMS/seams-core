@@ -1,0 +1,25 @@
+outs:
+- md5: 55739837d7eb8765bb95522f93012793
+  size: 19615995
+  path: si4-data/prism2-t240-s1.lammpstrj
+- md5: bd529c5b4032fabb9f7a872ab4445b3f
+  size: 19632761
+  path: si4-data/prism2-t240-s2.lammpstrj
+- md5: c4357800c9dbc930cd4371b118871ffc
+  size: 19608639
+  path: si4-data/prism2-t240-s3.lammpstrj
+- md5: bba78f2bb38b780c5d970530204ff2f5
+  size: 19609110
+  path: si4-data/prism2-t240-s4.lammpstrj
+- md5: 3d49fbd719cd68975e6e35fae42c1299
+  size: 39115469
+  path: si4-data/prism2-t260-s1.lammpstrj
+- md5: 9fc87e82ab761331b5b68e7c8d781d19
+  size: 39145569
+  path: si4-data/prism2-t260-s2.lammpstrj
+- md5: ca969b237b0cd0de3bfcd74f476d703c
+  size: 39097974
+  path: si4-data/prism2-t260-s3.lammpstrj
+- md5: 53791518482b4fef7d6339e0da0327bf
+  size: 39130943
+  path: si4-data/prism2-t260-s4.lammpstrj

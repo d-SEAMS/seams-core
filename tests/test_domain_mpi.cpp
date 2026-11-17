@@ -3,6 +3,7 @@
 // threaded single-process summary.
 
 #include "domain_frames.hpp"
+#include "slab_frames.hpp"
 
 #include <bop.hpp>
 #include <domain.hpp>
@@ -62,7 +63,7 @@ int main(int argc, char **argv) {
   int bad = 0;
   for (const auto &c : {tiltedFrame(16000, 78.4, 0.0, 0.0, 0.0, 4),
                         tiltedFrame(16000, 78.4, 9.0, 5.0, -7.0, 5)}) {
-    for (const int depth : {4, 6, 8}) {
+    for (const int depth : {4, 6, 8, 10}) {
       const auto got =
           seams::domain::gatherRings(c, cutoff, depth, MPI_COMM_WORLD);
       if (got.empty() || got != sortedRowRings(c, cutoff, depth)) {
@@ -110,7 +111,7 @@ int main(int argc, char **argv) {
     chill::getIceTypePlusNoPrint(serialOvito, rows, false, false);
     auto gotOvito = base;
     chill::distributedChillPlus(gotOvito, cutoff, ovito, false, MPI_COMM_WORLD, false);
-    const auto share = seams::domain::decompose(base, rank, nRanks, cutoff);
+    const auto share = seams::domain::gatheredWork().share;
     for (std::size_t k = 0; k < share.local.size(); k++) {
       if (!share.owned[k]) {
         continue;
@@ -172,7 +173,7 @@ int main(int argc, char **argv) {
     chill::getIceTypePlusNoPrint(serial, rows, false, true);
     auto got = base;
     chill::distributedChillPlus(got, cut, chill::chillPlusRule(), true, MPI_COMM_WORLD);
-    const auto share = seams::domain::decompose(base, rank, nRanks, cut);
+    const auto share = seams::domain::gatheredWork().share;
     for (std::size_t k = 0; k < share.local.size(); k++) {
       if (!share.owned[k]) {
         continue;
@@ -282,6 +283,64 @@ int main(int argc, char **argv) {
       bad++;
     }
   }
+  auto checkSlab = [&](molSys::PointCloud<molSys::Point<double>, double> base,
+                       const char *name) {
+    const double cut = 3.5;
+    const auto rows = nneigh::neighListO(cut, base, 1);
+    auto serial = base;
+    chill::classifyBonds(serial, rows, chill::chillPlusRule(), false);
+    chill::getIceTypePlusNoPrint(serial, rows, false, true);
+    const auto qSerial = chill::steinhardtQl(base, rows, 6);
+    auto got = base;
+    chill::distributedChillPlus(got, cut, chill::chillPlusRule(), true, MPI_COMM_WORLD);
+    const auto q = chill::distributedSteinhardt(base, cut, 6, MPI_COMM_WORLD);
+    const auto share = seams::domain::gatheredWork().share;
+    for (std::size_t k = 0; k < share.local.size(); k++) {
+      if (!share.owned[k]) {
+        continue;
+      }
+      const int frame = share.local[k];
+      if (got.pts[static_cast<std::size_t>(frame)].iceType !=
+          serial.pts[static_cast<std::size_t>(frame)].iceType) {
+        std::fprintf(stderr, "rank %d: %s label %d got %d serial %d\n", rank, name, frame,
+                     static_cast<int>(got.pts[static_cast<std::size_t>(frame)].iceType),
+                     static_cast<int>(serial.pts[static_cast<std::size_t>(frame)].iceType));
+        bad++;
+        break;
+      }
+      if (static_cast<std::size_t>(frame) >= q.ql.size() ||
+          static_cast<std::size_t>(frame) >= qSerial.ql.size()) {
+        std::fprintf(stderr, "rank %d: %s q6 length\n", rank, name);
+        bad++;
+        break;
+      }
+      const double dq = std::fabs(q.ql[static_cast<std::size_t>(frame)] -
+                                  qSerial.ql[static_cast<std::size_t>(frame)]);
+      const double db = std::fabs(q.qlBar[static_cast<std::size_t>(frame)] -
+                                  qSerial.qlBar[static_cast<std::size_t>(frame)]);
+      if (dq > 1e-15 || db > 1e-15) {
+        std::fprintf(stderr, "rank %d: %s q6 %d %.3e %.3e\n", rank, name, frame, dq, db);
+        bad++;
+        break;
+      }
+    }
+    const auto want =
+        seams::domain::summarize(sortedRowRings(base, cut, 6), base.nop, 6);
+    for (int pass = 0; pass < 2; pass++) {
+      const auto red = seams::domain::reduceRings(base, cut, 6, MPI_COMM_WORLD);
+      if (red.sizeCount != want.sizeCount) {
+        std::fprintf(stderr, "rank %d: %s rings pass %d\n", rank, name, pass);
+        bad++;
+      }
+    }
+    if (rank == 0) {
+      std::printf("%s nop %d checked\n", name, base.nop);
+    }
+  };
+  checkSlab(seams::frames::iceWaterSlab(24), "ice-water-110592");
+  checkSlab(seams::frames::hydrateLiquidSlab(24, 24, 4), "hydrate-105984");
+  checkSlab(seams::frames::iceWaterSlab(48), "ice-water-884736");
+  checkSlab(seams::frames::hydrateLiquidSlab(40, 24, 20), "hydrate-883200");
   int anyBad = 0;
   MPI_Allreduce(&bad, &anyBad, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
   MPI_Finalize();

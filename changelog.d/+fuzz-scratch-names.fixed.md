@@ -1,0 +1,1 @@
+`capi_fuzzer` writes its per-format scratch files under names that include the process id. `-fork` jobs and parallel test runs shared fixed names in one working directory, so one process could truncate a file another had mapped and die with SIGBUS. The fuzz targets also rebuild when their source changes.

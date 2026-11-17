@@ -55,6 +55,7 @@
               gdb
               ccache
               clang-tools
+              snakemake
             ];
           };
         }

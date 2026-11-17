@@ -1,0 +1,7 @@
+1
+00:00:00,300 --> 00:00:12,180
+The paper frame is input/traj/interface_f0.lammpstrj, 864 molecules and 1 frame. Published CHILL+ is hexagonal 352 and water 434. The stack is HHHHHHHH....C. docs_paper_interface_full asserts those lines.
+
+2
+00:00:12,580 --> 00:00:28,630
+I leave the report on screen. The numbers above are the ones the test locks. The picture track keeps a blank band under the text so a later caption can sit there without covering a count.

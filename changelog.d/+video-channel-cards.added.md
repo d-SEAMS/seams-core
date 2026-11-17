@@ -1,0 +1,1 @@
+The videos gallery and the README link the d-SEAMS Odysee channel. Every `docs/videos/<slug>/script.md` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.

@@ -101,16 +101,18 @@ Graph levi(int q) {
           v.push_back({a, b, c});
       }
   const int m = static_cast<int>(v.size());
-  Graph g(2 * m);
+  Graph g(static_cast<std::size_t>(2 * m));
   for (int i = 0; i < 2 * m; ++i)
-    g[i].push_back(i);
+    g[static_cast<std::size_t>(i)].push_back(i);
   for (int p = 0; p < m; ++p)
-    for (int l = 0; l < m; ++l)
-      if ((v[p][0] * v[l][0] + v[p][1] * v[l][1] + v[p][2] * v[l][2]) % q ==
-          0) {
-        g[p].push_back(m + l);
-        g[m + l].push_back(p);
+    for (int l = 0; l < m; ++l) {
+      const auto &vp = v[static_cast<std::size_t>(p)];
+      const auto &vl = v[static_cast<std::size_t>(l)];
+      if ((vp[0] * vl[0] + vp[1] * vl[1] + vp[2] * vl[2]) % q == 0) {
+        g[static_cast<std::size_t>(p)].push_back(m + l);
+        g[static_cast<std::size_t>(m + l)].push_back(p);
       }
+    }
   return g;
 }
 
@@ -127,9 +129,10 @@ Graph relabel(const Graph &g, unsigned seed) {
   std::shuffle(perm.begin(), perm.end(), rng);
   Graph out(g.size());
   for (std::size_t a = 0; a < g.size(); ++a) {
-    out[perm[a]].push_back(perm[a]);
+    auto &row = out[static_cast<std::size_t>(perm[a])];
+    row.push_back(perm[a]);
     for (std::size_t t = 1; t < g[a].size(); ++t)
-      out[perm[a]].push_back(perm[g[a][t]]);
+      row.push_back(perm[static_cast<std::size_t>(g[a][t])]);
   }
   return out;
 }
@@ -146,29 +149,35 @@ Out batch(const std::vector<Graph> &frames, int maxPer, int maxRings,
   const int kRowCap = 32;
   const int nF = static_cast<int>(frames.size());
   const int n = static_cast<int>(frames[0].size());
-  std::vector<int> mdeg(nF * n), mcols(nF * n * 4, -1);
-  for (int f = 0; f < nF; ++f)
-    for (int i = 0; i < n; ++i) {
+  const std::size_t nFrames = frames.size();
+  const std::size_t nAtoms = frames[0].size();
+  std::vector<int> mdeg(nFrames * nAtoms), mcols(nFrames * nAtoms * 4, -1);
+  for (std::size_t f = 0; f < nFrames; ++f)
+    for (std::size_t i = 0; i < nAtoms; ++i) {
       const auto &row = frames[f][i];
-      mdeg[f * n + i] = static_cast<int>(row.size()) - 1;
+      mdeg[f * nAtoms + i] = static_cast<int>(row.size()) - 1;
       for (std::size_t t = 1; t < row.size(); ++t)
-        mcols[(f * n + i) * 4 + t - 1] = row[t];
+        mcols[(f * nAtoms + i) * 4 + t - 1] = row[t];
     }
   Out out;
-  out.six.assign(nF * n, 0);
-  out.hc.assign(nF * n, 0);
-  out.ddc.assign(nF * n, 0);
-  out.nRings.assign(nF, 0);
-  std::vector<char> done(nF, 0), onHost(nF, 0);
+  out.six.assign(nFrames * nAtoms, 0);
+  out.hc.assign(nFrames * nAtoms, 0);
+  out.ddc.assign(nFrames * nAtoms, 0);
+  out.nRings.assign(nFrames, 0);
+  std::vector<char> done(nFrames, 0), onHost(nFrames, 0);
   for (;;) {
-    std::vector<int> nRings(nF, 0), rowMax(nF, 0), nPairs(nF, 0);
-    std::vector<int> ringAtoms(static_cast<std::size_t>(nF) * maxRings * 6, -1);
-    std::vector<int> tc(nF * n, 0),
-        through(static_cast<std::size_t>(nF) * n * maxPer, -1);
-    std::vector<int> hc(static_cast<std::size_t>(nF) * maxRings, 0),
+    std::vector<int> nRings(nFrames, 0), rowMax(nFrames, 0),
+        nPairs(nFrames, 0);
+    std::vector<int> ringAtoms(
+        nFrames * static_cast<std::size_t>(maxRings) * 6, -1);
+    std::vector<int> tc(nFrames * nAtoms, 0),
+        through(nFrames * nAtoms * static_cast<std::size_t>(maxPer), -1);
+    std::vector<int> hc(nFrames * static_cast<std::size_t>(maxRings), 0),
         ddc(hc.size(), 0);
-    std::vector<int> pairs(static_cast<std::size_t>(nF) * maxPairs * 2, -1);
-    std::vector<int> aHc(nF * n, 0), aDdc(nF * n, 0), six(nF * n, 0);
+    std::vector<int> pairs(nFrames * static_cast<std::size_t>(maxPairs) * 2,
+                           -1);
+    std::vector<int> aHc(nFrames * nAtoms, 0), aDdc(nFrames * nAtoms, 0),
+        six(nFrames * nAtoms, 0);
     grid(nF * n, [&] {
       k::enum_six(mdeg.data(), mcols.data(), n, nF, maxRings, nRings.data(),
                   ringAtoms.data());
@@ -199,7 +208,7 @@ Out batch(const std::vector<Graph> &frames, int maxPer, int maxRings,
     });
     int needPer = maxPer, needRings = maxRings, needPairs = maxPairs;
     bool pending = false;
-    for (int f = 0; f < nF; ++f) {
+    for (std::size_t f = 0; f < nFrames; ++f) {
       if (done[f] || onHost[f])
         continue;
       if (rowMax[f] > kRowCap) {
@@ -208,12 +217,11 @@ Out batch(const std::vector<Graph> &frames, int maxPer, int maxRings,
       }
       if (nRings[f] <= maxRings && rowMax[f] <= maxPer &&
           nPairs[f] <= maxPairs) {
-        std::copy(six.begin() + f * n, six.begin() + (f + 1) * n,
-                  out.six.begin() + f * n);
-        std::copy(aHc.begin() + f * n, aHc.begin() + (f + 1) * n,
-                  out.hc.begin() + f * n);
-        std::copy(aDdc.begin() + f * n, aDdc.begin() + (f + 1) * n,
-                  out.ddc.begin() + f * n);
+        const auto lo = static_cast<std::ptrdiff_t>(f * nAtoms);
+        const auto hi = static_cast<std::ptrdiff_t>((f + 1) * nAtoms);
+        std::copy(six.begin() + lo, six.begin() + hi, out.six.begin() + lo);
+        std::copy(aHc.begin() + lo, aHc.begin() + hi, out.hc.begin() + lo);
+        std::copy(aDdc.begin() + lo, aDdc.begin() + hi, out.ddc.begin() + lo);
         out.nRings[f] = nRings[f];
         done[f] = 1;
         continue;
@@ -230,15 +238,16 @@ Out batch(const std::vector<Graph> &frames, int maxPer, int maxRings,
     maxPairs = needPairs;
     ++out.retries;
   }
-  for (int f = 0; f < nF; ++f) {
+  for (std::size_t f = 0; f < nFrames; ++f) {
     if (!onHost[f])
       continue;
     const auto h = tum::hostCageCounts(frames[f]);
-    std::copy(h.atomSix.begin(), h.atomSix.end(), out.six.begin() + f * n);
-    std::copy(h.atomHc.begin(), h.atomHc.end(), out.hc.begin() + f * n);
-    std::copy(h.atomDdc.begin(), h.atomDdc.end(), out.ddc.begin() + f * n);
+    const auto lo = static_cast<std::ptrdiff_t>(f * nAtoms);
+    std::copy(h.atomSix.begin(), h.atomSix.end(), out.six.begin() + lo);
+    std::copy(h.atomHc.begin(), h.atomHc.end(), out.hc.begin() + lo);
+    std::copy(h.atomDdc.begin(), h.atomDdc.end(), out.ddc.begin() + lo);
     out.nRings[f] = h.nSix;
-    out.hostFrames.push_back(f);
+    out.hostFrames.push_back(static_cast<int>(f));
   }
   return out;
 }
@@ -256,11 +265,12 @@ bool run(const char *name, const std::vector<Graph> &frames, int per, int rings,
   std::printf("\n");
   for (std::size_t f = 0; f < frames.size(); ++f) {
     const auto h = tum::hostCageCounts(frames[f]);
+    const std::ptrdiff_t lo = static_cast<std::ptrdiff_t>(f) * n;
     const bool same =
         o.nRings[f] == h.nSix &&
-        std::equal(h.atomSix.begin(), h.atomSix.end(), o.six.begin() + f * n) &&
-        std::equal(h.atomHc.begin(), h.atomHc.end(), o.hc.begin() + f * n) &&
-        std::equal(h.atomDdc.begin(), h.atomDdc.end(), o.ddc.begin() + f * n);
+        std::equal(h.atomSix.begin(), h.atomSix.end(), o.six.begin() + lo) &&
+        std::equal(h.atomHc.begin(), h.atomHc.end(), o.hc.begin() + lo) &&
+        std::equal(h.atomDdc.begin(), h.atomDdc.end(), o.ddc.begin() + lo);
     std::printf("  frame %zu nSix %d HC rings %d DDC rings %d HC atoms %d DDC "
                 "atoms %d: kernels==host %s\n",
                 f, h.nSix, h.nHcRings, h.nDdcRings, h.nHcAtoms, h.nDdcAtoms,
@@ -314,18 +324,20 @@ bool ddcFixtures() {
         ringAtoms.insert(ringAtoms.end(), r.begin(), r.end());
         n = std::max(n, *std::max_element(r.begin(), r.end()) + 1);
       }
-      std::vector<int> tc(n, 0),
+      std::vector<int> tc(static_cast<std::size_t>(n), 0),
           through(static_cast<std::size_t>(n) * maxPer, -1);
       for (int r = 0; r < nR; ++r)
-        for (const int a : rings[r])
-          through[a * maxPer + tc[a]++] = r;
-      std::vector<int> hc(nR, 0), ddc(nR, 0);
+        for (const int a : rings[static_cast<std::size_t>(r)]) {
+          const auto ai = static_cast<std::size_t>(a);
+          through[ai * maxPer + static_cast<std::size_t>(tc[ai]++)] = r;
+        }
+      std::vector<int> hc(rings.size(), 0), ddc(rings.size(), 0);
       grid(nR, [&] {
         k::ddc_affil(&nR, ringAtoms.data(), tc.data(), through.data(),
                      hc.data(), n, 1, nR, maxPer, ddc.data());
       });
       bool same = true;
-      for (int r = 0; r < nR; ++r)
+      for (std::size_t r = 0; r < ddc.size(); ++r)
         same = same && (ddc[r] != 0) == (withExtra && r != 6);
       std::printf("DDC fixture %s, extra ring %s: DDC rings %d: %s\n", fx.name,
                   withExtra ? "yes" : "no",

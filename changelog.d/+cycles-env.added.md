@@ -1,0 +1,1 @@
+A linux-64 pixi environment, `cycles`, holds Python 3.13 and `bpy` 5.3 for the Cycles molecule stills. `pixi install -e cycles` is enough: `render_molecules.py` finds that interpreter without `MOLECULES_BPY`. `docs_render_molecules` exits 77 only when no interpreter imports `bpy`. The environment adds lock entries and leaves the default environment's solve alone.

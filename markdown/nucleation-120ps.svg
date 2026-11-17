@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420">
+<rect width="100%" height="100%" fill="#fff"/>
+<text x="64" y="18" font-family="sans-serif" font-size="14">Ice count, 1728-molecule mW seed at 220 K</text>
+<line x1="64" y1="372.0" x2="700" y2="372.0" stroke="#eee"/>
+<text x="56" y="376.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">0</text>
+<line x1="64" y1="314.0" x2="700" y2="314.0" stroke="#eee"/>
+<text x="56" y="318.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">20</text>
+<line x1="64" y1="256.0" x2="700" y2="256.0" stroke="#eee"/>
+<text x="56" y="260.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">40</text>
+<line x1="64" y1="198.0" x2="700" y2="198.0" stroke="#eee"/>
+<text x="56" y="202.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">60</text>
+<line x1="64" y1="140.0" x2="700" y2="140.0" stroke="#eee"/>
+<text x="56" y="144.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">80</text>
+<line x1="64" y1="82.0" x2="700" y2="82.0" stroke="#eee"/>
+<text x="56" y="86.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">100</text>
+<line x1="64" y1="24.0" x2="700" y2="24.0" stroke="#eee"/>
+<text x="56" y="28.0" text-anchor="end" font-family="sans-serif" font-size="11" fill="#444">120</text>
+<text x="64.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">0</text>
+<text x="170.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">20</text>
+<text x="276.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">40</text>
+<text x="382.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">60</text>
+<text x="488.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">80</text>
+<text x="594.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">100</text>
+<text x="700.0" y="392" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#444">120</text>
+<text x="360" y="412" text-anchor="middle" font-family="sans-serif" font-size="12">time (ps)</text>
+<text x="16" y="210" transform="rotate(-90 16 210)" font-family="sans-serif" font-size="12">ice molecules</text>
+<polyline fill="none" stroke="#1f4e79" stroke-width="1.6" stroke-dasharray="" points="64.0,354.6 117.0,273.4 170.0,203.8 223.0,224.1 276.0,189.3 329.0,169.0 382.0,180.6 435.0,157.4 488.0,163.2 541.0,99.4 594.0,93.6 647.0,61.7 700.0,47.2"/>
+<polyline fill="none" stroke="#1f4e79" stroke-width="1.6" stroke-dasharray="6 3" points="64.0,360.4 117.0,282.1 170.0,203.8 223.0,229.9 276.0,171.9 329.0,142.9 382.0,157.4 435.0,163.2 488.0,142.9 541.0,73.3 594.0,84.9 647.0,90.7 700.0,105.2"/>
+<polyline fill="none" stroke="#1f4e79" stroke-width="1.6" stroke-dasharray="2 3" points="64.0,340.1 117.0,282.1 170.0,203.8 223.0,169.0 276.0,151.6 329.0,163.2 382.0,111.0 435.0,142.9 488.0,102.3 541.0,113.9 594.0,128.4 647.0,113.9 700.0,113.9"/>
+<polyline fill="none" stroke="#2e7d32" stroke-width="1.6" stroke-dasharray="" points="64.0,345.9 117.0,273.4 170.0,250.2 223.0,258.9 276.0,250.2 329.0,215.4 382.0,192.2 435.0,203.8 488.0,186.4 541.0,169.0 594.0,154.5 647.0,125.5 700.0,137.1"/>
+<polyline fill="none" stroke="#2e7d32" stroke-width="1.6" stroke-dasharray="6 3" points="64.0,343.0 117.0,276.3 170.0,241.5 223.0,241.5 276.0,198.0 329.0,224.1 382.0,212.5 435.0,224.1 488.0,198.0 541.0,119.7 594.0,160.3 647.0,154.5 700.0,154.5"/>
+<polyline fill="none" stroke="#2e7d32" stroke-width="1.6" stroke-dasharray="2 3" points="64.0,322.7 117.0,279.2 170.0,206.7 223.0,171.9 276.0,160.3 329.0,186.4 382.0,163.2 435.0,171.9 488.0,148.7 541.0,169.0 594.0,171.9 647.0,140.0 700.0,195.1"/>
+<polyline fill="none" stroke="#b85c38" stroke-width="1.6" stroke-dasharray="" points="64.0,345.9 117.0,311.1 170.0,296.6 223.0,302.4 276.0,279.2 329.0,267.6 382.0,285.0 435.0,273.4 488.0,276.3 541.0,267.6 594.0,279.2 647.0,250.2 700.0,244.4"/>
+<polyline fill="none" stroke="#b85c38" stroke-width="1.6" stroke-dasharray="6 3" points="64.0,360.4 117.0,311.1 170.0,290.8 223.0,296.6 276.0,273.4 329.0,282.1 382.0,285.0 435.0,282.1 488.0,256.0 541.0,247.3 594.0,256.0 647.0,250.2 700.0,244.4"/>
+<polyline fill="none" stroke="#b85c38" stroke-width="1.6" stroke-dasharray="2 3" points="64.0,348.8 117.0,316.9 170.0,290.8 223.0,285.0 276.0,285.0 329.0,279.2 382.0,290.8 435.0,276.3 488.0,276.3 541.0,282.1 594.0,282.1 647.0,282.1 700.0,285.0"/>
+<line x1="480" y1="40" x2="504" y2="40" stroke="#1f4e79" stroke-width="2"/>
+<text x="510" y="44" font-family="sans-serif" font-size="12">kernel</text>
+<line x1="480" y1="58" x2="504" y2="58" stroke="#2e7d32" stroke-width="2"/>
+<text x="510" y="62" font-family="sans-serif" font-size="12">CHILL+</text>
+<line x1="480" y1="76" x2="504" y2="76" stroke="#b85c38" stroke-width="2"/>
+<text x="510" y="80" font-family="sans-serif" font-size="12">PTM</text>
+<line x1="480" y1="98" x2="504" y2="98" stroke="#666" stroke-width="1.4"/>
+<text x="510" y="102" font-family="sans-serif" font-size="11">seed 11001</text>
+<line x1="480" y1="114" x2="504" y2="114" stroke="#666" stroke-width="1.4" stroke-dasharray="6 3"/>
+<text x="510" y="118" font-family="sans-serif" font-size="11">seed 22002</text>
+<line x1="480" y1="130" x2="504" y2="130" stroke="#666" stroke-width="1.4" stroke-dasharray="2 3"/>
+<text x="510" y="134" font-family="sans-serif" font-size="11">seed 33003</text>
+</svg>

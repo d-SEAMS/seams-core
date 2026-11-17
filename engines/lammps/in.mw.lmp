@@ -1,0 +1,11 @@
+# mW ice/liquid with compute dseams in situ. The dump carries the same
+# coordinates at full precision for the offline CLI.
+#   lmp -var plugin dseamsplugin.so -var cells 8 -var steps 200 -var every 10 \
+#       -var melt 2000 -var dump insitu.lammpstrj -in in.mw.lmp
+include mw_setup.lmp
+plugin load ${plugin}
+compute ice all dseams cutoff 3.5
+dump d all custom ${every} ${dump} id type x y z c_ice
+dump_modify d sort id format float %.17g
+thermo ${every}
+run ${steps}

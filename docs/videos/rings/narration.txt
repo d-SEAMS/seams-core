@@ -1,0 +1,3 @@
+exampleTraj.lammpstrj is 250 oxygens. seams rings prints nop 250 rings 511, then the census 3 37, 4 273, 5 34, and 6 167.
+
+The ice Ih cell prints nop 128 rings 256, and the histogram line is 6 256. Those are the six-rings.

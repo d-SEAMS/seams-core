@@ -72,8 +72,23 @@ GlassKind glassFromDensity(double rho, double iceMax, double ldaMax,
 //! Three-argument form: LDA/MDA split at the midpoint of iceMax and mdaMin.
 GlassKind glassFromDensity(double rho, double iceMax, double mdaMin);
 
-//! Literature local-density windows: ice < 0.028, LDA < 0.040, MDA < 0.070,
-//! else HDA.
+//! Mass densities, g/cm^3. Ih is the 1 bar crystal. Ice VI is the dense
+//! tetrahedral crystal, not ice I.
+inline constexpr double kIceIhMassDensity = 0.917;
+inline constexpr double kIceVIMassDensity = 1.31;
+
+//! Number density in 1/A^3 from a mass density in g/cm^3.
+inline constexpr double numberDensity(double massGPerCm3) {
+  return massGPerCm3 * 6.02214076e23 / (18.015 * 1.0e24);
+}
+
+//! Ice/LDA split: the midpoint of the Ih and ice VI number densities.
+//! Ih (about 0.031) is ice. Ice VI (about 0.044) is not.
+inline constexpr double kIceNumberDensityMax =
+    0.5 * (numberDensity(kIceIhMassDensity) + numberDensity(kIceVIMassDensity));
+
+//! Local-density windows, 1/A^3. Ice is below kIceNumberDensityMax,
+//! LDA below 0.040, MDA below 0.070, else HDA.
 GlassKind glassFromDensity(double rho);
 
 } // namespace phase

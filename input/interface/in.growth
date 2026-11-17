@@ -1,0 +1,30 @@
+# Short mW ice/water interface at 270 K.
+# The starting frame is input/traj/interface_f0.lammpstrj (timestep 0).
+# Real units, Stillinger-Weber mW (Molinero and Moore, J. Phys. Chem. B
+# 113, 4008, 2009). The melting point of mW is near 274 K, so 270 K is
+# a few kelvin of undercooling. The ensemble is NVT at the snapshot
+# volume. One OpenMP thread. Dump every 5000 steps of 10 fs, which is
+# 50 ps, including the first step. The run is 1 ns.
+
+units real
+atom_style atomic
+boundary p p p
+atom_modify map array
+
+region box block 0 1 0 1 0 1
+create_box 1 box
+read_dump interface_f0.lammpstrj 0 x y z box yes add yes
+
+mass 1 18.015
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+timestep 10.0
+thermo 10000
+velocity all create 270.0 270 mom yes rot yes dist gaussian
+fix 1 all nvt temp 270.0 270.0 100.0
+dump 1 all custom 5000 growth.lammpstrj id type x y z
+dump_modify 1 sort id first yes
+run 100000

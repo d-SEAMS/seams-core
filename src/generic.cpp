@@ -35,14 +35,14 @@ int gen::prettyPrintYoda(
     outputFile << "# Frame\tAtomID\tx\ty\tz\tcij\ticeType\n";
     // Write out all the information out line by line
     for (int i = 0; i < yCloud.nop; i++) {
-      outputFile << yCloud.currentFrame << "\t" << yCloud.pts[i].atomID
-                 << "\t" << yCloud.pts[i].x << "\t" << yCloud.pts[i].y << "\t"
-                 << yCloud.pts[i].z << "\t";
+      outputFile << yCloud.currentFrame << "\t" << yCloud.pts[static_cast<std::size_t>(i)].atomID
+                 << "\t" << yCloud.pts[static_cast<std::size_t>(i)].x << "\t" << yCloud.pts[static_cast<std::size_t>(i)].y << "\t"
+                 << yCloud.pts[static_cast<std::size_t>(i)].z << "\t";
       // Print out cij
       // for(int c=0; c<yCloud.pts[i].c_ij.size(); c++){outputFile <<
       // yCloud.pts[i].c_ij[c]<<"\t";} Print out the classifier
       // TODO: Should print string representation
-      outputFile << static_cast<int>(yCloud.pts[i].iceType) << "\n";
+      outputFile << static_cast<int>(yCloud.pts[static_cast<std::size_t>(i)].iceType) << "\n";
     }
   }
   // Close the file
@@ -74,9 +74,9 @@ int gen::unwrappedCoordShift(
     int jatomIndex, double *x_i, double *y_i, double *z_i, double *x_j,
     double *y_j, double *z_j) {
   //
-  const double x_iatom = yCloud.pts[iatomIndex].x;
-  const double y_iatom = yCloud.pts[iatomIndex].y;
-  const double z_iatom = yCloud.pts[iatomIndex].z;
+  const double x_iatom = yCloud.pts[static_cast<std::size_t>(iatomIndex)].x;
+  const double y_iatom = yCloud.pts[static_cast<std::size_t>(iatomIndex)].y;
+  const double z_iatom = yCloud.pts[static_cast<std::size_t>(iatomIndex)].z;
   const auto dr = gen::relDist(yCloud, iatomIndex, jatomIndex);
   *x_i = x_iatom;
   *y_i = y_iatom;
@@ -98,8 +98,8 @@ int gen::unwrappedCoordShift(
  * @return The output angle between the input vectors, in radians
  */
 double gen::eigenVecAngle(std::vector<double> OO, std::vector<double> OH) {
-  Eigen::Vector3d eigOO = Eigen::Map<Eigen::Vector3d>(OO.data(), OO.size());
-  Eigen::Vector3d eigOH = Eigen::Map<Eigen::Vector3d>(OH.data(), OH.size());
+  Eigen::Vector3d eigOO = Eigen::Map<Eigen::Vector3d>(OO.data(), static_cast<std::ptrdiff_t>(OO.size()));
+  Eigen::Vector3d eigOH = Eigen::Map<Eigen::Vector3d>(OH.data(), static_cast<std::ptrdiff_t>(OH.size()));
   double cosAngle = eigOO.dot(eigOH) / (eigOO.norm() * eigOH.norm());
   // Clamp to [-1, 1] to guard against floating-point imprecision in acos
   cosAngle = std::clamp(cosAngle, -1.0, 1.0);
@@ -135,14 +135,14 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
   int numOfObservations = 0;
   if (n % 2 == 0) {
     for (int i = 0; i < n / 2; i++) {
-      lowerRange.push_back(sorted[i]);
-      upperRange.push_back(sorted[n / 2 + i]);
+      lowerRange.push_back(sorted[static_cast<std::size_t>(i)]);
+      upperRange.push_back(sorted[static_cast<std::size_t>(n / 2 + i)]);
     }
   } else {
     const int mid = n / 2;
     for (int i = 0; i < mid; i++) {
-      lowerRange.push_back(sorted[i]);
-      upperRange.push_back(sorted[mid + 1 + i]);
+      lowerRange.push_back(sorted[static_cast<std::size_t>(i)]);
+      upperRange.push_back(sorted[static_cast<std::size_t>(mid + 1 + i)]);
     }
   }
   // ----------------------
@@ -166,11 +166,11 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
   //
   // Loop through the values in inpVec to get the average, excluding outliers
   for (int i = 0; i < n; i++) {
-    if (sorted[i] < outlierLimLow || sorted[i] > outlierLimHigh) {
+    if (sorted[static_cast<std::size_t>(i)] < outlierLimLow || sorted[static_cast<std::size_t>(i)] > outlierLimHigh) {
       continue;
     }
     numOfObservations++;
-    avgVal += sorted[i];
+    avgVal += sorted[static_cast<std::size_t>(i)];
   }
   // ----------------------
   // This fails if there are not enough observations (ring size = 3)
@@ -178,7 +178,7 @@ double gen::getAverageWithoutOutliers(std::vector<double> inpVec) {
     double sumVal = 0.0;
     // Loop through all the values and sum
     for (int i = 0; i < n; i++) {
-      sumVal += inpVec[i];
+      sumVal += inpVec[static_cast<std::size_t>(i)];
     } // end of sum
     // Normalize
     avgVal = sumVal / n;

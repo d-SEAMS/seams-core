@@ -1,0 +1,262 @@
+name: Engines
+on:
+  push:
+    branches: [main, modernize]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci_engines-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  openmm-plumed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-engines-
+      - name: Install conda-forge OpenMM and PLUMED 2.9 into the pixi environment
+        run: |
+          set -euo pipefail
+          # Named pin. The glibc 2.28 baseline cannot inherit a bare
+          # "plumed" and silently follow whatever the lock capped.
+          pixi add openmm "plumed>=2.9.2,<2.10" numpy
+          ver=$(pixi run pkg-config --modversion plumed)
+          echo "PLUMED $ver"
+          case $ver in
+            2.9.*) ;;
+            *) echo "openmm-plumed baseline expected PLUMED 2.9, got $ver" >&2; exit 1 ;;
+          esac
+      - name: Build and run the engine tests
+        run: |
+          set -euo pipefail
+          pixi run meson setup build-eng -Dwith_tests=true -Dwith_openmm=auto -Dwith_plumed=auto
+          pixi run ninja -C build-eng
+          plugin=$(find build-eng -name seams_openmm -type f | head -n 1)
+          plumed_so=$(find build-eng -name 'libSeamsPlumed.so' -type f | head -n 1)
+          if [ -z "$plugin" ] || [ -z "$plumed_so" ]; then
+            echo "conda packages were installed but seams_openmm or libSeamsPlumed.so is missing" >&2
+            find build-eng -name 'seams_openmm' -o -name 'libSeamsPlumed.so' -o -name '*.so' | head
+            exit 1
+          fi
+          pixi run meson test -C build-eng --print-errorlogs \
+            openmm_reporter openmm_plugin plumed_driver insitu_observe | tee build-eng/engine-tests.txt
+          for name in openmm_reporter openmm_plugin plumed_driver insitu_observe; do
+            if ! grep -E "${name}[[:space:]]+OK" build-eng/engine-tests.txt >/dev/null; then
+              echo "${name} did not run" >&2
+              exit 1
+            fi
+          done
+
+  lammps-gromacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-engines-md-
+      - name: Install conda-forge LAMMPS and GROMACS into the pixi environment
+        run: pixi add lammps gromacs
+      - name: Build and run the LAMMPS and GROMACS tests
+        run: |
+          set -euo pipefail
+          pixi run meson setup build-md -Dwith_tests=true -Dwith_lammps=auto -Dwith_gromacs=auto
+          pixi run ninja -C build-md
+          pixi run meson test -C build-md --print-errorlogs lammps_hook gromacs_mdrun | tee build-md/md-tests.txt
+          for name in lammps_hook gromacs_mdrun; do
+            if ! grep -E "${name}[[:space:]]+OK" build-md/md-tests.txt >/dev/null; then
+              echo "${name} did not run" >&2
+              exit 1
+            fi
+          done
+
+  # Each engine plugin against the conda-forge engine of the default pixi
+  # environment, then its engine-e2e tests: a short ice/liquid run labeled
+  # in situ and checked frame by frame against the CLI. A skip fails the job.
+  engine-e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: lammps
+            options: -Dwith_lammps=enabled
+            tests: lammps_hook lammps_e2e lammps_e2e_np2 lammps_select lammps_select_np2
+          - engine: plumed
+            options: -Dwith_plumed=enabled
+            tests: plumed_driver plumed_units plumed_e2e
+          - engine: gromacs
+            options: -Dwith_gromacs=enabled -Dwith_plumed=enabled
+            tests: gromacs_mdrun gromacs_e2e gromacs_plumed_e2e
+          - engine: openmm
+            options: -Dwith_openmm=enabled
+            tests: openmm_reporter openmm_plugin openmm_e2e
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-engine-e2e-
+      - name: Build the ${{ matrix.engine }} plugin and run its engine tests
+        env:
+          ENGINE: ${{ matrix.engine }}
+          OPTIONS: ${{ matrix.options }}
+          TESTS: ${{ matrix.tests }}
+          # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+          UCX_TLS: tcp,self,sm
+          OMPI_MCA_pml: ob1
+          OMPI_MCA_btl: ^openib
+        run: |
+          set -euo pipefail
+          pixi run bash -c '
+            set -euo pipefail
+            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+            export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+            export OMPI_MCA_rmaps_base_oversubscribe=1
+            extra=""
+            if [ "$ENGINE" = lammps ]; then
+              # The runner NIC advertises a MANA device whose UD queues UCX
+              # cannot open. ob1 stays on the host and still runs at np=2.
+              # vader is the Open MPI 4 shared-memory BTL; tcp covers Open MPI 5,
+              # which renamed vader to sm.
+              export OMPI_MCA_pml=ob1
+              export OMPI_MCA_btl=self,vader,tcp
+              # conda-forge LAMMPS ships library.h only; compute dseams needs
+              # the class headers of the same release.
+              extra="-Dlammps_src_include=$(sh scripts/fetch_lammps_headers.sh "$RUNNER_TEMP/lammps-src")"
+            fi
+            meson setup build-e2e --buildtype=release -Dwith_tests=true $OPTIONS $extra
+            ninja -C build-e2e -j4
+            meson test -C build-e2e --print-errorlogs $TESTS | tee build-e2e/e2e-tests.txt
+            for name in $TESTS; do
+              if ! grep -E "seams-core:${name}[[:space:]]+OK" build-e2e/e2e-tests.txt >/dev/null; then
+                echo "${name} did not pass" >&2
+                exit 1
+              fi
+            done
+          '
+
+  docs-engine-howtos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-docs-engines-
+      - name: Install the four engines from conda-forge
+        run: |
+          set -euo pipefail
+          pixi add gromacs lammps openmm
+          # glibc 2.28 baseline. conda-forge LAMMPS links PLUMED 2.9 only.
+          # PLUMED 2.10 is the plumed210 environment, not this pin.
+          pixi add "plumed>=2.9.2,<2.10"
+          ver=$(pixi run pkg-config --modversion plumed)
+          echo "PLUMED $ver"
+          case $ver in
+            2.9.*) ;;
+            *) echo "docs engines expected PLUMED 2.9, got $ver" >&2; exit 1 ;;
+          esac
+      - name: Build with each engine enabled and run the docs engine tests
+        run: |
+          set -euo pipefail
+          pixi run bash -lc '
+            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig:$CONDA_PREFIX/lib.AVX_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+            export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+            meson setup build-docs-eng -Dwith_tests=true -Dwith_gromacs=enabled -Dwith_lammps=enabled -Dwith_openmm=enabled -Dwith_plumed=enabled
+            meson compile -C build-docs-eng
+            meson test -C build-docs-eng --print-errorlogs \
+              docs_engine_gromacs docs_engine_lammps docs_engine_openmm docs_engine_plumed docs_engine_insitu \
+              | tee build-docs-eng/docs-engine.txt
+            for name in docs_engine_gromacs docs_engine_lammps docs_engine_openmm docs_engine_plumed docs_engine_insitu; do
+              if ! grep -E "${name}[[:space:]]+OK" build-docs-eng/docs-engine.txt >/dev/null; then
+                echo "${name} did not pass" >&2
+                exit 1
+              fi
+            done
+          '
+
+  # PLUMED 2.10.2 on the glibc 2.39 sysroot. conda-forge LAMMPS cannot be
+  # installed next to that PLUMED, so this job compiles LAMMPS against it
+  # and runs the LAMMPS and OpenMM paths.
+  plumed-210:
+    runs-on: ubuntu-latest
+    env:
+      # Same default as scripts/build_lammps_plumed.sh. The cache key
+      # names it so a tag change cannot reuse another LAMMPS build.
+      LAMMPS_TAG: stable_22Jul2025_update1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: plumed210
+          cache-key: pixi-plumed210-
+      - name: Cache the source-built LAMMPS
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .lammps-plumed210/bin
+            .lammps-plumed210/include
+            .lammps-plumed210/lib
+            .lammps-plumed210/src
+            .lammps-plumed210/.lammps-tag
+          key: lammps-plumed210-${{ env.LAMMPS_TAG }}-${{ hashFiles('scripts/build_lammps_plumed.sh') }}
+      - name: Install PLUMED 2.10 and the glibc 2.39 sysroot
+        run: |
+          set -euo pipefail
+          pixi install -e plumed210 --platform linux-64-glibc239
+          ver=$(pixi run -e plumed210 --platform linux-64-glibc239 pkg-config --modversion plumed)
+          echo "PLUMED $ver"
+          case $ver in
+            2.10.*) ;;
+            *) echo "plumed210 expected PLUMED 2.10, got $ver" >&2; exit 1 ;;
+          esac
+          pixi run -e plumed210 --platform linux-64-glibc239 python3 -c '
+          import glob, json, os, sys
+          path = glob.glob(os.environ["CONDA_PREFIX"] + "/conda-meta/sysroot_linux-64-*.json")[0]
+          version = json.load(open(path))["version"]
+          print("sysroot_linux-64", version)
+          major, minor = (int(part) for part in version.split(".")[:2])
+          if (major, minor) < (2, 39):
+              sys.exit("sysroot %s is below 2.39" % version)
+          '
+      - name: Build LAMMPS against PLUMED 2.10 and run both engine paths
+        run: |
+          set -euo pipefail
+          pixi run -e plumed210 --platform linux-64-glibc239 bash -lc '
+            set -euo pipefail
+            prefix="$PWD/.lammps-plumed210"
+            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+            export LIBRARY_PATH="$prefix/lib:$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            export CPATH="$prefix/include:$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+            # Warm cache: the script returns the header dir without compiling.
+            src=$(sh scripts/build_lammps_plumed.sh "$prefix")
+            export PATH="$prefix/bin:$PATH"
+            export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+            export LMP="$prefix/bin/lmp"
+            export PLUMED_KERNEL="$CONDA_PREFIX/lib/libplumedKernel.so"
+            ver=$(pkg-config --modversion plumed)
+            case $ver in
+              2.10.*) ;;
+              *) echo "LAMMPS was not built against PLUMED 2.10 ($ver)" >&2; exit 1 ;;
+            esac
+            meson setup build-plumed210 --buildtype=release -Dwith_tests=true -Dwith_cli=true \
+              -Dwith_lammps=enabled -Dwith_plumed=enabled -Dwith_openmm=enabled \
+              -Dlammps_src_include="$src"
+            ninja -C build-plumed210 -j4
+            meson test -C build-plumed210 --print-errorlogs \
+              plumed_driver plumed_units plumed_e2e docs_engine_plumed \
+              openmm_reporter openmm_plugin | tee build-plumed210/plumed210.txt
+            for name in plumed_driver plumed_units plumed_e2e docs_engine_plumed openmm_reporter openmm_plugin; do
+              if ! grep -E "seams-core:${name}[[:space:]]+OK" build-plumed210/plumed210.txt >/dev/null; then
+                echo "${name} did not pass" >&2
+                exit 1
+              fi
+            done
+          '

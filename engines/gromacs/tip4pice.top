@@ -1,0 +1,37 @@
+; Copyright (c) d-SEAMS developers
+; TIP4P/Ice (Abascal et al., J. Chem. Phys. 122, 234511, 2005), rigid.
+; The virtual-site weight is d_OM / (2 d_OH cos(theta/2)) with d_OM = 0.01577 nm.
+
+[ defaults ]
+1 2 no 1.0 1.0
+
+[ atomtypes ]
+OW_ice 8 15.9994 0.0 A 0.31668 0.88216
+HW_ice 1 1.008 0.0 A 0.0 0.0
+MW 0 0.0 0.0 D 0.0 0.0
+
+[ moleculetype ]
+SOL 2
+
+[ atoms ]
+1 OW_ice 1 SOL OW 1 0.0 15.9994
+2 HW_ice 1 SOL HW1 1 0.5897 1.008
+3 HW_ice 1 SOL HW2 1 0.5897 1.008
+4 MW 1 SOL MW 1 -1.1794 0.0
+
+[ settles ]
+1 1 0.09572 0.15139
+
+[ virtual_sites3 ]
+4 1 2 3 1 0.13458335 0.13458335
+
+[ exclusions ]
+1 2 3 4
+2 1 3 4
+3 1 2 4
+4 1 2 3
+
+[ system ]
+TIP4P/Ice ice Ic slab and liquid
+
+[ molecules ]

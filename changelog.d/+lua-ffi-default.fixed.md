@@ -1,0 +1,1 @@
+The Lua LuaJIT FFI module `dseams_ffi.lua` is written by a plain build of the Lua binding, not only by its example test, so the LuaJIT FFI tutorial runs on a fresh build. The Lua binding lives in d-SEAMS/yodaStruct.

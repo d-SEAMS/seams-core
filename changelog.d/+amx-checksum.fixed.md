@@ -1,0 +1,1 @@
+The AMX INT8 product behind `ozaki-ii-amx` is checked against exact row, weighted-row and column checksums of its inputs, and recomputed with VNNI or scalar code when one disagrees. On a KVM guest that corrupted AMX tiles while separate processes used AMX at once, `ozaki` failed in 62 of 1200 concurrent runs and now passes all of them.

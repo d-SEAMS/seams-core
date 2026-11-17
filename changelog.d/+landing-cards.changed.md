@@ -1,0 +1,1 @@
+The landing page hides the root toctree and replaces that dump with cards for Tutorials, How-to, the language reference, the engines, Comparisons, and the paper reproductions. The suite-stack diagram fills the article column.

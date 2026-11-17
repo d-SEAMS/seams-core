@@ -1,7 +1,11 @@
 // Internal
 #include <franzblau.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
+#include <seams_input.hpp>
 
 // Standard
+#include <algorithm>
 #include <iostream>
 
 #include <catch2/catch_test_macros.hpp>
@@ -80,7 +84,7 @@ SCENARIO(
       fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
       THEN("The number of rings should be 2 for this case.") {
         // Find the number of rings inside the graph object
-        nRings = fullGraph.rings.size();  // Number of rings
+        nRings = static_cast<int>(fullGraph.rings.size());  // Number of rings
         REQUIRE(nRings == 2);             // Evaluate condition
       }
     }  // End of getting all the rings (non-primitive included)
@@ -169,17 +173,97 @@ SCENARIO(
       fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
       THEN("The number of primitive rings should be 5 for this case.") {
         // Find the number of rings inside the graph object
-        nAllRings =
-            fullGraph.rings.size();  // Number of rings after backtracking
+        nAllRings = static_cast<int>(
+            fullGraph.rings.size());  // Number of rings after backtracking
         // The number of all rings from backtracking should be 8
         REQUIRE(nAllRings == 8);
         // Get rid of all non-SP rings
         primitive::removeNonSPrings(fullGraph);
         // Get the number of primitive rings
-        nPrimitiveRings = fullGraph.rings.size();
+        nPrimitiveRings = static_cast<int>(fullGraph.rings.size());
         // For this case, the number of primitive rings should be 5
         REQUIRE(nPrimitiveRings == 5);  // Evaluate condition
       }
     }  // End of getting all the rings (non-primitive included)
   }    // End of given
 } // End of scenario
+
+// A ring through a vertex with more than 48 neighbours. Up to six-membered
+// rings the search keeps no distance table, and the primitivity test used
+// to read that missing table for a long row.
+TEST_CASE("A hexagon through a vertex of degree 62 is one primitive ring", "[ring]") {
+  const int hexagon = 6;
+  const int pendants = 60;
+  const int n = hexagon + pendants;
+  std::vector<std::vector<int>> nb(static_cast<std::size_t>(n));
+  auto bond = [&](int a, int b) {
+    nb[static_cast<std::size_t>(a)].push_back(b);
+    nb[static_cast<std::size_t>(b)].push_back(a);
+  };
+  for (int i = 0; i < hexagon; ++i) {
+    bond(i, (i + 1) % hexagon);
+  }
+  // The hub is ring position 1: the search does not test its source.
+  for (int p = hexagon; p < n; ++p) {
+    bond(1, p);
+  }
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(n));
+  std::vector<int> offsets{0};
+  std::vector<int> cols;
+  for (int i = 0; i < n; ++i) {
+    const std::size_t row = static_cast<std::size_t>(i);
+    std::sort(nb[row].begin(), nb[row].end());
+    nList[row].push_back(i);
+    nList[row].insert(nList[row].end(), nb[row].begin(), nb[row].end());
+    cols.insert(cols.end(), nb[row].begin(), nb[row].end());
+    offsets.push_back(static_cast<int>(cols.size()));
+  }
+  const std::vector<std::vector<int>> want{{0, 1, 2, 3, 4, 5}};
+  REQUIRE(primitive::ringNetwork(nList, 6) == want);
+  REQUIRE(primitive::ringNetwork(nList, 6, primitive::RingRows::Vectors) == want);
+  REQUIRE(primitive::ringNetwork(nList, 6, primitive::RingRows::Packed) == want);
+  REQUIRE(primitive::ringNetwork(offsets, cols, 6) == want);
+  REQUIRE(primitive::ringNetworkBalls(nList, 6) == want);
+}
+
+// The search skips odd rings only when a two-coloring of the graph
+// succeeds. The color buffer starts at -1, which a target with an
+// unsigned plain char (aarch64, or -funsigned-char) reads as 255: every
+// graph then looked bipartite and the sII host lost all its pentagons.
+TEST_CASE("The sII hydrate host keeps its five-membered rings", "[ring]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrjO("traj/genice_sII.lammpstrj", 1, cloud, 1);
+  REQUIRE(cloud.nop == 136);
+  const auto nList =
+      nneigh::neighbourListByIndex(cloud, nneigh::neighListO(3.5, cloud, 1));
+
+  std::vector<int> offsets{0};
+  std::vector<int> cols;
+  for (const auto &row : nList) {
+    cols.insert(cols.end(), row.begin() + 1, row.end());
+    offsets.push_back(static_cast<int>(cols.size()));
+  }
+
+  auto requireSizes = [](const char *search, const std::vector<std::vector<int>> &rings) {
+    INFO(search);
+    int five = 0;
+    int six = 0;
+    for (const auto &ring : rings) {
+      REQUIRE((ring.size() == 5 || ring.size() == 6));
+      (ring.size() == 5 ? five : six)++;
+    }
+    CHECK(five == 144);
+    CHECK(six == 16);
+  };
+
+  requireSizes("ringNetwork", primitive::ringNetwork(nList, 6));
+  requireSizes("ringNetwork Vectors",
+               primitive::ringNetwork(nList, 6, primitive::RingRows::Vectors));
+  requireSizes("ringNetwork Packed",
+               primitive::ringNetwork(nList, 6, primitive::RingRows::Packed));
+  requireSizes("ringNetwork CSR", primitive::ringNetwork(offsets, cols, 6));
+  requireSizes("ringNetworkBalls", primitive::ringNetworkBalls(nList, 6));
+
+  primitive::RingUpdater updater(6);
+  requireSizes("RingUpdater", updater.update(nList));
+}

@@ -1,0 +1,9 @@
+/* Export list for libseams. Only the C API in seams.h is public.
+   Template instantiations from namespace std keep default visibility
+   under -fvisibility=hidden, so this script hides them too. */
+{
+  global:
+    seams_*;
+  local:
+    *;
+};

@@ -1,0 +1,36 @@
+frames	148
+molecules	4096
+cutoff_A	3.5
+ring_depth	7
+q6bar_cut	0.36
+dump_step_delta	1000
+assumed_step_fs	10
+ps_per_frame	10
+ring_lead	chill_ext	ok	1	half_frames	11	ascent_frames	4	corr_lag	6	corr	0.17738	half_ps	110	ascent_ps	40	corr_ps	60
+ring_lead	chill_core	ok	1	half_frames	14	ascent_frames	4	corr_lag	15	corr	0.187212	half_ps	140	ascent_ps	40	corr_ps	150
+ring_lead	ovito_ext	ok	1	half_frames	11	ascent_frames	2	corr_lag	0	corr	0.259052	half_ps	110	ascent_ps	20	corr_ps	0
+ring_lead	ovito_core	ok	1	half_frames	15	ascent_frames	4	corr_lag	-3	corr	0.211176	half_ps	150	ascent_ps	40	corr_ps	-30
+ring_lead	q6bar	ok	1	half_frames	11	ascent_frames	1	corr_lag	15	corr	0.191404	half_ps	110	ascent_ps	10	corr_ps	150
+ring_lead	symmetry	ok	1	half_frames	8	ascent_frames	10	corr_lag	-19	corr	0.257453	half_ps	80	ascent_ps	100	corr_ps	-190
+ring_lead	chill_ext_n6	ok	1	half_frames	14	ascent_frames	3	corr_lag	6	corr	0.186853	half_ps	140	ascent_ps	30	corr_ps	60
+nucleus	chill_core	ok	1	climbed	1	onset_frame	141	onset_timestep	15817000	onset_size	407	onset_stack	0.567568	max_frame	143	max_timestep	15819000	max_size	459	max_stack	0.566449	onset_ps	1400	half_ok	1	half_frame	104	half_timestep	15780000	half_size	263	half_stack	0.509506	half_ps	1030
+nucleus	chill_ext	ok	1	climbed	1	onset_frame	138	onset_timestep	15814000	onset_size	710	onset_stack	0.57377	max_frame	139	max_timestep	15815000	max_size	752	max_stack	0.571429	onset_ps	1370	half_ok	1	half_frame	105	half_timestep	15781000	half_size	490	half_stack	0.48913	half_ps	1040
+nucleus	ovito_core	ok	1	climbed	1	onset_frame	141	onset_timestep	15817000	onset_size	400	onset_stack	0.5825	max_frame	143	max_timestep	15819000	max_size	447	max_stack	0.57047	onset_ps	1400	half_ok	1	half_frame	103	half_timestep	15779000	half_size	256	half_stack	0.515625	half_ps	1020
+nucleus	ovito_ext	ok	1	climbed	1	onset_frame	138	onset_timestep	15814000	onset_size	742	onset_stack	0.57377	max_frame	139	max_timestep	15815000	max_size	789	max_stack	0.572368	onset_ps	1370	half_ok	1	half_frame	105	half_timestep	15781000	half_size	528	half_stack	0.498168	half_ps	1040
+nucleus	q6bar	ok	1	climbed	1	onset_frame	141	onset_timestep	15817000	onset_size	641	onset_stack	0.604651	max_frame	143	max_timestep	15819000	max_size	699	max_stack	0.601504	onset_ps	1400	half_ok	1	half_frame	105	half_timestep	15781000	half_size	429	half_stack	0.561798	half_ps	1040
+nucleus	symmetry	ok	1	climbed	1	onset_frame	137	onset_timestep	15813000	onset_size	115	onset_stack	0.678261	max_frame	138	max_timestep	15814000	max_size	160	max_stack	0.5625	onset_ps	1360	half_ok	1	half_frame	102	half_timestep	15778000	half_size	91	half_stack	0.538462	half_ps	1010
+shift	chill_core	chill_ext	ok	1	d_size	227	d_frame	1	d_ps	10
+shift	chill_core	ovito_core	ok	1	d_size	-7	d_frame	-1	d_ps	-10
+shift	chill_core	ovito_ext	ok	1	d_size	265	d_frame	1	d_ps	10
+shift	chill_core	q6bar	ok	1	d_size	166	d_frame	1	d_ps	10
+shift	chill_core	symmetry	ok	1	d_size	-172	d_frame	-2	d_ps	-20
+shift	chill_ext	ovito_core	ok	1	d_size	-234	d_frame	-2	d_ps	-20
+shift	chill_ext	ovito_ext	ok	1	d_size	38	d_frame	0	d_ps	0
+shift	chill_ext	q6bar	ok	1	d_size	-61	d_frame	0	d_ps	0
+shift	chill_ext	symmetry	ok	1	d_size	-399	d_frame	-3	d_ps	-30
+shift	ovito_core	ovito_ext	ok	1	d_size	272	d_frame	2	d_ps	20
+shift	ovito_core	q6bar	ok	1	d_size	173	d_frame	2	d_ps	20
+shift	ovito_core	symmetry	ok	1	d_size	-165	d_frame	-1	d_ps	-10
+shift	ovito_ext	q6bar	ok	1	d_size	-99	d_frame	0	d_ps	0
+shift	ovito_ext	symmetry	ok	1	d_size	-437	d_frame	-3	d_ps	-30
+shift	q6bar	symmetry	ok	1	d_size	-338	d_frame	-3	d_ps	-30

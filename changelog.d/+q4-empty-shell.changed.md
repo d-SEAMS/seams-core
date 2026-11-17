@@ -1,0 +1,1 @@
+An empty Steinhardt shell is 0. The harmonic row stays zero and is not divided by the neighbour count, so freud and pyscal3 store NaN for that same atom. A NaN switch is not added: it would enter every mean and every CHILL+ label, and a neighbour count of zero already names the shell.

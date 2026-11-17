@@ -16,14 +16,26 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <diamond_cna.hpp>
+#include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <thread_team.hpp>
+#include <water_select.hpp>
 
+#include <chrono>
+#include <cmath>
+#include <cstring>
 #include <exception>
 #include <string>
 #include <vector>
 
-int seams_chill_plus(const double *xyz, int n, const double *box, int *labels) {
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
+int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels) {
+  const seams::FairWidth fair;
   return seams_chill_plus_graph(xyz, n, box, 3.5, nullptr, labels);
 }
 
@@ -46,7 +58,7 @@ int chillLabels(molSys::PointCloud<molSys::Point<double>, double> &cloud,
 }
 
 molSys::PointCloud<molSys::Point<double>, double>
-cloudFromXyz(const double *xyz, int n) {
+cloudFromXyz(const double *xyz, int n, bool index = true) {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.nop = n;
   cloud.currentFrame = 1;
@@ -59,15 +71,62 @@ cloudFromXyz(const double *xyz, int n) {
     p.type = 1;
     p.atomID = i + 1;
     p.molID = i + 1;
-    cloud.idIndexMap[i + 1] = i;
+    if (index) {
+      cloud.idIndexMap[i + 1] = i;
+    }
   }
   return cloud;
+}
+
+int writeQ4Q6(molSys::PointCloud<molSys::Point<double>, double> &cloud,
+              double cutoff, double *q4, double *q6, double *q4bar,
+              double *q6bar) {
+  // Two separate calls each rebuild the cutoff list. The paired kernel
+  // walks that list once and writes both orders. Averaged q-bar still
+  // takes the two calls, because the average reads every neighbour's q_lm.
+  if (q4bar == nullptr && q6bar == nullptr) {
+    std::vector<double> a4;
+    std::vector<double> a6;
+    if (chill::localCutoffQ4Q6(cloud, cutoff, 1, a4, a6) &&
+        static_cast<int>(a4.size()) == cloud.nop &&
+        static_cast<int>(a6.size()) == cloud.nop) {
+      if (cloud.nop > 0) {
+        std::memcpy(q4, a4.data(), static_cast<std::size_t>(cloud.nop) * sizeof(double));
+        std::memcpy(q6, a6.data(), static_cast<std::size_t>(cloud.nop) * sizeof(double));
+      }
+      return 0;
+    }
+  }
+  const auto a4 =
+      chill::steinhardtQlCutoff(cloud, cutoff, 4, 1, q4bar != nullptr);
+  const auto a6 =
+      chill::steinhardtQlCutoff(cloud, cutoff, 6, 1, q6bar != nullptr);
+  if (static_cast<int>(a4.ql.size()) != cloud.nop ||
+      static_cast<int>(a6.ql.size()) != cloud.nop) {
+    return 1;
+  }
+  if (cloud.nop > 0) {
+    std::memcpy(q4, a4.ql.data(),
+                static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    std::memcpy(q6, a6.ql.data(),
+                static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    if (q4bar != nullptr) {
+      std::memcpy(q4bar, a4.qlBar.data(),
+                  static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    }
+    if (q6bar != nullptr) {
+      std::memcpy(q6bar, a6.qlBar.data(),
+                  static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    }
+  }
+  return 0;
 }
 
 } // namespace
 
 int seams_chill_plus_graph(const double *xyz, int n, const double *box,
                            double cutoff, const char *graph, int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box == nullptr || labels == nullptr || n <= 0 ||
       !(cutoff > 0.0)) {
     return 1;
@@ -89,6 +148,7 @@ int seams_chill_plus_graph(const double *xyz, int n, const double *box,
 int seams_chill_plus_rule(const double *xyz, int n, const double *box,
                           double cutoff, const char *graph, const char *rule,
                           int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box == nullptr || labels == nullptr || n <= 0 ||
       !(cutoff > 0.0)) {
     return 1;
@@ -111,9 +171,82 @@ int seams_chill_plus_rule(const double *xyz, int n, const double *box,
   }
 }
 
+namespace {
+
+thread_local std::string g_c_error;
+thread_local double g_stages[4] = {0.0, 0.0, 0.0, 0.0};
+
+using StageClock = std::chrono::steady_clock;
+
+double secondsBetween(StageClock::time_point a, StageClock::time_point b) {
+  return std::chrono::duration<double>(b - a).count();
+}
+
+void note_c_error(const std::string &message) { g_c_error = message; }
+
+void clear_c_error() { g_c_error.clear(); }
+
+bool sameType(const int *types, int n, int &type0) {
+  if (types == nullptr || n <= 0) {
+    type0 = 1;
+    return true;
+  }
+  type0 = types[0];
+  for (int i = 1; i < n; ++i) {
+    if (types[i] != type0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+molSys::PointCloud<molSys::Point<double>, double>
+cloudFromSpecies(const double *xyz, int n, const int *types, const int *mols) {
+  auto cloud = cloudFromXyz(xyz, n);
+  for (int i = 0; i < n; ++i) {
+    auto &point = cloud.pts[static_cast<std::size_t>(i)];
+    point.type = types != nullptr ? types[i] : 1;
+    point.molID = mols != nullptr ? mols[i] : i + 1;
+  }
+  return cloud;
+}
+
+bool applyLammpsBox(molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                    const double *box9) {
+  return nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                      box9[2], box9[3], box9[4], box9[5],
+                                      box9[6], box9[7], box9[8]);
+}
+
+water::Selection
+selectSpecies(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+              int oxygen_type, int mol_mode, const int *mol_ids, int n_mol_ids) {
+  water::Request request;
+  if (oxygen_type > 0) {
+    request.type = oxygen_type;
+  }
+  if (mol_mode == 1) {
+    request.mol_mode = water::MolMode::Water;
+  } else if (mol_mode == 2) {
+    if (mol_ids == nullptr || n_mol_ids <= 0) {
+      throw std::invalid_argument("molecule selection is empty");
+    }
+    request.mol_mode = water::MolMode::Ids;
+    request.molecules.assign(mol_ids, mol_ids + n_mol_ids);
+  } else if (mol_mode != 0) {
+    throw std::invalid_argument("molecule mode is 0, 1 (water) or 2 (ids)");
+  }
+  return water::selectOxygens(cloud, request);
+}
+
+} // namespace
+
+const char *seams_c_error(void) { return g_c_error.c_str(); }
+
 int seams_chill_plus_graph_lammps(const double *xyz, int n,
                                   const double *box9, double cutoff,
                                   const char *graph, int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box9 == nullptr || labels == nullptr || n <= 0 ||
       !(cutoff > 0.0)) {
     return 1;
@@ -130,4 +263,458 @@ int seams_chill_plus_graph_lammps(const double *xyz, int n,
     return 1;
   }
   return chillLabels(cloud, cutoff, name, nullptr, labels);
+}
+
+namespace {
+
+int prepareSpecies(const double *xyz, int n, const double *box9,
+                   const int *types, const int *mols, int oxygen_type,
+                   int mol_mode, const int *mol_ids, int n_mol_ids,
+                   double cutoff, const char *graph, std::string &name,
+                   molSys::PointCloud<molSys::Point<double>, double> &full,
+                   water::Selection &selection, bool &uniformPath) {
+  clear_c_error();
+  uniformPath = false;
+  if (xyz == nullptr || box9 == nullptr || n <= 0 || !(cutoff > 0.0)) {
+    note_c_error("xyz, box, and a positive atom count are required");
+    return 1;
+  }
+  name = (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
+  if (name != "cutoff" && name != "mutual" && !name.empty()) {
+    note_c_error("graph is cutoff or mutual");
+    return 1;
+  }
+  if (name.empty()) {
+    name = "cutoff";
+  }
+  int type0 = 1;
+  const bool uniform = sameType(types, n, type0);
+  if (uniform && mol_mode == 0 && (oxygen_type == 0 || oxygen_type == type0)) {
+    uniformPath = true;
+    full = cloudFromXyz(xyz, n);
+    if (!applyLammpsBox(full, box9)) {
+      note_c_error("box edges do not make a cell");
+      return 1;
+    }
+    return 0;
+  }
+  if (!uniform && oxygen_type <= 0 && mol_mode == 0) {
+    note_c_error("mixed species need a water type or molecule");
+    return 1;
+  }
+  try {
+    full = cloudFromSpecies(xyz, n, types, mols);
+    if (!applyLammpsBox(full, box9)) {
+      note_c_error("box edges do not make a cell");
+      return 1;
+    }
+    selection = selectSpecies(full, oxygen_type, mol_mode, mol_ids, n_mol_ids);
+  } catch (const std::exception &ex) {
+    note_c_error(ex.what());
+    return 1;
+  }
+  return 0;
+}
+
+molSys::PointCloud<molSys::Point<double>, double>
+typeOneCopy(const molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+  auto out = cloudFromXyz(nullptr, 0);
+  out.nop = cloud.nop;
+  out.currentFrame = 1;
+  out.box = cloud.box;
+  out.boxLow = cloud.boxLow;
+  out.pts.resize(static_cast<std::size_t>(std::max(cloud.nop, 0)));
+  for (int i = 0; i < cloud.nop; ++i) {
+    auto &point = out.pts[static_cast<std::size_t>(i)];
+    const auto &src = cloud.pts[static_cast<std::size_t>(i)];
+    point.x = src.x;
+    point.y = src.y;
+    point.z = src.z;
+    point.type = 1;
+    point.atomID = i + 1;
+    point.molID = i + 1;
+    out.idIndexMap[point.atomID] = i;
+  }
+  return out;
+}
+
+using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+// Below this many atoms a team costs more than the loop it splits.
+constexpr int kParallelFrame = 2048;
+
+Cloud cloudOf(const double *xyz, int n, const double *box9) {
+  Cloud cloud;
+  cloud.nop = n;
+  cloud.currentFrame = 1;
+  cloud.pts.resize(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    p.x = xyz[3 * i];
+    p.y = xyz[3 * i + 1];
+    p.z = xyz[3 * i + 2];
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+  }
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5], box9[6],
+                                    box9[7], box9[8])) {
+    throw std::invalid_argument("box edges are not positive");
+  }
+  return cloud;
+}
+
+// Frame buffers of the calling thread. The cloud's points and the CSR keep
+// their storage between calls, so a repeated frame of the same size touches
+// no fresh pages.
+struct FrameScratch {
+  Cloud cloud;
+  std::vector<int> off;
+  std::vector<int> col;
+};
+
+FrameScratch &frameScratch() {
+  thread_local FrameScratch scratch;
+  return scratch;
+}
+
+// The same cloud as cloudOf, written into the thread's buffer. Callers
+// only read it.
+const Cloud &frameCloud(const double *xyz, int n, const double *box9) {
+  Cloud &cloud = frameScratch().cloud;
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5], box9[6],
+                                    box9[7], box9[8])) {
+    throw std::invalid_argument("box edges are not positive");
+  }
+  cloud.nop = n;
+  cloud.currentFrame = 1;
+  cloud.idIndexMap.clear();
+  cloud.pts.resize(static_cast<std::size_t>(n));
+  molSys::Point<double> *pts = cloud.pts.data();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= kParallelFrame && !omp_in_parallel())
+#endif
+  for (int i = 0; i < n; i++) {
+    auto &p = pts[i];
+    p.x = xyz[3 * i];
+    p.y = xyz[3 * i + 1];
+    p.z = xyz[3 * i + 2];
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.c_ij.clear();
+    p.iceType = molSys::atom_state_type::unclassified;
+    p.inSlice = true;
+  }
+  return cloud;
+}
+
+void copyInts(const int *src, int *dst, int count) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (count >= kParallelFrame && !omp_in_parallel())
+#endif
+  for (int i = 0; i < count; i++) {
+    dst[i] = src[i];
+  }
+}
+
+bool badFrame(const double *xyz, int n, const double *box9, double cutoff) {
+  return xyz == nullptr || box9 == nullptr || n <= 0 || !(cutoff > 0.0);
+}
+
+} // namespace
+
+int seams_chill_plus_species(const double *xyz, int n, const double *box9,
+                             const int *types, const int *mols,
+                             int oxygen_type, int mol_mode, const int *mol_ids,
+                             int n_mol_ids, double cutoff, const char *graph,
+                             int *labels, int *ion_ice, int *ion_liquid,
+                             double *ion_front) {
+  const seams::FairWidth fair;
+  if (labels == nullptr) {
+    note_c_error("labels are required");
+    return 1;
+  }
+  std::string name;
+  molSys::PointCloud<molSys::Point<double>, double> full;
+  water::Selection selection;
+  bool uniformPath = false;
+  if (prepareSpecies(xyz, n, box9, types, mols, oxygen_type, mol_mode, mol_ids,
+                     n_mol_ids, cutoff, graph, name, full, selection,
+                     uniformPath) != 0) {
+    return 1;
+  }
+  if (uniformPath) {
+    const int rc = chillLabels(full, cutoff, name, nullptr, labels);
+    if (ion_ice != nullptr) {
+      *ion_ice = 0;
+    }
+    if (ion_liquid != nullptr) {
+      *ion_liquid = 0;
+    }
+    if (ion_front != nullptr) {
+      *ion_front = -1.0;
+    }
+    return rc;
+  }
+  auto oxygen = water::subsetCloud(full, selection);
+  auto scored = typeOneCopy(oxygen);
+  std::vector<int> subLabels(static_cast<std::size_t>(std::max(scored.nop, 0)),
+                             6);
+  if (scored.nop > 0 &&
+      chillLabels(scored, cutoff, name, nullptr, subLabels.data()) != 0) {
+    note_c_error("CHILL+ failed on the water oxygens");
+    return 1;
+  }
+  for (int i = 0; i < n; ++i) {
+    labels[i] = static_cast<int>(molSys::atom_state_type::unclassified);
+  }
+  for (int k = 0; k < selection.n_oxygen; ++k) {
+    const int index = selection.index[static_cast<std::size_t>(k)];
+    labels[index] = subLabels[static_cast<std::size_t>(k)];
+    oxygen.pts[static_cast<std::size_t>(k)].iceType =
+        static_cast<molSys::atom_state_type>(subLabels[static_cast<std::size_t>(k)]);
+  }
+  const auto ions = water::collectIons(full, selection);
+  const auto report = water::ionFront(oxygen, ions);
+  if (ion_ice != nullptr) {
+    *ion_ice = report.ice;
+  }
+  if (ion_liquid != nullptr) {
+    *ion_liquid = report.liquid;
+  }
+  if (ion_front != nullptr) {
+    *ion_front = report.front;
+  }
+  return 0;
+}
+
+int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
+                               const int *types, const int *mols,
+                               int oxygen_type, int mol_mode,
+                               const int *mol_ids, int n_mol_ids, double cutoff,
+                               int *degree) {
+  const seams::FairWidth fair;
+  if (degree == nullptr) {
+    note_c_error("degree is required");
+    return 1;
+  }
+  std::string name;
+  molSys::PointCloud<molSys::Point<double>, double> full;
+  water::Selection selection;
+  bool uniformPath = false;
+  if (prepareSpecies(xyz, n, box9, types, mols, oxygen_type, mol_mode, mol_ids,
+                     n_mol_ids, cutoff, "cutoff", name, full, selection,
+                     uniformPath) != 0) {
+    return 1;
+  }
+  for (int i = 0; i < n; ++i) {
+    degree[i] = -1;
+  }
+  molSys::PointCloud<molSys::Point<double>, double> scored;
+  std::vector<int> back;
+  if (uniformPath) {
+    scored = full;
+    back.resize(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; ++i) {
+      back[static_cast<std::size_t>(i)] = i;
+    }
+  } else {
+    auto oxygen = water::subsetCloud(full, selection);
+    scored = typeOneCopy(oxygen);
+    back = selection.index;
+  }
+  const auto rows = nneigh::neighListO(cutoff, scored, 1);
+  if (static_cast<int>(rows.size()) < scored.nop) {
+    note_c_error("neighbour list is empty");
+    return 1;
+  }
+  for (int k = 0; k < scored.nop; ++k) {
+    const auto &row = rows[static_cast<std::size_t>(k)];
+    const int count = row.empty() ? 0 : static_cast<int>(row.size()) - 1;
+    degree[back[static_cast<std::size_t>(k)]] = count;
+  }
+  return 0;
+}
+
+int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
+                double *q4, double *q6, double *q4bar, double *q6bar) {
+  const seams::FairWidth fair;
+  if (xyz == nullptr || box == nullptr || q4 == nullptr || q6 == nullptr ||
+      n <= 0 || !(cutoff > 0.0)) {
+    return 1;
+  }
+  if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
+    return 1;
+  }
+  auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
+  cloud.box = {box[3], box[4], box[5]};
+  cloud.boxLow = {box[0], box[1], box[2]};
+  return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+}
+
+int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
+                       double cutoff, double *q4, double *q6, double *q4bar,
+                       double *q6bar) {
+  const seams::FairWidth fair;
+  if (xyz == nullptr || box9 == nullptr || q4 == nullptr || q6 == nullptr ||
+      n <= 0 || !(cutoff > 0.0)) {
+    return 1;
+  }
+  auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5],
+                                    box9[6], box9[7], box9[8])) {
+    return 1;
+  }
+  return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+}
+
+
+int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff,
+                     int *offsets, int *cols, int cols_cap, int *n_cols) {
+  const seams::FairWidth fair;
+  if (badFrame(xyz, n, box9, cutoff) || offsets == nullptr || n_cols == nullptr) {
+    return 1;
+  }
+  try {
+    const auto t0 = StageClock::now();
+    const Cloud &cloud = frameCloud(xyz, n, box9);
+    const auto t1 = StageClock::now();
+    std::vector<int> &off = frameScratch().off;
+    std::vector<int> &col = frameScratch().col;
+    if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
+      return 1;
+    }
+    const auto t2 = StageClock::now();
+    const int count = static_cast<int>(col.size());
+    *n_cols = count;
+    if (static_cast<int>(off.size()) != n + 1) {
+      return 1;
+    }
+    copyInts(off.data(), offsets, n + 1);
+    if (cols != nullptr) {
+      if (cols_cap < count) {
+        return 2;
+      }
+      copyInts(col.data(), cols, count);
+    }
+    const auto t3 = StageClock::now();
+    g_stages[0] = secondsBetween(t0, t1);
+    g_stages[1] = secondsBetween(t1, t2);
+    g_stages[2] = 0.0;
+    g_stages[3] = secondsBetween(t2, t3);
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}
+
+int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
+                    int order_l, double *ql) {
+  const seams::FairWidth fair;
+  if (badFrame(xyz, n, box9, cutoff) || ql == nullptr) {
+    return 1;
+  }
+  if (order_l != 3 && order_l != 4 && order_l != 6 && order_l != 8 &&
+      order_l != 12) {
+    return 1;
+  }
+  try {
+    const auto t0 = StageClock::now();
+    const Cloud &cloud = frameCloud(xyz, n, box9);
+    const auto t1 = StageClock::now();
+    const auto result = chill::steinhardtQlCutoff(cloud, cutoff, order_l, 1, false);
+    const auto t2 = StageClock::now();
+    if (static_cast<int>(result.ql.size()) != n) {
+      return 1;
+    }
+    const double *src = result.ql.data();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= kParallelFrame && !omp_in_parallel())
+#endif
+    for (int i = 0; i < n; i++) {
+      ql[i] = src[i];
+    }
+    const auto t3 = StageClock::now();
+    const auto &kernel = chill::lastQlCutoffStages();
+    const double inside = secondsBetween(t1, t2);
+    g_stages[0] = secondsBetween(t0, t1);
+    g_stages[1] = kernel.set ? kernel.list : 0.0;
+    g_stages[2] = kernel.set ? inside - kernel.list : inside;
+    g_stages[3] = secondsBetween(t2, t3);
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}
+
+void seams_c_last_stages(double seconds[4]) {
+  if (seconds == nullptr) {
+    return;
+  }
+  for (int i = 0; i < 4; i++) {
+    seconds[i] = g_stages[i];
+  }
+}
+
+int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff,
+                      int *labels) {
+  const seams::FairWidth fair;
+  if (badFrame(xyz, n, box9, cutoff) || labels == nullptr) {
+    return 1;
+  }
+  try {
+    auto cloud = cloudOf(xyz, n, box9);
+    std::vector<int> off;
+    std::vector<int> col;
+    // A crowded shell (the dense 512-atom frame has about 56 neighbours
+    // inside 3.5 A) does not need that whole list. mdapy's diamond
+    // identifier uses the four nearest neighbours. That list produces the
+    // same labels as the cutoff list on the frames this tree tests. A
+    // crystal shell is left on the cutoff list.
+    const double volume = std::abs(box9[3] * box9[4] * box9[5]);
+    const double shell =
+        volume > 0.0 ? (static_cast<double>(n) / volume) *
+                           (4.1887902047863905 * cutoff * cutoff * cutoff)
+                     : 0.0;
+    const bool crowded = shell > 12.0;
+    const bool listed =
+        crowded ? nneigh::directedKNearestCsr(cloud, 4, cutoff, off, col)
+                : nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false);
+    if (!listed) {
+      return 1;
+    }
+    std::vector<int> kind;
+    symm::diamondFromCsr(cloud, off, col, kind);
+    for (int i = 0; i < n; i++) {
+      labels[i] = kind[static_cast<std::size_t>(i)];
+    }
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}
+
+int seams_primitive_rings(const double *xyz, int n, const double *box9,
+                          double cutoff, int max_depth, int *counts, int counts_len) {
+  const seams::FairWidth fair;
+  if (badFrame(xyz, n, box9, cutoff) || counts == nullptr || max_depth < 3 ||
+      counts_len < max_depth + 1) {
+    return 1;
+  }
+  try {
+    const Cloud &cloud = frameCloud(xyz, n, box9);
+    std::vector<int> &off = frameScratch().off;
+    std::vector<int> &col = frameScratch().col;
+    if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
+      return 1;
+    }
+    primitive::ringSizeCounts(off, col, max_depth, counts, counts_len);
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
 }

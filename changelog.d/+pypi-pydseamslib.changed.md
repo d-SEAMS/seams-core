@@ -1,0 +1,1 @@
+The Python binding is released on PyPI as `pydseamslib` 2.14.0 from d-SEAMS/PydSEAMSlib, the distribution name of the 2.11 wheels, so `pip install -U pydseamslib` upgrades them in place. It provides `import dseams` and `import pydseams`.

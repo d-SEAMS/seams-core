@@ -1,0 +1,8 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.300 --> 00:00:19.680 line:95% align:center size:80%
+The OpenMM how-to scores the ice Ih dump. The locked line is hexagonal 128, six-rings 256, q6 0.625855. docs_engine_openmm asserts that line, and the run prints openmm hexagonal 128 six-rings 256 q6 0.625855.

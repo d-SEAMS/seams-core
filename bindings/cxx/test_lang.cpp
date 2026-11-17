@@ -8,8 +8,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <dlfcn.h>
 #include <vector>
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 namespace {
 
@@ -17,17 +21,24 @@ using ArmFn = void (*)(int, int);
 using LiveFn = long (*)();
 using ResetFn = void (*)();
 
+void *process_symbol(const char *name) {
+#if defined(_WIN32)
+  return reinterpret_cast<void *>(GetProcAddress(GetModuleHandleA(nullptr), name));
+#else
+  return dlsym(RTLD_DEFAULT, name);
+#endif
+}
 ArmFn fault_arm() {
-  return reinterpret_cast<ArmFn>(dlsym(RTLD_DEFAULT, "seams_test_arm"));
+  return reinterpret_cast<ArmFn>(process_symbol("seams_test_arm"));
 }
 LiveFn fault_live() {
-  return reinterpret_cast<LiveFn>(dlsym(RTLD_DEFAULT, "seams_test_live"));
+  return reinterpret_cast<LiveFn>(process_symbol("seams_test_live"));
 }
 LiveFn fault_peak() {
-  return reinterpret_cast<LiveFn>(dlsym(RTLD_DEFAULT, "seams_test_peak"));
+  return reinterpret_cast<LiveFn>(process_symbol("seams_test_peak"));
 }
 ResetFn fault_reset() {
-  return reinterpret_cast<ResetFn>(dlsym(RTLD_DEFAULT, "seams_test_reset_peak"));
+  return reinterpret_cast<ResetFn>(process_symbol("seams_test_reset_peak"));
 }
 
 int fail(const std::string &message) {
@@ -127,7 +138,9 @@ int main(int argc, char **argv) {
     }
   }
   mean = nfinite > 0 ? mean / static_cast<double>(nfinite) : 0.0;
-  if (std::abs(mean - 0.389362) > 1e-4) {
+  // Orthorhombic frames take the cutoff shell. 0.389362 is the
+  // four-nearest mean of the same oxygens.
+  if (std::abs(mean - 0.374897) > 1e-4) {
     std::cerr << "q3 mean " << mean << "\n";
     return fail("q3");
   }
@@ -151,7 +164,7 @@ int main(int argc, char **argv) {
     return fail("rings");
   }
   std::cout << "tip4p mutual rings";
-  for (int i = 3; i <= 8; ++i) {
+  for (std::size_t i = 3; i <= 8; ++i) {
     std::cout << " " << i << ":" << rings[i];
   }
   std::cout << "\n";
@@ -269,7 +282,11 @@ int main(int argc, char **argv) {
   if (argc > 2) {
     const std::string cmd = std::string(argv[2]) + " cages " + nucleation +
                             " --graph seeded --cutoff 3.5";
+#if defined(_WIN32)
+    FILE *pipe = _popen(cmd.c_str(), "r");
+#else
     FILE *pipe = popen(cmd.c_str(), "r");
+#endif
     if (pipe == nullptr) {
       return fail("cli pipe");
     }
@@ -278,7 +295,11 @@ int main(int argc, char **argv) {
     while (fgets(buf, sizeof buf, pipe) != nullptr) {
       line += buf;
     }
+#if defined(_WIN32)
+    const int rc = _pclose(pipe);
+#else
     const int rc = pclose(pipe);
+#endif
     if (rc != 0) {
       std::cerr << line;
       return fail("cli cages");
@@ -1047,6 +1068,164 @@ int main(int argc, char **argv) {
   seams_frame_free(tip);
   seams_frame_free(ice);
   seams_frame_free(guest);
+  {
+    const double brineXyz[] = {10, 10, 10, 12.8, 10, 10, 9.07, 12.42, 10,
+                               9.07, 8.79, 11.62, 9.07, 8.79, 8.38, 12.0, 10, 10};
+    const double brineBox[] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
+    const int types[] = {1, 1, 1, 1, 1, 3};
+    const int mols[] = {1, 2, 3, 4, 5, 6};
+    seams_frame *mixed =
+        seams_frame_from_species(brineXyz, 6, brineBox, types, nullptr, mols);
+    if (mixed == nullptr) {
+      return fail("brine frame");
+    }
+    int mixedLabels[6] = {};
+    if (seams_frame_chill_plus(mixed, 3.5, 0, "cutoff", mixedLabels, nullptr) !=
+        0) {
+      seams_frame_free(mixed);
+      return fail("brine untyped chill");
+    }
+    if (mixedLabels[5] == 6) {
+      seams_frame_free(mixed);
+      return fail("brine ion was already unclassified");
+    }
+    if (seams_frame_select(mixed, 1, nullptr, 0) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine select");
+    }
+    int selected[6] = {};
+    if (seams_frame_chill_plus(mixed, 3.5, 1, "cutoff", selected, nullptr) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine selected chill");
+    }
+    if (selected[5] != 6) {
+      seams_frame_free(mixed);
+      return fail("brine ion stayed labeled");
+    }
+    int ringCounts[7] = {};
+    if (seams_frame_rings(mixed, 3.5, 1, "cutoff", 6, ringCounts, 7) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine rings");
+    }
+    int hex = 0;
+    int cubicCages = 0;
+    int water = 0;
+    int both = 0;
+    if (seams_frame_cages(mixed, 3.5, 1, 4, "cutoff", 0, nullptr, &hex, &cubicCages,
+                          &water, &both) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine cages");
+    }
+    if (hex + cubicCages + water + both != 5) {
+      seams_frame_free(mixed);
+      return fail("brine cages counted the ion");
+    }
+    if (seams_frame_select(mixed, 9, nullptr, 0) == 0) {
+      seams_frame_free(mixed);
+      return fail("brine missing type was accepted");
+    }
+    if (std::string(seams_last_error()) != "atom type 9 is not in the frame") {
+      seams_frame_free(mixed);
+      return fail("brine missing type text");
+    }
+    const int absentMol = 99;
+    if (seams_frame_select(mixed, 1, &absentMol, 1) == 0) {
+      seams_frame_free(mixed);
+      return fail("brine missing molecule was accepted");
+    }
+    seams_frame_free(mixed);
+  }
+  {
+    seams_frame *fresh = seams_frame_read(tip4p.c_str(), 1, 2);
+    if (fresh == nullptr) {
+      return fail("reread tip4p");
+    }
+    const int nFresh = seams_frame_nop(fresh);
+    std::vector<double> moved(static_cast<std::size_t>(nFresh) * 3);
+    const double *src = seams_frame_positions(fresh);
+    for (int i = 0; i < nFresh * 3; ++i) {
+      moved[static_cast<std::size_t>(i)] = src[i];
+    }
+    moved[0] += 1.0e-4;
+    double freshBox[9];
+    seams_frame_box(fresh, freshBox);
+    if (seams_frame_set_positions(fresh, moved.data(), nFresh, freshBox) != 0) {
+      seams_frame_free(fresh);
+      return fail("set positions");
+    }
+    if (seams_frame_neighbours(fresh, 3.5, 2, "cutoff") != 0) {
+      seams_frame_free(fresh);
+      return fail("neighbours");
+    }
+    if (seams_frame_neighbour_pairs(fresh) <= 0) {
+      seams_frame_free(fresh);
+      return fail("neighbour pairs");
+    }
+    std::vector<double> freshQl(static_cast<std::size_t>(nFresh));
+    std::vector<double> bar(static_cast<std::size_t>(nFresh));
+    if (seams_frame_steinhardt(fresh, 3.5, 2, 6, freshQl.data(), bar.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("steinhardt");
+    }
+    if (seams_frame_steinhardt_graph(fresh, 3.5, 2, 6, "cutoff", freshQl.data(), bar.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("steinhardt graph");
+    }
+    std::vector<double> wl(static_cast<std::size_t>(nFresh));
+    if (seams_frame_wl(fresh, 3.5, 2, 4, wl.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("wl");
+    }
+    std::vector<double> q4(static_cast<std::size_t>(nFresh));
+    std::vector<double> q6(static_cast<std::size_t>(nFresh));
+    if (seams_frame_q4_q6(fresh, 3.5, 2, q4.data(), q6.data(), nullptr, nullptr) != 0) {
+      seams_frame_free(fresh);
+      return fail("q4 q6");
+    }
+    std::vector<int> iceLabels(static_cast<std::size_t>(nFresh));
+    int fused[9] = {};
+    if (seams_frame_q4_q6_chill(fresh, 3.5, 2, q4.data(), q6.data(), nullptr, nullptr,
+                               iceLabels.data(), fused) != 0) {
+      seams_frame_free(fresh);
+      return fail("q4 q6 chill");
+    }
+    std::vector<int> ringCounts(9);
+    seams_phase_times times{};
+    if (seams_frame_chill_rings(fresh, 3.5, 2, "cutoff", 6, 0.0, iceLabels.data(), fused,
+                               ringCounts.data(), 9, &times) != 0) {
+      seams_frame_free(fresh);
+      return fail("chill rings");
+    }
+    std::vector<int> shell(static_cast<std::size_t>(nFresh));
+    if (seams_frame_symmetry(fresh, 0.12, shell.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("symmetry");
+    }
+    double tau = 0.0;
+    if (seams_frames_jump_tau90(fresh, fresh, 1.0, 2, 1, &tau) != 0) {
+      seams_frame_free(fresh);
+      return fail("jump tau");
+    }
+    seams_frame_free(fresh);
+  }
   std::cout << "seams_lang ok " << seams_lang_version() << "\n";
+  const std::string shPath = root + "/input/traj/genice_sH.lammpstrj";
+  seams_frame *sh = seams_frame_read(shPath.c_str(), 1, 1);
+  if (sh == nullptr || seams_frame_nop(sh) != 136) {
+    return fail("sH frame");
+  }
+  double shBox[9] = {};
+  seams_frame_box(sh, shBox);
+  seams_frame_free(sh);
+  if (std::abs(shBox[3] - 24.8424228) > 1e-4 || std::abs(shBox[4] - 10.7570846) > 1e-4 ||
+      std::abs(shBox[5] - 20.1312910) > 1e-4 || std::abs(shBox[6] + 6.2106057) > 1e-4 ||
+      std::abs(shBox[7]) > 1e-6 || std::abs(shBox[8]) > 1e-6) {
+    std::cerr << "sH box";
+    for (double value : shBox) {
+      std::cerr << " " << value;
+    }
+    std::cerr << "\n";
+    return fail("sH cell");
+  }
   return 0;
 }

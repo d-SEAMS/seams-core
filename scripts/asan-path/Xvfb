@@ -1,0 +1,25 @@
+#!/bin/sh
+# The X server is not a seams binary. Preloaded, the xkbcomp it starts
+# leaks at exit, the keymap fails, and Xvfb exits before Qt connects.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+unset LD_PRELOAD
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/Xvfb" ]; then
+    found=$dir/Xvfb
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "Xvfb is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

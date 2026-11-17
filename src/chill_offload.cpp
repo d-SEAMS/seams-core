@@ -199,7 +199,7 @@ chill::ChillPlusResult chill::specializedChillPlus(
     std::partial_sort(cand.begin(), cand.begin() + static_cast<std::ptrdiff_t>(keep),
                       cand.end());
     for (std::size_t t = 0; t < keep; t++) {
-      neigh[static_cast<std::size_t>(i * kNb + t)] = cand[t].second;
+      neigh[static_cast<std::size_t>(static_cast<std::size_t>(i * kNb) + t)] = cand[t].second;
     }
     nb[static_cast<std::size_t>(i)] = static_cast<int>(keep);
     shell[static_cast<std::size_t>(i)] = static_cast<int>(cand.size());

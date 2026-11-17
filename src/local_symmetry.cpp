@@ -5,10 +5,12 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
 #include <local_symmetry.hpp>
 
 #include <ira_sofi.hpp>
 #include <seams_c_api.h>
+#include <thread_team.hpp>
 
 #include <Eigen/Dense>
 
@@ -20,6 +22,10 @@
 #include <new>
 #include <string>
 #include <vector>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 #ifdef SEAMS_HAS_SPGLIB
 #include <spglib.h>
@@ -179,7 +185,7 @@ std::vector<Eigen::Matrix3d> tetrahedralGroup() {
 Eigen::MatrixXd cage51264() {
   // One seed from each Td orbit of the 5^12 6^4 graph: the apex on a
   // threefold axis, a hexagon corner, and an edge site. The other vertices
-  // are the images under the tetrahedral group. Seeds are the centred
+  // are the images under the tetrahedral group. Seeds are the centered
   // equal-edge embedding of that graph.
   const Eigen::Vector3d seeds[3] = {
       {2.74568415, 2.74568415, 2.74568415},
@@ -420,6 +426,7 @@ std::string trimSymbol(const char *text) {
   return s;
 }
 
+#ifdef SEAMS_HAS_SPGLIB
 Eigen::Vector3d fracOf(const Eigen::Matrix3d &vectors, const Eigen::Vector3d &cart) {
   Eigen::Vector3d f = vectors.transpose().inverse() * cart;
   for (int k = 0; k < 3; k++) {
@@ -427,6 +434,7 @@ Eigen::Vector3d fracOf(const Eigen::Matrix3d &vectors, const Eigen::Vector3d &ca
   }
   return f;
 }
+#endif
 
 void writeFracCrystal(symm::Lattice &cell, const Eigen::MatrixXd &frac) {
   cell.cartesian.resize(frac.rows(), 3);
@@ -605,6 +613,103 @@ Space spaceGroup(const Eigen::Matrix3d &vectors, const Eigen::MatrixXd &cartesia
 #endif
 }
 
+bool conventionalCrystalSpace(const Eigen::Matrix3d &vectors,
+                              const Eigen::MatrixXd &cartesian,
+                              const std::vector<int> &kind, double symprec,
+                              Space &out) {
+  out = {};
+  out.status = 1;
+  const int n = static_cast<int>(cartesian.rows());
+  if (!spglibLinked() || n < 4 || static_cast<int>(kind.size()) != n ||
+      cartesian.cols() != 3) {
+    return false;
+  }
+  const int which = kind[0];
+  if (which != static_cast<int>(Kind::iceIh) && which != static_cast<int>(Kind::iceIc)) {
+    return false;
+  }
+  for (int k : kind) {
+    if (k != which) {
+      return false;
+    }
+  }
+  const double skew = std::abs(vectors(0, 1)) + std::abs(vectors(0, 2)) +
+                      std::abs(vectors(1, 0)) + std::abs(vectors(1, 2)) +
+                      std::abs(vectors(2, 0)) + std::abs(vectors(2, 1));
+  if (skew > 1e-6) {
+    return false;
+  }
+  const double Lx = vectors(0, 0);
+  const double Ly = vectors(1, 1);
+  const double Lz = vectors(2, 2);
+  if (!(Lx > 0.0 && Ly > 0.0 && Lz > 0.0)) {
+    return false;
+  }
+  if (std::abs(Lx - Ly) > 1e-4 * Lx || std::abs(Ly - Lz) > 1e-4 * Lx) {
+    return false;
+  }
+  // Ice Ic has eight molecules in the conventional cube. Ice Ih in a
+  // cubic metric is not this cell; eight is tried only so a doubled
+  // hexagonal setting that was placed in a cube can still match.
+  const int bases[2] = {which == static_cast<int>(Kind::iceIc) ? 8 : 4, 8};
+  for (int attempt = 0; attempt < 2; ++attempt) {
+    const int per = bases[attempt];
+    if (attempt == 1 && per == bases[0]) {
+      continue;
+    }
+    if (per <= 0 || n % per != 0) {
+      continue;
+    }
+    const int m3 = n / per;
+    const int m = static_cast<int>(std::lround(std::cbrt(static_cast<double>(m3))));
+    if (m < 1 || m * m * m != m3) {
+      continue;
+    }
+    const double a = Lx / static_cast<double>(m);
+    Eigen::MatrixXd small(per, 3);
+    int got = 0;
+    bool spill = false;
+    for (int i = 0; i < n; ++i) {
+      auto wrap = [](double v, double L) {
+        double t = v / L;
+        t -= std::floor(t);
+        if (!(t < 1.0)) {
+          t = 0.0;
+        }
+        return t * L;
+      };
+      const double x = wrap(cartesian(i, 0), Lx);
+      const double y = wrap(cartesian(i, 1), Ly);
+      const double z = wrap(cartesian(i, 2), Lz);
+      if (!(x < a && y < a && z < a)) {
+        continue;
+      }
+      if (got >= per) {
+        spill = true;
+        break;
+      }
+      small(got, 0) = x;
+      small(got, 1) = y;
+      small(got, 2) = z;
+      ++got;
+    }
+    if (spill || got != per) {
+      continue;
+    }
+    Eigen::Matrix3d cell = Eigen::Matrix3d::Zero();
+    cell(0, 0) = a;
+    cell(1, 1) = a;
+    cell(2, 2) = a;
+    const Space found = spaceGroup(cell, small, symprec);
+    if (found.status != 0) {
+      continue;
+    }
+    out = found;
+    return true;
+  }
+  return false;
+}
+
 Lattice crystal(Crystal which) {
   Lattice cell;
   const double d = kBond;
@@ -642,11 +747,159 @@ Lattice crystal(Crystal which) {
   return cell;
 }
 
+// Sixteen neighbours inside 5 A. A large orthorhombic cell does not walk
+// every atom through a 5x5x5 image stencil: that is n*125 distances and
+// it does not use the other cores. Cells of about 2.5 A and a halo that
+// covers 5 A hold the same neighbours.
+Eigen::MatrixXd iceShellOrtho(const Eigen::MatrixXd &cartesian, double Lx, double Ly, double Lz,
+                              int atom) {
+  const int n = static_cast<int>(cartesian.rows());
+  const double cut = 5.0;
+  const double cut2 = cut * cut;
+  auto cellsOf = [](double L) {
+    int ncell = std::max(1, static_cast<int>(std::floor(L / 2.5)));
+    if (L / static_cast<double>(ncell) > 5.0) {
+      ncell = std::max(1, static_cast<int>(std::ceil(L / 5.0)));
+    }
+    return std::max(3, ncell);
+  };
+  int nx = cellsOf(Lx);
+  int ny = cellsOf(Ly);
+  int nz = cellsOf(Lz);
+  seams::coarsenUntilFits(nx, ny, nz, 3);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return {};
+  }
+  std::vector<int> head(static_cast<std::size_t>(ncell), -1);
+  std::vector<int> next(static_cast<std::size_t>(n), -1);
+  std::vector<double> wrapped(static_cast<std::size_t>(n) * 3);
+  auto wrap = [](double v, double L) {
+    double t = v / L;
+    t -= std::floor(t);
+    if (!(t < 1.0)) {
+      t = 0.0;
+    }
+    return t * L;
+  };
+  for (int i = 0; i < n; i++) {
+    const double x = wrap(cartesian(i, 0), Lx);
+    const double y = wrap(cartesian(i, 1), Ly);
+    const double z = wrap(cartesian(i, 2), Lz);
+    wrapped[static_cast<std::size_t>(3 * i)] = x;
+    wrapped[static_cast<std::size_t>(3 * i) + 1] = y;
+    wrapped[static_cast<std::size_t>(3 * i) + 2] = z;
+    const int ix = std::min(nx - 1, static_cast<int>(x / Lx * nx));
+    const int iy = std::min(ny - 1, static_cast<int>(y / Ly * ny));
+    const int iz = std::min(nz - 1, static_cast<int>(z / Lz * nz));
+    const int c = (iz * ny + iy) * nx + ix;
+    next[static_cast<std::size_t>(i)] = head[static_cast<std::size_t>(c)];
+    head[static_cast<std::size_t>(c)] = i;
+  }
+  const double ox = wrapped[static_cast<std::size_t>(3 * atom)];
+  const double oy = wrapped[static_cast<std::size_t>(3 * atom) + 1];
+  const double oz = wrapped[static_cast<std::size_t>(3 * atom) + 2];
+  const int ix0 = std::min(nx - 1, static_cast<int>(ox / Lx * nx));
+  const int iy0 = std::min(ny - 1, static_cast<int>(oy / Ly * ny));
+  const int iz0 = std::min(nz - 1, static_cast<int>(oz / Lz * nz));
+  const int rx = std::max(1, static_cast<int>(std::ceil(cut / (Lx / nx))));
+  const int ry = std::max(1, static_cast<int>(std::ceil(cut / (Ly / ny))));
+  const int rz = std::max(1, static_cast<int>(std::ceil(cut / (Lz / nz))));
+  struct Near {
+    double d2;
+    double x, y, z;
+  };
+  std::vector<Near> neigh;
+  neigh.reserve(64);
+  for (int dz = -rz; dz <= rz; dz++) {
+    int iz = iz0 + dz;
+    int sz = 0;
+    while (iz < 0) {
+      iz += nz;
+      sz--;
+    }
+    while (iz >= nz) {
+      iz -= nz;
+      sz++;
+    }
+    for (int dy = -ry; dy <= ry; dy++) {
+      int iy = iy0 + dy;
+      int sy = 0;
+      while (iy < 0) {
+        iy += ny;
+        sy--;
+      }
+      while (iy >= ny) {
+        iy -= ny;
+        sy++;
+      }
+      for (int dx = -rx; dx <= rx; dx++) {
+        int ix = ix0 + dx;
+        int sx = 0;
+        while (ix < 0) {
+          ix += nx;
+          sx--;
+        }
+        while (ix >= nx) {
+          ix -= nx;
+          sx++;
+        }
+        const double shx = sx * Lx;
+        const double shy = sy * Ly;
+        const double shz = sz * Lz;
+        for (int j = head[static_cast<std::size_t>((iz * ny + iy) * nx + ix)]; j >= 0;
+             j = next[static_cast<std::size_t>(j)]) {
+          if (j == atom && sx == 0 && sy == 0 && sz == 0) {
+            continue;
+          }
+          const double x = wrapped[static_cast<std::size_t>(3 * j)] + shx - ox;
+          const double y = wrapped[static_cast<std::size_t>(3 * j) + 1] + shy - oy;
+          const double z = wrapped[static_cast<std::size_t>(3 * j) + 2] + shz - oz;
+          const double d2 = x * x + y * y + z * z;
+          if (d2 <= cut2 && d2 > 1e-16) {
+            neigh.push_back({d2, cartesian(atom, 0) + x, cartesian(atom, 1) + y,
+                             cartesian(atom, 2) + z});
+          }
+        }
+      }
+    }
+  }
+  if (static_cast<int>(neigh.size()) < 16) {
+    return {};
+  }
+  std::nth_element(neigh.begin(), neigh.begin() + 16, neigh.end(),
+                   [](const Near &a, const Near &b) { return a.d2 < b.d2; });
+  std::sort(neigh.begin(), neigh.begin() + 16,
+            [](const Near &a, const Near &b) { return a.d2 < b.d2; });
+  if (neigh[15].d2 > cut2) {
+    return {};
+  }
+  Eigen::MatrixXd shell(17, 3);
+  shell(0, 0) = cartesian(atom, 0);
+  shell(0, 1) = cartesian(atom, 1);
+  shell(0, 2) = cartesian(atom, 2);
+  for (int k = 0; k < 16; k++) {
+    shell(k + 1, 0) = neigh[static_cast<std::size_t>(k)].x;
+    shell(k + 1, 1) = neigh[static_cast<std::size_t>(k)].y;
+    shell(k + 1, 2) = neigh[static_cast<std::size_t>(k)].z;
+  }
+  return shell;
+}
+
 Eigen::MatrixXd iceShell(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
                          int atom) {
   const int n = static_cast<int>(cartesian.rows());
   if (atom < 0 || atom >= n || cartesian.cols() != 3) {
     return {};
+  }
+  const double skew = std::abs(vectors(0, 1)) + std::abs(vectors(0, 2)) +
+                      std::abs(vectors(1, 0)) + std::abs(vectors(1, 2)) +
+                      std::abs(vectors(2, 0)) + std::abs(vectors(2, 1));
+  const double Lx = vectors(0, 0);
+  const double Ly = vectors(1, 1);
+  const double Lz = vectors(2, 2);
+  if (n >= 64 && skew < 1e-8 && Lx > 12.0 && Ly > 12.0 && Lz > 12.0) {
+    return iceShellOrtho(cartesian, Lx, Ly, Lz, atom);
   }
   const Eigen::Vector3d origin = cartesian.row(atom).transpose();
   struct Neigh {
@@ -888,8 +1141,10 @@ SoaCols &soaCols() {
   return cols;
 }
 
-int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
-                                double shell_rmsd, int *labels) {
+int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattice9,
+                                  double shell_rmsd, double thermal_q, double bond_ratio,
+                                  int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
     return 1;
   }
@@ -905,6 +1160,36 @@ int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9
     cols.x[i] = xyz[3 * i];
     cols.y[i] = xyz[3 * i + 1];
     cols.z[i] = xyz[3 * i + 2];
+  }
+  symm::classifyIceArrays(cols.x, cols.y, cols.z, n, lat, labels, shell_rmsd, thermal_q,
+                          bond_ratio);
+  return 0;
+}
+
+int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
+                                double shell_rmsd, int *labels) {
+  const seams::FairWidth fair;
+  if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
+    return 1;
+  }
+  double lat[3][3];
+  for (int vec = 0; vec < 3; vec++) {
+    for (int comp = 0; comp < 3; comp++) {
+      lat[vec][comp] = lattice9[3 * vec + comp];
+    }
+  }
+  SoaCols &cols = soaCols();
+  cols.fit(static_cast<size_t>(n));
+  double *cx = cols.x;
+  double *cy = cols.y;
+  double *cz = cols.z;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 16384 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < n; i++) {
+    cx[i] = xyz[3 * i];
+    cy[i] = xyz[3 * i + 1];
+    cz[i] = xyz[3 * i + 2];
   }
   symm::classifyIceArrays(cols.x, cols.y, cols.z, n, lat, labels, shell_rmsd);
   return 0;

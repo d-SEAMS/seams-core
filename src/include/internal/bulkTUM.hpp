@@ -106,4 +106,5 @@ std::vector<int> atomsFromCages(const std::vector<std::vector<int>> &rings,
 
 } // namespace tum3
 
+/** @} */
 #endif // SEAMS_BULKTUM_H_

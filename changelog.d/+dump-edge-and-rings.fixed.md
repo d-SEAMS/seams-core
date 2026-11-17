@@ -1,0 +1,1 @@
+A chemfiles LAMMPS dump keeps the reduced cell edge. The bound span was being padded by the tilt a second time, so genice sH reported 31.05 Å instead of 24.84 Å. OVITO FindRings is compared as a subset of the primitive-ring census: K2,3 has three chordless 4-rings and FindRings reports two.

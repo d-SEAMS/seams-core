@@ -1,0 +1,17 @@
+PROJECT_NAME           = seams_lang
+OUTPUT_DIRECTORY       = docs/lang-cpp
+INPUT                  = bindings/cxx/seams_lang.h
+EXAMPLE_PATH           = docs/examples
+GENERATE_HTML          = YES
+GENERATE_XML           = NO
+GENERATE_LATEX         = NO
+QUIET                  = YES
+EXTRACT_ALL            = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_AS_ERROR          = YES
+PREDEFINED             = DOXYGEN_SHOULD_SKIP_THIS
+MACRO_EXPANSION        = YES
+OPTIMIZE_OUTPUT_FOR_C  = YES
+JAVADOC_AUTOBRIEF      = YES
+HAVE_DOT               = NO

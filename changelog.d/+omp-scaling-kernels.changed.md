@@ -1,0 +1,1 @@
+CHILL, CHILL+, the shell match, rings, prisms and the 2D RDF use the OpenMP team for more of their work. The kNN graph rows, the shell-match cell sorts, the ring-pool merge and the prism ring index run on the team, and the 2D RDF bins its cells inside the pair-loop region. `test_thread_invariance` checks that every result is identical at 1, 2, 4 and 8 threads.

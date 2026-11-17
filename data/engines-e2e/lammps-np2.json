@@ -1,0 +1,1 @@
+{"atom_frames": 86016, "engine": "lammps-np2", "frames": 21, "insitu_s_per_frame": 0.002480897095, "label_agreement": "86016/86016", "labels": {"0": 37467, "1": 443, "2": 41239, "3": 5175, "4": 218, "5": 1474}, "steps": 200, "system": "mW ice Ic/liquid, 4096 molecules", "version": "2 Aug 2023 - Update 2"}

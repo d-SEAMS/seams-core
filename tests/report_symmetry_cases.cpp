@@ -60,7 +60,7 @@ void chillHist(const Eigen::MatrixXd &xyz, double box, const char *tag) {
   std::vector<int> labels(static_cast<size_t>(n), -1);
   const char *names[] = {"cubic", "hexagonal", "water", "interfacial", "clathrate",
                          "interClathrate", "unclassified", "reCubic", "reHex"};
-  if (seams_chill_plus(raw.data(), n, cell, labels.data()) != 0) {
+  if (seams_chill_plus_flat(raw.data(), n, cell, labels.data()) != 0) {
     std::cout << tag << " chill failed\n";
     return;
   }

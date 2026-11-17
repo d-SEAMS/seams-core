@@ -1,0 +1,36 @@
+frames	5
+molecules	97336
+cutoff_A	3.5
+ring_depth	7
+q6bar_cut	0.36
+dump_step_delta	2000
+assumed_step_fs	10
+ps_per_frame	20
+ring_lead	chill_ext	ok	0
+ring_lead	chill_core	ok	0
+ring_lead	ovito_ext	ok	0
+ring_lead	ovito_core	ok	0
+ring_lead	q6bar	ok	0
+ring_lead	symmetry	ok	0
+ring_lead	chill_ext_n6	ok	0
+nucleus	chill_core	ok	1	climbed	1	onset_frame	1	onset_timestep	2000	onset_size	1	onset_stack	0	max_frame	4	max_timestep	8000	max_size	10	max_stack	0.6	onset_ps	0	half_ok	1	half_frame	2	half_timestep	4000	half_size	7	half_stack	0.714286	half_ps	20
+nucleus	chill_ext	ok	1	climbed	1	onset_frame	1	onset_timestep	2000	onset_size	5	onset_stack	nan	max_frame	5	max_timestep	10000	max_size	57	max_stack	0.416667	onset_ps	0	half_ok	1	half_frame	3	half_timestep	6000	half_size	34	half_stack	0.666667	half_ps	40
+nucleus	ovito_core	ok	1	climbed	1	onset_frame	3	onset_timestep	6000	onset_size	8	onset_stack	0.625	max_frame	4	max_timestep	8000	max_size	10	max_stack	0.6	onset_ps	40	half_ok	1	half_frame	2	half_timestep	4000	half_size	8	half_stack	0.75	half_ps	20
+nucleus	ovito_ext	ok	1	climbed	1	onset_frame	1	onset_timestep	2000	onset_size	4	onset_stack	0	max_frame	5	max_timestep	10000	max_size	66	max_stack	0.461538	onset_ps	0	half_ok	1	half_frame	2	half_timestep	4000	half_size	35	half_stack	0.6	half_ps	20
+nucleus	q6bar	ok	1	climbed	1	onset_frame	1	onset_timestep	2000	onset_size	2	onset_stack	nan	max_frame	5	max_timestep	10000	max_size	35	max_stack	nan	onset_ps	0	half_ok	1	half_frame	2	half_timestep	4000	half_size	20	half_stack	nan	half_ps	20
+nucleus	symmetry	ok	1	climbed	1	onset_frame	1	onset_timestep	2000	onset_size	0	onset_stack	nan	max_frame	2	max_timestep	4000	max_size	1	max_stack	0	onset_ps	0	half_ok	1	half_frame	2	half_timestep	4000	half_size	1	half_stack	0	half_ps	20
+shift	chill_core	chill_ext	ok	1	d_size	27	d_frame	1	d_ps	20
+shift	chill_core	ovito_core	ok	1	d_size	1	d_frame	0	d_ps	0
+shift	chill_core	ovito_ext	ok	1	d_size	28	d_frame	0	d_ps	0
+shift	chill_core	q6bar	ok	1	d_size	13	d_frame	0	d_ps	0
+shift	chill_core	symmetry	ok	1	d_size	-6	d_frame	0	d_ps	0
+shift	chill_ext	ovito_core	ok	1	d_size	-26	d_frame	-1	d_ps	-20
+shift	chill_ext	ovito_ext	ok	1	d_size	1	d_frame	-1	d_ps	-20
+shift	chill_ext	q6bar	ok	1	d_size	-14	d_frame	-1	d_ps	-20
+shift	chill_ext	symmetry	ok	1	d_size	-33	d_frame	-1	d_ps	-20
+shift	ovito_core	ovito_ext	ok	1	d_size	27	d_frame	0	d_ps	0
+shift	ovito_core	q6bar	ok	1	d_size	12	d_frame	0	d_ps	0
+shift	ovito_core	symmetry	ok	1	d_size	-7	d_frame	0	d_ps	0
+shift	ovito_ext	q6bar	ok	1	d_size	-15	d_frame	0	d_ps	0
+shift	ovito_ext	symmetry	ok	1	d_size	-34	d_frame	0	d_ps	0
+shift	q6bar	symmetry	ok	1	d_size	-19	d_frame	0	d_ps	0

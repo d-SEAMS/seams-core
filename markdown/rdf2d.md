@@ -19,7 +19,7 @@ frame = ds.read("dump-320.lammpstrj")
 r, g = frame.rdf_2d(output_dir="output/", cutoff=12.0, binwidth=0.05)
 ```
 
-`rdf_2d` returns bin centres and `g(r)`. The engine also writes
+`rdf_2d` returns bin centers and `g(r)`. The engine also writes
 `topoMonolayer/rdf.dat` under `output_dir`.
 
 ## Lua

@@ -117,29 +117,63 @@ struct Graph {
 //! member and runs toward the lesser of that member's ring neighbours, and
 //! the rings are sorted lexicographically.
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
-                                           int maxDepth);
+                                          int maxDepth);
 
-//! Rings on a CSR of cloud indices (no self entry, one edge each).
-std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
-                                           const std::vector<int> &cols, int maxDepth);
+//! Per-atom primitive-ring counts, without storing the rings.
+//! `counts[atom * (maxDepth + 1) + size]` is how many rings of that size
+//! contain the atom.
+std::vector<int> atomRingSizeCounts(const std::vector<std::vector<int>> &nList,
+                                    int maxDepth);
 
-//! The same ring set, built with a bounded ball at every vertex and a
-//! primitivity test of every pair. ringNetwork leaves that table out when
-//! the largest ring is at most 7, because a strict shortcut is then a walk
-//! of at most two edges.
-std::vector<std::vector<int>>
-ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
+//! Primitive rings whose size is at least @a minDepth and at most
+//! @a maxDepth. ringNetwork(nList, maxDepth) is minDepth 3. A separate
+//! name keeps ringNetwork(nList, maxDepth, {}) the empty source mask.
+std::vector<std::vector<int>> ringNetworkMinSize(const std::vector<std::vector<int>> &nList,
+                                                 int maxDepth, int minDepth);
 
-//! 0 when the last ringNetwork call answered every primitivity query from
-//! the adjacency rows, 1 when it filled the sorted pair table, 2 when it
-//! filled the occupancy bitset of the ball (rings of size 8 to 10).
-[[nodiscard]] int lastRingSearchUsedBalls();
+//! Which adjacency the ring search packs before it walks. Auto uses one
+//! sorted array per row: a single pass on one thread, a team on several.
+//! Vectors keeps a std::vector per atom. Packed forces the array even
+//! when the team has one thread. The ring set does not depend on the choice.
+enum class RingRows { Auto, Vectors, Packed };
+
+std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
+                                          int maxDepth, RingRows rows);
 
 //! The rings ringNetwork returns whose lowest-indexed member is flagged in
 //! @a sources (by index; empty flags every vertex), in the same order
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth,
                                           const std::vector<char> &sources);
+
+//! Rings of a CSR neighbour graph. `cols[offsets[i] .. offsets[i + 1]]`
+//! are the neighbours of vertex i, with no self entry. The ring set is
+//! the one ringNetwork returns for those rows with the vertex written
+//! in front of each row.
+std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
+                                          const std::vector<int> &cols, int maxDepth,
+                                          const std::vector<char> &sources = {});
+
+//! Ring sizes of the same search as ringNetwork(offsets, cols, maxDepth).
+//! counts[s] is the number of primitive rings of size s, for s below
+//! countsLen. The rings themselves are not gathered.
+void ringSizeCounts(const std::vector<int> &offsets, const std::vector<int> &cols,
+                    int maxDepth, int *counts, int countsLen);
+
+//! The same ring set, built with a bounded ball at every vertex and a
+//! primitivity test of every pair. ringNetwork leaves that table out when
+//! the largest ring is at most 7, because a strict shortcut is then a walk
+//! of at most two edges. The timing harness compares the two.
+std::vector<std::vector<int>>
+ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
+
+//! 0 when the last ringNetwork call answered every primitivity query from
+//! the adjacency rows, 1 when it filled the sorted pair table, 2 when it
+//! filled the occupancy bitset of a radius-4 ball, 3 when a radius-2 pair
+//! table answers distance 4 by a meet in the middle. Rings of size at most
+//! 7 report 0. Rings of size 8 and 9 report 1. Rings of size 10 report 3.
+//! ringNetworkBalls always reports 1.
+[[nodiscard]] int lastRingSearchUsedBalls();
 
 //! Creates a graph object and fills it with the information from a neighbour
 //! list and pointCloud created before. NOTE: the neighbourListIndex contains
@@ -219,18 +253,15 @@ public:
   //! Changed bonds per molecule on the last update.
   [[nodiscard]] double lastChangedBondFraction() const;
 
-  //! Above this fraction of vertices with a changed row, update recomputes
-  //! the whole frame in one pass instead. The default does not use a
-  //! fraction. The update enumerates the sources in T and no others, so
-  //! it takes a full pass only when T is the whole vertex set.
-  //! One never falls back; zero always does. The result equals a rebuild
-  //! at every fraction.
+  //! Kept for callers that used to force a whole-frame pass. The update
+  //! enumerates the sources in T and no others, so a whole-frame pass
+  //! happens only when T is every vertex. The stored fraction does not
+  //! replace that search. The result equals a rebuild at every fraction.
   void setFullPassFraction(double fraction);
 
-  //! Above this many changed bonds per molecule, update takes the same
-  //! whole-frame pass. The default is negative, which disables the test.
-  //! The vertex fraction is then the only switch. Ignored when the
-  //! vertex fraction is at least 1.
+  //! Kept for callers that used to force a whole-frame pass from the
+  //! changed-bond rate. The default is negative. The rate does not
+  //! replace the search of T.
   void setBondCrossover(double changedBondsPerMolecule);
 
 private:
@@ -250,6 +281,18 @@ struct RingSearchSplit {
 //! Balls, source enumeration and the gather from the last ringNetwork call.
 [[nodiscard]] RingSearchSplit lastRingSearchSplit();
 
+//! When set, ringNetwork records the primitive-test time in the split.
+void setPhaseTiming(bool on);
+
+//! Primitive-test milliseconds from the last timed ringNetwork, then zero.
+double takePrimitiveMs();
+
+//! When non-null, ringNetwork adds each source's enumeration time, in
+//! microseconds, at that source's index. The buffer must hold one entry
+//! per neighbour-list row. A null buffer skips the clock.
+void setSourceWork(double *microseconds);
+
 } // namespace primitive
 
+/** @} */
 #endif // SEAMS_FRANZBLAU_H_

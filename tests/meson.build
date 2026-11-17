@@ -1,7 +1,16 @@
 # d-SEAMS tests (Catch2 v3)
 
-catch2_dep = dependency('catch2-with-main', required: true,
-  fallback: ['catch2', 'catch2_with_main_dep'])
+# Prefer an installed Catch2 that actually links. A copy built against a
+# newer libc, or without PIE, is replaced by the wrap, which only the tests
+# use and so is not installed with d-SEAMS.
+catch2_dep = dependency('catch2-with-main', required: false)
+if not catch2_dep.found() or not cppc.links(
+    '#include <catch2/catch_test_macros.hpp>\nTEST_CASE("link") {}\n',
+    dependencies: catch2_dep,
+    name: 'installed catch2 links')
+  catch2_dep = subproject('catch2', default_options: ['tests=false', 'install=false']).get_variable(
+    'catch2_with_main_dep')
+endif
 
 test_sources = {
   'franzblau': 'franzblau-test.cpp',
@@ -28,6 +37,7 @@ test_sources = {
   'bulkTUM': 'test_bulkTUM.cpp',
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
+  'ring_census': 'test_ring_census.cpp',
   'ira_sofi': 'test_ira_sofi.cpp',
   'local_symmetry': 'test_local_symmetry.cpp',
   'classify_concurrent': 'test_classify_concurrent.cpp',
@@ -35,23 +45,46 @@ test_sources = {
   'cage_canon': 'test_cage_canon.cpp',
   'topo_fingerprint': 'test_topo_fingerprint.cpp',
   'ion_env': 'test_ion_env.cpp',
+  'brine_front': 'test_brine_front.cpp',
   'guest_occupancy': 'test_guest_occupancy.cpp',
   'shell_rings': 'test_shell_rings.cpp',
+  'ring_hop': 'test_ring_hop.cpp',
   'voronoi': 'test_voronoi.cpp',
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'cage_enum': 'test_cage_enum.cpp',
+  'trace_threads': 'test_trace_threads.cpp',
+  'pool_audit': 'test_pool_audit.cpp',
+  'stencil_rows': 'test_stencil_rows.cpp',
+  'ddc_regression': 'test_ddc_regression.cpp',
   'c_api': 'test_c_api.cpp',
+  'brine_select': 'test_brine_select.cpp',
   'chill_offload': 'test_chill_offload.cpp',
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
+  'nucleation_pathway': 'test_nucleation_pathway.cpp',
+  'interface_order': 'test_interface_order.cpp',
+  'science_front': 'test_science_front.cpp',
+  'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
+  'thread_invariance': 'test_thread_invariance.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
+  'wide_cell': 'test_wide_cell.cpp',
+  'offset_limit': 'test_offset_limit.cpp',
+  'prism_empty': 'test_prism_empty.cpp',
+  'basal_needle': 'test_basal_needle.cpp',
+  'ddc_copies': 'test_ddc_copies.cpp',
+  'hc_template': 'test_hc_template.cpp',
+  'avx_gemm': 'test_avx_gemm.cpp',
+  'ylm_fallback': 'test_ylm_fallback.cpp',
 }
 
 if readcon_dep.found()
   test_sources += {'readcon': 'test_readcon.cpp'}
+endif
+if chemfiles_dep.found()
+  test_sources += {'chemfiles_io': 'test_chemfiles_io.cpp'}
 endif
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any
@@ -64,6 +97,9 @@ endif
 #   3. Setting build_rpath so the binary also works when run outside meson test.
 _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+if chemfiles_libdir != ''
+  _test_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+endif
 # Coverage arc counters share a cache line. Several cores bounce that
 # line and the timed tests exceed their limit. One thread keeps the
 # counters and the tests inside the limit.
@@ -79,6 +115,9 @@ _test_rpath = '$ORIGIN/../src'
 if _readcondb_rpath != ''
   _test_rpath = _test_rpath + ':' + _readcondb_rpath
 endif
+if chemfiles_libdir != ''
+  _test_rpath = _test_rpath + ':' + chemfiles_libdir
+endif
 _test_link_args = _link_args
 if host_machine.system() == 'linux'
   _test_link_args += ['-Wl,--enable-new-dtags']
@@ -90,27 +129,56 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _test_link_args += ['-Wl,--end-group']
 endif
 
+# seams.h and the seams_version.h generated beside libseams.
+_api_incdirs = [include_directories('../include', '../src')]
+
 foreach name, src : test_sources
   # meson allows no nested ternary; the long-running suites get more time
   _timeout = 120
-  if name == 'cage_enum'
-    _timeout = 300
+  if name == 'cage_enum' or name == 'domain' or name == 'franzblau_extra'
+    # domain: a parallel run reached the last assertions after 120s.
+    _timeout = 1800
   elif name == 'bulkTUM'
+    # The last case is PG(2, 5). A solo coverage run is the bound.
+    _timeout = 2400
+  elif name == 'trace_threads'
+    # GenIce cells at several widths, the mW frame, and all 148 nucleation frames.
+    _timeout = 600
+  elif name == 'pool_audit'
+    # Ice Ic at 4096 molecules, each kernel at one thread and at eight.
+    _timeout = 300
+  elif name == 'cage_affiliation'
+    # The seeded case passes. A parallel run was killed at 120s on the
+    # last assertion.
     _timeout = 300
   elif name == 'bop' and offload_enabled
     _timeout = 600
+  elif name == 'interface_order'
+    _timeout = 600
+  elif name == 'science_front'
+    _timeout = 300
   endif
   test(name,
     executable('test_' + name, src,
       dependencies: [yds_dep, catch2_dep],
+      link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
       cpp_args: _args,
       link_args: _test_link_args,
-      include_directories: _incdirs,
+      include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
       build_rpath: _test_rpath),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: _timeout)
+    timeout: _timeout,
+    is_parallel: name != 'franzblau_extra' and name != 'bulkTUM',
+    suite: (name == 'franzblau_extra' or name == 'bulkTUM') ? 'heavy' : [])
 endforeach
+
+executable('interface_order', 'interface_order_main.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
 
 mpfr_dep = cppc.find_library('mpfr', required: true)
 gmp_dep = cppc.find_library('gmp', required: true)
@@ -136,6 +204,12 @@ executable('bench_cutoff_list', 'bench_cutoff_list.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+executable('bench_ql', 'bench_ql.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
 
 executable('report_symmetry_cases', 'report_symmetry_cases.cpp',
   dependencies: [yds_dep],
@@ -302,6 +376,27 @@ executable('bench_cages', 'bench_cages.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_ddc_ladder', 'bench_ddc_ladder.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_pool_audit', 'bench_pool_audit.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_trace_threads', 'bench_trace_threads.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_cage_h2h', 'bench_cage_h2h.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -317,6 +412,27 @@ executable('bench_strong', 'bench_strong.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_h2h_cpc', 'bench_h2h_cpc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+bench_ring_carry = executable('bench_ring_carry', 'bench_ring_carry.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
@@ -351,6 +467,27 @@ executable('bench_trajectory_incremental', 'bench_trajectory_incremental.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_hop_stride', 'bench_hop_stride.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('recall_construction', 'recall_construction.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('padding_probe', 'padding_probe.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_lammps_io', 'bench_lammps_io.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -364,6 +501,43 @@ executable('bench_lammps_walk', 'bench_lammps_walk.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+
+executable('bench_rings_h2h', 'bench_rings_h2h.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+rings_ih_inc = [include_directories('.'), include_directories('../include')]
+rings_ih_args = _args + ['-I' + meson.project_build_root() / 'src']
+rings_ih_test = executable('test_rings_ih', 'test_rings_ih.cpp',
+  dependencies: [catch2_dep],
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc,
+  build_rpath: _test_rpath)
+test('rings_ih', rings_ih_test, timeout: 180, env: _test_env)
+
+executable('bench_capi_overhead', 'bench_capi_overhead.cpp',
+  dependencies: [yds_dep],
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc + [_incdirs],
+  build_rpath: _test_rpath)
+
+executable('bench_rings_ih', 'bench_rings_ih.cpp',
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc,
+  build_rpath: _test_rpath)
+
+test('rings_ih_external', find_program('python3'),
+  args: [meson.project_source_root() / 'tests' / 'test_rings_ih_external.py'],
+  timeout: 180)
 
 executable('bench_stages', 'bench_stages.cpp',
   dependencies: [yds_dep],
@@ -450,11 +624,16 @@ _device_host_cases = {
   'levi5': ['levi:5', '1'],
 }
 foreach name, args : _device_host_cases
+  # levi:5 is PG(2, 5). Beside the dense-frame checks it finished in
+  # 5236 s. Those checks are now serial, and the limit is 6000 s.
+  _host_timeout = name == 'levi5' ? 6000 : 300
   test('device_host_' + name, _check_device_host,
     args: args,
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: 300)
+    timeout: _host_timeout,
+    is_parallel: name != 'levi5',
+    suite: name == 'levi5' ? 'heavy' : [])
 endforeach
 
 # The CUDA batch kernels on the host, no device needed
@@ -494,16 +673,34 @@ test('invariance_empty_frame', _check_invariance,
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   should_fail: true)
-# 1000 translations and 1000 permutations on every deposited frame, plus
-# the eight half-box shifts. The cage stage is the cost.
+# 1000 translations and 1000 permutations on every ordinary frame, plus
+# the eight half-box shifts. A frame above 2048 atoms is checked at one
+# trial. Degree above 80 is every vertex at cap 4. Degree above 40 is
+# every vertex at cap 6. One optimized search of dump-l is 8.7 s and of
+# dump-bcc is 3.8 s. 201 frames, three searches, is 7493 s.
+# The limit is 10800 s. A skip fails the run. Heavy cases
+# are serial so they do not steal the Levi graph's core.
 test('fuzz_cage_shift_permute', _fuzz_cage,
   args: [meson.project_source_root() / 'input' / 'traj', '1000'],
   env: _test_env,
-  timeout: 0)
+  timeout: 10800,
+  suite: 'heavy',
+  is_parallel: false)
 test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),
   timeout: 30)
+test('h2h_harness', find_program('python3'),
+  args: [files('test_h2h_harness.py'),
+         meson.project_build_root() / 'tests' / 'bench_h2h_cpc'],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
+test('ion_shell_rings', find_program('python3'),
+  args: [files('test_ion_shell_rings.py'), meson.project_build_root() / 'seams'],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
 test('docs_sources', find_program('python3'),
   args: [files('docs_sources.py')],
   workdir: meson.project_source_root(),
@@ -513,6 +710,28 @@ test('option_names', find_program('python3'),
          meson.project_build_root()],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('cycless_pentagon', find_program('python3'),
+  args: [files('test_cycless_pentagon.py'),
+         seams_api_lib.full_path()],
+  workdir: meson.project_source_root(),
+  timeout: 120)
+test('sqq_sh_triclinic', find_program('python3'),
+  args: [files('test_sqq_sh.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('ring_carry', bench_ring_carry,
+  args: ['800', '2'],
+  timeout: 180)
+test('ovito_chill_atoms', find_program('python3'),
+  args: [files('test_ovito_chill_atoms.py'),
+         seams_api_lib.full_path()],
+  workdir: meson.project_source_root(),
+  timeout: 180)
+test('ovito_ring_counts', find_program('python3'),
+  args: [files('test_ovito_ring_counts.py'),
+         meson.project_build_root() / 'tests' / 'bench_ring_ic'],
+  workdir: meson.project_source_root(),
+  timeout: 120)
 test('cli_surface', find_program('python3'),
   args: [files('cli_surface.py'), meson.project_build_root() / 'seams'],
   workdir: meson.project_source_root(),
@@ -525,4 +744,90 @@ test('mw215_deck', find_program('python3'),
 test('mw215_frame', find_program('python3'),
   args: [files('test_mw215_deck.py'), 'frame'],
   workdir: meson.project_source_root(),
-  timeout: 30)
+  timeout: 600)
+
+test('omp_threads',
+  executable('test_omp_threads', 'test_omp_threads.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  env: _test_env,
+  timeout: 120)
+
+# One-thread runs under taskset keep one cpu and one thread; see the driver.
+if host_machine.system() == 'linux'
+  test('serial_affinity', find_program('python3'),
+    args: [files('test_serial_affinity.py'),
+           executable('test_serial_affinity', 'test_serial_affinity.cpp',
+             dependencies: [yds_dep],
+             link_with: seams_api_lib,
+             cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+             link_args: _test_link_args,
+             include_directories: [_incdirs, include_directories('../include')],
+             build_rpath: _test_rpath)],
+    env: _test_env,
+    timeout: 300)
+endif
+
+test('chill_mixed',
+  executable('test_chill_mixed', 'test_chill_mixed.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
+
+# shared_module is a Mach-O bundle on Darwin, and DYLD_INSERT_LIBRARIES
+# loads only a dylib. LD_PRELOAD takes the module as built.
+if host_machine.system() == 'darwin'
+  dump_faults = shared_library('dump_faults', 'dump_faults_preload.c',
+    dependencies: dependency('dl', required: false))
+else
+  dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
+endif
+dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',
+  dependencies: [yds_dep],
+  include_directories: _incdirs,
+  link_args: _test_link_args,
+  build_rpath: _test_rpath)
+_fault_wrap = find_program('dump_fault_wrap.sh')
+_fault_eintr = environment()
+_fault_eintr.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_fault_eintr.set('DUMP_PREAD_EINTR', '1')
+_fault_eio = environment()
+_fault_eio.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_fault_eio.set('DUMP_PREAD_EIO', '1')
+_fault_fstat = environment()
+_fault_fstat.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_fault_fstat.set('DUMP_FSTAT_EIO', '1')
+test('dump_index_eintr', _fault_wrap,
+  args: [dump_faults.full_path(), dump_fault_driver, 'eintr'],
+  env: _fault_eintr, depends: dump_faults)
+test('dump_index_eio', _fault_wrap,
+  args: [dump_faults.full_path(), dump_fault_driver, 'eio'],
+  env: _fault_eio, depends: dump_faults)
+test('dump_fstat_keeps_atoms', _fault_wrap,
+  args: [dump_faults.full_path(), dump_fault_driver, 'fstat'],
+  env: _fault_fstat, depends: dump_faults)
+
+# A consumer of libyodaLib linked without --allow-shlib-undefined and
+# without sphericart on its own link line. The library the probe accepted
+# has to resolve through libyodaLib plus sphericart_consumer_args, the
+# -rpath-link that yds_dep also carries for a pip wheel's folder.
+if sphericart_found
+  _strict = cppc.has_link_argument('-Wl,--no-allow-shlib-undefined') ? ['-Wl,--no-allow-shlib-undefined'] : []
+  test('sphericart_consumer',
+    executable('sphericart_consumer', 'sphericart_consumer.cpp',
+      link_with: ydslib,
+      include_directories: include_directories('../src/include/internal'),
+      link_args: _strict + sphericart_consumer_args,
+      build_rpath: meson.project_build_root() / 'src'),
+    timeout: 30)
+endif

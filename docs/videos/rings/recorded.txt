@@ -1,0 +1,9 @@
+## scene-01.tape
+nop 250 rings 511
+3 37
+4 273
+5 34
+6 167
+## scene-02.tape
+nop 128 rings 256
+6 256

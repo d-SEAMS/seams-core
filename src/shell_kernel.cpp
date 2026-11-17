@@ -13,6 +13,7 @@
 // continuous shape measure is the scaled residual of Alvarez et al. 2005
 // after that alignment (Pinsky and Avnir 1998).
 
+#include <cpu_features.hpp>
 #include <local_symmetry.hpp>
 #include <shell_hot.hpp>
 
@@ -568,12 +569,12 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
     for (int shift = 0; shift < n; shift++) {
       int permTry[kMaxN];
       double mob[kMaxN][3];
-      for (int t = 0; t < n; t++) {
-        const int slot = dir == 0 ? (shift + t) % n : (shift + n - t) % n;
-        permTry[t] = order[slot].i;
-        mob[t][0] = env[permTry[t]][0];
-        mob[t][1] = env[permTry[t]][1];
-        mob[t][2] = env[permTry[t]][2];
+      for (int step = 0; step < n; step++) {
+        const int slot = dir == 0 ? (shift + step) % n : (shift + n - step) % n;
+        permTry[step] = order[slot].i;
+        mob[step][0] = env[permTry[step]][0];
+        mob[step][1] = env[permTry[step]][1];
+        mob[step][2] = env[permTry[step]][2];
       }
       double Rtry[3][3];
       double rms = 0.0;
@@ -584,8 +585,8 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
       if (measured < best) {
         best = measured;
         rmsd = measured;
-        for (int t = 0; t < n; t++) {
-          bestPerm[t] = permTry[t];
+        for (int step = 0; step < n; step++) {
+          bestPerm[step] = permTry[step];
         }
         for (int i = 0; i < 3; i++) {
           for (int j = 0; j < 3; j++) {
@@ -603,8 +604,8 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
   if (!(best < 1.0)) {
     return false;
   }
-  for (int t = 0; t < n; t++) {
-    perm[t] = bestPerm[t];
+  for (int step = 0; step < n; step++) {
+    perm[step] = bestPerm[step];
   }
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -612,10 +613,10 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
     }
   }
   double mob[kMaxN][3];
-  for (int t = 0; t < n; t++) {
-    mob[t][0] = env[perm[t]][0];
-    mob[t][1] = env[perm[t]][1];
-    mob[t][2] = env[perm[t]][2];
+  for (int step = 0; step < n; step++) {
+    mob[step][0] = env[perm[step]][0];
+    mob[step][1] = env[perm[step]][1];
+    mob[step][2] = env[perm[step]][2];
   }
   translationOf(templ, mob, n, R, t);
   rmsd = best;
@@ -636,7 +637,7 @@ bool matchIce(const double env[][3], int n, const double templ[][3], int perm[kM
   }
   int tf[4];
   nearest4(templ, n, 0, tf);
-  // Template atom 0 is the centre by construction. tf should be 1..4.
+  // Template atom 0 is the center by construction. tf should be 1..4.
   double best = 1e300;
   double best5 = 1e300;
   int bestPerm[kMaxN];
@@ -856,7 +857,8 @@ bool cageRecurse(const std::array<int, 3> adjE[], const std::array<int, 3> adjT[
     }
     int open = 0;
     for (int k = 0; k < 3; k++) {
-      if (adjE[i][k] >= 0 && mapE[adjE[i][k]] == -1) {
+      if (adjE[i][static_cast<std::size_t>(k)] >= 0 &&
+          mapE[adjE[i][static_cast<std::size_t>(k)]] == -1) {
         open++;
       }
     }
@@ -889,15 +891,17 @@ bool cageRecurse(const std::array<int, 3> adjE[], const std::array<int, 3> adjT[
   int openE[3];
   int nOpenE = 0;
   for (int k = 0; k < 3; k++) {
-    if (adjE[e][k] >= 0 && mapE[adjE[e][k]] == -1) {
-      openE[nOpenE++] = adjE[e][k];
+    if (adjE[e][static_cast<std::size_t>(k)] >= 0 &&
+        mapE[adjE[e][static_cast<std::size_t>(k)]] == -1) {
+      openE[nOpenE++] = adjE[e][static_cast<std::size_t>(k)];
     }
   }
   int openT[3];
   int nOpenT = 0;
   for (int k = 0; k < 3; k++) {
-    if (adjT[t][k] >= 0 && mapT[adjT[t][k]] == -1) {
-      openT[nOpenT++] = adjT[t][k];
+    if (adjT[t][static_cast<std::size_t>(k)] >= 0 &&
+        mapT[adjT[t][static_cast<std::size_t>(k)]] == -1) {
+      openT[nOpenT++] = adjT[t][static_cast<std::size_t>(k)];
     }
   }
   if (nOpenE != nOpenT) {
@@ -1066,67 +1070,6 @@ struct Grid {
   std::vector<double> py;
   std::vector<double> pz;
 };
-
-void invert3(const double M[3][3], double inv[3][3]) {
-  const double a = M[0][0], b = M[0][1], c = M[0][2];
-  const double d = M[1][0], e = M[1][1], f = M[1][2];
-  const double g = M[2][0], h = M[2][1], i = M[2][2];
-  const double det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-  const double s = 1.0 / det;
-  inv[0][0] = s * (e * i - f * h);
-  inv[0][1] = s * (c * h - b * i);
-  inv[0][2] = s * (b * f - c * e);
-  inv[1][0] = s * (f * g - d * i);
-  inv[1][1] = s * (a * i - c * g);
-  inv[1][2] = s * (c * d - a * f);
-  inv[2][0] = s * (d * h - e * g);
-  inv[2][1] = s * (b * g - a * h);
-  inv[2][2] = s * (a * e - b * d);
-}
-
-int eclipsedStored(const double c[3], const double nb[][3], int nNb, double cosine) {
-  int first[4];
-  int nFirst = 0;
-  int order[48];
-  double dd[48];
-  const int m = std::min(nNb, 48);
-  for (int i = 0; i < m; i++) {
-    order[i] = i;
-    dd[i] = dist2(c, nb[i]);
-  }
-  for (int a = 0; a < 4 && a < m; a++) {
-    int best = a;
-    for (int b = a + 1; b < m; b++) {
-      if (dd[b] < dd[best]) {
-        best = b;
-      }
-    }
-    std::swap(dd[a], dd[best]);
-    std::swap(order[a], order[best]);
-    if (dd[a] >= kBondLo * kBondLo && dd[a] <= kBondHi * kBondHi) {
-      first[nFirst++] = order[a];
-    }
-  }
-  if (nFirst < 4) {
-    return -1;
-  }
-  double pts[1 + 16][3];
-  pts[0][0] = c[0];
-  pts[0][1] = c[1];
-  pts[0][2] = c[2];
-  int idx[16];
-  const int keep = std::min(nNb, 16);
-  for (int i = 0; i < keep; i++) {
-    pts[i + 1][0] = nb[i][0];
-    pts[i + 1][1] = nb[i][1];
-    pts[i + 1][2] = nb[i][2];
-  }
-  // Rebuild first indices into pts[], where center is 0 and neighbors start at 1.
-  // nearest4 on this compact cloud.
-  int firstPts[4];
-  nearest4(pts, 1 + keep, 0, firstPts);
-  return eclipsedCountPts(pts, 1 + keep, 0, firstPts, cosine, nullptr);
-}
 
 } // namespace
 
@@ -1421,10 +1364,42 @@ double shellGate(double shellRmsd) {
   return std::isfinite(shellRmsd) && shellRmsd > 0.0 ? shellRmsd : kShellRmsd;
 }
 
+bool avx2Kernels() {
+#if defined(SEAMS_SHELL_AVX2)
+  const seams::cpu::Features &cpu = seams::cpu::features();
+  return cpu.avx2 && cpu.fma && seams::cpu::simdKernelsAllowed();
+#else
+  return false;
+#endif
+}
+
+void classifyPrepared(const double *x, const double *y, const double *z, int n,
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ, double bondRatio, bool openFace) {
+#if defined(SEAMS_SHELL_AVX2)
+  if (avx2Kernels()) {
+    avx2::classifyPrepared(x, y, z, n, lat, canon, gate, kind, thermalQ, bondRatio, openFace);
+    return;
+  }
+#endif
+  generic::classifyPrepared(x, y, z, n, lat, canon, gate, kind, thermalQ, bondRatio, openFace);
+}
+
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421,
+               int *n422, int *nGood) {
+#if defined(SEAMS_SHELL_AVX2)
+  if (avx2Kernels()) {
+    return avx2::diamondCna(sx, sy, sz, ambiguous, n421, n422, nGood);
+  }
+#endif
+  return generic::diamondCna(sx, sy, sz, ambiguous, n421, n422, nGood);
+}
+
 // The per-atom search lives in shell_classify.cpp, which does not include
-// Eigen and is built with AVX2. This wrapper only copies the coordinates.
+// Eigen. This wrapper only copies the coordinates.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind, double shellRmsd) {
+                 std::vector<int> &kind, double shellRmsd, double thermalQ, double bondRatio,
+                 bool openFace) {
   const int n = static_cast<int>(cartesian.rows());
   kind.assign(static_cast<size_t>(std::max(n, 0)), -1);
   if (n <= 0 || cartesian.cols() != 3) {
@@ -1434,15 +1409,47 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
                             {vectors(1, 0), vectors(1, 1), vectors(1, 2)},
                             {vectors(2, 0), vectors(2, 1), vectors(2, 2)}};
   classifyPrepared(cartesian.col(0).data(), cartesian.col(1).data(), cartesian.col(2).data(), n, lat,
-                   canonShell(), shellGate(shellRmsd), kind.data());
+                   canonShell(), shellGate(shellRmsd), kind.data(), thermalQ, bondRatio, openFace);
+}
+
+void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      std::vector<int> &kind, bool openFace) {
+  const int n = yCloud.nop;
+  kind.assign(static_cast<std::size_t>(std::max(n, 0)), -1);
+  if (n <= 0) {
+    return;
+  }
+  std::vector<double> x(static_cast<std::size_t>(n));
+  std::vector<double> y(x.size());
+  std::vector<double> z(x.size());
+  for (int i = 0; i < n; ++i) {
+    const auto &point = yCloud.pts[static_cast<std::size_t>(i)];
+    x[static_cast<std::size_t>(i)] = point.x;
+    y[static_cast<std::size_t>(i)] = point.y;
+    z[static_cast<std::size_t>(i)] = point.z;
+  }
+  double lat[3][3] = {};
+  const auto &box = yCloud.box;
+  lat[0][0] = box.size() > 0 ? box[0] : 1.0;
+  lat[1][1] = box.size() > 1 ? box[1] : lat[0][0];
+  lat[2][2] = box.size() > 2 ? box[2] : lat[0][0];
+  if (box.size() >= 6) {
+    lat[1][0] = box[3];
+    lat[2][0] = box[4];
+    lat[2][1] = box[5];
+  }
+  classifyIceArrays(x.data(), y.data(), z.data(), n, lat, kind.data(), kShellRmsd, kThermalQ,
+                    kThermalBondRatio, openFace);
 }
 
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
-                       int *kind, double shellRmsd) {
+                       int *kind, double shellRmsd, double thermalQ, double bondRatio,
+                       bool openFace) {
   if (n <= 0 || x == nullptr || y == nullptr || z == nullptr || kind == nullptr) {
     return;
   }
-  classifyPrepared(x, y, z, n, lat, canonShell(), shellGate(shellRmsd), kind);
+  classifyPrepared(x, y, z, n, lat, canonShell(), shellGate(shellRmsd), kind, thermalQ, bondRatio,
+                   openFace);
 }
 
 void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out) {

@@ -35,9 +35,9 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
                               std::vector<double> &quat, double &rmsd,
                               std::vector<double> &rmsdList, double &scale) {
   int nop =
-      refPoints.rows(); // Number of particles (equal to the number of rows)
+      static_cast<int>(refPoints.rows()); // Number of particles (equal to the number of rows)
   int dim =
-      refPoints.cols(); // Number of dimensions (equal to the number of columns)
+      static_cast<int>(refPoints.cols()); // Number of dimensions (equal to the number of columns)
   // Define every output before the first path that can leave early. Callers
   // hold these by reference and read them without consulting the return, so
   // an early exit that left them alone would hand back whatever the caller's
@@ -46,7 +46,7 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
   quat.assign(4, 0.0);
   quat[0] = 1.0; // identity rotation
   rmsd = -1.0;
-  rmsdList.assign(nop > 0 ? nop : 0, -1.0);
+  rmsdList.assign(static_cast<std::size_t>(nop > 0 ? nop : 0), -1.0);
   scale = 1.0;
   Eigen::MatrixXd centeredRefPnts(
       nop, dim); // Reference point set after centering wrt the centroid
@@ -100,7 +100,7 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
   // Update the quaternion with the normalized eigenvector
   quat.resize(4); // Output quaternion update
   for (int i = 0; i < 4; i++) {
-    quat[i] = calcEigenVec(i);
+    quat[static_cast<std::size_t>(i)] = calcEigenVec(i);
   } // end of quaternion update
   // --------
   // ---------------------------------------------------
@@ -318,7 +318,7 @@ double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
                       std::vector<double> &rmsdList, int nop, double scale) {
   Eigen::MatrixXd R(3, 3); // The (3x3) rotation vector
   // The RMSD per atom is filled in this vector
-  rmsdList.resize(nop);
+  rmsdList.resize(static_cast<std::size_t>(nop));
   //
   R = absor::quat2RotMatrix(
       quat); // orthonormal rotation matrix from the quaternion
@@ -339,7 +339,7 @@ double absor::getRMSD(const Eigen::MatrixXd &centeredRefPnts,
     rotatedLeft = R * targetCol;
     errorVec = refCol - scale * rotatedLeft;
     rmsd += errorVec.dot(errorVec);                // Total error
-    rmsdList[i] = std::sqrt(errorVec.dot(errorVec)); // Error per atom
+    rmsdList[static_cast<std::size_t>(i)] = std::sqrt(errorVec.dot(errorVec)); // Error per atom
   } // end of loop through every row
   //
   return std::sqrt(rmsd / nop);

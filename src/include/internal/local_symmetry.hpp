@@ -1,6 +1,9 @@
 #ifndef SEAMS_LOCAL_SYMMETRY_H_
 #define SEAMS_LOCAL_SYMMETRY_H_
 
+#include <mol_sys.hpp>
+#include <shell_hot.hpp>
+
 #include <Eigen/Core>
 #include <string>
 #include <vector>
@@ -34,7 +37,7 @@ inline constexpr int kTemplateCount = 8;
 const char *name(Kind kind);
 
 // Ideal oxygen coordinates, rows are atoms, angstrom. The first row of an
-// ice shell is the central oxygen. Cage and ring templates are centred.
+// ice shell is the central oxygen. Cage and ring templates are centered.
 Eigen::MatrixXd points(Kind kind);
 
 struct Overlay {
@@ -75,26 +78,34 @@ void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Over
 // as eclipsed.
 inline constexpr double kEclipsedCosine = 0.90;
 
-// Scale-free ceiling on the second-shell residual. Both clouds are centred,
+// Scale-free ceiling on the second-shell residual. Both clouds are centered,
 // then the RMSD is taken after the optimal rotation and the optimal scale
 // and divided by the template's root-mean-square radius (Horn 1987; Larsen,
-// Schmidt, Schiotz 2016). Zero is a perfect shape. The value is the operating
-// point chosen on seeds 91001 and 92002. A thermal label is scored against the
-// majority of this kernel, CHILL+ and PTM on the steepest-descent quench.
-// 0.12 is the tightest ceiling whose recall on those two seeds stays above
-// PTM when a crystal atom must have one crystal neighbour. Precision on that
-// pair is 0.994, against PTM at 0.995. Seed 93003 was not used to choose it.
-inline constexpr double kShellRmsd = 0.12;
+// Schmidt, Schiotz 2016). Zero is a perfect shape. 0.12 is the quenched mW
+// operating point. A TIP4P/2005 shell at the melting point still vibrates:
+// raising the ceiling from 0.12 to 0.15 recovers quench-confirmed crystal,
+// and the next step to 0.18 mostly adds atoms that neither PTM nor CHILL+
+// call ice after the same minimisation.
+inline constexpr double kShellRmsd = 0.15;
 
 // Per-atom ice label. kind[i] is iceIh, iceIc, iceIsd, or -1. shellRmsd is
 // the scale-free residual ceiling. The label is the template with the lowest
 // residual after the bond-graph permutation of the tetrahedron.
+// openFace is the second-shell completion for an under-coordinated neighbour.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind, double shellRmsd = kShellRmsd);
+                 std::vector<int> &kind, double shellRmsd = kShellRmsd,
+                 double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio,
+                 bool openFace = false);
 
 // Column SoA coordinates. The canon shell is built once. kind is written in full.
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
-                       int *kind, double shellRmsd = kShellRmsd);
+                       int *kind, double shellRmsd = kShellRmsd, double thermalQ = kThermalQ,
+                       double bondRatio = kThermalBondRatio, bool openFace = false);
+
+// Same labels as classifyIceArrays, packed from a point cloud. On ideal
+// cubic ice the codes match diamondFromCsr (0 hexagonal, 1 cubic, -1 other).
+void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      std::vector<int> &kind, bool openFace = false);
 
 // Azimuthal cosine of each tetrahedral bond, largest first. The value is
 // the best alignment of an outer neighbour with one of the other three
@@ -130,6 +141,15 @@ struct Space {
 // status 2 when spglib is not linked.
 Space spaceGroup(const Eigen::Matrix3d &vectors, const Eigen::MatrixXd &cartesian,
                  double symprec = 1e-3);
+
+// Space group of one conventional cell when every label is the same ideal
+// ice and the box is a cubic integer supercell of that cell. Returns false
+// when the frame is not that crystal; the caller then uses spaceGroup on
+// the whole cell. The international symbol matches the full-cell call.
+bool conventionalCrystalSpace(const Eigen::Matrix3d &vectors,
+                              const Eigen::MatrixXd &cartesian,
+                              const std::vector<int> &kind, double symprec,
+                              Space &out);
 
 enum class Crystal { iceIh, iceIc, fault };
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Equal-hardware head-to-head: d-SEAMS 2.0 (seams-core v2.12.0, through
-pydseamslib 2.11.1 built on it and the seams CLI) against OVITO 3.15.5, freud 3.5.0,
+"""Equal-hardware head-to-head: d-SEAMS 2.14.0 (seams-core, the in-tree
+Python front and the seams CLI) against OVITO 3.17.2, freud 3.5.0,
 R.I.N.G.S. 1.3.5 and GenIce2 2.2.13.3 on one pinned core.
 
     h2h.py prep | chill | q6 | cna | rings | gring | cage | t512 | env

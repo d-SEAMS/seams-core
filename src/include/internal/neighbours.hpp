@@ -156,7 +156,7 @@ inline void dumpFromFrac(const double H[3][3], const double origin[3],
   r[2] = origin[2] + H[2][2] * s[2];
 }
 
-/// Triclinic dump-cell volume |det(H)| from dumpBoundsToH.
+/// Triclinic dump-cell volume, the absolute value of det(H), from dumpBoundsToH.
 /// Bound spans Lx*Ly*Lz are not the cell volume when tilt is present.
 inline double dumpVolume(const std::vector<double> &box,
                          const std::vector<double> &boxLow) {
@@ -369,19 +369,27 @@ const std::vector<std::vector<int>> &reusedShellList(
 //! axis whose empty gap is wider than the cutoff does not wrap, and the
 //! fused cutoff list runs on that window rather than on the periodic box.
 //! Returns false when the atoms fill the box or the box is not orthorhombic.
-//! Rows are atom IDs, self first, in the same order as neighListO. A null
-//! source marks every atom as an anchor; otherwise only marked atoms
-//! receive partners.
+//! Rows are atom IDs when @a byId is set, and cloud indices otherwise.
+//! Self is first, then partners in ascending order, matching neighListO.
+//! A null source marks every atom as an anchor; otherwise only marked
+//! atoms receive partners. With @a everyRow the source still places the
+//! window, and every atom in it receives partners.
 bool blockWindowRows(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double rcutoff,
-    const std::vector<char> *source, std::vector<std::vector<int>> &rows);
+    const std::vector<char> *source, std::vector<std::vector<int>> &rows,
+    bool byId = true, bool everyRow = false);
 
 bool cellListRowsThreaded(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &subset, double rcutoff,
     std::vector<std::vector<int>> &rows);
 
-/// Full cutoff list as CSR of cloud indices.
+/// When set, neighListO stays on the one-thread builder even if the
+/// OpenMP team is wider. The team is left in place for the caller.
+void preferSerialCutoff(bool on);
+
+/// Full cutoff list as CSR of cloud indices. Orthorhombic, or a
+/// restricted triclinic cell stored as bound spans plus xy, xz, yz.
 ///
 /// Orthorhombic boxes (`box.size() == 3`) and restricted triclinic dump
 /// boxes (`box.size() >= 6`) both use the parallel cell sort. A null
@@ -394,7 +402,26 @@ bool cellListRowsThreaded(
 bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
-    std::vector<int> &cols, bool half = false);
+    std::vector<int> &cols, bool half = false,
+    std::vector<std::vector<int>> *directRows = nullptr, const int *indexToID = nullptr,
+    bool *wroteRows = nullptr, bool branchy = false);
+
+//! Same rows as neighListO, written into @a rows. A row keeps the capacity
+//! of the previous call, so a repeated frame does not allocate per atom.
+bool refillNeighListO(double rcutoff,
+                      const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      int typeI, std::vector<std::vector<int>> &rows);
+
+//! Same rows as getNewNeighbourListByIndex, written into @a rows.
+bool refillIndexRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     double cutoff, std::vector<std::vector<int>> &rows);
+
+/// Directed k nearest neighbours as a CSR of cloud indices, no self entry.
+/// `candidateCutoff` is the cell-size hint used by the k-nearest search.
+/// Rows are nearest first. Returns false when the cloud has no box.
+bool directedKNearestCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, std::vector<int> &offsets, std::vector<int> &cols);
 
 /// In-situ cutoff list. Candidates are built at `cutoff + skin` and
 /// reused while every atom and the box have moved by at most `skin/2`.
@@ -453,6 +480,13 @@ std::vector<std::vector<int>> neighListO(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI);
 
+//! Cutoff rows from the threaded linkcell list. Empty when linkcell is not
+//! built or the call fails; the caller then uses neighListO. The width is
+//! the OpenMP team, and the OpenMP team is left running.
+std::vector<std::vector<int>> neighListLinkcell(
+    double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    int typeI);
+
 //! Half neighbour list for one type (vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> halfNeighList(
@@ -492,6 +526,21 @@ std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual = true);
 
+//! Same neighbours as kNearestNeighbourList, as a CSR of cloud indices
+//! with no self entry. Column order matches that list after the
+//! atom-id rows are mapped back to indices.
+void kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+                 double candidateCutoff, int typeI, bool mutual, std::vector<int> &offsets,
+                 std::vector<int> &cols, bool park = true);
+
+//! Packed nominations from the same search as kNearestNeighbourList.
+//! `xyz` is n by 3 and `nom` is n by k cloud indices, nearest first,
+//! with unused slots set to -1. The rows are not symmetrized.
+void kNearestPacked(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, std::vector<double> &xyz,
+    std::vector<int> &nom);
+
 /** k-nearest graph on a type set (water oxygens). Substrate, ions and
  *  other species never appear as neighbours. An empty set is no atoms. */
 std::vector<std::vector<int>> kNearestNeighbourList(
@@ -515,7 +564,9 @@ kNearestNeighbourPair(
  *  graph to the cutoff graph: returns {max_i d_k(i), min_i d_{k+1}(i)} over
  *  particles of the type. When max_i d_k(i) <= rcutoff <= min_i d_{k+1}(i),
  *  the two graphs coincide edge for edge and every downstream graph
- *  predicate is identical. Brute force, intended for validation.
+ *  predicate is identical. Brute force, intended for validation. A
+ *  particle of the type with fewer than k others of that type returns
+ *  {infinity, 0}: no cutoff gives it k neighbours.
  */
 std::pair<double, double> shellSeparation(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
@@ -610,4 +661,5 @@ private:
 
 }  // namespace nneigh
 
+/** @} */
 #endif  // SEAMS_NEIGHBOURS_H_

@@ -186,7 +186,7 @@ struct BondClassifier {
 
 //! Staggered, eclipsed, or out of range. @a closed selects inclusive edges
 //! (c <= staggeredMax, eclipsedMin <= c <= eclipsedMax), the Nguyen and
-//! Molinero rule and the 2.13 behaviour. Open edges match OVITO 3.17.2
+//! Molinero rule and the 2.13 behavior. Open edges match OVITO 3.17.2
 //! (c < staggeredMax, eclipsedMin < c < eclipsedMax). The flag is an
 //! argument so BondClassifier stays three doubles and one int. A caller
 //! that passes the struct by value does not carry a fifth field.
@@ -246,8 +246,26 @@ void classifyBondsCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const BondClassifier &rule, bool isSlice = false);
 
 //! Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count.
+//! @a keepBonds false still writes iceType and skips the per-atom bond
+//! vectors. The labels are the same either way. The vectors are what a
+//! caller that reads c_ij needs.
 int chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                     const std::vector<int> &offsets, const std::vector<int> &cols);
+                     const std::vector<int> &offsets, const std::vector<int> &cols,
+                     bool keepBonds = true);
+
+//! OVITO Chill+ from a cutoff CSR. q_lm is the sum over every neighbour in
+//! the row, not the four closest. Edges are open and the Table 1 neighbour
+//! test is off, which is the Chill+ modifier. A crystal row still needs
+//! exactly four neighbours. Bond vectors are not stored. Returns the cubic
+//! count.
+int chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                          const std::vector<int> &offsets, const std::vector<int> &cols);
+
+//! Published CHILL labels from a cutoff CSR. Correlations are the four
+//! nearest neighbours in the list. Bond vectors are not stored. Returns
+//! the cubic count. Thresholds are chillRule().
+int chillFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<int> &offsets, const std::vector<int> &cols);
 
 //! Unnormalised real l = 3 bond-order vector of the atoms @a which selects.
 //! @a which null computes every atom. Ghost slots stay zero so a neighbour
@@ -263,7 +281,7 @@ struct BondOrder {
 
 void bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, const BondClassifier &rule,
-               BondOrder &order, const std::vector<char> *which);
+               BondOrder &order, const std::vector<char> *which, bool fresh = true);
 
 //! c_ij for atoms @a which selects, from a bond-order vector that already
 //! holds every neighbour the bond reads. Atoms outside @a which are left
@@ -348,6 +366,35 @@ getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<std::vector<int>> &nList, bool isSlice,
               int coordinationNumber, bool closedBounds);
 
+//! Published CHILL+ on the cutoff shell. The pair rows are read inside
+//! this call; the shared neighbour-list builder is not modified.
+//! Returns false when that search is not available.
+bool chillPlusPublishedCutoff(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI);
+
+//! One cutoff list and one bond pass for local q4, local q6, their
+//! Lechner-Dellago averages, and the published CHILL+ labels. The four
+//! q arrays match steinhardtQlCutoff with averaging on. Returns false
+//! when the atoms are not one type or the cutoff list is not available,
+//! and then writes nothing.
+bool q4q6ChillPlus(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI, std::vector<double> &q4, std::vector<double> &q6,
+    std::vector<double> &q4bar, std::vector<double> &q6bar);
+
+//! Cubic pre-filter from discovery/pysr_prefilter.py. The selected
+//! expression is cmean^4. It writes cubic and returns true only when
+//! every atom has a cutoff shell of four and a negative mean correlation
+//! whose fourth power sits above the highest non-cubic score in that
+//! search. That forces every bond below -0.84, which the published rule
+//! labels staggered, so the atom is cubic. Otherwise it returns false
+//! and leaves the cloud unchanged. The default published call does not
+//! use it.
+bool chillPlusSymbolicPrefilter(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI);
+
 //! Classifies each atom according to the CHILL+ algorithm.
 //! This is the 2.13 symbol: the published neighbour test stays on.
 void
@@ -394,7 +441,7 @@ getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
 //! 'Test' condition for classifying hexagonal ice using averaged q6 and q3
 //! Checks water
-//! According to https://!pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
+//! According to https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 void
 reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -426,6 +473,7 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 struct SteinhardtQl {
   std::vector<double> ql;    //! Local @f$q_l(i)@f$
   std::vector<double> qlBar; //! Averaged @f$\bar{q}_l(i)@f$
+  std::vector<double> wl;    //! Normalized @f$\hat{w}_l@f$, empty unless requested
 };
 
 //! Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6,
@@ -446,14 +494,61 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Neighbours are orthoFullCsr, not a four-nearest rebuild, and the
 //! kernel reads that CSR directly. Lechner-Dellago @f$\bar{q}_l@f$ is
 //! filled only when @a average is true. Otherwise `qlBar` stays zero.
+//! @a invariants fills @c wl with the normalized Steinhardt
+//! @f$\hat{w}_l@f$ for l = 4 or 6.
 [[nodiscard]] SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    double cutoff, int orderL, int typeI, bool average);
+    double cutoff, int orderL, int typeI, bool average, bool invariants = false);
+
+//! Wall seconds of the last steinhardtQlCutoff call on this thread: the
+//! cutoff list, then q_l and any average from it. @c set is false when
+//! that call took a path that does not time the two apart (orders 8 and
+//! 12, or a cell the solid-harmonic kernel declines).
+struct QlCutoffStages {
+  double list = 0.0;
+  double ql = 0.0;
+  bool set = false;
+};
+QlCutoffStages &lastQlCutoffStages();
+
+//! Local q4 and q6 from one cutoff list. Same values as two
+//! steinhardtQlCutoff calls with averaging off. Returns false when the
+//! shared shell cannot be built.
+bool localCutoffQ4Q6(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI, std::vector<double> &q4, std::vector<double> &q6);
+
+//! q4 and q6 from one cutoff list. The bond vectors are wrapped once.
+//! Each degree then uses the same harmonic as steinhardtQlCutoff, so the
+//! values match two separate calls. Returns false when that list is not
+//! available; the outputs are left untouched.
+[[nodiscard]] bool steinhardtQ4Q6Cutoff(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double cutoff, int typeI, bool average, SteinhardtQl &q4, SteinhardtQl &q6);
+
+//! Mutual k-nearest Steinhardt parameters. The coordinate buffer built
+//! for the nomination is the one the harmonics read, and the neighbour
+//! rows stay in one packed array. l is 3, 4 or 6; other degrees return
+//! the result of building the mutual graph and calling steinhardtQl.
+[[nodiscard]] SteinhardtQl steinhardtQlMutual(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, int orderL);
 
 //! Whether steinhardtQl splits atoms over the ranks of an initialised
 //! MPI_COMM_WORLD (true unless set). A driver that gives each rank whole
 //! frames of its own turns it off.
 void setSteinhardtAtomSplit(bool split);
+
+//! Rebuild, local kernel, halo exchange, and the write-back to the frame.
+struct AnalysisPhases {
+  double rebuildMs = 0;
+  double computeMs = 0;
+  double exchangeMs = 0;
+  double reduceMs = 0;
+};
+
+AnalysisPhases lastChillPhases();
+AnalysisPhases lastSteinhardtPhases();
 
 //! Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.
 inline int steinhardtQlmWidth(int orderL) { return 2 * (2 * orderL + 1); }
@@ -533,4 +628,5 @@ std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles);
 
 } // namespace sph
 
+/** @} */
 #endif // SEAMS_BOP_H_

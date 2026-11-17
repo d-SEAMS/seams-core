@@ -1,0 +1,1 @@
+Tilted LAMMPS dumps are read by the native reader again. Chemfiles 0.10.4 took the cell edge as `xhi_bound - xlo_bound` and kept the tilt padding, so the GenIce sH dump came back with an edge of 31.053 instead of 24.8424228 angstrom.

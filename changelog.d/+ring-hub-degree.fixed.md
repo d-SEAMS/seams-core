@@ -1,0 +1,1 @@
+The primitive ring search no longer crashes on a vertex with more than 48 neighbours when it searches by hops alone, as it does up to six-membered rings. Such a row fell through to the distance table that only the longer search builds; `seams_rings_find` over every atom of `input/traj/dump-bcc` was one case.

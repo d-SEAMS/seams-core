@@ -1,0 +1,12 @@
+#+TITLE: ClavisCage TRACE
+#+OPTIONS: toc:nil num:nil
+
+ClavisCage TRACE against the d-SEAMS cage census. The numbers are
+written from the vendored CSV at build time. Each timing row names the
+version, the thread count, the repeat count and the core count. TRACE
+does not take a thread count, so the eight-thread row times the same
+serial call as the one-thread row.
+
+#+begin_export rst
+.. include:: clavis-trace-tables.rst
+#+end_export

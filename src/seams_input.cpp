@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------------
 // d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
 //
-// Copyright (c) 2018--present d-SEAMS core team
+// Copyright (c) d-SEAMS developers
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the MIT License as published by
@@ -13,26 +13,47 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <atomic>
 #include <charconv>
+#include <chrono>
 #include <cmath>
+#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <vector>
 #include <filesystem>
 #include <fstream>
 #include <generic.hpp>
 #include <map>
+#include <sstream>
 #include <neighbours.hpp>
 #include <memory>
 #include <mutex>
 #include <seams_input.hpp>
 #include <string_view>
-#include <sys/mman.h>
+#include <thread>
+#include <utility>
 #include <sys/stat.h>
+
+// Larger than the 884736-molecule cell. A header past this is not a frame
+// the reader will allocate.
+constexpr int kMaxDeclaredAtoms = 8000000;
+
+bool declaredAtomsOk(int nop) {
+  return nop >= 0 && nop <= kMaxDeclaredAtoms;
+}
+#if defined(_WIN32) && !defined(__MINGW32__)
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
+#ifdef _WIN32
+#include <io.h>
+#endif
 #include <unordered_map>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -40,6 +61,17 @@
 #endif
 
 namespace {
+// A header atom count is untrusted. Every atom line takes at least
+// minLineBytes, so reserving more than the unread bytes can hold
+// allocates gigabytes for a few-byte file.
+std::size_t atomsThatFit(int nop, long long bytesLeft, std::size_t minLineBytes) {
+  if (nop <= 0) {
+    return 0;
+  }
+  const auto left = static_cast<std::size_t>(std::max(bytesLeft, 0LL));
+  return std::min(static_cast<std::size_t>(nop), left / minLineBytes + 1);
+}
+
 /**
  * @details Record the ID-to-index entry for the most recently appended point.
  *  A duplicate atom ID means the input is corrupt (two atoms cannot share an
@@ -83,8 +115,19 @@ int parseDumpFields(std::string_view line, double *out, int cap) {
       break;
     }
     double value = 0;
-    // libc++ on the macOS 11 conda SDK deletes from_chars(double).
-    // Dump fields are C-locale decimals; copy one token and use strtod.
+    // from_chars(double) is the fast C-locale scan. libc++ on the macOS 11
+    // conda SDK deletes it, and that build keeps strtod.
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+    const auto parsed = std::from_chars(p, end, value);
+    if (parsed.ec != std::errc{}) {
+      while (p < end && *p != ' ' && *p != '\t') {
+        ++p;
+      }
+      continue;
+    }
+    out[n++] = value;
+    p = parsed.ptr;
+#else
     char buf[64];
     const auto ntok = std::min<std::size_t>(static_cast<std::size_t>(end - p),
                                             sizeof(buf) - 1);
@@ -100,6 +143,7 @@ int parseDumpFields(std::string_view line, double *out, int cap) {
     }
     out[n++] = value;
     p += (endp - buf);
+#endif
   }
   return n;
 }
@@ -107,12 +151,156 @@ int parseDumpFields(std::string_view line, double *out, int cap) {
 bool parseDumpInt(std::string_view line, int &out) {
   const char *p = line.data();
   const char *const end = p + line.size();
-  while (p < end && (*p == ' ' || *p == '\t')) {
-    ++p;
-  }
+  while (p < end && (*p == ' ' || *p == '\t')) ++p;
   const auto parsed = std::from_chars(p, end, out);
   return parsed.ec == std::errc{};
 }
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+int openForRead(const std::string &path) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+  return _open(path.c_str(), _O_RDONLY | _O_BINARY);
+#else
+  return ::open(path.c_str(), O_RDONLY | O_BINARY);
+#endif
+}
+
+void closeFd(int fd) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+  _close(fd);
+#else
+  ::close(fd);
+#endif
+}
+
+std::int64_t seekFd(int fd, std::int64_t off, int whence) {
+#ifdef _WIN32
+  return ::_lseeki64(fd, off, whence);
+#else
+  return static_cast<std::int64_t>(::lseek(fd, static_cast<off_t>(off), whence));
+#endif
+}
+
+// pread where there is one. The Windows descriptors here are private to
+// the caller, so a seek and a read do the same.
+std::int64_t readAt(int fd, char *buf, std::size_t n, std::uint64_t off) {
+#ifdef _WIN32
+  if (seekFd(fd, static_cast<std::int64_t>(off), SEEK_SET) < 0) {
+    return -1;
+  }
+  const unsigned int chunk =
+      static_cast<unsigned int>(std::min<std::size_t>(n, 1u << 30));
+  return ::_read(fd, buf, chunk);
+#else
+  return ::pread(fd, buf, n, static_cast<off_t>(off));
+#endif
+}
+
+// A buffered, seekable read of one descriptor, which it closes. It reads
+// no further than the end of the file at that moment, so a dump that is
+// still being written is followed, and a descriptor that cannot seek to
+// its end (a /proc file: size 0, endless content) reads as empty.
+class FdReadBuf : public std::streambuf {
+public:
+  explicit FdReadBuf(int fd) : fd_(fd), buf_(1 << 16) {
+    setg(buf_.data(), buf_.data(), buf_.data());
+  }
+  ~FdReadBuf() override {
+    if (fd_ >= 0) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+      _close(fd_);
+#else
+      ::close(fd_);
+#endif
+    }
+  }
+  FdReadBuf(const FdReadBuf &) = delete;
+  FdReadBuf &operator=(const FdReadBuf &) = delete;
+
+protected:
+  int_type underflow() override {
+    if (gptr() < egptr()) {
+      return traits_type::to_int_type(*gptr());
+    }
+    const std::int64_t size = seekFd(fd_, 0, SEEK_END);
+    if (size <= end_ || seekFd(fd_, end_, SEEK_SET) != end_) {
+      return traits_type::eof();
+    }
+    const std::int64_t want =
+        std::min(static_cast<std::int64_t>(buf_.size()), size - end_);
+    std::int64_t n = -1;
+    do {
+#if defined(_WIN32) && !defined(__MINGW32__)
+      n = _read(fd_, buf_.data(), static_cast<unsigned int>(want));
+#else
+      n = ::read(fd_, buf_.data(), static_cast<unsigned int>(want));
+#endif
+    } while (n < 0 && errno == EINTR);
+    if (n <= 0) {
+      return traits_type::eof();
+    }
+    end_ += n;
+    setg(buf_.data(), buf_.data(), buf_.data() + n);
+    return traits_type::to_int_type(*gptr());
+  }
+
+  pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+                   std::ios_base::openmode which) override {
+    if (!(which & std::ios_base::in)) {
+      return pos_type(off_type(-1));
+    }
+    const std::int64_t here = end_ - (egptr() - gptr());
+    if (dir == std::ios_base::cur) {
+      if (off == 0) {
+        return pos_type(here);
+      }
+      return seekpos(pos_type(here + off), which);
+    }
+    if (dir == std::ios_base::end) {
+      const std::int64_t r = seekFd(fd_, off, SEEK_END);
+      return r < 0 ? pos_type(off_type(-1)) : reset(r);
+    }
+    return seekpos(pos_type(off), which);
+  }
+
+  pos_type seekpos(pos_type sp, std::ios_base::openmode which) override {
+    if (!(which & std::ios_base::in)) {
+      return pos_type(off_type(-1));
+    }
+    const std::int64_t r = seekFd(fd_, static_cast<std::int64_t>(sp), SEEK_SET);
+    return r < 0 ? pos_type(off_type(-1)) : reset(r);
+  }
+
+private:
+  pos_type reset(std::int64_t at) {
+    end_ = at;
+    setg(buf_.data(), buf_.data(), buf_.data());
+    return pos_type(at);
+  }
+
+  int fd_;
+  std::vector<char> buf_;
+  std::int64_t end_ = 0;
+};
+
+// One descriptor. The stream reads that descriptor and nothing else.
+class OwnedFdStream {
+public:
+  explicit OwnedFdStream(int fd) : fd_(fd), buf_(fd), in_(&buf_) {}
+  std::istream &stream() { return in_; }
+  int descriptor() const { return fd_; }
+  bool failed() const { return in_.bad(); }
+
+private:
+  int fd_;
+  FdReadBuf buf_;
+  std::istream in_;
+};
+
+bool streamReadFailed(std::istream &in) { return in.bad(); }
 
 // Live dump position, matching LAMMPS ReaderNative (rerun keeps FILE* at
 // the next snapshot) and chemfiles LAMMPSTrajectory::read_next. Random
@@ -120,12 +308,15 @@ bool parseDumpInt(std::string_view line, int &out) {
 struct LammpsDumpSession {
   std::mutex mu;
   std::string path;
-  std::ifstream file;
+  std::unique_ptr<OwnedFdStream> io;
   std::vector<std::uint64_t> offsets;
   int lastFrame = 0;
   bool fullyIndexed = false;
   std::filesystem::file_time_type mtime{};
   std::uintmax_t size{0};
+
+  int descriptor() const { return io ? io->descriptor() : -1; }
+  std::istream &stream() { return io->stream(); }
 
   bool open(const std::string &filename) {
     path = filename;
@@ -138,11 +329,15 @@ struct LammpsDumpSession {
     if (ec) {
       return false;
     }
-    file.open(filename, std::ios::in | std::ios::binary);
+    const int raw = openForRead(filename);
+    if (raw < 0) {
+      return false;
+    }
+    io = std::make_unique<OwnedFdStream>(raw);
     offsets.clear();
     lastFrame = 0;
     fullyIndexed = false;
-    return file.is_open();
+    return static_cast<bool>(stream());
   }
 
   bool stale() const {
@@ -155,33 +350,41 @@ struct LammpsDumpSession {
     return ec || mt != mtime;
   }
 
-  // One mmap + memchr walk of ITEM: TIMESTEP. getline was ~0.5 s on the
-  // 103 MB Niu dump; glibc memchr is the SIMD find, no extra library.
+  // A private copy, then a memchr walk of ITEM: TIMESTEP. An mmap of
+  // the file faults with SIGBUS when another writer truncates or
+  // replaces it before the pages are read. pread stops at the bytes
+  // that still belong to this descriptor.
   bool mmapIndexAll() {
-    if (fullyIndexed) {
-      return true;
-    }
-    const int fd = ::open(path.c_str(), O_RDONLY);
+    const int fd = openForRead(path);
     if (fd < 0) {
       return false;
     }
     struct stat st {};
     if (::fstat(fd, &st) != 0 || st.st_size <= 0) {
-      ::close(fd);
+      closeFd(fd);
       return false;
     }
     const auto nbytes = static_cast<std::size_t>(st.st_size);
-    void *map = ::mmap(nullptr, nbytes, PROT_READ, MAP_PRIVATE, fd, 0);
-    ::close(fd);
-    if (map == MAP_FAILED) {
-      return false;
+    std::vector<char> bytes(nbytes);
+    std::size_t got = 0;
+    while (got < nbytes) {
+      const std::int64_t n = readAt(fd, bytes.data() + got, nbytes - got, got);
+      if (n < 0) {
+        if (errno == EINTR) {
+          continue;
+        }
+        closeFd(fd);
+        return false;
+      }
+      if (n == 0) {
+        break;
+      }
+      got += static_cast<std::size_t>(n);
     }
-#ifdef POSIX_MADV_SEQUENTIAL
-    ::posix_madvise(map, nbytes, POSIX_MADV_SEQUENTIAL);
-#endif
+    closeFd(fd);
     offsets.clear();
-    const char *const begin = static_cast<const char *>(map);
-    const char *const end = begin + nbytes;
+    const char *const begin = bytes.data();
+    const char *const end = begin + got;
     constexpr char kNeedle[] = "ITEM: TIMESTEP";
     constexpr std::size_t kN = 14;
     const char *p = begin;
@@ -199,33 +402,29 @@ struct LammpsDumpSession {
         ++p;
       }
     }
-    ::munmap(map, nbytes);
     fullyIndexed = true;
     return !offsets.empty();
   }
 
   bool discoverNext() {
-    if (!file.is_open()) {
-      return false;
-    }
     if (offsets.empty()) {
-      file.clear();
-      file.seekg(0);
+      stream().clear();
+      stream().seekg(0);
     } else {
-      file.clear();
-      file.seekg(static_cast<std::streamoff>(offsets.back()));
+      stream().clear();
+      stream().seekg(static_cast<std::streamoff>(offsets.back()));
       std::string skip;
-      if (!std::getline(file, skip)) {
+      if (!std::getline(stream(), skip)) {
         return false;
       }
     }
-    while (file) {
-      const auto here = file.tellg();
+    while (stream()) {
+      const auto here = stream().tellg();
       if (here < 0) {
         return false;
       }
       std::string line;
-      if (!std::getline(file, line)) {
+      if (!std::getline(stream(), line)) {
         return false;
       }
       if (isLammpsTimestep(line)) {
@@ -237,16 +436,16 @@ struct LammpsDumpSession {
   }
 
   bool positionAt(int frame) {
-    if (frame < 1 || !file.is_open()) {
+    if (frame < 1) {
       return false;
     }
     if (lastFrame + 1 == frame && lastFrame > 0) {
-      const auto here = file.tellg();
+      const auto here = stream().tellg();
       if (here >= 0 && static_cast<int>(offsets.size()) < frame) {
         offsets.push_back(static_cast<std::uint64_t>(here));
       }
       std::string line;
-      if (!std::getline(file, line) || !isLammpsTimestep(line)) {
+      if (!std::getline(stream(), line) || !isLammpsTimestep(line)) {
         return false;
       }
       lastFrame = frame;
@@ -257,10 +456,10 @@ struct LammpsDumpSession {
         return false;
       }
     }
-    file.clear();
-    file.seekg(static_cast<std::streamoff>(offsets[frame - 1]));
+    stream().clear();
+    stream().seekg(static_cast<std::streamoff>(offsets[static_cast<std::size_t>(frame - 1)]));
     std::string line;
-    if (!std::getline(file, line) || !isLammpsTimestep(line)) {
+    if (!std::getline(stream(), line) || !isLammpsTimestep(line)) {
       return false;
     }
     lastFrame = frame;
@@ -304,7 +503,7 @@ std::shared_ptr<LammpsDumpSession> sessionFor(const std::string &filename) {
   }
   std::lock_guard<std::mutex> lock(gDumpMu);
   auto &slot = gDumps[filename];
-  if (!slot || slot->stale() || !slot->file.is_open()) {
+  if (!slot || slot->stale()) {
     slot = std::make_shared<LammpsDumpSession>();
     if (!slot->open(filename)) {
       slot.reset();
@@ -336,12 +535,16 @@ void noteCoordColumn(int col, const std::string &tok, int &x, int &y,
 } // namespace
 
 int sinp::nLammpsFrames(const std::string &filename) {
-  auto sess = sessionFor(filename);
-  if (sess == nullptr) {
+  try {
+    auto sess = sessionFor(filename);
+    if (sess == nullptr) {
+      return 0;
+    }
+    std::lock_guard<std::mutex> lock(sess->mu);
+    return sess->nframes();
+  } catch (const std::ios_base::failure &) {
     return 0;
   }
-  std::lock_guard<std::mutex> lock(sess->mu);
-  return sess->nframes();
 }
 
 void sinp::dropLammpsDumpIndex(const std::string &filename) {
@@ -381,6 +584,8 @@ void sinp::forEachLammpsFrame(
   }
   const int count = static_cast<int>(frames.size());
 
+  std::mutex errorMu;
+  std::string error;
 #ifdef SEAMS_HAS_OPENMP
   const int threads = nThreads > 0 ? nThreads : omp_get_max_threads();
 #pragma omp parallel for schedule(dynamic, 1) num_threads(threads)             \
@@ -388,13 +593,23 @@ void sinp::forEachLammpsFrame(
 #endif
   for (int k = 0; k < count; ++k) {
     const int frame = frames[static_cast<std::size_t>(k)];
-    molSys::PointCloud<molSys::Point<double>, double> cloud;
-    if (typeFilter > 0) {
-      cloud = readLammpsTrjO(filename, frame, cloud, typeFilter);
-    } else {
-      cloud = readLammpsTrj(filename, frame, cloud);
+    try {
+      molSys::PointCloud<molSys::Point<double>, double> cloud;
+      if (typeFilter > 0) {
+        cloud = readLammpsTrjO(filename, frame, cloud, typeFilter);
+      } else {
+        cloud = readLammpsTrj(filename, frame, cloud);
+      }
+      fn(frame, cloud);
+    } catch (const std::exception &ex) {
+      std::lock_guard<std::mutex> lock(errorMu);
+      if (error.empty()) {
+        error = ex.what();
+      }
     }
-    fn(frame, cloud);
+  }
+  if (!error.empty()) {
+    throw std::runtime_error(error);
   }
 }
 
@@ -438,8 +653,8 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
       bool ok = true;
       for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
         try {
-          id.push_back(std::stoi(tokens[i]));
-        } catch (const std::exception &) {
+          id.push_back(std::stoi(tokens[static_cast<std::size_t>(i)]));
+        } catch (...) {
           ok = false;
           break;
         }
@@ -480,6 +695,75 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
 
   return bonds;
 }
+namespace {
+
+// Extended XYZ stores the cell as Lattice="ax ay az bx by bz cx cy cz".
+// A reduced cell becomes the LAMMPS box (lengths, then xy xz yz). The
+// coordinate span is not a cell.
+bool latticeCell(const std::string &comment, std::vector<double> &box,
+                 std::vector<double> &boxLow) {
+  const auto key = comment.find("Lattice=");
+  if (key == std::string::npos) {
+    return false;
+  }
+  const auto open = comment.find_first_of("\"'", key + 8);
+  if (open == std::string::npos) {
+    throw std::runtime_error("XYZ Lattice is not a cell.");
+  }
+  const char quote = comment[open];
+  const auto close = comment.find(quote, open + 1);
+  if (close == std::string::npos) {
+    throw std::runtime_error("XYZ Lattice is not a cell.");
+  }
+  std::istringstream in(comment.substr(open + 1, close - open - 1));
+  double cell[9];
+  for (double &value : cell) {
+    if (!(in >> value)) {
+      throw std::runtime_error("XYZ Lattice is not a cell.");
+    }
+  }
+  const double ax = cell[0];
+  const double ay = cell[1];
+  const double az = cell[2];
+  const double bx = cell[3];
+  const double by = cell[4];
+  const double bz = cell[5];
+  const double cx = cell[6];
+  const double cy = cell[7];
+  const double cz = cell[8];
+  const double scale = std::max(std::abs(ax), std::max(std::abs(by), std::abs(cz)));
+  const double tol = 1e-8 * (scale > 1.0 ? scale : 1.0);
+  if (!(ax > 0.0 && by > 0.0 && cz > 0.0) || std::abs(ay) > tol ||
+      std::abs(az) > tol || std::abs(bz) > tol) {
+    throw std::runtime_error("XYZ Lattice is not a reduced cell.");
+  }
+  // Same reduced frame as setBoxFromLammpsEdges: a along x, b in the
+  // xy plane. The stored box is the bound span plus xy, xz, yz, and
+  // the origin shifts when a tilt is negative.
+  const double lx = ax;
+  const double ly = by;
+  const double lz = cz;
+  const double xy = bx;
+  const double xz = cx;
+  const double yz = cy;
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  const bool tilt =
+      std::abs(xy) > tol || std::abs(xz) > tol || std::abs(yz) > tol;
+  if (!tilt) {
+    box = {lx, ly, lz};
+    boxLow = {0.0, 0.0, 0.0};
+    return true;
+  }
+  box = {lx + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};
+  boxLow = {xmin, ymin, 0.0};
+  return true;
+}
+
+} // namespace
+
 /**
  * @details Function for reading in an XYZ file
  */
@@ -495,6 +779,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
   int iatom = 0;
   molSys::Point<double> iPoint; // Current point being read in from the file
   double xLo = 0.0, xHi = 0.0, yLo = 0.0, yHi = 0.0, zLo = 0.0, zHi = 0.0;
+  bool haveLattice = false;
 
   if (!(gen::file_exists(filename))) {
     std::cout
@@ -520,29 +805,44 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
     // At this point we know that the XYZ file is open
 
     // The first line contains the number of atoms
-    std::getline((*xyzFile), line);
+    if (!std::getline((*xyzFile), line)) {
+      xyzFile->close();
+      throw std::runtime_error("XYZ header is not an atom count.");
+    }
     try {
       nop = std::stoi(line);
-    } catch (const std::exception &) {
+    } catch (...) {
       xyzFile->close();
-      std::cerr << "XYZ header is not an atom count.\n";
-      yCloud.nop = 0;
-      return yCloud;
+      throw std::runtime_error("XYZ header is not an atom count.");
     }
-    if (nop < 0) {
+    if (!declaredAtomsOk(nop)) {
       xyzFile->close();
-      std::cerr << "XYZ header is not an atom count.\n";
-      yCloud.nop = 0;
-      return yCloud;
+      throw std::runtime_error("XYZ header is not an atom count.");
     }
-    // Skip the comment line
-    std::getline((*xyzFile), line);
-    // Reserve memory for atom coordinates using nop read in
-    yCloud.pts.reserve(nop);
+    // The comment may carry an extended-XYZ Lattice.
+    std::string comment;
+    std::getline((*xyzFile), comment);
+    try {
+      haveLattice = latticeCell(comment, yCloud.box, yCloud.boxLow);
+    } catch (...) {
+      xyzFile->close();
+      throw;
+    }
+    struct stat st {};
+    const auto at = static_cast<long long>(xyzFile->tellg());
+    const long long left =
+        ::stat(filename.c_str(), &st) == 0 && at >= 0
+            ? static_cast<long long>(st.st_size) - at
+            : 0;
+    // "0 0 0" and its newline.
+    yCloud.pts.reserve(atomsThatFit(nop, left, 6));
     yCloud.nop = nop;
     // Run this until EOF or you reach the next timestep
     std::map<std::string, int> elementType;
-    while (std::getline((*xyzFile), line)) {
+    // Stop at the declared count. A later frame is the next record,
+    // not extra atoms of this one.
+    while (static_cast<int>(yCloud.pts.size()) < nop &&
+           std::getline((*xyzFile), line)) {
 
       // Read in lines and tokenize them into std::string words and <double>
       // numbers
@@ -583,8 +883,9 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
         iPoint.x = std::stod(tokens[coordinateOffset]);
         iPoint.y = std::stod(tokens[coordinateOffset + 1]);
         iPoint.z = std::stod(tokens[coordinateOffset + 2]);
-      } catch (const std::exception &) {
-        continue;
+      } catch (...) {
+        xyzFile->close();
+        throw std::runtime_error("XYZ coordinate is not a number.");
       }
       if (yCloud.pts.empty()) {
         xLo = xHi = iPoint.x;
@@ -609,21 +910,25 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 
   xyzFile->close();
 
-  if (yCloud.pts.size() == 1) {
+  if (!haveLattice && yCloud.pts.size() == 1) {
     xHi = xLo + 10;
     yHi = yLo + 10;
     zHi = zLo + 10;
   } // for a single point in the system (never happens)
 
-  yCloud.box = {xHi - xLo, yHi - yLo, zHi - zLo};
-  yCloud.boxLow = {xLo, yLo, zLo};
+  if (!haveLattice) {
+    yCloud.box = {xHi - xLo, yHi - yLo, zHi - zLo};
+    yCloud.boxLow = {xLo, yLo, zLo};
+  }
   yCloud.currentFrame = 1;
 
   if (yCloud.pts.size() != static_cast<std::size_t>(yCloud.nop)) {
-    std::cerr << "Atoms didn't get filled in properly.\n";
-    // Callers index pts with nop. A short file must not keep the header
-    // count, or the next loop reads past pts.
-    yCloud.nop = static_cast<int>(yCloud.pts.size());
+    // A short or over-long frame is not a structure. Callers that kept
+    // the header count used to index past pts, and callers that rewrote
+    // nop used to report the fragment as one frame.
+    throw std::runtime_error(
+        "XYZ frame is truncated: expected " + std::to_string(yCloud.nop) +
+        " atoms, read " + std::to_string(yCloud.pts.size()) + ".");
   }
 
   return yCloud;
@@ -634,14 +939,52 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 namespace {
 enum class LammpsKeep { All, Type, TypeInSlice };
 
+// The descriptor was opened with the stream, so it names the same inode.
+// fstat's result is checked. A failure is a change, and the stat is not used.
+bool dumpChangedDuringRead(int fd, const std::string &path,
+                           const struct stat &opened) {
+  struct stat now {};
+  if (::fstat(fd, &now) != 0) {
+    return true;
+  }
+  if (now.st_size != opened.st_size) {
+    return true;
+  }
+  struct stat atPath {};
+  if (stat(path.c_str(), &atPath) != 0) {
+    return true;
+  }
+  return atPath.st_ino != now.st_ino;
+}
+
+// A writer can append in the gap between the last byte and this check.
+// One short poll keeps that snapshot. A file that stays the same size
+// and inode through the poll is finished, and a short frame is an error.
+bool dumpStillGrowing(int fd, const std::string &path, const struct stat &opened) {
+  if (dumpChangedDuringRead(fd, path, opened)) {
+    return true;
+  }
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::milliseconds(50);
+  while (std::chrono::steady_clock::now() < deadline) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    if (dumpChangedDuringRead(fd, path, opened)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Parse one snapshot. The session has already consumed ITEM: TIMESTEP.
 // Stop at the next ITEM: TIMESTEP and seek back so the live position sits
 // on that line, matching LAMMPS ReaderNative::read_time.
 void parseLammpsFrameBody(
-    std::ifstream &file,
+    std::istream &file, int fd, const std::string &path,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeFilter,
     LammpsKeep keep, bool isSlice, std::array<double, 3> coordLow,
     std::array<double, 3> coordHigh) {
+  struct stat opened {};
+  const bool haveOpened = fstat(fd, &opened) == 0;
   std::string line;
   std::vector<std::string> tokens;
   std::vector<double> tilt;
@@ -659,7 +1002,7 @@ void parseLammpsFrameBody(
   bool sawMol = false;
   int nextSyntheticId = 1;
   bool isTriclinic = false;
-  int nKept = 0;
+  int nLines = 0;
   molSys::Point<double> iPoint;
 
   while (true) {
@@ -684,7 +1027,16 @@ void parseLammpsFrameBody(
 
     if (readNOP && !itemLine) {
       if (parseDumpInt(line, nop) && nop >= 0) {
-        yCloud.pts.reserve(static_cast<std::size_t>(nop));
+        if (!declaredAtomsOk(nop)) {
+          throw std::runtime_error("declared atom count is past the reader limit");
+        }
+        const auto at = static_cast<long long>(file.tellg());
+        const long long left =
+            haveOpened && at >= 0 ? static_cast<long long>(opened.st_size) - at : 0;
+        // The fewest columns a dump can carry is "x y z".
+        const std::size_t hint = atomsThatFit(nop, left, 6);
+        yCloud.pts.reserve(hint);
+        yCloud.idIndexMap.reserve(hint);
         if (keep == LammpsKeep::All) {
           yCloud.nop = nop;
         }
@@ -714,6 +1066,9 @@ void parseLammpsFrameBody(
     }
     if (readAtoms && !itemLine && typeIndex >= 0 && xIndex >= 0 &&
         yIndex >= 0 && zIndex >= 0) {
+      if (line.find_first_not_of(" \t\r") != std::string::npos) {
+        nLines += 1;
+      }
       double fields[kMaxDumpFields];
       const int n = parseDumpFields(line, fields, kMaxDumpFields);
       int need = std::max({typeIndex, xIndex, yIndex, zIndex});
@@ -725,7 +1080,7 @@ void parseLammpsFrameBody(
       }
       // n is the field count, and need is a 0-based column, so the line
       // must hold at least need + 1 fields.
-      if (n > need && typeIndex >= 0) {
+      if (n > need) {
         iPoint.type = static_cast<int>(fields[typeIndex]);
         // A dump with no id column cannot reuse the type column: every
         // oxygen would share one ID and the last atom would win the map.
@@ -754,7 +1109,6 @@ void parseLammpsFrameBody(
         if (keep != LammpsKeep::All && iPoint.type != typeFilter) {
           continue;
         }
-        nKept++;
         yCloud.pts.push_back(iPoint);
         mapAtomIdToIndex(yCloud);
       }
@@ -774,41 +1128,54 @@ void parseLammpsFrameBody(
         sawMol = false;
         nextSyntheticId = 1;
         for (int i = 2; i < static_cast<int>(tokens.size()); i++) {
-          if (tokens[i] == "type") {
+          if (tokens[static_cast<std::size_t>(i)] == "type") {
             typeIndex = i - 2;
-          } else if (tokens[i] == "mol") {
+          } else if (tokens[static_cast<std::size_t>(i)] == "mol") {
             molIndex = i - 2;
             sawMol = true;
-          } else if (tokens[i] == "id") {
+          } else if (tokens[static_cast<std::size_t>(i)] == "id") {
             atomIndex = i - 2;
             sawId = true;
           } else {
-            noteCoordColumn(i - 2, tokens[i], xIndex, yIndex, zIndex);
+            noteCoordColumn(i - 2, tokens[static_cast<std::size_t>(i)], xIndex, yIndex, zIndex);
           }
         }
       }
     }
   }
 
+  // Fewer atom lines than the declared count is not a frame when the
+  // file is finished. A count that does not fit in int leaves nop unset
+  // and is not this case. A dump still being written changes under the
+  // read; that snapshot keeps the atoms it has.
+  // A read error is the stream state (errno on the owned descriptor),
+  // not a finished short file. A stable size and inode is a finished file.
+  if (nop >= 0 && nLines < nop && !streamReadFailed(file) &&
+      !(haveOpened && dumpStillGrowing(fd, path, opened))) {
+    throw std::runtime_error(
+        "LAMMPS dump frame is truncated: expected " + std::to_string(nop) +
+        " atoms, read " + std::to_string(nLines) + ".");
+  }
+
   // A frame cut short (a dump still being written) keeps the atoms it has;
   // the warning goes to stderr, which every rank of a frame split keeps
   if (keep != LammpsKeep::All) {
     yCloud.nop = static_cast<int>(yCloud.pts.size());
-    if (yCloud.pts.size() != static_cast<std::size_t>(nKept)) {
-      std::cerr << "Atoms didn't get filled in properly.\n";
-    }
   } else if (yCloud.pts.size() !=
              static_cast<std::size_t>(yCloud.nop < 0 ? 0 : yCloud.nop)) {
-    // A count that does not fit in int leaves nop unset. The atoms that
-    // were actually read are the frame.
-    if (nop >= 0 || !yCloud.pts.empty()) {
-      std::cerr << "Atoms didn't get filled in properly.\n";
-    }
+    // Reaching this else-if means the stored count and the atom vector
+    // disagree. A missing count leaves the stored nop at 0, so an empty
+    // vector never enters, and the warning condition is always true here.
+    std::cerr << "Atoms didn't get filled in properly.\n";
     yCloud.nop = static_cast<int>(yCloud.pts.size());
   }
 }
 
-bool openCloneAt(const std::string &filename, int frame, std::ifstream &in) {
+struct CloneRead {
+  std::unique_ptr<OwnedFdStream> io;
+};
+
+bool openCloneAt(const std::string &filename, int frame, CloneRead &out) {
   auto sess = sessionFor(filename);
   if (sess == nullptr) {
     return false;
@@ -821,13 +1188,302 @@ bool openCloneAt(const std::string &filename, int frame, std::ifstream &in) {
     }
     off = sess->offsets[static_cast<std::size_t>(frame - 1)];
   }
-  in.open(filename, std::ios::in | std::ios::binary);
-  if (!in.is_open()) {
+  const int raw = openForRead(filename);
+  if (raw < 0) {
     return false;
   }
-  in.seekg(static_cast<std::streamoff>(off));
+  out.io = std::make_unique<OwnedFdStream>(raw);
+  out.io->stream().seekg(static_cast<std::streamoff>(off));
   std::string line;
-  return static_cast<bool>(std::getline(in, line)) && isLammpsTimestep(line);
+  if (!std::getline(out.io->stream(), line) || !isLammpsTimestep(line)) {
+    out.io.reset();
+    return false;
+  }
+  return true;
+}
+
+bool parseLooseDouble(const char *&p, const char *end, double &out) {
+  while (p < end && (*p == ' ' || *p == '\t')) {
+    ++p;
+  }
+  if (p >= end) {
+    return false;
+  }
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+  const auto parsed = std::from_chars(p, end, out);
+  if (parsed.ec != std::errc{}) {
+    return false;
+  }
+  p = parsed.ptr;
+  return true;
+#else
+  char buf[64];
+  const auto ntok =
+      std::min<std::size_t>(static_cast<std::size_t>(end - p), sizeof(buf) - 1);
+  std::memcpy(buf, p, ntok);
+  buf[ntok] = '\0';
+  char *endp = nullptr;
+  out = std::strtod(buf, &endp);
+  if (endp == buf) {
+    return false;
+  }
+  p += endp - buf;
+  return true;
+#endif
+}
+
+bool parseLooseInt(const char *&p, const char *end, int &out) {
+  while (p < end && (*p == ' ' || *p == '\t')) {
+    ++p;
+  }
+  if (p >= end) {
+    return false;
+  }
+  const auto parsed = std::from_chars(p, end, out);
+  if (parsed.ec != std::errc{}) {
+    return false;
+  }
+  p = parsed.ptr;
+  return true;
+}
+
+// id type x y z on one orthorhombic frame. Anything else returns false and
+// the streaming parser reads the frame. The map is filled in one pass so a
+// 1e5-atom dump does not rehash and does not cross the iostream per line.
+bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
+                          molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                          int typeFilter, LammpsKeep keep, std::uint64_t &nextAt,
+                          bool *sawType2 = nullptr) {
+  if (keep == LammpsKeep::TypeInSlice) {
+    return false;
+  }
+  const int fd = openForRead(filename);
+  if (fd < 0) {
+    return false;
+  }
+  struct stat st {};
+  if (::stat(filename.c_str(), &st) != 0 || st.st_size <= 0) {
+    closeFd(fd);
+    return false;
+  }
+  const auto nbytes = static_cast<std::size_t>(st.st_size);
+  if (frameAt >= nbytes) {
+    closeFd(fd);
+    return false;
+  }
+  // pread, not mmap: a writer that truncates the dump faults an mmap with SIGBUS.
+  std::vector<char> bytes(nbytes);
+  std::size_t got = 0;
+  while (got < nbytes) {
+    const std::int64_t nread = readAt(fd, bytes.data() + got, nbytes - got, got);
+    if (nread < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      closeFd(fd);
+      return false;
+    }
+    if (nread == 0) {
+      break;
+    }
+    got += static_cast<std::size_t>(nread);
+  }
+  closeFd(fd);
+  if (got <= frameAt) {
+    return false;
+  }
+  bytes.resize(got);
+  const char *const begin = bytes.data();
+  const char *const end = begin + bytes.size();
+  const char *p = begin + frameAt;
+  auto nextLine = [&](const char *&s, const char *&e) {
+    s = p;
+    while (p < end && *p != '\n') {
+      ++p;
+    }
+    e = p;
+    if (e > s && e[-1] == '\r') {
+      --e;
+    }
+    if (p < end && *p == '\n') {
+      ++p;
+    }
+  };
+  const char *s = nullptr;
+  const char *e = nullptr;
+  auto startsWith = [](const char *s, const char *e, const char *lit) {
+    const std::size_t n = std::strlen(lit);
+    return static_cast<std::size_t>(e - s) >= n && std::memcmp(s, lit, n) == 0;
+  };
+  nextLine(s, e);
+  if (!startsWith(s, e, "ITEM: TIMESTEP")) {
+    return false;
+  }
+  nextLine(s, e);
+  nextLine(s, e);
+  if (!startsWith(s, e, "ITEM: NUMBER")) {
+    return false;
+  }
+  nextLine(s, e);
+  int nop = 0;
+  const char *np = s;
+  if (!parseLooseInt(np, e, nop) || !declaredAtomsOk(nop)) {
+    return false;
+  }
+  nextLine(s, e);
+  if (!startsWith(s, e, "ITEM: BOX") ||
+      std::string_view(s, static_cast<std::size_t>(e - s)).find("xy") !=
+          std::string_view::npos) {
+    return false;
+  }
+  double span[3];
+  double low[3];
+  for (int axis = 0; axis < 3; ++axis) {
+    nextLine(s, e);
+    const char *bp = s;
+    double lo = 0;
+    double hi = 0;
+    if (!parseLooseDouble(bp, e, lo) || !parseLooseDouble(bp, e, hi)) {
+      return false;
+    }
+    low[axis] = lo;
+    span[axis] = hi - lo;
+  }
+  nextLine(s, e);
+  while (e > s && (e[-1] == ' ' || e[-1] == '\t')) {
+    --e;
+  }
+  if (std::string_view(s, static_cast<std::size_t>(e - s)) !=
+      "ITEM: ATOMS id type x y z") {
+    return false;
+  }
+  yCloud.pts.clear();
+  yCloud.idIndexMap.clear();
+  yCloud.box = {span[0], span[1], span[2]};
+  yCloud.boxLow = {low[0], low[1], low[2]};
+  const bool filter = keep != LammpsKeep::All;
+  int kept = 0;
+  // "1 1 0 0 0" and its newline. A count the bytes cannot hold is a
+  // truncated frame, found here before the per-line arrays are sized.
+  bool failed = atomsThatFit(nop, end - p + 1, 10) < static_cast<std::size_t>(nop);
+  if (failed) {
+    nop = 0;
+  }
+  yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
+  // One pointer per atom line, then the numbers are parsed with no
+  // per-line string. The lines are independent, so the team splits them.
+  std::vector<const char *> lineAt(static_cast<std::size_t>(nop));
+  std::vector<const char *> lineEnd(static_cast<std::size_t>(nop));
+  {
+    const char *scan = p;
+    for (int i = 0; i < nop; ++i) {
+      if (scan >= end) {
+        failed = true;
+        break;
+      }
+      const char *ls = scan;
+      while (scan < end && *scan != '\n') {
+        ++scan;
+      }
+      const char *le = scan;
+      if (le > ls && le[-1] == '\r') {
+        --le;
+      }
+      if (startsWith(ls, le, "ITEM:")) {
+        failed = true;
+        break;
+      }
+      lineAt[static_cast<std::size_t>(i)] = ls;
+      lineEnd[static_cast<std::size_t>(i)] = le;
+      if (scan < end && *scan == '\n') {
+        ++scan;
+      }
+    }
+    if (!failed) {
+      p = scan;
+    }
+  }
+  struct Parsed {
+    int id = 0;
+    int typ = 0;
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    char ok = 0;
+  };
+  std::vector<Parsed> parsed(static_cast<std::size_t>(failed ? 0 : nop));
+  if (!failed) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 1024 && !omp_in_parallel())
+#endif
+    for (int i = 0; i < nop; ++i) {
+      const char *ap = lineAt[static_cast<std::size_t>(i)];
+      const char *ae = lineEnd[static_cast<std::size_t>(i)];
+      Parsed row;
+      row.ok = parseLooseInt(ap, ae, row.id) && parseLooseInt(ap, ae, row.typ) &&
+                       parseLooseDouble(ap, ae, row.x) && parseLooseDouble(ap, ae, row.y) &&
+                       parseLooseDouble(ap, ae, row.z)
+                   ? 1
+                   : 0;
+      parsed[static_cast<std::size_t>(i)] = row;
+    }
+    yCloud.pts.reserve(static_cast<std::size_t>(nop));
+    for (int i = 0; i < nop; ++i) {
+      const Parsed &row = parsed[static_cast<std::size_t>(i)];
+      if (!row.ok) {
+        failed = true;
+        break;
+      }
+      // The default oxygen choice is decided in this pass. A type-1
+      // crystal never parses the frame a second time.
+      if (sawType2 != nullptr && row.typ == 2) {
+        *sawType2 = true;
+      }
+      if (filter && row.typ != typeFilter) {
+        continue;
+      }
+      molSys::Point<double> point;
+      point.atomID = row.id;
+      point.molID = row.id;
+      point.type = row.typ;
+      point.x = row.x;
+      point.y = row.y;
+      point.z = row.z;
+      yCloud.pts.push_back(point);
+      if (!yCloud.idIndexMap.emplace(row.id, kept).second) {
+        std::cerr << "Warning: duplicate atom ID " << row.id
+                  << " in the input frame; the ID-to-index map keeps only the "
+                     "last atom read with this ID\n";
+        yCloud.idIndexMap[row.id] = kept;
+      }
+      ++kept;
+    }
+  }
+  if (failed) {
+    // The snapshot was taken at st.st_size. An append or a replace during
+    // the copy changes that size or the inode. The atoms already parsed
+    // are the frame; falling through would open the grown file, see a
+    // stable short count, and report a finished truncated dump.
+    struct stat later {};
+    const bool moved = ::stat(filename.c_str(), &later) != 0 ||
+                       later.st_size != st.st_size || later.st_ino != st.st_ino;
+    if (moved && kept > 0) {
+      yCloud.nop = kept;
+      nextAt = static_cast<std::uint64_t>(p - begin);
+      return true;
+    }
+    yCloud.pts.clear();
+    yCloud.idIndexMap.clear();
+    yCloud.box.clear();
+    yCloud.boxLow.clear();
+    return false;
+  }
+  if (keep == LammpsKeep::All && kept != nop) {
+    std::cerr << "Atoms didn't get filled in properly.\n";
+  }
+  yCloud.nop = kept;
+  nextAt = static_cast<std::uint64_t>(p - begin);
+  return true;
 }
 
 void loadLammpsFrame(
@@ -837,15 +1493,14 @@ void loadLammpsFrame(
     std::array<double, 3> coordHigh) {
   yCloud = molSys::clearPointCloud(yCloud);
   if (!gen::file_exists(filename)) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    std::cout << "Fatal Error: " << filename
+              << " does not exist or you gave the wrong path.\n";
     yCloud.currentFrame = targetFrame;
     return;
   }
   auto sess = sessionFor(filename);
   if (sess == nullptr) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    std::cout << "Fatal Error: could not open " << filename << ".\n";
     yCloud.currentFrame = targetFrame;
     return;
   }
@@ -856,19 +1511,30 @@ void loadLammpsFrame(
       yCloud.currentFrame = targetFrame;
       return;
     }
-    parseLammpsFrameBody(sess->file, yCloud, typeFilter, keep, isSlice,
-                         coordLow, coordHigh);
+    std::uint64_t nextAt = 0;
+    if (!isSlice && targetFrame >= 1 &&
+        static_cast<std::size_t>(targetFrame) <= sess->offsets.size() &&
+        parseMappedIdTypeXyz(
+            filename, sess->offsets[static_cast<std::size_t>(targetFrame - 1)],
+            yCloud, typeFilter, keep, nextAt)) {
+      sess->stream().clear();
+      sess->stream().seekg(static_cast<std::streamoff>(nextAt));
+      yCloud.currentFrame = targetFrame;
+      return;
+    }
+    parseLammpsFrameBody(sess->stream(), sess->descriptor(), filename, yCloud,
+                         typeFilter, keep, isSlice, coordLow, coordHigh);
     yCloud.currentFrame = targetFrame;
     return;
   }
-  std::ifstream clone;
+  CloneRead clone;
   if (!openCloneAt(filename, targetFrame, clone)) {
     std::cout << "You entered a frame that doesn't exist.\n";
     yCloud.currentFrame = targetFrame;
     return;
   }
-  parseLammpsFrameBody(clone, yCloud, typeFilter, keep, isSlice, coordLow,
-                       coordHigh);
+  parseLammpsFrameBody(clone.io->stream(), clone.io->descriptor(), filename, yCloud,
+                       typeFilter, keep, isSlice, coordLow, coordHigh);
   yCloud.currentFrame = targetFrame;
 }
 } // namespace
@@ -885,6 +1551,41 @@ void loadLammpsFrame(
  * @param[in] coordHigh Contains the upper limits of the slice, if a slice is to
  *  be created
  */
+bool sinp::readDefaultOxygen(
+    const std::string &filename, int frame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  auto sess = sessionFor(filename);
+  if (sess == nullptr) {
+    return false;
+  }
+  std::unique_lock<std::mutex> lock(sess->mu, std::try_to_lock);
+  if (!lock.owns_lock() || !sess->positionAt(frame)) {
+    return false;
+  }
+  const std::uint64_t frameAt = sess->offsets[static_cast<std::size_t>(frame - 1)];
+  bool saw2 = false;
+  std::uint64_t nextAt = 0;
+  yCloud = molSys::clearPointCloud(yCloud);
+  if (!parseMappedIdTypeXyz(filename, frameAt, yCloud, 1, LammpsKeep::Type, nextAt, &saw2)) {
+    return false;
+  }
+  if (!saw2) {
+    sess->stream().clear();
+    sess->stream().seekg(static_cast<std::streamoff>(nextAt));
+    yCloud.currentFrame = frame;
+    return true;
+  }
+  yCloud = molSys::clearPointCloud(yCloud);
+  nextAt = 0;
+  if (!parseMappedIdTypeXyz(filename, frameAt, yCloud, 2, LammpsKeep::Type, nextAt, nullptr)) {
+    return false;
+  }
+  sess->stream().clear();
+  sess->stream().seekg(static_cast<std::streamoff>(nextAt));
+  yCloud.currentFrame = frame;
+  return true;
+}
+
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readLammpsTrj(std::string filename, int targetFrame,
                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -892,7 +1593,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                     std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, -1, LammpsKeep::All, isSlice,
                   coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 /**
@@ -915,7 +1616,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
                      std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, typeO, LammpsKeep::Type,
                   isSlice, coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 /**
@@ -937,102 +1638,8 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, typeI,
                   LammpsKeep::TypeInSlice, isSlice, coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
-
-// ============================================================================
-// Optional format readers (compiled only when dependencies are available)
-// ============================================================================
-
-#ifdef SEAMS_HAS_CHEMFILES
-#include <chemfiles.hpp>
-
-molSys::PointCloud<molSys::Point<double>, double>
-sinp::readChemfiles(std::string filename, int targetFrame,
-                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                    int typeFilter) {
-  try {
-  chemfiles::Trajectory trajectory(filename);
-
-  if (targetFrame < 1 ||
-      static_cast<size_t>(targetFrame) > trajectory.nsteps()) {
-    std::cerr << "Frame " << targetFrame << " does not exist in " << filename
-              << " (has " << trajectory.nsteps() << " frames).\n";
-    return yCloud;
-  }
-
-  yCloud = molSys::clearPointCloud(yCloud);
-
-  auto frame = trajectory.read_step(static_cast<size_t>(targetFrame - 1));
-  auto positions = frame.positions();
-  auto cell = frame.cell();
-
-  // Lengths alone drop the cell angles. A GRO or PDB triclinic cell
-  // then takes orthorhombic minimum images.
-  const auto lengths = cell.lengths();
-  const auto angles = cell.angles();
-  nneigh::setBoxFromLengthsAngles(yCloud.box, yCloud.boxLow, lengths[0],
-                                 lengths[1], lengths[2], angles[0], angles[1],
-                                 angles[2]);
-
-  auto &topology = frame.topology();
-
-  for (size_t i = 0; i < frame.size(); i++) {
-    // LAMMPS dumps carry numeric type identifiers, which chemfiles stores as
-    // the atom type string with no atomic number; chemical formats carry
-    // element names with an atomic number. Prefer a numeric type string,
-    // fall back to the atomic number.
-    const auto numeric = [](const std::string &s) {
-      return !s.empty() &&
-             s.find_first_not_of("0123456789") == std::string::npos;
-    };
-    int atomType = 0;
-    if (numeric(topology[i].type())) {
-      atomType = std::stoi(topology[i].type());
-    } else if (numeric(topology[i].name())) {
-      atomType = std::stoi(topology[i].name());
-    } else {
-      atomType = static_cast<int>(topology[i].atomic_number().value_or(1));
-    }
-
-    // Apply type filter if requested (-1 means accept all)
-    if (typeFilter >= 0 && atomType != typeFilter) {
-      continue;
-    }
-
-    molSys::Point<double> pt;
-    pt.type = atomType;
-    // chemfiles orders LAMMPS dump atoms by their id, so index + 1 recovers
-    // the 1-based dump id for the contiguous case; other formats have no ID
-    // notion beyond position
-    pt.atomID = static_cast<int>(i) + 1;
-    // Molecule IDs surface as chemfiles residues where the format has them
-    const auto residue = topology.residue_for_atom(i);
-    pt.molID = (residue && residue->id())
-                   ? static_cast<int>(*residue->id())
-                   : pt.atomID;
-    pt.x = positions[i][0];
-    pt.y = positions[i][1];
-    pt.z = positions[i][2];
-
-    yCloud.pts.push_back(pt);
-    mapAtomIdToIndex(yCloud);
-  }
-
-  yCloud.nop = static_cast<int>(yCloud.pts.size());
-  yCloud.currentFrame = targetFrame;
-
-  return yCloud;
-  } catch (const std::exception &e) {
-    // chemfiles throws on unreadable or malformed files; report and return
-    // the empty cloud instead of terminating the caller
-    std::cerr << "chemfiles cannot read " << filename << ": " << e.what()
-              << "\n";
-    yCloud = molSys::clearPointCloud(yCloud);
-    return yCloud;
-  }
-}
-#endif // SEAMS_HAS_CHEMFILES
 
 #ifdef SEAMS_HAS_READCON
 #include <readcon-core.hpp>
@@ -1229,6 +1836,36 @@ sinp::readCon(std::string filename, int targetFrame,
     yCloud = molSys::clearPointCloud(yCloud);
   }
   return yCloud;
+}
+
+void sinp::forEachConFrame(
+    const std::string &filename, int first, int last,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn) {
+  const int begin = std::max(first, 1);
+  int visited = 0;
+  try {
+    readcon::ConFrameIterator frames(filename);
+    // nth consumes the frames it skips, so nth(0) is the next frame.
+    std::optional<readcon::ConFrame> frame =
+        frames.nth(static_cast<std::size_t>(begin - 1));
+    for (int at = begin; frame && (last <= 0 || at <= last); ++at) {
+      molSys::PointCloud<molSys::Point<double>, double> cloud;
+      if (!cloudFromHandle(frame->get_handle(), at, cloud)) {
+        std::cerr << "Cannot extract frame " << at << " from " << filename << "\n";
+        cloud = molSys::clearPointCloud(cloud);
+      }
+      visited += 1;
+      fn(at, cloud);
+      frame = frames.nth(0);
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Cannot open .con file " << filename << ": " << e.what() << "\n";
+  }
+  if (visited == 0) {
+    molSys::PointCloud<molSys::Point<double>, double> empty;
+    fn(begin, empty);
+  }
 }
 
 #ifdef SEAMS_HAS_READCON_DB

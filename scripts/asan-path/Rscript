@@ -1,0 +1,30 @@
+#!/bin/sh
+# R aborts in its own startup when libasan is preloaded. The runtime is
+# mapped when an R package loads libseams.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+unset LD_PRELOAD
+case ":${ASAN_OPTIONS:-}:" in
+  *verify_asan_link_order*) ;;
+  *) ASAN_OPTIONS="verify_asan_link_order=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}" ;;
+esac
+export ASAN_OPTIONS
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/Rscript" ]; then
+    found=$dir/Rscript
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "Rscript is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

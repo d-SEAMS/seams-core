@@ -1,0 +1,1 @@
+`recipe/recipe.yaml` builds `libseams` (`libyodaLib`, `libseams`, `libseams_lang`, the `seams` CLI, headers, pkg-config and CMake files) for conda-forge with rattler-build from the release tag archive. The `pydseamslib` wheels and their conda package are built in d-SEAMS/PydSEAMSlib.

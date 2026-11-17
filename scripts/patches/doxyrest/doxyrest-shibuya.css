@@ -1,0 +1,3 @@
+/* The doxyrest extension links this file when the theme is shibuya.
+   Shibuya and docs/source/_static/custom.css already style the book.
+   The rtd and sphinxdoc stylesheets are not applied here. */

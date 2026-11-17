@@ -82,6 +82,8 @@ void setAtomsWithSameMolID(
 
 }  // namespace gen
 
+/** @} */
+
 /**
  *  @addtogroup ring
  *  @{
@@ -119,4 +121,5 @@ void printSliceGetEdgeMoleculesInRings(
 
 }  // namespace ring
 
+/** @} */
 #endif  // SEAMS_SELECTION_H_

@@ -3,7 +3,8 @@
 """Regenerate the 215 K mW liquids and compare CHILL+ with OVITO.
 
 The velocity seed is 215 in in.equilibrate. One OpenMP thread keeps
-the trajectory fixed. Frames land in data/mw215/.
+the trajectory fixed. Frames land outside the tree, under MW215_DIR
+or `mw215-frames`.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 DECK = Path(__file__).resolve().parent
-OUT = ROOT / "data" / "mw215"
+OUT = Path(os.environ.get("MW215_DIR", "mw215-frames"))
 CELLS = (8, 16, 32)
 CUTOFF = 3.5
 RUNS = 7
@@ -89,8 +90,10 @@ def median(values):
 
 
 def time_rule(pos, box, rule: str):
-    sys.path.insert(0, str(ROOT / "bindings" / "python"))
-    from chill_plus import chill_plus
+    try:
+        from dseams import chill_plus
+    except ImportError as err:
+        raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib==2.14.0") from err
 
     labels = None
     samples = []
@@ -176,7 +179,11 @@ def main(argv: list[str]) -> int:
     if len(argv) > 1:
         cells = tuple(int(item) for item in argv[1:])
     for n in cells:
-        compare(generate(n))
+        path = generate(n)
+        try:
+            compare(path)
+        except ImportError as exc:
+            print(f"comparison skipped: {exc}", file=sys.stderr)
     return 0
 
 

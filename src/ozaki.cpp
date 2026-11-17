@@ -1,3 +1,4 @@
+#include <cpu_features.hpp>
 #include <ozaki.hpp>
 
 #include <algorithm>
@@ -11,6 +12,8 @@
 
 #if defined(__x86_64__)
 #include <immintrin.h>
+#endif
+#if defined(__x86_64__) && defined(__linux__)
 #include <sys/syscall.h>
 #include <unistd.h>
 #endif
@@ -21,6 +24,53 @@
 
 namespace seams::product {
 namespace {
+
+// __int128 is a GCC/Clang extension; the typedef keeps -pedantic quiet.
+__extension__ typedef __int128 i128;
+
+// clang-cl lowers a 128-bit / or % to __udivti3 and __umodti3. Those live
+// in compiler-rt, which lld-link does not pull into a DLL. Shifts and
+// subtracts stay in the instruction stream, so the Windows wheel links.
+struct DivMod128 {
+  __uint128_t quot;
+  __uint128_t rem;
+};
+
+int topBit128(__uint128_t value) {
+  if (value == 0) {
+    return -1;
+  }
+  const uint64_t hi = static_cast<uint64_t>(value >> 64);
+  if (hi != 0) {
+    return 127 - __builtin_clzll(hi);
+  }
+  return 63 - __builtin_clzll(static_cast<uint64_t>(value));
+}
+
+DivMod128 divmod128(__uint128_t n, __uint128_t d) {
+  if (d == 0) {
+    return {~__uint128_t{0}, n};
+  }
+  if (n < d) {
+    return {0, n};
+  }
+  const int shift = topBit128(n) - topBit128(d);
+  __uint128_t quot = 0;
+  __uint128_t rem = n;
+  __uint128_t probe = d << shift;
+  for (int i = shift; i >= 0; --i) {
+    if (rem >= probe) {
+      rem -= probe;
+      quot |= __uint128_t{1} << i;
+    }
+    probe >>= 1;
+  }
+  return {quot, rem};
+}
+
+__uint128_t udiv128(__uint128_t n, __uint128_t d) { return divmod128(n, d).quot; }
+
+__uint128_t umod128(__uint128_t n, __uint128_t d) { return divmod128(n, d).rem; }
 
 std::atomic<int> gMode{-1};
 std::atomic<int> gReduction{-1};
@@ -84,7 +134,7 @@ bool finitePair(double a, double b) {
   return std::isfinite(a) && std::isfinite(b);
 }
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__linux__)
 #ifndef ARCH_REQ_XCOMP_PERM
 #define ARCH_REQ_XCOMP_PERM 0x1023
 #endif
@@ -115,7 +165,7 @@ CrtTable makeCrt() {
   CrtTable t;
   t.modulus = 1;
   for (uint32_t m : cand) {
-    if (t.modulus > (~__uint128_t{0}) / m) {
+    if (t.modulus > udiv128(~__uint128_t{0}, m)) {
       break;
     }
     const __uint128_t next = t.modulus * m;
@@ -147,11 +197,11 @@ CrtTable makeCrt() {
     return t0;
   };
   for (int i = 0; i < t.s; i++) {
-    const __uint128_t Mi = t.modulus / t.m[i];
-    const int64_t yi = inv(static_cast<int64_t>(Mi % t.m[i]), t.m[i]);
+    const __uint128_t Mi = udiv128(t.modulus, t.m[i]);
+    const int64_t yi = inv(static_cast<int64_t>(umod128(Mi, t.m[i])), t.m[i]);
     t.weight[i] = Mi * static_cast<__uint128_t>(yi);
   }
-  __uint128_t lim = t.modulus / 2 - 1;
+  __uint128_t lim = (t.modulus >> 1) - 1;
   int bits = 0;
   while (bits < 120 && (__uint128_t{1} << bits) <= lim) {
     ++bits;
@@ -176,22 +226,22 @@ int symMod(int32_t a, int32_t m) {
   return r;
 }
 
-__int128 remCentered(__int128 s, __uint128_t M) {
-  const __uint128_t half = M / 2;
+i128 remCentered(i128 s, __uint128_t M) {
+  const __uint128_t half = M >> 1;
   __uint128_t u;
   if (s >= 0) {
-    u = static_cast<__uint128_t>(s) % M;
+    u = umod128(static_cast<__uint128_t>(s), M);
   } else {
-    const __uint128_t neg = static_cast<__uint128_t>(-s) % M;
+    const __uint128_t neg = umod128(static_cast<__uint128_t>(-s), M);
     u = neg == 0 ? 0 : M - neg;
   }
   if (u > half) {
-    return static_cast<__int128>(u - M);
+    return static_cast<i128>(u - M);
   }
-  return static_cast<__int128>(u);
+  return static_cast<i128>(u);
 }
 
-double roundI128(__int128 v, int extraExp) {
+double roundI128(i128 v, int extraExp) {
   if (v == 0) {
     return 0.0;
   }
@@ -245,7 +295,10 @@ int sliceWidthFor(int n) {
   return w;
 }
 
-__attribute__((optimize("fp-contract=off"))) double exactIntegerDot(
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("fp-contract=off")))
+#endif
+double exactIntegerDot(
     const double *cx, const double *cy, int n) {
   double acc = 0.0;
   for (int i = 0; i < n; i++) {
@@ -470,11 +523,11 @@ RealDot dotOzakiII(const double *x, const double *y, int n) {
     }
     residues[static_cast<std::size_t>(t)] = symMod(acc, m);
   }
-  __int128 acc = 0;
+  i128 acc = 0;
   for (int t = 0; t < modCount; t++) {
-    const __int128 term =
-        static_cast<__int128>(residues[static_cast<std::size_t>(t)]) *
-        static_cast<__int128>(table.weight[t]);
+    const i128 term =
+        static_cast<i128>(residues[static_cast<std::size_t>(t)]) *
+        static_cast<i128>(table.weight[t]);
     acc = remCentered(acc + term, table.modulus);
   }
   out.value = roundI128(acc, -(ex + ey));
@@ -508,93 +561,101 @@ void packRealImag(const std::complex<double> *z, int n, std::vector<double> &re,
 }
 
 #if defined(__x86_64__)
-__attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
-    int m, int n, int k, const signed char *A, int lda, const signed char *B,
-    int ldb, int *C, int ldc) {
+// The vector locals live in a separate function. Clang's OpenMP outline does
+// not inherit a target attribute, so those locals cannot sit in the parallel
+// loop itself. noinline stops the body being copied back into that outline.
+__attribute__((noinline, target("avx512f,avx512vnni"))) void int8VnniRow(
+    int n, int kp, int np, const uint8_t *auRow, const int8_t *bp,
+    const int32_t *colSum, int *cRow) {
+  std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
+  for (int j0 = 0; j0 < n; j0 += 16) {
+    __m512i acc = _mm512_setzero_si512();
+    for (int t = 0; t < kp; t += 4) {
+      uint32_t a4 = 0;
+      std::memcpy(&a4, auRow + t, 4);
+      const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
+      alignas(64) int8_t packed[64];
+      for (int lane = 0; lane < 4; lane++) {
+        for (int c = 0; c < 16; c++) {
+          const int j = j0 + c;
+          int8_t b = 0;
+          if (j < np && t + lane < kp) {
+            b = bp[static_cast<std::size_t>(t + lane) * static_cast<std::size_t>(np) +
+                   static_cast<std::size_t>(j)];
+          }
+          packed[c * 4 + lane] = b;
+        }
+      }
+      const __m512i vb = _mm512_load_si512(packed);
+      acc = _mm512_dpbusd_epi32(acc, va, vb);
+    }
+    alignas(64) int32_t tmp[16];
+    _mm512_store_si512(tmp, acc);
+    for (int c = 0; c < 16 && j0 + c < n; c++) {
+      const int j = j0 + c;
+      const int32_t corrected = tmp[c] - 128 * colSum[static_cast<std::size_t>(j)];
+      row[static_cast<std::size_t>(j)] = corrected;
+    }
+  }
+  for (int j = 0; j < n; j++) {
+    cRow[j] += row[static_cast<std::size_t>(j)];
+  }
+}
+
+bool int8GemmVnni(int m, int n, int k, const signed char *A, int lda,
+                  const signed char *B, int ldb, int *C, int ldc) {
   if (!vnniAvailable()) {
     return false;
   }
   const int kp = (k + 3) & ~3;
   const int np = (n + 15) & ~15;
-  std::vector<uint8_t> Au(static_cast<std::size_t>(m) * kp);
-  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * np);
+  std::vector<uint8_t> Au(static_cast<std::size_t>(m) * static_cast<std::size_t>(kp));
+  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * static_cast<std::size_t>(np));
   for (int i = 0; i < m; i++) {
     for (int t = 0; t < k; t++) {
       const int s = static_cast<int>(A[i * lda + t]);
-      Au[static_cast<std::size_t>(i) * kp + t] = static_cast<uint8_t>(s + 128);
+      Au[static_cast<std::size_t>(i) * static_cast<std::size_t>(kp) + static_cast<std::size_t>(t)] = static_cast<uint8_t>(s + 128);
     }
   }
   for (int t = 0; t < k; t++) {
     for (int j = 0; j < n; j++) {
-      Bp[static_cast<std::size_t>(t) * np + j] = B[t * ldb + j];
+      Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)] = B[t * ldb + j];
     }
   }
   std::vector<int32_t> colSum(static_cast<std::size_t>(n), 0);
   for (int t = 0; t < k; t++) {
     for (int j = 0; j < n; j++) {
-      colSum[static_cast<std::size_t>(j)] += Bp[static_cast<std::size_t>(t) * np + j];
+      colSum[static_cast<std::size_t>(j)] += Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)];
     }
   }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
-    for (int j0 = 0; j0 < n; j0 += 16) {
-      __m512i acc = _mm512_setzero_si512();
-      for (int t = 0; t < kp; t += 4) {
-        uint32_t a4 = 0;
-        std::memcpy(&a4, Au.data() + static_cast<std::size_t>(i) * kp + t, 4);
-        const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
-        alignas(64) int8_t packed[64];
-        for (int lane = 0; lane < 4; lane++) {
-          for (int c = 0; c < 16; c++) {
-            const int j = j0 + c;
-            int8_t b = 0;
-            if (j < np && t + lane < kp) {
-              b = Bp[static_cast<std::size_t>(t + lane) * np + j];
-            }
-            packed[c * 4 + lane] = b;
-          }
-        }
-        const __m512i vb = _mm512_load_si512(packed);
-        acc = _mm512_dpbusd_epi32(acc, va, vb);
-      }
-      alignas(64) int32_t tmp[16];
-      _mm512_store_si512(tmp, acc);
-      for (int c = 0; c < 16 && j0 + c < n; c++) {
-        const int j = j0 + c;
-        const int32_t corrected =
-            tmp[c] - 128 * colSum[static_cast<std::size_t>(j)];
-        row[static_cast<std::size_t>(j)] = corrected;
-      }
-    }
-    for (int j = 0; j < n; j++) {
-      C[i * ldc + j] += row[static_cast<std::size_t>(j)];
-    }
+    int8VnniRow(n, kp, np,
+                Au.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(kp),
+                Bp.data(), colSum.data(), C + static_cast<std::ptrdiff_t>(i) * ldc);
   }
   return true;
 }
 
-__attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
+#if defined(__linux__)
+__attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmxTiles(
     int m, int n, int k, const signed char *A, int lda, const signed char *B,
     int ldb, int *C, int ldc) {
-  if (!amxAvailable()) {
-    return false;
-  }
   const int mp = (m + 15) & ~15;
   const int np = (n + 15) & ~15;
   const int kp = (k + 63) & ~63;
-  std::vector<int8_t> Ap(static_cast<std::size_t>(mp) * kp, 0);
-  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * np, 0);
+  std::vector<int8_t> Ap(static_cast<std::size_t>(mp) * static_cast<std::size_t>(kp), 0);
+  std::vector<int8_t> Bp(static_cast<std::size_t>(kp) * static_cast<std::size_t>(np), 0);
   for (int i = 0; i < m; i++) {
     for (int t = 0; t < k; t++) {
-      Ap[static_cast<std::size_t>(i) * kp + t] = A[i * lda + t];
+      Ap[static_cast<std::size_t>(i) * static_cast<std::size_t>(kp) + static_cast<std::size_t>(t)] = A[i * lda + t];
     }
   }
   for (int t = 0; t < k; t++) {
     for (int j = 0; j < n; j++) {
-      Bp[static_cast<std::size_t>(t) * np + j] = B[t * ldb + j];
+      Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)] = B[t * ldb + j];
     }
   }
   struct TileCfg {
@@ -635,14 +696,14 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
           for (int t0 = 0; t0 < kp; t0 += 64) {
             for (int r = 0; r < 16; r++) {
               std::memcpy(at + r * 64,
-                          Ap.data() + static_cast<std::size_t>(i0 + r) * kp + t0, 64);
+                          Ap.data() + static_cast<std::size_t>(i0 + r) * static_cast<std::size_t>(kp) + t0, 64);
             }
             for (int g = 0; g < 16; g++) {
               for (int c = 0; c < 16; c++) {
                 for (int lane = 0; lane < 4; lane++) {
                   const int kk = t0 + g * 4 + lane;
                   bt[(g * 16 + c) * 4 + lane] =
-                      Bp[static_cast<std::size_t>(kk) * np + (j0 + c)];
+                      Bp[static_cast<std::size_t>(kk) * static_cast<std::size_t>(np) + (static_cast<std::size_t>(j0 + c))];
                 }
               }
             }
@@ -670,31 +731,126 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
   std::free(raw);
   return true;
 }
+#else
+// AMX tiles need the Linux arch_prctl permission request.
+bool int8GemmAmxTiles(int, int, int, const signed char *, int, const signed char *, int,
+                      int *, int) {
+  return false;
+}
+#endif
 
-__attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
-    int m, int n, int k, const double *A, int lda, const double *B, int ldb,
-    double *C, int ldc) {
+// Integer products are exact, so the row sums, the column sums and a
+// column-weighted row sum of P = A B must equal the same sums formed from
+// A and B (Huang and Abraham, IEEE Trans. Comput. C-33, 518 (1984)).
+bool int8ProductChecks(int m, int n, int k, const signed char *A, int lda,
+                       const signed char *B, int ldb, const int *P) {
+  std::vector<__int128> bRow(static_cast<std::size_t>(k), 0);
+  std::vector<__int128> bRowW(static_cast<std::size_t>(k), 0);
+  std::vector<__int128> aCol(static_cast<std::size_t>(k), 0);
+  for (int t = 0; t < k; t++) {
+    for (int j = 0; j < n; j++) {
+      const __int128 b = B[t * ldb + j];
+      bRow[static_cast<std::size_t>(t)] += b;
+      bRowW[static_cast<std::size_t>(t)] += b * (j + 1);
+    }
+    for (int i = 0; i < m; i++) {
+      aCol[static_cast<std::size_t>(t)] += A[i * lda + t];
+    }
+  }
+  for (int i = 0; i < m; i++) {
+    __int128 want = 0;
+    __int128 wantW = 0;
+    for (int t = 0; t < k; t++) {
+      const __int128 a = A[i * lda + t];
+      want += a * bRow[static_cast<std::size_t>(t)];
+      wantW += a * bRowW[static_cast<std::size_t>(t)];
+    }
+    __int128 got = 0;
+    __int128 gotW = 0;
+    for (int j = 0; j < n; j++) {
+      const __int128 p = P[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)];
+      got += p;
+      gotW += p * (j + 1);
+    }
+    if (got != want || gotW != wantW) {
+      return false;
+    }
+  }
+  for (int j = 0; j < n; j++) {
+    __int128 want = 0;
+    for (int t = 0; t < k; t++) {
+      want += aCol[static_cast<std::size_t>(t)] * B[t * ldb + j];
+    }
+    __int128 got = 0;
+    for (int i = 0; i < m; i++) {
+      got += P[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)];
+    }
+    if (got != want) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void int8GemmScalar(int m, int n, int k, const signed char *A, int lda,
+                    const signed char *B, int ldb, int *C, int ldc);
+
+// This KVM guest also corrupts AMX tiles when separate single-threaded
+// processes use AMX at the same time (62 of 1200 runs with 8 concurrent
+// processes, 0 of 1200 run one at a time), so every AMX product is
+// checked and recomputed off AMX when a checksum disagrees.
+bool int8GemmAmx(int m, int n, int k, const signed char *A, int lda,
+                 const signed char *B, int ldb, int *C, int ldc) {
+  if (!amxAvailable()) {
+    return false;
+  }
+  std::vector<int> P(static_cast<std::size_t>(m) * static_cast<std::size_t>(n), 0);
+  if (!int8GemmAmxTiles(m, n, k, A, lda, B, ldb, P.data(), n)) {
+    return false;
+  }
+  if (!int8ProductChecks(m, n, k, A, lda, B, ldb, P.data())) {
+    std::fill(P.begin(), P.end(), 0);
+    if (!int8GemmVnni(m, n, k, A, lda, B, ldb, P.data(), n)) {
+      int8GemmScalar(m, n, k, A, lda, B, ldb, P.data(), n);
+    }
+  }
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      C[i * ldc + j] += P[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)];
+    }
+  }
+  return true;
+}
+
+__attribute__((noinline, target("avx512f,fma"))) void gemmAvx512OneRow(
+    int n, int k, const double *aRow, const double *b, int ldb, double *cRow) {
+  int j = 0;
+  for (; j + 8 <= n; j += 8) {
+    __m512d acc = _mm512_setzero_pd();
+    for (int t = 0; t < k; t++) {
+      const __m512d bv =
+          _mm512_loadu_pd(b + static_cast<std::ptrdiff_t>(t) * ldb + j);
+      acc = _mm512_fmadd_pd(_mm512_set1_pd(aRow[t]), bv, acc);
+    }
+    _mm512_storeu_pd(cRow + j, acc);
+  }
+  for (; j < n; j++) {
+    double acc = 0.0;
+    for (int t = 0; t < k; t++) {
+      acc += aRow[t] * b[static_cast<std::ptrdiff_t>(t) * ldb + j];
+    }
+    cRow[j] = acc;
+  }
+}
+
+void gemmAvx512Rows(int m, int n, int k, const double *A, int lda, const double *B,
+                    int ldb, double *C, int ldc) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    int j = 0;
-    for (; j + 8 <= n; j += 8) {
-      __m512d acc = _mm512_setzero_pd();
-      for (int t = 0; t < k; t++) {
-        const __m512d b = _mm512_loadu_pd(B + static_cast<std::ptrdiff_t>(t) * ldb + j);
-        acc = _mm512_fmadd_pd(_mm512_set1_pd(A[static_cast<std::ptrdiff_t>(i) * lda + t]), b, acc);
-      }
-      _mm512_storeu_pd(C + static_cast<std::ptrdiff_t>(i) * ldc + j, acc);
-    }
-    for (; j < n; j++) {
-      double acc = 0.0;
-      for (int t = 0; t < k; t++) {
-        acc += A[static_cast<std::ptrdiff_t>(i) * lda + t] *
-               B[static_cast<std::ptrdiff_t>(t) * ldb + j];
-      }
-      C[static_cast<std::ptrdiff_t>(i) * ldc + j] = acc;
-    }
+    gemmAvx512OneRow(n, k, A + static_cast<std::ptrdiff_t>(i) * lda, B, ldb,
+                     C + static_cast<std::ptrdiff_t>(i) * ldc);
   }
 }
 #endif
@@ -795,8 +951,8 @@ const char *reductionName(Reduction r) {
 }
 
 bool amxAvailable() {
-#if defined(__x86_64__)
-  static const bool ok = requestAmx();
+#if defined(__x86_64__) && defined(__linux__)
+  static const bool ok = seams::cpu::features().amxInt8 && requestAmx();
   return ok;
 #else
   return false;
@@ -805,7 +961,7 @@ bool amxAvailable() {
 
 bool vnniAvailable() {
 #if defined(__x86_64__)
-  return __builtin_cpu_supports("avx512vnni");
+  return seams::cpu::features().avx512vnni;
 #else
   return false;
 #endif
@@ -1036,7 +1192,7 @@ namespace {
 void fp64Gemm(int m, int n, int k, const double *A, int lda, const double *B,
               int ldb, double *C, int ldc) {
 #if defined(__x86_64__)
-  if (__builtin_cpu_supports("avx512f")) {
+  if (seams::cpu::features().avx512f && seams::cpu::features().fma) {
     gemmAvx512Rows(m, n, k, A, lda, B, ldb, C, ldc);
     return;
   }
@@ -1059,8 +1215,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
   }
   const int kA = kSum / 2;
   const int kB = kSum - kA;
-  std::vector<int64_t> Ap(static_cast<std::size_t>(m) * k);
-  std::vector<int64_t> Bp(static_cast<std::size_t>(k) * n);
+  std::vector<int64_t> Ap(static_cast<std::size_t>(m) * static_cast<std::size_t>(k));
+  std::vector<int64_t> Bp(static_cast<std::size_t>(k) * static_cast<std::size_t>(n));
   std::vector<int> rowExp(static_cast<std::size_t>(m));
   std::vector<int> colExp(static_cast<std::size_t>(n));
   for (int i = 0; i < m; i++) {
@@ -1071,7 +1227,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
     }
     rowExp[static_cast<std::size_t>(i)] = exp;
     for (int t = 0; t < k; t++) {
-      Ap[static_cast<std::size_t>(i) * k + t] = row[static_cast<std::size_t>(t)];
+      Ap[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) + static_cast<std::size_t>(t)] = row[static_cast<std::size_t>(t)];
     }
   }
   for (int j = 0; j < n; j++) {
@@ -1086,13 +1242,13 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
     }
     colExp[static_cast<std::size_t>(j)] = exp;
     for (int t = 0; t < k; t++) {
-      Bp[static_cast<std::size_t>(t) * n + j] = scaled[static_cast<std::size_t>(t)];
+      Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)] = scaled[static_cast<std::size_t>(t)];
     }
   }
-  std::vector<__int128> acc(static_cast<std::size_t>(m) * n, 0);
-  std::vector<signed char> Ai(static_cast<std::size_t>(m) * k);
-  std::vector<signed char> Bi(static_cast<std::size_t>(k) * n);
-  std::vector<int> partial(static_cast<std::size_t>(m) * n, 0);
+  std::vector<i128> acc(static_cast<std::size_t>(m) * static_cast<std::size_t>(n), 0);
+  std::vector<signed char> Ai(static_cast<std::size_t>(m) * static_cast<std::size_t>(k));
+  std::vector<signed char> Bi(static_cast<std::size_t>(k) * static_cast<std::size_t>(n));
+  std::vector<int> partial(static_cast<std::size_t>(m) * static_cast<std::size_t>(n), 0);
   for (int mod = 0; mod < table.s; mod++) {
     const int modulus = static_cast<int>(table.m[mod]);
     for (int i = 0; i < m * k; i++) {
@@ -1122,8 +1278,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
                        : (use == Int8Backend::Vnni ? "ozaki-ii-vnni" : "ozaki-ii-scalar");
     for (int i = 0; i < m * n; i++) {
       const int r = symMod(partial[static_cast<std::size_t>(i)], modulus);
-      const __int128 term =
-          static_cast<__int128>(r) * static_cast<__int128>(table.weight[mod]);
+      const i128 term =
+          static_cast<i128>(r) * static_cast<i128>(table.weight[mod]);
       acc[static_cast<std::size_t>(i)] =
           remCentered(acc[static_cast<std::size_t>(i)] + term, table.modulus);
     }
@@ -1142,7 +1298,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
         for (int t = 0; t < k; t++) {
           const double b = B[static_cast<std::ptrdiff_t>(t) * ldb + j];
           trunc += invD * std::fabs(static_cast<long double>(b));
-          trunc += std::fabs(static_cast<long double>(Ap[static_cast<std::size_t>(i) * k + t])) *
+          trunc += std::fabs(static_cast<long double>(Ap[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) + static_cast<std::size_t>(t)])) *
                    invD * invE;
         }
         trunc *= 1.0L + 16.0L * static_cast<long double>(k) *
@@ -1191,7 +1347,7 @@ GemmInfo gemm(int m, int n, int k, const double *A, int lda, const double *B, in
       const RealDot d = realDot(row.data(), col.data(), k, which);
       C[static_cast<std::ptrdiff_t>(i) * ldc + j] = d.value;
       if (bounds != nullptr) {
-        bounds[static_cast<std::size_t>(i) * n + j] = d.bound;
+        bounds[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)] = d.bound;
       }
     }
   }

@@ -104,4 +104,5 @@ largestDomain(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
 
 } // namespace clump
 
+/** @} */
 #endif // SEAMS_CLUSTER_H_

@@ -1,0 +1,134 @@
+name: Compiler warnings
+on:
+  push:
+    branches: [main, modernize, 'release/**']
+  pull_request:
+    branches: [main, 'release/**']
+
+concurrency:
+  group: ci_clang_warn-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  clang-warnings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-clang-warn-
+      - name: Install Clang and its OpenMP
+        run: sudo apt-get update && sudo apt-get install -y clang libomp-dev
+      - name: Build with the warning set as errors
+        run: |
+          pixi run bash -lc 'CC=clang CXX=clang++ meson setup build-clang-werror -Dwith_tests=false'
+          pixi run ninja -C build-clang-werror
+
+  # The library sources PydSEAMSlib and dseams-r compile, under the newest
+  # Clang with the warnings those builds make errors. The minimal build has
+  # no OpenMP and no optional backend, as dseams-r has on macOS; the full
+  # build has both. Clang 22 finds omp.h only once libomp-22-dev is in, so
+  # the minimal build is configured before that package is installed.
+  binding-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Clang 22 without its OpenMP
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/llvm.sh" https://apt.llvm.org/llvm.sh
+          sudo bash "$RUNNER_TEMP/llvm.sh" 22
+          sudo apt-get install -y ninja-build pkg-config libeigen3-dev
+          pipx install meson
+      - name: Configure without OpenMP or optional backends
+        run: |
+          CC=clang-22 CXX=clang++-22 meson setup build-bindings-min --wrap-mode=nofallback \
+            -Dauto_features=disabled -Dwerror=true -Dwith_tests=false -Dwith_cli=false
+          if grep -q -- '-DSEAMS_HAS_' build-bindings-min/compile_commands.json; then
+            grep -o -- '-DSEAMS_HAS_[A-Z_0-9]*' build-bindings-min/compile_commands.json | sort -u
+            echo "::error::the minimal build enabled an optional backend"
+            exit 1
+          fi
+      - name: Check the binding sources without OpenMP
+        run: python3 scripts/check_binding_warnings.py build-bindings-min
+      - name: Build the binding libraries without OpenMP
+        run: meson compile -C build-bindings-min yodaLib seams seams_lang
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-clang22-bindings-
+      - name: Install the OpenMP of Clang 22
+        run: sudo apt-get install -y libomp-22-dev
+      - name: Configure with OpenMP and the default backends
+        run: |
+          pixi run bash -lc 'CC=clang-22 CXX=clang++-22 meson setup build-bindings-full -Dwerror=true -Dwith_tests=false -Dwith_cli=false'
+          if ! grep -q -- '-DSEAMS_HAS_OPENMP' build-bindings-full/compile_commands.json; then
+            echo "::error::the full build did not find OpenMP"
+            exit 1
+          fi
+      - name: Check the binding sources with OpenMP
+        run: pixi run python3 scripts/check_binding_warnings.py build-bindings-full
+      - name: Build the binding libraries with OpenMP
+        run: pixi run meson compile -C build-bindings-full yodaLib seams seams_lang
+
+  # Every target, tests, benchmarks, the C ABI and engines included, under
+  # Clang 21 with -Dwerror=true, then the suite on that build. The heavy
+  # suite runs for hours and stays on the main CI job.
+  clang21-all:
+    runs-on: ubuntu-latest
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # The Open MPI LAMMPS and PLUMED in the pixi env then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-clang21-
+      - name: Install Clang 21 and its OpenMP
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/llvm.sh" https://apt.llvm.org/llvm.sh
+          sudo bash "$RUNNER_TEMP/llvm.sh" 21
+          sudo apt-get install -y libomp-21-dev
+      # The docs snippet tests import dseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
+      - name: Build every target with warnings as errors
+        run: |
+          pixi run bash -lc 'CC=clang-21 CXX=clang++-21 meson setup build-clang21 -Dwerror=true -Dwith_tests=true'
+          pixi run ninja -C build-clang21
+      - name: Test the Clang build
+        run: pixi run meson test -C build-clang21 --print-errorlogs --no-suite heavy
+
+  # The same full build under GCC 15. Release, since -Warray-bounds and
+  # the other flow warnings only fire with the optimiser on.
+  gcc15-all:
+    runs-on: ubuntu-latest
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # The Open MPI LAMMPS and PLUMED in the pixi env then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-gcc15-
+      - name: Install GCC 15
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc-15 g++-15
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
+      - name: Build every target with warnings as errors
+        run: |
+          pixi run bash -lc 'CC=gcc-15 CXX=g++-15 meson setup build-gcc15 --buildtype=release -Dwerror=true -Dwith_tests=true'
+          pixi run ninja -C build-gcc15
+      - name: Test the GCC build
+        run: pixi run meson test -C build-gcc15 --print-errorlogs --no-suite heavy

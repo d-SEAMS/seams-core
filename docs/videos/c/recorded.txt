@@ -1,0 +1,18 @@
+## scene-01.tape
+pixi run build
+meson setup build
+meson compile -C build
+## scene-02.tape
+nop 128 frame 1 box 15.6457 14.7071 18.073
+## scene-03.tape
+# site-site
+# types 1 1 cutoff 3.5 cn 4.0315 nI 128 nJ 128 volume 4158.66
+## scene-04.tape
+nop 128 rings 256
+6 256
+## scene-05.tape
+nop 128 q6 0.625855 q6bar 0.562449
+
+nop 128 hexagonal 128
+## scene-06.tape
+nop 128 nI 128 q6 0.625855 hexagonal 128 rings 256

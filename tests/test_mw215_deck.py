@@ -1,21 +1,33 @@
 # Copyright (c) d-SEAMS developers
 
-"""The 215 K deck is small. A liquid frame, when present, stays outside git."""
+"""The 215 K deck is small. The liquid frame is written outside the tree."""
 
+import os
 import pathlib
+import shutil
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DECK = ROOT / "input" / "mw215" / "in.equilibrate"
 FETCH = ROOT / "input" / "mw215" / "fetch.py"
-FRAME = ROOT / "data" / "mw215" / "mw-liquid-512.lammpstrj"
+FRAME = pathlib.Path(os.environ.get("MW215_DIR", "mw215-frames")) / "mw-liquid-512.lammpstrj"
 
 
 def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "frame":
         if not FRAME.is_file():
-            sys.stderr.write("skip missing 215 K frame\n")
-            return 77
+            # The liquid dump is produced by the deck, not stored in git.
+            if shutil.which("lmp") is None:
+                sys.stderr.write("lmp is not on PATH\n")
+                return 77
+            sys.path.insert(0, str(ROOT / "input" / "mw215"))
+            from regenerate import generate
+
+            try:
+                generate(8)
+            except FileNotFoundError as exc:
+                sys.stderr.write("lmp is not runnable: {}\n".format(exc))
+                return 77
         if FRAME.stat().st_size < 1000:
             sys.stderr.write("frame is empty\n")
             return 1

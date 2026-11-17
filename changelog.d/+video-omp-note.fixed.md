@@ -1,0 +1,1 @@
+The `recorded.txt` check of `docs_video_tapes` ignores the note LAMMPS prints when `OMP_NUM_THREADS` is unset, as it is under `meson test`, so the lammps transcript matches with or without that variable. The `using 1 OpenMP thread(s)` line after it is still compared.

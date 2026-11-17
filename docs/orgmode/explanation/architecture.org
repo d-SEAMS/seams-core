@@ -1,60 +1,49 @@
 #+TITLE: Repositories
 #+OPTIONS: toc:nil num:nil
 
-d-SEAMS 2 is not a monolith. The classifier is one C++ library.
-Cutoff neighbour lists are optional vesin (brute-force fallback).
-Periodic k-nearest graphs are optional linkcell. Each language
-ships its own package against that library.
+d-SEAMS 2.14 is one C++ library plus the stable C API and C ABI that
+the language bindings call. ~linkcell::pairs_within~ owns the cutoff list.
+vesin is the fallback when linkcell is not built.
 
 | repository | product | role |
 |------------+---------+------|
-| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~ | C++ engine and CLI |
-| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ | Python helpers on ~yoda~ |
-| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~dseams~ | Lua/Fennel library |
-| [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell k-nearest neighbours |
+| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~, ~libseams~, ~libseams_lang~ | Engine, CLI, C API, language ABI, engine plugins |
+| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ | Python: ~import dseams~ and ~import pydseams~ |
+| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ | Lua and Fennel: ~require("dseams")~ |
+| [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ | R package |
+| [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | Julia packages over ~libseams_jll~ |
+| [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | ~dseams-sys~, ~dseams~ | Rust crates |
+| [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ | Fortran modules |
+| [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell neighbours |
 
-The front ends take seams-core as a Meson subproject (~libyodaLib~)
-or as a flake input. They do not vendor a second engine.
-
-A language binding that lived in the engine tree would force every
-C++ user to take that language's toolchain, and every wheel or rock
-to rebuild the same library. Splitting the repos keeps the Catch2
-suite, the ~seams~ CLI, and the optional backends on one Meson
-project, while Python and Lua version and release on their own
-schedules.
+Each binding pins a seams-core tag, builds or links ~libseams~ and
+~libseams_lang~ from it, and releases with the same version. PydSEAMSlib
+and yodaStruct take seams-core as a Meson subproject; the others build it
+at the pin in their CI or link an installed copy. No binding carries a
+second engine implementation. Building the engine needs no language
+toolchain beyond C and C++. [[file:../contributing/repositories.org][The
+repository map]] lists the pins and the release order.
 
 #+begin_export rst
 .. mermaid::
 
-   flowchart TB
-     subgraph engine["seams-core"]
-       LIB[libyodaLib]
-       CLI[seams CLI]
-     end
-     subgraph fronts["Front ends"]
-       PY[pydseams Frame]
-       LUA["require(\"dseams\")"]
-     end
-     LC["linkcell k-NN"]
-     VE["vesin cutoff"]
-     GPU["gpulite TUM batch"]
-     DUMP["LAMMPS / XYZ / chemfiles / con"] --> LIB
-     LC --> LIB
-     VE --> LIB
-     GPU --> LIB
-     LIB --> CLI
-     LIB --> PY
-     LIB --> LUA
+   flowchart TD
+     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
+     NB["linkcell, vesin<br/>or gpulite"] --> LIB
+     LIB --> API[libseams]
+     API --> CLI["seams command"]
+     API --> LANG["C and C++ here"]
+     API --> BIND["Python, Lua, R, Julia,<br/>Rust, Fortran repositories"]
 #+end_export
 
 * Why ~yoda~
 
 The 2020 product was a single executable named ~yodaStruct~. That
 binary is gone. The compiled C++ surface kept the name so existing
-registrations stay findable: the Python module is ~pydseams.yoda~
+registrations stay findable: the PydSEAMSlib module is ~pydseams.yoda~
 (~_core~ and ~cyoda~ are aliases of ~yoda~). Lua helpers are
 ~require("dseams")~; ~require("yoda")~ still resolves to that table.
-There is no ~yodaStruct~ executable in any of the three repositories.
+There is no ~yodaStruct~ executable in any d-SEAMS repository.
 
 * Builds
 
@@ -64,16 +53,13 @@ There is no ~yodaStruct~ executable in any of the three repositories.
 - *Wheels*: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
 
 The 2020 CMake Nix derivation of ~yodaStruct~ is gone.
-~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
-name PydSEAMSlib and yodaStruct.
 
 * Neighbour backends
 
-- *vesin* (optional, ~SEAMS_HAS_VESIN~): cutoff pair lists
-  (~neighList~, ~neighListO~). Brute force if the wrap is off.
-- *linkcell* (optional, ~SEAMS_HAS_LINKCELL~): periodic k-NN for
-  ~knn~ / ~knn-union~ / ~seeded~ graphs and the device TUM walk.
-  Not a drop-in for vesin cutoff lists.
+- *linkcell* (optional, ~SEAMS_HAS_LINKCELL~): ~linkcell::pairs_within~
+  owns the cutoff list.
+- *vesin* (optional, ~SEAMS_HAS_VESIN~): the cutoff fallback when
+  linkcell is not built.
 
 ~seams --features~ prints both.
 

@@ -1,0 +1,11 @@
+# mW ice/liquid with the d-SEAMS PLUMED action in situ through fix plumed.
+# SEAMS writes its own dump of what it classified; LAMMPS dumps the same
+# steps so the CLI can also read the engine's frames.
+#   lmp -var cells 8 -var steps 200 -var every 10 -var melt 2000 \
+#       -var dump native.lammpstrj -in in.mw.lmp   (PLUMED_KERNEL set)
+include mw_setup.lmp
+fix pl all plumed plumedfile plumed.dat outfile plumed.log
+dump d all custom ${every} ${dump} id type x y z
+dump_modify d sort id format float %.17g
+thermo ${every}
+run ${steps}

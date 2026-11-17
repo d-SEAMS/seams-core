@@ -1,0 +1,1 @@
+An install is relocatable. The vendored chemfiles is installed beside `libyodaLib` as `libseams-chemfiles.so.0.10`, and the installed `libyodaLib`, `libseams`, `libseams_lang` and `libSeamsPlumed` find each other through an `$ORIGIN` rpath instead of a build-tree path.

@@ -1,9 +1,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cage_affiliation.hpp>
+#include <edge_set.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+
+#include "ice_ic.hpp"
 #include <order_parameter.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
@@ -234,7 +237,7 @@ TEST_CASE("cageAffiliation marks the rings of an isolated hexagonal cage",
 
   // The affiliation covers every ring of the greedy cage
   for (const int r : cl[0].rings) {
-    REQUIRE(affiliation.hc[r]);
+    REQUIRE(affiliation.hc[static_cast<std::size_t>(r)]);
   }
   // And no ring outside the greedy HC list is HC-affiliated here
   for (size_t i = 0; i < six.size(); i++) {
@@ -273,6 +276,75 @@ TEST_CASE("cageAffiliation marks hexagonal ice HC on every thread count",
 #ifdef SEAMS_HAS_OPENMP
   }
   omp_set_num_threads(maxThreads);
+#endif
+}
+
+TEST_CASE("parallel cage affiliation matches the one-thread sweep",
+          "[cage_affiliation]") {
+#ifdef SEAMS_HAS_OPENMP
+  auto yCloud = iceIh(8, 5, 5);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 6));
+  REQUIRE(six.size() >= 1024);
+
+  struct RestoreThreads {
+    int saved = omp_get_max_threads();
+    ~RestoreThreads() { omp_set_num_threads(saved); }
+  } restore;
+  const int parallelThreads = std::max(2, std::min(restore.saved, 4));
+  auto at = [&](int threads, const std::vector<std::vector<int>> &rows) {
+    omp_set_num_threads(threads);
+    return ring::cageAffiliation(six, rows);
+  };
+
+  const auto serial = at(1, idx);
+  const auto parallel = at(parallelThreads, idx);
+  REQUIRE(serial.hc == parallel.hc);
+  REQUIRE(serial.ddc == parallel.ddc);
+  REQUIRE(std::all_of(serial.hc.begin(), serial.hc.end(),
+                      [](bool on) { return on; }));
+  REQUIRE(std::none_of(serial.ddc.begin(), serial.ddc.end(),
+                       [](bool on) { return on; }));
+
+  // Drop every bond that touches every fifth atom. The flags are no longer
+  // uniform, so a sweep that marks the wrong union cannot hide in an
+  // all-hexagonal crystal.
+  auto damaged = idx;
+  for (std::size_t i = 0; i < damaged.size(); i += 5) {
+    if (damaged[i].empty()) {
+      continue;
+    }
+    const int self = damaged[i][0];
+    for (auto &row : damaged) {
+      if (row.size() <= 1) {
+        continue;
+      }
+      if (row[0] == self) {
+        row.resize(1);
+        continue;
+      }
+      row.erase(std::remove(row.begin() + 1, row.end(), self), row.end());
+    }
+  }
+  const auto serialCut = at(1, damaged);
+  const auto parallelCut = at(parallelThreads, damaged);
+  REQUIRE(serialCut.hc == parallelCut.hc);
+  REQUIRE(serialCut.ddc == parallelCut.ddc);
+  const bool hcMixed =
+      std::find(serialCut.hc.begin(), serialCut.hc.end(), false) !=
+          serialCut.hc.end() &&
+      std::find(serialCut.hc.begin(), serialCut.hc.end(), true) !=
+          serialCut.hc.end();
+  const bool ddcMixed =
+      std::find(serialCut.ddc.begin(), serialCut.ddc.end(), false) !=
+          serialCut.ddc.end() &&
+      std::find(serialCut.ddc.begin(), serialCut.ddc.end(), true) !=
+          serialCut.ddc.end();
+  REQUIRE((hcMixed || ddcMixed));
+  REQUIRE(serialCut.hc != serial.hc);
+#else
+  SUCCEED("the sweep is the one-thread path without OpenMP");
 #endif
 }
 
@@ -351,6 +423,68 @@ TEST_CASE("AffiliationUpdater equals batch across the mW trajectory",
   }
 }
 
+std::map<std::string, int> cageCensus(const ring::CageAffiliation &flags) {
+  std::map<std::string, int> census{{"rings", 0}, {"hc", 0}, {"ddc", 0}, {"both", 0}};
+  census["rings"] = static_cast<int>(flags.hc.size());
+  for (std::size_t i = 0; i < flags.hc.size(); ++i) {
+    const bool hc = flags.hc[i];
+    const bool ddc = i < flags.ddc.size() && flags.ddc[i];
+    census["hc"] += hc ? 1 : 0;
+    census["ddc"] += ddc ? 1 : 0;
+    census["both"] += (hc && ddc) ? 1 : 0;
+  }
+  return census;
+}
+
+TEST_CASE("cage census matches the rebuild on every frame", "[cage_affiliation]") {
+  ring::AffiliationUpdater updater;
+  nneigh::SkinNeighborList skin(3.5, 2.0, 1);
+  for (int frame = 1; frame <= 11; ++frame) {
+    molSys::PointCloud<molSys::Point<double>, double> yCloud;
+    yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", frame, yCloud, 1);
+    auto nList = skin.update(yCloud);
+    auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+    auto six = sixMembered(primitive::ringNetwork(idx, 7));
+    const auto &carried = updater.update(six, idx);
+    const auto rebuilt = ring::cageAffiliation(six, idx);
+    INFO("frame " << frame);
+    REQUIRE(cageCensus(carried) == cageCensus(rebuilt));
+    REQUIRE(carried.hc == rebuilt.hc);
+    REQUIRE(carried.ddc == rebuilt.ddc);
+  }
+
+  // A bond removed on each step, so the census is not a copy of frame 1.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto rows = nneigh::neighbourListByIndex(
+      yCloud, nneigh::neighListO(3.5, yCloud, 1));
+  ring::AffiliationUpdater churn;
+  for (int step = 0; step < 6; ++step) {
+    if (step > 0) {
+      for (int a = 0; a < static_cast<int>(rows.size()); ++a) {
+        if (rows[static_cast<std::size_t>(a)].size() > 2) {
+          const int b = rows[static_cast<std::size_t>(a)][1];
+          auto drop = [](std::vector<int> &row, int value) {
+            row.erase(std::remove(row.begin() + 1, row.end(), value), row.end());
+          };
+          drop(rows[static_cast<std::size_t>(a)], b);
+          if (b >= 0 && b < static_cast<int>(rows.size())) {
+            drop(rows[static_cast<std::size_t>(b)], a);
+          }
+          break;
+        }
+      }
+    }
+    auto six = sixMembered(primitive::ringNetwork(rows, 6));
+    const auto &carried = churn.update(six, rows);
+    const auto rebuilt = ring::cageAffiliation(six, rows);
+    INFO("step " << step);
+    REQUIRE(cageCensus(carried) == cageCensus(rebuilt));
+    REQUIRE(carried.hc == rebuilt.hc);
+    REQUIRE(carried.ddc == rebuilt.ddc);
+  }
+}
+
 TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
@@ -362,8 +496,8 @@ TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
     auto drop = [](std::vector<int> &row, int value) {
       row.erase(std::remove(row.begin() + 1, row.end(), value), row.end());
     };
-    drop(rows[a], b);
-    drop(rows[b], a);
+    drop(rows[static_cast<std::size_t>(a)], b);
+    drop(rows[static_cast<std::size_t>(b)], a);
   };
 
   ring::AffiliationUpdater updater;
@@ -379,8 +513,9 @@ TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
         rng ^= rng >> 7;
         rng ^= rng << 17;
         const int a = static_cast<int>(rng % rows.size());
-        if (rows[a].size() > 2) {
-          const int b = rows[a][1 + (rng >> 32) % (rows[a].size() - 1)];
+        const auto &rowA = rows[static_cast<std::size_t>(a)];
+        if (rowA.size() > 2) {
+          const int b = rowA[1 + (rng >> 32) % (rowA.size() - 1)];
           removeBond(rows, a, b);
         }
       }
@@ -413,7 +548,7 @@ TEST_CASE("AffiliationUpdater matches batch when every neighbour row changes",
   auto emptyRows = idx;
   for (auto &row : emptyRows) {
     if (!row.empty()) {
-      row.resize(1);
+      row.erase(row.begin() + 1, row.end());
     }
   }
   const auto &incremental = updater.update(six, emptyRows);
@@ -489,6 +624,79 @@ TEST_CASE("AffiliationUpdater matches an unsorted ring list and an empty frame",
   REQUIRE(rebuilt.ddc == rebuiltBatch.ddc);
 }
 
+TEST_CASE("AffiliationUpdater falls back when the ring set churns",
+          "[cage_affiliation]") {
+  // The neighbour rows stay put, so the changed-row check does not return.
+  // Every new ring is dirty. Past the batch fraction that has to call
+  // fellBack before returning, or the following frames never store a diff.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+  REQUIRE(six.size() >= 8);
+  REQUIRE(idx.size() >= 6);
+
+  ring::AffiliationUpdater churn;
+  churn.setBatchFraction(0.05);
+  const auto &primed = churn.update(six, idx);
+  REQUIRE(primed.hc == ring::cageAffiliation(six, idx).hc);
+
+  const int nAtoms = static_cast<int>(idx.size());
+  std::vector<std::vector<int>> fresh;
+  fresh.reserve(six.size());
+  for (int i = 0; i < static_cast<int>(six.size()); ++i) {
+    std::vector<int> ring(6);
+    for (int k = 0; k < 6; ++k) {
+      ring[static_cast<std::size_t>(k)] = (i * 6 + k) % nAtoms;
+    }
+    fresh.push_back(std::move(ring));
+  }
+  const auto expect = ring::cageAffiliation(fresh, idx);
+  const auto &swept = churn.update(fresh, idx);
+  REQUIRE(swept.hc == expect.hc);
+  REQUIRE(swept.ddc == expect.ddc);
+  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+
+  // The fallback starts a one-frame backoff. That frame is a warm sweep
+  // even though the graph did not change, and it still matches a rebuild.
+  const auto &backed = churn.update(fresh, idx);
+  REQUIRE(backed.hc == expect.hc);
+  REQUIRE(backed.ddc == expect.ddc);
+  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+
+  // The backoff has expired. The same graph carries.
+  const auto &carried = churn.update(fresh, idx);
+  REQUIRE(carried.hc == expect.hc);
+  REQUIRE(carried.ddc == expect.ddc);
+  REQUIRE(churn.lastReclassified() == 0);
+}
+
+TEST_CASE("one seeded search matches two when the edge sets are the same",
+          "[cage_affiliation]") {
+  const auto ice = iceIc(512);
+  const auto graphs = nneigh::kNearestNeighbourPair(ice, 4, 5.0, 1);
+  const auto strict = nneigh::neighbourListByIndex(ice, graphs.first);
+  const auto uni = nneigh::neighbourListByIndex(ice, graphs.second);
+  REQUIRE(seams::provenEqual(seams::edgeSetOf(strict), seams::edgeSetOf(uni)));
+  const auto sixStrict = sixMembered(
+      ring::contractibleRings(primitive::ringNetwork(strict, 6), ice));
+  const auto sixUnion =
+      sixMembered(ring::contractibleRings(primitive::ringNetwork(uni, 6), ice));
+  const auto both =
+      ring::seededCageAffiliation(sixStrict, strict, sixUnion, uni, false);
+  const auto onceAff = ring::cageAffiliation(sixStrict, strict);
+  const auto once = ring::seededCageAffiliation(sixStrict, onceAff, sixStrict,
+                                                onceAff, strict, false);
+  REQUIRE(once.hc == both.hc);
+  REQUIRE(once.ddc == both.ddc);
+  int cubic = 0;
+  for (bool flag : once.ddc) {
+    cubic += flag ? 1 : 0;
+  }
+  REQUIRE(cubic == ice.nop);
+}
+
 TEST_CASE("cage membership is not a function of the four-neighbour star",
           "[cage_affiliation]") {
   // Two configurations that agree exactly on the closed star of a vertex --
@@ -504,19 +712,21 @@ TEST_CASE("cage membership is not a function of the four-neighbour star",
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
 
   const int v = 137; // an arbitrary bulk vertex
-  REQUIRE(idx[v].size() == 5);
-  std::vector<int> star(idx[v].begin(), idx[v].end()); // v plus neighbours
-  std::vector<bool> inStar(yCloud.nop, false);
+  const auto &vRow = idx[static_cast<std::size_t>(v)];
+  REQUIRE(vRow.size() == 5);
+  std::vector<int> star(vRow.begin(), vRow.end()); // v plus neighbours
+  std::vector<bool> inStar(static_cast<std::size_t>(yCloud.nop), false);
   for (const int a : star) {
-    inStar[a] = true;
+    inStar[static_cast<std::size_t>(a)] = true;
   }
 
   // Second shell: neighbours of v's neighbours, outside the star
   std::vector<int> secondShell;
-  for (size_t k = 1; k < idx[v].size(); k++) {
-    for (size_t m = 1; m < idx[idx[v][k]].size(); m++) {
-      const int w = idx[idx[v][k]][m];
-      if (!inStar[w]) {
+  for (size_t k = 1; k < vRow.size(); k++) {
+    const auto &kRow = idx[static_cast<std::size_t>(vRow[k])];
+    for (size_t m = 1; m < kRow.size(); m++) {
+      const int w = kRow[m];
+      if (!inStar[static_cast<std::size_t>(w)]) {
         secondShell.push_back(w);
       }
     }
@@ -560,28 +770,31 @@ TEST_CASE("cage membership is not a function of the four-neighbour star",
   // star's coordinates and induced edges are untouched
   auto broken = yCloud;
   for (const int w : secondShell) {
-    broken.pts[w].x += 20.0;
+    broken.pts[static_cast<std::size_t>(w)].x += 20.0;
   }
 
   // The closed star is bit-identical between the two configurations
   auto brokenIdx = nneigh::neighbourListByIndex(
       broken, nneigh::neighListO(3.5, broken, 1));
   for (const int a : star) {
-    REQUIRE(yCloud.pts[a].x == broken.pts[a].x);
-    REQUIRE(yCloud.pts[a].y == broken.pts[a].y);
-    REQUIRE(yCloud.pts[a].z == broken.pts[a].z);
+    const auto ai = static_cast<std::size_t>(a);
+    REQUIRE(yCloud.pts[ai].x == broken.pts[ai].x);
+    REQUIRE(yCloud.pts[ai].y == broken.pts[ai].y);
+    REQUIRE(yCloud.pts[ai].z == broken.pts[ai].z);
   }
   // Induced star edges: neighbour rows restricted to star members agree
   for (const int a : star) {
+    const auto &rowBefore = idx[static_cast<std::size_t>(a)];
+    const auto &rowAfter = brokenIdx[static_cast<std::size_t>(a)];
     std::vector<int> before, after;
-    for (size_t m = 1; m < idx[a].size(); m++) {
-      if (inStar[idx[a][m]]) {
-        before.push_back(idx[a][m]);
+    for (size_t m = 1; m < rowBefore.size(); m++) {
+      if (inStar[static_cast<std::size_t>(rowBefore[m])]) {
+        before.push_back(rowBefore[m]);
       }
     }
-    for (size_t m = 1; m < brokenIdx[a].size(); m++) {
-      if (inStar[brokenIdx[a][m]]) {
-        after.push_back(brokenIdx[a][m]);
+    for (size_t m = 1; m < rowAfter.size(); m++) {
+      if (inStar[static_cast<std::size_t>(rowAfter[m])]) {
+        after.push_back(rowAfter[m]);
       }
     }
     std::sort(before.begin(), before.end());
@@ -605,11 +818,11 @@ TEST_CASE("seeded affiliation: structural zero, consistency, recovery",
   // Consistency: identical graphs reproduce the plain affiliation atoms
   const auto both = ring::seededCageAffiliation(six, idx, six, idx);
   const auto plain = ring::cageAffiliation(six, idx);
-  std::vector<bool> plainDdcAtoms(yCloud.nop, false);
+  std::vector<bool> plainDdcAtoms(static_cast<std::size_t>(yCloud.nop), false);
   for (size_t i = 0; i < six.size(); i++) {
     if (plain.ddc[i]) {
       for (const int a : six[i]) {
-        plainDdcAtoms[a] = true;
+        plainDdcAtoms[static_cast<std::size_t>(a)] = true;
       }
     }
   }
@@ -633,19 +846,20 @@ TEST_CASE("seeded affiliation: structural zero, consistency, recovery",
   // intact permissive graph recovers every one of them
   auto cut = idx;
   for (const int victim : {17, 911, 2048, 3333, 4000}) {
-    for (size_t m = 1; m < cut[victim].size(); m++) {
-      auto &row = cut[cut[victim][m]];
+    auto &victimRow = cut[static_cast<std::size_t>(victim)];
+    for (size_t m = 1; m < victimRow.size(); m++) {
+      auto &row = cut[static_cast<std::size_t>(victimRow[m])];
       row.erase(std::remove(row.begin() + 1, row.end(), victim), row.end());
     }
-    cut[victim].resize(1);
+    victimRow.resize(1);
   }
   auto sixCut = sixMembered(primitive::ringNetwork(cut, 7));
   const auto strictOnly = ring::cageAffiliation(sixCut, cut);
-  std::vector<bool> strictAtoms(yCloud.nop, false);
+  std::vector<bool> strictAtoms(static_cast<std::size_t>(yCloud.nop), false);
   for (size_t i = 0; i < sixCut.size(); i++) {
     if (strictOnly.ddc[i]) {
       for (const int a : sixCut[i]) {
-        strictAtoms[a] = true;
+        strictAtoms[static_cast<std::size_t>(a)] = true;
       }
     }
   }
@@ -676,17 +890,17 @@ TEST_CASE("ring-adjacent completion: identity on a crystal, empty on nothing",
           yCloud.nop);
 
   // Remove one atom's labels by hand: every six-ring through it now has
-  // five labelled vertices, and the completion restores the sixth
+  // five labeled vertices, and the completion restores the sixth
   ring::SeededAtomLabels holed = plain;
   holed.ddc[137] = false;
   const auto filled = ring::ringAdjacentCompletion(holed, six);
   REQUIRE(filled.ddc[137]);
   REQUIRE(filled.ddc == plain.ddc);
 
-  // With no labelled vertex no ring has five: structural zero
+  // With no labeled vertex no ring has five: structural zero
   ring::SeededAtomLabels empty;
-  empty.hc.assign(yCloud.nop, false);
-  empty.ddc.assign(yCloud.nop, false);
+  empty.hc.assign(static_cast<std::size_t>(yCloud.nop), false);
+  empty.ddc.assign(static_cast<std::size_t>(yCloud.nop), false);
   const auto still = ring::ringAdjacentCompletion(empty, six);
   REQUIRE(std::count(still.hc.begin(), still.hc.end(), true) == 0);
   REQUIRE(std::count(still.ddc.begin(), still.ddc.end(), true) == 0);
@@ -728,32 +942,6 @@ std::vector<DdcFixture> repeatedWitnessFixtures() {
   };
 }
 
-// tum::device::ddcFrom over every ring of an explicit ring list
-std::vector<int> deviceDdc(const std::vector<std::vector<int>> &rings,
-                           int nAtoms) {
-  const int nRings = static_cast<int>(rings.size());
-  const int maxPer = tum::device::kRowCap;
-  std::vector<int> ringAtoms;
-  for (const auto &r : rings) {
-    ringAtoms.insert(ringAtoms.end(), r.begin(), r.end());
-  }
-  std::vector<int> count(nAtoms, 0);
-  std::vector<int> through(static_cast<std::size_t>(nAtoms) * maxPer, -1);
-  for (int r = 0; r < nRings; ++r) {
-    for (const int a : rings[r]) {
-      through[a * maxPer + count[a]++] = r;
-    }
-  }
-  std::vector<int> hc(nRings, 0);
-  std::vector<int> ddc(nRings, 0);
-  for (int r = 0; r < nRings; ++r) {
-    tum::device::ddcFrom(r, &nRings, ringAtoms.data(), count.data(),
-                         through.data(), hc.data(), nAtoms, maxPer,
-                         ddc.data());
-  }
-  return ddc;
-}
-
 } // namespace
 
 TEST_CASE("DDC needs six distinct peripheral rings", "[cage_affiliation]") {
@@ -770,9 +958,9 @@ TEST_CASE("DDC needs six distinct peripheral rings", "[cage_affiliation]") {
         nAtoms = std::max(nAtoms, *std::max_element(r.begin(), r.end()) + 1);
       }
       // No bonds: no basal pair, so no HC ring
-      std::vector<std::vector<int>> nList(nAtoms);
+      std::vector<std::vector<int>> nList(static_cast<std::size_t>(nAtoms));
       for (int a = 0; a < nAtoms; ++a) {
-        nList[a] = {a};
+        nList[static_cast<std::size_t>(a)] = {a};
       }
       const auto index = ring::buildRingSearchIndex(rings, nAtoms);
       // Series 05 keeps a peripheral set only when the seven rings span
@@ -826,15 +1014,17 @@ TEST_CASE("AffiliationUpdater matches a forced HC/DDC edge flip with fallback of
     auto drop = [](std::vector<int> &row, int value) {
       row.erase(std::remove(row.begin() + 1, row.end(), value), row.end());
     };
-    drop(graph[a], b);
-    drop(graph[b], a);
+    drop(graph[static_cast<std::size_t>(a)], b);
+    drop(graph[static_cast<std::size_t>(b)], a);
   };
   auto addBond = [](std::vector<std::vector<int>> &graph, int a, int b) {
-    if (std::find(graph[a].begin(), graph[a].end(), b) == graph[a].end()) {
-      graph[a].push_back(b);
+    auto &rowA = graph[static_cast<std::size_t>(a)];
+    auto &rowB = graph[static_cast<std::size_t>(b)];
+    if (std::find(rowA.begin(), rowA.end(), b) == rowA.end()) {
+      rowA.push_back(b);
     }
-    if (std::find(graph[b].begin(), graph[b].end(), a) == graph[b].end()) {
-      graph[b].push_back(a);
+    if (std::find(rowB.begin(), rowB.end(), a) == rowB.end()) {
+      rowB.push_back(a);
     }
   };
 
@@ -844,16 +1034,17 @@ TEST_CASE("AffiliationUpdater matches a forced HC/DDC edge flip with fallback of
   const auto baseDdc = batch0.ddc;
   const int nAtoms = static_cast<int>(rows.size());
   for (int a = 0; a < nAtoms && !sawSwitch; ++a) {
-    if (rows[a].size() < 3) {
+    const auto &rowA = rows[static_cast<std::size_t>(a)];
+    if (rowA.size() < 3) {
       continue;
     }
-    const int b = rows[a][1];
+    const int b = rowA[1];
     int c = -1;
     for (int cand = 0; cand < nAtoms; ++cand) {
       if (cand == a || cand == b) {
         continue;
       }
-      if (std::find(rows[a].begin(), rows[a].end(), cand) == rows[a].end()) {
+      if (std::find(rowA.begin(), rowA.end(), cand) == rowA.end()) {
         c = cand;
         break;
       }
@@ -894,7 +1085,7 @@ TEST_CASE("AffiliationUpdater covers a moved owner, a short batch, and a dropped
 
   std::vector<std::vector<int>> rows(8);
   for (int a = 0; a < 8; ++a) {
-    rows[a] = {a};
+    rows[static_cast<std::size_t>(a)] = {a};
   }
   std::vector<std::vector<int>> rings = {
       {0, 1, 2, 3, 4, 5},
@@ -919,7 +1110,7 @@ TEST_CASE("AffiliationUpdater covers a moved owner, a short batch, and a dropped
   // negative index is an arm. The span and the arm stamp both see it.
   std::vector<std::vector<int>> tied(6);
   for (int a = 0; a < 6; ++a) {
-    tied[a] = {a};
+    tied[static_cast<std::size_t>(a)] = {a};
   }
   const auto tiedAff =
       ring::cageAffiliation(std::vector<std::vector<int>>{{0, 1, -1, 2, 3, 4}}, tied);
@@ -929,7 +1120,7 @@ TEST_CASE("AffiliationUpdater covers a moved owner, a short batch, and a dropped
   // a negative index. A five-ring in the same list takes the other walk.
   std::vector<std::vector<int>> wide(13);
   for (int a = 0; a < 13; ++a) {
-    wide[a] = {a, 6, 11};
+    wide[static_cast<std::size_t>(a)] = {a, 6, 11};
   }
   std::vector<std::vector<int>> mixed = {
       {0, 1, 2, 3, 4, 5},
@@ -969,7 +1160,7 @@ TEST_CASE("AffiliationUpdater covers a moved owner, a short batch, and a dropped
 
   std::vector<std::vector<int>> fpRows(9);
   for (int a = 0; a < 9; ++a) {
-    fpRows[a] = {a};
+    fpRows[static_cast<std::size_t>(a)] = {a};
   }
   std::vector<std::vector<int>> firstRings = {
       {1, 2, 3, 4, 5, 0},
@@ -1042,7 +1233,7 @@ TEST_CASE("Affiliation edges the sweep used to leave closed",
   // hash walks backward. The updater must still match the forward writing.
   std::vector<std::vector<int>> rows(6);
   for (int a = 0; a < 6; ++a) {
-    rows[a] = {a};
+    rows[static_cast<std::size_t>(a)] = {a};
   }
   const std::vector<std::vector<int>> backward = {{1, 0, 3, 4, 5, 2}};
   const std::vector<std::vector<int>> forward = {{0, 2, 5, 4, 3, 1}};
@@ -1425,4 +1616,54 @@ TEST_CASE("Affiliation reads a pivot past the cloud and a one-sided seed",
   REQUIRE(wideCount == 1024);
   REQUIRE(ring::cageAffiliation(hex, many).hc.size() == 1);
 #endif
+}
+
+TEST_CASE("one affiliation matches two searches on an equal seeded graph",
+          "[cage]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double a = 6.35;
+  const int n = 4;
+  const double L = n * a;
+  const double b[8][3] = {{0, 0, 0},         {0, 0.5, 0.5},     {0.5, 0, 0.5},
+                          {0.5, 0.5, 0},     {0.25, 0.25, 0.25}, {0.25, 0.75, 0.75},
+                          {0.75, 0.25, 0.75}, {0.75, 0.75, 0.25}};
+  cloud.nop = n * n * n * 8;
+  cloud.currentFrame = 1;
+  cloud.box = {L, L, L};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts.resize(static_cast<std::size_t>(cloud.nop));
+  int t = 0;
+  for (int ix = 0; ix < n; ++ix) {
+    for (int iy = 0; iy < n; ++iy) {
+      for (int iz = 0; iz < n; ++iz) {
+        for (int k = 0; k < 8; ++k, ++t) {
+          auto &p = cloud.pts[static_cast<std::size_t>(t)];
+          p.type = 1;
+          p.atomID = t + 1;
+          p.molID = p.atomID;
+          p.x = (ix + b[k][0]) * a;
+          p.y = (iy + b[k][1]) * a;
+          p.z = (iz + b[k][2]) * a;
+          cloud.idIndexMap[p.atomID] = t;
+        }
+      }
+    }
+  }
+  const auto graphs = nneigh::kNearestNeighbourPair(cloud, 4, 5.0, 1);
+  REQUIRE(graphs.first == graphs.second);
+  const auto idx = nneigh::neighbourListByIndex(cloud, graphs.first);
+  const auto six =
+      ring::contractibleRings(sixMembered(primitive::ringNetwork(idx, 6)), cloud);
+  const auto once = ring::cageAffiliation(six, idx);
+  const auto one =
+      ring::seededCageAffiliation(six, once, six, once, idx, false);
+  const auto two = ring::seededCageAffiliation(six, idx, six, idx, false);
+  REQUIRE(one.hc == two.hc);
+  REQUIRE(one.ddc == two.ddc);
+  int cubic = 0;
+  for (int i = 0; i < cloud.nop; ++i) {
+    cubic += one.ddc[static_cast<std::size_t>(i)] ? 1 : 0;
+    REQUIRE(!one.hc[static_cast<std::size_t>(i)]);
+  }
+  REQUIRE(cubic == cloud.nop);
 }

@@ -1,0 +1,4 @@
+## scene-01.tape
+openmm hexagonal 128 six-rings 256 q6 0.625855
+## scene-02.tape
+insitu hexagonal 128 six-rings 256

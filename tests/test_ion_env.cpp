@@ -3,6 +3,7 @@
 #include <mol_sys.hpp>
 #include <site.hpp>
 
+#include <cmath>
 #include <vector>
 
 namespace {
@@ -57,7 +58,7 @@ TEST_CASE("an ion whose shell is all ice is in ice", "[ions]") {
   REQUIRE(env.nLiquid == 0);
 }
 
-TEST_CASE("an ion with no labelled neighbour is in liquid, a mixed shell is at the front",
+TEST_CASE("an ion with no labeled neighbour is in liquid, a mixed shell is at the front",
           "[ions]") {
   const auto cloud = lattice({0, 13});
   std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), false);
@@ -121,4 +122,74 @@ TEST_CASE("waterType zero accepts every non-ion atom", "[ions]") {
   std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), true);
   REQUIRE(site::ionEnvironment(cloud, ice, {13}, 1, 3.5).shell[0] == 5);
   REQUIRE(site::ionEnvironment(cloud, ice, {13}, 0, 3.5).shell[0] == 6);
+}
+
+TEST_CASE("every named water type is in the ion shell", "[ions]") {
+  auto cloud = lattice({13});
+  cloud.pts[4].type = 2;
+  cloud.pts[22].type = 2;
+  std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), true);
+  const std::vector<int> both{1, 2};
+  const auto env = site::ionEnvironment(cloud, ice, {13}, both, 3.5);
+  REQUIRE(env.shell[0] == 6);
+  REQUIRE(site::ionEnvironment(cloud, ice, {13}, std::vector<int>{1}, 3.5).shell[0] == 4);
+  REQUIRE(site::ionEnvironment(cloud, ice, {13}, std::vector<int>{2}, 3.5).shell[0] == 2);
+}
+
+TEST_CASE("an ion shell from the cell list matches the full periodic scan",
+          "[ions]") {
+  // 600 waters and 20 ions in a 30 A box, so the cutoff of 3.5 A gives
+  // eight cells per axis. Every shell is checked against a scan of all
+  // waters with the minimum image written out here.
+  Cloud cloud;
+  const double box = 30.0;
+  unsigned state = 12345u;
+  auto next = [&]() {
+    state = state * 1664525u + 1013904223u;
+    return static_cast<double>(state >> 8) / static_cast<double>(1u << 24);
+  };
+  std::vector<int> ions;
+  std::vector<bool> ice;
+  for (int i = 0; i < 620; i++) {
+    molSys::Point<double> p;
+    p.x = box * next();
+    p.y = box * next();
+    p.z = box * next();
+    p.type = i < 20 ? 3 : 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[i + 1] = i;
+    if (i < 20) {
+      ions.push_back(i);
+    }
+    ice.push_back(i % 3 == 0);
+  }
+  cloud.nop = 620;
+  cloud.box = {box, box, box};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double cutoff = 3.5;
+  const auto env = site::ionEnvironment(cloud, ice, ions, 1, cutoff);
+  REQUIRE(env.ion.size() == ions.size());
+  int nonEmpty = 0;
+  for (std::size_t k = 0; k < ions.size(); k++) {
+    const auto &a = cloud.pts[static_cast<std::size_t>(ions[k])];
+    std::vector<int> want;
+    for (int j = 20; j < cloud.nop; j++) {
+      const auto &b = cloud.pts[static_cast<std::size_t>(j)];
+      double d[3] = {a.x - b.x, a.y - b.y, a.z - b.z};
+      double r2 = 0.0;
+      for (double &c : d) {
+        c -= box * std::round(c / box);
+        r2 += c * c;
+      }
+      if (r2 < cutoff * cutoff) {
+        want.push_back(j);
+      }
+    }
+    REQUIRE(env.members[k] == want);
+    REQUIRE(env.shell[k] == static_cast<int>(want.size()));
+    nonEmpty += want.empty() ? 0 : 1;
+  }
+  REQUIRE(nonEmpty > 5);
 }

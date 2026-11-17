@@ -1,5 +1,30 @@
-# C ABI for the R and Julia fronts. Python is PydSEAMSlib and links
-# libyodaLib itself. The classifiers stay in libyodaLib.
+# libseams_lang: the wider C ABI the language bindings link. The
+# classifiers stay in libyodaLib.
+
+if get_option('with_tests')
+  binding_oracle = executable(
+    'binding_oracle',
+    files('../tests/binding_oracle.cpp'),
+    dependencies: [yds_dep],
+    build_rpath: meson.project_build_root() / 'src',
+  )
+
+  seams_hpp_test = executable(
+    'test_seams_hpp',
+    files('../tests/test_seams_hpp.cpp'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    cpp_args: ['-I' + meson.project_build_root() / 'src'],
+  )
+
+  test(
+    'seams_hpp_match',
+    seams_hpp_test,
+    args: [binding_oracle.full_path(), meson.project_source_root()],
+    depends: [binding_oracle, seams_api_lib],
+    timeout: 180,
+  )
+endif
 
 seams_lang = shared_library(
   'seams_lang',
@@ -7,8 +32,13 @@ seams_lang = shared_library(
   dependencies: [yds_dep],
   include_directories: include_directories('cxx'),
   cpp_args: ['-DSEAMS_LANG_VERSION="' + meson.project_version() + '"'],
+  install_rpath: '$ORIGIN',
   install: true,
 )
+
+if _abidiff.found()
+  subdir('abi')
+endif
 
 seams_lang_dep = declare_dependency(
   link_with: seams_lang,
@@ -18,76 +48,80 @@ seams_lang_dep = declare_dependency(
 
 install_headers('cxx/seams_lang.h', subdir: 'seams')
 
+# Naming the target gives meson-uninstalled/seams-lang-uninstalled.pc the
+# build-tree -L and -I. seams_lang is a shared_library(), so meson does
+# not walk its dependencies into Libs.private.
 pkg = import('pkgconfig')
 pkg.generate(
+  seams_lang,
   name: 'seams-lang',
   filebase: 'seams-lang',
   description: 'C ABI for the d-SEAMS language fronts',
   version: meson.project_version(),
   subdirs: ['seams'],
-  libraries: ['-L${libdir}', '-lseams_lang'],
   requires: ['seams-core'],
 )
 
-seams_lang_test = executable(
-  'test_seams_lang',
-  files('cxx/test_lang.cpp'),
-  dependencies: [seams_lang_dep],
-  include_directories: include_directories('cxx'),
-  link_args: ['-ldl'],
-)
+if get_option('with_tests')
+  seams_lang_test = executable(
+    'test_seams_lang',
+    files('cxx/test_lang.cpp'),
+    dependencies: [seams_lang_dep],
+    include_directories: include_directories('cxx'),
+    link_args: ['-ldl'],
+  )
 
-test(
-  'seams_lang_fixtures',
-  seams_lang_test,
-  args: [meson.project_source_root(), seams_exe.full_path()],
-  depends: [seams_exe],
-  timeout: 180,
-)
+  if get_option('with_cli')
+    test(
+      'seams_lang_fixtures',
+      seams_lang_test,
+      args: [meson.project_source_root(), seams_exe.full_path()],
+      depends: [seams_exe],
+      timeout: 180,
+    )
+  endif
 
-# Exit 77 (skipped) when pydseamslib, R dseams, or Julia is missing; CI
-# passes --require-all after installing all three.
-if get_option('with_cli') and get_option('with_tests')
-  test(
-    'chill_plus_fronts_agree',
-    find_program('python3', required: true),
-    args: [
-      meson.project_source_root() / 'tests' / 'chill_plus_fronts.py',
-      seams_exe.full_path(),
-      seams_lang.full_path(),
-    ],
-    env: {'DSEAMS_ROOT': meson.project_source_root()},
-    depends: [seams_exe, seams_lang],
-    timeout: 600,
+  seams_frames_test = executable(
+    'test_lang_frames',
+    files('cxx/test_frames.cpp'),
+    dependencies: [seams_lang_dep],
+    include_directories: include_directories('cxx'),
   )
-  test(
-    'chill_plus_ctypes',
-    find_program('python3', required: true),
-    args: [meson.project_source_root() / 'tests' / 'test_chill_plus_ctypes.py'],
-    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
-    depends: [seams_lang],
-    timeout: 120,
-  )
-  install_data(
-    'python/chill_plus.py',
-    install_dir: get_option('datadir') / 'seams' / 'python',
-  )
-  test(
-    'symmetry_ctypes',
-    find_program('python3', required: true),
-    args: [meson.project_source_root() / 'tests' / 'test_symmetry_ctypes.py'],
-    env: {'SEAMS_CORE_LIB': ydslib.full_path()},
-    depends: [ydslib],
-    timeout: 120,
-  )
-endif
+  test('seams_lang_frames', seams_frames_test, timeout: 60)
 
-# CxxWrap needs libcxxwrap_julia, which is a BinaryBuilder product and
-# is not part of the pixi or Nix closure. The Julia front that ships is
-# the ccall package under bindings/julia/Dseams.
-cxxwrap_dep = dependency('libcxxwrap_julia', required: false)
-if cxxwrap_dep.found()
-  message('libcxxwrap_julia found; the shipped Julia front is still ccall')
-else
-  message('Julia CxxWrap is not linked. Use bindings/julia/Dseams (ccall).')
+  # ctypes checks of libseams_lang and libyodaLib. The language bindings
+  # live in their own repositories; see docs/orgmode/contributing/repositories.org.
+  if get_option('with_cli') and not get_option('b_sanitize').contains('address')
+    test(
+      'wl_ice',
+      find_program('python3', required: true),
+      args: [meson.project_source_root() / 'tests' / 'test_wl_ice.py'],
+      env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+      depends: [seams_lang],
+      timeout: 180,
+    )
+    test(
+      'q4_q6_equal',
+      find_program('python3', required: true),
+      args: [meson.project_source_root() / 'tests' / 'test_q4_q6_equal.py'],
+      env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+      depends: [seams_lang],
+      timeout: 180,
+    )
+    _tip4p_env = environment()
+    _tip4p_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
+    _tip4p_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+    if chemfiles_libdir != ''
+      _tip4p_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+    endif
+    test(
+      'tip4p_overhead',
+      find_program('python3', required: true),
+      args: [meson.project_source_root() / 'tests' / 'test_tip4p_overhead.py'],
+      workdir: meson.project_source_root(),
+      env: _tip4p_env,
+      depends: [seams_lang],
+      timeout: 180,
+    )
+  endif
 endif

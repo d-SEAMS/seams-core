@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <numeric>
 #include <random>
@@ -112,7 +113,7 @@ TEST_CASE("neighbourListByIndex converts ID list to index list",
   REQUIRE(nListByIdx.size() == 4);
 
   // Since atomID == index in this test cloud, the lists should be identical
-  for (int i = 0; i < 4; i++) {
+  for (std::size_t i = 0; i < 4; i++) {
     REQUIRE(nListByIdx[i].size() == nListByID[i].size());
   }
 }
@@ -268,10 +269,11 @@ TEST_CASE("neighbour list matches minimum image for a tight box",
       INFO("box = " << boxLength << ", atom " << iatom);
 
       // Row header is the particle itself
-      REQUIRE(nList[iatom].size() >= 1);
-      REQUIRE(nList[iatom][0] == iatom);
+      const auto &row = nList[static_cast<std::size_t>(iatom)];
+      REQUIRE(row.size() >= 1);
+      REQUIRE(row[0] == iatom);
 
-      std::vector<int> got(nList[iatom].begin() + 1, nList[iatom].end());
+      std::vector<int> got(row.begin() + 1, row.end());
       std::sort(got.begin(), got.end());
 
       // No duplicates, and never the particle itself
@@ -386,8 +388,8 @@ TEST_CASE("neighList same type does not self-include or double-count",
   auto nList = nneigh::neighList(1.5, cloud, 1, 1);
   REQUIRE(nList.size() == 4);
   for (int i = 0; i < 4; i++) {
-    REQUIRE(nList[i][0] == i);
-    auto neigh = nList[i];
+    REQUIRE(nList[static_cast<std::size_t>(i)][0] == i);
+    auto neigh = nList[static_cast<std::size_t>(i)];
     std::sort(neigh.begin() + 1, neigh.end());
     REQUIRE(std::adjacent_find(neigh.begin() + 1, neigh.end()) == neigh.end());
     REQUIRE(std::find(neigh.begin() + 1, neigh.end(), i) == neigh.end());
@@ -486,6 +488,33 @@ TEST_CASE("neighListO returns empty when the cloud has no atoms",
   auto both = nneigh::kNearestNeighbourPair(cloud, 4, 5.5, 1);
   REQUIRE(both.first.empty());
   REQUIRE(both.second.empty());
+}
+
+TEST_CASE("shellSeparation fails when a site has fewer than k others",
+          "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double xs[4] = {1.0, 2.0, 3.0, 4.0};
+  for (int i = 0; i < 4; i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.x = xs[i];
+    p.y = 5.0;
+    p.z = 5.0;
+    cloud.pts.push_back(p);
+  }
+  cloud.nop = 4;
+  // Three others per site: k = 4 has no k-th neighbour.
+  const auto [maxKth, minNext] = nneigh::shellSeparation(cloud, 4, 1);
+  REQUIRE(std::isinf(maxKth));
+  REQUIRE(minNext == 0.0);
+  // k = 3 is exactly the others: the k-th distance is 3 (from an end site),
+  // and with no (k+1)-th distance there is no upper bound either.
+  const auto [maxThird, nextAfter] = nneigh::shellSeparation(cloud, 3, 1);
+  REQUIRE_THAT(maxThird, Catch::Matchers::WithinAbs(3.0, 1e-12));
+  REQUIRE(nextAfter == 0.0);
 }
 
 TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
@@ -924,9 +953,9 @@ TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
   for (int i = 0; i < n; i++) {
     for (int j = i + 1; j < n; j++) {
       if (gen::periodicDistSq(frame, cloud, i, j) <= cutoff * cutoff) {
-        wantFull[i].push_back(j + 1);
-        wantFull[j].push_back(i + 1);
-        wantHalf[i].push_back(j + 1);
+        wantFull[static_cast<std::size_t>(i)].push_back(j + 1);
+        wantFull[static_cast<std::size_t>(j)].push_back(i + 1);
+        wantHalf[static_cast<std::size_t>(i)].push_back(j + 1);
       }
     }
   }
@@ -1170,7 +1199,7 @@ TEST_CASE("water-type mask keeps Ag out of the 4-NN list", "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {20.0, 20.0, 20.0};
   cloud.boxLow = {0.0, 0.0, 0.0};
-  // Five waters in a plus, Ag sitting closer to the centre than one water.
+  // Five waters in a plus, Ag sitting closer to the center than one water.
   const double coords[6][3] = {{0, 0, 0},
                                {3, 0, 0},
                                {-3, 0, 0},
@@ -1489,7 +1518,7 @@ TEST_CASE("cutoff pairs match vesin on ice Ic", "[neighbours]") {
   options.return_shifts = false;
   options.return_distances = false;
   options.return_vectors = false;
-  VesinNeighborList neighbors;
+  VesinNeighborList neighbors{};
   const char *error = nullptr;
   const VesinDevice device{VesinCPU, 0};
   REQUIRE(vesin_neighbors(reinterpret_cast<const double (*)[3]>(xyz.data()), xyz.size(),
@@ -1601,4 +1630,263 @@ TEST_CASE("a skin rebuild matches a fresh cutoff list", "[neighbours]") {
   REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, 3.5, freshOff, freshCols, false));
   REQUIRE(skin.offsets() == freshOff);
   REQUIRE(skin.cols() == freshCols);
+}
+
+namespace {
+
+molSys::PointCloud<molSys::Point<double>, double> shearedIce(int cells) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double bond = 2.75;
+  const double lattice = 4.0 * bond / std::sqrt(3.0);
+  const double side = cells * lattice;
+  const double xy = 4.0;
+  const double xz = 1.5;
+  const double yz = 0.8;
+  const double basis[8][3] = {
+      {0, 0, 0},          {0.5, 0.5, 0},         {0.5, 0, 0.5},         {0, 0.5, 0.5},
+      {0.25, 0.25, 0.25}, {0.75, 0.75, 0.25},    {0.75, 0.25, 0.75},    {0.25, 0.75, 0.75}};
+  int id = 1;
+  for (int i = 0; i < cells; ++i) {
+    for (int j = 0; j < cells; ++j) {
+      for (int k = 0; k < cells; ++k) {
+        for (const auto &b : basis) {
+          const double X = (i + b[0]) * lattice;
+          const double Y = (j + b[1]) * lattice;
+          const double Z = (k + b[2]) * lattice;
+          molSys::Point<double> p;
+          p.x = X + (xy / side) * Y + (xz / side) * Z;
+          p.y = Y + (yz / side) * Z;
+          p.z = Z;
+          p.type = 1;
+          p.atomID = id;
+          p.molID = id;
+          cloud.idIndexMap[id] = cloud.nop;
+          cloud.pts.push_back(p);
+          ++cloud.nop;
+          ++id;
+        }
+      }
+    }
+  }
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  cloud.box = {side + xmax - xmin, side + ymax - ymin, side, xy, xz, yz};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  return cloud;
+}
+
+molSys::PointCloud<molSys::Point<double>, double> hexIce(int ncell) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double bond = 2.76;
+  const double a = bond * std::sqrt(8.0 / 3.0);
+  const double cLen = a * std::sqrt(8.0 / 3.0);
+  const double b = a * std::sqrt(3.0);
+  const double basis[4][3] = {
+      {1.0 / 3.0, 2.0 / 3.0, 0.0},
+      {2.0 / 3.0, 1.0 / 3.0, 0.5},
+      {1.0 / 3.0, 2.0 / 3.0, 3.0 / 8.0},
+      {2.0 / 3.0, 1.0 / 3.0, 7.0 / 8.0},
+  };
+  const double lx = ncell * a;
+  const double ly = ncell * b;
+  const double lz = ncell * cLen;
+  int id = 1;
+  for (int ix = 0; ix < ncell; ++ix) {
+    for (int iy = 0; iy < ncell; ++iy) {
+      for (int iz = 0; iz < ncell; ++iz) {
+        for (double shift : {0.0, 0.5}) {
+          for (const auto &site : basis) {
+            molSys::Point<double> p;
+            const double x = shift * a + site[0] * a - site[1] * a / 2.0 + ix * a;
+            const double y = shift * b + site[1] * b / 2.0 + iy * b;
+            p.x = x - lx * std::floor(x / lx);
+            p.y = y - ly * std::floor(y / ly);
+            p.z = (site[2] + iz) * cLen;
+            p.type = 1;
+            p.atomID = id;
+            p.molID = id;
+            cloud.idIndexMap[id] = cloud.nop;
+            cloud.pts.push_back(p);
+            ++cloud.nop;
+            ++id;
+          }
+        }
+      }
+    }
+  }
+  cloud.box = {lx, ly, lz};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  return cloud;
+}
+
+std::vector<std::pair<int, int>> bruteOrthoPairs(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud, double cutoff) {
+  const double rc2 = cutoff * cutoff;
+  const double lx = cloud.box[0];
+  const double ly = cloud.box[1];
+  const double lz = cloud.box[2];
+  std::vector<std::pair<int, int>> pairs;
+  for (int i = 0; i < cloud.nop; ++i) {
+    const auto &a = cloud.pts[static_cast<std::size_t>(i)];
+    for (int j = i + 1; j < cloud.nop; ++j) {
+      const auto &b = cloud.pts[static_cast<std::size_t>(j)];
+      double dx = a.x - b.x;
+      double dy = a.y - b.y;
+      double dz = a.z - b.z;
+      dx -= lx * std::nearbyint(dx / lx);
+      dy -= ly * std::nearbyint(dy / ly);
+      dz -= lz * std::nearbyint(dz / lz);
+      if (dx * dx + dy * dy + dz * dz < rc2) {
+        pairs.emplace_back(i, j);
+      }
+    }
+  }
+  return pairs;
+}
+
+std::vector<std::pair<int, int>> csrPairs(const std::vector<int> &offsets,
+                                         const std::vector<int> &cols, bool lowerOnly) {
+  std::vector<std::pair<int, int>> pairs;
+  const int n = static_cast<int>(offsets.size()) - 1;
+  for (int i = 0; i < n; ++i) {
+    for (int k = offsets[static_cast<std::size_t>(i)];
+         k < offsets[static_cast<std::size_t>(i) + 1]; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (!lowerOnly || i < j) {
+        pairs.emplace_back(i, j);
+      }
+    }
+  }
+  if (lowerOnly) {
+    std::sort(pairs.begin(), pairs.end());
+  }
+  return pairs;
+}
+
+std::uint64_t csrDigest(const std::vector<int> &offsets, const std::vector<int> &cols) {
+  std::uint64_t h = 1469598103934665603ull;
+  auto mix = [&](std::uint64_t v) {
+    h ^= v;
+    h *= 1099511628211ull;
+  };
+  mix(offsets.size());
+  for (int v : offsets) {
+    mix(static_cast<std::uint64_t>(v));
+  }
+  mix(cols.size());
+  for (int v : cols) {
+    mix(static_cast<std::uint64_t>(v));
+  }
+  return h;
+}
+
+} // namespace
+
+TEST_CASE("the half-stencil stash gives the pair list at one and eight threads",
+          "[neighbours]") {
+  // Hexagonal ice has four neighbours at 3.5 A and stays in the eight
+  // stash slots; at 6.0 A every shell overflows them and the list is
+  // recounted. Both have to be the brute-force pair set, and eight
+  // threads have to write the bytes one thread writes.
+  const struct {
+    int cells;
+    double cutoff;
+  } cases[] = {{8, 3.5}, {4, 6.0}, {2, 3.5}};
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+#endif
+  for (const auto &row : cases) {
+    INFO("cells " << row.cells << " cutoff " << row.cutoff);
+    auto cloud = hexIce(row.cells);
+    std::vector<int> serialOff, serialCols;
+#ifdef SEAMS_HAS_OPENMP
+    omp_set_num_threads(1);
+#endif
+    REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, row.cutoff, serialOff, serialCols, false));
+    REQUIRE(csrPairs(serialOff, serialCols, true) == bruteOrthoPairs(cloud, row.cutoff));
+#ifdef SEAMS_HAS_OPENMP
+    omp_set_num_threads(8);
+    std::vector<int> wideOff, wideCols;
+    REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, row.cutoff, wideOff, wideCols, false));
+    REQUIRE(wideOff == serialOff);
+    REQUIRE(wideCols == serialCols);
+#endif
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+}
+
+TEST_CASE("sheared ice keeps the shared shift-table pairs", "[neighbours][triclinic]") {
+  std::vector<int> offsets, cols;
+  auto small = shearedIce(24);
+  REQUIRE(nneigh::orthoFullCsr(small, nullptr, 3.5, offsets, cols));
+  REQUIRE(small.nop == 110592);
+  REQUIRE(cols.size() == 442368);
+  REQUIRE(csrDigest(offsets, cols) == 0x647177f805d1e1c6ull);
+  auto large = shearedIce(48);
+  REQUIRE(nneigh::orthoFullCsr(large, nullptr, 3.5, offsets, cols));
+  REQUIRE(large.nop == 884736);
+  REQUIRE(cols.size() == 3538944);
+  REQUIRE(csrDigest(offsets, cols) == 0xba88eb7da3372fc6ull);
+}
+
+TEST_CASE("a shell longer than the stash matches the brute-force cutoff", "[neighbours]") {
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+  omp_set_num_threads(saved < 8 ? saved : 8);
+#endif
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {8.0, 8.0, 8.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  const int nSide = 4;
+  const int n = nSide * nSide * nSide;
+  for (int iz = 0; iz < nSide; ++iz) {
+    for (int iy = 0; iy < nSide; ++iy) {
+      for (int ix = 0; ix < nSide; ++ix) {
+        molSys::Point<double> pt;
+        pt.type = 1;
+        pt.atomID = static_cast<int>(cloud.pts.size());
+        pt.molID = pt.atomID;
+        pt.x = ix * 2.0;
+        pt.y = iy * 2.0;
+        pt.z = iz * 2.0;
+        cloud.idIndexMap[pt.atomID] = pt.atomID;
+        cloud.pts.push_back(pt);
+      }
+    }
+  }
+  cloud.nop = n;
+  const double cutoff = 6.0;
+  const double rc2 = cutoff * cutoff;
+  const double edge = 8.0;
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, cutoff, offsets, cols));
+  REQUIRE(offsets.size() == static_cast<std::size_t>(n + 1));
+  for (int i = 0; i < n; ++i) {
+    int brute = 0;
+    for (int j = 0; j < n; ++j) {
+      if (j == i) {
+        continue;
+      }
+      const double dx = cloud.pts[static_cast<std::size_t>(j)].x - cloud.pts[static_cast<std::size_t>(i)].x;
+      const double dy = cloud.pts[static_cast<std::size_t>(j)].y - cloud.pts[static_cast<std::size_t>(i)].y;
+      const double dz = cloud.pts[static_cast<std::size_t>(j)].z - cloud.pts[static_cast<std::size_t>(i)].z;
+      const double wx = dx - std::nearbyint(dx / edge) * edge;
+      const double wy = dy - std::nearbyint(dy / edge) * edge;
+      const double wz = dz - std::nearbyint(dz / edge) * edge;
+      if (wx * wx + wy * wy + wz * wz < rc2) {
+        ++brute;
+      }
+    }
+    REQUIRE(brute > 48);
+    REQUIRE(offsets[static_cast<std::size_t>(i + 1)] - offsets[static_cast<std::size_t>(i)] == brute);
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
 }

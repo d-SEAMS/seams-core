@@ -18,7 +18,7 @@ namespace {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
-// Eight "water" vertices on a cube of edge 4 whose centre sits at (2, 2, 2)
+// Eight "water" vertices on a cube of edge 4 whose center sits at (2, 2, 2)
 // and a second cube shifted along x by the box length minus its edge, so
 // that its vertices straddle the periodic boundary; guests are appended.
 Cloud twoCubes(const std::vector<std::array<double, 3>> &guests) {
@@ -109,14 +109,14 @@ TEST_CASE("the periodic centroid of a cage across the boundary is inside it", "[
   REQUIRE(std::fabs(c0[1] - 2.0) < 1e-9);
   REQUIRE(std::fabs(c0[2] - 2.0) < 1e-9);
   const auto c1 = site::periodicCentroid(cloud, range(8, 16));
-  // the wrapped cube spans x in [18, 22): centre at 20 == 0 modulo the box
+  // the wrapped cube spans x in [18, 22): center at 20 == 0 modulo the box
   const double wrapped = std::fmod(c1[0] + 20.0, 20.0);
   REQUIRE((std::fabs(wrapped) < 1e-9 || std::fabs(wrapped - 20.0) < 1e-9));
   REQUIRE(std::fabs(c1[1] - 2.0) < 1e-9);
 }
 
-TEST_CASE("guests are assigned to the cage whose centre they are nearest", "[guests]") {
-  // one guest at the first centre, one near the wrapped centre seen from
+TEST_CASE("guests are assigned to the cage whose center they are nearest", "[guests]") {
+  // one guest at the first center, one near the wrapped center seen from
   // the far side of the box, one in open space
   const auto cloud = twoCubes({{2.0, 2.0, 2.0}, {19.5, 2.0, 2.2}, {10.0, 10.0, 10.0}});
   const std::vector<std::vector<int>> cages = {range(0, 8), range(8, 16)};
@@ -131,7 +131,7 @@ TEST_CASE("guests are assigned to the cage whose centre they are nearest", "[gue
   REQUIRE(occ.centreDistance[2] == -1.0);
 }
 
-TEST_CASE("ray-parity occupancy keeps a centre guest and rejects one outside",
+TEST_CASE("ray-parity occupancy keeps a center guest and rejects one outside",
           "[guests]") {
   const auto cloud = twoCubes({{2.0, 2.0, 2.0}, {10.0, 10.0, 10.0}, {2.0, 2.0, -0.5}});
   // Cube 0: vertices 0-7. Faces as 6 rings of 4.
@@ -231,11 +231,11 @@ TEST_CASE("a ray through a triangle edge or vertex is retried along the next dir
   REQUIRE(out.rays >= 2);
   REQUIRE_FALSE(out.inside);
   REQUIRE(out.crossings % 2 == 0);
-  // a clean ray from the centre is decided by the first direction
-  const auto centre = site::pointInFacesTrace(cloud, kCubeRings, kCubeFaces, {2.0, 2.0, 2.0});
-  REQUIRE(centre.rays == 1);
-  REQUIRE(centre.crossings == 1);
-  REQUIRE(centre.inside);
+  // a clean ray from the center is decided by the first direction
+  const auto center = site::pointInFacesTrace(cloud, kCubeRings, kCubeFaces, {2.0, 2.0, 2.0});
+  REQUIRE(center.rays == 1);
+  REQUIRE(center.crossings == 1);
+  REQUIRE(center.inside);
 }
 
 TEST_CASE("two guests in one cage count as multiple occupancy", "[guests]") {
@@ -268,12 +268,12 @@ TEST_CASE("two H2 in a GenIce sII 51264 cage report integer occupancy",
   REQUIRE_FALSE(found.empty());
   REQUIRE(found[0].vertices.size() == 28);
 
-  const auto centre = site::periodicCentroid(yCloud, found[0].vertices);
+  const auto center = site::periodicCentroid(yCloud, found[0].vertices);
   auto addGuest = [&](double dx, double dy, double dz) {
     molSys::Point<double> p;
-    p.x = centre[0] + dx;
-    p.y = centre[1] + dy;
-    p.z = centre[2] + dz;
+    p.x = center[0] + dx;
+    p.y = center[1] + dy;
+    p.z = center[2] + dz;
     p.type = 2;
     p.atomID = yCloud.nop + 1;
     p.molID = yCloud.nop + 1;

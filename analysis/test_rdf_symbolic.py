@@ -47,7 +47,7 @@ def test_slab_correction_factor():
         N(R) = rho * integral_0^R  4*pi*r^2 * f(r) dr
 
     For R <= h the integral should give the volume of the intersection of a
-    sphere of radius R with a slab of thickness h centred on the particle.
+    sphere of radius R with a slab of thickness h centered on the particle.
     The exact intersection volume for R <= h is:
 
         V_cap(R) = 4*pi*R^3/3 - pi*R^4/(2h)

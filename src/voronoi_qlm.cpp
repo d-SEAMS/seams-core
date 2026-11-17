@@ -52,12 +52,12 @@ double facetArea(size_t target, const std::vector<Vec3> &disp,
   Vec3 e1 = (std::fabs(u[0]) < 0.9) ? Vec3{1.0, 0.0, 0.0} : Vec3{0.0, 1.0, 0.0};
   const double proj = e1[0] * u[0] + e1[1] * u[1] + e1[2] * u[2];
   for (int k = 0; k < 3; k++) {
-    e1[k] -= proj * u[k];
+    e1[static_cast<std::size_t>(k)] -= proj * u[static_cast<std::size_t>(k)];
   }
   const double n1 =
       std::sqrt(e1[0] * e1[0] + e1[1] * e1[1] + e1[2] * e1[2]);
   for (int k = 0; k < 3; k++) {
-    e1[k] /= n1;
+    e1[static_cast<std::size_t>(k)] /= n1;
   }
   const Vec3 e2 = {u[1] * e1[2] - u[2] * e1[1], u[2] * e1[0] - u[0] * e1[2],
                    u[0] * e1[1] - u[1] * e1[0]};
@@ -128,7 +128,7 @@ double facetArea(size_t target, const std::vector<Vec3> &disp,
 std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double candidateCutoff) {
-  std::vector<chill::VoronoiWeights> result(yCloud.nop);
+  std::vector<chill::VoronoiWeights> result(static_cast<std::size_t>(yCloud.nop));
   if (yCloud.box.size() < 3 || candidateCutoff <= 0.0) {
     return result;
   }
@@ -166,11 +166,11 @@ std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
         total += areas[t];
       }
 
-      result[i].neighbours.clear();
-      result[i].weights.clear();
+      result[static_cast<std::size_t>(i)].neighbours.clear();
+      result[static_cast<std::size_t>(i)].weights.clear();
       // Certificate: every cell vertex within cutoff/2 of the particle, so
       // no bisector from beyond the cutoff could have cut the cell
-      result[i].certified =
+      result[static_cast<std::size_t>(i)].certified =
           total > 0.0 && maxVertexDistSq <= 0.25 * cutoffSq;
 
       if (total > 0.0) {
@@ -178,21 +178,21 @@ std::vector<chill::VoronoiWeights> chill::voronoiFacetWeights(
           // Facets thinner than one part in 1e9 of the cell surface are
           // clipping residue, not neighbours
           if (areas[t] > 1e-9 * total) {
-            result[i].neighbours.push_back(who[t]);
-            result[i].weights.push_back(areas[t] / total);
+            result[static_cast<std::size_t>(i)].neighbours.push_back(who[t]);
+            result[static_cast<std::size_t>(i)].weights.push_back(areas[t] / total);
           }
         }
         // Renormalise after dropping residue
         double kept = 0.0;
-        for (const double w : result[i].weights) {
+        for (const double w : result[static_cast<std::size_t>(i)].weights) {
           kept += w;
         }
-        for (double &w : result[i].weights) {
+        for (double &w : result[static_cast<std::size_t>(i)].weights) {
           w /= kept;
         }
       }
 
-      if (result[i].certified) {
+      if (result[static_cast<std::size_t>(i)].certified) {
         break;
       }
       cutoff *= 1.5;
@@ -207,8 +207,8 @@ chill::SteinhardtQl steinhardtQlFromCells(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<chill::VoronoiWeights> &cells, int orderL) {
   chill::SteinhardtQl result;
-  result.ql.assign(yCloud.nop, 0.0);
-  result.qlBar.assign(yCloud.nop, 0.0);
+  result.ql.assign(static_cast<std::size_t>(yCloud.nop), 0.0);
+  result.qlBar.assign(static_cast<std::size_t>(yCloud.nop), 0.0);
   if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8) {
     return result;
   }
@@ -218,9 +218,9 @@ chill::SteinhardtQl steinhardtQlFromCells(
   // Weighted q_lm(i) = sum_j w_ij Y_lm(u_ij), the facet weights replacing the
   // 1/N_b of the unweighted parameter
   std::vector<std::complex<double>> qlm(
-      static_cast<size_t>(yCloud.nop) * nComp, {0.0, 0.0});
+      static_cast<size_t>(yCloud.nop) * static_cast<std::size_t>(nComp), {0.0, 0.0});
   for (int i = 0; i < yCloud.nop; i++) {
-    const auto &cell = cells[i];
+    const auto &cell = cells[static_cast<std::size_t>(i)];
     for (size_t k = 0; k < cell.neighbours.size(); k++) {
       const int j = cell.neighbours[k];
       const auto d = gen::relDist(yCloud, i, j);
@@ -228,37 +228,37 @@ chill::SteinhardtQl steinhardtQlFromCells(
       const std::array<double, 2> angles = sph::radialCoord(d);
       const auto ylm = sph::spheriHarmo(orderL, angles);
       for (int m = 0; m < nComp; m++) {
-        qlm[static_cast<size_t>(i) * nComp + m] += cell.weights[k] * ylm[m];
+        qlm[static_cast<size_t>(i) * static_cast<std::size_t>(nComp) + static_cast<std::size_t>(m)] += cell.weights[k] * ylm[static_cast<std::size_t>(m)];
       }
     }
   }
 
   for (int i = 0; i < yCloud.nop; i++) {
-    const size_t row = static_cast<size_t>(i) * nComp;
+    const size_t row = static_cast<size_t>(i) * static_cast<std::size_t>(nComp);
     double sumLocal = 0.0;
     for (int m = 0; m < nComp; m++) {
-      sumLocal += std::norm(qlm[row + m]);
+      sumLocal += std::norm(qlm[row + static_cast<std::size_t>(m)]);
     }
-    result.ql[i] = std::sqrt(prefactor * sumLocal);
+    result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sumLocal);
 
     // Lechner-Dellago average of the weighted q_lm over the particle and its
     // facet neighbours
-    std::vector<std::complex<double>> bar(qlm.begin() + row,
-                                          qlm.begin() + row + nComp);
+    std::vector<std::complex<double>> bar(qlm.begin() + static_cast<std::ptrdiff_t>(row),
+                                          qlm.begin() + static_cast<std::ptrdiff_t>(row) + nComp);
     int contributing = 1;
-    for (const int j : cells[i].neighbours) {
-      const size_t jRow = static_cast<size_t>(j) * nComp;
+    for (const int j : cells[static_cast<std::size_t>(i)].neighbours) {
+      const size_t jRow = static_cast<size_t>(j) * static_cast<std::size_t>(nComp);
       for (int m = 0; m < nComp; m++) {
-        bar[m] += qlm[jRow + m];
+        bar[static_cast<std::size_t>(m)] += qlm[jRow + static_cast<std::size_t>(m)];
       }
       contributing++;
     }
     double sumBar = 0.0;
     for (int m = 0; m < nComp; m++) {
-      bar[m] /= static_cast<double>(contributing);
-      sumBar += std::norm(bar[m]);
+      bar[static_cast<std::size_t>(m)] /= static_cast<double>(contributing);
+      sumBar += std::norm(bar[static_cast<std::size_t>(m)]);
     }
-    result.qlBar[i] = std::sqrt(prefactor * sumBar);
+    result.qlBar[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sumBar);
   }
   return result;
 }

@@ -1,0 +1,29 @@
+<ForceField>
+ <AtomTypes>
+  <Type name="tip4pice-O" class="OW" element="O" mass="15.99943"/>
+  <Type name="tip4pice-H" class="HW" element="H" mass="1.007947"/>
+  <Type name="tip4pice-M" class="MW" mass="0"/>
+ </AtomTypes>
+ <Residues>
+  <Residue name="HOH">
+   <Atom name="O" type="tip4pice-O"/>
+   <Atom name="H1" type="tip4pice-H"/>
+   <Atom name="H2" type="tip4pice-H"/>
+   <Atom name="M" type="tip4pice-M"/>
+   <VirtualSite type="average3" siteName="M" atomName1="O" atomName2="H1" atomName3="H2" weight1="0.7308332982689929" weight2="0.13458335086550355" weight3="0.13458335086550355"/>
+   <Bond atomName1="O" atomName2="H1"/>
+   <Bond atomName1="O" atomName2="H2"/>
+  </Residue>
+ </Residues>
+ <HarmonicBondForce>
+  <Bond class1="OW" class2="HW" length="0.09572" k="462750.4"/>
+ </HarmonicBondForce>
+ <HarmonicAngleForce>
+  <Angle class1="HW" class2="OW" class3="HW" angle="1.82421813418" k="836.8"/>
+ </HarmonicAngleForce>
+ <NonbondedForce coulomb14scale="0.833333" lj14scale="0.5">
+  <Atom type="tip4pice-O" charge="0" sigma="0.31668" epsilon="0.882164484"/>
+  <Atom type="tip4pice-H" charge="0.5897" sigma="1" epsilon="0"/>
+  <Atom type="tip4pice-M" charge="-1.1794" sigma="1" epsilon="0"/>
+ </NonbondedForce>
+</ForceField>

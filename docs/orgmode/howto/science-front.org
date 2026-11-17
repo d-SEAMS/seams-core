@@ -1,0 +1,71 @@
+#+TITLE: Basal profiles and the nucleation census
+#+OPTIONS: toc:nil num:nil
+
+~science-front~ walks a LAMMPS dump with the threaded CHILL+, q6 and
+shell kernels from ~science/interface-nucleation~ at ~55192e3d~.
+The calls are ~layersOf~, ~nucleusOf~ and ~criticalSize~. This docs
+branch does not compile them. ~meson test docs_science_front~ runs
+the two commands when the sources are in the build, and exits 77
+when they are not.
+
+The critical size is an upper bound, not a committor. It is the mean
+size of the largest cluster in the contiguous band around that
+cluster's minimum. The band stops where the size exceeds the minimum
+by the larger of 5 molecules and 15 percent. A minimum in the first
+two frames means the dump starts after the nucleus is already at
+least that large. The interval is a percentile bootstrap of the mean.
+It is not the probability that the cluster will grow.
+
+* Basal TIP4P/Ice profile
+
+The recorded run is seventeen frames of a restrained ice Ih basal
+slab against liquid TIP4P/Ice at 230 K. The dump interval is 23.95 ps.
+The basal normal is z. The cutoff is 3.5 Å. Both fronts are defined
+on every frame. The thickness grows at 0.001077 Å/ps. Half of that
+slope, the mean advance of the two fronts, is 0.000539 Å/ps.
+
+The small frame in this repository is
+~input/traj/interface_f0.lammpstrj~, 864 type-1 waters, with the long
+edge along z. One frame is enough to write the layer profile:
+
+#+begin_src bash
+science-front interface input/traj/interface_f0.lammpstrj --bin 1 --out-dir science-out
+#+end_src
+
+~interface-layers.csv~ is one row per bin. ~interface-fronts.csv~
+carries the 0.5 crossing and the 10-90 width. A flat crystal leaves
+the front undefined.
+
+* The 148-frame mW census
+
+The trajectory is figshare
+[[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]],
+148 frames of 4096 molecules, md5 ~c28fc209a2854d2ba49e8f9b55accbe8~.
+~input/traj/nucleation_three.lammpstrj~ is its first three frames.
+The full dump is not committed. Place it at
+~data/science-frames/nucleation.lammpstrj~ and run:
+
+#+begin_src bash
+science-front nucleation data/science-frames/nucleation.lammpstrj --out-dir science-out
+#+end_src
+
+On that trajectory the largest extended cluster (cubic, hexagonal and
+interfacial) has its minimum in the first two frames. The critical
+size is 153.333 molecules, bootstrap 146 to 164, and ~upper_bound~
+is 1. The core cluster, cubic and hexagonal only, is 61.5 molecules
+and is also an upper bound. The q6-bar cluster, cut at 0.36, has its
+minimum later. Its size is 117 molecules and ~upper_bound~ is 0.
+None of these is a committor.
+
+The first three frames of the same dump, which the repository does
+carry, are the start of that series. The extended sizes are 177, 146
+and 150. The core sizes are 59, 64 and 70.
+
+OVITO's CHILL+ modifier matches the d-SEAMS ovito-chill+ label on
+the basal frame and on nucleation frame 2. The published CHILL+ rule
+does not: it keeps the 2015 neighbour test and the four-neighbour q3
+average. Freud q6 and q6-bar on the same 3.5 Å ball match the kernel.
+
+#+begin_export rst
+The functions are on :doc:`/stable/science`.
+#+end_export

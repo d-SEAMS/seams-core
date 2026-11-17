@@ -1,0 +1,128 @@
+/* Copyright (c) d-SEAMS developers */
+/* Test-side faults for pread and fstat. The library keeps calling libc. */
+#if !defined(__APPLE__)
+#define _GNU_SOURCE
+#endif
+#include <dlfcn.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+static int pread_faults_left(void) {
+  const char *n = getenv("DUMP_PREAD_EINTR");
+  if (n == NULL || n[0] == '\0') {
+    return 0;
+  }
+  return atoi(n);
+}
+
+static int fstat_seen = 0;
+
+static int fstat_fault(void) {
+  fstat_seen += 1;
+  /* The parse records one successful stat, then the change check fails. */
+  if (getenv("DUMP_FSTAT_EIO") != NULL && fstat_seen > 1) {
+    errno = EIO;
+    return -1;
+  }
+  return 0;
+}
+
+#if defined(__APPLE__)
+/* DYLD_INSERT_LIBRARIES does not override two-level libSystem bindings.
+ * The __interpose section does. fstat in the macOS 11 SDK is the symbol
+ * fstat$INODE64, which is what the engine calls. dyld does not apply an
+ * image's interposing to that image's own calls, so pread and fstat below
+ * reach libSystem without a dlsym lookup inside the replacement. */
+#define SEAMS_INTERPOSE(repl, orig)                                                            \
+  __attribute__((used)) static const struct {                                                 \
+    const void *repl;                                                                          \
+    const void *orig;                                                                          \
+  } _seams_interpose_##repl __attribute__((section("__DATA,__interpose"))) = {                 \
+      (const void *)(unsigned long)&(repl), (const void *)(unsigned long)&(orig)}
+
+static ssize_t seams_pread(int fd, void *buf, size_t count, off_t offset) {
+  static int left = -1;
+  if (left < 0) {
+    left = pread_faults_left();
+  }
+  if (getenv("DUMP_PREAD_EIO") != NULL) {
+    errno = EIO;
+    return -1;
+  }
+  if (left > 0) {
+    left -= 1;
+    errno = EINTR;
+    return -1;
+  }
+  return pread(fd, buf, count, offset);
+}
+
+/* __interpose also rebinds libSystem's and libc++'s own fstat calls, which
+ * glibc makes internally and LD_PRELOAD never sees. Only calls from the
+ * reader count: libyodaLib, or the driver when libyodaLib is static. */
+static int from_reader(const void *caller) {
+  Dl_info info;
+  if (dladdr(caller, &info) == 0 || info.dli_fname == NULL) {
+    return 0;
+  }
+  return strstr(info.dli_fname, "yodaLib") != NULL ||
+         strstr(info.dli_fname, "dump_fault_driver") != NULL;
+}
+
+static int seams_fstat(int fd, struct stat *buf) {
+  if (from_reader(__builtin_return_address(0)) && fstat_fault() != 0) {
+    return -1;
+  }
+  return fstat(fd, buf);
+}
+
+SEAMS_INTERPOSE(seams_pread, pread);
+SEAMS_INTERPOSE(seams_fstat, fstat);
+#else
+ssize_t pread(int fd, void *buf, size_t count, off_t offset) {
+  static ssize_t (*real_pread)(int, void *, size_t, off_t) = NULL;
+  static int left = -1;
+  if (real_pread == NULL) {
+    real_pread = dlsym(RTLD_NEXT, "pread");
+  }
+  if (left < 0) {
+    left = pread_faults_left();
+  }
+  if (getenv("DUMP_PREAD_EIO") != NULL) {
+    errno = EIO;
+    return -1;
+  }
+  if (left > 0) {
+    left -= 1;
+    errno = EINTR;
+    return -1;
+  }
+  return real_pread(fd, buf, count, offset);
+}
+
+int fstat(int fd, struct stat *buf) {
+  static int (*real_fstat)(int, struct stat *) = NULL;
+  if (real_fstat == NULL) {
+    real_fstat = dlsym(RTLD_NEXT, "fstat");
+  }
+  if (fstat_fault() != 0) {
+    return -1;
+  }
+  return real_fstat(fd, buf);
+}
+
+/* glibc with _FILE_OFFSET_BITS=64 calls __fxstat64, not fstat. */
+int __fxstat64(int ver, int fd, struct stat64 *buf) {
+  static int (*real_fxstat)(int, int, struct stat64 *) = NULL;
+  if (real_fxstat == NULL) {
+    real_fxstat = dlsym(RTLD_NEXT, "__fxstat64");
+  }
+  if (fstat_fault() != 0) {
+    return -1;
+  }
+  return real_fxstat(ver, fd, buf);
+}
+#endif

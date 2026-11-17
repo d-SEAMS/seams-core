@@ -2,11 +2,11 @@
 
 Install the package the paper uses::
 
-    pip install pydseamslib
+    pip install 'pydseamslib==2.14.0'
 
 ``import pydseams`` is the module. ``import pydseamslib`` is the same
-package. ``seams chill-plus`` on this tree uses the mutual
-four-neighbour list. ``Frame.chill_plus`` uses the cutoff neighbour
+package. ``seams chill-plus`` and ``Frame.chill_plus`` both use the
+cutoff neighbour list. ``graph="mutual"`` is the mutual four-neighbour
 list. On the cubic mW frame both lists label every site cubic.
 """
 
@@ -21,6 +21,10 @@ def test_mixed_tip4p_cutoff_chill_plus(tip4p):
     assert ice.interClathrate == 9
     assert ice.water == 241
     assert ice.clathrate == 0
+    mutual = frame.chill_plus(graph="mutual")
+    assert mutual.clathrate == 1
+    assert mutual.interClathrate == 7
+    assert mutual.water == 242
     cages = frame.cages()
     assert cages.n_ih == 0
     assert cages.n_ic == 0
@@ -43,3 +47,7 @@ def test_sI_512_cages(si):
         atoms.update(cage["vertices"])
     assert len(found) == 2
     assert len(atoms) == 40
+    opened = frame.cages_by_signature("512", edge="none")
+    assert len(opened) == 2
+    assert opened.n_atoms == 40
+    assert frame.cages_by_signature("512", edge="1,2") == []

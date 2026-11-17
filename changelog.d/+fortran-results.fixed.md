@@ -1,0 +1,1 @@
+The Fortran bindings free the result buffers after the copy, and a dump that cannot be opened names its path. The cubic example drops the arrays it owns after the frame is closed, which LeakSanitizer otherwise reports before a Fortran main finalizes its allocatables.

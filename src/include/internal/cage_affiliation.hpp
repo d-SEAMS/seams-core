@@ -116,10 +116,10 @@ public:
   //! the first call reports every ring.
   [[nodiscard]] int lastReclassified() const;
 
-  //! Above this fraction of dirty rings, update runs the batch sweep instead
-  //! (default 0.25; 1 never falls back). After such a frame the next 1, 2,
-  //! 4, then at most 8 frames run the batch sweep without the diff, while
-  //! frames keep falling back
+  //! Above this fraction of dirty rings, update runs one sweep instead of
+  //! remapping stored pairs. The default is 1, so a transition keeps every
+  //! ring outside the changed region. A smaller fraction opts into the
+  //! sweep. An unchanged graph returns the stored flags.
   void setBatchFraction(double fraction);
 
 private:
@@ -189,12 +189,12 @@ struct SeededAtomLabels {
  *  The walk repeats until a fixed point. HC and DDC complete on
  *  separate flag vectors.
  *
- *  A liquid ring that only touches a nucleus has at most a few labelled
+ *  A liquid ring that only touches a nucleus has at most a few labeled
  *  vertices, so the all-but-one rule cannot walk into the liquid. An
- *  empty seed stays empty: no ring then has five labelled vertices.
+ *  empty seed stays empty: no ring then has five labeled vertices.
  *
  *  The result is the least fixed point above the seed. Visiting order
- *  does not change the labelled set. lean/DseamsProofs/Completion.lean
+ *  does not change the labeled set. lean/DseamsProofs/Completion.lean
  *  states that claim. Catch2 covers the C++ identity on a crystal, the
  *  refill of a single vacancy, and the structural zero.
  * @param[in] labels Seeded per-atom flags.

@@ -189,9 +189,8 @@ TEST_CASE("ionCloud sheared box COM uses relDist not bound-span wrap",
   std::array<double, 3> span = {cloud.pts[1].x - cloud.pts[0].x,
                                 cloud.pts[1].y - cloud.pts[0].y,
                                 cloud.pts[1].z - cloud.pts[0].z};
-  for (int k = 0; k < 3; k++) {
-    span[k] -= cloud.box[static_cast<std::size_t>(k)] *
-               std::round(span[k] / cloud.box[static_cast<std::size_t>(k)]);
+  for (std::size_t k = 0; k < 3; k++) {
+    span[k] -= cloud.box[k] * std::round(span[k] / cloud.box[k]);
   }
   const double spanX = 0.5 * (cloud.pts[0].x + cloud.pts[0].x + span[0]);
   const double spanY = 0.5 * (cloud.pts[0].y + cloud.pts[0].y + span[1]);

@@ -1,0 +1,44 @@
+# One committor shot of the 4096-molecule mW lane.
+# source data starts a shot: shot.data is a climb frame, and velocities
+# are fresh Maxwell-Boltzmann at Tq from seed. source restart continues
+# a shot from the restart its previous segment wrote; positions,
+# velocities, the step and the Nose-Hoover state of fix 1 carry on.
+# Each snapshot is its own file so the driver can read a frame as soon
+# as it is complete and stop the run once the shot reaches a basin. A
+# segment that runs its full nrun writes the restart named by out.
+# On the data path the commands and their order are those of the first
+# version of this deck, so a shot started then replays bit for bit.
+
+variable source index data
+variable restart index shot.restart
+variable datafile index shot.data
+variable nrun index 100000
+variable ndump index 1000
+variable Tq index 180
+variable seed index 1
+variable out index shot.restart
+
+if "${source} == restart" then &
+  "read_restart ${restart}" &
+else &
+  "units real" &
+  "atom_style atomic" &
+  "boundary p p p" &
+  "atom_modify map array" &
+  "read_data ${datafile}" &
+  "reset_timestep 0"
+
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+timestep 10.0
+thermo 1000
+
+if "${source} == data" then &
+  "velocity all create ${Tq} ${seed} mom yes rot yes dist gaussian"
+fix 1 all nvt temp ${Tq} ${Tq} 200.0
+dump 1 all custom ${ndump} frame.*.lammpstrj id type x y z
+run ${nrun}
+write_restart ${out}

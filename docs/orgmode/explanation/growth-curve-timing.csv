@@ -1,0 +1,18 @@
+tool,cores,n,n_frames,median_s,q1_s,q3_s,iqr_s,per_frame_median_s,per_frame_q1_s,per_frame_q3_s,per_frame_iqr_s
+dseams-growth,1,8,8,0.063353,0.062837,0.063835,0.000999,0.007919,0.007855,0.007979,0.000125
+dseams-q6,1,8,8,0.039953,0.039656,0.040272,0.000616,0.004994,0.004957,0.005034,0.000077
+python-q6bar,1,8,8,1.079504,1.072443,1.083744,0.011301,0.134938,0.134055,0.135468,0.001413
+dseams-growth,8,8,8,0.043187,0.042979,0.043828,0.000849,0.005398,0.005372,0.005478,0.000106
+dseams-q6,8,8,8,0.029499,0.029209,0.031005,0.001797,0.003687,0.003651,0.003876,0.000225
+python-q6bar,8,8,8,0.263028,0.245326,0.265863,0.020536,0.032878,0.030666,0.033233,0.002567
+# source_frames prism2-t240-s1.lammpstrj
+# repeats 8
+# frames 8
+# affinity cores 1 mask 0 sched 1
+# affinity cores 8 mask 0-7 sched 8
+# median and IQR are over the repeats. IQR is the type-7 third quartile minus the first.
+# per_frame divides each repeat by the frame count. The same frames are used for every tool.
+# dseams-growth is interface_order growth. dseams-q6 is interface_order q6.
+# python-q6bar is scripts/q6bar_baseline.py, the Lechner-Dellago average.
+# One core runs that script as one process. Eight cores split the frames across that many processes.
+# OMP_NUM_THREADS equals the core count. No host name is recorded.

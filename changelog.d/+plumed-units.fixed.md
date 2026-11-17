@@ -1,0 +1,1 @@
+The PLUMED `SEAMS` action scaled positions and the box by 10 whatever PLUMED's length unit, so under `UNITS LENGTH=A` it saw a cell a hundred times too large: on the ideal 64-molecule cell `seams.ice` was 0 and `seams.q6` 0 instead of 1 and 0.6285. It now reads the unit from PLUMED. `meson test plumed_units` is the regression.

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Head-to-head of d-SEAMS against mdapy and fastatomstruct.
+"""Head-to-head of d-SEAMS against mdapy, fastatomstruct and vesin.
 
-Protocol matches the comparator campaign: one thread, taskset -c 0,
+Protocol matches the comparator campaign: taskset on the allowed cores,
 one warm-up, six timed calls, median and type-7 interquartile range.
-Frames are ideal ice Ic of 1000, 10648 and 110592 molecules, written
-only under a temporary directory and deleted before exit.
+Frames are ideal ice Ic. Scratch frames stay under bbdir and are removed
+before exit.
 
     H2H_PYTHON=/path/to/venv/bin/python scripts/h2h_watch.py \
-        --lib bbdir-eessi/bindings/libseams_lang.so \
+        --lib bbdir-release/bindings/libseams_lang.so \
         --out benchmarks/h2h-watch.csv
 
-The venv needs mdapy==2.0.0 and fastatomstruct. d-SEAMS is libseams_lang.
+The venv needs mdapy==2.0.0, fastatomstruct and vesin. d-SEAMS is libseams_lang.
 """
 
 from __future__ import annotations
@@ -20,9 +20,9 @@ import csv
 import ctypes
 import json
 import os
+import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -58,6 +58,10 @@ class Seams:
         lib.seams_frame_steinhardt.argtypes = [
             ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int,
             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
+        lib.seams_frame_neighbours.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_char_p]
+        lib.seams_frame_neighbour_pairs.argtypes = [ctypes.c_void_p]
+        lib.seams_frame_neighbour_pairs.restype = ctypes.c_int
         self.lib = lib
         self.version = lib.seams_lang_version().decode()
 
@@ -97,6 +101,13 @@ class Seams:
             raise RuntimeError(self.lib.seams_last_error().decode())
         return [int(counts[i]) for i in range(3, proto.MAX_RING + 1)]
 
+    def neighbours(self, handle):
+        status = self.lib.seams_frame_neighbours(
+            handle, proto.CUTOFF_A, 1, b"cutoff")
+        if status != 0:
+            raise RuntimeError(self.lib.seams_last_error().decode())
+        return int(self.lib.seams_frame_neighbour_pairs(handle))
+
     def q6(self, handle, n):
         ql = np.empty(n, dtype=np.float64)
         qlbar = np.empty(n, dtype=np.float64)
@@ -130,6 +141,9 @@ def worker(args):
     elif args.operation == "q6":
         def call(frame):
             return seams.q6(frame, n)
+    elif args.operation == "neighbours":
+        def call(frame):
+            return seams.neighbours(frame)
     else:
         raise SystemExit(args.operation)
     if args.once:
@@ -149,19 +163,35 @@ def worker(args):
         payload["labels"] = result
     elif args.operation == "rings":
         payload["census"] = result
+    elif args.operation == "neighbours":
+        payload["pairs"] = int(result)
     else:
         payload["q6"] = result.tolist()
+    payload["threads"] = int(os.environ.get("OMP_NUM_THREADS", "1"))
     seams.lib.seams_frame_free(handle)
     json.dump(payload, sys.stdout)
     sys.stdout.write("\n")
 
 
-def launch(python, script, extra, frame, env_extra=None):
-    cmd = ["taskset", "-c", proto.CORE, python, str(script), "--frame", str(frame), *extra]
+def core_list(threads):
+    if threads <= 1:
+        return "0"
+    return "0-" + str(threads - 1)
+
+
+def launch(python, script, extra, frame, env_extra=None, threads=1, timeout=None):
+    cores = core_list(threads)
+    cmd = ["taskset", "-c", cores, python, str(script), "--frame", str(frame), *extra]
     env = proto.pin_env()
+    env["OMP_NUM_THREADS"] = str(threads)
+    env["RAYON_NUM_THREADS"] = str(threads)
     if env_extra:
         env.update(env_extra)
-    done = subprocess.run(cmd, cwd=ROOT, env=env, text=True, capture_output=True)
+    try:
+        done = subprocess.run(
+            cmd, cwd=ROOT, env=env, text=True, capture_output=True, timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError(f"{' '.join(cmd)} exceeded {timeout}s") from exc
     if done.returncode != 0:
         raise RuntimeError(
             f"{' '.join(cmd)}\n{done.stdout}\n{done.stderr}")
@@ -169,8 +199,8 @@ def launch(python, script, extra, frame, env_extra=None):
         print(done.stderr, file=sys.stderr, end="" if done.stderr.endswith("\n") else "\n")
     line = done.stdout.strip().splitlines()[-1]
     payload = json.loads(line)
-    if payload.get("cpus") != proto.CORE:
-        raise RuntimeError(f"worker not pinned to core {proto.CORE}: {payload.get('cpus')}")
+    if payload.get("cpus") != cores:
+        raise RuntimeError(f"worker not pinned to {cores}: {payload.get('cpus')}")
     return payload
 
 
@@ -186,7 +216,11 @@ def agreement(reference, other, operation):
         left = reference["census"]
         right = other["census"]["counts"]
         same = left == right
-        return float(same), f"dseams={left};fastatomstruct={right}"
+        return float(same), f"dseams={left};other={right}"
+    if operation == "neighbours":
+        left = int(reference["pairs"])
+        right = int(other["pairs"])
+        return float(left == right), f"dseams={left};other={right}"
     left = np.asarray(reference["q6"], dtype=np.float64)
     right = np.asarray(other["q6"], dtype=np.float64)
     delta = np.abs(left - right)
@@ -241,12 +275,23 @@ def campaign(args):
         "agreement", "detail", "samples_ms",
     ]
     sizes = [int(v) for v in args.sizes.split(",")] if args.sizes else list(proto.REPETITIONS)
-    with out.open("w", newline="") as handle, tempfile.TemporaryDirectory(prefix="h2h-watch-") as tmp:
+    scratch = ROOT / "bbdir" / "h2h-scratch"
+    if scratch.exists():
+        shutil.rmtree(scratch)
+    scratch.mkdir(parents=True)
+    try:
+        _campaign_body(args, python, out, fields, sizes, scratch)
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+
+def _campaign_body(args, python, out, fields, sizes, scratch):
+    with out.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for repetitions in sizes:
             pos, side = proto.ice_ic(repetitions)
-            frame = Path(tmp) / f"ic-{len(pos)}.npz"
+            frame = scratch / f"ic-{len(pos)}.npz"
             np.savez(frame, positions=pos, side=np.float64(side))
             print(f"frame molecules={len(pos)} side_A={side:.6f}", flush=True)
             for operation, script, extra in (
@@ -310,11 +355,17 @@ def campaign(args):
 
 def once(args):
     """One untimed-setup call for the Airspeed Velocity arm. No CSV."""
+    if not getattr(args, "arm", ""):
+        args.arm = args.once
     bind_library(args)
     repetitions = {proto.molecules_for(r): r for r in proto.REPETITIONS}[args.molecules]
     pos, side = proto.ice_ic(repetitions)
-    with tempfile.TemporaryDirectory(prefix="h2h-once-") as tmp:
-        frame = Path(tmp) / "frame.npz"
+    scratch = ROOT / "bbdir" / "h2h-once"
+    if scratch.exists():
+        shutil.rmtree(scratch)
+    scratch.mkdir(parents=True)
+    try:
+        frame = scratch / "frame.npz"
         np.savez(frame, positions=pos, side=np.float64(side))
         if args.arm == "dseams-chill":
             worker(argparse.Namespace(
@@ -324,6 +375,24 @@ def once(args):
             import importlib.util
             spec = importlib.util.spec_from_file_location(
                 "h2h_mdapy", ROOT / "scripts/h2h_mdapy.py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            module.run(frame, 0, 1, True)
+        elif args.arm == "mdapy-rings":
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                "h2h_mdapy_rings", ROOT / "scripts/h2h_mdapy_rings.py")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            module.run(frame, 0, 1, True)
+        elif args.arm == "dseams-neighbours":
+            worker(argparse.Namespace(
+                frame=frame, lib=args.lib, operation="neighbours", once=True,
+                warmup=0, repeats=1))
+        elif args.arm == "vesin-neighbours":
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                "h2h_vesin", ROOT / "scripts/h2h_vesin.py")
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             module.run(frame, 0, 1, True)
@@ -351,6 +420,8 @@ def once(args):
             module.run(frame, "q6", 0, 1, True)
         else:
             raise SystemExit(args.arm)
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
 
 
 def main():

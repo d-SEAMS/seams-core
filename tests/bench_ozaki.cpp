@@ -97,7 +97,7 @@ std::string histOf(const Cloud &cloud) {
   return os.str();
 }
 
-const char *jsonNum(double x, char *buf, int n) {
+const char *jsonNum(double x, char *buf, std::size_t n) {
   if (!std::isfinite(x)) {
     std::snprintf(buf, n, "null");
   } else {
@@ -305,9 +305,10 @@ int main(int argc, char **argv) {
   std::fprintf(out, "\n  ],\n  \"synthetic_gemm\": [\n");
   bool firstG = true;
   for (int n : {32, 64, 128, 256, 512}) {
-    std::vector<double> A(static_cast<std::size_t>(n) * n);
-    std::vector<double> B(static_cast<std::size_t>(n) * n);
-    std::vector<double> C(static_cast<std::size_t>(n) * n);
+    const auto nn = static_cast<std::size_t>(n);
+    std::vector<double> A(nn * nn);
+    std::vector<double> B(nn * nn);
+    std::vector<double> C(nn * nn);
     std::srand(1);
     for (std::size_t i = 0; i < A.size(); i++) {
       A[i] = (std::rand() % 2000) / 1000.0 - 1.0;

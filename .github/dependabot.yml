@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # The workflows pin actions by commit SHA with the tag as a comment.
+  # Dependabot keeps that form when it bumps them.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci

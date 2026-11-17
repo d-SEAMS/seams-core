@@ -1,0 +1,55 @@
+TIP4P oxygen frame: primitive rings and CHILL+
+input/traj/exampleTraj.lammpstrj, atom type 2, 250 oxygens
+box 40 x 40 x 180.20265674635874 angstrom, orthorhombic
+source_tree: 53fd1909724f9246db2d9fab0c8bfa52996f3a13
+source_tree is git rev-parse HEAD^{tree} of the commit that contains
+the sources compared below, recorded before this log was added.
+
+Neighbour graphs
+  cutoff: oxygen pairs with minimum-image distance <= 3.5 angstrom
+  hbond: pydseamslib 2.11.1 geometric hydrogen bonds on that cutoff
+         list (acceptor-H <= 2.42 angstrom, O-O-H angle <= 30 degrees,
+         hydrogen LAMMPS type 1)
+  The cutoff list has 509 undirected edges, degree 2 to 6, mean 4.072.
+  The hydrogen-bond list has 460 edges, degree 2 to 4, mean 3.68.
+  Every hydrogen bond is also a cutoff edge. The two lists differ by
+  49 cutoff edges that are not hydrogen bonds.
+
+Independent primitive-ring count
+  A cycle is primitive when, for every pair of its vertices, the graph
+  distance equals the shorter arc (Franzblau, shortest-path criterion).
+  Simple cycles of length 3 to 6 were enumerated with the lowest index
+  first and one direction, then tested against all-pairs distances
+  capped at the cycle length. No engine ring routine was called.
+
+  graph     edges   size 3   size 4   size 5   size 6
+  hbond       460        1      230        4      192
+  cutoff      509       37      273       34      167
+
+  pydseamslib 2.11.1 ring_census on the default read (bonded auto, which
+  is hbond for a type-2 dump) is 1, 230, 4, 192.
+  The same package with bonded="cutoff" is 37, 273, 34, 167.
+  The in-tree hydrogen-bond census matches the reference and 2.11.1.
+  The in-tree cutoff census matches the reference and 2.11.1 bonded=cutoff.
+
+  The 37 triangles are primitive rings of the cutoff graph, not a
+  failure of the shortest-path test. One of them is oxygen indices
+  0, 51, 54 with minimum-image edges 2.763, 2.860 and 3.458 angstrom,
+  all inside 3.5. They are absent from the hydrogen-bond list, which
+  is why that census has a single triangle.
+
+CHILL+ on the same cutoff neighbour list
+  pydseamslib 2.11.1 chill_plus uses neighListO and does not require
+  the cutoff shell to hold exactly four neighbours. It reports 12
+  interClathrate and 238 water. Three of those interClathrate labels,
+  oxygen indices 28, 221 and 226, each have five oxygens inside 3.5
+  angstrom.
+  The published CHILL+ table requires a crystal or clathrate row to
+  have exactly four neighbours in the cutoff shell. The in-tree
+  cutoff path applies that test, so those three sites are water:
+  9 interClathrate and 241 water. Both totals are 250.
+  The tutorial expectation is the published count.
+
+sI guest cages
+  input/traj/genice_sI.lammpstrj, atom type 1, cutoff signature 512.
+  Two cages, vertex lists of length 20 and 20, 40 distinct indices.

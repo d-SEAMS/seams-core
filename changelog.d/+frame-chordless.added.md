@@ -1,0 +1,1 @@
+`seams_frame_chordless` lists the chordless cycles of one size on a `libseams_lang` frame, with the same rows as `seams_rings_chordless` on that frame. `seams.hpp` returns them from `Neighbours::chordless` and `rings_chordless`.

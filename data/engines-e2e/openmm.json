@@ -1,0 +1,1 @@
+{"atom_frames": 33660, "engine": "openmm", "frames": 20, "insitu_s_per_frame": 0.001803160549752647, "label_agreement": "33660/33660", "labels": {"0": 11453, "1": 52, "2": 17873, "3": 2839, "4": 174, "5": 1269}, "steps": 200, "system": "TIP4P/Ice ice Ic slab and liquid, 1683 molecules", "version": "8.5.2"}

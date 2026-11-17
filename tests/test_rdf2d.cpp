@@ -479,7 +479,7 @@ TEST_CASE("normalizeRDF produces non-negative values", "[rdf2d]") {
 
   REQUIRE(ret == 0);
   for (int i = 0; i < nbin; i++) {
-    REQUIRE(rdfValues[i] >= 0.0);
+    REQUIRE(rdfValues[static_cast<std::size_t>(i)] >= 0.0);
   }
 }
 

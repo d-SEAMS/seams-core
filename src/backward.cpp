@@ -37,10 +37,30 @@
 // - g++/clang++ -lbfd ...
 // #define BACKWARD_HAS_BFD 1
 
+// The stack walk needs <execinfo.h>, which musl does not have; there the
+// crash handler is left out.
+#if !defined(__linux__) || __has_include(<execinfo.h>)
 #include "backward.hpp"
 
+// A sanitizer owns the fatal signals. These handlers would replace its
+// report, and libFuzzer would not install its own or keep the input.
+#if defined(__SANITIZE_ADDRESS__) || defined(__SANITIZE_THREAD__)
+#define SEAMS_SANITIZED 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer) || __has_feature(thread_sanitizer) ||           \
+    __has_feature(memory_sanitizer) || __has_feature(undefined_behavior_sanitizer)
+#define SEAMS_SANITIZED 1
+#endif
+#endif
+
+#ifndef SEAMS_SANITIZED
 namespace backward {
 
-backward::SignalHandling sh;
+// Never destroyed. The handlers stay installed until the process ends, and
+// a signal raised after static destruction (a sanitizer abort at exit) would
+// otherwise read the freed alternate stack.
+backward::SignalHandling &sh = *new backward::SignalHandling;
 
 } // namespace backward
+#endif // SEAMS_SANITIZED
+#endif

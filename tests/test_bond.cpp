@@ -225,9 +225,8 @@ TEST_CASE("populateHbondsWithInputClouds accepts a mixed-image dump-H bond",
   REQUIRE_THAT(bond::getHbondDistanceOH(oCloud, hCloud, 1, 0),
                Catch::Matchers::WithinAbs(0.4, 1e-10));
   std::array<double, 3> span = {0.5 - 5.5, 0.5 - 6.360254037844386, 0.0};
-  for (int k = 0; k < 3; k++) {
-    span[k] -= oCloud.box[static_cast<size_t>(k)] *
-               std::round(span[k] / oCloud.box[static_cast<size_t>(k)]);
+  for (size_t k = 0; k < 3; k++) {
+    span[k] -= oCloud.box[k] * std::round(span[k] / oCloud.box[k]);
   }
   std::vector<double> ooDump = {oo[0], oo[1], oo[2]};
   std::vector<double> ooSpan = {span[0], span[1], span[2]};
@@ -311,7 +310,7 @@ TEST_CASE("populateHbonds detects hydrogen bonds from trajectory", "[bond]") {
   int bonded = 0;
   for (size_t i = 0; i < hBonds.size(); i++) {
     REQUIRE_FALSE(hBonds[i].empty());
-    REQUIRE(hBonds[i][0] == yCloud.pts[static_cast<int>(i)].atomID);
+    REQUIRE(hBonds[i][0] == yCloud.pts[i].atomID);
     if (hBonds[i].size() > 1) {
       bonded++;
     }

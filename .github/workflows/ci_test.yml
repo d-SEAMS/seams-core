@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci_test-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   build-test:
     strategy:
@@ -12,6 +16,12 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # PLUMED and the engine tests then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
@@ -29,28 +39,73 @@ jobs:
           sudo tar -xf MacOSX11.0.sdk.tar.xz -C /opt
           echo "SDKROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
           echo "CONDA_BUILD_SYSROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
+      # OVITO's Python module loads libEGL.so.1. The pixi env ships libegl,
+      # and the Ubuntu runner still needs the system loader names.
+      - name: Install EGL for OVITO
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
       - run: pixi run setup
       - run: pixi run build
       - run: pixi run test
       - run: pixi run install
 
+  # Plain char is unsigned on aarch64, ppc64le and s390x. The x86_64
+  # runner gets the same semantics from -funsigned-char, so a char used
+  # as a signed value fails here without an ARM runner. The heavy suite
+  # runs for hours and stays on build-test.
+  unsigned-char:
+    runs-on: ubuntu-latest
+    env:
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-unsigned-char-
+      - name: Install EGL for OVITO
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
+      - name: Configure with an unsigned plain char
+        run: |
+          pixi run bash -c 'CFLAGS="$CFLAGS -funsigned-char" CXXFLAGS="$CXXFLAGS -funsigned-char" meson setup build-uchar -Dwith_tests=true'
+          grep -q -- '-funsigned-char' build-uchar/compile_commands.json
+      - run: pixi run ninja -C build-uchar
+      - run: pixi run meson test -C build-uchar --print-errorlogs --no-suite heavy
+
   mpi:
     runs-on: ubuntu-latest
     env:
       # Hosted runners expose MANA devices without usable RDMA queues.
+      # UCX still selects that device unless the PML is the TCP BTL.
       UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           environments: mpi
           cache-key: pixi-mpi-
-      - run: pixi run -e mpi meson setup bbdir-mpi -Dwith_mpi=enabled -Dwith_tests=true -Dwith_python=false
+      - run: pixi run -e mpi meson setup bbdir-mpi -Dwith_mpi=enabled -Dwith_tests=true
       - run: pixi run -e mpi ninja -C bbdir-mpi
       - run: pixi run -e mpi meson test -C bbdir-mpi --print-errorlogs domain domain_mpi seams_mpi_frames_match_serial
 
   coverage:
     runs-on: ubuntu-latest
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # The Open MPI LAMMPS and PLUMED in the pixi env then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
@@ -58,6 +113,10 @@ jobs:
           environments: default
           cache-key: pixi-default-
           cache-write: false
+      - name: Install EGL for OVITO
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
       - run: pixi run coverage-setup
       - run: pixi run coverage-build
       - run: pixi run coverage-run
@@ -65,3 +124,41 @@ jobs:
         with:
           files: bbdir-cov/meson-logs/coverage.info
           fail_ci_if_error: false
+
+  # The linux-64 pixi stack: engines, OVITO, GenIce, packmol, the paper
+  # tutorials, and the docs snippets against pydseamslib. A skip fails the job.
+  pixi-suite:
+    runs-on: ubuntu-latest
+    env:
+      # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+      # The Open MPI LAMMPS and PLUMED in the pixi env then abort in MPI_Isend.
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          # cycles is the bpy interpreter for the molecule stills. abi
+          # carries libabigail, whose abidiff the capi_abi_2_13 checks need.
+          environments: default abi cycles
+          cache-key: pixi-suite-
+      # The locked OVITO wheel matches the locked PySide6 and Qt; a newer
+      # wheel needs a newer Qt and import ovito fails.
+      - name: Install Snakemake into the pixi interpreter
+        run: pixi run python -m pip install 'snakemake>=8' 'sqq==0.5.8'
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run sh scripts/install_pydseamslib.sh
+      - name: Install EGL for OVITO
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      # abi is solved apart from default and resolves other LAMMPS, PLUMED
+      # and compiler builds, so the suite stays in default and takes only
+      # abidiff from abi.
+      - name: Build and run the full suite
+        run: |
+          set -euo pipefail
+          abidiff=$(pixi run -e abi bash -c 'command -v abidiff')
+          test -x "$abidiff"
+          printf "[binaries]\nabidiff = '%s'\n" "$abidiff" > "$RUNNER_TEMP/abidiff.ini"
+          SEAMS_MESON_ARGS="--native-file $RUNNER_TEMP/abidiff.ini" pixi run bash scripts/ci_pixi_suite.sh

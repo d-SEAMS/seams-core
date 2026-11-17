@@ -1,14 +1,19 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <diamond_cna.hpp>
 #include <local_symmetry.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
 #include <seams_c_api.h>
 
 #include <Eigen/Geometry>
 
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
+#include <random>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -16,11 +21,6 @@
 #include <system_error>
 #include <unistd.h>
 #include <vector>
-
-namespace symm {
-int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421 = nullptr,
-               int *n422 = nullptr, int *nGood = nullptr);
-}
 
 namespace {
 
@@ -80,7 +80,7 @@ std::vector<int> chillLabels(const Eigen::MatrixXd &m) {
   }
   const double box[6] = {0, 0, 0, 50, 50, 50};
   std::vector<int> labels(static_cast<size_t>(n), -1);
-  REQUIRE(seams_chill_plus(xyz.data(), n, box, labels.data()) == 0);
+  REQUIRE(seams_chill_plus_flat(xyz.data(), n, box, labels.data()) == 0);
   return labels;
 }
 
@@ -209,6 +209,41 @@ TEST_CASE("space groups separate ice Ih, ice Ic and a stacking fault", "[symmetr
   REQUIRE(gFault.number == 15);
 }
 
+TEST_CASE("a cubic ice Ic supercell has the conventional space group", "[symmetry]") {
+  if (!symm::spglibLinked()) {
+    SKIP("spglib is not linked");
+  }
+  const auto cell = symm::crystal(symm::Crystal::iceIc);
+  const int m = 3;
+  const int n0 = static_cast<int>(cell.cartesian.rows());
+  symm::Lattice big;
+  big.vectors = cell.vectors * static_cast<double>(m);
+  big.cartesian.resize(static_cast<Eigen::Index>(n0 * m * m * m), 3);
+  int w = 0;
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < m; j++) {
+      for (int k = 0; k < m; k++) {
+        const Eigen::RowVector3d shift =
+            static_cast<double>(i) * cell.vectors.row(0) +
+            static_cast<double>(j) * cell.vectors.row(1) +
+            static_cast<double>(k) * cell.vectors.row(2);
+        for (int a = 0; a < n0; a++) {
+          big.cartesian.row(w++) = cell.cartesian.row(a) + shift;
+        }
+      }
+    }
+  }
+  std::vector<int> kind(static_cast<std::size_t>(big.cartesian.rows()),
+                        static_cast<int>(symm::Kind::iceIc));
+  symm::Space fast;
+  REQUIRE(symm::conventionalCrystalSpace(big.vectors, big.cartesian, kind, 1e-3, fast));
+  const symm::Space full = symm::spaceGroup(big.vectors, big.cartesian, 1e-3);
+  REQUIRE(fast.status == 0);
+  REQUIRE(fast.number == full.number);
+  REQUIRE(fast.symbol == full.symbol);
+  REQUIRE(fast.number == 227);
+}
+
 TEST_CASE("template names add what CHILL+ does not say", "[symmetry]") {
   const auto dod = symm::points(symm::Kind::cage512);
   const auto sI = symm::points(symm::Kind::cage51262);
@@ -236,7 +271,7 @@ TEST_CASE("template names add what CHILL+ does not say", "[symmetry]") {
   REQUIRE(symm::best(ih).name == "ice-Ih");
   REQUIRE(symm::best(isd).name == "ice-Isd");
   // CHILL+ has cubic, hexagonal, water, interfacial, clathrate. It has no
-  // stacking-fault id. The fault shell is not labelled hexagonal.
+  // stacking-fault id. The fault shell is not labeled hexagonal.
   REQUIRE(centreIh == 1);
   REQUIRE(centreIsd != 1);
   REQUIRE(centreIsd != 0);
@@ -317,6 +352,32 @@ TEST_CASE("an ice Ic supercell is cubic at every oxygen", "[symmetry]") {
   REQUIRE(static_cast<int>(kind.size()) == big.rows());
   for (int label : kind) {
     REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+}
+
+TEST_CASE("ideal Ic, Ih and a gaussian displacement keep their labels", "[symmetry]") {
+  std::mt19937 rng(20261113);
+  std::normal_distribution<double> noise(0.0, 0.05);
+  const symm::Crystal cells[] = {symm::Crystal::iceIc, symm::Crystal::iceIh};
+  const int expect[] = {static_cast<int>(symm::Kind::iceIc),
+                        static_cast<int>(symm::Kind::iceIh)};
+  for (int which = 0; which < 2; ++which) {
+    const auto cell = symm::crystal(cells[which]);
+    std::vector<int> kind;
+    symm::classifyIce(cell.cartesian, cell.vectors, kind);
+    for (int label : kind) {
+      REQUIRE(label == expect[which]);
+    }
+    Eigen::MatrixXd moved = cell.cartesian;
+    for (int row = 0; row < moved.rows(); ++row) {
+      for (int axis = 0; axis < 3; ++axis) {
+        moved(row, axis) += noise(rng);
+      }
+    }
+    symm::classifyIce(moved, cell.vectors, kind);
+    for (int label : kind) {
+      REQUIRE(label == expect[which]);
+    }
   }
 }
 
@@ -569,4 +630,171 @@ TEST_CASE("eight good diamond signatures stay a partial cubic label", "[symmetry
   REQUIRE(nGood == 12);
   REQUIRE(n421 == 12);
   REQUIRE(cubic == 1);
+}
+
+TEST_CASE("shell kernel matches diamondFromCsr on ideal cubic ice", "[symmetry]") {
+  const double oo = 2.75;
+  const double a = oo * 4.0 / std::sqrt(3.0);
+  const int nrep = 2;
+  const double basis[2][3] = {{0, 0, 0}, {0.25, 0.25, 0.25}};
+  const double fcc[4][3] = {{0, 0, 0}, {0.5, 0.5, 0}, {0.5, 0, 0.5}, {0, 0.5, 0.5}};
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double length = nrep * a;
+  cloud.box = {length, length, length};
+  cloud.boxLow = {0, 0, 0};
+  for (int i = 0; i < nrep; ++i) {
+    for (int j = 0; j < nrep; ++j) {
+      for (int k = 0; k < nrep; ++k) {
+        for (const auto &shift : fcc) {
+          for (const auto &site : basis) {
+            molSys::Point<double> p;
+            p.x = (i + shift[0] + site[0]) * a;
+            p.y = (j + shift[1] + site[1]) * a;
+            p.z = (k + shift[2] + site[2]) * a;
+            p.type = 1;
+            p.atomID = cloud.nop + 1;
+            cloud.idIndexMap[p.atomID] = cloud.nop;
+            cloud.pts.push_back(p);
+            cloud.nop += 1;
+          }
+        }
+      }
+    }
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, 3.5, offsets, cols, false));
+  std::vector<int> diamond;
+  symm::diamondFromCsr(cloud, offsets, cols, diamond);
+  std::vector<int> shell;
+  symm::classifyIceCloud(cloud, shell);
+  REQUIRE(shell == diamond);
+}
+
+TEST_CASE("the equilibrated TIP4P interface keeps its thermal ice counts", "[symmetry]") {
+  // 4096 oxygens from the TIP4P/2005 ice/water slab after the hop
+  // equilibration (target 252 K). A minimisation of that restart and a
+  // 4 ps average both call the vibrating-frame misses crystal: 867 of
+  // the 903 CHILL+ hexagonal misses and all 491 PTM hex-diamond misses.
+  // The counts below are this classifier after the thermal gates, not a
+  // copy of CHILL+.
+  std::ifstream in;
+  for (const char *path : {"tests/data/tip4p252-oxygens.txt",
+                           "../tests/data/tip4p252-oxygens.txt"}) {
+    in.open(path);
+    if (in) {
+      break;
+    }
+    in.clear();
+  }
+  REQUIRE(in);
+  int n = 0;
+  double lx = 0, ly = 0, lz = 0;
+  in >> n >> lx >> ly >> lz;
+  REQUIRE(n == 4096);
+  Eigen::MatrixXd xyz(n, 3);
+  for (int i = 0; i < n; i++) {
+    in >> xyz(i, 0) >> xyz(i, 1) >> xyz(i, 2);
+  }
+  REQUIRE(in);
+  Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
+  box(0, 0) = lx;
+  box(1, 1) = ly;
+  box(2, 2) = lz;
+  std::vector<int> kind;
+  symm::classifyIce(xyz, box, kind);
+  REQUIRE(static_cast<int>(kind.size()) == n);
+  int ih = 0, ic = 0, isd = 0, other = 0;
+  for (int label : kind) {
+    if (label == static_cast<int>(symm::Kind::iceIh)) {
+      ++ih;
+    } else if (label == static_cast<int>(symm::Kind::iceIc)) {
+      ++ic;
+    } else if (label == static_cast<int>(symm::Kind::iceIsd)) {
+      ++isd;
+    } else {
+      REQUIRE(label < 0);
+      ++other;
+    }
+  }
+  REQUIRE(ih == 1772);
+  REQUIRE(ic == 0);
+  REQUIRE(isd == 1);
+  REQUIRE(other == 2323);
+}
+
+namespace {
+
+std::array<int, 4> iceTally(const std::vector<int> &kind) {
+  int ih = 0, ic = 0, isd = 0, other = 0;
+  for (int label : kind) {
+    if (label == static_cast<int>(symm::Kind::iceIh)) {
+      ++ih;
+    } else if (label == static_cast<int>(symm::Kind::iceIc)) {
+      ++ic;
+    } else if (label == static_cast<int>(symm::Kind::iceIsd)) {
+      ++isd;
+    } else if (label < 0) {
+      ++other;
+    } else {
+      return {-1, -1, -1, -1};
+    }
+  }
+  return {ih, ic, isd, other};
+}
+
+} // namespace
+
+TEST_CASE("held-out thermal frames keep their ice counts", "[symmetry]") {
+  // First oxygen frame of each short run: mW slab at a 274 K setpoint,
+  // TIP4P/2005 slabs at 240 K and 260 K, the 230 K brine start, and bulk
+  // TIP4P/2005 liquid at 240 K with no ice seed. The trajectories stay
+  // out of git. The default gates are the ones scored on the 252 K slab.
+  // The second call is the previous residual 0.12, tetrahedral q 0.94
+  // and bond ratio 1.15.
+  struct Expect {
+    const char *file;
+    int n;
+    int ih, ic, isd, other;
+    int oldIh, oldIc, oldIsd, oldOther;
+  };
+  const Expect rows[] = {
+      {"holdout-mw274-oxygens.txt", 864, 368, 1, 0, 495, 226, 0, 0, 638},
+      {"holdout-tip4p240-oxygens.txt", 4096, 1676, 0, 0, 2420, 1288, 0, 0, 2808},
+      {"holdout-tip4p260-oxygens.txt", 4096, 1641, 0, 1, 2454, 1159, 0, 0, 2937},
+      {"holdout-brine230-oxygens.txt", 576, 144, 0, 0, 432, 144, 0, 0, 432},
+      {"holdout-tip4p-liquid240-oxygens.txt", 512, 0, 0, 0, 512, 0, 0, 0, 512},
+  };
+  for (const Expect &row : rows) {
+    std::ifstream in;
+    const std::string leaf = row.file;
+    const std::string candidates[] = {"tests/data/" + leaf, "../tests/data/" + leaf};
+    for (const std::string &path : candidates) {
+      in.open(path);
+      if (in) {
+        break;
+      }
+      in.clear();
+    }
+    REQUIRE(in);
+    int n = 0;
+    double lx = 0, ly = 0, lz = 0;
+    in >> n >> lx >> ly >> lz;
+    REQUIRE(n == row.n);
+    Eigen::MatrixXd xyz(n, 3);
+    for (int i = 0; i < n; i++) {
+      in >> xyz(i, 0) >> xyz(i, 1) >> xyz(i, 2);
+    }
+    REQUIRE(in);
+    Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
+    box(0, 0) = lx;
+    box(1, 1) = ly;
+    box(2, 2) = lz;
+    std::vector<int> kind;
+    symm::classifyIce(xyz, box, kind);
+    REQUIRE(static_cast<int>(kind.size()) == n);
+    REQUIRE(iceTally(kind) == std::array<int, 4>{row.ih, row.ic, row.isd, row.other});
+    symm::classifyIce(xyz, box, kind, 0.12, 0.94, 1.15);
+    REQUIRE(iceTally(kind) == std::array<int, 4>{row.oldIh, row.oldIc, row.oldIsd, row.oldOther});
+  }
 }

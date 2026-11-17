@@ -11,7 +11,7 @@ They are not in this repository, and this page does not invent their counts.
 
 The in-tree confined frame is =input/traj/exampleTraj.lammpstrj=.
 The runnable copy is =docs/tutorials/test_confined.py=.
-Install Python with ~pip install pydseamslib~.
+Install Python with ~pip install 'pydseamslib==2.14.0'~.
 
 #+begin_src python
 import pydseams as ds
@@ -20,6 +20,7 @@ frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 r, g = frame.rdf_2d("output", cutoff=6.0, binwidth=0.5)
 frame.monolayer_rings("output", sheet_area=1.0, max_depth=6)
 frame.find_prisms(output_dir="output", max_depth=4)
+assert len(r) == len(g) and len(r) > 0
 #+end_src
 
 ~sheet_area~ is the area the coverage fraction divides by.

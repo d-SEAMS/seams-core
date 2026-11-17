@@ -1,0 +1,2 @@
+## scene-01.tape
+plumed hexagonal 128 six-rings 256 q6 0.625855

@@ -1,0 +1,1 @@
+OpenMM, rings, and cages each have a video slug next to the existing rings-cages slug. Topic pages embed the recording from the same embed.txt as the gallery, using an Odysee /$/embed/ URL when a claim is present and the words video coming soon when it is not.

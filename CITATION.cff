@@ -3,6 +3,7 @@ message: "If you use this software, please cite it using the metadata below."
 title: "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations"
 type: software
 version: "2.14.0"
+date-released: "2026-11-15"
 license: MIT
 repository-code: "https://github.com/d-SEAMS/seams-core"
 url: https://dseams.info
@@ -21,13 +22,19 @@ preferred-citation:
   title: "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations"
   authors:
     - family-names: Goswami
-      given-names: Amrita
-      orcid: "https://orcid.org/0000-0001-8706-2383"
-    - family-names: Goswami
       given-names: Rohit
       orcid: "https://orcid.org/0000-0002-2393-8056"
-    - family-names: S
-      given-names: Ruhila
+    - family-names: Goswami
+      given-names: Amrita
+      orcid: "https://orcid.org/0000-0001-8706-2383"
+    - family-names: Singh
+      given-names: Jayant K.
+      orcid: "https://orcid.org/0000-0001-8056-2115"
   doi: "10.1021/acs.jcim.0c00031"
   journal: "Journal of Chemical Information and Modeling"
+  volume: 60
+  issue: 4
+  start: 2169
+  end: 2177
+  month: 3
   year: 2020

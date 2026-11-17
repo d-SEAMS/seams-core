@@ -1,0 +1,33 @@
+#+TITLE: Performance
+#+OPTIONS: toc:nil num:nil
+
+Head-to-head times for the neighbour list, primitive rings, local
+\(q_6\), CHILL+, cages, and PTM. The other codes are OVITO, freud,
+mdapy, ClavisCage, cycless, and SQQ. PTM is the OVITO polyhedral
+template match. Linkcell scaling is the cutoff-ring list against the
+older cell list.
+
+The 884736-molecule sitting is ice and a TIP4P/ice liquid, at 1, 2, 4
+and 8 threads. The rivals on that file are rings-statistics-matter,
+freud, mdapy, pyscal3, PLUMED, vesin and OVITO. The file is the sitting
+written at ~2ed49e87~. On the liquid, freud \(q_6\) is a hard-cutoff
+rounding gap, PLUMED is a rational-switch gap, and CHILL+ matches a
+counted subset of the molecules. The generated note prints those three
+CSV tokens.
+
+The figure is an SVG of median
+time against thread count, ice and liquid side by side.
+
+The tables are the frozen tables in =docs/records=, rendered from the
+benchmark records dataset (=docs/records/README.md= names the revision).
+
+#+begin_export rst
+.. figure:: sitting-large-threads.svg
+   :alt: Median time against thread count for 884736 molecules
+
+   Ice and the TIP4P/ice liquid. Each line is one code. The vertical axis is logarithmic.
+#+end_export
+
+#+begin_export rst
+.. include:: performance-h2h-tables.rst
+#+end_export

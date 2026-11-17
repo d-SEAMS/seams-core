@@ -1,0 +1,14 @@
+#+TITLE: 2.14.0 release notes
+#+OPTIONS: toc:nil num:nil
+
+These notes are built from the fragments in ~changelog.d/~.
+Each file is one user-visible change on the 2.14 lanes, in the
+towncrier form ~+slug.<type>.md~. ~docs/check_changelog.py~ renders
+them and fails if a fragment is left out or repeated.
+The notes are the changes since tag v2.13.0 (~7f310225~).
+The upgrade from 2.13 is
+[[file:../howto/upgrade-2.14.org][the upgrade guide]].
+
+#+begin_export rst
+.. include:: release-2.14-notes.rst
+#+end_export

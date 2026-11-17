@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------------
 // d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
 //
-// Copyright (c) 2018--present d-SEAMS core team
+// Copyright (c) d-SEAMS developers
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the MIT License as published by
@@ -22,6 +22,9 @@
 #include <mol_sys.hpp>
 #include <ring.hpp>
 #include <string>
+
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <filesystem>
 
@@ -62,6 +65,10 @@ int nLammpsFrames(const std::string &filename);
 //! Drop a cached dump session (tests that rewrite a path in place).
 void dropLammpsDumpIndex(const std::string &filename);
 
+//! Text of the exception currently being handled. Call from a catch
+//! clause. A std::exception yields what(); anything else is unnamed.
+std::string currentExceptionText();
+
 //! Call fn(frame, cloud) for each frame from max(first, 1) to last
 //! (1-based, inclusive) that falls to part of parts. last <= 0 means every
 //! ITEM: TIMESTEP. Frames are dealt in rounds of parts, in serpentine order
@@ -81,6 +88,12 @@ void forEachLammpsFrame(
 
 //! Function for reading in a specified frame (frame number and not timestep
 //! value)
+//! One id/type/x/y/z frame of the default oxygen selection: type 2 when
+//! any atom has that type, otherwise type 1. Returns false for any other
+//! column layout, leaving the cloud untouched by a successful read.
+bool readDefaultOxygen(const std::string &filename, int frame,
+                       molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
 molSys::PointCloud<molSys::Point<double>, double>
 readLammpsTrj(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -115,13 +128,61 @@ molSys::PointCloud<molSys::Point<double>, double> readXYZ(std::string filename);
 //! Reads bonds into a vector of vectors from a file with a specific format
 std::vector<std::vector<int>> readBonds(std::string filename);
 
+//! Number of steps chemfiles can read, or -1 when chemfiles is off
+//! or the file is not a trajectory it knows. seams_lang calls this
+//! with or without chemfiles.
+int chemfilesSteps(const std::string &filename);
+
 #ifdef SEAMS_HAS_CHEMFILES
-//! Read any trajectory format supported by chemfiles (PDB, GRO, DCD, etc.)
+//! How one chemfiles step is turned into a cloud.
+//! typeFilter > 0 keeps that species number. guessOxygen keeps
+//! atomic number 8 when the frame has elements, and otherwise the
+//! LAMMPS oxygen guess (type 2, then type 1). selection is a chemfiles
+//! selection; it is applied before the type filter.
+struct ChemfilesRead {
+  int frame = 1;
+  int typeFilter = -1;
+  bool guessOxygen = false;
+  std::string selection;
+};
+
+molSys::PointCloud<molSys::Point<double>, double>
+readChemfiles(std::string filename,
+              molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              const ChemfilesRead &request);
+
+//! typeFilter -1 keeps every atom. Positive values keep that species.
 molSys::PointCloud<molSys::Point<double>, double>
 readChemfiles(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               int typeFilter = -1);
+
+//! Steps [first, last] (1-based, inclusive; last <= 0 is the end) of one
+//! open chemfiles trajectory, in order. typeFilter -1 keeps every atom.
+//! Each cloud matches readChemfiles(filename, frame, cloud, typeFilter).
+//! A file chemfiles cannot read gives one empty cloud at frame first.
+void forEachChemfilesStep(
+    const std::string &filename, int first, int last, int typeFilter,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn);
+
+//! Walk [first, last] through a chemfiles trajectory. Returns false for a
+//! CON path or a file chemfiles does not open, so the caller can use
+//! another reader. part/parts keep one slice of the range.
+bool forEachChemfilesFrame(
+    const std::string &filename, int first, int last, int typeI,
+    const std::string &selection, int part, int parts,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn);
 #endif
+
+//! Postprocessing entry. CON stays on readcon. Every other file goes
+//! through chemfiles when that library is linked. typeI follows the
+//! CLI: negative keeps every atom, positive keeps one species, zero
+//! guesses oxygen.
+molSys::PointCloud<molSys::Point<double>, double>
+openFrame(const std::string &filename, int frame, int typeI,
+          const std::string &selection = {});
 
 #ifdef SEAMS_HAS_READCON
 //! Read a .con file through readcon-core. The cell lengths and angles
@@ -130,6 +191,14 @@ readChemfiles(std::string filename, int targetFrame,
 molSys::PointCloud<molSys::Point<double>, double>
 readCon(std::string filename, int targetFrame,
         molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! Frames [first, last] (1-based, inclusive; last <= 0 is the end) of one
+//! open readcon iterator, in order. Each cloud matches readCon for that
+//! frame. A file readcon cannot open gives one empty cloud at frame first.
+void forEachConFrame(
+    const std::string &filename, int first, int last,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn);
 
 #ifdef SEAMS_HAS_READCON_DB
 //! Append one CON path to a readcon-db corpus. A directory that holds
@@ -179,4 +248,5 @@ inline bool atomInSlice(double x, double y, double z,
 
 } // namespace sinp
 
+/** @} */
 #endif //// SEAMS_SEAMS_INPUT_H_

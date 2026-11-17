@@ -1,0 +1,114 @@
+#+TITLE: Repository map
+#+OPTIONS: toc:nil num:nil ^:nil
+
+d-SEAMS is seven repositories. This one, seams-core, holds the engine and
+everything that has to change with it. Each language binding is a separate
+repository that builds against a seams-core tag and releases with the same
+version number.
+
+* What lives where
+
+| Repository | Holds | Publishes |
+|------------+-------+-----------|
+| [[https://github.com/d-SEAMS/seams-core][d-SEAMS/seams-core]] | The C++ engine (~libyodaLib~), the C API ~libseams~ (=include/seams.h=), the C ABI ~libseams_lang~ (=bindings/cxx/seams_lang.h=), the ~seams~ command, the engine drivers (=engines/=, =adapters/python= ~dseams_insitu~), the C and C++ documentation, the science scripts, the videos, the conda recipe (=recipe/=) and the Yggdrasil recipe for ~libseams_jll~ (=packaging/yggdrasil=) | The ~vX.Y.Z~ tag, the GitHub release, conda ~libseams~, ~libseams_jll~, https://docs.dseams.info |
+| [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]] | The Python binding: ~import dseams~ (array calls) and ~import pydseams~ (the Frame API), with their tests and docs | ~pydseamslib~ on PyPI |
+| [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]] | The Lua and Fennel binding, ~require("dseams")~ | LuaRocks ~dseams~ |
+| [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]] | The R package ~dseams~ | The R source package |
+| [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]] | The Julia packages ~Dseams~ (over ~libseams_lang~) and ~Seams~ (over ~libseams~) | The Julia General registry, through ~libseams_jll~ |
+| [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]] | The crates ~dseams-sys~ (raw FFI over =seams.h=) and ~dseams~ (safe wrapper) | crates.io |
+| [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | The Fortran modules ~seams_c~ and ~seams~ | The fpm package ~dseams~ |
+
+A change belongs in seams-core when it touches a classifier, a reader, the
+neighbour list, =seams.h=, =seams_lang.h=, the CLI, or an engine driver. A
+change that only wraps an existing C entry point for one language belongs in
+that language's repository. A new analysis lands here first, with a C entry
+point, a C test and a page under =docs/api/c.md=; the bindings then wrap it
+after they move their pin.
+
+* How a binding pins seams-core
+
+Every binding names one seams-core revision, builds ~libseams~ and
+~libseams_lang~ from it (or from a release package), and runs its own suite
+against that build. A release pins the tag; between releases the pin can be a
+commit on a release branch.
+
+| Binding | Where the pin lives | What its CI builds |
+|---------+---------------------+--------------------|
+| PydSEAMSlib | =subprojects/seams-core.wrap= (~revision~) | The wheel, with the engine as a Meson subproject |
+| yodaStruct | =subprojects/seams-core.wrap= (~revision~) | The Lua module, with the engine as a Meson subproject |
+| dseams-r | =tools/seams-core.ref= (~SEAMS_CORE_REPO~, ~SEAMS_CORE_REF~) | The bundled source package, and a linked check against seams-core built at the pin |
+| Dseams.jl | ~SEAMS_CORE_REPO~ and ~SEAMS_CORE_REF~ in =.github/workflows/CI.yml= | seams-core at the pin, then ~Pkg.test~ for ~Dseams~ and ~Seams~ |
+| dseams-rs | =seams-core.env= (~SEAMS_CORE_REPO~, ~SEAMS_CORE_REF~), read by CI and =dseams-sys/vendor.py= | seams-core at the pin, then ~cargo test~ |
+| dseams-fortran | ~SEAMS_CORE_REPOSITORY~ and ~SEAMS_CORE_REF~ in =.github/workflows/ci.yml= | seams-core at the pin, installed, then ~fpm test~ |
+
+The binding's own version is the seams-core version it binds:
+~pydseamslib==2.14.0~ calls the 2.14.0 engine. This repository's tests do
+not build any binding. The C ABI tests (~meson test seams_lang_fixtures
+seams_lang_frames~) are the contract the bindings rely on. The core docs
+run their Python snippets against the installed ~pydseamslib~ of the same
+version, which the Docs workflow installs from the matching PydSEAMSlib tag.
+
+* Release order
+
+1. seams-core: the ~vX.Y.Z~ tag, the GitHub release, conda ~libseams~ from
+   =recipe/=, and the Yggdrasil pull request for ~libseams_jll~ from
+   =packaging/yggdrasil=. [[file:release.org][Release]] has the steps.
+2. PydSEAMSlib, dseams-rs, yodaStruct, dseams-fortran and dseams-r, in any
+   order: each moves its pin to ~vX.Y.Z~, sets its version to ~X.Y.Z~, and
+   follows its own release document.
+3. Dseams.jl, after ~libseams_jll~ ~X.Y.Z~ is merged in Yggdrasil and
+   registered.
+
+The core Docs workflow installs ~pydseamslib~ from the PydSEAMSlib ~vX.Y.Z~
+tag, so the published core docs follow step 2 for Python.
+
+* Develop seams-core and a binding together
+
+Build seams-core from a checkout, then point the binding at that build
+instead of at its pin.
+
+#+begin_src bash
+git clone https://github.com/d-SEAMS/seams-core.git
+cd seams-core
+pixi run setup
+pixi run build
+#+end_src
+
+~bbdir/src~ holds ~libseams.so~, ~libyodaLib.so~ and the generated
+=seams_version.h=, ~bbdir/bindings~ holds ~libseams_lang.so~, and
+=include/= and =bindings/cxx/= hold the other headers.
+~bbdir/meson-uninstalled~ has a pkg-config file for each of ~seams~,
+~seams-core~ and ~seams-lang~ that names those directories. With
+~PKG_CONFIG_PATH~ there, pkg-config resolves the three packages to the
+build tree and the source headers:
+
+#+begin_src bash
+export PKG_CONFIG_PATH=$PWD/bbdir/meson-uninstalled
+cc consumer.c $(pkg-config --cflags --libs seams-lang) \
+  -Wl,-rpath,$PWD/bbdir/bindings -Wl,-rpath,$PWD/bbdir/src
+#+end_src
+
+The libraries find each other and the patched chemfiles in
+~bbdir/chemfiles-prefix/lib~ through their own rpath. The consumer only
+needs a runpath, or ~LD_LIBRARY_PATH~, for the directories pkg-config
+names with ~-L~. ~meson test seams_lang_pkgconfig~ builds a consumer this
+way and against an install. For each binding:
+
+- PydSEAMSlib and yodaStruct: replace =subprojects/seams-core= with a
+  symlink to the checkout (Meson uses an existing subproject directory
+  before the wrap), then rebuild.
+- dseams-r: set ~DSEAMS_ROOT~ to the checkout; ~configure~ copies the
+  engine from there instead of downloading the pin. With ~SEAMS_LIBDIR~
+  and ~SEAMS_INCLUDE~ set it links the built ~libseams_lang~ instead.
+- Dseams.jl: set ~SEAMS_LANG_LIB~ to =bbdir/bindings/libseams_lang.so=
+  and ~SEAMS_LIB~ to =bbdir/src/libseams.so=, run
+  ~julia --project=. dev/develop_jll.jl~, then ~Pkg.test~.
+- dseams-rs: set ~SEAMS_LIB_DIR~ to =bbdir/src= and run ~cargo test~.
+- dseams-fortran: set ~FPM_LDFLAGS~ to
+  ~-L$SC/src -L$SC/bindings -Wl,-rpath,$SC/src -Wl,-rpath,$SC/bindings~
+  with ~SC~ at =bbdir=, then run ~fpm test~; its ~lang_tasks~ test links
+  ~libseams_lang~. Its Meson build finds both libraries with
+  ~PKG_CONFIG_PATH=$SC/meson-uninstalled~.
+
+When the binding needs a seams-core change, land it here first, then move
+the binding's pin to the commit that carries it.

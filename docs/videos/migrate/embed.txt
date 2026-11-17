@@ -1,0 +1,3 @@
+# Odysee claim, one line when the upload exists:
+# claim-name:full-claim-id
+dseams-migrate:ca1381615800e95d41cc8a379d62abd324800e59

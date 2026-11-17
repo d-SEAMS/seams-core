@@ -1,0 +1,63 @@
+# Full runs for the paper tutorials.
+#
+# SEAMS, SEAMS_LIBDIR, PAPER_OUT and PYTHON come from the environment.
+# The defaults are relative: bbdir/seams, bbdir/src, build/paper-full, python3.
+# A rule name is the tutorial: snakemake -s docs/tutorials/Snakefile brine
+
+import os
+import shlex
+
+SEAMS = os.environ.get("SEAMS", "bbdir/seams")
+LIBDIR = os.environ.get("SEAMS_LIBDIR", "bbdir/src")
+OUT = os.environ.get("PAPER_OUT", "build/paper-full")
+PYTHON = os.environ.get("PYTHON", "python3")
+SCRIPT = os.path.join(os.path.dirname(workflow.snakefile), "paper_science.py")
+TOPICS = ["interface", "cages", "rings", "brine", "nucleation"]
+
+
+def command(topic):
+    dest = os.path.join(OUT, topic)
+    return " ".join(
+        shlex.quote(part)
+        for part in (PYTHON, SCRIPT, topic + "-full", SEAMS, LIBDIR, dest)
+    )
+
+
+rule all:
+    input:
+        expand(os.path.join(OUT, "{topic}", "report.txt"), topic=TOPICS)
+
+
+rule interface:
+    output:
+        os.path.join(OUT, "interface", "report.txt")
+    shell:
+        command("interface")
+
+
+rule cages:
+    output:
+        os.path.join(OUT, "cages", "report.txt")
+    shell:
+        command("cages")
+
+
+rule rings:
+    output:
+        os.path.join(OUT, "rings", "report.txt")
+    shell:
+        command("rings")
+
+
+rule brine:
+    output:
+        os.path.join(OUT, "brine", "report.txt")
+    shell:
+        command("brine")
+
+
+rule nucleation:
+    output:
+        os.path.join(OUT, "nucleation", "report.txt")
+    shell:
+        command("nucleation")

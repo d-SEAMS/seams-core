@@ -22,7 +22,7 @@
 namespace site {
 
 struct DensityZ {
-  std::vector<double> z;   //! Bin centres along the chosen axis
+  std::vector<double> z;   //! Bin centers along the chosen axis
   std::vector<double> rho; //! Number density in each slab
   int type{0};             //! LAMMPS type; 0 = all atoms
 };

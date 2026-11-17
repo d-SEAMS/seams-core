@@ -1,9 +1,8 @@
-"""Primitive rings on the cutoff neighbour list.
+"""Primitive rings of the hydrogen-bond list.
 
-``pydseams.band.ring_census`` counts Franzblau rings on
-``Frame.bonds_by_index``. For this oxygen-only frame that list is
-the cutoff list, not the mutual four-nearest list the CLI uses for
-CHILL+.
+``pydseams.read`` of a type-2 oxygen dump follows pydseamslib 2.11.1:
+``ring_census`` is the Franzblau census of the hydrogen bonds, not
+every oxygen pair inside the 3.5 A cutoff.
 """
 
 import pytest

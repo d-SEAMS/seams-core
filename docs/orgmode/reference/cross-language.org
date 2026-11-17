@@ -3,7 +3,9 @@
 
 The task is CHILL+ on frame 1 of =input/traj/mW_cubic.lammpstrj=, LAMMPS type 1.
 The result is 4096 cubic sites.
-=docs/tutorials/test_cross_language.py= runs the fronts.
+The CLI and Python rows run here (=docs/tutorials/test_cross_language.py=
+runs the Python leg); the R and Julia rows run in their binding
+repositories.
 
 | language | call | cubic |
 |----------+------+-------|
@@ -12,12 +14,12 @@ The result is 4096 cubic sites.
 | R | =sum(chill_plus(read_frame(path, type=1L))$name == "cubic")= | 4096 |
 | Julia | =chill_plus(read_frame(path; type=1)).counts["cubic"]= | 4096 |
 
-Python is ~pip install pydseamslib~.
+Python is ~pip install 'pydseamslib==2.14.0'~.
 The import is ~pydseams~.
 ~import pydseamslib~ is the same package.
 The package name the d-SEAMS paper should use is ~pydseamslib~.
-R is =bindings/r/dseams=.
-Julia is =bindings/julia/Dseams= and calls =libseams_lang= with =ccall=.
+R is the ~dseams~ package from [[https://github.com/d-SEAMS/dseams-r][dseams-r]].
+Julia is ~Dseams~ from [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]], which calls =libseams_lang= with =ccall=.
 
 Every front defaults to the cutoff neighbour list (~graph = "cutoff"~, pairs closer than ~cutoff~, 3.5 Å).
 ~graph = "mutual"~ is the mutual four-nearest list with candidates inside ~cutoff + 1.5~, under the same name on every front.
@@ -45,10 +47,17 @@ The default is ~2.65,3.15~ in the coordinate units of the file.
 | Lua | =dseams.cages_by_signature(frame, "512", {edge = "none"})= |
 | C | =seams_frame_signature_edge(frame, 3.5, 1, "cutoff", "512", "none", &n_cages, &n_atoms)= |
 
+The same CLI lines on bundled frames:
+
+#+begin_src bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --type 2 --graph mutual
+seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge none
+#+end_src
+
 A null C edge string keeps the default.
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.
-A nanometre file uses ~0.265,0.315~.
+A nanometer file uses ~0.265,0.315~.
 
 =tests/chill_plus_fronts.py= (Meson test ~chill_plus_fronts_agree~) runs all four fronts on that dump with both lists.
 It checks the histograms on all four and the per-atom labels on Python, R, and Julia.

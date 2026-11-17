@@ -54,4 +54,5 @@ namespace ring {
 
 } // namespace ring
 
+/** @} */
 #endif // __TOPOCONFINED_H_

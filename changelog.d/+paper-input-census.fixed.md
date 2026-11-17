@@ -1,0 +1,1 @@
+The opt-in paper runs print the molecule count, the frame count, and the file they read, next to the size the paper states. Rings reads frame 1 of the 11-frame 4096-molecule mW dump. The interface and brine runs read the shipped 864-water frames. Nucleation reads the figshare trajectory, 148 frames of 4096 molecules.

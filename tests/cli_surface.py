@@ -78,6 +78,38 @@ def _write_three_types(path):
         )
 
 
+def _plain(text):
+    import re
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
+
+
+def _shell(text):
+    import re
+    match = re.search(r"shell\s+([0-9.]+)", _plain(text))
+    return float(match.group(1)) if match else None
+
+
+def _write_two_water(path):
+    rows = [
+        "ITEM: TIMESTEP",
+        "0",
+        "ITEM: NUMBER OF ATOMS",
+        "5",
+        "ITEM: BOX BOUNDS pp pp pp",
+        "0 20",
+        "0 20",
+        "0 20",
+        "ITEM: ATOMS id mol type x y z",
+        "1 1 9 10 10 10",
+        "2 2 1 12 10 10",
+        "3 3 1 10 12 10",
+        "4 4 2 8 10 10",
+        "5 5 2 10 8 10",
+    ]
+    with open(path, "w", encoding="ascii") as handle:
+        handle.write("\n".join(rows) + "\n")
+
+
 def _write_ions(path):
     with open(path, "w", encoding="ascii") as handle:
         handle.write(
@@ -105,6 +137,22 @@ def main():
         return 1
     if "deprecated" in paired.stderr:
         sys.stderr.write("pair-types warning\n" + paired.stderr)
+        return 1
+    help_run = run(seams, ["--help"])
+    help_text = _plain(help_run.stdout)
+    if (help_run.returncode != 0 or "--color-types" not in help_text
+            or "--colour-types" in help_text):
+        sys.stderr.write("colour-types help\n" + help_text + help_run.stderr)
+        return 1
+    colored = run(seams, ["fingerprint", ice, "--type", "1", "--hops", "1", "--color-types"])
+    british = run(seams, ["fingerprint", ice, "--type", "1", "--hops", "1", "--colour-types"])
+    plain = run(seams, ["fingerprint", ice, "--type", "1", "--hops", "1"])
+    if (colored.returncode != 0 or british.returncode != 0 or plain.returncode != 0
+            or colored.stdout != british.stdout or colored.stderr != british.stderr
+            or colored.stdout == plain.stdout):
+        sys.stderr.write(
+            "colour-types alias\n" + colored.stdout + british.stdout + plain.stdout
+            + colored.stderr + british.stderr + plain.stderr)
         return 1
     if os.environ.get("SEAMS_HAS_CHEMFILES", "0") != "1":
         for args in (
@@ -166,6 +214,9 @@ def main():
         ["chill-plus", tip, "--graph", "mutual", "--type", "2"],
         ["chill-plus", tip, "--layers", "--type", "2"],
         ["cages", tip, "--type", "2"],
+        ["rings", tip, "--type", "2"],
+        ["prisms", ice, "--type", "1"],
+        ["cluster", tip, "--type", "2"],
         ["cages", tip, "--graph", "cutoff", "--cutoff", "3.5", "--type", "2"],
         ["cages", ice, "--graph", "mutual", "--type", "1", "--signature", "512"],
         ["fingerprint", tip, "--type", "2", "--hops", "1"],
@@ -220,7 +271,7 @@ def main():
         ["cages", "input/traj/nucleation_f1.lammpstrj", "--type", "1", "--per-atom", cages_atom],
         ["cages", ice, "--type", "1", "--per-atom", cages_atom],
         ["cages", ice, "--type", "1", "--graph", "cutoff", "--water-types", "1"],
-        ["fingerprint", ice, "--type", "1", "--hops", "1", "--colour-types"],
+        ["fingerprint", ice, "--type", "1", "--hops", "1", "--color-types"],
         ["fingerprint", ice, "--type", "1", "--hops", "1", "--per-atom", classes],
         ["fingerprint", ice, "--type", "1", "--graph", "mutual", "--hops", "1"],
         ["ions", tip, "--ion-types", "1", "--ion-cutoff", "3.0",
@@ -516,7 +567,6 @@ def main():
         ["rdf", "missing-volume.lammpstrj", "--type", "0", "--bins", "2", "--cutoff", "1"],
         ["density-z", pdb, "--bins", "0"],
         ["density-z", pdb, "--type", "0", "--bins", "0", "--axis", "x"],
-        ["--water-types", "9", "chill", tip, "--type", "2"],
         ["--water-types", "1,2", "f4", tip, "--type", "0", "--htype", "1"],
         ["--water-types", "1", "f4", ice, "--type", "0", "--htype", "1"],
         ["cn", ions, "--ions", "--site", "9=cationHead", "--cutoff", "6"],
@@ -529,7 +579,6 @@ def main():
         ["cages", ice, "--type", "1", "--signature", "512", "--graph", "mutual"],
         ["--guest-types", "1,,2", "cages", ice, "--type", "1", "--signature", "512"],
         ["--ion-types", "1,,2", "ions", tip, "--site", "1=cationHead,2=anion"],
-        ["--water-types", "9", "cages", ice, "--type", "1"],
         ["cages", ice, "--type", "1", "--graph", "knn", "--signature", "512"],
         ["fingerprint", ice, "--type", "1", "--graph", "knn", "--hops", "1"],
         ["fingerprint", ice, "--type", "1", "--graph", "knn-union", "--hops", "1"],
@@ -574,6 +623,10 @@ def main():
         ["chill", tip, "--type", "2", "--graph", "seedex"],
         ["chill", tip, "--type", "2", "--graph", "seede"],
         ["chill", ice, "--type", "1", "--graph", "seededX"],
+        ["--water-types", "9", "chill", tip, "--type", "2"],
+        ["--water-types", "9", "cages", ice, "--type", "1"],
+        ["--mol", "nope", "chill", tip, "--type", "2"],
+        ["--mol", "0-1", "chill", tip],
     ):
         result = run(seams, args)
         if result.returncode != 2:
@@ -686,6 +739,17 @@ def main():
                              "--ion-types", "1", "--site", "1=cationHead,2=anion"])
     if typed_ions.returncode != 0 or "ions " not in typed_ions.stdout:
         sys.stderr.write("ions with water types\n" + typed_ions.stdout + typed_ions.stderr)
+        return 1
+    two_water = os.path.join(work, "two-water.lammpstrj")
+    _write_two_water(two_water)
+    both_types = run(seams, ["--water-types", "1,2", "ions", two_water, "--ion-types", "9",
+                             "--cutoff", "3.5"])
+    one_type = run(seams, ["--water-types", "1", "ions", two_water, "--ion-types", "9",
+                           "--cutoff", "3.5"])
+    if (both_types.returncode != 0 or one_type.returncode != 0 or
+            _shell(both_types.stdout) != 4.0 or _shell(one_type.stdout) != 2.0):
+        sys.stderr.write("two water types\n" + both_types.stdout + both_types.stderr +
+                         one_type.stdout + one_type.stderr)
         return 1
     ranged = run(seams, ["--frame", "1", "--last", "2", "read", cubic])
     if ranged.returncode != 0:

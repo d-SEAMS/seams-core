@@ -95,7 +95,7 @@ std::vector<double> topoparam::calcCoverageArea(
   // Loop through all the rings
   for (int iring = 0; iring < rings.size(); iring++) {
     // Get the coverage area for the current ring
-    singleAreas = topoparam::projAreaSingleRing(yCloud, rings[iring]);
+    singleAreas = topoparam::projAreaSingleRing(yCloud, rings[static_cast<std::size_t>(iring)]);
     // Add these to the total coverage area
     areaXY += singleAreas[0];
     areaXZ += singleAreas[1];
@@ -139,7 +139,7 @@ std::vector<double> topoparam::projAreaSingleRing(
   ys[0] = p0.y;
   zs[0] = p0.z;
   for (int k = 1; k < ringSize; k++) {
-    const auto dr = gen::relDist(yCloud, origin, ring[k]);
+    const auto dr = gen::relDist(yCloud, origin, ring[static_cast<std::size_t>(k)]);
     xs[static_cast<std::size_t>(k)] = p0.x - dr[0];
     ys[static_cast<std::size_t>(k)] = p0.y - dr[1];
     zs[static_cast<std::size_t>(k)] = p0.z - dr[2];

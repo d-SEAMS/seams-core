@@ -1,0 +1,34 @@
+#!/bin/sh
+# cargo on PATH in front of the real one during scripts/sanitize_suite.sh.
+# LD_PRELOAD is set so Python can host libseams. The same variable covers
+# rustc and the conda cc1 that build scripts spawn, and those compilers
+# then run under LeakSanitizer. A linkcell or minimage `cargo test` spends
+# the whole meson budget inside that compile. Drop the preload for the
+# build. A test that loads libseams (SEAMS_LIB_DIR or SEAMS_LIB) gets it
+# back through the runner, which wraps only the test binary.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+root=$(CDPATH= cd -- "$here/../.." && pwd)
+unset LD_PRELOAD
+if [ -n "${SEAMS_LIB_DIR:-}${SEAMS_LIB:-}" ]; then
+  export CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER="$root/scripts/asan_test_runner.sh"
+fi
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/cargo" ]; then
+    found=$dir/cargo
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "cargo is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

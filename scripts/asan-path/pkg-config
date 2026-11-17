@@ -1,0 +1,25 @@
+#!/bin/sh
+# pkg-config is not a seams binary. Preloaded, conda's wrapper script and
+# pkg-config.bin leak at exit and LeakSanitizer fails the lookup.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+unset LD_PRELOAD
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/pkg-config" ]; then
+    found=$dir/pkg-config
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "pkg-config is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

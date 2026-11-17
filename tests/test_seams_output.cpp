@@ -538,8 +538,8 @@ TEST_CASE("writeHisto writes cij q3 q6 files", "[seams_output]") {
   std::vector<double> avgQ6 = {0.1, 0.2, 0.3, 0.4};
 
   // Populate c_ij for each atom (needed by writeHisto)
-  for (int i = 0; i < cloud.nop; i++) {
-    int nNeigh = nList[i].size() - 1;
+  for (std::size_t i = 0; i < static_cast<std::size_t>(cloud.nop); i++) {
+    int nNeigh = static_cast<int>(nList[i].size()) - 1;
     for (int j = 0; j < nNeigh; j++) {
       molSys::Result res;
       res.c_value = 0.5;
@@ -636,9 +636,9 @@ TEST_CASE("writeBasalRingsPrism writes prism basal ring data",
   // Use the first 4 atom IDs as basal1, next 4 as basal2
   std::vector<int> basal1, basal2;
   for (int i = 0; i < 4 && i < yCloud.nop; i++)
-    basal1.push_back(yCloud.pts[i].atomID);
+    basal1.push_back(yCloud.pts[static_cast<std::size_t>(i)].atomID);
   for (int i = 4; i < 8 && i < yCloud.nop; i++)
-    basal2.push_back(yCloud.pts[i].atomID);
+    basal2.push_back(yCloud.pts[static_cast<std::size_t>(i)].atomID);
 
   int ret =
       sout::writeBasalRingsPrism(basal1, basal2, 1, nList, yCloud, false);
@@ -679,7 +679,8 @@ TEST_CASE("writeLAMMPSdataTopoBulk with mixed cage types", "[seams_output]") {
   ring::findDDC(rings, ringType, {}, cageList);
 
   // Get atom types from ring types
-  std::vector<cage::iceType> atomTypes(yCloud.nop, cage::iceType::dummy);
+  std::vector<cage::iceType> atomTypes(static_cast<std::size_t>(yCloud.nop),
+                                       cage::iceType::dummy);
   ring::getAtomTypesTopoBulk(rings, ringType, atomTypes);
 
   std::string tmpPath = fs::temp_directory_path().append("dseams_test_datatopobulk_mixed/").string();
@@ -751,10 +752,10 @@ TEST_CASE("writeBasalRingsHex writes HC basal ring data", "[seams_output]") {
   // nList is by atom ID (1-based), nList[atomID] = {atomID, neighbors...}
   std::vector<std::vector<int>> nList(13); // 0-12
   for (int i = 1; i <= 6; i++) {
-    nList[i] = {i, i + 6}; // atom i is neighbor of atom i+6
+    nList[static_cast<std::size_t>(i)] = {i, i + 6}; // atom i is neighbor of atom i+6
   }
   for (int i = 7; i <= 12; i++) {
-    nList[i] = {i, i - 6}; // atom i is neighbor of atom i-6
+    nList[static_cast<std::size_t>(i)] = {i, i - 6}; // atom i is neighbor of atom i-6
   }
 
   int ret = sout::writeBasalRingsHex(currentCage, 1, nList, rings);

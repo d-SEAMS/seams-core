@@ -57,7 +57,7 @@ TEST_CASE("singleClusterLinkedList groups all connected atoms", "[cluster]") {
   int current = start;
   int count = 0;
   do {
-    current = linkedList[current];
+    current = linkedList[static_cast<std::size_t>(current)];
     count++;
   } while (current != start && count <= 4);
 
@@ -114,7 +114,7 @@ TEST_CASE("recenterClusterCloud shifts centroid toward box center",
 
   // After recentering, the centroid should be at the box center (50,50,50)
   double cx = 0.0, cy = 0.0, cz = 0.0;
-  for (int i = 0; i < cloud.nop; i++) {
+  for (std::size_t i = 0; i < static_cast<std::size_t>(cloud.nop); i++) {
     cx += cloud.pts[i].x;
     cy += cloud.pts[i].y;
     cz += cloud.pts[i].z;
@@ -162,7 +162,7 @@ TEST_CASE("recenterClusterCloud unwraps a mixed image on dump H",
   REQUIRE_THAT(dx, Catch::Matchers::WithinAbs(4.5, 1e-10));
   REQUIRE_THAT(dy, Catch::Matchers::WithinAbs(1.160254037844386, 1e-10));
   double cx = 0.0, cy = 0.0, cz = 0.0;
-  for (int i = 0; i < cloud.nop; i++) {
+  for (std::size_t i = 0; i < static_cast<std::size_t>(cloud.nop); i++) {
     cx += cloud.pts[i].x;
     cy += cloud.pts[i].y;
     cz += cloud.pts[i].z;
@@ -231,7 +231,7 @@ TEST_CASE("largestIceCluster identifies clusters and writes stats",
   iceCloud.box = cloud.box;
   iceCloud.boxLow = cloud.boxLow;
   iceCloud.currentFrame = cloud.currentFrame;
-  for (int i = 0; i < cloud.nop; i++) {
+  for (std::size_t i = 0; i < static_cast<std::size_t>(cloud.nop); i++) {
     if (isIce[i]) {
       iceCloud.pts.push_back(cloud.pts[i]);
       iceCloud.idIndexMap[cloud.pts[i].atomID] =

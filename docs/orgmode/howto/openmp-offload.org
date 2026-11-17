@@ -54,8 +54,6 @@ export CXXFLAGS="-std=c++20 -idirafter $PWD/elja-sysroot/usr/include"
 meson setup build-offload --buildtype=debugoptimized \
   -Dcpp_std=none \
   -Dwith_openmp_offload=enabled \
-  -Dwith_python=false \
-  -Dwith_lua=disabled \
   -Dwith_mpi=disabled \
   -Dwith_gpulite=disabled \
   -Dcatch2:tests=false

@@ -13,7 +13,7 @@ extern "C" {
  * seams_chill_plus bonds every pair closer than 3.5 A (the cutoff list).
  * seams_chill_plus_graph takes the cutoff and graph: "cutoff" (also NULL
  * or "") or "mutual", the mutual four nearest inside cutoff + 1.5. */
-int seams_chill_plus(const double *xyz, int n, const double *box, int *labels);
+int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels);
 int seams_chill_plus_graph(const double *xyz, int n, const double *box,
                            double cutoff, const char *graph, int *labels);
 /* rule is "chill+" (NULL or "") or "ovito-chill+". A YAML or Lua
@@ -60,6 +60,76 @@ int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
 /* Same labels with an explicit scale-free residual ceiling. */
 int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
                                 double shell_rmsd, int *labels);
+/* thermal_q is the tetrahedral-order prefilter and bond_ratio is the
+ * longest/shortest of the four nearest bonds. The shipped gates are
+ * 0.85 and 1.20. The previous gates were 0.94 and 1.15 with shell_rmsd 0.12. */
+int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattice9,
+                                  double shell_rmsd, double thermal_q, double bond_ratio,
+                                  int *labels);
+
+/* Mixed frames. types and mols may be NULL (every atom is then one
+ * species, mol id = index + 1). oxygen_type > 0 keeps that LAMMPS type.
+ * mol_mode 0 ignores molecules, 1 keeps the water oxygen of each
+ * multi-atom molecule, 2 keeps mol_ids[0..n_mol_ids). A mixed frame
+ * with mol_mode 0 and oxygen_type 0 is an error. Labels of atoms that
+ * are not water oxygens are unclassified (6). ion_ice, ion_liquid and
+ * ion_front may be NULL. ion_front is the nearest ice oxygen, or -1.
+ * seams_c_error() is the message after a non-zero return.
+ * On a single-species cloud the labels match seams_chill_plus_graph_lammps. */
+int seams_chill_plus_species(const double *xyz, int n, const double *box9,
+                             const int *types, const int *mols,
+                             int oxygen_type, int mol_mode, const int *mol_ids,
+                             int n_mol_ids, double cutoff, const char *graph,
+                             int *labels, int *ion_ice, int *ion_liquid,
+                             double *ion_front);
+
+/* degree[i] is the oxygen-oxygen neighbour count inside cutoff, or -1
+ * when atom i is not a selected water oxygen. */
+int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
+                               const int *types, const int *mols,
+                               int oxygen_type, int mol_mode,
+                               const int *mol_ids, int n_mol_ids, double cutoff,
+                               int *degree);
+
+const char *seams_c_error(void);
+
+/* Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the
+ * solid-harmonic kernel. xyz is n*3. box is ox,oy,oz,lx,ly,lz.
+ * q4 and q6 are n doubles. q4bar and q6bar may be null; a null pointer
+ * skips that Lechner-Dellago average. Returns 0 on success. */
+int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
+                double *q4, double *q6, double *q4bar, double *q6bar);
+/* box9 is xlo,ylo,zlo,lx,ly,lz,xy,xz,yz, the same cell as
+ * seams_chill_plus_graph_lammps. */
+int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
+                       double cutoff, double *q4, double *q6, double *q4bar,
+                       double *q6bar);
+
+/* box9 is xlo, ylo, zlo, lx, ly, lz, xy, xz, yz, the same edges as
+ * seams_chill_plus_graph_lammps. The cutoff list is orthoFullCsr: cloud
+ * indices, no self entry, both directions, squared distance strictly
+ * below cutoff squared.
+ * offsets has n + 1 entries. When cols is null, *n_cols receives the
+ * pair count and the call returns 0. When cols_cap is short, *n_cols is
+ * that count and the call returns 2. */
+int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff,
+                     int *offsets, int *cols, int cols_cap, int *n_cols);
+/* Local Steinhardt q_l on that cutoff list. order_l is 3, 4, 6, 8, or 12. */
+int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
+                    int order_l, double *ql);
+/* Wall seconds of the last successful seams_cutoff_csr or seams_ql_cutoff
+ * call on the calling thread. seconds[0] builds the point cloud from xyz,
+ * [1] the cutoff list, [2] q_l, [3] copies into the caller's arrays.
+ * seams_cutoff_csr has no q_l stage. For order 8 or 12, seams_ql_cutoff
+ * counts the list inside [2] and leaves [1] at 0. */
+void seams_c_last_stages(double seconds[4]);
+/* Diamond common-neighbour labels. 1 cubic, 0 hexagonal, -1 otherwise. */
+int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff,
+                      int *labels);
+/* counts[k] is the number of primitive rings of size k.
+ * counts_len must be at least max_depth + 1. max_depth is at least 3. */
+int seams_primitive_rings(const double *xyz, int n, const double *box9,
+                          double cutoff, int max_depth, int *counts, int counts_len);
 
 #ifdef __cplusplus
 }

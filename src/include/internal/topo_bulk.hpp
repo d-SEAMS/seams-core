@@ -85,14 +85,21 @@ struct RingSearchIndex {
   //! is the ascending ring list of atom a. Empty when the index was not built.
   std::vector<int> ringOff;
   std::vector<int> ringCol;
+  //! Atoms the packed rows cover.
+  [[nodiscard]] int atomCount() const {
+    return ringOff.empty() ? 0 : static_cast<int>(ringOff.size()) - 1;
+  }
   std::vector<int> atomRank;
   //! Integer minimum-image winding of each ring. Empty if no box was supplied.
   std::vector<std::array<int, 3>> ringShift;
 };
 
-//! Builds the inverted atom-to-rings index used by the cage searches
+//! Builds the inverted atom-to-rings index used by the cage searches. With
+//! @a withRows false only the packed rows are filled, and
+//! ringsContainingAtom stays empty.
 [[nodiscard]] RingSearchIndex
-buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms);
+buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms,
+                     bool withRows = true);
 
 //! As buildRingSearchIndex, ranking the atoms by position (ring::positionRank)
 [[nodiscard]] RingSearchIndex buildRingSearchIndex(
@@ -111,6 +118,11 @@ positionRank(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 //! Without a box every ring is kept
 [[nodiscard]] std::vector<std::vector<int>> contractibleRings(
     const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! Same rings, compacted in place, so a kept ring is moved and not copied.
+[[nodiscard]] std::vector<std::vector<int>> contractibleRings(
+    std::vector<std::vector<int>> &&rings,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Faces for a cage search: contractibleRings, after refusing a cutoff that
@@ -154,14 +166,17 @@ struct PackingCertificate {
 
 //! Peripheral rings of one equatorial candidate. n == 0 when the ring is
 //! not a candidate. The first six sit inline. A defect that names more
-//! conflicts stores the rest in past, so none are dropped.
+//! conflicts stores the rest beside the row, so a crystal of candidates
+//! stays a plain block of integers.
+int equatorChoiceOverflow(const struct EquatorChoice *self, int at);
+void equatorChoiceOverflowPut(struct EquatorChoice *self, int at, int value);
+
 struct EquatorChoice {
   int ring[6]{};
   int n = 0;
-  std::vector<int> past;
 
   [[nodiscard]] int idAt(int k) const {
-    return k < 6 ? ring[k] : past[static_cast<std::size_t>(k - 6)];
+    return k < 6 ? ring[k] : equatorChoiceOverflow(this, k - 6);
   }
 
   void put(int k, int value) {
@@ -169,13 +184,11 @@ struct EquatorChoice {
       ring[k] = value;
       return;
     }
-    const std::size_t at = static_cast<std::size_t>(k - 6);
-    if (past.size() <= at) {
-      past.resize(at + 1);
-    }
-    past[at] = value;
+    equatorChoiceOverflowPut(this, k - 6, value);
   }
 };
+
+void releaseEquatorOverflow();
 
 //! Maximum set of mutually non-conflicting equatorial rings. @a periph[i].n
 //! is 0 when ring i is not a candidate. The returned ids are a maximum
@@ -244,7 +257,27 @@ bool equatorialConditions(const std::vector<std::vector<int>> &rings,
 class NeighBond {
 public:
   void build(const std::vector<std::vector<int>> &nList);
-  [[nodiscard]] bool operator()(int i, int j) const;
+
+  // Row i, sorted and unique. Empty when i is outside the cloud.
+  void row(int i, const int *&begin, const int *&end) const {
+    if (static_cast<unsigned>(i) >= static_cast<unsigned>(n_) || off_.empty()) {
+      begin = nullptr;
+      end = nullptr;
+      return;
+    }
+    begin = cols_.data() + off_[static_cast<std::size_t>(i)];
+    end = cols_.data() + off_[static_cast<std::size_t>(i + 1)];
+  }
+
+  [[nodiscard]] bool operator()(int i, int j) const {
+    const int *begin = nullptr;
+    const int *end = nullptr;
+    row(i, begin, end);
+    if (begin == nullptr) {
+      return false;
+    }
+    return std::binary_search(begin, end, j);
+  }
 
 private:
   int n_ = 0;

@@ -1,0 +1,58 @@
+# Hosts that are not built with the sanitizer. Each pattern is a frame
+# from a leak stack that does not enter seams or linkcell.
+#
+# CPython 3.12, Objects/obmalloc.c _PyObject_Malloc / dictobject.c:
+#   #1 _PyMem_RawMalloc Objects/obmalloc.c
+#   #5 new_keys_object Objects/dictobject.c
+# list growth in the same allocator, rings_ih_external, no seams frame:
+#   #1 _PyMem_RawRealloc Objects/obmalloc.c
+#   #6 list_resize Objects/listobject.c
+#   #1 PyThread_allocate_lock Python/thread_pthread.h
+leak:_PyObject_Malloc
+leak:_PyMem_RawMalloc
+leak:_PyObject_Realloc
+leak:PyMem_Realloc
+leak:PyThread_allocate_lock
+# insitu_observe, after the frame is freed. Modules/gcmodule.c, no seams frame:
+#   #1 _PyObject_GC_Resize
+leak:_PyObject_GC_Resize
+leak:PyUnicode_New
+# NumPy, numpy/_core/_multiarray_umath:
+#   #1 PyUFunc_FromFuncAndDataAndSignatureAndIdentity
+#   #1 PyDataMem_UserNEW
+#   #1 NpyString_new_allocator  (rings_ih_external, no seams frame)
+leak:PyUFunc_FromFuncAndData
+leak:PyDataMem_UserNEW
+leak:NpyString_new_allocator
+# NumPy array construction, docs and python fronts, no seams frame:
+#   #1 PyArray_NewFromDescr_int _multiarray_umath
+#   #1 PyArray_IntpConverter _multiarray_umath
+leak:PyArray_NewFromDescr
+leak:PyArray_IntpConverter
+# PySide6 / shiboken, imported by OVITO:
+#   #1 Shiboken::Conversions::createConverter libshiboken6
+#   #1 PySide::Signal::registerSignals libpyside6
+#   #1 qRegisterResourceData libQt6Core.so.6
+leak:libshiboken6
+leak:libpyside6
+leak:libQt6Core
+# OVITO's own pybind module:
+#   #1 pybind11::cpp_function::initialize_generic ovito_bindings.so
+leak:ovito_bindings.so
+# OpenMM registers serializers from a static initializer.
+#   #1 registerSerializationProxies libOpenMM.so
+#   #1 OpenMM::registerPythonForceProxy _openmm*.so
+#   #1 registerAmoebaSerializationProxies libOpenMMAmoeba.so
+#   #1 registerDrudeSerializationProxies libOpenMMDrude.so
+#   #1 SWIG_Python_addvarlink _openmm*.so
+# None of those frames enter seams.
+leak:libOpenMM.so
+leak:libOpenMMAmoeba.so
+leak:libOpenMMDrude.so
+leak:registerPythonForceProxy
+leak:SWIG_Python_addvarlink
+# pyvista_validation's C extension, imported by Frame.to_solvis:
+#   #1 fast_wrap src/fast/module.c
+#   #1 duplicate src/fast/module.c
+# The module path covers both, and neither enters seams.
+leak:pyvista_validation

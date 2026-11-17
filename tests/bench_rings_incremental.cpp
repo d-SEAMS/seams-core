@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 
   for (int frame = 0; frame < frames; frame++) {
     for (int k = 0; k < sites; k++) {
-      auto &p = cloud.pts[pick()];
+      auto &p = cloud.pts[static_cast<std::size_t>(pick())];
       p.x += 0.8 * ((frame + k) % 2 ? 1.0 : -1.0);
       p.y += 0.4;
     }

@@ -12,12 +12,16 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
+
 #include <algorithm>
+#include <atomic>
 #include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -25,6 +29,7 @@
 #include <queue>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <utility>
 
 #include <neighbours.hpp>
@@ -50,6 +55,10 @@
 #endif
 
 namespace {
+
+// Set while a caller wants the one-thread cutoff list and the OpenMP
+// team left untouched for a later parallel region.
+thread_local bool gSerialCutoff = false;
 
 /**
  * @details Reports whether a point cloud carries the three box lengths that
@@ -89,10 +98,10 @@ bool hasPeriodicBox(
  */
 std::vector<int> indexToIDTable(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  std::vector<int> indexToID(yCloud.nop, -1);
+  std::vector<int> indexToID(static_cast<std::size_t>(yCloud.nop), -1);
   for (const auto &[atomID, index] : yCloud.idIndexMap) {
     if (index >= 0 && index < yCloud.nop) {
-      indexToID[index] = atomID;
+      indexToID[static_cast<std::size_t>(index)] = atomID;
     }
   }
   return indexToID;
@@ -202,10 +211,14 @@ void binCutoffRows(std::size_t count, const Ends &ends,
                                subset[static_cast<std::size_t>(j)]};
   };
   int threads = 1;
-  // nvc++ -mp=gpu SIGSEGVs host parallel regions in libnvomp
+  // The parallel sort forks a team that has just been idle through the
+  // linkcell search. Waking it is several milliseconds on some samples
+  // and tens on others, which is slower than placing the rows on the
+  // calling thread. Keep the parallel path for a list that is large
+  // enough for that wake to be the smaller term.
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  if (nop >= kParallelRowsMinAtoms && !omp_in_parallel() &&
-      omp_get_max_threads() > 1) {
+  if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && count >= (1u << 20) &&
+      !omp_in_parallel() && omp_get_max_threads() > 1) {
     threads = omp_get_max_threads();
   }
 #endif
@@ -257,8 +270,13 @@ void binCutoffRows(std::size_t count, const Ends &ends,
  */
 bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 const std::vector<int> &subset, double rcutoff,
-                CutoffRows &out) {
-  seams::adoptThreads();
+                CutoffRows &out, bool handoff = true, double cellHint = 0.0) {
+  // The handoff pauses the OpenMP team so another pool can take the
+  // cores. The signature search keeps that team and only sets the
+  // linkcell width.
+  if (handoff) {
+    seams::adoptThreads();
+  }
   const size_t nSubset = subset.size();
   if (nSubset == 0) {
     out.first.assign(static_cast<std::size_t>(yCloud.nop) + 1, 0);
@@ -268,7 +286,7 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   std::vector<std::array<double, 3>> positions(nSubset);
   for (size_t i = 0; i < nSubset; i++) {
     const int idx = subset[i];
-    positions[i] = {yCloud.pts[idx].x, yCloud.pts[idx].y, yCloud.pts[idx].z};
+    positions[i] = {yCloud.pts[static_cast<std::size_t>(idx)].x, yCloud.pts[static_cast<std::size_t>(idx)].y, yCloud.pts[static_cast<std::size_t>(idx)].z};
   }
 
   double box[3][3];
@@ -287,10 +305,13 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         {box[0][0], box[0][1], box[0][2]}, {box[1][0], box[1][1], box[1][2]},
         {box[2][0], box[2][1], box[2][2]},
         {origin[0], origin[1], origin[2]});
-    const double hint = std::max(
-        rcutoff, std::cbrt(kAtomsPerLinkcellCell *
-                           nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
-                           static_cast<double>(nSubset)));
+    const double hinted = cellHint > 0.0
+                              ? cellHint
+                              : std::max(rcutoff,
+                                         std::cbrt(kAtomsPerLinkcellCell *
+                                                   nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
+                                                   static_cast<double>(nSubset)));
+    const double hint = hinted;
     // linkcell::pairs_within zeroes its vector on this thread before the
     // fill writes it; the C call fills a buffer nothing has touched
     const lc_cell raw = cell.raw();
@@ -427,13 +448,13 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  */
 std::vector<std::vector<int>> seedWithSelfIDs(const std::vector<int> &indexToID,
                                               int nop) {
-  std::vector<std::vector<int>> nList(nop);
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(nop));
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (indexToID[iatom] == -1) {
+    if (indexToID[static_cast<std::size_t>(iatom)] == -1) {
       std::cerr << "Something is wrong with your idIndexMap!\n";
       continue;
     }
-    nList[iatom].push_back(indexToID[iatom]);
+    nList[static_cast<std::size_t>(iatom)].push_back(indexToID[static_cast<std::size_t>(iatom)]);
   }
   return nList;
 }
@@ -441,7 +462,7 @@ std::vector<std::vector<int>> seedWithSelfIDs(const std::vector<int> &indexToID,
 //! True when index has a real atom ID in the reverse table.
 bool hasAtomID(const std::vector<int> &indexToID, int index) {
   return index >= 0 && static_cast<size_t>(index) < indexToID.size() &&
-         indexToID[index] != -1;
+         indexToID[static_cast<std::size_t>(index)] != -1;
 }
 
 //! Appends jatom's ID to iatom's row only when both particles have IDs.
@@ -453,7 +474,7 @@ void appendNeighbourID(std::vector<std::vector<int>> &nList,
   if (!hasAtomID(indexToID, iatom) || !hasAtomID(indexToID, jatom)) {
     return;
   }
-  nList[iatom].push_back(indexToID[jatom]);
+  nList[static_cast<std::size_t>(iatom)].push_back(indexToID[static_cast<std::size_t>(jatom)]);
 }
 
 #ifdef SEAMS_HAS_CUTOFF_LIST
@@ -463,25 +484,25 @@ std::vector<std::vector<int>> rowsByID(const CutoffRows &rows,
                                        const std::vector<int> &indexToID,
                                        int nop) {
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (indexToID[iatom] == -1) {
+    if (indexToID[static_cast<std::size_t>(iatom)] == -1) {
       std::cerr << "Something is wrong with your idIndexMap!\n";
     }
   }
   std::vector<std::vector<int>> nList(static_cast<std::size_t>(nop));
   // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel() && omp_get_max_threads() > 1)
+#pragma omp parallel for schedule(static) if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && !omp_in_parallel() && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (indexToID[iatom] == -1) {
+    if (indexToID[static_cast<std::size_t>(iatom)] == -1) {
       continue;
     }
     auto &row = nList[static_cast<std::size_t>(iatom)];
-    row.reserve(1 + rows.first[iatom + 1] - rows.first[iatom]);
-    row.push_back(indexToID[iatom]);
-    for (std::size_t k = rows.first[iatom]; k < rows.first[iatom + 1]; k++) {
+    row.reserve(1 + rows.first[static_cast<std::size_t>(iatom + 1)] - rows.first[static_cast<std::size_t>(iatom)]);
+    row.push_back(indexToID[static_cast<std::size_t>(iatom)]);
+    for (std::size_t k = rows.first[static_cast<std::size_t>(iatom)]; k < rows.first[static_cast<std::size_t>(iatom + 1)]; k++) {
       if (hasAtomID(indexToID, rows.partner[k])) {
-        row.push_back(indexToID[rows.partner[k]]);
+        row.push_back(indexToID[static_cast<std::size_t>(rows.partner[k])]);
       }
     }
   }
@@ -590,6 +611,7 @@ bool nneigh::cellListRowsThreaded(
       return false;
     }
   }
+  seams::coarsenUntilFits(ncell[0], ncell[1], ncell[2], 3);
   // fractional coordinates of the subset, wrapped into [0, 1)
   std::vector<int> cellOf(n);
   const auto wrap = [](double f) {
@@ -611,7 +633,10 @@ bool nneigh::cellListRowsThreaded(
     }
     cellOf[k] = (c[0] * ncell[1] + c[1]) * ncell[2] + c[2];
   }
-  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  int nCells = 0;
+  if (!seams::gridFits(ncell[0], ncell[1], ncell[2], nCells)) {
+    return false;
+  }
   std::vector<int> cellStart(static_cast<std::size_t>(nCells) + 1, 0);
   for (std::size_t k = 0; k < n; k++) {
     ++cellStart[static_cast<std::size_t>(cellOf[k]) + 1];
@@ -707,9 +732,145 @@ bool nneigh::cellListRowsThreaded(
   return true;
 }
 
+namespace {
+
+struct alignas(64) PairBag {
+  std::vector<std::pair<int, int>> pairs;
+};
+
+// Pairs inside one cutoff bin of the unwrapped window. Coordinates are
+// stored in cell order so each thread walks a contiguous slab. The
+// periodic axes are compile-time flags: a runtime branch in the inner
+// loop kept the hybrid teams off the pure-MPI pace.
+template <bool PX, bool PY, bool PZ>
+void searchSlots(const double *cx, const double *cy, const double *cz, const int *slotAtom,
+                 const int *cellStart, const int *cellOf, int slot0, int slot1, int nc0, int nc1,
+                 int nc2, double cut2, double ex, double ey, double ez,
+                 std::vector<std::pair<int, int>> &mine) {
+  mine.clear();
+  for (int slot = slot0; slot < slot1; ++slot) {
+      const int i = slotAtom[slot];
+      const double ixv = cx[slot];
+      const double iyv = cy[slot];
+      const double izv = cz[slot];
+      const int home = cellOf[i];
+      const int hx = home % nc0;
+      const int hy = (home / nc0) % nc1;
+      const int hz = home / (nc0 * nc1);
+      // A non-periodic window has no image of a pair in another cell, so
+      // the forward half of the 27-cell stencil lists each pair once.
+      const int dz0 = (!PX && !PY && !PZ) ? 0 : -1;
+      for (int dz = dz0; dz <= 1; ++dz) {
+        int jz = hz + dz;
+        if constexpr (PZ) {
+          if (jz < 0) {
+            jz += nc2;
+          } else if (jz >= nc2) {
+            jz -= nc2;
+          }
+        } else if (jz < 0 || jz >= nc2) {
+          continue;
+        }
+        const int dy0 = (!PX && !PY && !PZ && dz == 0) ? 0 : -1;
+        for (int dy = dy0; dy <= 1; ++dy) {
+          int jy = hy + dy;
+          if constexpr (PY) {
+            if (jy < 0) {
+              jy += nc1;
+            } else if (jy >= nc1) {
+              jy -= nc1;
+            }
+          } else if (jy < 0 || jy >= nc1) {
+            continue;
+          }
+          const int dx0 = (!PX && !PY && !PZ && dz == 0 && dy == 0) ? 0 : -1;
+          for (int dx = dx0; dx <= 1; ++dx) {
+            int jx = hx + dx;
+            if constexpr (PX) {
+              if (jx < 0) {
+                jx += nc0;
+              } else if (jx >= nc0) {
+                jx -= nc0;
+              }
+            } else if (jx < 0 || jx >= nc0) {
+              continue;
+            }
+            const int c = (jz * nc1 + jy) * nc0 + jx;
+            const int begin = cellStart[c];
+            const int end = cellStart[c + 1];
+            for (int t = begin; t < end; ++t) {
+              const int j = slotAtom[t];
+              if (j == i) {
+                continue;
+              }
+              // Full stencil: one direction. Half stencil: the same cell
+              // still needs that cut, and a forward cell is seen once.
+              if ((PX || PY || PZ || (dx == 0 && dy == 0 && dz == 0)) && j <= i) {
+                continue;
+              }
+              double dxv = ixv - cx[t];
+              double dyv = iyv - cy[t];
+              double dzv = izv - cz[t];
+              if constexpr (PX) {
+                if (dxv > 0.5 * ex) {
+                  dxv -= ex;
+                } else if (dxv < -0.5 * ex) {
+                  dxv += ex;
+                }
+              }
+              if constexpr (PY) {
+                if (dyv > 0.5 * ey) {
+                  dyv -= ey;
+                } else if (dyv < -0.5 * ey) {
+                  dyv += ey;
+                }
+              }
+              if constexpr (PZ) {
+                if (dzv > 0.5 * ez) {
+                  dzv -= ez;
+                } else if (dzv < -0.5 * ez) {
+                  dzv += ez;
+                }
+              }
+              if (dxv * dxv + dyv * dyv + dzv * dzv < cut2) {
+                mine.emplace_back(i, j);
+              }
+            }
+          }
+        }
+      }
+    }
+}
+
+template <bool PX, bool PY, bool PZ>
+void searchWindow(const double *cx, const double *cy, const double *cz, const int *slotAtom,
+                  const int *cellStart, const int *cellOf, int n, int nc0, int nc1, int nc2,
+                  double cut2, double ex, double ey, double ez, int nThreads,
+                  std::vector<PairBag> &partial) {
+  // Contiguous slabs, one per thread already pinned by OMP_PLACES.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nThreads > 1)
+#endif
+  {
+    int tid = 0;
+    int nt = 1;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+    nt = omp_get_num_threads();
+#endif
+    const int slot0 = static_cast<int>((static_cast<long long>(tid) * n) / nt);
+    const int slot1 = static_cast<int>((static_cast<long long>(tid + 1) * n) / nt);
+    searchSlots<PX, PY, PZ>(cx, cy, cz, slotAtom, cellStart, cellOf, slot0, slot1, nc0, nc1, nc2,
+                            cut2, ex, ey, ez, partial[static_cast<std::size_t>(tid)].pairs);
+  }
+}
+
+} // namespace
+
 bool nneigh::blockWindowRows(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double rcutoff,
-    const std::vector<char> *source, std::vector<std::vector<int>> &rows) {
+    const std::vector<char> *source, std::vector<std::vector<int>> &rows, bool byId,
+    bool everyRow) {
   if (yCloud.box.size() != 3 || yCloud.nop <= 0 || rcutoff <= 0.0) {
     return false;
   }
@@ -721,95 +882,185 @@ bool nneigh::blockWindowRows(
                             yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
                             yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
   const int n = yCloud.nop;
-  double lo[3] = {1.0e300, 1.0e300, 1.0e300};
-  double hi[3] = {-1.0e300, -1.0e300, -1.0e300};
-  int nAnchor = 0;
-  for (int i = 0; i < n; i++) {
-    if (source != nullptr &&
-        (static_cast<int>(source->size()) <= i || (*source)[static_cast<std::size_t>(i)] == 0)) {
-      continue;
-    }
-    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    const double c[3] = {p.x, p.y, p.z};
-    for (int d = 0; d < 3; d++) {
-      lo[d] = std::min(lo[d], c[d]);
-      hi[d] = std::max(hi[d], c[d]);
-    }
-    ++nAnchor;
+  const auto windowT0 = std::chrono::steady_clock::now();
+#ifdef SEAMS_HAS_OPENMP
+  const int nThreads = std::max(1, omp_get_max_threads());
+#else
+  const int nThreads = 1;
+#endif
+  // One pass over the anchors. Each thread keeps its own bounds; a
+  // reduction on the shared min raced under this libgomp.
+  struct Bound {
+    double lo[3];
+    double hi[3];
+    int n = 0;
+  };
+  std::vector<Bound> bounds(static_cast<std::size_t>(nThreads));
+  for (auto &b : bounds) {
+    b.lo[0] = b.lo[1] = b.lo[2] = 1.0e300;
+    b.hi[0] = b.hi[1] = b.hi[2] = -1.0e300;
+    b.n = 0;
   }
-  if (nAnchor == 0) {
-    return false;
-  }
-  // Every axis already reaches both ends of the box, so there is no
-  // empty slab to drop. This is the one-rank case.
-  int wide = 0;
-  for (int d = 0; d < 3; d++) {
-    if (hi[d] - lo[d] > lenBox[d] - rcutoff) {
-      ++wide;
-    }
-  }
-  if (wide == 3) {
-    return false;
-  }
-  // Fold anchors onto the first one. A block that does not wrap keeps its
-  // span; an owned atom that crossed the boundary does not stretch the
-  // interval across the whole box.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nThreads > 1)
+#endif
   {
-    double seed[3] = {};
-    bool haveSeed = false;
-    lo[0] = lo[1] = lo[2] = 1.0e300;
-    hi[0] = hi[1] = hi[2] = -1.0e300;
+    int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+#endif
+    Bound &b = bounds[static_cast<std::size_t>(tid)];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
     for (int i = 0; i < n; i++) {
       if (source != nullptr &&
           (static_cast<int>(source->size()) <= i || (*source)[static_cast<std::size_t>(i)] == 0)) {
         continue;
       }
       const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-      if (!haveSeed) {
-        seed[0] = p.x;
-        seed[1] = p.y;
-        seed[2] = p.z;
-        haveSeed = true;
-      }
-      const double c[3] = {p.x, p.y, p.z};
-      for (int d = 0; d < 3; d++) {
-        double s = c[d];
-        double delta = s - seed[d];
-        delta -= lenBox[d] * std::floor(delta / lenBox[d] + 0.5);
-        s = seed[d] + delta;
-        lo[d] = std::min(lo[d], s);
-        hi[d] = std::max(hi[d], s);
-      }
+      b.lo[0] = std::min(b.lo[0], p.x);
+      b.lo[1] = std::min(b.lo[1], p.y);
+      b.lo[2] = std::min(b.lo[2], p.z);
+      b.hi[0] = std::max(b.hi[0], p.x);
+      b.hi[1] = std::max(b.hi[1], p.y);
+      b.hi[2] = std::max(b.hi[2], p.z);
+      ++b.n;
     }
   }
+  double lo0 = 1.0e300, lo1 = 1.0e300, lo2 = 1.0e300;
+  double hi0 = -1.0e300, hi1 = -1.0e300, hi2 = -1.0e300;
+  int nAnchor = 0;
+  for (const auto &b : bounds) {
+    lo0 = std::min(lo0, b.lo[0]);
+    lo1 = std::min(lo1, b.lo[1]);
+    lo2 = std::min(lo2, b.lo[2]);
+    hi0 = std::max(hi0, b.hi[0]);
+    hi1 = std::max(hi1, b.hi[1]);
+    hi2 = std::max(hi2, b.hi[2]);
+    nAnchor += b.n;
+  }
+  if (nAnchor == 0) {
+    return false;
+  }
+  // A domain that crosses the periodic boundary has atoms at both ends of
+  // the box. The largest empty gap is the outside of that domain. Folding
+  // the anchors onto the other side keeps the window shorter than the box.
+  auto foldSpan = [&](double &lo, double &hi, int axis) {
+    const double edge = lenBox[axis];
+    if (!(edge > 0.0) || !(hi - lo > 0.5 * edge) || nAnchor < 2) {
+      return;
+    }
+    constexpr int kBins = 64;
+    int hist[kBins] = {};
+    for (int i = 0; i < n; i++) {
+      if (source != nullptr &&
+          (static_cast<int>(source->size()) <= i || (*source)[static_cast<std::size_t>(i)] == 0)) {
+        continue;
+      }
+      const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+      const double xyz[3] = {p.x, p.y, p.z};
+      double f = xyz[axis] / edge;
+      f -= std::floor(f);
+      int b = static_cast<int>(f * kBins);
+      if (b < 0) {
+        b = 0;
+      }
+      if (b >= kBins) {
+        b = kBins - 1;
+      }
+      hist[b]++;
+    }
+    int best = 0;
+    int startBin = 0;
+    for (int i = 0; i < kBins; i++) {
+      if (hist[i] != 0) {
+        continue;
+      }
+      int run = 1;
+      while (run < kBins && hist[(i + run) % kBins] == 0) {
+        run++;
+      }
+      if (run > best) {
+        best = run;
+        startBin = i;
+      }
+    }
+    if (best <= 0 || best >= kBins) {
+      return;
+    }
+    const double width = edge / kBins;
+    const int cluster = (startBin + best) % kBins;
+    lo = cluster * width - width;
+    hi = startBin * width + width;
+    if (hi <= lo) {
+      hi += edge;
+    }
+  };
+  if (source != nullptr) {
+    foldSpan(lo0, hi0, 0);
+    foldSpan(lo1, hi1, 1);
+    foldSpan(lo2, hi2, 2);
+  }
+  const double alo = lo0, ahi0 = hi0, alo1 = lo1, ahi1 = hi1, alo2 = lo2, ahi2 = hi2;
+  const double box0 = lenBox[0], box1 = lenBox[1], box2 = lenBox[2];
   // Owned atoms of one block do not wrap. Ghosts that do are shifted by a
   // box length so they sit against that block. The grid is the resulting
   // window, and it does not wrap.
   std::vector<double> local(static_cast<std::size_t>(n) * 3);
-  double plen[3] = {0.0, 0.0, 0.0};
-  double plow[3] = {1.0e300, 1.0e300, 1.0e300};
-  for (int i = 0; i < n; i++) {
-    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    const double c[3] = {p.x, p.y, p.z};
-    for (int d = 0; d < 3; d++) {
-      double best = c[d];
-      double bestDist = best < lo[d] ? lo[d] - best : (best > hi[d] ? best - hi[d] : 0.0);
-      for (int wrap = -1; wrap <= 1; wrap++) {
-        if (wrap == 0) {
-          continue;
+  double *const lptr = local.data();
+  std::vector<Bound> span(static_cast<std::size_t>(nThreads));
+  for (auto &b : span) {
+    b.lo[0] = b.lo[1] = b.lo[2] = 1.0e300;
+    b.hi[0] = b.hi[1] = b.hi[2] = -1.0e300;
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nThreads > 1)
+#endif
+  {
+    int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+#endif
+    Bound &b = span[static_cast<std::size_t>(tid)];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int i = 0; i < n; i++) {
+      const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+      const double c[3] = {p.x, p.y, p.z};
+      const double boxes[3] = {box0, box1, box2};
+      const double los[3] = {alo, alo1, alo2};
+      const double his[3] = {ahi0, ahi1, ahi2};
+      for (int d = 0; d < 3; d++) {
+        double best = c[d];
+        double bestDist = best < los[d] ? los[d] - best : (best > his[d] ? best - his[d] : 0.0);
+        for (int wrap = -1; wrap <= 1; wrap += 2) {
+          const double s = c[d] + wrap * boxes[d];
+          const double dist = s < los[d] ? los[d] - s : (s > his[d] ? s - his[d] : 0.0);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = s;
+          }
         }
-        const double s = c[d] + wrap * lenBox[d];
-        const double dist = s < lo[d] ? lo[d] - s : (s > hi[d] ? s - hi[d] : 0.0);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = s;
-        }
+        lptr[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)] = best;
+        b.lo[d] = std::min(b.lo[d], best);
+        b.hi[d] = std::max(b.hi[d], best);
       }
-      local[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)] = best;
-      plow[d] = std::min(plow[d], best);
-      plen[d] = std::max(plen[d], best);
     }
   }
+  double plow0 = 1.0e300, plow1 = 1.0e300, plow2 = 1.0e300;
+  double plen0 = -1.0e300, plen1 = -1.0e300, plen2 = -1.0e300;
+  for (const auto &b : span) {
+    plow0 = std::min(plow0, b.lo[0]);
+    plow1 = std::min(plow1, b.lo[1]);
+    plow2 = std::min(plow2, b.lo[2]);
+    plen0 = std::max(plen0, b.hi[0]);
+    plen1 = std::max(plen1, b.hi[1]);
+    plen2 = std::max(plen2, b.hi[2]);
+  }
+  const double plow[3] = {plow0, plow1, plow2};
+  const double plen[3] = {plen0, plen1, plen2};
   bool opened = false;
   double len[3];
   for (int d = 0; d < 3; d++) {
@@ -817,11 +1068,20 @@ bool nneigh::blockWindowRows(
     if (lenBox[d] - len[d] > rcutoff) {
       opened = true;
     }
-    for (int i = 0; i < n; i++) {
-      double &s = local[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)];
-      s -= plow[d];
-      if (!(s < len[d]) && len[d] > 0.0) {
-        s = std::nextafter(len[d], 0.0);
+  }
+  const double shift0 = plow[0], shift1 = plow[1], shift2 = plow[2];
+  const double len0 = len[0], len1 = len[1], len2 = len[2];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nThreads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    const double shifts[3] = {shift0, shift1, shift2};
+    const double lens[3] = {len0, len1, len2};
+    for (int d = 0; d < 3; d++) {
+      double &s = lptr[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)];
+      s -= shifts[d];
+      if (!(s < lens[d]) && lens[d] > 0.0) {
+        s = std::nextafter(lens[d], 0.0);
       }
     }
   }
@@ -851,15 +1111,19 @@ bool nneigh::blockWindowRows(
   return false;
 #else
   seams::adoptThreads();
-  thread_local std::vector<double> xyz;
-  xyz.resize(static_cast<std::size_t>(n) * 3);
+  // Not thread_local: the fill below is shared by the team. A thread-local
+  // buffer would be empty on every worker and the write would fault.
+  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
   std::vector<char> anchor(static_cast<std::size_t>(n), 1);
-  if (source != nullptr) {
+  if (source != nullptr && !everyRow) {
     for (int i = 0; i < n; i++) {
       anchor[static_cast<std::size_t>(i)] =
           static_cast<int>(source->size()) > i && (*source)[static_cast<std::size_t>(i)] != 0;
     }
   }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nThreads > 1)
+#endif
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     const double raw[3] = {p.x, p.y, p.z};
@@ -869,44 +1133,155 @@ bool nneigh::blockWindowRows(
                       : local[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)];
     }
   }
-  const double volume = edge[0] * edge[1] * edge[2];
-  const double hint = std::max(
-      rcutoff, std::cbrt(kAtomsPerLinkcellCell * volume / static_cast<double>(n)));
-  thread_local std::vector<linkcell::ShiftedPair> found;
-  try {
-    const linkcell::Cell cell = linkcell::Cell::from_vectors(
-        {edge[0], 0.0, 0.0}, {0.0, edge[1], 0.0}, {0.0, 0.0, edge[2]},
-        {originW[0], originW[1], originW[2]});
-    const lc_cell raw = cell.raw();
-    std::size_t count = 0;
-    // One side of each pair. Both atoms are written onto an anchor row below.
-    if (lc_pairs_within_rows(xyz.data(), static_cast<std::size_t>(n), &raw, rcutoff, nullptr,
-                             hint, 1, nullptr, 0, &count) != 0) {
-      return false;
-    }
-    found.resize(count);
-    if (count > 0 &&
-        lc_pairs_within_rows(xyz.data(), static_cast<std::size_t>(n), &raw, rcutoff, nullptr,
-                             hint, 1, reinterpret_cast<lc_pair *>(found.data()), count,
-                             &count) != 0) {
-      return false;
-    }
-    found.resize(count);
-  } catch (const linkcell::Error &) {
+  // A bin of one cutoff, wrapped on the axes that still see the whole box.
+  // The previous periodic walk built that full box in linkcell and did not
+  // get faster as the rank count grew, so two or four ranks stayed near the
+  // one-rank time. Threads of one rank share this loop.
+  const double cut2 = rcutoff * rcutoff;
+  int nc[3];
+  for (int d = 0; d < 3; d++) {
+    nc[d] = std::max(1, static_cast<int>(std::floor(edge[d] / rcutoff)));
+  }
+  seams::coarsenUntilFits(nc[0], nc[1], nc[2], 1);
+  int nCells = 0;
+  if (!seams::gridFits(nc[0], nc[1], nc[2], nCells)) {
     return false;
   }
-  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<int> cellOf(static_cast<std::size_t>(n), 0);
+  std::vector<int> cellCount(static_cast<std::size_t>(nCells), 0);
+  auto cellIndex = [&](double s, int axis) {
+    int ix = static_cast<int>(std::floor(s / rcutoff));
+    if (ix < 0) {
+      ix = 0;
+    }
+    if (ix >= nc[axis]) {
+      ix = nc[axis] - 1;
+    }
+    return ix;
+  };
+  for (int i = 0; i < n; i++) {
+    const double *p = xyz.data() + static_cast<std::size_t>(i) * 3;
+    const int c = (cellIndex(p[2], 2) * nc[1] + cellIndex(p[1], 1)) * nc[0] + cellIndex(p[0], 0);
+    cellOf[static_cast<std::size_t>(i)] = c;
+    cellCount[static_cast<std::size_t>(c)]++;
+  }
+  std::vector<int> cellStart(static_cast<std::size_t>(nCells) + 1, 0);
+  for (int c = 0; c < nCells; c++) {
+    cellStart[static_cast<std::size_t>(c) + 1] =
+        cellStart[static_cast<std::size_t>(c)] + cellCount[static_cast<std::size_t>(c)];
+  }
+  std::vector<int> cellAtom(static_cast<std::size_t>(n));
+  {
+    std::vector<int> fill = cellStart;
+    for (int i = 0; i < n; i++) {
+      const int c = cellOf[static_cast<std::size_t>(i)];
+      cellAtom[static_cast<std::size_t>(fill[static_cast<std::size_t>(c)]++)] = i;
+    }
+  }
+  // Cell order, one coordinate array per axis. The pair walk then reads
+  // neighbours of a bin sequentially instead of gathering the frame order.
+  std::vector<double> cx(static_cast<std::size_t>(n));
+  std::vector<double> cy(static_cast<std::size_t>(n));
+  std::vector<double> cz(static_cast<std::size_t>(n));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nThreads > 1)
+#endif
+  for (int slot = 0; slot < n; slot++) {
+    const int i = cellAtom[static_cast<std::size_t>(slot)];
+    const double *p = xyz.data() + static_cast<std::size_t>(i) * 3;
+    cx[static_cast<std::size_t>(slot)] = p[0];
+    cy[static_cast<std::size_t>(slot)] = p[1];
+    cz[static_cast<std::size_t>(slot)] = p[2];
+  }
+  const auto pairT0 = std::chrono::steady_clock::now();
+  if (const char *split = std::getenv("SEAMS_SPLIT")) {
+    if (split[0] == '1') {
+      const double prepMs =
+          std::chrono::duration<double, std::milli>(pairT0 - windowT0).count();
+      std::fprintf(stderr, "prep ms %.3f\n", prepMs);
+    }
+  }
+  // One cache line per bag. Adjacent vector headers were sharing a
+  // line, and every emplace on a hybrid team invalidated the others.
+  std::vector<PairBag> partial(static_cast<std::size_t>(nThreads));
+  for (auto &bag : partial) {
+    bag.pairs.reserve(static_cast<std::size_t>(n) * 4 / static_cast<std::size_t>(nThreads) + 16);
+  }
+  const int mask = (periodic[0] ? 1 : 0) | (periodic[1] ? 2 : 0) | (periodic[2] ? 4 : 0);
+  const auto runSearch = [&](auto &&go) {
+    go(cx.data(), cy.data(), cz.data(), cellAtom.data(), cellStart.data(), cellOf.data(), n, nc[0],
+       nc[1], nc[2], cut2, edge[0], edge[1], edge[2], nThreads, partial);
+  };
+  switch (mask) {
+  case 0:
+    runSearch(searchWindow<false, false, false>);
+    break;
+  case 1:
+    runSearch(searchWindow<true, false, false>);
+    break;
+  case 2:
+    runSearch(searchWindow<false, true, false>);
+    break;
+  case 3:
+    runSearch(searchWindow<true, true, false>);
+    break;
+  case 4:
+    runSearch(searchWindow<false, false, true>);
+    break;
+  case 5:
+    runSearch(searchWindow<true, false, true>);
+    break;
+  case 6:
+    runSearch(searchWindow<false, true, true>);
+    break;
+  default:
+    runSearch(searchWindow<true, true, true>);
+    break;
+  }
+  std::size_t nPairs = 0;
+  for (const auto &part : partial) {
+    nPairs += part.pairs.size();
+  }
+  if (const char *split = std::getenv("SEAMS_SPLIT")) {
+    if (split[0] == '1') {
+      const double pairMs =
+          std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pairT0)
+              .count();
+      std::fprintf(stderr, "pairs threads %d n %d cells %d hits %zu ms %.3f\n", nThreads, n, nCells,
+                   nPairs, pairMs);
+    }
+  }
+  const std::vector<int> indexToID = byId ? indexToIDTable(yCloud) : std::vector<int>{};
+  std::vector<int> threadDegree(static_cast<std::size_t>(nThreads) * static_cast<std::size_t>(n), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nThreads > 1)
+#endif
+  {
+    int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+#endif
+    int *deg = threadDegree.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(n);
+    for (const auto &hit : partial[static_cast<std::size_t>(tid)].pairs) {
+      if (anchor[static_cast<std::size_t>(hit.first)]) {
+        ++deg[hit.first];
+      }
+      if (anchor[static_cast<std::size_t>(hit.second)]) {
+        ++deg[hit.second];
+      }
+    }
+  }
   std::vector<int> degree(static_cast<std::size_t>(n), 0);
-  for (const auto &sp : found) {
-    if (sp.i == sp.j || sp.i < 0 || sp.j < 0 || sp.i >= n || sp.j >= n) {
-      continue;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nThreads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    int sum = 0;
+    for (int t = 0; t < nThreads; t++) {
+      sum += threadDegree[static_cast<std::size_t>(t) * static_cast<std::size_t>(n) +
+                          static_cast<std::size_t>(i)];
     }
-    if (anchor[static_cast<std::size_t>(sp.i)]) {
-      ++degree[static_cast<std::size_t>(sp.i)];
-    }
-    if (anchor[static_cast<std::size_t>(sp.j)]) {
-      ++degree[static_cast<std::size_t>(sp.j)];
-    }
+    degree[static_cast<std::size_t>(i)] = sum;
   }
   std::vector<int> cursor(static_cast<std::size_t>(n) + 1, 0);
   for (int i = 0; i < n; i++) {
@@ -914,16 +1289,35 @@ bool nneigh::blockWindowRows(
         cursor[static_cast<std::size_t>(i)] + degree[static_cast<std::size_t>(i)];
   }
   std::vector<int> partner(static_cast<std::size_t>(cursor[static_cast<std::size_t>(n)]));
-  std::vector<int> at = cursor;
-  for (const auto &sp : found) {
-    if (sp.i == sp.j || sp.i < 0 || sp.j < 0 || sp.i >= n || sp.j >= n) {
-      continue;
+  std::vector<int> threadAt(static_cast<std::size_t>(nThreads) * static_cast<std::size_t>(n), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nThreads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    int at = cursor[static_cast<std::size_t>(i)];
+    for (int t = 0; t < nThreads; t++) {
+      threadAt[static_cast<std::size_t>(t) * static_cast<std::size_t>(n) +
+               static_cast<std::size_t>(i)] = at;
+      at += threadDegree[static_cast<std::size_t>(t) * static_cast<std::size_t>(n) +
+                         static_cast<std::size_t>(i)];
     }
-    if (anchor[static_cast<std::size_t>(sp.i)]) {
-      partner[static_cast<std::size_t>(at[static_cast<std::size_t>(sp.i)]++)] = sp.j;
-    }
-    if (anchor[static_cast<std::size_t>(sp.j)]) {
-      partner[static_cast<std::size_t>(at[static_cast<std::size_t>(sp.j)]++)] = sp.i;
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nThreads > 1)
+#endif
+  {
+    int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+#endif
+    int *at = threadAt.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(n);
+    for (const auto &hit : partial[static_cast<std::size_t>(tid)].pairs) {
+      if (anchor[static_cast<std::size_t>(hit.first)]) {
+        partner[static_cast<std::size_t>(at[hit.first]++)] = hit.second;
+      }
+      if (anchor[static_cast<std::size_t>(hit.second)]) {
+        partner[static_cast<std::size_t>(at[hit.second]++)] = hit.first;
+      }
     }
   }
   if (static_cast<int>(rows.size()) != n) {
@@ -933,12 +1327,26 @@ bool nneigh::blockWindowRows(
       row.clear();
     }
   }
+  auto idOf = [&](int i) {
+    if (!byId) {
+      return i;
+    }
+    const int mapped = indexToID[static_cast<std::size_t>(i)];
+    if (mapped >= 0) {
+      return mapped;
+    }
+    return yCloud.pts[static_cast<std::size_t>(i)].atomID;
+  };
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nThreads > 1)
+#endif
   for (int i = 0; i < n; i++) {
-    if (indexToID[static_cast<std::size_t>(i)] == -1) {
+    const int idi = idOf(i);
+    if (idi < 0) {
       continue;
     }
     auto &row = rows[static_cast<std::size_t>(i)];
-    row.push_back(indexToID[static_cast<std::size_t>(i)]);
+    row.push_back(idi);
     if (!anchor[static_cast<std::size_t>(i)]) {
       continue;
     }
@@ -952,9 +1360,18 @@ bool nneigh::blockWindowRows(
         continue;
       }
       prev = j;
-      if (indexToID[static_cast<std::size_t>(j)] != -1) {
-        row.push_back(indexToID[static_cast<std::size_t>(j)]);
+      const int idj = idOf(j);
+      if (idj >= 0) {
+        row.push_back(idj);
       }
+    }
+  }
+  if (const char *split = std::getenv("SEAMS_SPLIT")) {
+    if (split[0] == '1') {
+      const double rowMs =
+          std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pairT0)
+              .count();
+      std::fprintf(stderr, "rows ms %.3f\n", rowMs);
     }
   }
   return true;
@@ -999,7 +1416,12 @@ const std::vector<std::vector<int>> &nneigh::reusedShellList(
     rows = neighListO(rcutoff, yCloud, 1);
     return rows;
   }
-  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  seams::coarsenUntilFits(ncell[0], ncell[1], ncell[2], 3);
+  int nCells = 0;
+  if (!seams::gridFits(ncell[0], ncell[1], ncell[2], nCells)) {
+    rows = neighListO(rcutoff, yCloud, 1);
+    return rows;
+  }
   cellOf.resize(static_cast<std::size_t>(n));
   cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   cellAtoms.resize(static_cast<std::size_t>(n));
@@ -1026,7 +1448,7 @@ const std::vector<std::vector<int>> &nneigh::reusedShellList(
   }
   fill.assign(cellStart.begin(), cellStart.end() - 1);
   for (int k = 0; k < n; k++) {
-    cellAtoms[static_cast<std::size_t>(fill[static_cast<std::size_t>(cellOf[k])]++)] = k;
+    cellAtoms[static_cast<std::size_t>(fill[static_cast<std::size_t>(cellOf[static_cast<std::size_t>(k)])]++)] = k;
   }
   if (static_cast<int>(rows.size()) != n) {
     rows.assign(static_cast<std::size_t>(n), {});
@@ -1123,13 +1545,17 @@ bool orthoFullList(const molSys::PointCloud<molSys::Point<double>, double> &yClo
       return false;
     }
   }
+  seams::coarsenUntilFits(ncell[0], ncell[1], ncell[2], 3);
   const double origin[3] = {
       yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
       yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
       yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
   const std::size_t n = subset.size();
   const double rc2 = rcutoff * rcutoff;
-  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  int nCells = 0;
+  if (!seams::gridFits(ncell[0], ncell[1], ncell[2], nCells)) {
+    return false;
+  }
   struct Packed {
     double x, y, z;
   };
@@ -1274,11 +1700,252 @@ bool orthoFullList(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 }  // namespace
 
+void nneigh::preferSerialCutoff(bool on) { gSerialCutoff = on; }
+
+namespace {
+
+void reserveOnCaller(std::vector<std::vector<int>> &rows, const std::vector<int> &need) {
+  if (rows.size() != need.size()) {
+    rows.assign(need.size(), {});
+  }
+  for (std::size_t i = 0; i < need.size(); i++) {
+    auto &row = rows[i];
+    if (static_cast<int>(row.capacity()) < need[i]) {
+      row.reserve(static_cast<std::size_t>(need[i]));
+    }
+  }
+}
+
+} // namespace
+
+bool nneigh::refillNeighListO(double rcutoff,
+                             const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                             int typeI, std::vector<std::vector<int>> &rows) {
+  if (!hasPeriodicBox(yCloud) || yCloud.box.size() < 3) {
+    return false;
+  }
+  const int nopAtoms = yCloud.nop;
+  std::vector<int> indexToID(static_cast<std::size_t>(std::max(nopAtoms, 0)));
+  int threads = 1;
+#ifdef SEAMS_HAS_OPENMP
+  threads = omp_get_max_threads();
+#pragma omp parallel for schedule(static) if (nopAtoms >= 256 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nopAtoms; ++i) {
+    indexToID[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].atomID;
+  }
+  std::vector<int> typeIIndices;
+  const std::vector<int> *subset = &typeIIndices;
+  int otherType = 0;
+  if (threads > 1 && nopAtoms > 0) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) reduction(+ : otherType)
+#endif
+    for (int i = 0; i < nopAtoms; ++i) {
+      otherType += yCloud.pts[static_cast<std::size_t>(i)].type != typeI;
+    }
+    if (otherType == 0) {
+      subset = nullptr;
+    }
+  }
+  if (subset != nullptr) {
+    typeIIndices.reserve(static_cast<std::size_t>(nopAtoms));
+    for (int i = 0; i < nopAtoms; ++i) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+        typeIIndices.push_back(i);
+      }
+    }
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  bool wrote = false;
+  const int nop = yCloud.nop;
+  if (static_cast<int>(rows.size()) != nop) {
+    rows.assign(static_cast<std::size_t>(nop), {});
+  }
+  if (!orthoFullCsr(yCloud, subset, rcutoff, offsets, cols, false, &rows, indexToID.data(),
+                    &wrote)) {
+    return false;
+  }
+  if (wrote) {
+    return true;
+  }
+  std::vector<int> need(static_cast<std::size_t>(nop), 1);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nop; i++) {
+    if (static_cast<int>(indexToID.size()) <= i || indexToID[static_cast<std::size_t>(i)] == -1) {
+      need[static_cast<std::size_t>(i)] = 0;
+      continue;
+    }
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    int n = 0;
+    for (int k = a; k < b; k++) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j >= 0 && j < static_cast<int>(indexToID.size()) &&
+          indexToID[static_cast<std::size_t>(j)] != -1) {
+        n++;
+      }
+    }
+    need[static_cast<std::size_t>(i)] = 1 + n;
+  }
+  reserveOnCaller(rows, need);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nop; i++) {
+    auto &row = rows[static_cast<std::size_t>(i)];
+    const int n = need[static_cast<std::size_t>(i)];
+    if (n <= 0) {
+      row.clear();
+      continue;
+    }
+    row.resize(static_cast<std::size_t>(n));
+    row[0] = indexToID[static_cast<std::size_t>(i)];
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    int w = 1;
+    for (int k = a; k < b && w < n; k++) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j >= 0 && j < static_cast<int>(indexToID.size()) &&
+          indexToID[static_cast<std::size_t>(j)] != -1) {
+        row[static_cast<std::size_t>(w++)] = indexToID[static_cast<std::size_t>(j)];
+      }
+    }
+  }
+  return true;
+}
+
+bool nneigh::refillIndexRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                            double cutoff, std::vector<std::vector<int>> &rows) {
+  if (!hasPeriodicBox(yCloud) || yCloud.box.size() < 3) {
+    return false;
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  bool wrote = false;
+  const int nop = yCloud.nop;
+  if (static_cast<int>(rows.size()) != nop) {
+    rows.assign(static_cast<std::size_t>(nop), {});
+  }
+  if (!orthoFullCsr(yCloud, nullptr, cutoff, offsets, cols, false, &rows, nullptr, &wrote)) {
+    return false;
+  }
+  if (wrote) {
+    return true;
+  }
+  std::vector<int> need(static_cast<std::size_t>(nop), 1);
+  for (int i = 0; i < nop; i++) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    need[static_cast<std::size_t>(i)] = 1 + std::max(0, b - a);
+  }
+  reserveOnCaller(rows, need);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nop; i++) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    const int n = 1 + std::max(0, b - a);
+    auto &row = rows[static_cast<std::size_t>(i)];
+    row.resize(static_cast<std::size_t>(n));
+    row[0] = i;
+    for (int k = a; k < b; k++) {
+      row[static_cast<std::size_t>(1 + k - a)] = cols[static_cast<std::size_t>(k)];
+    }
+  }
+  return true;
+}
+
+std::vector<std::vector<int>>
+nneigh::neighListLinkcell(
+    double rcutoff,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI) {
+#ifndef SEAMS_HAS_LINKCELL
+  (void)rcutoff;
+  (void)yCloud;
+  (void)typeI;
+  return {};
+#else
+  if (!hasPeriodicBox(yCloud) || !(rcutoff > 0.0) || yCloud.nop <= 0) {
+    return {};
+  }
+  seams::prepareCompute();
+  int pool = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (!gSerialCutoff && !omp_in_parallel()) {
+    pool = std::max(1, omp_get_max_threads());
+  }
+#endif
+  // Eight threads loses to four below a few thousand molecules: the
+  // list and the cage walk do not have a full team of work, and the
+  // extra workers show up as a slow sample. Larger crystals keep the
+  // width the caller asked for.
+  if (yCloud.nop < 4096 && pool > 4) {
+    pool = 4;
+  }
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel()) {
+    omp_set_num_threads(pool);
+  }
+#endif
+  lc_set_threads(pool);
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<int> typeIIndices;
+  typeIIndices.reserve(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+      typeIIndices.push_back(i);
+    }
+  }
+  if (typeIIndices.empty()) {
+    return {};
+  }
+  // Linkcell's buffered walk does not speed up on a large crystal: at
+  // 884736 molecules it stays near the one-thread time while the
+  // orthorhombic cell list does not. The rows are the same cutoff set,
+  // sorted, so the ring search does not depend on which builder ran.
+#ifdef SEAMS_HAS_OPENMP
+  const bool csrTeam = !gSerialCutoff && !omp_in_parallel() && pool > 1;
+#else
+  const bool csrTeam = false;
+#endif
+  if (csrTeam && (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
+      return idRowsFromCsr(yCloud, indexToID, offsets, cols);
+    }
+  }
+  CutoffRows rows;
+  if (!cutoffRows(yCloud, typeIIndices, rcutoff, rows, false, 0.0)) {
+    return {};
+  }
+  return rowsByID(rows, indexToID, yCloud.nop);
+#endif
+}
+
 std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
-  seams::adoptThreads();
+  // The cutoff rows are an OpenMP walk. Pausing that team here makes the
+  // next region pay a wake-up, and an unsized Rayon pool would spin beside
+  // it. Record the OpenMP width for linkcell and leave the team running.
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_OPENMP
+  const int pool = (gSerialCutoff || omp_in_parallel()) ? 1 : std::max(1, omp_get_max_threads());
+#else
+  const int pool = 1;
+#endif
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(pool);
+#else
+  (void)pool;
+#endif
   if (!hasPeriodicBox(yCloud)) {
     return {};
   }
@@ -1292,12 +1959,22 @@ nneigh::neighListO(double rcutoff,
   // Collect indices of typeI atoms
   std::vector<int> typeIIndices;
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type == typeI) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
       typeIIndices.push_back(i);
     }
   }
 
-  if (yCloud.box.size() >= 3) {
+  // Several threads use the persistent CSR. That covers an orthorhombic
+  // cell and a restricted triclinic cell (xy, xz, yz). One thread stays
+  // on linkcell's fused kernel, which is the faster builder there. A
+  // report that wants the OpenMP team left for the ring search sets
+  // preferSerialCutoff and keeps that one-thread kernel as well.
+#ifdef SEAMS_HAS_OPENMP
+  const bool csrTeam = !gSerialCutoff && !omp_in_parallel() && omp_get_max_threads() > 1;
+#else
+  const bool csrTeam = false;
+#endif
+  if (csrTeam && (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
     std::vector<int> offsets;
     std::vector<int> cols;
     if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
@@ -1309,7 +1986,7 @@ nneigh::neighListO(double rcutoff,
   // On one thread linkcell's fused kernel is the fastest builder. With
   // a team, the cell walk over atoms scales and each row is sorted, so
   // it matches that kernel's rows.
-  if (!omp_in_parallel() && omp_get_max_threads() > 1 &&
+  if (!gSerialCutoff && !omp_in_parallel() && omp_get_max_threads() > 1 &&
       typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
     std::vector<std::vector<int>> rows;
     if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
@@ -1433,7 +2110,7 @@ nneigh::neighListPair(
     std::vector<int> subset;
     subset.reserve(static_cast<size_t>(yCloud.nop));
     for (int i = 0; i < yCloud.nop; i++) {
-      const int t = yCloud.pts[i].type;
+      const int t = yCloud.pts[static_cast<std::size_t>(i)].type;
       if (t == typeI || t == typeJ) {
         subset.push_back(i);
       }
@@ -1441,8 +2118,8 @@ nneigh::neighListPair(
     CutoffRows rows;
     if (cutoffRows(yCloud, subset, rcutoff, rows)) {
       rows.forEachPair([&](int iatom, int jatom) {
-        const int ti = yCloud.pts[iatom].type;
-        const int tj = yCloud.pts[jatom].type;
+        const int ti = yCloud.pts[static_cast<std::size_t>(iatom)].type;
+        const int tj = yCloud.pts[static_cast<std::size_t>(jatom)].type;
         const bool mixed = (ti == typeI && tj == typeJ) ||
                            (ti == typeJ && tj == typeI);
         if (!mixed) {
@@ -1461,7 +2138,7 @@ nneigh::neighListPair(
   iIdx.reserve(static_cast<size_t>(yCloud.nop));
   jIdx.reserve(static_cast<size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    const int t = yCloud.pts[i].type;
+    const int t = yCloud.pts[static_cast<std::size_t>(i)].type;
     if (t == typeI) {
       iIdx.push_back(i);
     }
@@ -1517,10 +2194,10 @@ nneigh::halfNeighList(double rcutoff,
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
-  if (yCloud.box.size() >= 3) {
+  if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> typeIIndices;
     for (int i = 0; i < yCloud.nop; i++) {
-      if (yCloud.pts[i].type == typeI) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
         typeIIndices.push_back(i);
       }
     }
@@ -1535,7 +2212,7 @@ nneigh::halfNeighList(double rcutoff,
   {
     std::vector<int> typeIIndices;
     for (int i = 0; i < yCloud.nop; i++) {
-      if (yCloud.pts[i].type == typeI) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
         typeIIndices.push_back(i);
       }
     }
@@ -1559,12 +2236,12 @@ nneigh::halfNeighList(double rcutoff,
 
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
-    if (yCloud.pts[iatom].type != typeI) {
+    if (yCloud.pts[static_cast<std::size_t>(iatom)].type != typeI) {
       continue;
     }
     // Loop through the other atoms
     for (int jatom = iatom + 1; jatom < yCloud.nop; jatom++) {
-      if (yCloud.pts[jatom].type != typeI) {
+      if (yCloud.pts[static_cast<std::size_t>(jatom)].type != typeI) {
         continue;
       }
       // If the distance is greater than rcutoff, continue
@@ -1598,9 +2275,9 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     return {};
   }
 
-  std::vector<std::vector<int>> nList(yCloud.nop);
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(yCloud.nop));
 
-  if (yCloud.box.size() >= 3) {
+  if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> offsets;
     std::vector<int> cols;
     if (orthoFullCsr(yCloud, nullptr, cutoff, offsets, cols, false)) {
@@ -1630,7 +2307,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list over every particle.
   {
-    std::vector<int> allIndices(yCloud.nop);
+    std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
     std::iota(allIndices.begin(), allIndices.end(), 0);
 
     CutoffRows rows;
@@ -1640,10 +2317,10 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 #pragma omp parallel for schedule(static) if (yCloud.nop >= kParallelRowsMinAtoms && !omp_in_parallel())
 #endif
       for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-        auto &row = nList[iatom];
-        row.reserve(1 + rows.first[iatom + 1] - rows.first[iatom]);
+        auto &row = nList[static_cast<std::size_t>(iatom)];
+        row.reserve(1 + rows.first[static_cast<std::size_t>(iatom + 1)] - rows.first[static_cast<std::size_t>(iatom)]);
         row.push_back(iatom);
-        for (std::size_t k = rows.first[iatom]; k < rows.first[iatom + 1]; k++) {
+        for (std::size_t k = rows.first[static_cast<std::size_t>(iatom)]; k < rows.first[static_cast<std::size_t>(iatom + 1)]; k++) {
           row.push_back(rows.partner[k]);
         }
       }
@@ -1654,7 +2331,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
   // Initialize and fill the first element with the index of the atom whose
   // neighbour list will be filled
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    nList[iatom].push_back(iatom);
+    nList[static_cast<std::size_t>(iatom)].push_back(iatom);
   } // end of init
 #ifdef SEAMS_HAS_OPENMP
   if (yCloud.nop >= kThreadedCellRowsMinAtoms) {
@@ -1675,8 +2352,8 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 
   // Scratch buffers for the batched distance kernel, sized once for the
   // largest batch and reused across iatom
-  std::vector<double> dx(yCloud.nop), dy(yCloud.nop), dz(yCloud.nop);
-  std::vector<double> distSq(yCloud.nop);
+  std::vector<double> dx(static_cast<std::size_t>(yCloud.nop)), dy(static_cast<std::size_t>(yCloud.nop)), dz(static_cast<std::size_t>(yCloud.nop));
+  std::vector<double> distSq(static_cast<std::size_t>(yCloud.nop));
   std::vector<int> allIdx(static_cast<std::size_t>(yCloud.nop));
   std::iota(allIdx.begin(), allIdx.end(), 0);
 
@@ -1693,8 +2370,8 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
         continue;
       }
       const int jatom = iatom + 1 + static_cast<int>(jj);
-      nList[iatom].push_back(jatom);
-      nList[jatom].push_back(iatom);
+      nList[static_cast<std::size_t>(iatom)].push_back(jatom);
+      nList[static_cast<std::size_t>(jatom)].push_back(iatom);
     } // End of loop through jatom
   }   // End of loop for iatom
 
@@ -1776,7 +2453,8 @@ bool typeAllowed(int type, int typeI, const std::vector<int> *types) {
 bool nominateByLinkcell(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     int typeI, double cellHint, std::vector<int> &nom,
-    const std::vector<int> *types = nullptr) {
+    const std::vector<int> *types = nullptr,
+    std::vector<double> *keepXyz = nullptr) {
   const int n = yCloud.nop;
   if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return true;
@@ -1787,7 +2465,11 @@ bool nominateByLinkcell(
   if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
     return true;
   }
-  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  std::vector<double> localXyz;
+  std::vector<double> &xyz = keepXyz != nullptr ? *keepXyz : localXyz;
+  if (static_cast<int>(xyz.size()) != n * 3) {
+    xyz.resize(static_cast<std::size_t>(n) * 3);
+  }
   int nSrc = 0;
   bool uniform = true;
   for (int i = 0; i < n; i++) {
@@ -1842,6 +2524,14 @@ std::vector<int> nominatePacked(
   if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return nom;
   }
+#ifdef SEAMS_HAS_OPENMP
+  // Parking the team here made the following region pay a wake that
+  // moved by several milliseconds from call to call. The search keeps
+  // the width linkcell was given; the graph build below uses this team.
+  const bool parallelSearch = !omp_in_parallel() && omp_get_max_threads() > 1;
+#else
+  const bool parallelSearch = false;
+#endif
 #ifdef SEAMS_HAS_LINKCELL
   if (nominateByLinkcell(yCloud, k, typeI, cellHint, nom, types)) {
     return nom;
@@ -1856,18 +2546,26 @@ std::vector<int> nominatePacked(
   }
   if (yCloud.box.size() >= 6) {
     const gen::FracBox frame = gen::makeFracBox(yCloud);
-    for (const int i : owners) {
+    const int nOwners = static_cast<int>(owners.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallelSearch)
+#endif
+    for (int oi = 0; oi < nOwners; ++oi) {
+      const int i = owners[static_cast<std::size_t>(oi)];
       std::priority_queue<std::pair<double, int>> heap;
       for (const int j : owners) {
         if (j == i) {
           continue;
         }
         const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
+        // Equal distances keep the smaller index, the same rule as the
+        // one-thread linkcell heap, so the packed row matches it.
+        const std::pair<double, int> cand{d2, j};
         if (static_cast<int>(heap.size()) < k) {
-          heap.push({d2, j});
-        } else if (d2 < heap.top().first) {
+          heap.push(cand);
+        } else if (cand < heap.top()) {
           heap.pop();
-          heap.push({d2, j});
+          heap.push(cand);
         }
       }
       const int take = std::min(k, static_cast<int>(heap.size()));
@@ -1893,7 +2591,11 @@ std::vector<int> nominatePacked(
   int nx = std::max(1, static_cast<int>(std::floor(bx / edge)));
   int ny = std::max(1, static_cast<int>(std::floor(by / edge)));
   int nz = std::max(1, static_cast<int>(std::floor(bz / edge)));
-  const int ncell = nx * ny * nz;
+  seams::coarsenUntilFits(nx, ny, nz, 1);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return nom;
+  }
   const double invx = static_cast<double>(nx) / bx;
   const double invy = static_cast<double>(ny) / by;
   const double invz = static_cast<double>(nz) / bz;
@@ -1944,64 +2646,118 @@ std::vector<int> nominatePacked(
   }
 
   const int maxReach = std::max({nx, ny, nz}) / 2 + 1;
-  std::vector<unsigned> seen(static_cast<std::size_t>(ncell), 0);
-  unsigned stamp = 1;
-  for (const int i : owners) {
-    std::priority_queue<std::pair<double, int>> heap;
-    int ix = 0;
-    int iy = 0;
-    int iz = 0;
-    cellOf(i, ix, iy, iz);
-    ++stamp;
-    if (stamp == 0) {
-      std::fill(seen.begin(), seen.end(), 0);
-      stamp = 1;
-    }
-    int reach = 1;
-    while (reach <= maxReach) {
-      for (int dx = -reach; dx <= reach; dx++) {
-        for (int dy = -reach; dy <= reach; dy++) {
-          for (int dz = -reach; dz <= reach; dz++) {
-            const bool shell = (reach == 1) || (std::abs(dx) == reach ||
-                                                std::abs(dy) == reach ||
-                                                std::abs(dz) == reach);
-            if (!shell && reach > 1) {
-              continue;
+  const int nOwners = static_cast<int>(owners.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (parallelSearch)
+#endif
+  {
+    // One stamp row per worker. Sharing it made every cell visit bounce
+    // a cache line between the threads doing the search.
+    std::vector<unsigned> seen(static_cast<std::size_t>(ncell), 0);
+    unsigned stamp = 1;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int oi = 0; oi < nOwners; ++oi) {
+      const int i = owners[static_cast<std::size_t>(oi)];
+      struct Near {
+        double d2;
+        int j;
+      };
+      // k is four on the C API path. The row stays on the stack so the
+      // workers do not allocate once per atom.
+      Near best[32];
+      int nbest = 0;
+      std::priority_queue<std::pair<double, int>> heap;
+      const bool smallK = k <= 32;
+      auto push = [&](double d2, int j) {
+        if (smallK) {
+          int slot = nbest;
+          if (nbest == k) {
+            if (d2 > best[k - 1].d2 || (d2 == best[k - 1].d2 && j >= best[k - 1].j)) {
+              return;
             }
-            const int c = cellIndex(ix + dx, iy + dy, iz + dz);
-            if (seen[static_cast<std::size_t>(c)] == stamp) {
-              continue;
-            }
-            seen[static_cast<std::size_t>(c)] = stamp;
-            int j = head[static_cast<std::size_t>(c)];
-            while (j >= 0) {
-              if (j != i) {
-                const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
-                if (static_cast<int>(heap.size()) < k) {
-                  heap.push({d2, j});
-                } else if (d2 < heap.top().first) {
-                  heap.pop();
-                  heap.push({d2, j});
-                }
+            slot = k - 1;
+          } else {
+            ++nbest;
+          }
+          while (slot > 0 &&
+                 (d2 < best[slot - 1].d2 ||
+                  (d2 == best[slot - 1].d2 && j < best[slot - 1].j))) {
+            best[slot] = best[slot - 1];
+            --slot;
+          }
+          best[slot] = {d2, j};
+          return;
+        }
+        const std::pair<double, int> cand{d2, j};
+        if (static_cast<int>(heap.size()) < k) {
+          heap.push(cand);
+        } else if (cand < heap.top()) {
+          heap.pop();
+          heap.push(cand);
+        }
+      };
+      int ix = 0;
+      int iy = 0;
+      int iz = 0;
+      cellOf(i, ix, iy, iz);
+      ++stamp;
+      if (stamp == 0) {
+        std::fill(seen.begin(), seen.end(), 0);
+        stamp = 1;
+      }
+      int reach = 1;
+      while (reach <= maxReach) {
+        for (int dx = -reach; dx <= reach; dx++) {
+          for (int dy = -reach; dy <= reach; dy++) {
+            for (int dz = -reach; dz <= reach; dz++) {
+              const bool shell = (reach == 1) || (std::abs(dx) == reach ||
+                                                  std::abs(dy) == reach ||
+                                                  std::abs(dz) == reach);
+              if (!shell && reach > 1) {
+                continue;
               }
-              j = next[static_cast<std::size_t>(j)];
+              const int c = cellIndex(ix + dx, iy + dy, iz + dz);
+              if (seen[static_cast<std::size_t>(c)] == stamp) {
+                continue;
+              }
+              seen[static_cast<std::size_t>(c)] = stamp;
+              int j = head[static_cast<std::size_t>(c)];
+              while (j >= 0) {
+                if (j != i) {
+                  push(gen::periodicDistSq(frame, yCloud, i, j), j);
+                }
+                j = next[static_cast<std::size_t>(j)];
+              }
             }
           }
         }
+        const bool full = smallK ? nbest == k : static_cast<int>(heap.size()) >= k;
+        if (full) {
+          const double worst = smallK ? best[nbest - 1].d2 : heap.top().first;
+          const double bound = static_cast<double>(reach) * cellMin;
+          // Strict: an atom on the shell boundary can tie the worst
+          // distance and win on the smaller index.
+          if (worst < bound * bound) {
+            break;
+          }
+        }
+        ++reach;
       }
-      if (static_cast<int>(heap.size()) >= k) {
-        const double bound = static_cast<double>(reach) * cellMin;
-        if (heap.top().first <= bound * bound) {
-          break;
+      if (smallK) {
+        for (int t = 0; t < nbest; ++t) {
+          nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)] = best[t].j;
+        }
+      } else {
+        const int take = std::min(k, static_cast<int>(heap.size()));
+        for (int t = take - 1; t >= 0; t--) {
+          nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)] = heap.top().second;
+          heap.pop();
         }
       }
-      ++reach;
-    }
-    const int take = std::min(k, static_cast<int>(heap.size()));
-    for (int t = take - 1; t >= 0; t--) {
-      nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
-          static_cast<std::size_t>(t)] = heap.top().second;
-      heap.pop();
     }
   }
   return nom;
@@ -2036,6 +2792,80 @@ void fillGraphFromNom(
     const std::vector<int> &nom, int k, bool mutual,
     std::vector<std::vector<int>> &out) {
   const int n = yCloud.nop;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  if (n >= 4096 && k > 0 && omp_get_max_threads() > 1 && !omp_in_parallel()) {
+    // The serial fill appends edge (i, j) of nomination slot i * k + t to
+    // rows i and j in slot order. A row therefore holds its own accepted
+    // slots and the accepted slots naming it, merged by slot. Each thread
+    // builds whole rows from those two sorted lists.
+    const std::size_t slots = static_cast<std::size_t>(n) * static_cast<std::size_t>(k);
+    std::vector<char> accepted(slots, 0);
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < n; i++) {
+      for (int t = 0; t < k; t++) {
+        const std::size_t s = static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                              static_cast<std::size_t>(t);
+        const int j = nom[s];
+        if (j < 0 || j >= n || j == i) {
+          continue;
+        }
+        const bool listed = listsPacked(nom, n, k, j, i);
+        accepted[s] = mutual ? (i < j && listed) : (i < j || !listed);
+      }
+    }
+    std::vector<int> inOff(static_cast<std::size_t>(n) + 1, 0);
+    for (std::size_t s = 0; s < slots; s++) {
+      if (accepted[s] != 0) {
+        ++inOff[static_cast<std::size_t>(nom[s]) + 1];
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      inOff[static_cast<std::size_t>(i) + 1] += inOff[static_cast<std::size_t>(i)];
+    }
+    std::vector<int> inSlot(static_cast<std::size_t>(inOff[static_cast<std::size_t>(n)]));
+    {
+      std::vector<int> cursor(inOff.begin(), inOff.end() - 1);
+      for (std::size_t s = 0; s < slots; s++) {
+        if (accepted[s] != 0) {
+          inSlot[static_cast<std::size_t>(cursor[static_cast<std::size_t>(nom[s])]++)] =
+              static_cast<int>(s);
+        }
+      }
+    }
+    out.assign(static_cast<std::size_t>(n), {});
+#pragma omp parallel for schedule(static)
+    for (int r = 0; r < n; r++) {
+      const std::size_t own = static_cast<std::size_t>(r) * static_cast<std::size_t>(k);
+      int nOwn = 0;
+      for (int t = 0; t < k; t++) {
+        nOwn += accepted[own + static_cast<std::size_t>(t)] != 0 ? 1 : 0;
+      }
+      const int b = inOff[static_cast<std::size_t>(r)];
+      const int e = inOff[static_cast<std::size_t>(r) + 1];
+      auto &row = out[static_cast<std::size_t>(r)];
+      row.reserve(static_cast<std::size_t>(1 + nOwn + (e - b)));
+      row.push_back(yCloud.pts[static_cast<std::size_t>(r)].atomID);
+      int t = 0;
+      int c = b;
+      while (t < k || c < e) {
+        const std::size_t mine = own + static_cast<std::size_t>(t);
+        if (t < k && accepted[mine] == 0) {
+          ++t;
+          continue;
+        }
+        if (t < k && (c >= e || mine < static_cast<std::size_t>(inSlot[static_cast<std::size_t>(c)]))) {
+          row.push_back(yCloud.pts[static_cast<std::size_t>(nom[mine])].atomID);
+          ++t;
+        } else {
+          const int from = inSlot[static_cast<std::size_t>(c)] / k;
+          row.push_back(yCloud.pts[static_cast<std::size_t>(from)].atomID);
+          ++c;
+        }
+      }
+    }
+    return;
+  }
+#endif
   std::vector<int> deg(static_cast<std::size_t>(n), 0);
   for (int i = 0; i < n; i++) {
     for (int t = 0; t < k; t++) {
@@ -2090,25 +2920,389 @@ void fillBothGraphsFromNom(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &nom, int k, std::vector<std::vector<int>> &mutual,
     std::vector<std::vector<int>> &uni) {
-  fillGraphFromNom(yCloud, nom, k, true, mutual);
-  fillGraphFromNom(yCloud, nom, k, false, uni);
+  const int n = yCloud.nop;
+  // The two graphs read the same nominations. Building them together asks
+  // listsPacked once per candidate. Each thread keeps the candidates of its
+  // contiguous atom block, and the blocks are replayed in atom order, so
+  // the neighbour rows match the serial fills.
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool scale = n >= 4096 && k > 0 && omp_get_max_threads() > 1 && !omp_in_parallel();
+#else
+  const bool scale = false;
+#endif
+  if (!scale) {
+    fillGraphFromNom(yCloud, nom, k, true, mutual);
+    fillGraphFromNom(yCloud, nom, k, false, uni);
+    return;
+  }
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  struct Edge {
+    int i;
+    int j;
+  };
+  const int team = omp_get_max_threads();
+  std::vector<std::vector<Edge>> mutualParts(static_cast<std::size_t>(team));
+  std::vector<std::vector<Edge>> uniParts(static_cast<std::size_t>(team));
+#pragma omp parallel
+  {
+    std::vector<Edge> mutualLocal;
+    std::vector<Edge> uniLocal;
+#pragma omp for schedule(static)
+    for (int i = 0; i < n; i++) {
+      for (int t = 0; t < k; t++) {
+        const int j =
+            nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                static_cast<std::size_t>(t)];
+        if (j < 0 || j >= n || j == i) {
+          continue;
+        }
+        const bool listed = listsPacked(nom, n, k, j, i);
+        if (i < j && listed) {
+          mutualLocal.push_back(Edge{i, j});
+        }
+        if (i < j || !listed) {
+          uniLocal.push_back(Edge{i, j});
+        }
+      }
+    }
+    mutualParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(mutualLocal);
+    uniParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(uniLocal);
+  }
+  auto replay = [&](const std::vector<std::vector<Edge>> &parts,
+                    std::vector<std::vector<int>> &out) {
+    out.assign(static_cast<std::size_t>(n), {});
+    for (int i = 0; i < n; i++) {
+      auto &row = out[static_cast<std::size_t>(i)];
+      row.reserve(8);
+      row.push_back(yCloud.pts[static_cast<std::size_t>(i)].atomID);
+    }
+    for (const auto &part : parts) {
+      for (const Edge &edge : part) {
+        addUndirectedIDs(out, yCloud, edge.i, edge.j);
+      }
+    }
+  };
+  replay(mutualParts, mutual);
+  replay(uniParts, uni);
+#endif
 }
 
 } // namespace
+
+bool nneigh::directedKNearestCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, std::vector<int> &offsets, std::vector<int> &cols) {
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
+  cols.clear();
+  if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
+    return false;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, 1, hint);
+  std::vector<int> counts(static_cast<std::size_t>(n), 0);
+  for (int i = 0; i < n; i++) {
+    for (int t = 0; t < k; t++) {
+      const int j = nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                        static_cast<std::size_t>(t)];
+      if (j >= 0 && j < n && j != i) {
+        counts[static_cast<std::size_t>(i)]++;
+      }
+    }
+  }
+  if (!seams::prefixCounts(counts.data(), n, offsets)) {
+    return false;
+  }
+  cols.assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
+  std::vector<int> slot(offsets.begin(), offsets.end() - 1);
+  for (int i = 0; i < n; i++) {
+    for (int t = 0; t < k; t++) {
+      const int j = nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                        static_cast<std::size_t>(t)];
+      if (j >= 0 && j < n && j != i) {
+        cols[static_cast<std::size_t>(slot[static_cast<std::size_t>(i)]++)] = j;
+      }
+    }
+  }
+  return true;
+}
 
 std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   if (yCloud.nop <= 0 || k <= 0) {
     return {};
   }
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const bool timing = std::getenv("SEAMS_KNN_TIME") != nullptr;
+  const auto t0 = std::chrono::steady_clock::now();
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  const auto tNom = std::chrono::steady_clock::now();
   std::vector<std::vector<int>> out;
   fillGraphFromNom(yCloud, nom, k, mutual, out);
+  if (timing) {
+    const auto ms = [](auto a, auto b) {
+      return std::chrono::duration<double, std::milli>(b - a).count();
+    };
+    std::cerr << "knn-split n=" << yCloud.nop << " nom_ms=" << ms(t0, tNom)
+              << " graph_ms=" << ms(tNom, std::chrono::steady_clock::now()) << "\n";
+  }
   return out;
+}
+
+namespace {
+
+void csrFromRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<std::vector<int>> &rows, std::vector<int> &offsets,
+                 std::vector<int> &cols) {
+  const auto idx = nneigh::neighbourListByIndex(yCloud, rows);
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(n) + 1, 0);
+  for (int i = 0; i < n; ++i) {
+    int degree = 0;
+    if (static_cast<int>(idx.size()) > i) {
+      for (int id : idx[static_cast<std::size_t>(i)]) {
+        if (id != i) {
+          ++degree;
+        }
+      }
+    }
+    offsets[static_cast<std::size_t>(i) + 1] = offsets[static_cast<std::size_t>(i)] + degree;
+  }
+  cols.resize(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]));
+  for (int i = 0; i < n; ++i) {
+    if (static_cast<int>(idx.size()) <= i) {
+      continue;
+    }
+    int cursor = offsets[static_cast<std::size_t>(i)];
+    for (int id : idx[static_cast<std::size_t>(i)]) {
+      if (id == i) {
+        continue;
+      }
+      cols[static_cast<std::size_t>(cursor++)] = id;
+    }
+  }
+}
+
+struct CsrSlabs {
+  const std::vector<int> *nom = nullptr;
+  std::vector<int> *deg = nullptr;
+  std::vector<int> *cols = nullptr;
+  std::vector<int> *offsets = nullptr;
+  int n = 0;
+  int k = 0;
+  int done = 0;
+};
+
+extern "C" void csrDegreeSlab(void *raw, int begin, int end) {
+  const auto *job = static_cast<const CsrSlabs *>(raw);
+  const int n = job->n;
+  const int k = job->k;
+  const std::vector<int> &nom = *job->nom;
+  for (int i = begin; i < end; ++i) {
+    int degree = 0;
+    const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    for (int t = 0; t < k; ++t) {
+      const int j = row[t];
+      if (j < 0 || j >= n || j == i) {
+        continue;
+      }
+      if (listsPacked(nom, n, k, j, i)) {
+        ++degree;
+      }
+    }
+    (*job->deg)[static_cast<std::size_t>(i)] = degree;
+  }
+}
+
+extern "C" void csrFillSlab(void *raw, int begin, int end) {
+  const auto *job = static_cast<const CsrSlabs *>(raw);
+  const int n = job->n;
+  const int k = job->k;
+  const std::vector<int> &nom = *job->nom;
+  const std::vector<int> &offsets = *job->offsets;
+  std::vector<int> &cols = *job->cols;
+  for (int i = begin; i < end; ++i) {
+    int low[64];
+    int high[64];
+    int nlow = 0;
+    int nhigh = 0;
+    const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    for (int t = 0; t < k; ++t) {
+      const int j = row[t];
+      if (j < 0 || j >= n || j == i || !listsPacked(nom, n, k, j, i)) {
+        continue;
+      }
+      if (j < i) {
+        low[nlow++] = j;
+      } else {
+        high[nhigh++] = j;
+      }
+    }
+    for (int a = 1; a < nlow; ++a) {
+      const int v = low[a];
+      int b = a;
+      while (b > 0 && low[b - 1] > v) {
+        low[b] = low[b - 1];
+        --b;
+      }
+      low[b] = v;
+    }
+    int cursor = offsets[static_cast<std::size_t>(i)];
+    for (int t = 0; t < nlow; ++t) {
+      cols[static_cast<std::size_t>(cursor++)] = low[t];
+    }
+    for (int t = 0; t < nhigh; ++t) {
+      cols[static_cast<std::size_t>(cursor++)] = high[t];
+    }
+  }
+}
+
+}  // namespace
+
+#ifdef SEAMS_HAS_LINKCELL
+extern "C" void lc_for_slabs(int n, void *ctx, void (*fn)(void *, int, int));
+extern "C" void lc_set_continuation(void *ctx, void (*fn)(void *));
+#else
+namespace {
+// Without the linkcell pool the slabs are split over the OpenMP team.
+// Each slab writes only its own rows.
+void lc_for_slabs(int n, void *ctx, void (*fn)(void *, int, int)) {
+#ifdef SEAMS_HAS_OPENMP
+  const int slabs = std::max(1, std::min(n, omp_get_max_threads()));
+#pragma omp parallel for schedule(static) if (slabs > 1 && !omp_in_parallel())
+  for (int s = 0; s < slabs; ++s) {
+    fn(ctx, static_cast<int>(static_cast<long long>(n) * s / slabs),
+       static_cast<int>(static_cast<long long>(n) * (s + 1) / slabs));
+  }
+#else
+  fn(ctx, 0, n);
+#endif
+}
+}  // namespace
+#endif
+
+extern "C" void csrContinue(void *raw) {
+  auto *job = static_cast<CsrSlabs *>(raw);
+  const int n = job->n;
+  lc_for_slabs(n, job, csrDegreeSlab);
+  auto &offsets = *job->offsets;
+  const auto &deg = *job->deg;
+  for (int i = 0; i < n; ++i) {
+    offsets[static_cast<std::size_t>(i) + 1] =
+        offsets[static_cast<std::size_t>(i)] + deg[static_cast<std::size_t>(i)];
+  }
+  job->cols->assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
+  lc_for_slabs(n, job, csrFillSlab);
+  job->done = 1;
+}
+
+void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+                         double candidateCutoff, int typeI, bool mutual,
+                         std::vector<int> &offsets, std::vector<int> &cols, bool park) {
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  // The scan and the CSR merge share one Rayon pool, split into z-slabs.
+  // An OpenMP team left in active wait by the previous region sits on
+  // those cores, so park it for this call when the caller asks. A caller
+  // that classifies in OpenMP immediately afterwards leaves the team
+  // running: parking it makes that region pay the wake inside the same
+  // call. A search already inside a parallel region stays on the caller.
+#ifdef SEAMS_HAS_OPENMP
+  if (omp_in_parallel()) {
+    lc_set_threads(1);
+  } else {
+    if (park) {
+      omp_pause_resource_all(omp_pause_soft);
+    }
+    lc_set_threads(seams::teamFor(yCloud.nop));
+  }
+#else
+  (void)park;
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
+#else
+  (void)park;
+#endif
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
+  cols.clear();
+  if (n <= 0 || k <= 0) {
+    return;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  // The mutual row is determined by the packed nominations: lower
+  // indices ascending, then the higher indices in nearest-first order.
+  // k above 64 keeps the row builder. The fast path merges the CSR on
+  // the same pool that wrote the nominations, before that pool sleeps.
+  if (mutual && k <= 64) {
+    std::vector<int> nom(static_cast<std::size_t>(n) * static_cast<std::size_t>(k), -1);
+    std::vector<int> deg(static_cast<std::size_t>(n), 0);
+    CsrSlabs job{&nom, &deg, &cols, &offsets, n, k, 0};
+#ifdef SEAMS_HAS_LINKCELL
+    struct DropContinuation {
+      ~DropContinuation() { lc_set_continuation(nullptr, nullptr); }
+    } drop;
+    lc_set_continuation(&job, csrContinue);
+    if (nominateByLinkcell(yCloud, k, typeI, hint, nom) && job.done) {
+      return;
+    }
+#endif
+  }
+  const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  if (!mutual || k > 64) {
+    std::vector<std::vector<int>> rows;
+    fillGraphFromNom(yCloud, nom, k, mutual, rows);
+    csrFromRows(yCloud, rows, offsets, cols);
+    return;
+  }
+  std::vector<int> deg(static_cast<std::size_t>(n), 0);
+  CsrSlabs job{&nom, &deg, &cols, &offsets, n, k, 0};
+  csrContinue(&job);
+}
+
+void nneigh::kNearestPacked(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, std::vector<double> &xyz,
+    std::vector<int> &nom) {
+  // The q path calls this and then an OpenMP harmonic. Pausing the team
+  // here makes the next parallel region pay a wake-up, which is the
+  // several-millisecond swing on a few thousand atoms.
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
+  const int n = yCloud.nop;
+  nom.assign(static_cast<std::size_t>(std::max(n, 0)) * static_cast<std::size_t>(std::max(k, 0)),
+             -1);
+  if (n <= 0 || k <= 0) {
+    return;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+#ifdef SEAMS_HAS_LINKCELL
+  if (nominateByLinkcell(yCloud, k, typeI, hint, nom, nullptr, &xyz) &&
+      static_cast<int>(xyz.size()) == n * 3) {
+    return;
+  }
+#endif
+  if (nom.size() != static_cast<std::size_t>(n) * static_cast<std::size_t>(k) ||
+      std::all_of(nom.begin(), nom.end(), [](int v) { return v < 0; })) {
+    nom = nominatePacked(yCloud, k, typeI, hint);
+  }
+  xyz.resize(static_cast<std::size_t>(n) * 3);
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(3 * i)] = p.x;
+    xyz[static_cast<std::size_t>(3 * i + 1)] = p.y;
+    xyz[static_cast<std::size_t>(3 * i + 2)] = p.z;
+  }
 }
 
 std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
@@ -2118,6 +3312,10 @@ nneigh::kNearestNeighbourPair(
   if (yCloud.nop <= 0 || k <= 0) {
     return {{}, {}};
   }
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
   std::vector<std::vector<int>> mutual;
@@ -2130,7 +3328,11 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, const std::vector<int> &types, bool mutual) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {};
   }
@@ -2148,6 +3350,10 @@ nneigh::kNearestNeighbourPair(
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {{}, {}};
   }
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, types.front(), hint, &types);
   std::vector<std::vector<int>> mutual;
@@ -2324,13 +3530,13 @@ std::pair<double, double> nneigh::shellSeparation(
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   std::vector<double> dists;
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type != typeI) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
       continue;
     }
     const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
     dists.clear();
     for (int j = 0; j < yCloud.nop; j++) {
-      if (j == i || yCloud.pts[j].type != typeI) {
+      if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
@@ -2338,19 +3544,30 @@ std::pair<double, double> nneigh::shellSeparation(
                                                  pj.y, pj.z)
                                : gen::periodicDistSq(frame, yCloud, i, j));
     }
-    if (static_cast<int>(dists.size()) < k + 1) {
-      continue;
+    // A site with fewer than k others has no k-th neighbour, so no cutoff
+    // reproduces its k-nearest row. The certificate fails rather than
+    // skipping that site.
+    const int nOther = static_cast<int>(dists.size());
+    if (nOther < k) {
+      return {std::numeric_limits<double>::infinity(), 0.0};
     }
-    std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
-    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(k)])) {
+    // With exactly k others the k-th distance still bounds the cutoff from
+    // below; there is no (k+1)-th distance to bound it from above.
+    const int want = nOther < k + 1 ? k : k + 1;
+    std::partial_sort(dists.begin(), dists.begin() + want, dists.end());
+    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(want - 1)])) {
       dists.clear();
       for (int j = 0; j < yCloud.nop; j++) {
-        if (j == i || yCloud.pts[j].type != typeI) {
+        if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {
           continue;
         }
         dists.push_back(gen::periodicDistSq(frame, yCloud, i, j));
       }
-      std::partial_sort(dists.begin(), dists.begin() + k + 1, dists.end());
+      std::partial_sort(dists.begin(), dists.begin() + want, dists.end());
+    }
+    if (want == k) {
+      maxKth = std::max(maxKth, std::sqrt(dists[static_cast<std::size_t>(k - 1)]));
+      continue;
     }
     maxKth = std::max(maxKth, std::sqrt(dists[static_cast<std::size_t>(k - 1)]));
     const double next = std::sqrt(dists[static_cast<std::size_t>(k)]);
@@ -2413,7 +3630,7 @@ bool nneigh::SkinNeighborList::mustRebuild(
   }
   std::vector<double> old(3);
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type != typeI_) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI_) {
       continue;
     }
     old[0] = x0_[static_cast<std::size_t>(i)];
@@ -2435,7 +3652,7 @@ void nneigh::SkinNeighborList::rebuildCandidates(
   std::vector<int> subset;
   subset.reserve(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type == typeI_) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI_) {
       subset.push_back(i);
     }
   }
@@ -2451,11 +3668,11 @@ void nneigh::SkinNeighborList::rebuildCandidates(
   {
     const auto wideList = nneigh::neighListO(wide, yCloud, typeI_);
     for (int i = 0; i < yCloud.nop; i++) {
-      if (static_cast<int>(wideList.size()) <= i || wideList[i].size() <= 1) {
+      if (static_cast<int>(wideList.size()) <= i || wideList[static_cast<std::size_t>(i)].size() <= 1) {
         continue;
       }
-      for (std::size_t n = 1; n < wideList[i].size(); n++) {
-        const auto it = yCloud.idIndexMap.find(wideList[i][n]);
+      for (std::size_t n = 1; n < wideList[static_cast<std::size_t>(i)].size(); n++) {
+        const auto it = yCloud.idIndexMap.find(wideList[static_cast<std::size_t>(i)][n]);
         if (it == yCloud.idIndexMap.end()) {
           continue;
         }
@@ -2470,9 +3687,9 @@ void nneigh::SkinNeighborList::rebuildCandidates(
   y0_.resize(static_cast<std::size_t>(yCloud.nop));
   z0_.resize(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    x0_[static_cast<std::size_t>(i)] = yCloud.pts[i].x;
-    y0_[static_cast<std::size_t>(i)] = yCloud.pts[i].y;
-    z0_[static_cast<std::size_t>(i)] = yCloud.pts[i].z;
+    x0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].x;
+    y0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].y;
+    z0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].z;
   }
   box0_ = yCloud.box;
 }

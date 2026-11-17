@@ -1,0 +1,1 @@
+The Comparisons tables name HaoZeke/seams-core and the benchmark branch, with a GitHub link, instead of a local remote. The long census and timing tables sit in collapsible blocks under a short per-cell summary. The C, C++, Python, Fortran, Julia, R, Rust, and Lua examples are programs or asserted snippets the docs suite runs.

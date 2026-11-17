@@ -13,7 +13,59 @@
 //-----------------------------------------------------------------------------------
 
 #include <ira_sofi.hpp>
+#include <generic.hpp>
 #include <shapeMatch.hpp>
+
+namespace {
+
+// Height of the pair along the basal-ring normal. A prism is stacked:
+// coplanar rings have no component on that normal. Positions are taken
+// as minimum-image offsets from the first atom of basal1.
+double basalStackHeight(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &basal1, const std::vector<int> &basal2) {
+  if (basal1.size() < 3 || basal2.empty()) {
+    return 0.0;
+  }
+  const int origin = basal1[0];
+  auto centroid = [&](const std::vector<int> &ring) {
+    std::array<double, 3> c{0.0, 0.0, 0.0};
+    for (int idx : ring) {
+      const auto d = gen::relDist(yCloud, origin, idx);
+      c[0] += d[0];
+      c[1] += d[1];
+      c[2] += d[2];
+    }
+    const double n = static_cast<double>(ring.size());
+    c[0] /= n;
+    c[1] /= n;
+    c[2] /= n;
+    return c;
+  };
+  const auto u = gen::relDist(yCloud, origin, basal1[1]);
+  double nx = 0.0, ny = 0.0, nz = 0.0, nlen = 0.0;
+  for (std::size_t k = 2; k < basal1.size(); ++k) {
+    const auto v = gen::relDist(yCloud, origin, basal1[k]);
+    nx = u[1] * v[2] - u[2] * v[1];
+    ny = u[2] * v[0] - u[0] * v[2];
+    nz = u[0] * v[1] - u[1] * v[0];
+    nlen = std::sqrt(nx * nx + ny * ny + nz * nz);
+    if (nlen > 1e-12) {
+      break;
+    }
+  }
+  if (nlen == 0.0) {
+    return 0.0;
+  }
+  const auto c1 = centroid(basal1);
+  const auto c2 = centroid(basal2);
+  const double dx = c2[0] - c1[0];
+  const double dy = c2[1] - c1[1];
+  const double dz = c2[2] - c1[2];
+  return std::fabs(dx * nx + dy * ny + dz * nz) / nlen;
+}
+
+} // namespace
 
 /**
  * @details Shape-matching for a pair of polygon basal rings. Returns true if
@@ -25,7 +77,7 @@ bool match::matchPrism(
     std::vector<int> &basal1, std::vector<int> &basal2,
     std::vector<double> &rmsdPerAtom, bool isPerfect) {
   //
-  int ringSize = basal1.size(); // Number of nodes in each basal ring
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in each basal ring
   std::vector<int> matchedBasal1,
       matchedBasal2; // Re-ordered basal rings 1 and 2
   int dim = 3;       // Number of dimensions
@@ -113,7 +165,7 @@ bool match::matchUntetheredPrism(
     std::vector<int> &basal1, std::vector<int> &basal2,
     std::vector<double> &rmsdPerAtom) {
   //
-  int ringSize = basal1.size(); // Number of nodes in each basal ring
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in each basal ring
   std::vector<int> matchedBasal1,
       matchedBasal2; // Re-ordered basal rings 1 and 2
   int dim = 3;       // Number of dimensions
@@ -188,7 +240,7 @@ int match::updatePerAtomRMSDRing(const std::vector<int> &basalRing, int starting
                                  std::vector<double> &rmsdPerAtom) {
   //
   int atomIndex;                   // Atom particle index, in rmsdPerAtom
-  int ringSize = basalRing.size(); // Size of the basal ring
+  int ringSize = static_cast<int>(basalRing.size()); // Size of the basal ring
   int index;                       // Corresponding index in the basal ring
   double iRMSD;                    // Per-particle RMSD
 
@@ -202,11 +254,11 @@ int match::updatePerAtomRMSDRing(const std::vector<int> &basalRing, int starting
     } // end of wrap-around
     //
     // Get the atom index
-    atomIndex = basalRing[index];
+    atomIndex = basalRing[static_cast<std::size_t>(index)];
     // Get and update the RMSD per particle
-    iRMSD = rmsdFromMatch[i];
-    if (rmsdPerAtom[atomIndex] == -1) {
-      rmsdPerAtom[atomIndex] = iRMSD;
+    iRMSD = rmsdFromMatch[static_cast<std::size_t>(i)];
+    if (rmsdPerAtom[static_cast<std::size_t>(atomIndex)] == -1) {
+      rmsdPerAtom[static_cast<std::size_t>(atomIndex)] = iRMSD;
     } // end of update of RMSD
 
   } // end of updating the RMSD per particle
@@ -221,7 +273,7 @@ int match::updateRMSDRing(const std::vector<int> &basalRing, int startingIndex,
                           double rmsdVal, std::vector<double> &rmsdPerAtom) {
   //
   int atomIndex;                   // Atom particle index, in rmsdPerAtom
-  int ringSize = basalRing.size(); // Size of the basal ring
+  int ringSize = static_cast<int>(basalRing.size()); // Size of the basal ring
   int index;                       // Corresponding index in the basal ring
 
   // -----------------
@@ -234,10 +286,10 @@ int match::updateRMSDRing(const std::vector<int> &basalRing, int startingIndex,
     } // end of wrap-around
     //
     // Get the atom index
-    atomIndex = basalRing[index];
+    atomIndex = basalRing[static_cast<std::size_t>(index)];
     // The RMSD value to update with is rmsdVal
-    if (rmsdPerAtom[atomIndex] == -1) {
-      rmsdPerAtom[atomIndex] = rmsdVal;
+    if (rmsdPerAtom[static_cast<std::size_t>(atomIndex)] == -1) {
+      rmsdPerAtom[static_cast<std::size_t>(atomIndex)] = rmsdVal;
     } // end of update of RMSD
 
   } // end of updating the RMSD for each particle
@@ -253,8 +305,16 @@ bool match::matchPrismBlock(
     const std::vector<std::vector<int>> &nList, const Eigen::MatrixXd &refPoints,
     std::vector<int> &basal1, std::vector<int> &basal2, int &beginIndex) {
   //
-  int ringSize = basal1.size(); // Number of nodes in the basal rings
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in the basal rings
   bool isMatch; // Qualifier for whether the prism block matches or not
+  // The reference height is this candidate's own mean pairwise
+  // distance, and an RMSD of 6 still counts as a match, so two
+  // coplanar squares are accepted. A prism is stacked: reject a pair
+  // whose centroids have no component along the basal normal.
+  beginIndex = 0;
+  if (basalStackHeight(yCloud, basal1, basal2) <= 1e-8) {
+    return false;
+  }
   int dim = 3;  // Number of dimensions
   int nop = 2 * ringSize; // Number of particles in the prism block
   Eigen::MatrixXd refPrismBlock(

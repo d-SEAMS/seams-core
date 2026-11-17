@@ -68,7 +68,7 @@ Cloud lattice(int ionSite) {
 } // namespace
 
 TEST_CASE("the rings through an ion's shell are the squares that survive it", "[ions][rings]") {
-  const int ion = 62;  // (2, 2, 2), the centre
+  const int ion = 62;  // (2, 2, 2), the center
   const auto cloud = lattice(ion);
   const auto rows = nneigh::neighbourListByIndex(cloud, nneigh::neighListO(3.5, cloud, 1));
   const auto rings = primitive::ringNetwork(rows, 4);
