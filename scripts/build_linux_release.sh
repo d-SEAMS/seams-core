@@ -118,12 +118,30 @@ pkg-config --exists --print-errors "eigen3 >= 3.4.0"
 mkdir -p "$work/src"
 tar -C "$work/src" -xzf "$src_tar"
 src=$work/src/seams-core-${version}
+# Pinned to the wrap files. The recipe turns the .con reader on only
+# when this directory is already present, and nodownload will not clone it.
+git clone --depth 1 --branch v0.16.2 \
+  https://github.com/lode-org/readcon-core.git \
+  "$src/subprojects/readcon-core"
+git clone --depth 1 --branch v0.1.8 \
+  https://github.com/lode-org/readcon-db.git \
+  "$src/subprojects/readcon-db"
+export CARGO_HOME=$work/cargo
+export RUSTUP_HOME=$work/rustup
+curl --proto '=https' --tlsv1.2 -fsS https://sh.rustup.rs -o "$work/rustup-init"
+sh "$work/rustup-init" -y --default-toolchain 1.88.0 --profile minimal
+# rustup writes this file.
+. "$CARGO_HOME/env"
+printf '%s\n' "rustc: $(rustc --version)"
 prefix=$work/libseams-${version}
 export PREFIX=$prefix
 export CPU_COUNT=${CPU_COUNT:-$(nproc)}
 (cd "$src" && bash recipe/build-libseams.sh)
 
-EIGEN_SRC=$eigen_src bash "$root/scripts/finish_libseams_prefix.sh" "$prefix"
+EIGEN_SRC=$eigen_src \
+  READCON_CORE_SRC=$src/subprojects/readcon-core \
+  READCON_DB_SRC=$src/subprojects/readcon-db \
+  bash "$root/scripts/finish_libseams_prefix.sh" "$prefix"
 
 export PKG_CONFIG_PATH=$prefix/lib/pkgconfig
 pkg-config --exists --print-errors seams
@@ -234,6 +252,29 @@ int main(void) {
 EOF
 gcc "$work/consumer.c" -o "$work/consumer" $(pkg-config --cflags --libs seams)
 env LD_LIBRARY_PATH="$prefix/lib" "$work/consumer"
+
+cat > "$work/con_reader.c" <<'EOF'
+#include "seams.h"
+#include <stdio.h>
+int main(int argc, char **argv) {
+  seams_system *sys = seams_system_create();
+  if (argc != 2 || sys == 0) {
+    return 1;
+  }
+  if (seams_system_read(sys, argv[1], 1, -1) != SEAMS_OK) {
+    return 1;
+  }
+  if (seams_system_count(sys) <= 0) {
+    return 1;
+  }
+  seams_system_destroy(sys);
+  printf("con-reader ok\n");
+  return 0;
+}
+EOF
+gcc "$work/con_reader.c" -o "$work/con_reader" $(pkg-config --cflags --libs seams)
+env LD_LIBRARY_PATH="$prefix/lib" "$work/con_reader" \
+  "$src/subprojects/readcon-core/resources/test/tiny_multi_cuh2.con"
 
 mkdir -p "$out"
 tar -C "$work" -czf "$out/libseams-${version}-linux-x86_64.tar.gz" "libseams-${version}"

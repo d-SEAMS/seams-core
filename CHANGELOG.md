@@ -14,7 +14,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Added
 
-- The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, and the GCC runtime objects in its binaries.
+- The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
 
 ### Changed
 
@@ -38,6 +38,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `pin_host` is registered on Linux only. It reads cpu masks with `sched_getaffinity` and the proc filesystem, and the placement it checks exists only on Linux. On macOS it stopped at the missing `libyodaLib.so`, and it could not have passed with the dylib either.
 - The default pixi environment installs OpenMM on macOS, so `docs_engine_openmm` and the engine walkthrough run it there. The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
 - `seams.pc` and the other pkg-config files in the Linux tarball use `prefix=${pcfiledir}/../..`, so the link line follows wherever the tarball is unpacked.
+- `seams_system_read` in the Linux tarball reads .con files, because the release build turns the readcon reader on.
 
 ## [2.14.0] - 2026-11-15
 

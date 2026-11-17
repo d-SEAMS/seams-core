@@ -13,15 +13,12 @@ prefix=$1
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 shopt -s nullglob
 pc_files=("$prefix"/lib/pkgconfig/*.pc)
-if [[ ${#pc_files[@]} -ne 3 ]]; then
-  printf '%s\n' "expected seams.pc, seams-core.pc and seams-lang.pc" >&2
-  exit 1
-fi
-
+have_seams=0
 for pc in "${pc_files[@]}"; do
   base=$(basename "$pc")
   case $base in
-    seams.pc|seams-core.pc|seams-lang.pc) ;;
+    seams.pc|seams-core.pc|seams-lang.pc) have_seams=$((have_seams + 1)) ;;
+    readcon-core.pc|readcon-db.pc) ;;
     *)
       printf '%s\n' "unexpected pkg-config file $base" >&2
       exit 1
@@ -38,6 +35,10 @@ for pc in "${pc_files[@]}"; do
     exit 1
   fi
 done
+if [[ $have_seams -ne 3 ]]; then
+  printf '%s\n' "expected seams.pc, seams-core.pc and seams-lang.pc" >&2
+  exit 1
+fi
 
 cp "$root/LICENSE" "$prefix/LICENSE"
 lic=$prefix/licenses
@@ -103,6 +104,19 @@ if [[ ! -f $lic/gcc-runtime/COPYING3 || ! -f $lic/gcc-runtime/COPYING.RUNTIME ]]
   exit 1
 fi
 
+if [[ -n ${READCON_CORE_SRC:-} ]]; then
+  mkdir -p "$lic/readcon-core"
+  cp "$READCON_CORE_SRC/LICENSE" "$lic/readcon-core/LICENSE"
+fi
+if [[ -n ${READCON_DB_SRC:-} ]]; then
+  mkdir -p "$lic/readcon-db"
+  cp "$READCON_DB_SRC/LICENSE" "$lic/readcon-db/LICENSE"
+fi
+if [[ ! -f $lic/readcon-core/LICENSE || ! -f $lic/readcon-db/LICENSE ]]; then
+  printf '%s\n' "readcon licence texts were not copied" >&2
+  exit 1
+fi
+
 cat > "$lic/README" <<'EOF'
 The project licence is LICENSE at the top of this archive.
 
@@ -122,4 +136,10 @@ gcc-runtime
   GCC runtime objects the manylinux_2_28 compiler links statically
   for symbols absent from the shared libstdc++ and libgcc on glibc
   2.28. GPL-3.0 with the GCC Runtime Library Exception.
+
+readcon-core
+  The .con reader shipped beside libseams. MIT.
+
+readcon-db
+  The CON corpus reader shipped beside libseams. MIT.
 EOF

@@ -68,9 +68,9 @@ jobs:
               "The linux-x86_64 archive is built on glibc 2.28 and needs "
               "glibc 2.28 or newer, including RHEL 8, RHEL 9, and Ubuntu "
               "20.04 or newer. Its pkg-config files keep "
-              "`prefix=${pcfiledir}/../..`, and the archive includes LICENSE "
+              "`prefix=${pcfiledir}/../..`, the archive includes LICENSE "
               "plus the licenses of the third-party code compiled into the "
-              "binaries.\n"
+              "binaries, and the .con reader is included.\n"
           )
           pathlib.Path("dist/release-notes.md").write_text(
               body.strip() + "\n\n" + note
