@@ -760,18 +760,24 @@ def compile_statements(build, env, lang, body):
         uses_frame = "seams_frame_" in body
         uses_sys = "seams_system_" in body or re.search(r"\bsys\b", body) is not None
         declares_sys = "seams_system *sys" in body
+        wants_handle = any(
+            re.search(r"\b" + name + r"\b", body) for name, _ctype, _make, _destroy in C_HANDLES
+        )
         frame = ""
         if uses_frame and "seams_frame *frame" not in body:
             frame = "seams_frame *frame = seams_frame_read(path, 1, -1);\n"
         # A frame-only call does not need a system handle. Injecting one
         # pulls seams.h symbols into a unit that includes only seams_lang.h.
-        if uses_sys and not declares_sys:
+        # A neighbour, ring, cage, or fingerprint handle is built from sys,
+        # so that example still gets one.
+        needs_sys = uses_sys or wants_handle
+        if needs_sys and not declares_sys:
             sysline = (
                 "seams_system *sys = seams_system_create();\n"
                 "  seams_system_set_ortho(sys, doc_cell, 8, 0, 0, 0, a, a, a, NULL, NULL);\n"
             )
             owned = "sys"
-        elif uses_sys:
+        elif needs_sys:
             sysline = ""
             owned = "sys"
         else:
@@ -779,7 +785,7 @@ def compile_statements(build, env, lang, body):
             owned = "0"
         predeclared = owned == "sys" and not declares_sys
         mixed = uses_frame and (
-            uses_sys or "seams_chill_plus(" in body or "seams_rings_" in body or "seams_q4" in body
+            needs_sys or "seams_chill_plus(" in body or "seams_rings_" in body or "seams_q4" in body
         )
         header = "seams.h" if mixed or "seams_frame_" not in body else "seams_lang.h"
         forward = ""
