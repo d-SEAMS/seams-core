@@ -50,6 +50,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The default pixi environment installs OpenMM on macOS, so `docs_engine_openmm` and the engine walkthrough run it there. The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
 - `seams.pc` and the other pkg-config files in the Linux tarball use `prefix=${pcfiledir}/../..`, so the link line follows wherever the tarball is unpacked.
 - `seams_system_read` in the Linux tarball reads .con files, because the release build turns the readcon reader on.
+- The release recipe enables the .con reader when `SEAMS_WITH_READCON=enabled`. A checkout that already contains the readcon wrap leaves the reader off, as does the conda-forge archive.
 - The four-process placement check runs on a four-cpu mask. Each process keeps one cpu, and a sample counts that cpu. A lone process still has to show two cpus in the same sample.
 - The docs workflow check reads `contents: write` from the build-deploy job and stops at the next job.
 

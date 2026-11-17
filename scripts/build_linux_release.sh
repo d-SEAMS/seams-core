@@ -153,6 +153,7 @@ printf '%s\n' "rustc: $(rustc --version)"
 prefix=$work/libseams-${version}
 export PREFIX=$prefix
 export CPU_COUNT=${CPU_COUNT:-$(nproc)}
+export SEAMS_WITH_READCON=enabled
 (cd "$src" && bash recipe/build-libseams.sh)
 
 EIGEN_SRC=$eigen_src \

@@ -13,10 +13,11 @@ fi
 # chemfiles stays off until conda-forge ships one that passes the
 # mmCIF probe (cmake/chemfiles_mmcif_probe.cpp); the build would
 # otherwise download and patch 0.10.4.
-# The .con reader is on when its wrap is already unpacked. The linux
-# archive checks that wrap out before this script. A tree without it,
-# including the conda-forge source archive, leaves the reader off.
-if [[ -d subprojects/readcon-core ]]; then
+# The linux archive script sets SEAMS_WITH_READCON=enabled after it
+# has fetched the wraps. Every other build, including conda-forge and
+# a checkout where the wrap directory is already present, leaves the
+# reader off.
+if [[ ${SEAMS_WITH_READCON:-} == enabled ]]; then
   readcon_opt=-Dwith_readcon=enabled
 else
   readcon_opt=-Dwith_readcon=disabled
