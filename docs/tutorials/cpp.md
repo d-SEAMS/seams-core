@@ -27,7 +27,7 @@ A program that classifies one frame links `libseams` and calls
 
 ## Structure still
 
-```{figure} ../tutorials/molecules/cpp/overlay-web.png
+```{figure} ../user/tutorials/molecules/cpp/overlay-web.png
 :alt: Molecule still for this front
 :width: 480px
 

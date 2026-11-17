@@ -214,7 +214,7 @@ def main():
     corpus = harvest(errors)
     api = DOCS / "api"
     engines = DOCS / "engines"
-    howto = DOCS / "orgmode" / "howto"
+    howto = DOCS / "orgmode" / "user" / "howto"
     require_tokens(corpus, [api / "c.md"], c_symbols(), errors, "C API")
     require_tokens(corpus, [api / "cpp.md"], lang_symbols(), errors, "language ABI")
     require_tokens(

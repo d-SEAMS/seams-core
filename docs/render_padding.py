@@ -16,7 +16,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CSV = ROOT / "docs" / "data" / "recall-padding-validation.csv"
-OUT = ROOT / "docs" / "source" / "howto" / "cutoff-padding-tables.rst"
+OUT = ROOT / "docs" / "source" / "user" / "howto" / "cutoff-padding-tables.rst"
 
 SUMMARY = (
     "lane",

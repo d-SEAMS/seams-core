@@ -1,0 +1,22 @@
+#+TITLE: Paper figures
+#+OPTIONS: toc:nil num:nil
+
+The in-tree numbers behind the published figures, and the gallery drawn from those runs.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/paper-figures
+   tutorials/paper-interface
+   tutorials/paper-cages
+   tutorials/paper-rings
+   tutorials/paper-brine
+   tutorials/paper-nucleation
+   tutorials/gallery
+   ../science/index
+   ../science/interface
+   ../science/brine
+   ../science/cages
+   ../science/gallery
+#+end_export

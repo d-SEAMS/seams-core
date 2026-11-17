@@ -23,7 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONF = ROOT / "docs" / "source" / "conf.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "ci_docs.yml"
-NOTE = ROOT / "docs" / "orgmode" / "contributing" / "index.org"
+NOTE = ROOT / "docs" / "orgmode" / "development" / "index.org"
 BUILD = ROOT / "docs" / "build"
 HOST = "docs.dseams.info"
 DEPLOY_IF = (

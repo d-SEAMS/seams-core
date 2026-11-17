@@ -1,0 +1,13 @@
+#+TITLE: Getting started
+#+OPTIONS: toc:nil num:nil
+
+Install the engine, read one frame, and open the recording of that run.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   quickstart
+   install
+   ../videos/index
+#+end_export

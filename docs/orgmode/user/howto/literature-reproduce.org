@@ -1,0 +1,70 @@
+#+TITLE: Reproduce the literature head-to-head
+#+OPTIONS: toc:nil num:nil
+
+A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
+benchmark campaign. The records and the Snakemake rules that write them
+are in the private paper repository and the Hugging Face dataset
+=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
+revision); the scripts under =scripts/= that time a run stay here.
+
+~scripts/h2h_rc3_sitting.py~ writes ~benchmarks/rc3-sitting.csv~.
+One warm-up, then six timed calls. The median and the type-7
+interquartile range are the columns on
+[[file:../../explanation/performance.org][the sitting page]].
+This page is how each guest code is given a thread width, and what
+that width did to the median.
+
+The driver starts every row under ~taskset~. One thread is
+~taskset -c 0~. Eight threads are ~taskset -c 0-7~. It also sets
+~OMP_NUM_THREADS~ to that width and ~OMP_DYNAMIC=FALSE~. Each code
+then receives the same width through its own control.
+
+| code | what is timed | thread control |
+|------+---------------+----------------|
+| freud | local q4 and q6 | ~freud.parallel.set_num_threads(n)~ |
+| OVITO | CHILL+, primitive rings, polyhedral template matching | ~OVITO_THREAD_COUNT=n~ before ~import ovito~ |
+| mdapy | CHILL+, q4, q6, rings | ~mdapy.set_num_threads(n)~ |
+| vesin | full cell-list neighbour pairs | ~NeighborList(..., n_threads=n, algorithm="cell_list")~ |
+| PLUMED | symfunc q4 and q6 | ~PLUMED_NUM_THREADS~ was unset, so both columns are one thread |
+| rings-statistics-matter | primitive rings, Rust backend | ~ring_statistics(..., num_threads=n)~ |
+
+Polyhedral template matching is the OVITO modifier. Its row is
+~PTM~. rings-statistics-matter is the ~rsm~ package.
+
+#+begin_src bash
+python3 scripts/h2h_rc3_sitting.py
+#+end_src
+
+* What the medians do
+
+On ideal ice Ic at 110592 and 884736 molecules, freud, OVITO, mdapy,
+vesin, and rings-statistics-matter are faster at eight threads than at
+one. OVITO's template matching and its ring finder fall with the same
+control as its CHILL+. ~meson test docs_h2h_threads~ checks those
+inequalities against the CSV.
+
+The PLUMED rows in this sitting were measured on one thread because
+~PLUMED_NUM_THREADS~ was unset. The driver set ~OMP_NUM_THREADS~ and
+left ~PLUMED_NUM_THREADS~ alone. The installed header
+~plumed/tools/OpenMP.h~ exposes ~PLMD::OpenMP::getNumThreads~, which
+returns one thread when that variable is unset. That is why the
+~threads=1~ column and the ~threads=8~ column of these rows are the
+same one-thread measurement.
+~benchmarks/paper-cells/sitting-large.csv~ sets
+~PLUMED_NUM_THREADS~ to the width of the row, and that q6 time falls
+from one thread to eight. These rc3 rows are not that measurement.
+
+#+begin_src cpp
+#include "plumed/tools/OpenMP.h"
+#include <cstdio>
+
+int main() {
+  unsigned threads = PLMD::OpenMP::getNumThreads();
+  std::printf("plumed threads %u\n", threads);
+  return threads == 0 ? 1 : 0;
+}
+#+end_src
+
+#+begin_export rst
+.. include:: literature-speed.rst
+#+end_export

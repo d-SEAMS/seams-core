@@ -42,7 +42,7 @@ repository, released with the same version against the seams-core tag:
 | Rust | [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs) | crates `dseams-sys`, `dseams` |
 | Fortran | [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran) | fpm `dseams` |
 
-`docs/orgmode/contributing/repositories.org` says what lives where and how
+`docs/orgmode/development/repositories.org` says what lives where and how
 to develop seams-core and a binding together.
 
 Periodic k-nearest neighbour search is
@@ -126,7 +126,7 @@ The package it releases is conda-forge `libseams` (`recipe/`); the Julia
 `libseams_jll` is built from `packaging/yggdrasil`. The language packages
 (`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
 Julia packages) are built and released by their own repositories, listed
-above. `docs/orgmode/howto/install.org` has every install line.
+above. `docs/orgmode/getting-started/install.org` has every install line.
 
 ```bash
 pixi run setup && pixi run build && pixi run test
@@ -366,4 +366,4 @@ A player on a docs page uses `https://odysee.com/$/embed/<claim-name>:<claim-id>
 `Dseams` bindings link it; the Lua, Rust, Fortran and Julia `Seams`
 bindings link `libseams`. The bindings themselves live in the
 repositories in the table at the top. The how-to is
-`docs/orgmode/howto/bindings.org`.
+`docs/orgmode/user/howto/bindings.org`.

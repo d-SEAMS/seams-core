@@ -17,7 +17,7 @@ belongs to both cages sits on the fault. CHILL+ writes that as
 None of those names is a threshold on \(q_6\).
 
 The interface frame in
-[[file:../tutorials/interface.org][the interface tutorial]] is the
+[[file:../user/tutorials/interface.org][the interface tutorial]] is the
 small case. Its stack string is ~HHHHHHHH....C.~: eight hexagonal
 slabs and one cubic layer. Of 864 molecules, 352 are hexagonal and 1
 is cubic. A \(q_6\) cutoff would add those together. The cage search

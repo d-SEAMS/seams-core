@@ -1,4 +1,4 @@
-#+TITLE: Lookup pages
+#+TITLE: API reference
 #+OPTIONS: toc:nil num:nil ^:nil
 
 Lookup pages for the engine. Tutorials and how-tos live elsewhere.
@@ -17,3 +17,33 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:../explanation/performance.org][Sitting tables]] | Medians from ~benchmarks/rc3-sitting.csv~ |
 | [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
 | [[file:release-2.14.org][2.14.0 release notes]] | API, engines, threads, and deprecations since v2.13.0 |
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   python-frame
+   cli
+   data-formats
+   walk-compare
+   api
+   nix
+   cross-language
+   glossary
+   release-2.14
+   ../capi/index
+   ../stable/index
+   ../stable/c
+   ../stable/cpp
+   ../stable/python
+   ../stable/fortran
+   ../stable/julia
+   ../stable/r
+   ../stable/lua
+   ../stable/rust
+   ../stable/cli
+   ../stable/science
+   ../lang/index
+   ../api/index
+#+end_export

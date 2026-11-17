@@ -32,14 +32,14 @@
    :class-container: sd-text-center
 
    .. grid-item-card:: Read
-      :link: quickstart
+      :link: getting-started/quickstart
       :link-type: doc
       :class-card: sd-shadow-sm
 
       Load a LAMMPS frame and print nop, frame, and box.
 
    .. grid-item-card:: Classify
-      :link: tutorials/bulk-ice
+      :link: user/tutorials/bulk-ice
       :link-type: doc
       :class-card: sd-shadow-sm
 
@@ -81,7 +81,7 @@ seams prisms "$dump" --type 1
 #+end_src
 
 The [[file:videos/index.org][videos]], the
-[[file:howto/migrate-1x.org][1.x migration]], the
+[[file:user/howto/migrate-1x.org][1.x migration]], the
 [[file:explanation/performance-h2h.org][performance tables]], and the
 [[file:reference/release-2.14.org][2.14.0 notes]] are the rest of this
 release.
@@ -94,7 +94,7 @@ The first classification is five lines. Install with
 ~pip install 'pydseamslib==2.14.0'~ for the Frame package, with conda-forge's
 Meson toolchain, or with ~meson setup build && meson compile -C build~,
 then run the Python and C programs on
-[[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.
+[[file:getting-started/quickstart.org][the quick start]]. Both report 8 cubic molecules.
 
 #+begin_src bash
 seams read input/traj/ice1h.lammpstrj
@@ -116,7 +116,7 @@ version against this tag:
 - Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
 - Fortran: fpm ~dseams~, [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
 
-[[file:contributing/repositories.org][The repository map]] says what
+[[file:development/repositories.org][The repository map]] says what
 lives where.
 
 The header *Ecosystem* menu on every page jumps between the engine,
@@ -141,233 +141,64 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
 
 * Documentation structure
 
-This documentation follows the [[https://diataxis.fr/][Diataxis]]
-framework.
+Four ways in. The user guide groups the tutorials and the how-tos by
+task. The explanation pages are the background for those tasks.
 
 #+begin_export rst
-.. grid:: 1 2 3 3
+.. grid:: 1 1 2 4
    :gutter: 2
 
-   .. grid-item-card:: Tutorials
-      :link: tutorials/index
+   .. grid-item-card:: Getting started
+      :link: getting-started/index
       :link-type: doc
 
-      Ice, clathrates, brine, and nucleation, each with a runnable check.
+      Install the engine and classify one shipped frame.
 
-   .. grid-item-card:: How-to
-      :link: howto/index
+   .. grid-item-card:: User guide
+      :link: user/index
       :link-type: doc
 
-      Cutoff, neighbours, CHILL+, rings, and the engine builds.
+      Tutorials and how-tos, grouped by the analysis you want to run.
 
-   .. grid-item-card:: Reference
+   .. grid-item-card:: API reference
       :link: reference/index
       :link-type: doc
 
-      :doc:`C <capi/index>`, :doc:`C++ <stable/cpp>`,
-      :doc:`CLI <reference/cli>`, and the
-      :doc:`language bindings <howto/bindings>`.
+      The C API, the C++ API, the command line, and the language bindings.
 
-   .. grid-item-card:: Engines
-      :link: engines/index
+   .. grid-item-card:: Development
+      :link: development/index
       :link-type: doc
 
-      :doc:`LAMMPS <engines/lammps>`, :doc:`GROMACS <engines/gromacs>`,
-      :doc:`OpenMM <engines/openmm>`, :doc:`PLUMED <engines/plumed>`.
-
-   .. grid-item-card:: Comparisons
-      :link: comparisons
-      :link-type: doc
-
-      OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED, next to the tests that recompute them.
-
-   .. grid-item-card:: Videos
-      :link: videos/index
-      :link-type: doc
-
-      Odysee recordings of the bindings and the tutorials.
+      Build the engine, map the repositories, and cut a release.
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Getting started
 
-   quickstart
-   howto/install
-   videos/index
+   getting-started/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: Tutorials
+   :maxdepth: 2
+   :caption: User guide
 
-   tutorials/index
-   tutorials/clathrate
-   tutorials/interface
-   tutorials/nucleation
-   tutorials/brine
-   tutorials/insitu-run
-   tutorials/bulk-ice
-   tutorials/ice-and-clathrate
-   tutorials/rings
-   tutorials/order-parameters
-   tutorials/confined-water
-   tutorials/nanotube
-   tutorials/paper-figures
-   tutorials/paper-interface
-   tutorials/paper-cages
-   tutorials/paper-rings
-   tutorials/paper-brine
-   tutorials/paper-nucleation
-   tutorials/gallery
-   science/index
-   science/interface
-   science/brine
-   science/cages
-   science/gallery
-   fronts/index
-   fronts/c
-   fronts/cpp
-   fronts/fortran
-   fronts/julia
-   fronts/lua
-   fronts/python
-   fronts/r
-   fronts/rust
-   fronts/engines
-   fronts/gromacs
-   fronts/insitu
-   fronts/lammps
-   fronts/openmm
-   fronts/plumed
+   user/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: How-to
-
-   howto/index
-   howto/upgrade-2.14
-   howto/migrate-1x
-   howto/bindings
-   howto/versions
-   howto/benchmarks
-   howto/neighbour-lists
-   howto/openmp-offload
-   howto/classify-cli
-   howto/rings
-   howto/cages-trace
-   howto/q4-q6
-   howto/chill-plus
-   howto/cutoff-padding
-   howto/symmetry-classifier
-   howto/linkcell-carried
-   howto/sheared-cells
-   howto/ionic-liquid
-   howto/confined-ice
-   howto/science-front
-   howto/from-trajectory
-   howto/engine-gromacs
-   howto/engine-lammps
-   howto/engine-openmm
-   howto/engine-plumed
-   howto/engine-insitu
-   howto/faq
-   howto/troubleshooting
-   walkthrough/index
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Reference
+   :maxdepth: 2
+   :caption: API reference
 
    reference/index
-   reference/python-frame
-   reference/cli
-   reference/data-formats
-   reference/walk-compare
-   reference/api
-   reference/nix
-   reference/cross-language
-   reference/glossary
-   reference/release-2.14
-   stable/index
-   stable/c
-   stable/cpp
-   stable/python
-   stable/fortran
-   stable/julia
-   stable/r
-   stable/lua
-   stable/rust
-   stable/cli
-   stable/science
-   capi/index
-   lang/index
-   api/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: Engines
+   :maxdepth: 2
+   :caption: Development
 
-   engines/index
-   engines/lammps
-   engines/gromacs
-   engines/openmm
-   engines/plumed
-   engines/insitu
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Comparisons
-
-   comparisons
-   explanation/clavis-trace
-   explanation/sqq
-   explanation/ovito-findrings
-   explanation/performance-h2h
-   howto/literature-h2h
-   howto/literature-reproduce
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Explanation
-
-   explanation/index
-   explanation/architecture
-   explanation/c-api
-   explanation/chill-plus-vs-cages
-   explanation/chill-plus-rules
-   explanation/interface-order
-   explanation/ring-completion
-   explanation/primitive-rings
-   explanation/linkcell-scaling
-   explanation/rings-one-thread
-   explanation/topological-network
-   explanation/symmetry
-   explanation/trace-assembly
-   explanation/stacking-disorder
-   explanation/hop-ball
-   explanation/trace-threads
-   explanation/performance
-   explanation/performance-overview
-   explanation/binding-overhead
-   explanation/performance-range
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Project
-
-   changelog
-   contributing/index
-   contributing/repositories
-   contributing/release
-   contributing/lean
-   explanation/citation
+   development/index
 #+end_export
 
 The in-book C++ pages under =api/= are Doxygen via doxyrest. A sibling

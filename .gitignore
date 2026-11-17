@@ -128,10 +128,10 @@ docs/source/walkthrough/figures/
 docs/.cache/
 docs/source/*.rst
 docs/source/**/*.rst
-docs/source/tutorials/gallery/
-docs/source/tutorials/gallery-captions.rst
-docs/source/tutorials/molecules/
-docs/source/tutorials/molecules.rst
+docs/source/user/tutorials/gallery/
+docs/source/user/tutorials/gallery-captions.rst
+docs/source/user/tutorials/molecules/
+docs/source/user/tutorials/molecules.rst
 docs/source/videos/players.rst
 docs/videos/**/*.png
 docs/source/xml/

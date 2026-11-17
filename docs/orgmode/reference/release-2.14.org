@@ -7,7 +7,7 @@ towncrier form ~+slug.<type>.md~. ~docs/check_changelog.py~ renders
 them and fails if a fragment is left out or repeated.
 The notes are the changes since tag v2.13.0 (~7f310225~).
 The upgrade from 2.13 is
-[[file:../howto/upgrade-2.14.org][the upgrade guide]].
+[[file:../user/howto/upgrade-2.14.org][the upgrade guide]].
 
 #+begin_export rst
 .. include:: release-2.14-notes.rst

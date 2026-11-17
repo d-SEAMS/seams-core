@@ -5326,7 +5326,7 @@ The program those lines come from:
 
 ## Structure still
 
-```{figure} ../tutorials/molecules/c/overlay-web.png
+```{figure} ../user/tutorials/molecules/c/overlay-web.png
 :alt: Molecule still for this front
 :width: 480px
 

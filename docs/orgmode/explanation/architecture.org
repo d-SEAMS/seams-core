@@ -21,7 +21,7 @@ Each binding pins a seams-core tag, builds or links ~libseams~ and
 and yodaStruct take seams-core as a Meson subproject; the others build it
 at the pin in their CI or link an installed copy. No binding carries a
 second engine implementation. Building the engine needs no language
-toolchain beyond C and C++. [[file:../contributing/repositories.org][The
+toolchain beyond C and C++. [[file:../development/repositories.org][The
 repository map]] lists the pins and the release order.
 
 #+begin_export rst

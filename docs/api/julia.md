@@ -10,5 +10,5 @@ The [README](https://github.com/d-SEAMS/Dseams.jl#user-content-a-local-engine-bu
 gives the install command and a first example.
 
 The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/contributing/repositories.org`
+against that seams-core tag. `docs/orgmode/development/repositories.org`
 describes how the repositories fit together.

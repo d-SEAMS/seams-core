@@ -2,8 +2,8 @@
 
 This file is the working contract for anyone changing this repository. The
 README is for users of the engine; this file is for people editing it.
-`docs/orgmode/contributing/index.org` is the long form, and
-`docs/orgmode/contributing/repositories.org` maps the other d-SEAMS
+`docs/orgmode/development/index.org` is the long form, and
+`docs/orgmode/development/repositories.org` maps the other d-SEAMS
 repositories.
 
 ## What lives here and what does not
@@ -109,12 +109,12 @@ python3 scripts/gen_llms_txt.py
   with type `added`, `changed`, `deprecated`, `removed`, `fixed` or
   `security`, in the same commit. `docs_changelog` refuses a duplicate or
   a misnamed fragment. The release cut renders them with towncrier
-  (`docs/orgmode/contributing/release.org`).
+  (`docs/orgmode/development/release.org`).
 - ASCII punctuation in source, docs and commit messages.
 
 ## Releases
 
 `RELEASING.md` is the seams-core cut: tag, GitHub release, conda
 `libseams`, `libseams_jll`. Each binding releases afterwards from its own
-repository against the tag; `docs/orgmode/contributing/repositories.org`
+repository against the tag; `docs/orgmode/development/repositories.org`
 has the order.

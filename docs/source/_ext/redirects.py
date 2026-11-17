@@ -1,0 +1,34 @@
+# Copyright (c) d-SEAMS developers
+"""Publish a refresh page for every docname the book has moved.
+
+``page_redirects`` maps the old docname to the new one. The HTML is a
+short page with a canonical link and a refresh, so an old URL still
+opens the page that replaced it.
+"""
+
+import posixpath
+
+
+def _target(old, new):
+    base = posixpath.dirname(old + ".html") or "."
+    return posixpath.relpath(new + ".html", start=base)
+
+
+def collect_redirects(app):
+    mapping = app.config.page_redirects or {}
+    for old in sorted(mapping):
+        new = mapping[old]
+        yield (
+            old,
+            {
+                "redirect_target": _target(old, new),
+                "redirect_title": "Moved",
+            },
+            "redirect.html",
+        )
+
+
+def setup(app):
+    app.add_config_value("page_redirects", {}, "html")
+    app.connect("html-collect-pages", collect_redirects)
+    return {"version": "1.0", "parallel_read_safe": True, "parallel_write_safe": True}

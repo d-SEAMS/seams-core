@@ -11,7 +11,7 @@ A trajectory frame shares almost every bond with the frame before it.
 ~primitive::RingUpdater~ recomputes only the rings that can have
 changed, and the result equals ~primitive::ringNetwork~ on that frame.
 The measured speedups are the how-to
-[[file:../howto/linkcell-carried.org][Linkcell neighbours and carried updates]].
+[[file:../user/howto/linkcell-carried.org][Linkcell neighbours and carried updates]].
 
 * What can change
 

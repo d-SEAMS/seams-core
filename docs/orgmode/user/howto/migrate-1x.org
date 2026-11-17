@@ -1,0 +1,98 @@
+#+TITLE: Migrate from d-SEAMS 1.x
+#+OPTIONS: toc:nil num:nil
+
+#+begin_export rst
+.. include:: ../../videos/embeds/migrate.rst
+#+end_export
+
+1.x was a Lua script plus ~yodaStruct -c lua_inputs/config.yml~.
+The config named the trajectory and switched analyses on. 2.14 is one
+~seams~ subcommand, or one call in ~seams.h~ / ~seams_lang.h~, for
+each of those switches.
+
+1.x Lua had plain globals only. v1.0.1 registers them in ~src/main.cpp~
+with ~lua.set_function~. It has no ~dseams~ table and no
+~require("dseams")~. The other Lua names on this page first shipped in
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] 2.x, which calls
+~seams.h~. No seams-core 2.x release registers Lua names.
+
+The same input is used on both sides of a row. ~docs/tutorials/test_migrate.py~
+runs that pair and requires the same counts. ~meson test docs_migrate~
+is that check. It exits when a count differs.
+
+* yodaStyle config
+
+| 1.x key | 2.14 command | 2.14 C call |
+|---------+--------------+-------------|
+| ~bulk.topologicalNetworkCriterion~ | ~seams cages~ | ~seams_frame_cages~ |
+| ~bulk.bondOrderParameters~ | ~seams steinhardt~ | ~seams_frame_steinhardt_graph~ |
+| ~topoOneDim~ | ~seams prisms~ | ~seams_frame_prisms~ |
+| ~topoTwoDim~ | ~seams_frame_monolayer~ | ~seams_frame_monolayer~ |
+
+~topoTwoDim~ has no separate subcommand. The monolayer census is
+~seams_frame_monolayer~. The test calls it twice on the mixed TIP4P
+dump and requires the same eight counts.
+
+* Lua globals and later Lua names
+
+The first column holds the exact v1.0.1 globals; v1.0.0 registers the
+same set. A row with no 1.x global is an analysis 1.x did not have; it
+says so and names the yodaStruct release that first shipped it. Each
+yodaStruct column holds the Lua names that release first registered:
+the 2.0.0 globals (also run by ~example_lua/full_api~), the
+~require("dseams")~ table from 2.2.0 (~require("yoda")~, a separate
+helper table in 2.1.0, resolves to it from 2.2.0), and the later
+additions. Each row ends in the 2.14 replacement.
+
+| 1.x global (v1.0.1) | yodaStruct 2.0.0 | yodaStruct 2.2.0 | yodaStruct 2.4.1 | yodaStruct 2.7.0 | yodaStruct 2.8.0 | yodaStruct 2.9.0 | 2.14 command | 2.14 C call |
+|---------------------+------------------+------------------+------------------+------------------+------------------+------------------+--------------+-------------|
+| ~readFrame~ / ~readFrameOnlyOne~ | ~readLammpsTrjO~ | ~dseams.read~ |  | ~readLammpsTrj~ |  |  | ~seams read~ | ~seams_frame_read~ |
+| ~chillPlus_cij~ / ~chillPlus_iceType~ | ~getCorrelPlus~ / ~getIceTypePlus~ | ~dseams.chill_plus~ |  |  |  |  | ~seams chill-plus~ | ~seams_frame_chill_plus~ |
+| ~chill_cij~ / ~chill_iceType~ | ~getCorrel~ / ~getIceType~ | ~dseams.chill~ |  |  |  |  | ~seams chill~ | ~seams_frame_chill~ |
+| ~getPrimitiveRings~ | ~ringNetwork~ |  |  |  |  |  | ~seams rings~ | ~seams_frame_rings~ |
+| ~averageQ6~ | ~steinhardtQl~ |  |  |  |  |  | ~seams steinhardt~ | ~seams_frame_steinhardt_graph~ |
+| ~bulkTopologicalNetworkCriterion~ | ~seededCageAffiliation~ | ~dseams.cages~ |  |  |  |  | ~seams cages~ | ~seams_frame_cages~ |
+| new in 2.x (yodaStruct 2.9.0) |  |  |  |  |  | ~findBySignature~ / ~dseams.cages_by_signature~ | ~seams cages --signature~ | ~seams_frame_signature_edge~ |
+| ~neighborList~ / ~bondNetworkByIndex~ | ~neighListO~ | ~dseams.neighbors~ |  |  |  |  | ~seams_frame_neighbours~ | ~seams_neighbours_build~ |
+| new in 2.x (yodaStruct 2.0.0) | ~kNearestNeighbourList~ | ~dseams.knn~ |  |  |  |  | ~seams_frame_neighbours~ | ~seams_neighbours_build~ |
+| ~calcRDF~ |  |  | ~calcRDF3D~ | ~dseams.rdf~ |  |  | ~seams rdf~ | ~seams_frame_rdf~ |
+| ~prismAnalysis~ |  |  |  |  |  |  | ~seams prisms~ | ~seams_frame_prisms~ |
+| ~ringAnalysis~ |  |  |  |  |  |  | ~seams_frame_monolayer~ | ~seams_frame_monolayer~ |
+| ~getHbondNetwork~ |  |  |  | ~dseams.hbonds~ |  |  | ~seams hbonds~ | ~seams hbonds~ |
+| new in 2.x (yodaStruct 2.4.1) |  |  | ~calcCN~ / ~dseams.cn~ |  |  |  | ~seams cn~ | ~seams cn~ |
+| new in 2.x (yodaStruct 2.7.0) |  |  |  | ~densityByType~ / ~dseams.density~ |  |  | ~seams density-z~ | ~seams density-z~ |
+| new in 2.x (yodaStruct 2.8.0) |  |  |  |  | ~topologyFingerprint~ / ~dseams.fingerprint~ |  | ~seams fingerprint~ | ~seams fingerprint~ |
+| new in 2.x (yodaStruct 2.7.0) |  |  |  | ~contactPairs~ / ~dseams.pairs~ |  |  | ~seams pairs~ | ~seams pairs~ |
+| new in 2.x (yodaStruct 2.7.0) |  |  |  | ~domainStats~ / ~dseams.domain~ |  |  | ~seams domains~ | ~seams domains~ |
+
+~readLammpsTrjO~, ~getCorrelPlus~, ~ringNetwork~, ~neighListO~ and the
+other 2.0.0 names are the C++ functions behind the 1.x globals; v1.0.1
+bound them under the names in the first column. ~calcRDF~ in 1.x is the
+in-plane RDF of the monolayer script (~rdf2Danalysis_AA~). The 3D RDF
+that ~seams rdf~ prints first reached Lua as ~calcRDF3D~.
+~ringAnalysis~ is the 1.x ~topoTwoDim~ ring census and ~prismAnalysis~
+the 1.x ~topoOneDim~ one; both kept their names in yodaStruct.
+~bulkPrimitiveRings~ and ~shapeMatching~ are yodaStruct example folders,
+not Lua names.
+
+The 2015 rule and the OVITO rule are selected with ~--rule~, and in
+Python with pydseamslib's ~dseams.PUBLISHED~ or ~dseams.OVITO~. The
+walk-through is
+[[file:../../explanation/chill-plus-rules.org][the published rule and the OVITO rule]].
+
+Neighbours are the one row with two C calls and no text command.
+~seams_frame_neighbours~ counts the directed pairs on the language
+frame. ~seams_neighbours_build~ builds the same list through
+~seams.h~. The cutoff row uses graph ~cutoff~. The k-NN row uses
+graph ~mutual~. The test requires the two pair counts to be equal.
+
+Hydrogen bonds, coordination, the density profile, the topology key,
+contact pairs, and domains are the command itself. The test runs each
+command on ~input/traj/exampleTraj.lammpstrj~ and checks the printed
+line: 460 hydrogen bonds, coordination 9.144, the first density bin,
+89 fingerprint classes, pair count 0, and a polar domain of 750.
+
+CHILL+ and rings use the cubic cell ~input/traj/mW_cubic.lammpstrj~,
+type 1, cutoff 3.5 Å. The signature row uses ~input/traj/genice_sI.lammpstrj~
+with ~--cage-edge none~. A published CHILL+ count has to match
+~seams_frame_chill_plus~ on that file, name by name.

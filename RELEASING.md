@@ -81,5 +81,5 @@ Each binding moves its seams-core pin to `v2.14.0`, sets its version to
 The first five can go in any order. Dseams.jl waits for `libseams_jll`.
 The core Docs workflow installs `pydseamslib` from the PydSEAMSlib
 `v2.14.0` tag, so the published core documentation needs that tag.
-`docs/orgmode/contributing/repositories.org` has the pin locations and the
+`docs/orgmode/development/repositories.org` has the pin locations and the
 release order in one place.

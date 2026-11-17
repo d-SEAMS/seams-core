@@ -228,7 +228,7 @@ the read (type 0 then becomes 1).
 
 A mixed-type dump that is not the water guess needs ~--type I~.
 ~density-z~ treats ~0~ as every atom, not the oxygen guess.
-See [[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
+See [[file:../user/howto/ionic-liquid.org][Ionic-liquid dumps]].
 
 * ~--water-types~
 
@@ -285,7 +285,7 @@ flag. ~seams rdf~ uses the same dump H (~gen::periodicDist~ and
 ~nneigh::dumpVolume~). ~seams density-z~ uses recovered ~lx, ly,
 lz~ for \(A_\perp\), not bound spans. The in-plane sampler remains
 ~rdf2::sampleRDF_AA~; see
-[[file:../howto/sheared-cells.org][Sheared cells]].
+[[file:../user/howto/sheared-cells.org][Sheared cells]].
 
 * ~--graph~
 

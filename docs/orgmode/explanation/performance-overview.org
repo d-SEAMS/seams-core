@@ -27,7 +27,7 @@ width the column names.
 The full tables are
 [[file:performance.org][the release-candidate sitting]],
 [[file:trace-threads.org][the thread controls]], and
-[[file:../howto/literature-reproduce.org][the literature reproduction]].
+[[file:../user/howto/literature-reproduce.org][the literature reproduction]].
 ~meson test docs_sitting~, ~docs_trace_threads~, ~docs_pool_audit~, and
 ~docs_sitting_large~ recompute the stored medians.
 

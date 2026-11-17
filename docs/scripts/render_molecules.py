@@ -3385,7 +3385,7 @@ def fresh(directory, stem):
 
 
 def write_pages(out):
-    """Sphinx figure list. Paths are relative to docs/source/tutorials."""
+    """Sphinx figure list. Paths are relative to docs/source/user/tutorials."""
     lines = [
         "Molecule stills",
         "---------------",

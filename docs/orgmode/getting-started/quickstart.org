@@ -1,0 +1,161 @@
+#+TITLE: Quickstart
+#+OPTIONS: toc:nil num:nil
+
+Install the engine, then classify one cubic cell. The C program below
+is ~meson test docs_quickstart_c~, and the five Python lines are a
+snippet test against the installed pydseamslib. Both expect 8 cubic
+molecules.
+
+* Install
+
+Meson builds the engine, ~libseams~ and the ~seams~ command from this
+tree. conda-forge has the toolchain:
+
+#+begin_src bash
+conda install -c conda-forge meson ninja pkg-config eigen
+meson setup build
+meson compile -C build
+#+end_src
+
+The same two Meson lines are the install when the compilers are already
+on ~PATH~. The Python binding is a separate package, built from
+[[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]] against
+the same engine version:
+
+#+begin_src bash
+pip install 'pydseamslib==2.14.0'
+#+end_src
+
+* Five lines of Python
+
+#+begin_src python
+import dseams
+a = 2.75 * 4 / 3**0.5
+sites = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5), (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75))
+xyz = [[x * a, y * a, z * a] for x, y, z in sites]
+assert dseams.chill_plus(xyz, [a, a, a])[1][0] == 8
+#+end_src
+
+~chill_plus~ returns labels and the nine counts. Index 0 is cubic.
+
+* Five calls in C
+
+#+begin_src c
+seams_system *sys = seams_system_create();
+seams_system_set_ortho(sys, xyz, 8, 0, 0, 0, a, a, a, NULL, NULL);
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts);
+printf("cubic %d\n", counts[0]);
+seams_system_destroy(sys);
+#+end_src
+
+~docs/examples/quickstart.c~ is that call on the eight-atom diamond.
+The program prints ~cubic 8~.
+
+Build the engine, read a frame, and print what this binary linked.
+
+The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).
+
+* Install the engine
+
+Nix flake:
+
+#+begin_src bash
+nix build
+./result/bin/seams --help
+nix develop   # compiler, Eigen, BLAS, Catch2
+#+end_src
+
+pixi:
+
+#+begin_src bash
+pixi run setup
+pixi run build
+./bbdir/seams --help
+#+end_src
+
+Either path produces ~libyodaLib~, ~libseams~, ~libseams_lang~, and the ~seams~ CLI.
+
+* Read a frame
+
+#+begin_src bash
+seams read input/traj/exampleTraj.lammpstrj
+#+end_src
+
+The line is ~nop 250 frame 1 box ...~ after the oxygen guess (type 2, then type 1).
+Pass ~--type 2~ to skip the guess.
+
+* Features of this build
+
+#+begin_src bash
+seams --features
+#+end_src
+
+Each line is a compile-time backend: OpenMP, MPI, Highway SIMD, vesin, chemfiles, readcon-core, IRA/SOFI, sphericart, nauty. The Nix flake turns Eigen, BLAS/LAPACK, Catch2 and Highway on when nixpkgs provides them.
+Optional wrap-git backends stay off unless a package is already in the closure.
+~pixi~ enables what conda-forge put in the environment (Highway and chemfiles are in the default pixi lock).
+
+* Runtime knobs
+
+Knobs that change between machines and jobs are twelve-factor.
+They are not compiled in and they are not ~conf.yaml~.
+Defaults live in the binary.
+An optional dotenv file (~SEAMS_CONFIG~ or ~./seams.env~) fills unset variables.
+The process environment wins over the file.
+CLI flags win over the environment.
+
+#+begin_src bash
+cp seams.env.example seams.env
+seams --print-config
+seams --frame 1 --last 100 --jobs 8 --type 2 --graph seeded \
+  cages input/traj/exampleTraj.lammpstrj
+#+end_src
+
+The same values can be ~SEAMS_FRAME~, ~SEAMS_LAST~, ~SEAMS_JOBS~, ~SEAMS_TYPE~, ~SEAMS_CUTOFF~, ~SEAMS_CAGE_EDGE~, ~SEAMS_K~, ~SEAMS_GRAPH~, plus ~SEAMS_RESIDENT~, ~SEAMS_CELL~, ~SEAMS_OFFLOAD~, ~LINKCELL_TPP~, ~LINKCELL_BLOCK~.
+~SEAMS_CAGE_EDGE~ defaults to ~2.65,3.15~ (coordinate units of the file). ~none~ leaves a signature cage bound to the face census.
+~OMP_NUM_THREADS~ and ~CUDA_VISIBLE_DEVICES~ keep their usual meaning.
+Analysis choice (which ~seams~ command, which binding call) is not this table.
+
+* CHILL+ and cages
+
+#+begin_src bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+#+end_src
+
+On this fixture ~seams chill-plus~ uses the cutoff neighbour list (the default on every front) and prints 9 interfacial clathrate and 241 water.
+~--graph mutual~ uses the mutual four-neighbour list and prints 1 clathrate, 7 interfacial clathrate, and 242 water.
+The default cage graph is ~--graph seeded~ (mutual four-nearest seeds, union completions).
+This mixed frame has no complete HC or DDC.
+Cage membership is not the CHILL+ star.
+
+* One analysis at a time
+
+| goal | command | how-to |
+|------+---------+--------|
+| rings | ~seams rings FILE --type 2~ | [[file:../user/howto/rings.org][Primitive rings]] |
+| cages | ~seams cages FILE --type 2~ | [[file:../user/howto/cages-trace.org][Cages and TRACE]] |
+| q4 and q6 | ~seams steinhardt FILE --type 2~ | [[file:../user/howto/q4-q6.org][Local q4 and q6]] |
+| CHILL+ | ~seams chill-plus FILE --type 2~ | [[file:../user/howto/chill-plus.org][CHILL+]] |
+| symmetry | ~seams symmetry FILE --type 1~ | [[file:../user/howto/symmetry-classifier.org][Symmetry classifier]] |
+| neighbours | cutoff CSR, carried rings | [[file:../user/howto/linkcell-carried.org][Linkcell and carried rings]] |
+
+The same commands on bundled frames:
+
+#+begin_src bash
+seams rings input/traj/exampleTraj.lammpstrj --type 2
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+seams steinhardt input/traj/exampleTraj.lammpstrj --type 2
+seams chill-plus input/traj/exampleTraj.lammpstrj --type 2
+seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+* Language bindings
+
+Python (~pydseamslib~, ~import dseams~ and ~import pydseams~), Lua and
+Fennel, R, Julia, Rust, and Fortran each live in their own repository and
+release against the seams-core tag with the same version.
+[[file:../user/howto/bindings.org][Use a language binding]] lists them. The
+Frame tutorial is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+
+The full install matrix is [[file:install.org][Install]].
+The mixed-frame walkthrough is [[file:../user/tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].

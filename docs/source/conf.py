@@ -29,6 +29,10 @@ def _stage_records():
     records = os.path.join(_docs, "records")
     for folder, _dirs, files in os.walk(records):
         rel = os.path.relpath(folder, records)
+        if rel == "howto":
+            rel = os.path.join("user", "howto")
+        elif rel.startswith("howto" + os.sep):
+            rel = os.path.join("user", "howto", rel[len("howto" + os.sep) :])
         for name in files:
             if name == "README.md":
                 continue
@@ -111,7 +115,7 @@ def _write_gallery():
     if _sphinx_builder() in ("linkcheck", "doctest"):
         print("sphinx: science gallery is not part of this builder", file=sys.stderr)
         return
-    kept = os.path.isdir(os.path.join(_source, "tutorials", "gallery"))
+    kept = os.path.isdir(os.path.join(_source, "user", "tutorials", "gallery"))
     if _docs_ci() or not kept:
         raise SystemExit("science gallery failed")
     print("sphinx: science gallery left as committed", file=sys.stderr)
@@ -128,7 +132,7 @@ def _write_molecules():
     spec = importlib.util.spec_from_file_location("render_molecules", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    argv = ["--out", os.path.join(_source, "tutorials", "molecules"), "--pages"]
+    argv = ["--out", os.path.join(_source, "user", "tutorials", "molecules"), "--pages"]
     libdir = os.environ.get("SEAMS_LIBDIR", "")
     if libdir:
         argv.extend(["--libdir", libdir])
@@ -138,7 +142,7 @@ def _write_molecules():
         status = exc.code if isinstance(exc.code, int) else 1
     if status in (0, None):
         return
-    pictures = os.path.join(_source, "tutorials", "molecules")
+    pictures = os.path.join(_source, "user", "tutorials", "molecules")
     if _sphinx_builder() in ("linkcheck", "doctest"):
         # The gallery page includes the figure list, so it is written even
         # when no still was drawn; it then lists only the stills on disk.
@@ -267,9 +271,15 @@ def _ensure_root_index():
 
 
 def _link_capi():
-    """Point the generated book at the committed C API section."""
+    """Point the generated book at the committed C API section.
+
+    The API reference toctree already names ``capi/index``. A second
+    caption would list those pages twice.
+    """
     index = os.path.join(_source, "index.rst")
     if not os.path.isfile(index):
+        return
+    if "capi/index" in _toctree_docnames():
         return
     text = open(index, encoding="utf-8").read()
     if "\n   capi/index\n" in text:
@@ -288,13 +298,14 @@ def _link_capi():
 
 _stage_markdown_book()
 _ensure_root_index()
-_link_capi()
 
 
 def _link_lang():
     """Point the generated book at the per-language API pages."""
     index = os.path.join(_source, "index.rst")
     if not os.path.isfile(index):
+        return
+    if "lang/index" in _toctree_docnames():
         return
     text = open(index, encoding="utf-8").read()
     if "lang/index" in text:
@@ -311,13 +322,12 @@ def _link_lang():
         handle.write(extra)
 
 
-_link_lang()
-
-
 def _link_science():
     """Point the generated book at the science tutorials."""
     index = os.path.join(_source, "index.rst")
     if not os.path.isfile(index):
+        return
+    if "science/index" in _toctree_docnames():
         return
     text = open(index, encoding="utf-8").read()
     if "science/index" in text:
@@ -378,7 +388,12 @@ def _write_png_stub(png):
 
 
 def _toctree_docnames():
-    """Docnames already named by a ``.. toctree::`` entry."""
+    """Docnames already named by a ``.. toctree::`` entry.
+
+    An entry is relative to the page that lists it, including ``..``.
+    """
+    import posixpath
+
     included = set()
     for dirpath, dirnames, filenames in os.walk(_source):
         dirnames[:] = [name for name in dirnames if name not in {"_static", "_templates"}]
@@ -387,6 +402,7 @@ def _toctree_docnames():
                 continue
             parent = os.path.relpath(dirpath, _source)
             parent = "" if parent == "." else parent.replace(os.sep, "/")
+            docname = filename[:-4] if parent == "" else parent + "/" + filename[:-4]
             lines = open(os.path.join(dirpath, filename), encoding="utf-8", errors="replace")
             in_tree = False
             for raw in lines:
@@ -403,9 +419,11 @@ def _toctree_docnames():
                 entry = raw.strip()
                 if entry.startswith(":"):
                     continue
-                name = entry.split()[0].lstrip("/")
-                if parent:
-                    name = parent + "/" + name
+                name = entry.split()[0]
+                if name.startswith("/"):
+                    name = name.lstrip("/")
+                else:
+                    name = posixpath.normpath(posixpath.join(posixpath.dirname(docname), name))
                 included.add(name)
     return included
 
@@ -458,6 +476,8 @@ def _include_orphan_pages():
         handle.write("\n".join(lines))
 
 
+_link_capi()
+_link_lang()
 _link_science()
 _science_figure_stubs()
 
@@ -466,6 +486,8 @@ def _link_walkthrough():
     """Point the generated book at the engine walkthroughs."""
     index = os.path.join(_source, "index.rst")
     if not os.path.isfile(index):
+        return
+    if "walkthrough/index" in _toctree_docnames():
         return
     text = open(index, encoding="utf-8").read()
     if "walkthrough/index" in text:
@@ -602,6 +624,16 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
     extensions = ["doxyrest", "cpplexer", "breathe", *extensions]
     breathe_projects = {"seams": os.path.join(_source, "xml")}
     breathe_default_project = "seams"
+
+sys.path.insert(0, os.path.join(_source, "_ext"))
+extensions.append("redirects")
+_redirect_map = os.path.join(_docs, "page_redirects.json")
+page_redirects = {}
+if os.path.isfile(_redirect_map):
+    import json
+
+    with open(_redirect_map, encoding="utf-8") as _redirect_file:
+        page_redirects = json.load(_redirect_file)
 
 templates_path = ["_templates"]
 # players.rst and embeds/*.rst are untitled fragments that pages pull in

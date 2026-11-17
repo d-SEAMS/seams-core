@@ -128,7 +128,7 @@ A region that is already parallel does not fork again.
 | ~chill::steinhardtQlCutoff~ | ~SteinhardtQl (const PointCloud&, double cutoff, int orderL, int typeI, bool average, bool invariants = false)~. ~orthoFullCsr~ for one type, then ~q_l~. Degrees 4 and 6 on an orthorhombic or restricted-triclinic cell use the solid-harmonic kernel. ~qlBar~ is filled only when ~average~ is true. ~invariants~ fills ~wl~ for \(l = 4\) or \(6\). ~orderL~ is 3, 4, 6, 8, or 12. |
 
 The walk, the skin, and the session that timed them are in
-[[file:../howto/neighbour-lists.org][Cutoff neighbour lists]].
+[[file:../user/howto/neighbour-lists.org][Cutoff neighbour lists]].
 
 The face-edge window is the same string on every front.
 Python is ~frame.cages_by_signature("512", edge="none")~.

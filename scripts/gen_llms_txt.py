@@ -3,12 +3,14 @@
 """Write llms.txt, the plain-text map of the published d-SEAMS manual.
 
 The pages and their order come from the toctrees of docs/orgmode/index.org,
-one section per toctree caption. A page is an Org file under docs/orgmode,
-a Markdown page under docs/api, docs/engines or docs/tutorials (published
-as stable/, engines/ and fronts/), or an rst page under docs/source. Each
-line links the published HTML on https://docs.dseams.info with the page
-title and the first sentence of its prose. A last section links the
-language binding repositories.
+one section per top-level caption. Nested toctrees in those pages are
+walked in order, so a section index contributes its children. A page is
+an Org file under docs/orgmode, a Markdown page under docs/api,
+docs/engines or docs/tutorials (published as stable/, engines/ and
+fronts/), or an rst page under docs/source. Each line links the published
+HTML on https://docs.dseams.info with the page title and the first
+sentence of its prose. A last section links the language binding
+repositories.
 
 llms.txt is committed at the repository root and Sphinx copies it to the
 site root. ``--check`` exits 1 when the committed file differs from a
@@ -23,6 +25,7 @@ fresh generation.
 from __future__ import annotations
 
 import argparse
+import posixpath
 import re
 import sys
 from pathlib import Path
@@ -85,14 +88,35 @@ def toctrees(text):
             continue
         if stripped.startswith(":") or stripped == "":
             continue
-        if line.startswith("   ") and " " not in stripped and not stripped.startswith(".."):
+        if line.startswith("   ") and " " not in stripped and not stripped.startswith(".. "):
             current[1].append(stripped)
             continue
         current = None
-    return [(caption, names) for caption, names in trees if caption and names]
+    return [(caption, names) for caption, names in trees if names]
+
+
+def _tracked_source_rst():
+    """Rst pages that live in git. Sphinx writes the rest at build time."""
+    listed = set()
+    import subprocess
+
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--", "docs/source"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    for raw in result.stdout.split(b"\0"):
+        if raw.endswith(b".rst"):
+            listed.add(raw.decode())
+    return listed
+
+
+_TRACKED_RST = None
 
 
 def source_of(name):
+    global _TRACKED_RST
     org = ORG / (name + ".org")
     if org.is_file():
         return org
@@ -102,7 +126,10 @@ def source_of(name):
         if page.is_file():
             return page
     rst = DOCS / "source" / (name + ".rst")
-    if rst.is_file():
+    if _TRACKED_RST is None:
+        _TRACKED_RST = _tracked_source_rst()
+    key = rst.relative_to(ROOT).as_posix()
+    if key in _TRACKED_RST and rst.is_file():
         return rst
     return None
 
@@ -226,6 +253,30 @@ def title_and_paragraph(path):
     return title or path.stem, first_sentence(lead_paragraph(paragraphs))
 
 
+def walk_pages(name, seen, items):
+    """Append ``name`` and the pages named by its toctrees.
+
+    Entries are relative to the page that lists them. ``..`` climbs out
+    of that page's directory, the same way Sphinx resolves a toctree.
+    """
+    name = posixpath.normpath(name)
+    if name in seen:
+        return
+    path = source_of(name)
+    if path is None:
+        return
+    seen.add(name)
+    title, summary = title_and_paragraph(path)
+    entry = "- [{}]({}/{}.html)".format(title, SITE, name)
+    items.append(entry + (": " + summary if summary else ""))
+    if path.suffix != ".org":
+        return
+    parent = posixpath.dirname(name)
+    for _caption, children in toctrees(path.read_text(encoding="utf-8")):
+        for child in children:
+            walk_pages(posixpath.join(parent, child), seen, items)
+
+
 def render():
     index = (ORG / "index.org").read_text(encoding="utf-8")
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
@@ -242,15 +293,7 @@ def render():
     for caption, names in toctrees(index):
         items = []
         for name in names:
-            if name in seen:
-                continue
-            path = source_of(name)
-            if path is None:
-                continue
-            seen.add(name)
-            title, summary = title_and_paragraph(path)
-            entry = "- [{}]({}/{}.html)".format(title, SITE, name)
-            items.append(entry + (": " + summary if summary else ""))
+            walk_pages(name, seen, items)
         if items:
             lines.extend(["## " + caption, ""])
             lines.extend(items)

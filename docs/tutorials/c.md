@@ -23,7 +23,7 @@ LD_LIBRARY_PATH=build/src ./a.out
 
 ## Structure still
 
-```{figure} ../tutorials/molecules/c/overlay-web.png
+```{figure} ../user/tutorials/molecules/c/overlay-web.png
 :alt: Molecule still for this front
 :width: 480px
 

@@ -97,7 +97,7 @@ present, ~box.size() >= 6~. Pair distances go through
 with the same mapping as ~nneigh::dumpBoundsToH~ /
 ~nneigh::lammpsBoxToLcCell~. An independent-axis wrap on the bound
 spans is the wrong image for a sheared cell; see
-[[file:../howto/sheared-cells.org][Sheared cells]].
+[[file:../user/howto/sheared-cells.org][Sheared cells]].
 ~gen::formatDumpBox~ prints the spans and, when present, the tilt.
 Dump writers emit ~ITEM: BOX BOUNDS xy xz yz pp pp pp~ and a third
 field on each bound line when the cloud carries tilt.
@@ -119,7 +119,7 @@ dump that is not that water convention (ionic liquid, solvent plus
 solute) needs an explicit ~--type I~; the default ~0~ guess is type
 2 then type 1. The C++ filter is ~sinp::readLammpsTrjO~ or
 ~gen::getPointCloudOneAtomType~. See
-[[file:../howto/ionic-liquid.org][Ionic-liquid dumps]].
+[[file:../user/howto/ionic-liquid.org][Ionic-liquid dumps]].
 
 A live dump session caches ~ITEM: TIMESTEP~ offsets. Sequential
 walks do not rescan prior snapshots. ~seams --frame N --last M

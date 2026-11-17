@@ -1,0 +1,144 @@
+#+TITLE: Install the engine
+#+OPTIONS: toc:nil num:nil
+
+Get a ~seams~ binary, ~libyodaLib~, ~libseams~, and ~libseams_lang~.
+This page is the 2.14.0 install of the engine: conda-forge, a plain
+source build, pixi, or the Nix flake. The language bindings are
+separate packages built from their own repositories against the same
+engine version; the last section lists them.
+
+* conda-forge
+
+#+begin_src bash
+conda install -c conda-forge 'libseams=2.14.0'
+#+end_src
+
+~libseams~ is the engine: ~libyodaLib~, ~libseams~ (~seams.h~),
+~libseams_lang~, the ~seams~ CLI, and the ~seams~ and ~seams-core~
+pkg-config and CMake files. The recipe is ~recipe/recipe.yaml~
+(rattler-build). Until a conda-forge chemfiles passes the mmCIF probe
+below, the conda build leaves chemfiles off.
+
+conda-forge also carries the toolchain for a source build:
+
+#+begin_src bash
+conda install -c conda-forge meson ninja pkg-config eigen
+meson setup build
+meson compile -C build
+#+end_src
+
+* From source
+
+#+begin_src bash
+meson setup build && meson compile -C build
+#+end_src
+
+The same two lines are the install when the compilers are already on
+~PATH~. A full checkout and install:
+
+#+begin_src bash
+git clone https://github.com/d-SEAMS/seams-core && cd seams-core
+meson setup bbdir -Dwith_tests=false
+meson compile -C bbdir
+meson install -C bbdir           # --prefix sets the destination
+#+end_src
+
+~meson setup~ needs Eigen 3.4 or a network connection to fetch it, and
+fetches the optional subprojects whose options are ~auto~. Rust
+(~cargo~) is needed for linkcell, minimage and readcon. Options that
+only package builders use:
+
+| Option                    | Effect                                                         |
+|---------------------------+----------------------------------------------------------------|
+| ~-Dwith_blas=disabled~    | Do not link BLAS or LAPACK; nothing calls them yet             |
+| ~-Dwith_readcon=disabled~ | Leave out the readcon-core and readcon-db ~.con~ readers       |
+| ~--wrap-mode=nodownload~  | Fail instead of fetching a subproject                          |
+
+* pixi
+
+#+begin_src bash
+pixi run setup
+pixi run build
+./bbdir/seams --help
+./bbdir/seams --features
+#+end_src
+
+The default pixi lock includes Highway and chemfiles. Optional pixi
+environments: ~ira~, ~sphericart~, ~nauty~, ~mpi~, ~docs~,
+~formalanalysis~, ~repro~.
+
+conda-forge chemfiles 0.10.4 writes an mmCIF atom with no residue as
+~label_seq_id~ ~.~ and does not write ~label_entity_id~. The reader
+treats ~.~ as an entity id and dereferences that missing column. A
+read of the written file fails, and a write followed by a read in the
+same process segfaults inside ~mmCIFFormat::read~. Meson compiles
+~cmake/chemfiles_mmcif_probe.cpp~ and reads
+~cmake/mmcif_no_entity.mmcif~, the one-oxygen file that release
+writes. A library that does not return the oxygen at (1, 2, 3) in a
+10 by 11 by 12 cell is left unused. The build then fetches tag 0.10.4
+and applies ~cmake/patches/chemfiles-0.10.4-mmcif.patch~. A library
+that reads the file is kept. ~cmake/ChemfilesDep.cmake~ runs the same
+probe before it accepts an installed copy.
+~SEAMS_CHEMFILES_FORCE_VENDORED~ skips the installed copy. The Meson
+fallback sets it after the probe has already failed. The conda
+compiler puts its own lib directory first on the RPATH, and that
+directory already has ~libchemfiles.so.0.10~. The patched library is
+built as ~libseams-chemfiles~, with the soname
+~libseams-chemfiles.so.0.10~, so the loader does not open the
+unpatched file. That file has no ~seams_with_frame~.
+
+* Nix flake
+
+#+begin_src bash
+nix build
+./result/bin/seams --help
+nix develop
+nix run . -- read input/traj/exampleTraj.lammpstrj
+#+end_src
+
+The flake links Eigen, BLAS/LAPACK, Catch2, and Highway from nixpkgs.
+Wrap-git backends (vesin, readcon-core, linkcell) and chemfiles stay
+off unless the package is already in the closure. IRA, sphericart,
+nauty, and MPI stay off. vesin is cutoff; linkcell is k-NN. Binary
+cache: ~cachix use dseams~.
+
+The flake on/off table lives on [[file:../reference/nix.org][Nix]].
+
+* OpenMP target offload
+
+The host-only pixi and flake builds leave ~with_openmp_offload~
+off. The NVIDIA GPU path, including the Elja A100 module set and
+the Meson line, is [[file:../user/howto/openmp-offload.org][OpenMP target offload]].
+
+* Verify
+
+#+begin_src bash
+seams --help
+seams --version
+seams --features
+#+end_src
+
+Engine hooks follow ~-Dwith_lammps=auto~, ~-Dwith_gromacs=auto~,
+~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~. The engine pages
+([[file:../user/howto/engine-lammps.org][LAMMPS]], [[file:../user/howto/engine-plumed.org][PLUMED]]) build
+the LAMMPS compute and the PLUMED module.
+
+* Language bindings
+
+Each binding is its own repository and package, released with the same
+version as the engine it calls:
+
+| Language    | Install                                            | Repository |
+|-------------+----------------------------------------------------+------------|
+| Python      | ~pip install 'pydseamslib==2.14.0'~                 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
+| Lua, Fennel | LuaRocks ~dseams~                                   | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
+| R           | the ~dseams~ source package                         | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
+| Julia       | ~Dseams~, with the engine from ~libseams_jll~         | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
+| Rust        | crates ~dseams-sys~ and ~dseams~                     | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
+| Fortran     | fpm ~dseams~                                        | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
+
+Each repository's README has the full install, including linking an
+installed ~libseams~ from this page. [[file:../user/howto/bindings.org][Use a
+language binding]] lists what each one links, and the
+[[file:../development/repositories.org][repository map]] covers
+building a binding against a local engine.

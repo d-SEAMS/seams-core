@@ -255,6 +255,9 @@ rm -rf source/api
 rm -rf source/contributing
 rm -rf source/tutorials
 rm -rf source/howto
+rm -rf source/getting-started
+rm -rf source/user
+rm -rf source/development
 rm -rf source/reference
 rm -rf source/*.rst
 """

@@ -6,7 +6,7 @@ TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025,
 assembles hydrate cages from a hydrogen-bond graph. d-SEAMS answers
 the oxygen question: which rings tile a closed polyhedron of a given
 face census. The timed comparison is the how-to
-[[file:../howto/cages-trace.org][Cages and TRACE]]. This page is the
+[[file:../user/howto/cages-trace.org][Cages and TRACE]]. This page is the
 two constructions.
 
 * The hydrogen-bond cage
