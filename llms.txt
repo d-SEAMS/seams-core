@@ -68,7 +68,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Fortran](https://docs.dseams.info/fronts/fortran.md): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/fronts/julia.md): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
 - [Lua and Fennel](https://docs.dseams.info/fronts/lua.md): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
-- [Python](https://docs.dseams.info/fronts/python.md): The Python binding is pydseamslib on PyPI, import dseams.
+- [Python](https://docs.dseams.info/fronts/python.md): Classify ice Ih from Python. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
 - [R](https://docs.dseams.info/fronts/r.md): The R binding is the R package dseams.
 - [Rust](https://docs.dseams.info/fronts/rust.md): The Rust binding is the crates dseams-sys and dseams.
 - [Engines tutorial](https://docs.dseams.info/fronts/engines.md): Eight molecules of cubic ice are engines/tutorial/ice.data.
