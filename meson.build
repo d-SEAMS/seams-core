@@ -1760,6 +1760,10 @@ if get_option('with_cli') and get_option('with_tests')
     depends: [seams_lang],
     suite: 'docs',
     timeout: 60)
+  # About 24 s alone under AddressSanitizer, and more than 180 s when
+  # the full sanitizer suite shares the cores. An ordinary build keeps
+  # the 180 s limit.
+  _science_timeout = get_option('b_sanitize') == 'none' ? 180 : 900
   test(
     'docs_science_tutorials',
     python3,
@@ -1771,7 +1775,7 @@ if get_option('with_cli') and get_option('with_tests')
     env: binding_env,
     depends: [seams_api_lib],
     suite: 'docs',
-    timeout: 180)
+    timeout: _science_timeout)
   test(
     'docs_engine_walkthrough',
     python3,

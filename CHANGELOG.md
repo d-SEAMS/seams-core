@@ -20,6 +20,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - C API fuzzers built with `b_sanitize=thread` link `-fsanitize=thread,fuzzer` and the shared thread runtime.
 - A ThreadSanitizer build gives plumed, gmx and lmp the unsanitized plugin, because those hosts cannot map `libclang_rt.tsan`. Interpreter shims map that runtime before they dlopen `libseams`.
 - The serial LAMMPS hook calls `lammps_mpi_finalize` after `lammps_close`, which frees the ReadData and Run commands the stub would otherwise leave allocated. The MPI build still calls `MPI_Finalize`.
+- `docs_science_tutorials` keeps a 180 s timeout, and allows 900 s when `b_sanitize` is set. Alone under AddressSanitizer the tutorial takes about 24 s; in the full sanitizer suite it shares the cores and takes more than 180 s.
 
 ## [2.14.0] - 2026-11-15
 
