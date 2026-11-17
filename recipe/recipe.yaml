@@ -10,9 +10,8 @@ package:
 source:
   # The build disables every subproject-backed backend and takes Eigen
   # from conda-forge, so the GitHub tag archive is the whole source.
-  # sha256 is that of the v2.14.0 archive; fill it in after the tag.
   url: https://github.com/d-SEAMS/seams-core/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  sha256: fa3e6d8f75e5a06691bd806334f1a89e0998f729d8145a057dc68794a162a551
 
 build:
   number: 0

@@ -33,11 +33,9 @@ julia --project=ENV -e 'using Pkg; Pkg.develop(path="bindings/julia/Dseams"); Pk
 
 ## The source pin
 
-`build_tarballs.jl` sets `v2_14_0_tag_sha`. That constant is the stand-in
-for the v2.14.0 tag. It is the release-candidate commit
-`c1efa8c734214e9117cb77e89258bc9fdd214a6c`. After the tag is created,
-replace the constant with `git rev-parse v2.14.0` when the tag points
-somewhere else, then open the Yggdrasil pull request. Register
+`build_tarballs.jl` sets `v2_14_0_tag_sha` to the commit v2.14.0 tags,
+`acc8bbc803f55bac39493c85300f87a8ce302829` (`git rev-parse
+v2.14.0^{commit}`). The Yggdrasil pull request carries that pin. Register
 `libseams_jll` before Dseams: the General registry resolves
 `libseams_jll` when Registrator runs.
 

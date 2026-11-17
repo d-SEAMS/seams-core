@@ -9,14 +9,11 @@ include(joinpath(YGGDRASIL_DIR, "platforms", "macos_sdks.jl"))
 name = "libseams"
 version = v"2.14.0"
 
-# BinaryBuilder refuses GitHub's generated archives, and seams-core publishes
-# no release tarball, so the tree is pinned by commit. v2.14.0 is not tagged.
-# v2_14_0_tag_sha is the stand-in for that tag: the release-candidate commit
-# on origin/release/2.14-merge. When the tag exists, replace this value with
-# `git rev-parse v2.14.0` if the tag is a different commit. The portable
-# sources, optional-BLAS meson logic, and non-x86 guards are already in this
-# commit, so bundled/patches is not applied.
-const v2_14_0_tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
+# BinaryBuilder refuses GitHub's generated archives, so the tree is pinned
+# by the commit that v2.14.0 tags. The portable sources, optional-BLAS meson
+# logic, and non-x86 guards are in that commit, so bundled/patches is not
+# applied.
+const v2_14_0_tag_sha = "acc8bbc803f55bac39493c85300f87a8ce302829"
 
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", v2_14_0_tag_sha),
