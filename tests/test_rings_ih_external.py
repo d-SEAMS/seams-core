@@ -146,8 +146,17 @@ def _ovito_rings(pos, lengths):
     mat = np.zeros((3, 4))
     mat[:, :3] = np.diag(lengths)
     data = DataCollection()
-    data.create_cell(mat, pbc=(True, True, True))
-    parts = data.create_particles(count=len(pos))
+    if hasattr(data, "create_cell"):
+        data.create_cell(mat, pbc=(True, True, True))
+        parts = data.create_particles(count=len(pos))
+    else:
+        from ovito.data import Particles, SimulationCell
+
+        cell = SimulationCell(pbc=(True, True, True))
+        cell.matrix = mat
+        data.objects.append(cell)
+        parts = Particles()
+        data.objects.append(parts)
     parts.create_property("Position", data=np.asarray(pos))
     pipe = Pipeline(source=StaticSource(data=data))
     pipe.modifiers.append(CreateBondsModifier(cutoff=CUTOFF))

@@ -43,10 +43,12 @@ From =nix/package.nix= (~pname = "seams"~, ~version = "2.14.0"~):
 | ~mesonAutoFeatures~ | ~disabled~ |
 | wrap mode | ~nodownload~ (Meson setup hook) |
 
-The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
-=input=, =templates=, and the wraps =readcon-core.wrap=,
-=readcon-db.wrap=, =linkcell.wrap=, =minimage.wrap=, =vesin.wrap=,
-=subprojects/packagefiles=, and =bindings= (the C ABI in =bindings/cxx=).
+The fileset is =meson.build=, =meson_options.txt=, =src=, =include=,
+=tests=, =bindings=, =engines=, =bench=, =scripts=
+(including =scripts/dist_strip_vcs.py=), =examples=, =docs=, =input=,
+=templates=, =cmake=, =adapters=, the release files the suite reads, and the wraps
+=readcon-core.wrap=, =readcon-db.wrap=, =linkcell.wrap=,
+=minimage.wrap=, =vesin.wrap=, =subprojects/packagefiles=.
 
 * What stays off
 

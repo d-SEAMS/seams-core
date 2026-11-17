@@ -722,7 +722,9 @@ bool nneigh::cellListRowsThreaded(
       auto &row = rows[k];
       for (std::size_t t = 0; t < cand.size(); t++) {
         const double r2 = batched ? d2[t] : gen::periodicDistSq(frame, yCloud, i, cand[t]);
-        if (r2 <= rc2) {
+        // A pair exactly at the cutoff is outside, matching the brute-force
+        // oracle and the orthorhombic cell list.
+        if (r2 < rc2) {
           row.push_back(cand[t]);
         }
       }

@@ -3,8 +3,9 @@
 """Primitive rings against OVITO FindRings.
 
 Both sides see the same cutoff graph. d-SEAMS counts Franzblau primitive
-rings. K2,3 has three chordless 4-rings. FindRings returns a basis of
-two of them. On a larger frame FindRings must not exceed that census.
+rings. K2,3 has three chordless 4-rings. Older FindRings returned a
+basis of two of them. OVITO 3.17 reports all three. On a larger frame
+FindRings must not exceed that census.
 Exit 77 only when OVITO cannot be imported.
 """
 
@@ -146,8 +147,17 @@ def ovito_histogram(pts, lo, hi, depth: int) -> tuple[dict[int, int], int]:
     mat[:, :3] = np.diag(side)
     mat[:, 3] = lo
     data = DataCollection()
-    data.create_cell(mat, pbc=(True, True, True))
-    parts = data.create_particles(count=len(pts))
+    if hasattr(data, "create_cell"):
+        data.create_cell(mat, pbc=(True, True, True))
+        parts = data.create_particles(count=len(pts))
+    else:
+        from ovito.data import Particles, SimulationCell
+
+        cell = SimulationCell(pbc=(True, True, True))
+        cell.matrix = mat
+        data.objects.append(cell)
+        parts = Particles()
+        data.objects.append(parts)
     parts.create_property("Position", data=np.asarray(pts))
     pipe = Pipeline(source=StaticSource(data=data))
     pipe.modifiers.append(CreateBondsModifier(cutoff=CUTOFF))
@@ -265,10 +275,10 @@ def main() -> None:
             raise SystemExit(1)
         ours = summary_counts(bench(bench_bin, dump, 4, []))
         theirs, obonds = ovito_histogram(pts, lo, hi, 4)
-        if ours[4] != 3 or obonds != 6 or theirs[4] != 2:
+        if ours[4] != 3 or obonds != 6 or theirs[4] not in (2, 3):
             print("K2,3 dseams n4 {} ovito n4 {} bonds {}".format(ours[4], theirs[4], obonds), file=sys.stderr)
             raise SystemExit(1)
-        print("K2,3 primitive 4-rings 3, OVITO FindRings 2, bonds 6")
+        print("K2,3 primitive 4-rings 3, OVITO FindRings {}, bonds 6".format(theirs[4]))
 
     dump = os.path.abspath(DUMP)
     pts, lo, hi = load_frame(dump)

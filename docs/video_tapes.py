@@ -5,6 +5,7 @@
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -108,8 +109,13 @@ def prepare(root, seams, libdir, langdir, build):
             wrapper.unlink()
         real = os.environ.get(var, "").strip()
         if real:
-            wrapper.write_text('#!/bin/sh\nexec {} "$@" {}\n'.format(real, link_line))
-            wrapper.chmod(0o755)
+            # A bare `gcc` on PATH would be this shim once it is installed.
+            resolved = real if os.path.isabs(real) else shutil.which(real)
+            if resolved:
+                wrapper.write_text(
+                    '#!/bin/sh\nexec {} "$@" {}\n'.format(shlex.quote(resolved), link_line)
+                )
+                wrapper.chmod(0o755)
     env = os.environ.copy()
     env["PATH"] = str(shim) + os.pathsep + env.get("PATH", "")
     env["NO_COLOR"] = "1"
