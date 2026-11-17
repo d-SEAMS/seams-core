@@ -76,7 +76,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.md): Eight cubic-ice atoms, one observation:
 - [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.md): engines/lammps/in.dseams is a frozen cubic cell of 64 atoms.
 - [OpenMM tutorial](https://docs.dseams.info/fronts/openmm.md): DseamsReporter in adapters/python/dseams_insitu/openmm.py asks for positions every interval and calls InSitu.observe.
-- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.md): SEAMS has three components. q6 is the mean local q6 and carries finite-difference derivatives, so RESTRAINT can bias it.
+- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.md): SEAMS reports three components on this page.
 - [Paper figures](https://docs.dseams.info/user/paper.md): The in-tree numbers behind the published figures, and the gallery drawn from those runs.
 - [Paper figures](https://docs.dseams.info/user/tutorials/paper-figures.md): The 2020 JCIM figures are drawn from figshare project 73545.
 - [CHILL+ on an ice/water slab](https://docs.dseams.info/user/tutorials/paper-interface.md): An interface is where a rule is easy to fool.
