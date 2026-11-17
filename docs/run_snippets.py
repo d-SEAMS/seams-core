@@ -747,7 +747,9 @@ def c_context(body, predeclared):
         if name == "front":
             context.append("  int front_ice[8] = {0};")
         context.append("  {} *{} = NULL;".format(ctype, name))
-        context.append("  (void){};".format(make))
+        make_call = make.split("(", 1)[0] + "("
+        if make_call not in body:
+            context.append("  (void){};".format(make))
         if destroy + "(" + name not in body:
             cleanup.append("  {}({});".format(destroy, name))
     return context, cleanup

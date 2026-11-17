@@ -45,7 +45,7 @@ the CHILL+ Algorithm. /J. Phys. Chem. B/ 2015, 119, 9369--9376.
 CHILL: Moore, E. B.; de la Llave, E.; Welke, K.; Scherlis, D. A.;
 Molinero, V. Freezing, melting and structure of ice in a hydrophilic
 nanopore. /Phys. Chem. Chem. Phys./ 2010, 12, 4124--4134.
-[[https://doi.org/10.1039/b919724a][10.1039/b919724a]].
+doi:10.1039/b919724a.
 
 #+begin_src bibtex
 @Article{Moore2010,
