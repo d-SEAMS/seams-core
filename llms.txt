@@ -149,7 +149,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Fortran](https://docs.dseams.info/stable/fortran.md): The fpm package dseams is d-SEAMS/dseams-fortran.
 - [Julia](https://docs.dseams.info/stable/julia.md): Both live in d-SEAMS/Dseams.jl.
 - [R](https://docs.dseams.info/stable/r.md): The R package dseams is d-SEAMS/dseams-r.
-- [Lua and Fennel](https://docs.dseams.info/stable/lua.md): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
+- [Lua and Fennel](https://docs.dseams.info/stable/lua.md): The Lua and Fennel library is d-SEAMS/yodaStruct.
 - [Rust](https://docs.dseams.info/stable/rust.md): Both live in d-SEAMS/dseams-rs.
 - [Command line](https://docs.dseams.info/stable/cli.md): seams reads a trajectory and prints one result.
 - [Science front](https://docs.dseams.info/stable/science.md): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
