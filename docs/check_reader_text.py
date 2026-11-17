@@ -195,7 +195,7 @@ def claims(line: str):
     plain = line.replace("~", "").replace("`", "")
 
     for match in re.finditer(r"\bpip(?:3)?\s+install(?:\s+-\S+)*\s+['\"]?([A-Za-z0-9_.-]+)(?:==([A-Za-z0-9_.+-]+))?", plain):
-        yield "pip", match.group(1), match.group(2) or "*"
+        yield "pip", match.group(1).rstrip(".,;:"), (match.group(2) or "*").rstrip(".,;:")
 
     match = re.search(r"\b(?:conda|mamba)\s+install\b(.*)", plain)
     if match:
@@ -214,10 +214,10 @@ def claims(line: str):
             if token.startswith("-"):
                 continue
             package, sep, version = token.partition("=")
-            yield "conda", package, version if sep else "*"
+            yield "conda", package.rstrip(".,;:"), (version if sep else "*").rstrip(".,;:")
 
     for match in re.finditer(r"\bluarocks\s+install\s+([A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9_.+-]+))?", plain):
-        yield "luarocks", match.group(1), match.group(2) or "*"
+        yield "luarocks", match.group(1).rstrip(".,;:"), (match.group(2) or "*").rstrip(".,;:")
 
     if not re.search(r"\bcargo\s+add\b[^\n]*\s--git(?:\s|=)", plain):
         for match in re.finditer(
@@ -225,7 +225,7 @@ def claims(line: str):
             r"(?:@([A-Za-z0-9_.+-]+))?",
             plain,
         ):
-            yield "cargo", match.group(1), match.group(2) or "*"
+            yield "cargo", match.group(1).rstrip(".,;:"), (match.group(2) or "*").rstrip(".,;:")
 
     for call in re.finditer(r"\bPkg\.add\(([^)]*)\)", plain):
         body = call.group(1)
