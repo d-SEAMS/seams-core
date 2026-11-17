@@ -1,15 +1,22 @@
 #+TITLE: Release process
 #+OPTIONS: toc:nil num:nil
 
-This is the maintainer cut. ~.github/workflows/release.yml~ only
-runs ~gh release create~ when a ~v*~ tag is pushed. Versions,
-newsfragments, packages, and the Zenodo pin are not automated.
+This is the maintainer cut for seams-core. ~RELEASING.md~ is the same
+cut with the version filled in. ~.github/workflows/release.yml~ runs
+when a ~v*~ tag is pushed to d-SEAMS/seams-core. The job checks that
+the tag names the ~meson.build~ version
+(~scripts/check_release_version.py~), builds a source archive and a
+Linux ~libseams~ prefix with ~recipe/build-libseams.sh~, tests that
+prefix, and publishes a GitHub release. The notes are the matching
+~CHANGELOG.md~ section, passed as ~--notes-file~. The assets are the
+source archive, ~libseams-X.Y.Z-linux-x86_64.tar.gz~ and ~SHA256SUMS~.
+When the release already exists, the job uploads those assets with
+~gh release upload --clobber~. A tag pushed from a fork does not run
+the job. conda-forge and the Yggdrasil registration are opened by hand.
 
-This page is the seams-core cut: the tag, the GitHub release, conda
-~libseams~ from ~recipe/~, and ~libseams_jll~ from
-~packaging/yggdrasil~. The language bindings release from their own
-repositories after the tag; [[file:repositories.org][the repository
-map]] has the order.
+The language bindings release from their own repositories after the
+tag. [[file:repositories.org][The repository map]] has the pin files
+and the order.
 
 | repo | product |
 |------+---------|
@@ -20,66 +27,95 @@ map]] has the order.
 | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~ |
 | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
 | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
-| [[https://github.com/d-SEAMS/linkcell][linkcell]] | periodic k-nearest neighbour search |
-| [[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed]] | ~DSEAMS_CAGES~ PLUMED action |
 
-~-Dwith_lammps~, ~-Dwith_gromacs~, ~-Dwith_openmm~, and
-~-Dwith_plumed~ are ~auto~: the hook is built when the library is
-found.
+~recipe/build-libseams.sh~ and
+~packaging/yggdrasil/L/libseams/build_tarballs.jl~ disable the optional
+backends, including ~-Dwith_lammps=disabled~, ~-Dwith_gromacs=disabled~,
+~-Dwith_openmm=disabled~ and ~-Dwith_plumed=disabled~. A developer
+build leaves those four options at ~auto~, so the hook is compiled
+when the library is on the machine.
 
 * Checklist
 
-1. Feature work is on ~main~, or on a native GitHub stack that
-   lands on ~main~.
-2. CI is green on the merge commit (~CI~ and ~Docs~).
-3. Collect Keep a Changelog fragments under ~changelog.d/~ that
-   are *not* already in ~CHANGELOG.md~. Name each file
-   ~+slug.added.md~ (or ~changed~, ~deprecated~, ~removed~,
-   ~fixed~, ~security~). Fragments whose text is already in
-   ~CHANGELOG.md~ reprint those notes if they stay in the
-   directory.
+1. The change is merged to ~main~.
+2. The workflows on that commit are green. The workflows named ~CI~
+   and ~Docs~ are ~.github/workflows/ci_test.yml~ and
+   ~.github/workflows/ci_docs.yml~.
+3. Add one Keep a Changelog fragment under ~changelog.d/~ for each
+   user-visible change whose text is still absent from ~CHANGELOG.md~.
+   Name the file ~+slug.added.md~. The type is one of ~added~,
+   ~changed~, ~deprecated~, ~removed~, ~fixed~, ~security~.
+   ~docs/check_changelog.py~ accepts only a name that starts with ~+~.
    Then:
 
    #+begin_src bash
-   towncrier build --version X.Y.Z
+   towncrier build --version X.Y.Z --date YYYY-MM-DD
    #+end_src
 
-   That writes ~CHANGELOG.md~ and removes the consumed fragments.
-4. Bump ~pixi.toml~, ~meson.build~, and ~CITATION.cff~ together.
-   Pass ~--version X.Y.Z~ to towncrier; do not store a stale
-   version in ~towncrier.toml~. Sync
-   ~docs/orgmode/development/changelog.org~ with the new ~CHANGELOG.md~
-   section. ~nix/package.nix~ and
-   ~docs/source/Doxyfile_seams.cfg~ ~PROJECT_NUMBER~ also carry a
-   version string; do not leave them behind the cut.
-5. Export org docs with ~pixi run -e docs docbld~ (same command
-   as the contributing page and ~ci_docs.yml~). Org under
-   ~docs/orgmode/~ is the source. RST under ~docs/source/~ is
-   generated and is not committed.
-6. Open a ~chore: cut X.Y.Z~ pull request. Merge when CI is
-   green.
-7. Tag ~vX.Y.Z~ on ~d-SEAMS/seams-core~ and push the tag.
-   ~release.yml~ mints the GitHub release
-   (~gh release create --generate-notes~).
-8. Build conda ~libseams~ from ~recipe/recipe.yaml~ at the tag and
-   update the conda-forge feedstock. Open the Yggdrasil pull request
-   for ~libseams_jll~ from ~packaging/yggdrasil/L/libseams~ with the
-   tag's source hash.
-9. Each binding moves its seams-core pin to ~vX.Y.Z~, sets its
-   version to ~X.Y.Z~, and follows its own release document:
-   PydSEAMSlib, dseams-rs, yodaStruct, dseams-fortran and dseams-r
-   in any order, then Dseams.jl after ~libseams_jll~ ~X.Y.Z~ is
-   registered. The core Docs workflow installs ~pydseamslib~ from the
-   PydSEAMSlib ~vX.Y.Z~ tag.
-10. Zenodo: run ~repro/stage_zenodo.sh~ and pin the software in
-   that record to the release tag, never a commit. Do not mint a
-   new DOI version for prose. See ~repro/zenodo/README.md~.
-11. GitHub native stacked PRs are same-repo only. Use
-    ~gh stack link~ to attach PRs and ~gh stack merge~ to land
-    them. Cross-fork stacks are not supported. Merge-top lands
-    the whole stack. Use ~gh stack merge~ (async stack merge),
-    not a lone ~gh pr merge~ of a mid-stack PR, if the stack
-    object is to stay intact.
+   That writes the ~CHANGELOG.md~ section and deletes the fragments it
+   consumed. ~YYYY-MM-DD~ is the ~date-released~ value in ~CITATION.cff~.
+   ~scripts/check_release_version.py~ requires the newest
+   ~## [X.Y.Z] - YYYY-MM-DD~ heading to use the ~meson.build~ version
+   and that date. ~towncrier.toml~ has no version field. Pass
+   ~--version~. A fragment left in ~changelog.d/~ is drafted again on
+   the next build, so a note already present in ~CHANGELOG.md~ appears
+   twice when the file stays.
+   ~docs/check_towncrier.py~ drafts whatever fragments remain, at
+   version 2.14.0 and date 2026-11-15, requires that draft inside
+   ~CHANGELOG.md~, and fails when fewer than 100 fragment files
+   remain. The 2.14.0 fragments are still in ~changelog.d/~, which is
+   what that check requires. A later cut updates the version and the
+   date in that file in the same change.
+4. Keep one version string. ~meson.build~ ~version:~ is the source.
+   ~scripts/check_release_version.py~ also reads ~pixi.toml~,
+   ~recipe/recipe.yaml~ and ~CITATION.cff~. The book and the Nix
+   package carry the same string. The files are the table below.
+5. Build the book with ~pixi run -e docs docbld~. Org under
+   ~docs/orgmode/~ and the Markdown under ~docs/api/~, ~docs/engines/~
+   and ~docs/tutorials/~ are the source. RST under ~docs/source/~ is
+   generated and gitignored. ~docs/source/conf.py~ and
+   ~docs/source/Doxyfile_seams.cfg~ are committed.
+6. Open a pull request whose subject is ~chore: cut X.Y.Z~. Merge it
+   when the workflows are green.
+7. Tag the release commit and push the tag to d-SEAMS/seams-core:
+
+   #+begin_src bash
+   git checkout <release-commit>
+   git tag -a vX.Y.Z -m "d-SEAMS X.Y.Z"
+   git push https://github.com/d-SEAMS/seams-core.git vX.Y.Z
+   #+end_src
+
+   The tag push starts ~release.yml~, which creates the GitHub release
+   described above.
+8. Fill ~source.sha256~ in ~recipe/recipe.yaml~ from the tag archive,
+   then build the conda package locally:
+
+   #+begin_src bash
+   curl -L -o seams-core-X.Y.Z.tar.gz \
+     https://github.com/d-SEAMS/seams-core/archive/refs/tags/vX.Y.Z.tar.gz
+   sha256sum seams-core-X.Y.Z.tar.gz
+   rattler-build build --recipe recipe -c conda-forge
+   #+end_src
+
+   ~rattler-build build~ is the local proof. Copy ~recipe/~ into a
+   conda-forge feedstock pull request (staged-recipes, until a
+   feedstock exists). Opening that pull request publishes ~libseams~.
+9. ~packaging/yggdrasil/L/libseams/build_tarballs.jl~ pins the source
+   by commit. At 2.14.0 the constant is ~v2_14_0_tag_sha~. After the
+   tag exists, set that constant to ~git rev-parse vX.Y.Z^{commit}~
+   when the two differ. Copy ~packaging/yggdrasil/L/libseams~ into a
+   Yggdrasil checkout and open that pull request.
+   ~packaging/yggdrasil/README.md~ is the local BinaryBuilder build.
+   When the pull request merges, the registry registers
+   ~libseams_jll~. Dseams.jl registers after that.
+10. Each binding moves its seams-core pin to ~vX.Y.Z~, sets its version
+    to ~X.Y.Z~, and follows its own release document. PydSEAMSlib,
+    dseams-rs, yodaStruct, dseams-fortran and dseams-r can go in any
+    order. Dseams.jl waits until ~libseams_jll~ ~X.Y.Z~ is registered.
+    The Docs workflow builds ~pydseamslib~ from a PydSEAMSlib checkout
+    against the seams-core tree it is publishing
+    (~scripts/install_pydseamslib.sh~). That build is separate from
+    the PyPI release of ~pydseamslib~.
 
 * Version files
 
@@ -89,22 +125,23 @@ seams-core cut:
 |------+-------|
 | ~meson.build~ | ~project(..., version:)~ |
 | ~pixi.toml~ | ~[workspace] version~ |
-| ~CITATION.cff~ | ~version~ |
-| ~CHANGELOG.md~ | towncrier output for ~X.Y.Z~ |
-| ~docs/orgmode/development/changelog.org~ | new section from ~CHANGELOG.md~ |
+| ~recipe/recipe.yaml~ | ~context.version~ |
+| ~CITATION.cff~ | ~version~ and ~date-released~ |
+| ~CHANGELOG.md~ | towncrier section ~## [X.Y.Z] - YYYY-MM-DD~ |
+| ~docs/orgmode/development/changelog.org~ | the new section, taken from ~CHANGELOG.md~ |
 | ~nix/package.nix~ | ~version~ |
-| ~docs/source/Doxyfile_seams.cfg~ | ~PROJECT_NUMBER~ |
 | ~docs/source/conf.py~ | ~version~ and ~release~ |
+| ~docs/source/Doxyfile_seams.cfg~ | ~PROJECT_NUMBER~, written ~vX.Y.Z~ |
 
 Each binding repository lists its own version files in its release
 document.
 
 * Newsfragments
 
-One file for each user-visible change, under ~changelog.d/~,
-named ~+slug.<type>.md~ or ~<github-issue>.<type>.md~. Types are
-the Keep a Changelog set: ~added~, ~changed~, ~deprecated~,
-~removed~, ~fixed~, ~security~. Write the fragment in the same
-pull request as the change. The cut in step 3 consumes only
-fragments that are not already reflected in ~CHANGELOG.md~.
-Every d-SEAMS package uses this layout.
+One file for each user-visible change, under ~changelog.d/~, named
+~+slug.added.md~ with the type ~added~, ~changed~, ~deprecated~,
+~removed~, ~fixed~ or ~security~. Write the fragment in the same pull
+request as the change. The ~towncrier build~ in step 3 consumes
+every fragment file still in the directory. Every d-SEAMS package uses
+this directory layout. This repository's changelog check accepts the
+~+slug~ form.

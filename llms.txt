@@ -159,7 +159,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 - [Contributing](https://docs.dseams.info/development/index.md): This repository is the C++ engine (libyodaLib), the C API libseams, the C ABI libseams_lang, the seams CLI and the engine drivers.
 - [Repository map](https://docs.dseams.info/development/repositories.md): d-SEAMS is seven repositories.
-- [Release process](https://docs.dseams.info/development/release.md): This is the maintainer cut. .github/workflows/release.yml only runs gh release create when a v* tag is pushed.
+- [Release process](https://docs.dseams.info/development/release.md): This is the maintainer cut for seams-core.
 - [Lean proofs](https://docs.dseams.info/development/lean.md): lean/ is a Lean 4 (Mathlib) model of three pieces of the engine.
 - [Changelog](https://docs.dseams.info/development/changelog.md): Release notes for the d-SEAMS engine.
 
