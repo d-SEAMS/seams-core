@@ -1,0 +1,10 @@
+manager	package	version
+pip	pydseamslib	2.14.0
+conda	libseams	2.14.0
+conda	meson	*
+conda	ninja	*
+conda	pkg-config	*
+conda	eigen	*
+luarocks	dseams	2.14.0-1
+julia	Dseams	2.14.0
+r	dseams	*
