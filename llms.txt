@@ -158,7 +158,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 ## Development
 
 - [Contributing](https://docs.dseams.info/development/index.md): This repository is the C++ engine (libyodaLib), the C API libseams, the C ABI libseams_lang, the seams CLI and the engine drivers.
-- [Repository map](https://docs.dseams.info/development/repositories.md): d-SEAMS is seven repositories.
+- [Repository map](https://docs.dseams.info/development/repositories.md): d-SEAMS ships the engine and six language bindings as seven repositories.
 - [Release process](https://docs.dseams.info/development/release.md): This is the maintainer cut for seams-core.
 - [Lean proofs](https://docs.dseams.info/development/lean.md): lean/ is a Lean 4 (Mathlib) model of three pieces of the engine.
 - [Changelog](https://docs.dseams.info/development/changelog.md): Release notes for the d-SEAMS engine.
