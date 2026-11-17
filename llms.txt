@@ -127,7 +127,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Stacking disorder](https://docs.dseams.info/explanation/stacking-disorder.md): Cubic ice and hexagonal ice are the same puckered hexagons stacked in two orders.
 - [Local symmetry](https://docs.dseams.info/explanation/symmetry.md): The engine names a local environment as ice Ih, ice Ic, stacking-disordered ice, a hydrate cage, or a five- or six-ring, and it labels every oxygen in a cell.
 - [Topological network criteria](https://docs.dseams.info/explanation/topological-network.md): This page is the definitions. The runnable checks that the implementations still return the documented counts live under Tutorials.
-- [TRACE and signature cages](https://docs.dseams.info/explanation/trace-assembly.md): TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) assembles hydrate cages from a hydrogen-bond graph.
+- [TRACE and signature cages](https://docs.dseams.info/explanation/trace-assembly.md): TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) finds hydrate cages on a hydrogen-bond graph.
 - [Signature-search thread controls](https://docs.dseams.info/explanation/trace-threads.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
 
 ## API reference
