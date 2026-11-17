@@ -4,8 +4,8 @@
 Get a ~seams~ binary, ~libyodaLib~, ~libseams~, and ~libseams_lang~.
 This page is the @PROJECT_VERSION@ install of the engine: a source
 checkout or GitHub release tarball, pixi, or the Nix flake. The
-language bindings are separate projects; the last section lists the
-installation routes that are available now.
+language bindings are separate projects; the last section gives their
+install commands.
 
 * Build tools
 
@@ -51,7 +51,7 @@ only package builders use:
 
 | Option                              | Effect                                                   |
 |-------------------------------------+----------------------------------------------------------|
-| ~-Dwith_blas=disabled~              | Do not link BLAS or LAPACK; nothing calls them yet       |
+| ~-Dwith_blas=disabled~              | Do not link BLAS or LAPACK                               |
 | ~-Dwith_readcon=disabled~           | Leave out the readcon-core and readcon-db ~.con~ readers |
 | ~--wrap-mode=nodownload~            | Fail instead of fetching a subproject                    |
 | ~-Dchemfiles_dir=PREFIX~            | Use the chemfiles installed under PREFIX, and no other   |
@@ -171,7 +171,7 @@ the LAMMPS compute and the PLUMED module.
 
 * Language bindings
 
-Each binding is its own repository. These are the routes available now:
+Each binding is its own repository. Use these install commands:
 
 - Python: ~pip install 'pydseamslib==2.14.0'~.
 - Lua and Fennel: clone [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
