@@ -112,7 +112,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [CHILL+ versus cages](https://docs.dseams.info/explanation/chill-plus-vs-cages.md): Two classifiers live in libyodaLib.
 - [Citation](https://docs.dseams.info/explanation/citation.md): If you use this software, cite the methods paper.
 - [ClavisCage TRACE](https://docs.dseams.info/explanation/clavis-trace.md): ClavisCage 0.3.18 runs TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) on the same hydrate cells as d-SEAMS 2.14.0.
-- [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.md): primitive::RingUpdater returns the primitive rings of one neighbour graph.
 - [Interface and confined ice](https://docs.dseams.info/explanation/interface-order.md): Two published CHILL+ rules, on the same coordinates, with the thresholds left alone.
 - [Linkcell strong scaling](https://docs.dseams.info/explanation/linkcell-scaling.md): An orthorhombic frame is cut across ranks by linkcell's weighted recursive coordinate bisection of the periodic cell grid.
 - [Primitive rings and OVITO FindRings](https://docs.dseams.info/explanation/ovito-findrings.md): A ring is primitive when every pair of its vertices is as close along the ring as it is through the rest of the graph.
