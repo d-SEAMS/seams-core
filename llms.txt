@@ -11,7 +11,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 ## Getting started
 
 - [Getting started](https://docs.dseams.info/getting-started/index.md): Install the engine, read one frame, and open the recording of that run.
-- [Quickstart](https://docs.dseams.info/getting-started/quickstart.md): Install the engine, then classify one cubic cell.
+- [Quickstart](https://docs.dseams.info/getting-started/quickstart.md): Install the engine, classify one cubic cell, then read one LAMMPS frame.
 - [Install the engine](https://docs.dseams.info/getting-started/install.md): Get a seams binary, libyodaLib, libseams, and libseams_lang.
 - [Use with AI assistants](https://docs.dseams.info/getting-started/ai-assistants.md): The manual is published as HTML and as Markdown.
 - [Videos](https://docs.dseams.info/videos/index.md): Short screencasts of d-SEAMS in each language and tutorial are hosted on d-SEAMS on Odysee.
