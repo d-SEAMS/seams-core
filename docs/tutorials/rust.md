@@ -7,4 +7,4 @@ cargo add dseams --git https://github.com/d-SEAMS/dseams-rs
 ```
 
 Continue with the [Rust binding documentation](https://rust.dseams.info/)
-or watch the [Rust walkthrough](https://odysee.com/dseams-rust:687055b1ac9dfe7596006cb4f2fa466de9492ca5).
+or watch it on the [videos page](../videos/index.html).
