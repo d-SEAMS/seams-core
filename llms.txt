@@ -73,7 +73,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Rust](https://docs.dseams.info/fronts/rust.md): Classify ice Ih from Rust. The recording uses input/traj/ice1h.lammpstrj: seams read prints nop 128, and published CHILL+ at a 3.5 angstrom cutoff prints nop 128 hexagonal 128.
 - [Engines tutorial](https://docs.dseams.info/fronts/engines.md): Eight molecules of cubic ice are engines/tutorial/ice.data.
 - [GROMACS tutorial](https://docs.dseams.info/fronts/gromacs.md): gmx-seams reads a trajectory after gmx mdrun and classifies it with seams_chill_plus.
-- [In-situ tutorial](https://docs.dseams.info/fronts/insitu.md): Eight cubic-ice atoms, one observation:
+- [In-situ tutorial](https://docs.dseams.info/fronts/insitu.md): Eight cubic-ice atoms, one observation through InSitu.observe.
 - [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.md): engines/lammps/in.dseams is a frozen cubic cell of 64 atoms.
 - [OpenMM tutorial](https://docs.dseams.info/fronts/openmm.md): DseamsReporter in adapters/python/dseams_insitu/openmm.py asks for positions every interval and calls InSitu.observe.
 - [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.md): SEAMS reports three components on this page.
