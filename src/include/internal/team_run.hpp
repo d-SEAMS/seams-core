@@ -104,7 +104,8 @@ template <class C> void ompRun(const std::vector<std::size_t> &sizes, C &call) {
   }
 #ifdef SEAMS_HAS_OPENMP
   const int threads =
-      omp_in_parallel() ? 1 : static_cast<int>(std::min<std::size_t>(omp_get_max_threads(), most));
+      omp_in_parallel() ? 1 : static_cast<int>(std::min<std::size_t>(
+                                      static_cast<std::size_t>(omp_get_max_threads()), most));
   if (threads > 1) {
 #pragma omp parallel num_threads(threads)
     {
