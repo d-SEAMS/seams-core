@@ -4,9 +4,7 @@
 A cell is nine numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`. A zero tilt is orthorhombic.
 `lx, ly, lz` are edge lengths.
 
-`docs/examples/minimal_c.c` is the short program. `docs/examples/c_api_tour.c` calls every exported function on the in-tree fixtures.
-`meson test docs_c_api_tour` compiles that file, runs it, and requires each printed
-`capi` line below to match the run.
+`docs/examples/minimal_c.c` is the short program. `docs/examples/c_api_tour.c` calls every exported function on the in-tree fixtures. Each `capi` line below is a line that program prints.
 
 ## Handle lifecycle
 
@@ -22,8 +20,8 @@ objects. Destroying the frame does not free them.
 
 One thread uses a handle. Another thread may use a different handle at the same time,
 including for `seams_ql`, `seams_q4q6`, `seams_q6bar`, and `seams_steinhardt`: their
-q_lm scratch belongs to the calling thread. `tests/capi_q_threads.c` runs them, and
-CHILL+, on eight handles in eight threads.
+q_lm scratch belongs to the calling thread. Eight handles can run those calls, and
+CHILL+, at the same time.
 
 ## Status codes
 
@@ -60,27 +58,16 @@ libseams is compiled with hidden visibility and a linker export list, so the onl
 exported symbols are the `seams_*` functions in `seams.h`. `SEAMS_API` marks them.
 The library build defines `SEAMS_BUILDING`, which selects `dllexport` on Windows;
 consumers get `dllimport`. Define `SEAMS_STATIC` before including `seams.h` to link
-a static archive. `tests/capi_symbols.txt` is the exported list, and the
-`capi_symbols` test compares it with the header and the built library.
-`capi_abi` compares the exported names with `scripts/abi_baseline.txt`. When
-libabigail's `abidiff` is on `PATH` at configure time, it also builds libseams once
-more with debug info and compares its types with the ABI 1 corpus in
-`scripts/abi_baseline.abi`: added functions pass, and anything else fails. The
-`abi` pixi environment carries conda-forge's libabigail, so
-`pixi run -e abi meson setup <builddir>` finds it, and the `capi-abi` CI job runs
-that way. Distribution packages work too: `abigail-tools` on Debian and Ubuntu,
-`libabigail` on Fedora. The corpus is format 2.4, which libabigail 2.9 and 3.0
-read. Without
-`abidiff`, or with an older one, `capi_abi` still checks the exported names, says
-the type step was skipped, and passes.
+a static archive.
 
-The 2.13.0 release had no libseams. Its C interface was `seams_lang.h` in
-libseams_lang, which the R and Julia packages still use. `capi_abi_2_13` builds
-libseams_lang with debug info and compares its `seams_*` functions with the 2.13.0
-corpus in `scripts/abi_2.13.0_seams_lang.abi`. Functions added since 2.13.0 pass,
-and a removed function or a changed signature fails. `capi_abi_2_13_selftest`
-edits copies of the corpus to prove the comparison catches both. Without
-`abidiff`, both tests are skipped.
+`scripts/abi_baseline.txt` is the exported name list. `scripts/abi_baseline.abi`
+is the ABI 1 type corpus, libabigail format 2.4. libabigail 2.9 and 3.0 read it.
+The Debian and Ubuntu package is `abigail-tools`. Fedora calls it `libabigail`.
+
+2.13.0 had no libseams. Its C interface was `seams_lang.h` in libseams_lang.
+The R and Julia packages still link that library. `scripts/abi_2.13.0_seams_lang.abi`
+is the corpus of those `seams_*` functions. A function added since 2.13.0 stays
+compatible. Removing a function or changing a signature is an incompatible change.
 
 ## seams_last_error and seams_handle_error
 
@@ -108,7 +95,7 @@ A function that takes a `const` handle is a read-only accessor. On success it wr
 nothing to the handle; on failure it writes only the error copy, under a lock. Several
 threads may make `const` calls on one handle at the same time, as long as no non-const
 call on that handle overlaps them. Read the message with `seams_last_error_message`
-when threads share a handle. `tests/capi_const_threads.c` runs eight threads this way.
+when threads share a handle. Eight threads may share one handle this way.
 
 The frame accessors are `seams_system_count`, `seams_system_natoms`, `seams_system_box`,
 `seams_system_positions`, `seams_system_types`, and `seams_system_ids`. Every query on
@@ -139,32 +126,11 @@ records, so a view onto caller memory would be copied on every analysis call ins
 of once per frame. A failed load or reload leaves the earlier frame in place.
 `seams_system_set_positions` keeps that guarantee by checking every coordinate
 before it writes any, so it reads the input twice and needs no extra memory. The
-check scans from the end of the input, so the write pass finds its start still in
-cache. In a trajectory loop a reload then costs 2 to 5% more than writing the
-coordinates into the C++ frame directly at 4096 and 110592 molecules, and about 12%
-more at 884736, where the second read of the 21 MB input comes from L3.
-`seams_system_stage_positions(sys, 1)` makes it read the input once instead: it
-writes into a second set of per-atom records, checked in the same pass, and swaps
-that set in at the end. That reload stays within 5% of the direct write at each of
-those sizes. The set costs about 72 bytes per atom, 15 to 18% of the resident
-memory of a process that has loaded an ice frame of 0.1 to 0.9 million molecules
-and run CHILL+ on it.
-
-For large frames staged mode is the zero-overhead path. Once the input no longer
-fits in L2, the default check costs a full second read of it, and staging is the
-only way to read it once. The times below are per reload in a trajectory loop: the
-median of 21 batches of 100 calls on one thread, from `bench_capi_overhead`. The
-direct write is the C++ loop that writes x, y, z and the label into a built frame.
-
-| molecules | direct write | default | staged |
-| --- | --- | --- | --- |
-| 4096 | 0.0068 ms | 0.0070 ms (+2.3%) | 0.0072 ms (+4.4%) |
-| 110592 | 0.3882 ms | 0.4067 ms (+4.8%) | 0.3664 ms (-5.6%) |
-| 884736 | 3.1568 ms | 3.5415 ms (+12.2%) | 3.1939 ms (+1.2%) |
-
-Each interquartile range is at most 2.2% of its median. A loop over frames of a
-million atoms or more should call `seams_system_stage_positions(sys, 1)` once after
-the first `seams_system_set_atoms`, if the extra 72 bytes per atom fit.
+finiteness check scans from the end of the input.
+`seams_system_stage_positions(sys, 1)` makes the reload read the input once: it
+writes into a second set of per-atom records, checks those coordinates in the same
+pass, and swaps that set in at the end. Call it once after the first
+`seams_system_set_atoms` when the second copy of the frame fits.
 
 ## Threads
 
@@ -177,12 +143,9 @@ inside `seams_get_num_threads`.
 ## Examples by family
 
 Each program below covers one family and checks its own results on
-`input/traj/ice1h.lammpstrj`. `meson test capi_example_<family>` compiles it as C11
-with `-Wall -Wextra -Wpedantic -Werror` and runs it. The argument is the repository root.
-`capi_installed_examples` installs the build into a staging directory and builds all
-six out of tree against that install, once with the flags from `pkg-config seams` and
-once with `find_package(seams)` and `docs/examples/c/CMakeLists.txt`. Each binary must
-load the installed `libseams.so` and pass.
+`input/traj/ice1h.lammpstrj`. The argument is the repository root. An installed
+tree is used the same way: `pkg-config --cflags --libs seams`, or
+`find_package(seams)` with `docs/examples/c/CMakeLists.txt`.
 
 Neighbours, `docs/examples/c/neighbours.c`:
 
@@ -220,13 +183,6 @@ Errors, `docs/examples/c/errors.c`, needs no input file:
 :language: c
 ```
 
-## Documentation check
-
-`capi_docs_complete` checks that every function in `tests/capi_symbols.txt` has a
-doc comment in `seams.h` and that its section below carries the same text.
-`python3 docs/capi_docs.py --write include/seams.h tests/capi_symbols.txt docs/api/c.md`
-rewrites those sections from the header.
-
 ## What the tour runs
 
 The eight-atom cell is the diamond in `docs/examples/ice.c`. Every atom is cubic.
@@ -238,7 +194,7 @@ line below says otherwise.
 `docs/examples/core_counts.c` reads `input/traj/ice1h.lammpstrj` and
 `input/traj/genice_sII.lammpstrj` and checks the C core: 128 hexagonal
 waters and 256 six-rings, then 136 clathrate waters, 144 five-rings and
-16 six-rings. `meson test docs_core_counts` compiles and runs it.
+16 six-rings. It prints `hexagonal 128`, `rings6 256`, `clathrate 136` and `rings5 144`, and returns 0.
 
 ```{literalinclude} ../../../docs/examples/core_counts.c
 :language: c
@@ -250,12 +206,6 @@ waters and 256 six-rings, then 136 clathrate waters, 144 five-rings and
 ### seams_abi
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
-
-`seams_chill_plus` writes one label per atom and, when `counts9` is not null, nine
-population counts. `rule` is `SEAMS_CHILL_PUBLISHED` (four closest neighbours in
-q_lm, Nguyen and Molinero equation 1) or `SEAMS_CHILL_OVITO` (every neighbour
-inside the cutoff). `seams_label_name` maps a label to cubic, hexagonal, water,
-interfacial, clathrate, interClathrate, unclassified, reCubic, or reHex.
 
 ```
 capi seams_abi 1
@@ -454,6 +404,12 @@ capi seams_system_set_ortho 8
 ```
 
 ### seams_chill_plus
+
+`seams_chill_plus` writes one label per atom and, when `counts9` is not null, nine
+population counts. `rule` is `SEAMS_CHILL_PUBLISHED` (four closest neighbours in
+q_lm, Nguyen and Molinero equation 1) or `SEAMS_CHILL_OVITO` (every neighbour
+inside the cutoff). `seams_label_name` maps a label to cubic, hexagonal, water,
+interfacial, clathrate, interClathrate, unclassified, reCubic, or reHex.
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
@@ -5324,12 +5280,12 @@ The program those lines come from:
 ```
 
 
-## Structure still
+## Ice Ih
 
 ```{figure} ../user/tutorials/molecules/c/overlay-web.png
-:alt: Molecule still for this front
+:alt: Ice Ih colored by published CHILL+
 :width: 480px
 
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug c` writes the 2400 by 1800 PNG.
+Ice Ih colored by published CHILL+.
 ```
 
