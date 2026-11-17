@@ -38,6 +38,7 @@
 - [Brine freezing front](https://docs.dseams.info/science/brine.html): The d-SEAMS/brine-front-230K dataset provides the initial and final frames for a 20-pair loading.
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.html): Classify sII and sH hydrate cages.
 - [Science figures](https://docs.dseams.info/science/gallery.html): These four molecular views accompany the science tutorials.
+- [Language tutorials](https://docs.dseams.info/fronts/index.html)
 - [C tutorial](https://docs.dseams.info/fronts/c.html): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): A program that classifies one frame links libseams and calls seams_system_create, seams_system_set_frame, and seams_chill_plus.
 - [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
@@ -96,6 +97,7 @@
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): Perform the same CHILL+ analysis through four language bindings.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
 - [d-SEAMS 2.14 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes describe the user-visible changes since d-SEAMS 2.13.0.
+- [Stable API](https://docs.dseams.info/stable/index.html)
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
 - [Python](https://docs.dseams.info/stable/python.html): The Python binding is the pydseamslib distribution.

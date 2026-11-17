@@ -109,7 +109,8 @@ Install the language interface you want:
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
   with ~pip install 'pydseamslib==2.14.0'~
-- Lua and Fennel: clone [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+- Lua and Fennel: clone the
+  [[https://github.com/d-SEAMS/yodaStruct][Lua and Fennel source]]
   and run ~luarocks make~ in the checkout
 - R: ~remotes::install_github("d-SEAMS/dseams-r")~
 - Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~
