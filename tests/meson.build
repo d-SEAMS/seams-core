@@ -746,6 +746,10 @@ test('cli_surface', find_program('python3'),
   workdir: meson.project_source_root(),
   env: {'SEAMS_HAS_CHEMFILES': chemfiles_dep.found() ? '1' : '0'},
   timeout: 600)
+test('brine_front_cli', find_program('python3'),
+  args: [files('test_brine_front_cli.py'), meson.project_build_root() / 'brine_front'],
+  workdir: meson.project_source_root(),
+  timeout: 180)
 test('mw215_deck', find_program('python3'),
   args: [files('test_mw215_deck.py')],
   workdir: meson.project_source_root(),

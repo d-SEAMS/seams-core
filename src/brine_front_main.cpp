@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
     bool haveTimed = false;
     for (int frame = 1; args.maxFrames <= 0 || used < args.maxFrames; ++frame) {
       Cloud cloud;
-      sinp::readLammpsTrj(args.path, frame, cloud);
+      cloud = sinp::readLammpsTrj(args.path, frame, cloud);
       if (cloud.nop <= 0 || cloud.pts.empty()) {
         break;
       }
