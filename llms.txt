@@ -152,7 +152,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Lua and Fennel](https://docs.dseams.info/stable/lua.md): The Lua and Fennel library is d-SEAMS/yodaStruct.
 - [Rust](https://docs.dseams.info/stable/rust.md): Both live in d-SEAMS/dseams-rs.
 - [Command line](https://docs.dseams.info/stable/cli.md): seams reads a trajectory and prints one result.
-- [Science front](https://docs.dseams.info/stable/science.md): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
+- [Science front](https://docs.dseams.info/stable/science.md): src/include/internal/science_front.hpp is the C++ layer profile and the single-trajectory critical size.
 - [Language APIs](https://docs.dseams.info/lang/index.md): seams-core documents the C API and the C++ front here.
 
 ## Development
