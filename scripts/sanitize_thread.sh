@@ -84,11 +84,35 @@ tsan_rpath=
 if [ -n "$tsan_rt" ] && [ -f "$tsan_rt" ]; then
   tsan_rpath="-Wl,-rpath,$(dirname "$tsan_rt")"
 fi
+# The clang driver runs the first ld on PATH, and the pixi environment
+# puts its binutils there. That ld has the conda glibc 2.28 sysroot built
+# in. The thread runtime needs libstdc++.so.6, which LD_LIBRARY_PATH
+# resolves to the conda copy, and that copy needs libdl.so.2. The conda ld
+# then takes libdl from its own sysroot while libc comes from the host, and
+# the sysroot's libdl leaves _dl_sym, _dl_vsym and _dl_addr undefined.
+# Link with the host's ld so every needed library is looked up on the host.
+host_path=$PATH
+if [ -n "${CONDA_PREFIX:-}" ]; then
+  host_path=
+  oldifs=$IFS
+  IFS=:
+  for dir in $PATH; do
+    case $dir in
+      "$CONDA_PREFIX" | "$CONDA_PREFIX"/*) continue ;;
+    esac
+    host_path="${host_path:+$host_path:}$dir"
+  done
+  IFS=$oldifs
+fi
+if ! host_ld=$(PATH=$host_path command -v ld); then
+  echo "no ld outside the pixi environment; install binutils" >&2
+  exit 1
+fi
 link_args="['-shared-libsan','-Wl,--allow-multiple-definition','-Wl,-rpath,$prefix/lib'"
 if [ -n "$tsan_rpath" ]; then
   link_args="$link_args,'$tsan_rpath'"
 fi
-link_args="$link_args]"
+link_args="$link_args,'--ld-path=$host_ld']"
 meson setup "$build" $reconfigure \
   --buildtype=debugoptimized \
   -Dwith_tests=true \

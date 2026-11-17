@@ -26,6 +26,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `docs_sh_cell` compiles its header snippet with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
 - The sanitizer suite does not preload libasan into the meson test process. Interpreter wrappers and the cargo test runner map it for the process that hosts libseams. Host shells, compilers, and `mpirun` do not inherit it. `pin_host` exports the runtime only to its MPI ranks, turns off Open MPI's memory patcher for that launch, and turns leak detection off for those ranks. Open MPI and PMIx keep allocations until the rank exits, and those frames are not added to the suppression list.
 - `chill::cutoffSolid` calls `seams::ylm::ylmAdd8` only when `SEAMS_YLM_AVX512` is set. That function is built only on x86-64. The call used to stay in the binary at -O0 on every other machine, and a debug macOS arm64 link failed with the symbol undefined. `ylm_add8_o0` compiles that file at -O0 without the flag and rejects an undefined `ylmAdd8`.
+- `scripts/sanitize_thread.sh` links with the host `ld`. The conda `ld` took `libdl.so.2` from the conda sysroot and libc from the host, so meson rejected `-fsanitize=thread`. `scripts/build_tsan_openmp.sh` builds Archer from the LLVM release that matches clang. A libomp from an older release left `__kmpc_dispatch_deinit` undefined when the tests loaded it.
 
 ## [2.14.0] - 2026-11-15
 

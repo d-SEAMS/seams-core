@@ -1,0 +1,1 @@
+`scripts/sanitize_thread.sh` links with the host `ld`. The conda `ld` took `libdl.so.2` from the conda sysroot and libc from the host, so meson rejected `-fsanitize=thread`. `scripts/build_tsan_openmp.sh` builds Archer from the LLVM release that matches clang. A libomp from an older release left `__kmpc_dispatch_deinit` undefined when the tests loaded it.
