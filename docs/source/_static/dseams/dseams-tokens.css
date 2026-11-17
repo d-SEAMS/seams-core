@@ -1,0 +1,155 @@
+/*
+ * d-SEAMS documentation design tokens, shared by every *.dseams.info site.
+ * Palette, type scale, radii and header come from the live dseams.info page
+ * (d-SEAMS/landing css/site.css); the dark scheme is derived from the same hues.
+ * The blue and cyan trace back to the d-SEAMS logo (#0000ff, #00aaff).
+ */
+
+:root {
+  --ds-logo-blue: #0000ff;
+  --ds-logo-cyan: #00aaff;
+
+  --ds-font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --ds-font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  --ds-leading: 1.6;
+  --ds-measure: 44rem;
+  --ds-radius: 10px;
+  --ds-radius-md: 6px;
+  --ds-radius-sm: 4px;
+  --ds-family-h: 52px;
+
+  --ds-h1: clamp(2rem, 3.6vw, 2.95rem);
+  --ds-h1-weight: 750;
+  --ds-h2: clamp(1.5rem, 2.5vw, 2rem);
+  --ds-h3: 1.12rem;
+  --ds-h-weight: 700;
+  --ds-h-leading: 1.15;
+  --ds-h-tracking: -0.02em;
+
+  /* landing: paper, surface, frost, abyss, line */
+  --ds-bg: #f5f9fe;
+  --ds-bg-subtle: #ffffff;
+  --ds-bg-raised: #ffffff;
+  --ds-bg-hover: #e8f2fc;
+  --ds-border: #d0e1f0;
+  --ds-border-strong: #adc6dc;
+
+  --ds-ink: #0a1a2b;
+  --ds-text: #0a1a2b;
+  --ds-muted: #3e566e;
+  --ds-faint: #6b8399;
+
+  --ds-primary: #0e4da4;
+  --ds-primary-hover: #0a3b82;
+  --ds-link: #0e4da4;
+  --ds-link-hover: #006fa8;
+  --ds-accent: #0086c9;
+  --ds-accent-text: #006fa8;
+  --ds-accent-bright: #00a8e8;
+  --ds-accent-wash: rgba(0, 134, 201, 0.12);
+  --ds-primary-wash: rgba(14, 77, 164, 0.08);
+  --ds-focus: #9a650b;
+  --ds-on-primary: #ffffff;
+
+  /* The family header is the landing topbar: translucent surface, 1px line */
+  --ds-bar-bg: rgba(255, 255, 255, 0.94);
+  --ds-bar-text: #3e566e;
+  --ds-bar-text-hover: #0e4da4;
+  --ds-bar-border: #d0e1f0;
+  --ds-bar-menu-bg: #ffffff;
+  --ds-bar-shadow: 0 12px 28px rgba(8, 24, 41, 0.12);
+
+  --ds-inline-code-bg: #e8f2fc;
+  --ds-inline-code-text: #093772;
+
+  /* Code blocks are abyss in both modes, so the palette is fixed */
+  --ds-code-bg: #081829;
+  --ds-code-border: #16314a;
+  --ds-code-text: #e6f0fa;
+  --ds-code-faint: #6f889f;
+  --ds-syn-comment: #7f9ab5;
+  --ds-syn-keyword: #82b6ff;
+  --ds-syn-function: #4db8ff;
+  --ds-syn-type: #7fd8ff;
+  --ds-syn-string: #86e3d2;
+  --ds-syn-number: #f0b96b;
+  --ds-syn-operator: #a9bed3;
+  --ds-syn-error: #ff8d93;
+
+  --ds-note: #0e4da4;
+  --ds-note-bg: rgba(14, 77, 164, 0.06);
+  --ds-tip: #0077b3;
+  --ds-tip-bg: rgba(0, 149, 217, 0.1);
+  --ds-warn: #8f5a00;
+  --ds-warn-bg: rgba(199, 138, 27, 0.12);
+  --ds-danger: #b3202a;
+  --ds-danger-bg: rgba(220, 38, 38, 0.07);
+
+  --ds-shadow: 0 1px 2px rgba(11, 28, 44, 0.06), 0 4px 14px rgba(11, 28, 44, 0.05);
+  color-scheme: light;
+}
+
+/* Every generator names its dark mode differently. */
+:root[data-theme="dark"],
+:root[data-theme="ayu"],
+:root[data-bs-theme="dark"],
+html.dark,
+html.dark-mode,
+html.theme--documenter-dark,
+html.coal,
+html.navy,
+html.ayu,
+body[data-md-color-scheme="slate"] {
+  --ds-bg: #09131e;
+  --ds-bg-subtle: #0d1b2a;
+  --ds-bg-raised: #112336;
+  --ds-bg-hover: #15293f;
+  --ds-border: #1d344b;
+  --ds-border-strong: #2b4a68;
+
+  --ds-ink: #f0f7ff;
+  --ds-text: #e6f0fa;
+  --ds-muted: #9db5cc;
+  --ds-faint: #6f889f;
+
+  --ds-primary: #1f6fd0;
+  --ds-primary-hover: #7fd0ff;
+  --ds-link: #4db8ff;
+  --ds-link-hover: #7fd0ff;
+  --ds-accent: #0095d9;
+  --ds-accent-text: #4db8ff;
+  --ds-accent-wash: rgba(0, 149, 217, 0.18);
+  --ds-primary-wash: rgba(77, 184, 255, 0.12);
+
+  --ds-bar-bg: rgba(9, 19, 30, 0.94);
+  --ds-bar-text: #9db5cc;
+  --ds-bar-text-hover: #7fd0ff;
+  --ds-bar-border: #1d344b;
+  --ds-bar-menu-bg: #112336;
+  --ds-bar-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+  --ds-focus: #e8b04a;
+
+  --ds-inline-code-bg: #11253a;
+  --ds-inline-code-text: #bfe3ff;
+  --ds-code-bg: #0c1c2e;
+  --ds-code-border: #1d344b;
+
+  --ds-note: #7db4ff;
+  --ds-note-bg: rgba(77, 140, 255, 0.12);
+  --ds-tip: #4db8ff;
+  --ds-tip-bg: rgba(0, 149, 217, 0.14);
+  --ds-warn: #e8b04a;
+  --ds-warn-bg: rgba(232, 176, 74, 0.12);
+  --ds-danger: #ff8d93;
+  --ds-danger-bg: rgba(248, 81, 90, 0.13);
+
+  --ds-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 6px 18px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ds-focus);
+  outline-offset: 2px;
+}

@@ -1,0 +1,654 @@
+/* d-SEAMS family look for Sphinx + Shibuya. Load after dseams-tokens.css. */
+
+html,
+html.light,
+html.dark {
+  --sy-f-text: var(--ds-font-sans);
+  --sy-f-heading: var(--ds-font-sans);
+  --sy-f-mono: var(--ds-font-mono);
+  --sy-s-banner-height: var(--ds-family-h);
+
+  --sy-c-background: var(--ds-bg);
+  --sy-c-background-contrast: var(--ds-bg-subtle);
+  --sy-c-background-dropback: color-mix(in srgb, var(--ds-bg) 88%, transparent);
+  --sy-c-surface: var(--ds-bg-subtle);
+  --sy-c-text: var(--ds-text);
+  --sy-c-light: var(--ds-muted);
+  --sy-c-bold: var(--ds-ink);
+  --sy-c-heading: var(--ds-ink);
+  --sy-c-link: var(--ds-link);
+  --sy-c-link-hover: var(--ds-link-hover);
+  --sy-c-border: var(--ds-border);
+  --sy-c-divider: var(--ds-border);
+  --sy-c-foot-background: var(--ds-bg-subtle);
+  --sy-c-foot-text: var(--ds-muted);
+  --sy-c-foot-divider: var(--ds-border);
+  --sy-c-overlay: rgba(9, 24, 39, 0.5);
+  --yue-c-link-1: var(--ds-link);
+  --yue-c-link-2: var(--ds-link-hover);
+  --yue-c-link-border: color-mix(in srgb, var(--ds-link) 32%, transparent);
+
+  --accent-1: var(--ds-bg-subtle);
+  --accent-2: var(--ds-bg-subtle);
+  --accent-3: var(--ds-primary-wash);
+  --accent-4: var(--ds-primary-wash);
+  --accent-5: var(--ds-accent-wash);
+  --accent-6: var(--ds-border);
+  --accent-7: var(--ds-border-strong);
+  --accent-8: var(--ds-accent);
+  --accent-9: var(--ds-primary);
+  --accent-10: var(--ds-primary-hover);
+  --accent-11: var(--ds-link);
+  --accent-12: var(--ds-ink);
+  --accent-a3: var(--ds-primary-wash);
+  --accent-a4: var(--ds-primary-wash);
+  --accent-a5: var(--ds-accent-wash);
+  --accent-contrast: var(--ds-on-primary);
+  --accent-surface: var(--ds-bg-subtle);
+  --accent-indicator: var(--ds-accent);
+  --accent-track: var(--ds-accent);
+}
+
+body {
+  padding-top: var(--ds-family-h);
+  background: var(--ds-bg);
+  color: var(--ds-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Header */
+.sy-head {
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.sy-head-blur {
+  background-color: var(--ds-bg-subtle);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.sy-head-brand {
+  gap: 10px;
+}
+
+.sy-head-brand img {
+  height: 30px;
+  width: auto;
+}
+
+.sy-head-brand strong {
+  color: var(--ds-ink);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.sy-head-links a,
+.sy-head-links summary,
+.sy-head-links .nav-item-label {
+  color: var(--ds-muted);
+  font-weight: 500;
+}
+
+.sy-head-links a:hover,
+.sy-head-links summary:hover {
+  color: var(--ds-link-hover);
+}
+
+.sy-head-extra .searchbox button,
+.sy-head-extra .search-button {
+  border-radius: var(--ds-radius);
+  background: var(--ds-bg-subtle);
+  border: 1px solid var(--ds-border);
+}
+
+/* Sidebars */
+.sy-lside,
+.sy-rside {
+  font-size: 14px;
+}
+
+.sy-lside .globaltoc,
+.sy-lside .localtoc {
+  color: var(--ds-muted);
+}
+
+.sy-lside .globaltoc .caption,
+.sy-lside .globaltoc p.caption,
+.sy-lside p.caption {
+  color: var(--ds-ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sy-lside a,
+.sy-rside a {
+  color: var(--ds-muted);
+}
+
+.sy-lside a:hover,
+.sy-rside a:hover {
+  color: var(--ds-link-hover);
+}
+
+.sy-lside a.current,
+.sy-lside li.current > a,
+.sy-rside a.current,
+.sy-rside a.active {
+  color: var(--ds-link);
+  font-weight: 600;
+}
+
+.sy-rside .sy-rside-inner > section > h3,
+.sy-rside .localtoc > p.caption,
+.sy-rside .localtoc-title {
+  color: var(--ds-ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* Prose */
+.sy-content {
+  max-width: 100%;
+}
+
+.yue {
+  color: var(--ds-text);
+  font-size: 16px;
+  line-height: var(--ds-leading);
+}
+
+.yue > :not(.highlight):not(pre):not(table):not(div):not(figure):not(img):not(iframe),
+.yue p,
+.yue ul,
+.yue ol,
+.yue dl,
+.yue blockquote {
+  max-width: var(--ds-measure);
+}
+
+.yue h1,
+.yue h2,
+.yue h3,
+.yue h4,
+.yue h5 {
+  color: var(--ds-ink);
+  font-family: var(--ds-font-sans);
+  font-weight: var(--ds-h-weight);
+  letter-spacing: var(--ds-h-tracking);
+  line-height: var(--ds-h-leading);
+}
+
+.yue h1 {
+  font-size: var(--ds-h1);
+  font-weight: var(--ds-h1-weight);
+  margin-bottom: 16px;
+}
+
+.yue h2 {
+  font-size: var(--ds-h2);
+  margin-top: 2.2em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--ds-border);
+}
+
+.yue h3 {
+  font-size: var(--ds-h3);
+}
+
+.yue h4 {
+  font-size: 1rem;
+}
+
+.yue a {
+  font-weight: 500;
+}
+
+.yue a.headerlink,
+.yue a.headerlink:hover,
+.yue a.reference.internal.image-reference,
+.yue .sd-card a,
+.yue .sd-card a:hover,
+.yue :is(h1, h2, h3, h4, h5) a.toc-backref,
+.yue :is(h1, h2, h3, h4, h5) a.toc-backref:hover,
+.yue nav.contents a,
+.yue nav.contents a:hover {
+  border-bottom: 0;
+}
+
+.yue hr {
+  border-color: var(--ds-border);
+}
+
+.yue blockquote {
+  border-left: 3px solid var(--ds-accent);
+  color: var(--ds-muted);
+}
+
+/* Tables */
+.yue table {
+  font-size: 14px;
+  border: 1px solid var(--ds-border);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--ds-radius);
+  overflow: hidden;
+}
+
+.yue table th,
+.yue table td {
+  border: 0;
+  border-top: 1px solid var(--ds-border);
+  padding: 8px 14px;
+}
+
+.yue table thead th {
+  border-top: 0;
+  border-bottom: 1px solid var(--ds-border-strong);
+  background: var(--ds-bg-subtle);
+  color: var(--ds-ink);
+  font-weight: 650;
+}
+
+.yue table tbody tr:nth-child(2n) {
+  background: transparent;
+}
+
+/* Inline code */
+.yue code {
+  font-family: var(--ds-font-mono);
+  font-size: 0.86em;
+  padding: 0.1em 0.3em;
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-inline-code-bg);
+  color: var(--ds-inline-code-text);
+  border: 0;
+}
+
+.yue a code,
+.yue h1 code,
+.yue h2 code,
+.yue h3 code {
+  color: inherit;
+}
+
+/* Code blocks: deep water, same palette in light and dark */
+.yue .highlight,
+.yue div[class*="highlight-"] > .highlight,
+.yue pre.literal-block {
+  border: 1px solid var(--ds-code-border);
+  border-radius: var(--ds-radius);
+  background: var(--ds-code-bg);
+  color: var(--ds-code-text);
+  box-shadow: none;
+}
+
+.yue .highlight pre,
+.yue pre {
+  background: transparent;
+  color: var(--ds-code-text);
+  font-family: var(--ds-font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+  padding: 14px 18px;
+  margin: 0;
+}
+
+.yue .highlight pre code,
+.yue pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+.yue .highlight .c, .yue .highlight .c1, .yue .highlight .ch, .yue .highlight .cm,
+.yue .highlight .cp, .yue .highlight .cpf, .yue .highlight .cs, .yue .highlight .sd {
+  color: var(--ds-syn-comment);
+  font-style: italic;
+}
+
+.yue .highlight .k, .yue .highlight .kc, .yue .highlight .kd, .yue .highlight .kn,
+.yue .highlight .kp, .yue .highlight .kr, .yue .highlight .ow {
+  color: var(--ds-syn-keyword);
+  font-weight: 500;
+}
+
+.yue .highlight .kt, .yue .highlight .nc, .yue .highlight .nn, .yue .highlight .ne,
+.yue .highlight .no, .yue .highlight .nl {
+  color: var(--ds-syn-type);
+}
+
+.yue .highlight .nf, .yue .highlight .fm, .yue .highlight .na, .yue .highlight .nd,
+.yue .highlight .nb, .yue .highlight .bp, .yue .highlight .nt {
+  color: var(--ds-syn-function);
+}
+
+.yue .highlight .s, .yue .highlight .sa, .yue .highlight .sb, .yue .highlight .sc,
+.yue .highlight .dl, .yue .highlight .s2, .yue .highlight .se, .yue .highlight .sh,
+.yue .highlight .si, .yue .highlight .sx, .yue .highlight .sr, .yue .highlight .s1,
+.yue .highlight .ss {
+  color: var(--ds-syn-string);
+}
+
+.yue .highlight .m, .yue .highlight .mb, .yue .highlight .mf, .yue .highlight .mh,
+.yue .highlight .mi, .yue .highlight .il, .yue .highlight .mo {
+  color: var(--ds-syn-number);
+}
+
+.yue .highlight .o, .yue .highlight .p, .yue .highlight .n, .yue .highlight .nv,
+.yue .highlight .vc, .yue .highlight .vg, .yue .highlight .vi, .yue .highlight .w {
+  color: var(--ds-code-text);
+}
+
+.yue .highlight .o {
+  color: var(--ds-syn-operator);
+}
+
+.yue .highlight .err, .yue .highlight .gr, .yue .highlight .gd {
+  color: var(--ds-syn-error);
+  background: transparent;
+}
+
+.yue .highlight .gi {
+  color: var(--ds-syn-string);
+}
+
+.yue .highlight .gp, .yue .highlight .go {
+  color: var(--ds-syn-comment);
+}
+
+.yue .highlight .gh, .yue .highlight .gu, .yue .highlight .gs {
+  color: var(--ds-syn-function);
+  font-weight: 600;
+}
+
+button.copybtn {
+  color: var(--ds-code-faint);
+  border-radius: var(--ds-radius-sm);
+}
+
+button.copybtn:hover {
+  color: var(--ds-syn-function);
+}
+
+/* Admonitions */
+.yue .admonition,
+.yue .admonition.note {
+  --ds-adm: var(--ds-note);
+  --ds-adm-bg: var(--ds-note-bg);
+  border: 1px solid var(--ds-border);
+  border-left: 3px solid var(--ds-adm);
+  border-radius: var(--ds-radius);
+  background: var(--ds-adm-bg);
+  box-shadow: none;
+  font-size: 15px;
+}
+
+.yue .admonition.tip,
+.yue .admonition.hint,
+.yue .admonition.seealso {
+  --ds-adm: var(--ds-tip);
+  --ds-adm-bg: var(--ds-tip-bg);
+}
+
+.yue .admonition.warning,
+.yue .admonition.caution,
+.yue .admonition.attention,
+.yue .admonition.important {
+  --ds-adm: var(--ds-warn);
+  --ds-adm-bg: var(--ds-warn-bg);
+}
+
+.yue .admonition.danger,
+.yue .admonition.error {
+  --ds-adm: var(--ds-danger);
+  --ds-adm-bg: var(--ds-danger-bg);
+}
+
+.yue .admonition > .admonition-title,
+.yue .admonition > p.admonition-title {
+  background: transparent;
+  color: var(--ds-adm);
+  font-weight: 650;
+  border: 0;
+}
+
+.yue .admonition > .admonition-title::before {
+  background-color: var(--ds-adm);
+}
+
+/* sphinx-design cards */
+.yue .sd-card {
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius);
+  background: var(--ds-bg-raised);
+  color: var(--ds-text);
+  box-shadow: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.yue .sd-card:hover {
+  border-color: var(--ds-accent);
+  box-shadow: var(--ds-shadow);
+}
+
+.yue .sd-card .sd-card-title {
+  color: var(--ds-ink);
+  font-weight: 650;
+}
+
+.yue .sd-card .sd-card-body,
+.yue .sd-card .sd-card-text {
+  color: var(--ds-text);
+}
+
+.yue .sd-shadow-sm {
+  box-shadow: none !important;
+}
+
+/* Images and embedded video never push the layout wider than the column */
+.yue img,
+.yue iframe,
+.yue video,
+.yue svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.yue iframe {
+  display: block;
+  border: 0;
+  border-radius: var(--ds-radius);
+}
+
+.yue .highlight,
+.yue .table-wrapper,
+.yue table,
+.yue pre {
+  max-width: 100%;
+}
+
+.yue .highlight pre,
+.yue table {
+  overflow-x: auto;
+}
+
+/* Footer */
+.sy-foot {
+  border-top: 1px solid var(--ds-border);
+  background: var(--ds-bg-subtle);
+}
+
+.sy-foot a {
+  color: var(--ds-muted);
+}
+
+.sy-foot a:hover {
+  color: var(--ds-link-hover);
+}
+
+/* Narrow screens: one column, drawers sit below the family strip */
+@media (max-width: 767px) {
+  .yue .highlight pre,
+  .yue pre {
+    font-size: 12.5px;
+    padding: 12px 14px;
+  }
+
+  .sy-lside,
+  .sy-rside {
+    top: var(--ds-family-h);
+  }
+}
+
+/* Front-page emblem */
+.dseams-hero {
+  text-align: center;
+  margin: 0.25rem 0 1.5rem;
+  max-width: none;
+}
+
+.dseams-hero img {
+  display: inline-block;
+  width: 128px;
+  height: auto;
+}
+
+.dseams-hero img.dseams-hero-logo,
+.dseams-hero img.dseams-hero-logo--light,
+.dseams-hero img.dseams-hero-logo--dark {
+  display: none;
+  width: auto;
+  height: auto;
+  margin: 0 auto;
+  max-width: min(240px, 60vw);
+}
+
+html:not(.dark) .dseams-hero img.dseams-hero-logo--light,
+html.dark .dseams-hero img.dseams-hero-logo--dark {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) .dseams-hero img.dseams-hero-logo--light {
+    display: none;
+  }
+  html:not(.light):not(.dark) .dseams-hero img.dseams-hero-logo--dark {
+    display: block;
+  }
+}
+
+.dseams-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.sy-head-socials a,
+.sy-foot-socials a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ds-muted);
+}
+
+.sy-head-socials a:hover,
+.sy-foot-socials a:hover {
+  color: var(--ds-link-hover);
+}
+
+.yue table code {
+  font-size: 0.92em;
+}
+
+.yue nav.contents {
+  margin: 1rem 0 1.5rem;
+  padding: 12px 18px;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius);
+  background: var(--ds-bg-subtle);
+  font-size: 14px;
+}
+
+.yue nav.contents .topic-title {
+  margin: 0 0 6px;
+  font-weight: 650;
+  color: var(--ds-ink);
+}
+
+.yue nav.contents ul,
+.yue nav.contents li,
+.yue nav.contents li p {
+  margin: 0;
+}
+
+.yue nav.contents li {
+  padding: 1px 0;
+}
+
+@media (min-width: 1280px) {
+  .yue nav.contents {
+    display: none;
+  }
+}
+
+.yue :is(h1, h2, h3, h4, h5) a.toc-backref,
+.yue :is(h1, h2, h3, h4, h5) a.toc-backref:hover {
+  color: inherit;
+}
+
+/* Mermaid diagrams follow the tokens in both colour modes */
+.mermaid svg {
+  font-family: var(--ds-font-sans) !important;
+}
+
+.mermaid svg .node :is(rect, circle, ellipse, polygon, path),
+.mermaid svg .actor,
+.mermaid svg .labelBox {
+  fill: var(--ds-bg-subtle) !important;
+  stroke: var(--ds-primary) !important;
+  stroke-width: 1.25px !important;
+}
+
+.mermaid svg .cluster rect {
+  fill: transparent !important;
+  stroke: var(--ds-border-strong) !important;
+  stroke-dasharray: 4 3;
+}
+
+.mermaid svg :is(.nodeLabel, .edgeLabel, .cluster-label .nodeLabel, .label, .label text, .messageText, .actor text),
+.mermaid svg :is(text, span, p, div).nodeLabel {
+  color: var(--ds-ink) !important;
+  fill: var(--ds-ink) !important;
+}
+
+.mermaid svg .edgeLabel,
+.mermaid svg .edgeLabel :is(p, span, rect) {
+  background-color: var(--ds-bg) !important;
+  fill: var(--ds-bg) !important;
+}
+
+.mermaid svg :is(.flowchart-link, .messageLine0, .messageLine1, .relation) {
+  stroke: var(--ds-muted) !important;
+}
+
+.mermaid svg :is(.arrowheadPath, marker path) {
+  fill: var(--ds-muted) !important;
+  stroke: var(--ds-muted) !important;
+}
+
+html.dark pre.mermaid > svg,
+html.dark .yue pre.mermaid > svg {
+  filter: none !important;
+}
+
+pre.mermaid {
+  background: transparent !important;
+  border: 0;
+}
