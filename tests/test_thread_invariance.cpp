@@ -662,8 +662,12 @@ TEST_CASE("rings, their symmetry codes and the cage planes are the same at every
     REQUIRE(both.affiliation.ddc == wantAff.ddc);
     REQUIRE(both.planes.basal == wantPlanes.basal);
     REQUIRE(both.planes.equatorial == wantPlanes.equatorial);
-    REQUIRE(ring::cageAffiliation(six, idx).hc == wantAff.hc);
-    REQUIRE(ring::stackingPlanes(six, idx).equatorial == wantPlanes.equatorial);
+    const auto separateAffiliation = ring::cageAffiliation(six, idx);
+    REQUIRE(separateAffiliation.hc == both.affiliation.hc);
+    REQUIRE(separateAffiliation.ddc == both.affiliation.ddc);
+    const auto separatePlanes = ring::stackingPlanes(six, idx);
+    REQUIRE(separatePlanes.basal == both.planes.basal);
+    REQUIRE(separatePlanes.equatorial == both.planes.equatorial);
   }
 }
 

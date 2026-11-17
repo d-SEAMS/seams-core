@@ -376,6 +376,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   threads. Ring lists and labels on the 4096- and 32768-molecule cells
   are unchanged.
 - `seams_status_string` reads its argument as an `int`, so a code outside `seams_status` returns "unknown status" without undefined behaviour in the C++ library; clang's UBSan enum check aborted on it.
+- `test_thread_invariance` compares every cage-affiliation and stacking-plane field returned by the separate calls with the result of the single combined call at 1, 2, 4 and 8 threads.
 - `topo_bulk` calls `omp_get_thread_num` only when OpenMP is on.
 - `with_sphericart=auto` takes sphericart only from pkg-config or CMake. The library inside a pip wheel is used only with `-Dwith_sphericart=enabled`, and then `yds_dep` carries the `-rpath-link` a consumer of `libyodaLib` needs. The probe calls the constructor and `compute` the engine uses and links without `--allow-shlib-undefined`, and `sphericart_consumer` links a program against `libyodaLib` alone the same way.
 - q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.
