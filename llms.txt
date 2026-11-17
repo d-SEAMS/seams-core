@@ -41,7 +41,7 @@
 - [Language tutorials](https://docs.dseams.info/fronts/index.html)
 - [C tutorial](https://docs.dseams.info/fronts/c.html): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): A program that classifies one frame links libseams and calls seams_system_create, seams_system_set_frame, and seams_chill_plus.
-- [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
+- [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm Git dependency dseams.
 - [Julia](https://docs.dseams.info/fronts/julia.html): The Julia binding is the Julia package Dseams.
 - [Lua and Fennel](https://docs.dseams.info/fronts/lua.html): The Lua and Fennel binding provides require("dseams").
 - [Python](https://docs.dseams.info/fronts/python.html): Install the pydseamslib distribution and import it as dseams.
@@ -101,7 +101,7 @@
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
 - [Python](https://docs.dseams.info/stable/python.html): The Python binding is the pydseamslib distribution.
-- [Fortran](https://docs.dseams.info/stable/fortran.html): The Fortran binding is the fpm package dseams.
+- [Fortran](https://docs.dseams.info/stable/fortran.html): The Fortran binding is the fpm Git dependency dseams.
 - [Julia](https://docs.dseams.info/stable/julia.html): The Julia binding is the Julia package Dseams.
 - [R](https://docs.dseams.info/stable/r.html): The R binding is the R package dseams.
 - [Lua and Fennel](https://docs.dseams.info/stable/lua.html): The Lua and Fennel binding provides require("dseams").
