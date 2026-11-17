@@ -160,7 +160,7 @@ Fennel, R, Julia, Rust, and Fortran each live in their own repository and
 record the seams-core revision they build against. Registry publication is
 separate and may follow the engine release.
 [[file:howto/bindings.org][Use a language binding]] lists them. The
-Frame tutorial is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+Frame tutorial is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 
 The full install matrix is [[file:howto/install.org][Install]].
 The mixed-frame walkthrough is [[file:tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].

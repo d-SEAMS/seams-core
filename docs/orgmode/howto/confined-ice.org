@@ -13,7 +13,7 @@ Use a scripting front end:
 - Lua examples under ~example_lua/iceNanotube/~ in
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
 - ~Frame.find_prisms~ and ~Frame.monolayer_rings~ in
-  [[https://d-seams.github.io/PydSEAMSlib/][pydseams]]
+  [[https://python.dseams.info/][pydseams]]
 
 External dumps (figshare project 73545):
 ~Quasi-1D_Nanotube_LAMMPS_Trajectory~ and

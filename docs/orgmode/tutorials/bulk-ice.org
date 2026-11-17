@@ -12,7 +12,7 @@ The result is a labeled oxygen set and a reason the two scores disagree.
 - The in-tree dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
 
 Python is only needed for Step 6, which uses the pydseamslib package.
-The Frame tutorial lives in [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib]].
+The Frame tutorial lives in [[https://python.dseams.info/][PydSEAMSlib]].
 
 * Learning Objectives
 
@@ -160,7 +160,7 @@ CageScore(n_ih=0, n_ic=0, n_water=250)
 #+end_example
 
 Those counts are the cutoff list, the same list as Step 2.
-The Frame walkthrough is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+The Frame walkthrough is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 
 * Troubleshooting
 
@@ -177,7 +177,7 @@ The Frame walkthrough is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEA
 
 - [[file:../howto/classify-cli.org][Classify a dump you already have]] (frame ranges, ~--graph~, ~--jobs~)
 - [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]]
-- [[https://d-seams.github.io/PydSEAMSlib/][pydseams Frame tutorial]]
+- [[https://python.dseams.info/][pydseams Frame tutorial]]
 - [[file:../howto/bindings.org][The other language bindings]]
 
 * Summary

@@ -386,8 +386,8 @@ The performance pages here show tables rendered from those records
 
 * Related projects
 
-- [[https://d-seams.github.io/PydSEAMSlib/][pydseams]] :: Python Frame API on ~yoda~
-- [[https://d-seams.github.io/yodaStruct/][yodaStruct]] :: the Lua and Fennel binding, ~require("dseams")~
+- [[https://python.dseams.info/][pydseams]] :: Python Frame API on ~yoda~
+- [[https://lua.dseams.info/][yodaStruct]] :: the Lua and Fennel binding, ~require("dseams")~
 - [[https://github.com/d-SEAMS/linkcell][linkcell]] :: periodic linked-cell k-nearest neighbours
 - [[https://dseams.info][dseams.info]] :: project site
 

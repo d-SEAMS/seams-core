@@ -7,6 +7,8 @@ tests and release notes. It links the engine through the C API
 (`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
 (`bindings/cxx/seams_lang.h`) that this repository builds and installs.
 
+The binding documentation is at <https://python.dseams.info/>, and the Python walkthrough is [on Odysee](https://odysee.com/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa).
+
 ```bash
 pip install 'pydseamslib==@PROJECT_VERSION@'
 ```

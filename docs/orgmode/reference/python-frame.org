@@ -8,7 +8,7 @@
 ~dseams.userframe.read~ in pydseamslib @PROJECT_VERSION@ returns a ~Frame~ over
 ~libseams_lang~. The examples import it under the name ~pydseams~; the
 top-level ~import pydseams~ is the 2.11 ~yoda~ Frame, whose reference
-is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 Each call below is the example the suite runs, and the line under it is
 the output. The frame is
 ~input/traj/ice1h.lammpstrj~, 128 oxygens.

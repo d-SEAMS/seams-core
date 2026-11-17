@@ -6,6 +6,8 @@ tests and release notes. It links the engine through the C API
 (`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
 (`bindings/cxx/seams_lang.h`) that this repository builds and installs.
 
+The binding documentation is at <https://fortran.dseams.info/>, and the Fortran walkthrough is [on Odysee](https://odysee.com/dseams-fortran:e15a82c2f40ff1fdf10c89ff6c9f78b6b3fd583b).
+
 ```toml
 [dependencies]
 dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }

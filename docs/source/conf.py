@@ -616,8 +616,8 @@ warningiserror = True
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable", None),
-    "pydseams": ("https://d-seams.github.io/PydSEAMSlib/", None),
-    "luadseams": ("https://d-seams.github.io/yodaStruct/", None),
+    "pydseams": ("https://python.dseams.info/", None),
+    "luadseams": ("https://lua.dseams.info/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -697,13 +697,13 @@ html_theme_options = {
                 },
                 {
                     "title": "PydSEAMSlib (Python)",
-                    "url": "https://d-seams.github.io/PydSEAMSlib/",
+                    "url": "https://python.dseams.info/",
                     "summary": "pydseamslib: import dseams and import pydseams",
                     "external": True,
                 },
                 {
                     "title": "yodaStruct (Lua, Fennel)",
-                    "url": "https://d-seams.github.io/yodaStruct/",
+                    "url": "https://lua.dseams.info/",
                     "summary": "require(\"dseams\")",
                     "external": True,
                 },
