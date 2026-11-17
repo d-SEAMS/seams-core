@@ -376,6 +376,8 @@ int main(int argc, char **argv) {
   // may run on. A trial pool larger than the affinity set spends the
   // run in the scheduler. The pool stays one thread per allowed CPU.
   unsigned nThreads = std::max(1u, std::thread::hardware_concurrency());
+#ifdef __linux__
+  // macOS has no affinity mask to read; hardware_concurrency stands.
   cpu_set_t allowed;
   CPU_ZERO(&allowed);
   if (sched_getaffinity(0, sizeof(allowed), &allowed) == 0) {
@@ -384,6 +386,7 @@ int main(int argc, char **argv) {
       nThreads = static_cast<unsigned>(n);
     }
   }
+#endif
   if (const char *env = std::getenv("SEAMS_FUZZ_THREADS")) {
     char *end = nullptr;
     const long requested = std::strtol(env, &end, 10);
