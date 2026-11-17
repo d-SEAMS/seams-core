@@ -1,9 +1,10 @@
 name: Release
 # A v* tag that names the meson.build version gets a GitHub release with
 # the source archive, a Linux libseams prefix built from that archive
-# inside a manylinux_2_28 image, SHA256SUMS, and release notes.
-# GITHUB_TOKEN is the only credential; nothing is published to a package
-# registry.
+# inside a manylinux_2_28 image, SHA256SUMS, and release notes. Fresh
+# Ubuntu 22.04, Ubuntu 24.04, and Rocky Linux 9 containers test the
+# Linux archive before it is uploaded. GITHUB_TOKEN is the only
+# credential; nothing is published to a package registry.
 on:
   push:
     tags: ["v*"]
@@ -81,8 +82,34 @@ jobs:
           path: dist/
           if-no-files-found: error
 
-  publish:
+  test-tarball:
     needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Install and run the archive on fresh distributions
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          set -euo pipefail
+          for image in ubuntu:22.04 ubuntu:24.04 rockylinux:9; do
+            printf 'testing %s\n' "$image"
+            docker run --rm -i \
+              -e VERSION \
+              -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+              -w "$GITHUB_WORKSPACE" \
+              "$image" \
+              bash -s < scripts/test_libseams_tarball.sh
+          done
+
+  publish:
+    needs: [build, test-tarball]
     runs-on: ubuntu-latest
     permissions:
       contents: write
