@@ -585,6 +585,19 @@ if not os.path.isfile(_api_index):
             "Until that step has run, the header map is the API page.\n"
         )
 
+def _write_binding_api():
+    """Fill the language reference from the headers and the binding sources."""
+    import importlib.util
+
+    script = os.path.join(_docs, "binding_api.py")
+    spec = importlib.util.spec_from_file_location("binding_api", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("language API pages do not match their sources")
+
+
+_write_binding_api()
 _include_orphan_pages()
 
 # -- Project information -----------------------------------------------------

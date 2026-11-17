@@ -23,6 +23,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    :maxdepth: 1
    :hidden:
 
+   c-api
    python-frame
    cli
    data-formats

@@ -1082,6 +1082,12 @@ if get_option('with_cli') and get_option('with_tests')
     args: [meson.project_source_root() / 'docs' / 'check_redirects.py'],
     suite: 'docs',
     timeout: 60)
+  test(
+    'docs_binding_api',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_binding_api.py'],
+    suite: 'docs',
+    timeout: 180)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   tutorial_env.set('SEAMS_LIB', seams_api_lib.full_path())
