@@ -21,9 +21,26 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "engines"))
 from shared_library import require_library  # noqa: E402
-import e2e_common as e2e  # noqa: E402
+
+
+def _load_e2e():
+    """engines/e2e_common.py, without putting engines/ on sys.path.
+
+    engines/openmm, engines/lammps and the other engine folders would then
+    import as namespace packages, and a missing OpenMM would pass for an
+    installed one.
+    """
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[2] / "engines" / "e2e_common.py"
+    spec = importlib.util.spec_from_file_location("e2e_common", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+e2e = _load_e2e()
 
 
 def load(libdir: Path):
