@@ -97,8 +97,11 @@ def render_page(slug, title, intro, symbols, native_lang):
     lines.append("   * - Native")
     lines.append("     - C")
     for item in symbols:
-        mapped = item.get("c_api") or [item["name"]]
-        cell = ", ".join("``{}``".format(name) for name in mapped)
+        mapped = item["c_api"]
+        if mapped:
+            cell = ", ".join("``{}``".format(name) for name in mapped)
+        else:
+            cell = "no direct C call"
         lines.append("   * - ``{}``".format(item["name"]))
         lines.append("     - {}".format(cell))
     lines.append("")
@@ -128,6 +131,150 @@ def c_symbols():
     return symbols
 
 
+def _cpp_calls(body):
+    return sorted(set(re.findall(r"\b(seams_[A-Za-z0-9_]+)\s*\(", body)))
+
+
+def _cpp_brief(text, end):
+    window = text[max(0, end - 800) : end]
+    matches = list(re.finditer(r"/\*\*(.*?)\*/", window, re.S))
+    if not matches:
+        return ""
+    last = matches[-1]
+    if window[last.end() :].strip():
+        return ""
+    return render_capi._parse_comment(last.group(1))["brief"]
+
+
+def cpp_symbols():
+    """Public C++ types and the methods that call the C API."""
+    text = (ROOT / "include" / "seams.hpp").read_text(encoding="utf-8")
+    symbols = []
+    seen = set()
+    for match in re.finditer(r"^(class|struct)\s+(\w+)\b[^{;]*\{", text, re.M):
+        name = match.group(2)
+        if name == "Handle":
+            continue
+        start = match.end() - 1
+        depth = 0
+        body_end = start
+        for index in range(start, len(text)):
+            char = text[index]
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    body_end = index
+                    break
+        body = text[start : body_end + 1]
+        brief = _cpp_brief(text, match.start())
+        qual = "seams::" + name
+        if qual not in seen:
+            seen.add(qual)
+            symbols.append(
+                {
+                    "name": qual,
+                    "signature": match.group(0).split("{")[0].strip(),
+                    "summary": brief,
+                    "params": [],
+                    "returns": "",
+                    "c_api": _cpp_calls(body),
+                }
+            )
+        access = "private" if match.group(1) == "class" else "public"
+        local_calls = {}
+        pending = []
+        for method in re.finditer(
+            r"(public|private|protected)\s*:|(?P<sig>(?:\[\[nodiscard\]\]\s+)?[\w:<>,\s\*&]+?\s+(?P<name>~?\w+)\s*\([^;{}]*\)\s*(?:const)?\s*(?:noexcept)?\s*(?:override)?\s*\{)",
+            body,
+        ):
+            if method.group(1):
+                access = method.group(1)
+                continue
+            method_name = method.group("name")
+            if method_name in {"if", "for", "while", "switch"} or method_name.startswith("operator"):
+                continue
+            chunk_start = method.end() - 1
+            depth = 0
+            chunk_end = chunk_start
+            for index in range(chunk_start, len(body)):
+                char = body[index]
+                if char == "{":
+                    depth += 1
+                elif char == "}":
+                    depth -= 1
+                    if depth == 0:
+                        chunk_end = index
+                        break
+            chunk = body[chunk_start : chunk_end + 1]
+            local_calls[method_name] = _cpp_calls(chunk)
+            pending.append((access, method_name, method, chunk))
+        def resolved(name, stack):
+            if name in stack:
+                return set()
+            found = set(local_calls.get(name, ()))
+            chunk = next((item[3] for item in pending if item[1] == name), "")
+            for callee in re.findall(r"\b(\w+)\s*\(", chunk):
+                if callee in local_calls:
+                    found.update(resolved(callee, stack | {name}))
+            return found
+        for access_name, method_name, method, chunk in pending:
+            if access_name != "public":
+                continue
+            qual_method = qual + "::" + method_name
+            if qual_method in seen:
+                continue
+            seen.add(qual_method)
+            signature = " ".join(method.group("sig").split())
+            symbols.append(
+                {
+                    "name": qual_method,
+                    "signature": signature[:-1].strip(),
+                    "summary": _cpp_brief(body, method.start()),
+                    "params": [],
+                    "returns": "",
+                    "c_api": sorted(resolved(method_name, set())),
+                }
+            )
+    for match in re.finditer(
+        r"^(?:\[\[nodiscard\]\] )?inline [\w:<>,\s\*&]+ (\w+)\(([^;]*)\)\s*\{",
+        text,
+        re.M,
+    ):
+        name = match.group(1)
+        window = text[max(0, match.start() - 400) : match.start()]
+        if "@ingroup seams_cpp" not in window:
+            continue
+        qual = "seams::" + name
+        if qual in seen:
+            continue
+        seen.add(qual)
+        body_start = text.find("{", match.end() - 1)
+        depth = 0
+        body_end = body_start
+        for index in range(body_start, len(text)):
+            if text[index] == "{":
+                depth += 1
+            elif text[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    body_end = index
+                    break
+        symbols.append(
+            {
+                "name": qual,
+                "signature": " ".join(match.group(0).split())[:-1].strip(),
+                "summary": _cpp_brief(text, match.start()),
+                "params": [],
+                "returns": "",
+                "c_api": _cpp_calls(text[body_start : body_end + 1]),
+            }
+        )
+    symbols.sort(key=lambda item: item["name"])
+    return symbols
+
+
 LANGUAGES = {
     "c-api": {
         "title": "C",
@@ -141,6 +288,18 @@ LANGUAGES = {
         ),
         "lang": "c",
         "load": c_symbols,
+    },
+    "cpp-api": {
+        "title": "C++",
+        "intro": (
+            "``include/seams.hpp`` is the native C++ API: move-only handles in "
+            "namespace ``seams``, with results returned by value. "
+            ":doc:`/stable/cpp` is the narrative for that header. "
+            "This page lists the public types and methods, and the ``seams.h`` "
+            "functions each method calls."
+        ),
+        "lang": "cpp",
+        "load": cpp_symbols,
     },
 }
 
@@ -177,11 +336,11 @@ def problems(selected, written=None):
         if documented != names:
             errors.append("{} symbol block does not match the source list".format(slug))
         for item in symbols:
-            for c_name in item.get("c_api") or []:
-                if c_name not in known and c_name != item["name"]:
-                    errors.append("{} maps {} to unknown C symbol {}".format(slug, item["name"], c_name))
-                elif c_name not in known:
-                    errors.append("{} documents unknown C symbol {}".format(slug, c_name))
+            for c_name in item["c_api"]:
+                if c_name not in known:
+                    errors.append(
+                        "{} maps {} to unknown C symbol {}".format(slug, item["name"], c_name)
+                    )
         if not names:
             errors.append("{} has no public symbols".format(slug))
         if path.is_file():

@@ -24,6 +24,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    :hidden:
 
    c-api
+   cpp-api
    python-frame
    cli
    data-formats
