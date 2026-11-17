@@ -105,7 +105,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Worked examples](https://docs.dseams.info/user/tutorials/index.md): A tutorial is a learning path.
 - [Tasks](https://docs.dseams.info/user/howto/index.md): A how-to solves a goal you already have.
 - [Concepts](https://docs.dseams.info/explanation/index.md): These pages are for understanding.
-- [Repositories](https://docs.dseams.info/explanation/architecture.md): d-SEAMS 2.14 is one C++ library plus the stable C API and C ABI that the language bindings call.
+- [Architecture](https://docs.dseams.info/explanation/architecture.md): 0 is one C++ engine, libyodaLib.
 - [Binding overhead](https://docs.dseams.info/explanation/binding-overhead.md): Ice Ih at 4096, 32768, and 110592 molecules.
 - [The C API](https://docs.dseams.info/explanation/c-api.md): include/seams.h is ABI 1 of libseams.
 - [CHILL+: the published rule and the OVITO rule](https://docs.dseams.info/explanation/chill-plus-rules.md): Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369, equation 1 averages q_3 over the four nearest neighbours of a shell that already holds four neighbours inside the cutoff.
