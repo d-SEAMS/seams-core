@@ -5,38 +5,63 @@
 .. include:: ../../videos/embeds/brine.rst
 #+end_export
 
-~input/traj/nacl_front.lammpstrj~ is the 864-molecule interface with
-nine ions added. Type 1 is water. Types 3 and 4 are chloride and
-sodium. One chloride sits in a slab that CHILL+ calls fully
-crystalline. The other eight ions sit in liquid slabs.
-~meson test docs_tutorial_brine~ checks that split.
-~meson test docs_frame_tutorials~ runs that file in CI (~--small~).
-Without ~--small~, ~docs/tutorials/test_hf_frames.py~ downloads
-~data/frames/T230_m20_r0_tend.xyz~ from ~d-SEAMS/brine-front-230K~ at
-~4828e33ecf419c70643b2d466bfa4f283b4138dc~ and checks its sha256.
+The recording follows an ice front through a short brine run, then this
+864-water frame with nine ions.
 
-CHILL+ is run on the water alone, so an ion is not given an ice
-label. Each ion is then counted in the 3.7 Å slab that contains it.
-A slab is ice when at least half of its water is cubic, hexagonal,
-reCubic or reHex.
+=input/traj/nacl_front.lammpstrj= is the basal interface with nine ions
+added. The dump has 873 atoms. Type 1 is the 864 waters. Type 3 is
+chloride, five ions, and type 4 is sodium, four ions. The water
+coordinates are the same as =input/traj/interface_f0.lammpstrj=.
 
-| slab | ions | side |
-|------+------+------|
-| 3 | 1 | ice |
-| 9 | 2 | liquid |
-| 10 | 2 | liquid |
-| 12 | 2 | liquid |
-| 13 | 2 | liquid |
+~seams read~ keeps the oxygen.
 
-One ion is on the ice side of the front and eight are on the liquid
-side. The water census is unchanged from the ion-free frame:
-hexagonal 352.
+#+begin_src bash
+seams read input/traj/nacl_front.lammpstrj --type 1
+#+end_src
+
+#+begin_example
+nop 864 frame 1 box 22.9883 21.6093 52.5093
+#+end_example
+
+* Water labels
+
+CHILL+ runs on the water, so an ion receives no ice label. The census
+matches the ion-free frame.
+
+#+begin_src bash
+seams chill-plus input/traj/nacl_front.lammpstrj --type 1 --cutoff 3.5 --layers --axis 2
+#+end_src
+
+#+begin_example
+nop 864 clathrate 3 cubic 1 hexagonal 352 interClathrate 25 interfacial 49 water 434
+phi-c 0.00283286 stack HHHHHHHH....C.
+#+end_example
+
+* Which side of the front
+
+Slabs are 3.7 Å along \(z\), measured from the box origin. A water is
+crystal when its label is cubic, hexagonal, reCubic, or reHex. A slab
+is ice when at least half of its water is crystal.
+
+The chloride at \(z = 12\) Å is in the slab that starts at 11.1 Å.
+All 72 waters in that slab are crystal. The other eight ions are in
+slabs whose crystal fraction is under one half.
+
+| start (Å) | ions | side |
+|-----------+------+------|
+| 11.1 | 1 chloride | ice |
+| 33.3 | 1 chloride, 1 sodium | liquid |
+| 37.0 | 1 chloride, 1 sodium | liquid |
+| 44.4 | 1 chloride, 1 sodium | liquid |
+| 48.1 | 1 chloride, 1 sodium | liquid |
+
+The slab at 44.4 Å is on the liquid side of that cut and still holds
+one crystal water, the same molecule counted on the ion-free interface.
 
 #+begin_export rst
 .. figure:: molecules/brine/overlay-web.png
    :width: 480px
-   :alt: NaCl front. Water, sodium and chloride.
+   :alt: NaCl front. Water colored by published CHILL+, with sodium and chloride.
 
-   NaCl front. Water, sodium and chloride. ``python docs/scripts/render_molecules.py --slug brine`` writes the 2400 by 1800 still.
+   NaCl front. Water colored by published CHILL+, with sodium and chloride. The chloride in the ice slab has no ice label.
 #+end_export
-

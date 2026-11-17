@@ -38,7 +38,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Interfaces, nucleation, and brine](https://docs.dseams.info/user/interfaces.md): Ice fronts, a growing nucleus, and salt across the interface.
 - [Ice-water interface](https://docs.dseams.info/user/tutorials/interface.md): One frame of a basal interface is input/traj/interface_f0.lammpstrj, 864 molecules, 35 kB.
 - [Nucleation](https://docs.dseams.info/user/tutorials/nucleation.md): The 148-frame mW trajectory is figshare 10.6084/m9.figshare.11448702.v1.
-- [Brine and NaCl](https://docs.dseams.info/user/tutorials/brine.md): input/traj/nacl_front.lammpstrj is the 864-molecule interface with nine ions added.
+- [Brine and NaCl](https://docs.dseams.info/user/tutorials/brine.md): The recording follows an ice front through a short brine run, then this 864-water frame with nine ions.
 - [Basal profiles and the nucleation census](https://docs.dseams.info/user/howto/science-front.md): science-front walks a LAMMPS dump with the threaded CHILL+, q6 and shell kernels from science/interface-nucleation at 55192e3d.
 - [From a trajectory to the ice front](https://docs.dseams.info/user/howto/from-trajectory.md): You have a trajectory and want CHILL+ labels, the primitive rings, and the position of the ice front.
 - [Ionic-liquid dumps](https://docs.dseams.info/user/howto/ionic-liquid.md): A multi-type dump is not an ice frame.
