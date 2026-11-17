@@ -402,14 +402,13 @@ if linkcell_dep.found()
   _args += ['-DSEAMS_HAS_LINKCELL=1']
   # 0.4.3 adds the fused CSR query and the stage runner. A 0.4.2
   # library keeps the in-tree graph and the OpenMP stages. A subproject
-  # dependency cannot be passed to has_header_symbol, so that probe uses
-  # the wrap's include directory.
+  # dependency cannot be passed to has_header_symbol, and its source tree
+  # sits under the top-level project's subprojects directory when
+  # seams-core is itself a subproject, so its version stands in for the
+  # probe.
   if linkcell_dep.type_name() == 'internal'
-    _lc_inc = include_directories('subprojects/linkcell/include')
-    _lc_csr = cppc.has_header_symbol('linkcell.h', 'lc_knearest_csr',
-                                     include_directories: _lc_inc)
-    _lc_team = cppc.has_header_symbol('linkcell.h', 'lc_team_run',
-                                      include_directories: _lc_inc)
+    _lc_csr = linkcell_dep.version().version_compare('>=0.4.3')
+    _lc_team = _lc_csr
   else
     _lc_csr = cppc.has_header_symbol('linkcell.h', 'lc_knearest_csr',
                                      dependencies: linkcell_dep)
