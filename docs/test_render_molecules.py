@@ -104,16 +104,20 @@ def check_cache(module):
         "samples": np.int32(64),
         "panel": np.array("ice-ih"),
     }
-    program = sys.executable
-    first = module.cycles_digest(payload, program)
-    if module.cycles_digest(dict(payload), program) != first:
+    version = "5.3.0"
+    first = module.cycles_digest(payload, version)
+    if module.cycles_digest(dict(payload), version) != first:
         fail("the cache digest is not stable for the same inputs")
     moved = dict(payload, positions=payload["positions"] + 1e-9)
-    if module.cycles_digest(moved, program) == first:
+    if module.cycles_digest(moved, version) == first:
         fail("a moved atom kept the cached still")
-    if module.cycles_digest(dict(payload, samples=np.int32(65)), program) == first:
+    if module.cycles_digest(dict(payload, samples=np.int32(65)), version) == first:
         fail("a new sample count kept the cached still")
+    if module.cycles_digest(payload, "5.4.0") == first:
+        fail("another Blender release kept the cached still")
     saved = os.environ.get("MOLECULES_CACHE")
+    remote = os.environ.get("MOLECULES_REMOTE")
+    os.environ["MOLECULES_REMOTE"] = "0"
     with tempfile.TemporaryDirectory() as folder:
         os.environ["MOLECULES_CACHE"] = folder
         try:
@@ -134,6 +138,10 @@ def check_cache(module):
                 os.environ.pop("MOLECULES_CACHE", None)
             else:
                 os.environ["MOLECULES_CACHE"] = saved
+            if remote is None:
+                os.environ.pop("MOLECULES_REMOTE", None)
+            else:
+                os.environ["MOLECULES_REMOTE"] = remote
 
 
 def main():
