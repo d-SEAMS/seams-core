@@ -286,6 +286,38 @@ def concurrent(n: int) -> list[set[int]]:
     return sets
 
 
+PART_TIME = r"""
+import time
+end = time.time() + 120
+while time.time() < end:
+    start = time.time()
+    while time.time() - start < 0.004:
+        pass
+    time.sleep(0.004)
+"""
+
+
+def part_time_copy() -> int:
+    """Start the interpreter outside this process's children, half busy.
+
+    sh starts it in the background and exits, so its parent is not the
+    test and the workers do not see it as a sibling.
+    """
+    done = subprocess.run(
+        ["sh", "-c", '"$0" -c "$1" >/dev/null 2>&1 & echo $!', sys.executable, PART_TIME],
+        capture_output=True, text=True, check=True)
+    pid = int(done.stdout.strip())
+    time.sleep(0.2)
+    return pid
+
+
+def stop_copy(pid: int) -> None:
+    try:
+        os.kill(pid, 15)
+    except ProcessLookupError:
+        pass
+
+
 def assert_disjoint(sets: list[set[int]], label: str) -> None:
     if not sets or not any(sets):
         raise SystemExit(f"{label}: no pinning at all {sets}")
@@ -381,6 +413,17 @@ def main() -> int:
     pinned = concurrent(group)
     print(f"{group} processes on {ncpu} cpus", flush=True)
     assert_disjoint(pinned, f"{group} processes")
+
+    # The same group beside a copy of the interpreter that is not their
+    # sibling and runs about half the time. Its comings and goings must
+    # not shift the siblings' slices onto each other.
+    flapper = part_time_copy()
+    try:
+        beside = concurrent(group)
+    finally:
+        stop_copy(flapper)
+    print(f"{group} processes beside a part-time copy", flush=True)
+    assert_disjoint(beside, f"{group} processes beside a part-time copy")
 
     # Narrower process mask. The requested threads must stay inside it.
     narrow = narrow_cpus(mask_cpus())
