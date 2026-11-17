@@ -40,6 +40,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `seams.pc` and the other pkg-config files in the Linux tarball use `prefix=${pcfiledir}/../..`, so the link line follows wherever the tarball is unpacked.
 - `seams_system_read` in the Linux tarball reads .con files, because the release build turns the readcon reader on.
 - The four-process placement check runs on a four-cpu mask. Each process keeps one cpu, and a sample counts that cpu. A lone process still has to show two cpus in the same sample.
+- The docs workflow check reads `contents: write` from the build-deploy job and stops at the next job.
 
 ## [2.14.0] - 2026-11-15
 
