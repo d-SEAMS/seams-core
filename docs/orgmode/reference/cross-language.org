@@ -14,7 +14,9 @@ repositories.
 | R | =sum(chill_plus(read_frame(path, type=1L))$name == "cubic")= | 4096 |
 | Julia | =chill_plus(read_frame(path; type=1)).counts["cubic"]= | 4096 |
 
-Python is ~pip install 'pydseamslib==2.14.0'~.
+Python is ~pip install 'pydseamslib==@PROJECT_VERSION@'~. While that
+release is reaching PyPI, ~sh scripts/install_pydseamslib.sh~ installs
+the binding from source.
 The import is ~pydseams~.
 ~import pydseamslib~ is the same package.
 The package name the d-SEAMS paper should use is ~pydseamslib~.

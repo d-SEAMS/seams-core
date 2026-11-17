@@ -5,7 +5,8 @@ You label one frame two ways.
 CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
 The runnable copy is =docs/tutorials/test_ice_and_clathrate.py=.
-Python is ~pip install 'pydseamslib==2.14.0'~.
+Python is ~pip install 'pydseamslib==@PROJECT_VERSION@'~. The source
+fallback is ~sh scripts/install_pydseamslib.sh~.
 The import is ~dseams.userframe~, the Frame over ~libseams_lang~.
 
 * The mixed TIP4P frame

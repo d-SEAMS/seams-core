@@ -1,15 +1,21 @@
 # Python
 
-The Python binding is pydseamslib on PyPI, `import dseams`. It lives in its own repository,
+The Python binding is the `pydseamslib` distribution, with `import dseams`.
+This release's distribution is being published to PyPI from its own repository,
 [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib), with its API reference, tutorials,
 tests and release notes. It links the engine through the C API
 (`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
 (`bindings/cxx/seams_lang.h`) that this repository builds and installs.
 
 ```bash
-pip install 'pydseamslib==2.14.0'
+pip install 'pydseamslib==@PROJECT_VERSION@'
 ```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/contributing/repositories.org`
-describes how the repositories fit together.
+Until that upload is visible on the selected package index, install the
+binding from source against this checkout:
+
+```bash
+sh scripts/install_pydseamslib.sh
+```
+
+`docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

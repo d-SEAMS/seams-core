@@ -3,7 +3,7 @@
 
 These notes start from tag v2.13.0 (~7f310225~).
 The release notes are
-[[file:../reference/release-2.14.org][2.14.0]].
+[[file:../reference/release-2.14.org][2.14.1]].
 Rebuild the engine, then relink anything that should call ~libseams~.
 
 * C and C++
@@ -21,8 +21,8 @@ the program reads a trajectory path or keeps a frame across calls.
 * Language bindings
 
 2.14 moves every language binding out of this repository. Each one is
-its own repository and package, built against the seams-core 2.14.0 tag
-and versioned 2.14.0:
+its own repository and records the seams-core revision it builds
+against. Registry publication is independent of the engine release:
 
 | Language | 2.13 location | 2.14 repository | Package |
 |----------+---------------+-----------------+---------|
@@ -33,7 +33,9 @@ and versioned 2.14.0:
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
 | Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
 
-A Python script keeps working after ~pip install -U 'pydseamslib==2.14.0'~.
+A Python script keeps working after
+~pip install -U 'pydseamslib==@PROJECT_VERSION@'~. While that upload
+reaches PyPI, ~sh scripts/install_pydseamslib.sh~ installs from source.
 The per-language upgrade notes (new calls, renamed options, the ~SEAMS_LANG_LIB~
 and ~SEAMS_LIB_DIR~ variables) are in each repository's changelog. Paths
 under ~bindings/~ other than =bindings/cxx= no longer exist in this tree.

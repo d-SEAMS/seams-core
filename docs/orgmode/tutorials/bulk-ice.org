@@ -135,8 +135,11 @@ The Python binding is the pydseamslib package from
 provides ~import pydseams~ (the Frame API) and ~import dseams~:
 
 #+begin_src bash
-pip install 'pydseamslib==2.14.0'
+pip install 'pydseamslib==@PROJECT_VERSION@'
 #+end_src
+
+If that release is not visible on PyPI yet, run
+~sh scripts/install_pydseamslib.sh~ from this checkout instead.
 
 #+begin_src python
 import pydseams as ds
@@ -167,7 +170,8 @@ The Frame walkthrough is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEA
 - Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
   Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
 - ~ModuleNotFoundError: pydseams~: install the binding with
-  ~pip install 'pydseamslib==2.14.0'~.
+  ~pip install 'pydseamslib==@PROJECT_VERSION@'~ or the source-install
+  script above.
 
 * Next steps
 

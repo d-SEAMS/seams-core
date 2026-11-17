@@ -6,28 +6,33 @@ the C ABI =libseams_lang= (=bindings/cxx/seams_lang.h=) and the ~seams~
 command. :doc:`/stable/c` and :doc:`/stable/cpp` document those. Every other language is its own repository with its
 own documentation, tests and releases:
 
-| Language     | Repository                                               | Package                          | Links          |
+| Language     | Repository                                               | Interface                        | Links          |
 |--------------+----------------------------------------------------------+----------------------------------+----------------|
 | Python       | [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]]       | ~pydseamslib~ (~import dseams~, ~import pydseams~) | =libseams=, =libseams_lang= |
-| Lua, Fennel  | [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]         | LuaRocks ~dseams~                | =libseams=     |
+| Lua, Fennel  | [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]         | ~require("dseams")~              | =libseams=     |
 | R            | [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]]             | ~dseams~                         | =libseams_lang= |
 | Julia        | [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]]           | ~Dseams~, ~libseams_jll~         | =libseams=, =libseams_lang= |
 | Rust         | [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]]           | crates ~dseams-sys~, ~dseams~    | =libseams=     |
 | Fortran      | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm ~dseams~                     | =libseams=     |
 
-A binding release carries the seams-core version it was built against, so
-~pydseamslib==2.14.0~ calls the 2.14.0 engine. Each repository's README
-gives its install command. [[file:../contributing/repositories.org][The
+A binding records the seams-core revision it builds against. Registries
+may lag the engine release, so do not assume matching version numbers.
+Each repository's README gives its source install command.
+[[file:../contributing/repositories.org][The
 repository map]] describes how the bindings pin and test against a
 seams-core tag, the release order, and how to develop a binding against a
 local seams-core checkout.
 
 * Python
 
-~pip install 'pydseamslib==2.14.0'~ installs ~import dseams~ (array
+~pip install 'pydseamslib==@PROJECT_VERSION@'~ installs ~import dseams~ (array
 calls into the engine) and ~import pydseams~ (the Frame API on the
 [[file:../reference/python-frame.org][Python Frame]] page). The cubic ice
 frame in this tree gives the counts the other languages and the CLI print:
+
+The release is being uploaded to PyPI. Until it is visible on the
+selected package index, ~sh scripts/install_pydseamslib.sh~ installs the
+binding from its source repository against this checkout.
 
 #+begin_src python
 >>> import numpy as np

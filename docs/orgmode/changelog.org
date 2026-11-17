@@ -5,14 +5,25 @@ The C++ engine, ~libseams~, ~libseams_lang~ and the ~seams~ CLI are this
 repository. Each language binding is its own repository; the
 [[file:contributing/repositories.org][repository map]] lists them.
 
-The release history is [[file:../../CHANGELOG.md][CHANGELOG.md]]
+The release history is
+[[https://github.com/d-SEAMS/seams-core/blob/main/CHANGELOG.md][CHANGELOG.md]]
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.
+
+* 2.14.1
+
+2.14.1 corrects the 2.14 documentation and carries the fixes in the
+[[https://github.com/d-SEAMS/seams-core/blob/main/CHANGELOG.md][full changelog]].
+The Python wheel is being uploaded to PyPI. The conda-forge recipes,
+LuaRocks rock, Julia General package, CRAN package, and r-universe
+package are not available yet; use the source routes on the
+[[file:howto/install.org][install page]].
 
 * 2.14.0
 
 We cut 2.14.0 from tag v2.13.0. The bullets are
-[[file:../../CHANGELOG.md][CHANGELOG.md]]. This is the short form.
+[[https://github.com/d-SEAMS/seams-core/blob/main/CHANGELOG.md][CHANGELOG.md]].
+This is the short form.
 
 ~seams.h~ is ABI 1. A frame carries an orthorhombic or triclinic
 cell, and we return neighbours, both CHILL+ rules, q4 and q6,
@@ -23,15 +34,11 @@ from their own repositories.
 first use. ~seams_system_set_positions~ overwrites the coordinates
 of a stored frame, and the const readers copy the frame back out.
 
-2.14.0 moves every language binding to its own repository, released
-with the same version against this tag. Python on PyPI is
-~pydseamslib~ 2.14.0 from PydSEAMSlib (~import dseams~ and
-~import pydseams~). The Rust crates ~dseams-sys~ and ~dseams~ come from
-dseams-rs, the fpm package ~dseams~ from dseams-fortran, the LuaRocks
-rock ~dseams~ from yodaStruct, the R package ~dseams~ from dseams-r,
-and Julia ~Dseams~ from Dseams.jl. This repository releases conda
-~libseams~ from ~recipe/recipe.yaml~ and the Yggdrasil recipe for
-~libseams_jll~.
+2.14.0 moved every language binding to its own repository. The
+repositories contain Python, Rust, Fortran, Lua, R, and Julia source,
+but the corresponding same-version registry releases were not made.
+The in-tree conda and Yggdrasil recipes are packaging inputs, not
+published registry packages.
 
 LAMMPS, GROMACS, and OpenMM call the library on the frames a running
 calculation chooses. We report the primitive ring census, the

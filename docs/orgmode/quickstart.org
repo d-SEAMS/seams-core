@@ -23,8 +23,12 @@ on ~PATH~. The Python binding is a separate package, built from
 the same engine version:
 
 #+begin_src bash
-pip install 'pydseamslib==2.14.0'
+pip install 'pydseamslib==@PROJECT_VERSION@'
 #+end_src
+
+The release is being uploaded to PyPI. If the selected index does not
+have it yet, ~sh scripts/install_pydseamslib.sh~ installs from the
+PydSEAMSlib source repository against this checkout.
 
 * Five lines of Python
 
@@ -153,7 +157,8 @@ seams symmetry input/traj/mW_cubic.lammpstrj --type 1
 
 Python (~pydseamslib~, ~import dseams~ and ~import pydseams~), Lua and
 Fennel, R, Julia, Rust, and Fortran each live in their own repository and
-release against the seams-core tag with the same version.
+record the seams-core revision they build against. Registry publication is
+separate and may follow the engine release.
 [[file:howto/bindings.org][Use a language binding]] lists them. The
 Frame tutorial is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
 

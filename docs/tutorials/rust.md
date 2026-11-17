@@ -7,9 +7,8 @@ tests and release notes. It links the engine through the C API
 (`bindings/cxx/seams_lang.h`) that this repository builds and installs.
 
 ```bash
-cargo add dseams
+cargo add dseams --git https://github.com/d-SEAMS/dseams-rs
 ```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/contributing/repositories.org`
-describes how the repositories fit together.
+This uses the repository directly; a crates.io release is a separate
+registry step. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

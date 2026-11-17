@@ -8,9 +8,8 @@ tests and release notes. It links the engine through the C API
 
 ```toml
 [dependencies]
-dseams = { git = "https://github.com/d-SEAMS/dseams-fortran", tag = "v2.14.0" }
+dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }
 ```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/contributing/repositories.org`
-describes how the repositories fit together.
+This is a Git dependency; use a tag only after that repository publishes
+one. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

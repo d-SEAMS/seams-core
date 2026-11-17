@@ -4,8 +4,9 @@ Language APIs
 seams-core documents the C API and the C++ front here. Every other
 language binding is its own repository with its own documentation,
 tests and releases. Each one links ``libseams`` and ``libseams_lang``
-from this repository and is released after the seams-core tag with the
-same version.
+from this repository and records the seams-core revision it builds
+against. Registry publication is separate and may follow the engine
+release.
 
 .. list-table::
    :header-rows: 1
@@ -30,7 +31,7 @@ same version.
      - fpm ``dseams``
    * - Lua, Fennel
      - `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
-     - LuaRocks ``dseams``
+     - source package ``dseams``; LuaRocks registration is coming
 
 .. toctree::
    :maxdepth: 1

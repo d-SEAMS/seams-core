@@ -29,6 +29,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from shared_library import built_library  # noqa: E402
+from project_version import project_version  # noqa: E402
 DOCS = ROOT / "docs"
 FIXTURE = ROOT / "input" / "traj" / "genice_sI.lammpstrj"
 LANGS = {"python", "py", "c", "cpp", "c++", "cxx", "rust", "julia", "lua", "fortran", "f90", "r"}
@@ -54,17 +55,6 @@ MD_FENCE = re.compile(r"```([A-Za-z0-9_+-]+)\n(.*?)```", re.S)
 EXCERPT = re.compile(r"^(?:#|//|!)\s*excerpt:\s*(\S+)\s*$")
 OPTIONAL = ("ase", "solvis")
 BINDING = ("dseams", "pydseams")
-
-
-def project_version():
-    """The seams-core version, which pydseamslib releases share.
-
-    >>> project_version().count(".")
-    2
-    """
-    text = (ROOT / "meson.build").read_text(encoding="utf-8")
-    match = re.search(r"^\s*version:\s*'([^']+)'", text, re.M)
-    return match.group(1) if match else "unknown"
 
 
 def install_hint():

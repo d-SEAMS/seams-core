@@ -27,6 +27,8 @@ import re
 import sys
 from pathlib import Path
 
+from project_version import project_version
+
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 ORG = DOCS / "orgmode"
@@ -43,18 +45,18 @@ SUMMARY = (
     "bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, "
     "PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, "
     "Julia, Rust and Fortran bindings live in their own repositories and "
-    "release against the seams-core tag with the same version."
+    "record the seams-core revision they build against."
 )
 
 BINDINGS = (
     ("PydSEAMSlib", "https://github.com/d-SEAMS/PydSEAMSlib",
-     "Python binding, pydseamslib on PyPI (import dseams, import pydseams)."),
+     "Python binding source and the pydseamslib distribution (import dseams, import pydseams)."),
     ("yodaStruct", "https://github.com/d-SEAMS/yodaStruct",
-     "Lua and Fennel binding, the LuaRocks package dseams (require(\"dseams\"))."),
+     "Lua and Fennel binding source for require(\"dseams\"); LuaRocks registration is coming."),
     ("dseams-r", "https://github.com/d-SEAMS/dseams-r",
-     "R binding, the R package dseams."),
+     "R binding source for the dseams package; CRAN and r-universe registration are coming."),
     ("Dseams.jl", "https://github.com/d-SEAMS/Dseams.jl",
-     "Julia binding, the package Dseams over libseams_jll."),
+     "Julia binding source for Dseams; General registration and libseams_jll are coming."),
     ("dseams-rs", "https://github.com/d-SEAMS/dseams-rs",
      "Rust binding, the crates dseams-sys and dseams."),
     ("dseams-fortran", "https://github.com/d-SEAMS/dseams-fortran",
@@ -117,6 +119,7 @@ def plain(text):
     text = re.sub(r"(?<![\w=])=([^=\n]+)=(?![\w=])", r"\1", text)
     text = text.replace("``", "").replace("`", "").replace("**", "")
     text = re.sub(r"\\[()\[\]]", "", text)
+    text = text.replace("@PROJECT_VERSION@", project_version())
     return " ".join(text.split())
 
 

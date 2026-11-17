@@ -83,7 +83,7 @@ seams prisms "$dump" --type 1
 The [[file:videos/index.org][videos]], the
 [[file:howto/migrate-1x.org][1.x migration]], the
 [[file:explanation/performance-h2h.org][performance tables]], and the
-[[file:reference/release-2.14.org][2.14.0 notes]] are the rest of this
+[[file:reference/release-2.14.org][2.14.1 notes]] are the rest of this
 release.
 
 d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
@@ -91,7 +91,7 @@ Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 
 The first classification is five lines. Install with
-~pip install 'pydseamslib==2.14.0'~ for the Frame package, with conda-forge's
+~pip install 'pydseamslib==@PROJECT_VERSION@'~ for the Frame package, with conda-forge's
 Meson toolchain, or with ~meson setup build && meson compile -C build~,
 then run the Python and C programs on
 [[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.
@@ -102,15 +102,15 @@ seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
 seams cages input/traj/ice1h.lammpstrj
 #+end_src
 
-2.14.0 ships ~libseams~ (~seams.h~), ~libseams_lang~, the C and C++
+2.14.1 ships ~libseams~ (~seams.h~), ~libseams_lang~, the C and C++
 APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines.
 ~gmx-seams~ reads the trajectory after ~gmx mdrun~.
-Each language binding is its own repository, released with the same
-version against this tag:
+Each language binding is its own repository and records the engine
+revision it builds against. Registry publication is separate:
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
-- Lua and Fennel: LuaRocks ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]
+- Lua and Fennel: source package ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]; LuaRocks registration is coming
 - R: ~dseams~, [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
 - Julia: ~Dseams~, [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
 - Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]

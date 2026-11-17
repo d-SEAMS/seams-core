@@ -79,8 +79,9 @@ Tests to know by name:
 | `docs_video_tapes` | The recording tapes whose sources live here replay and match `recorded.txt` |
 
 The Python snippets in the docs import `dseams` and `pydseams` from the
-installed `pydseamslib` of the same version
-(`pip install pydseamslib==2.14.0`, or a build of d-SEAMS/PydSEAMSlib).
+installed `pydseamslib` built against this tree
+(`pip install "pydseamslib==$(python3 scripts/project_version.py)"`, or
+`sh scripts/install_pydseamslib.sh` for a source build).
 A `docs_snippet_` test fails, naming that pip line, when the package is
 missing. A test that exits 77 is a skip because an optional toolchain or
 input is absent.

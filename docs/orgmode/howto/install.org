@@ -2,22 +2,18 @@
 #+OPTIONS: toc:nil num:nil
 
 Get a ~seams~ binary, ~libyodaLib~, ~libseams~, and ~libseams_lang~.
-This page is the 2.14.0 install of the engine: conda-forge, a plain
-source build, pixi, or the Nix flake. The language bindings are
-separate packages built from their own repositories against the same
-engine version; the last section lists them.
+This page is the @PROJECT_VERSION@ install of the engine: a source
+checkout or GitHub release tarball, pixi, or the Nix flake. The
+language bindings are separate projects; the last section lists the
+installation routes that are available now.
 
-* conda-forge
+* Package registries
 
-#+begin_src bash
-conda install -c conda-forge 'libseams=2.14.0'
-#+end_src
-
-~libseams~ is the engine: ~libyodaLib~, ~libseams~ (~seams.h~),
-~libseams_lang~, the ~seams~ CLI, and the ~seams~ and ~seams-core~
-pkg-config and CMake files. The recipe is ~recipe/recipe.yaml~
-(rattler-build). Until a conda-forge chemfiles passes the mmCIF probe
-below, the conda build leaves chemfiles off.
+~libseams~, ~linkcell~, ~dseams-plumed~, and ~pydseamslib~ are not on
+conda-forge yet. Their staged-recipes work is pending. Until those
+recipes land, use the source routes on this page. The in-tree
+~recipe/recipe.yaml~ is release-packaging input, not evidence that a
+conda package is available.
 
 conda-forge also carries the toolchain for a source build:
 
@@ -34,7 +30,18 @@ meson setup build && meson compile -C build
 #+end_src
 
 The same two lines are the install when the compilers are already on
-~PATH~. A full checkout and install:
+~PATH~. Download the GitHub release source:
+
+#+begin_src bash
+curl -LO https://github.com/d-SEAMS/seams-core/archive/refs/tags/v@PROJECT_VERSION@.tar.gz
+tar -xf v@PROJECT_VERSION@.tar.gz
+cd seams-core-@PROJECT_VERSION@
+meson setup bbdir -Dwith_tests=false
+meson compile -C bbdir
+meson install -C bbdir
+#+end_src
+
+Or use a full checkout:
 
 #+begin_src bash
 git clone https://github.com/d-SEAMS/seams-core && cd seams-core
@@ -125,17 +132,16 @@ the LAMMPS compute and the PLUMED module.
 
 * Language bindings
 
-Each binding is its own repository and package, released with the same
-version as the engine it calls:
+Each binding is its own repository. These are the routes available now:
 
 | Language    | Install                                            | Repository |
 |-------------+----------------------------------------------------+------------|
-| Python      | ~pip install 'pydseamslib==2.14.0'~                 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
-| Lua, Fennel | LuaRocks ~dseams~                                   | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
-| R           | the ~dseams~ source package                         | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
-| Julia       | ~Dseams~, with the engine from ~libseams_jll~         | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
-| Rust        | crates ~dseams-sys~ and ~dseams~                     | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
-| Fortran     | fpm ~dseams~                                        | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
+| Python      | ~pip install 'pydseamslib==@PROJECT_VERSION@'~ or ~sh scripts/install_pydseamslib.sh~ | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
+| Lua, Fennel | source checkout; LuaRocks registration is coming    | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
+| R           | source checkout or GitHub release tarball; CRAN and r-universe are coming | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
+| Julia       | ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~; General registration is coming | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
+| Rust        | ~cargo add dseams --git https://github.com/d-SEAMS/dseams-rs~ | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
+| Fortran     | fpm Git dependency on the dseams-fortran repository | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
 
 Each repository's README has the full install, including linking an
 installed ~libseams~ from this page. [[file:bindings.org][Use a

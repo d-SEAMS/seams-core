@@ -1,6 +1,6 @@
 # d-SEAMS
 
-> d-SEAMS (seams-core) reads molecular-dynamics trajectories and names the ice in them: CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts, computed on one shared neighbour list. This repository builds the C++ engine, the C API libseams (include/seams.h), the C ABI libseams_lang that the language bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, Julia, Rust and Fortran bindings live in their own repositories and release against the seams-core tag with the same version.
+> d-SEAMS (seams-core) reads molecular-dynamics trajectories and names the ice in them: CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts, computed on one shared neighbour list. This repository builds the C++ engine, the C API libseams (include/seams.h), the C ABI libseams_lang that the language bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, Julia, Rust and Fortran bindings live in their own repositories and record the seams-core revision they build against.
 
 Each link below is a page of the published manual on https://docs.dseams.info. Contributor instructions are on the Contributing and Repository map pages.
 
@@ -44,8 +44,8 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): test_seams_api is the seams_c_api test.
 - [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/fronts/julia.html): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
-- [Lua and Fennel](https://docs.dseams.info/fronts/lua.html): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
-- [Python](https://docs.dseams.info/fronts/python.html): The Python binding is pydseamslib on PyPI, import dseams.
+- [Lua and Fennel](https://docs.dseams.info/fronts/lua.html): The Lua and Fennel binding provides require("dseams").
+- [Python](https://docs.dseams.info/fronts/python.html): The Python binding is the pydseamslib distribution, with import dseams.
 - [R](https://docs.dseams.info/fronts/r.html): The R binding is the R package dseams.
 - [Rust](https://docs.dseams.info/fronts/rust.html): The Rust binding is the crates dseams-sys and dseams.
 - [Engines tutorial](https://docs.dseams.info/fronts/engines.html): Eight molecules of cubic ice are engines/tutorial/ice.data.
@@ -90,7 +90,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 ## Reference
 
 - [Lookup pages](https://docs.dseams.info/reference/index.html): Lookup pages for the engine. Tutorials and how-tos live elsewhere.
-- [Python Frame](https://docs.dseams.info/reference/python-frame.html): dseams.userframe.read in pydseamslib 2.14.0 returns a Frame over libseams_lang.
+- [Python Frame](https://docs.dseams.info/reference/python-frame.html): dseams.userframe.read in pydseamslib 2.14.1 returns a Frame over libseams_lang.
 - [seams CLI](https://docs.dseams.info/reference/cli.html): The engine command is seams. The parser is Argum (the same parser as eonclient).
 - [Data Formats](https://docs.dseams.info/reference/data-formats.html): seams and the C++ readers share one suffix table.
 - [walk_compare](https://docs.dseams.info/reference/walk-compare.html): tests/walk_compare walks a LAMMPS dump and prints one row per frame.
@@ -98,14 +98,14 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Nix flake](https://docs.dseams.info/reference/nix.html): The flake builds libyodaLib and the seams CLI with Meson. It does not build Python or Lua. There are no overlays.
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
-- [2.14.0 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes are built from the fragments in changelog.d/.
+- [2.14.1 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes are built from the fragments in changelog.d/.
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
-- [Python](https://docs.dseams.info/stable/python.html): The Python binding is pydseamslib on PyPI, import dseams.
+- [Python](https://docs.dseams.info/stable/python.html): The Python binding is the pydseamslib distribution, with import dseams.
 - [Fortran](https://docs.dseams.info/stable/fortran.html): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/stable/julia.html): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
 - [R](https://docs.dseams.info/stable/r.html): The R binding is the R package dseams.
-- [Lua and Fennel](https://docs.dseams.info/stable/lua.html): The Lua and Fennel binding is the LuaRocks rock dseams, require("dseams").
+- [Lua and Fennel](https://docs.dseams.info/stable/lua.html): The Lua and Fennel binding provides require("dseams").
 - [Rust](https://docs.dseams.info/stable/rust.html): The Rust binding is the crates dseams-sys and dseams.
 - [Command line](https://docs.dseams.info/stable/cli.html): seams reads a trajectory and prints one result.
 - [Science front](https://docs.dseams.info/stable/science.html): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
@@ -165,9 +165,9 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 
 ## Language bindings
 
-- [PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib): Python binding, pydseamslib on PyPI (import dseams, import pydseams).
-- [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Lua and Fennel binding, the LuaRocks package dseams (require("dseams")).
-- [dseams-r](https://github.com/d-SEAMS/dseams-r): R binding, the R package dseams.
-- [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia binding, the package Dseams over libseams_jll.
+- [PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib): Python binding source and the pydseamslib distribution (import dseams, import pydseams).
+- [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Lua and Fennel binding source for require("dseams"); LuaRocks registration is coming.
+- [dseams-r](https://github.com/d-SEAMS/dseams-r): R binding source for the dseams package; CRAN and r-universe registration are coming.
+- [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia binding source for Dseams; General registration and libseams_jll are coming.
 - [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Rust binding, the crates dseams-sys and dseams.
 - [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Fortran binding, the fpm package dseams.
