@@ -53,7 +53,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [GROMACS](https://docs.dseams.info/user/howto/engine-gromacs.md): Build gmx-seams against conda-forge GROMACS 2026.3, or a later 2026 release.
 - [OpenMM](https://docs.dseams.info/user/howto/engine-openmm.md): Build the reporter against conda-forge OpenMM 8.6.1 or a later 8 release.
 - [PLUMED](https://docs.dseams.info/user/howto/engine-plumed.md): The thread count comes from PLUMED_NUM_THREADS.
-- [In-situ CHILL+](https://docs.dseams.info/user/howto/engine-insitu.md): InSitu in adapters/python/dseams_insitu/engine.py is the in-run classifier.
+- [In-situ CHILL+](https://docs.dseams.info/user/howto/engine-insitu.md): InSitu in adapters/python/dseams_insitu/engine.py classifies one frame during a run.
 - [OpenMP target offload](https://docs.dseams.info/user/howto/openmp-offload.md): Build the Steinhardt kernel and the TUM ice score (hop-bound six-rings and cage affiliation) for an NVIDIA GPU.
 - [Engine builds](https://docs.dseams.info/engines/index.md)
 - [LAMMPS](https://docs.dseams.info/engines/lammps.md): Meson builds run_hook, the in-run hook.
