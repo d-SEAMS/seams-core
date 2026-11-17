@@ -2,8 +2,7 @@
 #+OPTIONS: toc:nil num:nil
 
 A tutorial is a learning path. You finish it with a skill, not a
-lookup table. The one good tutorial on this site classifies the
-in-tree mixed TIP4P dump two ways.
+lookup table.
 
 | tutorial | you learn |
 |----------+-----------|
@@ -20,20 +19,31 @@ in-tree mixed TIP4P dump two ways.
 | [[file:nanotube.org][Quasi-one-dimensional ice]] | where the nanotube and monolayer examples live |
 | [[file:paper-figures.org][Paper figures]] | the in-tree numbers behind the 2020 figures |
 | [[file:paper-interface.org][Interface slab]] | Published CHILL+ against the OVITO rule on a slab you build |
-| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH, built in the test |
+| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH, built in the run |
 | [[file:paper-rings.org][Ring statistics]] | Primitive rings and the shortest-path test |
 | [[file:paper-brine.org][Ice in brine]] | The front, and the crystal count, along a short run |
 | [[file:paper-nucleation.org][Nucleation score]] | Mean q6bar as a nucleus is restored |
 | [[file:gallery.org][Science gallery]] | The full runs, drawn and captioned from their reports |
 
 How-tos solve a goal you already have. Reference names flags and
-headers. Explanation is why the two classifiers exist.
+headers. Explanation covers why CHILL+ and the cage census can disagree.
 
-Each paper tutorial keeps its fast test and adds a full run. The full
-run is a Snakemake rule, =snakemake -s docs/tutorials/Snakefile=, and
-=meson test --suite slow= checks that rule. The fast tests stay in
-the docs suite.
+A paper tutorial has a fast run and a full run. The topics are
+=interface=, =cages=, =rings=, =brine=, and =nucleation=. From the
+repository root, after a pixi build, this writes the fast brine
+picture and the lines that page quotes:
 
-The Python files under =docs/tutorials= are the runs. CI executes
-them. The pages here say what you are doing and what number you
-should see.
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py brine bbdir/seams bbdir/src out/brine
+#+end_src
+
+=out/brine/brine.png= is the picture. The full brine picture is the
+same command with =brine-full= and =out/brine-full=, which writes
+=out/brine-full/brine-full.png=. The other four topics use their own
+name in those two places. =pixi run meson test -C bbdir docs_paper_brine= checks the
+fast lines. =pixi run meson test -C bbdir --suite slow docs_paper_brine_full= checks the
+full lines when the build was configured with =-Dpaper_full=true=.
+Without that option the slow test exits 77. The other topics use the
+same test names with their own topic. =snakemake -s
+docs/tutorials/Snakefile brine= is the same full brine run. The
+scripts are the Python files under =docs/tutorials=.
