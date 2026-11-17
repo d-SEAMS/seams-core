@@ -6,14 +6,19 @@ sits near 0.2. A crystal sits near 0.5. A nucleus in a liquid pulls
 the mean up as it grows, which is why the score is the whole-frame
 average and not a single molecule.
 
-The trajectory has three frames and is built in the test. GenIce ice
+The trajectory has three frames and is built in the run. GenIce ice
 Ih is shaken into a liquid. The basal half of the original lattice is
 the nucleus. Frame 0 is the shaken liquid. Frame 1 puts half of that
 nucleus back on its lattice sites. Frame 2 puts the rest back. OpenMM
 relaxes each frame for two steps with those sites restrained, so the
 liquid can move and the nucleus cannot dissolve before you measure it.
 
-~meson test docs_paper_nucleation~ checks
+From the repository root, after a pixi build (=bbdir/seams= and
+=bbdir/src=):
+
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py nucleation bbdir/seams bbdir/src out/nucleation
+#+end_src
 
 #+begin_src text
 nucleation frame 0 q6bar 0.276023
@@ -21,17 +26,25 @@ nucleation frame 1 q6bar 0.320504
 nucleation frame 2 q6bar 0.334254
 #+end_src
 
-The mean rises at each stage. OVITO draws the last frame. The test
-exits 77 when GenIce, OpenMM, or OVITO is absent.
+The mean rises at each stage. The picture is
+=out/nucleation/nucleation.png=, the first of the three frames.
+=pixi run meson test -C bbdir docs_paper_nucleation= runs the same script and checks
+the three lines. That picture is
+=paper-tutorials/nucleation/nucleation.png= in the Meson build
+directory. The script exits 77 when GenIce, OpenMM, or OVITO is absent.
 
 * Full run
 
 The paper trajectory is figshare
 [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]]:
 148 frames of 4096 molecules, md5 ~c28fc209a2854d2ba49e8f9b55accbe8~.
-The file is fetched into ~docs/.cache~ and is not committed.
-=meson test --suite slow docs_paper_nucleation_full= runs
-~seams steinhardt~ on every frame.
+The script fetches it into ~docs/.cache~ when the file is missing or
+the checksum does not match. It is not part of the checkout.
+~seams steinhardt~ then runs on every frame.
+
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py nucleation-full bbdir/seams bbdir/src out/nucleation-full
+#+end_src
 
 #+begin_src text
 nucleation full input molecules 4096 frames 148 file-frames 148 file docs/.cache/figshare-11448702/nucleation.lammpstrj
@@ -41,6 +54,11 @@ nucleation full frame 148 q6bar 0.287256
 nucleation full lines 148
 #+end_src
 
-Frame 1 is the shipped ~nucleation_f1.lammpstrj~. The mean
-\(\bar q_6\) on that frame is 0.26063. Frame 148 is 0.287256.
-The test exits 77 when OVITO or Snakemake is absent.
+The picture is =out/nucleation-full/nucleation-full.png=, the first
+frame of the 148. Frame 1 of that file is the shipped
+~input/traj/nucleation_f1.lammpstrj~. The mean \(\bar q_6\) on frame
+1 is 0.26063. Frame 148 is 0.287256. The script exits 77 when OVITO
+does not import. =pixi run meson test -C bbdir --suite slow docs_paper_nucleation_full=
+checks the same lines when the build was configured with
+=-Dpaper_full=true=. Without that option, or when Snakemake is
+absent, the test exits 77.
