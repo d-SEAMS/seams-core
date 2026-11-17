@@ -1,15 +1,11 @@
 # Lua and Fennel
 
-The Lua and Fennel binding is the LuaRocks rock `dseams`, `require("dseams")`. It lives in its own repository,
-[d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+Classify a frame from Lua or Fennel. The recording follows `require("dseams")` and the same call from Fennel.
 
-```bash
-luarocks install dseams
+```{eval-rst}
+.. include:: ../videos/embeds/lua.rst
 ```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/development/repositories.org`
-describes how the repositories fit together.
+The binding is the Lua and Fennel library in [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct). `require("dseams")` in Lua and `(require :dseams)` in Fennel call `libseams` (`include/seams.h`). The rock is not published on LuaRocks, so `luarocks install dseams` does not install it. The README builds the module with Meson from that repository.
+
+Option tables and return values are the [Lua reference](https://d-seams.github.io/yodaStruct/reference/lua.html). Package names are the {doc}`Lua API </stable/lua>`.
