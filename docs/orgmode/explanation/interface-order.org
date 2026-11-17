@@ -3,21 +3,22 @@
 
 Two published CHILL+ rules, on the same coordinates, with the
 thresholds left alone.
-The neighbour test and the ~q3~ shell are what move the labels.
+The neighbour test and the \(q_3\) shell are what move the labels.
 The open edges do not, on these frames.
 Prism blocks and sheet rings name confined ice that CHILL+, the
 diamond test, adaptive common-neighbour analysis and a tetrahedron
 template do not.
+The rule itself is
+[[file:chill-plus-rules.org][CHILL+: the published rule and the OVITO rule]].
+The counts below are ~seams chill-plus~ on the shipped frames.
 
-The counts below come from ~interface_order~ on commit ~2f96e7bd~
-plus the comparison in this tree.
 Ideal ice Ih (~input/traj/ice1h.lammpstrj~, 128 molecules) is
 hexagonal under both rules, with no disagreements.
 
 * The two rules
 
 Nguyen and Molinero, J. Phys. Chem. B 119 (2015) 9369, equation 1
-averages ~q3~ over the four nearest neighbours.
+averages \(q_3\) over the four nearest neighbours.
 A staggered bond is ~c(i,j) <= -0.8~.
 An eclipsed bond is ~-0.35 <= c(i,j) <= 0.25~.
 Table 1 gives a crystal or clathrate label only when four neighbours
@@ -40,7 +41,7 @@ The neighbour test is not stated.
 
 mdapy's Chill+ kernel (cross-checked there against OVITO's
 ~ChillPlusModifier~) is the same statement in code.
-~q3~ is summed over every neighbour inside the cutoff, not over the
+\(q_3\) is summed over every neighbour inside the cutoff, not over the
 four nearest.
 The inequalities are strict.
 A row is classified only when the coordination is 4.
@@ -51,7 +52,7 @@ interfacial, with no look at the neighbour.
 ~ovito-chill+~ is the OVITO/mdapy rule.
 Neither threshold is changed.
 The comparison turns one lever at a time: the neighbour test, then
-the ~q3~ shell, then the open edges.
+the \(q_3\) shell, then the open edges.
 An atom is counted under the lever that first produces the OVITO
 label.
 If more than one lever moves the label, the atom is mixed.
@@ -59,7 +60,7 @@ If more than one lever moves the label, the atom is mixed.
 On both frames below, every atom that changes label has exactly four
 neighbours inside 3.5 Å.
 The shell condition in Table 1 is not the split.
-Widening ~q3~ changes the label of a four-coordinated molecule when
+Widening \(q_3\) changes the label of a four-coordinated molecule when
 one of its neighbours has a further neighbour inside the cutoff.
 The open edges move no atom on either frame.
 No correlation in these two frames sits on ~-0.8~, ~-0.35~ or ~0.25~.
@@ -84,7 +85,7 @@ Of the molecules that do not change label, 1927 also have four
 neighbours, 1428 have five, 289 have six and 38 have seven or more.
 17 have three.
 The extra neighbours sit on the agreeing population.
-They change a neighbour's ~q3~, and that is the shell lever.
+They change a neighbour's \(q_3\), and that is the shell lever.
 
 Ring membership does not separate the 397.
 395 of them lie on a primitive 6-ring, 381 on a 5-ring and 111 on a
@@ -121,9 +122,6 @@ the disagreeing set.
 Mean ~q6~ is 0.540 on the disagreeing set and 0.489 on the rest.
 Bulk ice Ih in the test set has mean ~q6~ 0.626.
 
-The numbers are ~docs/data/interface-order-nucleus.csv~, written by
-~scripts/interface_order_nucleus.py~.
-
 * Slab
 
 ~input/traj/interface_f0.lammpstrj~ is 864 mW molecules in a box of
@@ -134,7 +132,7 @@ The two rules disagree on 46 molecules.
 | lever | molecules |
 |-------+-----------|
 | neighbour test | 5 |
-| ~q3~ shell | 41 |
+| \(q_3\) shell | 41 |
 | open edge | 0 |
 | both levers | 0 |
 
@@ -193,8 +191,8 @@ The second layer is shifted by one bond in the plane, which is the
 graphite AB stacking, and separated by 2.75 Å.
 Half the bilayer molecules then have three neighbours and half have
 four.
-~iface::nanotube~ and ~iface::honeycombSheet~ build them.
-No trajectory is stored.
+The library builds the oxygen sites. No trajectory is stored.
+The ~seams~ command does not print the prism or sheet census.
 
 | framework | N | 2015 | OVITO | rings | diamond | CNA | PTM | ~q6~ |
 |-----------+---+------+-------+-------+---------+-----+-----+------|
@@ -242,7 +240,7 @@ Four velocity seeds, numbered 1 to 4, run at 240, 250, 260 and 270 K.
 The velocity seed is ten times the temperature plus the replica, so
 the sixteen streams differ.
 Frames are kept every 10 ps for 800 ps.
-The trajectories are not committed.
+The trajectories are not in this repository.
 The slope on a seed is ordinary least squares of the solid thickness
 while the 2015 solid fraction lies between 0.15 and 0.90 and both
 thicknesses are still defined.
@@ -253,14 +251,6 @@ The difference is the 2015 rate minus the OVITO rate on the same
 seed, resampled by the shared seed index.
 It excludes zero when those two percentiles lie on the same side of
 zero.
-
-This session had 8 cores.
-Each LAMMPS run used one OpenMP thread.
-The sixteen runs finished in 207.4 s of wall time.
-The individual runs took 89.4 to 115.2 s.
-Scoring the trajectories with ~interface_order growth~ took 13.3 s
-for those sixteen files and 20.0 s when 272 K and 273 K were added,
-one thread per scoring process, run serially.
 
 The thickness below is the ice slab on that fixed-volume cell.
 It is the sum of the two fronts.
@@ -315,13 +305,6 @@ Espinosa, Navarro, Sanz, Valeriani and Vega, J. Chem. Phys. 145,
 L is the liquid length in the first production frame.
 τ is the first frame whose solid fraction is at least 0.95.
 The mean of the seeds that freeze is the same percentile bootstrap.
-
-This part of the session used 8 cores, one OpenMP thread per LAMMPS
-run.
-The eight basal runs at 240 and 250 K took 696 to 736 s each.
-The invocation that wrote the other twenty-four trajectories took
-5709.2 s of wall time.
-Scoring all thirty-two files took 336 s, one thread, run serially.
 
 | face | T (K) | 2015 (Å/ns) | OVITO (Å/ns) | seeds |
 |------+-------+-------------+--------------+-------|
@@ -383,10 +366,7 @@ a = 1.80, λ = 23.15, γ = 1.20, cos θ0 = −1/3. The temperature is
 the Kelvin target of that fix. A 20 ps melt at 400 K with a 2 ps
 period left the liquid on the crystal sites, mean move 0.3 Å, so
 the liquid was melted for 100 ps at 500 K before the growth run.
-Four seeds at 240 K and four at 260 K. This session had 8 cores,
-one thread per run. The 240 K runs took 449 to 454 s, the 260 K
-runs took 859 to 863 s, and the invocation took 862.7 s of wall
-time. Scoring took 152 s.
+Four seeds at 240 K and four at 260 K.
 
 | definition | 240 K (Å/ns) | 260 K (Å/ns) | over printed | over printed/10 |
 |------------+--------------+--------------+--------------+-----------------|
@@ -421,10 +401,7 @@ The protocol keeps equation 2. A second campaign,
 secondary prism and adds the basal face, the primary prism, and one
 secondary-prism seed at a 5 fs step. The melt, the 2 ps Nose-Hoover
 periods, and the 10 fs step are the ones above. Production is 600 ps
-at 240 K and 1000 ps at 260 K, with frames every 5 ps. This session
-had 8 cores, one thread per run. Seventeen jobs took 1548 s of wall
-time. The 240 K runs took 359 to 365 s, the 260 K runs took 567 to
-586 s, and the 5 fs seed took 622 s. Scoring took 33 s.
+at 240 K and 1000 ps at 260 K, with frames every 5 ps.
 
 The one-front speed is the slope of the solid count,
 u = (dN/dt) L / (2 N), on solid fraction 0.55 to 0.90.
@@ -545,7 +522,6 @@ carries this factor of four, leaves a residual 10/4 = 2.5, which is
 the stable 2.4 measured here.
 Equation 2 is the speed the trajectories produce, and it is the
 speed in Figure 3 of Shi et al.
-The deck is unchanged.
 
 * Growth-speed curve
 
@@ -560,16 +536,7 @@ unchanged.
 Basal, primary prism and secondary prism, four velocity seeds each,
 six temperatures, seventy-two trajectories.
 Every seed reached a solid fraction of at least 0.90.
-Frames stay out of the tree.
-This session had 8 cores, one OpenMP thread per LAMMPS run.
-The seventy-two runs finished in 5711 s of wall time.
-The 220 K runs took 443 to 449 s and the 230 K runs took 447 to
-454 s.
-The 240 K runs took 352 to 369 s, the 250 K runs took 659 to 666 s,
-the 260 K runs took 570 to 587 s, and the 265 K runs took 1068 to
-1105 s.
-Scoring all seventy-two files took 26.5 s, eight processes, one
-thread each.
+The trajectories are not in this repository.
 
 The speed is the count slope already used for the factor of four,
 
@@ -654,7 +621,7 @@ falling through 265 K.
 
 Four times the secondary-prism count slope is the factor-of-four
 reading of Table I.
-At 240 K that is 447 [423, 481], and the printed 490 lies just above
+At 240 K that is 447 [423, 481], and the printed 490 lies above
 the interval.
 At 250 K it is 348 [314, 385], and the printed 375 lies inside.
 At 260 K it is 253 [232, 278], and the printed 266 lies inside.
@@ -715,14 +682,10 @@ That is the growth factor inside the crystallization time, not the
 crystallization time.
 
 On one frame from the 240 K secondary prism, during the growth, the
-pure-Python q6bar and ~interface_order q6~ counted the same molecules
+pure-Python q6bar and the d-SEAMS q6bar counted the same molecules
 above 0.30, 0.36, 0.40, 0.50 and 0.56.
-The timing used eight frames from ~prism2-t240-s1~, spread through
-the trajectory, repeated eight times, in one session after the runs
-had finished.
-taskset pinned the process to one core and to eight cores.
-The affinity mask held 1 and 8 cores.
-No host name was recorded.
+The timing used eight frames from that secondary-prism trajectory,
+spread through the run, repeated eight times.
 The median and the interquartile range are over the eight repeats.
 The per-frame time divides each repeat by eight.
 At eight cores the Python baseline runs one process per frame.
@@ -742,24 +705,21 @@ times the d-SEAMS q6bar frame.
 Eight cores shorten the CHILL+ frame by a factor of 1.5 and the
 d-SEAMS q6bar frame by a factor of 1.4.
 The Python frame shortens by a factor of 4.1.
-The rows are in ~growth-curve-timing.csv~.
 
-* Sources checked
+* References
 
-Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369–9376.
-The ACS page for doi 10.1021/jp510289t gives those authors, that
-volume and those pages.
+Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369–9376,
+[[https://doi.org/10.1021/jp510289t][10.1021/jp510289t]].
 Willard and Chandler, J. Phys. Chem. B 2010, 114, 1954–1958.
-The PMC copy PMC2834420 says they used ξ = 2.4 Å.
+Their coarse-graining width is ξ = 2.4 Å.
 Espinosa, Navarro, Sanz, Valeriani and Vega, J. Chem. Phys. 145,
-211922 (2016), doi 10.1063/1.4965427.
-Table I and Table II were read from page 211922-4 of the author PDF.
-The direct-coexistence cell of 4000 molecules, about 3 × 3 × 9 nm
-with an ice slice of about 4.5 nm, and the anisotropic barostat, are
-on page 211922-2.
-Equation 2, u = L / (2 τ), is on page 211922-4.
+211922 (2016), [[https://doi.org/10.1063/1.4965427][10.1063/1.4965427]].
+Table I and Table II are on page 211922-4.
+The 4000-molecule cell, about 3 × 3 × 9 nm with an ice slice of
+about 4.5 nm, and the anisotropic barostat, are on page 211922-2.
+Equation 2, \(u = L / (2 \tau)\), is on page 211922-4.
 Shi, Fulford, Salvalaglio and Molteni, J. Chem. Phys. 162, 054714
-(2025), also arXiv:2410.07050.
+(2025), arXiv:2410.07050.
 The text gives TIP4P/Ice maxima of 0.621 ± 0.104 Å/ns on the basal
 face and 0.840 ± 0.033 Å/ns on prism1 at 260 K.
 Figure 3 plots the mW basal and primary-prism rates.
@@ -774,38 +734,46 @@ Page 211922-7 of Espinosa et al. quotes their minimum crystallization
 time as about ten nanoseconds.
 Montero de Hijes, Romano, Gorfer and Dellago, J. Chem. Phys. 158,
 204706 (2023).
-The article HTML states the factor-of-ten correction in the caption
-of Figure 4.
+The caption of their Figure 4 records the factor-of-ten correction
+applied to the 2016 mW points.
 
-* Reproduce
+* On the shipped frames
 
-#+begin_src sh
-interface_order study input/traj/nucleation_f1.lammpstrj
-interface_order study input/traj/interface_f0.lammpstrj
-interface_order confined
-python3 input/interface/campaign.py
-python3 scripts/growth_rates.py --bin bbdir-eessi/tests/interface_order
-python3 input/interface/npt_growth.py
-python3 scripts/npt_rates.py --bin bbdir-eessi/tests/interface_order
-python3 input/interface/espinosa_protocol.py
-python3 scripts/espinosa_rates.py --bin bbdir-eessi/tests/interface_order
-python3 input/interface/espinosa_faces.py
-python3 scripts/espinosa_candidates.py --bin bbdir/tests/interface_order
-python3 input/interface/growth_curve.py
-python3 scripts/growth_curve_rates.py --bin bbdir/tests/interface_order
-python3 scripts/q6bar_timing.py --bin bbdir/tests/interface_order
-interface_order wc input/traj/nucleation_f1.lammpstrj
-python3 scripts/figures_interface_order.py \
-  --bin bbdir-eessi/tests/interface_order \
-  --growth data/interface/growth.lammpstrj --dt 50
+#+begin_src bash
+seams chill-plus input/traj/ice1h.lammpstrj --type 1 --rule chill+
+seams chill-plus input/traj/ice1h.lammpstrj --type 1 --rule ovito-chill+
+seams chill-plus input/traj/nucleation_f1.lammpstrj --type 1 --rule chill+
+seams chill-plus input/traj/nucleation_f1.lammpstrj --type 1 --rule ovito-chill+
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --layers --axis 2
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --rule ovito-chill+
 #+end_src
 
-The figures are the nucleus profile, the slab profile, the confined
-label grid and, when a trajectory is passed, the ice thickness.
+Ice Ih is hexagonal 128 under both rules.
+The nucleation frame is the table in the nucleus section.
+The interface slab is hexagonal 352, cubic 1, interfacial 49,
+clathrate 3, interfacial clathrate 25, water 434 and stack
+~HHHHHHHH....C.~ under the published rule, and hexagonal 346, cubic 1,
+interfacial 57, clathrate 3, interfacial clathrate 20 and water 437
+under the OVITO rule.
 
-[[file:figures/nucleus-profile.svg]]
-[[file:figures/interface-profile.svg]]
-[[file:figures/confined-labels.svg]]
-[[file:figures/growth-thickness.svg]]
-Solid means cubic, hexagonal and interfacial.
-Crystal means cubic and hexagonal only.
+#+begin_export rst
+.. figure:: figures/nucleus-profile.svg
+   :alt: Crystal and solid fraction against radius for the mW nucleus.
+
+   Crystal and solid fraction on the nucleation frame. Solid includes the interfacial label. Crystal is cubic and hexagonal only.
+
+.. figure:: figures/interface-profile.svg
+   :alt: Ice fraction along the surface normal of the mW slab.
+
+   Ice fraction along the long edge of the interface slab.
+
+.. figure:: figures/confined-labels.svg
+   :alt: Label fractions for the nanotube and sheet frameworks.
+
+   Fraction of molecules carrying each label on the confined frameworks.
+
+.. figure:: figures/growth-thickness.svg
+   :alt: Ice thickness against time for one fixed-volume slab.
+
+   Ice thickness of one fixed-volume slab. Solid includes the interfacial label.
+#+end_export
