@@ -746,7 +746,7 @@ html_theme_options = {
                 {
                     "title": "dseams-fortran (Fortran)",
                     "url": "https://github.com/d-SEAMS/dseams-fortran",
-                    "summary": "The fpm package dseams",
+                    "summary": "The fpm Git dependency dseams",
                     "external": True,
                 },
                 {
