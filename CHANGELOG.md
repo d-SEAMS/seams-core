@@ -11,6 +11,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.0] - 2026-11-15
+
 ### Added
 
 - A CI job compiles the library sources PydSEAMSlib and dseams-r build under Clang 22 with `-Wsign-conversion -Wunneeded-internal-declaration -Werror`, once without OpenMP or any optional backend and once with them, and builds those libraries with `-Dwerror=true`. The compiler-warnings workflow also runs on `release/**` branches.
