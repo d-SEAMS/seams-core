@@ -63,7 +63,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [In-situ](https://docs.dseams.info/engines/insitu.md): adapters/python/dseams_insitu/engine.py is InSitu.
 - [Engine walkthroughs](https://docs.dseams.info/walkthrough/index.md): Each page reads an in-repo input, runs published CHILL+, the primitive six-ring histogram, and local q6, and checks the result.
 - [Language walkthroughs](https://docs.dseams.info/user/languages.md): The same ice cell from C, C++, and each binding, and from each engine driver.
-- [C tutorial](https://docs.dseams.info/fronts/c.md): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
+- [C tutorial](https://docs.dseams.info/fronts/c.md): Label the eight-atom cubic cell with seams.h and print the library version.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.md): test_seams_api is the seams_c_api test.
 - [Fortran](https://docs.dseams.info/fronts/fortran.md): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/fronts/julia.md): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
