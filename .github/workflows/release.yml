@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}
+      tarball_sha256: ${{ steps.checksums.outputs.tarball_sha256 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -53,9 +54,16 @@ jobs:
             quay.io/pypa/manylinux_2_28_x86_64 \
             bash scripts/build_linux_release.sh
       - name: Checksums
+        id: checksums
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
+          set -euo pipefail
           (cd dist && sha256sum -- *.tar.gz > SHA256SUMS)
           cat dist/SHA256SUMS
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          sum=$(sha256sum "$file")
+          echo "tarball_sha256=${sum%% *}" >> "$GITHUB_OUTPUT"
       - name: Release notes
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -98,8 +106,17 @@ jobs:
       - name: Install and run the archive in fresh containers
         env:
           VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
         run: |
           set -euo pipefail
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          got=$(sha256sum "$file")
+          got=${got%% *}
+          if [[ -z $TARBALL_SHA256 || $got != "$TARBALL_SHA256" ]]; then
+            printf '%s\n' "artifact sha256 ${got} does not match the build output ${TARBALL_SHA256}" >&2
+            exit 1
+          fi
+          printf '%s\n' "tarball sha256 ${got}"
           printf '%s\n' "testing debian:12 C quickstart"
           docker run --rm -i \
             -e VERSION \
@@ -148,7 +165,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ github.ref_name }}
           VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
         run: |
+          set -euo pipefail
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          got=$(sha256sum "$file")
+          got=${got%% *}
+          if [[ -z $TARBALL_SHA256 || $got != "$TARBALL_SHA256" ]]; then
+            printf '%s\n' "artifact sha256 ${got} does not match the build output ${TARBALL_SHA256}" >&2
+            exit 1
+          fi
+          printf '%s\n' "tarball sha256 ${got}"
           assets=("dist/seams-core-${VERSION}.tar.gz" "dist/libseams-${VERSION}-linux-x86_64.tar.gz" dist/SHA256SUMS)
           if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release upload "$TAG_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
