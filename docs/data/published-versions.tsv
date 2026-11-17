@@ -6,5 +6,6 @@ conda	ninja	*
 conda	pkg-config	*
 conda	eigen	*
 luarocks	dseams	2.14.0-1
+cargo	dseams	*
 julia	Dseams	2.14.0
 r	dseams	*

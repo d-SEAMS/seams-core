@@ -60,6 +60,14 @@ PROCESS_PATTERNS = (
         r"docs/records/README\.md|\bbeing uploaded\b|\bregistration is coming\b",
         re.I,
     )),
+    ("binding publication process", re.compile(
+        r"\bbeing published\b|\bregistry install\b.*\bcoming\b|"
+        r"\bnot available there yet\b|"
+        r"\bwith its API reference, tutorials,\s*tests and release notes\b|"
+        r"\bthat this repository builds and installs\b|"
+        r"\bscripts/install_pydseamslib\.sh\b",
+        re.I,
+    )),
     ("benchmark provenance", re.compile(
         r"\bbenchmarks/|\bdocs/(?:records|data)/|\bstored in git\b|"
         r"\braw lines\b|\bSource file\s+``|\bRendered from\b",
@@ -122,6 +130,13 @@ def claims(line: str):
 
     for match in re.finditer(r"\bluarocks\s+install\s+([A-Za-z0-9_.-]+)(?:\s+([A-Za-z0-9_.+-]+))?", plain):
         yield "luarocks", match.group(1), match.group(2) or "*"
+
+    for match in re.finditer(
+        r"\bcargo\s+add(?:\s+--\S+(?:\s+\S+)?)?\s+([A-Za-z0-9_.-]+)"
+        r"(?:@([A-Za-z0-9_.+-]+))?",
+        plain,
+    ):
+        yield "cargo", match.group(1), match.group(2) or "*"
 
     for call in re.finditer(r"\bPkg\.add\(([^)]*)\)", plain):
         body = call.group(1)
