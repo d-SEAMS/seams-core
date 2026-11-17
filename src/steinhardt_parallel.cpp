@@ -1369,6 +1369,10 @@ SteinhardtQl cutoffSolid(
   const bool simd8 = false;
   (void)quad;
 #endif
+  // ylmAdd8 lives in ylm_cartesian_avx512.cpp, which meson builds only on
+  // x86-64. simd8 is constant false otherwise, but Apple clang at -O0
+  // still emits the call, and a debug arm64 link then misses the symbol.
+#if defined(SEAMS_YLM_AVX512)
   if (!wroteLocal && simd8) {
     auto oneAtom = [&](int atom) {
       const int a = scratch.offsets[static_cast<std::size_t>(atom)];
@@ -1513,6 +1517,7 @@ SteinhardtQl cutoffSolid(
       }
     }
   }
+#endif
   if (!wroteLocal && !simd8) {
   const int nTiles = (n + 7) / 8;
 #ifdef SEAMS_HAS_OPENMP

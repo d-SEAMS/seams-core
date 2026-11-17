@@ -1019,6 +1019,15 @@ if get_option('with_cli') and get_option('with_tests')
 
   python3 = find_program('python3', required: true)
   test(
+    'ylm_add8_o0',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'check_ylm_add8.py',
+      ylm_o0_probe.full_path(),
+    ],
+    depends: ylm_o0_probe,
+    timeout: 60)
+  test(
     'docs_language_examples',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_language_examples.py'],
