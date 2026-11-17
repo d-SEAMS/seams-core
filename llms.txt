@@ -74,7 +74,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Engines tutorial](https://docs.dseams.info/fronts/engines.md): Eight molecules of cubic ice are engines/tutorial/ice.data.
 - [GROMACS tutorial](https://docs.dseams.info/fronts/gromacs.md): gmx-seams reads a trajectory after gmx mdrun and classifies it with seams_chill_plus.
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.md): Eight cubic-ice atoms, one observation:
-- [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.md): engines/lammps/in.dseams is a real LAMMPS run.
+- [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.md): engines/lammps/in.dseams is a frozen cubic cell of 64 atoms.
 - [OpenMM tutorial](https://docs.dseams.info/fronts/openmm.md): DseamsReporter in adapters/python/dseams_insitu/openmm.py asks for positions every interval and calls InSitu.observe.
 - [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.md): SEAMS has three components. q6 is the mean local q6 and carries finite-difference derivatives, so RESTRAINT can bias it.
 - [Paper figures](https://docs.dseams.info/user/paper.md): The in-tree numbers behind the published figures, and the gallery drawn from those runs.
