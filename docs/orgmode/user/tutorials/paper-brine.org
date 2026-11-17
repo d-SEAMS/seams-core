@@ -16,7 +16,14 @@ and restrained. That move is the growth step. The relax is why the
 ions and the leftover liquid can answer it, instead of staying where
 packmol left them.
 
-~meson test docs_paper_brine~ checks
+From the repository root, after a pixi build (=bbdir/seams= and
+=bbdir/src=):
+
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py brine bbdir/seams bbdir/src out/brine
+#+end_src
+
+The script prints
 
 #+begin_src text
 brine frame 0 hexagonal 31 water 38 front 7.40
@@ -24,18 +31,25 @@ brine frame 1 hexagonal 32 water 36 front 7.40
 brine frame 2 hexagonal 32 water 35 front 7.40
 #+end_src
 
-The front stays at 7.40 Å. The stack remains ~HH...~, so the new
-crystal has not filled another 3.7 Å slab. The hexagonal count still
-rises from 31 to 32, and the water count falls from 38 to 35. One
-molecule has joined the ice. OVITO draws the last frame. The test
-exits 77 when GenIce, packmol, OpenMM, or OVITO is absent.
+and writes =out/brine/brine.png=. The dump has three frames. The
+picture is the first. The front stays at 7.40 Å, two slab widths, so
+the added hexagonal water has not filled the next 3.7 Å slab. The
+hexagonal count rises from 31 to 32 and stays there. The water count
+falls from 38 to 35. Those lines do not name the other labels.
+=pixi run meson test -C bbdir docs_paper_brine= runs the same script and checks the
+three lines. That picture is =paper-tutorials/brine/brine.png= in the
+Meson build directory. The script exits 77 when GenIce, packmol,
+OpenMM, or OVITO is absent.
 
 * Full run
 
-The brine frame the tutorials name is
+The brine frame in the tree is
 ~input/traj/nacl_front.lammpstrj~: 864 waters and 9 ions, one frame.
-=meson test --suite slow docs_paper_brine_full= reads that file.
 CHILL+ is scored on the waters.
+
+#+begin_src sh
+pixi run python docs/tutorials/paper_science.py brine-full bbdir/seams bbdir/src out/brine-full
+#+end_src
 
 #+begin_src text
 brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
@@ -43,6 +57,9 @@ brine full paper waters 864 ions 9 frames 1
 brine full waters 864 ions 9 hexagonal 352 water 434
 #+end_src
 
-Hexagonal is 352, the same water census as the ion-free interface
-frame. OVITO draws the frame. The test exits 77 when OVITO or
-Snakemake is absent.
+The picture is =out/brine-full/brine-full.png=, the one frame in the
+dump. Hexagonal is 352 and water is 434, the same counts as the
+ion-free interface frame. The script exits 77 when OVITO does not
+import. =pixi run meson test -C bbdir --suite slow docs_paper_brine_full= checks the
+same lines when the build was configured with =-Dpaper_full=true=.
+Without that option, or when Snakemake is absent, the test exits 77.
