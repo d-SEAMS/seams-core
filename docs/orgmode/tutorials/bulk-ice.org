@@ -1,7 +1,7 @@
 #+TITLE: Classify ice on the mixed TIP4P example
 #+OPTIONS: toc:nil num:nil
 
-You classify one in-tree frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
+You classify one supplied frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
 The result is a labeled oxygen set and a reason the two scores disagree.
 
 * Prerequisites
@@ -9,7 +9,7 @@ The result is a labeled oxygen set and a reason the two scores disagree.
 - A seams-core checkout.
   Work from the repository root so ~input/traj/~ is a child.
 - ~seams~ on ~PATH~ (~pixi run build~ produces ~./bbdir/seams~; ~nix build~ produces ~./result/bin/seams~).
-- The in-tree dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
+- The supplied dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
 
 Python is only needed for Step 6, which uses the pydseamslib package.
 The Frame tutorial lives in [[https://python.dseams.info/][PydSEAMSlib]].
@@ -135,7 +135,7 @@ The Python binding is the pydseamslib package from
 provides ~import pydseams~ (the Frame API) and ~import dseams~:
 
 #+begin_src bash
-pip install 'pydseamslib==@PROJECT_VERSION@'
+pip install 'pydseamslib==2.14.0'
 #+end_src
 
 If that release is not visible on PyPI yet, run
@@ -165,12 +165,12 @@ The Frame walkthrough is in the [[https://python.dseams.info/][PydSEAMSlib docum
 * Troubleshooting
 
 - ~nop 0~ or an empty histogram: wrong ~--type~.
-  Mixed TIP4P in this tree is type 2.
+  Mixed TIP4P in the supplied examples is type 2.
   mW is type 1.
 - Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
   Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
 - ~ModuleNotFoundError: pydseams~: install the binding with
-  ~pip install 'pydseamslib==@PROJECT_VERSION@'~ or the source-install
+  ~pip install 'pydseamslib==2.14.0'~ or the source-install
   script above.
 
 * Next steps

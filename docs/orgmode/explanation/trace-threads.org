@@ -1,22 +1,7 @@
 #+TITLE: Signature-search thread controls
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
-Commit ~9896a478~ on ~perf/trace-threads~ retimes the hydrate signature
-search at 1, 2, 4 and 8 threads, after the pool and the row placement
-changed. The census at every width is the one-thread census. The rows
-are ~benchmarks/trace-threads.csv~ in the benchmark records dataset; the
-tables below are rendered from it, with each median and type-7
-interquartile range recomputed from ~samples_ms~.
-
 * The process
-
-~scripts/paper_stats.py~ builds the environment for one width \(n\):
 
 | variable | value |
 |----------+-------|
@@ -130,30 +115,7 @@ full team is taken three times, 2 ms apart, and the lowest kept. One
 count in a few on an idle machine read a thread that was runnable for a
 moment, and the team ran on seven of eight cpus.
 
-The contended rows of the omp-scaling sitting (~scripts/omp_scaling.py~,
-source tree ~1c41a929~) run beside ~scripts/omp_spinner.c~ on all eight
-cpus. Each row is 8 processes of 10 samples. At 110592 molecules the
-k-nearest graph takes 20.0 ms bound and 19.1 ms unbound, against OVITO's
-28.2 and 28.3 ms. \(q_6\) takes 12.2 ms and 11.1 ms against OVITO's 23.6
-and 23.2 ms. CHILL+ takes 17.1 ms and the shell match 18.2 ms.
-Hartigan's dip test on the 8 per-process medians of each contended row
-gives p above 0.09.
-
 * Every kernel
-
-Commit ~848426f9~ sizes the team on every kernel. ~caeb71f8~ puts the
-one-thread carried update back on a direct copy and sort, binds a
-narrowed team to that many cores, and skips the periodic shift inside
-an interior cutoff cell. ~1ce3be3b~ retimes the same eight kernels
-after that change. The rows are ~benchmarks/pool-audit.csv~. The
-~commit~ column is ~caeb71f8~. Eight kernels run on ideal ice Ic:
-primitive rings, local and cutoff \(q_4\) and \(q_6\), CHILL+, the
-shell label, and one carried hop-ball update. The sizes are 4096,
-32768, 110592 and 884736 molecules. Each size is 32 rows, the eight
-kernels at 1, 2, 4 and 8 threads. One warm-up, then eight timed calls.
-The fingerprint of a kernel is the same at every width. ~meson test
-docs_pool_audit~ recomputes each median and type-7 interquartile range
-from ~samples_ms~.
 
 The rings kernel is ~primitive::ringNetwork~ on a neighbour graph built
 before the timer starts. It is not the full cutoff call. The rings row

@@ -57,31 +57,7 @@ and the timing boundary (graph outside the timer) are the ones above.
 
 * Search
 
-The 2.14.0 candidate already packs the adjacency into one column array.
-A ring of at most 7 members answers a shortcut of one or two edges from
-the neighbour rows. Rings of size 8, 9 and 10 use an occupancy bitset
-for the bounded ball. =feat/rings-theory= and =perf/rings-cages= were
-read against this commit; the production search already contains the
-part that applies at maximum ring size 6. The rings themselves are
-unchanged.
-
-=tests/test_ring_census= enumerates every simple cycle on a few small
-graphs, drops a cycle when any pair is closer through the graph than
-around the cycle, and checks that census, and the canonical rings,
-against =ringNetwork=.
-
-* Rerun
-
-#+begin_src bash
-meson setup build --buildtype=release -Dwith_tests=true \
-  -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
-ninja -C build -j2 tests/bench_rings_h2h
-python3 scripts/rings_one_thread.py \
-  --bench build/tests/bench_rings_h2h \
-  --json markdown/rings-one-thread.json
-#+end_src
-
-The interpreter must provide OVITO 3.17.2. Set =RINGS_PYTHON= when
-that is not =python3=. Snakemake rule =rings_one_thread= runs the same
-driver. Airspeed Velocity class =RingsOneThread= times one search on
-each side after the graph has been built.
+The search packs adjacency into one column array. Rings of at most
+seven members answer a shortcut from the neighbour rows; rings of size
+eight to ten use an occupancy bitset for the bounded ball. These choices
+do not change the rings returned.

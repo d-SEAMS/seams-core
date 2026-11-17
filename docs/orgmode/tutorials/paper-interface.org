@@ -6,7 +6,7 @@ be hexagonal ice. The liquid half should be water. The molecules in
 between are the ones where the published CHILL+ rule and the OVITO
 rule can part company, because they do not use the same neighbour test.
 
-The page builds that slab instead of reading a dump from the tree.
+This example builds a small slab.
 GenIce supplies a 2 by 2 by 1 ice Ih cell, oxygen only, so the
 hydrogen disorder is not part of the label. A copy of that cell is
 shifted by one box length along z and shaken by less than an angstrom.
@@ -17,7 +17,7 @@ the relax. The cutoff is 3.5 Å, the same shell CHILL+ will read, and
 it has to sit under half the shortest box edge or OpenMM refuses the
 periodic force.
 
-~meson test docs_paper_interface~ runs this and checks the two lines.
+The two rules give:
 The published rule prints
 
 #+begin_src text
@@ -35,15 +35,12 @@ between interfacial and water. That single molecule is the reason to
 name the rule when you quote an interface count. The layer stack is
 ~HHHHH~: five crystal slabs and no cubic ice, so \(\phi_c\) is 0.
 OVITO draws the same oxygens, so you can see the slab the numbers
-came from. The test exits 77 when GenIce, OpenMM, or OVITO is absent.
+came from.
 
 * Full run
 
-The paper frame in this tree is ~input/traj/interface_f0.lammpstrj~:
-864 molecules, one frame. =meson test --suite slow
-docs_paper_interface_full= reads that file. It prints the molecule
-count, the frame count, and the path, then the published and OVITO
-censuses.
+The supplied paper frame is ~input/traj/interface_f0.lammpstrj~:
+864 molecules, one frame. The published and OVITO rules give these censuses:
 
 #+begin_src text
 interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj
@@ -56,4 +53,3 @@ interface full stack HHHHHHHH....C.
 
 The stack is eight hexagonal slabs, a gap, and one cubic layer.
 Hexagonal is 352 on the published rule and 346 on the OVITO rule.
-The test exits 77 when OVITO or Snakemake is absent.

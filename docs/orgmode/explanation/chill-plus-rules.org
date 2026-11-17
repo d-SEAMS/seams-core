@@ -13,7 +13,7 @@ bonds with no eclipsed bond need a neighbour with more than one.
 OVITO 3.17.2 averages \(q_3\) over the whole cutoff shell. Its
 staggered edge is the open cut \(c(i,j) < -0.8\), and the eclipsed
 band is open at both ends. The modifier skips the neighbour test in
-footnote a. ~ovito-chill+~ in this tree is that rule. ~chill-plus~
+footnote a. ~ovito-chill+~ in the supplied examples is that rule. ~chill-plus~
 with no ~--rule~ is the 2015 rule.
 
 * One oxygen from the liquid

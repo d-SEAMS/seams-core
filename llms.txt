@@ -2,7 +2,7 @@
 
 > d-SEAMS (seams-core) reads molecular-dynamics trajectories and names the ice in them: CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts, computed on one shared neighbour list. This repository builds the C++ engine, the C API libseams (include/seams.h), the C ABI libseams_lang that the language bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, Julia, Rust and Fortran bindings live in their own repositories and record the seams-core revision they build against.
 
-Each link below is a page of the published manual on https://docs.dseams.info. Contributor instructions are on the Contributing and Repository map pages.
+Each link below is a page of the published manual on https://docs.dseams.info.
 
 ## Start
 
@@ -10,45 +10,45 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 
 ## Getting started
 
-- [Quickstart](https://docs.dseams.info/quickstart.html): Install the engine, then classify one cubic cell.
+- [Quickstart](https://docs.dseams.info/quickstart.html): Meson builds the engine, libseams and the seams command from this tree.
 - [Install the engine](https://docs.dseams.info/howto/install.html): Get a seams binary, libyodaLib, libseams, and libseams_lang.
-- [Videos](https://docs.dseams.info/videos/index.html): Silent picture tracks for the bindings and the tutorials.
+- [Videos](https://docs.dseams.info/videos/index.html): Watch d-SEAMS classify ice, find rings and cages, and analyse trajectories through its command-line tools, language bindings, and simulation-engine integrations.
 
 ## Tutorials
 
-- [Worked examples](https://docs.dseams.info/tutorials/index.html): A tutorial is a learning path.
-- [Classify a clathrate](https://docs.dseams.info/tutorials/clathrate.html): GenIce builds the three clathrate ices without guests.
-- [Ice-water interface](https://docs.dseams.info/tutorials/interface.html): One frame of a basal interface is input/traj/interface_f0.lammpstrj, 864 molecules, 35 kB.
+- [Worked examples](https://docs.dseams.info/tutorials/index.html): Choose a tutorial by the analysis you want to perform.
+- [Classify a clathrate](https://docs.dseams.info/tutorials/clathrate.html): The supplied trajectories contain three guest-free clathrate ices.
+- [Ice-water interface](https://docs.dseams.info/tutorials/interface.html): The supplied basal-interface frame is input/traj/interface_f0.lammpstrj.
 - [Nucleation](https://docs.dseams.info/tutorials/nucleation.html): The 148-frame mW trajectory is figshare 10.6084/m9.figshare.11448702.v1.
-- [Brine and NaCl](https://docs.dseams.info/tutorials/brine.html): input/traj/nacl_front.lammpstrj is the 864-molecule interface with nine ions added.
+- [Brine and NaCl](https://docs.dseams.info/tutorials/brine.html): CHILL+ is run on the water alone, so an ion is not given an ice label.
 - [Run in situ](https://docs.dseams.info/tutorials/insitu-run.html): The cubic cell is engines/lammps/ice.data, 64 atoms.
-- [Classify ice on the mixed TIP4P example](https://docs.dseams.info/tutorials/bulk-ice.html): You classify one in-tree frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
+- [Classify ice on the mixed TIP4P example](https://docs.dseams.info/tutorials/bulk-ice.html): You classify one supplied frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
 - [Ice and clathrate labels](https://docs.dseams.info/tutorials/ice-and-clathrate.html): You label one frame two ways. CHILL+ reads a staggered or eclipsed star.
 - [Primitive rings](https://docs.dseams.info/tutorials/rings.html): A primitive ring is a cycle that survives the Franzblau shortest-path test.
 - [Bond-orientational order parameters](https://docs.dseams.info/tutorials/order-parameters.html): Frame.steinhardt(l) returns the local q_l and the Lechner-Dellago average for every atom.
 - [Confined water](https://docs.dseams.info/tutorials/confined-water.html): Quasi-one-dimensional ice is a stack of prism blocks (Frame.find_prisms).
 - [Quasi-one-dimensional ice](https://docs.dseams.info/tutorials/nanotube.html): The seams CLI has no prism command.
-- [Paper figures](https://docs.dseams.info/tutorials/paper-figures.html): The 2020 JCIM figures are drawn from figshare project 73545.
+- [Paper figures](https://docs.dseams.info/tutorials/paper-figures.html): The 2020 JCIM figure data are available from figshare project 73545.
 - [CHILL+ on an ice/water slab](https://docs.dseams.info/tutorials/paper-interface.html): An interface is where a rule is easy to fool.
 - [Cage census of sI, sII and sH](https://docs.dseams.info/tutorials/paper-cages.html): A clathrate cage is a closed polyhedron of primitive rings.
 - [Primitive rings and the shortest-path test](https://docs.dseams.info/tutorials/paper-rings.html): A ring search first walks every simple cycle up to a chosen size.
 - [Ice growing into brine](https://docs.dseams.info/tutorials/paper-brine.html): The front is the height where the crystal slabs stop.
 - [Ice-likeness along a short nucleation run](https://docs.dseams.info/tutorials/paper-nucleation.html): Ice-likeness here is the mean Lechner-Dellago \bar q_6.
-- [Science gallery](https://docs.dseams.info/tutorials/gallery.html): The pictures are drawn when the book is built, from the same full runs the slow tutorial tests check.
-- [Science tutorials](https://docs.dseams.info/science/index.html): Three calculations from the papers, each run on a small input and checked in the docs job.
+- [Science gallery](https://docs.dseams.info/tutorials/gallery.html): These pictures show the interface, brine, cage, and nucleation examples.
+- [Science tutorials](https://docs.dseams.info/science/index.html): Three calculations from the papers, each using a small input: an ice-water interface, a brine freezing front, and clathrate cages.
 - [Ice/liquid interface and nucleation](https://docs.dseams.info/science/interface.html): The interface dump is input/traj/interface_f0.lammpstrj, 864 waters in a cell 23 by 22 by 53 angstrom.
-- [Brine freezing front](https://docs.dseams.info/science/brine.html): The frames are the 20-pair loading of d-SEAMS/brine-front-230K at revision 4828e33ecf419c70643b2d466bfa4f283b4138dc.
+- [Brine freezing front](https://docs.dseams.info/science/brine.html): The d-SEAMS/brine-front-230K dataset provides the initial and final frames for a 20-pair loading.
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.html): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
 - [Science figures](https://docs.dseams.info/science/gallery.html): The four renders used by the science tutorials.
 - [C tutorial](https://docs.dseams.info/fronts/c.html): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
-- [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): test_seams_api is the seams_c_api test.
+- [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): A program that classifies one frame links libseams and calls seams_system_create, seams_system_set_frame, and seams_chill_plus.
 - [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/fronts/julia.html): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
 - [Lua and Fennel](https://docs.dseams.info/fronts/lua.html): The Lua and Fennel binding provides require("dseams").
-- [Python](https://docs.dseams.info/fronts/python.html): The Python binding is the pydseamslib distribution, with import dseams.
+- [Python](https://docs.dseams.info/fronts/python.html)
 - [R](https://docs.dseams.info/fronts/r.html): The R binding is the R package dseams.
 - [Rust](https://docs.dseams.info/fronts/rust.html): The Rust binding is the crates dseams-sys and dseams.
-- [Engines tutorial](https://docs.dseams.info/fronts/engines.html): Eight molecules of cubic ice are engines/tutorial/ice.data.
+- [Engines tutorial](https://docs.dseams.info/fronts/engines.html): LAMMPS run_hook takes the coordinates LAMMPS already stores in angstroms and calls seams_chill_plus.
 - [GROMACS tutorial](https://docs.dseams.info/fronts/gromacs.html): gmx-seams is the trajectory-analysis tool.
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.html): Eight cubic-ice atoms, one observation:
 - [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.html): engines/lammps/in.dseams is a real LAMMPS run.
@@ -62,21 +62,21 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Migrate from d-SEAMS 1.x](https://docs.dseams.info/howto/migrate-1x.html): 1.x was a Lua script plus yodaStruct -c lua_inputs/config.yml.
 - [Use a language binding](https://docs.dseams.info/howto/bindings.html): This repository builds the engine, the C API libseams (include/seams.h), the C ABI libseams_lang (bindings/cxx/seams_lang.h) and the seams command.
 - [Version pins](https://docs.dseams.info/howto/versions.html): The version of a checkout is one string, written in six places.
-- [Benchmarks](https://docs.dseams.info/howto/benchmarks.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Benchmarks](https://docs.dseams.info/howto/benchmarks.html): Timings belong on the docs site of the commit that produced them.
 - [Cutoff neighbour lists](https://docs.dseams.info/howto/neighbour-lists.html): Build the cutoff list, choose the thread count, and read the pinned session that compared it with vesin, freud, matscipy, mdapy, and OVITO.
-- [OpenMP target offload](https://docs.dseams.info/howto/openmp-offload.html): Build the Steinhardt kernel and the TUM ice score (hop-bound six-rings and cage affiliation) for an NVIDIA GPU.
+- [OpenMP target offload](https://docs.dseams.info/howto/openmp-offload.html): Build the Steinhardt kernel and the TUM ice score for an NVIDIA GPU.
 - [Classify a dump](https://docs.dseams.info/howto/classify-cli.html): You have a LAMMPS water dump and want counts.
 - [Primitive rings](https://docs.dseams.info/howto/rings.html): Count primitive rings on a frame you already have.
 - [Cages and TRACE](https://docs.dseams.info/howto/cages-trace.html): Ask which molecules sit in a complete ice cage, or which polyhedra match a ring-size signature.
 - [Local q4 and q6](https://docs.dseams.info/howto/q4-q6.html): Compute the local Steinhardt parameters on the cutoff shell.
 - [CHILL+](https://docs.dseams.info/howto/chill-plus.html): Label every oxygen with the published CHILL+ star, or with the OVITO rule.
 - [Choosing a cutoff and padding](https://docs.dseams.info/howto/cutoff-padding.html): The neighbour cutoff is the --cutoff of seams chill-plus.
-- [The symmetry classifier](https://docs.dseams.info/howto/symmetry-classifier.html): Name the ice shell of each oxygen.
-- [Linkcell neighbours and carried updates](https://docs.dseams.info/howto/linkcell-carried.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [The symmetry classifier](https://docs.dseams.info/howto/symmetry-classifier.html): seams symmetry prints the matcher backend, a space-group line, one shell overlay when a crystal shell exists, and a tally:
+- [Linkcell neighbours and carried updates](https://docs.dseams.info/howto/linkcell-carried.html): Build the cutoff neighbour list, then keep rings when only part of the next frame moved.
 - [Sheared cells](https://docs.dseams.info/howto/sheared-cells.html): You have a triclinic LAMMPS dump and want the engine to use the real cell, not a diagonal of bound spans.
 - [Ionic-liquid dumps](https://docs.dseams.info/howto/ionic-liquid.html): A multi-type dump is not an ice frame.
 - [Confined ice](https://docs.dseams.info/howto/confined-ice.html): Classify ice in a nanotube or a monolayer.
-- [Basal profiles and the nucleation census](https://docs.dseams.info/howto/science-front.html): science-front walks a LAMMPS dump with the threaded CHILL+, q6 and shell kernels from science/interface-nucleation at 55192e3d.
+- [Basal profiles and the nucleation census](https://docs.dseams.info/howto/science-front.html): The critical size is an upper bound, not a committor.
 - [From a trajectory to the ice front](https://docs.dseams.info/howto/from-trajectory.html): You have a trajectory and want CHILL+ labels, the primitive rings, and the position of the ice front.
 - [GROMACS](https://docs.dseams.info/howto/engine-gromacs.html): The build below used conda-forge GROMACS 2026.3, with the compiler and Eigen already on the path.
 - [LAMMPS](https://docs.dseams.info/howto/engine-lammps.html): The build below used conda-forge LAMMPS 2022.06.23.
@@ -94,14 +94,14 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [seams CLI](https://docs.dseams.info/reference/cli.html): The engine command is seams. The parser is Argum (the same parser as eonclient).
 - [Data Formats](https://docs.dseams.info/reference/data-formats.html): seams and the C++ readers share one suffix table.
 - [walk_compare](https://docs.dseams.info/reference/walk-compare.html): tests/walk_compare walks a LAMMPS dump and prints one row per frame.
-- [API map](https://docs.dseams.info/reference/api.html): Lookup for the C++ identifiers in src/include/internal.
+- [API map](https://docs.dseams.info/reference/api.html): Four fronts, one engine (libyodaLib).
 - [Nix flake](https://docs.dseams.info/reference/nix.html): The flake builds libyodaLib and the seams CLI with Meson. It does not build Python or Lua. There are no overlays.
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
-- [2.14.0 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes are built from the fragments in changelog.d/.
+- [d-SEAMS 2.14 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes describe the user-visible changes since d-SEAMS 2.13.0.
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
-- [Python](https://docs.dseams.info/stable/python.html): The Python binding is the pydseamslib distribution, with import dseams.
+- [Python](https://docs.dseams.info/stable/python.html)
 - [Fortran](https://docs.dseams.info/stable/fortran.html): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/stable/julia.html): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
 - [R](https://docs.dseams.info/stable/r.html): The R binding is the R package dseams.
@@ -123,13 +123,13 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 
 ## Comparisons
 
-- [Head-to-head](https://docs.dseams.info/comparisons.html): Head-to-head results that are already in this tree.
+- [Head-to-head](https://docs.dseams.info/comparisons.html): Head-to-head results that are already in the supplied examples.
 - [ClavisCage TRACE](https://docs.dseams.info/explanation/clavis-trace.html): ClavisCage TRACE against the d-SEAMS cage census.
 - [SQQ](https://docs.dseams.info/explanation/sqq.html): SQQ against d-SEAMS. The census and the ratios are written from the vendored CSVs at build time.
 - [Primitive rings and OVITO FindRings](https://docs.dseams.info/explanation/ovito-findrings.html): A ring is primitive when every pair of its vertices is as close along the ring as it is through the rest of the graph.
 - [Performance](https://docs.dseams.info/explanation/performance-h2h.html): Head-to-head times for the neighbour list, primitive rings, local q_6, CHILL+, cages, and PTM.
-- [Literature head-to-head](https://docs.dseams.info/howto/literature-h2h.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
-- [Reproduce the literature head-to-head](https://docs.dseams.info/howto/literature-reproduce.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Literature head-to-head](https://docs.dseams.info/howto/literature-h2h.html): Cutoff neighbours, local q_4 and q_6, the diamond common-neighbour labels, metal CNA, primitive rings, local ice symmetry, 5^{12} cages and coordination, against mdapy, pyscal3, vesin, IRA, SQQ,...
+- [Reproduce the literature head-to-head](https://docs.dseams.info/howto/literature-reproduce.html): The driver starts every row under taskset.
 
 ## Explanation
 
@@ -147,27 +147,23 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Local symmetry](https://docs.dseams.info/explanation/symmetry.html): The engine names a local environment as ice Ih, ice Ic, stacking-disordered ice, a hydrate cage, or a five- or six-ring, and it labels every oxygen in a cell.
 - [TRACE and signature cages](https://docs.dseams.info/explanation/trace-assembly.html): TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) assembles hydrate cages from a hydrogen-bond graph.
 - [Stacking disorder](https://docs.dseams.info/explanation/stacking-disorder.html): Cubic ice and hexagonal ice are the same puckered hexagons stacked in two orders.
-- [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
-- [Signature-search thread controls](https://docs.dseams.info/explanation/trace-threads.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
-- [Release-candidate sitting](https://docs.dseams.info/explanation/performance.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
-- [Performance overview](https://docs.dseams.info/explanation/performance-overview.html): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.html): A trajectory frame shares almost every bond with the frame before it.
+- [Signature-search thread controls](https://docs.dseams.info/explanation/trace-threads.html): The process is pinned with taskset -c 0 when n = 1, and with taskset -c 0-(n-1) otherwise.
+- [Release-candidate sitting](https://docs.dseams.info/explanation/performance.html): The tables below report each median and interquartile range from the recorded timing samples.
+- [Performance overview](https://docs.dseams.info/explanation/performance-overview.html): Four sittings sit next to each other.
 - [Binding overhead](https://docs.dseams.info/explanation/binding-overhead.html): Ice Ih at 4096, 32768, and 110592 molecules.
 - [Performance, 4096 to 110592](https://docs.dseams.info/explanation/performance-range.html): Neighbour lists and primitive rings against freud, OVITO, mdapy, pyscal3, vesin, IRA, PTM, cycless, and every other code that has a neighbour or ring row in benchmarks/*.csv.
 
 ## Project
 
-- [Changelog](https://docs.dseams.info/changelog.html): The C++ engine, libseams, libseams_lang and the seams CLI are this repository.
-- [Contributing](https://docs.dseams.info/contributing/index.html): This repository is the C++ engine (libyodaLib), the C API libseams, the C ABI libseams_lang, the seams CLI and the engine drivers.
-- [Repository map](https://docs.dseams.info/contributing/repositories.html): d-SEAMS is seven repositories.
-- [Release process](https://docs.dseams.info/contributing/release.html): This is the maintainer cut. .github/workflows/release.yml only runs gh release create when a v* tag is pushed.
-- [Lean proofs](https://docs.dseams.info/contributing/lean.html): lean/ is a Lean 4 (Mathlib) model of ring::ringAdjacentCompletion.
+- [Changelog](https://docs.dseams.info/changelog.html): The C++ engine, libseams, libseams_lang, and the seams CLI share this release history.
 - [Citation](https://docs.dseams.info/explanation/citation.html): If you use this software, cite the methods paper.
 
 ## Language bindings
 
 - [PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib): Python binding source and the pydseamslib distribution (import dseams, import pydseams).
-- [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Lua and Fennel binding source for require("dseams"); LuaRocks registration is coming.
-- [dseams-r](https://github.com/d-SEAMS/dseams-r): R binding source for the dseams package; CRAN and r-universe registration are coming.
-- [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia binding source for Dseams; General registration and libseams_jll are coming.
+- [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Lua and Fennel binding source for require("dseams"); Install with LuaRocks or from the yodaStruct source.
+- [dseams-r](https://github.com/d-SEAMS/dseams-r): R binding source for the dseams package; Install the dseams R package.
+- [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia binding source for Dseams; Install Dseams with Julia's package manager.
 - [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Rust binding, the crates dseams-sys and dseams.
 - [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Fortran binding, the fpm package dseams.

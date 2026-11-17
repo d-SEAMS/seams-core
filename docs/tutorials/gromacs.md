@@ -8,15 +8,6 @@ meson setup build -Dwith_gromacs=auto
 meson compile -C build gmx-seams
 ```
 
-`engines/gromacs/run_mdrun.sh` builds a `.tpr` from `topol.top` and `md.mdp`,
-runs four frozen steps with `gmx mdrun`, and classifies `ice.xtc`. CI runs
-that script as the `gromacs_mdrun` meson test when the tool was built:
-
-```bash
-engines/gromacs/run_mdrun.sh build/gmx-seams build/src
-meson test -C build gromacs_mdrun --print-errorlogs
-```
-
 The tool prints one line of the form:
 
 ```

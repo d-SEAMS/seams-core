@@ -16,7 +16,7 @@ listed, and the same neighbour list is what the primitive search uses.
 A larger crystal would hide the filter, because almost every six-cycle
 in ice Ih already passes.
 
-~meson test docs_paper_rings~ checks
+The ring search gives
 
 #+begin_src text
 rings primitive 4 24 6 32
@@ -27,16 +27,11 @@ rings searched 4 24 6 128
 The shortest-path test and ~seams rings~ agree: 24 four-rings and 32
 six-rings. The unfiltered search found 128 six-cycles. The other 96
 have a shortcut, so they are dropped. There is no five-ring. OVITO
-draws the 16 oxygens. The test exits 77 when GenIce or OVITO is absent.
+draws the 16 oxygens.
 
 * Full run
 
-The paper's ring census is one frame of
-~input/traj/mW_cubic.lammpstrj~. The dump holds 11 frames of 4096
-molecules. The test reads frame 1. The paper states 4096 molecules
-and 8192 six-rings.
-
-=meson test --suite slow docs_paper_rings_full= checks
+The full frame gives
 
 #+begin_src text
 rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj
@@ -46,4 +41,3 @@ rings full histogram 6 8192
 #+end_src
 
 The histogram has one bin: 8192 six-rings. OVITO draws that frame.
-The test exits 77 when OVITO or Snakemake is absent.

@@ -52,11 +52,11 @@ BINDINGS = (
     ("PydSEAMSlib", "https://github.com/d-SEAMS/PydSEAMSlib",
      "Python binding source and the pydseamslib distribution (import dseams, import pydseams)."),
     ("yodaStruct", "https://github.com/d-SEAMS/yodaStruct",
-     "Lua and Fennel binding source for require(\"dseams\"); LuaRocks registration is coming."),
+     "Lua and Fennel binding source for require(\"dseams\"); Install with LuaRocks or from the yodaStruct source."),
     ("dseams-r", "https://github.com/d-SEAMS/dseams-r",
-     "R binding source for the dseams package; CRAN and r-universe registration are coming."),
+     "R binding source for the dseams package; Install the dseams R package."),
     ("Dseams.jl", "https://github.com/d-SEAMS/Dseams.jl",
-     "Julia binding source for Dseams; General registration and libseams_jll are coming."),
+     "Julia binding source for Dseams; Install Dseams with Julia's package manager."),
     ("dseams-rs", "https://github.com/d-SEAMS/dseams-rs",
      "Rust binding, the crates dseams-sys and dseams."),
     ("dseams-fortran", "https://github.com/d-SEAMS/dseams-fortran",
@@ -233,9 +233,7 @@ def render():
     index = (ORG / "index.org").read_text(encoding="utf-8")
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
     lines.append(
-        "Each link below is a page of the published manual on {}. "
-        "Contributor instructions are on the Contributing and Repository "
-        "map pages.".format(SITE)
+        "Each link below is a page of the published manual on {}.".format(SITE)
     )
     lines.append("")
     seen = set()

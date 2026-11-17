@@ -14,7 +14,7 @@ repositories.
 | R | =sum(chill_plus(read_frame(path, type=1L))$name == "cubic")= | 4096 |
 | Julia | =chill_plus(read_frame(path; type=1)).counts["cubic"]= | 4096 |
 
-Python is ~pip install 'pydseamslib==@PROJECT_VERSION@'~. While that
+Python is ~pip install 'pydseamslib==2.14.0'~. While that
 release is reaching PyPI, ~sh scripts/install_pydseamslib.sh~ installs
 the binding from source.
 The import is ~pydseams~.
@@ -60,7 +60,3 @@ A null C edge string keeps the default.
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.
 A nanometer file uses ~0.265,0.315~.
-
-=tests/chill_plus_fronts.py= (Meson test ~chill_plus_fronts_agree~) runs all four fronts on that dump with both lists.
-It checks the histograms on all four and the per-atom labels on Python, R, and Julia.
-The Python front needs a pydseamslib whose ~chill_plus~ takes ~graph~.

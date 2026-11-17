@@ -1,11 +1,6 @@
 #+TITLE: Quickstart
 #+OPTIONS: toc:nil num:nil
 
-Install the engine, then classify one cubic cell. The C program below
-is ~meson test docs_quickstart_c~, and the five Python lines are a
-snippet test against the installed pydseamslib. Both expect 8 cubic
-molecules.
-
 * Install
 
 Meson builds the engine, ~libseams~ and the ~seams~ command from this
@@ -23,12 +18,8 @@ on ~PATH~. The Python binding is a separate package, built from
 the same engine version:
 
 #+begin_src bash
-pip install 'pydseamslib==@PROJECT_VERSION@'
+pip install 'pydseamslib==2.14.0'
 #+end_src
-
-The release is being uploaded to PyPI. If the selected index does not
-have it yet, ~sh scripts/install_pydseamslib.sh~ installs from the
-PydSEAMSlib source repository against this checkout.
 
 * Five lines of Python
 
@@ -57,7 +48,7 @@ The program prints ~cubic 8~.
 
 Build the engine, read a frame, and print what this binary linked.
 
-The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).
+The supplied mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).
 
 * Install the engine
 

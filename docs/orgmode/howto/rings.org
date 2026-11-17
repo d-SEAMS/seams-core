@@ -25,10 +25,6 @@ what ~tests/cli_surface.py~ runs:
 
 * From the C API
 
-~seams_rings_find~ then ~seams_rings_histogram~ is the same census.
-~meson test seams_c_api~ runs it on the 64-atom cubic cell and requires
-a positive six-ring count.
-
 #+begin_src c
 // excerpt: tests/test_seams_api.c
   expect(seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK, "rings");

@@ -10,6 +10,3 @@ tests and release notes. It links the engine through the C API
 [dependencies]
 dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }
 ```
-
-This is a Git dependency; use a tag only after that repository publishes
-one. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

@@ -15,7 +15,6 @@
 | ~ModuleNotFoundError: pydseams~ | Wrong repository | PydSEAMSlib, not ~pixi run~ in seams-core |
 | Looking for ~yodaStruct -c lua_inputs/config.yml~ | 2020 executable | ~seams~ here; Lua library in yodaStruct |
 | ~seams: command not found~ | Binary not on ~PATH~ | After ~pixi run build~ / ~meson compile -C bbdir~ the binary is ~./bbdir/seams~. Install with ~pixi run install~ or ~meson install~ |
-| ~require("dseams")~ fails to load | The Lua binding is not installed | Install ~dseams~ from a [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] source checkout; LuaRocks registration is coming |
 | Wrap pin / ~nodownload~ miss | Flake does not fetch wrap-git | Pins live in ~subprojects/~ (~linkcell~ v0.4.2, ~vesin~ v0.5.7, ~readcon-core~ 0.16.2, ~gpulite~). The flake uses ~mesonAutoFeatures=disabled~ and wrap ~nodownload~ |
 
 The two command shapes on bundled frames:

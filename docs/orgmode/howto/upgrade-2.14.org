@@ -26,7 +26,7 @@ against. Registry publication is independent of the engine release:
 
 | Language | 2.13 location | 2.14 repository | Package |
 |----------+---------------+-----------------+---------|
-| Python | PydSEAMSlib (~pydseams~) and the in-tree ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
+| Python | PydSEAMSlib (~pydseams~) and the supplied ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
 | Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ |
 | R | none | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ |
 | Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~, over ~libseams_jll~ |
@@ -34,11 +34,11 @@ against. Registry publication is independent of the engine release:
 | Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
 
 A Python script keeps working after
-~pip install -U 'pydseamslib==@PROJECT_VERSION@'~. While that upload
+~pip install -U 'pydseamslib==2.14.0'~. For a source build
 reaches PyPI, ~sh scripts/install_pydseamslib.sh~ installs from source.
 The per-language upgrade notes (new calls, renamed options, the ~SEAMS_LANG_LIB~
 and ~SEAMS_LIB_DIR~ variables) are in each repository's changelog. Paths
-under ~bindings/~ other than =bindings/cxx= no longer exist in this tree.
+under ~bindings/~ other than =bindings/cxx= no longer exist in the supplied examples.
 
 * Engines
 

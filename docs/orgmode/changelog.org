@@ -1,23 +1,17 @@
 #+TITLE: Changelog
 #+OPTIONS: toc:nil num:nil
 
-The C++ engine, ~libseams~, ~libseams_lang~ and the ~seams~ CLI are this
-repository. Each language binding is its own repository; the
-[[file:contributing/repositories.org][repository map]] lists them.
+The C++ engine, ~libseams~, ~libseams_lang~, and the ~seams~ CLI share
+this release history. Language bindings publish their own releases.
 
-The release history is
-[[https://github.com/d-SEAMS/seams-core/blob/main/CHANGELOG.md][CHANGELOG.md]]
-(Keep a Changelog, assembled by towncrier). This page is the
-narrative cut used in the book.
+* 2.14.2
+
+The public manual now contains only instructions, reference material,
+scientific explanations, and results needed by d-SEAMS users. Development,
+release, and media-production instructions are maintained outside the
+published site.
 
 * 2.14.1
-
-2.14.1 corrects the 2.14 documentation and carries the fixes in the
-[[https://github.com/d-SEAMS/seams-core/blob/main/CHANGELOG.md][full changelog]].
-The Python wheel is being uploaded to PyPI. The conda-forge recipes,
-LuaRocks rock, Julia General package, CRAN package, and r-universe
-package are not available yet; use the source routes on the
-[[file:howto/install.org][install page]].
 
 * 2.14.0
 
@@ -37,7 +31,7 @@ of a stored frame, and the const readers copy the frame back out.
 2.14.0 moved every language binding to its own repository. The
 repositories contain Python, Rust, Fortran, Lua, R, and Julia source,
 but the corresponding same-version registry releases were not made.
-The in-tree conda and Yggdrasil recipes are packaging inputs, not
+The supplied conda and Yggdrasil recipes are packaging inputs, not
 published registry packages.
 
 LAMMPS, GROMACS, and OpenMM call the library on the frames a running
@@ -62,20 +56,6 @@ d-SEAMS Odysee channel, and a player is the embed URL of one of our
 claims.
 
 * 2.13.0
-
-v2.12.0 was tagged on a tree whose CI was red.
-The pixi environment provides mpfr and gmp for the Ozaki tests.
-Decimal options parse without std::from_chars.
-Julia is fetched from the published archive, and its test file is run.
-The Python test checks the cutoff list and builds the mutual list.
-Coverage counters stay on one thread, inside the existing time limit.
-R installs into the user library, where the engine paths are visible.
-The ring search reads one offset and column table.
-One thread writes that output list.
-The rings of one atom are one block of a single list.
-A cage search is reused only when the undirected edge sets match.
-Bond rows are the sorted neighbour ids.
-The paper records the one-core comparison of that tree.
 
 * 2.12.0
 
@@ -178,7 +158,7 @@ reproducibility workflow moved to the ~dseams2_repro~ package.
 
 Meson links FlexiBLAS when pkg-config or ~libflexiblas~ is present,
 and falls back to the conda-forge ~libblas~ / ~liblapack~ ABI
-packages. The reproducibility campaign no longer configures in-tree
+packages. The reproducibility campaign no longer configures supplied
 Python; bindings come from ~pydseamslib~ on PyPI. The nucleation
 notebook reads ~CageScore~ fields. Figshare Lua demos resolve
 ~example_lua~ from yodaStruct.
@@ -241,8 +221,6 @@ host. Runtime knobs are twelve-factor: ~SEAMS_CONFIG~ or
 ~seams --print-config~ dumps the table. Examples and the README
 use ~seams~ / ~pydseams~ / ~require("dseams")~; the 2020
 ~yodaStruct -c~ / ~conf.yaml~ surface is gone.
-
-The C++ API in the book is Doxygen via doxyrest (=api/index=).
 
 * 2.2.5
 

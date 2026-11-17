@@ -4,8 +4,7 @@
 You label one frame two ways.
 CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
-The runnable copy is =docs/tutorials/test_ice_and_clathrate.py=.
-Python is ~pip install 'pydseamslib==@PROJECT_VERSION@'~. The source
+Python is ~pip install 'pydseamslib==2.14.0'~. The source
 fallback is ~sh scripts/install_pydseamslib.sh~.
 The import is ~dseams.userframe~, the Frame over ~libseams_lang~.
 
@@ -58,7 +57,6 @@ assert len(found) == 2 and found.n_atoms == 40
 found = frame.cages_by_signature("512", max_ring_size=6)
 found = frame.cages_by_signature("51262", max_ring_size=8)
 #+end_src
-
 
 The CLI spelling is ~--cage-edge~ and ~SEAMS_CAGE_EDGE~.
 The C spelling is ~seams_frame_signature_edge~; a null edge string keeps the default.

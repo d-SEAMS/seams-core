@@ -12,6 +12,3 @@ The binding documentation is at <https://fortran.dseams.info/>, and the Fortran 
 [dependencies]
 dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }
 ```
-
-This is a Git dependency; use a tag only after that repository publishes
-one. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

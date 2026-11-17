@@ -1,13 +1,6 @@
 #+TITLE: Basal profiles and the nucleation census
 #+OPTIONS: toc:nil num:nil
 
-~science-front~ walks a LAMMPS dump with the threaded CHILL+, q6 and
-shell kernels from ~science/interface-nucleation~ at ~55192e3d~.
-The calls are ~layersOf~, ~nucleusOf~ and ~criticalSize~. This docs
-branch does not compile them. ~meson test docs_science_front~ runs
-the two commands when the sources are in the build, and exits 77
-when they are not.
-
 The critical size is an upper bound, not a committor. It is the mean
 size of the largest cluster in the contiguous band around that
 cluster's minimum. The band stops where the size exceeds the minimum
@@ -37,13 +30,6 @@ carries the 0.5 crossing and the 10-90 width. A flat crystal leaves
 the front undefined.
 
 * The 148-frame mW census
-
-The trajectory is figshare
-[[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]],
-148 frames of 4096 molecules, md5 ~c28fc209a2854d2ba49e8f9b55accbe8~.
-~input/traj/nucleation_three.lammpstrj~ is its first three frames.
-The full dump is not committed. Place it at
-~data/science-frames/nucleation.lammpstrj~ and run:
 
 #+begin_src bash
 science-front nucleation data/science-frames/nucleation.lammpstrj --out-dir science-out

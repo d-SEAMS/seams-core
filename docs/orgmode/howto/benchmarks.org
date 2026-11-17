@@ -1,12 +1,6 @@
 #+TITLE: Benchmarks
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
 Timings belong on the docs site of the commit that produced them.
 The ice table below is one such session: eight cores, one thread per
 core, cpus 0–7. It names no machine.
@@ -20,10 +14,6 @@ The drivers that exist today:
 | =tests/bench_churn_sweep= | incremental affiliation against a full pass |
 | =tests/bench_trajectory_incremental= | a trajectory update |
 | =tests/bench_gpu_batch= | a device-resident batch, when the build has one |
-| =tests/bench_cutoff_list= | orthorhombic ~orthoFullCsr~ against vesin, freud, and matscipy. Driven by =scripts/bench_neighbours_threads.py= |
-| =tests/bench_v2= | triclinic list, CHILL+, diamond common-neighbour test, and the hop ring search. Driven by =scripts/bench_neighbours_v2.py= |
-| =tests/bench_ql= | local cutoff \(q_4\) and \(q_6\). Driven by =scripts/bench_ql_threads.py= |
-| =tests/bench_rings_h2h= | primitive rings against OVITO FindRings. Driven by =scripts/rings_one_thread.py= and the Snakemake rule =rings_one_thread= |
 
 The neighbour session (host, pin, medians, rerun) is
 [[file:neighbour-lists.org][Cutoff neighbour lists]].
@@ -33,20 +23,7 @@ Record the host, the compiler, the commit, and whether =SEAMS_OFFLOAD= was set.
 A host-only build takes the host branch of the device code.
 Say so.
 
-=pixi run -e repro= is the Snakemake campaign (freud, pyscal3, the paper benches).
-That environment is Linux only.
-It is not part of =pixi run test=.
-
 * Ice Ic, 884736 molecules
-
-Cutoff 3.5 Å. The neighbour build is inside every sample.
-Two warm-ups, then ten samples.
-The median is the linear percentile at one half, position =0.5 * (n - 1)=.
-The interquartile range is the same estimator at three quarters minus the one at one quarter.
-The raw session log is not stored in the tree.
-OVITO's q6 call also builds degrees 2 through 5, because =max_l= is the highest degree.
-pyscal3 has no CHILL+ classifier.
-The published CHILL+ thresholds are unchanged.
 
 Medians, in milliseconds:
 
@@ -61,40 +38,12 @@ Medians, in milliseconds:
 | mdapy | 8 | 105.01 | 117.08 | 113.28 | 123.03 |
 | pyscal3 | 8 | 173.51 | 178.83 | 166.76 | none |
 
-One q4 sample in an earlier eight-sample run took 523.6 ms.
-The first call of a degree is the one that faults.
-On this rerun that call took 508.1 ms and touched 57547 pages.
-Every later q4 call touched none.
-The ten steady samples are min 290.36, median 290.91, interquartile range 7.44, max 310.44.
-The =q_lm= scratch is kept and reused, so that cost stays on the first call, which the warm-ups drop.
-One q6 sample in the same session reached 462.98 ms and faulted no pages.
-Sixty further q6 calls, pinned the same way, stayed between 299.9 and 324.6 ms.
-Each of those ran on the CPU.
-The scheduler delay on every one of them was under 0.05 ms.
-That probe is not stored in the tree.
-The 523.6 ms point did not come back, and the one q6 outlier is not a page fault, not a fresh allocation, and not a repeatable first touch.
-
 The one-thread q4-bar median here is 368.01 (interquartile range 3.13, samples 356.35–387.92).
 The parent =e943930a=, in the same session, is 363.82 (interquartile range 12.51, samples 353.29–371.97).
 The medians differ by 4.2 ms, and each median sits inside the other build's sample range.
 An earlier gap of 369.8 against 354.0 is that spread. It is not a slower average.
 
 * Local q4 and q6 on this tip
-
-Ideal ice Ic, cutoff 3.5 Å, local \(q_l\) (the average is off).
-The neighbour build is inside every sample.
-One warm-up, then eight samples, in one session.
-The median of an even count is the mean of the two central values.
-The interquartile range, in parentheses, is the type-7 three-quarter percentile minus the one-quarter percentile.
-The machine has 8 cores.
-The one-thread runs are pinned to one core.
-The eight-thread runs are pinned to eight cores, one thread per core.
-The table names no machine.
-OVITO 3.17.2 builds only up to the requested degree here (~max_l~ is that degree) and uses the cutoff neighbour mode.
-freud 3.6.1 stores \(q_l\) as float32.
-The largest per-atom gap to OVITO on these frames is \(7.8 \times 10^{-16}\).
-The largest per-atom gap to freud on the ice frames is \(1.6 \times 10^{-7}\).
-That comparison is not stored as a session log.
 
 Medians, in milliseconds:
 
@@ -114,12 +63,6 @@ full search of the same frame. Speedup is rebuild divided by carry.
 Every transition stayed inside the hop ball, and the carried rings
 matched the full search. The logs name no machine.
 
-The mW window is the growth trajectory at 208 K. The step is 10 fs, so
-strides of 10, 100 and 1000 steps are 0.1, 1 and 10 ps.
-=benchmarks/hop-stride-10.txt=, =benchmarks/hop-stride-100.txt= and
-=benchmarks/hop-stride-1000.txt= are the raw lines.
-=snakemake hop_stride= rebuilds them.
-
 | ps | graph | changed bonds | carry ms | rebuild ms | speedup |
 |----+-------+---------------+----------+------------+---------|
 | 0.1 | cutoff | 920 | 1.941 | 2.589 | 1.35 |
@@ -134,15 +77,6 @@ strides of 10, 100 and 1000 steps are 0.1, 1 and 10 ps.
 | 10 | seeded-strict | 1271 | 0.625 | 1.749 | 2.40 |
 | 10 | seeded-union | 1270 | 0.865 | 1.913 | 1.88 |
 | 10 | seeded | 1284 | 1.501 | 3.665 | 2.10 |
-
-The TIP4P/2005 slab is ice Ih against liquid water, equilibrated at
-252 K, the melting point of the model. The step is 2 fs, so strides of
-5, 50 and 500 steps are 0.01, 0.1 and 1 ps, an order of magnitude finer
-than the mW dumps. An oxygen moves farther in one picosecond than an mW
-site. The logs are =benchmarks/hop-stride-tip4p-5.txt=,
-=benchmarks/hop-stride-tip4p-50.txt= and
-=benchmarks/hop-stride-tip4p-500.txt=. =snakemake hop_stride= asks for
-them. =input/hop/regenerate_tip4p.py= writes the dumps.
 
 At 0.01, 0.1 and 1 ps every transition stayed inside the ball and the
 rings were identical to a full search. The seeded-strict graph is 8.3,
@@ -164,16 +98,6 @@ rings were identical to a full search. The seeded-strict graph is 8.3,
 | 1 | seeded | 926 | 1.442 | 2.818 | 1.95 |
 
 * Release candidate sitting
-
-Neighbours, local q4 and q6, CHILL+, primitive rings, the shell
-symmetry label and GenIce cages were retimed in one sitting, at
-110592 and 884736 molecules, on one thread and on eight. Six calls
-after a warm-up. The host is an eight-core Intel Xeon, family 6
-model 207, and the name is not recorded. The table, the versions
-and the rows that do not match an earlier quoted time are in
-[[file:literature-h2h.org][Literature head-to-head]]. The raw lines are
-=benchmarks/rc3-sitting.csv= and =benchmarks/rc3-sitting.txt=.
-=snakemake rc3_sitting= regenerates them.
 
 The 20.3 ms and 50.7 ms vesin times are the same full list of
 442368 pairs. =n_threads=0= follows =OMP_NUM_THREADS=, which is 1

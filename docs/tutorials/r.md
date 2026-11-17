@@ -8,6 +8,3 @@ tests and release notes. It links the engine through the C API
 
 Install it from a source checkout or a GitHub release source tarball using
 that repository's README.
-
-The package is not on CRAN or r-universe yet; those registry routes are
-coming. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

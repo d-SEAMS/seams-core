@@ -1,22 +1,16 @@
 #+TITLE: Science gallery
 #+OPTIONS: toc:nil num:nil
 
-The pictures are drawn when the book is built, from the same full runs
-the slow tutorial tests check. OVITO's Python renderer colors the
-atoms. When OVITO is missing, matplotlib draws the same coordinates
-in 3D. The image files are produced in the build and are not stored
-in the repository.
-
-Each caption says what the colors mean and repeats the numbers the
-tutorial test asserts. ~meson test docs_gallery~ builds the images
-and checks those numbers against the tutorial reports.
+These pictures show the interface, brine, cage, and nucleation examples.
+Each caption explains the colors and reports the corresponding molecular
+census.
 
 #+begin_export rst
 .. include:: gallery-captions.rst
 #+end_export
 
-Molecule stills from chemparseplot sit below the OVITO gallery. They are
-drawn by =docs/scripts/render_molecules.py= when the book is built.
+The molecular views below highlight the structures discussed in the
+tutorials.
 
 #+begin_export rst
 .. include:: molecules.rst

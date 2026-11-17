@@ -9,5 +9,3 @@ tests and release notes. It links the engine through the C API
 Install it from a yodaStruct source checkout using that repository's
 README. The `dseams` registry install on LuaRocks is coming; it is not
 available there yet.
-
-`docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

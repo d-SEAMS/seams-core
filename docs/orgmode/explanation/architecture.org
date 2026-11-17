@@ -16,14 +16,6 @@ vesin is the fallback when linkcell is not built.
 | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ | Fortran modules |
 | [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell neighbours |
 
-Each binding pins a seams-core tag, builds or links ~libseams~ and
-~libseams_lang~ from it, and releases with the same version. PydSEAMSlib
-and yodaStruct take seams-core as a Meson subproject; the others build it
-at the pin in their CI or link an installed copy. No binding carries a
-second engine implementation. Building the engine needs no language
-toolchain beyond C and C++. [[file:../contributing/repositories.org][The
-repository map]] lists the pins and the release order.
-
 #+begin_export rst
 .. mermaid::
 

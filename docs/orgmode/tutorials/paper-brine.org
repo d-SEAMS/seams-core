@@ -16,7 +16,7 @@ and restrained. That move is the growth step. The relax is why the
 ions and the leftover liquid can answer it, instead of staying where
 packmol left them.
 
-~meson test docs_paper_brine~ checks
+The short example gives
 
 #+begin_src text
 brine frame 0 hexagonal 31 water 38 front 7.40
@@ -34,7 +34,6 @@ exits 77 when GenIce, packmol, OpenMM, or OVITO is absent.
 
 The brine frame the tutorials name is
 ~input/traj/nacl_front.lammpstrj~: 864 waters and 9 ions, one frame.
-=meson test --suite slow docs_paper_brine_full= reads that file.
 CHILL+ is scored on the waters.
 
 #+begin_src text
@@ -44,5 +43,4 @@ brine full waters 864 ions 9 hexagonal 352 water 434
 #+end_src
 
 Hexagonal is 352, the same water census as the ion-free interface
-frame. OVITO draws the frame. The test exits 77 when OVITO or
-Snakemake is absent.
+frame. OVITO draws the frame.

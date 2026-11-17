@@ -4,7 +4,7 @@
 You have a trajectory and want CHILL+ labels, the primitive rings,
 and the position of the ice front. The commands are the same for a
 LAMMPS dump and, when chemfiles is compiled in, for a GROMACS
-=.gro= or =.xtc=. The files you can run from this tree are the
+=.gro= or =.xtc=. The files you can run from the distribution are the
 LAMMPS dumps under ~input/traj/~.
 
 * Read the frame

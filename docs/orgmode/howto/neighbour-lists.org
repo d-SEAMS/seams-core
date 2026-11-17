@@ -145,14 +145,6 @@ The row medians (IQR) are 4.160 (0.179) and 1.241 (0.104);
 29.510 (0.500) and 6.077 (0.959);
 291.817 (12.147) and 49.400 (2.016).
 
-#+begin_src bash
-meson setup build-release --buildtype=release -Dwith_tests=true \
-  -Dwith_cli=true -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
-ninja -C build-release tests/bench_cutoff_list
-NEIGH_BENCH=$PWD/build-release/tests/bench_cutoff_list \
-  python3 scripts/bench_neighbours_threads.py
-#+end_src
-
 =bench_cutoff_list= is the d-SEAMS side of that driver.
 The comparison environment is vesin 0.6.2, freud-analysis, matscipy,
 and ASE. NEIGH_PYTHON selects that interpreter. Do not install the
@@ -243,11 +235,6 @@ equal ~N~. The ring counts match mdapy: 221184 at 110592 molecules and
 FindRings does not write a structure code. PTM has no cubic-ice
 template, so its structure code is 0 on this crystal. The raw lines are
 in =markdown/neighbours-v3.md=.
-
-#+begin_src bash
-NEIGH_BENCH=$PWD/build-release/tests/bench_v2 \
-  python3 scripts/bench_neighbours_v2.py
-#+end_src
 
 The orthorhombic rows are ~bench_v2 ortho <molecules> <threads> 8~ under
 the same pin. ~bench_v2~ modes are ~tilt~, ~ortho~, ~chill~, ~rings~,

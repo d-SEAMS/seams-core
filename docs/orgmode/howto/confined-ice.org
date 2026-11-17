@@ -20,5 +20,5 @@ External dumps (figshare project 73545):
 ~Monolayer_LAMMPS_Trajectory~. This repository does not ship those
 files and does not pin prism counts.
 
-For the in-tree mixed TIP4P dump, start with
+For the supplied mixed TIP4P dump, start with
 [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].

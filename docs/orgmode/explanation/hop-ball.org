@@ -1,12 +1,6 @@
 #+TITLE: Carried rings and the hop ball
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
 A trajectory frame shares almost every bond with the frame before it.
 ~primitive::RingUpdater~ recomputes only the rings that can have
 changed, and the result equals ~primitive::ringNetwork~ on that frame.
@@ -51,9 +45,8 @@ hundred changed vertices are still one thread. That width is not
 sorts them directly, and merges the rings that stay with a direct
 walk. Several threads sort the indices, scan for rings that meet
 \(T\), and merge the kept rings with ~teamFor~. Dropped ring buffers
-are kept for the next update. The timed carried update is the hop
-kernel on [[file:trace-threads.org][the thread-control page]], retimed
-in ~benchmarks/pool-audit.csv~ at ~1ce3be3b~.
+are kept for the next update. The carried update is the hop kernel described on the
+[[file:trace-threads.org][thread-control page]].
 
 ~seams_frame_chill_rings~ is the language call that can keep a neighbour
 list across frames when a skin is set. The ring carry itself is the

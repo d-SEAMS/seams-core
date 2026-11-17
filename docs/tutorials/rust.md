@@ -9,6 +9,3 @@ tests and release notes. It links the engine through the C API
 ```bash
 cargo add dseams --git https://github.com/d-SEAMS/dseams-rs
 ```
-
-This uses the repository directly; a crates.io release is a separate
-registry step. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

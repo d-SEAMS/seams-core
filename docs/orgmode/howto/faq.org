@@ -8,7 +8,7 @@
 * Where is Python?
 
 [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-~pip install 'pydseamslib==@PROJECT_VERSION@'~, or
+~pip install 'pydseamslib==2.14.0'~, or
 ~sh scripts/install_pydseamslib.sh~ while the release upload reaches
 PyPI. ~import pydseams~. ~import pydseamslib~
 is an alias. The compiled module is ~yoda~.
@@ -31,7 +31,7 @@ for ~cages~ only.
 
 * Which ~--type~ do I pass?
 
-Mixed water dumps in this tree: type 2 oxygen. Single-site mW dumps:
+Mixed water dumps in the supplied examples: type 2 oxygen. Single-site mW dumps:
 type 1. Default ~0~ guesses type 2 then type 1. Any other mixed-type
 dump (ionic liquid, solvent plus solute) needs the integer type of
 the species you want; see [[file:ionic-liquid.org][Ionic-liquid dumps]].

@@ -15,24 +15,16 @@ own documentation, tests and releases:
 | Rust         | [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]]           | crates ~dseams-sys~, ~dseams~    | =libseams=     |
 | Fortran      | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm ~dseams~                     | =libseams=     |
 
-A binding records the seams-core revision it builds against. Registries
-may lag the engine release, so do not assume matching version numbers.
-Each repository's README gives its source install command.
-[[file:../contributing/repositories.org][The
-repository map]] describes how the bindings pin and test against a
-seams-core tag, the release order, and how to develop a binding against a
-local seams-core checkout.
+Choose the binding for your language from the table below. Each project
+documents its source installation route as well as its package-manager
+installation.
 
 * Python
 
-~pip install 'pydseamslib==@PROJECT_VERSION@'~ installs ~import dseams~ (array
+~pip install 'pydseamslib==2.14.0'~ installs ~import dseams~ (array
 calls into the engine) and ~import pydseams~ (the Frame API on the
 [[file:../reference/python-frame.org][Python Frame]] page). The cubic ice
-frame in this tree gives the counts the other languages and the CLI print:
-
-The release is being uploaded to PyPI. Until it is visible on the
-selected package index, ~sh scripts/install_pydseamslib.sh~ installs the
-binding from its source repository against this checkout.
+frame in the supplied examples gives the counts the other languages and the CLI print:
 
 #+begin_src python
 >>> import numpy as np
@@ -89,19 +81,9 @@ cutoff-shell solid-harmonic kernel is ~seams_q4q6~ in ~seams.h~ and
 is ~seams steinhardt~. ~--l~ names the degrees (default ~4,6~). ~--l 3,12~
 asks for the hydrate pair.
 
-* Tests
-
-#+begin_src bash
-meson test -C bbdir seams_lang_fixtures seams_lang_frames
-#+end_src
-
-These check the C ABI the bindings link. Each binding repository runs its
-own suite against a seams-core tag.
-
 * Recordings
 
-The language recordings use the same embed.txt as the videos page.
-A page without a claim includes no player.
+These recordings demonstrate the same ice census from each language.
 
 ** C
 

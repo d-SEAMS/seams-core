@@ -56,7 +56,7 @@ and use other frames. They do not contradict this frame. A search
 that stopped at size 6 never walks the shortcuts that make a larger
 primitive ring visible, and K2,3 is already a counterexample at size 4.
 
-* What the test asserts
+* Compare the results
 
 =tests/test_ovito_ring_counts.py= does not require the two histograms
 to be equal. It requires the bond counts to match, every d-SEAMS ring

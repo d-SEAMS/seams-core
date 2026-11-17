@@ -12,12 +12,8 @@ stores them, and ``iqr_ms`` when that is the interval it stores.
 ``n`` is the sample count in the file. A row with no time, or a
 verdict of absent or DNF, is written DNF.
 
-The classifier, polyhedral template matching, and IRA rows are
-``benchmarks/paper-numbers/sitting-large.csv``. ``ratio_vs_dseams`` is
-the ratio of medians. ``ratio_lo`` and ``ratio_hi`` are the interval
-stored in that file. ``source_commit`` is the commit column.
-
-``docs/render_performance_range.py`` writes the tables. ``--check``
-fails when a number on this page is not a token in one of the files.
+For the classifier, polyhedral template matching, and IRA rows,
+``ratio_vs_dseams`` is the ratio of medians. ``ratio_lo`` and ``ratio_hi``
+give its interval.
 
 .. include:: performance-range-tables.rst

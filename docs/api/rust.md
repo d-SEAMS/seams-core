@@ -11,6 +11,3 @@ The binding documentation is at <https://rust.dseams.info/>, and the Rust walkth
 ```bash
 cargo add dseams --git https://github.com/d-SEAMS/dseams-rs
 ```
-
-This uses the repository directly; a crates.io release is a separate
-registry step. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

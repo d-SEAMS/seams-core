@@ -6,13 +6,10 @@ Quasi-two-dimensional ice is a sheet of primitive rings (~Frame.monolayer_rings~
 The ~seams~ CLI does not grow a command for the prisms or the sheet.
 ~seams rdf~ is the three-dimensional partial RDF, not the in-plane histogram.
 
-The 2020 nanotube and monolayer dumps are figshare project 73545.
-They are not in this repository, and this page does not invent their counts.
-
-The in-tree confined frame is =input/traj/exampleTraj.lammpstrj=.
-The runnable copy is =docs/tutorials/test_confined.py=.
-Install Python with ~pip install 'pydseamslib==@PROJECT_VERSION@'~ or,
-while the release upload reaches PyPI, ~sh scripts/install_pydseamslib.sh~.
+The 2020 nanotube and monolayer trajectories are available from figshare
+project 73545. The example below uses
+=input/traj/exampleTraj.lammpstrj=.
+Install Python with ~pip install 'pydseamslib==2.14.0'~.
 
 #+begin_src python
 import pydseams as ds

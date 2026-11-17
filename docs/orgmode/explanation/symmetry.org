@@ -127,10 +127,10 @@ The call is on :doc:`/stable/cpp`.
 
 * Cages, rings, and the other codes
 
-The same in-tree matcher names a cage or a ring.
+The same matcher names a cage or a ring.
 It is a 3×3 SVD with the permutation fixed by the bond graph.
 The continuous shape measure of that overlay is the scaled residual of Pinsky and Avnir (/Inorganic Chemistry/ 37, 5575, 1998, [[https://doi.org/10.1021/ic9804925][10.1021/ic9804925]]) and of the Alvarez shape program (/Coordination Chemistry Reviews/ 249, 1693, 2005, [[https://doi.org/10.1016/j.ccr.2005.03.031][10.1016/j.ccr.2005.03.031]]).
-The shape program is not in the tree.
+Install the external shape program to compare its result.
 
 IRA (Gunde, Salles, Hémeryck and Martin-Samos, /Journal of Chemical Information and Modeling/ 61, 5446, 2021, [[https://doi.org/10.1021/acs.jcim.1c00567][10.1021/acs.jcim.1c00567]]) is an optional second matcher for the same templates.
 SOFI, from the same group (/Journal of Chemical Physics/ 161, 062503, 2024, [[https://doi.org/10.1063/5.0215689][10.1063/5.0215689]]), names the point group.
@@ -169,8 +169,7 @@ IRA is the Apache-2.0 option of its dual license, and it is not required to buil
 
 ~with_csm~ is a feature option, ~disabled~ by default.
 The continuous shape measure program is GPL-2.0.
-It is an external executable (~csm_shape~ or ~shape~), it is not vendored, and it is not linked into ~libyodaLib~.
-The Catch2 case that compares the in-tree measure with that program runs only when ~CSM_SHAPE~ is set.
+It is an external executable (~csm_shape~ or ~shape~), not part of ~libyodaLib~.
 ~with_spglib~ stays ~auto~ and links libsymspg when it is present.
 
 The shell translation unit is compiled into ~libyodaLib~ with the ordinary flags.
@@ -210,11 +209,11 @@ An mW site is one molecule.
 Crystal for the kernel is ice Ih, ice Ic, or stacking-disordered ice.
 Crystal for polyhedral template matching and for identify diamond is cubic or hexagonal diamond only.
 The first-neighbour and second-neighbour tags from identify diamond are counted apart from crystal.
-CHILL+ is the 2015 rule in this tree, cutoff 3.5 Å: four nearest neighbours, the staggered and eclipsed windows of Nguyen and Molinero, and the neighbour test in footnote a of their Table 1.
+CHILL+ uses the 2015 rule, cutoff 3.5 Å: four nearest neighbours, the staggered and eclipsed windows of Nguyen and Molinero, and the neighbour test in footnote a of their Table 1.
 It is not the OVITO Chill+ modifier.
 
-The interface frame is ~interface_f0.lammpstrj~ from ~science/interface-order~ at ~f5ca8ffc~, 864 mW molecules in a slab.
-The nucleation file is figshare [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]], md5 ~c28fc209a2854d2ba49e8f9b55accbe8~, 148 frames of 4096 molecules, the trajectory read by ~science/nucleation-pathways~ at ~170a6c18~.
+The interface frame is ~interface_f0.lammpstrj~, with 864 mW molecules in a slab.
+The nucleation trajectory is figshare [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]], with 148 frames of 4096 molecules.
 Its first frame is the shipped ~input/traj/nucleation_f1.lammpstrj~.
 
 #+CAPTION: Crystal, neighbour-tag and interfacial counts on the interface slab and the first nucleation frame, and the same crystal counts across the 148-frame trajectory. Diamond on the right-hand panel is cubic or hexagonal only.

@@ -57,8 +57,8 @@ def page_text(rows):
     return f"""Science figures
 ===============
 
-The four renders used by the science tutorials. Each caption is written
-from ``docs/data/science/figure-census.csv``, the census the science
+These four molecular views accompany the science tutorials. Each caption
+reports the molecular census that the science
 tutorials check.
 
 .. figure:: figures/interface.png

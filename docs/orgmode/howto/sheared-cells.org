@@ -101,5 +101,5 @@ hard-wired first minimum.
 * Empty or ortho clouds
 
 ~box.size() < 3~ yields an empty neighbour list. A length-3 box
-is treated as ortho. XYZ files in this tree do not carry a
+is treated as ortho. XYZ files in the supplied examples do not carry a
 periodic cell; use a LAMMPS dump when the true H matters.

@@ -13,8 +13,6 @@ The hexagon with vertex 0 joined to vertices 1 and 4 is the worked example on th
 A type-2 read of this dump uses the hydrogen-bond list: one three-ring, 230 four-rings, four five-rings, and 192 six-rings.
 ~dseams.userframe~ ~Frame.ring_census(8, graph="cutoff")~ uses the neighbour list inside 3.5 angstrom: 37 three-rings, 273 four-rings, 34 five-rings, and 167 six-rings.
 
-The runnable copy of the hydrogen-bond census is =docs/tutorials/test_rings.py=.
-
 #+begin_src python
 import pydseams as ds
 from pydseams.band import ring_census
@@ -36,6 +34,5 @@ The CLI CHILL+ graph is the mutual four-nearest list, so a census of that graph 
    :width: 480px
    :alt: Five- and six-rings on the sI host.
 
-   Five- and six-rings on the sI host. ``python docs/scripts/render_molecules.py --slug rings`` writes the 2400 by 1800 still.
+   Five- and six-membered rings on the sI host.
 #+end_export
-

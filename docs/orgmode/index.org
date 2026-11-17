@@ -91,7 +91,7 @@ Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 
 The first classification is five lines. Install with
-~pip install 'pydseamslib==@PROJECT_VERSION@'~ for the Frame package, with conda-forge's
+~pip install 'pydseamslib==2.14.0'~ for the Frame package, with conda-forge's
 Meson toolchain, or with ~meson setup build && meson compile -C build~,
 then run the Python and C programs on
 [[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.
@@ -105,19 +105,15 @@ seams cages input/traj/ice1h.lammpstrj
 2.14.1 ships ~libseams~ (~seams.h~), ~libseams_lang~, the C and C++
 APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines.
 ~gmx-seams~ reads the trajectory after ~gmx mdrun~.
-Each language binding is its own repository and records the engine
-revision it builds against. Registry publication is separate:
+Install the language interface you want:
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
-- Lua and Fennel: source package ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]; LuaRocks registration is coming
+- Lua and Fennel: source package ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]; ~luarocks install dseams 2.14.0-1~
 - R: ~dseams~, [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
 - Julia: ~Dseams~, [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
 - Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
 - Fortran: fpm ~dseams~, [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
-
-[[file:contributing/repositories.org][The repository map]] says what
-lives where.
 
 The header *Ecosystem* menu on every page jumps between the engine,
 the bindings, and linkcell.
@@ -363,26 +359,18 @@ framework.
    :caption: Project
 
    changelog
-   contributing/index
-   contributing/repositories
-   contributing/release
-   contributing/lean
    explanation/citation
 #+end_export
 
-The in-book C++ pages under =api/= are Doxygen via doxyrest. A sibling
-doxyYoda HTML tree (inline source, treeview) is at
-[[https://docs.dseams.info/api-cpp/][/api-cpp/]] after
-~pixi run -e docs docbld~.
+The [[https://docs.dseams.info/api-cpp/][C++ API reference]] includes
+the declarations and inline source.
 
 * d-SEAMS 2.0 paper
 
-The d-SEAMS 2.0 paper, its benchmark campaign, the record tables and
-the reproduction rules are in a private paper repository. The
-benchmark records and figure data are the Hugging Face datasets
-=d-SEAMS/dseams2-benchmark-records= and =d-SEAMS/dseams2-paper-figure-data=.
-The performance pages here show tables rendered from those records
-(=docs/records/README.md= names the revision).
+The d-SEAMS 2.0 benchmark records and figure data are available as the
+Hugging Face datasets =d-SEAMS/dseams2-benchmark-records= and
+=d-SEAMS/dseams2-paper-figure-data=. The performance pages summarize
+those measurements.
 
 * Related projects
 

@@ -11,5 +11,3 @@ The binding documentation is at <https://lua.dseams.info/>, and the Lua and Fenn
 Install it from a yodaStruct source checkout using that repository's
 README. The `dseams` registry install on LuaRocks is coming; it is not
 available there yet.
-
-`docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

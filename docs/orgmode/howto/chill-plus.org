@@ -41,10 +41,6 @@ fixture, and the 250-atom split on the 4096-molecule liquid, are
 
 * From the library
 
-~seams_chill_plus~ writes one label per atom and nine counts.
-~meson test seams_c_api~ requires every atom of the cubic cell to be
-~SEAMS_LABEL_CUBIC~ under both rules.
-
 #+begin_src c
 // excerpt: tests/test_seams_api.c
   expect(seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels,

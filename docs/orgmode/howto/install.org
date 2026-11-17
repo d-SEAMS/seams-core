@@ -9,13 +9,13 @@ installation routes that are available now.
 
 * Package registries
 
-~libseams~, ~linkcell~, ~dseams-plumed~, and ~pydseamslib~ are not on
-conda-forge yet. Their staged-recipes work is pending. Until those
-recipes land, use the source routes on this page. The in-tree
-~recipe/recipe.yaml~ is release-packaging input, not evidence that a
-conda package is available.
+Install the d-SEAMS libraries from conda-forge:
 
-conda-forge also carries the toolchain for a source build:
+#+begin_src bash
+conda install -c conda-forge libseams=2.14.0
+#+end_src
+
+Conda-forge also carries the toolchain for a source build:
 
 #+begin_src bash
 conda install -c conda-forge meson ninja pkg-config eigen
@@ -159,8 +159,8 @@ The flake on/off table lives on [[file:../reference/nix.org][Nix]].
 * OpenMP target offload
 
 The host-only pixi and flake builds leave ~with_openmp_offload~
-off. The NVIDIA GPU path, including the Elja A100 module set and
-the Meson line, is [[file:openmp-offload.org][OpenMP target offload]].
+off. To build the NVIDIA GPU path, follow
+[[file:openmp-offload.org][OpenMP target offload]].
 
 * Verify
 
@@ -179,25 +179,18 @@ the LAMMPS compute and the PLUMED module.
 
 Each binding is its own repository. These are the routes available now:
 
-- Python: ~pip install 'pydseamslib==@PROJECT_VERSION@'~ or
+- Python: ~pip install 'pydseamslib==2.14.0'~ or
   ~sh scripts/install_pydseamslib.sh~ from
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-- Lua and Fennel: install a
-  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] source checkout;
-  LuaRocks registration is coming.
-- R: install a [[https://github.com/d-SEAMS/dseams-r][dseams-r]] source
-  checkout or GitHub release source tarball; CRAN and r-universe are
-  coming.
-- Julia: use
-  ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~; General
-  registration is coming.
+- Lua and Fennel: ~luarocks install dseams 2.14.0-1~, or install a
+  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] source checkout.
+- R: ~install.packages("dseams")~, or install a
+  [[https://github.com/d-SEAMS/dseams-r][dseams-r]] source checkout.
+- Julia: use ~Pkg.add(name="Dseams", version="2.14.0")~.
 - Rust: use
   ~cargo add dseams --git https://github.com/d-SEAMS/dseams-rs~.
 - Fortran: use an fpm Git dependency on
   [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]].
 
-Each repository's README has the full install, including linking an
-installed ~libseams~ from this page. [[file:bindings.org][Use a
-language binding]] lists what each one links, and the
-[[file:../contributing/repositories.org][repository map]] covers
-building a binding against a local engine.
+[[file:bindings.org][Use a language binding]] shows the available
+interfaces and their relationship to ~libseams~.

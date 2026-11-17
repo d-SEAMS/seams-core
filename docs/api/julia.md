@@ -13,6 +13,3 @@ Install the current source as a Git dependency:
 ```bash
 julia -e 'using Pkg; Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")'
 ```
-
-Registration in Julia General and the matching `libseams_jll` release are
-coming. `docs/orgmode/contributing/repositories.org` describes how the repositories fit together.

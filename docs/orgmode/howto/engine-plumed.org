@@ -13,18 +13,6 @@ The build below used conda-forge PLUMED 2.10.1. The compiler and Eigen
 stay on the path. The same prefix holds GROMACS 2026.3, LAMMPS
 2022.06.23, and OpenMM 8.6.0.
 
-#+begin_src bash
-pixi init -c conda-forge dseams-engines
-pixi add --manifest-path dseams-engines/pixi.toml gromacs lammps openmm "plumed=2.10.*"
-eval "$(pixi shell-hook --manifest-path dseams-engines/pixi.toml)"
-export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
-export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
-meson setup build -Dwith_gromacs=enabled -Dwith_lammps=enabled -Dwith_openmm=enabled -Dwith_plumed=enabled
-meson compile -C build
-meson test -C build docs_engine_plumed --print-errorlogs
-#+end_src
-
 ~SEAMS~ components are ~seams.q6~ (mean local q6), ~seams.ice~ (cubic
 fraction), ~seams.ring~ (fraction of atoms on a primitive six-ring),
 ~seams.hexagonal~ (hexagonal count), and ~seams.six~ (six-ring count).
@@ -40,6 +28,3 @@ is mean q6, the hexagonal count, and the six-ring count:
 #+begin_src text
 plumed hexagonal 128 six-rings 256 q6 0.625855
 #+end_src
-
-~meson test docs_engine_plumed~ exits 77 when ~plumed~ or
-~libSeamsPlumed.so~ is absent.

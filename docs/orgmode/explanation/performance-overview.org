@@ -1,14 +1,8 @@
 #+TITLE: Performance overview
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
 Four sittings sit next to each other. Every number on this page is
-from the frozen tables in =docs/records=, rendered from the benchmark records dataset. A
+from the frozen tables. A
 ratio is the threads=1 median divided by the threads=8 median. The
 script marks a row flat when that ratio is between 0.95 and 1.05.
 A PLUMED row in the release-candidate table was measured on one
@@ -20,17 +14,14 @@ width the column names.
 |------+---------------|
 | ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
 | ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
-| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic and a TIP4P/ice liquid at 884736 molecules, paired with freud, mdapy, vesin, pyscal3, PLUMED, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads, recorded at ~2ed49e87~ |
-| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, retimed at ~1ce3be3b~ |
-| ~benchmarks/cutoff-rings.csv~ | The full cutoff ring call at 884736 molecules, linkcell against the cell list, recorded by ~cad887b2~ |
+| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic and a TIP4P/ice liquid at 884736 molecules, paired with freud, mdapy, vesin, pyscal3, PLUMED, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads |
+| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic |
+| ~benchmarks/cutoff-rings.csv~ | The full cutoff ring call at 884736 molecules, linkcell against the cell list |
 
 The full tables are
 [[file:performance.org][the release-candidate sitting]],
 [[file:trace-threads.org][the thread controls]], and
 [[file:../howto/literature-reproduce.org][the literature reproduction]].
-~meson test docs_sitting~, ~docs_trace_threads~, ~docs_pool_audit~, and
-~docs_sitting_large~ recompute the stored medians.
-
 The same operation name is not the same call across files. rc3 \(q_4\)
 is the guest's local parameter. The pool-audit file splits local and
 cutoff. The large-cell file names the call in its ~detail~ column. The
@@ -62,18 +53,14 @@ compared with rings-statistics-matter. PLUMED q6 in this file set
 
 * The 884736-molecule sitting
 
-~2ed49e87~ is the sitting of ice and the TIP4P/ice liquid. One warm-up,
+This comparison uses ice and a TIP4P/ice liquid. One warm-up,
 then the calls stored in ~n~, at 1, 2, 4 and 8 threads. Each width is
 its own process. The rivals are freud, mdapy, vesin, pyscal3
 (neighbours and q6), PLUMED q6 with ~PLUMED_NUM_THREADS~ set to that
 width, OVITO (CHILL+, q4, q6, coordination, and PTM with the default
 templates and with only the diamond templates), and
 rings-statistics-matter.
-~scripts/plot_sitting_large_time.py~ draws time against threads on a
-log axis, one panel per operation. The PDF is not stored.
-The tables recompute each median from the samples and carry the
-agreement notes. ~docs_table_csv~ checks the copied
-numbers. The rings row is still the full cutoff call. The separate
+ The rings row is still the full cutoff call. The separate
 ~cad887b2~ table times that call with the cell-list builder.
 
 #+begin_export rst

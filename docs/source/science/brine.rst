@@ -1,20 +1,11 @@
 Brine freezing front
 ====================
 
-The frames are the 20-pair loading of
-`d-SEAMS/brine-front-230K <https://huggingface.co/datasets/d-SEAMS/brine-front-230K/tree/4828e33ecf419c70643b2d466bfa4f283b4138dc>`_
-at revision ``4828e33ecf419c70643b2d466bfa4f283b4138dc``. The tutorial
-fetches ``T230_m20_r0_t0.xyz`` and ``T230_m20_r0_tend.xyz``, checks
-their SHA-256, and caches them under ``docs/.cache``. A later run uses
-the cache. If the fetch fails and the cache is empty, the tutorial
-prints
-
-.. code-block:: text
-
-   brine tutorial skipped: cannot fetch d-SEAMS/brine-front-230K at 4828e33ecf419c70643b2d466bfa4f283b4138dc
-
-and returns success. It does not treat a missing download as a passed
-measurement.
+The
+`d-SEAMS/brine-front-230K <https://huggingface.co/datasets/d-SEAMS/brine-front-230K>`_
+dataset provides the initial and final frames for a 20-pair loading.
+Download ``T230_m20_r0_t0.xyz`` and ``T230_m20_r0_tend.xyz`` before
+running the analysis.
 
 Each file stores a CHILL+ name on every oxygen. The engine is run again
 on the oxygen coordinates. All 1496 oxygens match the stored names at

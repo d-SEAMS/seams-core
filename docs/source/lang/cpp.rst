@@ -9,4 +9,4 @@ HTML is written to ``docs/lang-cpp/html``.
 
 ``docs/examples/lang_ice.c`` is the Ice Ih census. It prints
 ``hexagonal 128`` and ``rings6 256`` and returns 0 only when both match.
-``meson test docs_lang_ice`` compiles and runs it.
+Compile it with a C++17 compiler and link ``libseams``.
