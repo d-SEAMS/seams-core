@@ -1,43 +1,56 @@
 #+TITLE: Classify a clathrate
 #+OPTIONS: toc:nil num:nil
 
-GenIce builds the three clathrate ices without guests. The cage search
-is the signature census: closed polyhedra whose faces match a ring-size
-list. ~meson test docs_tutorial_clathrate~ runs that search and checks
-the counts.
+#+begin_export rst
+.. raw:: html
 
-The cells are already in the tree, each well under a megabyte.
+   <iframe title="dseams-cages" src="https://odysee.com/$/embed/dseams-cages:1c258cea9384acd2e21eeec509c5eedc050d08db" width="960" height="540" allowfullscreen></iframe>
+#+end_export
 
-| cell | file | molecules | census |
-|------+------+-----------+--------|
+Hexagonal cages on ice Ih, double-diamond cages on cubic ice, and the sI, sII and sH census on the repeated cells.
+The commands below use the unit cells in this tree.
+
+GenIce builds the three empty clathrate hosts. The cage search is a signature census: closed polyhedra whose faces match a ring-size list.
+
+| cell | file | waters | census |
+|------+------+--------+--------|
 | sI | ~input/traj/genice_sI.lammpstrj~ | 46 | 2 of \(5^{12}\), 6 of \(5^{12}6^{2}\) |
 | sII | ~input/traj/genice_sII.lammpstrj~ | 136 | 16 of \(5^{12}\), 8 of \(5^{12}6^{4}\) |
-| sH | ~input/traj/genice_sH.lammpstrj~ | 136 | four unit cells, so 12, 8 and 4 |
+| sH | ~input/traj/genice_sH.lammpstrj~ | 136 | 12 of \(5^{12}\), 8 of \(4^{3}5^{6}6^{3}\), 4 of \(5^{12}6^{8}\) |
 
-The sH unit cell is 3 of \(5^{12}\), 2 of \(4^{3}5^{6}6^{3}\), and 1 of
-\(5^{12}6^{8}\). The file is that cell repeated four times, and the
-test checks \(12, 8, 4 = 4 \times (3, 2, 1)\).
+The sH unit cell is 3 of \(5^{12}\), 2 of \(4^{3}5^{6}6^{3}\), and 1 of \(5^{12}6^{8}\).
+The file is that cell four times, so the census is \(12, 8, 4\).
+sH is skewed: the dump stores an ~xy~ tilt.
+sI and sII are orthogonal.
 
-sH is a skewed cell. The default cage-edge window measures bond lengths
-as if the box were orthorhombic, and the long faces then fall outside
-it. ~--cage-edge none~ keeps every primitive ring. sI and sII are
-orthogonal, and the default window leaves their census unchanged.
+The default face-edge window is ~2.65,3.15~ in the coordinate units of the file.
+These dumps are angstroms.
+On all three files that window and ~--cage-edge none~ print the same cage counts.
+~none~ keeps every primitive ring the neighbour list already accepted, and the cage bound is the face census alone.
 
 #+begin_src bash
 seams cages input/traj/genice_sI.lammpstrj --type 1 --graph cutoff --signature 512+51262
 seams cages input/traj/genice_sII.lammpstrj --type 1 --graph cutoff --signature 512+51264
-seams cages input/traj/genice_sH.lammpstrj --type 1 --graph cutoff \
-  --cage-edge none --signature 512+sh+51268
+seams cages input/traj/genice_sH.lammpstrj --type 1 --graph cutoff --signature 512+sh+51268
 #+end_src
 
-The lines you should see are ~cages 2~ and ~cages 6~ on sI, ~cages 16~
-and ~cages 8~ on sII, and ~cages 12~, ~cages 8~ and ~cages 4~ on sH.
+#+begin_example
+nop 46 graph cutoff signature 5:12 cages 2 atoms 40
+nop 46 graph cutoff signature 5:12,6:2 cages 6 atoms 46
+nop 136 graph cutoff signature 5:12 cages 16 atoms 136
+nop 136 graph cutoff signature 5:12,6:4 cages 8 atoms 128
+nop 136 graph cutoff signature 5:12 cages 12 atoms 136
+nop 136 graph cutoff signature 4:3,5:6,6:3 cages 8 atoms 112
+nop 136 graph cutoff signature 5:12,6:8 cages 4 atoms 120
+#+end_example
+
+~512~ is \(5^{12}\), ~51262~ is \(5^{12}6^{2}\), ~51264~ is \(5^{12}6^{4}\), ~sh~ is \(4^{3}5^{6}6^{3}\), and ~51268~ is \(5^{12}6^{8}\).
+The same three commands with ~--cage-edge none~ print these lines again.
 
 #+begin_export rst
 .. figure:: molecules/cage-si/overlay-web.png
    :width: 480px
-   :alt: GenIce sI host. sII and sH are drawn the same way.
+   :alt: sI host with one methane in each cage.
 
-   GenIce sI host. sII and sH are drawn the same way. ``python docs/scripts/render_molecules.py --slug cage-si`` writes the 2400 by 1800 still.
+   sI with one methane in each cage. The census above is the empty host.
 #+end_export
-

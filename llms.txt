@@ -22,7 +22,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Classify ice](https://docs.dseams.info/user/classify.md): Name the ice in a frame with CHILL+, cages, or the symmetry classifier.
 - [Classify ice on the mixed TIP4P example](https://docs.dseams.info/user/tutorials/bulk-ice.md): You classify one in-tree frame two ways: CHILL+ (a staggered or eclipsed star on each oxygen) and cage membership (hexagonal cage or double-diamond cage).
 - [Ice and clathrate labels](https://docs.dseams.info/user/tutorials/ice-and-clathrate.md): You label one frame two ways. CHILL+ reads a staggered or eclipsed star.
-- [Classify a clathrate](https://docs.dseams.info/user/tutorials/clathrate.md): GenIce builds the three clathrate ices without guests.
+- [Classify a clathrate](https://docs.dseams.info/user/tutorials/clathrate.md): Hexagonal cages on ice Ih, double-diamond cages on cubic ice, and the sI, sII and sH census on the repeated cells.
 - [Classify a dump](https://docs.dseams.info/user/howto/classify-cli.md): You have a LAMMPS water dump and want counts.
 - [CHILL+](https://docs.dseams.info/user/howto/chill-plus.md): Label every oxygen with the published CHILL+ rule, or with the OVITO rule.
 - [The symmetry classifier](https://docs.dseams.info/user/howto/symmetry-classifier.md): Name the ice shell of each oxygen.
