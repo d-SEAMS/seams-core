@@ -125,6 +125,7 @@ thread_local long long gProfLp3 = 0;
 thread_local long long gProfLp4 = 0;
 thread_local long long gOpen2 = 0;
 
+#ifdef SEAMS_HAS_OPENMP
 // Workers in a ring-search team read the calling thread's flags. Each
 // has its own thread_local copy, so the team copies them on entry.
 static void adoptSearchFlags(bool profile, bool timePrimitive, double *sourceWork) {
@@ -132,6 +133,7 @@ static void adoptSearchFlags(bool profile, bool timePrimitive, double *sourceWor
   gTimePrimitive = timePrimitive;
   gSourceWorkPtr = sourceWork;
 }
+#endif
 
 double millisSince(std::chrono::steady_clock::time_point start) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start)
