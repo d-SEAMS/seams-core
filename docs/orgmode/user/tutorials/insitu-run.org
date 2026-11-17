@@ -5,20 +5,51 @@
 .. include:: ../../videos/embeds/insitu.rst
 #+end_export
 
-The cubic cell is ~engines/lammps/ice.data~, 64 atoms. LAMMPS
-reads it from ~engines/lammps/in.dseams~ and calls ~seams_chill_plus~
-from ~fix external~ on every second step. OpenMM builds an
-eight-molecule cell in angstroms and steps it twice through
-~DseamsReporter~. ~meson test docs_tutorial_insitu~ runs whichever of
-those libraries is installed. When neither library is on the machine
-the test exits 77 and meson records a skip.
+The recording scores the ice Ih cell: 128 hexagonal labels, 256
+six-rings, and mean local q6 0.625855. The steps below run a cubic
+crystal inside LAMMPS and inside OpenMM.
 
-Both paths label every atom cubic. The LAMMPS line is ~ice~ equal to
-~calls~ times 64. The OpenMM line is ~openmm calls 2 ice 16~, two
-frames of eight cubic molecules.
+LAMMPS reads the 64-atom cell =engines/lammps/ice.data=. OpenMM builds
+an eight-molecule cubic cell in angstroms.
+
+* LAMMPS
+
+The deck is =engines/lammps/in.dseams=. It reads =ice.data=, clears the
+forces, and asks ~fix external~ for a callback every second step of an
+8-step run. The driver is =engines/run_hook= in the build directory.
+Run it from =engines/lammps= so ~read_data ice.data~ resolves. With the
+=bbdir= directory from the build instructions:
 
 #+begin_src bash
-# from engines/lammps, after meson compile -C build engines/run_hook
-../../build/engines/run_hook in.dseams
+cd engines/lammps
+../../bbdir/engines/run_hook in.dseams
+#+end_src
+
+On success the first line has the form
+
+#+begin_example
+lammps calls N stride 2 ice M
+#+end_example
+
+\(M\) equals \(N\) times 64: every atom of this cell is cubic, and the
+ice count adds the cubic labels from each callback. A second line
+prints the hexagonal count, the six-ring count, and q6 of the last
+callback. The hook is produced when the build finds a LAMMPS library.
+
+* OpenMM
+
+From the repository root:
+
+#+begin_src bash
 PYTHONPATH=adapters/python python3 engines/openmm/test_reporter.py
 #+end_src
+
+The script builds eight molecules, takes two steps, and labels each
+frame with CHILL+. When every label is cubic it prints
+
+#+begin_example
+openmm calls 2 ice 16
+#+end_example
+
+That is two frames of eight cubic molecules. The script needs OpenMM
+and the language library on the loader path.
