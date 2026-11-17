@@ -145,7 +145,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [C API](https://docs.dseams.info/capi/index.md): Every SEAMS_API function in include/seams.h.
 - [C](https://docs.dseams.info/stable/c.md): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.md): include/seams.hpp is the header-only C++ API.
-- [Python](https://docs.dseams.info/stable/python.md): The Python binding is pydseamslib on PyPI, import dseams.
+- [Python](https://docs.dseams.info/stable/python.md): pydseamslib provides import dseams and import pydseams.
 - [Fortran](https://docs.dseams.info/stable/fortran.md): The Fortran binding is the fpm package dseams.
 - [Julia](https://docs.dseams.info/stable/julia.md): The Julia binding is the Julia package Dseams. It lives in its own repository, d-SEAMS/Dseams.jl, with its API reference, tutorials, tests and release notes.
 - [R](https://docs.dseams.info/stable/r.md): The R binding is the R package dseams.

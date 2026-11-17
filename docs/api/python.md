@@ -1,15 +1,14 @@
 # Python
 
-The Python binding is pydseamslib on PyPI, `import dseams`. It lives in its own repository,
-[d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+`pydseamslib` provides `import dseams` and `import pydseams`.
 
-```bash
-pip install 'pydseamslib==2.14.0'
-```
+| name | role | library |
+| --- | --- | --- |
+| `dseams` | array calls | `libseams` (`include/seams.h`) |
+| `pydseams` | Frame API | `libseams` and `libseams_lang` (`bindings/cxx/seams_lang.h`) |
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/development/repositories.org`
-describes how the repositories fit together.
+The package and its symbol list are [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). The rendered reference is [PydSEAMSlib](https://d-seams.github.io/PydSEAMSlib/).
+
+`pip install 'pydseamslib==2.14.0'` is the pin that matches this engine. That file is not on PyPI. Install the tag in PydSEAMSlib built against seams-core 2.14.0.
+
+The first classification is the {doc}`Python tutorial </fronts/python>`.
