@@ -5,7 +5,18 @@
 cmake_minimum_required(VERSION 3.16)
 project(seams_chemfiles_mmcif_probe LANGUAGES CXX)
 
-find_package(chemfiles REQUIRED CONFIG)
+if(NOT SEAMS_CHEMFILES_MIN)
+  set(SEAMS_CHEMFILES_MIN 0.10.4)
+endif()
+# The parent passes CMAKE_PREFIX_PATH with "|" for ";". A set
+# SEAMS_CHEMFILES_DIR is searched alone.
+string(REPLACE "|" ";" CMAKE_PREFIX_PATH "${SEAMS_PREFIX_PATH}")
+if(SEAMS_CHEMFILES_DIR)
+  find_package(chemfiles ${SEAMS_CHEMFILES_MIN} REQUIRED CONFIG
+    NO_DEFAULT_PATH PATHS "${SEAMS_CHEMFILES_DIR}")
+else()
+  find_package(chemfiles ${SEAMS_CHEMFILES_MIN} REQUIRED CONFIG)
+endif()
 add_executable(seams_chemfiles_mmcif_probe
   ${CMAKE_CURRENT_LIST_DIR}/../chemfiles_mmcif_probe.cpp)
 target_compile_features(seams_chemfiles_mmcif_probe PRIVATE cxx_std_17)

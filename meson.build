@@ -433,114 +433,289 @@ endif
 
 chemfiles_libdir = ''
 _chem_vendored = false
+_chem_origin = ''
 chemfiles_opt = get_option('with_chemfiles')
+chemfiles_dir_opt = get_option('chemfiles_dir')
+chemfiles_vendor_opt = get_option('use_vendored_chemfiles')
+_chem_cross = meson.is_cross_build()
+# The vendored copy is tag 0.10.4. An installed copy must be that release
+# or a later 0.10 patch release, whichever way it was found. The version
+# is read from chemfiles/config.h as well as from the .pc or CMake file,
+# since that header is what the engine compiles against.
+_chem_range = ['>=0.10.4', '<0.11']
+_chem_version = ''
+_chem_unprobed = false
+fs = import('fs')
 # A disabled option must win over a chemfiles.pc on PKG_CONFIG_PATH.
 # Otherwise the native frame counters never run.
 if chemfiles_opt.disabled()
   chemfiles_dep = dependency('chemfiles-disabled-by-option', required: false)
 else
-  fs = import('fs')
-  chemfiles_dep = dependency('chemfiles', required: false)
-  # conda-forge 0.10.4 writes an mmCIF atom with no residue as
-  # label_seq_id "." and omits label_entity_id. The reader dereferences
-  # that missing column. Reading the written file throws, and a write
-  # followed by a read in the same process segfaults inside
-  # mmCIFFormat::read. The probe also counts the steps of a MOL2 molecule
-  # with an empty counts line, where 0.10.4 segfaults. A library that
-  # fails either is replaced by tag 0.10.4 plus cmake/patches/.
-  _chemfiles_system_ok = false
-  if chemfiles_dep.found()
-    _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
-    _mmcif_run = cppc.run(
-      fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
-      args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'],
-      dependencies: chemfiles_dep,
-      name: 'chemfiles reads an mmCIF atom with no residue id and a truncated MOL2')
-    _chemfiles_system_ok = _mmcif_run.compiled() and _mmcif_run.returncode() == 0
-    if not _chemfiles_system_ok
-      message('system chemfiles fails the mmCIF or MOL2 probe; building patched 0.10.4')
-      # dependency() has no way to drop a found library. This name is
-      # not a package. It clears the rejected system copy so the fetch
-      # below is the one that gets linked.
-      chemfiles_dep = dependency('chemfiles-mmcif-rejected', required: false)
+  _chem_none = dependency('chemfiles-not-searched', required: false)
+  chemfiles_dep = _chem_none
+  # An installed chemfiles is looked for in this order: the directory named
+  # by -Dchemfiles_dir (alone, when it is given), pkg-config, the CMake
+  # package, and last a chemfiles-config.cmake under the install prefix.
+  # That last step does not need a CMake binary, which Meson only trusts
+  # for the host machine when a cross file names one.
+  _chem_methods = []
+  if chemfiles_vendor_opt.enabled()
+    if chemfiles_dir_opt != ''
+      error('chemfiles_dir and use_vendored_chemfiles=enabled disagree about which chemfiles to link')
+    endif
+  elif chemfiles_dir_opt != ''
+    _chem_methods = ['chemfiles_dir']
+  else
+    _chem_methods = ['pkg-config', 'cmake', 'cmake-config-file']
+  endif
+  # Library directories that hold chemfiles-config.cmake: under --prefix and
+  # under each CMAKE_PREFIX_PATH entry.
+  _chem_cfg_roots = [get_option('prefix')]
+  if _dist_python.found()
+    _chem_env = run_command(_dist_python, '-c',
+                            'import os; print("\\n".join(p for p in os.environ.get("CMAKE_PREFIX_PATH", "").split(os.pathsep) if p))',
+                            check: false)
+    if _chem_env.returncode() == 0
+      foreach _entry : _chem_env.stdout().strip().split('\n')
+        if _entry != ''
+          _chem_cfg_roots += [_entry]
+        endif
+      endforeach
     endif
   endif
-  if not chemfiles_dep.found()
-    chem_prefix = meson.project_build_root() / 'chemfiles-prefix'
-    cmake_bin = find_program('cmake', required: chemfiles_opt)
-    # The prefix records the patches and the CMake files it was built
-    # with. A change to either refetches the source, since the patch step
-    # runs only on a fetch.
-    _chem_patch_ids = []
-    foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
-                      'patches/chemfiles-0.10.4-frame-visit.patch',
-                      'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
-                      'CMakeLists.txt', 'ChemfilesDep.cmake']
-      _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]
+  _chem_cfg_libdirs = []
+  foreach _cfg_root : _chem_cfg_roots
+    foreach _libsub : ['lib', 'lib64']
+      if fs.exists(_cfg_root / _libsub / 'cmake' / 'chemfiles' / 'chemfiles-config.cmake')
+        _chem_cfg_libdirs += [_cfg_root / _libsub]
+      endif
     endforeach
-    _chem_patch_text = '\n'.join(_chem_patch_ids)
-    _chem_stamp = chem_prefix / 'seams-patches.txt'
-    _chem_current = fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so') and fs.exists(_chem_stamp)
-    if _chem_current
-      # fs.read() refuses a path in the build tree.
-      _chem_current = run_command('cat', _chem_stamp, check: false).stdout().strip() == _chem_patch_text
+  endforeach
+  _chem_ext = false
+  _chem_rejected = []
+  _chem_dir_unusable = false
+  foreach _method : _chem_methods
+    if not _chem_ext
+      _cand = _chem_none
+      _cand_libdir = ''
+      if _method == 'pkg-config'
+        _cand = dependency('chemfiles', method: 'pkg-config', version: _chem_range, required: false)
+        if _cand.found()
+          _cand_libdir = _cand.get_variable(pkgconfig: 'libdir', default_value: '')
+        endif
+      elif _method == 'cmake'
+        _cand = dependency('chemfiles', method: 'cmake', modules: ['chemfiles'],
+                           version: _chem_range, required: false)
+        if _cand.found() and _chem_cfg_libdirs.length() > 0
+          # The CMake dependency carries the library by path, with no record
+          # of its directory. The first package file CMake would have used
+          # names it, for the probe below and for the installed rpath.
+          _cand_libdir = _chem_cfg_libdirs[0]
+        endif
+      else
+        # A prefix is a directory with include/chemfiles.hpp beside lib or lib64.
+        _chem_prefixes = []
+        if _method == 'chemfiles_dir'
+          _chem_prefixes = [[chemfiles_dir_opt, 'lib'], [chemfiles_dir_opt, 'lib64']]
+        else
+          foreach _libdir : _chem_cfg_libdirs
+            _chem_prefixes += [[fs.parent(_libdir), fs.name(_libdir)]]
+          endforeach
+        endif
+        foreach _pair : _chem_prefixes
+          _root = _pair[0]
+          if not _cand.found() and fs.exists(_root / 'include' / 'chemfiles.hpp')
+            _chem_lib = cppc.find_library('chemfiles', dirs: [_root / _pair[1]], required: false)
+            if _chem_lib.found()
+              # A flag, not include_directories(): Meson refuses an absolute
+              # path that falls inside the source tree, as a pixi prefix does.
+              _cand = declare_dependency(
+                dependencies: _chem_lib,
+                compile_args: ['-isystem', _root / 'include'])
+              _cand_libdir = _root / _pair[1]
+            endif
+          endif
+        endforeach
+        if not _cand.found() and _method == 'chemfiles_dir'
+          _chem_dir_unusable = true
+          _chem_rejected += ['chemfiles_dir ' + chemfiles_dir_opt + ' has no include/chemfiles.hpp beside lib/libchemfiles']
+        endif
+      endif
+      if _cand.found()
+        _cand_version = ''
+        if cppc.has_header('chemfiles/config.h', dependencies: _cand)
+          _cand_version = cppc.get_define('CHEMFILES_VERSION',
+                                          prefix: '#include <chemfiles/config.h>',
+                                          dependencies: _cand).strip('"')
+        endif
+        _cand_ok = _cand_version != '' and _cand_version.version_compare(_chem_range[0]) and _cand_version.version_compare(_chem_range[1])
+        if not _cand_ok
+          _chem_dir_unusable = _chem_dir_unusable or _method == 'chemfiles_dir'
+          _chem_rejected += [_method + ' found chemfiles ' + (_cand_version == '' ? '(no version in chemfiles/config.h)' : _cand_version) + ', which is not ' + ' '.join(_chem_range)]
+        elif _chem_cross
+          # A cross build cannot run the probe below. Running it whenever
+          # the target happens to run on the build machine would make the
+          # answer depend on the target, so the version is the only gate.
+          _chem_ext = true
+          _chem_unprobed = true
+        else
+          # conda-forge 0.10.4 writes an mmCIF atom with no residue as
+          # label_seq_id "." and omits label_entity_id. The reader
+          # dereferences that missing column. Reading the written file
+          # throws, and a write followed by a read in the same process
+          # segfaults inside mmCIFFormat::read. The probe also counts the
+          # steps of a MOL2 molecule with an empty counts line, where
+          # 0.10.4 segfaults. A library that fails either is not used.
+          _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
+          _mmcif_run = cppc.run(
+            fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
+            args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'] +
+                  (_cand_libdir != '' ? ['-Wl,-rpath,' + _cand_libdir] : []),
+            dependencies: _cand,
+            name: 'chemfiles reads an mmCIF atom with no residue id and a truncated MOL2')
+          if _mmcif_run.compiled() and _mmcif_run.returncode() == 0
+            _chem_ext = true
+          else
+            _chem_rejected += [_method + ' found chemfiles ' + _cand_version + ', which fails the mmCIF or MOL2 probe']
+          endif
+        endif
+        if _chem_ext
+          chemfiles_dep = _cand
+          _chem_version = _cand_version
+          _chem_origin = _method
+          if not _chem_cross and _cand_libdir != ''
+            chemfiles_libdir = _cand_libdir
+          endif
+        endif
+      endif
     endif
-    if cmake_bin.found() and not _chem_current
-      run_command('rm', '-rf', meson.project_build_root() / 'chemfiles-fetch', chem_prefix,
-                  check: true)
-      run_command(cmake_bin, '-S', meson.project_source_root() / 'cmake',
-                  '-B', meson.project_build_root() / 'chemfiles-fetch',
-                  '-DCMAKE_BUILD_TYPE=Release',
-                  '-DCMAKE_INSTALL_PREFIX=' + chem_prefix,
-                  '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
-                  '-DSEAMS_CHEMFILES_FORCE_VENDORED=ON',
-                  check: true)
-      run_command(cmake_bin, '--build',
-                  meson.project_build_root() / 'chemfiles-fetch',
-                  '--parallel', check: true)
-      run_command(cmake_bin, '--install',
-                  meson.project_build_root() / 'chemfiles-fetch',
-                  check: true)
-      run_command('sh', '-c', 'printf "%s\\n" "$1" > "$2"', 'sh', _chem_patch_text, _chem_stamp,
-                  check: true)
-    endif
-    # cmake/ChemfilesDep.cmake names the patched library seams-chemfiles,
-    # so its soname cannot be satisfied by the unpatched libchemfiles.so.0.10
-    # in the conda lib directory the conda driver puts first on the RPATH.
-    _chem_real = chem_prefix / 'lib' / 'libseams-chemfiles.so.0.10.4'
-    if fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so')
-      chemfiles_dep = cppc.find_library('seams-chemfiles',
-                                        dirs: chem_prefix / 'lib',
-                                        required: chemfiles_opt)
-      if chemfiles_dep.found()
-        chemfiles_dep = declare_dependency(
-          compile_args: ['-I' + chem_prefix / 'include', '-DSEAMS_CHEMFILES_PATCHED=1'],
-          dependencies: chemfiles_dep)
-        chemfiles_libdir = chem_prefix / 'lib'
-        _chem_vendored = true
-        # The installed libyodaLib finds this copy through its $ORIGIN
-        # rpath, under the soname it was linked against.
-        if fs.exists(_chem_real)
-          install_data(_chem_real, rename: 'libseams-chemfiles.so.0.10',
-                       install_dir: get_option('libdir'),
-                       install_mode: 'rwxr-xr-x')
+  endforeach
+  foreach _why : _chem_rejected
+    message('chemfiles: ' + _why)
+  endforeach
+  if _chem_dir_unusable
+    error('chemfiles_dir=' + chemfiles_dir_opt + ' is not usable: ' + '; '.join(_chem_rejected))
+  endif
+  if _chem_unprobed
+    warning('chemfiles ' + _chem_version + ' (' + _chem_origin + ') is used without the mmCIF and MOL2 probe, ' +
+            'which cannot run when cross compiling. 0.10.4 as released fails that probe: ' +
+            'a MOL2 molecule with no counts line is refused by the engine, and mmCIF written by chemfiles ' +
+            'for an atom with no residue cannot be read back')
+  endif
+  if not _chem_ext
+    # The vendored build runs CMake on the build machine at configure time.
+    # It is never the answer to a missing library when cross compiling,
+    # unless -Duse_vendored_chemfiles=enabled asks for it.
+    _chem_vendor_ok = chemfiles_vendor_opt.enabled() or (chemfiles_vendor_opt.auto() and not _chem_cross)
+    if not _chem_vendor_ok
+      _chem_why = chemfiles_vendor_opt.disabled() ? 'use_vendored_chemfiles=disabled' : 'cross compiling'
+      _chem_help = ('no usable installed chemfiles ' + ' '.join(_chem_range) + ' was found (tried ' +
+                    ', '.join(_chem_methods) + ') and ' + _chem_why + ' rules out building the patched copy. ' +
+                    'Point -Dchemfiles_dir at its prefix, or set -Dwith_chemfiles=disabled')
+      # A cross build that asked for chemfiles by leaving the option on auto
+      # must not turn into a build without the reader unnoticed.
+      if chemfiles_opt.enabled() or _chem_cross
+        error(_chem_help)
+      endif
+      message(_chem_help)
+    else
+      chem_prefix = meson.project_build_root() / 'chemfiles-prefix'
+      cmake_bin = find_program('cmake', required: chemfiles_opt, native: true)
+      _chem_cmake_args = []
+      _chem_host_id = host_machine.system() + '-' + host_machine.cpu_family()
+      if _chem_cross
+        _chem_toolchain = meson.get_external_property('cmake_toolchain_file', '', native: false)
+        if _chem_toolchain == ''
+          error('use_vendored_chemfiles=enabled needs the cmake_toolchain_file property in the cross file, ' +
+                'or the patched chemfiles would be built for the build machine')
+        endif
+        _chem_cmake_args += ['-DCMAKE_TOOLCHAIN_FILE=' + _chem_toolchain]
+        _chem_host_id += ' ' + _chem_toolchain
+      endif
+      # The prefix records the patches, the CMake files and the machine it
+      # was built with. A change to any of them refetches the source, since
+      # the patch step runs only on a fetch.
+      _chem_patch_ids = ['host ' + _chem_host_id]
+      foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
+                        'patches/chemfiles-0.10.4-frame-visit.patch',
+                        'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
+                        'CMakeLists.txt', 'ChemfilesDep.cmake']
+        _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]
+      endforeach
+      _chem_patch_text = '\n'.join(_chem_patch_ids)
+      _chem_stamp = chem_prefix / 'seams-patches.txt'
+      _chem_current = fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so') and fs.exists(_chem_stamp)
+      if _chem_current
+        # fs.read() refuses a path in the build tree.
+        _chem_current = run_command('cat', _chem_stamp, check: false).stdout().strip() == _chem_patch_text
+      endif
+      if cmake_bin.found() and not _chem_current
+        run_command('rm', '-rf', meson.project_build_root() / 'chemfiles-fetch', chem_prefix,
+                    check: true)
+        run_command(cmake_bin, '-S', meson.project_source_root() / 'cmake',
+                    '-B', meson.project_build_root() / 'chemfiles-fetch',
+                    '-DCMAKE_BUILD_TYPE=Release',
+                    '-DCMAKE_INSTALL_PREFIX=' + chem_prefix,
+                    '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+                    '-DSEAMS_CHEMFILES_FORCE_VENDORED=ON',
+                    _chem_cmake_args,
+                    check: true)
+        run_command(cmake_bin, '--build',
+                    meson.project_build_root() / 'chemfiles-fetch',
+                    '--parallel', check: true)
+        run_command(cmake_bin, '--install',
+                    meson.project_build_root() / 'chemfiles-fetch',
+                    check: true)
+        run_command('sh', '-c', 'printf "%s\\n" "$1" > "$2"', 'sh', _chem_patch_text, _chem_stamp,
+                    check: true)
+      endif
+      # cmake/ChemfilesDep.cmake names the patched library seams-chemfiles,
+      # so its soname cannot be satisfied by the unpatched libchemfiles.so.0.10
+      # in the conda lib directory the conda driver puts first on the RPATH.
+      _chem_real = chem_prefix / 'lib' / 'libseams-chemfiles.so.0.10.4'
+      if fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so')
+        chemfiles_dep = cppc.find_library('seams-chemfiles',
+                                          dirs: chem_prefix / 'lib',
+                                          required: chemfiles_opt)
+        if chemfiles_dep.found()
+          chemfiles_dep = declare_dependency(
+            compile_args: ['-I' + chem_prefix / 'include', '-DSEAMS_CHEMFILES_PATCHED=1'],
+            dependencies: chemfiles_dep)
+          chemfiles_libdir = chem_prefix / 'lib'
+          _chem_vendored = true
+          _chem_version = '0.10.4'
+          _chem_origin = 'vendored, patched'
+          # The installed libyodaLib finds this copy through its $ORIGIN
+          # rpath, under the soname it was linked against.
+          if fs.exists(_chem_real)
+            install_data(_chem_real, rename: 'libseams-chemfiles.so.0.10',
+                         install_dir: get_option('libdir'),
+                         install_mode: 'rwxr-xr-x')
+          endif
         endif
       endif
     endif
   endif
 endif
+_chem_report = false
 if chemfiles_dep.found()
   _deps += [chemfiles_dep]
   _args += ['-DSEAMS_HAS_CHEMFILES=1']
-  probed_libdir = chemfiles_dep.get_variable(pkgconfig: 'libdir',
-                                             default_value: '')
-  if probed_libdir != ''
-    chemfiles_libdir = probed_libdir
+  _chem_note = _chem_unprobed ? ', not probed' : ''
+  _chem_report = 'YES (' + _chem_version + ', ' + _chem_origin + _chem_note + ')'
+  if not _chem_cross
+    probed_libdir = chemfiles_dep.get_variable(pkgconfig: 'libdir',
+                                               default_value: '')
+    if probed_libdir != ''
+      chemfiles_libdir = probed_libdir
+    endif
   endif
   # The vendored copy sits in the build tree. Meson puts that directory on
   # the build rpath and strips it at install, so only a system chemfiles
-  # needs its directory recorded here.
-  if chemfiles_libdir != '' and not _chem_vendored
+  # needs its directory recorded here. A cross build leaves it out: the
+  # directory is on the build machine, and the target finds the library
+  # through its own loader path.
+  if chemfiles_libdir != '' and not _chem_vendored and not _chem_cross
     _link_args += ['-Wl,-rpath,' + chemfiles_libdir]
   endif
 endif
@@ -882,7 +1057,7 @@ summary({
   'Cutoff fallback (vesin)': vesin_dep.found(),
   'Cutoff list (linkcell pairs_within)': linkcell_dep.found(),
   'Minimum-image wrap (minimage)': minimage_dep.found(),
-  'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
+  'PDB/GRO/DCD readers (chemfiles)': _chem_report,
   '.con reader (readcon-core)': readcon_dep.found(),
   'CON corpus (readcon-db)': readcon_dep.found() and readcondb_dep.found(),
   'IRA/SOFI shape matching (libira)': ira_found,
