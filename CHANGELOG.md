@@ -16,6 +16,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 - The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, and the GCC runtime objects in its binaries.
 
+### Changed
+
+- Linux release binaries build inside manylinux_2_28 and need glibc 2.28 or newer.
+
 ### Fixed
 
 - Ring and cage search diagnostics stay on the calling thread. Concurrent searches no longer share the process-global profile, phase and split records, and an OpenMP team copies the calling thread's flags when it starts.
