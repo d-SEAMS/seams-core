@@ -29,7 +29,7 @@ _INTERPRETERS = {"python", "python3", "lua", "lua5.4", "luajit"}
 # The process that dlopens libseams is not one of these names.
 _HOST_TOOLS = {
     "cc", "c++", "gcc", "g++", "clang", "clang++",
-    "mpicc", "mpicxx", "mpic++",
+    "mpicc", "mpicxx", "mpic++", "mpirun", "mpiexec", "orterun",
     "sh", "bash",
 }
 asan = os.environ.get("ASAN_TEST_PRELOAD", "")
