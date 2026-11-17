@@ -300,7 +300,7 @@ if openmm_opt.allowed()
           'for var in ("LIBRARY_PATH", "LD_RUN_PATH"):\n' +
           '    dirs.extend(pathlib.Path(p) for p in os.environ.get(var, "").split(os.pathsep) if p)\n' +
           'for root in dirs:\n' +
-          '    if (root / "libOpenMM.so").is_file():\n' +
+          '    if any((root / name).is_file() for name in ("libOpenMM.so", "libOpenMM.dylib")):\n' +
           '        print(root)\n' +
           '        raise SystemExit(0)\n' +
           'raise SystemExit(1)\n',
