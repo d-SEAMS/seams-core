@@ -118,18 +118,35 @@ pkg-config --exists --print-errors "eigen3 >= 3.4.0"
 mkdir -p "$work/src"
 tar -C "$work/src" -xzf "$src_tar"
 src=$work/src/seams-core-${version}
-# Pinned to the wrap files. The recipe turns the .con reader on only
-# when this directory is already present, and nodownload will not clone it.
-git clone --depth 1 --branch v0.16.2 \
-  https://github.com/lode-org/readcon-core.git \
+# readcon-core v0.16.2, readcon-db v0.1.8. nodownload will not clone them.
+pin_repo() {
+  local url=$1 sha=$2 dest=$3 got
+  git init "$dest"
+  git -C "$dest" remote add origin "$url"
+  git -C "$dest" fetch --depth 1 origin "$sha"
+  git -C "$dest" checkout --detach FETCH_HEAD
+  got=$(git -C "$dest" rev-parse HEAD)
+  if [[ $got != "$sha" ]]; then
+    printf '%s\n' "checkout $got is not $sha" >&2
+    exit 1
+  fi
+}
+pin_repo https://github.com/lode-org/readcon-core.git \
+  9e12ea9727d5f3c85d8eeb4d927beb634e1bdb59 \
   "$src/subprojects/readcon-core"
-git clone --depth 1 --branch v0.1.8 \
-  https://github.com/lode-org/readcon-db.git \
+pin_repo https://github.com/lode-org/readcon-db.git \
+  0001a2c5a931bdde6bc8fe9b308f666dc28f4fe5 \
   "$src/subprojects/readcon-db"
 export CARGO_HOME=$work/cargo
 export RUSTUP_HOME=$work/rustup
-curl --proto '=https' --tlsv1.2 -fsS https://sh.rustup.rs -o "$work/rustup-init"
-sh "$work/rustup-init" -y --default-toolchain 1.88.0 --profile minimal
+# rustup 1.29.3
+rustup_sha256=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+curl --proto '=https' --tlsv1.2 -fsS \
+  -o "$work/rustup-init" \
+  https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init
+echo "${rustup_sha256}  $work/rustup-init" | sha256sum -c -
+chmod +x "$work/rustup-init"
+"$work/rustup-init" -y --default-toolchain 1.88.0 --profile minimal
 # rustup writes this file.
 . "$CARGO_HOME/env"
 printf '%s\n' "rustc: $(rustc --version)"

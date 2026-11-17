@@ -195,8 +195,12 @@ EOF
     printf '%s\n' "dseams readme example ok"
     ;;
   fortran)
+    # fpm 0.13.0 single-file source.
+    fpm_version=0.13.0
+    fpm_sha256=001cff6cf1145f215baa0888ba27acc06cea30a89b79d1a8be97db3fffbc8cd2
     curl -fsSL -o "$stage/fpm.F90" \
-      https://github.com/fortran-lang/fpm/releases/download/current/fpm.F90
+      "https://github.com/fortran-lang/fpm/releases/download/v${fpm_version}/fpm-${fpm_version}.F90"
+    echo "${fpm_sha256}  $stage/fpm.F90" | sha256sum -c -
     gfortran -o "$stage/fpm" "$stage/fpm.F90"
     git clone --depth 1 --branch "$dseams_fortran" \
       https://github.com/d-SEAMS/dseams-fortran.git \
