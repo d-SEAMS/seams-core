@@ -93,7 +93,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Performance and comparisons](https://docs.dseams.info/user/performance.md): What to time, how the literature codes were run, and where d-SEAMS sits next to them.
 - [Benchmarks](https://docs.dseams.info/user/howto/benchmarks.md): Time a 2.14.0 build and write down the run.
 - [Literature head-to-head](https://docs.dseams.info/user/howto/literature-h2h.md): Two recorded comparisons of d-SEAMS 2.14.0.
-- [Reproduce the literature head-to-head](https://docs.dseams.info/user/howto/literature-reproduce.md): A path under benchmarks/ on this page names a record of the d-SEAMS 2.0 benchmark campaign.
+- [Reproduce the literature head-to-head](https://docs.dseams.info/user/howto/literature-reproduce.md): scripts/h2h_rc3_sitting.py writes the six-call sitting.
 - [Head-to-head](https://docs.dseams.info/user/comparisons.md): Measured comparisons of d-SEAMS 2.14.0 with other structure codes.
 - [Versions and bindings](https://docs.dseams.info/user/versions.md): Move a 1.x script or a 2.13 install onto this release, and find the catalogue of tutorials and tasks.
 - [Upgrade from 2.13 to 2.14](https://docs.dseams.info/user/howto/upgrade-2.14.md): These notes start from tag v2.13.0 (7f310225).
