@@ -1064,6 +1064,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_discoverability',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_discoverability.py', '--self-test'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_c_symbols',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],

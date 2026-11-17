@@ -1,3 +1,16 @@
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+{%- if dseams_title %}
+<meta name="robots" content="{{ dseams_robots|e }}">
+<meta name="twitter:title" content="{{ dseams_title|e }}">
+<meta name="twitter:description" content="{{ dseams_description|e }}">
+<meta name="twitter:image" content="{{ dseams_image|e }}">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="{{ dseams_markdown|e }}" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{{ dseams_jsonld|safe }}</script>
+{%- endif %}

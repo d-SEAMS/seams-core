@@ -96,6 +96,10 @@ jobs:
         run: python3 docs/check_sitemap.py --self-test
       - name: Sitemap
         run: python3 docs/check_sitemap.py
+      - name: Discoverability
+        run: python3 docs/check_discoverability.py --self-test
+      - name: Discoverability outputs
+        run: python3 docs/check_discoverability.py
       # Upstream main only. Netlify reads this gh-pages tree and serves
       # docs.dseams.info. A CNAME file in the tree would fight that site.
       # peaceiris still writes .nojekyll.

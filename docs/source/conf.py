@@ -606,6 +606,10 @@ copyright = "2019-2026, d-SEAMS core team"
 author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 version = "2.14.0"
 release = "2.14.0"
+language = "en"
+# The default HTML title appends "2.14.0 documentation" to every page.
+# The short title keeps the tab and the social card on the page name.
+html_title = "d-SEAMS"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -782,6 +786,8 @@ html_theme_options = {
             ],
         },
     ],
+    "og_image_url": "https://docs.dseams.info/_static/og-dseams.png",
+    "ai_prompt_template": "Read {url} and answer from that d-SEAMS page.",
 }
 
 html_sidebars = {
@@ -799,6 +805,10 @@ html_sidebars = {
 # paths 404. The HTML files live at the site root.
 html_baseurl = "https://docs.dseams.info/"
 sitemap_url_scheme = "{link}"
+# search and genindex are not manual pages. 404.html is written after
+# Sphinx, so it never enters this list. lastmod is filled in
+# docs/discoverability.py from the git date of the page source.
+sitemap_excludes = ["search.html", "genindex.html"]
 
 
 def _copy_caption_tracks(app, exception):
@@ -868,3 +878,8 @@ def setup(app):
     app.connect("html-page-context", _edit_org_source)
     app.connect("build-finished", _copy_caption_tracks)
     app.connect("autodoc-skip-member", _skip_attributes)
+    if _docs not in sys.path:
+        sys.path.insert(0, _docs)
+    import discoverability
+
+    discoverability.connect(app)
