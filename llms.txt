@@ -20,7 +20,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 - [User guide](https://docs.dseams.info/user/index.md): Recipes and worked examples, grouped by the job you came to do.
 - [Classify ice](https://docs.dseams.info/user/classify.md): Name the ice in a frame with CHILL+, cages, or the symmetry classifier.
-- [Classify ice on the mixed TIP4P example](https://docs.dseams.info/user/tutorials/bulk-ice.md): You classify one in-tree frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
+- [Classify ice on the mixed TIP4P example](https://docs.dseams.info/user/tutorials/bulk-ice.md): You classify one in-tree frame two ways: CHILL+ (a staggered or eclipsed star on each oxygen) and cage membership (hexagonal cage or double-diamond cage).
 - [Ice and clathrate labels](https://docs.dseams.info/user/tutorials/ice-and-clathrate.md): You label one frame two ways. CHILL+ reads a staggered or eclipsed star.
 - [Classify a clathrate](https://docs.dseams.info/user/tutorials/clathrate.md): GenIce builds the three clathrate ices without guests.
 - [Classify a dump](https://docs.dseams.info/user/howto/classify-cli.md): You have a LAMMPS water dump and want counts.
