@@ -1,10 +1,10 @@
 name: Docs
 on:
   push:
-    branches: [main]
+    branches: [main, "release/*"]
     tags: ["v*"]
   pull_request:
-    branches: [main]
+    branches: [main, "release/*"]
 
 # Publish gh-pages only from d-SEAMS/seams-core main. Netlify
 # (dseamsdocs) is Git-linked to that branch and serves
@@ -21,6 +21,14 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
+  registry-claims:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Live docs registry claims
+        run: python3 docs/check_registry_claims.py
+
   build-deploy:
     runs-on: ubuntu-latest
     permissions:

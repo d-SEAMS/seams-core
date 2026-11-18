@@ -1269,6 +1269,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_registry_claims_selftest',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'test_check_registry_claims.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_changelog',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],
