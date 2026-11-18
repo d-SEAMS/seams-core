@@ -163,7 +163,12 @@ TEST_CASE("an all-liquid frame has no brine pockets", "[brine]") {
   const auto census = site::brinePockets(cloud, {false, false, false}, waters,
                                          {}, 1.5);
   REQUIRE(census.nPockets == 0);
-  REQUIRE(census.reservoirWaters == 0);
+  REQUIRE(census.reservoirWaters == 3);
+  const int ion = addPoint(cloud, 20.0, 0, 0, 3);
+  const auto withFlaggedIon = site::brinePockets(
+      cloud, {false, false, false, true}, waters, {ion}, 1.5);
+  REQUIRE(withFlaggedIon.nPockets == 0);
+  REQUIRE(withFlaggedIon.reservoirWaters == 3);
 }
 
 TEST_CASE("the front layer keeps its hexagon and counts the missing neighbours", "[brine]") {
