@@ -160,6 +160,7 @@ stdenv.mkDerivation (finalAttrs: {
     src = minimageSrc;
     hash = "sha256-8NSCv17ACkQbkBnycIZ3K9mUUOWwYX4u7OMii2F2znk=";
   };
+  cargoRoot = "subprojects/minimage";
 
   postPatch = ''
     cp -R ${minimageSrc} subprojects/minimage
