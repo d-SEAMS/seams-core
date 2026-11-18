@@ -121,6 +121,7 @@ stdenv.mkDerivation (finalAttrs: {
       ../cmake
       ../adapters
       ../extras
+      ../third_party
       ../subprojects/readcon-core.wrap
       ../subprojects/readcon-db.wrap
       ../subprojects/linkcell.wrap

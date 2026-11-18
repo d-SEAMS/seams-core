@@ -37,16 +37,16 @@ The only flake input is ~nixpkgs~ (~github:NixOS/nixpkgs/nixos-unstable~).
 
 From =nix/package.nix= (~pname = "seams"~, ~version = "2.14.0"~):
 
-| on | Eigen, BLAS, LAPACK, Catch2 3, Highway (~libhwy~) |
+| on | Eigen, BLAS, LAPACK, Catch2 3, Highway, spglib, nauty, and the OpenBabel CSM program |
+| engines | LAMMPS, GROMACS, OpenMM, and PLUMED from nixpkgs |
 | OpenMP | ~dependency('openmp')~ probe; Clang also gets ~llvmPackages.openmp~ |
-| Meson flags | ~with_tests=true~, ~with_cli=true~, ~with_mpi=false~, ~with_openmp_offload=false~ |
-| ~mesonAutoFeatures~ | ~disabled~ |
+| Meson flags | tests, CLI, packaged analysis and engine backends enabled; unavailable backends disabled |
 | wrap mode | ~nodownload~ (Meson setup hook) |
 
 The fileset is =meson.build=, =meson_options.txt=, =src=, =include=,
 =tests=, =bindings=, =engines=, =bench=, =gpu_host_kernels=, =scripts=
 (including =scripts/dist_strip_vcs.py=), =examples=, =docs=, =input=,
-=templates=, =cmake=, =adapters=, the release files the suite reads, and the wraps
+=templates=, =cmake=, =adapters=, =third_party=, the release files the suite reads, and the wraps
 =readcon-core.wrap=, =readcon-db.wrap=, =linkcell.wrap=,
 =minimage.wrap=, =vesin.wrap=, =subprojects/packagefiles=.
 
@@ -55,13 +55,12 @@ The fileset is =meson.build=, =meson_options.txt=, =src=, =include=,
 | ~with_mpi~ | ~false~ |
 | ~with_openmp_offload~ | ~false~ |
 | vesin, readcon-core, readcon-db, linkcell, minimage | wrap-git fallbacks are not fetched (~nodownload~) |
-| chemfiles | not in the flake closure |
-| IRA, sphericart, nauty | ~auto_features=disabled~, so the ~auto~ probes stay off |
+| chemfiles, IRA, sphericart | no package on this nixpkgs pin |
 
 ~seams --features~ on a flake build therefore reports Highway (and
-OpenMP when it linked) as enabled, and vesin, chemfiles, readcon-core,
-IRA/SOFI, sphericart, nauty, and MPI as disabled. Optional backends
-turn on only if a nixpkgs package is already in the closure.
+OpenMP when it linked), spglib, and nauty as enabled. Vesin, chemfiles,
+readcon-core, IRA/SOFI, sphericart, and MPI stay disabled because this
+nixpkgs pin has no package for them or the option is intentionally off.
 
 * Front-end flakes
 
