@@ -93,6 +93,14 @@ let
     url = "https://ndownloader.figshare.com/files/20418309";
     hash = "sha256-w8dQULt3Ys8NNBfi+6syZCLyPqBKZLb2nq8zM05NFAM=";
   };
+  brineFrameEarly = fetchurl {
+    url = "https://huggingface.co/datasets/d-SEAMS/brine-front-230K/resolve/4828e33ecf419c70643b2d466bfa4f283b4138dc/data/frames/T230_m20_r0_t0.xyz";
+    hash = "sha256-3FWDL8rmZKpeUoKDs76Idi798dq/TbFSC7HIBkAbYSg=";
+  };
+  brineFrameLate = fetchurl {
+    url = "https://huggingface.co/datasets/d-SEAMS/brine-front-230K/resolve/4828e33ecf419c70643b2d466bfa4f283b4138dc/data/frames/T230_m20_r0_tend.xyz";
+    hash = "sha256-3LwF+B8yG0UZXSWc1MIuaTQPnBrlfZPEenTJlcWN0F0=";
+  };
   gromacsLegacyHeaders = runCommand "gromacs-${gromacs.version}-source" {
     nativeBuildInputs = [
       gnutar
@@ -195,6 +203,9 @@ stdenv.mkDerivation (finalAttrs: {
     patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
     mkdir -p docs/.cache/figshare-11448702
     cp ${nucleationTrajectory} docs/.cache/figshare-11448702/nucleation.lammpstrj
+    mkdir -p docs/.cache/brine-front-230K/4828e33ecf419c70643b2d466bfa4f283b4138dc
+    cp ${brineFrameEarly} docs/.cache/brine-front-230K/4828e33ecf419c70643b2d466bfa4f283b4138dc/T230_m20_r0_t0.xyz
+    cp ${brineFrameLate} docs/.cache/brine-front-230K/4828e33ecf419c70643b2d466bfa4f283b4138dc/T230_m20_r0_tend.xyz
   '';
 
   nativeBuildInputs = [
