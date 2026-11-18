@@ -102,8 +102,11 @@ class Rc3Sitting:
     param_names = ["kind", "molecules", "threads"]
 
     def setup(self, kind, molecules, threads):
+        import importlib.util
         import sys
         import numpy as np
+        if kind.startswith("plumed-") and importlib.util.find_spec("plumed") is None:
+            raise NotImplementedError("plumed is not importable")
         sys_path = str(ROOT / "scripts")
         if sys_path not in sys.path:
             sys.path.insert(0, sys_path)

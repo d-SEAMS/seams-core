@@ -31,22 +31,43 @@ def _run(cmd):
     )
 
 
+def _serial_threads():
+    """One OpenMP and one Rayon thread, set before the first library loads.
+
+    libgomp reads these once, when the first OpenMP library loads. Left
+    unset, the team is as wide as the machine. Under a one-cpu affinity mask
+    the timed call then measures thread hand-offs on one core, about a
+    hundred times the serial cost on a thousand molecules.
+    """
+    for name, value in (
+        ("OMP_NUM_THREADS", "1"),
+        ("OMP_DYNAMIC", "FALSE"),
+        ("RAYON_NUM_THREADS", "1"),
+    ):
+        os.environ[name] = value
+
+
+def _prewarm():
+    """True unless SEAMS_BENCH_PREWARM=0, which drops the setup warm-up calls."""
+    return os.environ.get("SEAMS_BENCH_PREWARM", "1") != "0"
+
+
+def _release_binary(*parts):
+    """A binary of the release build. A missing one skips the arm."""
+    path = ROOT / "bbdir-release" / Path(*parts)
+    if not path.is_file():
+        raise NotImplementedError(f"{path.relative_to(ROOT)} is not built")
+    return str(path)
+
+
 class NeighbourArm:
+    """Skipped. No source or meson target builds bench_neigh_only."""
+
     def setup(self):
-        self.cmd = CORE + [
-            str(ROOT / "bbdir/tests/bench_neigh_only"),
-            "--traj", "input/traj/genice_sH.lammpstrj",
-            "--frame", "1",
-            "--type", "1",
-            "--reps", "1",
-            "--warmup", "0",
-            "--cutoff", "3.5",
-            "--k", "4",
-            "--threads", "1",
-        ]
+        raise NotImplementedError("bench_neigh_only has no source in this tree")
 
     def time_mutual_neighbours(self):
-        _run(self.cmd)
+        pass
 
 
 def _write_ideal_ic(path, repetitions, bond=2.75):
@@ -74,27 +95,28 @@ def _write_ideal_ic(path, repetitions, bond=2.75):
 
 
 class DdcArm:
-    """findDDC on 1,000-molecule ideal ice Ic. One warm-up, one timed call."""
+    """findDDC on 1,000-molecule ideal ice Ic. One warm-up, one timed call.
+
+    One process is one sample. SEAMS_BENCH_PREWARM=0 drops the warm-up call.
+    """
 
     def setup(self):
-        frame = ROOT / "bbdir" / "ddc-regression" / "frames" / "ic-1000.lammpstrj"
+        binary = _release_binary("tests", "bench_ddc_ladder")
+        frame = ROOT / "bbdir-release" / "ddc-regression" / "frames" / "ic-1000.lammpstrj"
         if not frame.is_file():
             _write_ideal_ic(frame, 5)
-        self.cmd = CORE + [
-            str(ROOT / "bbdir/tests/bench_ddc_ladder"),
-            str(frame),
-            "1",
-            "1",
-        ]
+        self.cmd = CORE + [binary, str(frame), str(int(_prewarm())), "1"]
 
     def time_find_ddc(self):
         _run(self.cmd)
 
 
 class RingArm:
+    """One bench_stages process on the sH hydrate: read, lists, rings, cages."""
+
     def setup(self):
         self.cmd = CORE + [
-            str(ROOT / "bbdir/tests/bench_stages"),
+            _release_binary("tests", "bench_stages"),
             "input/traj/genice_sH.lammpstrj",
             "1",
             "1",
@@ -106,31 +128,22 @@ class RingArm:
 
 
 class CampaignArms:
+    """Skipped. No source or meson target builds bench_paper."""
+
     def setup(self):
-        bench = str(ROOT / "bbdir/tests/bench_paper")
-        frame = "input/traj/genice_sI.lammpstrj"
-        modes = {
-            "chill": "chill",
-            "q6": "q6-full",
-            "seeded": "seeded-adj",
-            "rings": "rings",
-        }
-        self.commands = {
-            name: CORE + [bench, frame, "1", "0", "1", mode]
-            for name, mode in modes.items()
-        }
+        raise NotImplementedError("bench_paper has no source in this tree")
 
     def time_chill(self):
-        _run(self.commands["chill"])
+        pass
 
     def time_q6(self):
-        _run(self.commands["q6"])
+        pass
 
     def time_seeded_cages(self):
-        _run(self.commands["seeded"])
+        pass
 
     def time_rings(self):
-        _run(self.commands["rings"])
+        pass
 
 
 class ChillPlusIce:
@@ -146,6 +159,7 @@ class ChillPlusIce:
         lib_path = os.environ.get("SEAMS_LANG_LIB")
         if not lib_path:
             raise NotImplementedError("SEAMS_LANG_LIB is not set")
+        _serial_threads()
         lib = ctypes.CDLL(lib_path)
         lib.seams_frame_from_arrays.restype = ctypes.c_void_p
         lib.seams_frame_from_arrays.argtypes = [
@@ -201,7 +215,8 @@ class LocalQl:
 
     Eight threads, cutoff 3.5 angstrom. The neighbour list is inside the
     call. The averaged buffer is null, so the Lechner-Dellago pass is not
-    in the sample. Setup builds the frame and warms the scratch once.
+    in the sample. Setup builds the frame and warms the scratch once;
+    SEAMS_BENCH_PREWARM=0 drops that warm-up call.
     """
 
     def setup(self):
@@ -255,7 +270,7 @@ class LocalQl:
         if not frame:
             raise RuntimeError("could not build the ice frame")
         ql = (ctypes.c_double * n)()
-        if lib.seams_frame_steinhardt(frame, 3.5, 1, 4, ql, None) != 0:
+        if _prewarm() and lib.seams_frame_steinhardt(frame, 3.5, 1, 4, ql, None) != 0:
             raise RuntimeError("warmup failed")
         self._lib = lib
         self._frame = frame
@@ -316,6 +331,7 @@ class CutoffIce:
         if molecules not in cells:
             raise ValueError(molecules)
         m = cells[molecules]
+        _serial_threads()
         lib = ctypes.CDLL(lib_path)
         lib.seams_frame_from_arrays.restype = ctypes.c_void_p
         lib.seams_frame_from_arrays.argtypes = [
@@ -636,6 +652,7 @@ class OmpScaling:
     the monolayer census through the libseams frame handle, and the 2D RDF
     through libseams_lang. setup narrows the process to cpus 0 .. threads-1
     and sets the OpenMP width; a width above the allowed cpus is skipped.
+    setup also calls the operation once; SEAMS_BENCH_PREWARM=0 drops that call.
     The one-process-per-row sitting with the 884736-molecule cell, mdapy,
     pyscal3 and the contended rows is scripts/omp_scaling.py (Snakemake rule
     omp_scaling).
@@ -665,7 +682,8 @@ class OmpScaling:
         os.sched_setaffinity(0, set(range(threads)))
         self._call = omp_scaling.dseams_call(lib_path, operation)
         ctypes.CDLL("libgomp.so.1").omp_set_num_threads(threads)
-        self._call()
+        if _prewarm():
+            self._call()
 
     def time_call(self, operation, threads):
         self._call()
@@ -743,15 +761,8 @@ H2HSession.time_session.repeat = 1
 H2HSession.time_session.number = 1
 
 
-class CageHeadToHead:
-    """GenIce sI unit cell against cycless and ClavisCage.
-
-    The scaled sitting, including sII, sH and the cells past 110592
-    molecules, is benchmarks/cage-h2h-v8.txt. cycless drops spanning
-    cycles. ClavisCage is TRACE at 0.35 nm. d-SEAMS is seams_frame_cages
-    and one cmdCages signature search. Below 2048 molecules the library
-    keeps a single thread.
-    """
+class _CageCell:
+    """GenIce sI unit cell, the frame every cage arm times."""
 
     params = [1, 8]
     param_names = ["threads"]
@@ -780,8 +791,22 @@ class CageHeadToHead:
             raise NotImplementedError("the release language library is required") from exc
         self.mod = module
         self.dump = dump
-        self._cycless = importlib.util.find_spec("cycless") is not None
-        self._clavis = importlib.util.find_spec("clavis_engine") is not None
+
+    def teardown(self, threads):
+        bundle = getattr(self, "bundle", None)
+        if bundle is not None:
+            bundle["dseams"].close()
+
+
+class CageHeadToHead(_CageCell):
+    """d-SEAMS cages on the GenIce sI unit cell: seams_frame_cages, then cmdCages.
+
+    The scaled sitting, including sII, sH and the cells past 110592
+    molecules, is benchmarks/cage-h2h-v8.txt. Below 2048 molecules the
+    library keeps a single thread. The cycless and ClavisCage arms of the
+    same cell are CageHeadToHeadCycless and CageHeadToHeadClavis, so that a
+    tool that is not installed skips its own arm.
+    """
 
     def time_dseams_cages(self, threads):
         self.bundle["dseams"].seeded()
@@ -789,9 +814,18 @@ class CageHeadToHead:
     def time_dseams_cmd(self, threads):
         self.mod.cmd_signature(self.dump)
 
-    def time_cycless(self, threads):
-        if not self._cycless:
+
+class CageHeadToHeadCycless(_CageCell):
+    """cycless rings and polyhedra on the same cell. cycless drops spanning cycles."""
+
+    def setup(self, threads):
+        import importlib.util
+
+        if importlib.util.find_spec("cycless") is None:
             raise NotImplementedError("cycless is not installed")
+        super().setup(threads)
+
+    def time_cycless(self, threads):
         from cycless.cycles import cycles_iter
         from cycless.polyhed import polyhedra_iter
 
@@ -801,19 +835,23 @@ class CageHeadToHead:
         ]
         list(polyhedra_iter(rings, 22, quick=True))
 
-    def time_clavis(self, threads):
-        if not self._clavis:
+
+class CageHeadToHeadClavis(_CageCell):
+    """ClavisCage TRACE at 0.35 nm on the same cell."""
+
+    def setup(self, threads):
+        import importlib.util
+
+        if importlib.util.find_spec("clavis_engine") is None:
             raise NotImplementedError("clavis_engine is not installed")
+        super().setup(threads)
+
+    def time_clavis(self, threads):
         import clavis_engine
 
         clavis_engine.analyze_waters(
             self.bundle["waters"], "[]", self.bundle["box"], "trace", 0.35, 35.0
         )
-
-    def teardown(self, threads):
-        bundle = getattr(self, "bundle", None)
-        if bundle is not None:
-            bundle["dseams"].close()
 
 
 class H2HMdapyPyscal3Vesin:
