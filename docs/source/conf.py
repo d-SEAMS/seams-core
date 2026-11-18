@@ -185,6 +185,21 @@ def _write_video_players():
 _write_video_players()
 
 
+def _write_release_notes():
+    """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
+    import importlib.util
+
+    script = os.path.join(_docs, "check_changelog.py")
+    spec = importlib.util.spec_from_file_location("check_changelog", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("2.14.0 notes do not match changelog.d")
+
+
+_write_release_notes()
+
+
 def _write_padding():
     """Fill the cutoff-and-padding how-to from the validation CSV."""
     import importlib.util
@@ -444,6 +459,7 @@ def _include_orphan_pages():
         "user/howto/cutoff-padding-tables.rst",
         "user/tutorials/gallery-captions.rst",
         "user/tutorials/molecules.rst",
+        "reference/release-2.14-notes.rst",
         "science/figures/",
         "xml/",
         "doxygen-include/",
@@ -666,6 +682,7 @@ exclude_patterns = [
     "user/howto/cutoff-padding-tables.rst",
     "user/tutorials/gallery-captions.rst",
     "user/tutorials/molecules.rst",
+    "reference/release-2.14-notes.rst",
 ]
 # A warning is a failed book. Sphinx stops instead of publishing it.
 warningiserror = True
