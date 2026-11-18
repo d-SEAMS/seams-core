@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="teal" data-content_root="../">
+<html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Ice-likeness along a short nucleation run - d-SEAMS 2.14.0 documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Science gallery" href="gallery.html" /><link rel="prev" title="Ice growing into brine" href="paper-brine.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Ice-likeness along a short nucleation run - d-SEAMS molecular simulation analysis documentation</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Science gallery" href="gallery.html" /><link rel="prev" title="Ice growing into brine" href="paper-brine.html" />
       <link rel="canonical" href="https://docs.dseams.info/tutorials/paper-nucleation.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -12,70 +12,100 @@
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=29d35f5f" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
-  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
-}
-</style>
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=4f6f3aa2" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/tutorials/paper-nucleation.html"/>
   <meta property="og:title" content="Ice-likeness along a short nucleation run"/>
     <meta name="twitter:card" content="summary"/>
-  <!-- Antics analytics -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
-<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script></head>
-<body><div class="sy-head">
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="twitter:title" content="Ice-likeness along a short nucleation run - d-SEAMS">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://docs.dseams.info/#application",
+      "name": "d-SEAMS",
+      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
+      "applicationCategory": "ScientificApplication",
+      "operatingSystem": "Linux, macOS",
+      "url": "https://docs.dseams.info/",
+      "softwareVersion": "2.14.0",
+      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://github.com/d-SEAMS/seams-core#source",
+      "name": "seams-core",
+      "codeRepository": "https://github.com/d-SEAMS/seams-core",
+      "programmingLanguage": ["C++", "C", "Python"],
+      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    }
+  ]
+}
+</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
     <a class="sy-head-brand" href="../index.html">
-      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
-      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      
+      
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
-      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
-            <span>Ecosystem</span>
-            <i class="i-lucide chevron-down"></i>
-          </button>
-        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://docs.dseams.info">
-                <span>d-SEAMS engine</span>
-                <small>libyodaLib and the seams CLI</small>
-              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
-                <span>PydSEAMSlib (Python)</span>
-                <small>pydseamslib: import dseams and import pydseams</small>
-              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
-                <span>yodaStruct (Lua, Fennel)</span>
-                <small>require("dseams")</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/dseams-r">
-                <span>dseams-r (R)</span>
-                <small>The R package dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/Dseams.jl">
-                <span>Dseams.jl (Julia)</span>
-                <small>The Julia package Dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/dseams-rs">
-                <span>dseams-rs (Rust)</span>
-                <small>The crates dseams-sys and dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/dseams-fortran">
-                <span>dseams-fortran (Fortran)</span>
-                <small>The fpm package dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/linkcell">
-                <span>linkcell</span>
-                <small>Periodic linked-cell k-nearest neighbours</small>
-              </a></li></ul>
-      </li></ul></nav>
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
 </form><div class="sy-head-socials">
-  <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
-    <iconify-icon icon="simple-icons:github"></iconify-icon>
-  </a></div></div>
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
     </div>
     <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
 data-aria-auto="Switch to light color mode"
@@ -627,28 +657,7 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#full-run">Full run</a></li>
 </ul>
-</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
-  data-type="github" data-user="d-SEAMS" data-repo="seams-core">
-  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
-    <iconify-icon icon="simple-icons:github"></iconify-icon>
-  </span>
-  <span class="flex-grow px-2 break-all">
-    
-    
-      <span>seams-core</span>
-    
-    <span class="flex text-sm repo-stats-count">
-      <span class="flex items-center pr-3">
-        <iconify-icon icon="lucide:star"></iconify-icon>
-        <strong class="js-repo-stars ml-1">0</strong>
-      </span>
-      <span class="flex items-center">
-        <iconify-icon icon="lucide:git-fork"></iconify-icon>
-        <strong class="js-repo-forks ml-1">0</strong>
-      </span>
-    </span>
-  </span>
-</a><div class="edit-this-page">
+</div><div class="edit-this-page">
   <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/orgmode/tutorials/paper-nucleation.org">Edit this page</a>
 </div></div>
   </aside>
@@ -678,42 +687,7 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
-  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
-  <div id="copy-page-trigger">
-    <button
-      type="button"
-      class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="https://docs.dseams.info/_sources/tutorials/paper-nucleation.rst.txt"
-    >
-      <i class="i-lucide" data-icon="copy"></i>
-      <span>Copy page</span>
-    </button>
-    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
-      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
-      <i class="i-lucide chevron-down"></i>
-    </button>
-  </div>
-  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
-    <div role="presentation">
-      <div class="flex flex-col" role="group">
-        <button class="js-copy" type="button" role="menuitem"
-          data-url="https://docs.dseams.info/_sources/tutorials/paper-nucleation.rst.txt">
-          <span class="iconify-icon">
-            <i class="i-lucide" data-icon="copy"></i>
-          </span>
-          <span>Copy page</span>
-        </button>
-        <a role="menuitem" href="https://docs.dseams.info/_sources/tutorials/paper-nucleation.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/tutorials/paper-nucleation.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
-          <iconify-icon icon="bi:openai"></iconify-icon>
-          <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/tutorials/paper-nucleation.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
-          <iconify-icon icon="bi:claude"></iconify-icon>
-          <span>Open in Claude</span>
-        </a></div>
-    </div>
-  </div>
-</div><article class="yue dark-code" role="main">
+  <article class="yue dark-code" role="main">
           <section id="ice-likeness-along-a-short-nucleation-run">
 <h1>Ice-likeness along a short nucleation run<a class="headerlink" href="#ice-likeness-along-a-short-nucleation-run" title="Link to this heading">¶</a></h1>
 <p>Ice-likeness here is the mean Lechner-Dellago <span class="math notranslate nohighlight">\(\bar q_6\)</span>. A liquid
@@ -929,7 +903,7 @@ The test exits 77 when OVITO or Snakemake is absent.</p>
   </p>
 </div> <div class="sy-foot-socials">
 <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
-  <iconify-icon icon="simple-icons:github"></iconify-icon>
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
 </a></div>
     </div>
   </div>
@@ -940,5 +914,5 @@ The test exits 77 when OVITO or Snakemake is absent.</p>
       <script src="../_static/target-highlight.js?v=df7d332b"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
       <script src="../_static/shibuya.js?v=cac61aee"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
+      <script async="async" src="../_static/dseams/mathjax/tex-chtml.js?v=20daa33d"></script></body>
 </html>

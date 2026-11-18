@@ -689,26 +689,5 @@ See `Citation <explanation/citation.rst>`_.
    reference/release-2.14-notes
    tutorials/gallery-captions
    tutorials/molecules
-   videos/embeds/brine
-   videos/embeds/c
-   videos/embeds/cages
-   videos/embeds/cli
-   videos/embeds/cpp
-   videos/embeds/fortran
-   videos/embeds/gromacs
-   videos/embeds/insitu
-   videos/embeds/interface
-   videos/embeds/julia
-   videos/embeds/lammps
-   videos/embeds/lua
-   videos/embeds/migrate
-   videos/embeds/nucleation
-   videos/embeds/openmm
-   videos/embeds/plumed
-   videos/embeds/python
-   videos/embeds/r
-   videos/embeds/rings
-   videos/embeds/rust
-   videos/players
 
 .. linkcheck-pages-end

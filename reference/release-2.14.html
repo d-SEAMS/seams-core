@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-accent-color="teal" data-content_root="../">
+<html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>2.14.0 release notes - d-SEAMS 2.14.0 documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Stable API" href="../stable/index.html" /><link rel="prev" title="Glossary" href="glossary.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>2.14.0 release notes - d-SEAMS molecular simulation analysis documentation</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Stable API" href="../stable/index.html" /><link rel="prev" title="Glossary" href="glossary.html" />
       <link rel="canonical" href="https://docs.dseams.info/reference/release-2.14.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -12,70 +12,100 @@
     <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
-    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=29d35f5f" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
-  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
-}
-</style>
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=4f6f3aa2" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/reference/release-2.14.html"/>
   <meta property="og:title" content="2.14.0 release notes"/>
     <meta name="twitter:card" content="summary"/>
-  <!-- Antics analytics -->
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
-<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script></head>
-<body><div class="sy-head">
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+
+<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta property="og:image" content="https://dseams.info/images/og-card.png">
+<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="twitter:title" content="2.14.0 release notes - d-SEAMS">
+<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
+<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://docs.dseams.info/#application",
+      "name": "d-SEAMS",
+      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
+      "applicationCategory": "ScientificApplication",
+      "operatingSystem": "Linux, macOS",
+      "url": "https://docs.dseams.info/",
+      "softwareVersion": "2.14.0",
+      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://github.com/d-SEAMS/seams-core#source",
+      "name": "seams-core",
+      "codeRepository": "https://github.com/d-SEAMS/seams-core",
+      "programmingLanguage": ["C++", "C", "Python"],
+      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
+      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
+    }
+  ]
+}
+</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
   <div class="sy-head-blur"></div>
   <div class="sy-head-inner sy-container mx-auto">
     <a class="sy-head-brand" href="../index.html">
-      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
-      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      
+      
       <strong>d-SEAMS</strong>
     </a>
     <div class="sy-head-nav" id="head-nav">
-      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
-      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
-            <span>Ecosystem</span>
-            <i class="i-lucide chevron-down"></i>
-          </button>
-        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://docs.dseams.info">
-                <span>d-SEAMS engine</span>
-                <small>libyodaLib and the seams CLI</small>
-              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
-                <span>PydSEAMSlib (Python)</span>
-                <small>pydseamslib: import dseams and import pydseams</small>
-              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
-                <span>yodaStruct (Lua, Fennel)</span>
-                <small>require("dseams")</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/dseams-r">
-                <span>dseams-r (R)</span>
-                <small>The R package dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/Dseams.jl">
-                <span>Dseams.jl (Julia)</span>
-                <small>The Julia package Dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/dseams-rs">
-                <span>dseams-rs (Rust)</span>
-                <small>The crates dseams-sys and dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/dseams-fortran">
-                <span>dseams-fortran (Fortran)</span>
-                <small>The fpm package dseams</small>
-              </a></li><li><a href="https://github.com/d-SEAMS/linkcell">
-                <span>linkcell</span>
-                <small>Periodic linked-cell k-nearest neighbours</small>
-              </a></li></ul>
-      </li></ul></nav>
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li></ul></nav>
       <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
   <input type="text" name="q" placeholder="Search" />
   <kbd>/</kbd>
 </form><div class="sy-head-socials">
-  <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
-    <iconify-icon icon="simple-icons:github"></iconify-icon>
-  </a></div></div>
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
     </div>
     <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
 data-aria-auto="Switch to light color mode"
@@ -631,28 +661,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#removed">Removed</a></li>
 <li><a class="reference internal" href="#fixed">Fixed</a></li>
 </ul>
-</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
-  data-type="github" data-user="d-SEAMS" data-repo="seams-core">
-  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
-    <iconify-icon icon="simple-icons:github"></iconify-icon>
-  </span>
-  <span class="flex-grow px-2 break-all">
-    
-    
-      <span>seams-core</span>
-    
-    <span class="flex text-sm repo-stats-count">
-      <span class="flex items-center pr-3">
-        <iconify-icon icon="lucide:star"></iconify-icon>
-        <strong class="js-repo-stars ml-1">0</strong>
-      </span>
-      <span class="flex items-center">
-        <iconify-icon icon="lucide:git-fork"></iconify-icon>
-        <strong class="js-repo-forks ml-1">0</strong>
-      </span>
-    </span>
-  </span>
-</a><div class="edit-this-page">
+</div><div class="edit-this-page">
   <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/orgmode/reference/release-2.14.org">Edit this page</a>
 </div></div>
   </aside>
@@ -682,42 +691,7 @@ data-aria-dark="Switch to auto color mode">
   </div>
 </div><div class="flex flex-col break-words justify-between">
       <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
-  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
-  <div id="copy-page-trigger">
-    <button
-      type="button"
-      class="js-copy px-3 py-1 inline-flex items-center gap-1"
-      data-url="https://docs.dseams.info/_sources/reference/release-2.14.rst.txt"
-    >
-      <i class="i-lucide" data-icon="copy"></i>
-      <span>Copy page</span>
-    </button>
-    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
-      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
-      <i class="i-lucide chevron-down"></i>
-    </button>
-  </div>
-  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
-    <div role="presentation">
-      <div class="flex flex-col" role="group">
-        <button class="js-copy" type="button" role="menuitem"
-          data-url="https://docs.dseams.info/_sources/reference/release-2.14.rst.txt">
-          <span class="iconify-icon">
-            <i class="i-lucide" data-icon="copy"></i>
-          </span>
-          <span>Copy page</span>
-        </button>
-        <a role="menuitem" href="https://docs.dseams.info/_sources/reference/release-2.14.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
-            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/reference/release-2.14.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
-          <iconify-icon icon="bi:openai"></iconify-icon>
-          <span>Open in ChatGPT</span>
-        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/reference/release-2.14.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
-          <iconify-icon icon="bi:claude"></iconify-icon>
-          <span>Open in Claude</span>
-        </a></div>
-    </div>
-  </div>
-</div><article class="yue dark-code" role="main">
+  <article class="yue dark-code" role="main">
           <section id="release-notes">
 <h1>2.14.0 release notes<a class="headerlink" href="#release-notes" title="Link to this heading">¶</a></h1>
 <p>These notes are built from the fragments in <code class="docutils literal notranslate"><span class="pre">changelog.d/</span></code>.
@@ -837,7 +811,7 @@ Largest-cluster size and the Ic/Ih fraction are recorded for each definition.
 <li><p>OpenMM, rings, and cages each have a video slug next to the existing rings-cages slug. Topic pages embed the recording from the same embed.txt as the gallery, using an Odysee /$/embed/ URL when a claim is present and the words video coming soon when it is not.</p></li>
 <li><p>An <code class="docutils literal notranslate"><span class="pre">unsigned-char</span></code> CI job builds every target on x86_64 Linux with <code class="docutils literal notranslate"><span class="pre">-funsigned-char</span></code> and runs the suite on it, so code that reads a plain <code class="docutils literal notranslate"><span class="pre">char</span></code> as signed fails without an aarch64 runner.</p></li>
 <li><p>The videos gallery and the README link the d-SEAMS Odysee channel. Every <code class="docutils literal notranslate"><span class="pre">docs/videos/&lt;slug&gt;/script.md</span></code> end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.</p></li>
-<li><p>All nineteen recordings embed their Odysee claims. The cages transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS <code class="docutils literal notranslate"><span class="pre">overhead_s</span></code> timer is machine-dependent.</p></li>
+<li><p>All twenty recordings embed their Odysee claims. The cages transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS <code class="docutils literal notranslate"><span class="pre">overhead_s</span></code> timer is machine-dependent.</p></li>
 <li><p>The rings recording uses the 250-oxygen exampleTraj census and the ice Ih six-ring count. The Rust recording prints the ice Ih census. The GROMACS recording runs gmx-seams after gmx mdrun. A slug with no Odysee claim renders no player. End cards invite questions, issues, discussions, and pull requests. The Python pages show dseams.Frame next to pydseams.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">recipe/recipe.yaml</span></code> builds <code class="docutils literal notranslate"><span class="pre">libseams</span></code> (<code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>, <code class="docutils literal notranslate"><span class="pre">libseams</span></code>, <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>, the <code class="docutils literal notranslate"><span class="pre">seams</span></code> CLI, headers, pkg-config and CMake files) for conda-forge with rattler-build from the release tag archive. The <code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> wheels and their conda package are built in d-SEAMS/PydSEAMSlib.</p></li>
 </ul>
@@ -915,7 +889,7 @@ CHILL+, the ring census, and the template overlay read that CSR.</p></li>
 <li><p>Per-atom keys on a sparse frame reuse one repeated neighbourhood instead of refining it again, and the atoms of a large frame are refined together.</p></li>
 <li><p>The landing page hides the root toctree and replaces that dump with cards for Tutorials, How-to, the language reference, the engines, Comparisons, and the paper reproductions. The suite-stack diagram fills the article column.</p></li>
 <li><p>Cutoff neighbour lists (<code class="docutils literal notranslate"><span class="pre">neighListPair</span></code>, <code class="docutils literal notranslate"><span class="pre">halfNeighList</span></code>, <code class="docutils literal notranslate"><span class="pre">SkinNeighborList</span></code>, and <code class="docutils literal notranslate"><span class="pre">neighListO</span></code> / <code class="docutils literal notranslate"><span class="pre">getNewNeighbourListByIndex</span></code> below 2048 atoms) come from linkcell’s <code class="docutils literal notranslate"><span class="pre">lc_pairs_within</span></code> with cells of about 20 atoms, and vesin is the fallback. <code class="docutils literal notranslate"><span class="pre">halfNeighList</span></code> on 8192 atoms at water density with a 3.5 Å cutoff goes from 8.9 to 4.7 ms on one thread and 4.0 ms on eight. The first linkcell cutoff list keeps freed pages on the heap for the rest of the process (<code class="docutils literal notranslate"><span class="pre">M_TRIM_THRESHOLD</span></code>, <code class="docutils literal notranslate"><span class="pre">M_MMAP_THRESHOLD</span></code>).</p></li>
-<li><p>The linkcell wrap names the v0.4.1 tag and carries no patches.</p></li>
+<li><p>The linkcell wrap names the v0.4.2 tag and carries no patches.</p></li>
 <li><p>A neighbourhood row longer than 16 stays in visit order, because that ball does not repeat.</p></li>
 <li><p>The minimage wrap names the v0.1.4 tag. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.</p></li>
 <li><p>MPI ring analyses can reduce ring counts and per-atom ring types with <code class="docutils literal notranslate"><span class="pre">seams::domain::reduceRings</span></code>, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.</p></li>
@@ -938,6 +912,7 @@ CHILL+, the ring census, and the template overlay read that CSR.</p></li>
 <li><p>q12 is the Cartesian solid harmonic, eight bonds at a time. The value matches the associated-Legendre form.</p></li>
 <li><p>Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.</p></li>
 <li><p>A fingerprint and a per-atom ring count tally rings while searching and do not keep the list. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span> <span class="pre">--by-atom</span></code> reads those per-atom counts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scripts/sanitize_suite.sh</span></code> links <code class="docutils literal notranslate"><span class="pre">run_hook</span></code> to a serial LAMMPS that <code class="docutils literal notranslate"><span class="pre">scripts/build_lammps_serial.sh</span></code> builds, so no process in the AddressSanitizer run starts Open MPI, whose allocations outlive <code class="docutils literal notranslate"><span class="pre">MPI_Finalize</span></code>. Only the wrappers in <code class="docutils literal notranslate"><span class="pre">scripts/asan-path</span></code> whose program is installed go on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>, so an absent Julia takes its skip. <code class="docutils literal notranslate"><span class="pre">pkg-config</span></code>, <code class="docutils literal notranslate"><span class="pre">Xvfb</span></code>, <code class="docutils literal notranslate"><span class="pre">packmol</span></code> and the installed C API examples run without the preloaded runtime they are not built with.</p></li>
 <li><p>Interior cells of the one-thread orthorhombic cutoff skip the periodic-shift branches. A parallel ring search writes each neighbour row, already sorted, into one array, so the walk after the cell list matches the walk after linkcell.</p></li>
 <li><p>A ring census adds up its seven-rings and publishes one total per atom, instead of one atomic increment per ring.</p></li>
 <li><p>Seven-rings share the tests of one near vertex across the arms that leave it.</p></li>
@@ -972,6 +947,7 @@ CHILL+, the ring census, and the template overlay read that CSR.</p></li>
 <ul class="simple">
 <li><p>The thread pool stays inside the CPU mask it inherited. A restricted taskset or cpuset is no longer widened to every CPU the kernel would allow.</p></li>
 <li><p>The AMX INT8 product behind <code class="docutils literal notranslate"><span class="pre">ozaki-ii-amx</span></code> is checked against exact row, weighted-row and column checksums of its inputs, and recomputed with VNNI or scalar code when one disagrees. On a KVM guest that corrupted AMX tiles while separate processes used AMX at once, <code class="docutils literal notranslate"><span class="pre">ozaki</span></code> failed in 62 of 1200 concurrent runs and now passes all of them.</p></li>
+<li><p>The vendored argument parser passes a wide character to <code class="docutils literal notranslate"><span class="pre">iswspace</span></code> as <code class="docutils literal notranslate"><span class="pre">wint_t</span></code>. It cast through <code class="docutils literal notranslate"><span class="pre">unsigned</span></code>, which is a sign change where <code class="docutils literal notranslate"><span class="pre">wint_t</span></code> is <code class="docutils literal notranslate"><span class="pre">int</span></code>, so the macOS build stopped under <code class="docutils literal notranslate"><span class="pre">-Werror=sign-conversion</span></code>.</p></li>
 <li><p>The AVX2 per-atom ice classifier behind <code class="docutils literal notranslate"><span class="pre">symmetry</span></code> and the shell labels, and the AVX2 scan that builds a one-thread full neighbour list in a triclinic cell, run only on a CPU that reports AVX2 and FMA. The classifier’s file was compiled with <code class="docutils literal notranslate"><span class="pre">-mavx2</span> <span class="pre">-mfma</span></code> and called without a check, so <code class="docutils literal notranslate"><span class="pre">symmetry</span></code> stopped on an illegal instruction on a CPU without AVX2 or without FMA, and the inline header code that file emitted could replace the library’s own copies at link time. The triclinic scan checked the CPU inside a function that was itself compiled for AVX2. The classifier is now built twice, once for any CPU and once with a target pragma below its includes, the scan is split the same way, and each call takes the AVX2 copy only after the check. The double-precision product in <code class="docutils literal notranslate"><span class="pre">ozaki</span></code> now also requires FMA, and the AMX INT8 path requires the AMX-TILE and AMX-INT8 bits and the operating system’s tile state before it asks Linux for the tiles. One test switch holds the AVX-512 kernels, the classifier and the scan on their generic path, and a test compares the labels, the diamond signatures and the neighbour lists of the two paths. On a CPU with AVX2 and FMA the output is unchanged.</p></li>
 <li><p>The AVX-512 spherical-harmonic kernels behind Steinhardt q4, q6, q12 and the batched Ylm run only on a CPU that reports AVX-512F, AVX-512DQ and FMA, the three their file is compiled with. The q12 path checked AVX-512F alone and the batched paths AVX-512DQ alone, so a CPU with one of the three but not the others could stop on an illegal instruction. Every call now goes through one check, other CPUs take the scalar path with the same values, and a test forces that path and compares the two.</p></li>
 <li><p>The backtrace signal handler now outlives static destruction. A sanitizer abort at exit hit the freed handler stack and hung <code class="docutils literal notranslate"><span class="pre">lammps_hook</span></code> until its timeout.</p></li>
@@ -992,6 +968,7 @@ The sphere test checks tiling before the closed test.</p></li>
 <li><p>A MOL2 molecule whose counts line is empty no longer crashes <code class="docutils literal notranslate"><span class="pre">seams_path_nframes</span></code>. The vendored chemfiles 0.10.4 indexed the first count of an empty line; the build now applies <code class="docutils literal notranslate"><span class="pre">cmake/patches/chemfiles-0.10.4-mol2.patch</span></code> and refetches chemfiles when the patch set changes. Found by <code class="docutils literal notranslate"><span class="pre">capi_read_fuzzer</span></code>.</p></li>
 <li><p>CHILL+ defaults to the cutoff list on the CLI, the C API, the LAMMPS <code class="docutils literal notranslate"><span class="pre">compute</span> <span class="pre">dseams</span></code>, and every language binding. The mutual four-nearest list is <code class="docutils literal notranslate"><span class="pre">graph</span> <span class="pre">=</span> <span class="pre">mutual</span></code>. On <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> (oxygen, type 2) the cutoff list is 9 interClathrate and 241 water; the mutual list is 1 clathrate, 7 interClathrate, and 242 water. The docs tutorials run against the <code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> 2.14.0 package built from d-SEAMS/PydSEAMSlib.</p></li>
 <li><p>Keep the 2.13 signatures of <code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code>, <code class="docutils literal notranslate"><span class="pre">getIceTypePlus</span></code>, and <code class="docutils literal notranslate"><span class="pre">getIceTypePlusNoPrint</span></code> as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">capi_abi_2_13</span></code> and <code class="docutils literal notranslate"><span class="pre">capi_abi_2_13_selftest</span></code> run in the pixi suite with the abi environment’s <code class="docutils literal notranslate"><span class="pre">abidiff</span></code> instead of being accepted as skipped.</p></li>
 <li><p>Clang builds record the directory of clang’s <code class="docutils literal notranslate"><span class="pre">libomp.so</span></code> as a runpath, so the libraries, tests and libFuzzer harnesses start without <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code> with an EESSI LLVM and with the apt.llvm.org packages, whose <code class="docutils literal notranslate"><span class="pre">libomp</span></code> lives in <code class="docutils literal notranslate"><span class="pre">/usr/lib/llvm-&lt;version&gt;/lib</span></code>.</p></li>
 <li><p>The library builds with clang again: the prism code in <code class="docutils literal notranslate"><span class="pre">topo_one_dim.cpp</span></code> casts its signed ring and atom indices explicitly, as the rest of the tree does, so the <code class="docutils literal notranslate"><span class="pre">-Werror=sign-conversion</span></code> and <code class="docutils literal notranslate"><span class="pre">-Werror=shorten-64-to-32</span></code> that clang builds use no longer stop it.</p></li>
 <li><p>The engine builds with clang, libc++ and musl and on macOS. CPU features are read with cpuid instead of <code class="docutils literal notranslate"><span class="pre">__builtin_cpu_supports</span></code>, which needs compiler-rt’s <code class="docutils literal notranslate"><span class="pre">__cpu_model</span></code> on macOS. The AVX-512 row work in <code class="docutils literal notranslate"><span class="pre">ozaki.cpp</span></code> moved into target functions, since clang does not give an OpenMP region the target attribute of the enclosing function. The dump reader replaces <code class="docutils literal notranslate"><span class="pre">__gnu_cxx::stdio_filebuf</span></code>, which libc++ lacks, with its own seekable buffer. <code class="docutils literal notranslate"><span class="pre">backward.cpp</span></code> compiles to nothing where <code class="docutils literal notranslate"><span class="pre">&lt;execinfo.h&gt;</span></code> is missing, the ring profiler ticks use <code class="docutils literal notranslate"><span class="pre">steady_clock</span></code> off x86, and the AMX request in <code class="docutils literal notranslate"><span class="pre">ozaki.cpp</span></code> is Linux only.</p></li>
@@ -999,12 +976,14 @@ The sphere test checks tiling before the closed test.</p></li>
 <li><p>The multi-thread cutoff list records neighbour ids during the count walk, and the linkcell pool is sized to the OpenMP width.</p></li>
 <li><p>Keep a diamond shell while eight good (4,2,1) signatures, or the ambiguous band, are still reachable. The old count stopped once four bad rows made nine good signatures unreachable.</p></li>
 <li><p>On a crowded shell the diamond label uses the four nearest neighbours, the list mdapy uses, and the labels stay those of the cutoff list.</p></li>
+<li><p>The videos page and the 1.x migration guide play the migrate recording, now the twentieth cut, from its Odysee claim. The docs book builds again with warnings as errors: the video player fragments are no longer read as untitled pages, and the <code class="docutils literal notranslate"><span class="pre">q6DotScore</span></code> comment no longer reaches Sphinx as an undefined substitution. The docs deploy job draws the science and engine walkthrough figures before the book, so the published site no longer carries blank stand-ins for them.</p></li>
 <li><p>A LAMMPS dump whose <code class="docutils literal notranslate"><span class="pre">NUMBER</span> <span class="pre">OF</span> <span class="pre">ATOMS</span></code> line comes after <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> no longer indexes past the id table, which was sized for the previous count. Found by <code class="docutils literal notranslate"><span class="pre">capi_read_fuzzer</span></code>.</p></li>
 <li><p>A chemfiles LAMMPS dump keeps the reduced cell edge. The bound span was being padded by the tilt a second time, so genice sH reported 31.05 Å instead of 24.84 Å. OVITO FindRings is compared as a subset of the primitive-ring census: K2,3 has three chordless 4-rings and FindRings reports two.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">dump_index_eintr</span></code>, <code class="docutils literal notranslate"><span class="pre">dump_index_eio</span></code> and <code class="docutils literal notranslate"><span class="pre">dump_fstat_keeps_atoms</span></code> each write their dump under a directory of their own. The three run one driver in parallel and shared a fixed temporary directory, so one test’s cleanup could remove the other’s file and abort it with <code class="docutils literal notranslate"><span class="pre">filesystem</span> <span class="pre">error:</span> <span class="pre">cannot</span> <span class="pre">remove</span></code>.</p></li>
 <li><p>Engine checks load the plugin from the build tree. A copy staged under an install destdir is left alone.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">docs/howto/test_engines.py</span></code> runs each engine how-to in a temporary directory under <code class="docutils literal notranslate"><span class="pre">build/docs-examples</span></code> and removes it afterwards. <code class="docutils literal notranslate"><span class="pre">docs_engine_&lt;engine&gt;</span></code> and the <code class="docutils literal notranslate"><span class="pre">docs_video_tapes</span></code> scenes ran the same engine at once in one fixed directory, and PLUMED, which renames every <code class="docutils literal notranslate"><span class="pre">colvar</span></code> it finds to a numbered backup, refused to run once 101 backups had built up over repeated <code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">test</span></code> runs.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">libSeamsPlumed.so</span></code>, <code class="docutils literal notranslate"><span class="pre">run_hook</span></code> and <code class="docutils literal notranslate"><span class="pre">seams_openmm</span></code> carry an rpath to <code class="docutils literal notranslate"><span class="pre">libplumedKernel.so</span></code>, <code class="docutils literal notranslate"><span class="pre">liblammps.so</span></code> and <code class="docutils literal notranslate"><span class="pre">libOpenMM.so</span></code>. Without <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code>, PLUMED’s <code class="docutils literal notranslate"><span class="pre">LOAD</span></code> failed with “libplumedKernel.so: cannot open shared object file” and the two drivers did not start.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">lammps_hook</span></code> and the other engine tests run through <code class="docutils literal notranslate"><span class="pre">skip_missing_lib.sh</span></code> fail when the engine program fails. The wrapper read the exit status after its <code class="docutils literal notranslate"><span class="pre">if</span></code> block, where it is always 0, so a crashing <code class="docutils literal notranslate"><span class="pre">run_hook</span></code> was reported as passing.</p></li>
 <li><p>The Fortran methods that size a buffer and then fill it (<code class="docutils literal notranslate"><span class="pre">rdf</span></code>, <code class="docutils literal notranslate"><span class="pre">running_cn</span></code>, <code class="docutils literal notranslate"><span class="pre">density</span></code>, <code class="docutils literal notranslate"><span class="pre">brine_profile</span></code>, the fingerprint keys and the neighbour columns) pass the capacity in its own variable. They passed one variable as both the by-value capacity and the <code class="docutils literal notranslate"><span class="pre">intent(out)</span></code> length, which leaves the capacity undefined on entry.</p></li>
 <li><p>The Fortran bindings free the result buffers after the copy, and a dump that cannot be opened names its path. The cubic example drops the arrays it owns after the frame is closed, which LeakSanitizer otherwise reports before a Fortran main finalizes its allocatables.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">capi_fuzzer</span></code> writes its per-format scratch files under names that include the process id. <code class="docutils literal notranslate"><span class="pre">-fork</span></code> jobs and parallel test runs shared fixed names in one working directory, so one process could truncate a file another had mapped and die with SIGBUS. The fuzz targets also rebuild when their source changes.</p></li>
@@ -1015,15 +994,18 @@ The sphere test checks tiling before the closed test.</p></li>
 <li><p>The XYZ and LAMMPS dump readers no longer size their buffers from the header atom count alone. A few-byte file that declared 99999999 atoms made <code class="docutils literal notranslate"><span class="pre">seams_system_read</span></code> allocate several gigabytes before reporting the truncated frame, and under <code class="docutils literal notranslate"><span class="pre">MALLOC_PERTURB_</span></code> it pushed <code class="docutils literal notranslate"><span class="pre">capi_fuzzer</span></code> past its 4 GB limit. Reservations are now capped by what the unread bytes can hold, and the dump id index sizes its bitmap only after the rows confirm the count. <code class="docutils literal notranslate"><span class="pre">capi_contract</span></code> checks the peak RSS on Linux.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bench_rings_h2h</span> <span class="pre">--repl</span></code> answered every sample with the ring search on a graph built before the clock, so the inside row repeated the prebuilt one. An <code class="docutils literal notranslate"><span class="pre">in</span></code> line now times the neighbour list, its index and the ring search as one call, and <code class="docutils literal notranslate"><span class="pre">scripts/rings_one_thread.py</span></code> records the prebuilt and inside rows side by side and writes them to a CSV next to the JSON. The one-thread table on the Rings on one thread page is the prebuilt row and does not change.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">c_api_installed</span></code> and <code class="docutils literal notranslate"><span class="pre">capi_installed_examples</span></code> install into a fresh directory under <code class="docutils literal notranslate"><span class="pre">install-stages</span></code> in the build tree and remove it on exit, so <code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">test</span> <span class="pre">--repeat</span></code> can run two copies at once.</p></li>
+<li><p>A LAMMPS installed by its own CMake build is found through <code class="docutils literal notranslate"><span class="pre">liblammps.pc</span></code>, and <code class="docutils literal notranslate"><span class="pre">run_hook</span></code> links and loads that LAMMPS even when the environment holds another <code class="docutils literal notranslate"><span class="pre">liblammps.so.0</span></code>. <code class="docutils literal notranslate"><span class="pre">compute</span> <span class="pre">dseams</span></code> is built only when every LAMMPS header it includes compiles, so an install without <code class="docutils literal notranslate"><span class="pre">lammpsplugin.h</span></code> no longer stops the build. <code class="docutils literal notranslate"><span class="pre">scripts/fetch_lammps_headers.sh</span></code> also fetches the bundled <code class="docutils literal notranslate"><span class="pre">nlohmann</span></code> headers that <code class="docutils literal notranslate"><span class="pre">atom.h</span></code> includes since the 2025 releases.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">compute</span> <span class="pre">dseams</span></code> on several MPI ranks classified each rank’s own atoms as a separate cell, so atoms near a subdomain boundary lost neighbours. On two ranks, 8312 of 86016 labels over 21 frames of 4096-molecule mW ice and liquid differed from <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code> on the same dump. The compute now gathers every atom to rank 0, classifies the whole cell once, and returns each rank its labels; all 86016 match. <code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">test</span> <span class="pre">lammps_e2e_np2</span></code> is the regression.</p></li>
 <li><p>The landing-page and architecture diagrams quote labels that contain a slash or a quote, so Mermaid 11 draws the suite stack.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">meson-uninstalled/seams-lang-uninstalled.pc</span></code> and <code class="docutils literal notranslate"><span class="pre">seams-core-uninstalled.pc</span></code> name the build tree. They passed <code class="docutils literal notranslate"><span class="pre">-L</span></code> a lib directory under the build root that nothing is built into, and no include path, so a binding with <code class="docutils literal notranslate"><span class="pre">PKG_CONFIG_PATH</span></code> at <code class="docutils literal notranslate"><span class="pre">meson-uninstalled</span></code> did not find <code class="docutils literal notranslate"><span class="pre">seams_lang.h</span></code> and did not link <code class="docutils literal notranslate"><span class="pre">-lseams_lang</span></code> or <code class="docutils literal notranslate"><span class="pre">-lyodaLib</span></code>. The installed <code class="docutils literal notranslate"><span class="pre">seams-lang.pc</span></code> and <code class="docutils literal notranslate"><span class="pre">seams-core.pc</span></code> resolve to the same flags as before.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">language_fronts</span></code> gives <code class="docutils literal notranslate"><span class="pre">cargo</span> <span class="pre">test</span></code> the <code class="docutils literal notranslate"><span class="pre">SEAMS_SOURCE_ROOT</span></code> and <code class="docutils literal notranslate"><span class="pre">SEAMS_CPP_ORACLE</span></code> that the Rust <code class="docutils literal notranslate"><span class="pre">cpp_match</span></code> tests read, and builds <code class="docutils literal notranslate"><span class="pre">binding_oracle</span></code> first.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> no longer installs backward-cpp’s crash handler. Its static <code class="docutils literal notranslate"><span class="pre">SignalHandling</span></code> replaced the SIGSEGV handler of any process that loaded the library, so Julia, which faults on purpose at its GC safepoints, died with signal 11 at random points of <code class="docutils literal notranslate"><span class="pre">Pkg.test()</span></code> once <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code> was open. <code class="docutils literal notranslate"><span class="pre">backward.cpp</span></code> is now compiled into the <code class="docutils literal notranslate"><span class="pre">seams</span></code>, <code class="docutils literal notranslate"><span class="pre">brine_front</span></code>, <code class="docutils literal notranslate"><span class="pre">science-front</span></code> and <code class="docutils literal notranslate"><span class="pre">nucleation-pathway</span></code> executables, which keep their stack traces on a crash.</p></li>
+<li><p>A one-thread bond-order search no longer starts Rayon’s global pool at the CPU count. linkcell 0.4.2 fills the columns of <code class="docutils literal notranslate"><span class="pre">lc_pairs_within</span></code> on the width set with <code class="docutils literal notranslate"><span class="pre">lc_set_threads</span></code>. A Clang build also finds a libomp that only <code class="docutils literal notranslate"><span class="pre">LIBRARY_PATH</span></code> reaches, such as the Archer runtime of the ThreadSanitizer job, instead of stopping on “finding libomp failed”.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">-Dwith_linkcell=disabled</span></code> builds and links again: the k-nearest neighbour list merges its rows on the OpenMP team instead of calling linkcell’s slab walk, and the GPU batch helpers build under <code class="docutils literal notranslate"><span class="pre">-Werror</span></code> without linkcell.</p></li>
 <li><p>A Clang build loads one OpenMP runtime. linkcell compiled its OpenMP k-nearest region with the environment’s GCC and linked libgomp next to Clang’s libomp, and the two runtimes disagreed on thread numbers, so neighbour, ring, CHILL+ and C API calls indexed past their per-thread buffers and aborted. linkcell 0.4.1 compiles that region with the C compiler Meson chose and links that compiler’s runtime.</p></li>
 <li><p>The Lua LuaJIT FFI module <code class="docutils literal notranslate"><span class="pre">dseams_ffi.lua</span></code> is written by a plain build of the Lua binding, not only by its example test, so the LuaJIT FFI tutorial runs on a fresh build. The Lua binding lives in d-SEAMS/yodaStruct.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code> loads the module built for that interpreter. The Lua binding used to put the LuaJIT module first on the search path, and PUC Lua 5.4 then mapped that shared object.</p></li>
+<li><p>A macOS build finds <code class="docutils literal notranslate"><span class="pre">libomp</span></code>, the shared library Meson produced, and an open dump after <code class="docutils literal notranslate"><span class="pre">unlink</span></code>. Apple ld is not passed <code class="docutils literal notranslate"><span class="pre">-rpath-link</span></code>, Apple nm reads the exported C ABI, and the TIP4P overhead test skips when OpenMM cannot be imported.</p></li>
 <li><p>The 1.x migration guide lists only the Lua globals v1.0.1 registered (readFrame, chillPlus_iceType, getPrimitiveRings and the rest). The dseams table and the later Lua names sit under the yodaStruct release that first shipped each one, and coordination, density, fingerprint, contact pairs, domains, k-NN and signature search are marked new in 2.x. The migrate video narration says the same.</p></li>
 <li><p>A short LAMMPS frame no longer returns from the reading rank before <code class="docutils literal notranslate"><span class="pre">MPI_Gatherv</span></code>. Both ranks gather, and the frames that did read still print. On the 11-frame dump cut short, frames 1-10 stay whole and frame 11 keeps its header and two atoms.</p></li>
 <li><p>The four nearest bonds are ordered by an insertion sort of that bounded count. GCC 15 no longer inlines <code class="docutils literal notranslate"><span class="pre">std::sort</span></code> past the end of the stack array once OpenMP outlines the loop, and the order is unchanged. AVX dispatch uses the CPUID helper, which exists on aarch64.</p></li>
@@ -1038,6 +1020,7 @@ The sphere test checks tiling before the closed test.</p></li>
 <li><p>The PLUMED q6 derivative is expressed per nanometer. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.</p></li>
 <li><p>The PLUMED <code class="docutils literal notranslate"><span class="pre">SEAMS</span></code> action scaled positions and the box by 10 whatever PLUMED’s length unit, so under <code class="docutils literal notranslate"><span class="pre">UNITS</span> <span class="pre">LENGTH=A</span></code> it saw a cell a hundred times too large: on the ideal 64-molecule cell <code class="docutils literal notranslate"><span class="pre">seams.ice</span></code> was 0 and <code class="docutils literal notranslate"><span class="pre">seams.q6</span></code> 0 instead of 1 and 0.6285. It now reads the unit from PLUMED. <code class="docutils literal notranslate"><span class="pre">meson</span> <span class="pre">test</span> <span class="pre">plumed_units</span></code> is the regression.</p></li>
 <li><p>The engine compiles on aarch64, Apple silicon, and musl. The AVX kernels are built for x86_64 only and other targets take the scalar paths, <code class="docutils literal notranslate"><span class="pre">backward.cpp</span></code> is skipped without <code class="docutils literal notranslate"><span class="pre">execinfo.h</span></code>, and <code class="docutils literal notranslate"><span class="pre">LinearFit::stderr</span></code> is now <code class="docutils literal notranslate"><span class="pre">slopeStdErr</span></code> because musl defines <code class="docutils literal notranslate"><span class="pre">stderr</span></code> as a macro.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scripts/install_pydseamslib.sh</span></code> builds the binding with the subproject wraps of this tree, so pydseamslib gets the linkcell 0.4.1 that seams-core requires instead of the binding’s 0.4.0 pin.</p></li>
 <li><p>q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.</p></li>
 <li><p>The C API builds q4 and q6 from one cutoff shell and does not fill an atom-index map on that path.</p></li>
 <li><p>When <code class="docutils literal notranslate"><span class="pre">SEAMS_LIBDIR</span></code> is set, the R configure script exports <code class="docutils literal notranslate"><span class="pre">DSEAMS_ROOT</span></code> so it can find <code class="docutils literal notranslate"><span class="pre">seams.h</span></code>. A missing header names that variable.</p></li>
@@ -1246,7 +1229,7 @@ are unchanged.</p></li>
   </p>
 </div> <div class="sy-foot-socials">
 <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
-  <iconify-icon icon="simple-icons:github"></iconify-icon>
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
 </a></div>
     </div>
   </div>

@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-brine" src="https://odysee.com/$/embed/dseams-brine:124a3a7fa52cdf7aff34ac00cfba6068e240a947" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/brine.vtt">docs/videos/brine/captions.vtt</a></p>
-   <p>The brine front.</p>

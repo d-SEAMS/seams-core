@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-r" src="https://odysee.com/$/embed/dseams-r:e0c4871fe0399cf259531b5961c436abd79acadb" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/r.vtt">docs/videos/r/captions.vtt</a></p>
-   <p>R on ice Ih.</p>

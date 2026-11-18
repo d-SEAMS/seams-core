@@ -188,7 +188,7 @@ Added
 
 - The videos gallery and the README link the d-SEAMS Odysee channel. Every ``docs/videos/<slug>/script.md`` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.
 
-- All nineteen recordings embed their Odysee claims. The cages transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS ``overhead_s`` timer is machine-dependent.
+- All twenty recordings embed their Odysee claims. The cages transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS ``overhead_s`` timer is machine-dependent.
 
 - The rings recording uses the 250-oxygen exampleTraj census and the ice Ih six-ring count. The Rust recording prints the ice Ih census. The GROMACS recording runs gmx-seams after gmx mdrun. A slug with no Odysee claim renders no player. End cards invite questions, issues, discussions, and pull requests. The Python pages show dseams.Frame next to pydseams.
 
@@ -307,7 +307,7 @@ Changed
 
 - Cutoff neighbour lists (``neighListPair``, ``halfNeighList``, ``SkinNeighborList``, and ``neighListO`` / ``getNewNeighbourListByIndex`` below 2048 atoms) come from linkcell's ``lc_pairs_within`` with cells of about 20 atoms, and vesin is the fallback. ``halfNeighList`` on 8192 atoms at water density with a 3.5 Å cutoff goes from 8.9 to 4.7 ms on one thread and 4.0 ms on eight. The first linkcell cutoff list keeps freed pages on the heap for the rest of the process (``M_TRIM_THRESHOLD``, ``M_MMAP_THRESHOLD``).
 
-- The linkcell wrap names the v0.4.1 tag and carries no patches.
+- The linkcell wrap names the v0.4.2 tag and carries no patches.
 
 - A neighbourhood row longer than 16 stays in visit order, because that ball does not repeat.
 
@@ -352,6 +352,8 @@ Changed
 - Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
 
 - A fingerprint and a per-atom ring count tally rings while searching and do not keep the list. ``seams fingerprint --by-atom`` reads those per-atom counts.
+
+- ``scripts/sanitize_suite.sh`` links ``run_hook`` to a serial LAMMPS that ``scripts/build_lammps_serial.sh`` builds, so no process in the AddressSanitizer run starts Open MPI, whose allocations outlive ``MPI_Finalize``. Only the wrappers in ``scripts/asan-path`` whose program is installed go on ``PATH``, so an absent Julia takes its skip. ``pkg-config``, ``Xvfb``, ``packmol`` and the installed C API examples run without the preloaded runtime they are not built with.
 
 - Interior cells of the one-thread orthorhombic cutoff skip the periodic-shift branches. A parallel ring search writes each neighbour row, already sorted, into one array, so the walk after the cell list matches the walk after linkcell.
 
@@ -400,6 +402,8 @@ Fixed
 
 - The AMX INT8 product behind ``ozaki-ii-amx`` is checked against exact row, weighted-row and column checksums of its inputs, and recomputed with VNNI or scalar code when one disagrees. On a KVM guest that corrupted AMX tiles while separate processes used AMX at once, ``ozaki`` failed in 62 of 1200 concurrent runs and now passes all of them.
 
+- The vendored argument parser passes a wide character to ``iswspace`` as ``wint_t``. It cast through ``unsigned``, which is a sign change where ``wint_t`` is ``int``, so the macOS build stopped under ``-Werror=sign-conversion``.
+
 - The AVX2 per-atom ice classifier behind ``symmetry`` and the shell labels, and the AVX2 scan that builds a one-thread full neighbour list in a triclinic cell, run only on a CPU that reports AVX2 and FMA. The classifier's file was compiled with ``-mavx2 -mfma`` and called without a check, so ``symmetry`` stopped on an illegal instruction on a CPU without AVX2 or without FMA, and the inline header code that file emitted could replace the library's own copies at link time. The triclinic scan checked the CPU inside a function that was itself compiled for AVX2. The classifier is now built twice, once for any CPU and once with a target pragma below its includes, the scan is split the same way, and each call takes the AVX2 copy only after the check. The double-precision product in ``ozaki`` now also requires FMA, and the AMX INT8 path requires the AMX-TILE and AMX-INT8 bits and the operating system's tile state before it asks Linux for the tiles. One test switch holds the AVX-512 kernels, the classifier and the scan on their generic path, and a test compares the labels, the diamond signatures and the neighbour lists of the two paths. On a CPU with AVX2 and FMA the output is unchanged.
 
 - The AVX-512 spherical-harmonic kernels behind Steinhardt q4, q6, q12 and the batched Ylm run only on a CPU that reports AVX-512F, AVX-512DQ and FMA, the three their file is compiled with. The q12 path checked AVX-512F alone and the batched paths AVX-512DQ alone, so a CPU with one of the three but not the others could stop on an illegal instruction. Every call now goes through one check, other CPUs take the scalar path with the same values, and a test forces that path and compares the two.
@@ -437,6 +441,8 @@ Fixed
 
 - Keep the 2.13 signatures of ``getCorrelPlus``, ``getIceTypePlus``, and ``getIceTypePlusNoPrint`` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
 
+- ``capi_abi_2_13`` and ``capi_abi_2_13_selftest`` run in the pixi suite with the abi environment's ``abidiff`` instead of being accepted as skipped.
+
 - Clang builds record the directory of clang's ``libomp.so`` as a runpath, so the libraries, tests and libFuzzer harnesses start without ``LD_LIBRARY_PATH`` with an EESSI LLVM and with the apt.llvm.org packages, whose ``libomp`` lives in ``/usr/lib/llvm-<version>/lib``.
 
 - The library builds with clang again: the prism code in ``topo_one_dim.cpp`` casts its signed ring and atom indices explicitly, as the rest of the tree does, so the ``-Werror=sign-conversion`` and ``-Werror=shorten-64-to-32`` that clang builds use no longer stop it.
@@ -451,6 +457,8 @@ Fixed
 
 - On a crowded shell the diamond label uses the four nearest neighbours, the list mdapy uses, and the labels stay those of the cutoff list.
 
+- The videos page and the 1.x migration guide play the migrate recording, now the twentieth cut, from its Odysee claim. The docs book builds again with warnings as errors: the video player fragments are no longer read as untitled pages, and the ``q6DotScore`` comment no longer reaches Sphinx as an undefined substitution. The docs deploy job draws the science and engine walkthrough figures before the book, so the published site no longer carries blank stand-ins for them.
+
 - A LAMMPS dump whose ``NUMBER OF ATOMS`` line comes after ``ITEM: ATOMS`` no longer indexes past the id table, which was sized for the previous count. Found by ``capi_read_fuzzer``.
 
 - A chemfiles LAMMPS dump keeps the reduced cell edge. The bound span was being padded by the tilt a second time, so genice sH reported 31.05 Å instead of 24.84 Å. OVITO FindRings is compared as a subset of the primitive-ring census: K2,3 has three chordless 4-rings and FindRings reports two.
@@ -462,6 +470,8 @@ Fixed
 - ``docs/howto/test_engines.py`` runs each engine how-to in a temporary directory under ``build/docs-examples`` and removes it afterwards. ``docs_engine_<engine>`` and the ``docs_video_tapes`` scenes ran the same engine at once in one fixed directory, and PLUMED, which renames every ``colvar`` it finds to a numbered backup, refused to run once 101 backups had built up over repeated ``meson test`` runs.
 
 - ``libSeamsPlumed.so``, ``run_hook`` and ``seams_openmm`` carry an rpath to ``libplumedKernel.so``, ``liblammps.so`` and ``libOpenMM.so``. Without ``LD_LIBRARY_PATH``, PLUMED's ``LOAD`` failed with "libplumedKernel.so: cannot open shared object file" and the two drivers did not start.
+
+- ``lammps_hook`` and the other engine tests run through ``skip_missing_lib.sh`` fail when the engine program fails. The wrapper read the exit status after its ``if`` block, where it is always 0, so a crashing ``run_hook`` was reported as passing.
 
 - The Fortran methods that size a buffer and then fill it (``rdf``, ``running_cn``, ``density``, ``brine_profile``, the fingerprint keys and the neighbour columns) pass the capacity in its own variable. They passed one variable as both the by-value capacity and the ``intent(out)`` length, which leaves the capacity undefined on entry.
 
@@ -483,6 +493,8 @@ Fixed
 
 - ``c_api_installed`` and ``capi_installed_examples`` install into a fresh directory under ``install-stages`` in the build tree and remove it on exit, so ``meson test --repeat`` can run two copies at once.
 
+- A LAMMPS installed by its own CMake build is found through ``liblammps.pc``, and ``run_hook`` links and loads that LAMMPS even when the environment holds another ``liblammps.so.0``. ``compute dseams`` is built only when every LAMMPS header it includes compiles, so an install without ``lammpsplugin.h`` no longer stops the build. ``scripts/fetch_lammps_headers.sh`` also fetches the bundled ``nlohmann`` headers that ``atom.h`` includes since the 2025 releases.
+
 - ``compute dseams`` on several MPI ranks classified each rank's own atoms as a separate cell, so atoms near a subdomain boundary lost neighbours. On two ranks, 8312 of 86016 labels over 21 frames of 4096-molecule mW ice and liquid differed from ``seams chill-plus`` on the same dump. The compute now gathers every atom to rank 0, classifies the whole cell once, and returns each rank its labels; all 86016 match. ``meson test lammps_e2e_np2`` is the regression.
 
 - The landing-page and architecture diagrams quote labels that contain a slash or a quote, so Mermaid 11 draws the suite stack.
@@ -493,6 +505,8 @@ Fixed
 
 - ``libyodaLib`` no longer installs backward-cpp's crash handler. Its static ``SignalHandling`` replaced the SIGSEGV handler of any process that loaded the library, so Julia, which faults on purpose at its GC safepoints, died with signal 11 at random points of ``Pkg.test()`` once ``libseams_lang`` was open. ``backward.cpp`` is now compiled into the ``seams``, ``brine_front``, ``science-front`` and ``nucleation-pathway`` executables, which keep their stack traces on a crash.
 
+- A one-thread bond-order search no longer starts Rayon's global pool at the CPU count. linkcell 0.4.2 fills the columns of ``lc_pairs_within`` on the width set with ``lc_set_threads``. A Clang build also finds a libomp that only ``LIBRARY_PATH`` reaches, such as the Archer runtime of the ThreadSanitizer job, instead of stopping on "finding libomp failed".
+
 - ``-Dwith_linkcell=disabled`` builds and links again: the k-nearest neighbour list merges its rows on the OpenMP team instead of calling linkcell's slab walk, and the GPU batch helpers build under ``-Werror`` without linkcell.
 
 - A Clang build loads one OpenMP runtime. linkcell compiled its OpenMP k-nearest region with the environment's GCC and linked libgomp next to Clang's libomp, and the two runtimes disagreed on thread numbers, so neighbour, ring, CHILL+ and C API calls indexed past their per-thread buffers and aborted. linkcell 0.4.1 compiles that region with the C compiler Meson chose and links that compiler's runtime.
@@ -500,6 +514,8 @@ Fixed
 - The Lua LuaJIT FFI module ``dseams_ffi.lua`` is written by a plain build of the Lua binding, not only by its example test, so the LuaJIT FFI tutorial runs on a fresh build. The Lua binding lives in d-SEAMS/yodaStruct.
 
 - ``require("dseams")`` loads the module built for that interpreter. The Lua binding used to put the LuaJIT module first on the search path, and PUC Lua 5.4 then mapped that shared object.
+
+- A macOS build finds ``libomp``, the shared library Meson produced, and an open dump after ``unlink``. Apple ld is not passed ``-rpath-link``, Apple nm reads the exported C ABI, and the TIP4P overhead test skips when OpenMM cannot be imported.
 
 - The 1.x migration guide lists only the Lua globals v1.0.1 registered (readFrame, chillPlus_iceType, getPrimitiveRings and the rest). The dseams table and the later Lua names sit under the yodaStruct release that first shipped each one, and coordination, density, fingerprint, contact pairs, domains, k-NN and signature search are marked new in 2.x. The migrate video narration says the same.
 
@@ -528,6 +544,8 @@ Fixed
 - The PLUMED ``SEAMS`` action scaled positions and the box by 10 whatever PLUMED's length unit, so under ``UNITS LENGTH=A`` it saw a cell a hundred times too large: on the ideal 64-molecule cell ``seams.ice`` was 0 and ``seams.q6`` 0 instead of 1 and 0.6285. It now reads the unit from PLUMED. ``meson test plumed_units`` is the regression.
 
 - The engine compiles on aarch64, Apple silicon, and musl. The AVX kernels are built for x86_64 only and other targets take the scalar paths, ``backward.cpp`` is skipped without ``execinfo.h``, and ``LinearFit::stderr`` is now ``slopeStdErr`` because musl defines ``stderr`` as a macro.
+
+- ``scripts/install_pydseamslib.sh`` builds the binding with the subproject wraps of this tree, so pydseamslib gets the linkcell 0.4.1 that seams-core requires instead of the binding's 0.4.0 pin.
 
 - q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.
 

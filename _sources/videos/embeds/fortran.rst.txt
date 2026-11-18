@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-fortran" src="https://odysee.com/$/embed/dseams-fortran:e15a82c2f40ff1fdf10c89ff6c9f78b6b3fd583b" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/fortran.vtt">docs/videos/fortran/captions.vtt</a></p>
-   <p>Fortran on ice Ih.</p>

@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-cages" src="https://odysee.com/$/embed/dseams-cages:1c258cea9384acd2e21eeec509c5eedc050d08db" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/cages.vtt">docs/videos/cages/captions.vtt</a></p>
-   <p>Ice Ih hexagonal cages, cubic double-diamond cages, then the clathrate cells.</p>

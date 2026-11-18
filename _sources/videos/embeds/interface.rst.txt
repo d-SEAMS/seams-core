@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-interface" src="https://odysee.com/$/embed/dseams-interface:74af20635ceeef7945f8e22cb5b02522a865baa6" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/interface.vtt">docs/videos/interface/captions.vtt</a></p>
-   <p>CHILL+ on the basal interface.</p>

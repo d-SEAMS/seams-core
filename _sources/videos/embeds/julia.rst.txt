@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-julia" src="https://odysee.com/$/embed/dseams-julia:ec237bd28c57b7bdfa2996ccc420c16d9799176f" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/julia.vtt">docs/videos/julia/captions.vtt</a></p>
-   <p>Julia on ice Ih.</p>

@@ -1,0 +1,199 @@
+/*
+ * The d-SEAMS family header: the dseams.info topbar, same type, colours and
+ * brand mark, as one fixed bar above every generator's own header.
+ */
+
+.dseams-family {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  box-sizing: border-box;
+  height: var(--ds-family-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0 clamp(16px, 2vw, 24px);
+  background: var(--ds-bar-bg);
+  border-bottom: 1px solid var(--ds-bar-border);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  font-family: var(--ds-font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.dseams-family *,
+.dseams-family *::before,
+.dseams-family *::after {
+  box-sizing: border-box;
+}
+
+.dseams-family__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  flex: none;
+  color: var(--ds-ink);
+  font-size: 1.08em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.dseams-family__brand::before {
+  content: "";
+  width: 28px;
+  height: 29px;
+  flex: none;
+  background: url("dseams-mark.webp") center / contain no-repeat;
+}
+
+.dseams-family__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25em;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dseams-family__nav > li {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dseams-family__nav a,
+.dseams-family summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0;
+  color: var(--ds-bar-text);
+  font-size: 0.94em;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.dseams-family summary::-webkit-details-marker {
+  display: none;
+}
+
+.dseams-family summary::marker {
+  content: "";
+}
+
+.dseams-family summary::after {
+  content: " \25BE";
+  font-size: 0.78em;
+}
+
+.dseams-family__docs details {
+  position: relative;
+  margin: 0;
+}
+
+.dseams-family__menu {
+  position: absolute;
+  top: calc(100% + 0.35em);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 11.5em;
+  padding: 0.4em;
+  background: var(--ds-bar-menu-bg);
+  border: 1px solid var(--ds-bar-border);
+  border-radius: 8px;
+  box-shadow: var(--ds-bar-shadow);
+}
+
+.dseams-family__menu a {
+  min-height: 0;
+  padding: 0.42em 0.65em;
+  border-radius: 5px;
+  color: var(--ds-text);
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.dseams-family__menu a[aria-current="page"] {
+  color: var(--ds-accent-text);
+  font-weight: 700;
+  background: var(--ds-accent-wash);
+}
+
+.dseams-family__menu a:hover {
+  background: var(--ds-bg-hover);
+}
+
+.dseams-family a:focus-visible,
+.dseams-family summary:focus-visible {
+  outline: 3px solid var(--ds-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .dseams-family {
+    gap: 0.5em;
+  }
+  .dseams-family__nav {
+    gap: 0.85em;
+  }
+  .dseams-family__nav a,
+  .dseams-family summary {
+    font-size: 0.8em;
+  }
+  .dseams-family__anchor {
+    display: none !important;
+  }
+  .dseams-family__docs details {
+    position: static;
+  }
+  .dseams-family__menu {
+    right: 0.75em;
+  }
+}
+
+/* Themes colour every link; the header keeps its own colours. */
+.dseams-family.dseams-family a {
+  color: var(--ds-bar-text);
+  text-decoration: none;
+}
+
+.dseams-family.dseams-family .dseams-family__brand {
+  color: var(--ds-ink);
+}
+
+.dseams-family.dseams-family .dseams-family__menu a {
+  color: var(--ds-text);
+}
+
+.dseams-family.dseams-family .dseams-family__menu a[aria-current="page"] {
+  color: var(--ds-accent-text);
+}
+
+.dseams-family.dseams-family a:hover,
+.dseams-family.dseams-family a:focus-visible,
+.dseams-family.dseams-family summary:hover {
+  color: var(--ds-bar-text-hover);
+}
+
+.dseams-family.dseams-family .dseams-family__menu a:hover {
+  color: var(--ds-bar-text-hover);
+}
+
+@media print {
+  .dseams-family {
+    display: none;
+  }
+}

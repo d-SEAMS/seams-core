@@ -1,6 +1,0 @@
-.. raw:: html
-
-   <iframe title="dseams-python" src="https://odysee.com/$/embed/dseams-python:be29b99d4059bf4afe45ad0a9ca71e20bf11beaa" width="960" height="540" allowfullscreen></iframe>
-   <p>Captions are burned into the upload.</p>
-   <p>Transcript: <a href="/_static/captions/python.vtt">docs/videos/python/captions.vtt</a></p>
-   <p>Python on ice Ih.</p>

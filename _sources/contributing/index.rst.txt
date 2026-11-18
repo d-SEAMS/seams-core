@@ -174,7 +174,9 @@ Docs deploy from
 to ``gh-pages``, which Netlify serves at `https://docs.dseams.info <https://docs.dseams.info>`_.
 ``.github/workflows/ci_docs.yml`` has two jobs.
 ``build-deploy`` checks out the tree, builds ``libseams`` and ``seams``,
-installs ``pydseamslib`` from the matching PydSEAMSlib tag, and runs
+draws the science and engine walkthrough figures with
+``docs_science_tutorials`` and ``docs_engine_walkthrough`` (as ``verify``
+does), installs ``pydseamslib`` from the matching PydSEAMSlib tag, and runs
 ``DOCS_CI=1 pixi run -e docs docbld``. That build draws the molecule
 stills and the science gallery and copies ``llms.txt`` to the site
 root. Mermaid, lychee, and the sitemap check read

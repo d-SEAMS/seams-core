@@ -194,10 +194,7 @@ html {
 
 }
 
-@media (prefers-color-scheme: dark) {
-  html:not(.dark-mode) {
-    color-scheme: dark;
-
+html.dark-mode {
 /* page base colors */
 --page-background-color: black;
 --page-foreground-color: #C9D1D9;
@@ -389,7 +386,8 @@ html {
 --verifies-color-hl: #ad2617;
 --verifies-color-bg: #2e1917;
 
-}}
+}
+
 body {
 	background-color: var(--page-background-color);
 	color: var(--page-foreground-color);
