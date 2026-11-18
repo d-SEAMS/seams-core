@@ -8,7 +8,9 @@ Classify ice Ih from Python. The recording uses `input/traj/ice1h.lammpstrj`: `s
 
 The binding is [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). `import dseams` is the array API over `libseams` (`include/seams.h`). `import pydseams` is the Frame API. The worked example and the symbol list are the [PydSEAMSlib documentation](https://d-seams.github.io/PydSEAMSlib/).
 
-`pip install 'pydseamslib==2.14.0'` is the pin that matches this engine. That file is not on PyPI. Install the tag in PydSEAMSlib built against seams-core 2.14.0.
+```bash
+pip install 'pydseamslib==2.14.0'
+```
 
 The same two engine commands, without the binding:
 

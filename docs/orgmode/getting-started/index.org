@@ -9,6 +9,5 @@ Install the engine, read one frame, and open the recording of that run.
 
    quickstart
    install
-   ai-assistants
    ../videos/index
 #+end_export

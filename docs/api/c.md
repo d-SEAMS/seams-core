@@ -60,13 +60,8 @@ The library build defines `SEAMS_BUILDING`, which selects `dllexport` on Windows
 consumers get `dllimport`. Define `SEAMS_STATIC` before including `seams.h` to link
 a static archive.
 
-`scripts/abi_baseline.txt` is the exported name list. `scripts/abi_baseline.abi`
-is the ABI 1 type corpus, libabigail format 2.4. libabigail 2.9 and 3.0 read it.
-The Debian and Ubuntu package is `abigail-tools`. Fedora calls it `libabigail`.
-
 2.13.0 had no libseams. Its C interface was `seams_lang.h` in libseams_lang.
-The R and Julia packages still link that library. `scripts/abi_2.13.0_seams_lang.abi`
-is the corpus of those `seams_*` functions. A function added since 2.13.0 stays
+The R and Julia packages still link that library. A function added since 2.13.0 stays
 compatible. Removing a function or changing a signature is an incompatible change.
 
 ## seams_last_error and seams_handle_error

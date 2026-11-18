@@ -14,7 +14,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
 | [[file:cross-language.org][One task, four fronts]] | CHILL+ on frame 1 of the cubic mW dump, 4096 cubic sites |
 | [[file:glossary.org][glossary]] | Engine terms |
-| [[file:../explanation/performance.org][Release-candidate sitting]] | Medians from ~benchmarks/rc3-sitting.csv~ |
+| [[file:../explanation/performance.org][Release-candidate sitting]] | Medians and interquartile ranges for the release-candidate comparison |
 | [[file:../explanation/trace-threads.org][Signature-search thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
 | [[file:release-2.14.org][2.14.0 release notes]] | API, engines, threads, and deprecations since v2.13.0 |
 

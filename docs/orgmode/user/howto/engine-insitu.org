@@ -39,6 +39,3 @@ nop 128 frame 1 box 15.6457 14.7071 18.073
 ~nop 128 rings 256~ and then ~6 256~, so every primitive ring has size
 6. ~seams steinhardt --l 6~ prints ~nop 128 q6 0.625855 q6bar 0.562449~.
 Mean local q6 is 0.625855.
-
-~meson test docs_engine_insitu~ reads this dump through ~libseams_lang~
-and checks the hexagonal count and the six-ring bin.

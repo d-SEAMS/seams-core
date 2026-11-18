@@ -35,11 +35,6 @@ primitive. =ringNetwork= with maximum size 4 returns the three.
 The missing cycle is primitive. The smaller count is a ring the
 search did not emit.
 
-=tests/test_franzblau_extra.cpp= builds this adjacency and requires
-the three primitive 4-rings. =tests/test_ovito_ring_counts.py= places
-the same graph in a cell, checks that a 3.5 Å cutoff reproduces the
-six edges, and checks the OVITO count of 2.
-
 * The interface frame
 
 =input/traj/interface_f0.lammpstrj= is orthorhombic, 864 atoms, all
@@ -59,13 +54,9 @@ breadth-first distance in that 1929-bond graph.
 | 9 | 52 |
 | 10 | 449 |
 
-=tests/test_franzblau_extra.cpp= requires that histogram and requires
-every listed ring to be primitive. The same file's depth-6 bins are
-188, 377 and 1143. =markdown/rings-ic-timing-v4.txt= records
-=FindRings= on this frame at maximum size 6 with those three counts.
-
-=tests/test_ovito_ring_counts.py= requires the bond counts to match,
-every d-SEAMS ring to be primitive, and each OVITO bin from size 4
-through 10 to be at most the primitive bin. K2,3 is the strict
+The depth-6 bins are 188, 377 and 1143, and =FindRings= on this frame
+at maximum size 6 reports those three counts. Across sizes 4 through 10,
+the bond counts match, every d-SEAMS ring is primitive, and each OVITO
+bin is at most the primitive bin. K2,3 is the strict
 subset: 3 primitive 4-rings, and =FindRings= reports 2. Agreement at
 size 6 on this frame leaves the larger bins to that inequality.

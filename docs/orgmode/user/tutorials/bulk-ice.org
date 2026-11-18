@@ -138,10 +138,7 @@ The mixed TIP4P frame is the one that separates the two scores.
 
 * Step 6: Python
 
-PyPI serves ~pydseamslib~ 2.11.1.
-That wheel's ~import pydseams~ frame prints ~IceCounts(interClathrate=12, water=238)~ on this dump, and ~Frame.chill_plus~ takes no ~graph~ argument.
-The block below is the 2.14.0 frame, ~from dseams import userframe~, from the pydseamslib tree built against this engine.
-~pip install 'pydseamslib==2.14.0'~ does not resolve on PyPI.
+Install ~pydseamslib~ 2.14.0 with ~pip install 'pydseamslib==2.14.0'~ and import ~from dseams import userframe~, the Frame over ~libseams_lang~.
 
 #+begin_src python
 from dseams import userframe as ds
@@ -165,8 +162,7 @@ The Frame walkthrough is the [[file:../../reference/python-frame.org][Python Fra
   mW is type 1.
 - Unknown command, exit 2: the binary is ~seams~.
   The ice commands used here are ~read~, ~chill~, ~chill-plus~, and ~cages~.
-- ~ModuleNotFoundError: dseams~: the 2.14.0 frame is ~dseams.userframe~ in the pydseamslib tree built against this engine.
-  The PyPI wheel 2.11.1 provides ~import pydseams~ and does not provide ~dseams.userframe~.
+- ~ModuleNotFoundError: dseams~: install the binding with ~pip install 'pydseamslib==2.14.0'~.
 
 * Next steps
 

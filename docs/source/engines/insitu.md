@@ -16,14 +16,6 @@ meson setup build -Dwith_tests=true
 meson compile -C build
 ```
 
-`meson test -C build insitu_observe` calls `InSitu.observe` on an 8-atom
-cubic cell. Every label is cubic (0). A box that is neither 3 nor 9 numbers
-is rejected.
-
-```bash
-meson test -C build insitu_observe docs_engine_insitu --print-errorlogs
-```
-
 `observe` stores a length-3 box as `0, 0, 0, lx, ly, lz, 0, 0, 0` and
 classifies through `seams_frame_chill_rings`.
 

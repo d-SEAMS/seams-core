@@ -1,8 +1,7 @@
 .. list-table::
    :header-rows: 0
 
-   * - These tables are rendered from
-       ``benchmarks/rc3-sitting.csv``.
+   * - Medians and interquartile ranges from six timed calls after one warm-up.
 
 neighbours
 ^^^^^^^^^^

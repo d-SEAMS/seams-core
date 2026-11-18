@@ -40,17 +40,14 @@ seeded labels. When the flag is ~true~, those labels pass through
 
 On cubic ice the walk leaves both flag vectors unchanged. Clearing
 one atom's label on that crystal fills it again. An empty seed stays
-empty. ~tests/test_cage_affiliation.cpp~ records those three cases.
+empty.
 
 * Least fixed point
 
 The labeled set is the least fixed point of the all-but-one rule
-above the seed. Visiting order does not change that set. The Lean
-model in =lean/DseamsProofs/Completion.lean= states the claim; see
-=lean/README.org= for the theorem list and the ~lake~ build.
+above the seed. Visiting order does not change that set.
 
 Edge-sharing is a different rule. It labels every vertex of a ring
 that shares two vertices with a fully labeled ring, so two shared
-vertices label the rest of that ring. The Lean file names that
-counterexample ~edgeRule_not_sound~. Those vertices stay unlabeled
+vertices label the rest of that ring. Those vertices stay unlabeled
 under the all-but-one closure.

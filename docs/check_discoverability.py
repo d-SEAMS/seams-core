@@ -228,16 +228,6 @@ def agents_problems():
     ):
         if needle not in text:
             problems.append("AGENTS.md lacks " + needle)
-    page = DOCS / "orgmode" / "getting-started" / "ai-assistants.org"
-    if not page.is_file():
-        problems.append("the Use with AI assistants page is missing")
-    else:
-        page_text = page.read_text(encoding="utf-8")
-        if not page_text.startswith("#+TITLE: Use with AI assistants"):
-            problems.append("assistants page title is not 'Use with AI assistants'")
-        for needle in ("llms.txt", "SKILL.md", "context7.json", "text/markdown"):
-            if needle not in page_text:
-                problems.append("assistants page lacks " + needle)
     return problems
 
 

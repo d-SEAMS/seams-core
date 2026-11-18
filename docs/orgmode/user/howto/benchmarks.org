@@ -26,9 +26,7 @@ A host-only build takes the host branch of the device code.
 offload path when the build has one. Record the host, the compiler,
 the commit, the thread count, the cpu affinity, and =SEAMS_OFFLOAD=.
 
-The =repro= pixi environment is Linux only. It installs freud,
-pyscal3, and Snakemake, and it has no task of its own. The
-=Snakefile= in this repository regenerates the engine records. The comparisons below are the Python scripts.
+The comparisons below use the Python scripts under =scripts/=.
 
 * Neighbour list
 

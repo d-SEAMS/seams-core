@@ -40,30 +40,25 @@ OUTPUT = ROOT / "llms.txt"
 
 TITLE = "d-SEAMS"
 SUMMARY = (
-    "d-SEAMS (seams-core) reads molecular-dynamics trajectories and names "
-    "the ice in them: CHILL and CHILL+, topological cages, primitive rings, "
-    "Steinhardt q_l, and ice and brine fronts, computed on one shared "
-    "neighbour list. This repository builds the C++ engine, the C API "
-    "libseams (include/seams.h), the C ABI libseams_lang that the language "
-    "bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, "
-    "PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, "
-    "Julia, Rust and Fortran bindings live in their own repositories and "
-    "release against the seams-core tag with the same version."
+    "d-SEAMS reads molecular-dynamics trajectories and classifies ice with "
+    "CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, "
+    "and ice and brine fronts. Use it from the command line, a language "
+    "binding, or a supported simulation engine."
 )
 
 BINDINGS = (
     ("PydSEAMSlib", "https://github.com/d-SEAMS/PydSEAMSlib",
-     "Python binding, pydseamslib on PyPI (import dseams, import pydseams)."),
+     "Install the Python binding with pip install pydseamslib==2.14.0."),
     ("yodaStruct", "https://github.com/d-SEAMS/yodaStruct",
-     "Lua and Fennel binding, the LuaRocks package dseams (require(\"dseams\"))."),
+     "Clone the Lua and Fennel binding, then run luarocks make in the checkout."),
     ("dseams-r", "https://github.com/d-SEAMS/dseams-r",
-     "R binding, the R package dseams."),
+     "Install the R binding with remotes::install_github(\"d-SEAMS/dseams-r\")."),
     ("Dseams.jl", "https://github.com/d-SEAMS/Dseams.jl",
-     "Julia binding, the package Dseams over libseams_jll."),
+     "Install the Julia binding with Pkg.add(url=\"https://github.com/d-SEAMS/Dseams.jl\")."),
     ("dseams-rs", "https://github.com/d-SEAMS/dseams-rs",
-     "Rust binding, the crates dseams-sys and dseams."),
+     "Install the Rust binding with cargo add dseams@2.14.0."),
     ("dseams-fortran", "https://github.com/d-SEAMS/dseams-fortran",
-     "Fortran binding, the fpm package dseams."),
+     "Add the Fortran binding as an fpm Git dependency."),
 )
 
 COPIED = {
@@ -284,9 +279,7 @@ def render():
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
     lines.append(
         "Each link below is the Markdown twin of a page on {}, "
-        "served beside the HTML. Fetch this index first, then the pages "
-        "a question needs. Contributor instructions are on the "
-        "Contributing and Repository map pages.".format(SITE)
+        "served beside the HTML.".format(SITE)
     )
     lines.append("")
     seen = set()

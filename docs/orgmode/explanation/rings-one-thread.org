@@ -6,7 +6,6 @@ The cutoff graph is built before the timer on both sides.
 The cutoff is 3.5 Å and the largest ring has 6 members.
 Eight timed calls follow two warmups. The median of those eight
 is the mean of the two central samples.
-The samples, and those medians, are in =markdown/rings-one-thread.json=.
 The table rounds each median to 0.001 ms.
 
 * Frames
@@ -25,10 +24,9 @@ The per-size census is the same in both codes.
 | 4096 | 0 | 0 | 8192 |
 | 110592 | 0 | 0 | 221184 |
 
-* This session
+* Measured times
 
-The record is an 8-core Intel Xeon. The build is a release build
-with OpenMP. OVITO is 3.17.2.
+The build is a release build with OpenMP on 8 cores. OVITO is 3.17.2.
 
 | molecules | threads | d-SEAMS (ms) | OVITO (ms) |
 |-----------+---------+--------------+------------|
@@ -46,30 +44,5 @@ sizes, and so are the eight-thread medians.
 
 The timed call asks for rings of at most 6 members. A strict shortcut
 on a ring of at most 7 members is a walk of one or two edges, read
-from the neighbour rows, so this run never builds a distance ball.
+from the neighbour rows, so this search never builds a distance ball.
 The rings are the Franzblau set.
-
-=tests/test_ring_census= enumerates every simple cycle on a few small
-graphs, drops a cycle when any pair is closer through the graph than
-around the cycle, and checks that census, and the canonical rings,
-against =ringNetwork=.
-
-* Rerun
-
-#+begin_src bash
-meson setup build --buildtype=release -Dwith_tests=true \
-  -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
-ninja -C build -j2 tests/bench_rings_h2h
-python3 scripts/rings_one_thread.py \
-  --bench build/tests/bench_rings_h2h \
-  --json markdown/rings-one-thread.json
-#+end_src
-
-The interpreter that runs the driver must import OVITO 3.17.2.
-Pass =--python= when that interpreter is not =python3=.
-The driver writes two blocks for each frame: =prebuilt=, with the
-cutoff graph outside the timer, and =inside=, with the neighbour list
-in the same timer, plus a CSV beside the JSON. The table above is the
-prebuilt median already stored in =markdown/rings-one-thread.json=.
-Airspeed Velocity class =RingsOneThread= times one search on each side
-after the graph has been built.

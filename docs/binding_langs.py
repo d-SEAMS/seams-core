@@ -530,10 +530,7 @@ def languages():
         "rust-api": {
             "title": "Rust",
             "intro": (
-                "Item docs from the ``dseams`` crate, in the shape docs.rs renders them. "
-                "The crate pages will be on docs.rs as ``dseams`` and ``dseams-sys`` "
-                "when those crates are published. Until then the item text below "
-                "is the same comment block docs.rs would render, taken from "
+                "Item docs from the ``dseams`` crate, taken from "
                 "`dseams/src/lib.rs <https://github.com/d-SEAMS/dseams-rs/blob/main/dseams/src/lib.rs>`_. "
                 "``dseams`` is the safe API. ``dseams-sys`` is the raw FFI, re-exported as ``seams::ffi``."
             ),

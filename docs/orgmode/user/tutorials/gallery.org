@@ -1,51 +1,16 @@
 #+TITLE: Science gallery
 #+OPTIONS: toc:nil num:nil
 
-The six pictures are the full paper runs, drawn again by
-=pixi run meson test -C bbdir docs_gallery=. OVITO's Python renderer colors the atoms.
-When that render fails, matplotlib draws the same coordinates in 3D.
-The test writes these files under =docs/source/user/tutorials/gallery/=:
-
-| picture | file |
-|---------+------|
-| interface slab | =gallery-interface.png= |
-| brine frame | =gallery-brine.png= |
-| cubic mW six-rings | =gallery-rings.png= |
-| nucleation, frame 2 | =gallery-nucleation.png= |
-| sI cages | =gallery-cages-sI.png= |
-| sII cages | =gallery-cages-sII.png= |
-
-=gallery-rings.png= is frame 1 of =input/traj/mW_cubic.lammpstrj=,
-cubic ice. The bonds are the cutoff neighbours. The histogram is one
-bin, 8192 six-rings, two per molecule. The heading in the caption
-list below says ice Ih. The file is the cubic mW frame.
-=gallery-nucleation.png= colors each molecule by its own q6bar on
-frame 2 of the 148-frame trajectory. The command reruns all five full
-tutorials, including the figshare fetch for nucleation, then checks
-that each caption repeats the report lines.
-
-Each caption says what the colors mean and repeats the numbers the
-tutorial test asserts.
+These pictures show the interface, brine, ring, cage, and nucleation examples.
+Each caption explains the colors and reports the corresponding molecular
+census.
 
 #+begin_export rst
 .. include:: gallery-captions.rst
 #+end_export
 
-The molecule stills sit below those pictures. From the repository
-root, with =libseams.so= in =bbdir/src=:
-
-#+begin_src sh
-pixi run bash -c 'export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"; python docs/scripts/render_molecules.py --out docs/source/user/tutorials/molecules --pages --libdir bbdir/src --engine tachyon'
-#+end_src
-
-The prefix =lib= directory is on the loader path so OVITO can open
-libEGL. That command writes one folder per still under
-=docs/source/user/tutorials/molecules/=, with =overlay-web.png= in each,
-and =docs/source/user/tutorials/molecules.rst=, which is the list included
-here. chemparseplot supplies the oxygen-oxygen bond list. =--engine
-tachyon= draws with OVITO Tachyon. =--engine cycles= is the script
-default and stops when =bpy= does not produce a picture. The command
-exits 77 when chemparseplot, OVITO, or ase is missing.
+The molecular views below highlight the structures discussed in the
+tutorials.
 
 #+begin_export rst
 .. include:: molecules.rst

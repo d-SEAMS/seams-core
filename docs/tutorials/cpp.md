@@ -18,9 +18,8 @@ ice Ih atoms 128 hexagonal 128 q6bar 0.562448843702 shell_ih 128 pockets 0
 `seams.hpp` includes `seams.h`, which includes the generated `seams_version.h`. Meson compiles the program against `libseams`.
 
 ```bash
-meson setup build
-meson compile -C build docs_api_hpp
-./build/src/docs_api_hpp "$PWD"
+c++ -std=c++20 -Iinclude -Ibuild/src docs/examples/cpp_api.cpp -Lbuild/src -lseams -Wl,-rpath,build/src -o cpp_api
+./cpp_api "$PWD"
 ```
 
 `seams::set_num_threads(0)` restores the OpenMP width captured at the first call, `omp_get_max_threads()`. A type of 0 or less on a frame whose atoms do not all share one positive type classifies a copy in which those atoms are given one type. That copy is `unified_copy` in `src/seams_api.cpp`.

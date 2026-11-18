@@ -40,10 +40,7 @@ names =libplumed.so=; otherwise the script takes that library from the
 python3 scripts/h2h_rc3_sitting.py
 #+end_src
 
-=--out= defaults to =benchmarks/rc3-sitting.csv= and =--log= to
-=benchmarks/rc3-sitting.txt=. The vesin probe runs first. A later
-guest that fails is a =FAIL= line in the log and is left out of the
-CSV.
+The vesin probe runs first.
 
 * What the medians do
 

@@ -1,8 +1,7 @@
 .. list-table::
    :header-rows: 0
 
-   * - Rendered from ``benchmarks/paper-cells/sitting-large.csv``.
-       Ice Ic and the TIP4P/ice liquid, 884736 molecules, at 1, 2, 4 and 8 threads.
+   * - Ice Ic and the TIP4P/ice liquid, 884736 molecules, at 1, 2, 4 and 8 threads.
        ``median_ms`` and ``iqr_ms`` are recomputed from ``samples_ms``.
 
 884736 molecules, rings

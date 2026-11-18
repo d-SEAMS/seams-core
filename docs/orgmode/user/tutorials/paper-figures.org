@@ -2,13 +2,12 @@
 #+OPTIONS: toc:nil num:nil
 
 The 2020 JCIM figures are drawn from figshare project 73545.
-This page is the same calls on the dumps that are in the tree.
-The runnable copy is =docs/tutorials/test_paper_figures.py=.
+This page runs the same calls on the supplied example trajectories.
 Python is ~pip install 'pydseamslib==2.14.0'~; the import is ~dseams.userframe~.
 Run the block from the repository root.
 
-| figure | dump in this tree | call | result |
-|--------+-------------------+------+--------|
+| figure | trajectory | call | result |
+|--------+------------+------+--------|
 | cubic ice, CHILL+ | =mW_cubic.lammpstrj= frame 1, type 1 | ~chill_plus()~ | 4096 cubic |
 | cubic ice, cages | the same frame | ~cages()~ | ~n_ic~ 4096 |
 | sI 5^12 cages | =genice_sI.lammpstrj~, type 1 | ~cages_by_signature("512")~ | 2 cages, ~n_atoms~ 40 |
@@ -21,8 +20,7 @@ The cage score has no hexagonal cage and no double-diamond cage, so
 every oxygen is ~n_water~.
 
 The nucleation, nanotube, monolayer, and in-plane RDF figures use
-dumps from figshare project 73545. Those dumps are not in this tree.
-The block below does not draw them.
+trajectories from figshare project 73545.
 
 #+begin_src python
 from dseams import userframe as ds

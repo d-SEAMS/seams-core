@@ -185,21 +185,6 @@ def _write_video_players():
 _write_video_players()
 
 
-def _write_release_notes():
-    """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
-    import importlib.util
-
-    script = os.path.join(_docs, "check_changelog.py")
-    spec = importlib.util.spec_from_file_location("check_changelog", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main([]) != 0:
-        raise SystemExit("2.14.0 notes do not match changelog.d")
-
-
-_write_release_notes()
-
-
 def _write_padding():
     """Fill the cutoff-and-padding how-to from the validation CSV."""
     import importlib.util
@@ -448,6 +433,21 @@ def _include_orphan_pages():
             handle.write(text)
     included = _toctree_docnames()
     skip_prefixes = (
+        "explanation/cutoff-rings-tables.rst",
+        "explanation/performance-overview-tables.rst",
+        "explanation/pool-audit-tables.rst",
+        "explanation/performance-tables.rst",
+        "explanation/performance-h2h-tables.rst",
+        "explanation/sitting-large-tables.rst",
+        "explanation/trace-threads-tables.rst",
+        "explanation/comparisons-summary-tables.rst",
+        "explanation/clavis-trace-tables.rst",
+        "explanation/sqq-tables.rst",
+        "explanation/performance-range-tables.rst",
+        "user/howto/pool-audit-v5-tables.rst",
+        "user/howto/cutoff-padding-tables.rst",
+        "user/tutorials/gallery-captions.rst",
+        "user/tutorials/molecules.rst",
         "science/figures/",
         "xml/",
         "doxygen-include/",
@@ -655,7 +655,26 @@ if os.path.isfile(_redirect_map):
 templates_path = ["_templates"]
 # players.rst and embeds/*.rst are untitled fragments that pages pull in
 # with ``.. include::``. They are not documents.
-exclude_patterns = ["science/figures/**", "videos/players.rst", "videos/embeds/**"]
+exclude_patterns = [
+    "science/figures/**",
+    "videos/players.rst",
+    "videos/embeds/**",
+    "explanation/cutoff-rings-tables.rst",
+    "explanation/performance-overview-tables.rst",
+    "explanation/pool-audit-tables.rst",
+    "explanation/performance-tables.rst",
+    "explanation/performance-h2h-tables.rst",
+    "explanation/sitting-large-tables.rst",
+    "explanation/trace-threads-tables.rst",
+    "explanation/comparisons-summary-tables.rst",
+    "explanation/clavis-trace-tables.rst",
+    "explanation/sqq-tables.rst",
+    "explanation/performance-range-tables.rst",
+    "user/howto/pool-audit-v5-tables.rst",
+    "user/howto/cutoff-padding-tables.rst",
+    "user/tutorials/gallery-captions.rst",
+    "user/tutorials/molecules.rst",
+]
 # A warning is a failed book. Sphinx stops instead of publishing it.
 warningiserror = True
 
@@ -774,7 +793,7 @@ html_theme_options = {
                 {
                     "title": "dseams-fortran (Fortran)",
                     "url": "https://github.com/d-SEAMS/dseams-fortran",
-                    "summary": "The fpm package dseams",
+                    "summary": "The fpm Git dependency dseams",
                     "external": True,
                 },
                 {
@@ -787,7 +806,7 @@ html_theme_options = {
         },
     ],
     "og_image_url": "https://docs.dseams.info/_static/og-dseams.png",
-    "ai_prompt_template": "Read {url} and answer from that d-SEAMS page.",
+    "show_ai_links": False,
 }
 
 html_sidebars = {
@@ -808,7 +827,11 @@ sitemap_url_scheme = "{link}"
 # search and genindex are not manual pages. 404.html is written after
 # Sphinx, so it never enters this list. lastmod is filled in
 # docs/discoverability.py from the git date of the page source.
-sitemap_excludes = ["search.html", "genindex.html"]
+sitemap_excludes = [
+    "search.html",
+    "genindex.html",
+    *(old + ".html" for old in sorted(page_redirects)),
+]
 
 
 def _copy_caption_tracks(app, exception):

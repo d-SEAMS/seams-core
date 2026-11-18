@@ -593,7 +593,21 @@ def _blocks(node, level=0):
         lines = [_inline(child).strip() for child in node.children if _tag(child) == "line"]
         return "\n".join(line for line in lines if line) + "\n\n"
     if tag == "raw":
-        return ""
+        text = node.astext()
+        found = []
+        for match in re.finditer(
+            r'<div\s+id="(video-[A-Za-z0-9_-]+)"\s*>\s*<h2(?:\s+id="([^"]+)")?>([^<]+)</h2>\s*<p>([^<]+)</p>',
+            text,
+        ):
+            ident = match.group(2) or match.group(1)
+            found.append(
+                "\n## {} {{#{}}}\n\n{}\n\n".format(
+                    match.group(3).strip(),
+                    ident,
+                    match.group(4).strip(),
+                )
+            )
+        return "".join(found)
     if tag in (
         "comment",
         "target",
@@ -747,11 +761,31 @@ def not_found_html():
 
 def _captions():
     module = _llms()
-    index = (module.ORG / "index.org").read_text(encoding="utf-8")
     found = {}
-    for caption, names in module.toctrees(index):
-        for name in names:
-            found.setdefault(name, caption)
+    for path in sorted(module.ORG.rglob("*.org")):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        parent = path.relative_to(module.ORG).with_suffix("").as_posix()
+        parent_dir = parent.rsplit("/", 1)[0] if "/" in parent else ""
+        title = ""
+        for line in text.splitlines():
+            if line.upper().startswith("#+TITLE:"):
+                title = line.split(":", 1)[1].strip()
+                break
+        for caption, names in module.toctrees(text):
+            label = caption or title
+            if not label:
+                continue
+            for name in names:
+                resolved = name.lstrip("/") if name.startswith("/") else "/".join(filter(None, (parent_dir, name)))
+                # normalize .. segments
+                parts = []
+                for part in resolved.split("/"):
+                    if part == "..":
+                        if parts:
+                            parts.pop()
+                    elif part and part != ".":
+                        parts.append(part)
+                found["/".join(parts)] = label
     return found
 
 
@@ -780,7 +814,12 @@ def display_title(pagename, titles, captions):
     group = [name for name in same if group_of(name) == caption]
     if len(group) < 2:
         return "{} ({})".format(plain, caption)
-    return "{} ({})".format(plain, pagename.rsplit("/", 1)[-1])
+    parent = pagename.rsplit("/", 1)[0] if "/" in pagename else ""
+    if parent and len([name for name in same if name.startswith(parent + "/")]) == 1:
+        kind = parent.rsplit("/", 1)[-1]
+        label = {"howto": "How-to", "tutorials": "Tutorial"}.get(kind, kind)
+        return "{} ({})".format(plain, label)
+    return "{} ({})".format(plain, pagename)
 
 
 def _on_doctree(app, doctree, docname):

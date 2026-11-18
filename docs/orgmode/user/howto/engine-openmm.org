@@ -7,7 +7,7 @@
 
 Build the reporter against conda-forge OpenMM 8.6.1 or a later 8
 release. Eigen and a C++ compiler need to be on the path. Configure
-meson from that shell: the docs test imports ~openmm~, and the plugin
+meson from that shell so ~python3~ imports ~openmm~, and the plugin
 looks for ~libOpenMM~ on the same prefix. The exports are the include
 and library paths, including the AVX directories conda-forge uses.
 
@@ -20,12 +20,11 @@ export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:
 export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
 meson setup build -Dwith_openmm=enabled
 meson compile -C build
-meson test -C build docs_engine_openmm --print-errorlogs
 #+end_src
 
 ~DseamsReporter~ reads the OpenMM context in angstroms and calls
-~InSitu.observe~. The docs test loads ~input/traj/ice1h.lammpstrj~ onto
-a Reference-platform context with a zero force, steps once, and prints:
+~InSitu.observe~. Loading ~input/traj/ice1h.lammpstrj~ onto
+a Reference-platform context with a zero force and stepping once prints:
 
 #+begin_src text
 openmm hexagonal 128 six-rings 256 q6 0.625855

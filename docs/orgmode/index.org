@@ -63,6 +63,8 @@ C++ API ~include/seams.hpp~ (it links ~libseams~), the C ABI
 ~libseams_lang~ (~bindings/cxx/seams_lang.h~, used by the Python, R, and
 Julia fronts), the ~seams~ command, and the LAMMPS, GROMACS, OpenMM,
 PLUMED, and in-situ drivers. ~gmx-seams~ reads the trajectory ~gmx mdrun~ wrote.
+The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
+[[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
 ~seams --version~ prints ~2.14.0~.
 
 CHILL+ labels an oxygen from its four-neighbour star: cubic, hexagonal,
@@ -77,9 +79,6 @@ A source build from this tree, when the compilers are already on ~PATH~,
 is ~meson setup build && meson compile -C build~.
 pixi is ~pixi run setup && pixi run build~.
 [[file:getting-started/install.org][Install]] has each method.
-The conda-forge ~libseams~ package and the PyPI package ~pydseamslib~
-(~import dseams~, ~import pydseams~) are coming soon.
-The Nix flake does not configure on this tag.
 
 The ice Ih frame shipped in this tree is ~input/traj/ice1h.lammpstrj~,
 128 molecules of LAMMPS type 1.
@@ -97,23 +96,21 @@ cell from C and from Python.
 adds the ring census on this frame and the ice front on
 ~input/traj/interface_f0.lammpstrj~.
 
-Each other language is its own repository, released at the same version
-against the seams-core tag.
+Each other language is its own repository.
 [[file:user/howto/bindings.org][Use a language binding]] names the package
 and the library each one links.
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
+  with ~pip install 'pydseamslib==2.14.0'~ from
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
-- Lua and Fennel: ~require("dseams")~ from
-  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] (no LuaRocks module yet)
-- R: ~dseams~, [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
-- Julia: ~Dseams~ (over ~libseams_lang~) and ~Seams~ (over ~libseams~),
+- Lua and Fennel: ~require("dseams")~, clone
+  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and run ~luarocks make~ in the checkout
+- R: ~remotes::install_github("d-SEAMS/dseams-r")~ from [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
+- Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~ from
   [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
-- Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
-- Fortran: fpm ~dseams~, [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
+- Rust: ~cargo add dseams@2.14.0~ from [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
+- Fortran: fpm Git dependency ~dseams~ from [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
 
-[[file:development/repositories.org][The repository map]] lists what
-lives in each repository.
 [[file:reference/release-2.14.org][The 2.14.0 notes]] are the changes
 since 2.13.0.
 [[file:user/howto/migrate-1x.org][Migrate from 1.x]] maps ~yodaStruct -c~
@@ -143,7 +140,7 @@ which backends this binary has. The ~seams~ command, ~libseams~, and
 
 * Documentation structure
 
-Four ways in. The user guide groups the tutorials and the how-tos by
+The user guide groups the tutorials and the how-tos by
 task. The explanation pages are the background for those tasks.
 
 #+begin_export rst
@@ -168,11 +165,11 @@ task. The explanation pages are the background for those tasks.
 
       The C API, the C++ API, the command line, and the language bindings.
 
-   .. grid-item-card:: Development
-      :link: development/index
+   .. grid-item-card:: Project
+      :link: development/changelog
       :link-type: doc
 
-      Build the engine, map the repositories, and cut a release.
+      Release notes and how to cite d-SEAMS.
 
 .. toctree::
    :hidden:
@@ -198,9 +195,9 @@ task. The explanation pages are the background for those tasks.
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Development
+   :caption: Project
 
-   development/index
+   development/changelog
 #+end_export
 
 The C++ header reference is

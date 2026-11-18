@@ -7,7 +7,7 @@ between two vertices, so the long way around is not a ring of the
 network. The Franzblau test keeps a cycle only when, for every pair
 of its vertices, some shortest path between them lies on the cycle.
 Those survivors are the primitive rings. ~seams rings~ reports that
-census. The run also counts the cycles before the test, so you can
+census. The example also counts the cycles before the test, so you can
 see what the filter removes.
 
 The cell is GenIce ice Ih, one unit, 16 oxygens, cutoff 3.5 Å.
@@ -16,12 +16,7 @@ listed, and the same neighbour list is what the primitive search uses.
 A larger crystal would hide the filter, because almost every six-cycle
 in ice Ih already passes.
 
-From the repository root, after a pixi build (=bbdir/seams= and
-=bbdir/src=):
-
-#+begin_src sh
-pixi run python docs/tutorials/paper_science.py rings bbdir/seams bbdir/src out/rings
-#+end_src
+The ring search gives
 
 #+begin_src text
 rings primitive 4 24 6 32
@@ -32,22 +27,13 @@ rings searched 4 24 6 128
 The shortest-path test and ~seams rings~ agree: 24 four-rings and 32
 six-rings. The unfiltered search found 128 six-cycles and no
 five-ring. The other 96 six-cycles have a shortcut, so they are
-dropped. The picture is =out/rings/rings.png=, the 16 oxygens.
-=pixi run meson test -C bbdir docs_paper_rings= runs the same script and checks the
-three lines. That picture is =paper-tutorials/rings/rings.png= in the
-Meson build directory. The script exits 77 when GenIce or OVITO is
-absent.
+dropped.
 
 * Full run
 
 The paper ring census is one frame of
 ~input/traj/mW_cubic.lammpstrj~. The dump holds 11 frames of 4096
-molecules. The run reads frame 1. The paper census is 4096 molecules
-and 8192 six-rings.
-
-#+begin_src sh
-pixi run python docs/tutorials/paper_science.py rings-full bbdir/seams bbdir/src out/rings-full
-#+end_src
+molecules. Frame 1 has 4096 molecules and 8192 six-rings.
 
 #+begin_src text
 rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj
@@ -56,9 +42,4 @@ rings full nop 4096 rings 8192
 rings full histogram 6 8192
 #+end_src
 
-The histogram has one bin: 8192 six-rings. The picture is
-=out/rings-full/rings-full.png=, frame 1 of that dump. The script
-exits 77 when OVITO does not import. =pixi run meson test -C bbdir --suite slow
-docs_paper_rings_full= checks the same lines when the build was
-configured with =-Dpaper_full=true=. Without that option, or when
-Snakemake is absent, the test exits 77.
+The histogram has one bin: 8192 six-rings.

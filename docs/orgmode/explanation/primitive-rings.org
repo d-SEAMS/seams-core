@@ -37,7 +37,7 @@ hexagon as well, because no edge joins two non-consecutive vertices of
 the hexagon. The primitive search rejects the hexagon and keeps the
 pentagons.
 
-~tests/test_ring_hop.cpp~ is that fixture. The same search matches an
+The same search matches an
 independent enumeration of the primitive cycles. Where
 ~FindRings~ drops a primitive ring, the K2,3 counterexample is on
 [[file:ovito-findrings.org][Primitive rings and OVITO FindRings]].

@@ -13,16 +13,16 @@ by side. The vertical axis is logarithmic. It draws neighbours, rings,
 
 The rings rows are ~seams_frame_rings~ on the cutoff graph, depth 6:
 the neighbour list and the search are one timed call. The last table
-is a separate sitting of that full call, linkcell against the cell
+is a separate comparison of that full call, linkcell against the cell
 list. ~n~ is 8 on each of those rows. The link, convert and search
-stages of the same record are on
+stages of the same comparison are on
 [[file:trace-threads.org][the thread controls]].
 
-The release-candidate sitting, including cages and King's count, is
+The release-candidate comparison, including cages and King's count, is
 [[file:performance.org][the sitting page]].
-Neighbour and ring rows from the other records, for 4096 to 110592
-molecules, are [[file:performance-range.org][the size range]].
-How the sittings differ is
+Neighbour and ring rows for 4096 to 110592
+molecules are on [[file:performance-range.org][the size range]].
+How the comparisons differ is on
 [[file:performance-overview.org][the overview]].
 
 #+begin_export rst

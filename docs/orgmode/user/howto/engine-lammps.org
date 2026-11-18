@@ -19,13 +19,11 @@ export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:
 export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
 meson setup build -Dwith_lammps=enabled
 meson compile -C build
-meson test -C build docs_engine_lammps --print-errorlogs
 #+end_src
 
 ~run_hook~ registers a ~fix external~ callback. LAMMPS passes positions
-in angstroms. The docs test writes a data file from
-~input/traj/ice1h.lammpstrj~, freezes the forces, and runs the callback
-once. The hook prints:
+in angstroms. On a data file written from
+~input/traj/ice1h.lammpstrj~, with forces frozen, one callback prints:
 
 #+begin_src text
 lammps hexagonal 128 six-rings 256 q6 0.625855

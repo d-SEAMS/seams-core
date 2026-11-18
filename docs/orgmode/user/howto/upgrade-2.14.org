@@ -33,12 +33,12 @@ and versioned 2.14.0:
 
 | Language | 2.13 location | 2.14 repository | Package |
 |----------+---------------+-----------------+---------|
-| Python | PydSEAMSlib (~pydseams~) and the in-tree ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
-| Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ |
+| Python | PydSEAMSlib (~pydseams~) and the supplied ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
+| Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source, ~require("dseams")~ |
 | R | none | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ |
 | Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~, over ~libseams_jll~ |
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
-| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
+| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ |
 
 ~pip install -U 'pydseamslib==2.14.0'~ installs that package, with
 ~import dseams~ and ~import pydseams~.
@@ -46,8 +46,7 @@ Julia reads ~libseams_lang~ from ~SEAMS_LANG_LIB~.
 Rust reads the directory that holds ~libseams~ from ~SEAMS_LIB_DIR~.
 R reads ~SEAMS_LIBDIR~ and ~SEAMS_INCLUDE~.
 New calls and renamed options are in each repository's changelog.
-This tree keeps ~bindings/cxx~ (~seams_lang.h~ and ~libseams_lang~).
-The other language sources are not in this tree.
+This repository provides ~bindings/cxx~ (~seams_lang.h~ and ~libseams_lang~).
 
 * Engines
 
@@ -57,7 +56,9 @@ The build and the census for each engine are
 [[file:engine-lammps.org][LAMMPS]],
 [[file:engine-gromacs.org][GROMACS]],
 [[file:engine-openmm.org][OpenMM]], and
-[[file:engine-plumed.org][PLUMED]].
+[[file:engine-plumed.org][PLUMED]]. The standalone PLUMED action
+(~dseams-plumed~ v0.4.1) is indexed in
+[[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
 
 | engine | what to change |
 |--------+----------------|

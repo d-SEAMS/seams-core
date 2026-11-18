@@ -6,7 +6,11 @@ Classify ice Ih from Julia. The recording uses `input/traj/ice1h.lammpstrj`: `se
 .. include:: ../videos/embeds/julia.rst
 ```
 
-The binding is the Julia package `Dseams` in [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl). It is not in the General registry. The README's local-engine section is the install, and its first example classifies the bundled ice Ih frame as 128 hexagonal.
+The binding is the Julia package `Dseams` in [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl). Install as a Git dependency:
+
+```bash
+julia -e 'using Pkg; Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")'
+```
 
 `Dseams` calls `libseams_lang` (`bindings/cxx/seams_lang.h`). The same repository's `Seams` package calls `libseams` (`include/seams.h`).
 

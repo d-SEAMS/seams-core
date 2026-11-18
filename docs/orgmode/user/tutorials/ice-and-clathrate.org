@@ -4,12 +4,7 @@
 You label one frame two ways.
 CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
-
-The 2.14.0 frame is ~from dseams import userframe~, the frame over ~libseams_lang~.
-PyPI serves ~pydseamslib~ 2.11.1.
-That wheel's ~import pydseams~ prints ~IceCounts(interClathrate=12, water=238)~ on the mixed dump, ~Frame.chill_plus~ takes no ~graph~ argument, and ~cages_by_signature~ rejects ~edge~.
-~pip install 'pydseamslib==2.14.0'~ does not resolve on PyPI.
-The blocks below are the 2.14.0 frame, from the pydseamslib tree built against this engine.
+Install ~pydseamslib~ 2.14.0 with ~pip install 'pydseamslib==2.14.0'~ and import ~from dseams import userframe~, the frame over ~libseams_lang~.
 
 * The mixed TIP4P frame
 
@@ -71,5 +66,3 @@ assert len(found) == 2 and found.n_atoms == 40
 found = frame.cages_by_signature("51262")
 assert len(found) == 6 and found.n_atoms == 46
 #+end_src
-
-On the PyPI 2.11.1 frame, ~cages_by_signature("512")~ is also 2 cages and 40 vertices, and ~cages_by_signature("51262", max_ring_size=8)~ returns 90 cages.

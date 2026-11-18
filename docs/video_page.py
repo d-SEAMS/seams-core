@@ -320,7 +320,7 @@ def gallery_block(slug, claim):
     title, sentence = card(slug)
     lines = [
         '<div id="video-{}">'.format(slug),
-        "<h2>{}</h2>".format(xml(title)),
+        '<h2 id="{}">{}</h2>'.format(slug, xml(title)),
         "<p>{}</p>".format(xml(sentence)),
         iframe(title, claim[0], claim[1]),
         "</div>",

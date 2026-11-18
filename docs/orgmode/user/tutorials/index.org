@@ -17,9 +17,9 @@ lookup table.
 | [[file:order-parameters.org][Bond-orientational order]] | ~q_l~ and the Lechner-Dellago average |
 | [[file:confined-water.org][Confined water]] | in-plane RDF, sheet rings, prisms |
 | [[file:nanotube.org][Quasi-one-dimensional ice]] | where the nanotube and monolayer examples live |
-| [[file:paper-figures.org][Paper figures]] | the in-tree numbers behind the 2020 figures |
+| [[file:paper-figures.org][Paper figures]] | the supplied numbers behind the 2020 figures |
 | [[file:paper-interface.org][Interface slab]] | Published CHILL+ against the OVITO rule on a slab you build |
-| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH, built in the run |
+| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH |
 | [[file:paper-rings.org][Ring statistics]] | Primitive rings and the shortest-path test |
 | [[file:paper-brine.org][Ice in brine]] | The front, and the crystal count, along a short run |
 | [[file:paper-nucleation.org][Nucleation score]] | Mean q6bar as a nucleus is restored |
@@ -28,22 +28,6 @@ lookup table.
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation covers why CHILL+ and the cage census can disagree.
 
-A paper tutorial has a fast run and a full run. The topics are
-=interface=, =cages=, =rings=, =brine=, and =nucleation=. From the
-repository root, after a pixi build, this writes the fast brine
-picture and the lines that page quotes:
-
-#+begin_src sh
-pixi run python docs/tutorials/paper_science.py brine bbdir/seams bbdir/src out/brine
-#+end_src
-
-=out/brine/brine.png= is the picture. The full brine picture is the
-same command with =brine-full= and =out/brine-full=, which writes
-=out/brine-full/brine-full.png=. The other four topics use their own
-name in those two places. =pixi run meson test -C bbdir docs_paper_brine= checks the
-fast lines. =pixi run meson test -C bbdir --suite slow docs_paper_brine_full= checks the
-full lines when the build was configured with =-Dpaper_full=true=.
-Without that option the slow test exits 77. The other topics use the
-same test names with their own topic. =snakemake -s
-docs/tutorials/Snakefile brine= is the same full brine run. The
-scripts are the Python files under =docs/tutorials=.
+The paper tutorials provide a short example and the corresponding
+full-size result. Each page explains the analysis and the number you should
+see.

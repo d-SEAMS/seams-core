@@ -39,10 +39,7 @@ seams prisms input/traj/mW_cubic.lammpstrj --type 1
 
 * Sheet rings and the in-plane RDF
 
-PyPI serves ~pydseamslib~ 2.11.1.
-On that wheel, ~import pydseams~ reads this dump with the hydrogen-bond list, the sheet census is 1 three-ring, 230 four-rings, 4 five-rings and 192 six-rings, and ~find_prisms~ returns ~None~.
-~pip install 'pydseamslib==2.14.0'~ does not resolve on PyPI.
-The block below is the 2.14.0 frame, ~from dseams import userframe~, built against this engine.
+Install ~pydseamslib~ 2.14.0 with ~pip install 'pydseamslib==2.14.0'~ and import ~from dseams import userframe~.
 Its sheet census uses the cutoff neighbour list.
 Its prism rows are not the CLI line: size 4 is 50 perfect, where ~seams prisms~ prints 51.
 

@@ -31,6 +31,7 @@ SOURCE_LINE = re.compile(
     r"(?:[0-9a-f]{7,40}|master|HEAD)"
     r"(/[^\"'#\s<>]+)#L\d+(?:-L\d+)?"
 )
+OBFUSCATED_MAILTO = re.compile(r'href="(mai(?:[^"]*?))"')
 
 
 def rewrite(tree, old, new):
@@ -107,6 +108,26 @@ def publish_source_lines(tree):
     return changed
 
 
+def decode_doxygen_mail(tree):
+    """Turn Doxygen's concatenated mail attributes into mailto links."""
+    if not tree.is_dir():
+        return 0
+    changed = 0
+    for path in tree.rglob("*.html"):
+        text = path.read_text(encoding="utf-8", errors="replace")
+
+        def repl(match):
+            address = match.group(1).replace("'+'", "").replace("+'", "")
+            address = address.replace("'", "")
+            return 'href="{}"'.format(address)
+
+        updated = OBFUSCATED_MAILTO.sub(repl, text)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            changed += 1
+    return changed
+
+
 def relativize_ford(tree):
     """Point FORD's absolute docs/ford links at the published fortran tree."""
     if not tree.is_dir():
@@ -141,9 +162,10 @@ def main():
     paths = relativize_ford(BUILD / "fortran")
     lua = add_name_ids(BUILD / "lua")
     sources = publish_source_lines(BUILD)
+    mail = decode_doxygen_mail(BUILD / "api-cpp")
     print(
-        "built links: api-cpp {} anchors {} fortran {} paths {} lua {} sources {}".format(
-            api, anchors, fortran, paths, lua, sources
+        "built links: api-cpp {} anchors {} fortran {} paths {} lua {} sources {} mail {}".format(
+            api, anchors, fortran, paths, lua, sources, mail
         )
     )
     return 0

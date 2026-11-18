@@ -6,7 +6,7 @@ be hexagonal ice. The liquid half should be water. The molecules in
 between are the ones where the published CHILL+ rule and the OVITO
 rule can part company, because they do not use the same neighbour test.
 
-The run builds that slab instead of reading a dump from the tree.
+This example builds a small slab.
 GenIce supplies a 2 by 2 by 1 ice Ih cell, oxygen only, so the
 hydrogen disorder is not part of the label. A copy of that cell is
 shifted by one box length along z and shaken by less than an angstrom.
@@ -16,13 +16,6 @@ the lower half restrained. The restraint is why the crystal survives
 the relax. The cutoff is 3.5 Å, the same shell CHILL+ will read, and
 it has to sit under half the shortest box edge or OpenMM refuses the
 periodic force.
-
-From the repository root, after a pixi build (=bbdir/seams= and
-=bbdir/src=):
-
-#+begin_src sh
-pixi run python docs/tutorials/paper_science.py interface bbdir/seams bbdir/src out/interface
-#+end_src
 
 The published rule prints
 
@@ -39,21 +32,12 @@ interface ovito hexagonal 68 interfacial 20 water 40
 Both lines sum to 128, the oxygen count of the doubled cell. Both
 rules call 68 oxygens hexagonal. They move one molecule between
 interfacial and water. That single molecule is the reason to name the
-rule when you quote an interface count. The picture is
-=out/interface/interface.png=, the one frame in the dump.
-=pixi run meson test -C bbdir docs_paper_interface= runs the same script and checks the
-two lines. That picture is =paper-tutorials/interface/interface.png=
-in the Meson build directory. The script exits 77 when GenIce,
-OpenMM, or OVITO is absent.
+rule when you quote an interface count.
 
 * Full run
 
-The paper frame in this tree is ~input/traj/interface_f0.lammpstrj~:
+The supplied paper frame is ~input/traj/interface_f0.lammpstrj~:
 864 molecules, one frame.
-
-#+begin_src sh
-pixi run python docs/tutorials/paper_science.py interface-full bbdir/seams bbdir/src out/interface-full
-#+end_src
 
 #+begin_src text
 interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj
@@ -64,10 +48,5 @@ interface full phi-c 0.00283286
 interface full stack HHHHHHHH....C.
 #+end_src
 
-The picture is =out/interface-full/interface-full.png=. The stack is
-eight hexagonal slabs, a gap, and one cubic layer. Hexagonal is 352
-on the published rule and 346 on the OVITO rule. The script exits 77
-when OVITO does not import. =pixi run meson test -C bbdir --suite slow
-docs_paper_interface_full= checks the same lines when the build was
-configured with =-Dpaper_full=true=. Without that option, or when
-Snakemake is absent, the test exits 77.
+The stack is eight hexagonal slabs, a gap, and one cubic layer.
+Hexagonal is 352 on the published rule and 346 on the OVITO rule.

@@ -1,6 +1,6 @@
 # PLUMED tutorial
 
-`SEAMS` reports three components on this page. `q6` is the mean local q6 and carries finite-difference derivatives, so `RESTRAINT` can bias it. `ice` is the published CHILL+ cubic fraction and `ring` is the fraction of atoms on a primitive six-ring. Those two components have no derivatives.
+`SEAMS` reports three components on this page. `q6` is the mean local q6 and carries finite-difference derivatives, so `RESTRAINT` can bias it. `ice` is the published CHILL+ cubic fraction and `ring` is the fraction of atoms on a primitive six-ring. Those two components have no derivatives. The standalone PLUMED action (`dseams-plumed` v0.4.1) is indexed in [PLUMED-NEST egg 26.018](https://www.plumed-nest.org/eggs/26/018/).
 
 ```{eval-rst}
 .. include:: ../videos/embeds/plumed.rst

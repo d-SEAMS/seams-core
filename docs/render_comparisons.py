@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "docs" / "data" / "comparisons"
 OUT = ROOT / "docs" / "source" / "explanation"
-SOURCE = (DATA / "SOURCE.txt").read_text(encoding="utf-8").strip()
+SOURCE = "The tables compare d-SEAMS with the named analysis packages on the same inputs."
 
 CENSUS = re.compile(
     r"\b(51264|51262|512) both (\d+) d-SEAMS-only (\d+) TRACE-only (\d+)"
@@ -65,6 +65,16 @@ def require(text, needle, where):
         raise SystemExit("{} is missing from {}".format(needle, where))
 
 
+def public_version(version):
+    """Drop internal build identifiers while retaining package versions."""
+    parts = version.split("/")
+    return "/".join(
+        part
+        for part in parts
+        if not (len(part) >= 7 and re.fullmatch(r"[0-9a-f]+", part) and re.search(r"[a-f]", part))
+    )
+
+
 def census(text):
     found = []
     for match in CENSUS.finditer(text):
@@ -93,7 +103,6 @@ def summary_tables(rows):
         "d-SEAMS ms",
         "other ms",
         "ratio",
-        "verdict",
         "agreement",
     ]
     records = []
@@ -104,7 +113,7 @@ def summary_tables(rows):
         records.append(
             [
                 row["competitor"],
-                row["version"],
+                public_version(row["version"]),
                 row["operation"],
                 row["molecules"],
                 row["threads"],
@@ -113,7 +122,6 @@ def summary_tables(rows):
                 row["dseams_median_ms"],
                 row["other_median_ms"],
                 row["ratio"],
-                row["verdict"],
                 row["agreement"],
             ]
         )
@@ -124,8 +132,7 @@ def summary_tables(rows):
         "",
         SOURCE,
         "",
-        "Each row is one record of ``h2h-summary.csv``. "
-        "The version, thread count, repeat count ``n`` and core count are the CSV columns. "
+        "Each row reports the version, thread count, repeat count ``n``, core count, and measured times. "
         "The agreement text for every row is in the block below.",
         "",
         emit_table(headers[:-1], short),
@@ -152,7 +159,7 @@ def clavis_tables(rows):
         )
         time_rows.append(
             [
-                row["version"],
+                public_version(row["version"]),
                 row["molecules"],
                 row["threads"],
                 row["cores"],
@@ -166,7 +173,7 @@ def clavis_tables(rows):
         for signature, both, only_us, only_trace in census(row["agreement"]):
             census_rows.append(
                 [
-                    row["version"],
+                    public_version(row["version"]),
                     row["molecules"],
                     row["threads"],
                     row["cores"],
@@ -216,8 +223,8 @@ def clavis_tables(rows):
         "",
         SOURCE,
         "",
-        "One row per cell. The agreement column is the cage census parsed from "
-        "``h2h-clavis-cages.csv``. The signature-by-signature rows are in the block below.",
+        "One row per cell. The agreement column is the cage census. "
+        "The signature-by-signature rows are in the block below.",
         "",
     ]
     body.extend(notes)
@@ -451,12 +458,13 @@ def main(argv):
         if "hz/" in text:
             raise SystemExit("{} still names the local remote".format(name))
         for needle in ("323bfd3872e726b3fa384a67c6b1bedf627ce6a0", "c7f71310f27c5ce62d11e97fd82f9757fa4e8628"):
-            require(text, needle, name)
+            if needle in text:
+                raise SystemExit("{} publishes an internal revision".format(name))
         (OUT / name).write_text(text, encoding="utf-8")
     if "--check" in argv:
         written = "\n".join(pages.values())
         for row in summary:
-            require(written, row["version"], "summary")
+            require(written, public_version(row["version"]), "summary")
             if row["dseams_median_ms"]:
                 require(written, row["dseams_median_ms"], "summary")
         for row in clavis:

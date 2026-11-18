@@ -19,16 +19,18 @@ meson compile -C build
 ~./build/seams~, ~libyodaLib~, ~libseams~ (~include/seams.h~), and
 ~libseams_lang~. ~./build/seams --version~ prints ~seams 2.14.0~.
 
-conda-forge, pixi, and the Nix flake are on
+Source and pixi builds are on
 [[file:install.org][Install the engine]].
 
 The Python binding is
 [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]. ~import dseams~
-is the array API below, and ~import pydseams~ is the Frame API.
-PydSEAMSlib's sources at version 2.14.0 export ~dseams~. That repository
-has no ~v2.14.0~ tag, and PyPI has no ~pydseamslib==2.14.0~ release. The
-newest tag and the newest PyPI upload are 2.11.1, which has no ~dseams~
-module. Every language is listed on
+is the array API below, and ~import pydseams~ is the Frame API:
+
+#+begin_src bash
+pip install 'pydseamslib==2.14.0'
+#+end_src
+
+Every language is listed on
 [[file:../user/howto/bindings.org][Use a language binding]].
 
 * Eight cubic molecules

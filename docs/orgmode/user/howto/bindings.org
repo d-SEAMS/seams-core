@@ -13,19 +13,17 @@ Every other language is its own repository, with its own documentation,
 tests, and releases. A binding's version is the seams-core version it was
 built against. The Python release for this engine is ~pydseamslib~ 2.14.0.
 Each repository's README has the install command.
-[[file:../../development/repositories.org][The repository map]] describes
-how a binding pins a seams-core tag.
 
 * Languages
 
 | Language    | Repository                                               | Package                                | Links                       |
 |-------------+----------------------------------------------------------+----------------------------------------+-----------------------------|
 | Python      | [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]]       | ~pydseamslib~                          | =libseams=, =libseams_lang= |
-| Lua, Fennel | [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]         | LuaRocks ~dseams~, ~require("dseams")~ | =libseams=                  |
+| Lua, Fennel | [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]         | Git source, ~require("dseams")~        | =libseams=                  |
 | R           | [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]]             | ~dseams~                               | =libseams_lang=             |
 | Julia       | [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]]           | ~Dseams~, engine from ~libseams_jll~   | =libseams_lang=, =libseams= |
 | Rust        | [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]]           | crates ~dseams-sys~, ~dseams~          | =libseams=                  |
-| Fortran     | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm ~dseams~                           | =libseams=                  |
+| Fortran     | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm Git dependency ~dseams~            | =libseams=                  |
 
 ~import dseams~ is the array API over =libseams=: ~dseams.Frame~,
 ~chill_plus~, ~q4q6~, ~neighbours~, ~rings~, and ~from_ase~.

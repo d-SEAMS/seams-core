@@ -23,9 +23,6 @@ not call cubic or hexagonal. ~dseams_off~ and ~fp_off~ are the
 classifier with the completion off. ~dseams_on~ and ~fp_on~ are the
 same frame with it on.
 
-The tables are the summary, layer, and timing records in
-~docs/data/recall-padding-validation.csv~.
-
 #+begin_export rst
 .. include:: cutoff-padding-tables.rst
 #+end_export

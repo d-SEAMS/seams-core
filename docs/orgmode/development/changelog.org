@@ -4,13 +4,11 @@
 Release notes for the d-SEAMS engine. This repository builds
 ~libyodaLib~, the C library ~libseams~ (=include/seams.h=), the
 language ABI ~libseams_lang~, and the ~seams~ command. Each language
-binding is its own package. The
-[[file:repositories.org][repository map]] lists the
-repositories and the release order. The current release is 2.14.0.
+binding is its own package. The current release is 2.14.0.
 
 * 2.14.0
 
-Released 15 November 2026. ~seams.h~ is ABI 1. Callers moving from
+~seams.h~ is ABI 1. Callers moving from
 2.13 follow the [[file:../user/howto/upgrade-2.14.org][upgrade guide]].
 
 ** Highlights
@@ -56,19 +54,18 @@ Every public call returns a ~seams_status~. The library does not call
 
 ** Packages
 
-Each binding is version 2.14.0, released against this tag.
+Each binding is version 2.14.0.
 
 | Language | Package | Repository |
 |----------+---------+------------|
 | Python | ~pydseamslib~ (~import dseams~ and ~import pydseams~) | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
 | Rust | crates ~dseams-sys~ and ~dseams~ | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
-| Fortran | fpm package ~dseams~ | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
-| Lua, Fennel | LuaRocks ~dseams~, ~require("dseams")~ | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
+| Fortran | fpm Git dependency ~dseams~ | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
+| Lua, Fennel | Git source, ~require("dseams")~ | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
 | R | package ~dseams~ | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
 | Julia | ~Dseams~ (over ~libseams_lang~) and ~Seams~ (over ~libseams~) | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
 
-This repository publishes the conda package ~libseams~ and the
-Yggdrasil recipe for ~libseams_jll~. The Meson options that built the
+The Meson options that built the
 bindings in-tree are removed: ~with_python~, ~with_lua~, ~fennel_lua~,
 ~with_fortran~, ~julia_wrap~, ~r_libs_user~, and ~system_libseams~.
 
@@ -90,7 +87,9 @@ from the copy-in sources in =extras/lammps=. The plugin accepts
 only the named oxygens. GROMACS uses a module inside ~mdrun~. OpenMM
 uses a reporter.
 
-The PLUMED ~SEAMS~ collective variable is a separate plugin. Meson
+The PLUMED ~SEAMS~ collective variable is a separate plugin. The
+standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
+[[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]]. Meson
 builds it when ~-Dwith_plumed~ finds PLUMED. The option defaults to
 ~auto~. ~seams.q6~ is the mean local q6, ~seams.ice~ is the CHILL+
 cubic fraction, and ~seams.ring~ is the fraction of atoms on a
@@ -172,7 +171,6 @@ writes ~colors~ in its header and still reads a 2.13 file that says
 
 * 2.13.0
 
-Released 6 November 2026.
 
 - Each bond row is the sorted neighbour ids.
 - ~seams cages~ reuses a search only when the undirected edge sets
@@ -185,7 +183,6 @@ Released 6 November 2026.
 
 * 2.12.0
 
-Released 1 November 2026.
 
 Double-diamond cages are a maximum non-conflicting set.
 ~findDDC~ builds the mutual-conflict graph once. A one-cage component
@@ -242,7 +239,6 @@ This release adds the R package and the Julia package. Both call
 
 * 2.11.0
 
-Released 9 October 2026.
 
 - Cutoff neighbour rows and hexagonal and double-diamond cage
   affiliation run across host threads.
@@ -259,7 +255,6 @@ Released 9 October 2026.
 
 * 2.10.0
 
-Released 6 September 2026.
 
 - Rodger F4 and host \(q_{12}\) are per-atom fields, so the Zeron
   q3/q12 hydrate pair can be read from the command line.
@@ -283,7 +278,6 @@ Released 6 September 2026.
 
 * 2.9.2
 
-Released 2 September 2026.
 
 Every host stage of the ring pipeline runs under OpenMP. From 2048
 atoms, when OpenMP is compiled in, the cutoff neighbour list and the
@@ -296,7 +290,6 @@ every host stage and their sum and keeps the best of five runs.
 
 * 2.9.1
 
-Released 2 September 2026.
 
 The OpenMP target offload of the Steinhardt kernel compiles with nvc++
 23.7 (~-mp=gpu~) against CUDA 12.2 on an NVIDIA A100. The device path
@@ -306,7 +299,6 @@ forces the host path.
 
 * 2.9.0
 
-Released 2 September 2026.
 
 ~cage::findBySignature~ enumerates closed polyhedra from a ring-size
 census. ~seams cages --signature~ takes a census such as ~4:6,6:8~ or
@@ -329,7 +321,6 @@ per-atom decision, for OVITO or VMD.
 
 * 2.8.0
 
-Released 2 September 2026.
 
 ~topo::localKey~ names the isomorphism class of an atom's rooted
 bonded neighbourhood. With nauty linked, the key is the nauty
@@ -357,7 +348,6 @@ the call does not return an empty frame in its place.
 
 * 2.7.0
 
-Released 2 September 2026.
 
 ~ring::seededCageAffiliation~ takes an optional completion flag.
 ~ring::ringAdjacentCompletion~ fills the last vertex of any six-ring
@@ -367,12 +357,8 @@ walks. The rule is stated and proved in =lean/= with Mathlib: the
 completion is the least fixed point above the seed, it is empty on an
 empty seed, and it does not depend on the visiting order.
 
-The reproducibility workflow for the 2.0 paper lives in the
-[[https://github.com/d-SEAMS/dseams2_repro][dseams2_repro]] package.
-
 * 2.6.0
 
-Released 17 August 2026.
 
 Meson links FlexiBLAS when pkg-config or ~libflexiblas~ is present, and
 otherwise the conda-forge ~libblas~ and ~liblapack~ packages. Python
@@ -382,7 +368,6 @@ yodaStruct.
 
 * 2.5.0
 
-Released 16 August 2026.
 
 ~--family~ selects the chemistry. The default is ~waterIce~. ~chill~,
 ~chill-plus~, ~cages~, and ~ions~ on any other family print the family
@@ -397,7 +382,6 @@ from ~rdf::runningCN~ and ~rdf::firstMinimumBin~. Dump writers emit
 
 * 2.4.0
 
-Released 16 August 2026.
 
 ~seams rdf~ and ~seams cn~ compute partial three-dimensional site-site
 \(g_{IJ}(r)\) and coordination numbers under the dump minimum image.
@@ -413,21 +397,18 @@ the restricted-triclinic in-plane area \(l_x \times l_y\).
 
 * 2.3.4
 
-Released 16 August 2026.
 
 Steinhardt parameters, hydrogen bonds, and cluster wraps use the dump
 minimum image.
 
 * 2.3.3
 
-Released 16 August 2026.
 
 Cutoff fallbacks and the skin Verlet refresh use the dump 3 by 3
 minimum image.
 
 * 2.3.2
 
-Released 16 August 2026.
 
 Cutoff lists take the LAMMPS dump 3 by 3 cell. Device ice-score batches
 pass ~lammpsBoxToLinkcell~ when the dump carries tilt. This release
@@ -435,7 +416,6 @@ uses linkcell v0.3.1.
 
 * 2.3.1
 
-Released 16 August 2026.
 
 ~neighList~, ~halfNeighList~, and the in-plane RDF sampler use the
 vesin cell list, the same helper as ~neighListO~. Brute force remains
@@ -443,7 +423,6 @@ the fallback. The GPU ice-score workspace is unchanged.
 
 * 2.3.0
 
-Released 16 August 2026.
 
 The topological unit-matching ice score (mutual four-nearest graph,
 primitive hexagons, hexagonal and double-diamond cages) runs as a
@@ -458,7 +437,6 @@ Examples call ~seams~, ~pydseams~, and ~require("dseams")~. The 2020
 
 * 2.2.5
 
-Released 16 August 2026.
 
 This release uses linkcell v0.2.4. A static ~libyodaLib~ links the static
 linkcell archive, so a consumer of that archive does not need
@@ -467,7 +445,6 @@ linkcell archive, so a consumer of that archive does not need
 
 * 2.2.4
 
-Released 16 August 2026.
 
 Periodic /k/-nearest graphs come from
 [[https://github.com/d-SEAMS/linkcell][linkcell]] v0.2.2.
@@ -479,21 +456,18 @@ empty frame no longer stops the walker.
 
 * 2.2.3
 
-Released 15 August 2026.
 
 Help, errors, ice-type counts, and ~--features~ are colorized.
 ~NO_COLOR~ turns the color off.
 
 * 2.2.2
 
-Released 15 August 2026.
 
 The compiled Python module in this release is ~pydseams.yoda~.
 ~pydseams._core~ remains an alias.
 
 * 2.2.1
 
-Released 15 August 2026.
 
 - The Nix flake packages ~libyodaLib~ and ~seams~. The package is the
   Meson build.
@@ -507,7 +481,6 @@ Released 15 August 2026.
 
 * 2.2.0
 
-Released 15 August 2026.
 
 The engine command line is ~seams~, with ~read~, ~chill~,
 ~chill-plus~, and ~cages~. Lua callers use the ~dseams~ library from
@@ -515,7 +488,6 @@ yodaStruct. Python callers use ~pydseams~.
 
 * 2.1.2
 
-Released 15 August 2026.
 
 The CMake-era Nix entry points (~default.nix~, ~shell.nix~, and
 ~nix/yodaStruct.nix~) are removed. They still named the product
@@ -523,7 +495,6 @@ The CMake-era Nix entry points (~default.nix~, ~shell.nix~, and
 
 * 2.1.1
 
-Released 15 August 2026.
 
 The CHILL interfacial walk uses the same four-neighbour star as
 ~c_ij~. Atoms without four recorded bonds are labelled water, matching
@@ -533,7 +504,6 @@ not keep a double-diamond-only atom.
 
 * 2.1.0
 
-Released 15 August 2026.
 
 This repository is the C++ engine.
 
@@ -549,7 +519,6 @@ This repository is the C++ engine.
 
 * 2.0.1
 
-Released 7 April 2026.
 
 The Python bindings move to
 https://github.com/d-SEAMS/PydSEAMSlib . This repository is the C++
@@ -558,7 +527,6 @@ x86_64 wheels are no longer built.
 
 * 2.0.0
 
-Released 22 March 2026.
 
 Meson replaces CMake. The license changes from GPL to MIT. Optional
 dependencies are vesin neighbour lists, Highway SIMD, chemfiles, and
@@ -566,6 +534,5 @@ readcon-core. The engine tests are a Catch2 suite.
 
 * 1.0.0
 
-Initial release. Goswami, Goswami, and Singh, J. Chem. Inf. Model.
-2020, 60, 2169-2177,
+Initial release. Goswami, Goswami, and Singh, J. Chem. Inf. Model., 60, 2169-2177,
 [[https://doi.org/10.1021/acs.jcim.0c00031][10.1021/acs.jcim.0c00031]].

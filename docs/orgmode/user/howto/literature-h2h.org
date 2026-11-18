@@ -61,14 +61,12 @@ libira is not linked and =ira= when it is.
 python3 scripts/h2h_literature.py --lib bbdir/src/libyodaLib.so
 #+end_src
 
-=--out= defaults to =benchmarks/h2h-literature.csv= and =--log= to
-=benchmarks/h2h-literature.txt=. With no =--lib=, the library is
+With no =--lib=, the library is
 =SEAMS_CORE_LIB= or =build/src/libyodaLib.so=. =--sizes= defaults to
 128, 4096, and 110592. =--once CODE OP= times one operation on one
-phase. =benchmarks/h2h_literature.py= calls the same script once per
-method. It reads =H2H_PYTHON= and =SEAMS_CORE_LIB=.
+phase. It reads =H2H_PYTHON= and =SEAMS_CORE_LIB=.
 
-The neighbour and ring medians below are the stored rows of that CSV
+The neighbour and ring medians below are the stored rows
 at 4096 and 110592 molecules. =n= is 8. d-SEAMS on these rows is
 2.14.0. On ideal ice the script requires four neighbours per molecule
 before it times the frame.
@@ -166,9 +164,7 @@ range is type 7. Ideal ice Ic uses oxygen bond 2.75 Å and cutoff
 molecule, 221184 at 110592 molecules.
 
 The worker opens =bbdir-release/bindings/libseams_lang.so=. There is
-no flag for another path. =--out= defaults to
-=benchmarks/rc3-sitting.csv= and =--log= to
-=benchmarks/rc3-sitting.txt=.
+no flag for another path.
 
 #+begin_src bash
 python3 scripts/h2h_rc3_sitting.py
@@ -178,9 +174,7 @@ The run needs numpy, vesin, mdapy, freud, OVITO, ASE,
 =rings_statistics_matter=, =clavis_engine=, =fastatomstruct=, and a
 symfunc PLUMED. =PLUMED_LIB= names =libplumed.so=. Otherwise the
 script takes it from the =plumed= executable on =PATH=. The vesin
-probe runs first and stops the sitting if vesin is missing. A later
-guest that fails is a =FAIL= line in the log and is left out of the
-CSV.
+probe runs first and stops the run if vesin is missing.
 
 One thread is =taskset -c 0=. Eight threads are =taskset -c 0-7=.
 =OMP_NUM_THREADS= is that width and =OMP_DYNAMIC=FALSE=. The =cores=

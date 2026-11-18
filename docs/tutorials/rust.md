@@ -6,7 +6,11 @@ Classify ice Ih from Rust. The recording uses `input/traj/ice1h.lammpstrj`: `sea
 .. include:: ../videos/embeds/rust.rst
 ```
 
-The binding is [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs). `dseams-sys` is the raw FFI for `include/seams.h`. `dseams` is the safe wrapper. Neither crate is on crates.io. The crates.io name `seams` is an unrelated project. The README gives the dependency line and the `SEAMS_LIBDIR` build against this tree.
+The binding is [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs). `dseams-sys` is the raw FFI for `include/seams.h`. `dseams` is the safe wrapper.
+
+```bash
+cargo add dseams@2.14.0
+```
 
 The same two engine commands, without the crates:
 

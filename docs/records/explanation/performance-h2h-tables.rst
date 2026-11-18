@@ -1,7 +1,6 @@
 Linkcell against the cell list
 ------------------------------
 
-The rows are benchmarks/cutoff-rings.csv.
 Ice Ic at 884736 molecules. Each row is the full cutoff ring call.
 ``n`` is 8.
 

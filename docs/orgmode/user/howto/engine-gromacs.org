@@ -19,12 +19,11 @@ export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:
 export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
 meson setup build -Dwith_gromacs=enabled
 meson compile -C build
-meson test -C build docs_engine_gromacs --print-errorlogs
 #+end_src
 
 ~gmx-seams~ reads a trajectory in nanometers, multiplies the coordinates
-and the box by 10, and classifies the frame. The docs test writes a
-one-frame ~.gro~ from ~input/traj/ice1h.lammpstrj~ and runs:
+and the box by 10, and classifies the frame. Convert
+~input/traj/ice1h.lammpstrj~ to a one-frame ~.gro~ and run:
 
 #+begin_src bash
 gmx-seams -f ice1h.gro -cutoff 3.5

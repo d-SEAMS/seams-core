@@ -8,12 +8,12 @@
 The thread count comes from ~PLUMED_NUM_THREADS~. Set that variable
 before PLUMED starts. ~OMP_NUM_THREADS~ does not change the PLUMED team.
 With ~PLUMED_NUM_THREADS~ unset, ~PLMD::OpenMP::getNumThreads~ returns
-one thread.
+one thread. The standalone PLUMED action (~dseams-plumed~ v0.4.1) is
+indexed in [[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
 
-Build ~libSeamsPlumed.so~ against conda-forge PLUMED 2.9. That is the
-PLUMED the docs engine build uses. PLUMED 2.10 lives in its own
-environment, because a conda-forge LAMMPS package links PLUMED 2.9.
-Eigen and a C++ compiler need to be on the path. The exports
+Build ~libSeamsPlumed.so~ against conda-forge PLUMED 2.9. PLUMED 2.10
+lives in its own environment, because a conda-forge LAMMPS package links
+PLUMED 2.9. Eigen and a C++ compiler need to be on the path. The exports
 are the include and library paths of the prefix, including the AVX
 directories conda-forge uses.
 
@@ -26,7 +26,6 @@ export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:
 export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
 meson setup build -Dwith_plumed=enabled
 meson compile -C build
-meson test -C build docs_engine_plumed --print-errorlogs
 #+end_src
 
 ~SEAMS~ components are ~seams.q6~ (mean local q6), ~seams.ice~ (cubic
@@ -38,9 +37,9 @@ so the central difference runs only when a ~RESTRAINT~ has allocated it.
 
 The plugin converts positions and the box from PLUMED's length unit to
 angstroms. With the default unit, nanometers, the factor is 10.
-~CUTOFF~ is always angstroms. The docs test writes an xyz, in
-nanometers, from ~input/traj/ice1h.lammpstrj~ and runs ~plumed driver~.
-The colvar line is mean q6, the hexagonal count, and the six-ring count:
+~CUTOFF~ is always angstroms. Writing an xyz, in
+nanometers, from ~input/traj/ice1h.lammpstrj~ and running ~plumed driver~
+prints mean q6, the hexagonal count, and the six-ring count:
 
 #+begin_src text
 plumed hexagonal 128 six-rings 256 q6 0.625855

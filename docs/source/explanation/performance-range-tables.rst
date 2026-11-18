@@ -1,7 +1,5 @@
-h2h-ice-ic-rings-n16.csv
-------------------------
-
-Source file ``benchmarks/h2h-ice-ic-rings-n16.csv``.
+Ice Ic rings at sixteen repeats
+-------------------------------
 
 .. csv-table::
    :header: code, version, variant, phase, molecules, threads, n, median ms, min ms
@@ -11,10 +9,8 @@ Source file ``benchmarks/h2h-ice-ic-rings-n16.csv``.
    d-SEAMS, 2.14.0, bonds_and_rings, Ic, 110592, 8, 16, 55.7371, 53.6951
    OVITO, 3.17.2, bonds_and_rings, Ic, 110592, 8, 16, 264.0511, 253.0655
 
-h2h-ice-ic-rings.csv
---------------------
-
-Source file ``benchmarks/h2h-ice-ic-rings.csv``.
+Ice Ic rings
+------------
 
 .. csv-table::
    :header: code, version, variant, phase, molecules, threads, n, median ms, min ms
@@ -36,10 +32,8 @@ Source file ``benchmarks/h2h-ice-ic-rings.csv``.
    d-SEAMS, 2.14.0, bonds_and_rings, Ic, 110592, 8, 8, 50.8056, 48.5005
    OVITO, 3.17.2, bonds_and_rings, Ic, 110592, 8, 8, 277.7784, 256.6581
 
-h2h-literature.csv
-------------------
-
-Source file ``benchmarks/h2h-literature.csv``.
+Published-method comparisons
+----------------------------
 
 .. csv-table::
    :header: code, version, operation, phase, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -101,10 +95,8 @@ Source file ``benchmarks/h2h-literature.csv``.
    mdapy, 2.0.0, rings, Ih, 110592, 8, 8, 2981.948, 2972.034, 2989.280, 17.245
    SQQ, 0.5.8, rings, Ih, 110592, 8, 8, 21085.739, 20671.002, 21266.501, 595.499
 
-h2h-watch-v12.csv
------------------
-
-Source file ``benchmarks/h2h-watch-v12.csv``.
+Ring comparisons (v0.2.0)
+-------------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -118,10 +110,8 @@ Source file ``benchmarks/h2h-watch-v12.csv``.
    d-SEAMS, 2.13.0, rings, 110592, 8, 6, 56.196, 53.545, 58.150, 4.606
    rings-statistics-matter, 0.2.0, rings, 110592, 8, 6, 258.706, 250.839, 267.513, 16.674
 
-h2h-watch-v13.csv
------------------
-
-Source file ``benchmarks/h2h-watch-v13.csv``.
+Ring comparisons (v0.3.0)
+-------------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -135,10 +125,8 @@ Source file ``benchmarks/h2h-watch-v13.csv``.
    d-SEAMS, 2.13.0, rings, 110592, 8, 6, 46.111, 45.552, 46.841, 1.289
    rings-statistics-matter, 0.3.0, rings, 110592, 8, 6, 247.816, 247.260, 250.715, 3.454
 
-h2h-watch-v2.csv
-----------------
-
-Source file ``benchmarks/h2h-watch-v2.csv``.
+Small-cell comparisons
+----------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, n, median ms, q1 ms, q3 ms, iqr ms
@@ -151,10 +139,8 @@ Source file ``benchmarks/h2h-watch-v2.csv``.
    OVITO, 3.17.2, rings, 110592, 6, 564.355867, 561.745026, 565.098417, 3.353391
    cycless, 0.7, rings, 110592, 6, 398433.762302, 396772.871776, 400537.838888, 3764.967113
 
-h2h-watch-v3.csv
-----------------
-
-Source file ``benchmarks/h2h-watch-v3.csv``.
+Large-cell comparisons
+----------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, n, median ms, q1 ms, q3 ms, iqr ms
@@ -175,10 +161,8 @@ The same record stores these 1000-molecule rows. Quartiles were not recorded on 
    d-SEAMS, rings, 1000, 6, 3.044
    cycless, rings, 1000, 6, 3295.845
 
-h2h-watch-v4.csv
-----------------
-
-Source file ``benchmarks/h2h-watch-v4.csv``.
+Threaded comparisons
+--------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -202,10 +186,8 @@ Source file ``benchmarks/h2h-watch-v4.csv``.
    OVITO, 3.17.2, rings, 110592, 8, 6, 353.332, 339.120, 360.069, 20.949
    cycless, 0.7, rings, 110592, 8, 6, 383652.478, 382331.531, 390061.522, 7729.991
 
-h2h-watch-v6-sqq.csv
---------------------
-
-Source file ``benchmarks/h2h-watch-v6-sqq.csv``.
+SQQ comparisons
+---------------
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -213,10 +195,8 @@ Source file ``benchmarks/h2h-watch-v6-sqq.csv``.
    SQQ, 0.5.8, rings, 110592, 1, 6, 18234.926, 17943.971, 18534.404, 590.433
    SQQ, 0.5.8, rings, 110592, 8, 6, 17907.744, 17660.226, 18090.320, 430.095
 
-h2h-watch-v7.csv
-----------------
-
-Source file ``benchmarks/h2h-watch-v7.csv``.
+Neighbour comparisons
+---------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -242,10 +222,8 @@ Source file ``benchmarks/h2h-watch-v7.csv``.
    ASE, 3.29.0, neighbours, 110592, 8, 6, 1555.691, 1495.967, 1714.615, 218.647
    MDAnalysis, 2.11.0, neighbours, 110592, 8, 6, 640.507, 635.309, 649.452, 14.143
 
-h2h-watch.csv
--------------
-
-Source file ``benchmarks/h2h-watch.csv``.
+Additional comparisons
+----------------------
 
 .. csv-table::
    :header: code, version, operation, molecules, n, median ms, q1 ms, q3 ms, iqr ms
@@ -255,10 +233,8 @@ Source file ``benchmarks/h2h-watch.csv``.
    d-SEAMS, 2.13.0, rings, 110592, 6, 1132.575774, 1128.797129, 1135.430546, 6.633418
    fastatomstruct, 2.2.0, rings, 110592, 6, 464469.419662, 458386.323833, 516170.701190, 57784.377358
 
-rc2perf-literature.csv
+Literature performance
 ----------------------
-
-Source file ``benchmarks/rc2perf-literature.csv``.
 
 .. csv-table::
    :header: code, version, operation, phase, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms
@@ -285,10 +261,8 @@ Source file ``benchmarks/rc2perf-literature.csv``.
    mdapy, 2.0.0, rings, Ic, 110592, 8, 8, 1640.954, 1621.690, 1648.211, 26.521
    SQQ, 0.5.8, rings, Ic, 110592, 8, 8, 13893.758, 13821.643, 13955.952, 134.309
 
-thread-scale.csv
-----------------
-
-Source file ``benchmarks/thread-scale.csv``.
+Thread scaling
+--------------
 
 .. csv-table::
    :header: code, version, operation, molecules, threads, n, median ms, q1 ms, q3 ms, iqr ms

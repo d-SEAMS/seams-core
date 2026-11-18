@@ -13,9 +13,8 @@ Label the eight-atom cubic cell with `seams.h` and print the library version. Th
 `seams.h` includes the generated `seams_version.h`. Meson compiles the program against `libseams` and records the library path in the binary.
 
 ```bash
-meson setup build
-meson compile -C build docs_ice_example
-./build/src/docs_ice_example
+cc -Iinclude -Ibuild/src docs/examples/ice.c -Lbuild/src -lseams -Wl,-rpath,build/src -lm -o ice
+./ice
 ```
 
 `docs/examples/core_counts.c` reads `input/traj/ice1h.lammpstrj` and `input/traj/genice_sII.lammpstrj`. It returns 0 when Ice Ih is 128 hexagonal waters and 256 six-rings, and sII is 136 clathrate waters, 144 five-rings and 16 six-rings. The lines it prints are:

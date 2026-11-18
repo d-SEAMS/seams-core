@@ -1,23 +1,22 @@
 #+TITLE: Performance, 4096 to 110592
 #+OPTIONS: toc:nil num:nil
 
-Neighbour lists and primitive rings from the committed tables other
+Neighbour lists and primitive rings from the comparisons other
 than the release-candidate sitting and the 884736-molecule head-to-head.
 A row is listed when its stored ~n~ is at least 6. The interval is
-~q1 ms~ and ~q3 ms~ when the file stores them, ~iqr ms~ when that is
-the interval it stores, and ~min ms~ when that is the second time it
-stores. The version column is the version the row recorded. Several
-watch files record 2.13.0. Two of the files store a variant
+~q1 ms~ and ~q3 ms~ when recorded, ~iqr ms~ when that is
+the recorded interval, and ~min ms~ when that is the second time
+recorded. The version column is the version the row recorded. Two of the tables store a variant
 column, ~rings~ or ~bonds_and_rings~.
 
-One cycless record also stores a 1000-molecule row. It is listed with
-that record. Rows whose stored ~n~ is below 6 are omitted.
+One cycless comparison also stores a 1000-molecule row. It is listed with
+that table. Rows whose stored ~n~ is below 6 are omitted.
 
 The release-candidate medians are on
 [[file:performance.org][the sitting page]].
 The 884736-molecule ice and liquid medians are on
 [[file:performance-h2h.org][the head-to-head]].
-What each sitting measures is
+What each comparison measures is on
 [[file:performance-overview.org][the overview]].
 
 #+begin_export rst

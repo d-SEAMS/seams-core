@@ -334,7 +334,7 @@ def check_embeds(root):
             fail("{} iframe is missing".format(slug))
         if marker not in html:
             fail("{} card is missing".format(slug))
-        if "<h2>{}</h2>".format(title) not in html:
+        if "<h2>{}</h2>".format(title) not in html and '<h2 id="{}">{}</h2>'.format(slug, title) not in html:
             fail("{} title is missing".format(slug))
         if "<p>{}</p>".format(sentence) not in html:
             fail("{} description is missing".format(slug))

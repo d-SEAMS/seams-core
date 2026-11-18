@@ -1,10 +1,6 @@
 {
   "changelog": "development/changelog",
   "comparisons": "user/comparisons",
-  "contributing/index": "development/index",
-  "contributing/lean": "development/lean",
-  "contributing/release": "development/release",
-  "contributing/repositories": "development/repositories",
   "howto/benchmarks": "user/howto/benchmarks",
   "howto/bindings": "user/howto/bindings",
   "howto/cages-trace": "user/howto/cages-trace",
@@ -35,7 +31,6 @@
   "howto/symmetry-classifier": "user/howto/symmetry-classifier",
   "howto/troubleshooting": "user/howto/troubleshooting",
   "howto/upgrade-2.14": "user/howto/upgrade-2.14",
-  "howto/versions": "user/howto/versions",
   "quickstart": "getting-started/quickstart",
   "tutorials/brine": "user/tutorials/brine",
   "tutorials/bulk-ice": "user/tutorials/bulk-ice",

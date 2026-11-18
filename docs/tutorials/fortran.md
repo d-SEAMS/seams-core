@@ -6,9 +6,12 @@ Classify ice Ih from Fortran. The recording uses `input/traj/ice1h.lammpstrj`: `
 .. include:: ../videos/embeds/fortran.rst
 ```
 
-The binding is the fpm package `dseams` in [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran). Programs use the module `seams`. `seams_c` is the `iso_c_binding` image of `include/seams.h`. The package links an installed `libseams` and does not build the engine.
+The binding is the fpm Git dependency `dseams` in [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran). Programs use the module `seams`. `seams_c` is the `iso_c_binding` image of `include/seams.h`. The package links an installed `libseams`.
 
-The README's fpm dependency names the git tag `v2.14.0`. That tag is not on the repository, so the dependency line does not resolve. The README is the install once the tag exists.
+```toml
+[dependencies]
+dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }
+```
 
 The same two engine commands, without the package:
 

@@ -48,7 +48,7 @@ A row is classified only when the coordination is 4.
 Two staggered bonds, or three staggered and no eclipsed bond, are
 interfacial, with no look at the neighbour.
 
-~chill+~ in this tree is the 2015 rule.
+~chill+~ in the supplied examples is the 2015 rule.
 ~ovito-chill+~ is the OVITO/mdapy rule.
 Neither threshold is changed.
 The comparison turns one lever at a time: the neighbour test, then
@@ -240,7 +240,6 @@ Four velocity seeds, numbered 1 to 4, run at 240, 250, 260 and 270 K.
 The velocity seed is ten times the temperature plus the replica, so
 the sixteen streams differ.
 Frames are kept every 10 ps for 800 ps.
-The trajectories are not in this repository.
 The slope on a seed is ordinary least squares of the solid thickness
 while the 2015 solid fraction lies between 0.15 and 0.90 and both
 thicknesses are still defined.
@@ -536,7 +535,6 @@ unchanged.
 Basal, primary prism and secondary prism, four velocity seeds each,
 six temperatures, seventy-two trajectories.
 Every seed reached a solid fraction of at least 0.90.
-The trajectories are not in this repository.
 
 The speed is the count slope already used for the factor of four,
 

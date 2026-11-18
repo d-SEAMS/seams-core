@@ -3,15 +3,9 @@
 
 Release 2.14.0 provides the ~seams~ command, ~libyodaLib~, ~libseams~
 (~include/seams.h~), and ~libseams_lang~ (~bindings/cxx/seams_lang.h~).
-Build it from source or with [[https://pixi.sh][pixi]]. The Nix flake
-does not configure on this tag. The conda-forge package is coming
-soon. Language
-bindings live in their own repositories. The last section records which
-of those packages are published.
-
-* conda-forge
-
-The ~libseams~ 2.14.0 package is coming soon.
+Build it from source or with [[https://pixi.sh][pixi]]. Language
+bindings live in their own repositories; the last section gives their
+install commands.
 
 * From source
 
@@ -80,15 +74,6 @@ pixi run -e ira build
 
 The same ~-e~ flag takes ~sphericart~, ~nauty~, or ~mpi~.
 
-* Nix flake
-
-~nix build~ and ~nix run~ do not finish on this tag. Meson configure
-stops because the flake source omits ~scripts/dist_strip_vcs.py~, and
-~meson.build~ requires that file when Python is found. ~nix develop~
-stops earlier: the nixos-unstable pin refuses ~python3.14-stopit~,
-which nixpkgs marks broken. The [[file:../reference/nix.org][Nix]] page
-describes the derivation. Use the source build or pixi.
-
 * OpenMP target offload
 
 The builds on this page leave ~with_openmp_offload~ disabled. The
@@ -114,22 +99,25 @@ LAMMPS, GROMACS, OpenMM, and PLUMED hooks follow ~-Dwith_lammps=auto~,
 Each hook is built when its library is found. The engine pages are
 [[file:../user/howto/engine-lammps.org][LAMMPS]], [[file:../user/howto/engine-gromacs.org][GROMACS]],
 [[file:../user/howto/engine-openmm.org][OpenMM]], and [[file:../user/howto/engine-plumed.org][PLUMED]].
+The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
+[[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
 
 * Language bindings
 
-Each binding is its own repository and its own release. A 2.14.0
-package calls this engine. These are the public channels today:
+Each binding is its own repository. Use these install commands:
 
-| Language    | 2.14.0 package                                          | Repository |
-|-------------+---------------------------------------------------------+------------|
-| Python      | PyPI ~pydseamslib~ is coming soon                       | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] |
-| Lua, Fennel | no LuaRocks module                                      | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] |
-| R           | not on CRAN                                             | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] |
-| Julia       | ~Dseams~ and ~libseams_jll~ are not in the General registry | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] |
-| Rust        | ~dseams~ and ~dseams-sys~ are not on crates.io          | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] |
-| Fortran     | no fpm registry entry                                   | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] |
+- Python: ~pip install 'pydseamslib==2.14.0'~ from
+  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+- Lua and Fennel: clone [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+  and run ~luarocks make~ in the checkout.
+- R: ~remotes::install_github("d-SEAMS/dseams-r")~ from
+  [[https://github.com/d-SEAMS/dseams-r][dseams-r]].
+- Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~ from
+  [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]].
+- Rust: ~cargo add dseams@2.14.0~, or
+  ~cargo add dseams --git https://github.com/d-SEAMS/dseams-rs~ from
+  [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]].
+- Fortran: add [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
+  as an fpm Git dependency.
 
-Each repository README has the build for that language.
 [[file:../user/howto/bindings.org][Use a language binding]] lists what each one links.
-The [[file:../development/repositories.org][repository map]] covers a
-binding built against a checkout of this engine.

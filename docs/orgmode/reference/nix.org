@@ -7,7 +7,7 @@ not build Python or Lua. There are no overlays.
 #+begin_src bash
 nix build                  # ./result/bin/seams
 nix run . -- read input/traj/exampleTraj.lammpstrj
-nix develop                # inputsFrom seams, plus gdb, ccache, clang-tools, snakemake
+nix develop                # inputsFrom seams, plus gdb, ccache, clang-tools
 nix flake update           # refresh the nixpkgs pin
 nix fmt
 #+end_src
@@ -28,7 +28,7 @@ From =flake.nix=. Supported systems: ~x86_64-linux~,
 | ~apps.<system>.default~ | ~${packages.default}/bin/seams~ |
 | ~checks.<system>.seams~ | the ~seams~ package |
 | ~checks.<system>.default~ | same as ~seams~ |
-| ~devShells.<system>.default~ | ~inputsFrom~ the package; extra packages ~gdb~, ~ccache~, ~clang-tools~, ~snakemake~ |
+| ~devShells.<system>.default~ | ~inputsFrom~ the package; extra packages ~gdb~, ~ccache~, ~clang-tools~ |
 | ~formatter.<system>~ | ~nixfmt~ |
 
 The only flake input is ~nixpkgs~ (~github:NixOS/nixpkgs/nixos-unstable~).
