@@ -23,7 +23,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Added
 
-- The release upload waits until fresh Ubuntu 22.04, Rocky Linux 9, and Debian 12 containers have unpacked the linux-x86_64 tarball, compiled `docs/examples/quickstart.c` with the flags `pkg-config` prints for `seams`, and run that program on an eight-molecule ice frame.
+- The release upload now checks the linux-x86_64 tarball in fresh Ubuntu
+  22.04, Rocky Linux 9, and Debian 12 containers. Each check compiles
+  `docs/examples/quickstart.c` with the `pkg-config` flags for `seams` and
+  runs it on an eight-molecule ice frame.
 ### Fixed
 
 - Source archives now include every subproject, the patched chemfiles
