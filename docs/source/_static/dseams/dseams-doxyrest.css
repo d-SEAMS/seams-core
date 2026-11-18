@@ -1,0 +1,68 @@
+/* Doxyrest API pages under Shibuya (engine docs only). Load after dseams-shibuya.css. */
+
+.yue .doxyrest-overview-code-block,
+.yue .doxyrest-title-code-block {
+  background: var(--ds-code-bg);
+  color: var(--ds-code-text);
+  border: 1px solid var(--ds-code-border);
+  border-radius: var(--ds-radius);
+  font-family: var(--ds-font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.yue .doxyrest-title-code-block {
+  padding: 10px 16px;
+}
+
+.yue .doxyrest-overview-code-block pre,
+.yue .doxyrest-title-code-block pre {
+  background: transparent;
+  border: 0;
+  margin: 0;
+}
+
+.yue .highlight .doxyrest-code-link,
+.yue .highlight .doxyrest-code-link .std-ref,
+.yue .doxyrest-overview-code-block a,
+.yue .doxyrest-overview-code-block .doxyrest-code-link .std-ref,
+.yue .doxyrest-title-code-block a,
+.yue .doxyrest-title-code-block .doxyrest-code-link .std-ref {
+  color: var(--ds-syn-function) !important;
+  border-bottom: 0;
+  text-decoration: none;
+}
+
+.yue .highlight .doxyrest-code-link:hover .std-ref,
+.yue .doxyrest-overview-code-block a:hover,
+.yue .doxyrest-title-code-block a:hover {
+  text-decoration: underline;
+}
+
+.yue .highlight :is(.k, .kc, .kd, .kn, .kp, .kr, .kt, .nb) {
+  color: var(--ds-syn-keyword) !important;
+  font-weight: 500 !important;
+}
+
+.yue .highlight :is(.n, .na, .nc, .no, .nd, .ni, .ne, .nf, .nl, .nn, .nt, .nv, .nx, .py, .bp, .vc, .vg, .vi, .vm, .o, .ow, .p) {
+  color: var(--ds-code-text) !important;
+  font-weight: normal !important;
+}
+
+.yue .highlight :is(.c, .ch, .cm, .cp, .cpf, .c1, .cs) {
+  color: var(--ds-syn-comment) !important;
+  font-style: italic;
+}
+
+.yue .highlight :is(.s, .sa, .sb, .sc, .dl, .sd, .s2, .se, .sh, .si, .sx, .sr, .s1, .ss) {
+  color: var(--ds-syn-string) !important;
+}
+
+.yue .highlight :is(.m, .mb, .mf, .mh, .mi, .mo, .il) {
+  color: var(--ds-syn-number) !important;
+}
+
+.yue .doxyrest-lang-cpp-table td,
+.yue table.docutils.doxyrest-table td {
+  vertical-align: top;
+}

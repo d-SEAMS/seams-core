@@ -77,6 +77,11 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${PATH}"
           pixi run -e docs docbld
+      - name: SEO metadata
+        run: |
+          python3 docs/finalize_seo.py --self-test
+          python3 docs/check_seo.py --self-test
+          python3 docs/check_seo.py docs/build
       - name: Mermaid render
         run: python3 docs/check_mermaid.py
       - name: Lychee
