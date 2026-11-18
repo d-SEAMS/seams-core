@@ -15,11 +15,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Changed
 
 - Public documentation now contains reader instructions and scientific results only. Maintainer workflows, repository policy, provenance pins, and video-production notes have moved out of the published manual.
-- The pixi full-suite now fails whenever a test is skipped, so a passing
-  run confirms that the required analyses and documentation checks all ran.
-- `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
-  `compute dseams`; Meson errors unless `lammps_src_include` points to
-  matching sources.
+
+## [2.14.1] - 2026-11-16
 
 ### Added
 
@@ -27,21 +24,16 @@ by [towncrier](https://towncrier.readthedocs.io/).
   22.04, Rocky Linux 9, and Debian 12 containers. Each check compiles
   `docs/examples/quickstart.c` with the `pkg-config` flags for `seams` and
   runs it on an eight-molecule ice frame.
-### Fixed
-
-- Source archives now include every subproject, the patched chemfiles
-  source, and pinned tutorial inputs, so users can build and test in
-  offline environments.
-- The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
-- The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
-## [2.14.1] - 2026-11-16
-
-### Added
-
 - The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
 
 ### Changed
 
+- The pixi full-suite now fails whenever a test is skipped, so a passing
+  run confirms that the required analyses and documentation checks all ran.
+
+  `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
+  `compute dseams`; Meson errors unless `lammps_src_include` points to
+  matching sources.
 - Linux release binaries build inside manylinux_2_28 and need glibc 2.28 or newer.
 - On glibc the first library call raises the heap trim threshold to 256 MiB and the mmap threshold to 32 MiB, so the buffers one call frees are reused by the next instead of being faulted in again. The same call varied by 10 to 30 percent between runs before. The setting is process-wide; `SEAMS_MALLOC_TUNE=0` skips it, and a caller that set `MALLOC_*_` or a `glibc.malloc` tunable keeps its own values.
 - The k-nearest neighbour graph scales with OpenMP threads. linkcell 0.4.3 scatters the k-nearest mesh by bin owner, builds the graph rows and the CSR in the search's own parallel region and keeps a one-thread search on one thread; no OpenMP team is started for the call. Neighbour order is unchanged, ties included, at every thread count. On 110592-molecule ice Ic in the omp-scaling sitting of source tree 1c41a929, `seams_neighbours_knn` with four neighbours takes 40.6, 22.5, 13.0 and 7.9 ms at 1, 2, 4 and 8 threads instead of 58.2, 45.6, 37.0 and 33.2; on 884736 molecules it takes 62.5 ms at 8 threads instead of 279.8. In the same sitting OVITO takes 17.7 ms, mdapy 2.0.0 17.0 ms, freud 3.6.1 23.7 ms and pyscal3 4.1.0 103.5 ms for the same graph at 8 threads.
@@ -51,6 +43,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- Source archives now include every subproject, the patched chemfiles
+  source, and pinned tutorial inputs, so users can build and test in
+  offline environments.
+- The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
+- The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
 - Malformed MOL2 and mmCIF files that chemfiles refuses now report a read error through the C API and every language binding instead of returning a frame with zero atoms.
 - A ThreadSanitizer death fails the TSan C API suite. The suite runs with `exitcode=0` so that the libgomp barrier races do not fail it, and that was also the exit status of a FATAL, a CHECK failure or a deadly signal, in the suite and in each `capi_cpp_ref` it starts, so a crashed reference still left "capi suite ok". `abort_on_error=1` makes such a death SIGABRT, and `tests/capi_tsan_gate.py` passes the suite only on exit 0, a "capi suite ok" line, and no ThreadSanitizer output but data races among the main thread and the libgomp workers it started.
 - The docs publish job drew every molecule still twice at 4096 px and 256 samples, so Publish the book sat on the runner for hours. The delivered pictures are 2048 px, and a denoised 64-sample frame at that size matches the old stills. The job now stops if it runs for more than two hours.
