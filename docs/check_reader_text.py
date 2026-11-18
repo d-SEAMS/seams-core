@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import html.parser
 import json
+import os
 import re
 import shlex
 import sys
@@ -327,6 +328,10 @@ def html_pages(build):
 def main() -> int:
     errors = []
     registry_cache = {}
+    # The offline source-tarball job runs with no network. There the
+    # registry lookups are not made and the report says so; every text
+    # check still runs.
+    offline = os.environ.get("SEAMS_NO_NETWORK") == "1"
     registry_claims = 0
     source_count = 0
     html_count = 0
@@ -351,6 +356,8 @@ def main() -> int:
         for number, line in enumerate(text.splitlines(), 1):
             for manager, package, version in claims(line):
                 registry_claims += 1
+                if offline:
+                    continue
                 key = (manager, package.lower())
                 if key not in registry_cache:
                     try:
@@ -371,6 +378,12 @@ def main() -> int:
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
+    if offline:
+        print(
+            f"reader text ok ({source_count} exported sources, {html_count} HTML pages; "
+            f"{registry_claims} registry claims not checked: SEAMS_NO_NETWORK=1)"
+        )
+        return 0
     print(
         f"reader text ok ({source_count} exported sources, {html_count} HTML pages; "
         f"{registry_claims} registry claims checked live across "
