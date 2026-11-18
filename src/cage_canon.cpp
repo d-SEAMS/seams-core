@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <map>
+#include <mutex>
 #include <sstream>
 #include <vector>
 
@@ -38,6 +39,8 @@ void collectAtoms(const std::vector<std::vector<int>> &rings,
 std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> &edges,
                                   int root = -1,
                                   const std::vector<int> &colors = {}) {
+  static std::mutex nautyMutex;
+  const std::lock_guard<std::mutex> guard(nautyMutex);
   if (n <= 0 || n > MAXN) {
     return {};
   }
