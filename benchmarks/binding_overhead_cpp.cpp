@@ -58,7 +58,7 @@ double run(Held &held, const std::string &op, const std::string &path) {
   if (op == "knn") {
     double t0 = now_sec();
     {
-      auto nb = held.sys.knn(4, 3.5, true);
+      auto nb = held.sys.knn(seams::KnnOptions{4, 3.5, 0, true});
       sink += static_cast<double>(nb.nnz());
     }
     return now_sec() - t0;
@@ -82,7 +82,7 @@ double run(Held &held, const std::string &op, const std::string &path) {
   if (op == "rings") {
     double t0 = now_sec();
     {
-      auto rings = held.sys.rings(3.5, 6);
+      auto rings = held.sys.rings(seams::RingOptions{3.5, 0, seams::Graph::Cutoff, 6});
       (void)rings;
     }
     return now_sec() - t0;
