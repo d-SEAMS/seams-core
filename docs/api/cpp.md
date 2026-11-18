@@ -31,7 +31,8 @@ Its frame-mutation and order-parameter entries are
 
 ```{literalinclude} ../../../bindings/cxx/seams_lang.h
 :language: cpp
-:lines: 115-178
+:start-after: LANG_ORDER_BEGIN
+:end-before: LANG_ORDER_END
 ```
 
 `docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
