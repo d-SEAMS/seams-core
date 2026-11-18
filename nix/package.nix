@@ -114,10 +114,22 @@ let
     src = linkcellSrc;
     hash = "sha256-YSV6Ewb/O6/ekidfJAGJ/q+5kBhiSzRik9eVD25aPqA=";
   };
+  minimageCargoVendor = rustPlatform.fetchCargoVendor {
+    src = minimageSrc;
+    hash = "sha256-8NSCv17ACkQbkBnycIZ3K9mUUOWwYX4u7OMii2F2znk=";
+  };
   cargoHome = runCommand "seams-cargo-home" { } ''
-    mkdir -p "$out"
-    sed "s|@vendor@|${linkcellCargoVendor}|g" \
-      ${linkcellCargoVendor}/.cargo/config.toml > "$out/config.toml"
+    mkdir -p "$out/source-registry-0"
+    cp -R ${linkcellCargoVendor}/source-registry-0/. "$out/source-registry-0/"
+    chmod -R u+w "$out/source-registry-0"
+    cp -R --no-clobber ${minimageCargoVendor}/source-registry-0/. "$out/source-registry-0/"
+    cat > "$out/config.toml" <<EOF
+[source.vendored-source-registry-0]
+directory = "$out/source-registry-0"
+
+[source.crates-io]
+replace-with = "vendored-source-registry-0"
+EOF
   '';
   nanobindRoot = "${py.pkgs.nanobind}/lib/python${py.pythonVersion}/site-packages/nanobind";
 in
