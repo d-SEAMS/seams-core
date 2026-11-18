@@ -24,12 +24,14 @@ if preload and tsan and tsan in preload.split(":"):
         os.environ.pop("LD_PRELOAD", None)
 
 _INTERPRETERS = {"python", "python3", "lua", "lua5.4", "luajit"}
-# Host compilers and shells are not instrumented. A preload inherited
-# from this interpreter makes LeakSanitizer report their allocations.
+# Host compilers, build drivers and shells are not instrumented. A
+# preload inherited from this interpreter makes LeakSanitizer report
+# their allocations: cmake hands it to ninja, and ninja leaks at exit.
 # The process that dlopens libseams is not one of these names.
 _HOST_TOOLS = {
     "cc", "c++", "gcc", "g++", "clang", "clang++",
     "mpicc", "mpicxx", "mpic++", "mpirun", "mpiexec", "orterun",
+    "cmake", "ctest", "ninja", "make", "meson", "pkg-config", "pkgconf",
     "sh", "bash",
 }
 asan = os.environ.get("ASAN_TEST_PRELOAD", "")
