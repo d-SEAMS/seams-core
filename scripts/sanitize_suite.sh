@@ -23,13 +23,17 @@ build=$root/build-san
 # lacks the program, so a test that skips an absent tool would run the
 # wrapper and fail. Only wrappers whose program exists are linked in.
 wrap=$build/asan-path
+# Python leaves __pycache__ here once sitecustomize is imported.
+rm -rf "$wrap"
 mkdir -p "$wrap"
-rm -f "$wrap"/*
 for tool in "$root"/scripts/asan-path/*; do
   if command -v "${tool##*/}" >/dev/null 2>&1; then
     ln -s "$tool" "$wrap/${tool##*/}"
   fi
 done
+# The python3 wrapper puts its own directory on PYTHONPATH, which is this
+# one. sitecustomize is not a program, so the loop above skips it.
+ln -s "$root/scripts/asan-path/sitecustomize.py" "$wrap/sitecustomize.py"
 # Resolved before meson setup so find_program('cargo') records the wrapper.
 export PATH="$wrap:$PATH"
 # run_hook links LAMMPS and is built with the sanitizer. The environment's
