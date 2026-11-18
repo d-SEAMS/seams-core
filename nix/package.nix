@@ -37,6 +37,10 @@
   openmm,
   plumed,
   openmpi,
+  fftwFloat,
+  runCommand,
+  gnutar,
+  gzip,
 }:
 
 let
@@ -81,6 +85,15 @@ let
     url = "https://files.pythonhosted.org/packages/36/5a/6546c8ea2bee64c9e9552e06fdb31118a4f23a12aa161581b5fefd070152/towncrier-23.11.0-py3-none-any.whl";
     hash = "sha256-LlGcphlCbRiePJjJlVj+i+UMnO0T6h/CCko1OpXS3tc=";
   };
+  gromacsLegacyHeaders = runCommand "gromacs-${gromacs.version}-source" {
+    nativeBuildInputs = [
+      gnutar
+      gzip
+    ];
+  } ''
+    mkdir -p "$out"
+    tar -xzf ${gromacs.src} --strip-components=1 -C "$out"
+  '';
   nanobindRoot = "${py.pkgs.nanobind}/lib/python${py.pythonVersion}/site-packages/nanobind";
 in
 
@@ -174,6 +187,7 @@ stdenv.mkDerivation (finalAttrs: {
     gromacs
     openmm
     plumed
+    fftwFloat
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
 
@@ -190,6 +204,8 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_csm" true)
     (lib.mesonEnable "with_lammps" true)
     (lib.mesonEnable "with_gromacs" true)
+    (lib.mesonOption "lammps_src_include" "${lammps.src}/src")
+    (lib.mesonOption "gromacs_legacy_include" "${gromacsLegacyHeaders}/api/legacy/include")
     (lib.mesonEnable "with_openmm" true)
     (lib.mesonEnable "with_plumed" true)
     (lib.mesonEnable "with_chemfiles" false)
