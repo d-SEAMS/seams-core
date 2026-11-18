@@ -275,6 +275,9 @@ def check_folder(folder, env, root, record, absent):
         print(folder.name, "scenes", len(recorded), "of", len(parsed), "ran")
         return
     got = "\n".join(recorded).rstrip() + "\n"
+    if folder.name == "migrate" and " method nauty " in got:
+        path = folder / "recorded-nauty.txt"
+        have = path.read_text() if path.is_file() else ""
     if record:
         path.write_text(got)
         have = got
