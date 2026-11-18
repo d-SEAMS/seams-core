@@ -1228,13 +1228,19 @@ if get_option('with_cli') and get_option('with_tests')
   test(
     'docs_table_csv',
     python3,
-    args: [meson.project_source_root() / 'docs' / 'check_tables.py'],
+    args: [
+      meson.project_source_root() / 'scripts' / 'run_doc_check.py',
+      meson.project_source_root() / 'docs' / 'check_tables.py',
+    ],
     suite: 'docs',
     timeout: 60)
   test(
     'docs_prose',
     python3,
-    args: [meson.project_source_root() / 'docs' / 'check_prose.py'],
+    args: [
+      meson.project_source_root() / 'scripts' / 'run_doc_check.py',
+      meson.project_source_root() / 'docs' / 'check_prose.py',
+    ],
     suite: 'docs',
     timeout: 60)
   test(
