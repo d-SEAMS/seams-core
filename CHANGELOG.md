@@ -11,7 +11,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.0] - 2026-11-15
-
 ### Added
 
 - A CI job compiles the library sources PydSEAMSlib and dseams-r build under Clang 22 with `-Wsign-conversion -Wunneeded-internal-declaration -Werror`, once without OpenMP or any optional backend and once with them, and builds those libraries with `-Dwerror=true`. The compiler-warnings workflow also runs on `release/**` branches.
@@ -293,6 +292,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The Fortran bindings free the result buffers after the copy, and a dump that cannot be opened names its path. The cubic example drops the arrays it owns after the frame is closed, which LeakSanitizer otherwise reports before a Fortran main finalizes its allocatables.
 - The Fortran methods that size a buffer and then fill it (`rdf`, `running_cn`, `density`, `brine_profile`, the fingerprint keys and the neighbour columns) pass the capacity in its own variable. They passed one variable as both the by-value capacity and the `intent(out)` length, which leaves the capacity undefined on entry.
 - The Lua LuaJIT FFI module `dseams_ffi.lua` is written by a plain build of the Lua binding, not only by its example test, so the LuaJIT FFI tutorial runs on a fresh build. The Lua binding lives in d-SEAMS/yodaStruct.
+- The Nix package source includes `scripts/dist_strip_vcs.py`, which Meson reads when it finds Python. The development shell does not include Snakemake, which depends on the broken `stopit` package.
 - The Ozaki residue division uses shifts, so clang-cl no longer emits `__udivti3` and `__umodti3` for a 128-bit operator that lld-link does not pull into the DLL.
 - The PLUMED `SEAMS` action scaled positions and the box by 10 whatever PLUMED's length unit, so under `UNITS LENGTH=A` it saw a cell a hundred times too large: on the ideal 64-molecule cell `seams.ice` was 0 and `seams.q6` 0 instead of 1 and 0.6285. It now reads the unit from PLUMED. `meson test plumed_units` is the regression.
 - The PLUMED q6 derivative is expressed per nanometer. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.

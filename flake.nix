@@ -21,7 +21,10 @@
         system:
         let
           pkgs = pkgsFor system;
-          seams = pkgs.callPackage ./nix/package.nix { };
+          seams = pkgs.callPackage ./nix/package.nix {
+            robinMap = pkgs.robin-map;
+            vulkanLoader = pkgs.vulkan-loader;
+          };
         in
         {
           inherit seams;
@@ -55,7 +58,6 @@
               gdb
               ccache
               clang-tools
-              snakemake
             ];
           };
         }
