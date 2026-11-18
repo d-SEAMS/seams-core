@@ -50,17 +50,23 @@ def count(name):
     match = re.search(rf"^{name}:\s+(\d+)\s*$", text, re.M)
     return int(match.group(1)) if match else 0
 
+# pin_host runs its placement checks only with eight cpus or more
+# (tests/pin_host.py says why); on the four-cpu runners it reports a skip.
+ALLOWED_SKIPS = {"pin_host"}
+
 skipped = []
+allowed = []
 for line in text.splitlines():
     match = re.match(r"^\s*\d+/\d+\s+(.*?)\s+SKIP\b", line)
     if match:
-        skipped.append(match.group(1).rsplit(":", 1)[-1])
+        name = match.group(1).rsplit(":", 1)[-1]
+        (allowed if name in ALLOWED_SKIPS else skipped).append(name)
 failed = count("Fail")
 if failed or skipped:
     sys.exit(
         "suite failed={} skipped={}".format(failed, ", ".join(skipped))
     )
-print("suite failed=0 skipped=0")
+print("suite failed=0 skipped=0 allowed={}".format(", ".join(allowed) or "none"))
 PY
 # Skips alone leave meson at status 0. A failed test or a crash does not.
 if [ "$status" -ne 0 ]; then
