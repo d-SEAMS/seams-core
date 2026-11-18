@@ -81,6 +81,9 @@ endif
 # The counter goes negative, and the report then drops the line.
 if get_option('b_coverage') and (cpp_id == 'gcc' or cpp_id == 'clang')
   _args += ['-fprofile-update=atomic']
+  # Subprojects also have threaded kernels, so their counters must not
+  # use a read-modify-write update shared by several workers.
+  add_global_arguments('-fprofile-update=atomic', language: ['c', 'cpp'])
 endif
 
 # Platform conditionals
@@ -949,6 +952,7 @@ subdir('bench')
 
 # Tests
 if get_option('with_tests')
+  subdir('gpu_host_kernels')
   subdir('tests')
 endif
 
