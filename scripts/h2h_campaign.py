@@ -1712,12 +1712,18 @@ def fmt_ms(s: dict) -> str:
 def render_summary(rows, run_id=None) -> str:
     cells = cell_summary(rows, run_id)
     out = []
-    head = next((r for r in rows if r.get("type") in ("sample", "asv")), None)
-    if head:
+    shown = [r for r in rows if r.get("type") in ("sample", "asv")
+             and (run_id is None or r.get("run_id") == run_id)]
+    if shown:
+        head = shown[0]
         out.append(f"host {head.get('host', '?')}; {head.get('lscpu', '?')}; "
                    f"kernel {head.get('kernel', '?')}")
-        out.append(f"code_revision {head.get('code_revision', '?')}; "
-                   f"build {head.get('build', '')}")
+        out.append(f"build {head.get('build', '')}; code_revision of each run:")
+        revisions: dict = {}
+        for r in shown:
+            revisions.setdefault(r.get("run_id", "?"), set()).add(r.get("code_revision", "?"))
+        out.append("")
+        out.extend(f"- {run}: {', '.join(sorted(found))}" for run, found in revisions.items())
     out.append("")
     for workload in ("cutoff", "knn", "rings"):
         subset = [c for c in cells if c["workload"] == workload]
@@ -1785,9 +1791,11 @@ def render_summary(rows, run_id=None) -> str:
         out.append("")
     present = {(c["arm"], c["workload"]) for c in cells}
     notes = [(key, text) for key, text in ARM_NOTES.items() if tuple(key.split("/")) in present]
-    if notes:
+    if cells:
         out.append("## what the timed call covers")
         out.append("")
+        out.append("- threads: OS threads in the sample process after the timed call. Every "
+                   "sample is pinned to one core with every thread-count variable set to 1.")
         for key, text in notes:
             out.append(f"- {key}: {text}")
         out.append("")
@@ -1850,7 +1858,7 @@ def render_lanes(rows, run_id=None) -> str:
         out.append("")
     speed: dict = {}
     for c in cells:
-        if "A" not in c or "threads" not in c["params"]:
+        if "A" not in c or "threads" not in c["params"] or c["group"] == INVENTORY:
             continue
         rest = tuple(sorted((k, v) for k, v in c["params"].items() if k != "threads"))
         speed.setdefault((c["lane"], rest), {})[int(c["params"]["threads"])] = c["A"]["median"]
