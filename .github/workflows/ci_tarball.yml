@@ -38,7 +38,8 @@ jobs:
         run: |
           set -euxo pipefail
           docker build -t seams-offline - <<'EOF'
-          FROM rust:1.88.0-bookworm AS rust
+          # 1.89 stabilized the AVX-512 intrinsics linkcell's bw_roof example uses.
+          FROM rust:1.89.0-bookworm AS rust
           FROM ubuntu:24.04
           COPY --from=rust /usr/local/cargo /usr/local/cargo
           COPY --from=rust /usr/local/rustup /usr/local/rustup
@@ -96,6 +97,7 @@ jobs:
           set -euxo pipefail
           install -d -m 0777 tarball-results
           docker run --rm --network=none --user tester \
+            -e SEAMS_NO_NETWORK=1 \
             -e CONDA_PREFIX=/opt/openmm-sdk \
             -v "$PWD/tarball-results:/results" \
             seams-ready \
