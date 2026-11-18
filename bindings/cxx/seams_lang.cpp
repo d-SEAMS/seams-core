@@ -1414,7 +1414,21 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
     set_error("q4, q6 and a frame are required");
     return 1;
   }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("q4, q6 and CHILL+ need a finite positive cutoff");
+    return 1;
+  }
   try {
+    const int n = frame->cloud.nop;
+    if (n <= 0) {
+      frame->ql.clear();
+      frame->qlbar.clear();
+      frame->labels.clear();
+      if (counts9 != nullptr) {
+        std::memset(counts9, 0, 9 * sizeof(int));
+      }
+      return 0;
+    }
     const int typ = resolve_type(frame->cloud, type);
     std::vector<double> out4;
     std::vector<double> out6;
@@ -1424,7 +1438,6 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
       set_error("fused q4 q6 CHILL+ is not available for this frame");
       return 1;
     }
-    const int n = frame->cloud.nop;
     if (n > 0) {
       std::memcpy(q4, out4.data(), static_cast<std::size_t>(n) * sizeof(double));
       std::memcpy(q6, out6.data(), static_cast<std::size_t>(n) * sizeof(double));

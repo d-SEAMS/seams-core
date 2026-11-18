@@ -99,6 +99,27 @@ int chordless_selection() {
   bad += check(seams_frame_steinhardt_graph(typed, 1.0, 1, 6, "mutual", far_q6.data(), nullptr) == 0 &&
                    far_q6[0] == 0.0,
                "mutual steinhardt inside cutoff + 1.5");
+  seams_frame *empty = seams_frame_read("traj/ice1h.lammpstrj", 1, 9);
+  if (empty == nullptr) {
+    const auto empty_dump = dseams_test::freshDir() / "empty.lammpstrj";
+    {
+      std::ofstream out(empty_dump);
+      out << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n0\n"
+             "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+             "ITEM: ATOMS id type x y z\n";
+    }
+    empty = seams_frame_read(empty_dump.string().c_str(), 1, 0);
+    std::filesystem::remove_all(empty_dump.parent_path());
+  }
+  double empty_q4 = 0.0;
+  double empty_q6 = 0.0;
+  int empty_counts[9] = {9, 9, 9, 9, 9, 9, 9, 9, 9};
+  bad += check(empty != nullptr &&
+                   seams_frame_q4_q6_chill(empty, 3.5, 0, &empty_q4, &empty_q6, nullptr, nullptr,
+                                           nullptr, empty_counts) == 0 &&
+                   empty_counts[0] == 0 && empty_counts[6] == 0,
+               "empty q4 q6 chill zeros counts");
+  seams_frame_free(empty);
   seams_frame_free(typed);
   seams_frame_free(picked);
   return bad;
