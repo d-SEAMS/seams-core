@@ -18,6 +18,7 @@
   util-linux,
   fetchgit,
   fetchurl,
+  fetchzip,
   robinMap,
   unzip,
   libglvnd,
@@ -94,6 +95,18 @@ let
     mkdir -p "$out"
     tar -xzf ${gromacs.src} --strip-components=1 -C "$out"
   '';
+  minimageSrc = fetchzip {
+    url = "https://github.com/lode-org/minimage/archive/refs/tags/v0.1.4.tar.gz";
+    hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
+  };
+  linkcellSrc = fetchzip {
+    url = "https://github.com/d-SEAMS/linkcell/archive/refs/tags/v0.4.2.tar.gz";
+    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
+  };
+  vesinSrc = fetchzip {
+    url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
+    hash = "sha256-JsU+tDyATW6wmix7Tjwa5RnLRjB6b+sYSkMJIt5M5Yo=";
+  };
   nanobindRoot = "${py.pkgs.nanobind}/lib/python${py.pythonVersion}/site-packages/nanobind";
 in
 
@@ -143,6 +156,15 @@ stdenv.mkDerivation (finalAttrs: {
       ../subprojects/packagefiles
     ];
   };
+
+  postPatch = ''
+    cp -R ${minimageSrc} subprojects/minimage
+    cp -R ${linkcellSrc} subprojects/linkcell
+    cp -R ${vesinSrc} subprojects/vesin
+    chmod -R u+w subprojects/minimage subprojects/linkcell subprojects/vesin
+    cp -R subprojects/packagefiles/vesin/. subprojects/vesin/
+    patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
+  '';
 
   nativeBuildInputs = [
     meson
@@ -213,8 +235,8 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_ira" false)
     (lib.mesonEnable "with_sphericart" false)
     (lib.mesonEnable "with_gpulite" false)
-    (lib.mesonEnable "with_linkcell" false)
-    (lib.mesonEnable "with_minimage" false)
+    (lib.mesonEnable "with_linkcell" true)
+    (lib.mesonEnable "with_minimage" true)
   ];
 
   # Catch2, bindings, command-line examples and available engine backends.
