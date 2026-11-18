@@ -102,9 +102,13 @@ jobs:
             bash -lc '
               set -euxo pipefail
               for tree in git tar; do
+                # A failed step prints the end of its log; meson keeps the
+                # CMake output for chemfiles there.
                 meson setup "/work/${tree}" "/opt/${tree}" \
-                  -Dwith_tests=true --wrap-mode=nodownload
-                meson compile -C "/work/${tree}"
+                  -Dwith_tests=true --wrap-mode=nodownload \
+                  || { tail -n 150 "/work/${tree}/meson-logs/meson-log.txt"; exit 1; }
+                meson compile -C "/work/${tree}" \
+                  || { tail -n 150 "/work/${tree}/meson-logs/meson-log.txt"; exit 1; }
                 meson test -C "/work/${tree}" --list > "/results/${tree}-tests.txt"
                 CARGO_NET_OFFLINE=true meson test -C "/work/${tree}" \
                   --no-suite heavy --print-errorlogs
