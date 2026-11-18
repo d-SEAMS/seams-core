@@ -74,6 +74,13 @@ let
     url = "https://files.pythonhosted.org/packages/49/c2/a04fa003b4360e99d8e3fc2829abacf37396ace63ea1cd616402209ec7c6/shiboken6-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl";
     sha256 = "0h329n41j6fnzqmmlfg9871aprgdvnnhhf7nqysl8049n1dmdpiv";
   };
+  # This pin ships towncrier 25, which joins a Markdown title to the notes
+  # with no blank line. The changelog was rendered by towncrier 23.11, the
+  # release the pixi lock still runs, so the check uses that release.
+  towncrierWheel = fetchurl {
+    url = "https://files.pythonhosted.org/packages/36/5a/6546c8ea2bee64c9e9552e06fdb31118a4f23a12aa161581b5fefd070152/towncrier-23.11.0-py3-none-any.whl";
+    hash = "sha256-LlGcphlCbRiePJjJlVj+i+UMnO0T6h/CCko1OpXS3tc=";
+  };
   nanobindRoot = "${py.pkgs.nanobind}/lib/python${py.pythonVersion}/site-packages/nanobind";
 in
 
@@ -201,6 +208,30 @@ stdenv.mkDerivation (finalAttrs: {
     git -C .. init -q -b main
     git -C .. add -A
     git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
+    # The book writes these pages before the docs checks. They are not
+    # stored in the filtered source. The API line is the one llms.txt
+    # already publishes; doxygen is not part of this build.
+    python3 ../docs/check_changelog.py
+    python3 - << 'PY'
+from pathlib import Path
+root = Path("..").resolve()
+pages = (
+    ("Language tutorials", root / "docs/source/fronts/index.rst"),
+    ("Stable API", root / "docs/source/stable/index.rst"),
+)
+for title, dest in pages:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(title + "\n" + ("=" * len(title)) + "\n", encoding="utf-8")
+llms = (root / "llms.txt").read_text(encoding="utf-8").splitlines()
+summary = next(
+    line.split(": ", 1)[1]
+    for line in llms
+    if line.startswith("- [API Reference](")
+)
+api = root / "docs/source/api/index.rst"
+api.parent.mkdir(parents=True, exist_ok=True)
+api.write_text("API Reference\n=============\n\n" + summary + "\n", encoding="utf-8")
+PY
     # Scenes invoke "$CC". A bare gcc name resolves to a shim that calls
     # itself. The absolute wrapper does not.
     export CC=$(type -P gcc)
@@ -215,6 +246,7 @@ stdenv.mkDerivation (finalAttrs: {
     unzip -q -o ${solvisWheel} -d "$front"
     unzip -q -o ${pysideWheel} -d "$front"
     unzip -q -o ${shibokenWheel} -d "$front"
+    unzip -q -o ${towncrierWheel} -d "$front"
     export LD_LIBRARY_PATH=${lib.makeLibraryPath [
       libglvnd
       glib
