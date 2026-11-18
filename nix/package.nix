@@ -295,30 +295,6 @@ stdenv.mkDerivation (finalAttrs: {
     git -C .. init -q -b main
     git -C .. add -A
     git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
-    # The book writes these pages before the docs checks. They are not
-    # stored in the filtered source. The API line is the one llms.txt
-    # already publishes; doxygen is not part of this build.
-    python3 ../docs/check_changelog.py
-    python3 - << 'PY'
-from pathlib import Path
-root = Path("..").resolve()
-pages = (
-    ("Language tutorials", root / "docs/source/fronts/index.rst"),
-    ("Stable API", root / "docs/source/stable/index.rst"),
-)
-for title, dest in pages:
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(title + "\n" + ("=" * len(title)) + "\n", encoding="utf-8")
-llms = (root / "llms.txt").read_text(encoding="utf-8").splitlines()
-summary = next(
-    line.split(": ", 1)[1]
-    for line in llms
-    if line.startswith("- [API Reference](")
-)
-api = root / "docs/source/api/index.rst"
-api.parent.mkdir(parents=True, exist_ok=True)
-api.write_text("API Reference\n=============\n\n" + summary + "\n", encoding="utf-8")
-PY
     # Scenes invoke "$CC". A bare gcc name resolves to a shim that calls
     # itself. The absolute wrapper does not.
     export CC=$(type -P gcc)
