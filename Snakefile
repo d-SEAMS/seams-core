@@ -60,13 +60,18 @@ rule engines_e2e:
 # Config: h2h_stamp names the run and the record (default today),
 # h2h_rounds the rounds of the head-to-heads and lanes (default 8, at least 6),
 # h2h_asv_rounds the rounds of the asv cross-check of the head-to-heads
-# (default 6). H2H_OVITO_LD_LIBRARY_PATH, when set, is added to the library
-# path of the OVITO arms only.
+# (default 6). h2h_attempt is a suffix such as -2 for the run ids, the raw logs
+# and the done markers of h2h_lanes, h2h_asv and h2h_inventory. The lane rules
+# run again under a new suffix after an attempt that failed. The earlier rows
+# stay in the record, and the summary lists that run as replaced.
+# H2H_OVITO_LD_LIBRARY_PATH, when set, is added to the library path of the
+# OVITO arms only.
 import datetime
 
 H2H_STAMP = str(config.get("h2h_stamp", datetime.date.today().isoformat()))
 H2H_ROUNDS = int(config.get("h2h_rounds", 8))
 H2H_ASV_ROUNDS = int(config.get("h2h_asv_rounds", 6))
+H2H_ATTEMPT = str(config.get("h2h_attempt", ""))
 H2H_DIR = f"bbdir-h2h/{H2H_STAMP}"
 H2H_RECORD = f"data/h2h-campaign/{H2H_STAMP}.jsonl"
 H2H_COMMON = (
@@ -74,10 +79,11 @@ H2H_COMMON = (
 )
 
 
-def _h2h_args(name):
+def _h2h_args(name, attempt=""):
+    tag = f"{name}{attempt}"
     return (
-        f"{H2H_COMMON} --run-id {H2H_STAMP}-{name} "
-        f"--raw {H2H_DIR}/raw/{name} --work {H2H_DIR}/work/{name}"
+        f"{H2H_COMMON} --run-id {H2H_STAMP}-{tag} "
+        f"--raw {H2H_DIR}/raw/{tag} --work {H2H_DIR}/work/{tag}"
     )
 
 
@@ -119,10 +125,10 @@ rule h2h_lanes:
     input:
         rules.h2h_rings.output,
     output:
-        f"{H2H_DIR}/lanes.done",
+        f"{H2H_DIR}/lanes{H2H_ATTEMPT}.done",
     threads: 1000
     params:
-        args=_h2h_args("lanes"),
+        args=_h2h_args("lanes", H2H_ATTEMPT),
     shell:
         "python3 scripts/h2h_campaign.py lanes --lanes kernel,rings,scaling "
         f"--rounds {H2H_ROUNDS} {{params.args}} --marker {{output}}"
@@ -132,10 +138,10 @@ rule h2h_asv:
     input:
         rules.h2h_lanes.output,
     output:
-        f"{H2H_DIR}/asv.done",
+        f"{H2H_DIR}/asv{H2H_ATTEMPT}.done",
     threads: 1000
     params:
-        args=_h2h_args("asv"),
+        args=_h2h_args("asv", H2H_ATTEMPT),
     shell:
         "python3 scripts/h2h_campaign.py lanes --lanes h2h "
         f"--rounds {H2H_ASV_ROUNDS} {{params.args}} --marker {{output}}"
@@ -145,10 +151,10 @@ rule h2h_inventory:
     input:
         rules.h2h_asv.output,
     output:
-        f"{H2H_DIR}/inventory.done",
+        f"{H2H_DIR}/inventory{H2H_ATTEMPT}.done",
     threads: 1000
     params:
-        args=_h2h_args("inventory"),
+        args=_h2h_args("inventory", H2H_ATTEMPT),
     shell:
         "python3 scripts/h2h_campaign.py lanes --lanes inventory --rounds 1 "
         "--min-rounds 1 --timeout 300 {params.args} --marker {output}"
