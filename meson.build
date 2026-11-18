@@ -655,8 +655,14 @@ else
       if cmake_bin.found() and not _chem_current
         run_command('rm', '-rf', meson.project_build_root() / 'chemfiles-fetch', chem_prefix,
                     check: true)
+        # Meson builds with ninja, so the chemfiles build uses it too
+        # rather than assuming make is installed.
+        _chem_ninja = find_program('ninja', 'samu', required: false)
+        _chem_generator = _chem_ninja.found() ? ['-G', 'Ninja',
+                                                 '-DCMAKE_MAKE_PROGRAM=' + _chem_ninja.full_path()] : []
         run_command(cmake_bin, '-S', meson.project_source_root() / 'cmake',
                     '-B', meson.project_build_root() / 'chemfiles-fetch',
+                    _chem_generator,
                     '-DCMAKE_BUILD_TYPE=Release',
                     '-DCMAKE_INSTALL_PREFIX=' + chem_prefix,
                     '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
