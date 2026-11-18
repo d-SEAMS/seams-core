@@ -54,6 +54,7 @@ def stable(text):
         text,
         flags=re.S,
     )
+    text = text.replace("CITE BLOCK\n", "")
     text = re.sub(r"overhead_s \S+", "overhead_s TIME", text)
     text = re.sub(r"Loop time of \S+", "Loop time of TIME", text)
     text = re.sub(r"Performance:.*", "Performance: TIME", text)
@@ -63,6 +64,20 @@ def stable(text):
     text = re.sub(r"(?m)^((?:Pair|Neigh|Comm|Output|Modify|Other)\s+\|).*$", r"\1 TIME", text)
     # LAMMPS notes an unset OMP_NUM_THREADS; the thread count line follows.
     text = re.sub(r"(?m)^OMP_NUM_THREADS environment is not set\..*\n", "", text)
+    text = re.sub(
+        r"WARNING: No fixes with time integration, atoms won't move\s*\n"
+        r"For more information see https://docs\.lammps\.org/err\d+ "
+        r"\(src/verlet\.cpp:\d+\)",
+        "WARNING: No fixes with time integration, atoms won't move (src/verlet.cpp:60)",
+        text,
+    )
+    text = re.sub(r"(?m)^For more information see https://docs\.lammps\.org/err\d+.*$", "", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(
+        r"\n+\n(WARNING: No fixes with time integration, atoms won't move \(src/verlet\.cpp:60\))",
+        r"\n\1",
+        text,
+    )
     # gmx grompp draws a quote and a seed, and mdrun's timer row moves.
     text = re.sub(r"Setting the LD random seed to \S+", "Setting the LD random seed to SEED", text)
     text = re.sub(r"GROMACS reminds you:.*", "GROMACS reminds you: QUOTE", text)
