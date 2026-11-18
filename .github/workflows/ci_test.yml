@@ -24,7 +24,7 @@ jobs:
       OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           environments: default
           cache-key: pixi-default-
@@ -68,7 +68,7 @@ jobs:
       OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           environments: default
           cache-key: pixi-unsigned-char-
@@ -94,7 +94,7 @@ jobs:
       OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           environments: mpi
           cache-key: pixi-mpi-
@@ -112,7 +112,7 @@ jobs:
       OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           environments: default
           cache-key: pixi-default-
@@ -124,7 +124,7 @@ jobs:
       - run: pixi run coverage-setup
       - run: pixi run coverage-build
       - run: pixi run coverage-run
-      - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           files: bbdir-cov/meson-logs/coverage.info
           fail_ci_if_error: false
@@ -141,7 +141,7 @@ jobs:
       OMPI_MCA_btl: ^openib
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
         with:
           # cycles is the bpy interpreter for the molecule stills. abi
           # carries libabigail, whose abidiff the capi_abi_2_13 checks need.
