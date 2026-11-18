@@ -112,6 +112,7 @@ int seams_frame_chordless(seams_frame *frame, double cutoff, int type,
                           const char *graph, int size, int *rings,
                           int rings_len, int *n_rings, int *per_atom);
 
+/* LANG_ORDER_BEGIN */
 /** Replace coordinates of a frame built by seams_frame_from_arrays.
  * n must be the atom count already stored. The box is nine LAMMPS numbers. @ingroup lang_frame */
 int seams_frame_set_positions(seams_frame *frame, const double *xyz, int n,
@@ -176,6 +177,7 @@ int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
                             double *q4, double *q6, double *q4bar,
                             double *q6bar, int *labels, int counts9[9]);
+/* LANG_ORDER_END */
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /** Repeated prototypes. The documented declarations are above. @ingroup lang_order */
