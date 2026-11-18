@@ -89,6 +89,10 @@ let
     url = "https://files.pythonhosted.org/packages/36/5a/6546c8ea2bee64c9e9552e06fdb31118a4f23a12aa161581b5fefd070152/towncrier-23.11.0-py3-none-any.whl";
     hash = "sha256-LlGcphlCbRiePJjJlVj+i+UMnO0T6h/CCko1OpXS3tc=";
   };
+  nucleationTrajectory = fetchurl {
+    url = "https://ndownloader.figshare.com/files/20418309";
+    hash = "sha256-w8dQULt3Ys8NNBfi+6syZCLyPqBKZLb2nq8zM05NFAM=";
+  };
   gromacsLegacyHeaders = runCommand "gromacs-${gromacs.version}-source" {
     nativeBuildInputs = [
       gnutar
@@ -278,6 +282,8 @@ stdenv.mkDerivation (finalAttrs: {
     git -C .. init -q -b main
     git -C .. add -A
     git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
+    mkdir -p ../docs/.cache/figshare-11448702
+    cp ${nucleationTrajectory} ../docs/.cache/figshare-11448702/nucleation.lammpstrj
     # The book writes these pages before the docs checks. They are not
     # stored in the filtered source. The API line is the one llms.txt
     # already publishes; doxygen is not part of this build.
