@@ -1045,6 +1045,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_changelog_selftest',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--selftest'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'release_versions',
     python3,
     args: [meson.project_source_root() / 'scripts' / 'check_release_version.py'],
@@ -1067,6 +1073,12 @@ if get_option('with_cli') and get_option('with_tests')
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'gen_llms_txt.py'],
     workdir: meson.project_source_root() / 'scripts',
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_llms_txt_mismatch_selftest',
+    python3,
+    args: [meson.project_source_root() / 'scripts' / 'gen_llms_txt.py', '--selftest'],
     suite: 'docs',
     timeout: 60)
   test(
