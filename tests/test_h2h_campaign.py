@@ -91,6 +91,8 @@ def check_record():
                 "schema"):
         assert prov[key], key
     assert re.fullmatch(r"bench-[0-9a-f]{12}", prov["host"]), prov["host"]
+    assert re.fullmatch(r"[0-9a-f]{16}", prov["engine_tree"]), prov["engine_tree"]
+    assert "base_revision" in prov
     with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:
         path = Path(work) / "record.jsonl"
         hc.Record(path, prov).append({"type": "first", "value": 1})
@@ -319,14 +321,16 @@ def check_header_and_inventory():
         return {"type": "asv", "run_id": run_id, "lane": "scaled", "group": group,
                 "cell": f"mod.C.time_x({threads})", "kind": "time", "arm": "A", "round": 0,
                 "params": {"threads": str(threads)}, "status": "ok", "value": value,
-                "code_revision": revision, "host": "bench-test", "kernel": "6.0", "lscpu": "cpu"}
+                "code_revision": revision, "base_revision": "c" * 40, "engine_tree": "d" * 16,
+                "host": "bench-test", "kernel": "6.0", "lscpu": "cpu"}
 
     rows = [asv("lanes", "a" * 40, "scaling", 1, 0.08), asv("lanes", "a" * 40, "scaling", 8, 0.02),
             asv("inventory", "b" * 40, "inventory", 1, 0.5),
             asv("inventory", "b" * 40, "inventory", 8, 0.1)]
     text = hc.render_summary(rows)
-    assert f"- lanes: {'a' * 40}" in text and f"- inventory: {'b' * 40}" in text, text
-    assert f"- lanes: {'a' * 40}" in hc.render_summary(rows, "lanes")
+    assert f"- lanes: code_revision {'a' * 40}; base_revision {'c' * 40}; " in text, text
+    assert f"- inventory: code_revision {'b' * 40}; " in text and f"engine_tree {'d' * 16}" in text
+    assert f"- lanes: code_revision {'a' * 40}" in hc.render_summary(rows, "lanes")
     assert "b" * 40 not in hc.render_summary(rows, "lanes")
     speed = hc.render_lanes(rows)
     assert speed.count("| scaled | - | 1.00 |") == 1, "the inventory is not a speed-up row"

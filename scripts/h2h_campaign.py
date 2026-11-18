@@ -714,6 +714,17 @@ def harness_blob() -> str:
     return git("hash-object", "scripts/h2h_campaign.py")
 
 
+def base_revision() -> str:
+    """The upstream commit the measured code sits on, empty when it is not known."""
+    return git("merge-base", "HEAD", "origin/main")
+
+
+def engine_tree() -> str:
+    """A digest of the engine sources and build files in the checked-out commit."""
+    listing = git("ls-tree", "-r", "HEAD", "--", *ENGINE_PATHS)
+    return hashlib.sha256(listing.encode("utf-8")).hexdigest()[:16]
+
+
 def lscpu_lines() -> list[str]:
     done = subprocess.run(
         ["lscpu"], capture_output=True, text=True, check=False, env={**os.environ, "LC_ALL": "C"},
@@ -769,6 +780,8 @@ def provenance(run_id: str, stamp: str) -> dict:
         "lscpu_sha256": summary["lscpu_sha256"],
         "kernel": platform.release(),
         "code_revision": head_revision(),
+        "base_revision": base_revision(),
+        "engine_tree": engine_tree(),
         "code_dirty": engine_dirty(),
         "harness_blob": harness_blob(),
     }
@@ -1718,12 +1731,15 @@ def render_summary(rows, run_id=None) -> str:
         head = shown[0]
         out.append(f"host {head.get('host', '?')}; {head.get('lscpu', '?')}; "
                    f"kernel {head.get('kernel', '?')}")
-        out.append(f"build {head.get('build', '')}; code_revision of each run:")
+        out.append(f"build {head.get('build', '')}; code of each run:")
         revisions: dict = {}
         for r in shown:
-            revisions.setdefault(r.get("run_id", "?"), set()).add(r.get("code_revision", "?"))
+            revisions.setdefault(r.get("run_id", "?"), set()).add(
+                (r.get("code_revision", "?"), r.get("base_revision") or "-",
+                 r.get("engine_tree") or "-"))
         out.append("")
-        out.extend(f"- {run}: {', '.join(sorted(found))}" for run, found in revisions.items())
+        out.extend(f"- {run}: code_revision {rev}; base_revision {base}; engine_tree {tree}"
+                   for run, found in revisions.items() for rev, base, tree in sorted(found))
     out.append("")
     for workload in ("cutoff", "knn", "rings"):
         subset = [c for c in cells if c["workload"] == workload]
