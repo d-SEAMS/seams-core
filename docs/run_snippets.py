@@ -360,9 +360,30 @@ def sdk_flags(text):
             if folder.is_dir() and any(token in text for token in ("gromacs/", "plumed/", "OpenMM.h", "library.h")):
                 flags.append("-L" + str(folder))
                 rpaths.append(str(folder))
+    if "OpenMM.h" in text:
+        openmm_root = Path(os.environ.get("OPENMM_DIR", ""))
+        if openmm_root.is_dir() and (openmm_root / "include" / "OpenMM.h").is_file():
+            flags.extend(
+                [
+                    "-I" + str(openmm_root / "include"),
+                    "-L" + str(openmm_root / "lib"),
+                    "-lOpenMM",
+                ]
+            )
+            rpaths.append(str(openmm_root / "lib"))
     if "plumed/" in text and "-lplumedKernel" not in flags:
         # The kernel symbols, such as PLMD::OpenMP, are in libplumedKernel.
         kernel = library_file("libplumedKernel.so")
+        if kernel is None and shutil.which("pkg-config"):
+            libdir = subprocess.run(
+                ["pkg-config", "--variable=libdir", "plumed"],
+                text=True,
+                capture_output=True,
+                env=pkgconfig_env(),
+            ).stdout.strip()
+            candidate = os.path.join(libdir, "libplumedKernel.so")
+            if libdir and os.path.isfile(candidate):
+                kernel = candidate
         if kernel:
             flags.extend(["-L" + os.path.dirname(kernel), "-lplumedKernel"])
     if "OpenMM.h" in text and "-lOpenMM" not in flags:

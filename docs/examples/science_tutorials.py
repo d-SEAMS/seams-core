@@ -507,13 +507,13 @@ def render_hosts(root: Path, lib, figures: Path):
         ),
     }
 
-    def draw():
-        for stem, (dump, kinds, want) in hosts.items():
+    for stem, (dump, kinds, want) in hosts.items():
+        def draw(stem=stem, dump=dump, kinds=kinds, want=want):
             got = render_host(render, lib, dump, figures / f"{stem}.png", kinds)
             if tuple(got) != want:
                 raise RuntimeError(f"{stem} cages {got} wanted {want}")
 
-    _raster_or_fail(figures / "sii.png", draw)
+        _raster_or_fail(figures / f"{stem}.png", draw)
 
 
 def render_brine_scene(root: Path, frame: Path, figures: Path):

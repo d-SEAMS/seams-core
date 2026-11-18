@@ -158,5 +158,5 @@ void writeMolecule(OBMol& mol, const char *format, FILE* file, char *filename) {
 		printf ("Error writing data file using OpenBabel with format %s\n", format);
 		exit(1);
 	}
-	fprintf(file,os.str().c_str());
+	fprintf(file, "%s", os.str().c_str());
 }

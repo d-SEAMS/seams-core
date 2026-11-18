@@ -329,10 +329,12 @@ int main(int argc, char **argv) {
     std::cout.precision(12);
     std::cout << "xyz n " << xyz.nop << "\n";
     std::cout << "xyz cn " << coordinationOf(xyz, 6.0, 8) << "\n";
+#ifdef SEAMS_BINDING_HAS_READCON
     Cloud con = sinp::openFrame(root + "/input/eon/tiny_multi_cuh2.con", 1, -1);
     std::cout << "con n " << con.nop << "\n";
     std::cout.unsetf(std::ios::scientific);
     std::cout << "con hbond " << hbondCount(con) << "\n";
+#endif
     Cloud tri = sinp::openFrame(root + "/input/traj/genice_sH.lammpstrj", 1, 1);
     const auto q6 = chill::steinhardtQlCutoff(tri, 3.5, 6, 1, false);
     std::cout.setf(std::ios::scientific);

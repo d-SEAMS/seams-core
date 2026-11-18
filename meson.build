@@ -395,6 +395,8 @@ _sub_tests = ['with_tests=' + _sub_flag, 'with_examples=' + _sub_flag]
 _linkcell_opts = _sub_tests
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
+else
+  _linkcell_opts += ['with_gpulite=disabled']
 endif
 linkcell_dep = dependency('linkcell', version: '>=0.4.2', required: get_option('with_linkcell'),
                           fallback: ['linkcell', 'linkcell_dep'],
@@ -1043,6 +1045,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_changelog_selftest',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--selftest'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'release_versions',
     python3,
     args: [meson.project_source_root() / 'scripts' / 'check_release_version.py'],
@@ -1065,6 +1073,12 @@ if get_option('with_cli') and get_option('with_tests')
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'gen_llms_txt.py'],
     workdir: meson.project_source_root() / 'scripts',
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_llms_txt_mismatch_selftest',
+    python3,
+    args: [meson.project_source_root() / 'scripts' / 'gen_llms_txt.py', '--selftest'],
     suite: 'docs',
     timeout: 60)
   test(

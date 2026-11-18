@@ -3,12 +3,11 @@
 """Write llms.txt, the plain-text map of the published d-SEAMS manual.
 
 The pages and their order come from the toctrees of docs/orgmode/index.org,
-one section per toctree caption. A page is an Org file under docs/orgmode,
-a Markdown page under docs/api, docs/engines or docs/tutorials (published
-as stable/, engines/ and fronts/), or an rst page under docs/source. Each
-line links the published HTML on https://docs.dseams.info with the page
-title and the first sentence of its prose. A last section links the
-language binding repositories.
+one section per toctree caption. Descriptions come only from tracked Org,
+Markdown, RST, and Doxygen input files. Generated docs/source pages never
+affect the result. Each line links the published HTML on
+https://docs.dseams.info with the page title and the first sentence of its
+prose. A last section links the language binding repositories.
 
 llms.txt is committed at the repository root and Sphinx copies it to the
 site root. ``--check`` exits 1 when the committed file differs from a
@@ -25,6 +24,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +74,35 @@ COPIED = {
     "fronts": DOCS / "tutorials",
 }
 
+LANDINGS = {
+    "stable/index": "Stable API",
+    "engines/index": "Engine builds",
+    "fronts/index": "Language tutorials",
+}
+
+TRACKED_RST = {
+    name: DOCS / "source" / (name + ".rst")
+    for name in (
+        "science/index",
+        "science/interface",
+        "science/brine",
+        "science/cages",
+        "science/gallery",
+        "walkthrough/index",
+        "capi/index",
+        "lang/index",
+    )
+}
+
+DOXYGEN_INPUTS = (
+    ROOT / "src" / "include" / "internal",
+    ROOT / "include" / "seams.h",
+    ROOT / "include" / "seams.hpp",
+)
+DOXYGEN_GROUP = re.compile(
+    r"[@\\](defgroup|addtogroup)\s+([A-Za-z_][A-Za-z0-9_]*)\s*([^\n*]*)"
+)
+
 
 def toctrees(text):
     """(caption, [docname, ...]) for each toctree in an Org index."""
@@ -108,10 +137,46 @@ def source_of(name):
         page = COPIED[head] / (rest + ".md")
         if page.is_file():
             return page
-    rst = DOCS / "source" / (name + ".rst")
-    if rst.is_file():
-        return rst
-    return None
+    return TRACKED_RST.get(name)
+
+
+def doxygen_group_pages():
+    """Doxyrest group pages, ordered as its generated API index.
+
+    Doxygen sorts groups case-insensitively by their displayed title.
+    ``addtogroup`` without a title displays the group id. The extra target
+    page is written by the tracked scripts/doxyrest_targets.py postprocessor.
+    """
+    paths = []
+    for item in DOXYGEN_INPUTS:
+        if item.is_dir():
+            paths.extend(sorted(path for path in item.rglob("*") if path.is_file()))
+        else:
+            paths.append(item)
+    groups = {}
+    for path in paths:
+        for kind, name, title in DOXYGEN_GROUP.findall(
+            path.read_text(encoding="utf-8", errors="replace")
+        ):
+            title = title.strip()
+            if kind == "defgroup" or name not in groups:
+                groups[name] = title or name
+    ordered = sorted(groups.items(), key=lambda item: (item[1].casefold(), item[0]))
+    return ["generated_targets.rst"] + [
+        "group_{}.rst".format(name) for name, _title in ordered
+    ]
+
+
+def page(name):
+    """Return a published page title and summary from tracked inputs."""
+    if name in LANDINGS:
+        return LANDINGS[name], ""
+    if name == "api/index":
+        return "API Reference", first_sentence(" ".join(doxygen_group_pages()))
+    path = source_of(name)
+    if path is None:
+        return None
+    return title_and_paragraph(path)
 
 
 def plain(text):
@@ -251,11 +316,11 @@ def render():
         for name in names:
             if name in seen:
                 continue
-            path = source_of(name)
-            if path is None:
+            metadata = page(name)
+            if metadata is None:
                 continue
             seen.add(name)
-            title, summary = title_and_paragraph(path)
+            title, summary = metadata
             entry = "- [{}]({}/{}.html)".format(title, SITE, name)
             items.append(entry + (": " + summary if summary else ""))
         if items:
@@ -271,16 +336,42 @@ def render():
     return "\n".join(lines).rstrip() + "\n"
 
 
+def output_matches(path, expected):
+    current = path.read_text(encoding="utf-8") if path.is_file() else None
+    return current == expected, current
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="exit 1 when llms.txt differs from a fresh generation")
+    parser.add_argument(
+        "--selftest",
+        action="store_true",
+        help="prove the clean output passes and a mutated line fails",
+    )
     args = parser.parse_args(argv)
+    if args.check and args.selftest:
+        parser.error("--check and --selftest are mutually exclusive")
     text = render()
-    if args.check:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.is_file() else None
-        if current != text:
+    if args.check or args.selftest:
+        matches, current = output_matches(OUTPUT, text)
+        if not matches:
             print("llms.txt is out of date. Run: python3 scripts/gen_llms_txt.py", file=sys.stderr)
             return 1
+        if args.selftest:
+            marker = "- [API Reference]("
+            mutated = current.replace(marker, "- [Mutated API Reference](", 1)
+            with tempfile.TemporaryDirectory(prefix="seams-llms-selftest-") as directory:
+                candidate = Path(directory) / OUTPUT.name
+                candidate.write_text(mutated, encoding="utf-8")
+                if mutated == current or output_matches(candidate, text)[0]:
+                    print(
+                        "llms.txt mismatch selftest did not detect a mutation",
+                        file=sys.stderr,
+                    )
+                    return 1
+            print("llms.txt mismatch selftest ok")
+            return 0
         print("llms.txt ok ({} links)".format(text.count("\n- [")))
         return 0
     OUTPUT.write_text(text, encoding="utf-8")

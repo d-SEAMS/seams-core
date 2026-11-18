@@ -46,8 +46,8 @@ CHILL/CHILL+ classification scheme, as well as a yodaCloud struct to hold
  Both the <a
 href="https://pubs.rsc.org/en/content/articlehtml/2010/cp/b919724a">CHILL</a>
 and <a href="https://pubs.acs.org/doi/abs/10.1021/jp510289t">CHILL+</a> methods
-are based on the <a href="https://aip.scitation.org/doi/10.1063/1.471721">local
-bond order parameter method</a>, developed by ten Wolde et al. for the
+are based on the local bond order parameter method (ten Wolde et al.,
+J. Chem. Phys. 104, 9932, 1996, DOI 10.1063/1.471721), developed for the
 identification of crystal nuclei in Lennard-Jones systems. The local order
  parameter method is based on <a
 href="https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.47.1297">order
