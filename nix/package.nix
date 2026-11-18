@@ -102,10 +102,23 @@ let
     url = "https://github.com/lode-org/minimage/archive/refs/tags/v0.1.4.tar.gz";
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
   };
+  linkcellSrc = fetchzip {
+    url = "https://github.com/d-SEAMS/linkcell/archive/refs/tags/v0.4.2.tar.gz";
+    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
+  };
   vesinSrc = fetchzip {
     url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
     hash = "sha256-JsU+tDyATW6wmix7Tjwa5RnLRjB6b+sYSkMJIt5M5Yo=";
   };
+  linkcellCargoVendor = rustPlatform.fetchCargoVendor {
+    src = linkcellSrc;
+    hash = "sha256-YSV6Ewb/O6/ekidfJAGJ/q+5kBhiSzRik9eVD25aPqA=";
+  };
+  cargoHome = runCommand "seams-cargo-home" { } ''
+    mkdir -p "$out"
+    sed "s|@vendor@|${linkcellCargoVendor}|g" \
+      ${linkcellCargoVendor}/.cargo/config.toml > "$out/config.toml"
+  '';
   nanobindRoot = "${py.pkgs.nanobind}/lib/python${py.pythonVersion}/site-packages/nanobind";
 in
 
@@ -156,16 +169,11 @@ stdenv.mkDerivation (finalAttrs: {
     ];
   };
 
-  cargoDeps = rustPlatform.fetchCargoVendor {
-    src = minimageSrc;
-    hash = "sha256-8NSCv17ACkQbkBnycIZ3K9mUUOWwYX4u7OMii2F2znk=";
-  };
-  cargoRoot = "subprojects/minimage";
-
   postPatch = ''
     cp -R ${minimageSrc} subprojects/minimage
+    cp -R ${linkcellSrc} subprojects/linkcell
     cp -R ${vesinSrc} subprojects/vesin
-    chmod -R u+w subprojects/minimage subprojects/vesin
+    chmod -R u+w subprojects/minimage subprojects/linkcell subprojects/vesin
     cp -R subprojects/packagefiles/vesin/. subprojects/vesin/
     patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
   '';
@@ -190,7 +198,7 @@ stdenv.mkDerivation (finalAttrs: {
       pyvista
       traits
       towncrier
-      openmm
+      ps.openmm
     ]))
     openmpi
     lammps
@@ -198,7 +206,6 @@ stdenv.mkDerivation (finalAttrs: {
     plumed
     rustc
     cargo
-    rustPlatform.cargoSetupHook
   ];
 
   buildInputs = [
@@ -233,7 +240,6 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_csm" true)
     (lib.mesonEnable "with_lammps" true)
     (lib.mesonEnable "with_gromacs" true)
-    (lib.mesonOption "lammps_src_include" "${lammps.src}/src")
     (lib.mesonOption "gromacs_legacy_include" "${gromacsLegacyHeaders}/api/legacy/include")
     (lib.mesonEnable "with_openmm" true)
     (lib.mesonEnable "with_plumed" true)
@@ -242,9 +248,14 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_ira" false)
     (lib.mesonEnable "with_sphericart" false)
     (lib.mesonEnable "with_gpulite" false)
-    (lib.mesonEnable "with_linkcell" false)
+    (lib.mesonEnable "with_linkcell" true)
     (lib.mesonEnable "with_minimage" true)
   ];
+
+  preConfigure = ''
+    export CARGO_HOME=${cargoHome}
+    export CARGO_NET_OFFLINE=true
+  '';
 
   # Catch2, bindings, command-line examples and available engine backends.
   # docs/check_prose.py and docs/check_tables.py list pages with
@@ -282,6 +293,7 @@ PY
     # itself. The absolute wrapper does not.
     export CC=$(type -P gcc)
     export CXX=$(type -P g++)
+    export OPENMM_DIR=${openmm}
     front=$PWD/pyfront
     rm -rf "$front"
     mkdir -p "$front/dseams" "$front/pydseams"
