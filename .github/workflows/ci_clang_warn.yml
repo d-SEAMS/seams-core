@@ -52,7 +52,7 @@ jobs:
       - name: Check the binding sources without OpenMP
         run: python3 scripts/check_binding_warnings.py build-bindings-min
       - name: Build the binding libraries without OpenMP
-        run: meson compile -C build-bindings-min yodaLib seams seams_lang
+        run: meson compile -C build-bindings-min src/yodaLib src/seams bindings/seams_lang
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           environments: default
@@ -69,7 +69,7 @@ jobs:
       - name: Check the binding sources with OpenMP
         run: pixi run python3 scripts/check_binding_warnings.py build-bindings-full
       - name: Build the binding libraries with OpenMP
-        run: pixi run meson compile -C build-bindings-full yodaLib seams seams_lang
+        run: pixi run meson compile -C build-bindings-full src/yodaLib src/seams bindings/seams_lang
 
   # Every target, tests, benchmarks, the C ABI and engines included, under
   # Clang 21 with -Dwerror=true, then the suite on that build. The heavy
