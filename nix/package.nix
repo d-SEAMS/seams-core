@@ -273,6 +273,16 @@ stdenv.mkDerivation (finalAttrs: {
   # docs/check_prose.py and docs/check_tables.py list pages with
   # git ls-files. The filtered source has no repository of its own.
   doCheck = true;
+  checkPhase = ''
+    runHook preCheck
+    # The linkcell team contract checks both one- and two-worker pools.
+    # Nix's generic check hook otherwise caps OpenMP at one worker.
+    export OMP_NUM_THREADS=2
+    TERM=dumb ninja -j"$NIX_BUILD_CORES" meson-test-prereq
+    meson test -j"$NIX_BUILD_CORES" --no-rebuild --print-errorlogs \
+      --max-lines=1000000 --timeout-multiplier=0
+    runHook postCheck
+  '';
   preCheck = ''
     git -C .. init -q -b main
     git -C .. add -A
