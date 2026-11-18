@@ -143,6 +143,8 @@ TEST_CASE("a liquid cluster inside the ice is a brine pocket and holds its ion",
     waters.push_back(addPoint(cloud, i, 0, 8, 1));
     ice.push_back(false);
   }
+  waters.push_back(addPoint(cloud, 10, 0, 15, 1));
+  ice.push_back(true);
   const int ion = addPoint(cloud, 0.2, 0, 8, 3);
   ice.push_back(false);
   const auto census = site::brinePockets(cloud, ice, waters, {ion}, 1.5);
@@ -150,6 +152,18 @@ TEST_CASE("a liquid cluster inside the ice is a brine pocket and holds its ion",
   REQUIRE(census.nPockets == 1);
   REQUIRE(census.sizes == std::vector<int>{3});
   REQUIRE(census.pockets[0].nIons == 1);
+}
+
+TEST_CASE("an all-liquid frame has no brine pockets", "[brine]") {
+  auto cloud = emptyCloud(30, 30, 30);
+  std::vector<int> waters;
+  for (int i = 0; i < 3; ++i) {
+    waters.push_back(addPoint(cloud, 4.0 * i, 0, 0, 1));
+  }
+  const auto census = site::brinePockets(cloud, {false, false, false}, waters,
+                                         {}, 1.5);
+  REQUIRE(census.nPockets == 0);
+  REQUIRE(census.reservoirWaters == 0);
 }
 
 TEST_CASE("the front layer keeps its hexagon and counts the missing neighbours", "[brine]") {
