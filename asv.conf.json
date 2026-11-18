@@ -3,7 +3,7 @@
   "project": "d-seams",
   "project_url": "https://github.com/d-SEAMS/seams-core",
   "repo": ".",
-  "branches": ["scaling"],
+  "branches": ["main"],
   "environment_type": "existing",
   "env_dir": ".asv/env",
   "results_dir": ".asv/results",
