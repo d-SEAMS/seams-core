@@ -37,8 +37,9 @@ extern "C" {
  * type; <0 keeps every atom.
  * graph is "mutual" (also "knn"), "cutoff", "knn-union", or "seeded"
  * (cages only). CHILL and CHILL+ take "cutoff" (the default, used when
- * graph is NULL or "") or "mutual", the mutual four-nearest list with
- * candidates inside cutoff + 1.5. Returns 0 on success. */
+ * graph is NULL or "") or "mutual", the mutual four-nearest list. Mutual
+ * and union bonds are retained only inside cutoff + 1.5. Returns 0 on
+ * success. */
 
 typedef struct seams_frame seams_frame;
 

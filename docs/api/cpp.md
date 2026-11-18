@@ -13,9 +13,29 @@ c++ -std=c++20 -Iinclude docs/examples/cpp_api.cpp -Lbuild/src -lseams -o cpp_ap
 ./cpp_api "$PWD"
 ```
 
+`meson test docs_api_hpp` compiles that program and runs it on this tree.
+The eight-atom diamond is cubic. Ice Ih is hexagonal, 128 atoms, with mean
+q6-bar 0.562448843702.
+
 ```{literalinclude} ../../../docs/examples/cpp_api.cpp
 :language: cpp
 ```
+
+The wider language ABI remains `libseams_lang` (`seams_frame_*`). A program
+that only needs `seams.hpp` does not link it. `docs/examples/minimal_cpp.cpp`
+is that ABI on the GenIce sI cell. `meson test docs_examples` runs it.
+Its frame-mutation and order-parameter entries are
+`seams_frame_set_positions`, `seams_frame_steinhardt_graph`,
+`seams_frame_wl`, `seams_frame_q4_q6`, and
+`seams_frame_q4_q6_chill`.
+
+```{literalinclude} ../../../bindings/cxx/seams_lang.h
+:language: cpp
+:lines: 115-178
+```
+
+`docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
+`meson test docs_core_counts` runs it.
 
 ```{literalinclude} ../../../docs/examples/core_counts.cpp
 :language: cpp
@@ -24,6 +44,9 @@ c++ -std=c++20 -Iinclude docs/examples/cpp_api.cpp -Lbuild/src -lseams -o cpp_ap
 ```{literalinclude} ../../../docs/examples/minimal_cpp.cpp
 :language: cpp
 ```
+
+`docs/examples/ice.cpp` is the eight-atom C call. `meson test docs_api_cpp`
+runs it.
 
 ```{literalinclude} ../../../docs/examples/ice.cpp
 :language: cpp
@@ -63,6 +86,10 @@ as the engine headers (`Doxyfile_seams.cfg`, the rgpot layout). The
 generated pages are `api/index`.
 
 ## Ice Ih
+
+`input/traj/ice1h.lammpstrj`, frame 1, every atom, cutoff 3.5 angstrom, one
+thread. `tests/test_seams_hpp.cpp` (`meson test seams_hpp_match`) requires
+these numbers to match the C++ engine.
 
 ```
 ih n 128
@@ -846,11 +873,13 @@ Units: dimensionless counts
 Example: `docs/examples/minimal_cpp.cpp`
 <!-- API_SYMBOLS_END -->
 
+
 ## Structure still
 
 ```{figure} ../tutorials/molecules/cpp/overlay-web.png
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih colored by the published CHILL+ rule.
+Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
 ```
+

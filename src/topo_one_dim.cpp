@@ -874,6 +874,9 @@ int ring::deformedPrismTypes(const std::vector<ring::strucType> &atomState,
 int ring::rmAxialTranslations(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int &atomID,
     int firstFrame, int currentFrame) {
+  if (yCloud.nop <= 0 || yCloud.pts.empty()) {
+    return 0;
+  }
   int atomIndex;
   double H[3][3];
   double origin[3];

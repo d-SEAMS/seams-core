@@ -435,6 +435,9 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 int rdf2::normalizeRDF(int nopA, std::vector<double> &rdfValues,
                        std::vector<int> histogram, double binwidth, int nbin,
                        std::vector<double> volumeLengths, int nIter) {
+  if (nopA <= 0 || nIter <= 0 || volumeLengths.size() < 3) {
+    return 0;
+  }
   // volumeLengths is the particle AABB (box.size()==3) or dump H
   // {lx, ly, lz} (box.size()>=6). Product of the dump lengths is
   // nneigh::dumpVolume; Lx*Ly is the restricted-triclinic in-plane
@@ -447,6 +450,10 @@ int rdf2::normalizeRDF(int nopA, std::vector<double> &rdfValues,
       planeArea > 0.0
           ? volume / planeArea
           : *std::min_element(volumeLengths.begin(), volumeLengths.end());
+  if (!(planeArea > 0.0) || !(height > 0.0) || !std::isfinite(planeArea) ||
+      !std::isfinite(height)) {
+    return 0;
+  }
   double r;         // Distance for the current bin
   double factor;    // Factor for accounting for the two-dimensional slab
   double binVolume; // Volume of the current bin
@@ -500,6 +507,9 @@ std::vector<double> rdf2::getSystemLengths(
   }
 
   const int nop = yCloud.nop;
+  if (nop <= 0 || yCloud.pts.empty()) {
+    return {0.0, 0.0, 0.0};
+  }
   double x0 = yCloud.pts[0].x, x1 = x0;
   double y0 = yCloud.pts[0].y, y1 = y0;
   double z0 = yCloud.pts[0].z, z1 = z0;

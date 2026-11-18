@@ -191,6 +191,9 @@ bool keep_atom(int atom_type, int requested) {
 }
 
 void write_ice_labels(seams_frame *frame, int type, int *labels, int counts9[9]);
+std::vector<std::vector<int>>
+pairs_within(const Cloud &cloud, const std::vector<std::vector<int>> &wide,
+             double cutoff);
 
 std::vector<std::vector<int>> bond_list(Cloud &cloud, double cutoff, int typ,
                                         const std::string &graph, int k) {
@@ -199,11 +202,13 @@ std::vector<std::vector<int>> bond_list(Cloud &cloud, double cutoff, int typ,
     return nneigh::neighListO(cutoff, cloud, typ);
   }
   if (graph == "knn-union" || graph == "union") {
-    return nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
+    auto rows = nneigh::kNearestNeighbourList(cloud, k, cand, typ, false);
+    return pairs_within(cloud, rows, cand);
   }
   if (graph == "mutual" || graph == "knn" || graph == "knn-mutual" ||
       graph.empty()) {
-    return nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
+    auto rows = nneigh::kNearestNeighbourList(cloud, k, cand, typ, true);
+    return pairs_within(cloud, rows, cand);
   }
   throw std::invalid_argument(
       "unknown bond graph '" + graph +
@@ -374,6 +379,16 @@ seams_frame *seams_frame_read(const char *path, int frame, int type_filter) {
     set_error("path is null");
     return nullptr;
   }
+  if (frame < 1) {
+    set_error("frame index must be positive");
+    return nullptr;
+  }
+  const int nframes = seams_path_nframes(path);
+  if (nframes > 0 && frame > nframes) {
+    set_error("frame index is past the end of the trajectory");
+    return nullptr;
+  }
+  clear_error();
   try {
     auto owned = std::make_unique<seams_frame>();
     seams_frame *out = owned.get();
@@ -537,6 +552,10 @@ int classify_chill(seams_frame *frame, double cutoff, int type,
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
+    return 1;
+  }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("cutoff must be finite and positive");
     return 1;
   }
   if (drops_atoms(frame)) {
@@ -955,6 +974,10 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
     set_error("rings need a frame, max_depth >= 3, and counts_len");
     return 1;
   }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("cutoff must be finite and positive");
+    return 1;
+  }
   if (drops_atoms(frame)) {
     seams_frame sub = oxygen_subframe(frame);
     return seams_frame_rings(&sub, cutoff, type, graph, max_depth, counts,
@@ -1172,8 +1195,8 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                             const char *graph) {
   const seams::FairWidth fair;
   clear_error();
-  if (frame == nullptr || !(cutoff > 0.0)) {
-    set_error("neighbours need a frame and a positive cutoff");
+  if (frame == nullptr || !(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("neighbours need a frame and a finite positive cutoff");
     return 1;
   }
   try {
@@ -1227,6 +1250,15 @@ int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
+    return 1;
+  }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("cutoff must be finite and positive");
+    return 1;
+  }
+  if (order_l != 3 && order_l != 4 && order_l != 6 && order_l != 8 &&
+      order_l != 12) {
+    set_error("Steinhardt degree must be 3, 4, 6, 8, or 12");
     return 1;
   }
   if (drops_atoms(frame)) {
@@ -1342,8 +1374,8 @@ int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
     set_error("q4, q6 and a frame are required");
     return 1;
   }
-  if (!(cutoff > 0.0)) {
-    set_error("q4 and q6 need a positive cutoff");
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("q4 and q6 need a finite positive cutoff");
     return 1;
   }
   try {
@@ -1446,6 +1478,18 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
+    return 1;
+  }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("cutoff must be finite and positive");
+    return 1;
+  }
+  const std::string requested_graph = graph == nullptr ? "seeded" : graph;
+  if (requested_graph != "cutoff" && requested_graph != "mutual" &&
+      requested_graph != "knn" && requested_graph != "knn-mutual" &&
+      requested_graph != "knn-union" && requested_graph != "union" &&
+      requested_graph != "seeded") {
+    set_error("unknown cage graph '" + requested_graph + "'");
     return 1;
   }
   if (k <= 0) {

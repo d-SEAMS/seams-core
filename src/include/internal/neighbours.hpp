@@ -517,7 +517,9 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
  *  2.5%. Nominations are a periodic linked-cell k-nearest search via
  *  linkcell (Allen and Tildesley): vesin is cutoff-only and KD-trees
  *  have no minimum-image convention. candidateCutoff is only a
- *  cell-size hint.
+ *  cell-size hint: an empty hinted shell deliberately falls back to the
+ *  whole periodic cell so a k-nearest query still returns the nearest
+ *  available atoms.
  *  On an undistorted tetrahedral lattice with k = 4 this graph equals
  *  the first-shell cutoff graph. Rows are by atom ID with the leading
  *  self entry, like neighListO.
