@@ -77,6 +77,7 @@ jobs:
       - name: SEO metadata
         run: |
           python3 docs/finalize_seo.py --self-test
+          python3 docs/finalize_seo.py docs/build
           python3 docs/check_seo.py --self-test
           python3 docs/check_seo.py docs/build
       - name: Mermaid render

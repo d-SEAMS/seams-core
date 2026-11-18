@@ -22,6 +22,17 @@ def canonical_url(path: Path, root: Path) -> str:
     return BASE_URL + path.relative_to(root).as_posix()
 
 
+def sitemap_url(path: Path, root: Path) -> str:
+    route = path.relative_to(root).as_posix()
+    if route == "index.html":
+        route = ""
+    elif route.endswith("/index.html"):
+        route = route[:-10]
+    elif route.endswith(".html"):
+        route = route[:-5]
+    return BASE_URL + route.lower()
+
+
 def _json_ld() -> str:
     data = {
         "@context": "https://schema.org",
@@ -107,7 +118,9 @@ def finalize(root: Path) -> None:
     pages = sorted(root.rglob("*.html")) if root.is_dir() else []
     if not pages:
         raise ValueError(f"{root}: no built HTML pages found")
-    urls = [complete_page(page, root) for page in pages]
+    for page in pages:
+        complete_page(page, root)
+    urls = [sitemap_url(page, root) for page in pages]
     ET.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
     urlset = ET.Element("{http://www.sitemaps.org/schemas/sitemap/0.9}urlset")
     for url in urls:
@@ -137,7 +150,8 @@ def self_test() -> None:
         if not all(item in source for item in required):
             raise ValueError("self-test did not add all metadata")
         tree = ET.parse(root / "sitemap.xml")
-        if not any(node.text == canonical_url(page, root) for node in tree.iter()):
+        locs = [node.text for node in tree.iter() if node.tag.endswith("loc")]
+        if locs != ["https://docs.dseams.info/api-cpp/"]:
             raise ValueError("self-test sitemap omitted the page")
 
 
