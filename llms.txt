@@ -96,7 +96,7 @@
 - [Nix flake](https://docs.dseams.info/reference/nix.html): The flake builds libyodaLib and the seams CLI with Meson. It does not build Python or Lua. There are no overlays.
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): Perform the same CHILL+ analysis through four language bindings.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
-- [2.14.1 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes are built from the fragments in changelog.d/.
+- [2.14.1 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes describe the user-visible changes since d-SEAMS 2.13.0.
 - [Stable API](https://docs.dseams.info/stable/index.html)
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
