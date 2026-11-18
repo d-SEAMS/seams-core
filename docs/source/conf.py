@@ -433,12 +433,10 @@ def _include_orphan_pages():
             handle.write(text)
     included = _toctree_docnames()
     skip_prefixes = (
-        "contributing/",
         "explanation/cutoff-rings-tables.rst",
         "explanation/performance-overview-tables.rst",
         "explanation/pool-audit-tables.rst",
         "howto/pool-audit-v5-tables.rst",
-        "howto/versions.rst",
         "reference/release-2.14-notes.rst",
         "science/figures/",
         "xml/",
@@ -620,12 +618,10 @@ exclude_patterns = [
     "science/figures/**",
     "videos/players.rst",
     "videos/embeds/**",
-    "contributing/**",
     "explanation/cutoff-rings-tables.rst",
     "explanation/performance-overview-tables.rst",
     "explanation/pool-audit-tables.rst",
     "howto/pool-audit-v5-tables.rst",
-    "howto/versions.rst",
     "reference/release-2.14-notes.rst",
 ]
 # A warning is a failed book. Sphinx stops instead of publishing it.

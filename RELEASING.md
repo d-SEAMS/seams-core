@@ -94,5 +94,5 @@ The first five can go in any order. Dseams.jl waits for `libseams_jll`.
 The core Docs workflow installs `pydseamslib` from PydSEAMSlib source
 against the current seams-core checkout. Publish its PyPI release before
 advertising the registry route as complete.
-`docs/orgmode/contributing/repositories.org` has the pin locations and the
+`MAINTAINERS/repositories.org` has the pin locations and the
 release order in one place.

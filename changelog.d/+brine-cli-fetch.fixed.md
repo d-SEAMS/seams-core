@@ -1,1 +1,1 @@
-The brine tutorial downloads the 230 K frame through a checked transfer before analysis.
+`docs_brine_cli` fetches the 230 K brine frame itself, through the same checked download as the science tutorials, and no longer skips on a clone where no other test has fetched it first. The download takes a lock and lands through a `.part` file, so tests that start together do not read a partial frame.

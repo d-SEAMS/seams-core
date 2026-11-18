@@ -96,7 +96,6 @@ README_PATTERNS = tuple(
 )
 
 SKIP_PARTS = {
-    "contributing",
     "science/figures",
     "videos/embeds",
 }
@@ -105,7 +104,6 @@ SKIP_FILES = {
     "explanation/performance-overview-tables.rst",
     "explanation/pool-audit-tables.rst",
     "howto/pool-audit-v5-tables.rst",
-    "howto/versions.rst",
     "reference/release-2.14-notes.rst",
     "videos/players.rst",
 }

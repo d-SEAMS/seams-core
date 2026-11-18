@@ -109,6 +109,16 @@ def toctrees(text):
     return [(caption, names) for caption, names in trees if caption and names]
 
 
+def staged_index_titles():
+    """Landing titles that docs/source/conf.py gives the staged page groups."""
+    conf = (DOCS / "source" / "conf.py").read_text(encoding="utf-8")
+    block = conf.split("def _stage_markdown_book", 1)[1].split("for src_name", 1)[0]
+    return {
+        dest: title
+        for _, dest, title in re.findall(r'\("(\w+)", "(\w+)", "([^"]+)"\)', block)
+    }
+
+
 def source_of(name):
     org = ORG / (name + ".org")
     if org.is_file():
@@ -248,6 +258,7 @@ def render():
     index = (ORG / "index.org").read_text(encoding="utf-8")
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
     seen = set()
+    staged = staged_index_titles()
     home_title, home_summary = title_and_paragraph(ORG / "index.org")
     lines.extend(["## Start", "", "- [{}]({}/index.html): {}".format(home_title, SITE, home_summary), ""])
     seen.add("index")
@@ -256,11 +267,19 @@ def render():
         for name in names:
             if name in seen:
                 continue
-            path = source_of(name)
-            if path is None:
+            head, _, rest = name.partition("/")
+            if rest == "index" and head in staged:
+                seen.add(name)
+                items.append("- [{}]({}/{}.html)".format(staged[head], SITE, name))
                 continue
+            path = source_of(name)
+            if path is None and name == "api/index":
+                title, summary = "API Reference", ""
+            elif path is None:
+                continue
+            else:
+                title, summary = title_and_paragraph(path)
             seen.add(name)
-            title, summary = title_and_paragraph(path)
             summary = SUMMARY_OVERRIDES.get(name, summary)
             if re.search(
                 r"(?:^|[\s(])(?:docs|tests|src|adapters|engines|input|cmake)/"
