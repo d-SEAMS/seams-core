@@ -5,11 +5,12 @@
 Fragments under changelog.d stay on disk. The draft is compared to the
 changelog, and every fragment file is required to still be there.
 
-Fragments for the next release sit in changelog.d/2.14.1. Towncrier does
-not read that directory, so the 2.14.0 draft leaves them out, and each one
-is required in the 2.14.1 section of CHANGELOG.md.
+Fragments for follow-up patch releases sit in changelog.d/<X.Y.Z>.
+Towncrier does not read those directories for the 2.14.0 draft, so each
+fragment is required in its matching CHANGELOG.md section.
 """
 
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -17,7 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CHANGELOG = ROOT / "CHANGELOG.md"
 FRAGMENTS = ROOT / "changelog.d"
-NEXT = FRAGMENTS / "2.14.1"
+VERSION_DIR = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 def draft():
@@ -58,15 +59,21 @@ def section(text, version):
     return text[start:] if end < 0 else text[start:end]
 
 
-def missing_next(changelog):
-    if not NEXT.is_dir():
-        return []
-    notes = " ".join(section(changelog, "2.14.1").split())
-    return [
-        path.name
-        for path in sorted(NEXT.glob("*.md"))
-        if " ".join(path.read_text().split()) not in notes
-    ]
+def missing_versioned(changelog):
+    missing = {}
+    for directory in sorted(path for path in FRAGMENTS.iterdir() if path.is_dir()):
+        version = directory.name
+        if not VERSION_DIR.fullmatch(version):
+            continue
+        notes = " ".join(section(changelog, version).split())
+        absent = [
+            path.name
+            for path in sorted(directory.glob("*.md"))
+            if " ".join(path.read_text().split()) not in notes
+        ]
+        if absent:
+            missing[version] = absent
+    return missing
 
 
 def main():
@@ -78,9 +85,13 @@ def main():
     if rendered.strip() not in changelog:
         print("CHANGELOG.md does not contain the towncrier 2.14.0 draft", file=sys.stderr)
         return 1
-    absent = missing_next(changelog)
+    absent = missing_versioned(changelog)
     if absent:
-        print("CHANGELOG.md 2.14.1 lacks " + ", ".join(absent), file=sys.stderr)
+        for version in sorted(absent):
+            print(
+                "CHANGELOG.md {} lacks {}".format(version, ", ".join(absent[version])),
+                file=sys.stderr,
+            )
         return 1
     names = [
         path.name
