@@ -61,6 +61,13 @@ BINDINGS = (
      "Add the Fortran binding as an fpm Git dependency."),
 )
 
+PLUMED_PLUGIN = (
+    ("PLUMED-NEST egg", "https://www.plumed-nest.org/eggs/26/018/",
+     "d-SEAMS PLUMED plugin v0.4.1, plumID:26.018, tested with PLUMED v2.10 and master."),
+    ("dseams-plumed", "https://github.com/d-SEAMS/dseams-plumed",
+     "Companion repository for the d-SEAMS PLUMED plugin v0.4.1."),
+)
+
 COPIED = {
     "stable": DOCS / "api",
     "engines": DOCS / "engines",
@@ -296,6 +303,9 @@ def render():
             lines.append("")
     lines.extend(["## Language bindings", ""])
     for name, url, summary in BINDINGS:
+        lines.append("- [{}]({}): {}".format(name, url, summary))
+    lines.extend(["", "## PLUMED plugin", ""])
+    for name, url, summary in PLUMED_PLUGIN:
         lines.append("- [{}]({}): {}".format(name, url, summary))
     lines.append("")
     lines.extend([

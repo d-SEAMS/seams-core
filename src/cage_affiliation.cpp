@@ -534,6 +534,17 @@ struct FrameContext {
 
 namespace {
 
+void markHcRing(int ring, std::vector<char> &marked, std::vector<bool> &hc,
+                int &left) {
+  char &slot = marked[static_cast<std::size_t>(ring)];
+  if (slot != 0) {
+    return;
+  }
+  slot = 1;
+  hc[static_cast<std::size_t>(ring)] = true;
+  --left;
+}
+
 ring::CageAffiliation batchSweep(const FrameContext &ctx) {
   const std::vector<std::vector<int>> &rings = *ctx.rings;
   ring::CageAffiliation result;
@@ -637,15 +648,6 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
   } else {
     std::vector<char> on(static_cast<std::size_t>(nR), 0);
     int left = nR;
-    auto mark = [&](int m) {
-      char &slot = on[static_cast<std::size_t>(m)];
-      if (slot != 0) {
-        return;
-      }
-      slot = 1;
-      result.hc[static_cast<std::size_t>(m)] = true;
-      --left;
-    };
     std::vector<int> listHC;
     std::vector<ring::strucType> types(nRings, ring::strucType::unclassified);
     for (int i = 0; i < nR && left > 0; ++i) {
@@ -656,10 +658,10 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
         if (!ctx.basalPair(i, j)) {
           continue;
         }
-        mark(i);
-        mark(j);
+        markHcRing(i, on, result.hc, left);
+        markHcRing(j, on, result.hc, left);
         for (const int k : ctx.prismaticOf(i, j, listHC, types)) {
-          mark(k);
+          markHcRing(k, on, result.hc, left);
         }
       }
     }

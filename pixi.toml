@@ -47,14 +47,29 @@ setup-bindings = { cmd = "meson setup bbdir-lang --prefix=$CONDA_PREFIX -Dwith_t
 build-bindings = { cmd = "ninja -C bbdir-lang bindings/test_seams_lang", depends-on = ["setup-bindings"] }
 test-bindings = { cmd = "meson test -C bbdir-lang seams_lang_fixtures --print-errorlogs", depends-on = ["build-bindings"] }
 # Coverage runs the same docs and OpenMM tests as the default build.
-coverage-setup = "meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Db_coverage=true -Dbuildtype=debugoptimized --wipe 2>/dev/null; meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Db_coverage=true -Dbuildtype=debugoptimized"
+coverage-setup = """
+# GCC 14 emits contradictory JSON coverage records for inlined C++ headers.
+# The Ubuntu runner's GCC 13 emits consistent records for the same sources.
+export CC=/usr/bin/gcc
+export CXX=/usr/bin/g++
+export CFLAGS="$CFLAGS -O1 -fno-inline -fprofile-update=atomic -fprofile-abs-path -fprofile-filter-files=../src/.*\\;../bindings/.*\\;../subprojects/vesin/.*\\;../subprojects/minimage/.*\\;../subprojects/readcon-core/.*\\;../subprojects/readcon-db/.*\\;../subprojects/gpulite/.*\\;../subprojects/linkcell/.* -fprofile-exclude-files=.*Catch2.*\\;../tests/.*"
+export CXXFLAGS="$CXXFLAGS -O1 -fno-inline -fno-default-inline -fprofile-update=atomic -fprofile-abs-path -fprofile-filter-files=../src/.*\\;../bindings/.*\\;../subprojects/vesin/.*\\;../subprojects/minimage/.*\\;../subprojects/readcon-core/.*\\;../subprojects/readcon-db/.*\\;../subprojects/gpulite/.*\\;../subprojects/linkcell/.* -fprofile-exclude-files=.*Catch2.*\\;../tests/.*"
+export CPPFLAGS="$CPPFLAGS -O1"
+meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Db_coverage=true -Dbuildtype=debugoptimized --wipe 2>/dev/null
+meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Db_coverage=true -Dbuildtype=debugoptimized
+"""
 coverage-build = { cmd = "ninja -j4 -C bbdir-cov", depends-on = ["coverage-setup"] }
 coverage-run = { cmd = """
-meson test -C bbdir-cov --num-processes 1 && ninja -C bbdir-cov coverage && \
+meson test -C bbdir-cov --num-processes 1 && \
+lcov --capture --directory bbdir-cov --branch-coverage \
+  --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info && \
 lcov --remove bbdir-cov/meson-logs/coverage.info \
   '*/external/backward.hpp' '*/backward.cpp' \
   '*/tests/*' '*/bench_*' \
-  --output-file bbdir-cov/meson-logs/coverage.info --ignore-errors unused
+  --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info \
+  --ignore-errors unused && \
+genhtml bbdir-cov/meson-logs/coverage.info --branch-coverage \
+  --config-file .lcovrc --output-directory bbdir-cov/meson-logs/coveragereport
 """, depends-on = ["coverage-build"] }
 
 [environments]
@@ -238,7 +253,7 @@ cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-
 [feature.docs.tasks.fix-built-links]
 description = "Repair generated anchor ids the HTML checker follows"
 depends-on = ["sphinxbld", "install-doxyhtml"]
-cmd = "python3 docs/fix_built_links.py"
+cmd = "python3 docs/fix_built_links.py && python3 docs/finalize_seo.py docs/build"
 
 [feature.docs.tasks.docbld]
 depends-on = ["fix-built-links"]

@@ -405,6 +405,10 @@ PocketCensus brinePockets(const Cloud &cloud, const std::vector<bool> &iceFlag,
                           const std::vector<int> &waterIndices, const std::vector<int> &ionIndices,
                           double cutoff) {
   PocketCensus census;
+  if (std::none_of(iceFlag.begin(), iceFlag.end(),
+                   [](bool is_ice) { return is_ice; })) {
+    return census;
+  }
   std::vector<int> liquid;
   for (int water : waterIndices) {
     if (water < 0 || static_cast<std::size_t>(water) >= iceFlag.size()) {

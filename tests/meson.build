@@ -158,19 +158,44 @@ foreach name, src : test_sources
   elif name == 'science_front'
     _timeout = 300
   endif
-  test(name,
-    executable('test_' + name, src,
-      dependencies: [yds_dep, catch2_dep],
-      link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
-      cpp_args: _args,
-      link_args: _test_link_args,
-      include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
-      build_rpath: _test_rpath),
-    workdir: meson.project_source_root() / 'input',
-    env: _test_env,
-    timeout: _timeout,
-    is_parallel: name != 'franzblau_extra' and name != 'bulkTUM',
-    suite: (name == 'franzblau_extra' or name == 'bulkTUM') ? 'heavy' : [])
+  _exe = executable('test_' + name, src,
+    dependencies: [yds_dep, catch2_dep],
+    link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
+    build_rpath: _test_rpath)
+  if name == 'thread_invariance'
+    # These cases total more than the per-test budget under coverage. Keep
+    # every case and width, but give each independent group the same bound.
+    test(name + '_core', _exe,
+      args: ['[thread_invariance]~[c_api]'],
+      workdir: meson.project_source_root() / 'input',
+      env: _test_env, timeout: _timeout, is_parallel: true)
+    test(name + '_c_api', _exe,
+      args: ['[thread_invariance][c_api]~[thread_invariance_rings]~[thread_invariance_cages]~[thread_invariance_reuse]'],
+      workdir: meson.project_source_root() / 'input',
+      env: _test_env, timeout: _timeout, is_parallel: true)
+    test(name + '_rings', _exe,
+      args: ['[thread_invariance_rings]'],
+      workdir: meson.project_source_root() / 'input',
+      env: _test_env, timeout: _timeout, is_parallel: true)
+    test(name + '_cages', _exe,
+      args: ['[thread_invariance_cages]'],
+      workdir: meson.project_source_root() / 'input',
+      env: _test_env, timeout: _timeout, is_parallel: true)
+    test(name + '_reuse', _exe,
+      args: ['[thread_invariance_reuse]'],
+      workdir: meson.project_source_root() / 'input',
+      env: _test_env, timeout: _timeout, is_parallel: true)
+  else
+    test(name, _exe,
+      workdir: meson.project_source_root() / 'input',
+      env: _test_env,
+      timeout: _timeout,
+      is_parallel: name != 'franzblau_extra' and name != 'bulkTUM',
+      suite: (name == 'franzblau_extra' or name == 'bulkTUM') ? 'heavy' : [])
+  endif
 endforeach
 
 executable('interface_order', 'interface_order_main.cpp',
@@ -446,9 +471,17 @@ _check_invariance = executable('check_invariance', 'check_invariance.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+# Coverage arc updates are atomic. A thread pool shares those counters
+# and the 1000-trial search stops scaling, so the coverage binary runs
+# the same trials in child processes.
+_fuzz_cpp_args = []
+_fuzz_cpp_args += _args
+if get_option('b_coverage')
+  _fuzz_cpp_args += ['-DFUZZ_COVERAGE_PROCESSES']
+endif
 _fuzz_cage = executable('fuzz_cage_invariance', 'fuzz_cage_invariance.cpp',
   dependencies: [yds_dep],
-  cpp_args: _args,
+  cpp_args: _fuzz_cpp_args,
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
@@ -636,18 +669,14 @@ foreach name, args : _device_host_cases
     suite: name == 'levi5' ? 'heavy' : [])
 endforeach
 
-# The CUDA batch kernels on the host, no device needed
-_cuda_kernels = custom_target('gpu_batch_kernels',
-  input: meson.project_source_root() / 'src' / 'gpu_batch.cpp',
-  output: 'gpu_batch_kernels.inc',
-  command: [find_program('python3'), files('extract_cuda_kernels.py'),
-            '@INPUT@', '@OUTPUT@'])
+# The CUDA batch kernels on the host, no device needed.
+# The include is generated in gpu_host_kernels/.
 test('gpu_kernels_host',
   executable('gpu_kernels_host', ['gpu_kernels_host.cpp', _cuda_kernels],
     dependencies: [yds_dep],
     cpp_args: _args,
     link_args: _test_link_args,
-    include_directories: _incdirs,
+    include_directories: [_incdirs, _gpu_host_kernels_inc],
     build_rpath: _test_rpath),
   env: _test_env,
   timeout: 120)

@@ -452,6 +452,24 @@ def _software_problems(node, label):
     return problems
 
 
+# Doxygen writes api-cpp/ after Sphinx. Those pages have no Markdown twin or
+# manual JSON-LD. check_seo.py covers their metadata.
+DOXYGEN_DIR = "api-cpp/"
+
+
+def _route_files():
+    """Map each public route (no ``.html``, lower case) to its built page."""
+    routes = {}
+    for path in BUILD.rglob("*.html"):
+        route = "/" + path.relative_to(BUILD).as_posix()
+        if route.endswith("/index.html"):
+            route = route[:-10] or "/"
+        else:
+            route = route[:-5]
+        routes[route.lower()] = path
+    return routes
+
+
 def page_problems(html_path, md_path):
     parser = _Page()
     try:
@@ -583,15 +601,16 @@ def build_problems():
             problems.append("sitemap lists " + banned)
     titles = {}
     descriptions = {}
+    files = _route_files()
     for loc, _last in rows:
-        rel = urlsplit(loc).path.lstrip("/")
-        if not rel.endswith(".html"):
-            continue
-        html_path = BUILD / rel
-        md_path = BUILD / (rel[:-5] + ".md")
-        if not html_path.is_file():
+        html_path = files.get(urlsplit(loc).path.lower())
+        if html_path is None:
             problems.append("sitemap loc has no file: " + loc)
             continue
+        rel = html_path.relative_to(BUILD).as_posix()
+        if rel.startswith(DOXYGEN_DIR):
+            continue
+        md_path = BUILD / (rel[:-5] + ".md")
         got = page_problems(html_path, md_path)
         problems.extend(got)
         if html_path.is_file():

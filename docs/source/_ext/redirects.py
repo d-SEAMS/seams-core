@@ -2,8 +2,9 @@
 """Publish a refresh page for every docname the book has moved.
 
 ``page_redirects`` maps the old docname to the new one. The HTML is a
-short page with a canonical link and a refresh, so an old URL still
-opens the page that replaced it.
+short page with a refresh, so an old URL still opens the page that
+replaced it. The stub is not indexed and its canonical link names the
+stub itself, so a crawler never treats it as a second copy of the target.
 """
 
 import posixpath
@@ -16,12 +17,14 @@ def _target(old, new):
 
 def collect_redirects(app):
     mapping = app.config.page_redirects or {}
+    base = app.config.html_baseurl or ""
     for old in sorted(mapping):
         new = mapping[old]
         yield (
             old,
             {
                 "redirect_target": _target(old, new),
+                "redirect_url": base + old + ".html",
                 "redirect_title": "Moved",
             },
             "redirect.html",

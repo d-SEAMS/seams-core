@@ -184,6 +184,9 @@ void requireWidthInvariant(const Cloud &cloud, const std::vector<int> *subset, d
       const Csr serial = csrAt(1, cloud, subset, rc, half, branchy);
       REQUIRE(serial.ok);
       for (const int width : kWidths) {
+        if (width == 1) {
+          continue;
+        }
         INFO("width " << width << " half " << half << " branchy " << branchy);
         requireSameCsr(csrAt(width, cloud, subset, rc, half, branchy), serial);
       }
@@ -454,6 +457,9 @@ TEST_CASE("a small frame and a tilted box give the same CSR at every width",
   const Csr serial = csrAt(1, tilted, nullptr, 3.5);
   REQUIRE(serial.ok);
   for (const int width : kWidths) {
+    if (width == 1) {
+      continue;
+    }
     INFO("width " << width);
     requireSameCsr(csrAt(width, tilted, nullptr, 3.5), serial);
   }
@@ -467,6 +473,9 @@ TEST_CASE("local q4 and q6 keep every bit at every width", "[thread_invariance]"
       const auto serial = qlAt(1, *cloud, 3.5, l, 1, false);
       REQUIRE(serial.ql.size() == static_cast<std::size_t>(cloud->nop));
       for (const int width : kWidths) {
+        if (width == 1) {
+          continue;
+        }
         INFO("l " << l << " width " << width);
         const auto got = qlAt(width, *cloud, 3.5, l, 1, false);
         requireSameBits(got.ql, serial.ql);
@@ -485,6 +494,9 @@ TEST_CASE("averaged q6 and a mixed-type q4 keep every bit at every width",
   const auto serial6 = qlAt(1, mixed, 3.5, 6, 1, true);
   const auto serial4 = qlAt(1, mixed, 3.5, 4, 1, false);
   for (const int width : kWidths) {
+    if (width == 1) {
+      continue;
+    }
     INFO("width " << width);
     const auto got6 = qlAt(width, mixed, 3.5, 6, 1, true);
     requireSameBits(got6.ql, serial6.ql);
@@ -510,6 +522,7 @@ TEST_CASE("the C API CSR, q_l and ring census are the same at every width",
   }
   REQUIRE(wantCounts[6] > 0);
 
+  const auto serialQl4 = qlAt(1, warm, 3.5, 4, 1, false).ql;
   std::vector<double> serialQ4;
   std::vector<double> serialQ6;
   for (const int width : kWidths) {
@@ -532,7 +545,8 @@ TEST_CASE("the C API CSR, q_l and ring census are the same at every width",
     if (width == 1) {
       serialQ4 = q4;
       serialQ6 = q6;
-      requireSameBits(q4, qlAt(1, warm, 3.5, 4, 1, false).ql);
+      requireSameBits(q4, serialQl4);
+      continue;
     }
     requireSameBits(q4, serialQ4);
     requireSameBits(q6, serialQ6);
@@ -592,6 +606,9 @@ TEST_CASE("CHILL and CHILL+ labels and counts are the same at every width",
       }
       REQUIRE(distinctLabels(serial.labels) >= 2);
       for (const int width : kWidths) {
+        if (width == 1) {
+          continue;
+        }
         INFO("kind " << static_cast<int>(kind) << " type " << type << " width " << width);
         const Width team(width);
         REQUIRE(chillOf(sys, warm.nop, kind, type) == serial);
@@ -620,6 +637,7 @@ TEST_CASE("the shell match keeps its labels at every width", "[thread_invariance
       serialApi = api;
       serialFlat = flat;
       REQUIRE(distinctLabels(api) >= 2);
+      continue;
     }
     REQUIRE(api == serialApi);
     REQUIRE(flat == serialFlat);
@@ -627,7 +645,7 @@ TEST_CASE("the shell match keeps its labels at every width", "[thread_invariance
 }
 
 TEST_CASE("rings, their symmetry codes and the cage planes are the same at every width",
-          "[thread_invariance][c_api]") {
+          "[thread_invariance][c_api][thread_invariance_rings]") {
   REQUIRE(kFixedWidth);
   const Cloud warm = jittered(iceIc(32768), 0.8, 23);
   System sys(warm);
@@ -653,6 +671,9 @@ TEST_CASE("rings, their symmetry codes and the cage planes are the same at every
   REQUIRE(ring::contractibleRings(std::vector<std::vector<int>>(serialRings), warm) ==
           contractible);
   for (const int width : kWidths) {
+    if (width == 1) {
+      continue;
+    }
     INFO("width " << width);
     const Width team(width);
     REQUIRE(ringsOf(sys.handle, 0) == serialSet);
@@ -667,7 +688,7 @@ TEST_CASE("rings, their symmetry codes and the cage planes are the same at every
 }
 
 TEST_CASE("cages and their per-atom codes are the same at every width",
-          "[thread_invariance][c_api]") {
+          "[thread_invariance][c_api][thread_invariance_cages]") {
   REQUIRE(kFixedWidth);
   const Cloud cold = jittered(iceIc(32768), 0.3, 24);
   const Cloud warm = jittered(iceIc(32768), 0.8, 25);
@@ -680,6 +701,9 @@ TEST_CASE("cages and their per-atom codes are the same at every width",
     }
     REQUIRE(serial.counts[1] + serial.counts[3] > 0);
     for (const int width : kWidths) {
+      if (width == 1) {
+        continue;
+      }
       INFO("width " << width);
       const Width team(width);
       REQUIRE(cagesOf(sys.handle, cloud->nop, 0) == serial);
@@ -726,6 +750,7 @@ TEST_CASE("prisms are the same at every width", "[thread_invariance][c_api]") {
           // Squares stacked on squares share a bond, so only the
           // hexagons pair into prisms.
           REQUIRE((size == 4 || perfect > 0));
+          continue;
         }
         REQUIRE(perfect == serialPerfect);
         REQUIRE(list == serialList);
@@ -733,6 +758,9 @@ TEST_CASE("prisms are the same at every width", "[thread_invariance][c_api]") {
       }
     }
     for (const int width : kWidths) {
+      if (width == 1) {
+        continue;
+      }
       INFO("width " << width);
       const Width team(width);
       REQUIRE(prismsOf(sys.handle, 0) == serialApi);
@@ -767,6 +795,7 @@ TEST_CASE("the monolayer census, the 2D RDF and k-nearest rows are the same at e
       REQUIRE(census[6] > 0);
       REQUIRE(std::count_if(histogram.begin(), histogram.end(), [](int v) { return v > 0; }) >
               10);
+      continue;
     }
     REQUIRE(census == serialCensus);
     REQUIRE(histogram == serialHistogram);
@@ -777,7 +806,7 @@ TEST_CASE("the monolayer census, the 2D RDF and k-nearest rows are the same at e
 }
 
 TEST_CASE("one frame handle gives each kernel the frame a fresh handle would",
-          "[thread_invariance][c_api]") {
+          "[thread_invariance][c_api][thread_invariance_reuse]") {
   // The handle keeps one filtered copy of the frame between calls. A new
   // species filter, a new frame, or a kernel that does not use the copy
   // in between must not leak into the next call.

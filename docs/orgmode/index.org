@@ -66,6 +66,9 @@ PLUMED, and in-situ drivers. ~gmx-seams~ reads the trajectory ~gmx mdrun~ wrote.
 The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
 [[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
 ~seams --version~ prints ~2.14.0~.
+#+begin_export rst
+See the :doc:`PLUMED engine page <engines/plumed>` for the plugin.
+#+end_export
 
 CHILL+ labels an oxygen from its four-neighbour star: cubic, hexagonal,
 interfacial, clathrate, interClathrate, or water. Cage membership is a

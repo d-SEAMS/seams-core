@@ -58,7 +58,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [LAMMPS](https://docs.dseams.info/engines/lammps.md): Meson builds run_hook, the in-run hook.
 - [GROMACS](https://docs.dseams.info/engines/gromacs.md): engines/gromacs/seams_ice.cpp is a TrajectoryAnalysisModule.
 - [OpenMM](https://docs.dseams.info/engines/openmm.md): There is one reporter, DseamsReporter in adapters/python/dseams_insitu/openmm.py.
-- [PLUMED](https://docs.dseams.info/engines/plumed.md): The thread count comes from PLUMED_NUM_THREADS.
+- [PLUMED](https://docs.dseams.info/engines/plumed.md): The d-SEAMS PLUMED plugin egg (plumID:26.018) uses v0.4.1 of the dseams-plumed repository.
 - [In-situ](https://docs.dseams.info/engines/insitu.md): adapters/python/dseams_insitu/engine.py is InSitu.
 - [Engine walkthroughs](https://docs.dseams.info/walkthrough/index.md): Each page analyzes a supplied input with published CHILL+, the primitive six-ring histogram, and local q6.
 - [Language walkthroughs](https://docs.dseams.info/user/languages.md): The same ice cell from C, C++, and each binding, and from each engine driver.
@@ -75,7 +75,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.md): Eight cubic-ice atoms, one observation through InSitu.observe.
 - [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.md): engines/lammps/in.dseams is a frozen cubic cell of 64 atoms.
 - [OpenMM tutorial](https://docs.dseams.info/fronts/openmm.md): DseamsReporter in adapters/python/dseams_insitu/openmm.py asks for positions every interval and calls InSitu.observe.
-- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.md): SEAMS reports three components on this page.
+- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.md): Use the PLUMED engine page to get the d-SEAMS PLUMED plugin v0.4.1.
 - [Paper figures](https://docs.dseams.info/user/paper.md): The in-tree numbers behind the published figures, and the gallery drawn from those runs.
 - [Paper figures](https://docs.dseams.info/user/tutorials/paper-figures.md): The 2020 JCIM figures are drawn from figshare project 73545.
 - [CHILL+ on an ice/water slab](https://docs.dseams.info/user/tutorials/paper-interface.md): An interface is where a rule is easy to fool.
@@ -157,6 +157,11 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Install the Julia binding with Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl").
 - [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Install the Rust binding with cargo add dseams@2.14.0.
 - [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Add the Fortran binding as an fpm Git dependency.
+
+## PLUMED plugin
+
+- [PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/): d-SEAMS PLUMED plugin v0.4.1, plumID:26.018, tested with PLUMED v2.10 and master.
+- [dseams-plumed](https://github.com/d-SEAMS/dseams-plumed): Companion repository for the d-SEAMS PLUMED plugin v0.4.1.
 
 ## Optional
 

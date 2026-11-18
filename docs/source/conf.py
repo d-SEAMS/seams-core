@@ -696,6 +696,12 @@ intersphinx_mapping = {
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "shibuya"
+html_meta = {
+    "description": (
+        "Documentation for d-SEAMS, a molecular simulation trajectory analysis "
+        "engine for ice, clathrates, rings, cages, and structural order."
+    ),
+}
 # doi.org is the citation link. These publishers answer the redirect with
 # 403 to the link checker, so a redirect onto them is ignored.
 linkcheck_ignore = [
@@ -717,24 +723,31 @@ linkcheck_ignore = [
     r"https://huggingface\.co/datasets/d-SEAMS/.*",
 ]
 html_static_path = ["_static"]
-# llms.txt at the site root: a plain-text map of the published pages.
-html_extra_path = [os.path.join(os.path.dirname(_docs), "llms.txt")]
-html_css_files = ["custom.css"]
+# Machine-readable discovery files at the site root.
+html_extra_path = [
+    os.path.join(os.path.dirname(_docs), "llms.txt"),
+    os.path.join(_docs, "robots.txt"),
+]
+html_css_files = [
+    "dseams/dseams-tokens.css",
+    "dseams/dseams-family.css",
+    "dseams/dseams-shibuya.css",
+    "dseams/dseams-doxyrest.css",
+]
 html_js_files = []
-html_favicon = "_static/dSeamsLogo.ico"
+# Equations render with the vendored MathJax build.
+mathjax_path = "dseams/mathjax/tex-chtml.js"
+html_favicon = "_static/dseams/favicon.ico"
 
-# Mermaid: default CDN; diagrams via ``.. mermaid::`` from Org RST export.
+# Mermaid: vendored library; diagrams via ``.. mermaid::`` from Org RST export.
 mermaid_version = "11.4.0"
+mermaid_use_local = "dseams/mermaid.mjs"
 mermaid_height = "auto"
-mermaid_init_js = (
-    'import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.esm.min.mjs";'
-    "mermaid.initialize({startOnLoad:false, theme:'base', "
-    "flowchart:{htmlLabels:true, padding:16, nodeSpacing:30, rankSpacing:36}, "
-    "themeVariables:{fontSize:'18px', fontFamily:'Inter, sans-serif', "
-    "primaryColor:'#b7e4d8', primaryTextColor:'#102220', primaryBorderColor:'#0c5c56', "
-    "lineColor:'#0c5c56', secondaryColor:'#d5efe8', tertiaryColor:'#ffffff', "
-    "background:'#ffffff'}});"
-)
+mermaid_init_config = {
+    "startOnLoad": False,
+    "flowchart": {"htmlLabels": True, "padding": 16, "nodeSpacing": 30, "rankSpacing": 36},
+    "themeVariables": {"fontSize": "16px", "fontFamily": "ui-sans-serif, system-ui, sans-serif"},
+}
 
 html_context = {
     "source_type": "github",
@@ -746,10 +759,9 @@ html_context = {
 
 html_theme_options = {
     "github_url": "https://github.com/d-SEAMS/seams-core",
-    "accent_color": "teal",
+    "accent_color": "blue",
+    "show_ai_links": False,
     "dark_code": True,
-    "light_logo": "_static/dSeamsLogo.png",
-    "dark_logo": "_static/dSeamsLogo.png",
     "globaltoc_expand_depth": 1,
     "toctree_collapse": True,
     "toctree_maxdepth": 3,
@@ -760,68 +772,13 @@ html_theme_options = {
             "url": "/api-cpp/index.html",
             "resource": True,
         },
-        {
-            "title": "Ecosystem",
-            "children": [
-                {
-                    "title": "d-SEAMS engine",
-                    "url": "https://docs.dseams.info",
-                    "summary": "libyodaLib and the seams CLI",
-                    "external": True,
-                },
-                {
-                    "title": "PydSEAMSlib (Python)",
-                    "url": "https://d-seams.github.io/PydSEAMSlib/",
-                    "summary": "pydseamslib: import dseams and import pydseams",
-                    "external": True,
-                },
-                {
-                    "title": "yodaStruct (Lua, Fennel)",
-                    "url": "https://d-seams.github.io/yodaStruct/",
-                    "summary": "require(\"dseams\")",
-                    "external": True,
-                },
-                {
-                    "title": "dseams-r (R)",
-                    "url": "https://github.com/d-SEAMS/dseams-r",
-                    "summary": "The R package dseams",
-                    "external": True,
-                },
-                {
-                    "title": "Dseams.jl (Julia)",
-                    "url": "https://github.com/d-SEAMS/Dseams.jl",
-                    "summary": "The Julia package Dseams",
-                    "external": True,
-                },
-                {
-                    "title": "dseams-rs (Rust)",
-                    "url": "https://github.com/d-SEAMS/dseams-rs",
-                    "summary": "The crates dseams-sys and dseams",
-                    "external": True,
-                },
-                {
-                    "title": "dseams-fortran (Fortran)",
-                    "url": "https://github.com/d-SEAMS/dseams-fortran",
-                    "summary": "The fpm Git dependency dseams",
-                    "external": True,
-                },
-                {
-                    "title": "linkcell",
-                    "url": "https://github.com/d-SEAMS/linkcell",
-                    "summary": "Periodic linked-cell k-nearest neighbours",
-                    "external": True,
-                },
-            ],
-        },
     ],
     "og_image_url": "https://docs.dseams.info/_static/og-dseams.png",
-    "show_ai_links": False,
 }
 
 html_sidebars = {
     "**": [
         "sidebars/localtoc.html",
-        "sidebars/repo-stats.html",
         "sidebars/edit-this-page.html",
     ],
 }

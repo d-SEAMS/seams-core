@@ -34,6 +34,10 @@
 #include <csetjmp>
 #include <csignal>
 #include <unistd.h>
+#if defined(FUZZ_COVERAGE_PROCESSES) && !defined(_WIN32)
+#include <sys/wait.h>
+#include <cerrno>
+#endif
 
 #include <algorithm>
 #include <atomic>
@@ -486,8 +490,49 @@ int main(int argc, char **argv) {
           }
         }
       };
-      std::vector<std::thread> pool;
       const int chunk = std::max(1, (trials + static_cast<int>(nThreads) - 1) / static_cast<int>(nThreads));
+#if defined(FUZZ_COVERAGE_PROCESSES) && !defined(_WIN32)
+      // -fprofile-update=atomic puts every arc counter on one cache line.
+      // std::threads then serialize inside the ring search, and 1000 trials
+      // do not finish in 10800 s. A child has its own counters, so the same
+      // trial index set scales. _exit prevents a child gcov flush.
+      std::fflush(nullptr);
+      std::vector<pid_t> kids;
+      kids.reserve(nThreads);
+      for (unsigned w = 0; w < nThreads; w++) {
+        const int begin = static_cast<int>(w) * chunk;
+        const int end = std::min(trials, begin + chunk);
+        if (begin >= end) {
+          break;
+        }
+        const pid_t pid = fork();
+        if (pid < 0) {
+          std::perror("fuzz_cage_invariance fork");
+          bad.store(1);
+          break;
+        }
+        if (pid == 0) {
+#ifdef SEAMS_HAS_OPENMP
+          omp_set_num_threads(1);
+#endif
+          runRange(begin, end);
+          std::fflush(nullptr);
+          _exit(bad.load() == 0 ? 0 : 1);
+        }
+        kids.push_back(pid);
+      }
+      for (const pid_t pid : kids) {
+        int status = 0;
+        pid_t got = -1;
+        do {
+          got = waitpid(pid, &status, 0);
+        } while (got < 0 && errno == EINTR);
+        if (got < 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+          bad.store(1);
+        }
+      }
+#else
+      std::vector<std::thread> pool;
       for (unsigned w = 0; w < nThreads; w++) {
         const int begin = static_cast<int>(w) * chunk;
         const int end = std::min(trials, begin + chunk);
@@ -499,6 +544,7 @@ int main(int argc, char **argv) {
       for (auto &th : pool) {
         th.join();
       }
+#endif
       shiftTrials += static_cast<std::uint64_t>(trials);
       permTrials += static_cast<std::uint64_t>(trials);
       if (bad.load() != 0) {

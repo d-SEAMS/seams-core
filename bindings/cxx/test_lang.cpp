@@ -573,6 +573,12 @@ int main(int argc, char **argv) {
   if (blank == nullptr) {
     return fail("empty frame");
   }
+  if (seams_path_nframes(emptyPath.c_str()) != 1 ||
+      seams_frame_read(emptyPath.c_str(), 2, 0) != nullptr ||
+      seams_path_nframes(emptyPath.c_str()) != 1) {
+    seams_frame_free(blank);
+    return fail("past-end frame read");
+  }
   if (seams_frame_chill_plus(blank, 3.5, 0, "cutoff", nullptr, nullptr) != 0) {
     return fail("empty chill");
   }
@@ -707,6 +713,24 @@ int main(int argc, char **argv) {
   if (seams_frame_chill_plus(blank2, 3.5, 0, "cutoff", emptyLabels, counts) != 0) {
     return fail("empty labels");
   }
+  if (seams_frame_cages(blank2, 3.5, 0, 4, "bogus", 0, nullptr, &cageHex,
+                        nullptr, nullptr, nullptr) == 0) {
+    return fail("empty unknown cage graph");
+  }
+  if (seams_frame_rdf2d(blank2, 3.5, 0.5, nullptr, r2.data(), g2.data()) != 0) {
+    return fail("empty rdf2d");
+  }
+  for (double value : g2) {
+    if (value != 0.0) {
+      return fail("empty rdf2d values");
+    }
+  }
+  int emptyPrismN = 4;
+  seams_prism_row emptyPrisms[4] = {};
+  if (seams_frame_prisms(blank2, 3.5, 0, 6, outDir.c_str(), emptyPrisms,
+                         &emptyPrismN) != 0) {
+    return fail("empty prisms");
+  }
   int perEmpty[1] = {};
   if (seams_frame_cages(blank2, 3.5, 0, 4, "cutoff", 0, perEmpty, &cageHex, nullptr, nullptr, nullptr) != 0) {
     return fail("empty per atom");
@@ -819,6 +843,14 @@ int main(int argc, char **argv) {
   }
   if (seams_frame_steinhardt(oxygen, 3.5, 1, -1, qlOxygen.data(), qbarOxygen.data()) != 0 && seams_last_error()[0] == '\0') {
     return fail("silent bad order");
+  }
+  if (seams_frame_steinhardt(oxygen, 3.5, 1, 5, qlOxygen.data(),
+                              qbarOxygen.data()) == 0) {
+    return fail("unsupported Steinhardt degree");
+  }
+  if (seams_frame_rings(oxygen, std::nan(""), 1, "cutoff", 6, wide, 16) == 0 ||
+      seams_frame_rings(oxygen, 0.0, 1, "cutoff", 6, wide, 16) == 0) {
+    return fail("invalid ring cutoff");
   }
   if (seams_frame_steinhardt(blank2, 3.5, 0, 4, qlOxygen.data(), qbarOxygen.data()) != 0) {
     return fail("empty steinhardt");
@@ -1060,6 +1092,37 @@ int main(int argc, char **argv) {
     return fail("prism blank dir");
   }
   seams_frame_free(pair);
+  {
+    const double farXyz[] = {1, 1, 1, 11, 11, 11, 21, 21, 21};
+    const double farBox[] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
+    seams_frame *far = seams_frame_from_arrays(farXyz, 3, farBox, nullptr, nullptr);
+    if (far == nullptr || seams_frame_neighbours(far, 3.5, 1, "mutual") != 0 ||
+        seams_frame_neighbour_pairs(far) != 0) {
+      seams_frame_free(far);
+      return fail("mutual distance bound");
+    }
+    seams_frame_free(far);
+  }
+  {
+    const double planeXyz[] = {1, 1, 1, 12, 1, 1, 1, 12, 1};
+    const double planeBox[] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
+    seams_frame *plane =
+        seams_frame_from_arrays(planeXyz, 3, planeBox, nullptr, nullptr);
+    double planeR[12] = {};
+    double planeG[12] = {};
+    if (plane == nullptr ||
+        seams_frame_rdf2d(plane, 6.0, 0.5, nullptr, planeR, planeG) != 0) {
+      seams_frame_free(plane);
+      return fail("coplanar rdf2d");
+    }
+    for (double value : planeG) {
+      if (!std::isfinite(value)) {
+        seams_frame_free(plane);
+        return fail("coplanar rdf2d values");
+      }
+    }
+    seams_frame_free(plane);
+  }
   seams_frame_free(blank2);
   seams_frame_free(oxygen);
   std::filesystem::remove_all(out);
