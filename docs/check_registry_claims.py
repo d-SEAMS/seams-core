@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from check_reader_text import source_pages
+from check_reader_text import html_pages, source_pages
 from registry_claims import ClaimParseError, RegistryError, claims, live_versions
 
 
@@ -20,9 +20,13 @@ def check_registry_pages(pages, resolve_versions=live_versions):
     registry_claims = 0
     scanned_files = 0
 
-    for path, rel in pages:
+    for page in pages:
+        if len(page) == 3:
+            path, rel, text = page
+        else:
+            path, rel = page
+            text = path.read_text(encoding="utf-8", errors="replace")
         scanned_files += 1
-        text = path.read_text(encoding="utf-8", errors="replace")
         for number, line in enumerate(text.splitlines(), 1):
             try:
                 line_claims = list(claims(line))
@@ -51,9 +55,20 @@ def check_registry_pages(pages, resolve_versions=live_versions):
     return errors, scanned_files, registry_claims, len(registry_cache)
 
 
+def scanned_registry_pages():
+    for path, rel in source_pages():
+        yield path, rel, path.read_text(encoding="utf-8", errors="replace")
+    build = ROOT.parent / "docs" / "build"
+    if build.is_dir():
+        for path, rel, text in html_pages(build):
+            if text == "players.html must not be published":
+                continue
+            yield path, "html/" + rel, text
+
+
 def main() -> int:
     errors, scanned_files, registry_claims, package_count = check_registry_pages(
-        source_pages()
+        scanned_registry_pages()
     )
     if errors:
         print("\n".join(errors), file=sys.stderr)
