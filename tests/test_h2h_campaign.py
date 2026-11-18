@@ -284,6 +284,36 @@ def check_lane_counters():
         assert hc.lane_failures(path, "b") == []
 
 
+def check_attempts():
+    def plan(run_id, lanes):
+        return {"type": "plan", "kind": "lanes", "run_id": run_id, "lanes": lanes}
+
+    def asv(run_id, status, r=0, **extra):
+        return {"type": "asv", "run_id": run_id, "lane": "scaled", "group": "scaling",
+                "cell": "mod.C.time_x(1)", "kind": "time", "params": {}, "arm": "A",
+                "round": r, "status": status, "code_revision": "0123456789abcdef", **extra}
+
+    rows = [plan("first", ["scaled"]), plan("other", ["different"]), plan("second", ["scaled"])]
+    rows += [asv("first", "failed", detail="no information stored about the machine"),
+             asv("first", "skipped", r=1, detail="earlier round: failed"),
+             asv("other", "failed"),
+             asv("second", "ok", value=0.001), asv("second", "ok", r=1, value=0.002)]
+    replaced = hc.replaced_runs(rows)
+    assert replaced == {"first": "second"}, replaced
+    current = [r for r in rows if r.get("run_id") not in replaced]
+    earlier = [r for r in rows if r.get("run_id") in replaced]
+    stats = hc.lane_stat_rows(current)
+    assert [c["cell"] for c in stats if c["lane"] == "scaled"] == ["mod.C.time_x(1)"]
+    assert stats[0]["A"]["n"] == 2, "the replaced attempt must not leak into the cell"
+    text = hc.render_attempts(earlier, replaced)
+    assert "| first | second | 01234567 |" in text and "asv/failed 1" in text, text
+    assert "no information stored" in text, text
+
+    later_empty = rows + [plan("third", ["scaled"]), asv("third", "failed")]
+    assert hc.replaced_runs(later_empty)["third"] == "second", (
+        "a later run that recorded no sample does not replace one that did")
+
+
 def check_cli_floor_and_plan():
     script = ROOT / "scripts" / "h2h_campaign.py"
     with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:

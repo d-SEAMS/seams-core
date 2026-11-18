@@ -1892,9 +1892,62 @@ def render_lanes(rows, run_id=None) -> str:
     return "\n".join(out) + "\n"
 
 
+def run_groups(rows) -> list[list[str]]:
+    """The run ids that planned the same work, oldest first."""
+    groups: dict = {}
+    for r in rows:
+        if r.get("type") == "plan":
+            key = json.dumps([r.get("kind", "head-to-head"), r.get("lanes") or r.get("workloads")])
+            ids = groups.setdefault(key, [])
+            if r["run_id"] not in ids:
+                ids.append(r["run_id"])
+    return list(groups.values())
+
+
+def replaced_runs(rows) -> dict:
+    """Run id to the later run that replaces it. A run that planned the same work and
+    recorded a sample is preferred to a later one that recorded none."""
+    sampled = {r["run_id"] for r in rows if r.get("status") == "ok" and r.get("run_id")}
+    out = {}
+    for ids in run_groups(rows):
+        latest = ([i for i in ids if i in sampled] or ids)[-1]
+        out.update({i: latest for i in ids if i != latest})
+    return out
+
+
+def render_attempts(rows, replaced: dict) -> str:
+    if not rows:
+        return ""
+    out = ["## earlier attempts, replaced by a later run of the same plan", "",
+           "| run | replaced by | code revision | rows | first failure |",
+           "|---|---|---|---|---|"]
+    for run_id in sorted({r["run_id"] for r in rows}):
+        mine = [r for r in rows if r["run_id"] == run_id]
+        counts: dict = {}
+        for r in mine:
+            if r.get("status"):
+                key = f"{r.get('type')}/{r['status']}"
+                counts[key] = counts.get(key, 0) + 1
+        revisions = sorted({r["code_revision"][:8] for r in mine if r.get("code_revision")})
+        why = next((r["detail"] for r in mine
+                    if r.get("status") in ("failed", "timeout") and r.get("detail")), "")
+        why = " ".join(why.split())[:120].replace("|", "/")
+        out.append(f"| {run_id} | {replaced[run_id]} | {', '.join(revisions)} | "
+                   f"{', '.join(f'{k} {v}' for k, v in sorted(counts.items()))} | {why} |")
+    out.append("")
+    return "\n".join(out) + "\n"
+
+
 def summary_command(args) -> int:
     rows = read_rows(args.record)
-    text = render_summary(rows, args.run_id) + render_lanes(rows, args.run_id)
+    if args.run_id:
+        text = render_summary(rows, args.run_id) + render_lanes(rows, args.run_id)
+    else:
+        replaced = replaced_runs(rows)
+        current = [r for r in rows if r.get("run_id") not in replaced]
+        earlier = [r for r in rows if r.get("run_id") in replaced]
+        text = (render_summary(current) + render_lanes(current)
+                + render_attempts(earlier, replaced))
     if args.out:
         Path(args.out).parent.mkdir(parents=True, exist_ok=True)
         Path(args.out).write_text(text, encoding="utf-8")
