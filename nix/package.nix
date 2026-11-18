@@ -193,6 +193,8 @@ stdenv.mkDerivation (finalAttrs: {
     patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch
     cp -R subprojects/packagefiles/vesin/. subprojects/vesin/
     patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
+    mkdir -p docs/.cache/figshare-11448702
+    cp ${nucleationTrajectory} docs/.cache/figshare-11448702/nucleation.lammpstrj
   '';
 
   nativeBuildInputs = [
@@ -282,8 +284,6 @@ stdenv.mkDerivation (finalAttrs: {
     git -C .. init -q -b main
     git -C .. add -A
     git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
-    mkdir -p ../docs/.cache/figshare-11448702
-    cp ${nucleationTrajectory} ../docs/.cache/figshare-11448702/nucleation.lammpstrj
     # The book writes these pages before the docs checks. They are not
     # stored in the filtered source. The API line is the one llms.txt
     # already publishes; doxygen is not part of this build.
