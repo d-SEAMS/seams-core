@@ -1,5 +1,10 @@
 # PLUMED
 
+The [d-SEAMS PLUMED plugin egg](https://www.plumed-nest.org/eggs/26/018/)
+(plumID:26.018) uses v0.4.1 of the
+[dseams-plumed repository](https://github.com/d-SEAMS/dseams-plumed).
+It is tested with PLUMED v2.10 and master.
+
 The thread count comes from `PLUMED_NUM_THREADS`. Set that variable
 before PLUMED starts. `OMP_NUM_THREADS` does not change the PLUMED team.
 
