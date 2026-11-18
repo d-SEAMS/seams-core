@@ -65,9 +65,7 @@ lcov --capture --directory bbdir-cov --branch-coverage \
   --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info && \
 lcov --remove bbdir-cov/meson-logs/coverage.info \
   '*/external/backward.hpp' '*/backward.cpp' \
-  '*/tests/*' '*/bench_*' \
-  --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info \
-  --ignore-errors unused && \
+  --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info && \
 genhtml bbdir-cov/meson-logs/coverage.info --branch-coverage \
   --config-file .lcovrc --output-directory bbdir-cov/meson-logs/coveragereport
 """, depends-on = ["coverage-build"] }
