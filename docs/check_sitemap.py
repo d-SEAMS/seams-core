@@ -159,7 +159,7 @@ def mapped_files(build, locs):
             problems.append(err)
             continue
         parsed = urllib.parse.urlsplit(loc.strip())
-        route = urllib.parse.unquote(parsed.path)
+        route = urllib.parse.unquote(parsed.path).lower()
         candidate = routes.get(route)
         if candidate is None and rel.suffix != ".html":
             direct = build.joinpath(*rel.parts)
@@ -408,6 +408,8 @@ def mapper_cases():
             (["https://example.com/index.html"], "outside"),
             (["https://docs.dseams.info/missing.html"], "missing.html"),
             (["https://docs.dseams.info/../index.html"], "escapes"),
+            (["https://docs.dseams.info/index.html"], "canonical"),
+            (["https://docs.dseams.info/contributing/index.html"], "canonical"),
         ]
         for locs, needle in bad_cases:
             _write_urlset(build / "sitemap.xml", locs)

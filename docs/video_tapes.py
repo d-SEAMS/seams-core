@@ -59,6 +59,7 @@ def stable(text):
         flags=re.S,
     )
     text = text.replace("(src/src/", "(src/")
+    text = text.replace("CITE BLOCK\n", "")
     text = re.sub(r"overhead_s \S+", "overhead_s TIME", text)
     text = re.sub(r"Loop time of \S+ on \d+ procs", "Loop time of TIME on N procs", text)
     text = re.sub(r"Loop time of \S+", "Loop time of TIME", text)
