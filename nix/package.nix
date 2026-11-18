@@ -19,6 +19,9 @@
   fetchgit,
   fetchurl,
   fetchzip,
+  rustPlatform,
+  rustc,
+  cargo,
   robinMap,
   unzip,
   libglvnd,
@@ -99,10 +102,6 @@ let
     url = "https://github.com/lode-org/minimage/archive/refs/tags/v0.1.4.tar.gz";
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
   };
-  linkcellSrc = fetchzip {
-    url = "https://github.com/d-SEAMS/linkcell/archive/refs/tags/v0.4.2.tar.gz";
-    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
-  };
   vesinSrc = fetchzip {
     url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
     hash = "sha256-JsU+tDyATW6wmix7Tjwa5RnLRjB6b+sYSkMJIt5M5Yo=";
@@ -157,11 +156,15 @@ stdenv.mkDerivation (finalAttrs: {
     ];
   };
 
+  cargoDeps = rustPlatform.fetchCargoVendor {
+    src = minimageSrc;
+    hash = "sha256-8NSCv17ACkQbkBnycIZ3K9mUUOWwYX4u7OMii2F2znk=";
+  };
+
   postPatch = ''
     cp -R ${minimageSrc} subprojects/minimage
-    cp -R ${linkcellSrc} subprojects/linkcell
     cp -R ${vesinSrc} subprojects/vesin
-    chmod -R u+w subprojects/minimage subprojects/linkcell subprojects/vesin
+    chmod -R u+w subprojects/minimage subprojects/vesin
     cp -R subprojects/packagefiles/vesin/. subprojects/vesin/
     patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
   '';
@@ -192,6 +195,9 @@ stdenv.mkDerivation (finalAttrs: {
     lammps
     gromacs
     plumed
+    rustc
+    cargo
+    rustPlatform.cargoSetupHook
   ];
 
   buildInputs = [
@@ -235,7 +241,7 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_ira" false)
     (lib.mesonEnable "with_sphericart" false)
     (lib.mesonEnable "with_gpulite" false)
-    (lib.mesonEnable "with_linkcell" true)
+    (lib.mesonEnable "with_linkcell" false)
     (lib.mesonEnable "with_minimage" true)
   ];
 
