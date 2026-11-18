@@ -128,6 +128,11 @@ if lammps_opt.allowed()
     lammps_plugin_args = lammps_args
     if get_option('lammps_src_include') != ''
       lammps_plugin_args += ['-I' + get_option('lammps_src_include')]
+      # A serial LAMMPS has no MPI library; its headers take mpi.h from STUBS.
+      _lammps_stubs = get_option('lammps_src_include') / 'STUBS'
+      if not lammps_mpi.found() and fs.is_file(_lammps_stubs / 'mpi.h')
+        lammps_plugin_args += ['-I' + _lammps_stubs]
+      endif
     endif
     # check_header compiles the include, so a src tree without fmt/ fails here.
     # A LAMMPS CMake install carries compute.h but not lammpsplugin.h, and
