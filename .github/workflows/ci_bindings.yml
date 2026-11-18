@@ -21,6 +21,6 @@ jobs:
       - name: Build and test the C++ wrapper
         run: |
           pixi run meson setup bbdir-cpp -Dwith_tests=true -Dwith_cli=false
-          pixi run ninja -C bbdir-cpp bindings/test_seams_hpp src/docs_api_hpp
+          pixi run ninja -C bbdir-cpp bindings/test_seams_hpp bindings/bench_binding_overhead_cpp src/docs_api_hpp
           pixi run meson test -C bbdir-cpp seams_hpp_match docs_api_hpp --print-errorlogs
 

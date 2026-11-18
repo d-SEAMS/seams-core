@@ -24,6 +24,16 @@ if get_option('with_tests')
     depends: [binding_oracle, seams_api_lib],
     timeout: 180,
   )
+
+  # Compile-only guard: scripts/bench_binding_overhead.py builds this driver
+  # by hand, so a seams.hpp change would otherwise break it unseen.
+  executable(
+    'bench_binding_overhead_cpp',
+    files('../benchmarks/binding_overhead_cpp.cpp'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    cpp_args: ['-I' + meson.project_build_root() / 'src'],
+  )
 endif
 
 seams_lang = shared_library(
