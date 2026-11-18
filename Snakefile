@@ -38,3 +38,133 @@ rule engines_e2e:
         "data/engines-e2e.csv",
     shell:
         "python3 scripts/engines_e2e.py table {input} --out {output}"
+
+
+# Head-to-head campaign: d-SEAMS against freud, OVITO and the other tools
+# scripts/h2h_campaign.py covers, for neighbour lists and ring statistics on
+# water and ice from 136 to 110592 molecules, and the timing lanes of the
+# asv suite in benchmarks/. Every rule runs one subcommand of that script and
+# writes a done marker under bbdir-h2h/<stamp>/. The samples go to
+# data/h2h-campaign/<stamp>.jsonl. That record is append-only and is not a
+# Snakemake output, so Snakemake never deletes it. A rule that is interrupted
+# and run again resumes its run and skips the samples already recorded.
+#
+# The rules form one chain so that nothing else shares the machine, and each
+# claims every core Snakemake has. One sample is one fresh process on one
+# pinned core, with no warm-up call. The arms and the cells interleave round by
+# round and the odd rounds run in reverse. d-SEAMS is measured twice in every
+# cell, as its own A/A band. asv runs one invocation per sample.
+#
+#   snakemake --cores 1 h2h_campaign --config h2h_stamp=2026-11-18
+#
+# Config: h2h_stamp names the run and the record (default today),
+# h2h_rounds the rounds of the head-to-heads and lanes (default 8, at least 6),
+# h2h_asv_rounds the rounds of the asv cross-check of the head-to-heads
+# (default 6). H2H_OVITO_LD_LIBRARY_PATH, when set, is added to the library
+# path of the OVITO arms only.
+import datetime
+
+H2H_STAMP = str(config.get("h2h_stamp", datetime.date.today().isoformat()))
+H2H_ROUNDS = int(config.get("h2h_rounds", 8))
+H2H_ASV_ROUNDS = int(config.get("h2h_asv_rounds", 6))
+H2H_DIR = f"bbdir-h2h/{H2H_STAMP}"
+H2H_RECORD = f"data/h2h-campaign/{H2H_STAMP}.jsonl"
+H2H_COMMON = (
+    f"--stamp {H2H_STAMP} --record {H2H_RECORD} --resume --verbose"
+)
+
+
+def _h2h_args(name):
+    return (
+        f"{H2H_COMMON} --run-id {H2H_STAMP}-{name} "
+        f"--raw {H2H_DIR}/raw/{name} --work {H2H_DIR}/work/{name}"
+    )
+
+
+rule h2h_release_build:
+    output:
+        f"{H2H_DIR}/release-build.done",
+    threads: 1000
+    shell:
+        "python3 scripts/release_build.py && touch {output}"
+
+
+rule h2h_neighbours:
+    input:
+        rules.h2h_release_build.output,
+    output:
+        f"{H2H_DIR}/neighbours.done",
+    threads: 1000
+    params:
+        args=_h2h_args("neighbours"),
+    shell:
+        "python3 scripts/h2h_campaign.py run --head-to-head neighbours "
+        f"--rounds {H2H_ROUNDS} {{params.args}} --marker {{output}}"
+
+
+rule h2h_rings:
+    input:
+        rules.h2h_neighbours.output,
+    output:
+        f"{H2H_DIR}/rings.done",
+    threads: 1000
+    params:
+        args=_h2h_args("rings"),
+    shell:
+        "python3 scripts/h2h_campaign.py run --head-to-head rings "
+        f"--rounds {H2H_ROUNDS} {{params.args}} --marker {{output}}"
+
+
+rule h2h_lanes:
+    input:
+        rules.h2h_rings.output,
+    output:
+        f"{H2H_DIR}/lanes.done",
+    threads: 1000
+    params:
+        args=_h2h_args("lanes"),
+    shell:
+        "python3 scripts/h2h_campaign.py lanes --lanes kernel,rings,scaling "
+        f"--rounds {H2H_ROUNDS} {{params.args}} --marker {{output}}"
+
+
+rule h2h_asv:
+    input:
+        rules.h2h_lanes.output,
+    output:
+        f"{H2H_DIR}/asv.done",
+    threads: 1000
+    params:
+        args=_h2h_args("asv"),
+    shell:
+        "python3 scripts/h2h_campaign.py lanes --lanes h2h "
+        f"--rounds {H2H_ASV_ROUNDS} {{params.args}} --marker {{output}}"
+
+
+rule h2h_inventory:
+    input:
+        rules.h2h_asv.output,
+    output:
+        f"{H2H_DIR}/inventory.done",
+    threads: 1000
+    params:
+        args=_h2h_args("inventory"),
+    shell:
+        "python3 scripts/h2h_campaign.py lanes --lanes inventory --rounds 1 "
+        "--min-rounds 1 --timeout 300 {params.args} --marker {output}"
+
+
+rule h2h_summary:
+    input:
+        rules.h2h_inventory.output,
+    output:
+        f"data/h2h-campaign/{H2H_STAMP}.md",
+    params:
+        record=H2H_RECORD,
+    shell:
+        "python3 scripts/h2h_campaign.py summary --record {params.record} > {output}"
+
+
+rule h2h_campaign:
+    input:
+        rules.h2h_summary.output,
