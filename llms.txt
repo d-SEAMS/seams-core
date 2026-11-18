@@ -52,7 +52,7 @@
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.html): Eight cubic-ice atoms, one observation:
 - [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.html): Use d-SEAMS during a LAMMPS run.
 - [OpenMM tutorial](https://docs.dseams.info/fronts/openmm.html): Use d-SEAMS during an OpenMM simulation.
-- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.html): SEAMS has three components. q6 is the mean local q6 and carries finite-difference derivatives, so RESTRAINT can bias it.
+- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.html): Use the PLUMED engine page to get the d-SEAMS PLUMED plugin v0.4.1.
 
 ## How-to
 
@@ -79,7 +79,7 @@
 - [GROMACS](https://docs.dseams.info/howto/engine-gromacs.html): The build below used conda-forge GROMACS 2026.3, with the compiler and Eigen already on the path.
 - [LAMMPS](https://docs.dseams.info/howto/engine-lammps.html): The build below used conda-forge LAMMPS 2022.06.23.
 - [OpenMM](https://docs.dseams.info/howto/engine-openmm.html): The build below used conda-forge OpenMM 8.6.0.
-- [PLUMED](https://docs.dseams.info/howto/engine-plumed.html): The thread count comes from PLUMED_NUM_THREADS.
+- [PLUMED](https://docs.dseams.info/howto/engine-plumed.html): The d-SEAMS PLUMED plugin egg (plumID:26.018) uses v0.4.1 of the dseams-plumed repository.
 - [In-situ CHILL+](https://docs.dseams.info/howto/engine-insitu.html): Classify simulation frames in memory as a run advances.
 - [FAQ](https://docs.dseams.info/howto/faq.html): Install the engine. pixi or nix build.
 - [Troubleshooting](https://docs.dseams.info/howto/troubleshooting.html): The two command shapes on bundled frames:
@@ -118,7 +118,7 @@
 - [LAMMPS](https://docs.dseams.info/engines/lammps.html): Use d-SEAMS during a LAMMPS run.
 - [GROMACS](https://docs.dseams.info/engines/gromacs.html): Analyze a GROMACS trajectory with d-SEAMS.
 - [OpenMM](https://docs.dseams.info/engines/openmm.html): Classify frames during an OpenMM simulation.
-- [PLUMED](https://docs.dseams.info/engines/plumed.html): The thread count comes from PLUMED_NUM_THREADS.
+- [PLUMED](https://docs.dseams.info/engines/plumed.html): The d-SEAMS PLUMED plugin egg (plumID:26.018) uses v0.4.1 of the dseams-plumed repository.
 - [In-situ](https://docs.dseams.info/engines/insitu.html): Classify frames from a running simulation.
 
 ## Comparisons
@@ -167,3 +167,8 @@
 - [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Install the Julia binding with Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl").
 - [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Install the Rust binding with cargo add dseams@2.14.0.
 - [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Add the Fortran binding as an fpm Git dependency.
+
+## PLUMED plugin
+
+- [PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/): d-SEAMS PLUMED plugin v0.4.1, plumID:26.018, tested with PLUMED v2.10 and master.
+- [dseams-plumed](https://github.com/d-SEAMS/dseams-plumed): Companion repository for the d-SEAMS PLUMED plugin v0.4.1.

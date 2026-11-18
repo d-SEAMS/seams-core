@@ -1,6 +1,9 @@
 PLUMED
 ======
 
+Get the d-SEAMS PLUMED plugin v0.4.1 from the
+:doc:`PLUMED engine page <../engines/plumed>`.
+
 ``engines/plumed/SeamsColvar.cpp`` is the ``SEAMS`` action.
 ``engines/plumed/plumed.dat`` loads it on ``engines/plumed/ice.xyz``,
 restrains ``seams.q6``, and prints ``seams.ice`` and ``seams.ring``.

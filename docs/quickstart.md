@@ -36,7 +36,7 @@ working install command:
 | GROMACS | [engines/gromacs.md](engines/gromacs.md) | [tutorials/gromacs.md](tutorials/gromacs.md) |
 | LAMMPS | [engines/lammps.md](engines/lammps.md) | [tutorials/lammps.md](tutorials/lammps.md) |
 | OpenMM | [engines/openmm.md](engines/openmm.md) | [tutorials/openmm.md](tutorials/openmm.md) |
-| PLUMED | [engines/plumed.md](engines/plumed.md) | [tutorials/plumed.md](tutorials/plumed.md) |
+| PLUMED plugin v0.4.1 | [engines/plumed.md](engines/plumed.md) | [tutorials/plumed.md](tutorials/plumed.md) |
 | in-situ | [engines/insitu.md](engines/insitu.md) | [tutorials/insitu.md](tutorials/insitu.md) |
 
 Then run the C and CLI fronts on a bundled frame:

@@ -30,7 +30,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:engine-gromacs.org][GROMACS]] | Build ~gmx-seams~ and read the CHILL+ census |
 | [[file:engine-lammps.org][LAMMPS]] | Build the fix hook and read the CHILL+ census |
 | [[file:engine-openmm.org][OpenMM]] | Build the reporter and read the CHILL+ census |
-| [[file:engine-plumed.org][PLUMED]] | ~PLUMED_NUM_THREADS~, then q6, ice, and rings |
+| [[file:engine-plumed.org][PLUMED plugin v0.4.1]] | ~PLUMED_NUM_THREADS~, then q6, ice, and rings |
 | [[file:engine-insitu.org][In-situ CHILL+]] | Labels and the ring histogram from ~libseams_lang~ |
 | [[file:faq.org][FAQ]] | Short answers |
 | [[file:troubleshooting.org][Troubleshooting]] | Symptom, cause, fix |

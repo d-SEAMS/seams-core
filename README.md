@@ -27,6 +27,12 @@ C and C++ are documented here, as are the GROMACS, LAMMPS, OpenMM, PLUMED
 and in-situ engine drivers. Each other language binding is its own
 repository:
 
+The d-SEAMS PLUMED plugin v0.4.1 has a
+[PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/)
+(plumID:26.018) and a
+[companion repository](https://github.com/d-SEAMS/dseams-plumed). It is
+tested with PLUMED v2.10 and master.
+
 | Language | Repository | Package |
 |----------|------------|---------|
 | Python | [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) | `pydseamslib` on PyPI (`import dseams`, `import pydseams`) |

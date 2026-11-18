@@ -26,7 +26,8 @@ gmx-seams -f engines/gromacs/ice.gro -cutoff 3.5
 `gromacs hexagonal N six-rings M q6 Q`. `overhead_s` is machine-dependent.
 A topology is not required.
 `gmx-seams` runs after `gmx mdrun` and reads the trajectory that run wrote.
-Biasing from inside mdrun goes through the PLUMED collective variable, which links the same C API.
+Biasing from inside mdrun goes through the
+[d-SEAMS PLUMED plugin v0.4.1](plumed.md), which links the same C API.
 
 `-select` picks the sites to classify; the default is every atom. A
 multi-site water model needs its oxygens only, which takes a run input
