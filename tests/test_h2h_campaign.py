@@ -252,6 +252,38 @@ def check_lane_summary():
     assert "speed-up over one thread" in text and "4.00" in text, text
 
 
+def check_absolute_paths():
+    class Args:
+        record = "data/h2h-campaign/x.jsonl"
+        raw = "bbdir-h2h/x/raw"
+        work = ""
+        marker = "bbdir-h2h/x/lanes.done"
+
+    args = Args()
+    hc.absolute_paths(args)
+    assert Path(args.record).is_absolute() and args.record.endswith("data/h2h-campaign/x.jsonl")
+    assert Path(args.raw).is_absolute() and Path(args.marker).is_absolute()
+    assert args.work == "", "an empty option stays empty so that the default applies"
+
+
+def check_lane_counters():
+    rows = [
+        {"type": "asv", "run_id": "a", "group": "kernel", "cell": "k(1)", "status": "ok"},
+        {"type": "asv", "run_id": "a", "group": "kernel", "cell": "k(2)", "status": "failed"},
+        {"type": "asv", "run_id": "a", "group": "rings", "cell": "r", "status": "timeout"},
+        {"type": "asv", "run_id": "a", "group": "kernel", "cell": "k(3)", "status": "skipped"},
+        {"type": "asv", "run_id": "a", "group": "inventory", "cell": "i", "status": "failed"},
+        {"type": "asv", "run_id": "b", "group": "kernel", "cell": "k(1)", "status": "ok"},
+    ]
+    with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:
+        path = Path(work) / "record.jsonl"
+        path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+        assert hc.lane_samples(path, "a") == 1 and hc.lane_samples(path, "b") == 1
+        broken = sorted(r["cell"] for r in hc.lane_failures(path, "a"))
+        assert broken == ["k(2)", "r"], "the inventory and skipped cells are not failures"
+        assert hc.lane_failures(path, "b") == []
+
+
 def check_cli_floor_and_plan():
     script = ROOT / "scripts" / "h2h_campaign.py"
     with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:

@@ -1460,6 +1460,18 @@ def harvest(results: Path, host: str, cell: dict):
     return None
 
 
+def lane_samples(path, run_id: str) -> int:
+    return sum(1 for r in read_rows(path)
+               if r.get("type") == "asv" and r.get("run_id") == run_id and r.get("status") == "ok")
+
+
+def lane_failures(path, run_id: str) -> list[dict]:
+    """Cells that failed or timed out. The inventory is where broken benchmarks are listed."""
+    return [r for r in read_rows(path)
+            if r.get("type") == "asv" and r.get("run_id") == run_id
+            and r.get("group") != INVENTORY and r.get("status") in ("failed", "timeout")]
+
+
 def run_lanes(args) -> int:
     import release_build
 
@@ -1574,11 +1586,14 @@ def run_lanes(args) -> int:
         record.append(row)
         log.flush()
         if args.verbose:
-            print(f"r{r} {cell['label']} {arm} {row['status']} "
-                  f"{row.get('value', '')}", flush=True)
+            why = ("" if row["status"] == "ok"
+                   else " " + " ".join(row.get("detail", "").split())[-140:])
+            print(f"r{r} {cell['label']} {arm} {row['status']} {row.get('value', '')}{why}",
+                  flush=True)
 
     log = open(raw / "driver.log", "a", encoding="utf-8")
     current_round = -1
+    timed = any(lane.group != INVENTORY for lane in lanes)
     for r in range(args.rounds):
         flip = r % 2 == 1
         sequence = list(reversed(cells)) if flip else list(cells)
@@ -1594,7 +1609,17 @@ def run_lanes(args) -> int:
                 if (r, cell["label"], arm) in done:
                     continue
                 attempt(cell, lane, r, arm, position, "rev" if flip else "fwd")
+        if r == 0 and timed and not lane_samples(record.path, run_id):
+            log.close()
+            sys.stderr.write("round 0 produced no sample. The record holds the reasons.\n")
+            return 1
     log.close()
+    broken = sorted({row["cell"] for row in lane_failures(record.path, run_id)})
+    if broken:
+        sys.stderr.write(f"{len(broken)} cells failed or timed out, for example {broken[0]}\n")
+    if timed and not lane_samples(record.path, run_id):
+        sys.stderr.write("no cell produced a sample\n")
+        return 1
     if args.marker:
         marker = Path(args.marker)
         marker.parent.mkdir(parents=True, exist_ok=True)
@@ -1881,6 +1906,15 @@ def summary_command(args) -> int:
 # -------------------------------------------------------------------- CLI
 
 
+def absolute_paths(args) -> None:
+    """asv reads its config and its machine file from the directories it is given, and it
+    does not run in the directory this script does, so a relative path names another place."""
+    for name in ("record", "raw", "work", "marker"):
+        value = getattr(args, name, "")
+        if value:
+            setattr(args, name, str(Path(value).resolve()))
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1937,6 +1971,8 @@ def main(argv=None) -> int:
     s.add_argument("--out", default="")
 
     args = parser.parse_args(argv)
+    if args.command in ("run", "lanes"):
+        absolute_paths(args)
     if args.command == "worker":
         return run_worker(args)
     if args.command == "run":
