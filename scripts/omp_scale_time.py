@@ -138,7 +138,7 @@ def median_of(samples: list[float]) -> float:
     return statistics.median(samples)
 
 
-def session(lib, threads: int, samples: int = SAMPLES) -> dict[str, float]:
+def session(lib, threads: int, samples: int = SAMPLES, warmup: int = 1) -> dict[str, float]:
     if lib.seams_set_num_threads(threads) != 0:
         raise SystemExit(f"seams_set_num_threads({threads}) failed")
     n, xyz, box, types, ids = ice_ih(24)
@@ -177,7 +177,8 @@ def session(lib, threads: int, samples: int = SAMPLES) -> dict[str, float]:
 
         out = {}
         for name, fn in (("knn", knn), ("q6", q6), ("chill", chill), ("read", read)):
-            fn()
+            for _ in range(warmup):
+                fn()
             ticks = []
             for _ in range(samples):
                 t0 = time_ns()
