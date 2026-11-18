@@ -87,6 +87,20 @@ int chordless_selection() {
                "seeded is not a chordless graph");
   bad += check(seams_frame_chordless(typed, 3.5, 1, "cutoff", 13, nullptr, 0, &got_n, nullptr) == 1,
                "size 13");
+  bad += check(seams_frame_chordless(typed, 1.0, 1, "mutual", 6, nullptr, 0, &got_n, nullptr) == 0 &&
+                   got_n == 0,
+               "mutual chordless inside cutoff + 1.5");
+  int hex_cages = -1;
+  int cubic_cages = -1;
+  int water_cages = -1;
+  bad += check(seams_frame_cages(typed, 1.0, 1, 4, "seeded", 0, nullptr, &hex_cages,
+                                 &cubic_cages, &water_cages, nullptr) == 0 &&
+                   hex_cages == 0 && cubic_cages == 0 && water_cages == 64,
+               "seeded cages inside cutoff + 1.5");
+  std::vector<double> far_q6(static_cast<std::size_t>(n), 1.0);
+  bad += check(seams_frame_steinhardt_graph(typed, 1.0, 1, 6, "mutual", far_q6.data(), nullptr) == 0 &&
+                   far_q6[0] == 0.0,
+               "mutual steinhardt inside cutoff + 1.5");
   seams_frame_free(typed);
   seams_frame_free(picked);
   return bad;
