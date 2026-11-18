@@ -690,7 +690,11 @@ data-aria-dark="Switch to auto color mode">
 <iframe title="dseams-plumed" src="https://odysee.com/$/embed/dseams-plumed:ddd2f9e27e0a126ef3feba3bb6da8378464e57df" width="960" height="540" allowfullscreen></iframe>
 <p>Captions are burned into the upload.</p>
 <p>Transcript: <a href="/_static/captions/plumed.vtt">docs/videos/plumed/captions.vtt</a></p>
-<p>PLUMED driver.</p><p>The thread count comes from <code class="docutils literal notranslate"><span class="pre">PLUMED_NUM_THREADS</span></code>. Set that variable
+<p>PLUMED driver.</p><p>The <a class="reference external" href="https://www.plumed-nest.org/eggs/26/018/">d-SEAMS PLUMED plugin egg</a>
+(plumID:26.018) uses v0.4.1 of the
+<a class="reference external" href="https://github.com/d-SEAMS/dseams-plumed">dseams-plumed repository</a>.
+It is tested with PLUMED v2.10 and master.</p>
+<p>The thread count comes from <code class="docutils literal notranslate"><span class="pre">PLUMED_NUM_THREADS</span></code>. Set that variable
 before PLUMED starts. <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code> does not change the PLUMED team.
 In PLUMED 2.10 <code class="docutils literal notranslate"><span class="pre">getNumThreads</span></code> reads only <code class="docutils literal notranslate"><span class="pre">PLUMED_NUM_THREADS</span></code>.</p>
 <p>The build below used conda-forge PLUMED 2.10.1. The compiler and Eigen

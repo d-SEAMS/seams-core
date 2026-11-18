@@ -40,6 +40,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Brine freezing front](https://docs.dseams.info/science/brine.html): The frames are the 20-pair loading of d-SEAMS/brine-front-230K at revision 4828e33ecf419c70643b2d466bfa4f283b4138dc.
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.html): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
 - [Science figures](https://docs.dseams.info/science/gallery.html): The four renders used by the science tutorials.
+- [Language tutorials](https://docs.dseams.info/fronts/index.html)
 - [C tutorial](https://docs.dseams.info/fronts/c.html): seams.h is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
 - [C++ tutorial](https://docs.dseams.info/fronts/cpp.html): test_seams_api is the seams_c_api test.
 - [Fortran](https://docs.dseams.info/fronts/fortran.html): The Fortran binding is the fpm package dseams.
@@ -53,7 +54,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [In-situ tutorial](https://docs.dseams.info/fronts/insitu.html): Eight cubic-ice atoms, one observation:
 - [LAMMPS tutorial](https://docs.dseams.info/fronts/lammps.html): engines/lammps/in.dseams is a real LAMMPS run.
 - [OpenMM tutorial](https://docs.dseams.info/fronts/openmm.html): DseamsReporter in adapters/python/dseams_insitu/openmm.py asks for positions every interval and calls InSitu.observe.
-- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.html): SEAMS has three components. q6 is the mean local q6 and carries finite-difference derivatives, so RESTRAINT can bias it.
+- [PLUMED tutorial](https://docs.dseams.info/fronts/plumed.html): Use the PLUMED engine page to get the d-SEAMS PLUMED plugin v0.4.1.
 
 ## How-to
 
@@ -81,7 +82,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [GROMACS](https://docs.dseams.info/howto/engine-gromacs.html): The build below used conda-forge GROMACS 2026.3, with the compiler and Eigen already on the path.
 - [LAMMPS](https://docs.dseams.info/howto/engine-lammps.html): The build below used conda-forge LAMMPS 2022.06.23.
 - [OpenMM](https://docs.dseams.info/howto/engine-openmm.html): The build below used conda-forge OpenMM 8.6.0.
-- [PLUMED](https://docs.dseams.info/howto/engine-plumed.html): The thread count comes from PLUMED_NUM_THREADS.
+- [PLUMED](https://docs.dseams.info/howto/engine-plumed.html): The d-SEAMS PLUMED plugin egg (plumID:26.018) uses v0.4.1 of the dseams-plumed repository.
 - [In-situ CHILL+](https://docs.dseams.info/howto/engine-insitu.html): InSitu in adapters/python/dseams_insitu/engine.py is the in-run classifier.
 - [FAQ](https://docs.dseams.info/howto/faq.html): Install the engine. pixi or nix build.
 - [Troubleshooting](https://docs.dseams.info/howto/troubleshooting.html): The two command shapes on bundled frames:
@@ -99,6 +100,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [One task, four fronts](https://docs.dseams.info/reference/cross-language.html): The task is CHILL+ on frame 1 of input/traj/mW_cubic.lammpstrj, LAMMPS type 1.
 - [Glossary](https://docs.dseams.info/reference/glossary.html)
 - [2.14.0 release notes](https://docs.dseams.info/reference/release-2.14.html): These notes are built from the fragments in changelog.d/.
+- [Stable API](https://docs.dseams.info/stable/index.html)
 - [C](https://docs.dseams.info/stable/c.html): seams.h is ABI 1 of libseams. A handle is opaque.
 - [C++](https://docs.dseams.info/stable/cpp.html): include/seams.hpp is the header-only C++ API.
 - [Python](https://docs.dseams.info/stable/python.html): The Python binding is pydseamslib on PyPI, import dseams.
@@ -111,6 +113,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Science front](https://docs.dseams.info/stable/science.html): These calls live in src/include/internal/science_front.hpp on science/interface-nucleation (55192e3d).
 - [C API](https://docs.dseams.info/capi/index.html): Every SEAMS_API function in include/seams.h.
 - [Language APIs](https://docs.dseams.info/lang/index.html): seams-core documents the C API and the C++ front here.
+- [API Reference](https://docs.dseams.info/api/index.html): generated_targets.rst group_bond.rst group_prism3.rst group_seams_cpp.rst group_cage.rst group_capi_cage.rst group_chill.rst group_clump.rst group_capi_frame_io.rst group_capi_frame.rst...
 
 ## Engines
 
@@ -118,7 +121,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [LAMMPS](https://docs.dseams.info/engines/lammps.html): Meson builds run_hook, the in-run hook.
 - [GROMACS](https://docs.dseams.info/engines/gromacs.html): engines/gromacs/seams_ice.cpp is a TrajectoryAnalysisModule.
 - [OpenMM](https://docs.dseams.info/engines/openmm.html): There is one reporter, DseamsReporter in adapters/python/dseams_insitu/openmm.py.
-- [PLUMED](https://docs.dseams.info/engines/plumed.html): The thread count comes from PLUMED_NUM_THREADS.
+- [PLUMED](https://docs.dseams.info/engines/plumed.html): The d-SEAMS PLUMED plugin egg (plumID:26.018) uses v0.4.1 of the dseams-plumed repository.
 - [In-situ](https://docs.dseams.info/engines/insitu.html): adapters/python/dseams_insitu/engine.py is InSitu.
 
 ## Comparisons
@@ -171,3 +174,8 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 - [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Julia binding, the package Dseams over libseams_jll.
 - [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Rust binding, the crates dseams-sys and dseams.
 - [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Fortran binding, the fpm package dseams.
+
+## PLUMED plugin
+
+- [PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/): d-SEAMS PLUMED plugin v0.4.1, plumID:26.018, tested with PLUMED v2.10 and master.
+- [dseams-plumed](https://github.com/d-SEAMS/dseams-plumed): Companion repository for the d-SEAMS PLUMED plugin v0.4.1.

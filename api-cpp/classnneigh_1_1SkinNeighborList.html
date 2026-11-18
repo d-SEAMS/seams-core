@@ -234,7 +234,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p>Persistent neighbour list with a LAMMPS skin. </p>
 <p>Vesin (or the brute-force fallback) builds candidates at cutoff+skin, which is the ghost halo: periodic images already sit in that shell. The cell list is rebuilt only when some atom has moved more than skin/2 from the last rebuild, the Verlet trigger. The bond graph for rings is the candidate pairs whose current distance is inside the analysis cutoff. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00614">614</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00616">616</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
 </div><a name="doc-constructors" id="doc-constructors"></a><h2 id="header-doc-constructors" class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a80f555acadad22b5edcc4af8285006ed" name="a80f555acadad22b5edcc4af8285006ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a80f555acadad22b5edcc4af8285006ed">&#9670;&#160;</a></span>SkinNeighborList()</h2>
@@ -297,10 +297,10 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00631">631</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  631</span>                                                               {</div>
-<div class="line"><span class="lineno">  632</span>    <span class="keywordflow">return</span> nList_;</div>
-<div class="line"><span class="lineno">  633</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00633">633</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  633</span>                                                               {</div>
+<div class="line"><span class="lineno">  634</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  635</span>  }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -327,8 +327,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00621">621</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  621</span>{ <span class="keywordflow">return</span> graph_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00623">623</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  623</span>{ <span class="keywordflow">return</span> graph_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -357,8 +357,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Atoms whose cutoff bond set changed on the last update. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00630">630</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  630</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00632">632</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  632</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -385,8 +385,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00628">628</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  628</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00630">630</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  630</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
 </div><!-- fragment -->
 </div>
 </div>

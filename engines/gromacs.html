@@ -761,7 +761,8 @@ by 10 on the way into <code class="docutils literal notranslate"><span class="pr
 <code class="docutils literal notranslate"><span class="pre">gromacs</span> <span class="pre">hexagonal</span> <span class="pre">N</span> <span class="pre">six-rings</span> <span class="pre">M</span> <span class="pre">q6</span> <span class="pre">Q</span></code>. <code class="docutils literal notranslate"><span class="pre">overhead_s</span></code> is machine-dependent.
 A topology is not required.
 <code class="docutils literal notranslate"><span class="pre">gmx-seams</span></code> runs after <code class="docutils literal notranslate"><span class="pre">gmx</span> <span class="pre">mdrun</span></code> and reads the trajectory that run wrote.
-Biasing from inside mdrun goes through the PLUMED collective variable, which links the same C API.</p>
+Biasing from inside mdrun goes through the
+<a class="reference internal" href="plumed.html"><span class="std std-doc">d-SEAMS PLUMED plugin v0.4.1</span></a>, which links the same C API.</p>
 <p><code class="docutils literal notranslate"><span class="pre">-select</span></code> picks the sites to classify; the default is every atom. A
 multi-site water model needs its oxygens only, which takes a run input
 file: <code class="docutils literal notranslate"><span class="pre">gmx-seams</span> <span class="pre">-s</span> <span class="pre">topol.tpr</span> <span class="pre">-f</span> <span class="pre">traj.trr</span> <span class="pre">-select</span> <span class="pre">'name</span> <span class="pre">OW'</span></code>. <code class="docutils literal notranslate"><span class="pre">-dump</span> <span class="pre">file</span></code>

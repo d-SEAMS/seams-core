@@ -99,7 +99,11 @@ then run the Python and C programs on
     seams cages input/traj/ice1h.lammpstrj
 
 2.14.0 ships ``libseams`` (``seams.h``), ``libseams_lang``, the C and C++
-APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines.
+APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines. The d-SEAMS
+PLUMED plugin is v0.4.1.
+
+See the :doc:`PLUMED engine page <engines/plumed>` for the plugin.
+
 ``gmx-seams`` reads the trajectory after ``gmx mdrun``.
 Each language binding is its own repository, released with the same
 version against this tag:
