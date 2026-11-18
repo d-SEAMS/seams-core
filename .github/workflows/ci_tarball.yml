@@ -82,8 +82,9 @@ jobs:
               cp -a /src /opt/git
               mkdir /opt/tar
               tar -C /opt/tar --strip-components=1 -xzf "$TARBALL"
-              rm -rf /opt/git/docs/.cache
+              rm -rf /opt/git/docs/.cache /opt/git/cmake/vendor
               cp -a /opt/tar/docs/.cache /opt/git/docs/.cache
+              cp -a /opt/tar/cmake/vendor /opt/git/cmake/vendor
               cd /opt/git
               sh scripts/install_pydseamslib.sh --break-system-packages
               chown -R tester:tester /opt/git /opt/tar
