@@ -244,6 +244,7 @@ cmd = "python3 docs/fix_built_links.py"
 
 [feature.docs.tasks.docbld]
 depends-on = ["fix-built-links"]
+cmd = "python3 docs/fix_built_links.py --sitemap docs/build"
 
 [feature.docs.tasks.docdel]
 cwd = "docs"
