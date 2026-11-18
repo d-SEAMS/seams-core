@@ -93,6 +93,7 @@ stdenv.mkDerivation (finalAttrs: {
       ../bindings
       ../engines
       ../bench
+      ../gpu_host_kernels
       ../scripts
       ../examples
       ../docs
