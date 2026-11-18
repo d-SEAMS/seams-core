@@ -336,6 +336,19 @@ def check_header_and_inventory():
     assert speed.count("| scaled | - | 1.00 |") == 1, "the inventory is not a speed-up row"
 
 
+def check_failure_detail():
+    skipped = "n/a [100.00%]\n asv: skipped: NotImplementedError('plumed is not importable')\n"
+    assert hc.failure_detail(skipped) == "NotImplementedError('plumed is not importable')"
+    compile_log = "\n".join(
+        ["cc -c x.cpp", "x.cpp:9:3: error: no matching function for call to 'knn'",
+         "note: candidate expects 2 arguments", "ninja: build stopped", "make: failed",
+         "asv: benchmark failed (exit status 1)"])
+    found = hc.failure_detail(compile_log)
+    assert found.splitlines()[0].endswith("no matching function for call to 'knn'"), found
+    assert found.endswith("asv: benchmark failed (exit status 1)"), found
+    assert hc.failure_detail(f"error in {ROOT}/src/a.cpp").startswith("error in <repo>/src")
+
+
 def check_cli_floor_and_plan():
     script = ROOT / "scripts" / "h2h_campaign.py"
     with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:

@@ -690,6 +690,21 @@ def scrub(text: str) -> str:
     return PATH_TOKEN.sub("<path>", text)
 
 
+ERROR_LINE = re.compile(r"\berror\b|Traceback|Exception|No such file", re.IGNORECASE)
+
+
+def failure_detail(text: str, limit: int = 500) -> str:
+    """Why a cell did not run: the skip reason, else the first error line and the last lines."""
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    for line in reversed(lines):
+        _, found, reason = line.partition("asv: skipped:")
+        if found:
+            return scrub(reason.strip())[:limit]
+    tail = lines[-3:]
+    first = next((line for line in lines if ERROR_LINE.search(line) and line not in tail), "")
+    return scrub("\n".join(([first] if first else []) + tail))[:limit]
+
+
 def git(*args: str) -> str:
     done = subprocess.run(
         ["git", *args], cwd=ROOT, capture_output=True, text=True, check=False,
@@ -1591,8 +1606,7 @@ def run_lanes(args) -> int:
         else:
             reason = "skipped" if "asv: skipped" in text else (
                 "timeout" if status == "timeout" else "failed")
-            detail = scrub("\n".join(line for line in text.splitlines()
-                                     if line.strip())[-500:])
+            detail = failure_detail(text)
             row.update({"status": reason, "detail": detail, "returncode": code})
             dead[cell["label"]] = reason
             log.write(f"{label} order {order} pos {position} {reason} {detail[-200:]!r}\n")
@@ -1896,7 +1910,7 @@ def render_lanes(rows, run_id=None) -> str:
         out.append("## asv lanes: cells with no sample")
         out.append("")
         for c in failed:
-            out.append(f"- {c['lane']} {c['cell']}: {c['status']}: {c['detail'][-160:]}")
+            out.append(f"- {c['lane']} {c['cell']}: {c['status']}: {c['detail'][:160]}")
         out.append("")
     listed = sorted((c for c in cells if c["group"] == INVENTORY), key=lambda c: c["cell"])
     if listed:
@@ -1910,7 +1924,7 @@ def render_lanes(rows, run_id=None) -> str:
                 value = f"{c['A']['median']:.3f} {c['unit']}"
                 out.append(f"| {c['cell']} | ran | {value} | |")
             else:
-                detail = " ".join(c["detail"].split())[-120:].replace("|", "/")
+                detail = " ".join(c["detail"].split())[:160].replace("|", "/")
                 out.append(f"| {c['cell']} | {c['status']} | - | {detail} |")
         out.append("")
     return "\n".join(out) + "\n"
