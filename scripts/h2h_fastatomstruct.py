@@ -44,13 +44,16 @@ def atoms_of(pos, side):
     elements = [fs.Element.O] * len(pos)
     cell = np.eye(3, dtype=np.float64) * float(side)
     atoms = fs.Atoms(np.ascontiguousarray(pos, dtype=np.float64), cell, elements)
-    atoms.set_pbc([True, True, True])
-    pbc = [bool(flag) for flag in atoms.get_pbc()]
-    if pbc != [True, True, True]:
-        raise RuntimeError(f"frame pbc {pbc}")
-    got = _matrix(atoms.get_cell())
-    if got.shape != (3, 3) or not np.allclose(got, cell, rtol=0.0, atol=1e-8):
-        raise RuntimeError("frame cell is not the periodic ice Ic cube")
+    # 2.2.0 has no set_pbc. 2.3.0 treats a cell without it as non-periodic,
+    # so the sitting checks run only on that API.
+    if hasattr(atoms, "set_pbc"):
+        atoms.set_pbc([True, True, True])
+        pbc = [bool(flag) for flag in atoms.get_pbc()]
+        if pbc != [True, True, True]:
+            raise RuntimeError(f"frame pbc {pbc}")
+        got = _matrix(atoms.get_cell())
+        if got.shape != (3, 3) or not np.allclose(got, cell, rtol=0.0, atol=1e-8):
+            raise RuntimeError("frame cell is not the periodic ice Ic cube")
     return atoms
 
 
@@ -71,8 +74,10 @@ def unwrap_result(value):
 
 
 def run(path, operation, warmup, repeats, once, threads=1):
-    fs.disable_telemetry()
-    fs.suppress_telemetry_notice()
+    if hasattr(fs, "disable_telemetry"):
+        fs.disable_telemetry()
+    if hasattr(fs, "suppress_telemetry_notice"):
+        fs.suppress_telemetry_notice()
     fs.set_num_threads(threads)
     if fs.get_num_threads() != threads:
         raise RuntimeError(f"fastatomstruct threads {fs.get_num_threads()}")
