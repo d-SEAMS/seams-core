@@ -53,6 +53,6 @@ A lookup of PyPI, conda-forge, crates.io or CRAN does not belong in
 package that is not published yet, fails or hangs the test, and the
 release sits in the queue behind it.
 
-Registry checks stay in their own job. The local ~version-drift~ and
-towncrier draft checks run in release-prepare CI and in the Meson release
-and documentation suites.
+Registry and release-tool checks stay in their own jobs. ~version-drift~
+and the towncrier checks run in release-prepare CI. Meson tests the
+release metadata with Python already required by the test suite.

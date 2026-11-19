@@ -74,7 +74,7 @@ Tests to know by name:
 | `seams_lang_fixtures`, `seams_lang_frames` | The `libseams_lang` C ABI the bindings rely on |
 | `docs_snippet_<page>` | Every C, C++ and Python block on that docs page |
 | `docs_check`, `docs_api_coverage`, `docs_c_symbols` | Every C and C++ symbol is documented with an example |
-| `release_version_drift`, `release_towncrier_draft`, `release_versions` | Cogapp copies, towncrier rendering, and release metadata |
+| `release_versions`, `release_versions_selftest` | Release metadata and its parser |
 | `docs_llms_txt` | `llms.txt` matches `scripts/gen_llms_txt.py` |
 | `docs_video_tapes` | The recording tapes whose sources live here replay and match `recorded.txt` |
 

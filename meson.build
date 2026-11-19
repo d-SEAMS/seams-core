@@ -1000,7 +1000,6 @@ if get_option('with_cli') and get_option('with_tests')
   subdir('engines/e2e')
 
   python3 = find_program('python3', required: true)
-  pixi_program = find_program('pixi', required: true)
   test(
     'docs_language_examples',
     python3,
@@ -1047,20 +1046,6 @@ if get_option('with_cli') and get_option('with_tests')
     'release_versions_selftest',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'check_release_version.py'],
-    suite: ['docs', 'release'],
-    timeout: 60)
-  test(
-    'release_version_drift',
-    pixi_program,
-    args: ['run', '--frozen', '-e', 'version', 'version-drift'],
-    workdir: meson.project_source_root(),
-    suite: ['docs', 'release'],
-    timeout: 60)
-  test(
-    'release_towncrier_draft',
-    pixi_program,
-    args: ['run', '--frozen', '-e', 'version', 'towncrier-draft'],
-    workdir: meson.project_source_root(),
     suite: ['docs', 'release'],
     timeout: 60)
   test(
