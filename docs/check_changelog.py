@@ -6,16 +6,20 @@ from __future__ import annotations
 
 import pathlib
 import re
+import subprocess
 import sys
+import tempfile
 import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "towncrier.toml"
+CHANGELOG = ROOT / "CHANGELOG.md"
 NOTES = ROOT / "docs" / "source" / "reference" / "release-2.14-notes.rst"
 PAGE = ROOT / "docs" / "orgmode" / "reference" / "release-2.14.org"
 MINIMUM_FRAGMENTS = 100
 IGNORED = {"README.md", ".gitkeep"}
 CODE = re.compile(r"`([^`]+)`")
+RELEASE = re.compile(r"^## \[(\d+\.\d+\.\d+)\] - (\d{4}-\d{2}-\d{2})$", re.M)
 
 
 def read_config():
@@ -166,8 +170,49 @@ def check(fragments, rendered):
     return errors
 
 
+def towncrier_draft():
+    """Render the configured draft that the tracked changelog must contain."""
+    match = RELEASE.search(CHANGELOG.read_text(encoding="utf-8"))
+    if match is None:
+        return None, "CHANGELOG.md has no release heading"
+    version, date = match.groups()
+    done = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "towncrier",
+            "build",
+            "--draft",
+            "--version",
+            version,
+            "--date",
+            date,
+        ],
+        cwd=str(ROOT),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if done.returncode != 0:
+        return None, (done.stdout + done.stderr).strip() or "towncrier draft failed"
+    marker = done.stdout.find("## [{}]".format(version))
+    if marker < 0:
+        return None, "towncrier draft has no {} heading".format(version)
+    return done.stdout[marker:].strip() + "\n", None
+
+
+def draft_matches_changelog(draft):
+    return draft.strip() in CHANGELOG.read_text(encoding="utf-8")
+
+
 def main(argv):
     global FRAGMENTS, TYPES, HEADINGS, NAME
+    if argv not in ([], ["--check"], ["--selftest"]):
+        print(
+            "usage: docs/check_changelog.py [--check|--selftest]",
+            file=sys.stderr,
+        )
+        return 2
     try:
         FRAGMENTS, TYPES, orphan_prefix, HEADINGS = read_config()
     except ValueError as exc:
@@ -183,25 +228,47 @@ def main(argv):
         print("\n".join(errors), file=sys.stderr)
         return 1
     rendered = render(fragments)
-    errors = check(fragments, rendered)
+    if "--check" in argv or "--selftest" in argv:
+        with tempfile.TemporaryDirectory(prefix="seams-release-notes-") as directory:
+            candidate = pathlib.Path(directory) / NOTES.name
+            candidate.write_text(rendered, encoding="utf-8")
+            checked_render = candidate.read_text(encoding="utf-8")
+    else:
+        checked_render = rendered
+    errors = check(fragments, checked_render)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    if argv not in ([], ["--check"]):
-        print("usage: docs/check_changelog.py [--check]", file=sys.stderr)
-        return 2
-    if "--check" in argv:
-        if not NOTES.is_file() or NOTES.read_text() != rendered:
-            print(
-                "{} is stale; rebuild it from {}".format(
-                    NOTES.relative_to(ROOT), FRAGMENTS.relative_to(ROOT)
-                ),
-                file=sys.stderr,
-            )
+    draft, draft_error = towncrier_draft()
+    if draft_error is not None:
+        print(draft_error, file=sys.stderr)
+        return 1
+    if not draft_matches_changelog(draft):
+        print(
+            "CHANGELOG.md does not contain the towncrier draft from {}".format(
+                FRAGMENTS.relative_to(ROOT)
+            ),
+            file=sys.stderr,
+        )
+        return 1
+    if "--selftest" in argv:
+        first_body = rst_body(fragments[0][2]).splitlines()[0]
+        mutated_render = checked_render.replace(
+            first_body, first_body + " mismatch", 1
+        )
+        if mutated_render == checked_render or not check(fragments, mutated_render):
+            print("rendered-note mismatch selftest did not fail", file=sys.stderr)
             return 1
-    else:
+        draft_line = fragments[0][2].splitlines()[0]
+        mutated_draft = draft.replace(draft_line, draft_line + " mismatch", 1)
+        if mutated_draft == draft or draft_matches_changelog(mutated_draft):
+            print("fragment mismatch selftest did not fail", file=sys.stderr)
+            return 1
+        print("changelog mismatch selftest ok")
+        return 0
+    if "--check" not in argv:
         NOTES.parent.mkdir(parents=True, exist_ok=True)
-        NOTES.write_text(rendered)
+        NOTES.write_text(rendered, encoding="utf-8")
     print(
         "changelog fragments match {} active entries in {}".format(
             len(fragments), FRAGMENTS.relative_to(ROOT)
