@@ -1,0 +1,11 @@
+pixi.toml
+towncrier.toml
+CITATION.cff
+nix/package.nix
+recipe/recipe.yaml
+docs/source/conf.py
+docs/source/Doxyfile_seams.cfg
+docs/source/Doxyfile_doxyyoda.cfg
+Doxyfile-prj.cfg
+packaging/yggdrasil/L/libseams/build_tarballs.jl
+skills/d-seams/SKILL.md

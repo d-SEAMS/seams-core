@@ -30,8 +30,12 @@ jobs:
         env:
           TAG_NAME: ${{ github.ref_name }}
         run: |
-          python3 scripts/check_release_version.py --tag "$TAG_NAME"
-          echo "version=$(python3 scripts/check_release_version.py --print)" >> "$GITHUB_OUTPUT"
+          python3 -m venv "$RUNNER_TEMP/cogapp"
+          "$RUNNER_TEMP/cogapp/bin/python" -m pip install 'cogapp==3.6.0'
+          "$RUNNER_TEMP/cogapp/bin/python" -m cogapp -I ci/version --check @ci/version/files.txt
+          version=$(python3 ci/version/seams_version.py)
+          test "v${version}" = "$TAG_NAME"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
       - name: Toolchain
         run: |
           sudo apt-get update

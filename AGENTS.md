@@ -118,14 +118,10 @@ python3 scripts/gen_llms_txt.py
   (`fix(cages): ...`). One logical change per commit.
 - Every user-visible change adds a fragment `changelog.d/+slug.<type>.md`
   with type `added`, `changed`, `deprecated`, `removed`, `fixed` or
-  `security`, in the same commit. `docs_changelog` refuses a duplicate or
-  a misnamed fragment. The release cut renders them with towncrier
-  (`docs/orgmode/development/release.org`).
+  `security`, in the same commit. The release cut renders them with
+  towncrier.
 - ASCII punctuation in source, docs and commit messages.
 
 ## Releases
 
-`RELEASING.md` is the seams-core cut: tag, GitHub release, conda
-`libseams`, `libseams_jll`. Each binding releases afterwards from its own
-repository against the tag; `docs/orgmode/development/repositories.org`
-has the order.
+`docs/orgmode/contributing/developer/release.org`.

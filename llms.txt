@@ -156,6 +156,9 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 ## Project
 
 - [Changelog](https://docs.dseams.info/development/changelog.md): Release notes for the d-SEAMS engine.
+- [Developing seams-core](https://docs.dseams.info/contributing/developer/index.md): How to build, test and change the engine.
+- [Cutting a seams-core release](https://docs.dseams.info/contributing/developer/release.md): The numbered seams-core release cut.
+- [Release questions](https://docs.dseams.info/contributing/developer/faq.md): What stalled 2.14.1, and the checks that stay out of the meson suite.
 
 ## Language bindings
 

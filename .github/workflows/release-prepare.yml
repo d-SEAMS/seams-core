@@ -1,0 +1,72 @@
+name: Release prepare
+# Dry-run of the release cut. It checks that the version copies match
+# meson.build, drafts the towncrier notes, and asks cocogitto for the next
+# tag. It does not push a tag and it does not publish.
+#
+# workflow_dispatch takes bump: auto, patch, minor, or major.
+on:
+  pull_request:
+    paths:
+      - cog.toml
+      - towncrier.toml
+      - changelog.d/**
+      - CHANGELOG.md
+      - meson.build
+      - pixi.toml
+      - pixi.lock
+      - ci/version/**
+      - .github/workflows/release.yml
+      - .github/workflows/release-prepare.yml
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump to dry-run
+        required: true
+        default: auto
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-prepare-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        with:
+          environments: version
+          cache: true
+
+      - name: Version copies match meson.build
+        run: pixi run -e version version-drift
+
+      - name: Towncrier draft
+        run: pixi run -e version towncrier-draft
+
+      - name: Install cocogitto
+        run: |
+          curl -fsSL -o /tmp/cog.tgz \
+            https://github.com/cocogitto/cocogitto/releases/download/6.3.0/cocogitto-6.3.0-x86_64-unknown-linux-musl.tar.gz
+          tar -xzf /tmp/cog.tgz -C /tmp
+          mkdir -p "$HOME/.local/bin"
+          install -m 0755 /tmp/x86_64-unknown-linux-musl/cog "$HOME/.local/bin/cog"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/cog" --version
+
+      - name: Dry-run the bump
+        run: |
+          "$HOME/.local/bin/cog" bump --${{ inputs.bump || 'auto' }} --dry-run

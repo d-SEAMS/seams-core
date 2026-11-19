@@ -7,7 +7,9 @@ const YGGDRASIL_DIR = "../.."
 include(joinpath(YGGDRASIL_DIR, "platforms", "macos_sdks.jl"))
 
 name = "libseams"
+# [[[cog import seams_version as v; cog.outl(f'version = v"{v.VERSION}"')]]]
 version = v"2.14.0"
+# [[[end]]]
 
 # BinaryBuilder refuses GitHub's generated archives, and seams-core publishes
 # no release tarball, so the tree is pinned by commit. v2.14.0 is not tagged.

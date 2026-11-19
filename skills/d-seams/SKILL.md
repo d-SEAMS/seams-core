@@ -5,7 +5,9 @@ license: MIT
 compatibility: "The engine builds with Meson. Python is the package pydseamslib. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
 metadata:
   author: d-SEAMS
+  # [[[cog import seams_version as v; cog.outl(f'  version: "{v.VERSION}"')]]]
   version: "2.14.0"
+  # [[[end]]]
 ---
 
 # Use d-SEAMS

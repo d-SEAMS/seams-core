@@ -201,6 +201,7 @@ task. The explanation pages are the background for those tasks.
    :caption: Project
 
    development/changelog
+   contributing/developer/index
 #+end_export
 
 The C++ header reference is

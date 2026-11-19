@@ -185,21 +185,6 @@ def _write_video_players():
 _write_video_players()
 
 
-def _write_release_notes():
-    """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
-    import importlib.util
-
-    script = os.path.join(_docs, "check_changelog.py")
-    spec = importlib.util.spec_from_file_location("check_changelog", script)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    if module.main([]) != 0:
-        raise SystemExit("2.14.0 notes do not match changelog.d")
-
-
-_write_release_notes()
-
-
 def _write_padding():
     """Fill the cutoff-and-padding how-to from the validation CSV."""
     import importlib.util
@@ -616,8 +601,10 @@ _include_orphan_pages()
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
 author = "Rohit Goswami, Amrita Goswami, Ruhila S"
+# [[[cog import seams_version as v; cog.outl(f'version = "{v.VERSION}"'); cog.outl(f'release = "{v.VERSION}"')]]]
 version = "2.14.0"
 release = "2.14.0"
+# [[[end]]]
 language = "en"
 # The default HTML title appends "2.14.0 documentation" to every page.
 # The short title keeps the tab and the social card on the page name.
