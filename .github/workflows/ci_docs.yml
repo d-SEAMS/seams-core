@@ -1,10 +1,10 @@
 name: Docs
 on:
   push:
-    branches: [main]
+    branches: [main, "release/*"]
     tags: ["v*"]
   pull_request:
-    branches: [main]
+    branches: [main, "release/*"]
 
 # Publish gh-pages only from d-SEAMS/seams-core main. Netlify
 # (dseamsdocs) is Git-linked to that branch and serves
@@ -77,6 +77,8 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${PATH}"
           pixi run -e docs docbld
+      - name: Live docs registry claims
+        run: python3 docs/check_registry_claims.py
       - name: SEO metadata
         run: |
           python3 docs/finalize_seo.py --self-test

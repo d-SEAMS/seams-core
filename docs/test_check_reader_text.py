@@ -4,6 +4,7 @@
 import unittest
 
 from check_reader_text import PROCESS_PATTERNS, README_PATTERNS, source_pages
+from registry_claims import ClaimParseError, claims
 
 
 def labels(text, patterns):
@@ -70,6 +71,19 @@ class ReaderTextPatterns(unittest.TestCase):
                     "build status badge",
                     labels(text, README_PATTERNS),
                 )
+
+    def test_claim_parser_counts_expected_commands(self):
+        line = (
+            "pip install dseamslib==2.14.1; "
+            "cargo add seams-core@2.14.1; "
+            "conda install -c conda-forge seams-core=2.14.1"
+        )
+        found = list(claims(line))
+        self.assertEqual(len(found), 3)
+
+    def test_claim_parser_rejects_malformed_conda_line(self):
+        with self.assertRaises(ClaimParseError):
+            list(claims('conda install "seams-core=2.14.1'))
 
 
 if __name__ == "__main__":
