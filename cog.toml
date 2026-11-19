@@ -1,6 +1,6 @@
-# cocogitto. The tag is vX.Y.Z (tag_prefix). towncrier owns CHANGELOG.md.
-# Prepare meson.build and CITATION.cff, then run the bump from the Pixi
-# version environment so cogapp and towncrier are available to the hooks.
+# Cocogitto writes meson.build with Meson's rewriter, cogapp copies the
+# version and ship date, and towncrier owns CHANGELOG.md. Run the bump from
+# an environment that provides Meson, cogapp, and towncrier.
 from_latest_tag = true
 ignore_merge_commits = true
 disable_changelog = true
@@ -10,7 +10,7 @@ skip_untracked = false
 
 pre_bump_hooks = [
   "meson rewrite kwargs set project / version {{version}}",
-  "python3 -m cogapp -I ci/version -r @ci/version/files.txt",
+  "SEAMS_RELEASE_DATE=$(date +%F) python3 -m cogapp -I ci/version -r @ci/version/files.txt",
   "towncrier build --yes --version {{version}}",
 ]
 post_bump_hooks = [

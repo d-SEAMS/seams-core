@@ -37,8 +37,8 @@ def read(name):
 def versions():
     found = {
         "meson.build": first(r"^project\([^)]*?version\s*:\s*'([^']+)'", read("meson.build"), "meson.build"),
-        "pixi.toml": first(r'^\[workspace\][^\[]*?^version\s*=\s*"([^"]+)"', read("pixi.toml"), "pixi.toml"),
-        "recipe/recipe.yaml": first(r'^context:\s*\n\s+version:\s*"([^"]+)"', read("recipe/recipe.yaml"), "recipe/recipe.yaml"),
+        "pixi.toml": first(r'^\[workspace\](?:\n(?!\[)[^\n]*)*?\nversion\s*=\s*"([^"]+)"', read("pixi.toml"), "pixi.toml"),
+        "recipe/recipe.yaml": first(r'^context:(?:\n(?!\S)[^\n]*)*?\n\s+version:\s*"([^"]+)"', read("recipe/recipe.yaml"), "recipe/recipe.yaml"),
         "CITATION.cff": first(r'^version:\s*"?([^"\s]+)"?', read("CITATION.cff"), "CITATION.cff"),
     }
     return found

@@ -5,7 +5,9 @@ type: software
 # [[[cog import seams_version as v; cog.outl(f'version: "{v.VERSION}"')]]]
 version: "2.14.0"
 # [[[end]]]
+# [[[cog import seams_version as v; cog.outl(f'date-released: "{v.RELEASE_DATE}"')]]]
 date-released: "2026-11-15"
+# [[[end]]]
 license: MIT
 repository-code: "https://github.com/d-SEAMS/seams-core"
 url: https://dseams.info

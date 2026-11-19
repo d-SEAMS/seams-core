@@ -13,65 +13,60 @@ copies. ~pixi run --frozen -e version version-drift~ fails if a copy has
 drifted. The prek hook ~version-drift~ runs that check.
 
 Do not edit a copy by hand. Cocogitto changes ~meson.build~ with Meson's
-rewriter before cogapp regenerates the copies.
+rewriter before cogapp regenerates the copies. Its cogapp hook supplies the
+ship day as ~SEAMS_RELEASE_DATE~; ordinary drift checks keep the committed
+date.
 
 * The cut
 
 Work on ~main~, with the fragments for this version already in
 ~changelog.d/~.
 
-1. Set the release date in ~CITATION.cff~ and ~codemeta.json~.
-
-   #+begin_example
-   git add CITATION.cff codemeta.json
-   git commit -m "chore(release): set publication date"
-   #+end_example
-
-2. Preview the notes and validate the fragment names.
+1. Preview the notes and validate the fragment names.
 
    #+begin_example
    pixi run --frozen -e version towncrier-check
    pixi run --frozen -e version towncrier-draft
    #+end_example
 
-3. Ask cocogitto for the tag. ~--dry-run~ prints it and does not write.
+2. Ask cocogitto for the tag. ~--dry-run~ prints it and does not write.
 
    #+begin_example
    cog bump --auto --dry-run
    #+end_example
 
-   With ~v2.14.0~ and ~v2.14.1~ tagged, the conventional commits after
-   them make ~--auto~ print ~v2.15.0~. Pin the intended next patch:
+   Conventional commits may make ~--auto~ choose a minor release. Pin the
+   intended post-2.14.2 patch:
 
    #+begin_example
-   cog bump --version 2.14.2 --dry-run
+   cog bump --version 2.14.3 --dry-run
    #+end_example
 
-   That prints ~v2.14.2~. Asking for 2.14.1 would be a no-op because
-   ~v2.14.1~ already exists.
+   That prints ~v2.14.3~.
 
-4. Run the bump from an environment that provides Meson, cogapp, and
+3. Run the bump from an environment that provides Meson, cogapp, and
    towncrier. The pre-bump hooks use Meson's rewriter to set the source
-   version, regenerate ~ci/version/files.txt~, and run plain towncrier.
-   Cocogitto commits the rendered changelog and creates the annotated tag.
+   version, set the ship date in ~CITATION.cff~ and ~codemeta.json~,
+   regenerate ~ci/version/files.txt~, and run plain towncrier. Cocogitto
+   commits the rendered changelog and creates the annotated tag.
 
    #+begin_example
-   cog bump --version 2.14.2
+   cog bump --version 2.14.3
    #+end_example
 
-   Cocogitto creates the bump commit and annotated ~v2.14.2~ tag. Do not
+   Cocogitto creates the bump commit and annotated ~v2.14.3~ tag. Do not
    create a second tag by hand.
 
-5. Check the metadata, copies, and tag.
+4. Check the metadata, copies, and tag.
 
    #+begin_example
-   python3 scripts/check_release_version.py --tag v2.14.2
+   python3 scripts/check_release_version.py --tag v2.14.3
    pixi run --frozen -e version version-drift
-   git rev-parse v2.14.2^{commit}
+   git rev-parse v2.14.3^{commit}
    git rev-parse HEAD
    #+end_example
 
-6. Push the bump commit and the tag. ~.github/workflows/release.yml~ runs
+5. Push the bump commit and the tag. ~.github/workflows/release.yml~ runs
    on a ~v*~ tag of ~d-SEAMS/seams-core~. It checks the tag against
    ~meson.build~, checks the cogapp copies, and opens the GitHub release
    with ~GITHUB_TOKEN~. A ~workflow_dispatch~ with an existing tag

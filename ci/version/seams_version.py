@@ -10,6 +10,7 @@ Call cogapp through ``python -m cogapp``, because cocogitto also installs
 a ``cog`` executable.
 """
 
+import os
 import re
 from pathlib import Path
 
@@ -21,3 +22,12 @@ if _match is None:
     raise RuntimeError("meson.build has no project version")
 
 VERSION = _match.group(1)
+
+_DATE = re.compile(r'^date-released:\s*"?(\d{4}-\d{2}-\d{2})"?', re.MULTILINE)
+_date_match = _DATE.search((ROOT / "CITATION.cff").read_text(encoding="utf-8"))
+if _date_match is None:
+    raise RuntimeError("CITATION.cff has no release date")
+
+RELEASE_DATE = os.environ.get("SEAMS_RELEASE_DATE", _date_match.group(1))
+if re.fullmatch(r"\d{4}-\d{2}-\d{2}", RELEASE_DATE) is None:
+    raise RuntimeError("SEAMS_RELEASE_DATE must be YYYY-MM-DD")
