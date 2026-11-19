@@ -46,7 +46,7 @@ def versions():
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--tag", help="release tag, such as v2.14.0")
+    parser.add_argument("--tag", help="release tag, such as vX.Y.Z")
     parser.add_argument("--print", action="store_true", help="print the version")
     args = parser.parse_args(argv)
 

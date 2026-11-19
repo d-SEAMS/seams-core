@@ -138,7 +138,7 @@ The mixed TIP4P frame is the one that separates the two scores.
 
 * Step 6: Python
 
-Install ~pydseamslib~ 2.14.0 with ~pip install 'pydseamslib==2.14.0'~ and import ~from dseams import userframe~, the Frame over ~libseams_lang~.
+Install ~pydseamslib~ with ~pip install pydseamslib~ and import ~from dseams import userframe~, the Frame over ~libseams_lang~.
 
 #+begin_src python
 from dseams import userframe as ds
@@ -162,7 +162,7 @@ The Frame walkthrough is the [[file:../../reference/python-frame.org][Python Fra
   mW is type 1.
 - Unknown command, exit 2: the binary is ~seams~.
   The ice commands used here are ~read~, ~chill~, ~chill-plus~, and ~cages~.
-- ~ModuleNotFoundError: dseams~: install the binding with ~pip install 'pydseamslib==2.14.0'~.
+- ~ModuleNotFoundError: dseams~: install the binding with ~pip install pydseamslib~.
 
 * Next steps
 
