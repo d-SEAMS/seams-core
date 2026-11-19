@@ -3,29 +3,35 @@ Performance
 ===========
 
 
-Head-to-head times for the neighbour list, primitive rings, local
-:math:`q_6`, CHILL+, cages, and PTM. The other codes are OVITO, freud,
-mdapy, ClavisCage, cycless, and SQQ. PTM is the OVITO polyhedral
-template match. Linkcell scaling is the cutoff-ring list against the
-older cell list.
+Head-to-head times for ice Ic and a TIP4P/ice liquid at 884736
+molecules. The widths are 1, 2, 4 and 8 threads. ``n`` is the sample
+count on the row. Liquid rings-statistics-matter at one thread has
+``n`` of 6. Every other row of this sitting has ``n`` of 8. The median
+and the interquartile range are recomputed from the samples.
 
-The 884736-molecule sitting is ice and a TIP4P/ice liquid, at 1, 2, 4
-and 8 threads. The rivals on that file are rings-statistics-matter,
-freud, mdapy, pyscal3, PLUMED, vesin and OVITO. The file is the sitting
-written at ``2ed49e87``. On the liquid, freud :math:`q_6` is a hard-cutoff
-rounding gap, PLUMED is a rational-switch gap, and CHILL+ matches a
-counted subset of the molecules. The generated note prints those three
-CSV tokens.
+The figure is median time against thread count, ice and liquid side
+by side. The vertical axis is logarithmic. It draws neighbours, rings,
+:math:`q_6` and CHILL+.
 
-The figure is an SVG of median
-time against thread count, ice and liquid side by side.
+The rings rows are ``seams_frame_rings`` on the cutoff graph, depth 6:
+the neighbour list and the search are one timed call. The last table
+is a separate comparison of that full call, linkcell against the cell
+list. ``n`` is 8 on each of those rows. The link, convert and search
+stages of the same comparison are on
+`the thread controls <trace-threads.rst>`_.
 
-The tables are the frozen tables in ``docs/records``, rendered from the
-benchmark records dataset (``docs/records/README.md`` names the revision).
+The release-candidate comparison, including cages and King's count, is
+`the sitting page <performance.rst>`_.
+Neighbour and ring rows for 4096 to 110592
+molecules are on `the size range <performance-range.rst>`_.
+How the comparisons differ is on
+`the overview <performance-overview.rst>`_.
 
 .. figure:: sitting-large-threads.svg
    :alt: Median time against thread count for 884736 molecules
 
    Ice and the TIP4P/ice liquid. Each line is one code. The vertical axis is logarithmic.
+
+.. include:: sitting-large-tables.rst
 
 .. include:: performance-h2h-tables.rst

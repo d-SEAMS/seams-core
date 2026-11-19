@@ -1,0 +1,1400 @@
+R
+=
+
+Rd-style entries for the exported functions in `dseams-r <https://github.com/d-SEAMS/dseams-r>`_. The title, ``@param``, ``@return``, and ``@examples`` lines are the roxygen block above each function.
+
+Native API
+----------
+
+Generated from the sources named below. A name on this page is a public call in that language.
+
+cages
+~~~~~
+
+.. api-symbol: cages
+
+.. code-block:: r
+
+   cages(frame, cutoff = 3.5, type = 0L, k = 4L, graph = "seeded")
+
+Hexagonal-cage and double-diamond membership
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **type**: LAMMPS type. 0 uses the first atom's type.
+- **k**: Neighbours kept by the k-nearest graphs.
+- **graph**: \`"seeded"\`, \`"mutual"\`, \`"cutoff"\`, or \`"knn-union"\`.
+
+Returns
+
+A data.frame with columns \`atom\`, \`cage\`, \`name\`.
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   found <- cages(frame)
+   attr(found, "n_ih")
+
+cages.dseams_frame
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: cages.dseams_frame
+
+.. code-block:: r
+
+   cages.dseams_frame(frame, cutoff = 3.5, type = 0L, k = 4L, graph = "seeded")
+
+chill_plus
+~~~~~~~~~~
+
+.. api-symbol: chill_plus
+
+.. code-block:: r
+
+   chill_plus(frame, cutoff = 3.5, type = 0L, graph = "cutoff", rule = "chill+")
+
+CHILL+ ice labels
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **cutoff**: Neighbour cutoff in angstrom. For the mutual graph this is
+- **type**: LAMMPS type. 0 uses the first atom's type.
+- **graph**: \`"cutoff"\` or \`"mutual"\`.
+- **rule**: \`"chill+"\` or \`"ovito-chill+"\`. A YAML or Lua snippet with
+
+Returns
+
+A data.frame with columns \`atom\`, \`type\`, \`label\`, \`name\`.
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   ice <- chill_plus(frame)
+   table(ice$name)
+   ice
+
+chill_plus.dseams_frame
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: chill_plus.dseams_frame
+
+.. code-block:: r
+
+   chill_plus.dseams_frame(frame, cutoff = 3.5, type = 0L, graph = "cutoff", rule = "chill+")
+
+dseams_example
+~~~~~~~~~~~~~~
+
+.. api-symbol: dseams_example
+
+.. code-block:: r
+
+   dseams_example(name = NULL)
+
+Path of a trajectory shipped with the package
+
+Parameters
+
+- **name**: File name. \`NULL\` lists the files.
+
+Returns
+
+A path, or a character vector of file names when \`name\` is \`NULL\`.
+
+Example
+
+.. code-block:: r
+
+   dseams_example()
+   dseams_example("ice1h.lammpstrj")
+
+dseams_threads
+~~~~~~~~~~~~~~
+
+.. api-symbol: dseams_threads
+
+.. code-block:: r
+
+   dseams_threads(n = NULL)
+
+Engine threads
+
+Parameters
+
+- **n**: Number of threads, or \`NULL\` to only query.
+
+Returns
+
+The thread count in effect after the call. Without OpenMP this
+
+Example
+
+.. code-block:: r
+
+   dseams_threads()
+
+dseams_version
+~~~~~~~~~~~~~~
+
+.. api-symbol: dseams_version
+
+.. code-block:: r
+
+   dseams_version()
+
+Engine version
+
+Returns
+
+The version string of the bundled seams-core engine.
+
+Example
+
+.. code-block:: r
+
+   dseams_version()
+
+jump_tau90
+~~~~~~~~~~
+
+.. api-symbol: jump_tau90
+
+.. code-block:: r
+
+   jump_tau90(first, second, dt = 1, oxygen_type = 1L, hydrogen_type = 2L)
+
+Jump-rotor tau\_90 between two frames
+
+Parameters
+
+- **first,second**: \`dseams\_frame\` objects read with every atom
+- **dt**: Time between the two frames.
+- **oxygen\_type,hydrogen\_type**: LAMMPS types of the oxygen and hydrogen
+
+Returns
+
+A number: \`dt\`, or \`NaN\`.
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = -1L)
+   jump_tau90(frame, frame, dt = 1, oxygen_type = 2L, hydrogen_type = 1L)
+
+nframes
+~~~~~~~
+
+.. api-symbol: nframes
+
+.. code-block:: r
+
+   nframes(path)
+
+positions
+~~~~~~~~~
+
+.. api-symbol: positions
+
+.. code-block:: r
+
+   positions(frame)
+
+Atom positions
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+
+Returns
+
+\`positions()\` returns a numeric matrix with one row per atom and
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   head(positions(frame))
+
+positions.dseams_frame
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: positions.dseams_frame
+
+.. code-block:: r
+
+   positions.dseams_frame(frame)
+
+primitive_rings
+~~~~~~~~~~~~~~~
+
+.. api-symbol: primitive_rings
+
+.. code-block:: r
+
+   primitive_rings(frame, cutoff = 3.5, type = 0L, graph = "mutual", max_depth = 6L)
+
+Primitive ring census
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **type**: LAMMPS type. 0 uses the first atom's type.
+- **graph**: \`"mutual"\` or \`"cutoff"\`.
+- **max\_depth**: Largest ring retained.
+
+Returns
+
+A data.frame with columns \`size\` and \`n\`, one row per ring size
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   primitive_rings(frame, graph = "cutoff", max_depth = 6L)
+
+primitive_rings.dseams_frame
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: primitive_rings.dseams_frame
+
+.. code-block:: r
+
+   primitive_rings.dseams_frame(frame, cutoff = 3.5, type = 0L, graph = "mutual", max_depth = 6L)
+
+print.dseams_cages
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_cages
+
+.. code-block:: r
+
+   print.dseams_cages(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_cages\` data frame.
+- **...**: Ignored.
+
+print.dseams_chill
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_chill
+
+.. code-block:: r
+
+   print.dseams_chill(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_chill\` vector.
+- **...**: Ignored.
+
+print.dseams_frame
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_frame
+
+.. code-block:: r
+
+   print.dseams_frame(x, ...)
+
+print.dseams_ice
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_ice
+
+.. code-block:: r
+
+   print.dseams_ice(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_ice\` data frame.
+- **...**: Ignored.
+
+print.dseams_q4_q6
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_q4_q6
+
+.. code-block:: r
+
+   print.dseams_q4_q6(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_q4\_q6\` data frame.
+- **...**: Ignored.
+
+print.dseams_rings
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_rings
+
+.. code-block:: r
+
+   print.dseams_rings(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_rings\` data frame.
+- **...**: Ignored.
+
+print.dseams_steinhardt
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_steinhardt
+
+.. code-block:: r
+
+   print.dseams_steinhardt(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_steinhardt\` data frame.
+- **...**: Ignored.
+
+print.dseams_system
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: print.dseams_system
+
+.. code-block:: r
+
+   print.dseams_system(x, ...)
+
+Parameters
+
+- **x**: A \`dseams\_system\`.
+- **...**: Ignored.
+
+q4_q6
+~~~~~
+
+.. api-symbol: q4_q6
+
+.. code-block:: r
+
+   q4_q6(frame, cutoff = 3.5, type = 0L)
+
+Local q4 and q6 on the cutoff shell
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **type**: LAMMPS type. 0 uses the first atom's type.
+
+Returns
+
+A data.frame with columns \`atom\`, \`q4\`, \`q6\`, \`q4bar\`, \`q6bar\`.
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   head(q4_q6(frame))
+
+q4_q6.dseams_frame
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: q4_q6.dseams_frame
+
+.. code-block:: r
+
+   q4_q6.dseams_frame(frame, cutoff = 3.5, type = 0L)
+
+read_frame
+~~~~~~~~~~
+
+.. api-symbol: read_frame
+
+.. code-block:: r
+
+   read_frame(path, frame = 1L, type = 0L)
+
+Read one trajectory frame
+
+Parameters
+
+- **path**: Path to a LAMMPS dump, or an XYZ file.
+- **frame**: 1-based frame index.
+- **type**: LAMMPS type filter.
+- **x**: A \`dseams\_frame\`, for \`print()\`.
+- **object**: A \`dseams\_frame\`, for \`summary()\`.
+- **...**: Ignored.
+
+Returns
+
+\`read\_frame()\` returns an object of class \`dseams\_frame\`.
+
+Example
+
+.. code-block:: r
+
+   path <- dseams_example("ice1h.lammpstrj")
+   nframes(path)
+   frame <- read_frame(path, type = -1L)
+   frame
+
+seams_cages
+~~~~~~~~~~~
+
+.. api-symbol: seams_cages
+
+.. code-block:: r
+
+   seams_cages(sys, cutoff = 3.5, graph = 2L, k = 4L, complete = FALSE)
+
+Disjoint cage population counts.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **graph**: \`2\` seeded, \`1\` mutual, \`0\` cutoff. These are the same
+- **k**: Neighbour count for the seeded graph.
+- **complete**: When true, run ring-adjacent completion.
+
+Returns
+
+An integer vector \`c(n\_hex, n\_cubic, n\_water, n\_both)\`, class \`dseams\_cage\_counts\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_cages(sys)
+
+seams_chill
+~~~~~~~~~~~
+
+.. api-symbol: seams_chill
+
+.. code-block:: r
+
+   seams_chill(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L)
+
+Original CHILL population counts
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **type**: Species filter. Zero keeps every atom.
+- **graph**: \`0\` cutoff, \`1\` mutual.
+- **rule**: \`0\` published, \`1\` OVITO.
+
+Returns
+
+An integer vector of length 9, class \`dseams\_chill\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_chill(sys)
+
+seams_contact_pairs
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_contact_pairs
+
+.. code-block:: r
+
+   seams_contact_pairs(sys, spec)
+
+Mutual nearest unlike contacts.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **spec**: Site-table text such as \`"1=cationHead"\`.
+
+Returns
+
+An integer vector \`c(n\_pairs, n\_cation, n\_anion)\`, class \`dseams\_contacts\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_contact_pairs(sys, "1=cationHead")
+
+seams_coordination
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_coordination
+
+.. code-block:: r
+
+   seams_coordination(sys, rmax = 3.5, bins = 8L)
+
+Coordination number integrated to \`rmax\`.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **rmax**: Cutoff in angstrom.
+- **bins**: Bin count used by the integral.
+
+Returns
+
+A numeric scalar.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_coordination(sys)
+
+seams_density_axis
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_density_axis
+
+.. code-block:: r
+
+   seams_density_axis(sys, type = 0L, bins = 4L, axis = 2L)
+
+Number density along one cell axis.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **type**: Species filter.
+- **bins**: Bin count.
+- **axis**: 0, 1, or 2.
+
+Returns
+
+A numeric vector, class \`dseams\_density\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_density_axis(sys)
+
+seams_domains
+~~~~~~~~~~~~~
+
+.. api-symbol: seams_domains
+
+.. code-block:: r
+
+   seams_domains(sys, spec, cutoff = 3.5, subset = 0L)
+
+Largest polar or apolar domain.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **spec**: Site-table text.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **subset**: \`0\` apolar, \`1\` polar.
+
+Returns
+
+A numeric vector \`c(n\_subset, largest, percolation)\`, class \`dseams\_domains\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_domains(sys, "1=waterO")
+
+seams_fingerprint
+~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_fingerprint
+
+.. code-block:: r
+
+   seams_fingerprint(sys, cutoff = 3.5, hops = 2L)
+
+Topological fingerprint summary.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **hops**: Neighbourhood depth.
+
+Returns
+
+An integer vector \`c(key\_length, ring\_sum)\`, class \`dseams\_fingerprint\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_fingerprint(sys)
+
+seams_hbonds
+~~~~~~~~~~~~
+
+.. api-symbol: seams_hbonds
+
+.. code-block:: r
+
+   seams_hbonds(sys, cutoff = 3.5, oxygen_type = 1L, hydrogen_type = 2L, dist = 2.42, angle = 30)
+
+Hydrogen-bond count.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Heavy-atom cutoff in angstrom.
+- **oxygen\_type,hydrogen\_type**: Species numbers.
+- **dist**: Acceptor-H distance in angstrom.
+- **angle**: O-O-H angle in degrees.
+
+Returns
+
+An integer.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("exampleTraj.lammpstrj"), type = -1L)
+   seams_hbonds(sys, oxygen_type = 2L, hydrogen_type = 1L)
+
+seams_monolayer
+~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_monolayer
+
+.. code-block:: r
+
+   seams_monolayer(sys, cutoff = 3.5, max_depth = 6L, sheet_area = 100)
+
+Primitive-ring histogram of a monolayer.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **max\_depth**: Largest ring size.
+- **sheet\_area**: Sheet area in square angstrom.
+
+Returns
+
+An integer vector, class \`dseams\_monolayer\`. \`counts[k + 1]\` is size \`k\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_monolayer(sys)
+
+seams_neighbours_knn
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_neighbours_knn
+
+.. code-block:: r
+
+   seams_neighbours_knn(sys, k = 4L, cutoff = 3.5, mutual = TRUE)
+
+Column count of a k-nearest neighbour list.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **k**: Neighbour count.
+- **cutoff**: Nominal cutoff in angstrom.
+- **mutual**: When true, keep the mutual graph.
+
+Returns
+
+An integer, class \`dseams\_nnz\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_neighbours_knn(sys)
+
+seams_prisms
+~~~~~~~~~~~~
+
+.. api-symbol: seams_prisms
+
+.. code-block:: r
+
+   seams_prisms(sys, cutoff = 3.5)
+
+Perfect prism counts by ring size.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+
+Returns
+
+An integer vector of length 7, class \`dseams\_prisms\`. Index 7 is size 6.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_prisms(sys)
+
+seams_rdf
+~~~~~~~~~
+
+.. api-symbol: seams_rdf
+
+.. code-block:: r
+
+   seams_rdf(sys, rmax = 6, bins = 8L)
+
+Partial radial distribution.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **rmax**: Maximum radius in angstrom.
+- **bins**: Bin count.
+
+Returns
+
+A list of class \`dseams\_rdf\` with \`r\`, \`g\`, and \`volume\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_rdf(sys)
+
+seams_rings_vertices
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_rings_vertices
+
+.. code-block:: r
+
+   seams_rings_vertices(sys, cutoff = 3.5, max_depth = 6L, index = 0L)
+
+Atom indices of one primitive ring.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **max\_depth**: Largest ring size.
+- **index**: Ring index, from 0.
+
+Returns
+
+An integer vector, class \`dseams\_vertices\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_rings_vertices(sys)
+
+seams_running_cn
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_running_cn
+
+.. code-block:: r
+
+   seams_running_cn(sys, rmax = 6, bins = 8L)
+
+Running coordination number.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **rmax**: Maximum radius in angstrom.
+- **bins**: Bin count.
+
+Returns
+
+A numeric vector, class \`dseams\_running\_cn\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_running_cn(sys)
+
+seams_set_num_threads
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_set_num_threads
+
+.. code-block:: r
+
+   seams_set_num_threads(n)
+
+Set the OpenMP width used by the next analysis.
+
+Parameters
+
+- **n**: Thread count. Zero restores the library default.
+
+Returns
+
+The width the next analysis requests, as an integer. A
+
+Example
+
+.. code-block:: r
+
+   seams_set_num_threads(1L)
+
+seams_signature_cages
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_signature_cages
+
+.. code-block:: r
+
+   seams_signature_cages(sys, spec, cutoff = 3.5, graph = 0L)
+
+Closed cages of one ring census.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **spec**: Census text such as \`"512"\`.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **graph**: \`0\` cutoff or \`1\` mutual.
+
+Returns
+
+An integer vector \`c(n\_cages, n\_atoms)\`, class \`dseams\_signature\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_signature_cages(sys, "512")
+
+seams_site_table
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_site_table
+
+.. code-block:: r
+
+   seams_site_table(sys, spec)
+
+Per-atom site kind.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **spec**: Site-table text such as \`"1=waterO"\`.
+
+Returns
+
+An integer vector, class \`dseams\_sites\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_site_table(sys, "1=waterO")
+
+seams_steinhardt
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_steinhardt
+
+.. code-block:: r
+
+   seams_steinhardt(sys, order, cutoff = 3.5, average = FALSE)
+
+Local Steinhardt parameter on the cutoff shell.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **order**: Spherical-harmonic degree. 3, 4, 6, 8, or 12.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **average**: When true, the second element is the Lechner-Dellago average.
+
+Returns
+
+A list of class \`dseams\_order\` with elements \`ql\` and \`qlbar\`.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_steinhardt(sys, order = 6L)
+
+seams_system_count
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_system_count
+
+.. code-block:: r
+
+   seams_system_count(sys)
+
+Atom count stored on a system.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+
+Returns
+
+An integer. Zero when the handle has no frame.
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+   seams_system_count(sys)
+
+seams_system_new
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_system_new
+
+.. code-block:: r
+
+   seams_system_new()
+
+Empty system handle
+
+Returns
+
+A \`dseams\_system\`. \`print()\` and \`summary()\` return the handle,
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   sys
+
+seams_system_read
+~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams_system_read
+
+.. code-block:: r
+
+   seams_system_read(sys, path, frame = 1L, type = -1L)
+
+Read one frame into a system.
+
+Parameters
+
+- **sys**: A \`dseams\_system\`.
+- **path**: Trajectory path.
+- **frame**: 1-based frame index.
+- **type**: Species filter. Negative keeps every atom.
+
+Returns
+
+The atom count. \`sys\` is updated in place. On failure the
+
+Example
+
+.. code-block:: r
+
+   sys <- seams_system_new()
+   seams_system_read(sys, dseams_example("ice1h.lammpstrj"))
+
+signature_cages
+~~~~~~~~~~~~~~~
+
+.. api-symbol: signature_cages
+
+.. code-block:: r
+
+   signature_cages(frame, spec = "512", cutoff = 3.5, type = 0L, graph = "cutoff")
+
+Closed cages for one ring census
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **spec**: Ring census such as \`"512"\` (twelve pentagons, the sI small
+- **cutoff**: Neighbour cutoff in angstrom.
+- **type**: LAMMPS type. 0 uses the first atom's type.
+- **graph**: \`"cutoff"\` or \`"mutual"\`.
+
+Returns
+
+An integer vector \`c(n\_cages, n\_atoms)\`.
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = 2L)
+   signature_cages(frame, "512")
+
+signature_cages.dseams_frame
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: signature_cages.dseams_frame
+
+.. code-block:: r
+
+   signature_cages.dseams_frame(frame, spec = "512", cutoff = 3.5, type = 0L, graph = "cutoff")
+
+steinhardt
+~~~~~~~~~~
+
+.. api-symbol: steinhardt
+
+.. code-block:: r
+
+   steinhardt(frame, order_l = 6L, cutoff = 3.5, type = 0L, graph = NULL)
+
+Steinhardt order parameters
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **order\_l**: Spherical-harmonic degree. 3, 4, 6, 8, and 12 are computed.
+- **cutoff**: Neighbour cutoff in angstrom.
+- **type**: LAMMPS type. 0 uses the first atom's type.
+- **graph**: Neighbour graph. \`NULL\` is the cutoff shell. \`"mutual"\` is
+
+Returns
+
+A data.frame with columns \`atom\`, \`ql\`, \`qlbar\`.
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   summary(steinhardt(frame, order_l = 6L)$ql)
+
+steinhardt.dseams_frame
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: steinhardt.dseams_frame
+
+.. code-block:: r
+
+   steinhardt.dseams_frame(frame, order_l = 6L, cutoff = 3.5, type = 0L, graph = NULL)
+
+summary.dseams_cages
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_cages
+
+.. code-block:: r
+
+   summary.dseams_cages(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_cages\` data frame.
+
+summary.dseams_chill
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_chill
+
+.. code-block:: r
+
+   summary.dseams_chill(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_chill\` vector.
+
+summary.dseams_frame
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_frame
+
+.. code-block:: r
+
+   summary.dseams_frame(object, ...)
+
+summary.dseams_ice
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_ice
+
+.. code-block:: r
+
+   summary.dseams_ice(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_ice\` data frame.
+
+summary.dseams_q4_q6
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_q4_q6
+
+.. code-block:: r
+
+   summary.dseams_q4_q6(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_q4\_q6\` data frame.
+
+summary.dseams_rings
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_rings
+
+.. code-block:: r
+
+   summary.dseams_rings(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_rings\` data frame.
+
+summary.dseams_steinhardt
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_steinhardt
+
+.. code-block:: r
+
+   summary.dseams_steinhardt(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_steinhardt\` data frame.
+
+summary.dseams_system
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: summary.dseams_system
+
+.. code-block:: r
+
+   summary.dseams_system(object, ...)
+
+Parameters
+
+- **object**: A \`dseams\_system\`.
+
+symmetry
+~~~~~~~~
+
+.. api-symbol: symmetry
+
+.. code-block:: r
+
+   symmetry(frame, shell_rmsd = 0.12)
+
+Shell symmetry label for every atom
+
+Parameters
+
+- **frame**: A \`dseams\_frame\`.
+- **shell\_rmsd**: Largest RMSD, in the units of the file, at which a
+
+Returns
+
+An integer vector, one code per atom: 0 ice Ih, 1 ice Ic,
+
+Example
+
+.. code-block:: r
+
+   frame <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+   table(symmetry(frame))
+
+symmetry.dseams_frame
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: symmetry.dseams_frame
+
+.. code-block:: r
+
+   symmetry.dseams_frame(frame, shell_rmsd = 0.12)
+
+C API
+-----
+
+Each native call and the ``seams.h`` or ``seams_lang.h`` function it uses. The C column is the stable ABI.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Native
+     - C
+   * - ``cages``
+     - no direct C call
+   * - ``cages.dseams_frame``
+     - ``seams_frame_cages``, ``seams_frame_ids``, ``seams_frame_nop``, ``seams_last_error``
+   * - ``chill_plus``
+     - no direct C call
+   * - ``chill_plus.dseams_frame``
+     - ``seams_frame_chill_plus_rule``, ``seams_frame_ids``, ``seams_frame_nop``, ``seams_frame_types``, ``seams_last_error``
+   * - ``dseams_example``
+     - no direct C call
+   * - ``dseams_threads``
+     - no direct C call
+   * - ``dseams_version``
+     - ``seams_lang_version``
+   * - ``jump_tau90``
+     - ``seams_frames_jump_tau90``, ``seams_last_error``
+   * - ``nframes``
+     - ``seams_last_error``, ``seams_path_nframes``
+   * - ``positions``
+     - no direct C call
+   * - ``positions.dseams_frame``
+     - ``seams_frame_nop``, ``seams_frame_positions``
+   * - ``primitive_rings``
+     - no direct C call
+   * - ``primitive_rings.dseams_frame``
+     - ``seams_frame_rings``, ``seams_last_error``
+   * - ``print.dseams_cages``
+     - no direct C call
+   * - ``print.dseams_chill``
+     - no direct C call
+   * - ``print.dseams_frame``
+     - ``seams_frame_nop``
+   * - ``print.dseams_ice``
+     - no direct C call
+   * - ``print.dseams_q4_q6``
+     - no direct C call
+   * - ``print.dseams_rings``
+     - no direct C call
+   * - ``print.dseams_steinhardt``
+     - no direct C call
+   * - ``print.dseams_system``
+     - ``seams_system_count``
+   * - ``q4_q6``
+     - no direct C call
+   * - ``q4_q6.dseams_frame``
+     - ``seams_frame_ids``, ``seams_frame_nop``, ``seams_frame_q4_q6``, ``seams_last_error``
+   * - ``read_frame``
+     - ``seams_frame_read``, ``seams_last_error``
+   * - ``seams_cages``
+     - no direct C call
+   * - ``seams_chill``
+     - no direct C call
+   * - ``seams_contact_pairs``
+     - no direct C call
+   * - ``seams_coordination``
+     - no direct C call
+   * - ``seams_density_axis``
+     - no direct C call
+   * - ``seams_domains``
+     - no direct C call
+   * - ``seams_fingerprint``
+     - no direct C call
+   * - ``seams_hbonds``
+     - no direct C call
+   * - ``seams_monolayer``
+     - no direct C call
+   * - ``seams_neighbours_knn``
+     - no direct C call
+   * - ``seams_prisms``
+     - no direct C call
+   * - ``seams_rdf``
+     - no direct C call
+   * - ``seams_rings_vertices``
+     - no direct C call
+   * - ``seams_running_cn``
+     - no direct C call
+   * - ``seams_set_num_threads``
+     - no direct C call
+   * - ``seams_signature_cages``
+     - no direct C call
+   * - ``seams_site_table``
+     - no direct C call
+   * - ``seams_steinhardt``
+     - no direct C call
+   * - ``seams_system_count``
+     - no direct C call
+   * - ``seams_system_new``
+     - no direct C call
+   * - ``seams_system_read``
+     - no direct C call
+   * - ``signature_cages``
+     - no direct C call
+   * - ``signature_cages.dseams_frame``
+     - ``seams_frame_signature``, ``seams_last_error``
+   * - ``steinhardt``
+     - no direct C call
+   * - ``steinhardt.dseams_frame``
+     - ``seams_frame_ids``, ``seams_frame_nop``, ``seams_frame_steinhardt``, ``seams_frame_steinhardt_graph``, ``seams_last_error``
+   * - ``summary.dseams_cages``
+     - no direct C call
+   * - ``summary.dseams_chill``
+     - no direct C call
+   * - ``summary.dseams_frame``
+     - ``seams_frame_nop``
+   * - ``summary.dseams_ice``
+     - no direct C call
+   * - ``summary.dseams_q4_q6``
+     - no direct C call
+   * - ``summary.dseams_rings``
+     - no direct C call
+   * - ``summary.dseams_steinhardt``
+     - no direct C call
+   * - ``summary.dseams_system``
+     - no direct C call
+   * - ``symmetry``
+     - no direct C call
+   * - ``symmetry.dseams_frame``
+     - ``seams_frame_nop``, ``seams_frame_symmetry``, ``seams_last_error``

@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="blue" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>C++ (reference) - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Python" href="python-api.html" /><link rel="prev" title="C" href="c-api.html" /><link rel="canonical" href="https://docs.dseams.info/reference/cpp-api.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css?v=f040eaf7" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-tokens.css?v=d0993c48" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-family.css?v=4f6f3aa2" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-shibuya.css?v=86c54dcb" />
+    <link rel="stylesheet" type="text/css" href="../_static/dseams/dseams-doxyrest.css?v=cb763bf8" />
+    
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/reference/cpp-api.html"/>
+  <meta property="og:title" content="C++ (reference)"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="include/seams.hpp is the native C++ API: move-only handles in namespace seams, with results returned by value. C++ is the narrative for that header."/>
+    <meta property="og:description" content="include/seams.hpp is the native C++ API: move-only handles in namespace seams, with results returned by value. C++ is the narrative for that header."/><meta name="twitter:card" content="summary_large_image"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
+<link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
+<link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
+<meta name="robots" content="index, follow">
+<meta name="twitter:title" content="C++ (reference) - d-SEAMS">
+<meta name="twitter:description" content="include/seams.hpp is the native C++ API: move-only handles in namespace seams, with results returned by value. C++ is the narrative for that header.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/reference/cpp-api.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"C++ (reference) - d-SEAMS","description":"include/seams.hpp is the native C++ API: move-only handles in namespace seams, with results returned by value. C++ is the narrative for that header.","url":"https://docs.dseams.info/reference/cpp-api.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
+<body><nav class="dseams-family" aria-label="d-SEAMS">
+  <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
+  <ul class="dseams-family__nav">
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#install">Install</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#output">Output</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#science">Methods</a></li>
+    <li class="dseams-family__docs">
+      <details>
+        <summary>Docs</summary>
+        <div class="dseams-family__menu">
+          <a href="https://docs.dseams.info/" aria-current="page">Engine &amp; CLI</a>
+          <a href="https://python.dseams.info/">Python</a>
+          <a href="https://rust.dseams.info/">Rust</a>
+          <a href="https://julia.dseams.info/">Julia</a>
+          <a href="https://r.dseams.info/">R</a>
+          <a href="https://lua.dseams.info/">Lua / Fennel</a>
+          <a href="https://fortran.dseams.info/">Fortran</a>
+          <a href="https://plumed.dseams.info/">PLUMED</a>
+          <a href="https://linkcell.dseams.info/">linkcell</a>
+        </div>
+      </details>
+    </li>
+    <li><a href="https://wiki.dseams.info/">Wiki</a></li>
+    <li class="dseams-family__anchor"><a href="https://dseams.info/#cite">Cite</a></li>
+    <li><a href="https://github.com/d-SEAMS">GitHub</a></li>
+  </ul>
+</nav><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../user/index.html">User guide</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="c-api.html">C</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-api.html">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia-api.html">Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="r-api.html">R</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rust-api.html">Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran-api.html">Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lua-api.html">Lua</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli-api.html">Command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-frame.html">Python Frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html">seams CLI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="walk-compare.html">walk_compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-language.html">One task on every front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release-2.14.html">2.14.0 release notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../capi/index.html">C API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/c.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/python.html">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/r.html">R</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/science.html">Science front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
+</ul>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_SkinNeighborList.html">class nneigh::SkinNeighborList</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_primitive_RingUpdater.html">class primitive::RingUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_AffiliationUpdater.html">class ring::AffiliationUpdater</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_ring_NeighBond.html">class ring::NeighBond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Brine.html">class seams::Brine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Cages.html">class seams::Cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Error.html">class seams::Error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_FairWidth.html">class seams::FairWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Fingerprint.html">class seams::Fingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Neighbours.html">class seams::Neighbours</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings.html">class seams::Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_Rings_iterator.html">class seams::Rings::iterator</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_System.html">class seams::System</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_seams_detail_Handle.html">template class seams::detail::Handle</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_Signature_Kind.html">enum cage::Signature::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_cageType.html">enum cage::cageType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_cage_iceType.html">enum cage::iceType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_ChillPlusRule.html">enum chill::ChillPlusRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_chill_CrystalKind.html">enum chill::CrystalKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Cause.html">enum iface::Cause</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_iface_Kind.html">enum iface::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_atom_state_type.html">enum molSys::atom_state_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_molSys_bond_type.html">enum molSys::bond_type</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nneigh_BondGraph.html">enum nneigh::BondGraph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_nucleation_CommittorFate.html">enum nucleation::CommittorFate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_phase_GlassKind.html">enum phase::GlassKind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_primitive_RingRows.html">enum primitive::RingRows</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_ring_strucType.html">enum ring::strucType</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Int8Backend.html">enum seams::product::Int8Backend</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Mode.html">enum seams::product::Mode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_seams_product_Reduction.html">enum seams::product::Reduction</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Family.html">enum site::Family</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_IonState.html">enum site::IonState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_site_Kind.html">enum site::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Crystal.html">enum symm::Crystal</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_symm_Kind.html">enum symm::Kind</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/enum_water_MolMode.html">enum water::MolMode</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-atoms">seams_system_set_atoms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system-set-positions">seams_system_set_positions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-handle-error">seams_handle_error</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-status">seams_status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-system">seams_system</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-cagelabel">seams::CageLabel</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#doxid-group-seams-cpp-1ga66e498496a8ac061410534a9f0171779">seams::Status</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-chillrule">seams::ChillRule</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-domainsubset">seams::DomainSubset</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-graph">seams::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-axis">seams::Axis</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#seams-set-num-threads">seams::set_num_threads</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5">group__seams__cpp_1gga67eb3c576e152683e1fb0b0092e753c0a9b9d8a976b42e0bd66381797644943d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d">group__seams__cpp_1ggaa26c5e09631ed2e863d7ba9069e64683a6f575a49d4e9449dbfc22f0c1753384d</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622ababa30fa4b9595875c0498e063b76870c5e0</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084">group__seams__cpp_1ggaadb6ab84dae1fdc4c8b8c9808622abababc5449e9092ea92f5393be6516916084</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/generated_targets.html#group-seams-cpp-1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5">group__seams__cpp_1ggab0a343eee2fee14066d1e497e54cfb82a21c2e59531c8710156d34a3c30ac81d5</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/global.html">Global Namespace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_bond.html">Bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_cage.html">Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_brine.html">Ice/brine fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_cage.html">Cages and ice shells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame.html">Frames</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_frame_io.html">Frame reload and read-back</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_meta.html">Library metadata and errors</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_more.html">Further analyses</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_neigh.html">Neighbour lists</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_order.html">Order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_ring.html">Rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_sized.html">Status-returning and length-checked entry points</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_capi_types.html">Types</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_chill.html">Chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_clump.html">Clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_gen.html">Gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_molSys.html">MolSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_nneigh.html">Nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_primitive.html">Primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_prism3.html">Bulk prisms</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf.html">Rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_rdf2.html">Rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_ring.html">Ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_seams_cpp.html">C++ API</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/group_sinp.html">Sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_absor.html">namespace absor</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_bond.html">namespace bond</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_cage.html">namespace cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chill.html">namespace chill</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_chordless.html">namespace chordless</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_clump.html">namespace clump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen.html">namespace gen</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gen_mic.html">namespace gen::mic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_gpu.html">namespace gpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_iface.html">namespace iface</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ira.html">namespace ira</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_match.html">namespace match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_molSys.html">namespace molSys</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nneigh.html">namespace nneigh</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_nucleation.html">namespace nucleation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_phase.html">namespace phase</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_pntToPnt.html">namespace pntToPnt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_primitive.html">namespace primitive</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_prism3.html">namespace prism3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf.html">namespace rdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_rdf2.html">namespace rdf2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_ring.html">namespace ring</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_science.html">namespace science</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams.html">namespace seams</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cfg.html">namespace seams::cfg</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_cpu.html">namespace seams::cpu</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_detail.html">namespace seams::detail</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_domain.html">namespace seams::domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_minimax.html">namespace seams::minimax</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_product.html">namespace seams::product</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_solid.html">namespace seams::solid</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_sphericart_ylm.html">namespace seams::sphericart_ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_steinhardt.html">namespace seams::steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_tsan.html">namespace seams::tsan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_wigner.html">namespace seams::wigner</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_seams_ylm.html">namespace seams::ylm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sinp.html">namespace sinp</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_site.html">namespace site</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sout.html">namespace sout</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_sph.html">namespace sph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_std.html">namespace std</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm.html">namespace symm</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_avx2.html">namespace symm::avx2</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_symm_generic.html">namespace symm::generic</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topo.html">namespace topo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_topoparam.html">namespace topoparam</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum.html">namespace tum</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum3.html">namespace tum3</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_tum_device.html">namespace tum::device</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/namespace_water.html">namespace water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Cage.html">struct cage::Cage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_CageShape.html">struct cage::CageShape</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_EdgeWindow.html">struct cage::EdgeWindow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FormerRow.html">struct cage::FormerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_FoundCage.html">struct cage::FoundCage</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_cage_Signature.html">struct cage::Signature</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_AnalysisPhases.html">struct chill::AnalysisPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondClassifier.html">struct chill::BondClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_BondOrder.html">struct chill::BondOrder</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_ChillPlusResult.html">struct chill::ChillPlusResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_LinearClassifier.html">struct chill::LinearClassifier</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlCutoffStages.html">struct chill::QlCutoffStages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_QlmAtom.html">struct chill::QlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_SteinhardtQl.html">struct chill::SteinhardtQl</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_TemplateHit.html">struct chill::TemplateHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_VoronoiWeights.html">struct chill::VoronoiWeights</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_chill_YlmAtom.html">struct chill::YlmAtom</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_clump_Domain.html">struct clump::Domain</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gen_FracBox.html">struct gen::FracBox</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_BatchResult.html">struct gpu::BatchResult</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_DeviceInfo.html">struct gpu::DeviceInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Footprint.html">struct gpu::Footprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_gpu_Plan.html">struct gpu::Plan</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Bin.html">struct iface::Bin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_BootstrapInterval.html">struct iface::BootstrapInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Front.html">struct iface::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Growth.html">struct iface::Growth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_GrowthFrame.html">struct iface::GrowthFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Profile.html">struct iface::Profile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_Study.html">struct iface::Study</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_iface_WillardChandler.html">struct iface::WillardChandler</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_Match.html">struct ira::Match</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ira_PointGroup.html">struct ira::PointGroup</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Point.html">template struct molSys::Point</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_PointCloud.html">template struct molSys::PointCloud</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_molSys_Result.html">struct molSys::Result</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Ascent.html">struct nucleation::Ascent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_CommittorCall.html">struct nucleation::CommittorCall</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_FrameRecord.html">struct nucleation::FrameRecord</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_GrowBasin.html">struct nucleation::GrowBasin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_HalfRise.html">struct nucleation::HalfRise</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Lead.html">struct nucleation::Lead</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_nucleation_Shift.html">struct nucleation::Shift</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_phase_IceXXIHit.html">struct phase::IceXXIHit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Graph.html">struct primitive::Graph</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_RingSearchSplit.html">struct primitive::RingSearchSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_primitive_Vertex.html">struct primitive::Vertex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_rdf_PartialRdf.html">struct rdf::PartialRdf</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_CageAffiliation.html">struct ring::CageAffiliation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_DdcSplit.html">struct ring::DdcSplit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_EquatorChoice.html">struct ring::EquatorChoice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackParts.html">struct ring::PackParts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_PackingCertificate.html">struct ring::PackingCertificate</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_RingSearchIndex.html">struct ring::RingSearchIndex</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_SeededAtomLabels.html">struct ring::SeededAtomLabels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_ring_StackingPlanes.html">struct ring::StackingPlanes</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_AtomRow.html">struct science::AtomRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_ClusterPart.html">struct science::ClusterPart</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_CriticalSize.html">struct science::CriticalSize</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Front.html">struct science::Front</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_LayerRow.html">struct science::LayerRow</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_Layers.html">struct science::Layers</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_NucleusFrame.html">struct science::NucleusFrame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_science_SlopeInterval.html">struct science::SlopeInterval</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BondOptions.html">struct seams::BondOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineFronts.html">struct seams::BrineFronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineOptions.html">struct seams::BrineOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_BrineProfile.html">struct seams::BrineProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageCounts.html">struct seams::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_CageOptions.html">struct seams::CageOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChillOptions.html">struct seams::ChillOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_ChordlessCycles.html">struct seams::ChordlessCycles</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Classification.html">struct seams::Classification</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Contacts.html">struct seams::Contacts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityOptions.html">struct seams::DensityOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DensityProfile.html">struct seams::DensityProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Distribution.html">struct seams::Distribution</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DistributionOptions.html">struct seams::DistributionOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainOptions.html">struct seams::DomainOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_DomainReport.html">struct seams::DomainReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_EdgeSet.html">struct seams::EdgeSet</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FairState.html">struct seams::FairState</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_FingerprintOptions.html">struct seams::FingerprintOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_KnnOptions.html">struct seams::KnnOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_NeighbourOptions.html">struct seams::NeighbourOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_OrderOptions.html">struct seams::OrderOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Pockets.html">struct seams::Pockets</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismCensus.html">struct seams::PrismCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_PrismOptions.html">struct seams::PrismOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q4Q6.html">struct seams::Q4Q6</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6Bar.html">struct seams::Q6Bar</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Q6BarOptions.html">struct seams::Q6BarOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Rejection.html">struct seams::Rejection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RingOptions.html">struct seams::RingOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_RunningCoordination.html">struct seams::RunningCoordination</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SheetOptions.html">struct seams::SheetOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureMatch.html">struct seams::SignatureMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SignatureOptions.html">struct seams::SignatureOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_Steinhardt.html">struct seams::Steinhardt</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_SteinhardtOptions.html">struct seams::SteinhardtOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_TeamWidth.html">struct seams::TeamWidth</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cfg_Runtime.html">struct seams::cfg::Runtime</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_cpu_Features.html">struct seams::cpu::Features</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingPhases.html">struct seams::domain::RingPhases</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_RingSummary.html">struct seams::domain::RingSummary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_domain_Share.html">struct seams::domain::Share</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_Cij.html">struct seams::product::Cij</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_ComplexDot.html">struct seams::product::ComplexDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_GemmInfo.html">struct seams::product::GemmInfo</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_product_RealDot.html">struct seams::product::RealDot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_seams_tsan_Slot.html">struct seams::tsan::Slot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_BrinePocket.html">struct site::BrinePocket</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationBin.html">struct site::ConcentrationBin</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_ConcentrationProfile.html">struct site::ConcentrationProfile</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_DensityZ.html">struct site::DensityZ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontLayerReport.html">struct site::FrontLayerReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontOptions.html">struct site::FrontOptions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontPair.html">struct site::FrontPair</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_FrontSnapshot.html">struct site::FrontSnapshot</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_GuestOccupancy.html">struct site::GuestOccupancy</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IceClusterIons.html">struct site::IceClusterIons</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_InsideTrace.html">struct site::InsideTrace</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_IonEnvironment.html">struct site::IonEnvironment</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_LinearFit.html">struct site::LinearFit</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_PocketCensus.html">struct site::PocketCensus</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_RejectionCoefficient.html">struct site::RejectionCoefficient</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_Table.html">struct site::Table</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_site_TrapEvent.html">struct site::TrapEvent</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_CanonShell.html">struct symm::CanonShell</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Group.html">struct symm::Group</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Lattice.html">struct symm::Lattice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Overlay.html">struct symm::Overlay</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Shell17.html">struct symm::Shell17</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_symm_Space.html">struct symm::Space</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_FrameFingerprint.html">struct topo::FrameFingerprint</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_KeyLibrary.html">struct topo::KeyLibrary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LibraryMatch.html">struct topo::LibraryMatch</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topo_LocalKey.html">struct topo::LocalKey</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_topoparam_LayerStack.html">struct topoparam::LayerStack</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_CageCounts.html">struct tum::CageCounts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_tum_SpecializedCaps.html">struct tum::SpecializedCaps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonReport.html">struct water::IonReport</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/comparisons-summary-tables.html">Head-to-head summary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sqq-tables.html">SQQ</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#native-api">Native API</a><ul>
+<li><a class="reference internal" href="#seams-bondoptions">seams::BondOptions</a></li>
+<li><a class="reference internal" href="#seams-brine">seams::Brine</a></li>
+<li><a class="reference internal" href="#seams-brine-fronts">seams::Brine::fronts</a></li>
+<li><a class="reference internal" href="#seams-brine-pockets">seams::Brine::pockets</a></li>
+<li><a class="reference internal" href="#seams-brine-profile">seams::Brine::profile</a></li>
+<li><a class="reference internal" href="#seams-brine-rejection">seams::Brine::rejection</a></li>
+<li><a class="reference internal" href="#seams-brinefronts">seams::BrineFronts</a></li>
+<li><a class="reference internal" href="#seams-brineoptions">seams::BrineOptions</a></li>
+<li><a class="reference internal" href="#seams-brineprofile">seams::BrineProfile</a></li>
+<li><a class="reference internal" href="#seams-cagecounts">seams::CageCounts</a></li>
+<li><a class="reference internal" href="#seams-cageoptions">seams::CageOptions</a></li>
+<li><a class="reference internal" href="#seams-cages">seams::Cages</a></li>
+<li><a class="reference internal" href="#seams-cages-counts">seams::Cages::counts</a></li>
+<li><a class="reference internal" href="#seams-cages-labels">seams::Cages::labels</a></li>
+<li><a class="reference internal" href="#seams-chilloptions">seams::ChillOptions</a></li>
+<li><a class="reference internal" href="#seams-chordlesscycles">seams::ChordlessCycles</a></li>
+<li><a class="reference internal" href="#seams-chordlesscycles-count">seams::ChordlessCycles::count</a></li>
+<li><a class="reference internal" href="#seams-chordlesscycles-cycle">seams::ChordlessCycles::cycle</a></li>
+<li><a class="reference internal" href="#seams-classification">seams::Classification</a></li>
+<li><a class="reference internal" href="#seams-contacts">seams::Contacts</a></li>
+<li><a class="reference internal" href="#seams-densityoptions">seams::DensityOptions</a></li>
+<li><a class="reference internal" href="#seams-densityprofile">seams::DensityProfile</a></li>
+<li><a class="reference internal" href="#seams-distribution">seams::Distribution</a></li>
+<li><a class="reference internal" href="#seams-distributionoptions">seams::DistributionOptions</a></li>
+<li><a class="reference internal" href="#seams-domainoptions">seams::DomainOptions</a></li>
+<li><a class="reference internal" href="#seams-domainreport">seams::DomainReport</a></li>
+<li><a class="reference internal" href="#seams-error">seams::Error</a></li>
+<li><a class="reference internal" href="#seams-error-error">seams::Error::Error</a></li>
+<li><a class="reference internal" href="#seams-error-code">seams::Error::code</a></li>
+<li><a class="reference internal" href="#seams-error-status">seams::Error::status</a></li>
+<li><a class="reference internal" href="#seams-fingerprint">seams::Fingerprint</a></li>
+<li><a class="reference internal" href="#seams-fingerprint-atom">seams::Fingerprint::atom</a></li>
+<li><a class="reference internal" href="#seams-fingerprint-key">seams::Fingerprint::key</a></li>
+<li><a class="reference internal" href="#seams-fingerprint-rings">seams::Fingerprint::rings</a></li>
+<li><a class="reference internal" href="#seams-fingerprintoptions">seams::FingerprintOptions</a></li>
+<li><a class="reference internal" href="#seams-knnoptions">seams::KnnOptions</a></li>
+<li><a class="reference internal" href="#seams-neighbouroptions">seams::NeighbourOptions</a></li>
+<li><a class="reference internal" href="#seams-neighbours">seams::Neighbours</a></li>
+<li><a class="reference internal" href="#seams-neighbours-chordless">seams::Neighbours::chordless</a></li>
+<li><a class="reference internal" href="#seams-neighbours-degrees">seams::Neighbours::degrees</a></li>
+<li><a class="reference internal" href="#seams-neighbours-nnz">seams::Neighbours::nnz</a></li>
+<li><a class="reference internal" href="#seams-neighbours-pairs">seams::Neighbours::pairs</a></li>
+<li><a class="reference internal" href="#seams-orderoptions">seams::OrderOptions</a></li>
+<li><a class="reference internal" href="#seams-pockets">seams::Pockets</a></li>
+<li><a class="reference internal" href="#seams-prismcensus">seams::PrismCensus</a></li>
+<li><a class="reference internal" href="#seams-prismoptions">seams::PrismOptions</a></li>
+<li><a class="reference internal" href="#seams-q4q6">seams::Q4Q6</a></li>
+<li><a class="reference internal" href="#seams-q6bar">seams::Q6Bar</a></li>
+<li><a class="reference internal" href="#seams-q6baroptions">seams::Q6BarOptions</a></li>
+<li><a class="reference internal" href="#seams-rejection">seams::Rejection</a></li>
+<li><a class="reference internal" href="#seams-ringoptions">seams::RingOptions</a></li>
+<li><a class="reference internal" href="#seams-rings">seams::Rings</a></li>
+<li><a class="reference internal" href="#seams-rings-fraction">seams::Rings::fraction</a></li>
+<li><a class="reference internal" href="#seams-rings-histogram">seams::Rings::histogram</a></li>
+<li><a class="reference internal" href="#seams-rings-iterator">seams::Rings::iterator</a></li>
+<li><a class="reference internal" href="#seams-rings-size">seams::Rings::size</a></li>
+<li><a class="reference internal" href="#seams-rings-vertices">seams::Rings::vertices</a></li>
+<li><a class="reference internal" href="#seams-runningcoordination">seams::RunningCoordination</a></li>
+<li><a class="reference internal" href="#seams-sheetoptions">seams::SheetOptions</a></li>
+<li><a class="reference internal" href="#seams-signaturematch">seams::SignatureMatch</a></li>
+<li><a class="reference internal" href="#seams-signatureoptions">seams::SignatureOptions</a></li>
+<li><a class="reference internal" href="#seams-steinhardt">seams::Steinhardt</a></li>
+<li><a class="reference internal" href="#seams-steinhardtoptions">seams::SteinhardtOptions</a></li>
+<li><a class="reference internal" href="#seams-system">seams::System</a></li>
+<li><a class="reference internal" href="#seams-system-system">seams::System::System</a></li>
+<li><a class="reference internal" href="#seams-system-brine">seams::System::brine</a></li>
+<li><a class="reference internal" href="#seams-system-cages">seams::System::cages</a></li>
+<li><a class="reference internal" href="#seams-system-chill">seams::System::chill</a></li>
+<li><a class="reference internal" href="#seams-system-chill-plus">seams::System::chill_plus</a></li>
+<li><a class="reference internal" href="#seams-system-contact-pairs">seams::System::contact_pairs</a></li>
+<li><a class="reference internal" href="#seams-system-coordination">seams::System::coordination</a></li>
+<li><a class="reference internal" href="#seams-system-count">seams::System::count</a></li>
+<li><a class="reference internal" href="#seams-system-density">seams::System::density</a></li>
+<li><a class="reference internal" href="#seams-system-domains">seams::System::domains</a></li>
+<li><a class="reference internal" href="#seams-system-fingerprint">seams::System::fingerprint</a></li>
+<li><a class="reference internal" href="#seams-system-hbonds">seams::System::hbonds</a></li>
+<li><a class="reference internal" href="#seams-system-knn">seams::System::knn</a></li>
+<li><a class="reference internal" href="#seams-system-monolayer">seams::System::monolayer</a></li>
+<li><a class="reference internal" href="#seams-system-neighbour-degree">seams::System::neighbour_degree</a></li>
+<li><a class="reference internal" href="#seams-system-neighbours">seams::System::neighbours</a></li>
+<li><a class="reference internal" href="#seams-system-prisms">seams::System::prisms</a></li>
+<li><a class="reference internal" href="#seams-system-q4q6">seams::System::q4q6</a></li>
+<li><a class="reference internal" href="#seams-system-q6bar">seams::System::q6bar</a></li>
+<li><a class="reference internal" href="#seams-system-ql">seams::System::ql</a></li>
+<li><a class="reference internal" href="#seams-system-rdf">seams::System::rdf</a></li>
+<li><a class="reference internal" href="#seams-system-read">seams::System::read</a></li>
+<li><a class="reference internal" href="#seams-system-rings">seams::System::rings</a></li>
+<li><a class="reference internal" href="#seams-system-rings-chordless">seams::System::rings_chordless</a></li>
+<li><a class="reference internal" href="#seams-system-running-cn">seams::System::running_cn</a></li>
+<li><a class="reference internal" href="#seams-system-set-ortho">seams::System::set_ortho</a></li>
+<li><a class="reference internal" href="#seams-system-signature-cages">seams::System::signature_cages</a></li>
+<li><a class="reference internal" href="#seams-system-site-table">seams::System::site_table</a></li>
+<li><a class="reference internal" href="#seams-system-steinhardt">seams::System::steinhardt</a></li>
+<li><a class="reference internal" href="#seams-system-symmetry">seams::System::symmetry</a></li>
+<li><a class="reference internal" href="#seams-abi">seams::abi</a></li>
+<li><a class="reference internal" href="#seams-check">seams::check</a></li>
+<li><a class="reference internal" href="#seams-label-name">seams::label_name</a></li>
+<li><a class="reference internal" href="#seams-nframes">seams::nframes</a></li>
+<li><a class="reference internal" href="#seams-num-threads">seams::num_threads</a></li>
+<li><a class="reference internal" href="#seams-ring-symmetry-name">seams::ring_symmetry_name</a></li>
+<li><a class="reference internal" href="#seams-set-num-threads">seams::set_num_threads</a></li>
+<li><a class="reference internal" href="#seams-version">seams::version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#c-api">C API</a></li>
+</ul>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">C++ (reference)</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="c">
+<h1>C++<a class="headerlink" href="#c" title="Link to this heading">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">include/seams.hpp</span></code> is the native C++ API: move-only handles in namespace <code class="docutils literal notranslate"><span class="pre">seams</span></code>, with results returned by value. <a class="reference internal" href="../stable/cpp.html"><span class="doc">C++</span></a> is the narrative for that header. This page lists the public types and methods, and the <code class="docutils literal notranslate"><span class="pre">seams.h</span></code> functions each method calls.</p>
+<section id="native-api">
+<h2>Native API<a class="headerlink" href="#native-api" title="Link to this heading">¶</a></h2>
+<p>Generated from the sources named below. A name on this page is a public call in that language.</p>
+<section id="seams-bondoptions">
+<h3>seams::BondOptions<a class="headerlink" href="#seams-bondoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">BondOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a hydrogen-bond count.</p>
+</section>
+<section id="seams-brine">
+<h3>seams::Brine<a class="headerlink" href="#seams-brine" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">Brine</span> <span class="p">:</span> <span class="k">public</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_brine</span><span class="p">,</span> <span class="n">seams_brine_destroy</span><span class="o">&gt;</span>
+</span></pre></div>
+</div>
+<p>Owned planar ice-front measurement.</p>
+</section>
+<section id="seams-brine-fronts">
+<h3>seams::Brine::fronts<a class="headerlink" href="#seams-brine-fronts" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">BrineFronts</span> <span class="n">fronts</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-brine-pockets">
+<h3>seams::Brine::pockets<a class="headerlink" href="#seams-brine-pockets" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Pockets</span> <span class="n">pockets</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-brine-profile">
+<h3>seams::Brine::profile<a class="headerlink" href="#seams-brine-profile" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">BrineProfile</span> <span class="n">profile</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-brine-rejection">
+<h3>seams::Brine::rejection<a class="headerlink" href="#seams-brine-rejection" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Rejection</span> <span class="n">rejection</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-brinefronts">
+<h3>seams::BrineFronts<a class="headerlink" href="#seams-brinefronts" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">BrineFronts</span>
+</span></pre></div>
+</div>
+<p>The two planar crossings of an ice slab.</p>
+</section>
+<section id="seams-brineoptions">
+<h3>seams::BrineOptions<a class="headerlink" href="#seams-brineoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">BrineOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a planar ice front.</p>
+</section>
+<section id="seams-brineprofile">
+<h3>seams::BrineProfile<a class="headerlink" href="#seams-brineprofile" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">BrineProfile</span>
+</span></pre></div>
+</div>
+<p>Concentration profile along the brine axis.</p>
+</section>
+<section id="seams-cagecounts">
+<h3>seams::CageCounts<a class="headerlink" href="#seams-cagecounts" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">CageCounts</span>
+</span></pre></div>
+</div>
+<p>Disjoint cage populations.</p>
+</section>
+<section id="seams-cageoptions">
+<h3>seams::CageOptions<a class="headerlink" href="#seams-cageoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">CageOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for hexagonal and double-diamond cages.</p>
+</section>
+<section id="seams-cages">
+<h3>seams::Cages<a class="headerlink" href="#seams-cages" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">Cages</span> <span class="p">:</span> <span class="k">public</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_cage_set</span><span class="p">,</span> <span class="n">seams_cages_destroy</span><span class="o">&gt;</span>
+</span></pre></div>
+</div>
+<p>Owned hexagonal and double-diamond membership.</p>
+</section>
+<section id="seams-cages-counts">
+<h3>seams::Cages::counts<a class="headerlink" href="#seams-cages-counts" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">CageCounts</span> <span class="n">counts</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Disjoint population counts.</p>
+</section>
+<section id="seams-cages-labels">
+<h3>seams::Cages::labels<a class="headerlink" href="#seams-cages-labels" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">labels</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">n_atoms</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>One cage code per atom.</p>
+</section>
+<section id="seams-chilloptions">
+<h3>seams::ChillOptions<a class="headerlink" href="#seams-chilloptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">ChillOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for CHILL and CHILL+.</p>
+</section>
+<section id="seams-chordlesscycles">
+<h3>seams::ChordlessCycles<a class="headerlink" href="#seams-chordlesscycles" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">ChordlessCycles</span>
+</span></pre></div>
+</div>
+<p>Chordless cycles of one length.</p>
+</section>
+<section id="seams-chordlesscycles-count">
+<h3>seams::ChordlessCycles::count<a class="headerlink" href="#seams-chordlesscycles-count" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">count</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-chordlesscycles-cycle">
+<h3>seams::ChordlessCycles::cycle<a class="headerlink" href="#seams-chordlesscycles-cycle" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">cycle</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">index</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-classification">
+<h3>seams::Classification<a class="headerlink" href="#seams-classification" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Classification</span>
+</span></pre></div>
+</div>
+<p>CHILL or CHILL+ labels and the nine population counts.</p>
+</section>
+<section id="seams-contacts">
+<h3>seams::Contacts<a class="headerlink" href="#seams-contacts" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Contacts</span>
+</span></pre></div>
+</div>
+<p>Mutual nearest unlike contacts of a site table.</p>
+</section>
+<section id="seams-densityoptions">
+<h3>seams::DensityOptions<a class="headerlink" href="#seams-densityoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">DensityOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for the axial number density.</p>
+</section>
+<section id="seams-densityprofile">
+<h3>seams::DensityProfile<a class="headerlink" href="#seams-densityprofile" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">DensityProfile</span>
+</span></pre></div>
+</div>
+<p>Number density along one cell axis.</p>
+</section>
+<section id="seams-distribution">
+<h3>seams::Distribution<a class="headerlink" href="#seams-distribution" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Distribution</span>
+</span></pre></div>
+</div>
+<p>Partial radial distribution.</p>
+</section>
+<section id="seams-distributionoptions">
+<h3>seams::DistributionOptions<a class="headerlink" href="#seams-distributionoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">DistributionOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a partial RDF, its running coordination, or the integral.</p>
+</section>
+<section id="seams-domainoptions">
+<h3>seams::DomainOptions<a class="headerlink" href="#seams-domainoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">DomainOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a domain search.</p>
+</section>
+<section id="seams-domainreport">
+<h3>seams::DomainReport<a class="headerlink" href="#seams-domainreport" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">DomainReport</span>
+</span></pre></div>
+</div>
+<p>Largest polar or apolar domain.</p>
+</section>
+<section id="seams-error">
+<h3>seams::Error<a class="headerlink" href="#seams-error" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">Error</span> <span class="p">:</span> <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span>
+</span></pre></div>
+</div>
+<p>Failure from the C API, or from a rejected argument.</p>
+</section>
+<section id="seams-error-error">
+<h3>seams::Error::Error<a class="headerlink" href="#seams-error-error" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">Error</span><span class="p">(</span><span class="kt">int</span> <span class="n">status</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">message</span><span class="p">)</span> <span class="o">:</span> <span class="n">std</span><span class="o">::</span><span class="n">runtime_error</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">message</span><span class="p">)),</span> <span class="n">code_</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Build an error from a status and a message.</p>
+</section>
+<section id="seams-error-code">
+<h3>seams::Error::code<a class="headerlink" href="#seams-error-code" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kt">int</span> <span class="n">code</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span>
+</span></pre></div>
+</div>
+<p>Status integer. Same values as `seams_status`.</p>
+</section>
+<section id="seams-error-status">
+<h3>seams::Error::status<a class="headerlink" href="#seams-error-status" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Status</span> <span class="n">status</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span>
+</span></pre></div>
+</div>
+<p>Status as the `Status` enumeration when the code is known.</p>
+</section>
+<section id="seams-fingerprint">
+<h3>seams::Fingerprint<a class="headerlink" href="#seams-fingerprint" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">Fingerprint</span> <span class="p">:</span> <span class="k">public</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_topo</span><span class="p">,</span> <span class="n">seams_fingerprint_destroy</span><span class="o">&gt;</span>
+</span></pre></div>
+</div>
+<p>Owned topological fingerprint.</p>
+</section>
+<section id="seams-fingerprint-atom">
+<h3>seams::Fingerprint::atom<a class="headerlink" href="#seams-fingerprint-atom" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">atom</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Local key of one atom.</p>
+</section>
+<section id="seams-fingerprint-key">
+<h3>seams::Fingerprint::key<a class="headerlink" href="#seams-fingerprint-key" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">key</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Frame fingerprint text.</p>
+</section>
+<section id="seams-fingerprint-rings">
+<h3>seams::Fingerprint::rings<a class="headerlink" href="#seams-fingerprint-rings" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">rings</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Primitive-ring census stored on the fingerprint.</p>
+</section>
+<section id="seams-fingerprintoptions">
+<h3>seams::FingerprintOptions<a class="headerlink" href="#seams-fingerprintoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">FingerprintOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a topological fingerprint.</p>
+</section>
+<section id="seams-knnoptions">
+<h3>seams::KnnOptions<a class="headerlink" href="#seams-knnoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">KnnOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a k-nearest neighbour list.</p>
+</section>
+<section id="seams-neighbouroptions">
+<h3>seams::NeighbourOptions<a class="headerlink" href="#seams-neighbouroptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">NeighbourOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a neighbour list.</p>
+</section>
+<section id="seams-neighbours">
+<h3>seams::Neighbours<a class="headerlink" href="#seams-neighbours" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">Neighbours</span> <span class="p">:</span> <span class="k">public</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_neighbours</span><span class="p">,</span> <span class="n">seams_neighbours_destroy</span><span class="o">&gt;</span>
+</span></pre></div>
+</div>
+<p>Owned neighbour list.</p>
+</section>
+<section id="seams-neighbours-chordless">
+<h3>seams::Neighbours::chordless<a class="headerlink" href="#seams-neighbours-chordless" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">ChordlessCycles</span> <span class="n">chordless</span><span class="p">(</span><span class="kt">int</span> <span class="n">size</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Chordless cycles of one length on this graph.</p>
+</section>
+<section id="seams-neighbours-degrees">
+<h3>seams::Neighbours::degrees<a class="headerlink" href="#seams-neighbours-degrees" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">degrees</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Degree of each atom.</p>
+</section>
+<section id="seams-neighbours-nnz">
+<h3>seams::Neighbours::nnz<a class="headerlink" href="#seams-neighbours-nnz" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">nnz</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Number of neighbour pairs, omitting self.</p>
+</section>
+<section id="seams-neighbours-pairs">
+<h3>seams::Neighbours::pairs<a class="headerlink" href="#seams-neighbours-pairs" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">pairs</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Directed pairs `(atom, neighbour)`.</p>
+</section>
+<section id="seams-orderoptions">
+<h3>seams::OrderOptions<a class="headerlink" href="#seams-orderoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">OrderOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for q_l on a named graph.</p>
+</section>
+<section id="seams-pockets">
+<h3>seams::Pockets<a class="headerlink" href="#seams-pockets" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Pockets</span>
+</span></pre></div>
+</div>
+<p>Brine pockets trapped in the ice.</p>
+</section>
+<section id="seams-prismcensus">
+<h3>seams::PrismCensus<a class="headerlink" href="#seams-prismcensus" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">PrismCensus</span>
+</span></pre></div>
+</div>
+<p>Perfect and imperfect prism counts by ring size.</p>
+</section>
+<section id="seams-prismoptions">
+<h3>seams::PrismOptions<a class="headerlink" href="#seams-prismoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">PrismOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for prism stacks.</p>
+</section>
+<section id="seams-q4q6">
+<h3>seams::Q4Q6<a class="headerlink" href="#seams-q4q6" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Q4Q6</span>
+</span></pre></div>
+</div>
+<p>Local q4 and q6 on the cutoff shell.</p>
+</section>
+<section id="seams-q6bar">
+<h3>seams::Q6Bar<a class="headerlink" href="#seams-q6bar" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Q6Bar</span>
+</span></pre></div>
+</div>
+<p>Lechner-Dellago q6-bar and the ice count above a cut.</p>
+</section>
+<section id="seams-q6baroptions">
+<h3>seams::Q6BarOptions<a class="headerlink" href="#seams-q6baroptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Q6BarOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for the q6-bar ice summary.</p>
+</section>
+<section id="seams-rejection">
+<h3>seams::Rejection<a class="headerlink" href="#seams-rejection" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Rejection</span>
+</span></pre></div>
+</div>
+<p>Molal rejection coefficient.</p>
+</section>
+<section id="seams-ringoptions">
+<h3>seams::RingOptions<a class="headerlink" href="#seams-ringoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">RingOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for primitive rings.</p>
+</section>
+<section id="seams-rings">
+<h3>seams::Rings<a class="headerlink" href="#seams-rings" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">Rings</span> <span class="p">:</span> <span class="k">public</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_rings</span><span class="p">,</span> <span class="n">seams_rings_destroy</span><span class="o">&gt;</span>
+</span></pre></div>
+</div>
+<p>Owned primitive-ring set.</p>
+</section>
+<section id="seams-rings-fraction">
+<h3>seams::Rings::fraction<a class="headerlink" href="#seams-rings-fraction" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kt">double</span> <span class="n">fraction</span><span class="p">(</span><span class="kt">int</span> <span class="n">ring_size</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Fraction of atoms that sit on a ring of one size.</p>
+</section>
+<section id="seams-rings-histogram">
+<h3>seams::Rings::histogram<a class="headerlink" href="#seams-rings-histogram" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">histogram</span><span class="p">(</span><span class="kt">int</span> <span class="n">up_to</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Histogram of ring size.</p>
+</section>
+<section id="seams-rings-iterator">
+<h3>seams::Rings::iterator<a class="headerlink" href="#seams-rings-iterator" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">Rings</span> <span class="o">*</span><span class="n">owner</span><span class="p">,</span> <span class="kt">int</span> <span class="n">index</span><span class="p">)</span> <span class="o">:</span> <span class="n">owner_</span><span class="p">(</span><span class="n">owner</span><span class="p">),</span> <span class="n">index_</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-rings-size">
+<h3>seams::Rings::size<a class="headerlink" href="#seams-rings-size" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kt">int</span> <span class="n">size</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Number of primitive rings.</p>
+</section>
+<section id="seams-rings-vertices">
+<h3>seams::Rings::vertices<a class="headerlink" href="#seams-rings-vertices" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">vertices</span><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">)</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Atom indices of one ring.</p>
+</section>
+<section id="seams-runningcoordination">
+<h3>seams::RunningCoordination<a class="headerlink" href="#seams-runningcoordination" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">RunningCoordination</span>
+</span></pre></div>
+</div>
+<p>Running coordination number along a partial RDF.</p>
+</section>
+<section id="seams-sheetoptions">
+<h3>seams::SheetOptions<a class="headerlink" href="#seams-sheetoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">SheetOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a monolayer ring histogram.</p>
+</section>
+<section id="seams-signaturematch">
+<h3>seams::SignatureMatch<a class="headerlink" href="#seams-signaturematch" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">SignatureMatch</span>
+</span></pre></div>
+</div>
+<p>Closed cages whose ring census matches a signature.</p>
+</section>
+<section id="seams-signatureoptions">
+<h3>seams::SignatureOptions<a class="headerlink" href="#seams-signatureoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">SignatureOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a signature cage census.</p>
+</section>
+<section id="seams-steinhardt">
+<h3>seams::Steinhardt<a class="headerlink" href="#seams-steinhardt" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">Steinhardt</span>
+</span></pre></div>
+</div>
+<p>Local Steinhardt parameter, and the average when it was asked for.</p>
+</section>
+<section id="seams-steinhardtoptions">
+<h3>seams::SteinhardtOptions<a class="headerlink" href="#seams-steinhardtoptions" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">struct</span> <span class="n">SteinhardtOptions</span>
+</span></pre></div>
+</div>
+<p>Knobs for a local Steinhardt parameter on the cutoff shell.</p>
+</section>
+<section id="seams-system">
+<h3>seams::System<a class="headerlink" href="#seams-system" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="k">class</span> <span class="nl">System</span> <span class="p">:</span> <span class="k">public</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_system</span><span class="p">,</span> <span class="n">seams_system_destroy</span><span class="o">&gt;</span>
+</span></pre></div>
+</div>
+<p>One frame: coordinates, a cell, and the analyses that read them.</p>
+</section>
+<section id="seams-system-system">
+<h3>seams::System::System<a class="headerlink" href="#seams-system-system" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">System</span><span class="p">()</span> <span class="o">:</span> <span class="n">detail</span><span class="o">::</span><span class="n">Handle</span><span class="o">&lt;</span><span class="n">seams_system</span><span class="p">,</span> <span class="n">seams_system_destroy</span><span class="o">&gt;</span><span class="p">(</span><span class="n">seams_system_create</span><span class="p">())</span>
+</span></pre></div>
+</div>
+<p>Allocate an empty frame.</p>
+</section>
+<section id="seams-system-brine">
+<h3>seams::System::brine<a class="headerlink" href="#seams-system-brine" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Brine</span> <span class="n">brine</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">ice</span><span class="p">,</span> <span class="k">const</span> <span class="n">BrineOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Planar ice front from an ice assignment.</p>
+</section>
+<section id="seams-system-cages">
+<h3>seams::System::cages<a class="headerlink" href="#seams-system-cages" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Cages</span> <span class="n">cages</span><span class="p">(</span><span class="k">const</span> <span class="n">CageOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-chill">
+<h3>seams::System::chill<a class="headerlink" href="#seams-system-chill" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="n">chill</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type</span><span class="p">,</span> <span class="kt">int</span> <span class="n">graph</span><span class="p">,</span> <span class="kt">int</span> <span class="n">rule</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-chill-plus">
+<h3>seams::System::chill_plus<a class="headerlink" href="#seams-system-chill-plus" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Classification</span> <span class="n">chill_plus</span><span class="p">(</span><span class="k">const</span> <span class="n">ChillOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-contact-pairs">
+<h3>seams::System::contact_pairs<a class="headerlink" href="#seams-system-contact-pairs" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Contacts</span> <span class="n">contact_pairs</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">spec</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-coordination">
+<h3>seams::System::coordination<a class="headerlink" href="#seams-system-coordination" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kt">double</span> <span class="n">coordination</span><span class="p">(</span><span class="k">const</span> <span class="n">DistributionOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-count">
+<h3>seams::System::count<a class="headerlink" href="#seams-system-count" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kt">int</span> <span class="n">count</span><span class="p">()</span> <span class="k">const</span>
+</span></pre></div>
+</div>
+<p>Number of points in the frame.</p>
+</section>
+<section id="seams-system-density">
+<h3>seams::System::density<a class="headerlink" href="#seams-system-density" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">DensityProfile</span> <span class="n">density</span><span class="p">(</span><span class="k">const</span> <span class="n">DensityOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-domains">
+<h3>seams::System::domains<a class="headerlink" href="#seams-system-domains" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">DomainReport</span> <span class="n">domains</span><span class="p">(</span><span class="k">const</span> <span class="n">DomainOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-fingerprint">
+<h3>seams::System::fingerprint<a class="headerlink" href="#seams-system-fingerprint" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Fingerprint</span> <span class="n">fingerprint</span><span class="p">(</span><span class="k">const</span> <span class="n">FingerprintOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-hbonds">
+<h3>seams::System::hbonds<a class="headerlink" href="#seams-system-hbonds" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kt">int</span> <span class="n">hbonds</span><span class="p">(</span><span class="k">const</span> <span class="n">BondOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-knn">
+<h3>seams::System::knn<a class="headerlink" href="#seams-system-knn" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Neighbours</span> <span class="n">knn</span><span class="p">(</span><span class="k">const</span> <span class="n">KnnOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-monolayer">
+<h3>seams::System::monolayer<a class="headerlink" href="#seams-system-monolayer" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">monolayer</span><span class="p">(</span><span class="k">const</span> <span class="n">SheetOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Primitive-ring histogram of a monolayer.</p>
+</section>
+<section id="seams-system-neighbour-degree">
+<h3>seams::System::neighbour_degree<a class="headerlink" href="#seams-system-neighbour-degree" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">neighbour_degree</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">species</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Degree of each atom on the cutoff graph.</p>
+</section>
+<section id="seams-system-neighbours">
+<h3>seams::System::neighbours<a class="headerlink" href="#seams-system-neighbours" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Neighbours</span> <span class="n">neighbours</span><span class="p">(</span><span class="k">const</span> <span class="n">NeighbourOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-prisms">
+<h3>seams::System::prisms<a class="headerlink" href="#seams-system-prisms" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">PrismCensus</span> <span class="n">prisms</span><span class="p">(</span><span class="k">const</span> <span class="n">PrismOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-q4q6">
+<h3>seams::System::q4q6<a class="headerlink" href="#seams-system-q4q6" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Q4Q6</span> <span class="n">q4q6</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">species</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-q6bar">
+<h3>seams::System::q6bar<a class="headerlink" href="#seams-system-q6bar" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Q6Bar</span> <span class="n">q6bar</span><span class="p">(</span><span class="k">const</span> <span class="n">Q6BarOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-ql">
+<h3>seams::System::ql<a class="headerlink" href="#seams-system-ql" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Steinhardt</span> <span class="n">ql</span><span class="p">(</span><span class="k">const</span> <span class="n">OrderOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-rdf">
+<h3>seams::System::rdf<a class="headerlink" href="#seams-system-rdf" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Distribution</span> <span class="n">rdf</span><span class="p">(</span><span class="k">const</span> <span class="n">DistributionOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-read">
+<h3>seams::System::read<a class="headerlink" href="#seams-system-read" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kt">void</span> <span class="n">read</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">path</span><span class="p">,</span> <span class="kt">int</span> <span class="n">frame</span><span class="p">,</span> <span class="kt">int</span> <span class="n">type_filter</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Read one frame from a trajectory path.</p>
+</section>
+<section id="seams-system-rings">
+<h3>seams::System::rings<a class="headerlink" href="#seams-system-rings" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">Rings</span> <span class="n">rings</span><span class="p">(</span><span class="k">const</span> <span class="n">RingOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-rings-chordless">
+<h3>seams::System::rings_chordless<a class="headerlink" href="#seams-system-rings-chordless" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">ChordlessCycles</span> <span class="n">rings_chordless</span><span class="p">(</span><span class="k">const</span> <span class="n">NeighbourOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">,</span> <span class="kt">int</span> <span class="n">size</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Chordless cycles of one length on a neighbour graph.</p>
+</section>
+<section id="seams-system-running-cn">
+<h3>seams::System::running_cn<a class="headerlink" href="#seams-system-running-cn" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">RunningCoordination</span> <span class="n">running_cn</span><span class="p">(</span><span class="k">const</span> <span class="n">DistributionOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-set-ortho">
+<h3>seams::System::set_ortho<a class="headerlink" href="#seams-system-set-ortho" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kt">void</span> <span class="n">set_ortho</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">span</span><span class="o">&lt;</span><span class="k">const</span> <span class="kt">double</span><span class="o">&gt;</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">double</span> <span class="n">lx</span><span class="p">,</span> <span class="kt">double</span> <span class="n">ly</span><span class="p">,</span> <span class="kt">double</span> <span class="n">lz</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Store points in an orthorhombic cell whose origin is zero.</p>
+</section>
+<section id="seams-system-signature-cages">
+<h3>seams::System::signature_cages<a class="headerlink" href="#seams-system-signature-cages" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">SignatureMatch</span> <span class="n">signature_cages</span><span class="p">(</span><span class="k">const</span> <span class="n">SignatureOptions</span> <span class="o">&amp;</span><span class="n">options</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-site-table">
+<h3>seams::System::site_table<a class="headerlink" href="#seams-system-site-table" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">site_table</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">spec</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Per-atom site kind.</p>
+</section>
+<section id="seams-system-steinhardt">
+<h3>seams::System::steinhardt<a class="headerlink" href="#seams-system-steinhardt" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;&gt;</span> <span class="n">steinhardt</span><span class="p">(</span><span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">order</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">average</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-system-symmetry">
+<h3>seams::System::symmetry<a class="headerlink" href="#seams-system-symmetry" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">symmetry</span><span class="p">(</span><span class="kt">double</span> <span class="n">shell_rmsd</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Per-atom ice-shell label.</p>
+</section>
+<section id="seams-abi">
+<h3>seams::abi<a class="headerlink" href="#seams-abi" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kr">inline</span> <span class="kt">int</span> <span class="n">abi</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<p>ABI number compiled into this library.</p>
+</section>
+<section id="seams-check">
+<h3>seams::check<a class="headerlink" href="#seams-check" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kr">inline</span> <span class="kt">void</span> <span class="nf">check</span><span class="p">(</span><span class="kt">int</span> <span class="n">status</span><span class="p">,</span> <span class="k">const</span> <span class="kt">void</span> <span class="o">*</span><span class="n">handle</span><span class="p">)</span> <span class="p">{</span> <span class="k">if</span> <span class="p">(</span><span class="n">status</span> <span class="o">==</span> <span class="n">SEAMS_OK</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="seams-label-name">
+<h3>seams::label_name<a class="headerlink" href="#seams-label-name" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kr">inline</span> <span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">label_name</span><span class="p">(</span><span class="n">Label</span> <span class="n">label</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Short name of a CHILL+ label.</p>
+</section>
+<section id="seams-nframes">
+<h3>seams::nframes<a class="headerlink" href="#seams-nframes" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kr">inline</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">nframes</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">path</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Count frames in a trajectory path.</p>
+</section>
+<section id="seams-num-threads">
+<h3>seams::num_threads<a class="headerlink" href="#seams-num-threads" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kr">inline</span> <span class="kt">int</span> <span class="n">num_threads</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<p>OpenMP width the next call will use.</p>
+</section>
+<section id="seams-ring-symmetry-name">
+<h3>seams::ring_symmetry_name<a class="headerlink" href="#seams-ring-symmetry-name" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kr">inline</span> <span class="n">std</span><span class="o">::</span><span class="n">string_view</span> <span class="n">ring_symmetry_name</span><span class="p">(</span><span class="n">RingSymmetry</span> <span class="n">symmetry</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Short name of a ring-symmetry code.</p>
+</section>
+<section id="seams-set-num-threads">
+<h3>seams::set_num_threads<a class="headerlink" href="#seams-set-num-threads" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kr">inline</span> <span class="kt">void</span> <span class="n">set_num_threads</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span>
+</span></pre></div>
+</div>
+<p>Set the OpenMP width for the next call.</p>
+</section>
+<section id="seams-version">
+<h3>seams::version<a class="headerlink" href="#seams-version" title="Link to this heading">¶</a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="p">[[</span><span class="n">nodiscard</span><span class="p">]]</span> <span class="kr">inline</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">version</span><span class="p">()</span>
+</span></pre></div>
+</div>
+<p>Library version text, for example `2.14.0`.</p>
+</section>
+</section>
+<section id="c-api">
+<h2>C API<a class="headerlink" href="#c-api" title="Link to this heading">¶</a></h2>
+<p>Each native call and the <code class="docutils literal notranslate"><span class="pre">seams.h</span></code> or <code class="docutils literal notranslate"><span class="pre">seams_lang.h</span></code> function it uses. The C column is the stable ABI.</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Native</p></th>
+<th class="head"><p>C</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::BondOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Brine</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_fronts</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_brine_pockets</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_brine_profile</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_brine_rejection</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Brine::fronts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_fronts</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Brine::pockets</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_pockets</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Brine::profile</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_profile</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Brine::rejection</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_rejection</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::BrineFronts</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::BrineOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::BrineProfile</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::CageCounts</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::CageOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Cages</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_cages_counts</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_cages_labels</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Cages::counts</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_cages_counts</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Cages::labels</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_cages_labels</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::ChillOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::ChordlessCycles</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::ChordlessCycles::count</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::ChordlessCycles::cycle</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Classification</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Contacts</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::DensityOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::DensityProfile</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Distribution</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::DistributionOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::DomainOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::DomainReport</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Error</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Error::Error</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Error::code</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Error::status</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Fingerprint</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_fingerprint_atom</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_fingerprint_key</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_fingerprint_rings</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Fingerprint::atom</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_fingerprint_atom</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Fingerprint::key</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_fingerprint_key</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Fingerprint::rings</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_fingerprint_rings</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::FingerprintOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::KnnOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::NeighbourOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Neighbours</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_copy</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_neighbours_count</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_chordless</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Neighbours::chordless</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_count</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_chordless</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Neighbours::degrees</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_copy</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Neighbours::nnz</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_copy</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Neighbours::pairs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_copy</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::OrderOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Pockets</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::PrismCensus</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::PrismOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Q4Q6</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Q6Bar</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Q6BarOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rejection</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::RingOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rings</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_count</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_fraction</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_histogram</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_vertices</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rings::fraction</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_fraction</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rings::histogram</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_histogram</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rings::iterator</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rings::size</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_count</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Rings::vertices</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_vertices</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::RunningCoordination</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::SheetOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::SignatureMatch</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::SignatureOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::Steinhardt</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::SteinhardtOptions</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_analyse</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_cages</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_chill</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_chill_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_contact_pairs</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_coordination</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_density_axis</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_domains</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_fingerprint</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_hbonds</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_monolayer</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_neighbours_build</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_neighbours_knn</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_prisms</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_q4q6</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_q6bar</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_ql</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rdf</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_find</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_running_cn</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_signature_cages</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_site_table</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_steinhardt</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_create</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_read</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_set_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_set_ortho</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_symmetry</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::System</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::brine</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_brine_analyse</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::cages</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_cages</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::chill</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::chill_plus</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_chill</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_chill_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::contact_pairs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_contact_pairs</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::coordination</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_coordination</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::count</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::density</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_density_axis</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::domains</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_domains</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::fingerprint</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_fingerprint</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::hbonds</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_hbonds</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::knn</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_knn</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::monolayer</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_monolayer</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::neighbour_degree</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_build</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::neighbours</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_build</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::prisms</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_prisms</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::q4q6</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_q4q6</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::q6bar</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_q6bar</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::ql</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_ql</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::rdf</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rdf</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::read</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_system_read</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::rings</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_find</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::rings_chordless</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_neighbours_build</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::running_cn</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_running_cn</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::set_ortho</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::signature_cages</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_signature_cages</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::site_table</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_site_table</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::steinhardt</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_ql</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_steinhardt</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::System::symmetry</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_symmetry</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::abi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_abi</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::check</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::label_name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_label_name</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::nframes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_path_nframes</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::num_threads</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_get_num_threads</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::ring_symmetry_name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_ring_symmetry_name</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">seams::set_num_threads</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_set_num_threads</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seams::version</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_version_string</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="c-api.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">C</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="python-api.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Python</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <svg class="dseams-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=7bb62513"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

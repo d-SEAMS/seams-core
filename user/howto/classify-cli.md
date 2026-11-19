@@ -1,0 +1,114 @@
+<!-- https://docs.dseams.info/user/howto/classify-cli.md -->
+
+# Classify a dump {#classify-a-dump}
+
+You have a LAMMPS water dump and want counts. The flag table is
+[seams CLI](../../reference/cli.md). Counts for the mixed TIP4P
+frame are in [the mixed TIP4P tutorial](../tutorials/bulk-ice.md).
+The CHILL+ rules are on [CHILL+](chill-plus.md).
+
+Run the blocks below from a seams-core checkout, so `input/traj/`
+resolves. On your own dump, pass the same flags with that path.
+
+## One frame {#one-frame}
+
+`input/traj/exampleTraj.lammpstrj` is one frame of mixed TIP4P:
+750 atoms, type 2 oxygen, type 1 hydrogen. The default cutoff is
+3.5 Å.
+
+```bash
+seams read input/traj/exampleTraj.lammpstrj
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+seams rdf input/traj/exampleTraj.lammpstrj --type 2 --cutoff 10
+```
+
+`read` prints `nop 250`. `chill-plus` prints `interClathrate 9 water 241`.
+`cages` prints `water 250`.
+
+`chill` is the original CHILL rule.
+`chill-plus` is the published CHILL+ rule: a crystal row has exactly
+four neighbours inside the cutoff, q3 is the mean over the four
+nearest of them, and the Table 1 neighbour test stays on.
+`chill_plus` is an alias of `chill-plus`.
+`ovito-chill+` is the OVITO 3.17.2 rule: the same shell of four, q3
+over that whole shell, and the neighbour test off.
+`ovito_chill_plus` is an alias of `ovito-chill+`.
+`--rule ovito-chill+` selects the OVITO rule on `chill-plus`.
+A path given to `--rule` is read as text and scanned for a `rule` or
+`chill-plus` key, written `rule:` or `rule =`. Comments are skipped.
+When `--rule` is absent, `CHILL_PLUS_RULE` in the environment, or in
+`./seams.env` when that file is loaded, is the same string.
+
+`chill` and `chill-plus` read one neighbour list. The stored default
+graph name is `seeded`, and both commands map that name onto the
+cutoff list: every pair closer than `--cutoff`.
+`--graph mutual` keeps the mutual four nearest neighbours.
+`--cutoff` is the cell-size hint for that search.
+
+## Type {#type}
+
+`--type 0`, the default, keeps type 2 on a single LAMMPS frame when
+any atom has it, and type 1 otherwise.
+`--type` is that load filter.
+`--water-types` is the neighbour mask: the mixed frame is loaded,
+and ice is scored on the named LAMMPS types only. Substrate and ions
+stay out of the neighbour list.
+`--family` defaults to `waterIce`. `chill`, `chill-plus`, `cages`,
+and `ions` exit 2 for every other family. The message names the family.
+
+`input/traj/mW_cubic.lammpstrj` is single-site mW, type 1.
+`input/traj/agi_water_tiny.lammpstrj` has water type 1 and ion types
+3 and 4.
+
+```bash
+seams cages input/traj/mW_cubic.lammpstrj --type 1
+seams chill-plus input/traj/agi_water_tiny.lammpstrj --water-types 1
+seams cages input/traj/agi_water_tiny.lammpstrj --graph seeded --water-types 1
+seams ions input/traj/agi_water_tiny.lammpstrj --ion-types 3,4 --water-types 1
+seams chill-plus input/traj/exampleTraj.lammpstrj --type 2 --family ionicLiquid  # exits 2
+```
+
+The family command prints `CHILL/TUM refused for family ionicLiquid`.
+A dump with more than two LAMMPS types, and no `--family`, prints a
+hint and still exits 0. The AgI commands above do that.
+A triclinic dump uses the stored tilt. See
+[Sheared cells](sheared-cells.md).
+
+## Frame range {#frame-range}
+
+Frames are 1-based. `--last` is inclusive. On a LAMMPS dump, a
+`--last` past the end of the file stops at the last frame.
+`--jobs` is the OpenMP worker count for that dump. `--jobs 1` is
+serial. `mW_cubic.lammpstrj` has 11 frames.
+
+```bash
+seams chill-plus input/traj/mW_cubic.lammpstrj --type 1 --frame 1 --last 2 --jobs 2
+```
+
+## Bond graph for cages {#bond-graph-for-cages}
+
+`seeded` is the default: mutual k-nearest seeds and the union of
+each atom’s k nearest. `k` defaults to 4. `-k` sets it.
+`--complete` fills the last vertex of a six-ring when the other
+vertices already carry a label.
+
+```bash
+seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph seeded
+seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph seeded --complete
+seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph cutoff --cutoff 3.5
+seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph knn -k 4
+seams cages input/traj/mW_cubic.lammpstrj --type 1 --graph knn-union -k 4
+```
+
+On that cubic cell each of the four graphs prints `cubic 4096`.
+
+## Features of this binary {#features-of-this-binary}
+
+```bash
+seams --features
+```
+
+Each line is a compile-time switch, `enabled` or `disabled`.
+OpenMP, chemfiles, and readcon-core are the switches the other
+how-tos name.

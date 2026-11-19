@@ -2,8 +2,7 @@
 <html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Formats - d-SEAMS molecular simulation analysis documentation</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="walk_compare" href="walk-compare.html" /><link rel="prev" title="seams CLI" href="cli.html" />
-      <link rel="canonical" href="https://docs.dseams.info/reference/data-formats.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Data Formats - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="walk_compare" href="walk-compare.html" /><link rel="prev" title="seams CLI" href="cli.html" /><link rel="canonical" href="https://docs.dseams.info/reference/data-formats.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -19,50 +18,26 @@
     
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/reference/data-formats.html"/>
-  <meta property="og:title" content="Data Formats"/>
-    <meta name="twitter:card" content="summary"/>
+  <meta property="og:title" content="Data Formats"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="seams and the C++ readers share one suffix table."/>
+    <meta property="og:description" content="seams and the C++ readers share one suffix table."/><meta name="twitter:card" content="summary_large_image"/>
   <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
 <link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
 <link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
-<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-
-<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta property="og:image" content="https://dseams.info/images/og-card.png">
-<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="robots" content="index, follow">
 <meta name="twitter:title" content="Data Formats - d-SEAMS">
-<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://docs.dseams.info/#application",
-      "name": "d-SEAMS",
-      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
-      "applicationCategory": "ScientificApplication",
-      "operatingSystem": "Linux, macOS",
-      "url": "https://docs.dseams.info/",
-      "softwareVersion": "2.14.0",
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    },
-    {
-      "@type": "SoftwareSourceCode",
-      "@id": "https://github.com/d-SEAMS/seams-core#source",
-      "name": "seams-core",
-      "codeRepository": "https://github.com/d-SEAMS/seams-core",
-      "programmingLanguage": ["C++", "C", "Python"],
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    }
-  ]
-}
-</script></head>
+<meta name="twitter:description" content="seams and the C++ readers share one suffix table.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/reference/data-formats.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Data Formats - d-SEAMS","description":"seams and the C++ readers share one suffix table.","url":"https://docs.dseams.info/reference/data-formats.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
 <body><nav class="dseams-family" aria-label="d-SEAMS">
   <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
   <ul class="dseams-family__nav">
@@ -128,161 +103,53 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../videos/index.html">Videos</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Worked examples</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/clathrate.html">Classify a clathrate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/interface.html">Ice-water interface</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nucleation.html">Nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/brine.html">Brine and NaCl</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/insitu-run.html">Run in situ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-interface.html">CHILL+ on an ice/water slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-cages.html">Cage census of sI, sII and sH</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-rings.html">Primitive rings and the shortest-path test</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-brine.html">Ice growing into brine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-nucleation.html">Ice-likeness along a short nucleation run</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery.html">Science gallery</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/index.html">Science tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/interface.html">Ice/liquid interface and nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/brine.html">Brine freezing front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/cages.html">sII and sH hydrate cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/gallery.html">Science figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/index.html">Language tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/c.html">C tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/cpp.html">C++ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/engines.html">Engines tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/gromacs.html">GROMACS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/insitu.html">In-situ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lammps.html">LAMMPS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/openmm.html">OpenMM tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/plumed.html">PLUMED tutorial</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../user/index.html">User guide</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">Tasks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/upgrade-2.14.html">Upgrade from 2.13 to 2.14</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/migrate-1x.html">Migrate from d-SEAMS 1.x</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Use a language binding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/neighbour-lists.html">Cutoff neighbour lists</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cages-trace.html">Cages and TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/q4-q6.html">Local q4 and q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/chill-plus.html">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding.html">Choosing a cutoff and padding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/symmetry-classifier.html">The symmetry classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/linkcell-carried.html">Linkcell neighbours and carried updates</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/science-front.html">Basal profiles and the nucleation census</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/from-trajectory.html">From a trajectory to the ice front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-insitu.html">In-situ CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../walkthrough/index.html">Engine walkthroughs</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="index.html">Lookup pages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="python-frame.html">Python Frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="cli.html">seams CLI</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Formats</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="walk-compare.html">walk_compare</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="api.html">API map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="cross-language.html">One task, four fronts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="glossary.html">Glossary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="release-2.14.html">2.14.0 release notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/c.html">C</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/science.html">Science front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../capi/index.html">C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="c-api.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cpp-api.html">C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-api.html">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="julia-api.html">Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="r-api.html">R</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rust-api.html">Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fortran-api.html">Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lua-api.html">Lua</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli-api.html">Command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python-frame.html">Python Frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html">seams CLI</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Data Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="walk-compare.html">walk_compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-language.html">One task on every front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release-2.14.html">2.14.0 release notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../capi/index.html">C API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/c.html">C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/python.html">Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/r.html">R</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../stable/science.html">Science front</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Engines</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/index.html">Engine builds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/insitu.html">In-situ</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Comparisons</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../comparisons.html">Head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/clavis-trace.html">ClavisCage TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sqq.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h.html">Performance</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-h2h.html">Literature head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-reproduce.html">Reproduce the literature head-to-head</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Concepts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/c-api.html">The C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/interface-order.html">Interface and confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/primitive-rings.html">Primitive rings and the full graph</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/linkcell-scaling.html">Linkcell strong scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/rings-one-thread.html">Rings on one thread</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/symmetry.html">Local symmetry</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/trace-assembly.html">TRACE and signature cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/stacking-disorder.html">Stacking disorder</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/hop-ball.html">Carried rings and the hop ball</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/trace-threads.html">Signature-search thread controls</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance.html">Release-candidate sitting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview.html">Performance overview</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/binding-overhead.html">Binding overhead</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range.html">Performance, 4096 to 110592</a></li>
+</li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/repositories.html">Repository map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/release.html">Release process</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/lean.html">Lean proofs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
 </ul>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
@@ -562,88 +429,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/clavis-trace-tables.html">ClavisCage TRACE</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/comparisons-summary-tables.html">Head-to-head summary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/cutoff-rings-tables.html">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html">884736 sitting, ice and liquid</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#neighbours">Neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#rings">Rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#rings-against-cycless">Rings against cycless</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#rings-against-sqq">Rings against SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#q6-against-ovito">q6 against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#cages">Cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-h2h-tables.html#linkcell-scaling">Linkcell scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview-tables.html">What each file holds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview-tables.html#rc3-sitting-one-thread-against-eight">rc3 sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview-tables.html#molecule-sitting-one-thread-against-eight">884736-molecule sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview-tables.html#signature-search-one-thread-against-eight">signature search, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview-tables.html#pool-sized-kernels-one-thread-against-eight">pool-sized kernels, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-overview-tables.html#pool-audit-at-4096-molecules-four-threads-against-eight">Pool audit at 4096 molecules, four threads against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html">binding-overhead.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-ice-ic-rings-n16-csv">h2h-ice-ic-rings-n16.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-ice-ic-rings-csv">h2h-ice-ic-rings.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-literature-csv">h2h-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-summary-csv">h2h-summary.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v12-csv">h2h-watch-v12.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v13-csv">h2h-watch-v13.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v2-csv">h2h-watch-v2.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v3-csv">h2h-watch-v3.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v4-csv">h2h-watch-v4.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v6-sqq-csv">h2h-watch-v6-sqq.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-v7-csv">h2h-watch-v7.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#h2h-watch-csv">h2h-watch.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#rank-scale-csv">rank-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#rc2perf-literature-csv">rc2perf-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#rc3-sitting-csv">rc3-sitting.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#thread-scale-csv">thread-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#weak-scale-csv">weak-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-range-tables.html#sitting-large-csv">sitting-large.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html">neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#q4">q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#rings">rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#cages">cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/performance-tables.html#king">king</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/pool-audit-tables.html">ice Ic, 4096 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/pool-audit-tables.html#ice-ic-32768-molecules">ice Ic, 32768 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/pool-audit-tables.html#ice-ic-110592-molecules">ice Ic, 110592 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/pool-audit-tables.html#ice-ic-884736-molecules">ice Ic, 884736 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html">884736 molecules, rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-q4">884736 molecules, q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-q6">884736 molecules, q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-q4-q6">884736 molecules, q4+q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-neighbours">884736 molecules, neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-coordination">884736 molecules, coordination</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-chill">884736 molecules, chill+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-classifier">884736 molecules, classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-ptm-default">884736 molecules, ptm-default</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sitting-large-tables.html#molecules-ptm-ice">884736 molecules, ptm-ice</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/sqq-tables.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/trace-threads-tables.html">signature cages, sI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/trace-threads-tables.html#signature-cages-sii">signature cages, sII</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html">The bulk-liquid gate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#summary-rows">Summary rows</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#layers-whose-label-changed">Layers whose label changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#classify-timings">Classify timings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-speed.html">One thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html">Neighbours against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html#full-cutoff-ring-call">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="release-2.14-notes.html">Added</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="release-2.14-notes.html#changed">Changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="release-2.14-notes.html#deprecated">Deprecated</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="release-2.14-notes.html#removed">Removed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="release-2.14-notes.html#fixed">Fixed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html">Interface slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#brine-frame">Brine frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#ice-ih-six-rings">Ice Ih six-rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#nucleation-nucleus">Nucleation nucleus</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#si-and-sii-cages">sI and sII cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/molecules.html">Molecule stills</a></li>
 </ul>
         </div>
       </div>
@@ -662,8 +449,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#chemfiles-pdb-gro-dcd">chemfiles (PDB, GRO, DCD)</a></li>
 <li><a class="reference internal" href="#eon-con">eOn <code class="docutils literal notranslate"><span class="pre">.con</span></code></a></li>
 </ul>
-</div><div class="edit-this-page">
-  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/orgmode/reference/data-formats.org">Edit this page</a>
 </div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
@@ -680,8 +465,12 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Data Formats</strong>
+        <a itemprop="item" href="index.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Data Formats</strong>
+        <meta itemprop="position" content="3" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -726,11 +515,11 @@ not the frame index).</p>
 </tbody>
 </table>
 </div>
-<p>The CLI matches the substring after the last <code class="docutils literal notranslate"><span class="pre">.</span></code> (<code class="docutils literal notranslate"><span class="pre">xyz</span></code>, <code class="docutils literal notranslate"><span class="pre">con</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">gro</span></code>, <code class="docutils literal notranslate"><span class="pre">dcd</span></code>). Everything else, including a path with no
-dot, is a LAMMPS dump. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> reports chemfiles and
-readcon-core. Python <code class="docutils literal notranslate"><span class="pre">pydseams.read</span></code> and Lua <code class="docutils literal notranslate"><span class="pre">dseams.read</span></code> use the
-same suffixes.</p>
+<p>The CLI takes the substring after the last <code class="docutils literal notranslate"><span class="pre">.</span></code> and compares it to
+<code class="docutils literal notranslate"><span class="pre">xyz</span></code>, <code class="docutils literal notranslate"><span class="pre">con</span></code>, <code class="docutils literal notranslate"><span class="pre">pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">gro</span></code>, and <code class="docutils literal notranslate"><span class="pre">dcd</span></code>. The comparison is exact, so
+<code class="docutils literal notranslate"><span class="pre">foo.xyz/dump</span></code> is a LAMMPS dump. A path with no dot is a LAMMPS dump.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> reports chemfiles and readcon-core. The 2.14
+Python frame is documented on <a class="reference external" href="python-frame.html">Python Frame</a>.</p>
 <section id="type-columns">
 <h2>Type columns<a class="headerlink" href="#type-columns" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper docutils container">
@@ -745,18 +534,18 @@ same suffixes.</p>
 <tbody>
 <tr class="row-even"><td><p>LAMMPS</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> <code class="docutils literal notranslate"><span class="pre">type</span></code> column</p></td>
-<td><p>single-frame: keep type 2, then type 1 if empty</p></td>
+<td><p>type 2 when any atom has that type, otherwise type 1. A multi-frame <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> keeps every atom</p></td>
 <td><p>keep type <code class="docutils literal notranslate"><span class="pre">I</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>XYZ</p></td>
-<td><p>hard-coded <code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>first appearance of each symbol, starting at 1</p></td>
 <td><p>ignored on the read</p></td>
 <td><p>ignored on the read</p></td>
 </tr>
 <tr class="row-even"><td><p>chemfiles</p></td>
-<td><p>numeric <code class="docutils literal notranslate"><span class="pre">type</span></code> string, else numeric <code class="docutils literal notranslate"><span class="pre">name</span></code>, else atomic number (or <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></td>
+<td><p>all-digit <code class="docutils literal notranslate"><span class="pre">type</span></code> string, else atomic number, else 8 for O/OW/OH and 1 for H/HW/HO, else 0</p></td>
 <td><p>keep every atom (<code class="docutils literal notranslate"><span class="pre">typeFilter</span> <span class="pre">=</span> <span class="pre">-1</span></code>)</p></td>
-<td><p>keep type <code class="docutils literal notranslate"><span class="pre">I</span></code></p></td>
+<td><p>keep that species number</p></td>
 </tr>
 <tr class="row-odd"><td><p>readcon</p></td>
 <td><p>atomic number from the file</p></td>
@@ -768,7 +557,11 @@ same suffixes.</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">Point::atomID</span></code> is the file id when the format has one, else
 1-based file order. <code class="docutils literal notranslate"><span class="pre">Point::molID</span></code> is <code class="docutils literal notranslate"><span class="pre">mol</span></code> when present, else
-<code class="docutils literal notranslate"><span class="pre">atomID</span></code> (chemfiles: residue id when the format has residues).</p>
+<code class="docutils literal notranslate"><span class="pre">atomID</span></code>. chemfiles prefers a numeric <code class="docutils literal notranslate"><span class="pre">mol</span></code> property, then the
+residue id, then <code class="docutils literal notranslate"><span class="pre">atomID</span></code>.</p>
+<p>A symbol that parses as a number is XYZ type 1. Si then N is type 1
+then type 2. A frame with no element names and no atomic numbers
+stores chemfiles species 1.</p>
 </section>
 <section id="empty-frames">
 <h2>Empty frames<a class="headerlink" href="#empty-frames" title="Link to this heading">¶</a></h2>
@@ -795,25 +588,38 @@ when the reader knows it.</p>
 <tr class="row-odd"><td><p>XYZ path missing</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;Wrong</span> <span class="pre">filepath&quot;)</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>chemfiles frame out of range</p></td>
-<td><p>cloud left as passed in (usually empty)</p></td>
+<tr class="row-even"><td><p>XYZ header, truncated frame, or bad coordinate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::runtime_error</span></code> (see XYZ)</p></td>
 </tr>
-<tr class="row-odd"><td><p>chemfiles throws</p></td>
+<tr class="row-odd"><td><p>chemfiles step past the last frame</p></td>
 <td><p>empty cloud</p></td>
 </tr>
-<tr class="row-even"><td><p>readcon path unreadable or frame missing</p></td>
+<tr class="row-even"><td><p>chemfiles error or selection error</p></td>
 <td><p>empty cloud</p></td>
+</tr>
+<tr class="row-odd"><td><p>XYZ opened by chemfiles with zero steps</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">std::runtime_error</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>readcon path unreadable, frame missing, or frame index below 1</p></td>
+<td><p>empty cloud, <code class="docutils literal notranslate"><span class="pre">currentFrame</span></code> left at 0</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code> on an empty cloud print <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code>
-and return 0. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">0</span></code>.</p>
+and return 0. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> without <code class="docutils literal notranslate"><span class="pre">--signature</span></code> prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">seeded</span> <span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">both</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">0</span></code>. <code class="docutils literal notranslate"><span class="pre">--graph</span></code> replaces
+<code class="docutils literal notranslate"><span class="pre">seeded</span></code>. With <code class="docutils literal notranslate"><span class="pre">--signature</span></code>, each signature prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">graph</span> <span class="pre">seeded</span> <span class="pre">signature</span> <span class="pre">SPEC</span> <span class="pre">cages</span> <span class="pre">0</span> <span class="pre">atoms</span> <span class="pre">0</span></code>.
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> on a missing dump prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span></code> and returns 0.
+A missing <code class="docutils literal notranslate"><span class="pre">.con</span></code> path makes the CLI throw <code class="docutils literal notranslate"><span class="pre">cannot</span> <span class="pre">read</span> <span class="pre">PATH</span></code>.
+A <code class="docutils literal notranslate"><span class="pre">.pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, or <code class="docutils literal notranslate"><span class="pre">.dcd</span></code> path on a build without chemfiles throws
+<code class="docutils literal notranslate"><span class="pre">chemfiles</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">this</span> <span class="pre">build</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">sinp::nLammpsFrames</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code> when the file cannot be read.
 <code class="docutils literal notranslate"><span class="pre">sinp::forEachLammpsFrame</span></code> is a no-op when that count is <code class="docutils literal notranslate"><span class="pre">0</span></code>, or
-when <code class="docutils literal notranslate"><span class="pre">first</span> <span class="pre">&gt;</span> <span class="pre">last</span></code>. The CLI’s range dispatcher treats XYZ as one frame
-and reads chemfiles/readcon frames serially; it preserves requested frame
-order for every supported suffix.</p>
+when <code class="docutils literal notranslate"><span class="pre">first</span> <span class="pre">&gt;</span> <span class="pre">last</span></code>. The CLI prints the frames it ran, in the
+requested order. XYZ is one frame: a range that starts after frame 1
+prints nothing. chemfiles and readcon walk in order on one open
+file and stop at the first empty cloud after the first requested
+frame.</p>
 </section>
 <section id="lammps-dump">
 <h2>LAMMPS dump<a class="headerlink" href="#lammps-dump" title="Link to this heading">¶</a></h2>
@@ -833,14 +639,15 @@ order for every supported suffix.</p>
 </span></pre></div>
 </div>
 <p>That block is the first snapshot of
-<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> (750 atoms, 250 waters).</p>
+<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> (750 atoms, 250 of type 2).</p>
 <p>Required <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> columns: <code class="docutils literal notranslate"><span class="pre">type</span></code>, and one coordinate triple.
 The coordinate names follow LAMMPS <code class="docutils literal notranslate"><span class="pre">ReaderNative</span></code>: <code class="docutils literal notranslate"><span class="pre">x</span></code> / <code class="docutils literal notranslate"><span class="pre">y</span></code> / <code class="docutils literal notranslate"><span class="pre">z</span></code>
 if present, otherwise the first of <code class="docutils literal notranslate"><span class="pre">xu</span></code> / <code class="docutils literal notranslate"><span class="pre">xs</span></code> / <code class="docutils literal notranslate"><span class="pre">xsu</span></code> (and the <code class="docutils literal notranslate"><span class="pre">y</span></code>
 and <code class="docutils literal notranslate"><span class="pre">z</span></code> analogues <code class="docutils literal notranslate"><span class="pre">yu</span></code> / <code class="docutils literal notranslate"><span class="pre">ys</span></code> / <code class="docutils literal notranslate"><span class="pre">ysu</span></code>, <code class="docutils literal notranslate"><span class="pre">zu</span></code> / <code class="docutils literal notranslate"><span class="pre">zs</span></code> / <code class="docutils literal notranslate"><span class="pre">zsu</span></code>). Extra
 columns are ignored.</p>
-<p>Optional columns: <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">mol</span></code>. Missing <code class="docutils literal notranslate"><span class="pre">mol</span></code> falls back to <code class="docutils literal notranslate"><span class="pre">id</span></code>.
-If both are missing, the reader uses column 0 for both.</p>
+<p>Optional columns: <code class="docutils literal notranslate"><span class="pre">id</span></code>, <code class="docutils literal notranslate"><span class="pre">mol</span></code>. A missing <code class="docutils literal notranslate"><span class="pre">mol</span></code> column copies
+<code class="docutils literal notranslate"><span class="pre">atomID</span></code> into <code class="docutils literal notranslate"><span class="pre">molID</span></code>. A missing <code class="docutils literal notranslate"><span class="pre">id</span></code> column assigns <code class="docutils literal notranslate"><span class="pre">atomID</span></code> from
+1 in file order. Column 0 is used only when the header names it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">PointCloud.box</span></code> is <code class="docutils literal notranslate"><span class="pre">hi</span> <span class="pre">-</span> <span class="pre">lo</span></code> per axis (the LAMMPS bound spans, not
 the lattice edge lengths). <code class="docutils literal notranslate"><span class="pre">PointCloud.boxLow</span></code> is the lower bound.
 A third number on a box line is a triclinic tilt (<code class="docutils literal notranslate"><span class="pre">xy</span></code>, then <code class="docutils literal notranslate"><span class="pre">xz</span></code>,
@@ -850,31 +657,42 @@ present, <code class="docutils literal notranslate"><span class="pre">box.size()
 with the same mapping as <code class="docutils literal notranslate"><span class="pre">nneigh::dumpBoundsToH</span></code> /
 <code class="docutils literal notranslate"><span class="pre">nneigh::lammpsBoxToLcCell</span></code>. An independent-axis wrap on the bound
 spans is the wrong image for a sheared cell; see
-<a class="reference external" href="../howto/sheared-cells.html">Sheared cells</a>.
+<a class="reference external" href="../user/howto/sheared-cells.html">Sheared cells</a>.
 <code class="docutils literal notranslate"><span class="pre">gen::formatDumpBox</span></code> prints the spans and, when present, the tilt.
 Dump writers emit <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">BOX</span> <span class="pre">BOUNDS</span> <span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span> <span class="pre">pp</span> <span class="pre">pp</span> <span class="pre">pp</span></code> and a third
 field on each bound line when the cloud carries tilt.</p>
 <p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints the three bound spans (<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">Lx</span> <span class="pre">Ly</span> <span class="pre">Lz</span></code>) and,
 when <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>, the tilt (<code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>).</p>
 <p>Mixed water dumps in this tree use type 2 for oxygen and type 1 for
-hydrogen. Single-site mW dumps in this tree use type 1.</p>
-<p>A two-type (or multi-type) dump is the same text format. Each atom
-keeps its <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">ATOMS</span></code> <code class="docutils literal notranslate"><span class="pre">type</span></code> value. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> / <code class="docutils literal notranslate"><span class="pre">chill</span></code> /
-<code class="docutils literal notranslate"><span class="pre">cages</span></code> still filter through <code class="docutils literal notranslate"><span class="pre">--type</span></code> (<code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code>). <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">--pair-types</span> <span class="pre">I,J</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">!=</span> <span class="pre">J</span></code> loads every atom (<code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>)
-and histograms I-J pairs. The pair list is
-<code class="docutils literal notranslate"><span class="pre">nneigh::neighListPair</span></code>; the histogram is <code class="docutils literal notranslate"><span class="pre">rdf::partialRdf</span></code>.
-Neither is an ice score. A mixed-type
-dump that is not that water convention (ionic liquid, solvent plus
-solute) needs an explicit <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>; the default <code class="docutils literal notranslate"><span class="pre">0</span></code> guess is type
-2 then type 1. The C++ filter is <code class="docutils literal notranslate"><span class="pre">sinp::readLammpsTrjO</span></code> or
-<code class="docutils literal notranslate"><span class="pre">gen::getPointCloudOneAtomType</span></code>. See
-<a class="reference external" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a>.</p>
+hydrogen. <code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code> has 250 atoms of type 2.
+Single-site mW dumps in this tree use type 1.
+<code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code> is 11 frames of 4096 atoms, all type 1.</p>
+<p>On one frame, omitted <code class="docutils literal notranslate"><span class="pre">--type</span></code> (the value 0) keeps type 2 when any
+atom has it, otherwise type 1. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> does that in
+<code class="docutils literal notranslate"><span class="pre">readDefaultOxygen</span></code> for an orthorhombic <code class="docutils literal notranslate"><span class="pre">id</span> <span class="pre">type</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code> frame, and
+otherwise in <code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code>,
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span></code>, <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">steinhardt</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rings</span></code> load every atom and then apply the same keep
+(<code class="docutils literal notranslate"><span class="pre">water::keepHistoricalOxygen</span></code>). A frame with neither type 1 nor
+type 2 is empty after that keep. A multi-frame <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> with
+<code class="docutils literal notranslate"><span class="pre">--type</span></code> omitted loads every atom (<code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> keeps that LAMMPS type (<code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code>).
+<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">rdf</span> <span class="pre">--pair-types</span> <span class="pre">I,J</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">!=</span> <span class="pre">J</span></code> loads every atom
+(<code class="docutils literal notranslate"><span class="pre">readLammpsTrj</span></code>). The histogram is <code class="docutils literal notranslate"><span class="pre">rdf::partialRdf</span></code>, which builds
+its pairs with <code class="docutils literal notranslate"><span class="pre">nneigh::neighListPair</span></code>. Neither is an ice score. A
+mixed-type dump that is not the water convention (ionic liquid,
+solvent plus solute) needs an explicit <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code>. See
+<a class="reference external" href="../user/howto/ionic-liquid.html">Ionic-liquid dumps</a>.</p>
 <p>A live dump session caches <code class="docutils literal notranslate"><span class="pre">ITEM:</span> <span class="pre">TIMESTEP</span></code> offsets. Sequential
-walks do not rescan prior snapshots. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--frame</span> <span class="pre">N</span> <span class="pre">--last</span> <span class="pre">M</span> <span class="pre">--jobs</span> <span class="pre">J</span></code> walks that table with one handle per OpenMP worker.
-<code class="docutils literal notranslate"><span class="pre">sinp::dropLammpsDumpIndex</span></code> drops a cached session (tests that
-rewrite a path in place).</p>
+walks do not rescan prior snapshots. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--frame</span> <span class="pre">N</span> <span class="pre">--last</span> <span class="pre">M</span> <span class="pre">--jobs</span> <span class="pre">J</span></code> walks that table. Each worker seeks the shared offsets
+and opens its own handle when the session lock is held.
+<code class="docutils literal notranslate"><span class="pre">sinp::dropLammpsDumpIndex</span></code> drops the cached offsets for one path
+so the next read indexes the file again.</p>
 <p>The two type-filtered C++ readers take the same slice arguments
-(<code class="docutils literal notranslate"><span class="pre">isSlice</span></code>, <code class="docutils literal notranslate"><span class="pre">coordLow</span></code>, <code class="docutils literal notranslate"><span class="pre">coordHigh</span></code>) and do not keep the same atoms.</p>
+(<code class="docutils literal notranslate"><span class="pre">isSlice</span></code>, <code class="docutils literal notranslate"><span class="pre">coordLow</span></code>, <code class="docutils literal notranslate"><span class="pre">coordHigh</span></code>) and do not keep the same atoms.
+The CLI has no slice flag. <code class="docutils literal notranslate"><span class="pre">gen::getPointCloudOneAtomType</span></code> copies
+one type out of a cloud that is already loaded, and drops atoms
+outside the slice when <code class="docutils literal notranslate"><span class="pre">isSlice</span></code> is true.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -894,57 +712,87 @@ rewrite a path in place).</p>
 </div>
 <p>An axis is inside the box when the coordinate lies in the closed
 interval, or when that axis has <code class="docutils literal notranslate"><span class="pre">lo</span> <span class="pre">==</span> <span class="pre">hi</span></code> (unconstrained).
-<code class="docutils literal notranslate"><span class="pre">([0,0,0],</span> <span class="pre">[50,0,0])</span></code> is <code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">50]</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> open.</p>
-<p>The CLI does not expose the slice. Python
-<code class="docutils literal notranslate"><span class="pre">Frame(...,</span> <span class="pre">region=(lo,</span> <span class="pre">hi))</span></code> calls <code class="docutils literal notranslate"><span class="pre">readLammpsTrjreduced</span></code>. Lua
-<code class="docutils literal notranslate"><span class="pre">dseams.read</span></code> calls <code class="docutils literal notranslate"><span class="pre">readLammpsTrjO</span></code> and has no region; a shrinking
-read is <code class="docutils literal notranslate"><span class="pre">dseams.core.readLammpsTrjreduced</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">([0,0,0],</span> <span class="pre">[50,0,0])</span></code> is <code class="docutils literal notranslate"><span class="pre">x</span></code> in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">50]</span></code>, with <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code>
+unconstrained.</p>
 </section>
 <section id="xyz">
 <h2>XYZ<a class="headerlink" href="#xyz" title="Link to this heading">¶</a></h2>
-<p>Always compiled. Standard XYZ:</p>
+<p>Always compiled. <code class="docutils literal notranslate"><span class="pre">templates/hc.xyz</span></code> and <code class="docutils literal notranslate"><span class="pre">templates/ddc.xyz</span></code> are cage
+templates. The hexagonal-cage file begins:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">12
-</span><span data-line="2">comment
+</span><span data-line="2">Lattice=&quot;     53.96900177       0.00000000       0.00000000       0.00000000      54.52899933       0.00000000       0.00000000       0.00000000      51.25699997&quot; Properties=species:S:1:pos:R:3
 </span><span data-line="3">O 8.995 10.3859997 15.0939999
 </span><span data-line="4">O 6.7459998 14.2810001 15.0939999
 </span></pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">templates/hc.xyz</span></code> is this shape (hexagonal-cage template). The first
-line is the atom count, the second line is skipped, each data line is
-<code class="docutils literal notranslate"><span class="pre">symbol</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code>. Every atom is stored as type 1. The box is the axis-
-aligned bounding box of the coordinates (<code class="docutils literal notranslate"><span class="pre">boxLow</span></code> is the minimum);
-the comment line is not parsed for a lattice. <code class="docutils literal notranslate"><span class="pre">seams</span></code> routes <code class="docutils literal notranslate"><span class="pre">.xyz</span></code>
-here and ignores <code class="docutils literal notranslate"><span class="pre">--type</span></code> on the read (classification still uses
-<code class="docutils literal notranslate"><span class="pre">--type</span></code>, which then sees type 1).</p>
-<p>XYZ files in this tree do not carry a periodic cell. Analyses that
-need the true box should use a LAMMPS dump.</p>
+<p>The first line is the atom count. The second line is a comment.
+<code class="docutils literal notranslate"><span class="pre">Lattice=&quot;ax</span> <span class="pre">ay</span> <span class="pre">az</span> <span class="pre">bx</span> <span class="pre">by</span> <span class="pre">bz</span> <span class="pre">cx</span> <span class="pre">cy</span> <span class="pre">cz&quot;</span></code> is stored as a LAMMPS dump
+box. An untilted cell stores the three lengths and an origin at
+zero. <code class="docutils literal notranslate"><span class="pre">templates/hc.xyz</span></code> is that case: <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> prints
+<code class="docutils literal notranslate"><span class="pre">box</span> <span class="pre">53.969</span> <span class="pre">54.529</span> <span class="pre">51.257</span></code>. A tilt stores the bound spans, then
+<code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>, and shifts <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> when a tilt is negative. The cell
+must have positive <code class="docutils literal notranslate"><span class="pre">ax</span></code>, <code class="docutils literal notranslate"><span class="pre">by</span></code>, and <code class="docutils literal notranslate"><span class="pre">cz</span></code>, and <code class="docutils literal notranslate"><span class="pre">ay</span></code>, <code class="docutils literal notranslate"><span class="pre">az</span></code>, and <code class="docutils literal notranslate"><span class="pre">bz</span></code>
+must be zero within tolerance. A bad value throws
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">Lattice</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">cell.&quot;)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">Lattice</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">reduced</span> <span class="pre">cell.&quot;)</span></code>.</p>
+<p>Without <code class="docutils literal notranslate"><span class="pre">Lattice=</span></code>, the comment contributes no cell. The box is the
+axis-aligned span of the coordinates and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> is the minimum.
+One atom and no lattice is stored as a 10 Å cube from that point.
+That span is not a periodic cell. Analyses that need the simulation
+cell should use a LAMMPS dump or a <code class="docutils literal notranslate"><span class="pre">Lattice=</span></code> line.</p>
+<p>Each data line is <code class="docutils literal notranslate"><span class="pre">symbol</span> <span class="pre">x</span> <span class="pre">y</span> <span class="pre">z</span></code>, or three numbers and no symbol.
+<code class="docutils literal notranslate"><span class="pre">atomID</span></code> and <code class="docutils literal notranslate"><span class="pre">molID</span></code> are the 1-based line order. The reader stops at
+the declared count. A header that is not an atom count throws
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">header</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">an</span> <span class="pre">atom</span> <span class="pre">count.&quot;)</span></code>. A short
+frame throws <code class="docutils literal notranslate"><span class="pre">std::runtime_error</span></code> naming the expected and actual
+counts. A coordinate that is not a number throws
+<code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">coordinate</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">a</span> <span class="pre">number.&quot;)</span></code>.</p>
+<p>The CLI routes <code class="docutils literal notranslate"><span class="pre">.xyz</span></code> here and does not apply <code class="docutils literal notranslate"><span class="pre">--type</span></code> on the read.
+Classification still receives <code class="docutils literal notranslate"><span class="pre">--type</span></code> and sees the types assigned
+above.</p>
 </section>
 <section id="chemfiles-pdb-gro-dcd">
 <h2>chemfiles (PDB, GRO, DCD)<a class="headerlink" href="#chemfiles-pdb-gro-dcd" title="Link to this heading">¶</a></h2>
 <p>Compiled when Meson finds chemfiles (<code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_CHEMFILES</span></code>). The CLI
 opens <code class="docutils literal notranslate"><span class="pre">.pdb</span></code>, <code class="docutils literal notranslate"><span class="pre">.gro</span></code>, and <code class="docutils literal notranslate"><span class="pre">.dcd</span></code> only. The C++ entry
-<code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code> accepts any path chemfiles can open.</p>
-<p>Frame <code class="docutils literal notranslate"><span class="pre">N</span></code> is <code class="docutils literal notranslate"><span class="pre">read_step(N-1)</span></code>. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> keeps that
-numeric type; otherwise every atom is kept. Type is the chemfiles
-type or name string when it is all digits, otherwise the atomic
-number (<code class="docutils literal notranslate"><span class="pre">value_or(1)</span></code>). <code class="docutils literal notranslate"><span class="pre">box</span></code> is the cell lengths; <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> is the
-origin. <code class="docutils literal notranslate"><span class="pre">atomID</span></code> is the 1-based file order. <code class="docutils literal notranslate"><span class="pre">molID</span></code> is the residue
-id when the format has residues, else <code class="docutils literal notranslate"><span class="pre">atomID</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">sinp::readChemfiles</span></code> accepts any path chemfiles can open. A <code class="docutils literal notranslate"><span class="pre">.dcd</span></code>
+beside a <code class="docutils literal notranslate"><span class="pre">.pdb</span></code> of the same stem uses that PDB as topology.</p>
+<p>Frame <code class="docutils literal notranslate"><span class="pre">N</span></code> is step <code class="docutils literal notranslate"><span class="pre">N-1</span></code>. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code> with <code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> keeps that species
+number. <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">0</span></code> and a negative type keep every atom. Species is
+the all-digit <code class="docutils literal notranslate"><span class="pre">type</span></code> string when chemfiles has one, otherwise the
+atomic number, otherwise 8 for O/OW/OH and 1 for H/HW/HO (name or
+type), otherwise 0. A frame that names no element stores species 1
+in place of 0.</p>
+<p>An orthogonal cell is stored as its three lengths with <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> at
+the origin. A tilted cell is the dump box (spans, then <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>)
+with <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> shifted for a negative tilt. An infinite cell clears
+<code class="docutils literal notranslate"><span class="pre">box</span></code> and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code>. <code class="docutils literal notranslate"><span class="pre">atomID</span></code> is the 1-based index in the file,
+including atoms the type filter dropped.</p>
+<p>A step past the last frame, a chemfiles error, or a bad selection
+returns an empty cloud. An XYZ trajectory that chemfiles opens with
+zero steps throws <code class="docutils literal notranslate"><span class="pre">std::runtime_error(&quot;XYZ</span> <span class="pre">read</span> <span class="pre">failed:</span> <span class="pre">the</span> <span class="pre">file</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">frames&quot;)</span></code>.</p>
 <p>A flake build leaves chemfiles off. The default pixi environment
-ships chemfiles, so <code class="docutils literal notranslate"><span class="pre">pixi</span> <span class="pre">run</span> <span class="pre">build</span></code> reports <code class="docutils literal notranslate"><span class="pre">chemfiles:</span> <span class="pre">enabled</span></code>.</p>
+provides chemfiles. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> then prints <code class="docutils literal notranslate"><span class="pre">chemfiles:</span> <span class="pre">enabled</span></code>.</p>
 </section>
 <section id="eon-con">
 <h2>eOn <code class="docutils literal notranslate"><span class="pre">.con</span></code><a class="headerlink" href="#eon-con" title="Link to this heading">¶</a></h2>
 <p>Compiled when Meson finds readcon-core (<code class="docutils literal notranslate"><span class="pre">SEAMS_HAS_READCON</span></code>).
-<code class="docutils literal notranslate"><span class="pre">input/eon/tiny_multi_cuh2.con</span></code> is a two-frame fixture (Cu + H,
-<code class="docutils literal notranslate"><span class="pre">con_spec_version</span></code> 2).</p>
-<p><code class="docutils literal notranslate"><span class="pre">type</span></code> is the atomic number from the file. <code class="docutils literal notranslate"><span class="pre">atomID</span></code> is the file atom
-id. <code class="docutils literal notranslate"><span class="pre">molID</span></code> is set to <code class="docutils literal notranslate"><span class="pre">atomID</span></code>. <code class="docutils literal notranslate"><span class="pre">box</span></code> is <code class="docutils literal notranslate"><span class="pre">frame-&gt;cell[0..2]</span></code>;
-<code class="docutils literal notranslate"><span class="pre">boxLow</span></code> is the origin. Frame <code class="docutils literal notranslate"><span class="pre">N</span></code> is the Nth record from the
-iterator. The CLI does not type-filter <code class="docutils literal notranslate"><span class="pre">.con</span></code>.</p>
-<p>A flake build leaves readcon-core off (the wrap is not downloaded).
-Enable it in a Meson build that can see the wrap or a system package,
-then <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code> reports <code class="docutils literal notranslate"><span class="pre">readcon-core:</span> <span class="pre">enabled</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">input/eon/tiny_multi_cuh2.con</span></code> is a two-frame file (Cu + H,
+<code class="docutils literal notranslate"><span class="pre">con_spec_version</span></code> 2) with an orthorhombic cell
+15.3456 by 21.702 by 100 Å.</p>
+<p><code class="docutils literal notranslate"><span class="pre">type</span></code> is the atomic number. <code class="docutils literal notranslate"><span class="pre">atomID</span></code> is the file atom id.
+<code class="docutils literal notranslate"><span class="pre">molID</span></code> is <code class="docutils literal notranslate"><span class="pre">atomID</span></code>. Lengths and angles become the dump box.
+Orthorhombic angles (90 degrees) store three lengths and an origin
+at zero. A shear stores spans plus <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code>, and <code class="docutils literal notranslate"><span class="pre">boxLow</span></code> shifts
+with a negative tilt. Frame <code class="docutils literal notranslate"><span class="pre">N</span></code> is the Nth record. An index below 1,
+a missing record, or a file readcon cannot open returns an empty
+cloud, with <code class="docutils literal notranslate"><span class="pre">currentFrame</span></code> left at 0. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> on a missing
+record prints <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">0</span> <span class="pre">frame</span> <span class="pre">0</span></code> and returns 0. The CLI does not
+type-filter <code class="docutils literal notranslate"><span class="pre">.con</span></code>.</p>
+<p>A flake build leaves readcon-core off: auto features are disabled
+and the wrap is not fetched. A Meson build that can see the wrap or
+a system package, with the feature left on auto or set to enabled,
+prints <code class="docutils literal notranslate"><span class="pre">readcon-core:</span> <span class="pre">enabled</span></code> from <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">--features</span></code>.</p>
 </section>
 </section>
 

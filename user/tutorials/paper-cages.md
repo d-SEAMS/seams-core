@@ -1,0 +1,59 @@
+<!-- https://docs.dseams.info/user/tutorials/paper-cages.md -->
+
+# Cage census of sI, sII and sH {#cage-census-of-si-sii-and-sh}
+
+A clathrate cage is a closed polyhedron of primitive rings. The
+signature is the face list: $5^{12}$ is twelve pentagons, and
+$5^{12}6^{2}$ adds two hexagons. Counting those polyhedra is how you
+tell sI from sII from sH. GenIce builds the empty host. Guests would
+sit in the cages and are left out here, because the census is of the
+water rings.
+
+Use only the oxygen sites in the LAMMPS trajectory. Hydrogens
+and the massless site would change the neighbour list. sI and sII are
+orthogonal. Their commands use the default face-edge window,
+`2.65,3.15` in the angstroms of the dump. sH is skewed. The GenIce
+HS3 cell has a tilt, and the dump keeps it. The sH command passes
+`--cage-edge none`, so a face is kept from its ring census and is not
+filtered by edge length. sI and sII do not pass that flag.
+
+The cage census is
+
+```text
+cages sI 2 6
+cages sII 16 8
+cages sH 6 4 2
+```
+
+sI, one cell, 46 waters: 2 of $5^{12}$ and 6 of $5^{12}6^{2}$.
+sII, 136 waters: 16 of $5^{12}$ and 8 of $5^{12}6^{4}$.
+sH, the GenIce HS3 cell, 68 waters: 6 of $5^{12}$, 4 of
+$4^{3}5^{6}6^{3}$, and 2 of $5^{12}6^{8}$.
+
+## Full run {#full-run}
+
+The unit cell is already the right cage. A larger host has to hold
+that census times the number of cells, or the count is wrong.
+The full example repeats sI as 2 by 2 by 2, eight cells and 368 waters,
+and sII and sH as 2 by 2 by 1, four cells, 544 and 272 waters. sH
+keeps its tilt. `--cage-edge none` is still only the sH command.
+
+The repeated cells give
+
+```text
+cages full input sI molecules 368 frames 1 file sI-full.lammpstrj
+cages full sI 16 48
+cages full input sII molecules 544 frames 1 file sII-full.lammpstrj
+cages full sII 64 32
+cages full input sH molecules 272 frames 1 file sH-full.lammpstrj
+cages full sH 24 16 8
+cages full paper unit sI molecules 46 cages 2 6
+cages full paper unit sII molecules 136 cages 16 8
+cages full paper unit sH molecules 68 cages 6 4 2
+```
+
+Eight sI cells hold 16 of $5^{12}$ and 48 of $5^{12}6^{2}$. Four
+sII cells hold 64 of $5^{12}$ and 32 of $5^{12}6^{4}$. Four sH
+cells hold 24 of $5^{12}$, 16 of $4^{3}5^{6}6^{3}$, and 8 of
+$5^{12}6^{8}$. Each number is the unit-cell count times the number
+of cells.

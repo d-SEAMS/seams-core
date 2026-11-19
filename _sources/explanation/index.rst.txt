@@ -7,50 +7,79 @@ These pages are for understanding. They are not recipes.
 
 .. table::
 
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | page                                                                    | question                                                         |
-    +=========================================================================+==================================================================+
-    | `Three repositories <architecture.rst>`_                                | Why the engine, Python, and Lua are three packages               |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `The C API <c-api.rst>`_                                                | Opaque handles, errors, and the analyses libseams exports        |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `CHILL+ versus cages <chill-plus-vs-cages.rst>`_                        | Why the two scores disagree                                      |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `CHILL+: the published rule and the OVITO rule <chill-plus-rules.rst>`_ | Four-nearest q3, the neighbour test, and the OVITO shell         |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Interface and confined ice <interface-order.rst>`_                     | Where the 2015 rule and the OVITO rule part                      |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Ring-adjacent completion <ring-completion.rst>`_                       | ``ringAdjacentCompletion`` and the seeded flag                   |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Primitive rings and the full graph <primitive-rings.rst>`_             | Distances on the whole graph, then levels below the source       |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Primitive rings and OVITO FindRings <ovito-findrings.rst>`_            | K2,3 has three primitive 4-rings; FindRings reports two          |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Linkcell strong scaling <linkcell-scaling.rst>`_                       | The weighted cell bisection, its halo, and the measured speedups |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Rings on one thread <rings-one-thread.rst>`_                           | ``ringNetwork`` against OVITO FindRings                          |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Topological network criteria <topological-network.rst>`_               | The formulae the classifiers use                                 |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Local symmetry <symmetry.rst>`_                                        | The ice shell, the cages, and the held-out scores                |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `TRACE and signature cages <trace-assembly.rst>`_                       | Hydrogen-bond cages and :math:`V-E+F=2`                          |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Stacking disorder <stacking-disorder.rst>`_                            | Why a ring census separates cubic ice from hexagonal ice         |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Carried rings <hop-ball.rst>`_                                         | Which rings a changed bond can touch                             |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Signature thread controls <trace-threads.rst>`_                        | Team size, the OpenMP wait, and the pool-audit kernels           |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Release-candidate sitting <performance.rst>`_                          | Tables built from ``benchmarks/rc3-sitting.csv``                 |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Performance overview <performance-overview.rst>`_                      | rc3, the signature search, the large cell, and the pool audit    |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Performance <performance-h2h.rst>`_                                    | Neighbours, rings, q6, CHILL+, cages, PTM, and linkcell scaling  |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Binding overhead <binding-overhead.rst>`_                              | Language wrappers against the C API on ice Ih                    |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Performance, 4096 to 110592 <performance-range.rst>`_                  | Neighbour and ring rows, with the stored interval, n, and DNF    |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
-    | `Citation <citation.rst>`_                                              | What to cite                                                     |
-    +-------------------------------------------------------------------------+------------------------------------------------------------------+
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | page                                                                    | question                                                              |
+    +=========================================================================+=======================================================================+
+    | `Repositories <architecture.rst>`_                                      | What seams-core, the language packages, and linkcell each build       |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `The C API <c-api.rst>`_                                                | Opaque handles, errors, and the analyses libseams exports             |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `CHILL+ versus cages <chill-plus-vs-cages.rst>`_                        | Why the two scores disagree                                           |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `CHILL+: the published rule and the OVITO rule <chill-plus-rules.rst>`_ | Four-nearest q3, the neighbour test, and the OVITO shell              |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Interface and confined ice <interface-order.rst>`_                     | Where the 2015 rule and the OVITO rule part                           |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Ring-adjacent completion <ring-completion.rst>`_                       | ``ringAdjacentCompletion`` and the seeded flag                        |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Primitive rings and the full graph <primitive-rings.rst>`_             | Distances on the whole graph, then levels below the source            |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Primitive rings and OVITO FindRings <ovito-findrings.rst>`_            | K2,3 has three primitive 4-rings; FindRings reports two               |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Linkcell strong scaling <linkcell-scaling.rst>`_                       | The rank bisection, its halo, and the column split inside one process |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Rings on one thread <rings-one-thread.rst>`_                           | ``ringNetwork`` against OVITO FindRings                               |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Topological network criteria <topological-network.rst>`_               | The formulae the classifiers use                                      |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Local symmetry <symmetry.rst>`_                                        | The ice shell, the cages, and the held-out scores                     |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `TRACE and signature cages <trace-assembly.rst>`_                       | Hydrogen-bond cages and :math:`V-E+F=2`                               |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Stacking disorder <stacking-disorder.rst>`_                            | Why a ring census separates cubic ice from hexagonal ice              |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Carried rings <hop-ball.rst>`_                                         | Which rings a changed bond can touch                                  |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Signature thread controls <trace-threads.rst>`_                        | Team size, the OpenMP wait, and the kernel timings                    |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Release-candidate sitting <performance.rst>`_                          | Medians and interquartile ranges for the release-candidate comparison |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Performance overview <performance-overview.rst>`_                      | Overview of the performance comparisons                               |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Performance <performance-h2h.rst>`_                                    | Neighbours, rings, q6, CHILL+, cages, PTM, and linkcell scaling       |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Binding overhead <binding-overhead.rst>`_                              | Language wrappers against the C API on ice Ih                         |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Performance, 4096 to 110592 <performance-range.rst>`_                  | Neighbour and ring rows, with the stored interval and n               |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+    | `Citation <citation.rst>`_                                              | What to cite                                                          |
+    +-------------------------------------------------------------------------+-----------------------------------------------------------------------+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   architecture
+   binding-overhead
+   c-api
+   chill-plus-rules
+   chill-plus-vs-cages
+   citation
+   clavis-trace
+   hop-ball
+   interface-order
+   linkcell-scaling
+   ovito-findrings
+   performance
+   performance-h2h
+   performance-overview
+   performance-range
+   primitive-rings
+   ring-completion
+   rings-one-thread
+   sqq
+   stacking-disorder
+   symmetry
+   topological-network
+   trace-assembly
+   trace-threads

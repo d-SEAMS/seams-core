@@ -1,0 +1,168 @@
+<!-- https://docs.dseams.info/reference/python-frame.md -->
+
+# Python Frame {#python-frame}
+
+`dseams.userframe.read` in pydseamslib 2.14.0 returns a `Frame` over
+`libseams_lang`. Install with `pip install 'pydseamslib==2.14.0'`.
+`import pydseams` loads `pydseams.frame.Frame`.
+That class has no `graph` argument on `chill_plus` and no `edge`
+argument on `cages_by_signature`.
+The calls below use `userframe`. The frame is
+`input/traj/ice1h.lammpstrj`, 128 oxygens, and the line under each
+call is the result on that cell.
+
+## read {#read}
+
+```python
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> frame.n_atoms
+128
+```
+
+## steinhardt {#steinhardt}
+
+```python
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> q = frame.steinhardt(6)
+>>> sorted(q)
+['ql', 'ql_bar']
+>>> len(q["ql"])
+128
+>>> round(sum(q["ql"]) / len(q["ql"]), 6)
+0.625855
+```
+
+## ring_census {#ring-census}
+
+```python
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> frame.ring_census(6)
+{6: 256}
+```
+
+## rdf_2d {#rdf-2d}
+
+```python
+>>> import tempfile
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> radius, values = frame.rdf_2d(tempfile.mkdtemp(), cutoff=6.0, binwidth=0.5)
+>>> len(radius)
+12
+```
+
+`len(radius)` is `int(cutoff / binwidth)`, here `int(6.0 / 0.5)`.
+`values` is `g(r)` on those bin centers.
+
+## monolayer_rings {#monolayer-rings}
+
+```python
+>>> import tempfile
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> sheet = frame.monolayer_rings(tempfile.mkdtemp(), sheet_area=1.0, max_depth=6)
+>>> sheet[6]["count"]
+256
+```
+
+## find_prisms {#find-prisms}
+
+```python
+>>> import tempfile
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> frame.find_prisms(output_dir=tempfile.mkdtemp(), max_depth=4)
+[{'size': 3, 'perfect': 0, 'imperfect': 0}, {'size': 4, 'perfect': 0, 'imperfect': 0}]
+```
+
+`max_depth=4` asks for prism sizes 3 and 4.
+This cell’s primitive rings are the 256 six-rings, so both sizes are empty and both counts stay 0.
+
+## to_ase {#to-ase}
+
+```python
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> atoms = frame.to_ase()
+>>> len(atoms)
+128
+```
+
+## to_solvis {#to-solvis}
+
+`to_solvis` needs solvis-tools. It returns `solvis.system.System`.
+
+```python
+>>> from dseams import userframe
+>>> frame = userframe.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> type(frame.to_solvis()).__name__
+'System'
+```
+
+## `dseams.Frame` {#dseams-frame}
+
+`import dseams` is the array module in the same pydseamslib wheel.
+This repository does not build it. `dseams.Frame` stores a coordinate
+array and calls `include/seams.h`. `dseams.from_ase` returns positions
+and a LAMMPS cell, which `set_frame` accepts. `q4q6` returns the local
+`q4` and `q6` arrays. `chill_plus()` returns labels and nine counts;
+index 1 is hexagonal. `neighbours` returns a CSR, and the last offset
+is the pair count. On this ice Ih cell that is 128 waters, 512
+neighbour entries, 256 six-rings, mean q6 0.625855, and 128 hexagonal
+labels.
+
+```python
+>>> import numpy as np
+>>> import dseams
+>>> def ice():
+...     xyz, edges, reading = [], [], False
+...     handle = open("input/traj/ice1h.lammpstrj")
+...     try:
+...         while True:
+...             line = handle.readline()
+...             if line == "":
+...                 break
+...             if line.startswith("ITEM: BOX BOUNDS"):
+...                 edges = []
+...                 for _ in range(3):
+...                     lo, hi = handle.readline().split()[:2]
+...                     edges.append(float(hi) - float(lo))
+...             elif line.startswith("ITEM: ATOMS"):
+...                 reading = True
+...             elif reading:
+...                 parts = line.split()
+...                 if len(parts) < 5:
+...                     break
+...                 xyz.append([float(v) for v in parts[2:5]])
+...     finally:
+...         handle.close()
+...     return xyz, edges
+>>> xyz, edges = ice()
+>>> frame = dseams.Frame()
+>>> frame.set_frame(np.asarray(xyz), np.asarray(edges))
+>>> frame.count()
+128
+>>> offsets, cols = frame.neighbours(3.5)
+>>> int(offsets[-1])
+512
+>>> sizes, sym, hist, frac = frame.rings(3.5, 6)
+>>> int(hist[6])
+256
+>>> q4, q6 = frame.q4q6(3.5)
+>>> round(float(q6.mean()), 6)
+0.625855
+>>> labels, counts = frame.chill_plus()
+>>> int(counts[1])
+128
+>>> from ase import Atoms
+>>> atoms = Atoms(symbols=["O"] * len(xyz), positions=xyz, cell=edges, pbc=True)
+>>> pos, box = dseams.from_ase(atoms)
+>>> pos.shape
+(128, 3)
+>>> frame.set_frame(pos, box)
+>>> int(frame.chill_plus()[1][1])
+128
+```

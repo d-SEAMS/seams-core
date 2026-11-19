@@ -1,0 +1,220 @@
+==========
+Benchmarks
+==========
+
+
+Time a 2.14.0 build and write down the run. The guest-code medians are
+on `Literature head-to-head <literature-h2h.rst>`_. The thread
+width each guest receives is on
+`Reproduce the literature head-to-head <literature-reproduce.rst>`_.
+The pinned neighbour session is
+`Cutoff neighbour lists <neighbour-lists.rst>`_.
+
+Build
+-----
+
+``pixi run build`` configures ``bbdir`` with ``-Dwith_tests=true`` and
+compiles it. The same two steps by hand:
+
+.. code:: bash
+
+    meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true
+    ninja -C bbdir
+
+The timers are ``bbdir/tests/bench_*``. ``pixi run test`` runs the test
+suite and does not run them.
+
+A host-only build takes the host branch of the device code.
+``SEAMS_OFFLOAD=0`` forces that path. ``SEAMS_OFFLOAD=1`` selects the
+offload path when the build has one. Record the host, the compiler,
+the commit, the thread count, the cpu affinity, and ``SEAMS_OFFLOAD``.
+
+The comparisons below use the Python scripts under ``scripts/``.
+
+Neighbour list
+--------------
+
+``bench_cutoff_list`` times ``nneigh::orthoFullCsr`` and ``neighListO`` on
+ideal ice Ic. The lattice constant is 6.35 Å and the cutoff is 3.5 Å.
+Molecules must be ``8 n^3``. The arguments are molecules, threads, and
+repetitions. The defaults are 110592, 1, and 8. Every repetition is a
+sample. The printed median is the sample at index ``n/2`` after sorting.
+
+.. code:: bash
+
+    bbdir/tests/bench_cutoff_list 110592 1 8
+
+``scripts/bench_neighbours_threads.py`` runs that binary and the same
+list in vesin, freud, and matscipy, at 10648, 110592, and 884736
+molecules and at 1, 2, 4, and 8 threads. Set ``NEIGH_BENCH`` to the
+binary. The script's own default is
+``build-release/tests/bench_cutoff_list``. ``--reps`` defaults to 8.
+``--out`` writes the lines.
+
+Triclinic list, CHILL+, rings, and diamond
+------------------------------------------
+
+``bench_v2`` takes a mode, a molecule count, a thread count, and a
+repetition count. Molecules must be ``8 n^3``. ``tilt`` builds the
+triclinic cell, with ``xy = 0.25 L``, ``xz = 0.05 L``, and ``yz = 0.12 L``.
+Any other mode uses the orthorhombic cell. The cutoff is 3.5 Å and
+the neighbour build is inside the timer. The first call is the
+warm-up and is dropped. The printed median is again the sample at
+index ``n/2`` after sorting.
+
+.. table::
+
+    +--------------+----------------------------------------------------+
+    | mode         | what the timer includes                            |
+    +==============+====================================================+
+    | ``tilt``     | the triclinic cutoff list                          |
+    +--------------+----------------------------------------------------+
+    | ``chill``    | that list, then CHILL+                             |
+    +--------------+----------------------------------------------------+
+    | ``rings``    | that list, then primitive rings to depth 6         |
+    +--------------+----------------------------------------------------+
+    | ``symmetry`` | that list, then the diamond common-neighbour label |
+    +--------------+----------------------------------------------------+
+
+.. code:: bash
+
+    bbdir/tests/bench_v2 tilt 110592 1 8
+
+``rings`` is a full search of one frame. The carried update is
+``bench_hop_stride``, below. ``scripts/bench_neighbours_v2.py`` drives
+``bench_v2`` and the matching vesin, freud, mdapy, and OVITO calls.
+Set ``NEIGH_BENCH``. The script's default is
+``bbdir-release/tests/bench_v2``. An output path, when given, is the
+first argument. ``NEIGH_ONLY`` limits the matrix to
+``mode:molecules:threads``.
+
+Local q4 and q6
+---------------
+
+``bench_ql`` reads a frame: a little-endian ``uint32`` count, a ``float64``
+box length, then ``n`` times three ``float64`` coordinates. The arguments
+are the frame, the degree, and the number of timed calls. One warm-up
+runs first. The neighbour build, at cutoff 3.5 Å, is inside every
+sample. A last path writes the warm-up :math:`q_l` as raw ``float64``.
+
+.. code:: bash
+
+    bbdir/tests/bench_ql frame.bin 6 8
+
+``scripts/bench_ql_threads.py`` builds ideal ice Ic at bond 2.75 Å and
+one shifted liquid, and times degrees 4 and 6 against OVITO and
+freud. ``--out`` is required. The binary is ``SEAMS_QL_BENCH``, or
+``bbdir-release/tests/bench_ql``, or ``bbdir/tests/bench_ql``. One
+warm-up, then eight samples. The median of an even count is the mean
+of the two central values, and the interquartile range is
+Hyndman-Fan type 7.
+
+Primitive rings against OVITO
+-----------------------------
+
+``bench_rings_h2h`` times the ring search on a cutoff graph built
+before the timer. ``--repl`` reads commands: ``go`` repeats that search,
+``in`` times the neighbour list, the index, and the search together,
+and ``quit`` stops.
+
+.. code:: bash
+
+    bbdir/tests/bench_rings_h2h input/traj/exampleTraj.lammpstrj 1 2 3.5 6 8 2
+
+The arguments after the dump are frame, atom type, cutoff, maximum
+ring, repetitions, and warm-up. The defaults for the last two are 8
+and 2. Type 2 is the oxygen in ``exampleTraj.lammpstrj``.
+
+``scripts/rings_one_thread.py`` runs the binary and OVITO
+``CreateBondsModifier`` plus ``FindRingsModifier`` at one thread and at
+eight. ``--bench`` is the binary and ``--json`` is the output path.
+
+Cage stage
+----------
+
+Run ``bench_cages`` from ``input/``. The default dump is
+``traj/mW_cubic.lammpstrj``, frame 1, three repetitions, atom type 1.
+The later arguments are the HC template, the DDC template, and the
+atom type. The templates in the tree are ``templates/hc.xyz`` and
+``templates/ddc.xyz``.
+
+.. code:: bash
+
+    cd input && ../bbdir/tests/bench_cages
+
+Each printed time is the fastest repetition. The lines are the ring
+network to depth 7, ``findHC``, ``findDDC``, both of those, local :math:`q_6`,
+and, when the templates load, the shape match. A nauty certificate of
+the six-rings is included when nauty is linked.
+
+``bench_ddc_ladder`` times ``findDDC`` alone. Neighbours, rings, and
+``findHC`` run before the timer. The arguments are the dump, the
+warm-up count, and the repetition count.
+
+.. code:: bash
+
+    bbdir/tests/bench_ddc_ladder input/traj/mW_cubic.lammpstrj 1 8
+
+Incremental updates
+-------------------
+
+``bench_churn_sweep`` moves a ball of molecules from frame A to frame B
+and times ``RingUpdater`` and ``AffiliationUpdater`` against a full pass.
+Each printed time is the median of the repetitions. Every incremental
+result is checked against the batch result.
+
+.. code:: bash
+
+    bbdir/tests/bench_churn_sweep input/traj/mW_cubic.lammpstrj
+
+The optional arguments are frame A, frame B, cutoff, atom type,
+repetitions, a ring full-pass fraction, and an affiliation batch
+fraction.
+
+``bench_trajectory_incremental`` walks a dump. ``RingUpdater`` is checked
+against ``ringNetwork``, and ``AffiliationUpdater`` against the batch
+affiliation. The graph is ``cutoff``, ``knn``, or ``knn-union``. The
+default graph is ``knn``.
+
+.. code:: bash
+
+    bbdir/tests/bench_trajectory_incremental input/traj/mW_cubic.lammpstrj
+
+The optional arguments are the frame count, the atom type, the
+maximum ring depth, the skin, and the graph.
+
+``bench_hop_stride`` times the carried primitive-ring update against a
+full search of the same frame. The graphs are the 3.5 Å cutoff list
+and the seeded pair used by ``seams cages``: mutual and union
+4-nearest, candidate cutoff 5 Å, rings through depth 6. The names in
+the log are ``cutoff``, ``seeded-strict``, ``seeded-union``, and ``seeded``.
+One warm-up, then eight repetitions, unless ``--reps`` and ``--warmup``
+say otherwise. The printed carry and rebuild times are type-7
+medians. The printed speedup is the sum of the per-frame median
+rebuild times divided by the sum of the per-frame median carry times.
+A transition is inside the ball when the update enumerates fewer
+sources than the molecule count.
+
+.. code:: bash
+
+    bbdir/tests/bench_hop_stride time input/traj/mW_cubic.lammpstrj --graph both
+
+``crossover`` uses ``--frame-a`` and ``--frame-b``. ``--type`` selects the
+atom type. The carried-ring definition is on
+`Linkcell neighbours and carried updates <linkcell-carried.rst>`_.
+
+Device batch
+------------
+
+``bench_gpu_batch`` reads a dump and prints ``resident yes`` or
+``resident no``. A host build that cannot keep the frames on the device
+stops there. When they stay resident, the log has the cold
+upload, compute, and download, then the warm repeat with the smallest
+compute time.
+
+.. code:: bash
+
+    bbdir/tests/bench_gpu_batch input/traj/mW_cubic.lammpstrj
+
+The optional arguments are the frame count, the atom type, and the
+number of warm repeats. The defaults are 11, 1, and 5.

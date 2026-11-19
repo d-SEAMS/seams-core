@@ -7,4 +7,4 @@ leaves scope, including when a call throws.
 .. literalinclude:: ../../examples/lang_tasks_cpp.cpp
    :language: cpp
 
-``docs_lang_cpp`` compiles and runs this file.
+Compile this file as C++17 and link ``libseams``.

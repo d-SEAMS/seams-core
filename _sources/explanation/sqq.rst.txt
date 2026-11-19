@@ -3,11 +3,97 @@ SQQ
 ===
 
 
-SQQ against d-SEAMS. The census and the ratios are written from the
-vendored CSVs at build time. A timing row names the version, the
-thread count, the repeat count and the core count. On the TIP4P/2005
-frame the edges and the rings are the exact-match rows. The chordless
-census is the like-for-like ratio. CHILL+ against SQQ's ice stage is
-the whole-tool ratio.
+SQQ 0.5.8 counts shortest-path chordless rings of size 4, 5 and 6.
+d-SEAMS 2.14.0 counts primitive rings, and that census includes
+3-rings, which SQQ does not search. On a crystal the two censuses
+are the same list. On a disordered hydrogen-bond network they are
+not, and an ice label that reads those rings moves with them.
 
-.. include:: sqq-tables.rst
+The ice comparison has three readings. The merged label puts
+published CHILL+, which does not search rings, next to SQQ's ice
+stage on chordless 6-rings. The primitive reading applies that same
+SQQ ice rule to the d-SEAMS primitive 6-rings. The chordless reading
+applies it to the d-SEAMS chordless 6-rings. The chordless reading
+is the like-for-like label. The merged reading is the whole-tool
+label.
+
+The 4096-molecule TIP4P/2005 frame
+----------------------------------
+
+The oxygen-oxygen edges and the rings match.
+
+.. table::
+
+    +-------------------+---------+-------+-----------+
+    | quantity          | d-SEAMS |   SQQ | agreement |
+    +===================+=========+=======+===========+
+    | O-O edges         |   10495 | 10495 |         1 |
+    +-------------------+---------+-------+-----------+
+    | 4-rings           |    1758 |  1758 |         1 |
+    +-------------------+---------+-------+-----------+
+    | 5-rings           |    2763 |  2763 |         1 |
+    +-------------------+---------+-------+-----------+
+    | 6-rings           |    2485 |  2485 |         1 |
+    +-------------------+---------+-------+-----------+
+    | chordless 6-rings |    4045 |  4045 |         1 |
+    +-------------------+---------+-------+-----------+
+
+The merged ice label does not. Published CHILL+ names 4 molecules
+ice and SQQ names 1129. The agreement is 0.724854. The SQQ rule on
+the primitive 6-rings names 1075, agreement 0.986816 against SQQ's
+
+1. The same rule on the chordless 6-rings names 1129 on both
+
+sides, agreement 1, all 4096 molecules.
+
+The ring lists already match, so the merged gap is the choice of
+ice rule. CHILL+ reads four bond correlations. SQQ reads the
+chordless 6-rings. Once both sides use the chordless rings, the
+labels agree.
+
+Eight repeats, mean milliseconds. The ratio is SQQ divided by d-SEAMS.
+
+.. table::
+
+    +-------------------------+---------+---------+-----------+---------+
+    | operation               | threads | d-SEAMS |       SQQ |   ratio |
+    +=========================+=========+=========+===========+=========+
+    | rings                   |       1 | 22.6026 | 1054.3846 |  46.649 |
+    +-------------------------+---------+---------+-----------+---------+
+    | rings                   |       8 |  8.2165 | 1056.0863 | 128.532 |
+    +-------------------------+---------+---------+-----------+---------+
+    | ice, CHILL+ against SQQ |       1 |  1.7860 |  914.2565 | 511.905 |
+    +-------------------------+---------+---------+-----------+---------+
+    | ice, CHILL+ against SQQ |       8 |  1.5802 |  916.2551 | 579.849 |
+    +-------------------------+---------+---------+-----------+---------+
+    | ice, chordless rings    |       1 | 28.5570 |  914.2565 |  32.015 |
+    +-------------------------+---------+---------+-----------+---------+
+    | ice, chordless rings    |       8 |  7.9694 |  916.2551 | 114.971 |
+    +-------------------------+---------+---------+-----------+---------+
+
+SQQ is one Python process. Extra threads do not shorten it. The
+d-SEAMS ring search does shorten, so the ratio rises from one
+thread to eight.
+
+Where else the lists agree
+--------------------------
+
+Ideal ice Ic and ice Ih, at 4096 and at 110592 molecules, match on
+the edges, the 4-rings, the 5-rings, the 6-rings, the chordless
+6-rings and every ice reading. Each crystal has two 6-rings per
+molecule and no 4-ring or 5-ring.
+
+The 4096-molecule mW liquid matches on the edges and the rings.
+Its merged ice agreement is 0.561768 (81 against 1851). The
+chordless reading matches, 1851 on both sides.
+
+The 250-molecule TIP4P oxygen frame matches on the edges and the
+rings. Its merged ice agreement is 0.176000 (0 against 206). The
+chordless reading matches, 206 on both sides.
+
+The 110592-molecule mW liquid is the frame that misses. The
+oxygen-oxygen edges are 259187 and 259186. The 4-rings are 34097
+and 34098, the 5-rings 86218 and 86217, the 6-rings 85092 and
+85094, and the chordless 6-rings 123915 and 123917. The chordless
+ice reading is 50120 against 50121, agreement 0.999991. The merged
+ice agreement is 0.561957.

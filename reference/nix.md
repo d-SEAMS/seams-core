@@ -1,0 +1,91 @@
+<!-- https://docs.dseams.info/reference/nix.md -->
+
+# Nix flake {#nix-flake}
+
+The flake builds `libyodaLib` and the `seams` CLI with Meson. It does
+not build Python or Lua. There are no overlays.
+
+```bash
+nix build                  # ./result/bin/seams
+nix run . -- read input/traj/exampleTraj.lammpstrj
+nix develop                # inputsFrom seams, plus gdb, ccache, clang-tools
+nix flake update           # refresh the nixpkgs pin
+nix fmt
+```
+
+`nix build` sets `doCheck`, so the build runs the Meson suite.
+That suite includes the CLI tests `seams_read`, `seams_help`,
+`seams_version`, `seams_features`, and `seams_print_config`.
+
+## Flake outputs {#flake-outputs}
+
+From `flake.nix`. Supported systems: `x86_64-linux`,
+`aarch64-linux`, `x86_64-darwin`, `aarch64-darwin`.
+
+| output | value |
+| --- | --- |
+| packages.<system>.seams | nix/package.nix derivation |
+| packages.<system>.default | same as seams |
+| apps.<system>.default | ${packages.default}/bin/seams |
+| checks.<system>.seams | the seams package |
+| checks.<system>.default | same as seams |
+| devShells.<system>.default | inputsFrom the package; extra packages gdb, ccache, clang-tools |
+| formatter.<system> | nixfmt |
+
+The only flake input is `nixpkgs` (`github:NixOS/nixpkgs/nixos-unstable`).
+
+## What the package enables {#what-the-package-enables}
+
+From `nix/package.nix` (`pname = "seams"`, `version = "2.14.0"`):
+
+| piece | this package |
+| --- | --- |
+| Eigen | required, version at least 3.4 |
+| Highway | libhwy, probed and linked when found |
+| OpenMP | dependency('openmp', required: false), then a link of a parallel region. Clang also gets llvmPackages.openmp. NVIDIA uses -mp and skips that dependency |
+| GMP, MPFR | required by the test suite (test_ozaki) |
+| Catch2 3 | tests |
+| BLAS, LAPACK | present in the sandbox. with_blas is an auto feature, so it stays off and the libraries are not linked. No engine call uses them |
+| Meson flags | with_tests=true, with_cli=true, with_mpi=false, with_openmp_offload=false |
+| mesonAutoFeatures | disabled |
+| wrap mode | nodownload (Meson setup hook) |
+
+The fileset is `meson.build`, `meson_options.txt`, `src`, `tests`,
+`input`, `templates`, and the wraps `readcon-core.wrap`,
+`readcon-db.wrap`, `linkcell.wrap`, `minimage.wrap`, `vesin.wrap`,
+`subprojects/packagefiles`, and `bindings` (the C ABI in `bindings/cxx`).
+
+## What stays off {#what-stays-off}
+
+| option | why it stays off |
+| --- | --- |
+| with_mpi | set to false |
+| with_openmp_offload | set to false |
+| linkcell, minimage, chemfiles, readcon-core, readcon-db, IRA, sphericart, nauty, spglib, gpulite | auto features. auto_features=disabled does not search them, and nodownload does not fetch the wraps |
+| vesin | probed with required: false, and vesin is not a build input, so the sandbox probe misses |
+
+`seams --features` on this package reports Highway SIMD enabled, and
+OpenMP enabled when the link probe succeeds. It reports vesin cutoff
+fallback, linkcell pairs_within, chemfiles, readcon-core, readcon-db,
+IRA/SOFI, spglib, sphericart, nauty, and MPI disabled. A vesin
+pkg-config file in the build sandbox would turn that probe on. The
+`auto` features above stay off when the package is only present in
+nixpkgs.
+
+## Front-end flakes {#front-end-flakes}
+
+[yodaStruct](https://github.com/d-SEAMS/yodaStruct) and
+[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) each take this
+repository as a source input (`flake = false`) and pass that tree
+into their package. The yodaStruct flake builds it as a Meson
+subproject.
+
+## Cachix {#cachix}
+
+The [dseams](https://dseams.cachix.org/) cache is optional (not a
+flake input):
+
+```bash
+nix-env -iA cachix -f https://cachix.org/api/v1/install
+cachix use dseams
+```

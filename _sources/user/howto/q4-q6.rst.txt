@@ -1,0 +1,58 @@
+===============
+Local q4 and q6
+===============
+
+
+Compute the local Steinhardt parameters on the cutoff shell. Degrees
+4 and 6 use the solid-harmonic kernel. The Lechner-Dellago average is
+printed beside each local mean.
+
+The CLI
+-------
+
+``seams steinhardt`` prints one ``qL`` / ``qLbar`` pair for each degree
+named by ``--l``. The default is ``4,6``. Degrees 3, 8 and 12 are
+computed only when named. ``--l 3,4,6,12`` is the former four-degree
+line. The neighbour list is the cutoff shell (default 3.5 Å).
+
+.. code:: bash
+
+    # excerpt: docs/orgmode/getting-started/quickstart.org
+    seams steinhardt input/traj/exampleTraj.lammpstrj --type 2
+
+::
+
+    nop 250 q4 0.693844 q4bar 0.648011 q6 0.420854 q6bar 0.33063
+
+The C API
+---------
+
+``seams_q4q6`` writes one local :math:`q_4` and one local :math:`q_6` per atom.
+One of the two pointers may be null. Passing both null is an error.
+On a 64-atom cubic cell the mean :math:`q_6` is above 0.3.
+
+.. code:: c
+
+    seams_q4q6(sys, 3.5, 0, q4, q6);
+
+``seams_frame_q4_q6`` is the same pair on ``libseams_lang``, and it can
+also write the Lechner-Dellago averages. A null ``q4bar`` or ``q6bar``
+skips that average. The Python frame method is ``q4q6``. The ``q4_q6``
+wrappers in the Python, R and Julia binding repositories call
+``seams_frame_q4_q6``.
+
+Empty shells
+------------
+
+An atom with no neighbour inside the cutoff keeps an empty
+spherical-harmonic row. The kernel does not divide by a neighbour
+count of zero, so the local :math:`q_l` and the Lechner-Dellago average
+are both 0. freud and pyscal3 store NaN for that atom.
+
+0 leaves the mean, CHILL+, and the nucleation :math:`\bar q_6` finite.
+The neighbour count of that atom is already 0. There is no option
+that writes NaN.
+
+On the liquid comparison, an empty shell is 0 here and NaN in freud
+and pyscal3. Every atom that has a shell matches pyscal3 to
+:math:`10^{-10}`.

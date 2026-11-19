@@ -1,0 +1,91 @@
+<!-- https://docs.dseams.info/user/howto/sheared-cells.md -->
+
+# Sheared cells {#sheared-cells}
+
+You have a triclinic LAMMPS dump and want the engine to use the
+real cell, not a diagonal of bound spans.
+
+A dump `ITEM: BOX BOUNDS` line is `lo hi [tilt]`. The reader stores
+`hi - lo` per axis in `PointCloud.box[0..2]` and, when a third
+number is present, appends `xy, xz, yz` so `box.size() >= 6`.
+Those first three numbers are bound spans. They are not the
+lattice edge lengths.
+
+The engine recovers the restricted-triclinic matrix H (rows
+$\mathbf{a}$, $\mathbf{b}$, $\mathbf{c}$) and the origin from
+the spans, the tilt, and `boxLow`. Neighbour lists and every
+minimum-image distance use that H. Wrapping each Cartesian axis
+by `box[0]`, `box[1]`, `box[2]` is the wrong image on a sheared
+cell.
+
+The `seams` CLI has no tilt flag. A sheared dump is enough.
+`seams read` prints the three bound spans and, when
+`box.size() >= 6`, `xy xz yz`. `seams rdf` histograms
+`rdf::partialRdf` with the same dump MIC; the ideal-gas volume is
+`nneigh::dumpVolume` (`|det H|`, not the product of bound spans).
+`seams density-z` takes $A_\perp$ from that H (`ly*lz` for `x`,
+and so on), not from bound spans.
+Type selection on a mixed dump is `--type I`; unlike-pair RDF is
+`--pair-types I,J`. See [Ionic-liquid dumps](ionic-liquid.md).
+The dump layout is on [data
+formats](../../reference/data-formats.md).
+
+## Recover H {#recover-h}
+
+`nneigh::dumpBoundsToH` (and `lammpsBoxToLcCell` /
+`lammpsBoxToLinkcell`) invert the LAMMPS bound mapping:
+
+- `lx = xspan - max(0, xy, xz, xy+xz) + min(0, xy, xz, xy+xz)`
+- `ly = yspan - max(0, yz) + min(0, yz)`
+- `lz = zspan`
+- origin is `boxLow` minus the same lower clip
+
+`gen::periodicDistSq` / `gen::relDist` call
+`gen::triclinicMinImage` when `box.size() >= 6`: fractional
+coordinates relative to that origin, wrap the fractional
+difference, map back through H. A length-3 `box` stays an
+independent-axis wrap of the three spans.
+
+## Neighbour lists {#neighbour-lists}
+
+Cutoff lists (`nneigh::neighListO`, `neighList`, `halfNeighList`,
+`getNewNeighbourListByIndex`, the vesin cell list, the brute
+fallback, and `SkinNeighborList`) pass the dump 3x3 into the
+minimum image. k-nearest lists (`kNearestNeighbourList`) build
+the same H through `lammpsBoxToLinkcell`. Device ice-score
+batches use `residentFrameCell`: `nBox >= 6` or a supplied
+`boxLow` becomes one dump cell; three lengths stay ortho.
+
+A pair that is only close across the `a` image of a sheared cell
+is a neighbour at cutoff 1.0. Treating the bound span 15 as `lx`
+misses that pair.
+
+## Other MIC users {#other-mic-users}
+
+The same dump H feeds Steinhardt flattening, hydrogen-bond
+distances, cluster unwrap, and the in-plane RDF sampler.
+
+`seams rdf FILE --cutoff RMAX` is the 3D partial $g_{IJ}(r)$.
+
+```bash
+seams rdf input/traj/il_tiny.lammpstrj --cutoff 6.0
+```
+
+The in-plane sampler remains
+`rdf2::sampleRDF_AA` on a `PointCloud`. `rdf::runningCN` and
+`rdf::coordinationNumber` integrate `4 pi rho_J s^2 g ds` with
+`rho_J = nJ / volume`; the cutoff is a caller input, not a
+hard-wired first minimum.
+
+## Empty or ortho clouds {#empty-or-ortho-clouds}
+
+`box.size() < 3` yields an empty neighbour list. A length-3 box
+is orthorhombic. An extended XYZ whose comment carries `Lattice=`
+is read as that cell.
+
+```bash
+seams read templates/hc.xyz
+```
+
+That prints `nop 12 frame 1 box 53.969 54.529 51.257`. A triclinic H,
+with tilt `xy xz yz`, comes from a LAMMPS dump.

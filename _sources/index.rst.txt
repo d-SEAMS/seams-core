@@ -28,18 +28,18 @@
    :class-container: sd-text-center
 
    .. grid-item-card:: Read
-      :link: quickstart
+      :link: getting-started/quickstart
       :link-type: doc
       :class-card: sd-shadow-sm
 
       Load a LAMMPS frame and print nop, frame, and box.
 
    .. grid-item-card:: Classify
-      :link: tutorials/bulk-ice
+      :link: user/tutorials/bulk-ice
       :link-type: doc
       :class-card: sd-shadow-sm
 
-      CHILL+ four-neighbour star: cubic, hexagonal, interfacial, water.
+      CHILL+ four-neighbour star: cubic, hexagonal, interfacial, clathrate, interClathrate, or water.
 
    .. grid-item-card:: Score
       :link: explanation/chill-plus-vs-cages
@@ -52,83 +52,72 @@ Overview
 --------
 
 d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
-``libseams`` is the library: CHILL+, cages, primitive rings, and :math:`q_6` share one cutoff neighbour list.
-The ``seams`` command, the C and C++ APIs, and the language bindings call that library.
+The name is Deferred Structural Elucidation Analysis for Molecular
+Simulations. Release 2.14.0 of this repository is the C++ engine
+``libyodaLib``, the C API ``libseams`` (``include/seams.h``), the header-only
+C++ API ``include/seams.hpp`` (it links ``libseams``), the C ABI
+``libseams_lang`` (``bindings/cxx/seams_lang.h``, used by the Python, R, and
+Julia fronts), the ``seams`` command, and the LAMMPS, GROMACS, OpenMM,
+PLUMED, and in-situ drivers. ``gmx-seams`` reads the trajectory ``gmx mdrun`` wrote.
+The standalone PLUMED action (``dseams-plumed`` v0.4.1) is indexed in
+`PLUMED-NEST egg 26.018 <https://www.plumed-nest.org/eggs/26/018/>`_.
+``seams --version`` prints ``2.14.0``.
 
-Install the engine with one line.
+See the :doc:`engines/plumed` page for the plugin.
 
-.. code:: bash
+CHILL+ labels an oxygen from its four-neighbour star: cubic, hexagonal,
+interfacial, clathrate, interClathrate, or water. Cage membership is a
+separate score. A molecule in a hexagonal cage (HC) is ice Ih. A molecule
+in a double-diamond cage (DDC) is ice Ic. A molecule in neither is water.
+Primitive rings and Steinhardt :math:`q_l` are computed in the same engine.
+`CHILL+ versus cages <explanation/chill-plus-vs-cages.rst>`_ records
+where the two scores disagree.
 
-    meson setup build && meson compile -C build
+A source build from this tree, when the compilers are already on ``PATH``,
+is ``meson setup build && meson compile -C build``.
+pixi is ``pixi run setup && pixi run build``.
+`Install <getting-started/install.rst>`_ has each method.
 
-Ten lines classify the cubic cell shipped in ``input/traj``.
-
-.. code:: bash
-
-    dump=input/traj/mW_cubic.lammpstrj
-    seams read "$dump" --type 1
-    seams chill-plus "$dump" --type 1 --cutoff 3.5
-    seams ovito-chill+ "$dump" --type 1 --cutoff 3.5
-    seams rings "$dump" --type 1 --cutoff 3.5
-    seams steinhardt "$dump" --type 1 --l 6
-    seams cages "$dump" --type 1
-    seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge none
-    seams rdf "$dump" --pair-types 1,1 --cutoff 6 --bins 4
-    seams prisms "$dump" --type 1
-
-The `videos <videos/index.rst>`_, the
-`1.x migration <howto/migrate-1x.rst>`_, the
-`performance tables <explanation/performance-h2h.rst>`_, and the
-`2.14.0 notes <reference/release-2.14.rst>`_ are the rest of this
-release.
-
-d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
-Simulations) classifies ice in molecular-dynamics trajectories. This
-repository is the C++ engine (``libyodaLib``) and the ``seams`` CLI.
-
-The first classification is five lines. Install with
-``pip install 'pydseamslib==2.14.0'`` for the Frame package, with conda-forge's
-Meson toolchain, or with ``meson setup build && meson compile -C build``,
-then run the Python and C programs on
-`the quick start <quickstart.rst>`_. Both report 8 cubic molecules.
+The ice Ih frame shipped in this tree is ``input/traj/ice1h.lammpstrj``,
+128 molecules of LAMMPS type 1.
 
 .. code:: bash
 
     seams read input/traj/ice1h.lammpstrj
     seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
-    seams cages input/traj/ice1h.lammpstrj
 
-2.14.0 ships ``libseams`` (``seams.h``), ``libseams_lang``, the C and C++
-APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines. The d-SEAMS
-PLUMED plugin is v0.4.1.
+``seams read`` prints ``nop 128 frame 1 box 15.6457 14.7071 18.073``.
+``seams chill-plus`` prints ``nop 128 hexagonal 128``.
+`The quick start <getting-started/quickstart.rst>`_ classifies an eight-atom cubic
+cell from C and from Python.
+`From a trajectory to the ice front <user/howto/from-trajectory.rst>`_
+adds the ring census on this frame and the ice front on
+``input/traj/interface_f0.lammpstrj``.
 
-See the :doc:`PLUMED engine page <engines/plumed>` for the plugin.
-
-``gmx-seams`` reads the trajectory after ``gmx mdrun``.
-Each language binding is its own repository, released with the same
-version against this tag:
+Each other language is its own repository.
+`Use a language binding <user/howto/bindings.rst>`_ names the package
+and the library each one links.
 
 - Python: ``pydseamslib`` (``import dseams``, ``import pydseams``),
+  with ``pip install 'pydseamslib==2.14.0'`` from
   `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_
 
-- Lua and Fennel: LuaRocks ``dseams``, `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
+- Lua and Fennel: ``require("dseams")``, clone
+  `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_ and run ``luarocks make`` in the checkout
 
-- R: ``dseams``, `dseams-r <https://github.com/d-SEAMS/dseams-r>`_
+- R: ``remotes::install_github("d-SEAMS/dseams-r")`` from `dseams-r <https://github.com/d-SEAMS/dseams-r>`_
 
-- Julia: ``Dseams``, `Dseams.jl <https://github.com/d-SEAMS/Dseams.jl>`_
+- Julia: ``Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")`` from
+  `Dseams.jl <https://github.com/d-SEAMS/Dseams.jl>`_
 
-- Rust: ``dseams-sys`` and ``dseams``, `dseams-rs <https://github.com/d-SEAMS/dseams-rs>`_
+- Rust: ``cargo add dseams@2.14.0`` from `dseams-rs <https://github.com/d-SEAMS/dseams-rs>`_
 
-- Fortran: fpm ``dseams``, `dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_
+- Fortran: fpm Git dependency ``dseams`` from `dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_
 
-`The repository map <contributing/repositories.rst>`_ says what
-lives where.
-
-The header **Ecosystem** menu on every page jumps between the engine,
-the bindings, and linkcell.
-
-Build with a Nix flake (``nix build``, ``nix develop``) or with
-``pixi run setup && pixi run build && pixi run test``.
+`The 2.14.0 notes <reference/release-2.14.rst>`_ are the changes
+since 2.13.0.
+`Migrate from 1.x <user/howto/migrate-1x.rst>`_ maps ``yodaStruct -c``
+onto ``seams``.
 
 Suite stack
 -----------
@@ -136,269 +125,104 @@ Suite stack
 .. mermaid::
 
    flowchart TD
-     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
-     LC[linkcell] --> LIB
+     DUMP["LAMMPS dump and XYZ"] --> LIB[libyodaLib]
+     NB["linkcell or vesin"] --> LIB
+     LIB --> CLI[seams]
      LIB --> API[libseams]
-     API --> CLI["seams command"]
-     CLI --> OUT["stdout counts"]
-     API --> LANG["C and C++ here<br/>Python, Lua, R, Julia,<br/>Rust, Fortran repositories"]
+     LIB --> ABI["libseams_lang<br/>Python, R, Julia"]
+
+``libyodaLib`` reads a LAMMPS dump or an XYZ file. chemfiles
+(``.pdb``, ``.gro``, ``.dcd``) and the ``.con`` reader are compiled in when
+those libraries are found. The cutoff neighbour list is linkcell when
+that library is built, and vesin otherwise. ``seams --features`` prints
+which backends this binary has. The ``seams`` command, ``libseams``, and
+``libseams_lang`` each link ``libyodaLib``. ``include/seams.hpp`` links
+``libseams``. Python and Julia link both libraries. R links
+``libseams_lang``. Lua, Rust, and Fortran link ``libseams``.
 
 Documentation structure
 -----------------------
 
-This documentation follows the `Diataxis <https://diataxis.fr/>`_
-framework.
+The user guide groups the tutorials and the how-tos by
+task. The explanation pages are the background for those tasks.
 
-.. grid:: 1 2 3 3
+.. grid:: 1 1 2 4
    :gutter: 2
 
-   .. grid-item-card:: Tutorials
-      :link: tutorials/index
+   .. grid-item-card:: Getting started
+      :link: getting-started/index
       :link-type: doc
 
-      Ice, clathrates, brine, and nucleation, each with a runnable check.
+      Install the engine and classify one shipped frame.
 
-   .. grid-item-card:: How-to
-      :link: howto/index
+   .. grid-item-card:: User guide
+      :link: user/index
       :link-type: doc
 
-      Cutoff, neighbours, CHILL+, rings, and the engine builds.
+      Tutorials and how-tos, grouped by the analysis you want to run.
 
-   .. grid-item-card:: Reference
+   .. grid-item-card:: API reference
       :link: reference/index
       :link-type: doc
 
-      :doc:`C <capi/index>`, :doc:`C++ <stable/cpp>`,
-      :doc:`CLI <reference/cli>`, and the
-      :doc:`language bindings <howto/bindings>`.
+      The C API, the C++ API, the command line, and the language bindings.
 
-   .. grid-item-card:: Engines
-      :link: engines/index
+   .. grid-item-card:: Project
+      :link: development/changelog
       :link-type: doc
 
-      :doc:`LAMMPS <engines/lammps>`, :doc:`GROMACS <engines/gromacs>`,
-      :doc:`OpenMM <engines/openmm>`, :doc:`PLUMED <engines/plumed>`.
-
-   .. grid-item-card:: Comparisons
-      :link: comparisons
-      :link-type: doc
-
-      OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED, next to the tests that recompute them.
-
-   .. grid-item-card:: Videos
-      :link: videos/index
-      :link-type: doc
-
-      Odysee recordings of the bindings and the tutorials.
+      Release notes and how to cite d-SEAMS.
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Getting started
 
-   quickstart
-   howto/install
-   videos/index
+   getting-started/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: Tutorials
+   :maxdepth: 2
+   :caption: User guide
 
-   tutorials/index
-   tutorials/clathrate
-   tutorials/interface
-   tutorials/nucleation
-   tutorials/brine
-   tutorials/insitu-run
-   tutorials/bulk-ice
-   tutorials/ice-and-clathrate
-   tutorials/rings
-   tutorials/order-parameters
-   tutorials/confined-water
-   tutorials/nanotube
-   tutorials/paper-figures
-   tutorials/paper-interface
-   tutorials/paper-cages
-   tutorials/paper-rings
-   tutorials/paper-brine
-   tutorials/paper-nucleation
-   tutorials/gallery
-   science/index
-   science/interface
-   science/brine
-   science/cages
-   science/gallery
-   fronts/index
-   fronts/c
-   fronts/cpp
-   fronts/fortran
-   fronts/julia
-   fronts/lua
-   fronts/python
-   fronts/r
-   fronts/rust
-   fronts/engines
-   fronts/gromacs
-   fronts/insitu
-   fronts/lammps
-   fronts/openmm
-   fronts/plumed
+   user/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: How-to
-
-   howto/index
-   howto/upgrade-2.14
-   howto/migrate-1x
-   howto/bindings
-   howto/versions
-   howto/benchmarks
-   howto/neighbour-lists
-   howto/openmp-offload
-   howto/classify-cli
-   howto/rings
-   howto/cages-trace
-   howto/q4-q6
-   howto/chill-plus
-   howto/cutoff-padding
-   howto/symmetry-classifier
-   howto/linkcell-carried
-   howto/sheared-cells
-   howto/ionic-liquid
-   howto/confined-ice
-   howto/science-front
-   howto/from-trajectory
-   howto/engine-gromacs
-   howto/engine-lammps
-   howto/engine-openmm
-   howto/engine-plumed
-   howto/engine-insitu
-   howto/faq
-   howto/troubleshooting
-   walkthrough/index
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Reference
+   :maxdepth: 2
+   :caption: API reference
 
    reference/index
-   reference/python-frame
-   reference/cli
-   reference/data-formats
-   reference/walk-compare
-   reference/api
-   reference/nix
-   reference/cross-language
-   reference/glossary
-   reference/release-2.14
-   stable/index
-   stable/c
-   stable/cpp
-   stable/python
-   stable/fortran
-   stable/julia
-   stable/r
-   stable/lua
-   stable/rust
-   stable/cli
-   stable/science
-   capi/index
-   lang/index
-   api/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
-   :caption: Engines
-
-   engines/index
-   engines/lammps
-   engines/gromacs
-   engines/openmm
-   engines/plumed
-   engines/insitu
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Comparisons
-
-   comparisons
-   explanation/clavis-trace
-   explanation/sqq
-   explanation/ovito-findrings
-   explanation/performance-h2h
-   howto/literature-h2h
-   howto/literature-reproduce
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Explanation
-
-   explanation/index
-   explanation/architecture
-   explanation/c-api
-   explanation/chill-plus-vs-cages
-   explanation/chill-plus-rules
-   explanation/interface-order
-   explanation/ring-completion
-   explanation/primitive-rings
-   explanation/linkcell-scaling
-   explanation/rings-one-thread
-   explanation/topological-network
-   explanation/symmetry
-   explanation/trace-assembly
-   explanation/stacking-disorder
-   explanation/hop-ball
-   explanation/trace-threads
-   explanation/performance
-   explanation/performance-overview
-   explanation/binding-overhead
-   explanation/performance-range
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Project
 
-   changelog
-   contributing/index
-   contributing/repositories
-   contributing/release
-   contributing/lean
-   explanation/citation
+   development/changelog
 
-The in-book C++ pages under ``api/`` are Doxygen via doxyrest. A sibling
-doxyYoda HTML tree (inline source, treeview) is at
-`*api-cpp* <https://docs.dseams.info/api-cpp/>`_ after
-``pixi run -e docs docbld``.
+The C++ header reference is
+`*api-cpp* <https://docs.dseams.info/api-cpp/>`_.
 
-d-SEAMS 2.0 paper
------------------
+Performance
+-----------
 
-The d-SEAMS 2.0 paper, its benchmark campaign, the record tables and
-the reproduction rules are in a private paper repository. The
-benchmark records and figure data are the Hugging Face datasets
-``d-SEAMS/dseams2-benchmark-records`` and ``d-SEAMS/dseams2-paper-figure-data``.
-The performance pages here show tables rendered from those records
-(``docs/records/README.md`` names the revision).
+The numbers for OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED are on
+`Head-to-head <user/comparisons.rst>`_.
+The sitting medians are on
+`the sitting tables <explanation/performance.rst>`_.
 
 Related projects
 ----------------
 
-`pydseams <https://d-seams.github.io/PydSEAMSlib/>`_
-    Python Frame API on ``yoda``
+`PydSEAMSlib docs <https://d-seams.github.io/PydSEAMSlib/>`_
+    Python, ``import dseams`` and ``import pydseams``
 
-`yodaStruct <https://d-seams.github.io/yodaStruct/>`_
-    the Lua and Fennel binding, ``require("dseams")``
+`yodaStruct docs <https://d-seams.github.io/yodaStruct/>`_
+    Lua and Fennel, ``require("dseams")``
 
 `linkcell <https://github.com/d-SEAMS/linkcell>`_
-    periodic linked-cell k-nearest neighbours
+    periodic linked-cell neighbours
 
 `dseams.info <https://dseams.info>`_
     project site
@@ -676,22 +500,7 @@ See `Citation <explanation/citation.rst>`_.
    api/struct_water_IonSite
    api/struct_water_Request
    api/struct_water_Selection
-   explanation/clavis-trace-tables
    explanation/comparisons-summary-tables
-   explanation/cutoff-rings-tables
-   explanation/performance-h2h-tables
-   explanation/performance-overview-tables
-   explanation/performance-range-tables
-   explanation/performance-tables
-   explanation/pool-audit-tables
-   explanation/sitting-large-tables
    explanation/sqq-tables
-   explanation/trace-threads-tables
-   howto/cutoff-padding-tables
-   howto/literature-speed
-   howto/pool-audit-v5-tables
-   reference/release-2.14-notes
-   tutorials/gallery-captions
-   tutorials/molecules
 
 .. linkcheck-pages-end

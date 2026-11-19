@@ -1,0 +1,934 @@
+Lua
+===
+
+Names registered on ``require("dseams")`` in `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_. Each entry is a ``set_function`` name. The C column lists ``seams_*`` calls in that function when the binding reaches ``seams.h`` directly.
+
+Native API
+----------
+
+Generated from the sources named below. A name on this page is a public call in that language.
+
+dseams.averageQ6
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.averageQ6
+
+.. code-block:: lua
+
+   averageQ6
+
+dseams.bondClassifierNames
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.bondClassifierNames
+
+.. code-block:: lua
+
+   bondClassifierNames
+
+dseams.bondNetworkByIndex
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.bondNetworkByIndex
+
+.. code-block:: lua
+
+   bondNetworkByIndex
+
+dseams.bulkRingNumberAnalysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.bulkRingNumberAnalysis
+
+.. code-block:: lua
+
+   bulkRingNumberAnalysis
+
+dseams.bulkTopoUnitMatching
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.bulkTopoUnitMatching
+
+.. code-block:: lua
+
+   bulkTopoUnitMatching
+
+dseams.bulkTopologicalNetworkCriterion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.bulkTopologicalNetworkCriterion
+
+.. code-block:: lua
+
+   bulkTopologicalNetworkCriterion
+
+dseams.cageAffiliation
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.cageAffiliation
+
+.. code-block:: lua
+
+   cageAffiliation
+
+dseams.calcCN
+~~~~~~~~~~~~~
+
+.. api-symbol: dseams.calcCN
+
+.. code-block:: lua
+
+   calcCN
+
+dseams.calcRDF
+~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.calcRDF
+
+.. code-block:: lua
+
+   calcRDF
+
+dseams.calcRDF3D
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.calcRDF3D
+
+.. code-block:: lua
+
+   calcRDF3D
+
+dseams.calcRunningCN
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.calcRunningCN
+
+.. code-block:: lua
+
+   calcRunningCN
+
+dseams.chillPlus_cij
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.chillPlus_cij
+
+.. code-block:: lua
+
+   chillPlus_cij
+
+dseams.chillPlus_iceType
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.chillPlus_iceType
+
+.. code-block:: lua
+
+   chillPlus_iceType
+
+dseams.chill_cij
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.chill_cij
+
+.. code-block:: lua
+
+   chill_cij
+
+dseams.chill_iceType
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.chill_iceType
+
+.. code-block:: lua
+
+   chill_iceType
+
+dseams.classifyBonds
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.classifyBonds
+
+.. code-block:: lua
+
+   classifyBonds
+
+dseams.classifyTemplates
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.classifyTemplates
+
+.. code-block:: lua
+
+   classifyTemplates
+
+dseams.classifyTopology
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.classifyTopology
+
+.. code-block:: lua
+
+   classifyTopology
+
+dseams.clusterAnalysis
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.clusterAnalysis
+
+.. code-block:: lua
+
+   clusterAnalysis
+
+dseams.contactPairs
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.contactPairs
+
+.. code-block:: lua
+
+   contactPairs
+
+dseams.densityByKind
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.densityByKind
+
+.. code-block:: lua
+
+   densityByKind
+
+dseams.densityByType
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.densityByType
+
+.. code-block:: lua
+
+   densityByType
+
+dseams.domainStats
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.domainStats
+
+.. code-block:: lua
+
+   domainStats
+
+dseams.donatedHydrogenBond
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.donatedHydrogenBond
+
+.. code-block:: lua
+
+   donatedHydrogenBond
+
+dseams.findBySignature
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.findBySignature
+
+.. code-block:: lua
+
+   findBySignature
+
+dseams.getCorrel
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getCorrel
+
+.. code-block:: lua
+
+   getCorrel
+
+dseams.getCorrelPlus
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getCorrelPlus
+
+.. code-block:: lua
+
+   getCorrelPlus
+
+dseams.getHbondNetwork
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getHbondNetwork
+
+.. code-block:: lua
+
+   getHbondNetwork
+
+dseams.getHbondNetworkFromClouds
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getHbondNetworkFromClouds
+
+.. code-block:: lua
+
+   getHbondNetworkFromClouds
+
+dseams.getHbondNetworkFromDonors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getHbondNetworkFromDonors
+
+.. code-block:: lua
+
+   getHbondNetworkFromDonors
+
+dseams.getIceType
+~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getIceType
+
+.. code-block:: lua
+
+   getIceType
+
+dseams.getIceTypeNoPrint
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getIceTypeNoPrint
+
+.. code-block:: lua
+
+   getIceTypeNoPrint
+
+dseams.getIceTypePlus
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getIceTypePlus
+
+.. code-block:: lua
+
+   getIceTypePlus
+
+dseams.getIceTypePlusNoPrint
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getIceTypePlusNoPrint
+
+.. code-block:: lua
+
+   getIceTypePlusNoPrint
+
+dseams.getNewNeighbourListByIndex
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getNewNeighbourListByIndex
+
+.. code-block:: lua
+
+   getNewNeighbourListByIndex
+
+dseams.getPointCloudAtomsOfOneAtomType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getPointCloudAtomsOfOneAtomType
+
+.. code-block:: lua
+
+   getPointCloudAtomsOfOneAtomType
+
+dseams.getPrimitiveRings
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.getPrimitiveRings
+
+.. code-block:: lua
+
+   getPrimitiveRings
+
+dseams.guestOccupancy
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.guestOccupancy
+
+.. code-block:: lua
+
+   guestOccupancy
+
+dseams.indicesOf
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.indicesOf
+
+.. code-block:: lua
+
+   indicesOf
+
+dseams.ionCloud
+~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.ionCloud
+
+.. code-block:: lua
+
+   ionCloud
+
+dseams.ionEnvironment
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.ionEnvironment
+
+.. code-block:: lua
+
+   ionEnvironment
+
+dseams.kNearestNeighbourList
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.kNearestNeighbourList
+
+.. code-block:: lua
+
+   kNearestNeighbourList
+
+dseams.kNearestNeighbourPair
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.kNearestNeighbourPair
+
+.. code-block:: lua
+
+   kNearestNeighbourPair
+
+dseams.localTopologyKey
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.localTopologyKey
+
+.. code-block:: lua
+
+   localTopologyKey
+
+dseams.modifyChill
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.modifyChill
+
+.. code-block:: lua
+
+   modifyChill
+
+dseams.mutualNearestUnlike
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.mutualNearestUnlike
+
+.. code-block:: lua
+
+   mutualNearestUnlike
+
+dseams.neighListO
+~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.neighListO
+
+.. code-block:: lua
+
+   neighListO
+
+dseams.neighListPair
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.neighListPair
+
+.. code-block:: lua
+
+   neighListPair
+
+dseams.neighborList
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.neighborList
+
+.. code-block:: lua
+
+   neighborList
+
+dseams.neighbourListByIndex
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.neighbourListByIndex
+
+.. code-block:: lua
+
+   neighbourListByIndex
+
+dseams.parseSiteSpec
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.parseSiteSpec
+
+.. code-block:: lua
+
+   parseSiteSpec
+
+dseams.percentage_Ice
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.percentage_Ice
+
+.. code-block:: lua
+
+   percentage_Ice
+
+dseams.periodicCentroid
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.periodicCentroid
+
+.. code-block:: lua
+
+   periodicCentroid
+
+dseams.prismAnalysis
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.prismAnalysis
+
+.. code-block:: lua
+
+   prismAnalysis
+
+dseams.readChemfiles
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readChemfiles
+
+.. code-block:: lua
+
+   readChemfiles
+
+dseams.readCon
+~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readCon
+
+.. code-block:: lua
+
+   readCon
+
+dseams.readFrame
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readFrame
+
+.. code-block:: lua
+
+   readFrame
+
+dseams.readFrameOnlyOne
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readFrameOnlyOne
+
+.. code-block:: lua
+
+   readFrameOnlyOne
+
+dseams.readFrameOnlyOneAllAtoms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readFrameOnlyOneAllAtoms
+
+.. code-block:: lua
+
+   readFrameOnlyOneAllAtoms
+
+dseams.readLammpsTrj
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readLammpsTrj
+
+.. code-block:: lua
+
+   readLammpsTrj
+
+dseams.readLammpsTrjO
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readLammpsTrjO
+
+.. code-block:: lua
+
+   readLammpsTrjO
+
+dseams.readLammpsTrjreduced
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readLammpsTrjreduced
+
+.. code-block:: lua
+
+   readLammpsTrjreduced
+
+dseams.readXYZ
+~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.readXYZ
+
+.. code-block:: lua
+
+   readXYZ
+
+dseams.recenterCluster
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.recenterCluster
+
+.. code-block:: lua
+
+   recenterCluster
+
+dseams.registerBondClassifier
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.registerBondClassifier
+
+.. code-block:: lua
+
+   registerBondClassifier
+
+dseams.ringAnalysis
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.ringAnalysis
+
+.. code-block:: lua
+
+   ringAnalysis
+
+dseams.ringNetwork
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.ringNetwork
+
+.. code-block:: lua
+
+   ringNetwork
+
+dseams.seededCageAffiliation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.seededCageAffiliation
+
+.. code-block:: lua
+
+   seededCageAffiliation
+
+dseams.selectAtomsInSliceWithRingEdgeAtoms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.selectAtomsInSliceWithRingEdgeAtoms
+
+.. code-block:: lua
+
+   selectAtomsInSliceWithRingEdgeAtoms
+
+dseams.selectEdgeAtomsInRingsWithinSlice
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.selectEdgeAtomsInRingsWithinSlice
+
+.. code-block:: lua
+
+   selectEdgeAtomsInRingsWithinSlice
+
+dseams.selectInSingleSlice
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.selectInSingleSlice
+
+.. code-block:: lua
+
+   selectInSingleSlice
+
+dseams.shellRingCensus
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.shellRingCensus
+
+.. code-block:: lua
+
+   shellRingCensus
+
+dseams.shellSeparation
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.shellSeparation
+
+.. code-block:: lua
+
+   shellSeparation
+
+dseams.soapSpectrum
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.soapSpectrum
+
+.. code-block:: lua
+
+   soapSpectrum
+
+dseams.soapSpectrumAll
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.soapSpectrumAll
+
+.. code-block:: lua
+
+   soapSpectrumAll
+
+dseams.steinhardtQl
+~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.steinhardtQl
+
+.. code-block:: lua
+
+   steinhardtQl
+
+dseams.steinhardtQlVoronoi
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.steinhardtQlVoronoi
+
+.. code-block:: lua
+
+   steinhardtQlVoronoi
+
+dseams.topologyFingerprint
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.topologyFingerprint
+
+.. code-block:: lua
+
+   topologyFingerprint
+
+dseams.topologyLibrary
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.topologyLibrary
+
+.. code-block:: lua
+
+   topologyLibrary
+
+dseams.voronoiFacetWeights
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.voronoiFacetWeights
+
+.. code-block:: lua
+
+   voronoiFacetWeights
+
+dseams.voronoiFeatures
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.voronoiFeatures
+
+.. code-block:: lua
+
+   voronoiFeatures
+
+dseams.writeDump
+~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.writeDump
+
+.. code-block:: lua
+
+   writeDump
+
+dseams.writeHistogram
+~~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: dseams.writeHistogram
+
+.. code-block:: lua
+
+   writeHistogram
+
+C API
+-----
+
+Each native call and the ``seams.h`` or ``seams_lang.h`` function it uses. The C column is the stable ABI.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 40 60
+
+   * - Native
+     - C
+   * - ``dseams.averageQ6``
+     - no direct C call
+   * - ``dseams.bondClassifierNames``
+     - no direct C call
+   * - ``dseams.bondNetworkByIndex``
+     - no direct C call
+   * - ``dseams.bulkRingNumberAnalysis``
+     - no direct C call
+   * - ``dseams.bulkTopoUnitMatching``
+     - no direct C call
+   * - ``dseams.bulkTopologicalNetworkCriterion``
+     - no direct C call
+   * - ``dseams.cageAffiliation``
+     - no direct C call
+   * - ``dseams.calcCN``
+     - no direct C call
+   * - ``dseams.calcRDF``
+     - no direct C call
+   * - ``dseams.calcRDF3D``
+     - no direct C call
+   * - ``dseams.calcRunningCN``
+     - no direct C call
+   * - ``dseams.chillPlus_cij``
+     - no direct C call
+   * - ``dseams.chillPlus_iceType``
+     - no direct C call
+   * - ``dseams.chill_cij``
+     - no direct C call
+   * - ``dseams.chill_iceType``
+     - no direct C call
+   * - ``dseams.classifyBonds``
+     - no direct C call
+   * - ``dseams.classifyTemplates``
+     - no direct C call
+   * - ``dseams.classifyTopology``
+     - no direct C call
+   * - ``dseams.clusterAnalysis``
+     - no direct C call
+   * - ``dseams.contactPairs``
+     - no direct C call
+   * - ``dseams.densityByKind``
+     - no direct C call
+   * - ``dseams.densityByType``
+     - no direct C call
+   * - ``dseams.domainStats``
+     - no direct C call
+   * - ``dseams.donatedHydrogenBond``
+     - no direct C call
+   * - ``dseams.findBySignature``
+     - no direct C call
+   * - ``dseams.getCorrel``
+     - no direct C call
+   * - ``dseams.getCorrelPlus``
+     - no direct C call
+   * - ``dseams.getHbondNetwork``
+     - no direct C call
+   * - ``dseams.getHbondNetworkFromClouds``
+     - no direct C call
+   * - ``dseams.getHbondNetworkFromDonors``
+     - no direct C call
+   * - ``dseams.getIceType``
+     - no direct C call
+   * - ``dseams.getIceTypeNoPrint``
+     - no direct C call
+   * - ``dseams.getIceTypePlus``
+     - no direct C call
+   * - ``dseams.getIceTypePlusNoPrint``
+     - no direct C call
+   * - ``dseams.getNewNeighbourListByIndex``
+     - no direct C call
+   * - ``dseams.getPointCloudAtomsOfOneAtomType``
+     - no direct C call
+   * - ``dseams.getPrimitiveRings``
+     - no direct C call
+   * - ``dseams.guestOccupancy``
+     - no direct C call
+   * - ``dseams.indicesOf``
+     - no direct C call
+   * - ``dseams.ionCloud``
+     - no direct C call
+   * - ``dseams.ionEnvironment``
+     - no direct C call
+   * - ``dseams.kNearestNeighbourList``
+     - no direct C call
+   * - ``dseams.kNearestNeighbourPair``
+     - no direct C call
+   * - ``dseams.localTopologyKey``
+     - no direct C call
+   * - ``dseams.modifyChill``
+     - no direct C call
+   * - ``dseams.mutualNearestUnlike``
+     - no direct C call
+   * - ``dseams.neighListO``
+     - no direct C call
+   * - ``dseams.neighListPair``
+     - no direct C call
+   * - ``dseams.neighborList``
+     - no direct C call
+   * - ``dseams.neighbourListByIndex``
+     - no direct C call
+   * - ``dseams.parseSiteSpec``
+     - no direct C call
+   * - ``dseams.percentage_Ice``
+     - no direct C call
+   * - ``dseams.periodicCentroid``
+     - no direct C call
+   * - ``dseams.prismAnalysis``
+     - no direct C call
+   * - ``dseams.readChemfiles``
+     - no direct C call
+   * - ``dseams.readCon``
+     - no direct C call
+   * - ``dseams.readFrame``
+     - no direct C call
+   * - ``dseams.readFrameOnlyOne``
+     - no direct C call
+   * - ``dseams.readFrameOnlyOneAllAtoms``
+     - no direct C call
+   * - ``dseams.readLammpsTrj``
+     - no direct C call
+   * - ``dseams.readLammpsTrjO``
+     - no direct C call
+   * - ``dseams.readLammpsTrjreduced``
+     - no direct C call
+   * - ``dseams.readXYZ``
+     - no direct C call
+   * - ``dseams.recenterCluster``
+     - no direct C call
+   * - ``dseams.registerBondClassifier``
+     - no direct C call
+   * - ``dseams.ringAnalysis``
+     - no direct C call
+   * - ``dseams.ringNetwork``
+     - no direct C call
+   * - ``dseams.seededCageAffiliation``
+     - no direct C call
+   * - ``dseams.selectAtomsInSliceWithRingEdgeAtoms``
+     - no direct C call
+   * - ``dseams.selectEdgeAtomsInRingsWithinSlice``
+     - no direct C call
+   * - ``dseams.selectInSingleSlice``
+     - no direct C call
+   * - ``dseams.shellRingCensus``
+     - no direct C call
+   * - ``dseams.shellSeparation``
+     - no direct C call
+   * - ``dseams.soapSpectrum``
+     - no direct C call
+   * - ``dseams.soapSpectrumAll``
+     - no direct C call
+   * - ``dseams.steinhardtQl``
+     - no direct C call
+   * - ``dseams.steinhardtQlVoronoi``
+     - no direct C call
+   * - ``dseams.topologyFingerprint``
+     - no direct C call
+   * - ``dseams.topologyLibrary``
+     - no direct C call
+   * - ``dseams.voronoiFacetWeights``
+     - no direct C call
+   * - ``dseams.voronoiFeatures``
+     - no direct C call
+   * - ``dseams.writeDump``
+     - no direct C call
+   * - ``dseams.writeHistogram``
+     - no direct C call

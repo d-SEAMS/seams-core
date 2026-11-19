@@ -1,0 +1,14 @@
+===========================
+Performance and comparisons
+===========================
+
+
+What to time, how the literature codes were run, and where d-SEAMS sits next to them.
+
+.. toctree::
+   :maxdepth: 1
+
+   howto/benchmarks
+   howto/literature-h2h
+   howto/literature-reproduce
+   comparisons

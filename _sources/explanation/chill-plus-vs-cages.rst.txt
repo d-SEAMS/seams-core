@@ -3,47 +3,76 @@ CHILL+ versus cages
 ===================
 
 
-Two classifiers live in ``libyodaLib``.
-They answer different questions and they do not imply each other.
+Two classifiers in the engine library ``libyodaLib`` answer different
+questions. A CHILL+ label does not imply a cage, and a cage label
+does not imply a CHILL+ label.
 
 Four-neighbour star
 -------------------
 
-CHILL (``seams chill``, ``chill::getCorrel`` / ``getIceTypeNoPrint``) and CHILL+ (``seams chill-plus``, ``chill::getCorrelPlus`` / ``getIceTypePlusNoPrint``) look at the four-neighbour star.
-Both stay on the host.
-A crystal label needs exactly four neighbours inside the cutoff. That shell count is taken before the bond list is cut to four. The old count after the cut was a bug: a shell of five or more neighbours could still receive an ice label. q3 is then the average over the four nearest neighbours of a four-neighbour shell. The staggered and eclipsed pattern of that star labels the atom cubic, hexagonal, interfacial, clathrate, or water.
+CHILL (``seams chill``, ``chill::getCorrel`` / ``getIceTypeNoPrint``) and
+the published CHILL+ call (``seams chill-plus``, ``chill::getCorrelPlus``
+/ ``getIceTypePlusNoPrint``) read the bond star of an oxygen.
 
-A molecule is cubic or hexagonal when its four bonds look like ice, even if those neighbours do not close a cage.
+CHILL is Moore et al., *Phys. Chem. Chem. Phys.* 2010, 12, 4124
+(DOI 10.1039/b919724a). It averages
+:math:`q_3` over the four nearest neighbours. A staggered bond is
+:math:`c(i,j) \le -0.8`. An eclipsed bond lies on
+:math:`-0.2 \le c(i,j) \le -0.05`. The label is read from those four
+bonds, so a cutoff shell of five or more neighbours can still be ice
+when the four nearest bonds match. The labels are cubic, hexagonal,
+interfacial, and water.
 
-CHILL+: Nguyen and Molinero, **J. Phys. Chem. B** 2015 (`10.1021/jp510289t <https://doi.org/10.1021/jp510289t>`_).
-CHILL: Moore et al., **Phys. Chem. Chem. Phys.** 2010.
+CHILL+ is Nguyen and Molinero, *J. Phys. Chem. B* 2015, 119, 9369
+(`10.1021/jp510289t <https://doi.org/10.1021/jp510289t>`_). The
+eclipsed window is :math:`-0.35 \le c(i,j) \le 0.25`. A crystal,
+clathrate, or interfacial label needs exactly four neighbours inside
+the cutoff. That count is the cutoff shell, taken before the bond
+list is reduced to the four nearest. :math:`q_3` is the average over
+those four neighbours. The labels are cubic, hexagonal, interfacial,
+clathrate, interfacial clathrate, and water.
+
+A molecule is cubic or hexagonal when its four bonds look like ice,
+even when those neighbours do not close a cage.
+
+The OVITO form of CHILL+ averages :math:`q_3` over the whole cutoff
+shell. That comparison is
+`the published rule and the OVITO rule <chill-plus-rules.rst>`_.
 
 Cage membership
 ---------------
 
-The ice score (``seams cages``, ``ring::seededCageAffiliation`` by default) is cage membership.
-A molecule in a hexagonal cage (HC) is ice Ih.
-A molecule in a double-diamond cage (DDC) is ice Ic.
-A molecule in neither is water.
-The cages are assembled from six-membered primitive rings on a chosen bond graph.
+The ice score (``seams cages``, ``ring::seededCageAffiliation`` by
+default) is cage membership. A molecule in a hexagonal cage (HC) is
+ice Ih. A molecule in a double-diamond cage (DDC) is ice Ic. A
+molecule in both is counted as both. A molecule in neither is water.
+The cages are assembled from six-membered primitive rings on a chosen
+bond graph.
 
-This is topological unit matching (TUM).
-The methods paper is the 2020 JCIM article (see `Citation <citation.rst>`_).
+This is topological unit matching (TUM). The methods paper is the
+2020 JCIM article (see `Citation <citation.rst>`_).
 
-The GPU path (``gpu::analyzeResident``) is that TUM ice score only: ``linkcell::gpu`` k-nearest, the mutual four-nearest graph, primitive six-rings, and HC/DDC affiliation.
-CHILL, CHILL+, and :math:`q_{lm}` stay on the host.
-Only cage labels come back.
+The GPU path (``gpu::analyzeResident``) is that TUM ice score only:
+``linkcell::gpu`` k-nearest, the mutual four-nearest graph, primitive
+six-rings, and HC/DDC affiliation. CHILL, CHILL+, and :math:`q_{lm}` stay
+on the host. Only cage labels come back.
 
 Why they disagree
 -----------------
 
-A configuration can agree exactly on the closed star of a vertex (same induced graph, same coordinates on those five atoms) and still disagree on that vertex's cage label, because the cage predicates read a larger neighbourhood of six-rings.
-The Catch2 suite encodes that fact: cage membership is not a function of the four-neighbour star.
+A configuration can share the closed star of a vertex (the same
+induced graph and the same coordinates on those five atoms) and still
+carry a different cage label, because the cage predicates read a
+larger neighbourhood of six-rings. Cage membership is not a function
+of the four-neighbour star.
 
-On the in-tree mixed TIP4P dump (``input/traj/exampleTraj.lammpstrj``), ``seams chill-plus`` uses the cutoff list by default and prints 9 interfacial clathrate and 241 water; ``--graph mutual`` prints 1 clathrate, 7 interfacial clathrate, and 242 water.
-Seeded cages report zero HC and zero DDC.
-A three-eclipsed star is not cage membership.
-The commands are in `the mixed TIP4P tutorial <../tutorials/bulk-ice.rst>`_.
+On the mixed TIP4P dump (``input/traj/exampleTraj.lammpstrj``, oxygen
+type 2), ``seams chill-plus`` uses the cutoff list by default and
+prints ``interClathrate 9 water 241``. ``--graph mutual`` prints
+``clathrate 1 interClathrate 7 water 242``. ``seams cages`` prints
+``hexagonal 0 cubic 0 both 0 water 250``. A three-eclipsed star is not
+cage membership. The commands are in
+`the mixed TIP4P tutorial <../user/tutorials/bulk-ice.rst>`_.
 
 Bond graph
 ----------
@@ -52,29 +81,32 @@ Bond graph
 
 .. table::
 
-    +---------------+-------------------------------------------------------+
-    | value         | graph                                                 |
-    +===============+=======================================================+
-    | ``cutoff``    | pairs inside the distance cutoff                      |
-    +---------------+-------------------------------------------------------+
-    | ``knn``       | mutual k-nearest (default ``k=4``)                    |
-    +---------------+-------------------------------------------------------+
-    | ``knn-union`` | union k-nearest (completion graph of the seeded rule) |
-    +---------------+-------------------------------------------------------+
-    | ``seeded``    | mutual seeds, union completions (CLI default)         |
-    +---------------+-------------------------------------------------------+
+    +---------------+------------------------------------------------------------------+
+    | value         | graph                                                            |
+    +===============+==================================================================+
+    | ``cutoff``    | pairs inside the distance cutoff                                 |
+    +---------------+------------------------------------------------------------------+
+    | ``knn``       | mutual k-nearest (default ``k=4``). ``mutual`` is the same graph |
+    +---------------+------------------------------------------------------------------+
+    | ``knn-union`` | union k-nearest, the completion graph of the seeded rule         |
+    +---------------+------------------------------------------------------------------+
+    | ``seeded``    | mutual seeds and union completions (the CLI default)             |
+    +---------------+------------------------------------------------------------------+
 
-On a perfect cubic crystal the four graphs coincide.
-On a mixed nucleation dump they do not have to.
-
-Pool-audit ``ac510645`` records the fix in ``18588dac``. The seeded cage call searches once when the mutual and union edge sets match. ``fellBack()`` runs before a dirty frame returns, so the following frames are warm sweeps.
+On the 4096-molecule cubic cell (``input/traj/mW_cubic.lammpstrj``,
+type 1) each of the four graphs labels every molecule cubic. On the
+mixed TIP4P dump each of the four graphs labels every oxygen water.
+The split with CHILL+ on that dump is the star.
 
 Ring-adjacent completion
 ------------------------
 
-``ring::seededCageAffiliation`` takes a fifth argument, ``ringAdjacentCompletion``, default ``false``.
-When the flag is ``true``, the accepted labels pass through ``ring::ringAdjacentCompletion``: a permissive six-ring with all but one vertex labeled fills that last vertex, iterated to a fixed point.
-Hexagonal cage (HC) flags and double-diamond cage (DDC) flags run as two walks.
+``ring::seededCageAffiliation`` takes ``ringAdjacentCompletion`` as its
+fifth argument, default ``false``. When the flag is ``true``, the
+accepted labels pass through ``ring::ringAdjacentCompletion``: a
+permissive six-ring with all but one vertex labeled fills that last
+vertex, and the walk repeats to a fixed point. Hexagonal-cage flags
+and double-diamond-cage flags run as two walks.
 
-``seams cages --complete`` sets the flag.
-The rule, the least-fixed-point claim, and the Lean build live on `Ring-adjacent completion <ring-completion.rst>`_.
+``seams cages --complete`` sets the flag. The rule and its least fixed
+point are on `Ring-adjacent completion <ring-completion.rst>`_.

@@ -3,10 +3,20 @@ ClavisCage TRACE
 ================
 
 
-ClavisCage TRACE against the d-SEAMS cage census. The numbers are
-written from the vendored CSV at build time. Each timing row names the
-version, the thread count, the repeat count and the core count. TRACE
-does not take a thread count, so the eight-thread row times the same
-serial call as the one-thread row.
+ClavisCage 0.3.18 runs TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025,
+`10.1021/acs.jctc.5c01459 <https://doi.org/10.1021/acs.jctc.5c01459>`_)
+on the same hydrate cells as d-SEAMS 2.14.0. d-SEAMS counts closed cages
+of census :math:`5^{12}`, :math:`5^{12}6^{2}` and :math:`5^{12}6^{4}` on the oxygen
+neighbour graph. TRACE counts cages on the hydrogen-bond graph. The two
+constructions are `TRACE and signature cages <trace-assembly.rst>`_.
+The commands are the how-to
+`Cages and TRACE <../user/howto/cages-trace.rst>`_.
+
+``analyze_waters`` takes no thread count, so an eight-thread row times the
+same serial TRACE call as the one-thread row. d-SEAMS uses the width the
+row names. A row also names the version pair, the molecule count, the
+repeat count ``n`` and the core count. The agreement text is the cage
+census: cages found by both codes, cages found only by d-SEAMS, and
+cages found only by TRACE.
 
 .. include:: clavis-trace-tables.rst

@@ -1,9 +1,7 @@
 SQQ
 ---
 
-h2h-summary.csv and h2h-clavis-cages.csv are copied from HaoZeke/seams-core branch bench/h2h-mdapy-pyscal3-vesin at 323bfd3872e726b3fa384a67c6b1bedf627ce6a0 (https://github.com/HaoZeke/seams-core/blob/323bfd3872e726b3fa384a67c6b1bedf627ce6a0/benchmarks/h2h-summary.csv).
-h2h-sqq.csv and h2h-sqq-agree.csv are copied from HaoZeke/seams-core branch bench/h2h-sqq at c7f71310f27c5ce62d11e97fd82f9757fa4e8628 (https://github.com/HaoZeke/seams-core/blob/c7f71310f27c5ce62d11e97fd82f9757fa4e8628/benchmarks/h2h-sqq.csv).
-docs/render_comparisons.py writes the Comparisons tables from these files.
+The tables compare d-SEAMS with the named analysis packages on the same inputs.
 
 On the 4096-molecule TIP4P/2005 frame the edges and rings match: O-O edges 10495 = 10495; 4-rings 1758 = 1758; 5-rings 2763 = 2763; 6-rings 2485 = 2485.
 The chordless census is the like-for-like ice row. At one thread the SQQ/d-SEAMS ratio is 32.015 (version 2.14.0/0.5.8, threads 1, n=8, cores 1) and at eight threads it is 114.971 (version 2.14.0/0.5.8, threads 8, n=8, cores 8).

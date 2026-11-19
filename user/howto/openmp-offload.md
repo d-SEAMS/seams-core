@@ -1,0 +1,73 @@
+<!-- https://docs.dseams.info/user/howto/openmp-offload.md -->
+
+# OpenMP target offload {#openmp-target-offload}
+
+Build the Steinhardt kernel and the TUM ice score (hop-bound
+six-rings and cage affiliation) for an NVIDIA GPU. This build is
+separate from the gpulite resident-batch path and from the host-only
+pixi environment.
+
+The Meson option is `-Dwith_openmp_offload=enabled`. Configure links
+a real `target teams distribute parallel for`. The summary line
+`OpenMP target offload` is YES only when that link succeeds. The probe
+tries, in order, `-mp=gpu`, then `-mp=gpu -gpu=cc80`, then
+`-mp=gpu -gpu=cuda12.2`, then `-mp=gpu -gpu=cc80,cuda12.2`, then
+`-mp=gpu -gpu=cuda11.6`, then `-mp=gpu -gpu=cc80,cuda11.6`, then
+`-fopenmp -fopenmp-targets=` plus the `offload_triple` option (default
+`nvptx64-nvidia-cuda`). The first set that links is used on the compile
+line and the link line. An HPC SDK that does not ship a toolkit
+matching the driver still links when a `-gpu=cudaX.Y` set names a
+bundled release. The 22.3 SDK ships CUDA 11.6. The 23.7 SDK ships
+CUDA 12.2.
+
+## Configure and build {#configure-and-build}
+
+Configure with an NVIDIA HPC compiler or a Clang installation that
+provides `libomptarget`:
+
+```bash
+export CXX=nvc++
+meson setup build-offload --buildtype=debugoptimized \
+  -Dwith_openmp_offload=enabled \
+  -Dwith_mpi=disabled \
+  -Dwith_gpulite=disabled
+meson compile -C build-offload
+```
+
+For nvc++ 23.7 with Meson 1.4, pass `-Dcpp_std=none` and
+`CXXFLAGS="-std=c++20"` when Meson does not list C++20 for that
+compiler release.
+
+## Runtime {#runtime}
+
+Steinhardt, the TUM cage count, and CHILL+ each read `SEAMS_OFFLOAD`
+with their own rule. `seams` loads the variable first and writes it
+back before the command. Unset is written as `0`. The value `0`, and a
+value whose first letter is `f` or `n`, stay off. Any other value,
+including the word `off`, is written back as `1`.
+
+A library caller that sets the variable itself sees the raw text:
+
+- Steinhardt (`wantOffload` inside `steinhardtQl` and
+  `steinhardtQlCutoff`) uses the device when
+  `omp_get_num_devices() > 0` and the value does not start with `0`.
+  Unset, seen directly, also uses the device. `l = 12` has no device
+  harmonics and stays on the host. After `seams` rewrites the
+  variable, unset therefore stays on the host. `seams steinhardt`
+  reaches the device when that write is `1` and a device is present.
+- TUM (`tum::preferOffload`) uses the hop-bound target kernels only
+  when the variable is set, non-empty, and does not start with `0`,
+  and a device is present. Otherwise `tum::cageCounts` stays on host
+  `ringNetwork` (Franzblau) and `cageAffiliation`. `seams cages` on a
+  cutoff graph or a mutual graph calls that path. The seeded graph
+  stays on the host.
+- CHILL+ (`chill::preferOffload`) is on when the variable is set and
+  is not exactly `0`. `chill::chillPlus` then runs the flattened
+  four-nearest tables, in a target region when a device is present.
+  `seams chill-plus` does not call `chill::chillPlus`. Published
+  cutoff CHILL+ stays on the host cell list.
+
+`seams --features` prints the compile-time backends: OpenMP,
+`linkcell pairs_within`, `vesin cutoff fallback`, and the rest of that
+list. It does not print the offload define. The Meson summary line is
+the record of the probe.

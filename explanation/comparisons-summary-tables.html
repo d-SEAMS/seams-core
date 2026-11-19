@@ -2,8 +2,7 @@
 <html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Head-to-head summary - d-SEAMS molecular simulation analysis documentation</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Full cutoff ring call" href="cutoff-rings-tables.html" /><link rel="prev" title="ClavisCage TRACE" href="clavis-trace-tables.html" />
-      <link rel="canonical" href="https://docs.dseams.info/explanation/comparisons-summary-tables.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Head-to-head summary - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="SQQ" href="sqq-tables.html" /><link rel="prev" title="Changelog" href="../development/changelog.html" /><link rel="canonical" href="https://docs.dseams.info/explanation/comparisons-summary-tables.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -19,50 +18,26 @@
     
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/explanation/comparisons-summary-tables.html"/>
-  <meta property="og:title" content="Head-to-head summary"/>
-    <meta name="twitter:card" content="summary"/>
+  <meta property="og:title" content="Head-to-head summary"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="The tables compare d-SEAMS with the named analysis packages on the same inputs."/>
+    <meta property="og:description" content="The tables compare d-SEAMS with the named analysis packages on the same inputs."/><meta name="twitter:card" content="summary_large_image"/>
   <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
 <link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
 <link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
-<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-
-<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta property="og:image" content="https://dseams.info/images/og-card.png">
-<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="robots" content="index, follow">
 <meta name="twitter:title" content="Head-to-head summary - d-SEAMS">
-<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://docs.dseams.info/#application",
-      "name": "d-SEAMS",
-      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
-      "applicationCategory": "ScientificApplication",
-      "operatingSystem": "Linux, macOS",
-      "url": "https://docs.dseams.info/",
-      "softwareVersion": "2.14.0",
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    },
-    {
-      "@type": "SoftwareSourceCode",
-      "@id": "https://github.com/d-SEAMS/seams-core#source",
-      "name": "seams-core",
-      "codeRepository": "https://github.com/d-SEAMS/seams-core",
-      "programmingLanguage": ["C++", "C", "Python"],
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    }
-  ]
-}
-</script></head>
+<meta name="twitter:description" content="The tables compare d-SEAMS with the named analysis packages on the same inputs.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/explanation/comparisons-summary-tables.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Head-to-head summary - d-SEAMS","description":"The tables compare d-SEAMS with the named analysis packages on the same inputs.","url":"https://docs.dseams.info/explanation/comparisons-summary-tables.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
 <body><nav class="dseams-family" aria-label="d-SEAMS">
   <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
   <ul class="dseams-family__nav">
@@ -128,161 +103,19 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../videos/index.html">Videos</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Worked examples</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/clathrate.html">Classify a clathrate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/interface.html">Ice-water interface</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nucleation.html">Nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/brine.html">Brine and NaCl</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/insitu-run.html">Run in situ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-interface.html">CHILL+ on an ice/water slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-cages.html">Cage census of sI, sII and sH</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-rings.html">Primitive rings and the shortest-path test</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-brine.html">Ice growing into brine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-nucleation.html">Ice-likeness along a short nucleation run</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery.html">Science gallery</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/index.html">Science tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/interface.html">Ice/liquid interface and nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/brine.html">Brine freezing front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/cages.html">sII and sH hydrate cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/gallery.html">Science figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/index.html">Language tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/c.html">C tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/cpp.html">C++ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/engines.html">Engines tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/gromacs.html">GROMACS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/insitu.html">In-situ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lammps.html">LAMMPS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/openmm.html">OpenMM tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/plumed.html">PLUMED tutorial</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../user/index.html">User guide</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">Tasks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/upgrade-2.14.html">Upgrade from 2.13 to 2.14</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/migrate-1x.html">Migrate from d-SEAMS 1.x</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Use a language binding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/neighbour-lists.html">Cutoff neighbour lists</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cages-trace.html">Cages and TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/q4-q6.html">Local q4 and q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/chill-plus.html">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding.html">Choosing a cutoff and padding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/symmetry-classifier.html">The symmetry classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/linkcell-carried.html">Linkcell neighbours and carried updates</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/science-front.html">Basal profiles and the nucleation census</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/from-trajectory.html">From a trajectory to the ice front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-insitu.html">In-situ CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../walkthrough/index.html">Engine walkthroughs</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Lookup pages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/python-frame.html">Python Frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14.html">2.14.0 release notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/c.html">C</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/science.html">Science front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../capi/index.html">C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Engines</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/index.html">Engine builds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/insitu.html">In-situ</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Comparisons</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../comparisons.html">Head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sqq.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-h2h.html">Literature head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-reproduce.html">Reproduce the literature head-to-head</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="index.html">Concepts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="architecture.html">Repositories</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="c-api.html">The C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="interface-order.html">Interface and confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="binding-overhead.html">Binding overhead</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range.html">Performance, 4096 to 110592</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/repositories.html">Repository map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/release.html">Release process</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/lean.html">Lean proofs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
@@ -562,88 +395,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="clavis-trace-tables.html">ClavisCage TRACE</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Head-to-head summary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="cutoff-rings-tables.html">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html">884736 sitting, ice and liquid</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#neighbours">Neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings">Rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings-against-cycless">Rings against cycless</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings-against-sqq">Rings against SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#q6-against-ovito">q6 against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#cages">Cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#linkcell-scaling">Linkcell scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html">What each file holds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#rc3-sitting-one-thread-against-eight">rc3 sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#molecule-sitting-one-thread-against-eight">884736-molecule sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#signature-search-one-thread-against-eight">signature search, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#pool-sized-kernels-one-thread-against-eight">pool-sized kernels, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#pool-audit-at-4096-molecules-four-threads-against-eight">Pool audit at 4096 molecules, four threads against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html">binding-overhead.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-ice-ic-rings-n16-csv">h2h-ice-ic-rings-n16.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-ice-ic-rings-csv">h2h-ice-ic-rings.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-literature-csv">h2h-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-summary-csv">h2h-summary.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v12-csv">h2h-watch-v12.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v13-csv">h2h-watch-v13.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v2-csv">h2h-watch-v2.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v3-csv">h2h-watch-v3.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v4-csv">h2h-watch-v4.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v6-sqq-csv">h2h-watch-v6-sqq.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v7-csv">h2h-watch-v7.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-csv">h2h-watch.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rank-scale-csv">rank-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rc2perf-literature-csv">rc2perf-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rc3-sitting-csv">rc3-sitting.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#thread-scale-csv">thread-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#weak-scale-csv">weak-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#sitting-large-csv">sitting-large.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html">neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#q4">q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#rings">rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#cages">cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#king">king</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html">ice Ic, 4096 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-32768-molecules">ice Ic, 32768 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-110592-molecules">ice Ic, 110592 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-884736-molecules">ice Ic, 884736 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html">884736 molecules, rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q4">884736 molecules, q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q6">884736 molecules, q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q4-q6">884736 molecules, q4+q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-neighbours">884736 molecules, neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-coordination">884736 molecules, coordination</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-chill">884736 molecules, chill+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-classifier">884736 molecules, classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-ptm-default">884736 molecules, ptm-default</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-ptm-ice">884736 molecules, ptm-ice</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="sqq-tables.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads-tables.html">signature cages, sI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads-tables.html#signature-cages-sii">signature cages, sII</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html">The bulk-liquid gate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#summary-rows">Summary rows</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#layers-whose-label-changed">Layers whose label changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#classify-timings">Classify timings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-speed.html">One thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html">Neighbours against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html#full-cutoff-ring-call">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html">Added</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#changed">Changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#deprecated">Deprecated</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#removed">Removed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#fixed">Fixed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html">Interface slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#brine-frame">Brine frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#ice-ih-six-rings">Ice Ih six-rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#nucleation-nucleus">Nucleation nucleus</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#si-and-sii-cages">sI and sII cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/molecules.html">Molecule stills</a></li>
 </ul>
         </div>
       </div>
@@ -685,10 +438,8 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue dark-code" role="main">
           <section id="head-to-head-summary">
 <h1>Head-to-head summary<a class="headerlink" href="#head-to-head-summary" title="Link to this heading">¶</a></h1>
-<p>h2h-summary.csv and h2h-clavis-cages.csv are copied from HaoZeke/seams-core branch bench/h2h-mdapy-pyscal3-vesin at 323bfd3872e726b3fa384a67c6b1bedf627ce6a0 (<a class="reference external" href="https://github.com/HaoZeke/seams-core/blob/323bfd3872e726b3fa384a67c6b1bedf627ce6a0/benchmarks/h2h-summary.csv">https://github.com/HaoZeke/seams-core/blob/323bfd3872e726b3fa384a67c6b1bedf627ce6a0/benchmarks/h2h-summary.csv</a>).
-h2h-sqq.csv and h2h-sqq-agree.csv are copied from HaoZeke/seams-core branch bench/h2h-sqq at c7f71310f27c5ce62d11e97fd82f9757fa4e8628 (<a class="reference external" href="https://github.com/HaoZeke/seams-core/blob/c7f71310f27c5ce62d11e97fd82f9757fa4e8628/benchmarks/h2h-sqq.csv">https://github.com/HaoZeke/seams-core/blob/c7f71310f27c5ce62d11e97fd82f9757fa4e8628/benchmarks/h2h-sqq.csv</a>).
-docs/render_comparisons.py writes the Comparisons tables from these files.</p>
-<p>Each row is one record of <code class="docutils literal notranslate"><span class="pre">h2h-summary.csv</span></code>. The version, thread count, repeat count <code class="docutils literal notranslate"><span class="pre">n</span></code> and core count are the CSV columns. The agreement text for every row is in the block below.</p>
+<p>The tables compare d-SEAMS with the named analysis packages on the same inputs.</p>
+<p>Each row reports the version, thread count, repeat count <code class="docutils literal notranslate"><span class="pre">n</span></code>, core count, and measured times. The agreement text for every row is in the block below.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -702,7 +453,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <th class="head"><p>d-SEAMS ms</p></th>
 <th class="head"><p>other ms</p></th>
 <th class="head"><p>ratio</p></th>
-<th class="head"><p>verdict</p></th>
 </tr>
 </thead>
 <tbody>
@@ -716,7 +466,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-odd"><td><p>vesin</p></td>
 <td><p>2.14.0/0.6.2</p></td>
@@ -728,7 +477,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.2524</p></td>
 <td><p>1.7137</p></td>
 <td><p>6.7902</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0/3.6.1</p></td>
@@ -740,7 +488,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.2809</p></td>
 <td><p>2.9465</p></td>
 <td><p>10.4886</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -752,7 +499,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7256</p></td>
 <td><p>4.6527</p></td>
 <td><p>6.4123</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -764,7 +510,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7415</p></td>
 <td><p>3.5078</p></td>
 <td><p>4.7306</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -776,7 +521,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7184</p></td>
 <td><p>2.6670</p></td>
 <td><p>3.7122</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0</p></td>
@@ -788,7 +532,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>correctness</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0</p></td>
@@ -800,7 +543,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>correctness</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0</p></td>
@@ -812,10 +554,9 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>correctness</p></td>
 </tr>
 <tr class="row-odd"><td><p>PTM</p></td>
-<td><p>2.14.0/162cc834</p></td>
+<td><p>2.14.0</p></td>
 <td><p>ptm</p></td>
 <td><p>4096</p></td>
 <td><p>1</p></td>
@@ -824,7 +565,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7334</p></td>
 <td><p>189.4989</p></td>
 <td><p>258.3907</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -836,7 +576,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7255</p></td>
 <td><p>4.5952</p></td>
 <td><p>6.3335</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>freud</p></td>
 <td><p>2.14.0</p></td>
@@ -848,7 +587,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -860,7 +598,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7306</p></td>
 <td><p>4.7155</p></td>
 <td><p>6.4542</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -872,7 +609,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>4.5301</p></td>
 <td><p>15.8206</p></td>
 <td><p>3.4923</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -884,7 +620,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7264</p></td>
 <td><p>105.0304</p></td>
 <td><p>144.5805</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>PLUMED</p></td>
 <td><p>2.14.0/2.10.0</p></td>
@@ -896,7 +631,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7230</p></td>
 <td><p>121.5863</p></td>
 <td><p>168.1621</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>rings-statistics-matter</p></td>
 <td><p>2.14.0/0.3.0</p></td>
@@ -908,7 +642,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>4.5552</p></td>
 <td><p>56.9215</p></td>
 <td><p>12.4961</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>cycless</p></td>
 <td><p>2.14.0/0.7</p></td>
@@ -920,7 +653,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>5.0379</p></td>
 <td><p>12678.2659</p></td>
 <td><p>2516.5770</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>IRA</p></td>
 <td><p>2.14.0/2.2.0</p></td>
@@ -932,7 +664,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.7481</p></td>
 <td><p>1302.6695</p></td>
 <td><p>1741.2294</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>SQQ</p></td>
 <td><p>0.5.8</p></td>
@@ -944,7 +675,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-even"><td><p>vesin</p></td>
 <td><p>2.14.0/0.6.2</p></td>
@@ -956,7 +686,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>6.4962</p></td>
 <td><p>45.9557</p></td>
 <td><p>7.0742</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>freud</p></td>
 <td><p>2.14.0/3.6.1</p></td>
@@ -968,7 +697,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>6.4788</p></td>
 <td><p>91.8476</p></td>
 <td><p>14.1766</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -980,7 +708,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>18.7583</p></td>
 <td><p>108.5550</p></td>
 <td><p>5.7870</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -992,7 +719,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>18.7787</p></td>
 <td><p>99.5513</p></td>
 <td><p>5.3013</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1004,10 +730,9 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>18.5351</p></td>
 <td><p>56.9564</p></td>
 <td><p>3.0729</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>PTM</p></td>
-<td><p>2.14.0/162cc834</p></td>
+<td><p>2.14.0</p></td>
 <td><p>ptm</p></td>
 <td><p>110592</p></td>
 <td><p>1</p></td>
@@ -1016,7 +741,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>21.8284</p></td>
 <td><p>4855.0064</p></td>
 <td><p>222.4168</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1028,7 +752,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>18.4099</p></td>
 <td><p>113.8680</p></td>
 <td><p>6.1851</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>freud</p></td>
 <td><p>2.14.0</p></td>
@@ -1040,7 +763,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1052,7 +774,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>20.7730</p></td>
 <td><p>136.5008</p></td>
 <td><p>6.5711</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1064,7 +785,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>119.4383</p></td>
 <td><p>503.1571</p></td>
 <td><p>4.2127</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1076,7 +796,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>21.0405</p></td>
 <td><p>2903.9205</p></td>
 <td><p>138.0160</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>PLUMED</p></td>
 <td><p>2.14.0/2.10.0</p></td>
@@ -1088,7 +807,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>19.2551</p></td>
 <td><p>3006.8135</p></td>
 <td><p>156.1569</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>rings-statistics-matter</p></td>
 <td><p>2.14.0/0.3.0</p></td>
@@ -1100,7 +818,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>116.2389</p></td>
 <td><p>1327.4966</p></td>
 <td><p>11.4204</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>IRA</p></td>
 <td><p>2.2.0</p></td>
@@ -1112,7 +829,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-even"><td><p>cycless</p></td>
 <td><p>2.14.0/0.7</p></td>
@@ -1124,7 +840,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>136.3856</p></td>
 <td><p>341558.2557</p></td>
 <td><p>2504.3573</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>SQQ</p></td>
 <td><p>0.5.8</p></td>
@@ -1136,7 +851,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-even"><td><p>vesin</p></td>
 <td><p>2.14.0/0.6.2</p></td>
@@ -1148,7 +862,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>82.4432</p></td>
 <td><p>1140.5612</p></td>
 <td><p>13.8345</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>freud</p></td>
 <td><p>2.14.0/3.6.1</p></td>
@@ -1160,7 +873,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>102.7091</p></td>
 <td><p>930.3372</p></td>
 <td><p>9.0580</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1172,7 +884,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>237.0502</p></td>
 <td><p>1039.0684</p></td>
 <td><p>4.3833</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -1184,7 +895,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>237.9653</p></td>
 <td><p>927.0447</p></td>
 <td><p>3.8957</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1196,10 +906,9 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>203.1011</p></td>
 <td><p>585.3079</p></td>
 <td><p>2.8819</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>PTM</p></td>
-<td><p>2.14.0/162cc834</p></td>
+<td><p>2.14.0</p></td>
 <td><p>ptm</p></td>
 <td><p>884736</p></td>
 <td><p>1</p></td>
@@ -1208,7 +917,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>255.8396</p></td>
 <td><p>38381.2306</p></td>
 <td><p>150.0207</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1220,7 +928,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>208.1052</p></td>
 <td><p>1007.4027</p></td>
 <td><p>4.8408</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>freud</p></td>
 <td><p>2.14.0</p></td>
@@ -1232,7 +939,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1244,7 +950,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>248.1369</p></td>
 <td><p>1136.5466</p></td>
 <td><p>4.5803</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1256,7 +961,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>1046.5149</p></td>
 <td><p>4542.0060</p></td>
 <td><p>4.3401</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1268,7 +972,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>259.8032</p></td>
 <td><p>23247.5896</p></td>
 <td><p>89.4815</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>PLUMED</p></td>
 <td><p>2.14.0/2.10.0</p></td>
@@ -1280,7 +983,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>240.7382</p></td>
 <td><p>23208.5792</p></td>
 <td><p>96.4059</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>rings-statistics-matter</p></td>
 <td><p>2.14.0/0.3.0</p></td>
@@ -1292,7 +994,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>1032.6158</p></td>
 <td><p>13012.7347</p></td>
 <td><p>12.6017</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>cycless</p></td>
 <td><p>0.7</p></td>
@@ -1304,7 +1005,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-even"><td><p>IRA</p></td>
 <td><p>2.2.0</p></td>
@@ -1316,7 +1016,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-odd"><td><p>SQQ</p></td>
 <td><p>0.5.8</p></td>
@@ -1328,7 +1027,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-even"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -1340,7 +1038,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-odd"><td><p>vesin</p></td>
 <td><p>2.14.0/0.6.2</p></td>
@@ -1352,7 +1049,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.2509</p></td>
 <td><p>0.5761</p></td>
 <td><p>2.2961</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0/3.6.1</p></td>
@@ -1364,7 +1060,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.3054</p></td>
 <td><p>0.8688</p></td>
 <td><p>2.8444</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1376,7 +1071,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.5273</p></td>
 <td><p>0.8488</p></td>
 <td><p>1.6098</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -1388,7 +1082,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.3900</p></td>
 <td><p>1.9000</p></td>
 <td><p>4.8712</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1400,10 +1093,9 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.5076</p></td>
 <td><p>0.5913</p></td>
 <td><p>1.1649</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>PTM</p></td>
-<td><p>2.14.0/162cc834</p></td>
+<td><p>2.14.0</p></td>
 <td><p>ptm</p></td>
 <td><p>4096</p></td>
 <td><p>8</p></td>
@@ -1412,7 +1104,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.2783</p></td>
 <td><p>24.0122</p></td>
 <td><p>86.2705</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1424,7 +1115,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.4711</p></td>
 <td><p>4.5363</p></td>
 <td><p>9.6285</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0</p></td>
@@ -1436,7 +1126,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1448,7 +1137,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.5566</p></td>
 <td><p>1.9548</p></td>
 <td><p>3.5122</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1460,7 +1148,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>2.6129</p></td>
 <td><p>17.6346</p></td>
 <td><p>6.7491</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1472,7 +1159,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.5204</p></td>
 <td><p>28.3374</p></td>
 <td><p>54.4549</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>PLUMED</p></td>
 <td><p>2.14.0/2.10.0</p></td>
@@ -1484,7 +1170,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.6326</p></td>
 <td><p>109.1420</p></td>
 <td><p>172.5345</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>rings-statistics-matter</p></td>
 <td><p>2.14.0/0.3.0</p></td>
@@ -1496,7 +1181,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>2.2476</p></td>
 <td><p>12.5984</p></td>
 <td><p>5.6052</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>cycless</p></td>
 <td><p>2.14.0/0.7</p></td>
@@ -1508,7 +1192,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>2.9191</p></td>
 <td><p>12516.1838</p></td>
 <td><p>4287.6594</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>IRA</p></td>
 <td><p>2.14.0/2.2.0</p></td>
@@ -1520,7 +1203,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>1.2898</p></td>
 <td><p>1299.2780</p></td>
 <td><p>1007.3679</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>SQQ</p></td>
 <td><p>0.5.8</p></td>
@@ -1532,7 +1214,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-odd"><td><p>vesin</p></td>
 <td><p>2.14.0/0.6.2</p></td>
@@ -1544,7 +1225,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>4.0501</p></td>
 <td><p>14.9654</p></td>
 <td><p>3.6950</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0/3.6.1</p></td>
@@ -1556,7 +1236,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>3.8882</p></td>
 <td><p>31.5433</p></td>
 <td><p>8.1125</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1568,7 +1247,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>5.3935</p></td>
 <td><p>15.2391</p></td>
 <td><p>2.8254</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -1580,7 +1258,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>5.3208</p></td>
 <td><p>18.3291</p></td>
 <td><p>3.4448</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1592,10 +1269,9 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>7.5892</p></td>
 <td><p>10.3904</p></td>
 <td><p>1.3691</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>PTM</p></td>
-<td><p>2.14.0/162cc834</p></td>
+<td><p>2.14.0</p></td>
 <td><p>ptm</p></td>
 <td><p>110592</p></td>
 <td><p>8</p></td>
@@ -1604,7 +1280,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>8.2662</p></td>
 <td><p>613.5692</p></td>
 <td><p>74.2262</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1616,7 +1291,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>5.2050</p></td>
 <td><p>113.8816</p></td>
 <td><p>21.8794</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0</p></td>
@@ -1628,7 +1302,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1640,7 +1313,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>8.3309</p></td>
 <td><p>29.5160</p></td>
 <td><p>3.5430</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1652,7 +1324,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>48.3409</p></td>
 <td><p>323.8505</p></td>
 <td><p>6.6993</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1664,7 +1335,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>8.5196</p></td>
 <td><p>387.5268</p></td>
 <td><p>45.4867</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>PLUMED</p></td>
 <td><p>2.14.0/2.10.0</p></td>
@@ -1676,7 +1346,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>8.9858</p></td>
 <td><p>3028.2786</p></td>
 <td><p>337.0065</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>rings-statistics-matter</p></td>
 <td><p>2.14.0/0.3.0</p></td>
@@ -1688,7 +1357,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>47.2318</p></td>
 <td><p>307.1093</p></td>
 <td><p>6.5022</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>IRA</p></td>
 <td><p>2.2.0</p></td>
@@ -1700,7 +1368,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-odd"><td><p>cycless</p></td>
 <td><p>2.14.0/0.7</p></td>
@@ -1712,7 +1379,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>65.8726</p></td>
 <td><p>337108.4778</p></td>
 <td><p>5117.5843</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>SQQ</p></td>
 <td><p>0.5.8</p></td>
@@ -1724,7 +1390,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-odd"><td><p>vesin</p></td>
 <td><p>2.14.0/0.6.2</p></td>
@@ -1736,7 +1401,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>41.3136</p></td>
 <td><p>209.6075</p></td>
 <td><p>5.0736</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0/3.6.1</p></td>
@@ -1748,7 +1412,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>49.5928</p></td>
 <td><p>343.2560</p></td>
 <td><p>6.9215</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1760,7 +1423,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>71.0785</p></td>
 <td><p>149.8983</p></td>
 <td><p>2.1089</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>pyscal3</p></td>
 <td><p>2.14.0/4.1.0</p></td>
@@ -1772,7 +1434,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>71.7527</p></td>
 <td><p>177.4625</p></td>
 <td><p>2.4733</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>mdapy</p></td>
 <td><p>2.14.0/2.0.0</p></td>
@@ -1784,10 +1445,9 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>66.4798</p></td>
 <td><p>115.4407</p></td>
 <td><p>1.7365</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>PTM</p></td>
-<td><p>2.14.0/162cc834</p></td>
+<td><p>2.14.0</p></td>
 <td><p>ptm</p></td>
 <td><p>884736</p></td>
 <td><p>8</p></td>
@@ -1796,7 +1456,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>59.6748</p></td>
 <td><p>4823.9120</p></td>
 <td><p>80.8367</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1808,7 +1467,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>59.4890</p></td>
 <td><p>1008.0481</p></td>
 <td><p>16.9451</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>freud</p></td>
 <td><p>2.14.0</p></td>
@@ -1820,7 +1478,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>absent</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1832,7 +1489,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>62.1147</p></td>
 <td><p>262.3612</p></td>
 <td><p>4.2238</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1844,7 +1500,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>484.2037</p></td>
 <td><p>2917.3354</p></td>
 <td><p>6.0250</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>OVITO</p></td>
 <td><p>2.14.0/3.17.2</p></td>
@@ -1856,7 +1511,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>63.6214</p></td>
 <td><p>3062.3280</p></td>
 <td><p>48.1336</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>PLUMED</p></td>
 <td><p>2.14.0/2.10.0</p></td>
@@ -1868,7 +1522,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>91.1466</p></td>
 <td><p>23631.1588</p></td>
 <td><p>259.2655</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>rings-statistics-matter</p></td>
 <td><p>2.14.0/0.3.0</p></td>
@@ -1880,7 +1533,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>476.9637</p></td>
 <td><p>2967.7415</p></td>
 <td><p>6.2222</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>cycless</p></td>
 <td><p>0.7</p></td>
@@ -1892,7 +1544,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-odd"><td><p>IRA</p></td>
 <td><p>2.2.0</p></td>
@@ -1904,7 +1555,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-even"><td><p>SQQ</p></td>
 <td><p>0.5.8</p></td>
@@ -1916,7 +1566,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p>DNF</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1928,7 +1577,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.5796</p></td>
 <td><p>50.3899</p></td>
 <td><p>86.9321</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1940,7 +1588,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>0.5947</p></td>
 <td><p>50.2893</p></td>
 <td><p>84.5632</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1952,7 +1599,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>3.7222</p></td>
 <td><p>297.6070</p></td>
 <td><p>79.9538</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1964,7 +1610,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>2.9243</p></td>
 <td><p>297.9639</p></td>
 <td><p>101.8907</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1976,7 +1621,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>1.4924</p></td>
 <td><p>68.3007</p></td>
 <td><p>45.7666</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -1988,7 +1632,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>1.5655</p></td>
 <td><p>68.2571</p></td>
 <td><p>43.6016</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -2000,7 +1643,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>10.7150</p></td>
 <td><p>697.6882</p></td>
 <td><p>65.1132</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -2012,7 +1654,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>4.7284</p></td>
 <td><p>697.7931</p></td>
 <td><p>147.5752</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-odd"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -2024,7 +1665,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>955.8314</p></td>
 <td><p>61962.4841</p></td>
 <td><p>64.8257</p></td>
-<td><p>WIN</p></td>
 </tr>
 <tr class="row-even"><td><p>ClavisCage</p></td>
 <td><p>2.14.0/0.3.18</p></td>
@@ -2036,7 +1676,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p>303.0753</p></td>
 <td><p>61956.9697</p></td>
 <td><p>204.4277</p></td>
-<td><p>WIN</p></td>
 </tr>
 </tbody>
 </table>
@@ -2057,7 +1696,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <th class="head"><p class="sd-card-text">d-SEAMS ms</p></th>
 <th class="head"><p class="sd-card-text">other ms</p></th>
 <th class="head"><p class="sd-card-text">ratio</p></th>
-<th class="head"><p class="sd-card-text">verdict</p></th>
 <th class="head"><p class="sd-card-text">agreement</p></th>
 </tr>
 </thead>
@@ -2072,7 +1710,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">pyscal3 4.1.0 __all__ has no CHILL or CHILL+ name. common_neighbor_analysis is adaptive CNA and returns fcc, hcp, bcc, ico, and others (pyscal3/descriptors.py). diamond_structure is extended CNA. Neither is Nguyen and Molinero CHILL+. PyPI’s latest pyscal3 is this same 4.1.0.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">vesin</p></td>
@@ -2085,7 +1722,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.2524</p></td>
 <td><p class="sd-card-text">1.7137</p></td>
 <td><p class="sd-card-text">6.7902</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 8192 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -2098,7 +1734,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.2809</p></td>
 <td><p class="sd-card-text">2.9465</p></td>
 <td><p class="sd-card-text">10.4886</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 8192 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -2111,7 +1746,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7256</p></td>
 <td><p class="sd-card-text">4.6527</p></td>
 <td><p class="sd-card-text">6.4123</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">pyscal3</p></td>
@@ -2124,7 +1758,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7415</p></td>
 <td><p class="sd-card-text">3.5078</p></td>
 <td><p class="sd-card-text">4.7306</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -2137,7 +1770,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7184</p></td>
 <td><p class="sd-card-text">2.6670</p></td>
 <td><p class="sd-card-text">3.7122</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 4096 equal q6_max_abs 4.441e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2150,7 +1782,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">correctness</p></td>
 <td><p class="sd-card-text">phase Ih atoms 4096 disagree 4096. hexagonal_ice vs Other coordination 4 n=4096 (3 staggered and 1 eclipsed). Every disagreement is a CHILL+ row on a shell adaptive CNA does not name: Structure Type is only Other, FCC, HCP, BCC, or ICO (ovito/modifiers/__init__.pyi). FCC control 256/256 FCC, so the modifier is classifying. CHILL+ rows are the table in src/include/internal/bop.hpp.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -2163,7 +1794,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">correctness</p></td>
 <td><p class="sd-card-text">phase Ic atoms 4096 disagree 4096. cubic_ice vs Other coordination 4 n=4096 (4 staggered and 0 eclipsed). Every disagreement is a CHILL+ row on a shell adaptive CNA does not name: Structure Type is only Other, FCC, HCP, BCC, or ICO (ovito/modifiers/__init__.pyi). FCC control 256/256 FCC, so the modifier is classifying. CHILL+ rows are the table in src/include/internal/bop.hpp.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2176,11 +1806,10 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">correctness</p></td>
 <td><p class="sd-card-text">phase liquid atoms 4096 disagree 222. hexagonal_ice vs Other coordination 4 n=1 (3 staggered and 1 eclipsed); hydrate vs Other coordination 4 n=49 (4 eclipsed and 0 staggered); interfacial_hydrate vs Other coordination 4 n=168 (3 eclipsed); interfacial_ice vs Other coordination 4 n=4 (2 staggered, or 3 staggered and 0 eclipsed). Every disagreement is a CHILL+ row on a shell adaptive CNA does not name: Structure Type is only Other, FCC, HCP, BCC, or ICO (ovito/modifiers/__init__.pyi). FCC control 256/256 FCC, so the modifier is classifying. CHILL+ rows are the table in src/include/internal/bop.hpp. Four shifted-ice waters have 12 neighbours inside 3.5 A: 690 at (4.490, 15.864, 50.345), 1673 at (16.865, 18.399, 11.795), 1675 at (15.210, 17.036, 12.464), 2304 at (16.902, 34.179, 1.355). An independent minimum-image count gives the same 12 distinct ids. The nearest pair in the frame is 0.183 A, from the Gaussian shift, not a repeated periodic image.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">PTM</p></td>
-<td><p class="sd-card-text">2.14.0/162cc834</p></td>
+<td><p class="sd-card-text">2.14.0</p></td>
 <td><p class="sd-card-text">ptm</p></td>
 <td><p class="sd-card-text">4096</p></td>
 <td><p class="sd-card-text">1</p></td>
@@ -2189,7 +1818,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7334</p></td>
 <td><p class="sd-card-text">189.4989</p></td>
 <td><p class="sd-card-text">258.3907</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal rmsd_max 4.337e-08</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -2202,7 +1830,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7255</p></td>
 <td><p class="sd-card-text">4.5952</p></td>
 <td><p class="sd-card-text">6.3335</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 4096 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">freud</p></td>
@@ -2215,7 +1842,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020).</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2228,7 +1854,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7306</p></td>
 <td><p class="sd-card-text">4.7155</p></td>
 <td><p class="sd-card-text">6.4542</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -2241,7 +1866,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">4.5301</p></td>
 <td><p class="sd-card-text">15.8206</p></td>
 <td><p class="sd-card-text">3.4923</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 8192 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2254,7 +1878,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7264</p></td>
 <td><p class="sd-card-text">105.0304</p></td>
 <td><p class="sd-card-text">144.5805</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">PLUMED</p></td>
@@ -2267,7 +1890,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7230</p></td>
 <td><p class="sd-card-text">121.5863</p></td>
 <td><p class="sd-card-text">168.1621</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 2.220e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">rings-statistics-matter</p></td>
@@ -2280,7 +1902,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">4.5552</p></td>
 <td><p class="sd-card-text">56.9215</p></td>
 <td><p class="sd-card-text">12.4961</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 8192 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">cycless</p></td>
@@ -2293,7 +1914,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">5.0379</p></td>
 <td><p class="sd-card-text">12678.2659</p></td>
 <td><p class="sd-card-text">2516.5770</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 8192 equal; cycles_iter has no thread argument</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">IRA</p></td>
@@ -2306,7 +1926,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.7481</p></td>
 <td><p class="sd-card-text">1302.6695</p></td>
 <td><p class="sd-card-text">1741.2294</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">SQQ</p></td>
@@ -2319,7 +1938,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">512 molecules exceeded 600 s, so this size was not started</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">vesin</p></td>
@@ -2332,7 +1950,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">6.4962</p></td>
 <td><p class="sd-card-text">45.9557</p></td>
 <td><p class="sd-card-text">7.0742</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 221184 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">freud</p></td>
@@ -2345,7 +1962,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">6.4788</p></td>
 <td><p class="sd-card-text">91.8476</p></td>
 <td><p class="sd-card-text">14.1766</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 221184 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">mdapy</p></td>
@@ -2358,7 +1974,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">18.7583</p></td>
 <td><p class="sd-card-text">108.5550</p></td>
 <td><p class="sd-card-text">5.7870</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">pyscal3</p></td>
@@ -2371,7 +1986,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">18.7787</p></td>
 <td><p class="sd-card-text">99.5513</p></td>
 <td><p class="sd-card-text">5.3013</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">mdapy</p></td>
@@ -2384,11 +1998,10 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">18.5351</p></td>
 <td><p class="sd-card-text">56.9564</p></td>
 <td><p class="sd-card-text">3.0729</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 110592 equal q6_max_abs 1.776e-15</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">PTM</p></td>
-<td><p class="sd-card-text">2.14.0/162cc834</p></td>
+<td><p class="sd-card-text">2.14.0</p></td>
 <td><p class="sd-card-text">ptm</p></td>
 <td><p class="sd-card-text">110592</p></td>
 <td><p class="sd-card-text">1</p></td>
@@ -2397,7 +2010,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">21.8284</p></td>
 <td><p class="sd-card-text">4855.0064</p></td>
 <td><p class="sd-card-text">222.4168</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 110592 equal rmsd_max 4.337e-08</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -2410,7 +2022,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">18.4099</p></td>
 <td><p class="sd-card-text">113.8680</p></td>
 <td><p class="sd-card-text">6.1851</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 110592 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">freud</p></td>
@@ -2423,7 +2034,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020).</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2436,7 +2046,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">20.7730</p></td>
 <td><p class="sd-card-text">136.5008</p></td>
 <td><p class="sd-card-text">6.5711</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 110592 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -2449,7 +2058,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">119.4383</p></td>
 <td><p class="sd-card-text">503.1571</p></td>
 <td><p class="sd-card-text">4.2127</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 221184 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2462,7 +2070,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">21.0405</p></td>
 <td><p class="sd-card-text">2903.9205</p></td>
 <td><p class="sd-card-text">138.0160</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 110592 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">PLUMED</p></td>
@@ -2475,7 +2082,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">19.2551</p></td>
 <td><p class="sd-card-text">3006.8135</p></td>
 <td><p class="sd-card-text">156.1569</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 5.551e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">rings-statistics-matter</p></td>
@@ -2488,7 +2094,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">116.2389</p></td>
 <td><p class="sd-card-text">1327.4966</p></td>
 <td><p class="sd-card-text">11.4204</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 221184 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">IRA</p></td>
@@ -2501,7 +2106,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">one sample exceeded 600 s | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 110592 = 501919.9 ms. N^2 projection from 32768 is 585513.7 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">cycless</p></td>
@@ -2514,7 +2118,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">136.3856</p></td>
 <td><p class="sd-card-text">341558.2557</p></td>
 <td><p class="sd-card-text">2504.3573</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 221184 equal; cycles_iter has no thread argument</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">SQQ</p></td>
@@ -2527,7 +2130,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">4096 molecules exceeded 600 s, so this size was not started</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">vesin</p></td>
@@ -2540,7 +2142,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">82.4432</p></td>
 <td><p class="sd-card-text">1140.5612</p></td>
 <td><p class="sd-card-text">13.8345</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 1769472 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">freud</p></td>
@@ -2553,7 +2154,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">102.7091</p></td>
 <td><p class="sd-card-text">930.3372</p></td>
 <td><p class="sd-card-text">9.0580</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 1769472 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">mdapy</p></td>
@@ -2566,7 +2166,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">237.0502</p></td>
 <td><p class="sd-card-text">1039.0684</p></td>
 <td><p class="sd-card-text">4.3833</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">pyscal3</p></td>
@@ -2579,7 +2178,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">237.9653</p></td>
 <td><p class="sd-card-text">927.0447</p></td>
 <td><p class="sd-card-text">3.8957</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">mdapy</p></td>
@@ -2592,11 +2190,10 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">203.1011</p></td>
 <td><p class="sd-card-text">585.3079</p></td>
 <td><p class="sd-card-text">2.8819</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 884736 equal q6_max_abs 2.331e-15</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">PTM</p></td>
-<td><p class="sd-card-text">2.14.0/162cc834</p></td>
+<td><p class="sd-card-text">2.14.0</p></td>
 <td><p class="sd-card-text">ptm</p></td>
 <td><p class="sd-card-text">884736</p></td>
 <td><p class="sd-card-text">1</p></td>
@@ -2605,7 +2202,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">255.8396</p></td>
 <td><p class="sd-card-text">38381.2306</p></td>
 <td><p class="sd-card-text">150.0207</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 884736 equal rmsd_max 4.337e-08</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -2618,7 +2214,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">208.1052</p></td>
 <td><p class="sd-card-text">1007.4027</p></td>
 <td><p class="sd-card-text">4.8408</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 884736 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">freud</p></td>
@@ -2631,7 +2226,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020).</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2644,7 +2238,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">248.1369</p></td>
 <td><p class="sd-card-text">1136.5466</p></td>
 <td><p class="sd-card-text">4.5803</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 884736 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -2657,7 +2250,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">1046.5149</p></td>
 <td><p class="sd-card-text">4542.0060</p></td>
 <td><p class="sd-card-text">4.3401</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 1769472 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2670,7 +2262,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">259.8032</p></td>
 <td><p class="sd-card-text">23247.5896</p></td>
 <td><p class="sd-card-text">89.4815</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 884736 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">PLUMED</p></td>
@@ -2683,7 +2274,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">240.7382</p></td>
 <td><p class="sd-card-text">23208.5792</p></td>
 <td><p class="sd-card-text">96.4059</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 6.661e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">rings-statistics-matter</p></td>
@@ -2696,7 +2286,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">1032.6158</p></td>
 <td><p class="sd-card-text">13012.7347</p></td>
 <td><p class="sd-card-text">12.6017</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 1769472 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">cycless</p></td>
@@ -2709,7 +2298,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">one sample exceeded 600 s | fit b=1.0193 se=0.0111 R2=0.999166 from 64,216,512,1000,1728,4096,8000,13824,32768; extrapolated 884736 = 2952280.4 ms. Fit, not a measurement. cycles_iter has no thread argument.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">IRA</p></td>
@@ -2722,7 +2310,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">110592 molecules exceeded 600 s, so this size was not started | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 884736 = 25162336.6 ms. N^2 projection from 32768 is 37472876.4 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">SQQ</p></td>
@@ -2735,7 +2322,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">4096 molecules exceeded 600 s, so this size was not started</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">pyscal3</p></td>
@@ -2748,7 +2334,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">pyscal3 4.1.0 __all__ has no CHILL or CHILL+ name. common_neighbor_analysis is adaptive CNA and returns fcc, hcp, bcc, ico, and others (pyscal3/descriptors.py). diamond_structure is extended CNA. Neither is Nguyen and Molinero CHILL+. PyPI’s latest pyscal3 is this same 4.1.0.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">vesin</p></td>
@@ -2761,7 +2346,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.2509</p></td>
 <td><p class="sd-card-text">0.5761</p></td>
 <td><p class="sd-card-text">2.2961</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 8192 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -2774,7 +2358,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.3054</p></td>
 <td><p class="sd-card-text">0.8688</p></td>
 <td><p class="sd-card-text">2.8444</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 8192 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -2787,7 +2370,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.5273</p></td>
 <td><p class="sd-card-text">0.8488</p></td>
 <td><p class="sd-card-text">1.6098</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">pyscal3</p></td>
@@ -2800,7 +2382,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.3900</p></td>
 <td><p class="sd-card-text">1.9000</p></td>
 <td><p class="sd-card-text">4.8712</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -2813,11 +2394,10 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.5076</p></td>
 <td><p class="sd-card-text">0.5913</p></td>
 <td><p class="sd-card-text">1.1649</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 4096 equal q6_max_abs 4.441e-16</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">PTM</p></td>
-<td><p class="sd-card-text">2.14.0/162cc834</p></td>
+<td><p class="sd-card-text">2.14.0</p></td>
 <td><p class="sd-card-text">ptm</p></td>
 <td><p class="sd-card-text">4096</p></td>
 <td><p class="sd-card-text">8</p></td>
@@ -2826,7 +2406,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.2783</p></td>
 <td><p class="sd-card-text">24.0122</p></td>
 <td><p class="sd-card-text">86.2705</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal rmsd_max 4.337e-08</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -2839,7 +2418,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.4711</p></td>
 <td><p class="sd-card-text">4.5363</p></td>
 <td><p class="sd-card-text">9.6285</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 4096 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -2852,7 +2430,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020).</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -2865,7 +2442,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.5566</p></td>
 <td><p class="sd-card-text">1.9548</p></td>
 <td><p class="sd-card-text">3.5122</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -2878,7 +2454,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">2.6129</p></td>
 <td><p class="sd-card-text">17.6346</p></td>
 <td><p class="sd-card-text">6.7491</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 8192 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -2891,7 +2466,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.5204</p></td>
 <td><p class="sd-card-text">28.3374</p></td>
 <td><p class="sd-card-text">54.4549</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">PLUMED</p></td>
@@ -2904,7 +2478,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.6326</p></td>
 <td><p class="sd-card-text">109.1420</p></td>
 <td><p class="sd-card-text">172.5345</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 2.220e-16</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">rings-statistics-matter</p></td>
@@ -2917,7 +2490,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">2.2476</p></td>
 <td><p class="sd-card-text">12.5984</p></td>
 <td><p class="sd-card-text">5.6052</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 8192 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">cycless</p></td>
@@ -2930,7 +2502,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">2.9191</p></td>
 <td><p class="sd-card-text">12516.1838</p></td>
 <td><p class="sd-card-text">4287.6594</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 8192 equal; cycles_iter has no thread argument</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">IRA</p></td>
@@ -2943,7 +2514,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">1.2898</p></td>
 <td><p class="sd-card-text">1299.2780</p></td>
 <td><p class="sd-card-text">1007.3679</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 4096 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">SQQ</p></td>
@@ -2956,7 +2526,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">512 molecules exceeded 600 s, so this size was not started</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">vesin</p></td>
@@ -2969,7 +2538,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">4.0501</p></td>
 <td><p class="sd-card-text">14.9654</p></td>
 <td><p class="sd-card-text">3.6950</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 221184 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -2982,7 +2550,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">3.8882</p></td>
 <td><p class="sd-card-text">31.5433</p></td>
 <td><p class="sd-card-text">8.1125</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 221184 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -2995,7 +2562,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">5.3935</p></td>
 <td><p class="sd-card-text">15.2391</p></td>
 <td><p class="sd-card-text">2.8254</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">pyscal3</p></td>
@@ -3008,7 +2574,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">5.3208</p></td>
 <td><p class="sd-card-text">18.3291</p></td>
 <td><p class="sd-card-text">3.4448</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -3021,11 +2586,10 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">7.5892</p></td>
 <td><p class="sd-card-text">10.3904</p></td>
 <td><p class="sd-card-text">1.3691</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 110592 equal q6_max_abs 1.776e-15</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">PTM</p></td>
-<td><p class="sd-card-text">2.14.0/162cc834</p></td>
+<td><p class="sd-card-text">2.14.0</p></td>
 <td><p class="sd-card-text">ptm</p></td>
 <td><p class="sd-card-text">110592</p></td>
 <td><p class="sd-card-text">8</p></td>
@@ -3034,7 +2598,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">8.2662</p></td>
 <td><p class="sd-card-text">613.5692</p></td>
 <td><p class="sd-card-text">74.2262</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 110592 equal rmsd_max 4.337e-08</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3047,7 +2610,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">5.2050</p></td>
 <td><p class="sd-card-text">113.8816</p></td>
 <td><p class="sd-card-text">21.8794</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 110592 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -3060,7 +2622,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020).</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -3073,7 +2634,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">8.3309</p></td>
 <td><p class="sd-card-text">29.5160</p></td>
 <td><p class="sd-card-text">3.5430</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 110592 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -3086,7 +2646,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">48.3409</p></td>
 <td><p class="sd-card-text">323.8505</p></td>
 <td><p class="sd-card-text">6.6993</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 221184 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -3099,7 +2658,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">8.5196</p></td>
 <td><p class="sd-card-text">387.5268</p></td>
 <td><p class="sd-card-text">45.4867</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 110592 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">PLUMED</p></td>
@@ -3112,7 +2670,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">8.9858</p></td>
 <td><p class="sd-card-text">3028.2786</p></td>
 <td><p class="sd-card-text">337.0065</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 5.551e-16</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">rings-statistics-matter</p></td>
@@ -3125,7 +2682,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">47.2318</p></td>
 <td><p class="sd-card-text">307.1093</p></td>
 <td><p class="sd-card-text">6.5022</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 221184 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">IRA</p></td>
@@ -3138,7 +2694,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">one sample exceeded 600 s | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 110592 = 501919.9 ms. N^2 projection from 32768 is 585513.7 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">cycless</p></td>
@@ -3151,7 +2706,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">65.8726</p></td>
 <td><p class="sd-card-text">337108.4778</p></td>
 <td><p class="sd-card-text">5117.5843</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 221184 equal; cycles_iter has no thread argument</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">SQQ</p></td>
@@ -3164,7 +2718,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">4096 molecules exceeded 600 s, so this size was not started</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">vesin</p></td>
@@ -3177,7 +2730,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">41.3136</p></td>
 <td><p class="sd-card-text">209.6075</p></td>
 <td><p class="sd-card-text">5.0736</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 1769472 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -3190,7 +2742,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">49.5928</p></td>
 <td><p class="sd-card-text">343.2560</p></td>
 <td><p class="sd-card-text">6.9215</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">pairs 1769472 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -3203,7 +2754,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">71.0785</p></td>
 <td><p class="sd-card-text">149.8983</p></td>
 <td><p class="sd-card-text">2.1089</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">pyscal3</p></td>
@@ -3216,7 +2766,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">71.7527</p></td>
 <td><p class="sd-card-text">177.4625</p></td>
 <td><p class="sd-card-text">2.4733</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">mdapy</p></td>
@@ -3229,11 +2778,10 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">66.4798</p></td>
 <td><p class="sd-card-text">115.4407</p></td>
 <td><p class="sd-card-text">1.7365</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 884736 equal q6_max_abs 2.331e-15</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">PTM</p></td>
-<td><p class="sd-card-text">2.14.0/162cc834</p></td>
+<td><p class="sd-card-text">2.14.0</p></td>
 <td><p class="sd-card-text">ptm</p></td>
 <td><p class="sd-card-text">884736</p></td>
 <td><p class="sd-card-text">8</p></td>
@@ -3242,7 +2790,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">59.6748</p></td>
 <td><p class="sd-card-text">4823.9120</p></td>
 <td><p class="sd-card-text">80.8367</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 884736 equal rmsd_max 4.337e-08</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3255,7 +2802,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">59.4890</p></td>
 <td><p class="sd-card-text">1008.0481</p></td>
 <td><p class="sd-card-text">16.9451</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">labels 884736 equal; analyze_waters parses JSON built once; chill.rs is a serial loop and Cargo.toml leaves rayon commented out; 0.3.18</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">freud</p></td>
@@ -3268,7 +2814,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">absent</p></td>
 <td><p class="sd-card-text">freud 3.6.1 modules are box, cluster, data, density, diffraction, environment, errors, interface, locality, msd, order, parallel, plot, pmft, util. There is no ring or cycle module. order.py is Steinhardt, Hexatic, SolidLiquid, Cubatic, Nematic, RotationalAutocorrelation, and ContinuousCoordination. Ramasubramani and others, Comput. Phys. Commun. 254, 107275 (2020).</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -3281,7 +2826,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">62.1147</p></td>
 <td><p class="sd-card-text">262.3612</p></td>
 <td><p class="sd-card-text">4.2238</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 884736 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">OVITO</p></td>
@@ -3294,7 +2838,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">484.2037</p></td>
 <td><p class="sd-card-text">2917.3354</p></td>
 <td><p class="sd-card-text">6.0250</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 1769472 equal</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">OVITO</p></td>
@@ -3307,7 +2850,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">63.6214</p></td>
 <td><p class="sd-card-text">3062.3280</p></td>
 <td><p class="sd-card-text">48.1336</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagonal 884736 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">PLUMED</p></td>
@@ -3320,7 +2862,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">91.1466</p></td>
 <td><p class="sd-card-text">23631.1588</p></td>
 <td><p class="sd-card-text">259.2655</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">q6_max_abs 6.661e-16</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">rings-statistics-matter</p></td>
@@ -3333,7 +2874,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">476.9637</p></td>
 <td><p class="sd-card-text">2967.7415</p></td>
 <td><p class="sd-card-text">6.2222</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">hexagons 1769472 equal</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">cycless</p></td>
@@ -3346,7 +2886,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">one sample exceeded 600 s | fit b=1.0193 se=0.0111 R2=0.999166 from 64,216,512,1000,1728,4096,8000,13824,32768; extrapolated 884736 = 2952280.4 ms. Fit, not a measurement. cycles_iter has no thread argument.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">IRA</p></td>
@@ -3359,7 +2898,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">110592 molecules exceeded 600 s, so this size was not started | fit b=1.8826 se=0.0354 R2=0.999646 from 8000,13824,32768; extrapolated 884736 = 25162336.6 ms. N^2 projection from 32768 is 37472876.4 ms. The nine-size exponent is not used: the local exponent rises with N. Fit, not a measurement. classify_serial has no thread argument.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">SQQ</p></td>
@@ -3372,7 +2910,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td></td>
 <td></td>
 <td></td>
-<td><p class="sd-card-text">DNF</p></td>
 <td><p class="sd-card-text">4096 molecules exceeded 600 s, so this size was not started</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3385,7 +2922,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.5796</p></td>
 <td><p class="sd-card-text">50.3899</p></td>
 <td><p class="sd-card-text">86.9321</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sI. 512 both 1 d-SEAMS-only 1 TRACE-only 0; 51262 both 0 d-SEAMS-only 6 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0. 512-0 has 18 of 30 bonds across the periodic cell; the six 51262 cages have 10 to 15. The 5^12 TRACE returns has none. The 2x2x2 tile matches, so d-SEAMS is right.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3398,7 +2934,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">0.5947</p></td>
 <td><p class="sd-card-text">50.2893</p></td>
 <td><p class="sd-card-text">84.5632</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sI. 512 both 1 d-SEAMS-only 1 TRACE-only 0; 51262 both 0 d-SEAMS-only 6 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0. 512-0 has 18 of 30 bonds across the periodic cell; the six 51262 cages have 10 to 15. The 5^12 TRACE returns has none. The 2x2x2 tile matches, so d-SEAMS is right.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3411,7 +2946,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">3.7222</p></td>
 <td><p class="sd-card-text">297.6070</p></td>
 <td><p class="sd-card-text">79.9538</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sI-222. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 48 d-SEAMS-only 0 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3424,7 +2958,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">2.9243</p></td>
 <td><p class="sd-card-text">297.9639</p></td>
 <td><p class="sd-card-text">101.8907</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sI-222. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 48 d-SEAMS-only 0 TRACE-only 0; 51264 both 0 d-SEAMS-only 0 TRACE-only 0.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3437,7 +2970,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">1.4924</p></td>
 <td><p class="sd-card-text">68.3007</p></td>
 <td><p class="sd-card-text">45.7666</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sII. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 8 d-SEAMS-only 0 TRACE-only 0.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3450,7 +2982,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">1.5655</p></td>
 <td><p class="sd-card-text">68.2571</p></td>
 <td><p class="sd-card-text">43.6016</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sII. 512 both 16 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 8 d-SEAMS-only 0 TRACE-only 0.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3463,7 +2994,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">10.7150</p></td>
 <td><p class="sd-card-text">697.6882</p></td>
 <td><p class="sd-card-text">65.1132</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sII-222. 512 both 128 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 64 d-SEAMS-only 0 TRACE-only 0.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3476,7 +3006,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">4.7284</p></td>
 <td><p class="sd-card-text">697.7931</p></td>
 <td><p class="sd-card-text">147.5752</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sII-222. 512 both 128 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 64 d-SEAMS-only 0 TRACE-only 0.</p></td>
 </tr>
 <tr class="row-odd"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3489,7 +3018,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">955.8314</p></td>
 <td><p class="sd-card-text">61962.4841</p></td>
 <td><p class="sd-card-text">64.8257</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sII-9x9x10. 512 both 12960 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 6480 d-SEAMS-only 0 TRACE-only 0. TRACE is serial: analyze_waters has no thread argument and Cargo.toml leaves rayon commented out.</p></td>
 </tr>
 <tr class="row-even"><td><p class="sd-card-text">ClavisCage</p></td>
@@ -3502,7 +3030,6 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
 <td><p class="sd-card-text">303.0753</p></td>
 <td><p class="sd-card-text">61956.9697</p></td>
 <td><p class="sd-card-text">204.4277</p></td>
-<td><p class="sd-card-text">WIN</p></td>
 <td><p class="sd-card-text">sII-9x9x10. 512 both 12960 d-SEAMS-only 0 TRACE-only 0; 51262 both 0 d-SEAMS-only 0 TRACE-only 0; 51264 both 6480 d-SEAMS-only 0 TRACE-only 0. TRACE is serial: analyze_waters has no thread argument and Cargo.toml leaves rayon commented out.</p></td>
 </tr>
 </tbody>
@@ -3517,16 +3044,16 @@ docs/render_comparisons.py writes the Comparisons tables from these files.</p>
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="clavis-trace-tables.html">
+    <a href="../development/changelog.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">ClavisCage TRACE</div></div>
+        <span>Previous</span><div class="title">Changelog</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="cutoff-rings-tables.html">
+    <a href="sqq-tables.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Full cutoff ring call</div>
+        <div class="title">SQQ</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

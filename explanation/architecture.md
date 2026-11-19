@@ -1,0 +1,124 @@
+<!-- https://docs.dseams.info/explanation/architecture.md -->
+
+# Architecture {#architecture}
+
+d-SEAMS 2.14.0 is one C++ engine, `libyodaLib`. Callers link
+`libseams`, `libseams_lang`, or both. `libseams` (`include/seams.h`) is
+the C API. `libseams_lang` (`bindings/cxx/seams_lang.h`) is the C ABI.
+Each library links `libyodaLib`. `libseams_lang` is a separate library
+from `libseams`. The `seams` command is the command-line front on the
+same engine.
+
+The engine reads the trajectory. XYZ and LAMMPS dumps are built in.
+`.pdb`, `.gro`, and `.dcd` need chemfiles, and `.con` needs readcon.
+Without chemfiles the command refuses `.pdb`, `.gro`, and `.dcd`.
+Without readcon it refuses `.con`. Every other suffix is read as a
+LAMMPS dump.
+
+Optional drivers for LAMMPS, GROMACS, OpenMM, and PLUMED live in this
+repository.
+
+Building the engine and the `seams` command takes a C and C++
+toolchain. Python, Lua, R, Julia, Rust, and Fortran are not required
+for that build.
+
+## Language packages {#language-packages}
+
+Each language is its own package. The package calls this engine. It
+does not carry a second copy of a classifier. A package release carries
+the engine version it was built against, so `pydseamslib==2.14.0`
+calls the 2.14.0 engine.
+
+| language | repository | package | calls |
+| --- | --- | --- | --- |
+| Python | PydSEAMSlib | pydseamslib | libseams (import dseams) and libseams_lang (import pydseams) |
+| Lua, Fennel | yodaStruct | Git source, require("dseams") | libseams |
+| R | dseams-r | dseams | libseams_lang |
+| Julia | Dseams.jl | Dseams, Seams | Dseams calls libseams_lang. Seams calls libseams. Both are distributed through libseams_jll |
+| Rust | dseams-rs | dseams-sys, dseams | libseams |
+| Fortran | dseams-fortran | fpm Git dependency dseams | libseams |
+
+[Use a language binding](../user/howto/bindings.md) has the install
+commands.
+
+## Why the name is yoda {#why-the-name-is-yoda}
+
+The 1.x executable was `yodaStruct`. This repository builds `seams`.
+It does not build `yodaStruct`. The compiled Python module is
+`pydseams.yoda`. `_core` and `cyoda` are aliases of `yoda`. Lua loads
+`require("dseams")`. `require("yoda")` is that table.
+
+## Cutoff list {#cutoff-list}
+
+The cutoff list is every pair inside the distance cutoff. The full
+list, which the `seams` command builds, picks a builder from the build
+and from the OpenMP team.
+
+With several OpenMP threads, an orthorhombic box and a box that carries
+tilt terms are searched with the engine’s cell list. A search that
+returns a list is the cutoff list. One thread does not run that search.
+`linkcell::pairs_within` (`lc_pairs_within_rows`) is the builder when
+the cell list did not supply the pairs, the build includes linkcell,
+and the call succeeds. [linkcell](https://github.com/d-SEAMS/linkcell)
+is that library. This repository asks for linkcell 0.4.2 or newer.
+linkcell’s release number is its own, and the 2.14.0 tag does not
+name it. `libyodaLib` links one copy and exports the `lc_` symbols.
+
+Vesin fills the list when it is built and linkcell produced nothing:
+linkcell is absent, or the linkcell call failed. When neither library
+produced a list, the search continues with a cell list and then a
+direct loop over pairs.
+
+`seams --features` prints the compile-time backends. `linkcell pairs_within` and `vesin cutoff fallback` are two of those lines, each
+`enabled` or `disabled`, among OpenMP, MPI, readers, and the other
+optional libraries. The printout is the build. It does not name which
+builder ran for a frame. A linkcell failure prints `trying the next cutoff list`. A vesin failure prints `falling back to brute force`.
+
+The bond graph is a separate choice. For `seams cages`, `--graph` is
+`cutoff`, `knn`, `knn-union`, or `seeded`, and `seeded` is the default
+for that command. The cutoff-list builder does not select the graph.
+Which graph the six-rings are found on, and why that is a different
+question from CHILL+, is [CHILL+ versus cages](chill-plus-vs-cages.md).
+
+## Device paths {#device-paths}
+
+Two optional device builds do different work.
+
+OpenMP target offload is the Meson option `with_openmp_offload`. The
+default is disabled. The build covers Steinhardt $Y_{lm}$ and the
+cage score, as hop-bound six-rings and cage affiliation, on the
+neighbour list the host built. `SEAMS_OFFLOAD` requests that path.
+The default is off, and `0` keeps the work on the host. `seams cages`
+with `--graph seeded`, the default, stays on the host either way.
+`seams chill` and `seams chill-plus` run on the host.
+
+gpulite is the Meson option `with_gpulite`. When that library is
+linked, the engine provides `gpu::analyzeResident`, a CUDA batch of
+frames that stays on the device. The batch is the cage score: linkcell
+device k-nearest, the mutual four-nearest graph, primitive six-rings,
+and HC/DDC labels. It needs that device k-nearest. Without it, the
+call reports that the path is not built. The batch returns cage
+labels. It does not compute CHILL, CHILL+, or $q_{lm}$. The `seams`
+subcommands do not call `gpu::analyzeResident`.
+
+## Runtime settings {#runtime-settings}
+
+Defaults are compiled into the binary. A dotenv file (`SEAMS_CONFIG`,
+or `./seams.env` when that file is present) fills keys that are still
+unset. The process environment overrides the file. A flag on the
+`seams` command overrides the value for the setting that flag names.
+`seams --print-config` prints the resolved values.
+
+The keys choose frames, workers, the default graph, and whether
+offload was requested. The subcommand (`chill`, `cages`, `rings`, and
+the others) is not one of the keys. Compile-time Meson options are not
+in the file. [The command reference](../reference/cli.md) lists
+the keys and the defaults.
+
+## Two classifiers {#two-classifiers}
+
+`libyodaLib` holds both ice classifiers. CHILL and CHILL+ label a
+molecule from its four nearest neighbours. The cage score labels
+hexagonal-cage and double-diamond-cage membership. The two results do
+not imply each other. The argument, and the counts on the mixed TIP4P
+dump, are on [CHILL+ versus cages](chill-plus-vs-cages.md).

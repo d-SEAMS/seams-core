@@ -13,7 +13,6 @@ c++ -std=c++20 -Iinclude docs/examples/cpp_api.cpp -Lbuild/src -lseams -o cpp_ap
 ./cpp_api "$PWD"
 ```
 
-`meson test docs_api_hpp` compiles that program and runs it on this tree.
 The eight-atom diamond is cubic. Ice Ih is hexagonal, 128 atoms, with mean
 q6-bar 0.562448843702.
 
@@ -23,7 +22,7 @@ q6-bar 0.562448843702.
 
 The wider language ABI remains `libseams_lang` (`seams_frame_*`). A program
 that only needs `seams.hpp` does not link it. `docs/examples/minimal_cpp.cpp`
-is that ABI on the GenIce sI cell. `meson test docs_examples` runs it.
+is that ABI on the GenIce sI cell.
 Its frame-mutation and order-parameter entries are
 `seams_frame_set_positions`, `seams_frame_steinhardt_graph`,
 `seams_frame_wl`, `seams_frame_q4_q6`, and
@@ -35,7 +34,6 @@ Its frame-mutation and order-parameter entries are
 ```
 
 `docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
-`meson test docs_core_counts` runs it.
 
 ```{literalinclude} ../../../docs/examples/core_counts.cpp
 :language: cpp
@@ -45,8 +43,7 @@ Its frame-mutation and order-parameter entries are
 :language: cpp
 ```
 
-`docs/examples/ice.cpp` is the eight-atom C call. `meson test docs_api_cpp`
-runs it.
+`docs/examples/ice.cpp` is the eight-atom C call.
 
 ```{literalinclude} ../../../docs/examples/ice.cpp
 :language: cpp
@@ -81,15 +78,13 @@ A handle requires exclusive use. Two frames on two threads may run
 scratch inside the library belongs to the calling thread. `set_num_threads`
 is process-global.
 
-Doxygen comments on `seams.hpp` and `seams.h` feed the same doxyrest tree
-as the engine headers (`Doxyfile_seams.cfg`, the rgpot layout). The
-generated pages are `api/index`.
+Doxygen comments on `seams.hpp` and `seams.h` are the C++ reference at
+`api/index`.
 
 ## Ice Ih
 
 `input/traj/ice1h.lammpstrj`, frame 1, every atom, cutoff 3.5 angstrom, one
-thread. `tests/test_seams_hpp.cpp` (`meson test seams_hpp_match`) requires
-these numbers to match the C++ engine.
+thread. These numbers are the C++ engine on that frame.
 
 ```
 ih n 128
@@ -156,8 +151,8 @@ try {
 empty. The destructor of an empty handle does nothing. The caller does not
 call `seams_*_destroy`.
 
-`bindings/cxx/test_lang.cpp` is the `seams_lang` fixture. It is a separate
-ABI from `seams.hpp`.
+`bindings/cxx/test_lang.cpp` calls `libseams_lang`. That ABI is separate
+from `seams.hpp`.
 
 ```{literalinclude} ../../../bindings/cxx/test_lang.cpp
 :language: cpp
@@ -874,12 +869,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 <!-- API_SYMBOLS_END -->
 
 
-## Structure still
+## Ice Ih
 
-```{figure} ../tutorials/molecules/cpp/overlay-web.png
-:alt: Molecule still for this front
+```{figure} ../user/tutorials/molecules/cpp/overlay-web.png
+:alt: Ice Ih colored by published CHILL+
 :width: 480px
 
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
+Ice Ih colored by published CHILL+.
 ```
 

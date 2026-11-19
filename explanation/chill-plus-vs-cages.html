@@ -2,8 +2,7 @@
 <html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CHILL+ versus cages - d-SEAMS molecular simulation analysis documentation</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="CHILL+: the published rule and the OVITO rule" href="chill-plus-rules.html" /><link rel="prev" title="The C API" href="c-api.html" />
-      <link rel="canonical" href="https://docs.dseams.info/explanation/chill-plus-vs-cages.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CHILL+ versus cages - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Citation" href="citation.html" /><link rel="prev" title="CHILL+: the published rule and the OVITO rule" href="chill-plus-rules.html" /><link rel="canonical" href="https://docs.dseams.info/explanation/chill-plus-vs-cages.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -19,50 +18,26 @@
     
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/explanation/chill-plus-vs-cages.html"/>
-  <meta property="og:title" content="CHILL+ versus cages"/>
-    <meta name="twitter:card" content="summary"/>
+  <meta property="og:title" content="CHILL+ versus cages"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="Two classifiers in the engine library libyodaLib answer different questions."/>
+    <meta property="og:description" content="Two classifiers in the engine library libyodaLib answer different questions."/><meta name="twitter:card" content="summary_large_image"/>
   <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
 <link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
 <link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
-<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-
-<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta property="og:image" content="https://dseams.info/images/og-card.png">
-<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="robots" content="index, follow">
 <meta name="twitter:title" content="CHILL+ versus cages - d-SEAMS">
-<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://docs.dseams.info/#application",
-      "name": "d-SEAMS",
-      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
-      "applicationCategory": "ScientificApplication",
-      "operatingSystem": "Linux, macOS",
-      "url": "https://docs.dseams.info/",
-      "softwareVersion": "2.14.0",
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    },
-    {
-      "@type": "SoftwareSourceCode",
-      "@id": "https://github.com/d-SEAMS/seams-core#source",
-      "name": "seams-core",
-      "codeRepository": "https://github.com/d-SEAMS/seams-core",
-      "programmingLanguage": ["C++", "C", "Python"],
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    }
-  ]
-}
-</script></head>
+<meta name="twitter:description" content="Two classifiers in the engine library libyodaLib answer different questions.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/explanation/chill-plus-vs-cages.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"CHILL+ versus cages - d-SEAMS","description":"Two classifiers in the engine library libyodaLib answer different questions.","url":"https://docs.dseams.info/explanation/chill-plus-vs-cages.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
 <body><nav class="dseams-family" aria-label="d-SEAMS">
   <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
   <ul class="dseams-family__nav">
@@ -128,161 +103,57 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../videos/index.html">Videos</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Worked examples</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/clathrate.html">Classify a clathrate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/interface.html">Ice-water interface</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nucleation.html">Nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/brine.html">Brine and NaCl</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/insitu-run.html">Run in situ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-interface.html">CHILL+ on an ice/water slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-cages.html">Cage census of sI, sII and sH</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-rings.html">Primitive rings and the shortest-path test</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-brine.html">Ice growing into brine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-nucleation.html">Ice-likeness along a short nucleation run</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery.html">Science gallery</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/index.html">Science tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/interface.html">Ice/liquid interface and nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/brine.html">Brine freezing front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/cages.html">sII and sH hydrate cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/gallery.html">Science figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/index.html">Language tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/c.html">C tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/cpp.html">C++ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/engines.html">Engines tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/gromacs.html">GROMACS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/insitu.html">In-situ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lammps.html">LAMMPS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/openmm.html">OpenMM tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/plumed.html">PLUMED tutorial</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">Tasks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/upgrade-2.14.html">Upgrade from 2.13 to 2.14</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/migrate-1x.html">Migrate from d-SEAMS 1.x</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Use a language binding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/neighbour-lists.html">Cutoff neighbour lists</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cages-trace.html">Cages and TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/q4-q6.html">Local q4 and q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/chill-plus.html">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding.html">Choosing a cutoff and padding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/symmetry-classifier.html">The symmetry classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/linkcell-carried.html">Linkcell neighbours and carried updates</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/science-front.html">Basal profiles and the nucleation census</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/from-trajectory.html">From a trajectory to the ice front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-insitu.html">In-situ CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../walkthrough/index.html">Engine walkthroughs</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Lookup pages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/python-frame.html">Python Frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14.html">2.14.0 release notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/c.html">C</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/science.html">Science front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../capi/index.html">C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Engines</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/index.html">Engine builds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/insitu.html">In-situ</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Comparisons</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../comparisons.html">Head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sqq.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-h2h.html">Literature head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-reproduce.html">Reproduce the literature head-to-head</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="index.html">Concepts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="architecture.html">Repositories</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="c-api.html">The C API</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">CHILL+ versus cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="interface-order.html">Interface and confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="binding-overhead.html">Binding overhead</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range.html">Performance, 4096 to 110592</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../user/index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../user/classify.html">Classify ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/order.html">Rings, cages, and order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/interfaces.html">Interfaces, nucleation, and brine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/confined.html">Confined ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/engines.html">Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/languages.html">Language walkthroughs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/versions.html">Versions and bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/paper.html">Paper figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/performance.html">Performance and comparisons</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Concepts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="binding-overhead.html">Binding overhead</a></li>
+<li class="toctree-l3"><a class="reference internal" href="c-api.html">The C API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CHILL+ versus cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interface-order.html">Interface and confined ice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-range.html">Performance, 4096 to 110592</a></li>
+<li class="toctree-l3"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sqq.html">SQQ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/repositories.html">Repository map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/release.html">Release process</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/lean.html">Lean proofs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
 </ul>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
@@ -562,88 +433,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="clavis-trace-tables.html">ClavisCage TRACE</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="comparisons-summary-tables.html">Head-to-head summary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="cutoff-rings-tables.html">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html">884736 sitting, ice and liquid</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#neighbours">Neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings">Rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings-against-cycless">Rings against cycless</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings-against-sqq">Rings against SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#q6-against-ovito">q6 against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#cages">Cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#linkcell-scaling">Linkcell scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html">What each file holds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#rc3-sitting-one-thread-against-eight">rc3 sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#molecule-sitting-one-thread-against-eight">884736-molecule sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#signature-search-one-thread-against-eight">signature search, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#pool-sized-kernels-one-thread-against-eight">pool-sized kernels, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#pool-audit-at-4096-molecules-four-threads-against-eight">Pool audit at 4096 molecules, four threads against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html">binding-overhead.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-ice-ic-rings-n16-csv">h2h-ice-ic-rings-n16.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-ice-ic-rings-csv">h2h-ice-ic-rings.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-literature-csv">h2h-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-summary-csv">h2h-summary.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v12-csv">h2h-watch-v12.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v13-csv">h2h-watch-v13.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v2-csv">h2h-watch-v2.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v3-csv">h2h-watch-v3.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v4-csv">h2h-watch-v4.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v6-sqq-csv">h2h-watch-v6-sqq.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v7-csv">h2h-watch-v7.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-csv">h2h-watch.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rank-scale-csv">rank-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rc2perf-literature-csv">rc2perf-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rc3-sitting-csv">rc3-sitting.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#thread-scale-csv">thread-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#weak-scale-csv">weak-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#sitting-large-csv">sitting-large.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html">neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#q4">q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#rings">rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#cages">cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#king">king</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html">ice Ic, 4096 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-32768-molecules">ice Ic, 32768 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-110592-molecules">ice Ic, 110592 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-884736-molecules">ice Ic, 884736 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html">884736 molecules, rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q4">884736 molecules, q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q6">884736 molecules, q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q4-q6">884736 molecules, q4+q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-neighbours">884736 molecules, neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-coordination">884736 molecules, coordination</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-chill">884736 molecules, chill+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-classifier">884736 molecules, classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-ptm-default">884736 molecules, ptm-default</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-ptm-ice">884736 molecules, ptm-ice</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="sqq-tables.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads-tables.html">signature cages, sI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads-tables.html#signature-cages-sii">signature cages, sII</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html">The bulk-liquid gate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#summary-rows">Summary rows</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#layers-whose-label-changed">Layers whose label changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#classify-timings">Classify timings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-speed.html">One thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html">Neighbours against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html#full-cutoff-ring-call">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html">Added</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#changed">Changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#deprecated">Deprecated</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#removed">Removed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#fixed">Fixed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html">Interface slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#brine-frame">Brine frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#ice-ih-six-rings">Ice Ih six-rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#nucleation-nucleus">Nucleation nucleus</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#si-and-sii-cages">sI and sII cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/molecules.html">Molecule stills</a></li>
 </ul>
         </div>
       </div>
@@ -661,8 +452,6 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#bond-graph">Bond graph</a></li>
 <li><a class="reference internal" href="#ring-adjacent-completion">Ring-adjacent completion</a></li>
 </ul>
-</div><div class="edit-this-page">
-  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/orgmode/explanation/chill-plus-vs-cages.org">Edit this page</a>
 </div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
@@ -679,8 +468,16 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">CHILL+ versus cages</strong>
+        <a itemprop="item" href="../user/index.html"><span itemprop="name">User guide</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Concepts</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">CHILL+ versus cages</strong>
+        <meta itemprop="position" content="4" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -694,38 +491,65 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue dark-code" role="main">
           <section id="chill-versus-cages">
 <h1>CHILL+ versus cages<a class="headerlink" href="#chill-versus-cages" title="Link to this heading">¶</a></h1>
-<p>Two classifiers live in <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>.
-They answer different questions and they do not imply each other.</p>
+<p>Two classifiers in the engine library <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> answer different
+questions. A CHILL+ label does not imply a cage, and a cage label
+does not imply a CHILL+ label.</p>
 <section id="four-neighbour-star">
 <h2>Four-neighbour star<a class="headerlink" href="#four-neighbour-star" title="Link to this heading">¶</a></h2>
-<p>CHILL (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill::getCorrel</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypeNoPrint</span></code>) and CHILL+ (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code>, <code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypePlusNoPrint</span></code>) look at the four-neighbour star.
-Both stay on the host.
-A crystal label needs exactly four neighbours inside the cutoff. That shell count is taken before the bond list is cut to four. The old count after the cut was a bug: a shell of five or more neighbours could still receive an ice label. q3 is then the average over the four nearest neighbours of a four-neighbour shell. The staggered and eclipsed pattern of that star labels the atom cubic, hexagonal, interfacial, clathrate, or water.</p>
-<p>A molecule is cubic or hexagonal when its four bonds look like ice, even if those neighbours do not close a cage.</p>
-<p>CHILL+: Nguyen and Molinero, <strong>J. Phys. Chem. B</strong> 2015 (<a class="reference external" href="https://doi.org/10.1021/jp510289t">10.1021/jp510289t</a>).
-CHILL: Moore et al., <strong>Phys. Chem. Chem. Phys.</strong> 2010.</p>
+<p>CHILL (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill</span></code>, <code class="docutils literal notranslate"><span class="pre">chill::getCorrel</span></code> / <code class="docutils literal notranslate"><span class="pre">getIceTypeNoPrint</span></code>) and
+the published CHILL+ call (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code>, <code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code>
+/ <code class="docutils literal notranslate"><span class="pre">getIceTypePlusNoPrint</span></code>) read the bond star of an oxygen.</p>
+<p>CHILL is Moore et al., <em>Phys. Chem. Chem. Phys.</em> 2010, 12, 4124
+(DOI 10.1039/b919724a). It averages
+<span class="math notranslate nohighlight">\(q_3\)</span> over the four nearest neighbours. A staggered bond is
+<span class="math notranslate nohighlight">\(c(i,j) \le -0.8\)</span>. An eclipsed bond lies on
+<span class="math notranslate nohighlight">\(-0.2 \le c(i,j) \le -0.05\)</span>. The label is read from those four
+bonds, so a cutoff shell of five or more neighbours can still be ice
+when the four nearest bonds match. The labels are cubic, hexagonal,
+interfacial, and water.</p>
+<p>CHILL+ is Nguyen and Molinero, <em>J. Phys. Chem. B</em> 2015, 119, 9369
+(<a class="reference external" href="https://doi.org/10.1021/jp510289t">10.1021/jp510289t</a>). The
+eclipsed window is <span class="math notranslate nohighlight">\(-0.35 \le c(i,j) \le 0.25\)</span>. A crystal,
+clathrate, or interfacial label needs exactly four neighbours inside
+the cutoff. That count is the cutoff shell, taken before the bond
+list is reduced to the four nearest. <span class="math notranslate nohighlight">\(q_3\)</span> is the average over
+those four neighbours. The labels are cubic, hexagonal, interfacial,
+clathrate, interfacial clathrate, and water.</p>
+<p>A molecule is cubic or hexagonal when its four bonds look like ice,
+even when those neighbours do not close a cage.</p>
+<p>The OVITO form of CHILL+ averages <span class="math notranslate nohighlight">\(q_3\)</span> over the whole cutoff
+shell. That comparison is
+<a class="reference external" href="chill-plus-rules.html">the published rule and the OVITO rule</a>.</p>
 </section>
 <section id="cage-membership">
 <h2>Cage membership<a class="headerlink" href="#cage-membership" title="Link to this heading">¶</a></h2>
-<p>The ice score (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code>, <code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> by default) is cage membership.
-A molecule in a hexagonal cage (HC) is ice Ih.
-A molecule in a double-diamond cage (DDC) is ice Ic.
-A molecule in neither is water.
-The cages are assembled from six-membered primitive rings on a chosen bond graph.</p>
-<p>This is topological unit matching (TUM).
-The methods paper is the 2020 JCIM article (see <a class="reference external" href="citation.html">Citation</a>).</p>
-<p>The GPU path (<code class="docutils literal notranslate"><span class="pre">gpu::analyzeResident</span></code>) is that TUM ice score only: <code class="docutils literal notranslate"><span class="pre">linkcell::gpu</span></code> k-nearest, the mutual four-nearest graph, primitive six-rings, and HC/DDC affiliation.
-CHILL, CHILL+, and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay on the host.
-Only cage labels come back.</p>
+<p>The ice score (<code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code>, <code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> by
+default) is cage membership. A molecule in a hexagonal cage (HC) is
+ice Ih. A molecule in a double-diamond cage (DDC) is ice Ic. A
+molecule in both is counted as both. A molecule in neither is water.
+The cages are assembled from six-membered primitive rings on a chosen
+bond graph.</p>
+<p>This is topological unit matching (TUM). The methods paper is the
+2020 JCIM article (see <a class="reference external" href="citation.html">Citation</a>).</p>
+<p>The GPU path (<code class="docutils literal notranslate"><span class="pre">gpu::analyzeResident</span></code>) is that TUM ice score only:
+<code class="docutils literal notranslate"><span class="pre">linkcell::gpu</span></code> k-nearest, the mutual four-nearest graph, primitive
+six-rings, and HC/DDC affiliation. CHILL, CHILL+, and <span class="math notranslate nohighlight">\(q_{lm}\)</span> stay
+on the host. Only cage labels come back.</p>
 </section>
 <section id="why-they-disagree">
 <h2>Why they disagree<a class="headerlink" href="#why-they-disagree" title="Link to this heading">¶</a></h2>
-<p>A configuration can agree exactly on the closed star of a vertex (same induced graph, same coordinates on those five atoms) and still disagree on that vertex’s cage label, because the cage predicates read a larger neighbourhood of six-rings.
-The Catch2 suite encodes that fact: cage membership is not a function of the four-neighbour star.</p>
-<p>On the in-tree mixed TIP4P dump (<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code>), <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code> uses the cutoff list by default and prints 9 interfacial clathrate and 241 water; <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">mutual</span></code> prints 1 clathrate, 7 interfacial clathrate, and 242 water.
-Seeded cages report zero HC and zero DDC.
-A three-eclipsed star is not cage membership.
-The commands are in <a class="reference external" href="../tutorials/bulk-ice.html">the mixed TIP4P tutorial</a>.</p>
+<p>A configuration can share the closed star of a vertex (the same
+induced graph and the same coordinates on those five atoms) and still
+carry a different cage label, because the cage predicates read a
+larger neighbourhood of six-rings. Cage membership is not a function
+of the four-neighbour star.</p>
+<p>On the mixed TIP4P dump (<code class="docutils literal notranslate"><span class="pre">input/traj/exampleTraj.lammpstrj</span></code>, oxygen
+type 2), <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">chill-plus</span></code> uses the cutoff list by default and
+prints <code class="docutils literal notranslate"><span class="pre">interClathrate</span> <span class="pre">9</span> <span class="pre">water</span> <span class="pre">241</span></code>. <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">mutual</span></code> prints
+<code class="docutils literal notranslate"><span class="pre">clathrate</span> <span class="pre">1</span> <span class="pre">interClathrate</span> <span class="pre">7</span> <span class="pre">water</span> <span class="pre">242</span></code>. <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> prints
+<code class="docutils literal notranslate"><span class="pre">hexagonal</span> <span class="pre">0</span> <span class="pre">cubic</span> <span class="pre">0</span> <span class="pre">both</span> <span class="pre">0</span> <span class="pre">water</span> <span class="pre">250</span></code>. A three-eclipsed star is not
+cage membership. The commands are in
+<a class="reference external" href="../user/tutorials/bulk-ice.html">the mixed TIP4P tutorial</a>.</p>
 </section>
 <section id="bond-graph">
 <h2>Bond graph<a class="headerlink" href="#bond-graph" title="Link to this heading">¶</a></h2>
@@ -742,28 +566,32 @@ The commands are in <a class="reference external" href="../tutorials/bulk-ice.ht
 <td><p>pairs inside the distance cutoff</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">knn</span></code></p></td>
-<td><p>mutual k-nearest (default <code class="docutils literal notranslate"><span class="pre">k=4</span></code>)</p></td>
+<td><p>mutual k-nearest (default <code class="docutils literal notranslate"><span class="pre">k=4</span></code>). <code class="docutils literal notranslate"><span class="pre">mutual</span></code> is the same graph</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">knn-union</span></code></p></td>
-<td><p>union k-nearest (completion graph of the seeded rule)</p></td>
+<td><p>union k-nearest, the completion graph of the seeded rule</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
-<td><p>mutual seeds, union completions (CLI default)</p></td>
+<td><p>mutual seeds and union completions (the CLI default)</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>On a perfect cubic crystal the four graphs coincide.
-On a mixed nucleation dump they do not have to.</p>
-<p>Pool-audit <code class="docutils literal notranslate"><span class="pre">ac510645</span></code> records the fix in <code class="docutils literal notranslate"><span class="pre">18588dac</span></code>. The seeded cage call searches once when the mutual and union edge sets match. <code class="docutils literal notranslate"><span class="pre">fellBack()</span></code> runs before a dirty frame returns, so the following frames are warm sweeps.</p>
+<p>On the 4096-molecule cubic cell (<code class="docutils literal notranslate"><span class="pre">input/traj/mW_cubic.lammpstrj</span></code>,
+type 1) each of the four graphs labels every molecule cubic. On the
+mixed TIP4P dump each of the four graphs labels every oxygen water.
+The split with CHILL+ on that dump is the star.</p>
 </section>
 <section id="ring-adjacent-completion">
 <h2>Ring-adjacent completion<a class="headerlink" href="#ring-adjacent-completion" title="Link to this heading">¶</a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> takes a fifth argument, <code class="docutils literal notranslate"><span class="pre">ringAdjacentCompletion</span></code>, default <code class="docutils literal notranslate"><span class="pre">false</span></code>.
-When the flag is <code class="docutils literal notranslate"><span class="pre">true</span></code>, the accepted labels pass through <code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code>: a permissive six-ring with all but one vertex labeled fills that last vertex, iterated to a fixed point.
-Hexagonal cage (HC) flags and double-diamond cage (DDC) flags run as two walks.</p>
-<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--complete</span></code> sets the flag.
-The rule, the least-fixed-point claim, and the Lean build live on <a class="reference external" href="ring-completion.html">Ring-adjacent completion</a>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ring::seededCageAffiliation</span></code> takes <code class="docutils literal notranslate"><span class="pre">ringAdjacentCompletion</span></code> as its
+fifth argument, default <code class="docutils literal notranslate"><span class="pre">false</span></code>. When the flag is <code class="docutils literal notranslate"><span class="pre">true</span></code>, the
+accepted labels pass through <code class="docutils literal notranslate"><span class="pre">ring::ringAdjacentCompletion</span></code>: a
+permissive six-ring with all but one vertex labeled fills that last
+vertex, and the walk repeats to a fixed point. Hexagonal-cage flags
+and double-diamond-cage flags run as two walks.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span> <span class="pre">--complete</span></code> sets the flag. The rule and its least fixed
+point are on <a class="reference external" href="ring-completion.html">Ring-adjacent completion</a>.</p>
 </section>
 </section>
 
@@ -773,16 +601,16 @@ The rule, the least-fixed-point claim, and the Lean build live on <a class="refe
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="c-api.html">
+    <a href="chill-plus-rules.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">The C API</div></div>
+        <span>Previous</span><div class="title">CHILL+: the published rule and the OVITO rule</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="chill-plus-rules.html">
+    <a href="citation.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">CHILL+: the published rule and the OVITO rule</div>
+        <div class="title">Citation</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

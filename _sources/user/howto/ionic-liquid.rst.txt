@@ -1,0 +1,182 @@
+==================
+Ionic-liquid dumps
+==================
+
+
+An ionic-liquid dump is a multi-type frame, and CHILL is the wrong
+score for the ions.
+Keep CHILL and cages on water with ``--water-types T`` (the neighbour
+mask). ``--type`` is the load filter. Use ``seams rdf`` for a partial
+g\_IJ(r) under the dump minimum image. Use ``seams density-z``
+for a type-resolved :math:`\rho(z)` in a slit.
+
+The bundled frame ``input/traj/il_tiny.lammpstrj`` has 12 atoms of
+LAMMPS types 1, 2, 3 and 4 in a 24 Å cube. When ``--family`` is omitted
+and the loaded frame has more than two types, stderr prints
+
+.. code:: text
+
+    hint: more than two LAMMPS types; set --family (default waterIce)
+
+and the command still exits 0.
+
+Pick one type
+-------------
+
+``--type`` / ``-t`` selects the loaded type. ``0``, the default, keeps type
+2 when that type is present, and type 1 when it is absent.
+``density-z`` is the exception: ``0`` keeps every atom.
+A dump whose species is not that guess needs the integer type.
+
+.. code:: bash
+
+    seams read input/traj/il_tiny.lammpstrj
+    seams read input/traj/il_tiny.lammpstrj --type 3
+
+The first command keeps type 2 and prints ``nop 4 frame 1 box 24 24 24``.
+``--type 3`` keeps two atoms and prints ``nop 2 frame 1 box 24 24 24``.
+
+Unlike-type neighbours
+----------------------
+
+``nneigh::neighListPair(rcut, cloud, typeI, typeJ)`` builds I-J
+pairs. ``I == J`` is the like-type list (``neighListO``). Distances
+use ``gen::periodicDistSq``, so a sheared dump box uses the same
+MIC as the ice neighbour lists.
+
+Partial g(r)
+------------
+
+.. code:: bash
+
+    seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+    seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0 --bins 60
+    seams rdf input/traj/il_tiny.lammpstrj --type 2 --cutoff 6.0
+
+``--pair-types I,J`` selects the pair. The default is ``I = J = --type``,
+a like-type g(r) of the guessed or requested species.
+``--types`` is a deprecated exact alias of ``--pair-types`` and prints
+``--types is deprecated; use --pair-types``.
+``--cutoff`` is rmax. ``--bins`` is optional (default ``rmax / 0.1``, so
+60 bins at 6 Å).
+
+Stdout is ``# r g count``, then ``# types I J rmax R bins N volume V``,
+then one ``r g count`` row per bin. The normalization volume is
+``det(H)`` from the dump box. On this orthorhombic frame that volume
+is 13824. Tilt ``xy xz yz`` enters H when the dump carries it. The
+unlike-pair header is
+
+.. code:: text
+
+    # types 1 2 rmax 6 bins 60 volume 13824
+
+``seams rdf`` is a pair histogram. CHILL and cages stay on water.
+
+Site kinds and ion vertices
+---------------------------
+
+LAMMPS ``type`` is a column, and the chemistry lives in a
+``site::Table`` of type-to-kind (and optional atom-ID overrides).
+``Table::of`` looks up the override first, then the type, else
+``unspecified``. ``indicesOf(polar)`` is the union of ``cationHead``,
+``anion``, and explicit ``polar``; ``indicesOf(apolar)`` is ``tail`` plus
+explicit ``apolar``. ``site::ionCloud`` emits one vertex per ``molID``
+that carries a cation head or anion: the unweighted COM of those
+tagged atoms, unwrapped with ``gen::relDist`` to the first atom of
+the group, with ``Point::type`` 1 (cation) or 2 (anion). A long-chain
+cation COM sits on the polar head, because the tail atoms are not
+in that average. Family is an input on the table. Types do not
+set it.
+
+On that ion cloud, ``nneigh::nearestUnlike(cloud, 1, 2)`` is each
+ion's nearest unlike neighbour and the MIC distance.
+``nneigh::mutualNearestUnlike`` keeps the mutual edges. Those
+are contact pairs. ``seams cn`` is the coordination number, from
+the integral of :math:`g(r)`.
+
+Polar and apolar domains
+------------------------
+
+.. code:: bash
+
+    seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+    seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset apolar
+
+``seams domains`` builds the mask from ``site::indicesOf`` and walks
+Stoddard's clusters on that subset.
+Neighbours are the dump-MIC cutoff list (``--cutoff``, default
+3.5 Å). Stdout is ``subset NAME n N largest L P``, and ``P = L / N``.
+On this frame the lines are ``subset polar n 8 largest 4 P 0.5`` and
+``subset apolar n 2 largest 1 P 0.5``. Missing ``--site`` prints
+``domains needs --site`` and exits 2. ``--family`` applies to ice
+scores. Domains ignore it.
+
+Confined layers
+---------------
+
+A slit or slab dump needs type-resolved :math:`\rho(z)`.
+
+.. code:: bash
+
+    seams density-z input/traj/il_tiny.lammpstrj
+    seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
+    seams density-z input/traj/il_tiny.lammpstrj --type 2 --axis z
+
+``--type 0`` (default) histograms every atom. ``--type I`` keeps one
+LAMMPS type. ``--axis`` is the Cartesian coordinate (``x``, ``y``, or
+``z``; default ``z``). ``--bins`` is optional (default the bound span
+over :math:`0.1`, 240 bins on this 24 Å cube).
+
+Stdout is ``# z rho`` then one row per bin. The slice volume is
+:math:`A_\perp \times dz`. :math:`A_\perp` comes from dump H (``ly*lz``
+for ``x``, ``lx*lz`` for ``y``, ``lx*ly`` for ``z``) using the recovered
+edge lengths. The integral of ``rho * A * dz`` is the number of
+selected atoms.
+
+Confined IL work is this histogram plus the in-plane
+``rdf2::rdf2Danalysis_AA`` sampler.
+``seams chill input/traj/il_tiny.lammpstrj --family confinedIL`` exits 2.
+
+Molten salt is ``seams rdf`` / ``cn`` plus ``ionCloud`` when the melt
+is multi-site. DES adds explicit donor H-bonds. Electrolyte is
+ion--O rdf/cn plus water H-bonds. Silica / BeF2 is rdf/cn plus
+Franzblau on the M--X graph and ``getq6`` on the tetrahedral
+cation (``steinhardtQlVoronoi`` otherwise).
+
+Read the box
+------------
+
+``seams read FILE`` prints ``nop N frame F box Lx Ly Lz`` and, when the
+dump is triclinic (``box.size() >= 6``), the tilt ``xy xz yz``. On
+``il_tiny.lammpstrj`` the default load prints ``nop 4 frame 1 box 24 24 24``.
+Bound spans are the edge lengths on this orthorhombic frame. A sheared
+dump carries tilt as well. See `Sheared cells <sheared-cells.rst>`_.
+
+Family names
+------------
+
+``--family`` names the material. The default is ``waterIce``.
+``seams chill``, ``chill-plus``, and ``cages`` exit 2 when ``--family`` is
+``ionicLiquid``, ``moltenSalt``, ``des``, ``electrolyte``, ``confinedIL``,
+``confinedWater``, or ``networkFormer``. The message names the family.
+For ``ionicLiquid`` it is ``CHILL/TUM refused for family ionicLiquid``.
+Unflagged ``seams chill`` stays the historical water path.
+
+.. code:: bash
+
+    seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+    seams cn input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+    seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion'
+    seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+    seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+    seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
+    seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid  # exits 2
+
+The coordination line is ``# types 1 2 cutoff 6 cn 1.75 nI 4 nJ 4 volume 13824``.
+The ion coordination line is ``cage ionCloud types 1 2 cutoff 3.5 degree 1.5 nCation 4 nAnion 4``.
+The contact line is ``contact-pair count 4 nCation 4 nAnion 4``.
+The last command exits 2.
+
+Flags and the rest of the surface live on
+`seams CLI <../../reference/cli.rst>`_. Formats live on
+`data formats <../../reference/data-formats.rst>`_.

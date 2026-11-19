@@ -1,0 +1,256 @@
+<!-- https://docs.dseams.info/reference/data-formats.md -->
+
+# Data Formats {#data-formats}
+
+`seams` and the C++ readers share one suffix table. Coordinates are
+Cartesian Angstroms. Frames are 1-based (the file’s timestep value is
+not the frame index).
+
+| suffix | reader | always compiled? |
+| --- | --- | --- |
+| .lammpstrj, .dump, .lammps, anything else | LAMMPS dump text | yes |
+| .xyz | sinp::readXYZ | yes |
+| .pdb, .gro, .dcd | sinp::readChemfiles | only with SEAMS_HAS_CHEMFILES |
+| .con | sinp::readCon | only with SEAMS_HAS_READCON |
+
+The CLI takes the substring after the last `.` and compares it to
+`xyz`, `con`, `pdb`, `gro`, and `dcd`. The comparison is exact, so
+`foo.xyz/dump` is a LAMMPS dump. A path with no dot is a LAMMPS dump.
+`seams --features` reports chemfiles and readcon-core. The 2.14
+Python frame is documented on [Python Frame](python-frame.md).
+
+## Type columns {#type-columns}
+
+| reader | Point::type | --type 0 | --type I (I > 0) |
+| --- | --- | --- | --- |
+| LAMMPS | ITEM: ATOMS type column | type 2 when any atom has that type, otherwise type 1. A multi-frame seams read keeps every atom | keep type I |
+| XYZ | first appearance of each symbol, starting at 1 | ignored on the read | ignored on the read |
+| chemfiles | all-digit type string, else atomic number, else 8 for O/OW/OH and 1 for H/HW/HO, else 0 | keep every atom (typeFilter = -1) | keep that species number |
+| readcon | atomic number from the file | keep every atom | keep every atom (--type is not applied) |
+
+`Point::atomID` is the file id when the format has one, else
+1-based file order. `Point::molID` is `mol` when present, else
+`atomID`. chemfiles prefers a numeric `mol` property, then the
+residue id, then `atomID`.
+
+A symbol that parses as a number is XYZ type 1. Si then N is type 1
+then type 2. A frame with no element names and no atomic numbers
+stores chemfiles species 1.
+
+## Empty frames {#empty-frames}
+
+A reader that cannot fill atoms returns a cloud with `nop == 0`
+(`pts` empty). `currentFrame` is still the requested 1-based index
+when the reader knows it.
+
+| situation | result |
+| --- | --- |
+| LAMMPS path missing or unreadable | empty cloud, currentFrame = targetFrame |
+| LAMMPS frame does not exist | empty cloud, currentFrame = targetFrame |
+| LAMMPS type filter matches nothing | nop == 0 |
+| XYZ path missing | std::runtime_error("Wrong filepath") |
+| XYZ header, truncated frame, or bad coordinate | std::runtime_error (see XYZ) |
+| chemfiles step past the last frame | empty cloud |
+| chemfiles error or selection error | empty cloud |
+| XYZ opened by chemfiles with zero steps | std::runtime_error |
+| readcon path unreadable, frame missing, or frame index below 1 | empty cloud, currentFrame left at 0 |
+
+`seams chill` / `seams chill-plus` on an empty cloud print `nop 0`
+and return 0. `seams cages` without `--signature` prints `nop 0 graph seeded hexagonal 0 cubic 0 both 0 water 0`. `--graph` replaces
+`seeded`. With `--signature`, each signature prints `nop 0 graph seeded signature SPEC cages 0 atoms 0`.
+`seams read` on a missing dump prints `nop 0` and returns 0.
+A missing `.con` path makes the CLI throw `cannot read PATH`.
+A `.pdb`, `.gro`, or `.dcd` path on a build without chemfiles throws
+`chemfiles is not in this build`.
+
+`sinp::nLammpsFrames` is `0` when the file cannot be read.
+`sinp::forEachLammpsFrame` is a no-op when that count is `0`, or
+when `first > last`. The CLI prints the frames it ran, in the
+requested order. XYZ is one frame: a range that starts after frame 1
+prints nothing. chemfiles and readcon walk in order on one open
+file and stop at the first empty cloud after the first requested
+frame.
+
+## LAMMPS dump {#lammps-dump}
+
+Default reader. Text dump, frames concatenated, each starting with
+`ITEM: TIMESTEP`.
+
+```text
+ITEM: TIMESTEP
+15000000
+ITEM: NUMBER OF ATOMS
+750
+ITEM: BOX BOUNDS pp pp pp
+-2.0000000000000000e+01 2.0000000000000000e+01
+-2.0000000000000000e+01 2.0000000000000000e+01
+7.0316731227034523e+00 1.8723432986906221e+02
+ITEM: ATOMS id mol type x y z c_peratom
+1 1 2 1.62441 -0.745636 131.621 -28.449
+2 1 1 2.11159 -0.763153 132.444 9.60885
+```
+
+That block is the first snapshot of
+`input/traj/exampleTraj.lammpstrj` (750 atoms, 250 of type 2).
+
+Required `ITEM: ATOMS` columns: `type`, and one coordinate triple.
+The coordinate names follow LAMMPS `ReaderNative`: `x` / `y` / `z`
+if present, otherwise the first of `xu` / `xs` / `xsu` (and the `y`
+and `z` analogues `yu` / `ys` / `ysu`, `zu` / `zs` / `zsu`). Extra
+columns are ignored.
+
+Optional columns: `id`, `mol`. A missing `mol` column copies
+`atomID` into `molID`. A missing `id` column assigns `atomID` from
+1 in file order. Column 0 is used only when the header names it.
+
+`PointCloud.box` is `hi - lo` per axis (the LAMMPS bound spans, not
+the lattice edge lengths). `PointCloud.boxLow` is the lower bound.
+A third number on a box line is a triclinic tilt (`xy`, then `xz`,
+then `yz`) and is appended to `box`. When those three tilts are
+present, `box.size() >= 6`. Pair distances go through
+`gen::periodicDistSq` / `gen::triclinicMinImage`, which recover H
+with the same mapping as `nneigh::dumpBoundsToH` /
+`nneigh::lammpsBoxToLcCell`. An independent-axis wrap on the bound
+spans is the wrong image for a sheared cell; see
+[Sheared cells](../user/howto/sheared-cells.md).
+`gen::formatDumpBox` prints the spans and, when present, the tilt.
+Dump writers emit `ITEM: BOX BOUNDS xy xz yz pp pp pp` and a third
+field on each bound line when the cloud carries tilt.
+
+`seams read` prints the three bound spans (`box Lx Ly Lz`) and,
+when `box.size() >= 6`, the tilt (`xy xz yz`).
+
+Mixed water dumps in this tree use type 2 for oxygen and type 1 for
+hydrogen. `input/traj/exampleTraj.lammpstrj` has 250 atoms of type 2.
+Single-site mW dumps in this tree use type 1.
+`input/traj/mW_cubic.lammpstrj` is 11 frames of 4096 atoms, all type 1.
+
+On one frame, omitted `--type` (the value 0) keeps type 2 when any
+atom has it, otherwise type 1. `seams read` does that in
+`readDefaultOxygen` for an orthorhombic `id type x y z` frame, and
+otherwise in `readLammpsTrjO`. `seams chill`, `seams chill-plus`,
+`seams cages`, `seams fingerprint`, `seams steinhardt`, and
+`seams rings` load every atom and then apply the same keep
+(`water::keepHistoricalOxygen`). A frame with neither type 1 nor
+type 2 is empty after that keep. A multi-frame `seams read` with
+`--type` omitted loads every atom (`readLammpsTrj`).
+
+`--type I` with `I > 0` keeps that LAMMPS type (`readLammpsTrjO`).
+`seams rdf --pair-types I,J` with `I != J` loads every atom
+(`readLammpsTrj`). The histogram is `rdf::partialRdf`, which builds
+its pairs with `nneigh::neighListPair`. Neither is an ice score. A
+mixed-type dump that is not the water convention (ionic liquid,
+solvent plus solute) needs an explicit `--type I`. See
+[Ionic-liquid dumps](../user/howto/ionic-liquid.md).
+
+A live dump session caches `ITEM: TIMESTEP` offsets. Sequential
+walks do not rescan prior snapshots. `seams --frame N --last M --jobs J` walks that table. Each worker seeks the shared offsets
+and opens its own handle when the session lock is held.
+`sinp::dropLammpsDumpIndex` drops the cached offsets for one path
+so the next read indexes the file again.
+
+The two type-filtered C++ readers take the same slice arguments
+(`isSlice`, `coordLow`, `coordHigh`) and do not keep the same atoms.
+The CLI has no slice flag. `gen::getPointCloudOneAtomType` copies
+one type out of a cloud that is already loaded, and drops atoms
+outside the slice when `isSlice` is true.
+
+| reader | keep |
+| --- | --- |
+| readLammpsTrjO | Every atom of the requested type. isSlice sets inSlice on each point and does not drop. nop is the type-filtered count. The O in the name is historical; the type argument is any LAMMPS type. |
+| readLammpsTrjreduced | Atoms of the requested type that pass the slice, or every atom of that type when isSlice is false. nop is the kept count. |
+
+An axis is inside the box when the coordinate lies in the closed
+interval, or when that axis has `lo == hi` (unconstrained).
+`([0,0,0], [50,0,0])` is `x` in `[0, 50]`, with `y` and `z`
+unconstrained.
+
+## XYZ {#xyz}
+
+Always compiled. `templates/hc.xyz` and `templates/ddc.xyz` are cage
+templates. The hexagonal-cage file begins:
+
+```text
+12
+Lattice="     53.96900177       0.00000000       0.00000000       0.00000000      54.52899933       0.00000000       0.00000000       0.00000000      51.25699997" Properties=species:S:1:pos:R:3
+O 8.995 10.3859997 15.0939999
+O 6.7459998 14.2810001 15.0939999
+```
+
+The first line is the atom count. The second line is a comment.
+`Lattice="ax ay az bx by bz cx cy cz"` is stored as a LAMMPS dump
+box. An untilted cell stores the three lengths and an origin at
+zero. `templates/hc.xyz` is that case: `seams read` prints
+`box 53.969 54.529 51.257`. A tilt stores the bound spans, then
+`xy xz yz`, and shifts `boxLow` when a tilt is negative. The cell
+must have positive `ax`, `by`, and `cz`, and `ay`, `az`, and `bz`
+must be zero within tolerance. A bad value throws
+`std::runtime_error("XYZ Lattice is not a cell.")` or
+`std::runtime_error("XYZ Lattice is not a reduced cell.")`.
+
+Without `Lattice=`, the comment contributes no cell. The box is the
+axis-aligned span of the coordinates and `boxLow` is the minimum.
+One atom and no lattice is stored as a 10 Å cube from that point.
+That span is not a periodic cell. Analyses that need the simulation
+cell should use a LAMMPS dump or a `Lattice=` line.
+
+Each data line is `symbol x y z`, or three numbers and no symbol.
+`atomID` and `molID` are the 1-based line order. The reader stops at
+the declared count. A header that is not an atom count throws
+`std::runtime_error("XYZ header is not an atom count.")`. A short
+frame throws `std::runtime_error` naming the expected and actual
+counts. A coordinate that is not a number throws
+`std::runtime_error("XYZ coordinate is not a number.")`.
+
+The CLI routes `.xyz` here and does not apply `--type` on the read.
+Classification still receives `--type` and sees the types assigned
+above.
+
+## chemfiles (PDB, GRO, DCD) {#chemfiles-pdb-gro-dcd}
+
+Compiled when Meson finds chemfiles (`SEAMS_HAS_CHEMFILES`). The CLI
+opens `.pdb`, `.gro`, and `.dcd` only. The C++ entry
+`sinp::readChemfiles` accepts any path chemfiles can open. A `.dcd`
+beside a `.pdb` of the same stem uses that PDB as topology.
+
+Frame `N` is step `N-1`. `--type I` with `I > 0` keeps that species
+number. `--type 0` and a negative type keep every atom. Species is
+the all-digit `type` string when chemfiles has one, otherwise the
+atomic number, otherwise 8 for O/OW/OH and 1 for H/HW/HO (name or
+type), otherwise 0. A frame that names no element stores species 1
+in place of 0.
+
+An orthogonal cell is stored as its three lengths with `boxLow` at
+the origin. A tilted cell is the dump box (spans, then `xy xz yz`)
+with `boxLow` shifted for a negative tilt. An infinite cell clears
+`box` and `boxLow`. `atomID` is the 1-based index in the file,
+including atoms the type filter dropped.
+
+A step past the last frame, a chemfiles error, or a bad selection
+returns an empty cloud. An XYZ trajectory that chemfiles opens with
+zero steps throws `std::runtime_error("XYZ read failed: the file has no frames")`.
+
+A flake build leaves chemfiles off. The default pixi environment
+provides chemfiles. `seams --features` then prints `chemfiles: enabled`.
+
+## eOn `.con` {#eon-con}
+
+Compiled when Meson finds readcon-core (`SEAMS_HAS_READCON`).
+`input/eon/tiny_multi_cuh2.con` is a two-frame file (Cu + H,
+`con_spec_version` 2) with an orthorhombic cell
+15.3456 by 21.702 by 100 Å.
+
+`type` is the atomic number. `atomID` is the file atom id.
+`molID` is `atomID`. Lengths and angles become the dump box.
+Orthorhombic angles (90 degrees) store three lengths and an origin
+at zero. A shear stores spans plus `xy xz yz`, and `boxLow` shifts
+with a negative tilt. Frame `N` is the Nth record. An index below 1,
+a missing record, or a file readcon cannot open returns an empty
+cloud, with `currentFrame` left at 0. `seams read` on a missing
+record prints `nop 0 frame 0` and returns 0. The CLI does not
+type-filter `.con`.
+
+A flake build leaves readcon-core off: auto features are disabled
+and the wrap is not fetched. A Meson build that can see the wrap or
+a system package, with the feature left on auto or set to enabled,
+prints `readcon-core: enabled` from `seams --features`.

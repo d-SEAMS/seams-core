@@ -1,0 +1,29 @@
+<!-- https://docs.dseams.info/user/howto/troubleshooting.md -->
+
+# Troubleshooting {#troubleshooting}
+
+| symptom | cause | fix |
+| --- | --- | --- |
+| A command and a trajectory file are required / exit 2 | The command, the file, or both were omitted | seams read input/traj/ice1h.lammpstrj |
+| unknown command: NAME / exit 2 | NAME is not a command | seams --help. chill_plus is chill-plus. ovito_chill_plus is ovito-chill+ |
+| bad --pair-types (want I,J) / exit 2 | The value is not two integers separated by a comma | seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 |
+| nop 0, exit 0 | The type filter kept no atoms, or the frame is empty | --type 2 on mixed TIP4P (exampleTraj.lammpstrj). --type 1 on single-site dumps (ice1h.lammpstrj, mW_cubic.lammpstrj). Another species needs its integer (Ionic-liquid dumps). --strict-input makes an empty frame exit 2 |
+| Neighbours miss a pair across a sheared face | Bound spans were used as the edge lengths | The tilt factors in the dump are enough. The engine recovers H (Sheared cells) |
+| chemfiles: disabled, then chemfiles is not in this build | This binary has no chemfiles. The suffix in the message is pdb, gro, or dcd | pixi run build (the default lock enables chemfiles). The nix flake leaves chemfiles out (Nix flake) |
+| segfault in mmCIFFormat::read with conda-forge chemfiles 0.10.4 | That release writes label_seq_id . and omits label_entity_id | Use the pixi or Meson build. It rejects that library and builds tag 0.10.4 with cmake/patches/chemfiles-0.10.4-mmcif.patch. A library you linked yourself needs that patch (Install the engine) |
+| readcon-core is not in this build; CON input needs it | seams --features shows readcon-core: disabled. The nix flake does not include it | A Meson build that finds readcon-core reads .con. -Dwith_readcon=disabled leaves the reader out |
+| --jobs stays serial | OpenMP is off, or the file is not a LAMMPS dump | seams --features. --jobs is the OpenMP worker count on a LAMMPS dump range. --jobs 1 is serial. .xyz, .pdb, .gro, .dcd, and .con are one frame at a time |
+| ModuleNotFoundError: pydseams | The Python package is PydSEAMSlib | pip install 'pydseamslib==2.14.0' (PydSEAMSlib) |
+| Looking for yodaStruct -c lua_inputs/config.yml | That command is the 1.x driver | seams in this repository. Lua is require("dseams") from yodaStruct. See Migrate from 1.x |
+| seams: command not found | The binary is not on PATH | After pixi run build or meson compile -C bbdir it is ./bbdir/seams. nix build writes ./result/bin/seams. pixi run install or meson install installs it |
+| module 'dseams' not found / require("dseams") fails | Lua cannot see dseams.lua and dseams_core.so | Build yodaStruct with meson. Set LUA_PATH to lua/?.lua and LUA_CPATH to the directory that holds dseams_core.so. require("yoda") returns the same table |
+
+Two commands on the bundled frames:
+
+```bash
+seams read input/traj/ice1h.lammpstrj
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2
+```
+
+When you file an issue, include `seams --version`, `seams --features`,
+the command line, and a minimal dump.

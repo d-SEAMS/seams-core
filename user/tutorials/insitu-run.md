@@ -1,0 +1,52 @@
+<!-- https://docs.dseams.info/user/tutorials/insitu-run.md -->
+
+# Run in situ {#run-in-situ}
+
+The recording scores the ice Ih cell: 128 hexagonal labels, 256
+six-rings, and mean local q6 0.625855. The steps below run a cubic
+crystal inside LAMMPS and inside OpenMM.
+
+LAMMPS reads the 64-atom cell `engines/lammps/ice.data`. OpenMM builds
+an eight-molecule cubic cell in angstroms.
+
+## LAMMPS {#lammps}
+
+The deck is `engines/lammps/in.dseams`. It reads `ice.data`, clears the
+forces, and asks `fix external` for a callback every second step of an
+8-step run. The driver is `engines/run_hook` in the build directory.
+Run it from `engines/lammps` so `read_data ice.data` resolves. With the
+`bbdir` directory from the build instructions:
+
+```bash
+cd engines/lammps
+../../bbdir/engines/run_hook in.dseams
+```
+
+On success the first line has the form
+
+```default
+lammps calls N stride 2 ice M
+```
+
+$M$ equals $N$ times 64: every atom of this cell is cubic, and the
+ice count adds the cubic labels from each callback. A second line
+prints the hexagonal count, the six-ring count, and q6 of the last
+callback. The hook is produced when the build finds a LAMMPS library.
+
+## OpenMM {#openmm}
+
+From the repository root:
+
+```bash
+PYTHONPATH=adapters/python python3 engines/openmm/test_reporter.py
+```
+
+The script builds eight molecules, takes two steps, and labels each
+frame with CHILL+. When every label is cubic it prints
+
+```default
+openmm calls 2 ice 16
+```
+
+That is two frames of eight cubic molecules. The script needs OpenMM
+and the language library on the loader path.

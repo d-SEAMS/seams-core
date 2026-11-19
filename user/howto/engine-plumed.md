@@ -1,0 +1,48 @@
+<!-- https://docs.dseams.info/user/howto/engine-plumed.md -->
+
+# PLUMED {#plumed}
+
+The thread count comes from `PLUMED_NUM_THREADS`. Set that variable
+before PLUMED starts. `OMP_NUM_THREADS` does not change the PLUMED team.
+With `PLUMED_NUM_THREADS` unset, `PLMD::OpenMP::getNumThreads` returns
+one thread.
+
+The [d-SEAMS PLUMED plugin egg](https://www.plumed-nest.org/eggs/26/018/)
+(plumID:26.018) uses v0.4.1 of the
+[dseams-plumed repository](https://github.com/d-SEAMS/dseams-plumed).
+The build below uses PLUMED 2.9. A conda-forge LAMMPS package links
+that release, so PLUMED 2.10 stays in its own environment.
+
+Build `libSeamsPlumed.so` against conda-forge PLUMED 2.9. PLUMED 2.10
+lives in its own environment, because a conda-forge LAMMPS package links
+PLUMED 2.9. Eigen and a C++ compiler need to be on the path. The exports
+are the include and library paths of the prefix, including the AVX
+directories conda-forge uses.
+
+```bash
+pixi init -c conda-forge dseams-plumed
+pixi add --manifest-path dseams-plumed/pixi.toml "plumed>=2.9.2,<2.10"
+eval "$(pixi shell-hook --manifest-path dseams-plumed/pixi.toml)"
+export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig:$CONDA_PREFIX/lib.AVX_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+meson setup build -Dwith_plumed=enabled
+meson compile -C build
+```
+
+`SEAMS` components are `seams.q6` (mean local q6), `seams.ice` (cubic
+fraction), `seams.ring` (fraction of atoms on a primitive six-ring),
+`seams.hexagonal` (hexagonal count), and `seams.six` (six-ring count).
+A `RESTRAINT` can bias `seams.q6`. The other four components have no
+derivatives. A `PRINT` of `seams.q6` leaves the derivative array empty,
+so the central difference runs only when a `RESTRAINT` has allocated it.
+
+The plugin converts positions and the box from PLUMED’s length unit to
+angstroms. With the default unit, nanometers, the factor is 10.
+`CUTOFF` is always angstroms. Writing an xyz, in
+nanometers, from `input/traj/ice1h.lammpstrj` and running `plumed driver`
+prints mean q6, the hexagonal count, and the six-ring count:
+
+```text
+plumed hexagonal 128 six-rings 256 q6 0.625855
+```

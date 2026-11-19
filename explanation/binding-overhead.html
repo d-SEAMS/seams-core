@@ -2,8 +2,7 @@
 <html lang="en" data-accent-color="blue" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Binding overhead - d-SEAMS molecular simulation analysis documentation</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Performance, 4096 to 110592" href="performance-range.html" /><link rel="prev" title="Performance overview" href="performance-overview.html" />
-      <link rel="canonical" href="https://docs.dseams.info/explanation/binding-overhead.html" /><script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Binding overhead - d-SEAMS</title><link rel="shortcut icon" href="../_static/favicon.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="The C API" href="c-api.html" /><link rel="prev" title="Architecture" href="architecture.html" /><link rel="canonical" href="https://docs.dseams.info/explanation/binding-overhead.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
@@ -19,50 +18,26 @@
     
     <meta property="og:type" content="website"/>
   <meta property="og:url" content="https://docs.dseams.info/explanation/binding-overhead.html"/>
-  <meta property="og:title" content="Binding overhead"/>
-    <meta name="twitter:card" content="summary"/>
+  <meta property="og:title" content="Binding overhead"/><meta property="og:image" content="https://docs.dseams.info/_static/og-dseams.png"/>
+    <meta name="description" content="Ice Ih at 4096, 32768, and 110592 molecules."/>
+    <meta property="og:description" content="Ice Ih at 4096, 32768, and 110592 molecules."/><meta name="twitter:card" content="summary_large_image"/>
   <link rel="icon" type="image/png" sizes="32x32" href="../_static/dseams/favicon-32.png">
 <link rel="icon" type="image/svg+xml" href="../_static/dseams/favicon.svg">
 <link rel="apple-touch-icon" href="../_static/dseams/apple-touch-icon.png">
 <!-- Antics analytics -->
 <script defer src="https://antics-api.turtletech.us/antics.js"></script>
 <script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script>
-<meta name="description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-
-<meta property="og:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta property="og:image" content="https://dseams.info/images/og-card.png">
-<meta property="og:site_name" content="d-SEAMS molecular simulation analysis documentation">
+<meta name="robots" content="index, follow">
 <meta name="twitter:title" content="Binding overhead - d-SEAMS">
-<meta name="twitter:description" content="Documentation for d-SEAMS, a molecular simulation trajectory analysis engine for ice, clathrates, rings, cages, and structural order.">
-<meta name="twitter:image" content="https://dseams.info/images/og-card.png">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://docs.dseams.info/#application",
-      "name": "d-SEAMS",
-      "description": "Molecular simulation trajectory analysis for ice, clathrates, rings, cages, and structural order.",
-      "applicationCategory": "ScientificApplication",
-      "operatingSystem": "Linux, macOS",
-      "url": "https://docs.dseams.info/",
-      "softwareVersion": "2.14.0",
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    },
-    {
-      "@type": "SoftwareSourceCode",
-      "@id": "https://github.com/d-SEAMS/seams-core#source",
-      "name": "seams-core",
-      "codeRepository": "https://github.com/d-SEAMS/seams-core",
-      "programmingLanguage": ["C++", "C", "Python"],
-      "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
-      "citation": "https://doi.org/10.1021/acs.jcim.0c00031"
-    }
-  ]
-}
-</script></head>
+<meta name="twitter:description" content="Ice Ih at 4096, 32768, and 110592 molecules.">
+<meta name="twitter:image" content="https://docs.dseams.info/_static/og-dseams.png">
+<meta property="og:image:alt" content="d-SEAMS. Deferred structural elucidation analysis for molecular simulations.">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="d-SEAMS">
+<link rel="alternate" type="text/markdown" href="https://docs.dseams.info/explanation/binding-overhead.md" title="Markdown">
+<link rel="describedby" href="https://docs.dseams.info/llms.txt">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareSourceCode","name":"d-SEAMS","description":"d-SEAMS reads molecular-dynamics trajectories and classifies ice with CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, and ice and brine fronts. Use it from the command line, a language binding, or a supported simulation engine.","version":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C"],"datePublished":"2026-11-15","citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}}},{"@type":"SoftwareApplication","name":"d-SEAMS","applicationCategory":"Science","operatingSystem":"Linux, macOS, Windows","softwareVersion":"2.14.0","license":"https://spdx.org/licenses/MIT","codeRepository":"https://github.com/d-SEAMS/seams-core","url":"https://docs.dseams.info/","programmingLanguage":["C++","C","Python","Lua","Fennel","R","Julia","Rust","Fortran"],"citation":{"@type":"ScholarlyArticle","name":"d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations","identifier":"https://doi.org/10.1021/acs.jcim.0c00031","url":"https://doi.org/10.1021/acs.jcim.0c00031","datePublished":"2020-03-20","author":[{"@type":"Person","name":"Rohit Goswami"},{"@type":"Person","name":"Amrita Goswami"},{"@type":"Person","name":"Jayant K. Singh"}],"isPartOf":{"@type":"PublicationVolume","volumeNumber":"60","isPartOf":{"@type":"Periodical","name":"Journal of Chemical Information and Modeling"}}},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebPage","name":"Binding overhead - d-SEAMS","description":"Ice Ih at 4096, 32768, and 110592 molecules.","url":"https://docs.dseams.info/explanation/binding-overhead.html","isPartOf":"https://docs.dseams.info/","inLanguage":"en"}]}</script></head>
 <body><nav class="dseams-family" aria-label="d-SEAMS">
   <a class="dseams-family__brand" href="https://dseams.info/">d-SEAMS</a>
   <ul class="dseams-family__nav">
@@ -128,161 +103,57 @@ data-aria-dark="Switch to auto color mode">
       <div class="sy-scrollbar p-6">
         <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting started</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../videos/index.html">Videos</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../getting-started/index.html">Getting started</a></li>
 </ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Worked examples</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/clathrate.html">Classify a clathrate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/interface.html">Ice-water interface</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nucleation.html">Nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/brine.html">Brine and NaCl</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/insitu-run.html">Run in situ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/nanotube.html">Quasi-one-dimensional ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-interface.html">CHILL+ on an ice/water slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-cages.html">Cage census of sI, sII and sH</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-rings.html">Primitive rings and the shortest-path test</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-brine.html">Ice growing into brine</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-nucleation.html">Ice-likeness along a short nucleation run</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery.html">Science gallery</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/index.html">Science tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/interface.html">Ice/liquid interface and nucleation</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/brine.html">Brine freezing front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/cages.html">sII and sH hydrate cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../science/gallery.html">Science figures</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/index.html">Language tutorials</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/c.html">C tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/cpp.html">C++ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/engines.html">Engines tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/gromacs.html">GROMACS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/insitu.html">In-situ tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/lammps.html">LAMMPS tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/openmm.html">OpenMM tutorial</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../fronts/plumed.html">PLUMED tutorial</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">Tasks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/upgrade-2.14.html">Upgrade from 2.13 to 2.14</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/migrate-1x.html">Migrate from d-SEAMS 1.x</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Use a language binding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/neighbour-lists.html">Cutoff neighbour lists</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/rings.html">Primitive rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cages-trace.html">Cages and TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/q4-q6.html">Local q4 and q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/chill-plus.html">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding.html">Choosing a cutoff and padding</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/symmetry-classifier.html">The symmetry classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/linkcell-carried.html">Linkcell neighbours and carried updates</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/science-front.html">Basal profiles and the nucleation census</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/from-trajectory.html">From a trajectory to the ice front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/engine-insitu.html">In-situ CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../walkthrough/index.html">Engine walkthroughs</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Lookup pages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/python-frame.html">Python Frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14.html">2.14.0 release notes</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/index.html">Stable API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/c.html">C</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cpp.html">C++</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/python.html">Python</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/fortran.html">Fortran</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/julia.html">Julia</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/r.html">R</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/lua.html">Lua and Fennel</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/rust.html">Rust</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/cli.html">Command line</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../stable/science.html">Science front</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../capi/index.html">C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../lang/index.html">Language APIs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Engines</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/index.html">Engine builds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/lammps.html">LAMMPS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/gromacs.html">GROMACS</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/openmm.html">OpenMM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/plumed.html">PLUMED</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../engines/insitu.html">In-situ</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Comparisons</span></p>
-<ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../comparisons.html">Head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sqq.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-h2h.html">Literature head-to-head</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-reproduce.html">Reproduce the literature head-to-head</a></li>
-</ul>
-<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">User guide</span></p>
 <ul class="current">
-<li class="toctree-l1 _expand"><a class="reference internal" href="index.html">Concepts</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="architecture.html">Repositories</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="c-api.html">The C API</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="interface-order.html">Interface and confined ice</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Binding overhead</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range.html">Performance, 4096 to 110592</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../user/index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../user/classify.html">Classify ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/order.html">Rings, cages, and order</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/interfaces.html">Interfaces, nucleation, and brine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/confined.html">Confined ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/engines.html">Engines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/languages.html">Language walkthroughs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/versions.html">Versions and bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/paper.html">Paper figures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../user/performance.html">Performance and comparisons</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Concepts</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Binding overhead</a></li>
+<li class="toctree-l3"><a class="reference internal" href="c-api.html">The C API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-rules.html">CHILL+: the published rule and the OVITO rule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="clavis-trace.html">ClavisCage TRACE</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hop-ball.html">Carried rings and the hop ball</a></li>
+<li class="toctree-l3"><a class="reference internal" href="interface-order.html">Interface and confined ice</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linkcell-scaling.html">Linkcell strong scaling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ovito-findrings.html">Primitive rings and OVITO FindRings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance.html">Release-candidate sitting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-h2h.html">Performance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-overview.html">Performance overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="performance-range.html">Performance, 4096 to 110592</a></li>
+<li class="toctree-l3"><a class="reference internal" href="primitive-rings.html">Primitive rings and the full graph</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rings-one-thread.html">Rings on one thread</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sqq.html">SQQ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="stacking-disorder.html">Stacking disorder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="symmetry.html">Local symmetry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-assembly.html">TRACE and signature cages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="trace-threads.html">Signature-search thread controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">API reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">API reference</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Project</span></p>
 <ul>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/repositories.html">Repository map</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/release.html">Release process</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/lean.html">Lean proofs</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="citation.html">Citation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../development/changelog.html">Changelog</a></li>
 </ul>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/class_nneigh_CutoffSkin.html">class nneigh::CutoffSkin</a></li>
@@ -562,88 +433,8 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_IonSite.html">struct water::IonSite</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Request.html">struct water::Request</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/struct_water_Selection.html">struct water::Selection</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="clavis-trace-tables.html">ClavisCage TRACE</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="comparisons-summary-tables.html">Head-to-head summary</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="cutoff-rings-tables.html">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html">884736 sitting, ice and liquid</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#neighbours">Neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings">Rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings-against-cycless">Rings against cycless</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#rings-against-sqq">Rings against SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#q6-against-ovito">q6 against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#cages">Cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-h2h-tables.html#linkcell-scaling">Linkcell scaling</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html">What each file holds</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#rc3-sitting-one-thread-against-eight">rc3 sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#molecule-sitting-one-thread-against-eight">884736-molecule sitting, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#signature-search-one-thread-against-eight">signature search, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#pool-sized-kernels-one-thread-against-eight">pool-sized kernels, one thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-overview-tables.html#pool-audit-at-4096-molecules-four-threads-against-eight">Pool audit at 4096 molecules, four threads against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html">binding-overhead.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-ice-ic-rings-n16-csv">h2h-ice-ic-rings-n16.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-ice-ic-rings-csv">h2h-ice-ic-rings.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-literature-csv">h2h-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-summary-csv">h2h-summary.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v12-csv">h2h-watch-v12.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v13-csv">h2h-watch-v13.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v2-csv">h2h-watch-v2.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v3-csv">h2h-watch-v3.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v4-csv">h2h-watch-v4.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v6-sqq-csv">h2h-watch-v6-sqq.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-v7-csv">h2h-watch-v7.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#h2h-watch-csv">h2h-watch.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rank-scale-csv">rank-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rc2perf-literature-csv">rc2perf-literature.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#rc3-sitting-csv">rc3-sitting.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#thread-scale-csv">thread-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#weak-scale-csv">weak-scale.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-range-tables.html#sitting-large-csv">sitting-large.csv</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html">neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#q4">q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#q6">q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#chill">CHILL+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#rings">rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#cages">cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#ptm">PTM</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="performance-tables.html#king">king</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html">ice Ic, 4096 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-32768-molecules">ice Ic, 32768 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-110592-molecules">ice Ic, 110592 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="pool-audit-tables.html#ice-ic-884736-molecules">ice Ic, 884736 molecules</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html">884736 molecules, rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q4">884736 molecules, q4</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q6">884736 molecules, q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-q4-q6">884736 molecules, q4+q6</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-neighbours">884736 molecules, neighbours</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-coordination">884736 molecules, coordination</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-chill">884736 molecules, chill+</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-classifier">884736 molecules, classifier</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-ptm-default">884736 molecules, ptm-default</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="sitting-large-tables.html#molecules-ptm-ice">884736 molecules, ptm-ice</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="sqq-tables.html">SQQ</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads-tables.html">signature cages, sI</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="trace-threads-tables.html#signature-cages-sii">signature cages, sII</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html">The bulk-liquid gate</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#summary-rows">Summary rows</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#layers-whose-label-changed">Layers whose label changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/cutoff-padding-tables.html#classify-timings">Classify timings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/literature-speed.html">One thread against eight</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html">Neighbours against OVITO</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/pool-audit-v5-tables.html#full-cutoff-ring-call">Full cutoff ring call</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html">Added</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#changed">Changed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#deprecated">Deprecated</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#removed">Removed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/release-2.14-notes.html#fixed">Fixed</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html">Interface slab</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#brine-frame">Brine frame</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#ice-ih-six-rings">Ice Ih six-rings</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#nucleation-nucleus">Nucleation nucleus</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/gallery-captions.html#si-and-sii-cages">sI and sII cages</a></li>
-<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/molecules.html">Molecule stills</a></li>
 </ul>
         </div>
       </div>
@@ -654,8 +445,20 @@ data-aria-dark="Switch to auto color mode">
     <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
       <i class="i-lucide close"></i>
     </button>
-    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="edit-this-page">
-  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/orgmode/explanation/binding-overhead.org">Edit this page</a>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#handles">Handles</a></li>
+<li><a class="reference internal" href="#per-molecule-results">Per-molecule results</a></li>
+<li><a class="reference internal" href="#freud-and-ovito">freud and OVITO</a></li>
+<li><a class="reference internal" href="#eight-threads">Eight threads</a></li>
+<li><a class="reference internal" href="#times">Times</a><ul>
+<li><a class="reference internal" href="#read">read</a></li>
+<li><a class="reference internal" href="#knn">knn</a></li>
+<li><a class="reference internal" href="#q6">q6</a></li>
+<li><a class="reference internal" href="#chill">CHILL</a></li>
+<li><a class="reference internal" href="#rings">rings</a></li>
+</ul>
+</li>
+</ul>
 </div></div>
   </aside>
   <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
@@ -672,8 +475,16 @@ data-aria-dark="Switch to auto color mode">
         <span>/</span>
         <meta itemprop="position" content="1" />
       </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-        <strong itemprop="name">Binding overhead</strong>
+        <a itemprop="item" href="../user/index.html"><span itemprop="name">User guide</span></a>
+        <span>/</span>
         <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Concepts</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Binding overhead</strong>
+        <meta itemprop="position" content="4" />
       </li></ol>
     <div class="xl:hidden ml-1">
       <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
@@ -687,93 +498,564 @@ data-aria-dark="Switch to auto color mode">
   <article class="yue dark-code" role="main">
           <section id="binding-overhead">
 <h1>Binding overhead<a class="headerlink" href="#binding-overhead" title="Link to this heading">¶</a></h1>
-<p>Ice Ih at 4096, 32768, and 110592 molecules. GenIce builds a missing cell. The oxygen sites are kept and scaled from nanometers to angstroms.</p>
-<p>The run used 8 cores of Intel(R) Xeon(R) Processor. No host name is recorded. One process per binding stayed open for both thread widths. The serial phase set OMP_NUM_THREADS and PLUMED_NUM_THREADS to 1. The threaded phase set both to 8 and called seams_set_num_threads. Each cell below is the median of 8 repeats after one warmup, in milliseconds, with the interquartile range in parentheses.</p>
-<p>Read, the mutual 4-neighbour list, and the primitive-ring search return a handle. On the 110592-molecule cell the slowest of those wrappers was python read at 1 thread, 1.09 times the direct C call. The file parser and the search run inside libseams. The wrapper passes a pointer and, for rings and neighbours, destroys the handle.</p>
-<p>CHILL and q6 write one number per molecule, and the timed q6 call also writes q6bar. C, C++, Fortran, Rust, Julia, R, and the ctypes module fill one contiguous buffer and hand its address to libseams. Lua then stores every value in a table. On the 110592-molecule cell, Lua q6 at 1 thread is 1.05 times the C median. That gap is the table write.</p>
-<p>Two copies that did not belong in the wrappers are gone. Lua’s CSR export walked the neighbour lists into a temporary buffer and then into the table. It now reads the CSR that the handle already owns. Julia’s orthorhombic frame setter copied a 3-by-n Float64 matrix that was already the layout seams_system_set_ortho copies. It now passes that pointer. Rust, C++, and Julia allocate the q6bar buffer only when the caller asks for the Lechner-Dellago average. The timed call asks for it, so both buffers are required.</p>
-<p>freud and OVITO are separate programs, timed in the same session on the same oxygen coordinates. Freud times knn, q6. OVITO times knn, q6, read, rings. freud’s neighbour query is the one-way 4-nearest list inside 5 angstroms, the candidate shell the mutual list uses, and its q6 call includes the averaged parameter. OVITO reads the dump, builds a 4-neighbour finder, runs the Steinhardt modifier with the averaged parameters, and runs FindRings after creating bonds at 3.5 angstroms. OVITO has no original CHILL modifier, and freud has no reader, no CHILL, and no primitive-ring search, so those cells are empty. seams_rings_find also classifies prisms. That walk is about one second at 4096 molecules, where every binding was repeated. The C search was repeated at 32768 molecules as well. A 110592-molecule call did not return within 180 seconds, so that cell is empty. Python’s ctypes ring call is 1.36 times C on that cell. The other languages return the ring handle and stay with the C time.</p>
-<p>At 8 threads the seams neighbour, q6, and CHILL calls take longer than the one-thread calls, on every language at once. freud and OVITO move the other way and get faster. The bindings are following the library, not adding a cost of their own.</p>
+<p>Ice Ih at 4096, 32768, and 110592 molecules. GenIce writes a cell
+that is not already on disk. The oxygen sites are kept and scaled
+from nanometers to angstroms.</p>
+<p>The record is an 8-core Intel Xeon. It does not name the host. Each
+seams binding is one process for both thread widths. The process sets
+<code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code> and <code class="docutils literal notranslate"><span class="pre">PLUMED_NUM_THREADS</span></code> to 1, then to 8, and calls
+<code class="docutils literal notranslate"><span class="pre">seams_set_num_threads</span></code> at each width. freud runs inside the Python
+process and uses the same widths. The 1-thread and 8-thread OVITO
+rows are two processes, started with <code class="docutils literal notranslate"><span class="pre">OVITO_THREAD_COUNT</span></code> set to 1
+and to 8. Each cell is the median of 8 repeats after one warmup, in
+milliseconds. The median of an even sample is the mean of the two
+central values. The number in parentheses is the interquartile range,
+quartile 3 minus quartile 1, Hyndman-Fan type 7.</p>
+<section id="handles">
+<h2>Handles<a class="headerlink" href="#handles" title="Link to this heading">¶</a></h2>
+<p>Read, the mutual 4-neighbour list, and the primitive-ring search
+return a handle. The parser and the search run inside libseams. The
+C, Fortran, Lua, and ctypes drivers destroy a neighbour or ring
+handle inside the timed section. The C++ wrapper destroys that handle
+when the owning object leaves scope. On the 110592-molecule cell at 1
+thread, Python read is the slowest measured wrapper of read and the
+neighbour list: 47.209 ms against the C read median of 43.195 ms, a
+ratio of 1.09.</p>
+<p><code class="docutils literal notranslate"><span class="pre">seams_rings_find</span></code> stores the primitive rings through size 6 on the
+3.5 angstrom cutoff graph. A 5-ring is marked as a pentagon and a
+6-ring as a hexagon. Prism, cage, and stacking labels are written
+when <code class="docutils literal notranslate"><span class="pre">seams_rings_labels</span></code> reads the symmetry. The timed calls leave
+that symmetry unread, so the prism pass stays out of the measurement.
+At 4096 molecules the C median is 991.813 ms at 1 thread and
+1561.161 ms at 8 threads. Every binding is repeated at that size. The
+C search is also recorded at 32768 molecules, 65237.213 ms at 1
+thread and 62041.600 ms at 8 threads. The 110592-molecule ring cells
+are empty. A probe of that search had not returned after several
+minutes.</p>
+<p>At 4096 molecules the Python ctypes ring call is 1344.104 ms at 1
+thread, 1.36 times C, and 1909.255 ms at 8 threads, 1.22 times C. The
+other languages stay with the C time. Julia and R copy the ring
+vertices out of the handle. Fortran also fills a size histogram and
+the fraction of atoms on six-membered rings. Those extras sit inside
+the C time.</p>
+</section>
+<section id="per-molecule-results">
+<h2>Per-molecule results<a class="headerlink" href="#per-molecule-results" title="Link to this heading">¶</a></h2>
+<p>CHILL writes one label per molecule. The call is original CHILL,
+published edges, on the cutoff graph. The timed q6 call writes q6 and
+the Lechner-Dellago average q6bar, one double each per molecule, on
+the 3.5 angstrom cutoff graph. A null q6bar pointer passed to
+<code class="docutils literal notranslate"><span class="pre">seams_steinhardt</span></code> skips that average. The C, C++, and Fortran
+drivers, and the ctypes worker, pass both caller-owned buffers. The
+C++ wrapper allocates the averaged vector only when the caller asks
+for it, and this call asks for it. On the 110592-molecule cell at 1
+thread, Lua q6 is 33.288 ms, 1.05 times the C median of 31.822 ms.
+The ctypes worker is 33.806 ms on that cell, 1.06 times C.</p>
+<p>R times each call with <code class="docutils literal notranslate"><span class="pre">proc.time</span></code> elapsed time. On the calls that
+finish in a few milliseconds the R medians fall on whole
+milliseconds.</p>
+</section>
+<section id="freud-and-ovito">
+<h2>freud and OVITO<a class="headerlink" href="#freud-and-ovito" title="Link to this heading">¶</a></h2>
+<p>freud and OVITO are timed in the same session, on the same oxygen
+coordinates. The freud rows are the neighbour query and q6. The OVITO
+rows are read, a 4-neighbour finder, q6, and rings.</p>
+<p>The seams neighbour list is the mutual 4-nearest graph. Candidates
+lie inside 5 angstroms, the 3.5 angstrom cutoff plus 1.5. freud’s
+query is the one-way 4-nearest list inside that same shell. OVITO’s
+finder is <code class="docutils literal notranslate"><span class="pre">NearestNeighborFinder</span></code> with 4 neighbours. freud’s q6 call
+is Steinhardt with l = 6, the averaged parameter, and a neighbour
+shell of 3.5 angstroms. OVITO’s Steinhardt modifier uses that cutoff,
+maximum degree 6, and the averaged parameters. OVITO’s ring row
+creates bonds at 3.5 angstroms and then runs FindRings with a maximum
+ring size of 6. That search is a different census from
+<code class="docutils literal notranslate"><span class="pre">seams_rings_find</span></code>.</p>
+</section>
+<section id="eight-threads">
+<h2>Eight threads<a class="headerlink" href="#eight-threads" title="Link to this heading">¶</a></h2>
+<p>Neighbour lists and CHILL take longer at 8 threads than at 1 thread,
+at every size, in every language. q6 on the 4096-molecule cell is
+faster at 8 threads: C falls from 0.950 ms to 0.550 ms, and the
+languages with a finer clock follow it. R stays at 1 ms on that cell.
+On the 32768-molecule cell C q6 rises from 9.065 ms to 278.258 ms,
+and on the 110592-molecule cell from 31.822 ms to 294.849 ms.
+Primitive rings at 4096 molecules are slower at 8 threads as well.
+freud and OVITO neighbour and q6 calls are faster at 8 threads at
+every size. The language bindings follow libseams.</p>
 <figure class="align-default" id="id1">
 <img alt="Median time of each binding divided by the direct C call" src="../_images/binding-overhead.png" />
 <figcaption>
-<p><span class="caption-text">Median time divided by the direct C call. The vertical axis is logarithmic so a wrapper near 1 and a separate analysis sit on the same axes.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
+<p><span class="caption-text">Median time divided by the direct C call. The vertical axis is logarithmic, so a wrapper near 1 and a separate analysis sit on the same axes.</span><a class="headerlink" href="#id1" title="Link to this image">¶</a></p>
 </figcaption>
 </figure>
-<p>The table is milliseconds, median and interquartile range.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span><span data-line="1">### read
-</span><span data-line="2">
-</span><span data-line="3">| binding | 4096 mol, 1 thr | 4096 mol, 8 thr | 32768 mol, 1 thr | 32768 mol, 8 thr | 110592 mol, 1 thr | 110592 mol, 8 thr |
-</span><span data-line="4">| --- | --- | --- | --- | --- | --- | --- |
-</span><span data-line="5">| c | 1.473 (0.102) | 1.914 (0.139) | 13.038 (0.407) | 12.593 (0.183) | 43.195 (1.025) | 43.968 (0.419) |
-</span><span data-line="6">| cxx | 1.477 (0.100) | 1.572 (0.038) | 12.798 (0.531) | 12.691 (0.097) | 43.853 (0.785) | 43.552 (0.319) |
-</span><span data-line="7">| rust | 1.410 (0.104) | 1.597 (0.063) | 12.887 (0.244) | 13.396 (0.352) | 43.545 (0.605) | 45.336 (0.917) |
-</span><span data-line="8">| fortran | 1.389 (0.094) | 1.569 (0.026) | 13.117 (0.419) | 12.650 (0.074) | 43.452 (1.531) | 42.667 (0.263) |
-</span><span data-line="9">| python | 1.529 (0.039) | 1.720 (0.046) | 13.849 (0.257) | 13.853 (0.171) | 47.209 (1.610) | 47.161 (0.339) |
-</span><span data-line="10">| julia | 1.644 (0.131) | 1.657 (0.057) | 12.826 (0.244) | 12.776 (0.144) | 43.743 (0.802) | 43.656 (1.017) |
-</span><span data-line="11">| r | 2.000 (0.000) | 2.000 (1.000) | 13.000 (1.000) | 13.500 (1.000) | 44.000 (0.750) | 45.000 (1.500) |
-</span><span data-line="12">| lua | 1.433 (0.105) | 1.619 (0.077) | 12.719 (0.103) | 12.616 (0.098) | 43.134 (1.148) | 42.844 (0.579) |
-</span><span data-line="13">| ovito | 0.931 (0.185) | 0.770 (0.322) | 3.430 (0.099) | 3.374 (0.099) | 10.412 (0.095) | 10.792 (0.366) |
-</span><span data-line="14">
-</span><span data-line="15">### knn
-</span><span data-line="16">
-</span><span data-line="17">| binding | 4096 mol, 1 thr | 4096 mol, 8 thr | 32768 mol, 1 thr | 32768 mol, 8 thr | 110592 mol, 1 thr | 110592 mol, 8 thr |
-</span><span data-line="18">| --- | --- | --- | --- | --- | --- | --- |
-</span><span data-line="19">| c | 1.514 (0.079) | 27.743 (10.310) | 11.037 (1.037) | 40.923 (7.282) | 34.649 (1.164) | 87.766 (0.503) |
-</span><span data-line="20">| cxx | 1.417 (0.074) | 26.379 (5.515) | 10.580 (0.506) | 37.441 (6.457) | 34.709 (1.824) | 87.613 (0.335) |
-</span><span data-line="21">| rust | 1.671 (0.555) | 26.074 (3.756) | 10.453 (0.475) | 39.154 (3.668) | 35.537 (1.000) | 88.082 (2.917) |
-</span><span data-line="22">| fortran | 1.471 (0.320) | 26.048 (5.748) | 10.806 (0.314) | 41.825 (7.451) | 34.847 (1.498) | 87.630 (0.269) |
-</span><span data-line="23">| python | 1.503 (0.168) | 24.730 (7.606) | 10.168 (0.306) | 37.780 (4.181) | 34.388 (0.540) | 87.690 (0.416) |
-</span><span data-line="24">| julia | 1.646 (0.327) | 26.186 (6.041) | 10.453 (0.338) | 37.962 (5.320) | 34.650 (1.018) | 87.674 (0.354) |
-</span><span data-line="25">| r | 1.000 (1.000) | 25.000 (4.000) | 11.000 (0.000) | 34.500 (5.750) | 35.500 (1.000) | 87.000 (0.250) |
-</span><span data-line="26">| lua | 1.584 (0.310) | 22.932 (6.993) | 9.941 (0.256) | 35.865 (8.944) | 33.749 (0.511) | 87.746 (0.221) |
-</span><span data-line="27">| freud | 3.816 (0.118) | 0.971 (0.075) | 30.398 (0.793) | 7.711 (0.173) | 115.737 (2.468) | 28.924 (0.704) |
-</span><span data-line="28">| ovito | 4.855 (0.130) | 3.803 (0.118) | 28.731 (0.191) | 6.271 (2.759) | 111.893 (0.967) | 25.452 (0.290) |
-</span><span data-line="29">
-</span><span data-line="30">### q6
-</span><span data-line="31">
-</span><span data-line="32">| binding | 4096 mol, 1 thr | 4096 mol, 8 thr | 32768 mol, 1 thr | 32768 mol, 8 thr | 110592 mol, 1 thr | 110592 mol, 8 thr |
-</span><span data-line="33">| --- | --- | --- | --- | --- | --- | --- |
-</span><span data-line="34">| c | 0.950 (0.065) | 0.550 (0.038) | 9.065 (0.103) | 278.258 (5.256) | 31.822 (0.170) | 294.849 (4.382) |
-</span><span data-line="35">| cxx | 0.950 (0.038) | 0.630 (0.014) | 9.198 (0.075) | 277.243 (7.035) | 32.071 (0.236) | 293.159 (4.447) |
-</span><span data-line="36">| rust | 0.977 (0.036) | 0.590 (0.089) | 9.093 (0.117) | 290.282 (8.931) | 32.849 (0.383) | 305.443 (9.056) |
-</span><span data-line="37">| fortran | 0.993 (0.050) | 0.548 (0.018) | 9.590 (0.142) | 275.684 (3.985) | 32.046 (0.311) | 292.669 (5.437) |
-</span><span data-line="38">| python | 1.074 (0.038) | 0.591 (0.012) | 9.518 (0.126) | 280.564 (4.839) | 33.806 (0.391) | 292.919 (4.287) |
-</span><span data-line="39">| julia | 1.089 (0.032) | 0.586 (0.039) | 9.403 (0.242) | 276.384 (5.361) | 32.778 (0.667) | 290.929 (3.464) |
-</span><span data-line="40">| r | 1.000 (0.000) | 1.000 (0.000) | 9.500 (1.000) | 281.000 (9.250) | 32.500 (1.000) | 298.000 (7.250) |
-</span><span data-line="41">| lua | 0.997 (0.024) | 0.605 (0.016) | 9.421 (0.096) | 276.478 (8.887) | 33.288 (0.280) | 299.717 (3.706) |
-</span><span data-line="42">| freud | 15.445 (0.538) | 2.370 (0.110) | 117.509 (0.663) | 19.127 (0.680) | 420.061 (3.630) | 69.442 (2.957) |
-</span><span data-line="43">| ovito | 4.420 (0.170) | 2.902 (0.119) | 25.406 (0.153) | 13.486 (4.197) | 101.413 (0.776) | 49.343 (20.923) |
-</span><span data-line="44">
-</span><span data-line="45">### CHILL
-</span><span data-line="46">
-</span><span data-line="47">| binding | 4096 mol, 1 thr | 4096 mol, 8 thr | 32768 mol, 1 thr | 32768 mol, 8 thr | 110592 mol, 1 thr | 110592 mol, 8 thr |
-</span><span data-line="48">| --- | --- | --- | --- | --- | --- | --- |
-</span><span data-line="49">| c | 2.545 (0.599) | 215.612 (13.410) | 15.028 (0.144) | 281.844 (8.804) | 50.706 (0.660) | 307.791 (3.955) |
-</span><span data-line="50">| cxx | 2.022 (0.175) | 216.275 (12.959) | 15.311 (0.533) | 282.941 (4.131) | 51.169 (0.729) | 309.498 (3.983) |
-</span><span data-line="51">| rust | 2.136 (0.631) | 226.970 (8.981) | 15.115 (0.347) | 292.174 (9.213) | 51.398 (0.779) | 307.757 (1.419) |
-</span><span data-line="52">| fortran | 2.209 (0.468) | 216.502 (11.087) | 15.389 (0.335) | 278.995 (5.726) | 50.230 (0.397) | 306.692 (3.310) |
-</span><span data-line="53">| python | 2.078 (0.448) | 218.109 (12.232) | 14.914 (0.396) | 278.877 (9.074) | 50.560 (0.435) | 307.498 (0.622) |
-</span><span data-line="54">| julia | 2.182 (0.983) | 217.869 (11.820) | 15.247 (0.396) | 278.677 (2.682) | 48.838 (0.491) | 309.555 (3.159) |
-</span><span data-line="55">| r | 2.500 (1.000) | 212.000 (13.750) | 15.000 (1.000) | 281.000 (4.250) | 49.500 (1.250) | 310.500 (4.000) |
-</span><span data-line="56">| lua | 2.055 (0.272) | 218.213 (6.988) | 14.900 (0.170) | 281.558 (4.855) | 49.876 (0.791) | 307.628 (0.315) |
-</span><span data-line="57">
-</span><span data-line="58">### rings
-</span><span data-line="59">
-</span><span data-line="60">| binding | 4096 mol, 1 thr | 4096 mol, 8 thr | 32768 mol, 1 thr | 32768 mol, 8 thr | 110592 mol, 1 thr | 110592 mol, 8 thr |
-</span><span data-line="61">| --- | --- | --- | --- | --- | --- | --- |
-</span><span data-line="62">| c | 991.813 (24.299) | 1561.161 (15.766) | 65237.213 (2485.686) | 62041.600 (202.918) |  |  |
-</span><span data-line="63">| cxx | 993.822 (2.624) | 1559.290 (5.610) |  |  |  |  |
-</span><span data-line="64">| rust | 996.532 (5.895) | 1558.758 (17.700) |  |  |  |  |
-</span><span data-line="65">| fortran | 989.092 (2.912) | 1554.381 (15.306) |  |  |  |  |
-</span><span data-line="66">| python | 1344.104 (4.591) | 1909.255 (9.019) |  |  |  |  |
-</span><span data-line="67">| julia | 992.607 (5.326) | 1553.860 (10.599) |  |  |  |  |
-</span><span data-line="68">| r | 994.500 (4.750) | 1549.500 (3.750) |  |  |  |  |
-</span><span data-line="69">| lua | 1002.424 (18.117) | 1552.125 (5.559) |  |  |  |  |
-</span><span data-line="70">| ovito | 20.977 (0.993) | 19.223 (0.599) |  |  |  |  |
-</span></pre></div>
+</section>
+<section id="times">
+<h2>Times<a class="headerlink" href="#times" title="Link to this heading">¶</a></h2>
+<p>Milliseconds. An empty cell has no sample.</p>
+<section id="read">
+<h3>read<a class="headerlink" href="#read" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>binding</p></th>
+<th class="head"><p>4096 mol, 1 thr</p></th>
+<th class="head"><p>4096 mol, 8 thr</p></th>
+<th class="head"><p>32768 mol, 1 thr</p></th>
+<th class="head"><p>32768 mol, 8 thr</p></th>
+<th class="head"><p>110592 mol, 1 thr</p></th>
+<th class="head"><p>110592 mol, 8 thr</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>1.473 (0.102)</p></td>
+<td><p>1.914 (0.139)</p></td>
+<td><p>13.038 (0.407)</p></td>
+<td><p>12.593 (0.183)</p></td>
+<td><p>43.195 (1.025)</p></td>
+<td><p>43.968 (0.419)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cxx</p></td>
+<td><p>1.477 (0.100)</p></td>
+<td><p>1.572 (0.038)</p></td>
+<td><p>12.798 (0.531)</p></td>
+<td><p>12.691 (0.097)</p></td>
+<td><p>43.853 (0.785)</p></td>
+<td><p>43.552 (0.319)</p></td>
+</tr>
+<tr class="row-even"><td><p>rust</p></td>
+<td><p>1.410 (0.104)</p></td>
+<td><p>1.597 (0.063)</p></td>
+<td><p>12.887 (0.244)</p></td>
+<td><p>13.396 (0.352)</p></td>
+<td><p>43.545 (0.605)</p></td>
+<td><p>45.336 (0.917)</p></td>
+</tr>
+<tr class="row-odd"><td><p>fortran</p></td>
+<td><p>1.389 (0.094)</p></td>
+<td><p>1.569 (0.026)</p></td>
+<td><p>13.117 (0.419)</p></td>
+<td><p>12.650 (0.074)</p></td>
+<td><p>43.452 (1.531)</p></td>
+<td><p>42.667 (0.263)</p></td>
+</tr>
+<tr class="row-even"><td><p>python</p></td>
+<td><p>1.529 (0.039)</p></td>
+<td><p>1.720 (0.046)</p></td>
+<td><p>13.849 (0.257)</p></td>
+<td><p>13.853 (0.171)</p></td>
+<td><p>47.209 (1.610)</p></td>
+<td><p>47.161 (0.339)</p></td>
+</tr>
+<tr class="row-odd"><td><p>julia</p></td>
+<td><p>1.644 (0.131)</p></td>
+<td><p>1.657 (0.057)</p></td>
+<td><p>12.826 (0.244)</p></td>
+<td><p>12.776 (0.144)</p></td>
+<td><p>43.743 (0.802)</p></td>
+<td><p>43.656 (1.017)</p></td>
+</tr>
+<tr class="row-even"><td><p>r</p></td>
+<td><p>2.000 (0.000)</p></td>
+<td><p>2.000 (1.000)</p></td>
+<td><p>13.000 (1.000)</p></td>
+<td><p>13.500 (1.000)</p></td>
+<td><p>44.000 (0.750)</p></td>
+<td><p>45.000 (1.500)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lua</p></td>
+<td><p>1.433 (0.105)</p></td>
+<td><p>1.619 (0.077)</p></td>
+<td><p>12.719 (0.103)</p></td>
+<td><p>12.616 (0.098)</p></td>
+<td><p>43.134 (1.148)</p></td>
+<td><p>42.844 (0.579)</p></td>
+</tr>
+<tr class="row-even"><td><p>ovito</p></td>
+<td><p>0.931 (0.185)</p></td>
+<td><p>0.770 (0.322)</p></td>
+<td><p>3.430 (0.099)</p></td>
+<td><p>3.374 (0.099)</p></td>
+<td><p>10.412 (0.095)</p></td>
+<td><p>10.792 (0.366)</p></td>
+</tr>
+</tbody>
+</table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">benchmarks/binding-overhead.csv</span></code> is the summary. The sample log is written beside the generated cells and is not stored in git. <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">scripts/bench_binding_overhead.py</span></code> repeats the session. The Snakemake rule <code class="docutils literal notranslate"><span class="pre">binding_overhead</span></code> calls that script.</p>
+</section>
+<section id="knn">
+<h3>knn<a class="headerlink" href="#knn" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>binding</p></th>
+<th class="head"><p>4096 mol, 1 thr</p></th>
+<th class="head"><p>4096 mol, 8 thr</p></th>
+<th class="head"><p>32768 mol, 1 thr</p></th>
+<th class="head"><p>32768 mol, 8 thr</p></th>
+<th class="head"><p>110592 mol, 1 thr</p></th>
+<th class="head"><p>110592 mol, 8 thr</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>1.514 (0.079)</p></td>
+<td><p>27.743 (10.310)</p></td>
+<td><p>11.037 (1.037)</p></td>
+<td><p>40.923 (7.282)</p></td>
+<td><p>34.649 (1.164)</p></td>
+<td><p>87.766 (0.503)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cxx</p></td>
+<td><p>1.417 (0.074)</p></td>
+<td><p>26.379 (5.515)</p></td>
+<td><p>10.580 (0.506)</p></td>
+<td><p>37.441 (6.457)</p></td>
+<td><p>34.709 (1.824)</p></td>
+<td><p>87.613 (0.335)</p></td>
+</tr>
+<tr class="row-even"><td><p>rust</p></td>
+<td><p>1.671 (0.555)</p></td>
+<td><p>26.074 (3.756)</p></td>
+<td><p>10.453 (0.475)</p></td>
+<td><p>39.154 (3.668)</p></td>
+<td><p>35.537 (1.000)</p></td>
+<td><p>88.082 (2.917)</p></td>
+</tr>
+<tr class="row-odd"><td><p>fortran</p></td>
+<td><p>1.471 (0.320)</p></td>
+<td><p>26.048 (5.748)</p></td>
+<td><p>10.806 (0.314)</p></td>
+<td><p>41.825 (7.451)</p></td>
+<td><p>34.847 (1.498)</p></td>
+<td><p>87.630 (0.269)</p></td>
+</tr>
+<tr class="row-even"><td><p>python</p></td>
+<td><p>1.503 (0.168)</p></td>
+<td><p>24.730 (7.606)</p></td>
+<td><p>10.168 (0.306)</p></td>
+<td><p>37.780 (4.181)</p></td>
+<td><p>34.388 (0.540)</p></td>
+<td><p>87.690 (0.416)</p></td>
+</tr>
+<tr class="row-odd"><td><p>julia</p></td>
+<td><p>1.646 (0.327)</p></td>
+<td><p>26.186 (6.041)</p></td>
+<td><p>10.453 (0.338)</p></td>
+<td><p>37.962 (5.320)</p></td>
+<td><p>34.650 (1.018)</p></td>
+<td><p>87.674 (0.354)</p></td>
+</tr>
+<tr class="row-even"><td><p>r</p></td>
+<td><p>1.000 (1.000)</p></td>
+<td><p>25.000 (4.000)</p></td>
+<td><p>11.000 (0.000)</p></td>
+<td><p>34.500 (5.750)</p></td>
+<td><p>35.500 (1.000)</p></td>
+<td><p>87.000 (0.250)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lua</p></td>
+<td><p>1.584 (0.310)</p></td>
+<td><p>22.932 (6.993)</p></td>
+<td><p>9.941 (0.256)</p></td>
+<td><p>35.865 (8.944)</p></td>
+<td><p>33.749 (0.511)</p></td>
+<td><p>87.746 (0.221)</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>3.816 (0.118)</p></td>
+<td><p>0.971 (0.075)</p></td>
+<td><p>30.398 (0.793)</p></td>
+<td><p>7.711 (0.173)</p></td>
+<td><p>115.737 (2.468)</p></td>
+<td><p>28.924 (0.704)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ovito</p></td>
+<td><p>4.855 (0.130)</p></td>
+<td><p>3.803 (0.118)</p></td>
+<td><p>28.731 (0.191)</p></td>
+<td><p>6.271 (2.759)</p></td>
+<td><p>111.893 (0.967)</p></td>
+<td><p>25.452 (0.290)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="q6">
+<h3>q6<a class="headerlink" href="#q6" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>binding</p></th>
+<th class="head"><p>4096 mol, 1 thr</p></th>
+<th class="head"><p>4096 mol, 8 thr</p></th>
+<th class="head"><p>32768 mol, 1 thr</p></th>
+<th class="head"><p>32768 mol, 8 thr</p></th>
+<th class="head"><p>110592 mol, 1 thr</p></th>
+<th class="head"><p>110592 mol, 8 thr</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>0.950 (0.065)</p></td>
+<td><p>0.550 (0.038)</p></td>
+<td><p>9.065 (0.103)</p></td>
+<td><p>278.258 (5.256)</p></td>
+<td><p>31.822 (0.170)</p></td>
+<td><p>294.849 (4.382)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cxx</p></td>
+<td><p>0.950 (0.038)</p></td>
+<td><p>0.630 (0.014)</p></td>
+<td><p>9.198 (0.075)</p></td>
+<td><p>277.243 (7.035)</p></td>
+<td><p>32.071 (0.236)</p></td>
+<td><p>293.159 (4.447)</p></td>
+</tr>
+<tr class="row-even"><td><p>rust</p></td>
+<td><p>0.977 (0.036)</p></td>
+<td><p>0.590 (0.089)</p></td>
+<td><p>9.093 (0.117)</p></td>
+<td><p>290.282 (8.931)</p></td>
+<td><p>32.849 (0.383)</p></td>
+<td><p>305.443 (9.056)</p></td>
+</tr>
+<tr class="row-odd"><td><p>fortran</p></td>
+<td><p>0.993 (0.050)</p></td>
+<td><p>0.548 (0.018)</p></td>
+<td><p>9.590 (0.142)</p></td>
+<td><p>275.684 (3.985)</p></td>
+<td><p>32.046 (0.311)</p></td>
+<td><p>292.669 (5.437)</p></td>
+</tr>
+<tr class="row-even"><td><p>python</p></td>
+<td><p>1.074 (0.038)</p></td>
+<td><p>0.591 (0.012)</p></td>
+<td><p>9.518 (0.126)</p></td>
+<td><p>280.564 (4.839)</p></td>
+<td><p>33.806 (0.391)</p></td>
+<td><p>292.919 (4.287)</p></td>
+</tr>
+<tr class="row-odd"><td><p>julia</p></td>
+<td><p>1.089 (0.032)</p></td>
+<td><p>0.586 (0.039)</p></td>
+<td><p>9.403 (0.242)</p></td>
+<td><p>276.384 (5.361)</p></td>
+<td><p>32.778 (0.667)</p></td>
+<td><p>290.929 (3.464)</p></td>
+</tr>
+<tr class="row-even"><td><p>r</p></td>
+<td><p>1.000 (0.000)</p></td>
+<td><p>1.000 (0.000)</p></td>
+<td><p>9.500 (1.000)</p></td>
+<td><p>281.000 (9.250)</p></td>
+<td><p>32.500 (1.000)</p></td>
+<td><p>298.000 (7.250)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lua</p></td>
+<td><p>0.997 (0.024)</p></td>
+<td><p>0.605 (0.016)</p></td>
+<td><p>9.421 (0.096)</p></td>
+<td><p>276.478 (8.887)</p></td>
+<td><p>33.288 (0.280)</p></td>
+<td><p>299.717 (3.706)</p></td>
+</tr>
+<tr class="row-even"><td><p>freud</p></td>
+<td><p>15.445 (0.538)</p></td>
+<td><p>2.370 (0.110)</p></td>
+<td><p>117.509 (0.663)</p></td>
+<td><p>19.127 (0.680)</p></td>
+<td><p>420.061 (3.630)</p></td>
+<td><p>69.442 (2.957)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ovito</p></td>
+<td><p>4.420 (0.170)</p></td>
+<td><p>2.902 (0.119)</p></td>
+<td><p>25.406 (0.153)</p></td>
+<td><p>13.486 (4.197)</p></td>
+<td><p>101.413 (0.776)</p></td>
+<td><p>49.343 (20.923)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="chill">
+<h3>CHILL<a class="headerlink" href="#chill" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>binding</p></th>
+<th class="head"><p>4096 mol, 1 thr</p></th>
+<th class="head"><p>4096 mol, 8 thr</p></th>
+<th class="head"><p>32768 mol, 1 thr</p></th>
+<th class="head"><p>32768 mol, 8 thr</p></th>
+<th class="head"><p>110592 mol, 1 thr</p></th>
+<th class="head"><p>110592 mol, 8 thr</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>2.545 (0.599)</p></td>
+<td><p>215.612 (13.410)</p></td>
+<td><p>15.028 (0.144)</p></td>
+<td><p>281.844 (8.804)</p></td>
+<td><p>50.706 (0.660)</p></td>
+<td><p>307.791 (3.955)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cxx</p></td>
+<td><p>2.022 (0.175)</p></td>
+<td><p>216.275 (12.959)</p></td>
+<td><p>15.311 (0.533)</p></td>
+<td><p>282.941 (4.131)</p></td>
+<td><p>51.169 (0.729)</p></td>
+<td><p>309.498 (3.983)</p></td>
+</tr>
+<tr class="row-even"><td><p>rust</p></td>
+<td><p>2.136 (0.631)</p></td>
+<td><p>226.970 (8.981)</p></td>
+<td><p>15.115 (0.347)</p></td>
+<td><p>292.174 (9.213)</p></td>
+<td><p>51.398 (0.779)</p></td>
+<td><p>307.757 (1.419)</p></td>
+</tr>
+<tr class="row-odd"><td><p>fortran</p></td>
+<td><p>2.209 (0.468)</p></td>
+<td><p>216.502 (11.087)</p></td>
+<td><p>15.389 (0.335)</p></td>
+<td><p>278.995 (5.726)</p></td>
+<td><p>50.230 (0.397)</p></td>
+<td><p>306.692 (3.310)</p></td>
+</tr>
+<tr class="row-even"><td><p>python</p></td>
+<td><p>2.078 (0.448)</p></td>
+<td><p>218.109 (12.232)</p></td>
+<td><p>14.914 (0.396)</p></td>
+<td><p>278.877 (9.074)</p></td>
+<td><p>50.560 (0.435)</p></td>
+<td><p>307.498 (0.622)</p></td>
+</tr>
+<tr class="row-odd"><td><p>julia</p></td>
+<td><p>2.182 (0.983)</p></td>
+<td><p>217.869 (11.820)</p></td>
+<td><p>15.247 (0.396)</p></td>
+<td><p>278.677 (2.682)</p></td>
+<td><p>48.838 (0.491)</p></td>
+<td><p>309.555 (3.159)</p></td>
+</tr>
+<tr class="row-even"><td><p>r</p></td>
+<td><p>2.500 (1.000)</p></td>
+<td><p>212.000 (13.750)</p></td>
+<td><p>15.000 (1.000)</p></td>
+<td><p>281.000 (4.250)</p></td>
+<td><p>49.500 (1.250)</p></td>
+<td><p>310.500 (4.000)</p></td>
+</tr>
+<tr class="row-odd"><td><p>lua</p></td>
+<td><p>2.055 (0.272)</p></td>
+<td><p>218.213 (6.988)</p></td>
+<td><p>14.900 (0.170)</p></td>
+<td><p>281.558 (4.855)</p></td>
+<td><p>49.876 (0.791)</p></td>
+<td><p>307.628 (0.315)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="rings">
+<h3>rings<a class="headerlink" href="#rings" title="Link to this heading">¶</a></h3>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>binding</p></th>
+<th class="head"><p>4096 mol, 1 thr</p></th>
+<th class="head"><p>4096 mol, 8 thr</p></th>
+<th class="head"><p>32768 mol, 1 thr</p></th>
+<th class="head"><p>32768 mol, 8 thr</p></th>
+<th class="head"><p>110592 mol, 1 thr</p></th>
+<th class="head"><p>110592 mol, 8 thr</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>c</p></td>
+<td><p>991.813 (24.299)</p></td>
+<td><p>1561.161 (15.766)</p></td>
+<td><p>65237.213 (2485.686)</p></td>
+<td><p>62041.600 (202.918)</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>cxx</p></td>
+<td><p>993.822 (2.624)</p></td>
+<td><p>1559.290 (5.610)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>rust</p></td>
+<td><p>996.532 (5.895)</p></td>
+<td><p>1558.758 (17.700)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>fortran</p></td>
+<td><p>989.092 (2.912)</p></td>
+<td><p>1554.381 (15.306)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>python</p></td>
+<td><p>1344.104 (4.591)</p></td>
+<td><p>1909.255 (9.019)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>julia</p></td>
+<td><p>992.607 (5.326)</p></td>
+<td><p>1553.860 (10.599)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>r</p></td>
+<td><p>994.500 (4.750)</p></td>
+<td><p>1549.500 (3.750)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>lua</p></td>
+<td><p>1002.424 (18.117)</p></td>
+<td><p>1552.125 (5.559)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ovito</p></td>
+<td><p>20.977 (0.993)</p></td>
+<td><p>19.223 (0.599)</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -782,16 +1064,16 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="performance-overview.html">
+    <a href="architecture.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">Performance overview</div></div>
+        <span>Previous</span><div class="title">Architecture</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="performance-range.html">
+    <a href="c-api.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">Performance, 4096 to 110592</div>
+        <div class="title">The C API</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

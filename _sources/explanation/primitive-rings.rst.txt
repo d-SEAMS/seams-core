@@ -38,22 +38,24 @@ The full graph has the path ``1-0-4``, so the distance is 2. The ring
 distance is 3, and the hexagon is not primitive. The two pentagons
 ``0-1-2-3-4`` and ``0-1-6-5-4`` are primitive. A chordless search keeps the
 hexagon as well, because no edge joins two non-consecutive vertices of
-the hexagon. The primitive search, and OVITO FindRings on this bond
-list, both reject the hexagon and keep the pentagons.
+the hexagon. The primitive search rejects the hexagon and keeps the
+pentagons.
 
-``tests/test_ring_hop.cpp`` is that fixture. A depth-10 census is the
-primitive set. OVITO FindRings is a subset of it; the K2,3 counterexample
-is on `Primitive rings and OVITO FindRings <ovito-findrings.rst>`_.
+The same search matches an
+independent enumeration of the primitive cycles. Where
+``FindRings`` drops a primitive ring, the K2,3 counterexample is on
+`Primitive rings and OVITO FindRings <ovito-findrings.rst>`_.
 
 The shortest-path statement
 ---------------------------
 
 Yuan and Cormack (Comput. Mater. Sci. 24, 343, 2002) build each ring
-from shortest paths. Let :math:`D` be the largest size sought and write
-:math:`L = \lfloor D/2 \rfloor`. A ring of even size :math:`2L` is a source
-plus two vertex-disjoint shortest paths to one vertex at level :math:`L`.
-A ring of odd size :math:`2L+1` closes on an edge that joins two vertices
-both at level :math:`L`.
+from shortest paths. A ring of even size :math:`2L` is a source plus two
+vertex-disjoint shortest paths to one vertex at level :math:`L`. A ring of
+odd size :math:`2L+1` closes on an edge that joins two vertices both at
+level :math:`L`. The search builds those candidates only up to the largest
+size requested. In the code that limit is ``maxDepth``, and the breadth-first
+walk stops at level ``maxDepth / 2``.
 
 Franzblau's filter then drops a candidate when any pair of its members
 is closer through the graph than along the ring. For a cycle

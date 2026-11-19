@@ -2,10 +2,8 @@ Language APIs
 =============
 
 seams-core documents the C API and the C++ front here. Every other
-language binding is its own repository with its own documentation,
-tests and releases. Each one links ``libseams`` and ``libseams_lang``
-from this repository and is released after the seams-core tag with the
-same version.
+language binding is its own package with its own documentation.
+Each one links ``libseams`` or ``libseams_lang``.
 
 .. list-table::
    :header-rows: 1
@@ -27,10 +25,10 @@ same version.
      - ``dseams-sys``, ``dseams``
    * - Fortran
      - `d-SEAMS/dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_
-     - fpm ``dseams``
+     - fpm Git dependency ``dseams``
    * - Lua, Fennel
      - `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
-     - LuaRocks ``dseams``
+     - Git source; ``require("dseams")``
 
 .. toctree::
    :maxdepth: 1
