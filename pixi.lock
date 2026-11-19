@@ -2,7 +2,7 @@ version: 7
 platforms:
 - name: linux-64
   virtual-packages:
-  - __unix=0
+  - __unix=0=0
   - __linux=4.18
   - __glibc=2.28
   - __archspec=0=x86_64
@@ -10,17 +10,17 @@ platforms:
   subdir: linux-64
   virtual-packages:
   - __glibc=2.39
-  - __unix=0
+  - __unix=0=0
   - __linux=4.18
   - __archspec=0=x86_64
 - name: osx-64
   virtual-packages:
-  - __unix=0
+  - __unix=0=0
   - __osx=13.0
   - __archspec=0=x86_64
 - name: osx-arm64
   virtual-packages:
-  - __unix=0
+  - __unix=0=0
   - __osx=13.0
   - __archspec=0=m1
 environments:
@@ -953,6 +953,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.15.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wheel-0.46.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/xlsxwriter-3.2.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/_openmp_mutex-4.5-7_kmp_llvm.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/bzip2-1.0.8-h500dc9f_9.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/c-compiler-1.11.0-h7a00415_0.conda
@@ -981,7 +982,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/gmp-6.3.0-h65442b7_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/icu-78.2-h14c5de8_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/isl-0.26-imath32_h2e86a7b_101.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-64/lcov-1.16-h694c41f_0.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/lcov-2.5-h8822bef_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ld64-956.6-llvm19_1_hc3792c1_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/ld64_osx-64-956.6-llvm19_1_hcae3351_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/libblas-3.11.0-5_he492b99_openblas.conda
@@ -1016,6 +1017,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-64/numpy-2.4.3-py312h746d82c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/openssl-3.6.1-hb6871ef_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/perl-5.32.1-7_h10d778d_perl5.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/perl-capture-tiny-0.48-pl5321h694c41f_1.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/osx-64/perl-devel-stacktrace-2.04-pl5321h4c411aa_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/pkg-config-0.29.2-hf7e621a_1009.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/python-3.12.13-ha9537fe_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-64/readline-8.3-h68b038d_0.conda
@@ -1115,6 +1118,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.15.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wheel-0.46.3-pyhd8ed1ab_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/xlsxwriter-3.2.9-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/_openmp_mutex-4.5-7_kmp_llvm.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/bzip2-1.0.8-hd037594_9.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/c-compiler-1.11.0-h61f9b84_0.conda
@@ -1143,7 +1147,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/gmp-6.3.0-hf5e55b1_3.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/icu-78.2-hef89b57_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/isl-0.26-imath32_h347afa1_101.conda
-      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/lcov-1.16-hce30654_0.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/lcov-2.5-h820172f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ld64-956.6-llvm19_1_he86490a_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ld64_osx-arm64-956.6-llvm19_1_ha2625f7_4.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/libblas-3.11.0-5_h51639a9_openblas.conda
@@ -1181,6 +1185,8 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/openssl-3.6.1-hd24854e_1.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pcre2-10.47-h30297fc_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/perl-5.32.1-7_h4614cfb_perl5.conda
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/perl-capture-tiny-0.48-pl5321hce30654_1.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/osx-arm64/perl-devel-stacktrace-2.04-pl5321ha040cf9_0.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pkg-config-0.29.2-hde07d2e_1009.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/python-3.12.13-h8561d8f_0_cpython.conda
       - conda: https://conda.anaconda.org/conda-forge/osx-arm64/readline-8.3-h46df422_0.conda
@@ -14251,16 +14257,21 @@ packages:
   purls: []
   size: 894410
   timestamp: 1680649639107
-- conda: https://conda.anaconda.org/conda-forge/osx-64/lcov-1.16-h694c41f_0.tar.bz2
-  sha256: 5c1b6de14584774b88001913a971467d96b9d33a22dc2454dc2be85117cfb0c0
-  md5: 1e25a3c9beb93b2361ded17911cd3c0c
+- conda: https://conda.anaconda.org/conda-forge/osx-64/lcov-2.5-h8822bef_0.conda
+  sha256: c72b768c93f09b856338f89ecf649e1e3567fc85b9e14e5838bf33cd1b0b8737
+  md5: b649d5d45bbfba3878224af0e6a8d6d1
   depends:
   - perl 5.*
+  - python
+  - xlsxwriter
+  - perl-capture-tiny
+  - perl-devel-stacktrace
   license: GPL-2.0-or-later
-  license_family: GPL-2
+  license_family: GPL
   purls: []
-  size: 98510
-  timestamp: 1664797342314
+  run_exports: {}
+  size: 3107117
+  timestamp: 1787643805168
 - conda: https://conda.anaconda.org/conda-forge/osx-64/ld64-956.6-llvm19_1_hc3792c1_4.conda
   sha256: 6f821c4c6a19722162ef2905c45e0f8034544dab70bb86c647fb4e022a9c27b4
   md5: 4d51a4b9f959c1fac780645b9d480a82
@@ -14696,6 +14707,28 @@ packages:
   purls: []
   size: 12334471
   timestamp: 1703311001432
+- conda: https://conda.anaconda.org/conda-forge/osx-64/perl-capture-tiny-0.48-pl5321h694c41f_1.tar.bz2
+  sha256: f6110871238b099c802715da71777ba97c8acbb7fed6fd489b4561af70dfcfb6
+  md5: 6c656405cbf99f5ee247b2d32fe1a89e
+  depends:
+  - perl >=5.32.1,<5.33.0a0 *_perl5
+  license: Artistic-2.0
+  purls: []
+  run_exports: {}
+  size: 16506
+  timestamp: 1643301591370
+- conda: https://conda.anaconda.org/conda-forge/osx-64/perl-devel-stacktrace-2.04-pl5321h4c411aa_0.conda
+  sha256: 74ba99a8bd699ef92a48cea5af5edda10be3edbfacd6efc80a130285f4a81612
+  md5: 9231e9577f0a6c36bd10deff4cc450ac
+  depends:
+  - perl >=5.32.1,<5.33.0a0 *_perl5
+  license: Artistic-2.0
+  purls: []
+  run_exports:
+    weak:
+    - perl-devel-stacktrace =2.04
+  size: 20124
+  timestamp: 1745394649216
 - conda: https://conda.anaconda.org/conda-forge/osx-64/pkg-config-0.29.2-hf7e621a_1009.conda
   sha256: 636122606556b651ad4d0ac60c7ab6b379e98f390359a1f0c05ad6ba6fb3837f
   md5: 0b1b9f9e420e4a0e40879b61f94ae646
@@ -15214,16 +15247,21 @@ packages:
   purls: []
   size: 819937
   timestamp: 1680649567633
-- conda: https://conda.anaconda.org/conda-forge/osx-arm64/lcov-1.16-hce30654_0.tar.bz2
-  sha256: 00819f6f9540e2581cbc64befeeeebd97f514ebf748f3d83ad28e6dceca438b6
-  md5: 1ac9bafe4c9b48c70a159a9c9501511e
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/lcov-2.5-h820172f_0.conda
+  sha256: 08318c761074701ff6e7a26d7ac47a0b97ebc217d10c3735a0acdfdb6adb3a12
+  md5: 56edf799c55b9d6f06788c353932b26f
   depends:
   - perl 5.*
+  - python
+  - xlsxwriter
+  - perl-capture-tiny
+  - perl-devel-stacktrace
   license: GPL-2.0-or-later
-  license_family: GPL-2
+  license_family: GPL
   purls: []
-  size: 98707
-  timestamp: 1664797316218
+  run_exports: {}
+  size: 3107132
+  timestamp: 1787643693949
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/ld64-956.6-llvm19_1_he86490a_4.conda
   sha256: d6197b4825ece12ab63097bd677294126439a1a6222c7098885aa23464ef280c
   md5: 22eb76f8d98f4d3b8319d40bda9174de
@@ -15699,6 +15737,28 @@ packages:
   purls: []
   size: 14439531
   timestamp: 1703311335652
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/perl-capture-tiny-0.48-pl5321hce30654_1.tar.bz2
+  sha256: 16bd59b9fd3dcd7f54c70844d6227c4811b317ac4530d48b48f4f8374277cb72
+  md5: aa3af199b5675fa543e985c7e5d2e625
+  depends:
+  - perl >=5.32.1,<5.33.0a0 *_perl5
+  license: Artistic-2.0
+  purls: []
+  run_exports: {}
+  size: 16478
+  timestamp: 1655720247857
+- conda: https://conda.anaconda.org/conda-forge/osx-arm64/perl-devel-stacktrace-2.04-pl5321ha040cf9_0.conda
+  sha256: b963b564b2f8004ff978a96165f5a9c5249eec382ded5aeae7b26a45eee8e575
+  md5: 850d67c0aac1222d3b67dc0164ba051d
+  depends:
+  - perl >=5.32.1,<5.33.0a0 *_perl5
+  license: Artistic-2.0
+  purls: []
+  run_exports:
+    weak:
+    - perl-devel-stacktrace =2.04
+  size: 20146
+  timestamp: 1745394687575
 - conda: https://conda.anaconda.org/conda-forge/osx-arm64/pkg-config-0.29.2-hde07d2e_1009.conda
   sha256: d82f4655b2d67fe12eefe1a3eea4cd27d33fa41dbc5e9aeab5fd6d3d2c26f18a
   md5: b4f41e19a8c20184eec3aaf0f0953293
