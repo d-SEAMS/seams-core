@@ -75,12 +75,12 @@ SRCS=(
 OBJS=()
 for src in "${SRCS[@]}"; do
   obj=$BUILD/${src%.cpp}.o
-  "$CXX" -std=c++17 -O2 -I"$TREE/src/include/internal" -I"$TREE/src/include/external" \
+  "$CXX" -std=c++17 -O2 -I"$TREE/src/include/internal" \
     -c "$TREE/src/$src" -o "$obj"
   OBJS+=("$obj")
 done
 echo "baseline compiler: $CXX" >&2
-"$CXX" -std=c++17 -O2 -I"$TREE/src/include/internal" -I"$TREE/src/include/external" \
+"$CXX" -std=c++17 -O2 -I"$TREE/src/include/internal" \
   -o "$BUILD/baseline_dseams1" "$SCRIPT_DIR/baseline_dseams1.cpp" "${OBJS[@]}" \
   -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm
 
