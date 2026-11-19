@@ -36,7 +36,7 @@ and versioned 2.14.0:
 | Python | PydSEAMSlib (~pydseams~) and the supplied ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
 | Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source, ~require("dseams")~ |
 | R | none | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ |
-| Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~, over ~libseams_jll~ |
+| Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~ |
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
 | Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ |
 

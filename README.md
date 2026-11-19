@@ -32,7 +32,7 @@ seams cages water.lammpstrj
 
 C and C++ are documented here, as are the GROMACS, LAMMPS, OpenMM, PLUMED
 and in-situ engine drivers. Each other language binding is its own
-repository, released with the same version against the seams-core tag:
+repository.
 
 The d-SEAMS PLUMED plugin v0.4.1 has a
 [PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/)
@@ -43,14 +43,11 @@ tested with PLUMED v2.10 and master.
 | Language | Repository | Package |
 |----------|------------|---------|
 | Python | [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) | `pydseamslib` on PyPI (`import dseams`, `import pydseams`) |
-| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | LuaRocks `dseams` (`require("dseams")`) |
+| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | Git source (`require("dseams")`) |
 | R | [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r) | `dseams` |
-| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams`, over `libseams_jll` |
+| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams` |
 | Rust | [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs) | crates `dseams-sys`, `dseams` |
 | Fortran | [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran) | fpm `dseams` |
-
-`docs/orgmode/development/repositories.org` says what lives where and how
-to develop seams-core and a binding together.
 
 Periodic k-nearest neighbour search is
 [linkcell](https://github.com/d-SEAMS/linkcell).
@@ -59,8 +56,6 @@ Build with `pixi run setup && pixi run build && pixi run test`, or with
 the Nix flake: `nix build` and `nix develop`.
 
 Released versions live in [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog).
-Unreleased notes are files under `changelog.d/`. The cut is
-`towncrier build --version X.Y.Z`.
 
 # Runtime configuration
 
@@ -129,9 +124,8 @@ The corresponding `bibtex` entry is:
 
 The live builds are `pixi` + meson, or the Nix flake. This repository
 builds `libyodaLib`, `libseams`, `libseams_lang`, and the `seams` CLI.
-The package it releases is conda-forge `libseams` (`recipe/`); the Julia
-`libseams_jll` is built from `packaging/yggdrasil`. The language packages
-(`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
+The language packages
+(`pydseamslib`, the crates, the fpm package, the R and
 Julia packages) are built and released by their own repositories, listed
 above. `docs/orgmode/getting-started/install.org` has every install line.
 

@@ -44,7 +44,7 @@ calls the 2.14.0 engine.
 | Python | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ | ~libseams~ (~import dseams~) and ~libseams_lang~ (~import pydseams~) |
 | Lua, Fennel | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source, ~require("dseams")~ | ~libseams~ |
 | R | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ | ~libseams_lang~ |
-| Julia | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | ~Dseams~ calls ~libseams_lang~. ~Seams~ calls ~libseams~. Both are distributed through ~libseams_jll~ |
+| Julia | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | ~Dseams~ calls ~libseams_lang~. ~Seams~ calls ~libseams~. |
 | Rust | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | ~dseams-sys~, ~dseams~ | ~libseams~ |
 | Fortran | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ | ~libseams~ |
 
