@@ -9,8 +9,7 @@ directed neighbour pairs, the primitive ring histogram for sizes 0
 through 6, and the nine CHILL+ label counts.
 
 The Python, R, Julia, Rust, Fortran and Lua bindings run the same three
-tasks in their own repositories, against the seams-core tag with the
-same version. :doc:`index` lists them.
+tasks in their own repositories. :doc:`index` lists them.
 
 .. toctree::
    :maxdepth: 1
