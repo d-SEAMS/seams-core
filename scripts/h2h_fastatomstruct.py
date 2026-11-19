@@ -31,12 +31,17 @@ def load_frame(path):
 def atoms_of(pos, side):
     elements = [fs.Element.O] * len(pos)
     cell = np.eye(3, dtype=np.float64) * side
-    return fs.Atoms(pos, cell, elements)
+    atoms = fs.Atoms(pos, cell, elements)
+    if hasattr(atoms, "set_pbc"):
+        atoms.set_pbc([True, True, True])
+    return atoms
 
 
 def run(path, operation, warmup, repeats, once, threads=1):
-    fs.disable_telemetry()
-    fs.suppress_telemetry_notice()
+    if hasattr(fs, "disable_telemetry"):
+        fs.disable_telemetry()
+    if hasattr(fs, "suppress_telemetry_notice"):
+        fs.suppress_telemetry_notice()
     fs.set_num_threads(threads)
     if fs.get_num_threads() != threads:
         raise RuntimeError(f"fastatomstruct threads {fs.get_num_threads()}")
