@@ -8,7 +8,7 @@ The Sphinx page is `docs/orgmode/explanation/symmetry.org`. This file is the sam
 
 A crystal oxygen is ice Ih (0), ice Ic (1), or stacking-disordered ice (2). Anything else is −1. Only those two diamond structures count as crystal when the same frame is scored with OVITO. The first-neighbour and second-neighbour tags from identify diamond are not crystal, and polyhedral template matching counts only cubic diamond and hexagonal diamond.
 
-The seventeen-atom shell is the central oxygen, its four nearest neighbours, and the twelve neighbours of those four. That is the shell polyhedral template matching uses for diamond (Larsen, Schmidt and Schiøtz, *Modeling and Simulation in Materials Science and Engineering* 24, 055007, 2016, [10.1088/0965-0393/24/5/055007](https://iopscience.iop.org/article/10.1088/0965-0393/24/5/055007)).
+The seventeen-atom shell is the central oxygen, its four nearest neighbours, and the twelve neighbours of those four. That is the shell polyhedral template matching uses for diamond (Larsen, Schmidt and Schiøtz, *Modeling and Simulation in Materials Science and Engineering* 24, 055007, 2016, DOI 10.1088/0965-0393/24/5/055007, [arXiv:1603.05143](https://arxiv.org/abs/1603.05143)).
 
 ## Neighbours
 
