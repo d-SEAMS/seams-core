@@ -33,7 +33,7 @@ meson setup build && meson compile -C build
 `pixi run setup && pixi run build` uses the locked toolchain and writes
 `./bbdir/seams`. `nix build` writes `./result/bin/seams`.
 
-Python is a separate package. Building this repository does not install it.
+Install the Python package separately:
 
 ```bash
 pip install pydseamslib
