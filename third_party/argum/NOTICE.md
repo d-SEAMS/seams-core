@@ -40,9 +40,9 @@ would silently drop all four.
 
 Given that, moving the file next to the code that uses it is more
 honest than wrapping a fork and carrying a patch to re-apply it forever
-(the pattern iralib_interf.h follows for the same reason, in
-`src/include/internal/`, since it has no upstream wrap or
-meson-buildable release either). This sits under `third_party/`
+(iralib_interf.h follows the same pattern, living in
+`src/include/internal/` since it too has no upstream wrap or
+meson-buildable release). This sits under `third_party/`
 instead of `src/include/internal/` so it stays out of
 `.clang-tidy`'s `HeaderFilterRegex` and Doxygen's `INPUT` the way
 `third_party/csm` already does: those enforce this project's own style
