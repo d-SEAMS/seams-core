@@ -129,8 +129,7 @@ The corresponding `bibtex` entry is:
 
 The live builds are `pixi` + meson, or the Nix flake. This repository
 builds `libyodaLib`, `libseams`, `libseams_lang`, and the `seams` CLI.
-The package it releases is conda-forge `libseams` (`recipe/`); the Julia
-`libseams_jll` is built from `packaging/yggdrasil`. The language packages
+The language packages
 (`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
 Julia packages) are built and released by their own repositories, listed
 above. `docs/orgmode/getting-started/install.org` has every install line.
