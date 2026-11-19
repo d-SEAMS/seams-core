@@ -2380,6 +2380,11 @@ def render_summary(rows, run_id=None) -> str:
         out.append("| system | molecules | arm | n | wall ms | x seams | A/A band | "
                    "peak MiB | delta MiB | cpu ms | threads | verdict |")
         out.append("|---|---|---|---|---|---|---|---|---|---|---|---|")
+        noisy = {
+            (c["workload"], c["system"])
+            for c in subset
+            if c["arm"] not in (REFERENCE, TWIN) and not single_compute(c)
+        }
         for c in subset:
             ref = next((x for x in subset
                         if x["system"] == c["system"] and x["arm"] == REFERENCE), None)
@@ -2388,7 +2393,7 @@ def render_summary(rows, run_id=None) -> str:
             ratio_text = (
                 f"{ratio:.2f}" if c.get("comparable", True) else "-"
             )
-            if ratio_text != "-" and c["arm"] not in (REFERENCE, TWIN) and not single_compute(c):
+            if ratio_text != "-" and (c["workload"], c["system"]) in noisy:
                 ratio_text += " (not single-thread)"
             band = c["aa"]
             band_text = (f"{band['min']:.3f}-{band['max']:.3f}" if band.get("n") else "-")
@@ -2529,7 +2534,8 @@ def render_summary(rows, run_id=None) -> str:
             )
         if unlabeled:
             out.append(
-                "- x seams marked not single-thread did not stay on one compute thread."
+                "- x seams is marked not single-thread on every arm of a cell whose "
+                "competitor did not stay on one compute thread."
             )
         for key, text in notes:
             out.append(f"- {key}: {text}")
