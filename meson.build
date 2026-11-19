@@ -1781,6 +1781,8 @@ if get_option('with_cli') and get_option('with_tests')
     env: binding_env,
     depends: [seams_api_lib],
     suite: 'docs',
+    # ASan makes the render CPU-bound; keep it from sharing the runner cores.
+    is_parallel: not get_option('b_sanitize').contains('address'),
     timeout: 180)
   test(
     'docs_engine_walkthrough',
