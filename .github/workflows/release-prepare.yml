@@ -52,10 +52,10 @@ jobs:
           cache: true
 
       - name: Version copies match meson.build
-        run: pixi run -e version version-drift
+        run: pixi run --frozen -e version version-drift
 
       - name: Towncrier draft
-        run: pixi run -e version towncrier-draft
+        run: pixi run --frozen -e version towncrier-draft
 
       - name: Install cocogitto
         run: |

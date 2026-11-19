@@ -6,22 +6,25 @@ The cut itself is [[file:release.org][release.org]].
 
 * Why the manylinux glibc 2.28 job exited 128
 
-PydSEAMSlib ~.github/workflows/build_wheels.yml~ builds the glibc 2.28
-wheels as manylinux_2_28. That job failed with git exit 128. Git 2.35 and
-later refuse a work tree whose owner is not the user running git. The
-runner owns the checkout, and the user inside the manylinux container is
-someone else, so git stops before it will read the tree.
+seams-core Release run 44409982519 built the Linux archive inside the
+~manylinux_2_28~ container. ~scripts/build_linux_release.sh~ ran as root
+and extracted the source archive with ~tar -xzf~. Tar retained the uid
+stored in the archive, so the extracted ~subprojects/readcon-core~ was
+not owned by the user running Git. Git 2.35 and later reject such a work
+tree as dubious and the release stopped with exit 128.
 
-The job has to mark the checkout, and the sdist tree cibuildwheel unpacks,
-as a safe directory before any git command:
+The build must assign extracted files to the container user and replace
+the dist copy before creating the pinned checkout:
 
 #+begin_example
-git config --global --add safe.directory "$GITHUB_WORKSPACE"
-git config --global --add safe.directory '*'
+tar --no-same-owner -C "$work/src" -xzf "$src_tar"
+rm -rf "$dest"
+git init "$dest"
 #+end_example
 
-A new tag does not fix an ownership check. The same tree fails again
-until ~safe.directory~ includes it.
+This is a seams-core source-archive ownership bug, not a PydSEAMSlib
+wheel-build failure. A global ~safe.directory~ exception would hide the
+ownership error rather than correct the archive build.
 
 * Why a starved queue is rebuilt from the tag that already exists
 
@@ -31,17 +34,17 @@ pull request runs. Then ~workflow_dispatch~ the workflow on the tag that
 is already cut, so that tag is rebuilt. Do not push another tag, and do
 not open another pull request, to get a runner.
 
-For the wheels, dispatch ~build_wheels.yml~ on the existing tag:
+For the seams-core release, dispatch ~release.yml~ with the existing tag:
 
 #+begin_example
-gh run list --workflow build_wheels.yml --status queued
+gh run list --workflow release.yml --status queued
 gh run cancel RUN_ID
-gh workflow run build_wheels.yml --ref v2.14.1
+gh workflow run release.yml -f tag=v2.14.1
 #+end_example
 
-For the engine package job, the same two steps on
-~.github/workflows/ci_packages.yml~. ~release.yml~ itself runs when the
-~v*~ tag is pushed. It is not how a starved wheel build is retried.
+The dispatch checks out that tag, validates its version, and uses the tag
+name for the concurrency group and GitHub release. A tag push remains the
+normal trigger; dispatch is the rebuild path and does not create a tag.
 
 * Why live registry checks stay out of meson test
 
@@ -50,6 +53,6 @@ A lookup of PyPI, conda-forge, crates.io or CRAN does not belong in
 package that is not published yet, fails or hangs the test, and the
 release sits in the queue behind it.
 
-Those checks stay in their own job. ~pixi r -e version version-drift~
-reads the git checkout. It does not talk to a registry, and it is the
-prek hook, not a meson test.
+Those checks stay in their own job.
+~pixi run --frozen -e version version-drift~ reads the git checkout. It
+does not talk to a registry, and it is the prek hook, not a meson test.

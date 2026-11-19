@@ -1,6 +1,7 @@
 pixi.toml
 towncrier.toml
 CITATION.cff
+codemeta.json
 nix/package.nix
 recipe/recipe.yaml
 docs/source/conf.py
