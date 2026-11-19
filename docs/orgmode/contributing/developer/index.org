@@ -23,9 +23,9 @@ meson test -C bbdir
 
 * The version environment
 
-cogapp regenerates the version copies. It has its own pixi environment,
-because the cogapp wheel installs a ~cog~ script that would shadow
-cocogitto.
+Meson rewrites the source version and cogapp regenerates the copies. These
+tools have their own pixi environment, because the cogapp wheel installs a
+~cog~ script that would shadow cocogitto.
 
 | Task | Environment | What it does |
 | release-cog | version | Rewrite every path in ~ci/version/files.txt~ from ~meson.build~ |

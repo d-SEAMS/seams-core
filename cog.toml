@@ -9,6 +9,7 @@ tag_prefix = "v"
 skip_untracked = false
 
 pre_bump_hooks = [
+  "meson rewrite kwargs set project / version {{version}}",
   "python3 -m cogapp -I ci/version -r @ci/version/files.txt",
   "towncrier build --yes --version {{version}}",
 ]

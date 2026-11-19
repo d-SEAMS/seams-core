@@ -1,9 +1,9 @@
 #+TITLE: Cutting a seams-core release
 #+OPTIONS: toc:nil num:nil
 
-The numbered seams-core release cut. ~meson.build~ is the one place a
-person writes the version. Everything else in ~ci/version/files.txt~ is a
-cogapp copy. The tag prefix in ~cog.toml~ is ~v~.
+The numbered seams-core release cut. ~meson.build~ is the version source.
+Everything in ~ci/version/files.txt~ is a cogapp copy. The tag prefix in
+~cog.toml~ is ~v~.
 
 * One version, then the copies
 
@@ -12,22 +12,19 @@ cogapp copy. The tag prefix in ~cog.toml~ is ~v~.
 copies. ~pixi run --frozen -e version version-drift~ fails if a copy has
 drifted. The prek hook ~version-drift~ runs that check.
 
-Do not edit a copy by hand. Change ~meson.build~, then run ~release-cog~.
+Do not edit a copy by hand. Cocogitto changes ~meson.build~ with Meson's
+rewriter before cogapp regenerates the copies.
 
 * The cut
 
 Work on ~main~, with the fragments for this version already in
 ~changelog.d/~.
 
-1. Set the next version in ~meson.build~ and the release date in
-   ~CITATION.cff~ and ~codemeta.json~, regenerate every copy, and commit
-   that prepared state.
+1. Set the release date in ~CITATION.cff~ and ~codemeta.json~.
 
    #+begin_example
-   pixi run --frozen -e version release-cog
-   pixi run --frozen -e version version-drift
-   git add -u
-   git commit -m "chore(release): prepare 2.14.2 metadata"
+   git add CITATION.cff codemeta.json
+   git commit -m "chore(release): set publication date"
    #+end_example
 
 2. Preview the notes and validate the fragment names.
@@ -53,10 +50,10 @@ Work on ~main~, with the fragments for this version already in
    That prints ~v2.14.2~. Asking for 2.14.1 would be a no-op because
    ~v2.14.1~ already exists.
 
-4. Run the bump from an environment that provides cogapp and towncrier.
-   The two pre-bump hooks regenerate ~ci/version/files.txt~ and run plain
-   ~towncrier build~. Cocogitto commits the rendered changelog and creates
-   the annotated tag.
+4. Run the bump from an environment that provides Meson, cogapp, and
+   towncrier. The pre-bump hooks use Meson's rewriter to set the source
+   version, regenerate ~ci/version/files.txt~, and run plain towncrier.
+   Cocogitto commits the rendered changelog and creates the annotated tag.
 
    #+begin_example
    cog bump --version 2.14.2
@@ -105,7 +102,9 @@ Branch from the tag, add a ~fix:~ commit and a fragment, and
 Cogapp replaces the version-copy assertions in
 ~scripts/check_release_version.py~. That checker remains for the release
 heading, date, and tag assertions that cogapp does not cover. Plain
-towncrier replaces ~docs/check_towncrier.py~ and
-~docs/check_changelog.py~.
+towncrier replaces the release rendering in ~docs/check_towncrier.py~ and
+~docs/check_changelog.py~. Duplicate fragment bodies, every misnamed
+fragment, and hand-added duplicate release headings remain outside its
+native checks.
 ~.github/workflows/release-prepare.yml~ is the dry-run on a pull request
 and on ~workflow_dispatch~.

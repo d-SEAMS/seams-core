@@ -7,9 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-# [[[cog import seams_version as v; cog.outl(f"  version: '{v.VERSION}',")]]]
 version: '2.14.0',
-# [[[end]]]
   default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
