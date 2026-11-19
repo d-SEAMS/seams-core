@@ -38,3 +38,32 @@ rule engines_e2e:
         "data/engines-e2e.csv",
     shell:
         "python3 scripts/engines_e2e.py table {input} --out {output}"
+
+
+# Ideal ice Ic, cutoff 3.5 A, King's shortest-path rings and q_6.
+# One core, twenty rounds, no pre-warm. FAS_SEAMS_PYTHON, FAS220_PYTHON
+# and FAS230_PYTHON select the interpreters.
+rule fas230_samples:
+    input:
+        "scripts/h2h_fas230.py",
+        "scripts/h2h_fas230_summary.py",
+        "scripts/h2h_fastatomstruct.py",
+        "scripts/h2h_watch.py",
+        "scripts/h2h_protocol.py",
+        "scripts/release_build.py",
+    output:
+        "benchmarks/fas230-samples.csv",
+        "benchmarks/fas230-lscpu.txt",
+    shell:
+        "\"${{FAS_SEAMS_PYTHON:-python3}}\" scripts/h2h_fas230.py "
+        "--samples {output[0]} --lscpu {output[1]}"
+
+
+rule fas230_summary:
+    input:
+        samples="benchmarks/fas230-samples.csv",
+        script="scripts/h2h_fas230_summary.py",
+    output:
+        "benchmarks/fas230-summary.csv",
+    shell:
+        "python3 {input.script} --samples {input.samples} --summary {output}"

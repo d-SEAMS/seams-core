@@ -128,3 +128,51 @@ class Rc3Sitting:
 Rc3Sitting.time_call.repeat = 1
 Rc3Sitting.time_call.number = 1
 Rc3Sitting.time_call.warmup_time = 0
+
+
+# One call per arm. The twenty-round medians are the Snakemake rule
+# fas230_samples, which runs scripts/h2h_fas230.py. FAS220_PYTHON and
+# FAS230_PYTHON select the two fastatomstruct builds. FAS_SEAMS_PYTHON
+# loads libseams_lang.
+class Fastatomstruct230:
+    params = [["seams", "fas220", "fas230"], ["rings", "q6"], [1000, 10648, 110592]]
+    param_names = ["arm", "operation", "molecules"]
+
+    def setup(self, arm, operation, molecules):
+        import sys
+        import numpy as np
+        sys_path = str(ROOT / "scripts")
+        if sys_path not in sys.path:
+            sys.path.insert(0, sys_path)
+        import h2h_protocol as proto
+        repetitions = {1000: 5, 10648: 11, 110592: 24}[molecules]
+        pos, side = proto.ice_ic(repetitions)
+        frame = ROOT / "bbdir" / "fas230-asv" / f"ic-{molecules}.npz"
+        frame.parent.mkdir(parents=True, exist_ok=True)
+        if not frame.is_file():
+            np.savez(frame, positions=np.ascontiguousarray(pos), side=np.float64(side))
+        if arm == "seams":
+            python = os.environ.get("FAS_SEAMS_PYTHON", PY)
+            self.cmd = [
+                "taskset", "-c", "0", python, str(ROOT / "scripts" / "h2h_watch.py"),
+                "--worker", "--lib", LIB, "--frame", str(frame),
+                "--operation", operation, "--warmup", "0", "--repeats", "1",
+            ]
+        else:
+            key = "FAS230_PYTHON" if arm == "fas230" else "FAS220_PYTHON"
+            python = os.environ.get(key, "")
+            if not python:
+                raise NotImplementedError(f"{key} selects the fastatomstruct interpreter")
+            self.cmd = [
+                "taskset", "-c", "0", python, str(ROOT / "scripts" / "h2h_fastatomstruct.py"),
+                "--frame", str(frame), "--operation", operation,
+                "--warmup", "0", "--repeats", "1", "--threads", "1",
+            ]
+
+    def time_call(self, arm, operation, molecules):
+        _run(self.cmd)
+
+
+Fastatomstruct230.time_call.repeat = 1
+Fastatomstruct230.time_call.number = 1
+Fastatomstruct230.time_call.warmup_time = 0

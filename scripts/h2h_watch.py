@@ -158,6 +158,9 @@ def worker(args):
         "molecules": int(n),
         "samples_ms": samples,
         "cpus": proto.cpus_allowed(),
+        "warmup": int(args.warmup),
+        "periodic": True,
+        "cell_side_A": float(side),
     }
     if args.operation == "chill+":
         payload["labels"] = result

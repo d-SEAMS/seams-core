@@ -3,7 +3,11 @@
 
 King's shortest-path rings are the R1 census of RINGS. q_l uses the
 near-hard radial weight p1=48, which on this crystal is the four
-neighbours inside 3.5 A. Prints one JSON object.
+neighbours inside 3.5 A. The frame is built with the cubic cell and
+periodic boundaries on every axis. In 2.3.0 a frame with no cell is
+non-periodic, and the Rust ring and neighbour calls return Result; the
+Python entry points used here surface an error instead of a value.
+Prints one JSON object.
 """
 
 from __future__ import annotations
@@ -28,10 +32,42 @@ def load_frame(path):
     return data["positions"], float(data["side"])
 
 
+def _matrix(value):
+    magnitude = getattr(value, "magnitude", None)
+    if magnitude is not None and not hasattr(value, "shape"):
+        value = magnitude
+    return np.asarray(value, dtype=np.float64)
+
+
 def atoms_of(pos, side):
+    """Periodic cubic cell. A missing cell is a different problem on 2.3.0."""
     elements = [fs.Element.O] * len(pos)
-    cell = np.eye(3, dtype=np.float64) * side
-    return fs.Atoms(pos, cell, elements)
+    cell = np.eye(3, dtype=np.float64) * float(side)
+    atoms = fs.Atoms(np.ascontiguousarray(pos, dtype=np.float64), cell, elements)
+    atoms.set_pbc([True, True, True])
+    pbc = [bool(flag) for flag in atoms.get_pbc()]
+    if pbc != [True, True, True]:
+        raise RuntimeError(f"frame pbc {pbc}")
+    got = _matrix(atoms.get_cell())
+    if got.shape != (3, 3) or not np.allclose(got, cell, rtol=0.0, atol=1e-8):
+        raise RuntimeError("frame cell is not the periodic ice Ic cube")
+    return atoms
+
+
+def unwrap_result(value):
+    """Return the success value if a binding hands back a Result object."""
+    current = value
+    for _ in range(3):
+        is_ok = getattr(current, "is_ok", None)
+        unwrap = getattr(current, "unwrap", None)
+        if not callable(is_ok) or not callable(unwrap):
+            return current
+        if not is_ok():
+            reveal = getattr(current, "unwrap_err", None)
+            err = reveal() if callable(reveal) else current
+            raise RuntimeError(f"fastatomstruct Result: {err}")
+        current = unwrap()
+    return current
 
 
 def run(path, operation, warmup, repeats, once, threads=1):
@@ -51,15 +87,18 @@ def run(path, operation, warmup, repeats, once, threads=1):
         method = fs.analysis.rings.RingMethod.King
 
         def call(frame):
-            sizes, counts = fs.analysis.rings.ring_size_distribution(
-                frame, cutoff, proto.MAX_RING, method)
+            got = unwrap_result(fs.analysis.rings.ring_size_distribution(
+                frame, cutoff, proto.MAX_RING, method))
+            if not isinstance(got, tuple) or len(got) != 2:
+                raise RuntimeError("ring result is not a pair")
+            sizes, counts = got
             return {
                 "sizes": [int(v) for v in sizes],
-                "counts": [int(round(float(v))) for v in counts],
+                "counts": [float(v) for v in counts],
             }
     elif operation == "q6":
         def call(frame):
-            values = fs.analysis.bond_order.q_l(frame, 6, cutoff, 48)
+            values = unwrap_result(fs.analysis.bond_order.q_l(frame, 6, cutoff, 48))
             return np.asarray(values, dtype=np.float64)
     else:
         raise SystemExit(f"unknown operation {operation}")
@@ -76,6 +115,9 @@ def run(path, operation, warmup, repeats, once, threads=1):
         "samples_ms": samples,
         "cpus": proto.cpus_allowed(),
         "threads": int(fs.get_num_threads()),
+        "warmup": int(warmup),
+        "periodic": True,
+        "cell_side_A": side,
     }
     if operation == "rings":
         payload["census"] = result
