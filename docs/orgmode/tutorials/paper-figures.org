@@ -1,12 +1,12 @@
 #+TITLE: Paper figures
 #+OPTIONS: toc:nil num:nil
 
-The 2020 JCIM figures are drawn from figshare project 73545.
-This page is the same calls on the dumps that are in the tree.
-The runnable copy is =docs/tutorials/test_paper_figures.py=.
-Python is ~pip install 'pydseamslib==2.14.0'~; the import is ~dseams.userframe~.
+The 2020 JCIM figure data are available from figshare project 73545.
+This page applies the same analyses to the supplied example trajectories.
+Install Python with ~pip install 'pydseamslib==2.14.0'~ and import
+~dseams.userframe~.
 
-| figure | dump in this tree | call | result |
+| figure | trajectory | call | result |
 |--------+-------------------+------+--------|
 | cubic ice, CHILL+ | =mW_cubic.lammpstrj= frame 1, type 1 | ~chill_plus()~ | 4096 cubic |
 | cubic ice, cages | the same frame | ~cages()~ | ~n_ic~ 4096 |

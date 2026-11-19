@@ -172,14 +172,9 @@ def block(slug, claim):
     if claim is None:
         return ""
     blurb = BLURB.get(slug, slug)
-    transcript = (
-        '<p>Transcript: <a href="/_static/captions/{}.vtt">'
-        "docs/videos/{}/captions.vtt</a></p>"
-    ).format(slug, slug)
     body = (
         iframe(claim[0], claim[1])
-        + "\n   <p>Captions are burned into the upload.</p>\n   "
-        + transcript
+        + '\n   <p><a href="/_static/captions/{}.vtt">Captions</a></p>'.format(slug)
     )
     return "   {}\n   <p>{}</p>".format(body, blurb)
 

@@ -22,10 +22,6 @@ seams steinhardt input/traj/exampleTraj.lammpstrj --type 2 --cutoff 3.5
 
 * The C API
 
-~seams_q4q6~ writes one q4 and one q6 per atom. Either pointer may be
-null. On the 64-atom cubic cell the mean q6 is above 0.3.
-~meson test seams_c_api~ is that check.
-
 #+begin_src c
 // excerpt: tests/test_seams_api.c
   expect(seams_q4q6(sys, 3.5, 0, q4, q6) == SEAMS_OK, "q4 q6");
@@ -52,6 +48,7 @@ would put a non-number into every mean, into CHILL+, and into the
 nucleation \(\bar q_6\). The neighbour list already names the empty
 shell: a count of zero is that atom. There is no NaN option.
 
-~meson test q4_q6_equal~ checks the split on a liquid frame. The atom
-with an empty shell is 0 here and NaN in freud and pyscal3. Every atom
-that has a shell matches pyscal3 to \(10^{-10}\).
+On a liquid frame, every atom with a non-empty shell matches pyscal3
+to \(10^{-10}\). freud stores \(q_l\) as float32, so its values differ
+by float32 rounding. For an empty shell d-SEAMS returns 0, while freud
+and pyscal3 return NaN.

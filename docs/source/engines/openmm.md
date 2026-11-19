@@ -9,16 +9,6 @@ which atoms are oxygens. `report` reads the context in angstrom and calls
 frame of the classified sites, keyed by 1-based particle index, with their
 CHILL+ labels. `seconds` and `calls` time the reports.
 
-`meson test openmm_e2e` runs 200 steps of a TIP4P/Ice ice Ic slab and
-liquid on the CPU platform with the reporter every 10 steps, then requires
-`seams chill-plus` on that dump to give the same label to every oxygen.
-
-`meson test openmm_reporter` runs `engines/openmm/test_reporter.py`.
-`meson test docs_engine_openmm` runs `DseamsReporter` on
-`input/traj/ice1h.lammpstrj`. `meson test openmm_plugin` runs
-`engines/openmm/plugin.cpp`, which calls
-`seams_chill_plus` after scaling OpenMM nanometers by 10.
-
 ```{literalinclude} ../../../engines/openmm/test_reporter.py
 :language: python
 :lines: 12-14,58-61

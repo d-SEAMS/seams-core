@@ -1,9 +1,9 @@
 #+TITLE: Upgrade from 2.13 to 2.14
 #+OPTIONS: toc:nil num:nil
 
-These notes start from tag v2.13.0 (~7f310225~).
+These notes describe the changes from d-SEAMS 2.13 to 2.14.
 The release notes are
-[[file:../reference/release-2.14.org][2.14.0]].
+[[file:../reference/release-2.14.org][2.14.1]].
 Rebuild the engine, then relink anything that should call ~libseams~.
 
 * C and C++
@@ -21,22 +21,22 @@ the program reads a trajectory path or keeps a frame across calls.
 * Language bindings
 
 2.14 moves every language binding out of this repository. Each one is
-its own repository and package, built against the seams-core 2.14.0 tag
-and versioned 2.14.0:
+its own repository and records the seams-core revision it builds
+against.
 
 | Language | 2.13 location | 2.14 repository | Package |
 |----------+---------------+-----------------+---------|
-| Python | PydSEAMSlib (~pydseams~) and the in-tree ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
-| Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ |
+| Python | PydSEAMSlib (~pydseams~) and the supplied ~dseams~ module | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~: ~import dseams~ and ~import pydseams~ |
+| Lua, Fennel | yodaStruct (1.x) | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source, ~require("dseams")~ |
 | R | none | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ |
 | Julia | none | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~ and ~Seams~, over ~libseams_jll~ |
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
-| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ |
+| Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ |
 
-A Python script keeps working after ~pip install -U 'pydseamslib==2.14.0'~.
+A Python script keeps working after
+~pip install -U 'pydseamslib==2.14.0'~.
 The per-language upgrade notes (new calls, renamed options, the ~SEAMS_LANG_LIB~
-and ~SEAMS_LIB_DIR~ variables) are in each repository's changelog. Paths
-under ~bindings/~ other than =bindings/cxx= no longer exist in this tree.
+and ~SEAMS_LIB_DIR~ variables) are in each binding's changelog.
 
 * Engines
 
@@ -52,10 +52,9 @@ The default for LAMMPS and GROMACS is auto.
 | PLUMED | The ~SEAMS~ collective variable scales internal nanometers to angstroms and returns a q6 derivative per nanometer. |
 
 A head-to-head that times PLUMED's own symfunc has to set
-~PLUMED_NUM_THREADS~. The rows in ~benchmarks/rc3-sitting.csv~ left
-that variable unset, so they were measured on one thread. The q6 rows
-in ~benchmarks/paper-cells/sitting-large.csv~ set it, and that time
-falls as the width grows.
+~PLUMED_NUM_THREADS~. Leaving that variable unset measures one thread.
+When it is set to the requested width, the q6 time falls as the width
+grows.
 
 * Threads
 

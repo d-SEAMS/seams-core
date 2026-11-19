@@ -37,6 +37,12 @@ spack.yml
 subprojects/nanobind-*/
 subprojects/robin-map-*/
 subprojects/packagecache/
+subprojects/Catch2-*/
+subprojects/gpulite/
+subprojects/linkcell/
+subprojects/minimage/
+subprojects/readcon-core/
+subprojects/readcon-db/
 subprojects/vesin/
 
 # Prerequisites
@@ -456,3 +462,6 @@ bindings/rust/seams-sys/vendor/
 *.crate
 *.rock
 lua_modules/
+
+# The LaTeX patterns above match version-named directories.
+!/changelog.d/[0-9]*.[0-9]*.[0-9]*/

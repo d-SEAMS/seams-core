@@ -1,8 +1,7 @@
 .. list-table::
    :header-rows: 0
 
-   * - Rendered from ``benchmarks/rc3-sitting.csv``.
-       ``t1`` and ``t8`` are the medians in the threads=1 and threads=8 columns.
+   * - ``t1`` and ``t8`` are the medians in the threads=1 and threads=8 columns.
        ``ratio`` is ``t1 / t8``.
        A PLUMED row was measured on one thread because ``PLUMED_NUM_THREADS`` was unset.
        Both of its columns are that measurement.

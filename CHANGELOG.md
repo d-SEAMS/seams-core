@@ -10,6 +10,80 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.2] - unreleased
+
+### Changed
+
+- Public documentation now contains reader instructions and scientific results only. Maintainer workflows, repository policy, provenance pins, and video-production notes have moved out of the published manual.
+
+### Fixed
+
+- Split docs reader text checks from live package-registry validation. Meson
+  `docs_reader_text` now stays offline while still parsing install claims, and CI
+  runs live registry claim checks in a dedicated docs workflow job.
+
+## [2.14.1] - 2026-11-16
+
+### Added
+
+- The release upload now checks the linux-x86_64 tarball in fresh Ubuntu
+  22.04, Rocky Linux 9, and Debian 12 containers. Each check compiles
+  `docs/examples/quickstart.c` with the `pkg-config` flags for `seams` and
+  runs it on an eight-molecule ice frame.
+- The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
+
+### Changed
+
+- The pixi full-suite now fails whenever a test is skipped, so a passing
+  run confirms that the required analyses and documentation checks all ran.
+
+  `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
+  `compute dseams`; Meson errors unless `lammps_src_include` points to
+  matching sources.
+- Linux release binaries build inside manylinux_2_28 and need glibc 2.28 or newer.
+- On glibc the first library call raises the heap trim threshold to 256 MiB and the mmap threshold to 32 MiB, so the buffers one call frees are reused by the next instead of being faulted in again. The same call varied by 10 to 30 percent between runs before. The setting is process-wide; `SEAMS_MALLOC_TUNE=0` skips it, and a caller that set `MALLOC_*_` or a `glibc.malloc` tunable keeps its own values.
+- The k-nearest neighbour graph scales with OpenMP threads. linkcell 0.4.3 scatters the k-nearest mesh by bin owner, builds the graph rows and the CSR in the search's own parallel region and keeps a one-thread search on one thread; no OpenMP team is started for the call. Neighbour order is unchanged, ties included, at every thread count. On 110592-molecule ice Ic in the omp-scaling sitting of source tree 1c41a929, `seams_neighbours_knn` with four neighbours takes 40.6, 22.5, 13.0 and 7.9 ms at 1, 2, 4 and 8 threads instead of 58.2, 45.6, 37.0 and 33.2; on 884736 molecules it takes 62.5 ms at 8 threads instead of 279.8. In the same sitting OVITO takes 17.7 ms, mdapy 2.0.0 17.0 ms, freud 3.6.1 23.7 ms and pyscal3 4.1.0 103.5 ms for the same graph at 8 threads.
+- Rings with symmetry codes build the atom-to-ring index on the team and no longer copy a frame whose rings all have one size before the cage and prism passes. `seams_rings_find` on 110592-molecule ice Ic takes 31.3 ms at 8 threads instead of 36.6, 4.1 times faster than 1 thread instead of 3.5, and 302 ms instead of 358 on 884736 molecules. The 1-thread times are no slower, and every label is identical to the previous build at 1, 3 and 8 threads.
+- The linux-x86_64 archive loads the system OpenMP runtime (`libgomp1` on Debian and Ubuntu, `libgomp` on RHEL).
+- The linux-x86_64 release notes record the glibc version, OpenMP runtime, pkg-config prefix, and binding versions measured for that build.
+
+### Fixed
+
+- Source archives now include every subproject, the patched chemfiles
+  source, and pinned tutorial inputs, so users can build and test in
+  offline environments.
+- The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
+- The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
+- Malformed MOL2 and mmCIF files that chemfiles refuses now report a read error through the C API and every language binding instead of returning a frame with zero atoms.
+- A ThreadSanitizer death fails the TSan C API suite. The suite runs with `exitcode=0` so that the libgomp barrier races do not fail it, and that was also the exit status of a FATAL, a CHECK failure or a deadly signal, in the suite and in each `capi_cpp_ref` it starts, so a crashed reference still left "capi suite ok". `abort_on_error=1` makes such a death SIGABRT, and `tests/capi_tsan_gate.py` passes the suite only on exit 0, a "capi suite ok" line, and no ThreadSanitizer output but data races among the main thread and the libgomp workers it started.
+- The docs publish job drew every molecule still twice at 4096 px and 256 samples, so Publish the book sat on the runner for hours. The delivered pictures are 2048 px, and a denoised 64-sample frame at that size matches the old stills. The job now stops if it runs for more than two hours.
+- Library calls cope better when other processes keep the cores busy. Placement reads the threads other processes have runnable: beside a few it narrows the team to the free cpus and leaves it unplaced, and beside half the mask or more it leaves the team to the scheduler and runs the cutoff list, cutoff q_l, CHILL+ and the shell match as stages whose chunks linkcell's pool claims, so no stage waits for a worker the scheduler has parked. A lone team narrower than the mask is not pinned. Linkcell's pool keeps the requested width when the OpenMP team is narrowed, the k-nearest graph passes are handed out in parts, a full-width fork that waits out a time slice halves the team at once, and the frame calls of the R and Julia fronts narrow as the C API does. Beside an 8-thread spinner on 8 cores, the 884736-molecule k-nearest graph takes 114 ms bound and 110 ms unbound instead of 345 and 365 (OVITO 209 and 207), and on 110592 molecules 20.0 ms bound and 19.1 ms unbound instead of 54.5 and 59.1 (OVITO 28.2 and 28.3). q6 on 110592 molecules takes 12.2 ms bound and 11.1 ms unbound (OVITO 23.6 and 23.2).
+- Worker placement now stays inside the host mask and is undone when the call returns. `SEAMS_PIN=0` leaves placement to the host. `OMP_PROC_BIND`, `OMP_PLACES`, `GOMP_CPU_AFFINITY`, `KMP_AFFINITY`, and a caller already bound to one cpu are left as the host set them. Several copies of the program share the mask in disjoint slices instead of all pinning worker i to cpu i.
+- An unbound 8-thread team no longer stalls when another thread is runnable. When the team fills the mask on an otherwise idle machine, workers take one allowed cpu each unless `OMP_PROC_BIND` is already set, and linkcell's pool keeps that cpu list instead of inheriting the caller's pin. With only `OMP_NUM_THREADS=8`, neighbours and q6 on 110592-molecule ice Ic take 2.4 ms each in one fresh process, ahead of the 13.0 ms (OVITO q6) and 17.0 ms (mdapy k-nearest graph) rival times.
+- `docs_science_tutorials` and the science snippet pages run the Julia and R tutorials from the bindings they moved to. With `julia` on PATH, the Julia leg runs `examples/science_tutorials.jl` of the developed Dseams.jl against this build's libseams; with `Rscript`, the R leg runs the `examples/science_tutorials.R` that the installed dseams package carries. They ran `docs/examples/science_tutorials.jl`, `science_tutorials.R` and `science_r.c`, which left with the bindings, and failed wherever Julia or R was installed. A missing Dseams.jl or dseams fails the tutorial and names the binding.
+- Ring and cage search diagnostics stay on the calling thread. Concurrent searches no longer share the process-global profile, phase and split records, and an OpenMP team copies the calling thread's flags when it starts.
+- The k-nearest degree scan starts after the linkcell pool joins, so it no longer reads a row while that row is still being stored.
+- The cage invariance fuzzer sizes its trial pool to the CPUs the process may run on.
+- C API fuzzers built with `b_sanitize=thread` link `-fsanitize=thread,fuzzer` and the shared thread runtime.
+- A ThreadSanitizer build gives plumed, gmx and lmp the unsanitized plugin, because those hosts cannot map `libclang_rt.tsan`. Interpreter shims map that runtime before they dlopen `libseams`.
+- The serial LAMMPS hook calls `lammps_mpi_finalize` after `lammps_close`, which frees the ReadData and Run commands the stub would otherwise leave allocated. The MPI build still calls `MPI_Finalize`.
+- `docs_science_tutorials` keeps a 180 s timeout, and allows 900 s when `b_sanitize` is set. Alone under AddressSanitizer the tutorial takes about 24 s; in the full sanitizer suite it shares the cores and takes more than 180 s.
+- The fused k-nearest graph and linkcell's stage runner are used when that library provides `lc_knearest_csr` and `lc_team_run`. A linkcell 0.4.2 build keeps the in-tree graph and the OpenMP stages.
+- `docs_video_tapes` compares the seams census and the rest of the recording, and no longer treats a LAMMPS warning or its docs URL as part of that result.
+- `docs_sh_cell` compiles its header snippet with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
+- The sanitizer suite does not preload libasan into the meson test process. Interpreter wrappers and the cargo test runner map it for the process that hosts libseams. Host shells, compilers, and `mpirun` do not inherit it. `pin_host` exports the runtime only to its MPI ranks, turns off Open MPI's memory patcher for that launch, and turns leak detection off for those ranks. Open MPI and PMIx keep allocations until the rank exits, and those frames are not added to the suppression list.
+- `chill::cutoffSolid` calls `seams::ylm::ylmAdd8` only when `SEAMS_YLM_AVX512` is set. That function is built only on x86-64. The call used to stay in the binary at -O0 on every other machine, and a debug macOS arm64 link failed with the symbol undefined. `ylm_add8_o0` compiles that file at -O0 without the flag and rejects an undefined `ylmAdd8`.
+- `scripts/sanitize_thread.sh` links with the host `ld`. The conda `ld` took `libdl.so.2` from the conda sysroot and libc from the host, so meson rejected `-fsanitize=thread`. `scripts/build_tsan_openmp.sh` builds Archer from the LLVM release that matches clang. A libomp from an older release left `__kmpc_dispatch_deinit` undefined when the tests loaded it.
+- `pin_host` is registered on Linux only. It reads cpu masks with `sched_getaffinity` and the proc filesystem, and the placement it checks exists only on Linux. On macOS it stopped at the missing `libyodaLib.so`, and it could not have passed with the dylib either.
+- The default pixi environment installs OpenMM on macOS, so `docs_engine_openmm` and the engine walkthrough run it there. The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
+- `seams.pc` and the other pkg-config files in the Linux tarball use `prefix=${pcfiledir}/../..`, so the link line follows wherever the tarball is unpacked.
+- `seams_system_read` in the Linux tarball reads .con files, because the release build turns the readcon reader on.
+- The release recipe enables the .con reader when `SEAMS_WITH_READCON=enabled`. A checkout that already contains the readcon wrap leaves the reader off, as does the conda-forge archive.
+- The four-process placement check runs on a four-cpu mask. Each process keeps one cpu, and a sample counts that cpu. A lone process still has to show two cpus in the same sample.
+- The docs workflow check reads `contents: write` from the build-deploy job and stops at the next job.
+- The documentation build rewrites sitemap entries to lowercase extensionless routes after the link and metadata pass, and video end cards no longer include publication-status text.
+- d-SEAMS builds against an installed chemfiles 0.10.4 or a later 0.10 release, including the copy in Chemfiles_jll. The build finds it through `-Dchemfiles_dir`, pkg-config or the CMake package. A cross build with `-Dwith_chemfiles=auto` that finds no chemfiles stops with an error that lists the places it searched, and never builds a copy for the build machine. The option `-Duse_vendored_chemfiles` takes `auto`, `enabled` or `disabled`. CMake builds take `SEAMS_CHEMFILES_DIR` and `SEAMS_USE_VENDORED_CHEMFILES`. With an installed chemfiles 0.10.4, d-SEAMS refuses a MOL2 file with no counts line and an mmCIF file with no `label_entity_id` column and an unset `label_seq_id`. Each gives a message where it used to crash.
+
 ## [2.14.0] - 2026-11-15
 
 ### Added
@@ -61,7 +135,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Meson options `-Dwith_blas`, `-Dwith_readcon`, and `-Dsystem_libseams`. The last builds only the `dseams` module against an installed `libseams`.
 - One sitting pairs ice Ic at 884736 molecules with freud, mdapy, vesin, OVITO PTM and CHILL+, and rings-statistics-matter, at 1, 2, 4 and 8 threads. The detail column records the agreement check on that frame. The rings row is the cutoff list and the ring search together. The pool-audit rings kernel is ringNetwork alone.
 - One sitting retimes neighbours, q4, q6, CHILL+, rings, symmetry and hydrate cages at 110592 and 884736 molecules on one thread and on eight. The raw lines are benchmarks/rc3-sitting.csv.
-- OpenMM, rings, and cages each have a video slug next to the existing rings-cages slug. Topic pages embed the recording from the same embed.txt as the gallery, using an Odysee /$/embed/ URL when a claim is present and the words video coming soon when it is not.
+- OpenMM, rings, and cages each have a video slug next to the existing rings-cages slug. Topic pages embed the recording from the same Odysee source as the gallery.
 - Orthorhombic frames are cut by linkcell's weighted recursive coordinate bisection of the cell grid. The halo is the stencil painted while walking the cells a rank owns, and the same cut is reused on the next frame of that size. Neighbour rows, CHILL+, q6 and primitive rings keep their scratch across that repeat, and the ring search answers a length-2 shortcut that passes below the source.
 - Primitive rings are the Franzblau shortest-path census. OVITO FindRings is a subset: K2,3 has three chordless 4-rings and FindRings reports two, and every ring on the 864-atom interface frame at 3.5 Å is primitive.
 - Python, Julia, Rust and Fortran call the C API. Python reads NumPy arrays in place and accepts ASE and MDAnalysis frames. Julia uses ccall. Rust splits the raw FFI from the safe crate. Fortran binds the same symbols with iso_c_binding.
@@ -73,7 +147,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The PLUMED `SEAMS` action takes `MODE=all|q6|q6bar` and `DUMP=file`. `MODE=q6` and `MODE=q6bar` compute only the mean local q6 or the mean q6-bar, without CHILL+ or the ring search. `DUMP` appends the coordinates handed to d-SEAMS and the per-atom value, plus the CHILL+ label under `MODE=all`.
 - The Python Frame reference runs `read`, `steinhardt`, `ring_census`, `rdf_2d`, `monolayer_rings`, `find_prisms`, `to_ase`, and `to_solvis` on ice Ih and shows each result.
 - The R package `dseams` (d-SEAMS/dseams-r) builds as a self-contained source package that carries its own copy of the engine, or links an installed `libseams_lang` through `SEAMS_LIBDIR` and `SEAMS_INCLUDE`. The Julia package `Dseams` (d-SEAMS/Dseams.jl) takes its engine from `libseams_jll`, or from the `libseams_lang` that `SEAMS_LANG_LIB` or `Dseams.set_library!` names. `packaging/yggdrasil/L/libseams` in this repository is the Yggdrasil recipe for `libseams_jll`.
-- The Rust bindings are the crates `dseams-sys` and `dseams` (library names `seams_sys` and `seams`), built and published from d-SEAMS/dseams-rs. `dseams-sys` compiles a bundled C API by default and links an installed `libseams` with the `system` feature. The Fortran module is the fpm package `dseams` from d-SEAMS/dseams-fortran, and the LuaRocks rock `dseams` for Lua 5.1 to 5.4 and LuaJIT comes from d-SEAMS/yodaStruct. Each links an installed `libseams`; `ci_packages.yml` here builds and installs that `libseams` prefix.
+- The Rust bindings are the crates `dseams-sys` and `dseams` (library names `seams_sys` and `seams`), published from d-SEAMS/dseams-rs. `dseams-sys` compiles a bundled C API by default and links an installed `libseams` with the `system` feature. The Fortran module is available as the fpm Git dependency `dseams` from d-SEAMS/dseams-fortran. The Lua 5.1 to 5.4 and LuaJIT source is available from d-SEAMS/yodaStruct and provides `require("dseams")`.
 - The Rust, Fortran, and Python ctypes bindings call the analyses `seams.h` now exports, including frame reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer.
 - The Snakemake rule `h2h_plumed_q6` runs PLUMED's `Q6`, `LOCAL_AVERAGE` and `LOCAL_Q6` and d-SEAMS `q6` and `q6bar` through `SEAMS` in `plumed driver` on the same mW ice/liquid frames at 4096 and 110592 molecules, serial and with 8 threads, and writes the per-atom agreement and the seconds per frame to `benchmarks/h2h-plumed-q6.csv`. The asv benchmark `h2h_plumed_q6` times the same decks.
 - The binding-overhead session times each language wrapper of read, k-nearest neighbours, q6 with q6bar, CHILL, and primitive rings on ice Ih, and records the median and interquartile range.
@@ -88,7 +162,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The rings recording uses the 250-oxygen exampleTraj census and the ice Ih six-ring count. The Rust recording prints the ice Ih census. The GROMACS recording runs gmx-seams after gmx mdrun. A slug with no Odysee claim renders no player. End cards invite questions, issues, discussions, and pull requests. The Python pages show dseams.Frame next to pydseams.
 - The secondary-prism speed is reported under equation 2 and under the solid-count slope, on the 4000-molecule cell.
   The 2015 CHILL+ thresholds are unchanged.
-- The videos gallery and the README link the d-SEAMS Odysee channel. Every `docs/videos/<slug>/script.md` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.
+- The source build installs `libyodaLib`, `libseams`, `libseams_lang`, the `seams` CLI, headers, pkg-config metadata, and CMake metadata. PyPI provides the `pydseamslib` 2.14.0 wheels from d-SEAMS/PydSEAMSlib.
+- The videos gallery and the README link the d-SEAMS Odysee channel.
 - `-Dcapi_fuzz_coverage=true` instruments this project's code for libFuzzer under clang, so the fuzzers see coverage inside `libseams` and not only in the harness. Subprojects stay uninstrumented, so their examples link without a sanitizer runtime; with sanitizers or coverage on, clang links the shared libraries with `-z undefs` and leaves the runtime's symbols to the executable.
 - `-Dcapi_sanitize=address,undefined` builds the C API suite under ASan and UBSan at once, and every UBSan build also checks float-to-int overflow, which GCC leaves out of `-fsanitize=undefined`.
 - `-Dlammps_src_include=DIR` builds `compute dseams` against conda-forge LAMMPS, which installs `library.h` without the class headers. `scripts/fetch_lammps_headers.sh DEST` checks out `src` of the release that `lmp` reports and prints the directory.
@@ -115,7 +190,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
   `cages_by_signature`, `steinhardt`, `rdf_2d`, `monolayer_rings`,
   `find_prisms`, and `pydseams.band.ring_census` call `libseams_lang`.
   The tutorials keep those calls.
-- `recipe/recipe.yaml` builds `libseams` (`libyodaLib`, `libseams`, `libseams_lang`, the `seams` CLI, headers, pkg-config and CMake files) for conda-forge with rattler-build from the release tag archive. The `pydseamslib` wheels and their conda package are built in d-SEAMS/PydSEAMSlib.
 - `require("dseams")` is a Lua 5.4 and LuaJIT module over `seams.h`, with userdata handles and a Fennel wrapper on the same module. Reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer call that header.
 - `seams chill` and `seams chill-plus` take `--per-atom FILE` and append a LAMMPS dump frame with a `label` column, the CHILL or CHILL+ class of each site. Workers under `--jobs` append whole frames.
 - `seams_c_last_stages` returns the wall seconds of the last `seams_cutoff_csr` or `seams_ql_cutoff` call on the calling thread, split into point-cloud conversion, cutoff-list build, q_l and copy-out.
@@ -197,7 +271,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The ice cage search counts distinct atoms in a small buffer and builds only the least ring reading.
 - The in-plane RDF builds an explicit grid whose cells are the cutoff and bins packed coordinates from the neighbouring cells. Each thread keeps its own histogram until the frame finishes.
 - The landing page hides the root toctree and replaces that dump with cards for Tutorials, How-to, the language reference, the engines, Comparisons, and the paper reproductions. The suite-stack diagram fills the article column.
-- The language bindings move to their own repositories, each released with the seams-core version it binds: Python to d-SEAMS/PydSEAMSlib (`pydseamslib`, `import dseams` and `import pydseams`), Lua and Fennel to d-SEAMS/yodaStruct (LuaRocks `dseams`), R to d-SEAMS/dseams-r, Julia to d-SEAMS/Dseams.jl, Rust to d-SEAMS/dseams-rs (crates `dseams-sys` and `dseams`), and Fortran to d-SEAMS/dseams-fortran (fpm `dseams`). seams-core builds the engine, the C API `libseams`, the C ABI `libseams_lang`, the `seams` CLI and the engine drivers, and releases conda `libseams` and the Yggdrasil recipe for `libseams_jll`. The Meson options `with_python`, `with_lua`, `fennel_lua`, `with_fortran`, `julia_wrap`, `r_libs_user` and `system_libseams` are removed with the bindings they built. The docs run their Python snippets against the installed `pydseamslib` of the same version. `docs/orgmode/contributing/repositories.org` maps the repositories, the pins and the release order.
+- The language bindings move to their own repositories: Python to d-SEAMS/PydSEAMSlib (`pydseamslib`, `import dseams` and `import pydseams`), Lua and Fennel to the d-SEAMS/yodaStruct Git source, R to the d-SEAMS/dseams-r Git source, Julia to the d-SEAMS/Dseams.jl Git source, Rust to d-SEAMS/dseams-rs (crates `dseams-sys` and `dseams`), and Fortran to the d-SEAMS/dseams-fortran fpm Git dependency. seams-core builds the engine, the C API `libseams`, the C ABI `libseams_lang`, the `seams` CLI, and the engine drivers.
 - The linkcell wrap names the v0.4.2 tag and carries no patches.
 - The minimage wrap names the v0.1.4 tag. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
 - The one-thread carried ring update copies and sorts its rings directly again. Several threads still sort indices and merge in parallel. A team narrower than the process is bound once to that many cores of the allowed set. Interior cells of the orthorhombic cutoff skip the periodic-shift arithmetic. One-thread and several-thread results still match.
@@ -330,7 +404,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `capi_symbols`, which holds the exported functions of `libseams` to `tests/capi_symbols.txt`, reads the exports with `readelf` when `nm` is missing and reports a skip when neither exists; it used to pass without checking. `capi_symbols_selftest` proves that the check rejects an unlisted export and a listed function the library no longer exports, and that `nm` and `readelf` agree.
 - `compute dseams` on several MPI ranks classified each rank's own atoms as a separate cell, so atoms near a subdomain boundary lost neighbours. On two ranks, 8312 of 86016 labels over 21 frames of 4096-molecule mW ice and liquid differed from `seams chill-plus` on the same dump. The compute now gathers every atom to rank 0, classifies the whole cell once, and returns each rank its labels; all 86016 match. `meson test lammps_e2e_np2` is the regression.
 - `docs/howto/test_engines.py` runs each engine how-to in a temporary directory under `build/docs-examples` and removes it afterwards. `docs_engine_<engine>` and the `docs_video_tapes` scenes ran the same engine at once in one fixed directory, and PLUMED, which renames every `colvar` it finds to a numbered backup, refused to run once 101 backups had built up over repeated `meson test` runs.
-- `docs_brine_cli` fetches the 230 K brine frame itself, through the same checked download as the science tutorials, and no longer skips on a clone where no other test has fetched it yet. The download takes a lock and lands through a `.part` file, so tests that start together do not read a partial frame.
+- `docs_brine_cli` fetches the 230 K brine frame itself, through the same checked download as the science tutorials, and no longer skips on a clone where no other test has fetched it first. The download takes a lock and lands through a `.part` file, so tests that start together do not read a partial frame.
 - `docs_video_tapes` treats a step that exits 77 as an absent engine or frame. That scene is skipped, each scene of the folder that ran still has to match its own section of `recorded.txt`, the narration check of that folder is left out, and the remaining tapes still run; the test then exits 77 with the reasons. Any other exit is still a failure.
 - `dseams-sys` declares the C functions that return nothing without `-> ()`, so `cargo clippy --all-targets` with warnings denied passes on the 1.85 MSRV toolchain as well as on current stable. `gen_sys.py` writes the declarations that way.
 - `dump_index_eintr`, `dump_index_eio` and `dump_fstat_keeps_atoms` each write their dump under a directory of their own. The three run one driver in parallel and shared a fixed temporary directory, so one test's cleanup could remove the other's file and abort it with `filesystem error: cannot remove`.

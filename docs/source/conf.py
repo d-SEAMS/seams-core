@@ -15,6 +15,9 @@ except RuntimeError:
 # -- Path setup --------------------------------------------------------------
 _source = os.path.dirname(os.path.abspath(__file__))
 _docs = os.path.dirname(_source)
+_root = os.path.dirname(_docs)
+sys.path.insert(0, os.path.join(_root, "scripts"))
+from project_version import project_version
 
 
 def _stage_records():
@@ -182,7 +185,7 @@ _write_video_players()
 
 
 def _write_release_notes():
-    """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
+    """Fill the current notes from changelog.d before Sphinx reads pages."""
     import importlib.util
 
     script = os.path.join(_docs, "check_changelog.py")
@@ -190,7 +193,7 @@ def _write_release_notes():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     if module.main([]) != 0:
-        raise SystemExit("2.14.0 notes do not match changelog.d")
+        raise SystemExit("release notes do not match changelog.d")
 
 
 _write_release_notes()
@@ -430,6 +433,11 @@ def _include_orphan_pages():
             handle.write(text)
     included = _toctree_docnames()
     skip_prefixes = (
+        "explanation/cutoff-rings-tables.rst",
+        "explanation/performance-overview-tables.rst",
+        "explanation/pool-audit-tables.rst",
+        "howto/pool-audit-v5-tables.rst",
+        "reference/release-2.14-notes.rst",
         "science/figures/",
         "xml/",
         "doxygen-include/",
@@ -569,8 +577,8 @@ _include_orphan_pages()
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
 author = "Rohit Goswami, Amrita Goswami, Ruhila S"
-version = "2.14.0"
-release = "2.14.0"
+version = project_version()
+release = version
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -606,15 +614,24 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
 templates_path = ["_templates"]
 # players.rst and embeds/*.rst are untitled fragments that pages pull in
 # with ``.. include::``. They are not documents.
-exclude_patterns = ["science/figures/**", "videos/players.rst", "videos/embeds/**"]
+exclude_patterns = [
+    "science/figures/**",
+    "videos/players.rst",
+    "videos/embeds/**",
+    "explanation/cutoff-rings-tables.rst",
+    "explanation/performance-overview-tables.rst",
+    "explanation/pool-audit-tables.rst",
+    "howto/pool-audit-v5-tables.rst",
+    "reference/release-2.14-notes.rst",
+]
 # A warning is a failed book. Sphinx stops instead of publishing it.
 warningiserror = True
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable", None),
-    "pydseams": ("https://d-seams.github.io/PydSEAMSlib/", None),
-    "luadseams": ("https://d-seams.github.io/yodaStruct/", None),
+    "pydseams": ("https://python.dseams.info/", None),
+    "luadseams": ("https://lua.dseams.info/", None),
 }
 
 # -- Options for HTML output -------------------------------------------------
@@ -715,6 +732,38 @@ html_baseurl = "https://docs.dseams.info/"
 sitemap_url_scheme = "{link}"
 
 
+def _replace_project_version(app, docname, source):
+    """Render release-sensitive commands from the Meson project version."""
+    source[0] = source[0].replace("@PROJECT_VERSION@", release)
+
+
+def _canonical_sitemap(app, exception):
+    """Use the lowercase extensionless URLs served without redirects."""
+    if exception is not None:
+        return
+    import urllib.parse
+    import xml.etree.ElementTree as ET
+
+    path = os.path.join(app.outdir, "sitemap.xml")
+    if not os.path.isfile(path):
+        return
+    tree = ET.parse(path)
+    for element in tree.getroot().iter():
+        if not element.tag.endswith("loc") or not element.text:
+            continue
+        parsed = urllib.parse.urlsplit(element.text)
+        route = parsed.path
+        if route.endswith("/index.html"):
+            route = route[:-10] or "/"
+        elif route.endswith(".html"):
+            route = route[:-5]
+        route = route.lower()
+        element.text = urllib.parse.urlunsplit(
+            (parsed.scheme, parsed.netloc, route, parsed.query, parsed.fragment)
+        )
+    tree.write(path, encoding="utf-8", xml_declaration=True)
+
+
 def _copy_caption_tracks(app, exception):
     """Publish the draft VTT files next to the HTML so <track> can load them."""
     if exception is not None:
@@ -778,7 +827,9 @@ def _edit_org_source(app, pagename, templatename, context, doctree):
 
 
 def setup(app):
+    app.connect("source-read", _replace_project_version)
     app.connect("doctree-resolved", _relative_rst_links)
     app.connect("html-page-context", _edit_org_source)
+    app.connect("build-finished", _canonical_sitemap)
     app.connect("build-finished", _copy_caption_tracks)
     app.connect("autodoc-skip-member", _skip_attributes)

@@ -8,7 +8,8 @@
 * Where is Python?
 
 [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-~pip install 'pydseamslib==2.14.0'~. ~import pydseams~. ~import pydseamslib~
+~pip install 'pydseamslib==2.14.0'~.
+~import pydseams~. ~import pydseamslib~
 is an alias. The compiled module is ~yoda~.
 
 * Where is Lua / Fennel?
@@ -29,7 +30,7 @@ for ~cages~ only.
 
 * Which ~--type~ do I pass?
 
-Mixed water dumps in this tree: type 2 oxygen. Single-site mW dumps:
+Mixed water dumps in the supplied examples: type 2 oxygen. Single-site mW dumps:
 type 1. Default ~0~ guesses type 2 then type 1. Any other mixed-type
 dump (ionic liquid, solvent plus solute) needs the integer type of
 the species you want; see [[file:ionic-liquid.org][Ionic-liquid dumps]].
@@ -58,7 +59,7 @@ Yes: ~--frame N --last M --jobs J~ via ~forEachLammpsFrame~.
 
 solvis, through ~pydseamslib[solvis]~ (~frame.to_solvis()~). That is
 the viewer for this release; the
-[[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]]
+[[https://python.dseams.info/][PydSEAMSlib documentation]]
 has the how-to. OVITO still opens the LAMMPS text the engine writes; it
 is not the documented path.
 

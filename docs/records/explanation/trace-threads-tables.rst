@@ -1,8 +1,7 @@
 .. list-table::
    :header-rows: 0
 
-   * - These tables are rendered from
-       ``benchmarks/trace-threads.csv``.
+   * - Each table reports the median and interquartile range for the named thread width.
 
 signature cages, sI
 ^^^^^^^^^^^^^^^^^^^

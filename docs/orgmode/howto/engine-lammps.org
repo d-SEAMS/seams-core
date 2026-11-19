@@ -9,18 +9,6 @@ The build below used conda-forge LAMMPS 2022.06.23. The serial binary
 reports 23 Jun 2022, Update 1. The compiler and Eigen stay on the path.
 The same prefix holds GROMACS 2026.3, OpenMM 8.6.0, and PLUMED 2.10.1.
 
-#+begin_src bash
-pixi init -c conda-forge dseams-engines
-pixi add --manifest-path dseams-engines/pixi.toml gromacs lammps openmm "plumed=2.10.*"
-eval "$(pixi shell-hook --manifest-path dseams-engines/pixi.toml)"
-export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
-export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
-meson setup build -Dwith_gromacs=enabled -Dwith_lammps=enabled -Dwith_openmm=enabled -Dwith_plumed=enabled
-meson compile -C build
-meson test -C build docs_engine_lammps --print-errorlogs
-#+end_src
-
 ~run_hook~ registers a ~fix external~ callback. LAMMPS passes positions
 in angstroms. The docs test writes a data file from
 ~input/traj/ice1h.lammpstrj~, freezes the forces, and runs one step of
@@ -37,7 +25,3 @@ the callback fires 5 times on the 64-atom cubic cell. The hook prints
 ~lammps hexagonal 0 six-rings 128 q6 0.628539~. The 320 cubic labels
 are 5 calls of 64 atoms. ~q6 0.628539~ is that last call. The name on
 the fix line is ~pf/callback~.
-
-~engines/lammps/compute_dseams.cpp~ is the copy-in compute. This build
-does not compile it. ~meson test docs_engine_lammps~ exits 77 when
-~run_hook~ was not built.

@@ -1,14 +1,34 @@
-#+TITLE: 2.14.0 release notes
+#+TITLE: 2.14.1 release notes
 #+OPTIONS: toc:nil num:nil
 
-These notes are built from the fragments in ~changelog.d/~.
-Each file is one user-visible change on the 2.14 lanes, in the
-towncrier form ~+slug.<type>.md~. ~docs/check_changelog.py~ renders
-them and fails if a fragment is left out or repeated.
-The notes are the changes since tag v2.13.0 (~7f310225~).
+These notes describe the user-visible changes since d-SEAMS 2.13.0.
 The upgrade from 2.13 is
 [[file:../howto/upgrade-2.14.org][the upgrade guide]].
 
-#+begin_export rst
-.. include:: release-2.14-notes.rst
-#+end_export
+# release-2.14-notes.rst is the maintainer fragment ledger, not a public page.
+
+* Analysis
+
+- The C API and language ABI expose trajectory frames, neighbour lists,
+  CHILL and CHILL+, primitive rings, cage signatures, Steinhardt order
+  parameters, symmetry labels, and per-atom results.
+- The ~seams~ command reads LAMMPS, XYZ, chemfiles, and CON trajectories
+  when the corresponding reader is enabled.
+- LAMMPS, GROMACS, OpenMM, PLUMED, and in-situ integrations can classify
+  frames from running or completed simulations.
+
+* Performance and portability
+
+- Cutoff and k-nearest neighbour searches, rings, order parameters, and
+  cage analyses use shared-memory parallelism when OpenMP is available.
+- Restricted triclinic cells use the full periodic cell, and frame ranges
+  preserve input order.
+- Optional backends include MPI, OpenMP target offload, Highway, chemfiles,
+  readcon, IRA, sphericart, spglib, and nauty.
+
+* Interfaces
+
+The stable C interface is ~include/seams.h~. C++ users can call the engine
+headers directly. Python, Lua and Fennel, R, Julia, Rust, and Fortran
+bindings are documented on [[file:../howto/bindings.org][Use a language
+binding]].

@@ -488,9 +488,15 @@ static void read_contract(const char *root) {
   truth(nframes >= 1, fn, "at least one frame");
   snprintf(path, sizeof path, "%s/tests/fixtures/malformed/mol2_empty_counts.mol2", root);
   expect(seams_path_nframes(path, &nframes), SEAMS_ERR_ARG, fn, "MOL2 with no counts line");
-  expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_RANGE, "seams_system_read",
+  expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_ARG, "seams_system_read",
          "MOL2 with no counts line");
   truth(seams_system_count(sys) == n, "seams_system_read", "a failed MOL2 read keeps the frame");
+  snprintf(path, sizeof path, "%s/tests/fixtures/malformed/mmcif_no_data.mmcif", root);
+  expect(seams_path_nframes(path, &nframes), SEAMS_ERR_ARG, fn, "mmCIF with no data block");
+  expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_ARG, "seams_system_read",
+         "mmCIF with no data block");
+  truth(seams_system_count(sys) == n, "seams_system_read",
+        "a failed mmCIF read keeps the frame");
   past_eof_contract(sys, root);
   seams_system_destroy(sys);
 }

@@ -1,11 +1,6 @@
 #+TITLE: Quickstart
 #+OPTIONS: toc:nil num:nil
 
-Install the engine, then classify one cubic cell. The C program below
-is ~meson test docs_quickstart_c~, and the five Python lines are a
-snippet test against the installed pydseamslib. Both expect 8 cubic
-molecules.
-
 * Install
 
 Meson builds the engine, ~libseams~ and the ~seams~ command from this
@@ -53,7 +48,7 @@ The program prints ~cubic 8~.
 
 Build the engine, read a frame, and print what this binary linked.
 
-The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).
+The supplied mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).
 
 * Install the engine
 
@@ -153,9 +148,9 @@ seams symmetry input/traj/mW_cubic.lammpstrj --type 1
 
 Python (~pydseamslib~, ~import dseams~ and ~import pydseams~), Lua and
 Fennel, R, Julia, Rust, and Fortran each live in their own repository and
-release against the seams-core tag with the same version.
+record the seams-core revision they build against.
 [[file:howto/bindings.org][Use a language binding]] lists them. The
-Frame tutorial is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+Frame tutorial is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 
 The full install matrix is [[file:howto/install.org][Install]].
 The mixed-frame walkthrough is [[file:tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].

@@ -20,8 +20,8 @@ export SEAMS_LIB=$SEAMS_LIB_DIR/libseams.so
 ```
 
 Pages for each front. C, C++ and the engines are built and tested here;
-the other language pages link to the binding repositories, each released
-with the same version against the seams-core tag:
+the other language pages link to their binding repositories and give the
+working install command:
 
 | front | install | tutorial |
 | --- | --- | --- |

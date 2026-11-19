@@ -1,9 +1,16 @@
 name: Release
 # A v* tag that names the meson.build version gets a GitHub release with
-# the source archive, a Linux libseams prefix built from that archive by
-# the conda recipe's script, SHA256SUMS, and the tag's CHANGELOG.md
-# section as notes. GITHUB_TOKEN is the only credential; nothing is
-# published to a package registry.
+# the source archive, a Linux libseams prefix built from that archive
+# inside a manylinux_2_28 image, SHA256SUMS, and release notes. Fresh
+# containers test that archive before it is uploaded: a C quickstart
+# linked through pkg-config on Debian 12, the same program on the
+# archive rpath, dseams from crates.io on rust:1.85, and
+# dseams-fortran `fpm test` on Ubuntu 24.04. Ubuntu 22.04, Rocky Linux 9
+# and Debian 12 each unpack that same tarball, compile
+# docs/examples/quickstart.c with pkg-config, and run it on an ice frame.
+# The upload waits for both jobs.
+# GITHUB_TOKEN is the only credential;
+# nothing is published to a package registry.
 on:
   push:
     tags: ["v*"]
@@ -21,6 +28,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.version.outputs.version }}
+      tarball_sha256: ${{ steps.checksums.outputs.tarball_sha256 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -32,48 +40,52 @@ jobs:
         run: |
           python3 scripts/check_release_version.py --tag "$TAG_NAME"
           echo "version=$(python3 scripts/check_release_version.py --print)" >> "$GITHUB_OUTPUT"
-      - name: Toolchain
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y g++ ninja-build pkg-config libeigen3-dev
-          pipx install meson
       - name: Source archive
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          mkdir dist
-          git archive --format=tar --prefix="seams-core-${VERSION}/" HEAD | gzip -9n > "dist/seams-core-${VERSION}.tar.gz"
-      - name: Build libseams from the archive with the conda recipe script
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ meson ninja-build pkg-config libeigen3-dev git curl ca-certificates
+          rustup_sha256=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+          curl --proto '=https' --tlsv1.2 -fsS \
+            -o "$RUNNER_TEMP/rustup-init" \
+            https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init
+          echo "${rustup_sha256}  $RUNNER_TEMP/rustup-init" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/rustup-init"
+          export CARGO_HOME="$RUNNER_TEMP/cargo"
+          export RUSTUP_HOME="$RUNNER_TEMP/rustup"
+          "$RUNNER_TEMP/rustup-init" -y --default-toolchain none --profile minimal
+          . "$CARGO_HOME/env"
+          rustup toolchain install 1.88.0 --profile minimal
+          rustup default 1.88.0
+          meson subprojects download
+          meson setup build-dist -Dwith_tests=false -Dwith_chemfiles=disabled
+          meson dist -C build-dist --include-subprojects --formats gztar --no-tests
+          mkdir -p dist
+          cp "build-dist/meson-dist/seams-core-${VERSION}.tar.gz" dist/
+      - name: Linux archive on glibc 2.28
+        env:
+          OUT_DIR: ${{ github.workspace }}/dist
+        run: |
+          docker run --rm \
+            -e OUT_DIR \
+            -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+            -w "$GITHUB_WORKSPACE" \
+            quay.io/pypa/manylinux_2_28_x86_64 \
+            bash scripts/build_linux_release.sh
+      - name: Checksums
+        id: checksums
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          mkdir "$RUNNER_TEMP/src"
-          tar -C "$RUNNER_TEMP/src" -xzf "dist/seams-core-${VERSION}.tar.gz"
-          cd "$RUNNER_TEMP/src/seams-core-${VERSION}"
-          PREFIX="$RUNNER_TEMP/libseams-${VERSION}" CPU_COUNT="$(nproc)" bash recipe/build-libseams.sh
-      # The recipe's tests, run on the plain install. The loader path stays
-      # unset: the programs and libraries find each other by runpath.
-      - name: Test the installed prefix
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          prefix="$RUNNER_TEMP/libseams-${VERSION}"
-          for f in lib/libseams.so lib/libseams_lang.so lib/libyodaLib.so include/seams.h include/seams_version.h include/seams/seams_lang.h bin/seams lib/pkgconfig/seams.pc lib/pkgconfig/seams-core.pc lib/cmake/seams/seams-config.cmake; do
-            test -e "$prefix/$f" || { echo "missing $f"; exit 1; }
-          done
-          test "$(env -u LD_LIBRARY_PATH "$prefix/bin/seams" --version)" = "seams ${VERSION}"
-          export PKG_CONFIG_PATH="$prefix/lib/pkgconfig"
-          test "$(pkg-config --modversion seams)" = "${VERSION}"
-          read -ra seams_flags <<< "$(pkg-config --cflags --libs seams)"
-          cc docs/examples/quickstart.c "${seams_flags[@]}" -lm -Wl,-rpath,"$prefix/lib" -o "$RUNNER_TEMP/quickstart"
-          env -u LD_LIBRARY_PATH "$RUNNER_TEMP/quickstart"
-      - name: Package the prefix
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          tar -C "$RUNNER_TEMP" -czf "dist/libseams-${VERSION}-linux-x86_64.tar.gz" "libseams-${VERSION}"
+          set -euo pipefail
           (cd dist && sha256sum -- *.tar.gz > SHA256SUMS)
           cat dist/SHA256SUMS
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          sum=$(sha256sum "$file")
+          echo "tarball_sha256=${sum%% *}" >> "$GITHUB_OUTPUT"
       - name: Release notes
         env:
           VERSION: ${{ steps.version.outputs.version }}
@@ -85,7 +97,16 @@ jobs:
           start = text.index(f"## [{ver}]")
           nxt = text.find("\n## [", start + 1)
           body = text[start:] if nxt < 0 else text[start:nxt]
-          pathlib.Path("dist/release-notes.md").write_text(body.strip() + "\n")
+          note_path = pathlib.Path("dist/linux-archive-note.md")
+          note = note_path.read_text().strip()
+          if not note:
+              raise SystemExit("linux archive note is empty")
+          for required in ("glibc", "seams.pc", "dseams"):
+              if required not in note:
+                  raise SystemExit("linux archive note is missing " + required)
+          pathlib.Path("dist/release-notes.md").write_text(
+              body.strip() + "\n\n" + note + "\n"
+          )
           PY
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -93,8 +114,106 @@ jobs:
           path: dist/
           if-no-files-found: error
 
-  publish:
+  test-tarball:
     needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Install and run the archive in fresh containers
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
+        run: |
+          set -euo pipefail
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          got=$(sha256sum "$file")
+          got=${got%% *}
+          if [[ -z $TARBALL_SHA256 || $got != "$TARBALL_SHA256" ]]; then
+            printf '%s\n' "artifact sha256 ${got} does not match the build output ${TARBALL_SHA256}" >&2
+            exit 1
+          fi
+          printf '%s\n' "tarball sha256 ${got}"
+          printf '%s\n' "testing debian:12 C quickstart"
+          docker run --rm -i \
+            -e VERSION \
+            -e CHECK=c \
+            -e QUICKSTART="$GITHUB_WORKSPACE/quickstart.c" \
+            -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
+            -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -v "$GITHUB_WORKSPACE/docs/examples/quickstart.c:$GITHUB_WORKSPACE/quickstart.c:ro" \
+            -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
+            -w "$GITHUB_WORKSPACE" \
+            debian:12 \
+            bash -s < scripts/test_libseams_tarball.sh
+          printf '%s\n' "testing rust:1.85 dseams"
+          docker run --rm -i \
+            -e VERSION \
+            -e CHECK=rust \
+            -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
+            -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
+            -w "$GITHUB_WORKSPACE" \
+            rust:1.85 \
+            bash -s < scripts/test_libseams_tarball.sh
+          printf '%s\n' "testing ubuntu:24.04 dseams-fortran"
+          docker run --rm -i \
+            -e VERSION \
+            -e CHECK=fortran \
+            -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
+            -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+            -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
+            -w "$GITHUB_WORKSPACE" \
+            ubuntu:24.04 \
+            bash -s < scripts/test_libseams_tarball.sh
+
+  test-distros:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release
+          path: dist
+      - name: Quickstart on Ubuntu 22.04, Rocky Linux 9 and Debian 12
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
+        run: |
+          set -euo pipefail
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          got=$(sha256sum "$file")
+          got=${got%% *}
+          if [[ -z $TARBALL_SHA256 || $got != "$TARBALL_SHA256" ]]; then
+            printf '%s\n' "artifact sha256 ${got} does not match the build output ${TARBALL_SHA256}" >&2
+            exit 1
+          fi
+          printf '%s\n' "tarball sha256 ${got}"
+          for image in ubuntu:22.04 rockylinux:9 debian:12; do
+            printf '%s\n' "testing ${image} C quickstart on an ice frame"
+            docker run --rm -i \
+              -e VERSION \
+              -e CHECK=c \
+              -e QUICKSTART="$GITHUB_WORKSPACE/quickstart.c" \
+              -e CONSUMERS="$GITHUB_WORKSPACE/linux_tarball_consumers" \
+              -v "$GITHUB_WORKSPACE/dist:$GITHUB_WORKSPACE/dist:ro" \
+              -v "$GITHUB_WORKSPACE/docs/examples/quickstart.c:$GITHUB_WORKSPACE/quickstart.c:ro" \
+              -v "$GITHUB_WORKSPACE/scripts/linux_tarball_consumers:$GITHUB_WORKSPACE/linux_tarball_consumers:ro" \
+              -w "$GITHUB_WORKSPACE" \
+              "$image" \
+              bash -s < scripts/test_libseams_tarball.sh
+          done
+
+  publish:
+    needs: [build, test-tarball, test-distros]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -108,7 +227,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG_NAME: ${{ github.ref_name }}
           VERSION: ${{ needs.build.outputs.version }}
+          TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
         run: |
+          set -euo pipefail
+          file="dist/libseams-${VERSION}-linux-x86_64.tar.gz"
+          got=$(sha256sum "$file")
+          got=${got%% *}
+          if [[ -z $TARBALL_SHA256 || $got != "$TARBALL_SHA256" ]]; then
+            printf '%s\n' "artifact sha256 ${got} does not match the build output ${TARBALL_SHA256}" >&2
+            exit 1
+          fi
+          printf '%s\n' "tarball sha256 ${got}"
           assets=("dist/seams-core-${VERSION}.tar.gz" "dist/libseams-${VERSION}-linux-x86_64.tar.gz" dist/SHA256SUMS)
           if gh release view "$TAG_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release upload "$TAG_NAME" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber

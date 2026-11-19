@@ -2,8 +2,8 @@
 
 This file is the working contract for anyone changing this repository. The
 README is for users of the engine; this file is for people editing it.
-`docs/orgmode/contributing/index.org` is the long form, and
-`docs/orgmode/contributing/repositories.org` maps the other d-SEAMS
+`MAINTAINERS/docs.org` is the long form, and
+`MAINTAINERS/repositories.org` maps the other d-SEAMS
 repositories.
 
 ## What lives here and what does not
@@ -79,8 +79,9 @@ Tests to know by name:
 | `docs_video_tapes` | The recording tapes whose sources live here replay and match `recorded.txt` |
 
 The Python snippets in the docs import `dseams` and `pydseams` from the
-installed `pydseamslib` of the same version
-(`pip install pydseamslib==2.14.0`, or a build of d-SEAMS/PydSEAMSlib).
+installed `pydseamslib` built against this tree
+(`pip install "pydseamslib==$(python3 scripts/project_version.py)"`, or
+`sh scripts/install_pydseamslib.sh` for a source build).
 A `docs_snippet_` test fails, naming that pip line, when the package is
 missing. A test that exits 77 is a skip because an optional toolchain or
 input is absent.
@@ -109,12 +110,12 @@ python3 scripts/gen_llms_txt.py
   with type `added`, `changed`, `deprecated`, `removed`, `fixed` or
   `security`, in the same commit. `docs_changelog` refuses a duplicate or
   a misnamed fragment. The release cut renders them with towncrier
-  (`docs/orgmode/contributing/release.org`).
+  (`MAINTAINERS/release.org`).
 - ASCII punctuation in source, docs and commit messages.
 
 ## Releases
 
 `RELEASING.md` is the seams-core cut: tag, GitHub release, conda
 `libseams`, `libseams_jll`. Each binding releases afterwards from its own
-repository against the tag; `docs/orgmode/contributing/repositories.org`
+repository against the tag; `MAINTAINERS/repositories.org`
 has the order.

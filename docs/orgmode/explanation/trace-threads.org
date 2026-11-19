@@ -1,22 +1,7 @@
 #+TITLE: Signature-search thread controls
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
-Commit ~9896a478~ on ~perf/trace-threads~ retimes the hydrate signature
-search at 1, 2, 4 and 8 threads, after the pool and the row placement
-changed. The census at every width is the one-thread census. The rows
-are ~benchmarks/trace-threads.csv~ in the benchmark records dataset; the
-tables below are rendered from it, with each median and type-7
-interquartile range recomputed from ~samples_ms~.
-
 * The process
-
-~scripts/paper_stats.py~ builds the environment for one width \(n\):
 
 | variable | value |
 |----------+-------|
@@ -32,8 +17,7 @@ The process is pinned with ~taskset -c 0~ when \(n = 1\), and with
 remain. The median of an even count is the mean of the two central
 samples. The interquartile range is the type-7 upper quartile minus
 the lower one. ~cores~ is the size of the affinity set. ~affinity~ is
-~Cpus_allowed_list~. The ~commit~ column is the source commit the
-sitting recorded.
+~Cpus_allowed_list~.
 
 * One pool, then the search
 
@@ -77,44 +61,84 @@ Membership is the sorted atom ids of each face, not the ring index.
 ~seams_set_num_threads~ is the installed way to set the OpenMP width
 the next search reads.
 
+* Placement when the host does not bind
+
+An unbound team leaves every worker free to migrate. A barrier then
+waits for a worker the scheduler has parked, and a call of a few
+milliseconds stretches by tens of milliseconds. Forcing an active spin
+makes that stall the common case, so the library does not set
+~OMP_WAIT_POLICY~.
+
+~seams::PinSession~ places the team for the enclosing call and restores
+each worker's previous affinity when the call returns. Workers do not
+stay pinned. A lone team narrower than the mask is not placed: it has
+free cpus to move to, and a pinned worker would wait out anything else
+that lands on its cpu. ~SEAMS_PIN=0~ skips placement. Placement adds no cpu
+outside the host mask. A caller already bound to one cpu, or a process whose
+~OMP_PROC_BIND~, ~OMP_PLACES~, ~GOMP_CPU_AFFINITY~ or ~KMP_AFFINITY~
+chooses places, is left to that choice. ~KMP_AFFINITY=none~ and
+~KMP_AFFINITY=disabled~ do not count as a choice.
+
+Several copies of the same program that share a parent, and another
+copy that is on a cpu, divide the mask. Each keeps a disjoint slice and
+the team is narrowed to that slice, so two eight-thread processes on
+eight cpus do not both pin worker ~i~ to cpu ~i~. Linkcell's pool reads
+the same slice (~lc_set_places~) instead of inheriting the caller's
+single cpu. A pool that has already started keeps the cpus it was built
+with.
+
+* Calls on a crowded machine
+
+~seams::team::run~ (~src/include/internal/team_run.hpp~) runs a call as
+stages of chunks in one parallel region. Every chunk of a stage returns
+before the next stage starts. The orthorhombic cutoff list, cutoff
+\(q_4\) and \(q_6\), the CHILL+ bonds and labels, and the shell match
+use it. The k-nearest graph runs all of its passes in one linkcell
+search region.
+
+On a machine the caller has to itself the region is one OpenMP team,
+one static loop per stage, each thread on one contiguous run of chunks.
+Linkcell's pool is not started. A stage has one chunk per OpenMP
+thread.
+
+While other processes keep half of the caller's cpus busy or more, the
+region is linkcell's ~lc_team_run~. The caller is one of the workers, a
+chunk is claimed from a counter, and a stage closes when its last
+claimed chunk returns, so a worker the scheduler has not run holds up
+nothing it has not claimed. A stage has two chunks per worker.
+
+The load is read from ~/proc/stat~: the busy time of the caller's cpus
+less this process's own cpu time, averaged over at least 0.1 s. The
+first look counts runnable threads instead. A count that would narrow a
+full team is taken three times, 2 ms apart, and the lowest kept. One
+count in a few on an idle machine read a thread that was runnable for a
+moment, and the team ran on seven of eight cpus.
+
+* Contended cores
+
+With all eight cores shared by an eight-thread competing process,
+each result uses eight processes of ten samples. At 110592 molecules,
+the k-nearest graph takes 20.0 ms bound and 19.1 ms unbound, against
+OVITO at 28.2 and 28.3 ms. \(q_6\) takes 12.2 and 11.1 ms against
+OVITO at 23.6 and 23.2 ms. CHILL+ takes 17.1 ms and the shell match
+takes 18.2 ms. Hartigan's dip test on the eight per-process medians
+of each row gives \(p > 0.09\).
+
 * Every kernel
 
-Commit ~848426f9~ sizes the team on every kernel. ~caeb71f8~ puts the
-one-thread carried update back on a direct copy and sort, binds a
-narrowed team to that many cores, and skips the periodic shift inside
-an interior cutoff cell. ~1ce3be3b~ retimes the same eight kernels
-after that change. The rows are ~benchmarks/pool-audit.csv~. The
-~commit~ column is ~caeb71f8~. Eight kernels run on ideal ice Ic:
-primitive rings, local and cutoff \(q_4\) and \(q_6\), CHILL+, the
-shell label, and one carried hop-ball update. The sizes are 4096,
-32768, 110592 and 884736 molecules. Each size is 32 rows, the eight
-kernels at 1, 2, 4 and 8 threads. One warm-up, then eight timed calls.
-The fingerprint of a kernel is the same at every width. ~meson test
-docs_pool_audit~ recomputes each median and type-7 interquartile range
-from ~samples_ms~.
-
 The rings kernel is ~primitive::ringNetwork~ on a neighbour graph built
-before the timer starts. It is not the full cutoff call. The rings row
-of ~benchmarks/paper-cells/sitting-large.csv~ is ~seams_frame_rings~,
-which builds the cutoff list and then searches the rings. Those two
-rows are not the same measurement.
+before the timer starts. It is not the full cutoff call.
+~seams_frame_rings~ builds the cutoff list and then searches the rings,
+so those two rows are not the same measurement.
 
 * The full cutoff ring call
 
 Several threads inside ~neighListLinkcell~ build an orthorhombic or
 triclinic cutoff list with the cell-list CSR. One thread still uses
 linkcell's buffered walk. The rows are the same sorted cutoff set, so
-the ring search matches across thread counts. ~cad887b2~ times that
-full call, the neighbour list plus the index conversion plus the
-depth-6 search, on ice Ic at 884736 molecules. It is interleaved with
-the ~1ce3be3b~ builder. Each sample is the last of three repeats in a
-fresh process. The table is ~benchmarks/cutoff-rings.csv~. ~link~ is
-the neighbour-list build. This sitting is not the ~ringNetwork~ kernel
-above, and it is not the rings row of the 884736-molecule sitting.
-
-#+begin_export rst
-.. include:: cutoff-rings-tables.rst
-#+end_export
+the ring search matches across thread counts. The full call includes
+the neighbour list, index conversion, and depth-6 ring search. It is
+not the ~ringNetwork~ kernel above.
 
 ~seams::teamFor~ is the width of a per-atom walk. Below 2048 atoms it
 is one thread. Below 8192 atoms, when the caller asked for more than
@@ -172,5 +196,4 @@ replaced by ~teamFor~.
 :doc:`/stable/c` names ``seams_set_num_threads`` and ``seams_get_num_threads``.
 
 .. include:: trace-threads-tables.rst
-.. include:: pool-audit-tables.rst
 #+end_export

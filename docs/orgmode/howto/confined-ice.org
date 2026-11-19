@@ -13,12 +13,12 @@ Use a scripting front end:
 - Lua examples under ~example_lua/iceNanotube/~ in
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
 - ~Frame.find_prisms~ and ~Frame.monolayer_rings~ in
-  [[https://d-seams.github.io/PydSEAMSlib/][pydseams]]
+  [[https://python.dseams.info/][pydseams]]
 
 External dumps (figshare project 73545):
 ~Quasi-1D_Nanotube_LAMMPS_Trajectory~ and
 ~Monolayer_LAMMPS_Trajectory~. This repository does not ship those
 files and does not pin prism counts.
 
-For the in-tree mixed TIP4P dump, start with
+For the supplied mixed TIP4P dump, start with
 [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].

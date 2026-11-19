@@ -96,4 +96,5 @@ The table is milliseconds, median and interquartile range.
    | lua | 1002.424 (18.117) | 1552.125 (5.559) |  |  |  |  |
    | ovito | 20.977 (0.993) | 19.223 (0.599) |  |  |  |  |
 
-``benchmarks/binding-overhead.csv`` is the summary. The sample log is written beside the generated cells and is not stored in git. ``python3 scripts/bench_binding_overhead.py`` repeats the session. The Snakemake rule ``binding_overhead`` calls that script.
+The table reports the median of eight repeats after one warmup, with
+the interquartile range in parentheses.

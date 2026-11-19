@@ -1,8 +1,7 @@
 .. list-table::
    :header-rows: 0
 
-   * - Rendered from ``benchmarks/cutoff-rings.csv``.
-       Ice Ic at 884736 molecules. ``linkcell`` is the 1ce3be3b builder.
+   * - Ice Ic at 884736 molecules. ``linkcell`` is the buffered cell-list builder.
        ``cell-list`` is the orthorhombic list inside the ring call.
        ``total`` medians are recomputed from ``samples_ms``.
 

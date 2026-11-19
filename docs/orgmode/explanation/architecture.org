@@ -9,20 +9,12 @@ vesin is the fallback when linkcell is not built.
 |------------+---------+------|
 | [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~, ~libseams~, ~libseams_lang~ | Engine, CLI, C API, language ABI, engine plugins |
 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ | Python: ~import dseams~ and ~import pydseams~ |
-| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ | Lua and Fennel: ~require("dseams")~ |
+| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source | Lua and Fennel: ~require("dseams")~ |
 | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ | R package |
 | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | Julia packages over ~libseams_jll~ |
 | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | ~dseams-sys~, ~dseams~ | Rust crates |
-| [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ | Fortran modules |
+| [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ | Fortran modules |
 | [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell neighbours |
-
-Each binding pins a seams-core tag, builds or links ~libseams~ and
-~libseams_lang~ from it, and releases with the same version. PydSEAMSlib
-and yodaStruct take seams-core as a Meson subproject; the others build it
-at the pin in their CI or link an installed copy. No binding carries a
-second engine implementation. Building the engine needs no language
-toolchain beyond C and C++. [[file:../contributing/repositories.org][The
-repository map]] lists the pins and the release order.
 
 #+begin_export rst
 .. mermaid::
@@ -83,6 +75,15 @@ the table. Keys: ~SEAMS_FRAME~ / ~LAST~ / ~JOBS~ / ~TYPE~ /
 ~CUTOFF~ / ~K~ / ~GRAPH~ / ~RESIDENT~ / ~CELL~ / ~OFFLOAD~,
 ~LINKCELL_TPP~ / ~BLOCK~, ~YODA_FENNEL_PATH~ / ~YODA_LUA_PATH~.
 Analysis choice is not this table.
+
+On glibc the first library call raises the heap trim threshold to
+256 MiB and the mmap threshold to 32 MiB. With the defaults, the
+buffers one call freed went back to the kernel and were faulted in
+again by the next call, and the same call varied by 10 to 30 percent
+between runs. glibc has one heap per process, so the setting holds
+for the caller too. ~SEAMS_MALLOC_TUNE=0~ in the process environment
+leaves malloc untouched. A caller that already set ~MALLOC_*_~ or a
+~glibc.malloc~ tunable keeps its own values.
 
 * Ice score and the CHILL+ star
 

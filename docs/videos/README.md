@@ -20,3 +20,7 @@ The PNG files are not committed. Odysee hosts the finished recordings.
 `docs/videos/<slug>/embed.txt` is where the claim id goes once the
 upload exists. Until that line is present, the docs render no player
 for the slug.
+
+Keep each draft VTT file under `docs/videos/<slug>/`. Captions may be
+burned into the finished upload. A later narration mix uses ffmpeg with
+`-c:a aac -aac_coder fast`.

@@ -28,8 +28,3 @@ seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
 seams rings input/traj/ice1h.lammpstrj --cutoff 3.5
 seams steinhardt input/traj/ice1h.lammpstrj --cutoff 3.5 --l 6
 #+end_src
-
-A length-3 box is stored as ~0, 0, 0, lx, ly, lz, 0, 0, 0~. The nine
-LAMMPS numbers are passed through. ~meson test docs_engine_insitu~
-reads this dump through ~libseams_lang~ and checks the hexagonal count
-and the six-ring bin. It exits 77 when that library was not built.

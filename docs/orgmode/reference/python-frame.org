@@ -8,7 +8,7 @@
 ~dseams.userframe.read~ in pydseamslib 2.14.0 returns a ~Frame~ over
 ~libseams_lang~. The examples import it under the name ~pydseams~; the
 top-level ~import pydseams~ is the 2.11 ~yoda~ Frame, whose reference
-is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 Each call below is the example the suite runs, and the line under it is
 the output. The frame is
 ~input/traj/ice1h.lammpstrj~, 128 oxygens.
@@ -96,9 +96,9 @@ the output. The frame is
 'System'
 #+end_src
 
-* In-tree ~dseams.Frame~
+* Array-based ~dseams.Frame~
 
-~import dseams~ is the module built in this tree. ~dseams.Frame~ stores
+~import dseams~ is the module built in the supplied examples. ~dseams.Frame~ stores
 a coordinate array. ~dseams.from_ase~ returns positions and a LAMMPS
 cell, which ~set_frame~ accepts. The calls below are the ice Ih cell
 from the Python recording: 128 waters, 512 neighbour entries, 256

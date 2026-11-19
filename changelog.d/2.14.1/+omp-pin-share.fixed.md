@@ -1,0 +1,1 @@
+Worker placement now stays inside the host mask and is undone when the call returns. `SEAMS_PIN=0` leaves placement to the host. `OMP_PROC_BIND`, `OMP_PLACES`, `GOMP_CPU_AFFINITY`, `KMP_AFFINITY`, and a caller already bound to one cpu are left as the host set them. Several copies of the program share the mask in disjoint slices instead of all pinning worker i to cpu i.

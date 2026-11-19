@@ -1,7 +1,7 @@
 #+TITLE: Classify ice on the mixed TIP4P example
 #+OPTIONS: toc:nil num:nil
 
-You classify one in-tree frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
+You classify one supplied frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
 The result is a labeled oxygen set and a reason the two scores disagree.
 
 * Prerequisites
@@ -9,10 +9,10 @@ The result is a labeled oxygen set and a reason the two scores disagree.
 - A seams-core checkout.
   Work from the repository root so ~input/traj/~ is a child.
 - ~seams~ on ~PATH~ (~pixi run build~ produces ~./bbdir/seams~; ~nix build~ produces ~./result/bin/seams~).
-- The in-tree dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
+- The supplied dump ~input/traj/exampleTraj.lammpstrj~ (one frame, 750 atoms, 250 TIP4P waters; LAMMPS type 2 oxygen, type 1 hydrogen).
 
 Python is only needed for Step 6, which uses the pydseamslib package.
-The Frame tutorial lives in [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib]].
+The Frame tutorial lives in [[https://python.dseams.info/][PydSEAMSlib]].
 
 * Learning Objectives
 
@@ -157,23 +157,24 @@ CageScore(n_ih=0, n_ic=0, n_water=250)
 #+end_example
 
 Those counts are the cutoff list, the same list as Step 2.
-The Frame walkthrough is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+The Frame walkthrough is in the [[https://python.dseams.info/][PydSEAMSlib documentation]].
 
 * Troubleshooting
 
 - ~nop 0~ or an empty histogram: wrong ~--type~.
-  Mixed TIP4P in this tree is type 2.
+  Mixed TIP4P in the supplied examples is type 2.
   mW is type 1.
 - Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
   Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
 - ~ModuleNotFoundError: pydseams~: install the binding with
-  ~pip install 'pydseamslib==2.14.0'~.
+  ~pip install 'pydseamslib==2.14.0'~ or the source-install
+  script above.
 
 * Next steps
 
 - [[file:../howto/classify-cli.org][Classify a dump you already have]] (frame ranges, ~--graph~, ~--jobs~)
 - [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]]
-- [[https://d-seams.github.io/PydSEAMSlib/][pydseams Frame tutorial]]
+- [[https://python.dseams.info/][pydseams Frame tutorial]]
 - [[file:../howto/bindings.org][The other language bindings]]
 
 * Summary

@@ -1,26 +1,14 @@
 .. list-table::
    :header-rows: 0
 
-   * - Rendered from the four CSVs.
-       ``ratio`` is the threads=1 median divided by the threads=8 median.
+   * - ``ratio`` is the threads=1 median divided by the threads=8 median.
        ``flat`` means that ratio is between 0.95 and 1.05.
-       A PLUMED row in the rc3 table says ``one thread; PLUMED_NUM_THREADS unset``.
+       A PLUMED row marked ``one thread; PLUMED_NUM_THREADS unset`` used one thread.
        Both of its columns were measured on one thread because that variable was unset.
        The large-cell PLUMED row set ``PLUMED_NUM_THREADS``, so it is not that label.
 
-What each file holds
-^^^^^^^^^^^^^^^^^^^^
-
-.. csv-table::
-   :header: file, rows, threads, molecules
-
-   rc3-sitting.csv, 116, 1 8, 46 136 368 1000 4096 10648 21952 32768 64000 110592 884736
-   sitting-large.csv, 208, 1 2 4 8, 884736
-   trace-threads.csv, 32, 1 2 4 8, 368 1088 2944 8704 9936 23552 29376 69632
-   pool-audit.csv, 128, 1 2 4 8, 4096 32768 110592 884736
-
-rc3 sitting, one thread against eight
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+One thread against eight
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. csv-table::
    :header: code, operation, molecules, t1_ms, t8_ms, ratio, with_threads

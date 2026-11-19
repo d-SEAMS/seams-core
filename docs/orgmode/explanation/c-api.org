@@ -75,14 +75,6 @@ origin, edge lengths, then xy, xz, yz.
 
 * OVITO and freud
 
-=tests/capi_ovito_freud.py= calls =libseams= through ctypes. The frames
-are ice Ih, ice Ic, sI, the TIP4P/ice liquid of 4096 oxygens, the brine
-slab, and the nucleation frame. The test exits with an error when
-=freud= or =ovito= cannot be imported. Pixi installs the PyPI packages
-=freud-analysis= and =ovito= into the default environment, and the
-=crosscheck= feature repeats those two pins. The =capi-crosscheck=
-job is the run that installs that feature.
-
 | quantity | agreement |
 |----------+-----------|
 | cutoff neighbours at 3.5 Å | identical rows on all six frames |
@@ -168,8 +160,3 @@ Meson installs =seams.h=, =seams_version.h=, =libseams.so=,
 #+begin_src sh
 pkg-config --cflags --libs seams
 #+end_src
-
-=examples/c= is a small C program that builds against that install,
-either with pkg-config or with =find_package(seams)= and the imported
-target =seams::seams=. =meson test c_api_installed= installs into the
-build tree and compiles that program both ways.

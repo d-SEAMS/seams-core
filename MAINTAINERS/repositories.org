@@ -3,20 +3,20 @@
 
 d-SEAMS is seven repositories. This one, seams-core, holds the engine and
 everything that has to change with it. Each language binding is a separate
-repository that builds against a seams-core tag and releases with the same
-version number.
+repository that records the seams-core revision it builds against. A
+binding's registry publication is a separate release step.
 
 * What lives where
 
-| Repository | Holds | Publishes |
+| Repository | Holds | Available route |
 |------------+-------+-----------|
-| [[https://github.com/d-SEAMS/seams-core][d-SEAMS/seams-core]] | The C++ engine (~libyodaLib~), the C API ~libseams~ (=include/seams.h=), the C ABI ~libseams_lang~ (=bindings/cxx/seams_lang.h=), the ~seams~ command, the engine drivers (=engines/=, =adapters/python= ~dseams_insitu~), the C and C++ documentation, the science scripts, the videos, the conda recipe (=recipe/=) and the Yggdrasil recipe for ~libseams_jll~ (=packaging/yggdrasil=) | The ~vX.Y.Z~ tag, the GitHub release, conda ~libseams~, ~libseams_jll~, https://docs.dseams.info |
-| [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]] | The Python binding: ~import dseams~ (array calls) and ~import pydseams~ (the Frame API), with their tests and docs | ~pydseamslib~ on PyPI |
-| [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]] | The Lua and Fennel binding, ~require("dseams")~ | LuaRocks ~dseams~ |
-| [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]] | The R package ~dseams~ | The R source package |
-| [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]] | The Julia packages ~Dseams~ (over ~libseams_lang~) and ~Seams~ (over ~libseams~) | The Julia General registry, through ~libseams_jll~ |
-| [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]] | The crates ~dseams-sys~ (raw FFI over =seams.h=) and ~dseams~ (safe wrapper) | crates.io |
-| [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | The Fortran modules ~seams_c~ and ~seams~ | The fpm package ~dseams~ |
+| [[https://github.com/d-SEAMS/seams-core][d-SEAMS/seams-core]] | The C++ engine (~libyodaLib~), the C API ~libseams~ (=include/seams.h=), the C ABI ~libseams_lang~ (=bindings/cxx/seams_lang.h=), the ~seams~ command, the engine drivers (=engines/=, =adapters/python= ~dseams_insitu~), the C and C++ documentation, the science scripts, the videos, the conda recipe (=recipe/=) and the Yggdrasil recipe for ~libseams_jll~ (=packaging/yggdrasil=) | Source checkout and GitHub release tarball; conda-forge and ~libseams_jll~ are coming |
+| [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]] | The Python binding: ~import dseams~ (array calls) and ~import pydseams~ (the Frame API), with their tests and docs | Source checkout; the @PROJECT_VERSION@ PyPI upload is in progress |
+| [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]] | The Lua and Fennel binding, ~require("dseams")~ | Source checkout; LuaRocks registration is coming |
+| [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]] | The R package ~dseams~ | Source checkout or GitHub release source tarball; CRAN and r-universe are coming |
+| [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]] | The Julia packages ~Dseams~ (over ~libseams_lang~) and ~Seams~ (over ~libseams~) | Git dependency; Julia General and ~libseams_jll~ are coming |
+| [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]] | The crates ~dseams-sys~ (raw FFI over =seams.h=) and ~dseams~ (safe wrapper) | Git dependency |
+| [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | The Fortran modules ~seams_c~ and ~seams~ | fpm Git dependency |
 
 A change belongs in seams-core when it touches a classifier, a reader, the
 neighbour list, =seams.h=, =seams_lang.h=, the CLI, or an engine driver. A
@@ -41,12 +41,12 @@ commit on a release branch.
 | dseams-rs | =seams-core.env= (~SEAMS_CORE_REPO~, ~SEAMS_CORE_REF~), read by CI and =dseams-sys/vendor.py= | seams-core at the pin, then ~cargo test~ |
 | dseams-fortran | ~SEAMS_CORE_REPOSITORY~ and ~SEAMS_CORE_REF~ in =.github/workflows/ci.yml= | seams-core at the pin, installed, then ~fpm test~ |
 
-The binding's own version is the seams-core version it binds:
-~pydseamslib==2.14.0~ calls the 2.14.0 engine. This repository's tests do
-not build any binding. The C ABI tests (~meson test seams_lang_fixtures
+The binding pin, not an assumed matching package version, says which
+seams-core revision it binds. This repository's tests do not build any
+binding. The C ABI tests (~meson test seams_lang_fixtures
 seams_lang_frames~) are the contract the bindings rely on. The core docs
-run their Python snippets against the installed ~pydseamslib~ of the same
-version, which the Docs workflow installs from the matching PydSEAMSlib tag.
+run their Python snippets against PydSEAMSlib built from its source
+repository by ~scripts/install_pydseamslib.sh~.
 
 * Release order
 
@@ -59,8 +59,8 @@ version, which the Docs workflow installs from the matching PydSEAMSlib tag.
 3. Dseams.jl, after ~libseams_jll~ ~X.Y.Z~ is merged in Yggdrasil and
    registered.
 
-The core Docs workflow installs ~pydseamslib~ from the PydSEAMSlib ~vX.Y.Z~
-tag, so the published core docs follow step 2 for Python.
+The core Docs workflow installs ~pydseamslib~ from PydSEAMSlib source
+against the current seams-core checkout.
 
 * Develop seams-core and a binding together
 

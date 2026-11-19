@@ -18,10 +18,6 @@ census. `rings` prints the primitive-ring histogram. On this cell those
 lines are `nop 46`, coordination over 46 oxygens, `q6 0.595`, `clathrate 46`,
 and `6 54`.
 
-`docs/examples/minimal_cli.sh` runs those five
-commands. `meson test docs_examples` runs it.
-`require("dseams")` is the Lua module over `seams.h`. `examples/chill-plus.lua` is the options table passed as the CHILL+ rule.
-
 ```{literalinclude} ../../../docs/examples/minimal_cli.sh
 :language: bash
 ```

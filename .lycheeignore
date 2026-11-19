@@ -2,6 +2,7 @@
 https://pubs\.acs\.org/
 https://onlinelibrary\.wiley\.com/
 https://pubs\.aip\.org/
+https://aip\.scitation\.org/
 https://www\.tandfonline\.com/
 https://journals\.aps\.org/
 https://link\.aps\.org/
@@ -19,3 +20,6 @@ https://doi\.org/10\.1103/
 # The Wilf notes host returns 403, including to a browser user agent.
 https://www\.math\.upenn\.edu/~wilf/
 https://www2\.math\.upenn\.edu/~wilf/
+
+# Source templates: meson fills @PROJECT_VERSION@ when it configures.
+@PROJECT_VERSION@

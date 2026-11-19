@@ -114,6 +114,28 @@ endif
 # and that copy's lc_set_threads won the dynamic lookup, so the width never
 # reached the searches libyodaLib runs. yds_dep therefore passes the
 # linkcell headers alone.
+# cutoffSolid calls ylmAdd8 only on x86-64. At -O0 a compiler keeps that
+# call even when the flag in front of it is constant false, and the
+# arm64 link then misses the symbol. This archive is the same file
+# without SEAMS_YLM_AVX512, at -O0, so the check does not need an arm64
+# machine.
+if get_option('with_tests')
+  _ylm_probe_args = []
+  foreach _ylm_arg : _args
+    if _ylm_arg != '-DSEAMS_YLM_AVX512=1'
+      _ylm_probe_args += _ylm_arg
+    endif
+  endforeach
+  ylm_o0_probe = static_library(
+    'ylm_o0_probe',
+    'steinhardt_parallel.cpp',
+    cpp_args: _ylm_probe_args,
+    override_options: ['optimization=0'],
+    include_directories: _incdirs,
+    dependencies: _deps,
+  )
+endif
+
 ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps + (linkcell_dep.found() ? [linkcell_dep] : []),

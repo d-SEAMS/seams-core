@@ -27,6 +27,8 @@ import re
 import sys
 from pathlib import Path
 
+from project_version import project_version
+
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 ORG = DOCS / "orgmode"
@@ -35,31 +37,46 @@ OUTPUT = ROOT / "llms.txt"
 
 TITLE = "d-SEAMS"
 SUMMARY = (
-    "d-SEAMS (seams-core) reads molecular-dynamics trajectories and names "
-    "the ice in them: CHILL and CHILL+, topological cages, primitive rings, "
-    "Steinhardt q_l, and ice and brine fronts, computed on one shared "
-    "neighbour list. This repository builds the C++ engine, the C API "
-    "libseams (include/seams.h), the C ABI libseams_lang that the language "
-    "bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, "
-    "PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, "
-    "Julia, Rust and Fortran bindings live in their own repositories and "
-    "release against the seams-core tag with the same version."
+    "d-SEAMS reads molecular-dynamics trajectories and classifies ice with "
+    "CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, "
+    "and ice and brine fronts. Use it from the command line, a language "
+    "binding, or a supported simulation engine."
 )
 
 BINDINGS = (
     ("PydSEAMSlib", "https://github.com/d-SEAMS/PydSEAMSlib",
-     "Python binding, pydseamslib on PyPI (import dseams, import pydseams)."),
+     "Install the Python binding with pip install pydseamslib==2.14.0."),
     ("yodaStruct", "https://github.com/d-SEAMS/yodaStruct",
-     "Lua and Fennel binding, the LuaRocks package dseams (require(\"dseams\"))."),
+     "Clone the Lua and Fennel binding, then run luarocks make in the checkout."),
     ("dseams-r", "https://github.com/d-SEAMS/dseams-r",
-     "R binding, the R package dseams."),
+     "Install the R binding with remotes::install_github(\"d-SEAMS/dseams-r\")."),
     ("Dseams.jl", "https://github.com/d-SEAMS/Dseams.jl",
-     "Julia binding, the package Dseams over libseams_jll."),
+     "Install the Julia binding with Pkg.add(url=\"https://github.com/d-SEAMS/Dseams.jl\")."),
     ("dseams-rs", "https://github.com/d-SEAMS/dseams-rs",
-     "Rust binding, the crates dseams-sys and dseams."),
+     "Install the Rust binding with cargo add dseams@2.14.0."),
     ("dseams-fortran", "https://github.com/d-SEAMS/dseams-fortran",
-     "Fortran binding, the fpm package dseams."),
+     "Add the Fortran binding as an fpm Git dependency."),
 )
+
+SUMMARY_OVERRIDES = {
+    "quickstart": "Build d-SEAMS and classify the supplied ice frame.",
+    "tutorials/interface": "Classify an ice-water interface and inspect the result.",
+    "tutorials/insitu-run": "Run CHILL+ while a LAMMPS simulation advances.",
+    "science/interface": "Analyze an ice-water interface and a nucleating trajectory.",
+    "science/cages": "Classify sII and sH hydrate cages.",
+    "fronts/lammps": "Use d-SEAMS during a LAMMPS run.",
+    "fronts/openmm": "Use d-SEAMS during an OpenMM simulation.",
+    "howto/benchmarks": "Measure and compare d-SEAMS performance.",
+    "howto/engine-insitu": "Classify simulation frames in memory as a run advances.",
+    "reference/walk-compare": "Compare frame-by-frame classifications.",
+    "reference/cross-language": "Perform the same CHILL+ analysis through four language bindings.",
+    "stable/science": "Use the science interfaces for profiles, counts, and nucleation analysis.",
+    "api/index": "Browse the C++ API by namespace, class, function, and data structure.",
+    "engines/lammps": "Use d-SEAMS during a LAMMPS run.",
+    "engines/gromacs": "Analyze a GROMACS trajectory with d-SEAMS.",
+    "engines/openmm": "Classify frames during an OpenMM simulation.",
+    "engines/insitu": "Classify frames from a running simulation.",
+}
 
 PLUMED_PLUGIN = (
     ("PLUMED-NEST egg", "https://www.plumed-nest.org/eggs/26/018/",
@@ -99,6 +116,16 @@ def toctrees(text):
     return [(caption, names) for caption, names in trees if caption and names]
 
 
+def staged_index_titles():
+    """Landing titles that docs/source/conf.py gives the staged page groups."""
+    conf = (DOCS / "source" / "conf.py").read_text(encoding="utf-8")
+    block = conf.split("def _stage_markdown_book", 1)[1].split("for src_name", 1)[0]
+    return {
+        dest: title
+        for _, dest, title in re.findall(r'\("(\w+)", "(\w+)", "([^"]+)"\)', block)
+    }
+
+
 def source_of(name):
     org = ORG / (name + ".org")
     if org.is_file():
@@ -124,6 +151,7 @@ def plain(text):
     text = re.sub(r"(?<![\w=])=([^=\n]+)=(?![\w=])", r"\1", text)
     text = text.replace("``", "").replace("`", "").replace("**", "")
     text = re.sub(r"\\[()\[\]]", "", text)
+    text = text.replace("@PROJECT_VERSION@", project_version())
     return " ".join(text.split())
 
 
@@ -236,13 +264,8 @@ def title_and_paragraph(path):
 def render():
     index = (ORG / "index.org").read_text(encoding="utf-8")
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
-    lines.append(
-        "Each link below is a page of the published manual on {}. "
-        "Contributor instructions are on the Contributing and Repository "
-        "map pages.".format(SITE)
-    )
-    lines.append("")
     seen = set()
+    staged = staged_index_titles()
     home_title, home_summary = title_and_paragraph(ORG / "index.org")
     lines.extend(["## Start", "", "- [{}]({}/index.html): {}".format(home_title, SITE, home_summary), ""])
     seen.add("index")
@@ -251,11 +274,28 @@ def render():
         for name in names:
             if name in seen:
                 continue
-            path = source_of(name)
-            if path is None:
+            head, _, rest = name.partition("/")
+            if rest == "index" and head in staged:
+                seen.add(name)
+                items.append("- [{}]({}/{}.html)".format(staged[head], SITE, name))
                 continue
+            path = source_of(name)
+            if path is None and name == "api/index":
+                title, summary = "API Reference", ""
+            elif path is None:
+                continue
+            else:
+                title, summary = title_and_paragraph(path)
             seen.add(name)
-            title, summary = title_and_paragraph(path)
+            summary = SUMMARY_OVERRIDES.get(name, summary)
+            if re.search(
+                r"(?:^|[\s(])(?:docs|tests|src|adapters|engines|input|cmake)/"
+                r"|(?:generated_targets|group_[A-Za-z0-9_]+)\.rst\b"
+                r"|\b(?:branch|commit)\b",
+                summary,
+                re.IGNORECASE,
+            ):
+                summary = "Learn how to use {} with d-SEAMS.".format(title)
             entry = "- [{}]({}/{}.html)".format(title, SITE, name)
             items.append(entry + (": " + summary if summary else ""))
         if items:

@@ -36,9 +36,10 @@ def main():
     spec = importlib.util.find_spec("openmm")
     if spec is None or spec.origin is None:
         e2e.skip("the openmm Python package was not found")
-    lib = e2e.find_build_file(args.build, "libseams_lang.so")
+    name = "libseams_lang.dylib" if sys.platform == "darwin" else "libseams_lang.so"
+    lib = e2e.find_build_file(args.build, name)
     if lib is None:
-        sys.exit(f"libseams_lang.so was not built under {args.build}")
+        sys.exit(f"{name} was not built under {args.build}")
     cli = e2e.seams_cli(args.build)
 
     import numpy as np

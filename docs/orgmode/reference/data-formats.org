@@ -105,8 +105,8 @@ field on each bound line when the cloud carries tilt.
 ~seams read~ prints the three bound spans (~box Lx Ly Lz~) and,
 when ~box.size() >= 6~, the tilt (~xy xz yz~).
 
-Mixed water dumps in this tree use type 2 for oxygen and type 1 for
-hydrogen. Single-site mW dumps in this tree use type 1.
+Mixed water dumps in the supplied examples use type 2 for oxygen and type 1 for
+hydrogen. Single-site mW dumps in the supplied examples use type 1.
 
 A two-type (or multi-type) dump is the same text format. Each atom
 keeps its ~ITEM: ATOMS~ ~type~ value. ~seams read~ / ~chill~ /
@@ -163,7 +163,7 @@ the comment line is not parsed for a lattice. ~seams~ routes ~.xyz~
 here and ignores ~--type~ on the read (classification still uses
 ~--type~, which then sees type 1).
 
-XYZ files in this tree do not carry a periodic cell. Analyses that
+XYZ files in the supplied examples do not carry a periodic cell. Analyses that
 need the true box should use a LAMMPS dump.
 
 * chemfiles (PDB, GRO, DCD)

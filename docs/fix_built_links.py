@@ -10,10 +10,13 @@ and it can emit the build machine's ``docs/ford`` path.
 
 import os
 import re
+import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "docs" / "build"
+BASE_URL = "https://docs.dseams.info"
 FORD_MARK = "/docs/ford/"
 INDEX_HREF = re.compile(r'href="#(index_[^"]+)"')
 # LDoc writes `<a name = "symbol">`. The link checker matches fragments to id.
@@ -31,6 +34,7 @@ SOURCE_LINE = re.compile(
     r"(?:[0-9a-f]{7,40}|master|HEAD)"
     r"(/[^\"'#\s<>]+)#L\d+(?:-L\d+)?"
 )
+OBFUSCATED_MAILTO = re.compile(r'href="(mai(?:[^"]*?))"')
 
 
 def rewrite(tree, old, new):
@@ -107,6 +111,26 @@ def publish_source_lines(tree):
     return changed
 
 
+def decode_doxygen_mail(tree):
+    """Turn Doxygen's concatenated mail attributes into mailto links."""
+    if not tree.is_dir():
+        return 0
+    changed = 0
+    for path in tree.rglob("*.html"):
+        text = path.read_text(encoding="utf-8", errors="replace")
+
+        def repl(match):
+            address = match.group(1).replace("'+'", "").replace("+'", "")
+            address = address.replace("'", "")
+            return 'href="{}"'.format(address)
+
+        updated = OBFUSCATED_MAILTO.sub(repl, text)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            changed += 1
+    return changed
+
+
 def relativize_ford(tree):
     """Point FORD's absolute docs/ford links at the published fortran tree."""
     if not tree.is_dir():
@@ -134,16 +158,61 @@ def relativize_ford(tree):
     return changed
 
 
-def main():
+def canonical_route(rel):
+    """Return the lowercase extensionless public route for one HTML file."""
+    route = "/" + rel.as_posix()
+    if route.endswith("/index.html"):
+        route = route[:-10] or "/"
+    elif route.endswith(".html"):
+        route = route[:-5]
+    return route.lower()
+
+
+def canonical_sitemap(tree):
+    """Write sitemap.xml with canonical lowercase extensionless routes."""
+    if not tree.is_dir():
+        return 0
+    pages = sorted(tree.rglob("*.html"))
+    if not pages:
+        return 0
+    routes = []
+    seen = set()
+    for page in pages:
+        route = canonical_route(page.relative_to(tree))
+        if route not in seen:
+            seen.add(route)
+            routes.append(route)
+    ET.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
+    urlset = ET.Element("{http://www.sitemaps.org/schemas/sitemap/0.9}urlset")
+    for route in routes:
+        node = ET.SubElement(urlset, "{http://www.sitemaps.org/schemas/sitemap/0.9}url")
+        ET.SubElement(
+            node, "{http://www.sitemaps.org/schemas/sitemap/0.9}loc"
+        ).text = BASE_URL + route
+    ET.ElementTree(urlset).write(
+        tree / "sitemap.xml", encoding="utf-8", xml_declaration=True
+    )
+    return len(routes)
+
+
+def main(argv=None):
+    args = sys.argv[1:] if argv is None else argv
+    if args[:1] == ["--sitemap"]:
+        target = Path(args[1]) if len(args) > 1 else BUILD
+        sitemap = canonical_sitemap(target)
+        print("canonical sitemap: {} routes".format(sitemap))
+        return 0
     api = rewrite(BUILD / "api-cpp", "#index_~", "#index__7E")
     anchors = add_missing_index_ids(BUILD / "api-cpp")
     fortran = rewrite(BUILD / "fortran", "#moduleprocedure-", "#proc-")
     paths = relativize_ford(BUILD / "fortran")
     lua = add_name_ids(BUILD / "lua")
     sources = publish_source_lines(BUILD)
+    mail = decode_doxygen_mail(BUILD / "api-cpp")
+    sitemap = canonical_sitemap(BUILD)
     print(
-        "built links: api-cpp {} anchors {} fortran {} paths {} lua {} sources {}".format(
-            api, anchors, fortran, paths, lua, sources
+        "built links: api-cpp {} anchors {} fortran {} paths {} lua {} sources {} mail {} sitemap {}".format(
+            api, anchors, fortran, paths, lua, sources, mail, sitemap
         )
     )
     return 0

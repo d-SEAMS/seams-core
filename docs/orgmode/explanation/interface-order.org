@@ -9,8 +9,7 @@ Prism blocks and sheet rings name confined ice that CHILL+, the
 diamond test, adaptive common-neighbour analysis and a tetrahedron
 template do not.
 
-The counts below come from ~interface_order~ on commit ~2f96e7bd~
-plus the comparison in this tree.
+The counts below compare the two CHILL+ rules on the same coordinates.
 Ideal ice Ih (~input/traj/ice1h.lammpstrj~, 128 molecules) is
 hexagonal under both rules, with no disagreements.
 
@@ -47,7 +46,7 @@ A row is classified only when the coordination is 4.
 Two staggered bonds, or three staggered and no eclipsed bond, are
 interfacial, with no look at the neighbour.
 
-~chill+~ in this tree is the 2015 rule.
+~chill+~ in the supplied examples is the 2015 rule.
 ~ovito-chill+~ is the OVITO/mdapy rule.
 Neither threshold is changed.
 The comparison turns one lever at a time: the neighbour test, then
@@ -120,9 +119,6 @@ template matching cutoff, passes 12 molecules, of which 1 is in
 the disagreeing set.
 Mean ~q6~ is 0.540 on the disagreeing set and 0.489 on the rest.
 Bulk ice Ih in the test set has mean ~q6~ 0.626.
-
-The numbers are ~docs/data/interface-order-nucleus.csv~, written by
-~scripts/interface_order_nucleus.py~.
 
 * Slab
 
@@ -242,7 +238,7 @@ Four velocity seeds, numbered 1 to 4, run at 240, 250, 260 and 270 K.
 The velocity seed is ten times the temperature plus the replica, so
 the sixteen streams differ.
 Frames are kept every 10 ps for 800 ps.
-The trajectories are not committed.
+The table reports the resulting trajectories.
 The slope on a seed is ordinary least squares of the solid thickness
 while the 2015 solid fraction lies between 0.15 and 0.90 and both
 thicknesses are still defined.
@@ -560,7 +556,7 @@ unchanged.
 Basal, primary prism and secondary prism, four velocity seeds each,
 six temperatures, seventy-two trajectories.
 Every seed reached a solid fraction of at least 0.90.
-Frames stay out of the tree.
+
 This session had 8 cores, one OpenMP thread per LAMMPS run.
 The seventy-two runs finished in 5711 s of wall time.
 The 220 K runs took 443 to 449 s and the 230 K runs took 447 to
@@ -720,7 +716,7 @@ above 0.30, 0.36, 0.40, 0.50 and 0.56.
 The timing used eight frames from ~prism2-t240-s1~, spread through
 the trajectory, repeated eight times, in one session after the runs
 had finished.
-taskset pinned the process to one core and to eight cores.
+The comparison uses one and eight cores.
 The affinity mask held 1 and 8 cores.
 No host name was recorded.
 The median and the interquartile range are over the eight repeats.
@@ -778,27 +774,6 @@ The article HTML states the factor-of-ten correction in the caption
 of Figure 4.
 
 * Reproduce
-
-#+begin_src sh
-interface_order study input/traj/nucleation_f1.lammpstrj
-interface_order study input/traj/interface_f0.lammpstrj
-interface_order confined
-python3 input/interface/campaign.py
-python3 scripts/growth_rates.py --bin bbdir-eessi/tests/interface_order
-python3 input/interface/npt_growth.py
-python3 scripts/npt_rates.py --bin bbdir-eessi/tests/interface_order
-python3 input/interface/espinosa_protocol.py
-python3 scripts/espinosa_rates.py --bin bbdir-eessi/tests/interface_order
-python3 input/interface/espinosa_faces.py
-python3 scripts/espinosa_candidates.py --bin bbdir/tests/interface_order
-python3 input/interface/growth_curve.py
-python3 scripts/growth_curve_rates.py --bin bbdir/tests/interface_order
-python3 scripts/q6bar_timing.py --bin bbdir/tests/interface_order
-interface_order wc input/traj/nucleation_f1.lammpstrj
-python3 scripts/figures_interface_order.py \
-  --bin bbdir-eessi/tests/interface_order \
-  --growth data/interface/growth.lammpstrj --dt 50
-#+end_src
 
 The figures are the nucleus profile, the slab profile, the confined
 label grid and, when a trajectory is passed, the ice thickness.

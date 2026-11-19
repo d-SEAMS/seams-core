@@ -16,10 +16,6 @@ with ~lua.set_function~. It has no ~dseams~ table and no
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] 2.x, which calls
 ~seams.h~. No seams-core 2.x release registers Lua names.
 
-The same input is used on both sides of a row. ~docs/tutorials/test_migrate.py~
-runs that pair and requires the same counts. ~meson test docs_migrate~
-is that check. It exits when a count differs.
-
 * yodaStyle config
 
 | 1.x key | 2.14 command | 2.14 C call |
@@ -28,10 +24,6 @@ is that check. It exits when a count differs.
 | ~bulk.bondOrderParameters~ | ~seams steinhardt~ | ~seams_frame_steinhardt_graph~ |
 | ~topoOneDim~ | ~seams prisms~ | ~seams_frame_prisms~ |
 | ~topoTwoDim~ | ~seams_frame_monolayer~ | ~seams_frame_monolayer~ |
-
-~topoTwoDim~ has no separate subcommand. The monolayer census is
-~seams_frame_monolayer~. The test calls it twice on the mixed TIP4P
-dump and requires the same eight counts.
 
 * Lua globals and later Lua names
 
@@ -79,18 +71,6 @@ The 2015 rule and the OVITO rule are selected with ~--rule~, and in
 Python with pydseamslib's ~dseams.PUBLISHED~ or ~dseams.OVITO~. The
 walk-through is
 [[file:../explanation/chill-plus-rules.org][the published rule and the OVITO rule]].
-
-Neighbours are the one row with two C calls and no text command.
-~seams_frame_neighbours~ counts the directed pairs on the language
-frame. ~seams_neighbours_build~ builds the same list through
-~seams.h~. The cutoff row uses graph ~cutoff~. The k-NN row uses
-graph ~mutual~. The test requires the two pair counts to be equal.
-
-Hydrogen bonds, coordination, the density profile, the topology key,
-contact pairs, and domains are the command itself. The test runs each
-command on ~input/traj/exampleTraj.lammpstrj~ and checks the printed
-line: 460 hydrogen bonds, coordination 9.144, the first density bin,
-89 fingerprint classes, pair count 0, and a polar domain of 750.
 
 CHILL+ and rings use the cubic cell ~input/traj/mW_cubic.lammpstrj~,
 type 1, cutoff 3.5 Å. The signature row uses ~input/traj/genice_sI.lammpstrj~

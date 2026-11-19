@@ -3,9 +3,6 @@
 
 The task is CHILL+ on frame 1 of =input/traj/mW_cubic.lammpstrj=, LAMMPS type 1.
 The result is 4096 cubic sites.
-The CLI and Python rows run here (=docs/tutorials/test_cross_language.py=
-runs the Python leg); the R and Julia rows run in their binding
-repositories.
 
 | language | call | cubic |
 |----------+------+-------|
@@ -14,7 +11,7 @@ repositories.
 | R | =sum(chill_plus(read_frame(path, type=1L))$name == "cubic")= | 4096 |
 | Julia | =chill_plus(read_frame(path; type=1)).counts["cubic"]= | 4096 |
 
-Python is ~pip install 'pydseamslib==2.14.0'~.
+Install Python with ~pip install 'pydseamslib==2.14.0'~.
 The import is ~pydseams~.
 ~import pydseamslib~ is the same package.
 The package name the d-SEAMS paper should use is ~pydseamslib~.
@@ -58,7 +55,3 @@ A null C edge string keeps the default.
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.
 A nanometer file uses ~0.265,0.315~.
-
-=tests/chill_plus_fronts.py= (Meson test ~chill_plus_fronts_agree~) runs all four fronts on that dump with both lists.
-It checks the histograms on all four and the per-atom labels on Python, R, and Julia.
-The Python front needs a pydseamslib whose ~chill_plus~ takes ~graph~.

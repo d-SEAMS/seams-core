@@ -16,12 +16,6 @@ not call cubic or hexagonal. ~dseams_off~ and ~fp_off~ are the
 classifier with the completion off. ~dseams_on~ and ~fp_on~ are the
 same frame with it on.
 
-The rows are the cells of ~docs/data/recall-padding-validation.csv~.
-That file is ~data/recall-padding-validation.csv~ written by
-~scripts/recall_padding.py~ on ~science/interface-nucleation~ at
-~6ec9c283~. Sphinx fills the tables from the file. A number that is
-not a cell of that file is not written.
-
 #+begin_export rst
 .. include:: cutoff-padding-tables.rst
 #+end_export

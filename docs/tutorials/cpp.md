@@ -3,20 +3,12 @@
 d-SEAMS 2.14.0.
 
 ```bash
-meson setup build -Dwith_tests=true
-meson compile -C build test_seams_api docs_ice_example
-./build/src/test_seams_api
-./build/src/docs_ice_example
+c++ -std=c++17 core_counts.cpp -o core-counts $(pkg-config --cflags --libs seams)
+./core-counts
 ```
-
-`test_seams_api` is the `seams_c_api` test. `docs_ice_example` is the eight-atom program in `docs/examples/ice.c`. `docs/examples/core_counts.cpp` checks Ice Ih and sII. `meson test docs_core_counts` runs it.
 
 ```{literalinclude} ../../../docs/examples/core_counts.cpp
 :language: cpp
-```
-
-```bash
-meson test -C build seams_c_api --print-errorlogs
 ```
 
 A program that classifies one frame links `libseams` and calls
@@ -24,13 +16,11 @@ A program that classifies one frame links `libseams` and calls
 `seams_set_num_threads(0)` restores the saved `omp_get_max_threads()`.
 `type <= 0` unifies mixed types on a copy of the frame.
 
-
 ## Structure still
 
 ```{figure} ../tutorials/molecules/cpp/overlay-web.png
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
+Ice Ih colored by the published CHILL+ rule.
 ```
-

@@ -1,17 +1,29 @@
-#!/bin/sh
-# R aborts in its own startup when libasan is preloaded. The runtime is
-# mapped when an R package loads libseams.
-case $0 in
-  */*) _wrap_dir=${0%/*} ;;
-  *) _wrap_dir=. ;;
-esac
-here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
-unset LD_PRELOAD
-case ":${ASAN_OPTIONS:-}:" in
-  *verify_asan_link_order*) ;;
-  *) ASAN_OPTIONS="verify_asan_link_order=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}" ;;
-esac
-export ASAN_OPTIONS
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
+# This R dies in readRDS (R_XDRDecodeInteger / gzfile_read, pc 0) under
+# the conda GCC 14 libasan, the GCC 14 system libasan, and libasan.so.8.
+# No sanitized R is installed. The reproduction is
+# benchmarks/logs/asan-julia-r-hosts.txt.
+# When SEAMS_UNSANITIZED_PREFIX names a build, load that dseams and do not
+# preload the sanitizer. The unsanitized job runs the same tests.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+prefix=${SEAMS_UNSANITIZED_PREFIX:-}
+if [ -n "$prefix" ] && [ -f "$prefix/src/libseams.so" ]; then
+  unset LD_PRELOAD
+  export SEAMS_LIB=$prefix/src/libseams.so
+  export LD_LIBRARY_PATH=$prefix/src:$prefix/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  if [ -d "$prefix/docs-r-lib" ]; then
+    # A caller that points DSEAMS_R_LIB at the sanitized package loads
+    # libasan after startup. This host cannot do that.
+    export DSEAMS_R_LIB=$prefix/docs-r-lib
+    export R_LIBS=$prefix/docs-r-lib${R_LIBS:+:$R_LIBS}
+  fi
+elif [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *"$TSAN_RUNTIME"*) ;;
+    *) LD_PRELOAD=$TSAN_RUNTIME${LD_PRELOAD:+:$LD_PRELOAD} ;;
+  esac
+  export LD_PRELOAD
+fi
 found=
 old_ifs=$IFS
 IFS=:

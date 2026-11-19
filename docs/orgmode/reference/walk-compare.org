@@ -135,5 +135,5 @@ nineteen zeros.
 bbdir/tests/walk_compare input/traj/exampleTraj.lammpstrj 1 2
 #+end_src
 
-That walks frame 1, type 2 (TIP4P oxygen in the in-tree mixed dump).
+That walks frame 1, type 2 (TIP4P oxygen in the supplied mixed dump).
 Add a fourth argument to stride a long trajectory.

@@ -4,10 +4,6 @@
 A cell is nine numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`. A zero tilt is orthorhombic.
 `lx, ly, lz` are edge lengths.
 
-`docs/examples/minimal_c.c` is the short program. `docs/examples/c_api_tour.c` calls every exported function on the in-tree fixtures.
-`meson test docs_c_api_tour` compiles that file, runs it, and requires each printed
-`capi` line below to match the run.
-
 ## Handle lifecycle
 
 `seams_system_create` allocates an empty frame. The caller owns it and passes it to
@@ -56,23 +52,16 @@ behavior.
 
 ## Linking
 
-libseams is compiled with hidden visibility and a linker export list, so the only
-exported symbols are the `seams_*` functions in `seams.h`. `SEAMS_API` marks them.
-The library build defines `SEAMS_BUILDING`, which selects `dllexport` on Windows;
-consumers get `dllimport`. Define `SEAMS_STATIC` before including `seams.h` to link
-a static archive. `tests/capi_symbols.txt` is the exported list, and the
-`capi_symbols` test compares it with the header and the built library.
-`capi_abi` compares the exported names with `scripts/abi_baseline.txt`. When
-libabigail's `abidiff` is on `PATH` at configure time, it also builds libseams once
-more with debug info and compares its types with the ABI 1 corpus in
-`scripts/abi_baseline.abi`: added functions pass, and anything else fails. The
-`abi` pixi environment carries conda-forge's libabigail, so
-`pixi run -e abi meson setup <builddir>` finds it, and the `capi-abi` CI job runs
-that way. Distribution packages work too: `abigail-tools` on Debian and Ubuntu,
-`libabigail` on Fedora. The corpus is format 2.4, which libabigail 2.9 and 3.0
-read. Without
-`abidiff`, or with an older one, `capi_abi` still checks the exported names, says
-the type step was skipped, and passes.
+libseams uses hidden visibility and exports only the `seams_*`
+functions declared in `seams.h`. `SEAMS_API` marks those declarations.
+The library build defines `SEAMS_BUILDING`, which selects `dllexport`
+on Windows; consumers receive `dllimport`. Define `SEAMS_STATIC`
+before including `seams.h` when linking a static archive.
+
+After installing libseams, build the examples out of tree with the
+compiler and linker flags from `pkg-config seams`, or use
+`find_package(seams)` from CMake. The resulting program loads the
+installed libseams.
 
 The 2.13.0 release had no libseams. Its C interface was `seams_lang.h` in
 libseams_lang, which the R and Julia packages still use. `capi_abi_2_13` builds
@@ -176,14 +165,6 @@ inside `seams_get_num_threads`.
 
 ## Examples by family
 
-Each program below covers one family and checks its own results on
-`input/traj/ice1h.lammpstrj`. `meson test capi_example_<family>` compiles it as C11
-with `-Wall -Wextra -Wpedantic -Werror` and runs it. The argument is the repository root.
-`capi_installed_examples` installs the build into a staging directory and builds all
-six out of tree against that install, once with the flags from `pkg-config seams` and
-once with `find_package(seams)` and `docs/examples/c/CMakeLists.txt`. Each binary must
-load the installed `libseams.so` and pass.
-
 Neighbours, `docs/examples/c/neighbours.c`:
 
 ```{literalinclude} ../../../docs/examples/c/neighbours.c
@@ -235,17 +216,11 @@ is the 46-oxygen sI cage. `input/traj/exampleTraj.lammpstrj` is the mixed TIP4P 
 used for hydrogen bonds, sites, and domains. The cutoff is 3.5 angstroms unless a
 line below says otherwise.
 
-`docs/examples/core_counts.c` reads `input/traj/ice1h.lammpstrj` and
-`input/traj/genice_sII.lammpstrj` and checks the C core: 128 hexagonal
-waters and 256 six-rings, then 136 clathrate waters, 144 five-rings and
-16 six-rings. `meson test docs_core_counts` compiles and runs it.
-
 ```{literalinclude} ../../../docs/examples/core_counts.c
 :language: c
 ```
 
 ## Functions
-
 
 ### seams_abi
 
@@ -266,7 +241,7 @@ capi seams_abi 1
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version 134656
+capi seams_version 134657
 ```
 
 ### seams_version_major
@@ -290,7 +265,7 @@ capi seams_version_minor 14
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_patch 0
+capi seams_version_patch 1
 ```
 
 ### seams_version_string
@@ -298,7 +273,7 @@ capi seams_version_patch 0
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_string 2.14.0
+capi seams_version_string 2.14.1
 ```
 
 ### seams_status_string
@@ -5323,13 +5298,11 @@ The program those lines come from:
 ```{literalinclude} ../../../docs/examples/c_api_tour.c
 ```
 
-
 ## Structure still
 
 ```{figure} ../tutorials/molecules/c/overlay-web.png
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug c` writes the 2400 by 1800 PNG.
+Ice Ih colored by the published CHILL+ rule.
 ```
-

@@ -1,12 +1,6 @@
 #+TITLE: Linkcell neighbours and carried updates
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
 Build the cutoff neighbour list, then keep rings when only part of
 the next frame moved. The scaling argument is
 [[file:../explanation/linkcell-scaling.org][Linkcell strong scaling]].
@@ -68,10 +62,7 @@ the row ~seeded-strict~.
 
 The TIP4P/2005 ice/water slab (2 fs step) is finer: 0.01, 0.1, and
 1 ps. An oxygen moves farther in one picosecond than an mW site. The
-~seeded-strict~ speedups are 8.31, 3.28, and 2.59. The logs are
-~benchmarks/hop-stride-tip4p-5.txt~,
-~benchmarks/hop-stride-tip4p-50.txt~, and
-~benchmarks/hop-stride-tip4p-500.txt~.
+~seeded-strict~ speedups are 8.31, 3.28, and 2.59.
 
 #+begin_src python
 # excerpt: tests/cli_surface.py

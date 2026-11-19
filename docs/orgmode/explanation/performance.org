@@ -1,28 +1,14 @@
-#+TITLE: Release-candidate sitting
+#+TITLE: Measured performance
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
-
-The numbers below are ~benchmarks/rc3-sitting.csv~, written by
-~scripts/h2h_rc3_sitting.py~, in the benchmark records dataset. The
-tables below are rendered from that file, with each stored median and
-interquartile range checked against the samples.
+The tables below report each median and interquartile range from the
+recorded timing samples.
 
 * Methods
 
 One warm-up is discarded. The column ~n~ is the number of timed calls
-that remain. In this file it is 6 on every row. ~samples_ms~ lists
+that remain. It is 6 on every row. ~samples_ms~ lists
 those calls, in milliseconds, to three decimal places.
-
-The median of an even count is the mean of the two central samples
-after sorting. The interquartile range is the type-7 gap: the linear
-quantile at position \(q(n-1)\), with \(q = 0.75\) minus \(q = 0.25\),
-which is ~quantile_linear~ in ~scripts/h2h_protocol.py~. ~median_ms~
-and ~iqr_ms~ are that pair, written to three decimal places.
 
 ~threads~ is the width requested for that row. The worker is started
 with ~OMP_NUM_THREADS~ set to that width and ~OMP_DYNAMIC=FALSE~.
@@ -32,9 +18,8 @@ through its own setter (~set_num_threads~, ~OVITO_THREAD_COUNT~,
 ~num_threads~ on the Rust ring call, ~n_threads~ for vesin).
 
 ~cores~ is ~Cpus_allowed_list~ from ~/proc/self/status~, read in the
-worker. It is the cpu affinity of the timed process, not a model name.
-The host name is not in the file. A one-thread guest that does not
-change its mask reports ~0~. d-SEAMS calls ~seams::widenAffinity~
+worker. It is the cpu affinity of the timed process. A one-thread guest
+that does not change its mask reports ~0~. d-SEAMS calls ~seams::widenAffinity~
 before the timed work, which puts back every cpu the kernel still
 allows, so some one-thread d-SEAMS rows report ~0-7~ while OpenMP
 itself was one thread. Every eight-thread row reports ~0-7~.
@@ -49,7 +34,7 @@ The algorithm pages are
 [[file:trace-assembly.org][TRACE and signature cages]],
 [[file:symmetry.org][the symmetry classifier]], and
 [[file:hop-ball.org][carried rings]].
-The signature-search widths, and the kernel teams from ~848426f9~, are
+The signature-search widths and kernel teams are described under
 [[file:trace-threads.org][thread controls]].
 
 #+begin_export rst

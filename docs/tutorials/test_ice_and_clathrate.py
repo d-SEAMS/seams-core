@@ -2,7 +2,7 @@
 
 Install the package the paper uses::
 
-    pip install 'pydseamslib==2.14.0'
+    pip install "pydseamslib==$(python3 scripts/project_version.py)"
 
 ``import pydseams`` is the module. ``import pydseamslib`` is the same
 package. ``seams chill-plus`` and ``Frame.chill_plus`` both use the

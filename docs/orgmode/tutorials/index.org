@@ -1,9 +1,8 @@
 #+TITLE: Worked examples
 #+OPTIONS: toc:nil num:nil
 
-A tutorial is a learning path. You finish it with a skill, not a
-lookup table. The one good tutorial on this site classifies the
-in-tree mixed TIP4P dump two ways.
+Choose a tutorial by the analysis you want to perform. The examples use
+the supplied trajectories and state the output you should expect.
 
 | tutorial | you learn |
 |----------+-----------|
@@ -18,22 +17,17 @@ in-tree mixed TIP4P dump two ways.
 | [[file:order-parameters.org][Bond-orientational order]] | ~q_l~ and the Lechner-Dellago average |
 | [[file:confined-water.org][Confined water]] | in-plane RDF, sheet rings, prisms |
 | [[file:nanotube.org][Quasi-one-dimensional ice]] | where the nanotube and monolayer examples live |
-| [[file:paper-figures.org][Paper figures]] | the in-tree numbers behind the 2020 figures |
+| [[file:paper-figures.org][Paper figures]] | the numbers behind the 2020 figures |
 | [[file:paper-interface.org][Interface slab]] | Published CHILL+ against the OVITO rule on a slab you build |
-| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH, built in the test |
+| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH |
 | [[file:paper-rings.org][Ring statistics]] | Primitive rings and the shortest-path test |
 | [[file:paper-brine.org][Ice in brine]] | The front, and the crystal count, along a short run |
 | [[file:paper-nucleation.org][Nucleation score]] | Mean q6bar as a nucleus is restored |
-| [[file:gallery.org][Science gallery]] | The full runs, drawn and captioned from their reports |
+| [[file:gallery.org][Science gallery]] | Interface, brine, cage, and nucleation views |
 
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.
 
-Each paper tutorial keeps its fast test and adds a full run. The full
-run is a Snakemake rule, =snakemake -s docs/tutorials/Snakefile=, and
-=meson test --suite slow= checks that rule. The fast tests stay in
-the docs suite.
-
-The Python files under =docs/tutorials= are the runs. CI executes
-them. The pages here say what you are doing and what number you
-should see.
+The paper tutorials provide a short example and the corresponding
+full-size result. Each page explains the analysis and the number you should
+see.

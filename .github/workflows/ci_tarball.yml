@@ -1,0 +1,139 @@
+name: Offline source tarball
+
+on:
+  push:
+    branches: [main, "release/**"]
+  pull_request:
+    branches: [main, "release/**"]
+
+jobs:
+  dist-offline:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the source tarball
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ meson ninja-build pkg-config libeigen3-dev git curl ca-certificates
+          rustup_sha256=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
+          curl --proto '=https' --tlsv1.2 -fsS \
+            -o "$RUNNER_TEMP/rustup-init" \
+            https://static.rust-lang.org/rustup/archive/1.29.3/x86_64-unknown-linux-gnu/rustup-init
+          echo "${rustup_sha256}  $RUNNER_TEMP/rustup-init" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/rustup-init"
+          export CARGO_HOME="$RUNNER_TEMP/cargo"
+          export RUSTUP_HOME="$RUNNER_TEMP/rustup"
+          "$RUNNER_TEMP/rustup-init" -y --default-toolchain none --profile minimal
+          . "$CARGO_HOME/env"
+          rustup toolchain install 1.88.0 --profile minimal
+          rustup default 1.88.0
+          meson subprojects download
+          meson setup build-dist -Dwith_tests=false -Dwith_chemfiles=disabled
+          meson dist -C build-dist --include-subprojects --formats gztar --no-tests
+      - name: Build the test image
+        run: |
+          set -euxo pipefail
+          docker build -t seams-offline - <<'EOF'
+          # 1.89 stabilized the AVX-512 intrinsics linkcell's bw_roof example uses.
+          FROM rust:1.89.0-bookworm AS rust
+          FROM ubuntu:24.04
+          COPY --from=rust /usr/local/cargo /usr/local/cargo
+          COPY --from=rust /usr/local/rustup /usr/local/rustup
+          ENV PATH="/usr/local/cargo/bin:${PATH}"
+          ENV RUSTUP_HOME=/usr/local/rustup
+          ENV CARGO_HOME=/usr/local/cargo
+          ENV DEBIAN_FRONTEND=noninteractive
+          RUN apt-get update && apt-get install -y --no-install-recommends \
+                g++ meson ninja-build pkg-config python3 python3-pip python-is-python3 \
+                python3-dev python3-numpy python3-pil python3-matplotlib python3-ase \
+                python3-openmm libopenmm-dev libopenmm-plugins libeigen3-dev \
+                libmpfr-dev libgmp-dev libblas-dev liblapack-dev cmake git patch \
+                libegl1 libopengl0 libgl1 libxkbcommon0 libxkbcommon-x11-0 \
+                libdbus-1-3 libxi6 libsm6 libice6 libxcb-cursor0 libxcb-icccm4 \
+                libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-shape0 \
+                libxcb-xkb1 ca-certificates \
+              && python3 -m pip install --break-system-packages --upgrade-strategy only-if-needed \
+                   'numpy==1.26.4' 'towncrier==23.11.0' 'freud-analysis==3.6.1' \
+                   'ovito==3.15.5' 'solvis-tools==0.1.5' \
+              && python3 -m pip install --break-system-packages --ignore-installed --no-deps \
+                   'scipy==1.17.1' 'openmm==8.2.0' \
+              && install -d /opt/openmm-sdk/include /opt/openmm-sdk/lib \
+              && ln -s /usr/include/OpenMM.h /opt/openmm-sdk/include/OpenMM.h \
+              && ln -s /usr/include/OpenMM /opt/openmm-sdk/include/OpenMM \
+              && ln -s /usr/lib/x86_64-linux-gnu/libOpenMM.so \
+                   /opt/openmm-sdk/lib/libOpenMM.so \
+              && useradd --create-home tester \
+              && install -d -o tester -g tester /work /results \
+              && rm -rf /var/lib/apt/lists/*
+          EOF
+      - name: Prepare both source trees
+        run: |
+          set -euxo pipefail
+          tarball=$(ls build-dist/meson-dist/seams-core-*.tar.gz)
+          docker run --name seams-prep \
+            -v "$PWD:/src:ro" \
+            -e "TARBALL=/src/${tarball}" \
+            seams-offline \
+            bash -lc '
+              set -euxo pipefail
+              cp -a /src /opt/git
+              mkdir /opt/tar
+              tar -C /opt/tar --strip-components=1 -xzf "$TARBALL"
+              rm -rf /opt/git/docs/.cache /opt/git/cmake/vendor
+              cp -a /opt/tar/docs/.cache /opt/git/docs/.cache
+              cp -a /opt/tar/cmake/vendor /opt/git/cmake/vendor
+              cd /opt/git
+              sh scripts/install_pydseamslib.sh --break-system-packages
+              chown -R tester:tester /opt/git /opt/tar
+            '
+          docker commit seams-prep seams-ready
+          docker rm seams-prep
+      - name: Compare git and offline tarball suites
+        run: |
+          set -euxo pipefail
+          install -d -m 0777 tarball-results
+          docker run --rm --network=none --user tester \
+            -e SEAMS_NO_NETWORK=1 \
+            -e CONDA_PREFIX=/opt/openmm-sdk \
+            -v "$PWD/tarball-results:/results" \
+            seams-ready \
+            bash -lc '
+              set -euxo pipefail
+              for tree in git tar; do
+                # A failed step prints the end of its log; meson keeps the
+                # CMake output for chemfiles there.
+                meson setup "/work/${tree}" "/opt/${tree}" \
+                  -Dwith_tests=true --wrap-mode=nodownload \
+                  || { tail -n 150 "/work/${tree}/meson-logs/meson-log.txt"; exit 1; }
+                meson compile -C "/work/${tree}" \
+                  || { tail -n 150 "/work/${tree}/meson-logs/meson-log.txt"; exit 1; }
+                meson test -C "/work/${tree}" --list > "/results/${tree}-tests.txt"
+                CARGO_NET_OFFLINE=true meson test -C "/work/${tree}" \
+                  --no-suite heavy --print-errorlogs
+                python3 - "/work/${tree}/meson-logs/testlog.json" \
+                  "/results/${tree}-skips.txt" <<'"'"'PY'"'"'
+          import json
+          import pathlib
+          import sys
+
+          rows = [json.loads(line) for line in pathlib.Path(sys.argv[1]).read_text().splitlines()]
+          skipped = sorted(row["name"] for row in rows if row["result"] == "SKIP")
+          pathlib.Path(sys.argv[2]).write_text("".join(name + "\n" for name in skipped))
+          PY
+              done
+              diff -u /results/git-tests.txt /results/tar-tests.txt
+              diff -u /results/git-skips.txt /results/tar-skips.txt
+              cat /results/git-tests.txt
+              cat /results/tar-tests.txt
+              cat /results/git-skips.txt
+              cat /results/tar-skips.txt
+            '
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: offline-source-tarball-lists
+          path: tarball-results/
+          if-no-files-found: error

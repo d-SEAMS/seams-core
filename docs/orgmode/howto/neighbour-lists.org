@@ -1,8 +1,8 @@
 #+TITLE: Cutoff neighbour lists
 #+OPTIONS: toc:nil num:nil ^:nil
 
-Build the cutoff list, choose the thread count, and read the pinned
-session that compared it with vesin, freud, matscipy, mdapy, and OVITO.
+Build the cutoff list, choose the thread count, and compare it with
+vesin, freud, matscipy, mdapy, and OVITO.
 The calls are on the [[file:../reference/api.org][API map]].
 The drivers are on [[file:benchmarks.org][Benchmarks]].
 
@@ -86,11 +86,11 @@ Each call sets ~omp_set_dynamic(0)~ and sizes its scratch for
 The thread count is ~OMP_NUM_THREADS~.
 There is no setter and no thread argument on these functions.
 A call made from inside an OpenMP region does not fork a second team.
-The pinned session also sets ~OMP_PROC_BIND=close~, ~OMP_PLACES=cores~,
+The measurements below set ~OMP_PROC_BIND=close~, ~OMP_PLACES=cores~,
 ~OMP_DYNAMIC=FALSE~, and ~OMP_WAIT_POLICY=PASSIVE~, and pins the process
 with ~taskset~ to cores ~0 .. T-1~.
 
-* Orthorhombic session
+* Orthorhombic results
 
 Ice Ic, lattice constant 6.35 Å, cutoff 3.5 Å.
 Each conventional cell holds 8 molecules, so the three frames are
@@ -106,10 +106,9 @@ of RAM. The compiler is GCC 15.2.0, release ~-O3~.
 The guest does not expose hardware performance counters.
 The comparison columns used eight timed calls after one warmup.
 The median is the 5th of the 8 sorted samples. Times are milliseconds.
-The d-SEAMS columns are the later session recorded under the table.
 vesin is 0.6.2, freud is 3.6.1, matscipy is 1.3.1 with ASE 3.29.0.
-Every code returned ~4N~ pairs. A later sitting, six calls and the
-language API, is in [[file:literature-h2h.org][Literature head-to-head]]. There the
+Every code returned ~4N~ pairs. The language API comparison is in
+[[file:literature-h2h.org][Literature head-to-head]]. There the
 one-thread vesin pool is 51.194 ms and an explicit eight-thread pool
 is 22.269 ms, both full lists of 442368 pairs. A 50.7 ms time that
 was labeled as eight threads had =n_threads= left at 0 while
@@ -124,18 +123,13 @@ was labeled as eight threads had =n_threads= left at 0 while
 | 884736 | 1 | 244.517 | 291.817 | 1073.681 | 1067.929 | 585.680 |
 | 884736 | 8 | 35.618 | 49.400 | 176.231 | 1068.058 | 590.335 |
 
-The 2-thread and 4-thread rows are in =markdown/neighbours.md=.
 The d-SEAMS columns in this table, and the triclinic and orthorhombic
-columns of the shared-stencil table, were measured in one session on
-8 cores. Eight timed calls after one warmup. The process is pinned to
+columns of the shared-stencil table, were measured on 8 cores. Eight
+timed calls follow one warmup. The process is pinned to
 cores 0 .. T-1, with OMP_NUM_THREADS=T, OMP_DYNAMIC=FALSE,
 OMP_PROC_BIND=close, OMP_PLACES=cores, and OMP_WAIT_POLICY=PASSIVE.
-=bench_cutoff_list= times this orthorhombic CSR and the atom-ID rows.
-=bench_v2= =tilt= and =ortho= time the shared-stencil CSR. The median
-is the 5th of the 8 sorted samples. The interquartile range (IQR) is
+The median is the 5th of the 8 sorted samples. The interquartile range (IQR) is
 the linear 75th percentile minus the linear 25th, with rank (n-1)p.
-No host name is part of the record. The vesin, freud, and matscipy
-columns are the earlier comparison, not this session.
 
 Orthorhombic CSR median (IQR) in milliseconds, 1 thread then 8:
 10648 is 3.709 (0.280) and 0.968 (0.040);
@@ -145,20 +139,11 @@ The row medians (IQR) are 4.160 (0.179) and 1.241 (0.104);
 29.510 (0.500) and 6.077 (0.959);
 291.817 (12.147) and 49.400 (2.016).
 
-#+begin_src bash
-meson setup build-release --buildtype=release -Dwith_tests=true \
-  -Dwith_cli=true -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
-ninja -C build-release tests/bench_cutoff_list
-NEIGH_BENCH=$PWD/build-release/tests/bench_cutoff_list \
-  python3 scripts/bench_neighbours_threads.py
-#+end_src
-
-=bench_cutoff_list= is the d-SEAMS side of that driver.
 The comparison environment is vesin 0.6.2, freud-analysis, matscipy,
-and ASE. NEIGH_PYTHON selects that interpreter. Do not install the
+and ASE. Do not install the
 unrelated PyPI package named freud.
 
-* Triclinic session, before the shared stencil
+* Triclinic results before the shared stencil
 
 The same ice, with ~xy = 0.25 L~, ~xz = 0.05 L~, ~yz = 0.12 L~.
 Eight timed calls after one warmup. The median is again the 5th sample.
@@ -193,8 +178,6 @@ template match.
 | rings | 884736 | 1 | 1143.636 | 18713.615 | 5447.092 |
 | rings | 884736 | 8 | 387.861 | 18813.651 | 2974.254 |
 
-The full sample list is =markdown/neighbours-v2.md=.
-
 * Shared stencil
 
 At 110592 molecules the perpendicular widths give 42 by 43 by 43 cells,
@@ -202,7 +185,7 @@ against 43 cubed for the cube. Both reaches are 1, so both lists use the
 27-cell stencil. The walks test 4,297,540 and 4,204,334 candidate pairs.
 The earlier 43 ms was the cell matrix, multiplied for every candidate.
 The 27 cartesian images are now filled once, and both boxes call that
-loop. The d-SEAMS columns are the same 8-core session as the
+loop. The d-SEAMS columns are the same 8-core measurements as the
 orthorhombic table: eight samples, median the 5th, IQR defined there.
 vesin and freud are the earlier comparison.
 
@@ -241,14 +224,4 @@ Every molecule of this ice is cubic, so the CHILL+ and diamond sinks
 equal ~N~. The ring counts match mdapy: 221184 at 110592 molecules and
 1769472 at 884736. The OVITO ring sink is the particle count, because
 FindRings does not write a structure code. PTM has no cubic-ice
-template, so its structure code is 0 on this crystal. The raw lines are
-in =markdown/neighbours-v3.md=.
-
-#+begin_src bash
-NEIGH_BENCH=$PWD/build-release/tests/bench_v2 \
-  python3 scripts/bench_neighbours_v2.py
-#+end_src
-
-The orthorhombic rows are ~bench_v2 ortho <molecules> <threads> 8~ under
-the same pin. ~bench_v2~ modes are ~tilt~, ~ortho~, ~chill~, ~rings~,
-and ~symmetry~.
+template, so its structure code is 0 on this crystal.
