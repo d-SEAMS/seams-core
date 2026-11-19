@@ -2371,6 +2371,9 @@ def render_summary(rows, run_id=None) -> str:
                 extra = ", ".join(f"{k} {v}" for k, v in meta_items)
                 out.append(f"- {arm_name}: {tool_name} {ver} ({extra})")
     out.append("")
+    any_noisy = any(
+        c["arm"] not in (REFERENCE, TWIN) and not single_compute(c) for c in cells
+    )
     for workload in ("cutoff", "knn", "rings", "q6"):
         subset = [c for c in cells if c["workload"] == workload]
         if not subset:
@@ -2393,7 +2396,7 @@ def render_summary(rows, run_id=None) -> str:
             ratio_text = (
                 f"{ratio:.2f}" if c.get("comparable", True) else "-"
             )
-            if ratio_text != "-" and (c["workload"], c["system"]) in noisy:
+            if ratio_text != "-" and (any_noisy or (c["workload"], c["system"]) in noisy):
                 ratio_text += " (not single-thread)"
             band = c["aa"]
             band_text = (f"{band['min']:.3f}-{band['max']:.3f}" if band.get("n") else "-")
@@ -2534,8 +2537,8 @@ def render_summary(rows, run_id=None) -> str:
             )
         if unlabeled:
             out.append(
-                "- x seams is marked not single-thread on every arm of a cell whose "
-                "competitor did not stay on one compute thread."
+                "- x seams is marked not single-thread on every figure when a competitor "
+                "did not stay on one compute thread."
             )
         for key, text in notes:
             out.append(f"- {key}: {text}")
