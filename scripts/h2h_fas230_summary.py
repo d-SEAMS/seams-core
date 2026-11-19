@@ -409,7 +409,7 @@ def assemble(records, full):
 def write_summary(records, path, full):
     rows = assemble(records, full)
     with path.open("w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=SUMMARY_FIELDS)
+        writer = csv.DictWriter(handle, fieldnames=SUMMARY_FIELDS, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     return rows

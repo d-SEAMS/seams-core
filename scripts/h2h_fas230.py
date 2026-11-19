@@ -405,7 +405,7 @@ def main():
         out = Path(args.samples)
         out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("w", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=FIELDS)
+            writer = csv.DictWriter(handle, fieldnames=FIELDS, lineterminator="\n")
             writer.writeheader()
             handle.flush()
             for job in summary.iter_jobs():
