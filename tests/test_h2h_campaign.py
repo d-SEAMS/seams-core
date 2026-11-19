@@ -556,10 +556,12 @@ def campaign_leaks(text: str, current_user: str = "", node: str = "") -> list[st
     if node and len(node) > 3 and node in text:
         leaks.append("current hostname")
 
-    token_parts = (
-        "ghp_", "github_pat_", "gho_", "hf_", "sk-", "AKIA", "xoxb-", "xoxp-",
+    token_re = re.compile(
+        r"(?:ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|"
+        r"gho_[A-Za-z0-9]{20,}|hf_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}|"
+        r"AKIA[A-Z0-9]{16}|xox[bp]-[A-Za-z0-9-]{20,})"
     )
-    if any(part in text for part in token_parts):
+    if token_re.search(text):
         leaks.append("token")
     assignment = re.compile(
         r"(?im)\b[A-Za-z_][A-Za-z0-9_.-]*\s*=\s*"
