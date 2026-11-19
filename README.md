@@ -24,6 +24,11 @@ Datasets: [figshare](https://figshare.com/projects/d-SEAMS_Datasets/73545).
 Zenodo: [d-seams](https://zenodo.org/communities/d-seams/).
 Wiki: [wiki.dseams.info](https://wiki.dseams.info).
 
+The large example trajectories are in the public Hugging Face dataset
+`d-SEAMS/seams-core-inputs`, pinned at revision
+`163ca2d8dfcb7ef21d88aea1c67381d841f63641`. Download and SHA-256-verify
+them with `python3 input/fetch.py`.
+
 ```bash
 seams read water.lammpstrj
 seams chill-plus water.lammpstrj --cutoff 3.5

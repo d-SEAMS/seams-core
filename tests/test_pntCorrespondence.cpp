@@ -235,7 +235,7 @@ TEST_CASE("relOrderPrismBlock with nList from trajectory", "[pntCorrespondence]"
   // relOrderPrismBlock needs a nList where basal ring atoms are mutual
   // neighbours. Use the mW trajectory for a realistic test.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);

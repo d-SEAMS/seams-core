@@ -137,6 +137,7 @@ def expected_phrases(text, start):
 
 
 def run_python_block(build, env, body):
+    body = run_snippets.fixture_inputs(body, env)
     if "```" in body:
         raise run_snippets.Fail("code fence leaked into a Python block")
     if body.lstrip().startswith(">>>") or "\n>>> " in body:
@@ -160,6 +161,7 @@ def run_python_block(build, env, body):
 
 def run_cli_block(build, script):
     env = os.environ.copy()
+    script = run_snippets.fixture_inputs(script, env)
     env["PATH"] = str(build) + os.pathsep + env.get("PATH", "")
     lib = str(build / "src")
     env["LD_LIBRARY_PATH"] = lib + os.pathsep + env.get("LD_LIBRARY_PATH", "")

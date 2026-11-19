@@ -138,6 +138,13 @@ def load(name):
 def stage_prep():
     DATA.mkdir(parents=True, exist_ok=True)
     WORK.mkdir(parents=True, exist_ok=True)
+    cubic = TRAJ / "mW_cubic.lammpstrj"
+    if not cubic.is_file():
+        subprocess.run(
+            [sys.executable, str(_ROOT / "input" / "fetch.py"),
+             "mW_cubic.lammpstrj", "--output-dir", str(TRAJ)],
+            check=True,
+        )
     if not NIU.is_file():
         fetch = pathlib.Path(__file__).resolve().parent / "fetch_niu_trajectory.py"
         subprocess.run(

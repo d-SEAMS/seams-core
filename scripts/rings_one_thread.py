@@ -215,6 +215,12 @@ def ovito_worker_main(traj: str) -> None:
 def prepare_frames(h2h, work: Path) -> list[tuple[str, str, int]]:
     small = ROOT / "input" / "traj" / "genice_sH.lammpstrj"
     cubic_path = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    if not cubic_path.is_file():
+        subprocess.run(
+            [sys.executable, str(ROOT / "input" / "fetch.py"),
+             "mW_cubic.lammpstrj"],
+            check=True,
+        )
     cubic = h2h.read_lammps_frame(str(cubic_path), 1)
     replica = h2h.replicate_frame(cubic, 3, 3, 3)
     replica_path = work / "mW-cubic-3x3x3.lammpstrj"

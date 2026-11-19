@@ -2,7 +2,7 @@
 and cage affiliation across frames or recomputes them (--rebuild,
 SEAMS_CARRY=0, or two frame workers).
 
-usage: cli_carry.py SEAMS TRAJ_DIR
+usage: cli_carry.py SEAMS TRAJ_DIR [fixture|full]
 """
 
 import os
@@ -11,6 +11,9 @@ import sys
 import tempfile
 
 seams, traj = sys.argv[1:3]
+mode = sys.argv[3] if len(sys.argv) > 3 else "full"
+if mode not in ("fixture", "full"):
+    raise SystemExit("mode must be fixture or full")
 env = {k: v for k, v in os.environ.items() if k != "SEAMS_CARRY"}
 failed = []
 
@@ -51,14 +54,23 @@ def perturbed(path, out, frames=6):
                 f.write(f"{a[0]} {a[1]} {x} {a[3]} {a[4]}\n")
 
 
-mw = os.path.join(traj, "mW_cubic.lammpstrj")
-liquid = os.path.join(traj, "dump-l.lammpstrj")
+if mode == "full":
+    mw = os.path.join(traj, "mW_cubic.lammpstrj")
+    liquid = os.path.join(traj, "dump-l.lammpstrj")
+    mw_frames = 11
+else:
+    mw = os.path.join(traj, "cubic-real-7.fixture.lammpstrj")
+    liquid = os.path.join(traj, "liquid-real-30.fixture.lammpstrj")
+    mw_frames = 7
 for graph in ("seeded", "cutoff", "knn"):
-    same(["--frame", "1", "--last", "11", "cages", "--graph", graph, mw], 11)
-same(["--frame", "1", "--last", "11", "cages", "--complete", mw], 11)
-same(["--frame", "1", "--last", "11", "cages", "--graph", "cutoff",
-      "--signature", "hc", mw], 11)
-same(["--frame", "1", "--last", "11", "chill-plus", "--tum-layers", mw], 11)
+    same(["--frame", "1", "--last", str(mw_frames), "cages", "--graph", graph, mw],
+         mw_frames)
+same(["--frame", "1", "--last", str(mw_frames), "cages", "--complete", mw],
+     mw_frames)
+same(["--frame", "1", "--last", str(mw_frames), "cages", "--graph", "cutoff",
+      "--signature", "hc", mw], mw_frames)
+same(["--frame", "1", "--last", str(mw_frames), "chill-plus", "--tum-layers", mw],
+     mw_frames)
 for graph in ("seeded", "knn"):
     same(["--frame", "1", "--last", "30", "-t", "1", "cages", "--graph", graph,
           liquid], 30)

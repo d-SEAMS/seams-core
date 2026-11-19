@@ -16,6 +16,11 @@ The table rounds each median to 0.001 ms.
 | orth-4k | 4096 | =input/traj/mW_cubic.lammpstrj=, cubic ice |
 | orth-1e5 | 110592 | that cubic cell, replicated 3 by 3 by 3 |
 
+The driver invokes the shared =input/fetch.py= helper when the cubic
+trajectory is absent.  The helper uses =d-SEAMS/seams-core-inputs= revision
+=163ca2d8dfcb7ef21d88aea1c67381d841f63641= and verifies the pinned
+SHA-256 digest.
+
 The per-size census is the same in both codes.
 
 | molecules | 4 | 5 | 6 |

@@ -1893,7 +1893,7 @@ TEST_CASE("steinhardtQl offload matches serial and threaded bit for bit",
   auto fccList = nneigh::neighListO(cutoff, fcc, 1);
 
   molSys::PointCloud<molSys::Point<double>, double> mw;
-  mw = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, mw, 1);
+  mw = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, mw, 1);
   REQUIRE(mw.nop > 0);
   auto mwList = nneigh::neighListO(3.5, mw, 1);
 

@@ -200,7 +200,12 @@ def main():
     page = root / "docs" / "orgmode" / "user" / "howto" / "migrate-1x.org"
     check_page(page.read_text())
     api, lang = load(libdir, langdir)
-    cubic = root / "input" / "traj" / "mW_cubic.lammpstrj"
+    cubic = Path(
+        os.environ.get(
+            "SEAMS_CUBIC_TRAJ",
+            root / "input" / "traj" / "mW_cubic.lammpstrj",
+        )
+    )
     tip = root / "input" / "traj" / "exampleTraj.lammpstrj"
     guest = root / "input" / "traj" / "genice_sI.lammpstrj"
     ran = set()

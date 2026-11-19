@@ -691,10 +691,10 @@ def rel_input(path):
     return Path(path).resolve().relative_to(ROOT).as_posix()
 
 
-def input_line(topic, path, frames_read):
+def input_line(topic, path, frames_read, label=None):
     frames, atoms = dump_census(path)
     return "{} full input molecules {} frames {} file-frames {} file {}".format(
-        topic, atoms, frames_read, frames, rel_input(path)
+        topic, atoms, frames_read, frames, rel_input(label or path)
     )
 
 
@@ -821,7 +821,8 @@ def cages_full(seams, libdir, out):
 
 
 def rings_full(seams, libdir, out):
-    dump = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    published = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    dump = Path(os.environ.get("SEAMS_CUBIC_TRAJ", published))
     text = run_seams(
         seams,
         libdir,
@@ -838,7 +839,7 @@ def rings_full(seams, libdir, out):
         elif len(parts) == 2 and parts[0].isdigit():
             histogram.append("{} {}".format(parts[0], parts[1]))
     lines = [
-        input_line("rings", dump, 1),
+        input_line("rings", dump, 1, published),
         "rings full paper molecules 4096 frames 1 rings 8192",
         "rings full nop {} rings {}".format(nop, total),
         "rings full histogram {}".format(" ".join(histogram)),

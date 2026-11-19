@@ -67,23 +67,23 @@ def same(args, records, rc=0, extra=None):
 
 # A Steinhardt atom split still spanning both ranks pairs different frames
 # and hangs
-same(["--frame", "1", "--last", "11", "steinhardt", dump], 11)
-same(["--frame", "1", "--last", "20", "cages", dump], 11)
+same(["--frame", "1", "--last", "7", "steinhardt", dump], 7)
+same(["--frame", "1", "--last", "20", "cages", dump], 7)
 # read prints the frame it loaded, so a rank reading the wrong frame shows;
 # frame 0 starts at the first
-same(["--frame", "0", "--last", "20", "read", dump], 11)
+same(["--frame", "0", "--last", "20", "read", dump], 7)
 # The CON reader stops at its first missing frame and stays on rank 0
 same(["--frame", "1", "--last", "8", "read", con], 2)
 same(["--frame", "3", "steinhardt", dump], 1)
 # Every frame fails, and each status comes back through the gather
-same(["--strict-input", "--type", "99", "--frame", "1", "--last", "11", "read",
-      dump], 11, rc=2)
+same(["--strict-input", "--type", "99", "--frame", "1", "--last", "7", "read",
+      dump], 7, rc=2)
 same(["--frame", "1", "--last", "4", "read", dump], 4, extra={"FORCE_COLOR": "1"})
 
-# input/traj/mW_cubic.lammpstrj is 11 complete frames of 4096 atoms.
+# The fixture is seven complete, distinct source frames of 4096 atoms.
 # This test cuts that file on purpose: lines[:last ITEM: ATOMS + 3] keeps
-# frames 1-10 whole and leaves frame 11 with its header and two atom lines.
-# A finished short frame is an error, so both ranks print ten records and
+# frames 1-6 whole and leaves frame 7 with its header and two atom lines.
+# A finished short frame is an error, so both ranks print six records and
 # the truncation message, and both join the gather.
 with tempfile.TemporaryDirectory() as tmp:
     short = os.path.join(tmp, "short.lammpstrj")
@@ -92,7 +92,7 @@ with tempfile.TemporaryDirectory() as tmp:
     atoms = max(i for i, line in enumerate(lines) if line.startswith("ITEM: ATOMS"))
     with open(short, "w") as f:
         f.writelines(lines[:atoms + 3])
-    serial, mpi = same(["--frame", "1", "--last", "20", "read", short], 10, rc=2)
+    serial, mpi = same(["--frame", "1", "--last", "20", "read", short], 6, rc=2)
     note = "LAMMPS dump frame is truncated:"
     check("short frame errors once", serial.stderr.count(note) == 1 and
           mpi.stderr.count(note) == 1)

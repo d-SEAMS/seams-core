@@ -526,7 +526,7 @@ TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
   // and every downstream graph predicate is identical. Checked here on the
   // thermal mW frame at k = 4, rcutoff = 3.5.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
 
   const auto [maxKth, minNext] = nneigh::shellSeparation(yCloud, 4, 1);
@@ -551,7 +551,7 @@ TEST_CASE("k-nearest graph reduces exactly to the cutoff graph when the "
 TEST_CASE("k-nearest pair matches two separate k-nearest builds",
           "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto mutual = nneigh::kNearestNeighbourList(yCloud, 4, 5.5, 1, true);
   auto uni = nneigh::kNearestNeighbourList(yCloud, 4, 5.5, 1, false);
   auto both = nneigh::kNearestNeighbourPair(yCloud, 4, 5.5, 1);
@@ -564,7 +564,7 @@ TEST_CASE("k-nearest graph is exact under an undersized candidate cutoff",
   // The brute-force fallback recomputes any atom whose k-th neighbour lies
   // beyond the candidate cutoff, so the nominations are exact regardless
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
 
   auto generous = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1);
   auto starved = nneigh::kNearestNeighbourList(yCloud, 4, 1.0, 1);
@@ -584,7 +584,7 @@ TEST_CASE("mutual and union k-nearest graphs coincide on the crystal",
   // symmetrizations produce the same graph, and both reduce to the cutoff
   // graph under the shell-separation certificate
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto unionRows = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1, false);
   auto mutualRows = nneigh::kNearestNeighbourList(yCloud, 4, 3.5, 1, true);
   REQUIRE(unionRows.size() == mutualRows.size());
@@ -612,7 +612,7 @@ TEST_CASE("bondGraphFromName accepts the published graph names",
 TEST_CASE("SkinNeighborList default is the mutual four-nearest graph",
           "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   nneigh::SkinNeighborList skin(3.5, 2.0, 1);
   const auto &bonds = skin.update(yCloud);
   auto knn = nneigh::kNearestNeighbourList(yCloud, 4, 5.5, 1, true);

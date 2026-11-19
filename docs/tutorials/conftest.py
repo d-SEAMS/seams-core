@@ -18,7 +18,12 @@ def tip4p(root: Path) -> Path:
 
 @pytest.fixture(scope="session")
 def cubic(root: Path) -> Path:
-    return root / "input" / "traj" / "mW_cubic.lammpstrj"
+    return Path(
+        os.environ.get(
+            "SEAMS_CUBIC_TRAJ",
+            root / "input" / "traj" / "cubic-real-7.fixture.lammpstrj",
+        )
+    )
 
 
 @pytest.fixture(scope="session")

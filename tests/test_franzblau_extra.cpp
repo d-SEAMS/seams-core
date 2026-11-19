@@ -405,7 +405,7 @@ TEST_CASE("cropped dump-l rings match the pairing walk and the filtered search",
   // that the pairing walk returns, and dense enough that a cap of one takes
   // the level walk.
   molSys::PointCloud<molSys::Point<double>, double> cloud;
-  cloud = sinp::readLammpsTrjO("traj/dump-l.lammpstrj", 1, cloud, 1);
+  cloud = sinp::readLammpsTrjO("traj/liquid-real-30.fixture.lammpstrj", 1, cloud, 1);
   REQUIRE(cloud.nop > 64);
   // Every eighth atom. The piece stays on the original box and cutoff,
   // and its shortest-path counts stay small enough for the pairing walk.

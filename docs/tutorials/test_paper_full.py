@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+RINGS_FILE_FRAMES = 7 if os.environ.get("SEAMS_CUBIC_TRAJ") else 11
+
 EXPECT = {
     "interface": [
         "interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj",
@@ -29,7 +31,7 @@ EXPECT = {
         "cages full paper unit sH molecules 68 cages 6 4 2",
     ],
     "rings": [
-        "rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj",
+        f"rings full input molecules 4096 frames 1 file-frames {RINGS_FILE_FRAMES} file input/traj/mW_cubic.lammpstrj",
         "rings full paper molecules 4096 frames 1 rings 8192",
         "rings full nop 4096 rings 8192",
         "rings full histogram 6 8192",

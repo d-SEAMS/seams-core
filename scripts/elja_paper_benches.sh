@@ -28,6 +28,7 @@ BASE_TREE=${BASE_TREE:-$SEAMS_ROOT/../seams-base}
 # the baseline worktree plus the recorded tip SHA behind for the job body.
 if [ "${1:-}" = "prep" ]; then
   cd "$SEAMS_ROOT"
+  python3 input/fetch.py mW_cubic.lammpstrj
   if [[ -d ${SEAMS_PIXI_BIN:-$HOME/.pixi/bin} ]]; then
     export PATH=${SEAMS_PIXI_BIN:-$HOME/.pixi/bin}:$PATH
   fi
@@ -50,6 +51,10 @@ fi
 
 mkdir -p "$OUT_DIR"
 cd "$SEAMS_ROOT"
+if [[ ! -f input/traj/mW_cubic.lammpstrj ]]; then
+  echo "input/traj/mW_cubic.lammpstrj is missing; run the prep stage" >&2
+  exit 1
+fi
 
 log() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$OUT_DIR/driver.log"; }
 

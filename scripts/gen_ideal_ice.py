@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import math
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -174,8 +176,13 @@ def liquid_frames(root=None):
     frames = []
     mw = traj / "dump-l.lammpstrj"
     tip = traj / "exampleTraj.lammpstrj"
-    if mw.is_file():
-        frames.append(read_lammps_first(mw, 1, "liquid-mw", "liquid-mw"))
+    if not mw.is_file():
+        subprocess.run(
+            [sys.executable, str(root / "input" / "fetch.py"),
+             "dump-l.lammpstrj"],
+            check=True,
+        )
+    frames.append(read_lammps_first(mw, 1, "liquid-mw", "liquid-mw"))
     if tip.is_file():
         frames.append(read_lammps_first(tip, 2, "tip4p-o", "tip4p-o"))
     return frames

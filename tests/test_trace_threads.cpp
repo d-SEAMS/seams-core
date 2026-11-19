@@ -255,7 +255,7 @@ TEST_CASE("signature cages match the serial census on GenIce and mW",
     requireSame(serialH, take(sH), "sH threads " + std::to_string(threads));
   }
 
-  const Cloud mw = loadFrame("traj/mW_cubic.lammpstrj", 1);
+  const Cloud mw = loadFrame("traj/cubic-real-7.fixture.lammpstrj", 1);
   REQUIRE(mw.nop == 4096);
   expectMatch(mw, "mW", 0, 0, 0, 2048);
   setThreads(1);
