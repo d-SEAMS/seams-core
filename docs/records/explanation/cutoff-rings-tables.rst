@@ -1,10 +1,13 @@
 .. list-table::
    :header-rows: 0
 
-   * - Rendered from ``benchmarks/cutoff-rings.csv``.
-       Ice Ic at 884736 molecules. ``linkcell`` is the 1ce3be3b builder.
-       ``cell-list`` is the orthorhombic list inside the ring call.
-       ``total`` medians are recomputed from ``samples_ms``.
+   * - Ice Ic at 884736 molecules. ``cell-list`` is the orthorhombic
+       cutoff list. ``linkcell`` is the buffered walk. ``total`` is
+       the neighbour list, the index conversion and the depth-6 search.
+       ``link``, ``convert`` and ``search`` are those three parts.
+       ``n`` is the number of timed calls. The median of an even count
+       is the mean of the two central samples. ``iqr_ms`` is the
+       type-7 interquartile range, filled on the ``total`` rows.
 
 Full cutoff ring call
 ^^^^^^^^^^^^^^^^^^^^^^

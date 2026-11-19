@@ -12,9 +12,9 @@ nix flake update           # refresh the nixpkgs pin
 nix fmt
 #+end_src
 
-~nix build~ runs Meson ~doCheck~: the Catch2 suite plus the CLI
-smoke tests ~seams_read~, ~seams_help~, ~seams_version~,
-~seams_features~.
+~nix build~ sets ~doCheck~, so the build runs the Meson suite.
+That suite includes the CLI tests ~seams_read~, ~seams_help~,
+~seams_version~, ~seams_features~, and ~seams_print_config~.
 
 * Flake outputs
 
@@ -37,8 +37,14 @@ The only flake input is ~nixpkgs~ (~github:NixOS/nixpkgs/nixos-unstable~).
 
 From =nix/package.nix= (~pname = "seams"~, ~version = "2.14.0"~):
 
-| on | Eigen, BLAS, LAPACK, Catch2 3, Highway (~libhwy~) |
-| OpenMP | ~dependency('openmp')~ probe; Clang also gets ~llvmPackages.openmp~ |
+| piece | this package |
+|-------+--------------|
+| Eigen | required, version at least 3.4 |
+| Highway | ~libhwy~, probed and linked when found |
+| OpenMP | ~dependency('openmp', required: false)~, then a link of a parallel region. Clang also gets ~llvmPackages.openmp~. NVIDIA uses ~-mp~ and skips that dependency |
+| GMP, MPFR | required by the test suite (~test_ozaki~) |
+| Catch2 3 | tests |
+| BLAS, LAPACK | present in the sandbox. ~with_blas~ is an auto feature, so it stays off and the libraries are not linked. No engine call uses them |
 | Meson flags | ~with_tests=true~, ~with_cli=true~, ~with_mpi=false~, ~with_openmp_offload=false~ |
 | ~mesonAutoFeatures~ | ~disabled~ |
 | wrap mode | ~nodownload~ (Meson setup hook) |
@@ -50,23 +56,28 @@ The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
 
 * What stays off
 
-| ~with_mpi~ | ~false~ |
-| ~with_openmp_offload~ | ~false~ |
-| vesin, readcon-core, readcon-db, linkcell, minimage | wrap-git fallbacks are not fetched (~nodownload~) |
-| chemfiles | not in the flake closure |
-| IRA, sphericart, nauty | ~auto_features=disabled~, so the ~auto~ probes stay off |
+| option | why it stays off |
+|--------+------------------|
+| ~with_mpi~ | set to ~false~ |
+| ~with_openmp_offload~ | set to ~false~ |
+| linkcell, minimage, chemfiles, readcon-core, readcon-db, IRA, sphericart, nauty, spglib, gpulite | ~auto~ features. ~auto_features=disabled~ does not search them, and ~nodownload~ does not fetch the wraps |
+| vesin | probed with ~required: false~, and vesin is not a build input, so the sandbox probe misses |
 
-~seams --features~ on a flake build therefore reports Highway (and
-OpenMP when it linked) as enabled, and vesin, chemfiles, readcon-core,
-IRA/SOFI, sphericart, nauty, and MPI as disabled. Optional backends
-turn on only if a nixpkgs package is already in the closure.
+~seams --features~ on this package reports Highway SIMD enabled, and
+OpenMP enabled when the link probe succeeds. It reports vesin cutoff
+fallback, linkcell pairs_within, chemfiles, readcon-core, readcon-db,
+IRA/SOFI, spglib, sphericart, nauty, and MPI disabled. A vesin
+pkg-config file in the build sandbox would turn that probe on. The
+~auto~ features above stay off when the package is only present in
+nixpkgs.
 
 * Front-end flakes
 
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] have matching
-flakes. They take seams-core as a locked source input and build it as
-the Meson subproject.
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] each take this
+repository as a source input (~flake = false~) and pass that tree
+into their package. The yodaStruct flake builds it as a Meson
+subproject.
 
 * Cachix
 

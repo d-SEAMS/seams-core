@@ -1,0 +1,74 @@
+#+TITLE: Ice-water interface
+#+OPTIONS: toc:nil num:nil
+
+#+begin_export rst
+.. include:: ../../videos/embeds/interface.rst
+#+end_export
+
+The recording labels this basal frame with published CHILL+: hexagonal
+352, water 434, and the stack ~HHHHHHHH....C.~
+
+=input/traj/interface_f0.lammpstrj= is one frame, 864 molecules of type 1.
+
+* Read the frame
+
+#+begin_src bash
+seams read input/traj/interface_f0.lammpstrj --type 1
+#+end_src
+
+#+begin_example
+nop 864 frame 1 box 22.9883 21.6093 52.5093
+#+end_example
+
+* Published CHILL+
+
+The default list bonds every pair closer than ~--cutoff~. ~--layers~
+bins cubic and hexagonal molecules, including reCubic and reHex, along
+~--axis~. Axis 2 is \(z\).
+
+#+begin_src bash
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --cutoff 3.5 --layers --axis 2
+#+end_src
+
+#+begin_example
+nop 864 clathrate 3 cubic 1 hexagonal 352 interClathrate 25 interfacial 49 water 434
+phi-c 0.00283286 stack HHHHHHHH....C.
+#+end_example
+
+phi-c is the cubic count divided by the cubic and hexagonal counts.
+reCubic is counted with cubic, and reHex with hexagonal. This frame has
+no reCubic or reHex molecules, so phi-c is 1/353, printed as 0.00283286.
+
+The stack is one character per layer along \(z\). The 52.5093 Å edge is
+split into 14 layers of equal width. H means the hexagonal count in
+that layer exceeds the cubic count, C means the cubic count exceeds the
+hexagonal count, and a dot means the layer has neither. The string is
+eight H, four dots, one C, and a final dot.
+
+* The ice front
+
+The front uses a second binning: slabs of 3.7 Å from \(z = 0\). A
+molecule is crystal when its label is cubic, hexagonal, reCubic, or
+reHex. This frame has 353 crystal molecules.
+
+From 7.4 Å through 14.8 Å every water in those slabs is crystal: 39,
+then 72, then 69. The fraction then falls through one half.
+
+| start (Å) | crystal | waters |
+|-----------+---------+--------|
+| 18.5 | 39 | 41 |
+| 22.2 | 34 | 71 |
+| 25.9 | 4 | 62 |
+| 44.4 | 1 | 65 |
+
+The crossing is at 22.035 Å, between the slab at 18.5 Å (39/41) and the
+slab at 22.2 Å (34/71). Later slabs stay under one half. The slab at
+44.4 Å holds the remaining crystal molecule.
+
+#+begin_export rst
+.. figure:: molecules/interface/overlay-web.png
+   :width: 480px
+   :alt: Basal interface colored by published CHILL+.
+
+   Basal interface colored by published CHILL+.
+#+end_export

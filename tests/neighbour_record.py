@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-PAGE = Path("docs/orgmode/howto/neighbour-lists.org")
+PAGE = Path("docs/orgmode/user/howto/neighbour-lists.org")
 
 
 def main() -> int:

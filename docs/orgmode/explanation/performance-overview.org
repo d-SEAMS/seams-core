@@ -1,81 +1,17 @@
 #+TITLE: Performance overview
 #+OPTIONS: toc:nil num:nil
 
-A path under =benchmarks/= on this page names a record of the d-SEAMS 2.0
-benchmark campaign. The records and the Snakemake rules that write them
-are in the private paper repository and the Hugging Face dataset
-=d-SEAMS/dseams2-benchmark-records= (=docs/records/README.md= names the
-revision); the scripts under =scripts/= that time a run stay here.
+Each median is printed on one page.
 
-Four sittings sit next to each other. Every number on this page is
-from the frozen tables in =docs/records=, rendered from the benchmark records dataset. A
-ratio is the threads=1 median divided by the threads=8 median. The
-script marks a row flat when that ratio is between 0.95 and 1.05.
-A PLUMED row in the release-candidate table was measured on one
-thread because ~PLUMED_NUM_THREADS~ was unset. The 884736-molecule
-sitting sets that variable, so its PLUMED q6 row is timed at the
-width the column names.
+| page | comparison |
+|------+------------|
+| [[file:performance.org][Release-candidate sitting]] | Ideal ice Ic at 110592 and 884736 molecules, one thread and eight. ~n~ is 6. Median and type-7 interquartile range for neighbours, \(q_4\), \(q_6\), CHILL+, rings, cages, the row stored as PTM, and King's count. |
+| [[file:performance-h2h.org][Head-to-head]] | Ice Ic and a TIP4P/ice liquid at 884736 molecules, at 1, 2, 4 and 8 threads. ~n~ is 6 or 8. Median and interquartile range recomputed from the samples. |
+| [[file:performance-range.org][4096 to 110592]] | Neighbour and ring rows for 4096 to 110592 molecules, kept when ~n~ is at least 6, with the recorded interval. |
+| [[file:trace-threads.org][Signature thread controls]] | The hydrate signature search, the eight kernels, and the cutoff ring call split into link, convert and search. |
 
-| file | what it times |
-|------+---------------|
-| ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
-| ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
-| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic and a TIP4P/ice liquid at 884736 molecules, paired with freud, mdapy, vesin, pyscal3, PLUMED, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads, recorded at ~2ed49e87~ |
-| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, retimed at ~1ce3be3b~ |
-| ~benchmarks/cutoff-rings.csv~ | The full cutoff ring call at 884736 molecules, linkcell against the cell list, recorded by ~cad887b2~ |
+The operation string is the string the table stored. It is a different call on different pages.
 
-The full tables are
-[[file:performance.org][the release-candidate sitting]],
-[[file:trace-threads.org][the thread controls]], and
-[[file:../howto/literature-reproduce.org][the literature reproduction]].
-~meson test docs_sitting~, ~docs_trace_threads~, ~docs_pool_audit~, and
-~docs_sitting_large~ recompute the stored medians.
+On the release-candidate comparison, \(q_4\) and \(q_6\) are one Steinhardt call, and the rings row is ~seams_frame_rings~ on the cutoff graph: the neighbour list and the search together. The 884736-molecule rings row is that same call in the other comparison. The rings kernel on the thread-controls page is ~ringNetwork~ after the neighbour graph already exists. Those ring times are separate measurements.
 
-The same operation name is not the same call across files. rc3 \(q_4\)
-is the guest's local parameter. The pool-audit file splits local and
-cutoff. The large-cell file names the call in its ~detail~ column. The
-tables keep the operation string the CSV stored.
-
-The rings row in the large-cell file is the full cutoff call. It is
-~seams_frame_rings~: the cutoff list and the ring search together.
-The rings kernel in the pool-audit file is ~ringNetwork~ alone, and
-that timer starts after the neighbour graph exists. The two numbers
-are not interchangeable.
-
-The large-cell ~detail~ column is the agreement check on the ice
-frame and on the TIP4P/ice liquid. q6 is compared with freud and with
-mdapy, and with pyscal3 and with PLUMED. On the liquid the freud gap
-is 1.525e-04, from hard-cutoff rounding, and the PLUMED gap is
-1.679e-01, from the rational switch. CHILL+ on that liquid matches
-830736/884736 molecules. The neighbour count is the directed pairs
-left by the cutoff list. d-SEAMS is compared with vesin and freud,
-and with pyscal3. OVITO coordination is the same pair sum. Both
-CHILL+ codes are compared on the cubic label. The classifier is
-compared with OVITO PTM restricted to the cubic and hexagonal diamond
-templates, where ice Ic is cubic diamond. The six-ring count is
-compared with rings-statistics-matter. PLUMED q6 in this file set
-~PLUMED_NUM_THREADS~. It is not the one-thread rc3 row.
-
-#+begin_export rst
-.. include:: performance-overview-tables.rst
-#+end_export
-
-* The 884736-molecule sitting
-
-~2ed49e87~ is the sitting of ice and the TIP4P/ice liquid. One warm-up,
-then the calls stored in ~n~, at 1, 2, 4 and 8 threads. Each width is
-its own process. The rivals are freud, mdapy, vesin, pyscal3
-(neighbours and q6), PLUMED q6 with ~PLUMED_NUM_THREADS~ set to that
-width, OVITO (CHILL+, q4, q6, coordination, and PTM with the default
-templates and with only the diamond templates), and
-rings-statistics-matter.
-~scripts/plot_sitting_large_time.py~ draws time against threads on a
-log axis, one panel per operation. The PDF is not stored.
-The tables recompute each median from the samples and carry the
-agreement notes. ~docs_table_csv~ checks the copied
-numbers. The rings row is still the full cutoff call. The separate
-~cad887b2~ table times that call with the cell-list builder.
-
-#+begin_export rst
-.. include:: sitting-large-tables.rst
-#+end_export
+The release-candidate PLUMED worker sets ~OMP_NUM_THREADS~ and does not set ~PLUMED_NUM_THREADS~. The head-to-head page holds the other PLUMED \(q_6\) rows.

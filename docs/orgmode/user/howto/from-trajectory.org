@@ -1,0 +1,71 @@
+#+TITLE: From a trajectory to the ice front
+#+OPTIONS: toc:nil num:nil
+
+You have a trajectory and want CHILL+ labels, the primitive rings,
+and the position of the ice front. The commands below run on a
+LAMMPS dump. When chemfiles is compiled in, the same commands also
+read =.pdb=, =.gro=, and =.dcd=. ~gmx-seams~ reads the =.xtc= that
+~gmx mdrun~ wrote. The files you can run from this tree are the
+LAMMPS dumps under ~input/traj/~.
+
+* Read the frame
+
+~input/traj/ice1h.lammpstrj~ is 128 molecules of ice Ih.
+~input/traj/interface_f0.lammpstrj~ is 864 molecules of a basal
+ice-water interface. Type 1 is the water in both files.
+
+#+begin_src bash
+seams read input/traj/ice1h.lammpstrj
+seams read input/traj/interface_f0.lammpstrj --type 1
+#+end_src
+
+Ice Ih prints ~nop 128 frame 1 box 15.6457 14.7071 18.073~.
+The interface prints ~nop 864 frame 1 box 22.9883 21.6093 52.5093~.
+
+* CHILL+ labels
+
+#+begin_src bash
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --cutoff 3.5
+#+end_src
+
+Ice Ih is ~hexagonal 128~. The interface is ~hexagonal 352~,
+~water 434~, ~interfacial 49~, ~interClathrate 25~, ~clathrate 3~,
+and ~cubic 1~.
+
+* Rings
+
+#+begin_src bash
+seams rings input/traj/ice1h.lammpstrj --cutoff 3.5
+seams rings input/traj/interface_f0.lammpstrj --type 1 --cutoff 3.5
+#+end_src
+
+Ice Ih has 256 rings, all of size 6. The interface has 1850 rings:
+142 of size 3, 188 of size 4, 377 of size 5, and 1143 of size 6.
+
+* The ice front
+
+~--layers --axis 2~ bins the CHILL+ labels along z, the long edge
+of the interface cell. The nominal layer width is 3.7 Å. The box
+is split into ~round(Lz / 3.7)~ equal slabs, 14 slabs of 3.751 Å
+on this cell.
+
+#+begin_src bash
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --layers --axis 2
+#+end_src
+
+The census line is unchanged, and the command adds
+
+#+begin_src text
+phi-c 0.00283286 stack HHHHHHHH....C.
+#+end_src
+
+~phi-c~ is the cubic share of the cubic and hexagonal molecules,
+1/353. The stack is eight hexagonal slabs, a gap, and one cubic
+slab.
+
+A fixed grid of 3.7 Å, counted from the same per-atom labels
+(~--per-atom~), puts the crystal fraction at 0.95 in the slab that
+starts at 18.5 Å and at 0.48 in the next slab. Crystal here is
+cubic, hexagonal, ~reCubic~, and ~reHex~. That fraction crosses
+one half at 22.03 Å.

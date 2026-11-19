@@ -1,0 +1,166 @@
+#+TITLE: Quickstart
+#+OPTIONS: toc:nil num:nil
+
+Install the engine, classify one cubic cell, then read one LAMMPS frame.
+Commands below are run from the repository root.
+
+* Install
+
+The build needs a C++ compiler, Eigen 3.4 or newer, and Rust (linkcell,
+minimage, and readcon).
+
+#+begin_src bash
+meson setup build -Dwith_tests=false
+meson compile -C build
+./build/seams --version
+#+end_src
+
+~-Dwith_tests=false~ leaves out the test suite. The compile still writes
+~./build/seams~, ~libyodaLib~, ~libseams~ (~include/seams.h~), and
+~libseams_lang~. ~./build/seams --version~ prints ~seams 2.14.0~.
+
+Source and pixi builds are on
+[[file:install.org][Install the engine]].
+
+The Python binding is
+[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]. ~import dseams~
+is the array API below, and ~import pydseams~ is the Frame API:
+
+#+begin_src bash
+pip install 'pydseamslib==2.14.0'
+#+end_src
+
+Every language is listed on
+[[file:../user/howto/bindings.org][Use a language binding]].
+
+* Eight cubic molecules
+
+The cell is the eight-atom diamond. The nearest-neighbour distance is
+2.75 Å, so the cubic lattice constant is ~2.75 * 4 / sqrt(3)~.
+
+#+begin_src python
+import dseams
+a = 2.75 * 4 / 3**0.5
+sites = (
+    (0, 0, 0),
+    (0.5, 0.5, 0),
+    (0.5, 0, 0.5),
+    (0, 0.5, 0.5),
+    (0.25, 0.25, 0.25),
+    (0.75, 0.75, 0.25),
+    (0.75, 0.25, 0.75),
+    (0.25, 0.75, 0.75),
+)
+xyz = [[x * a, y * a, z * a] for x, y, z in sites]
+labels, counts = dseams.chill_plus(xyz, [a, a, a])
+print(int(counts[0]))
+assert counts[0] == 8
+#+end_src
+
+~dseams.chill_plus~ returns one label per atom and nine counts, in the
+order of ~seams_label_name~. Index 0 is cubic. The call uses the
+published rule and the cutoff neighbour list at 3.5 Å. The program
+prints ~8~: every atom is cubic.
+
+The same cell is ~docs/examples/quickstart.c~. That program prints
+~cubic 8~.
+
+#+begin_src bash
+cc -I include -I build/src docs/examples/quickstart.c -L build/src -lseams -lm -Wl,-rpath,"$PWD/build/src" -o quickstart
+./quickstart
+#+end_src
+
+~-I build/src~ is the generated ~seams_version.h~. The calls in that
+file are:
+
+#+begin_src c
+seams_system *sys = seams_system_create();
+seams_system_set_ortho(sys, xyz, 8, 0, 0, 0, a, a, a, NULL, NULL);
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts);
+printf("cubic %d\n", counts[0]);
+seams_system_destroy(sys);
+#+end_src
+
+~a~ is the lattice constant, ~xyz~ is the 24 coordinates, ~labels~ is
+one int per atom, and ~counts~ is nine ints. Index 0 is
+~SEAMS_LABEL_CUBIC~.
+
+* Read a frame
+
+~input/traj/exampleTraj.lammpstrj~ is one frame of 750 atoms: 250
+oxygens and 500 hydrogens, 250 TIP4P waters. Type 2 is oxygen. Type 1
+is hydrogen.
+
+#+begin_src bash
+./build/seams read input/traj/exampleTraj.lammpstrj
+#+end_src
+
+#+begin_example
+nop 250 frame 1 box 40 40 180.203
+#+end_example
+
+~nop~ is the number of atoms kept. ~box~ is the three bound spans, in
+the file's coordinate units. When ~--type~ is omitted, the reader keeps
+type 2 if the file contains it, and type 1 otherwise. ~--type 2~ names
+oxygen. On this file it prints the same line.
+
+* CHILL+ and cages
+
+#+begin_src bash
+./build/seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+./build/seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2 --graph mutual
+./build/seams cages input/traj/exampleTraj.lammpstrj --type 2
+#+end_src
+
+#+begin_example
+nop 250 interClathrate 9 water 241
+nop 250 clathrate 1 interClathrate 7 water 242
+nop 250 graph seeded hexagonal 0 cubic 0 both 0 water 250
+#+end_example
+
+The lines are in command order. The first CHILL+ command uses the
+cutoff list: every pair closer than 3.5 Å. ~--graph mutual~ keeps the
+mutual four nearest neighbours, with candidates inside the cutoff plus
+1.5 Å. ~interClathrate~ is the three-eclipsed star. It is a different
+label from ~interfacial~.
+
+~seams cages~ defaults to ~--graph seeded~: mutual four-nearest seeds,
+then union completions. ~hexagonal~ is the hexagonal cage, ~cubic~ is
+the double-diamond cage, and ~both~ is an oxygen that belongs to both
+cages. This frame has none of those cages. Cage membership is a different score from the
+CHILL+ star. The walk-through is
+[[file:../user/tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].
+
+* Other counts
+
+#+begin_src bash
+./build/seams rings input/traj/exampleTraj.lammpstrj --type 2
+./build/seams steinhardt input/traj/exampleTraj.lammpstrj --type 2
+./build/seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+~mW_cubic.lammpstrj~ is 4096 atoms of type 1.
+
+- [[file:../user/howto/rings.org][Primitive rings]]
+- [[file:../user/howto/q4-q6.org][Local q4 and q6]]
+- [[file:../user/howto/symmetry-classifier.org][The symmetry classifier]]
+- [[file:../user/howto/chill-plus.org][CHILL+]]
+- [[file:../user/howto/cages-trace.org][Cages and TRACE]]
+
+* Backends
+
+#+begin_src bash
+./build/seams --features
+#+end_src
+
+The command prints ~Compile-time features:~ and one line per backend.
+The names are OpenMP, MPI, Highway SIMD, vesin cutoff fallback,
+linkcell pairs_within, chemfiles, readcon-core, readcon-db, IRA/SOFI,
+spglib, sphericart, and nauty. Each line ends with ~enabled~ or
+~disabled~. Which lines are enabled depends on the build. chemfiles is
+the PDB, GRO, and DCD reader. readcon-core is the CON reader.
+
+Frame, atom type, cutoff, and graph are flags, or the variables
+printed by ~./build/seams --print-config~. The names and the
+precedence of ~./seams.env~ and ~SEAMS_CONFIG~ are on the
+[[file:../reference/cli.org][seams CLI]] page.

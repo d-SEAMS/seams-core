@@ -118,8 +118,8 @@ def main():
     langdir = Path(sys.argv[4])
     build = Path(sys.argv[5])
     page = (root / "docs" / "orgmode" / "explanation" / "chill-plus-rules.org").read_text()
-    howto = (root / "docs" / "orgmode" / "howto" / "chill-plus.org").read_text()
-    migration = (root / "docs" / "orgmode" / "howto" / "migrate-1x.org").read_text()
+    howto = (root / "docs" / "orgmode" / "user" / "howto" / "chill-plus.org").read_text()
+    migration = (root / "docs" / "orgmode" / "user" / "howto" / "migrate-1x.org").read_text()
     if "chill-plus-rules.org" not in howto:
         fail("CHILL+ reference does not link the rule page")
     if "chill-plus-rules.org" not in migration:

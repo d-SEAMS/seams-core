@@ -1,18 +1,40 @@
 # Binding overhead
 
-Ice Ih at 4096, 32768, and 110592 molecules. GenIce builds a missing cell. The oxygen sites are kept and scaled from nanometers to angstroms.
+Ice Ih at 4096, 32768, and 110592 molecules. GenIce writes a cell that is not already on disk. The oxygen sites are kept and scaled from nanometers to angstroms.
 
-The run used 8 cores of Intel(R) Xeon(R) Processor. No host name is recorded. One process per binding stayed open for both thread widths. The serial phase set OMP_NUM_THREADS and PLUMED_NUM_THREADS to 1. The threaded phase set both to 8 and called seams_set_num_threads. Each cell below is the median of 8 repeats after one warmup, in milliseconds, with the interquartile range in parentheses.
+The record is an 8-core Intel Xeon. It does not name the host. Each seams binding is one process for both thread widths. The process sets `OMP_NUM_THREADS` and `PLUMED_NUM_THREADS` to 1, then to 8, and calls `seams_set_num_threads` at each width. freud runs inside the Python process and uses the same widths. The 1-thread and 8-thread OVITO rows are two processes, started with `OVITO_THREAD_COUNT` set to 1 and to 8. Each cell is the median of 8 repeats after one warmup, in milliseconds. The median of an even sample is the mean of the two central values. The number in parentheses is the interquartile range, quartile 3 minus quartile 1, Hyndman-Fan type 7.
 
-Read, the mutual 4-neighbour list, and the primitive-ring search return a handle. On the 110592-molecule cell the slowest of those wrappers was python read at 1 thread, 1.09 times the direct C call. The file parser and the search run inside libseams. The wrapper passes a pointer and, for rings and neighbours, destroys the handle.
+## Handles
 
-CHILL and q6 write one number per molecule, and the timed q6 call also writes q6bar. C, C++, Fortran, Rust, Julia, R, and the ctypes module fill one contiguous buffer and hand its address to libseams. Lua then stores every value in a table. On the 110592-molecule cell, Lua q6 at 1 thread is 1.05 times the C median. That gap is the table write.
+Read, the mutual 4-neighbour list, and the primitive-ring search return a handle. The parser and the search run inside libseams. The C, Fortran, Lua, and ctypes drivers destroy a neighbour or ring handle inside the timed section. The C++ wrapper destroys that handle when the owning object leaves scope. On the 110592-molecule cell at 1 thread, Python read is the slowest measured wrapper of read and the neighbour list: 47.209 ms against the C read median of 43.195 ms, a ratio of 1.09.
 
-Two copies that did not belong in the wrappers are gone. Lua's CSR export walked the neighbour lists into a temporary buffer and then into the table. It now reads the CSR that the handle already owns. Julia's orthorhombic frame setter copied a 3-by-n Float64 matrix that was already the layout seams_system_set_ortho copies. It now passes that pointer. Rust, C++, and Julia allocate the q6bar buffer only when the caller asks for the Lechner-Dellago average. The timed call asks for it, so both buffers are required.
+`seams_rings_find` stores the primitive rings through size 6 on the 3.5 angstrom cutoff graph. A 5-ring is marked as a pentagon and a 6-ring as a hexagon. Prism, cage, and stacking labels are written when `seams_rings_labels` reads the symmetry. The timed calls leave that symmetry unread, so the prism pass stays out of the measurement. At 4096 molecules the C median is 991.813 ms at 1 thread and 1561.161 ms at 8 threads. Every binding is repeated at that size. The C search is also recorded at 32768 molecules, 65237.213 ms at 1 thread and 62041.600 ms at 8 threads. The 110592-molecule ring cells are empty. A probe of that search had not returned after several minutes.
 
-freud and OVITO are separate programs, timed in the same session on the same oxygen coordinates. Freud times knn, q6. OVITO times knn, q6, read, rings. freud's neighbour query is the one-way 4-nearest list inside 5 angstroms, the candidate shell the mutual list uses, and its q6 call includes the averaged parameter. OVITO reads the dump, builds a 4-neighbour finder, runs the Steinhardt modifier with the averaged parameters, and runs FindRings after creating bonds at 3.5 angstroms. OVITO has no original CHILL modifier, and freud has no reader, no CHILL, and no primitive-ring search, so those cells are empty. seams_rings_find also classifies prisms. That walk is about one second at 4096 molecules, where every binding was repeated. The C search was repeated at 32768 molecules as well. A 110592-molecule call did not return within 180 seconds, so that cell is empty. Python's ctypes ring call is 1.36 times C on that cell. The other languages return the ring handle and stay with the C time.
+At 4096 molecules the Python ctypes ring call is 1344.104 ms at 1 thread, 1.36 times C, and 1909.255 ms at 8 threads, 1.22 times C. The other languages stay with the C time. Julia and R copy the ring vertices out of the handle. Fortran also fills a size histogram and the fraction of atoms on six-membered rings. Those extras sit inside the C time.
 
-At 8 threads the seams neighbour, q6, and CHILL calls take longer than the one-thread calls, on every language at once. freud and OVITO move the other way and get faster. The bindings are following the library, not adding a cost of their own.
+## Per-molecule results
+
+CHILL writes one label per molecule. The call is original CHILL, published edges, on the cutoff graph. The timed q6 call writes q6 and the Lechner-Dellago average q6bar, one double each per molecule, on the 3.5 angstrom cutoff graph. A null q6bar pointer passed to `seams_steinhardt` skips that average. The C, C++, and Fortran drivers, and the ctypes worker, pass both caller-owned buffers. The C++ wrapper allocates the averaged vector only when the caller asks for it, and this call asks for it. On the 110592-molecule cell at 1 thread, Lua q6 is 33.288 ms, 1.05 times the C median of 31.822 ms. The ctypes worker is 33.806 ms on that cell, 1.06 times C.
+
+R times each call with `proc.time` elapsed time. On the calls that finish in a few milliseconds the R medians fall on whole milliseconds.
+
+## freud and OVITO
+
+freud and OVITO are timed in the same session, on the same oxygen coordinates. The freud rows are the neighbour query and q6. The OVITO rows are read, a 4-neighbour finder, q6, and rings.
+
+The seams neighbour list is the mutual 4-nearest graph. Candidates lie inside 5 angstroms, the 3.5 angstrom cutoff plus 1.5. freud's query is the one-way 4-nearest list inside that same shell. OVITO's finder is `NearestNeighborFinder` with 4 neighbours. freud's q6 call is Steinhardt with l = 6, the averaged parameter, and a neighbour shell of 3.5 angstroms. OVITO's Steinhardt modifier uses that cutoff, maximum degree 6, and the averaged parameters. OVITO's ring row creates bonds at 3.5 angstroms and then runs FindRings with a maximum ring size of 6. That search is a different census from `seams_rings_find`.
+
+## Eight threads
+
+Neighbour lists and CHILL take longer at 8 threads than at 1 thread, at every size, in every language. q6 on the 4096-molecule cell is faster at 8 threads: C falls from 0.950 ms to 0.550 ms, and the languages with a finer clock follow it. R stays at 1 ms on that cell. On the 32768-molecule cell C q6 rises from 9.065 ms to 278.258 ms, and on the 110592-molecule cell from 31.822 ms to 294.849 ms. Primitive rings at 4096 molecules are slower at 8 threads as well. freud and OVITO neighbour and q6 calls are faster at 8 threads at every size. The language bindings follow libseams.
+
+![Median time of each binding divided by the direct C call](../records/_static/binding-overhead.png)
+
+Median time of each binding divided by the direct C call. The vertical axis is logarithmic, so a wrapper near 1 and a separate analysis sit on the same axes.
+
+## Times
+
+Milliseconds. An empty cell has no sample.
 
 ### read
 
@@ -84,5 +106,3 @@ At 8 threads the seams neighbour, q6, and CHILL calls take longer than the one-t
 | r | 994.500 (4.750) | 1549.500 (3.750) |  |  |  |  |
 | lua | 1002.424 (18.117) | 1552.125 (5.559) |  |  |  |  |
 | ovito | 20.977 (0.993) | 19.223 (0.599) |  |  |  |  |
-
-The figure is drawn when the docs are built. It is the median ratio to the direct C call.

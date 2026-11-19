@@ -197,7 +197,7 @@ def expect_line(text, needle):
 def main():
     root, seams, libdir, langdir = sys.argv[1:5]
     root = Path(root)
-    page = root / "docs" / "orgmode" / "howto" / "migrate-1x.org"
+    page = root / "docs" / "orgmode" / "user" / "howto" / "migrate-1x.org"
     check_page(page.read_text())
     api, lang = load(libdir, langdir)
     cubic = root / "input" / "traj" / "mW_cubic.lammpstrj"

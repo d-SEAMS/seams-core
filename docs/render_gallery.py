@@ -17,8 +17,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from shared_library import require_library  # noqa: E402
-IMAGE_DIR = ROOT / "docs" / "source" / "tutorials" / "gallery"
-CAPTIONS = ROOT / "docs" / "source" / "tutorials" / "gallery-captions.rst"
+IMAGE_DIR = ROOT / "docs" / "source" / "user" / "tutorials" / "gallery"
+CAPTIONS = ROOT / "docs" / "source" / "user" / "tutorials" / "gallery-captions.rst"
 RUNS = ROOT / "docs" / "build" / "gallery-runs"
 
 # Okabe-Ito, so the CHILL+ classes stay distinct for the common color-vision deficiencies.

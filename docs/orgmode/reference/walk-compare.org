@@ -2,16 +2,15 @@
 #+OPTIONS: toc:nil num:nil ^:nil
 
 ~tests/walk_compare~ walks a LAMMPS dump and prints one row per
-frame. Each row has four-neighbour star (~CHILL+~) counts, cage
-membership on the same cutoff graph, and the seeded assignment on the
-mutual and union four-nearest graphs, with the largest ice cluster of
-each score. Cage flags are hexagonal cage (HC) and double-diamond
-cage (DDC).
+frame. Each row has four-neighbour CHILL+ counts from
+~chill::getCorrelPlus~ and ~chill::getIceTypePlusNoPrint~ on the
+cutoff neighbour list, cage membership on that same graph, and the
+seeded assignment on the mutual and union four-nearest graphs, with
+the largest ice cluster of each score. Cage flags are hexagonal cage
+(HC) and double-diamond cage (DDC).
 
-The walk_compare binary is a Meson executable. ~pixi run setup &&
-pixi run build~ (~-Dwith_tests=true~) writes
-~bbdir/tests/walk_compare~. A Nix develop tree writes the same name
-under the Meson build directory. Catch2 does not run this binary.
+The binary is the Meson target ~tests/walk_compare~. A test build
+writes it at ~bbdir/tests/walk_compare~.
 
 * Inputs
 
@@ -32,7 +31,7 @@ walk_compare TRAJ [lastFrame] [atomType] [stride]
      - LAMMPS dump path
    * - ``lastFrame``
      - all frames
-     - inclusive 1-based cap; ``0`` or a value at or above the dump length walks every frame
+     - inclusive 1-based cap; a non-positive value, or a value at or above the dump length, walks every frame
    * - ``atomType``
      - ``1``
      - LAMMPS type kept by ``sinp::readLammpsTrjO``

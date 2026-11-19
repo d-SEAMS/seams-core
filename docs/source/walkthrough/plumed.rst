@@ -4,7 +4,9 @@ PLUMED
 Get the d-SEAMS PLUMED plugin v0.4.1 from the
 :doc:`PLUMED engine page <../engines/plumed>`.
 
-``engines/plumed/SeamsColvar.cpp`` is the ``SEAMS`` action.
+``engines/plumed/SeamsColvar.cpp`` is the ``SEAMS`` action. The
+standalone PLUMED action (``dseams-plumed`` v0.4.1) is indexed in
+`PLUMED-NEST egg 26.018 <https://www.plumed-nest.org/eggs/26/018/>`_.
 ``engines/plumed/plumed.dat`` loads it on ``engines/plumed/ice.xyz``,
 restrains ``seams.q6``, and prints ``seams.ice`` and ``seams.ring``.
 Coordinates in the xyz file are nanometers. ``calculate`` multiplies

@@ -1,0 +1,123 @@
+#+TITLE: Install the engine
+#+OPTIONS: toc:nil num:nil
+
+Release 2.14.0 provides the ~seams~ command, ~libyodaLib~, ~libseams~
+(~include/seams.h~), and ~libseams_lang~ (~bindings/cxx/seams_lang.h~).
+Build it from source or with [[https://pixi.sh][pixi]]. Language
+bindings live in their own repositories; the last section gives their
+install commands.
+
+* From source
+
+You need a C++20 compiler, CMake, Python 3, Meson 1.3 or newer, Ninja,
+pkg-config, and cargo with rustc 1.88 or newer. Eigen 3.4 must be
+visible as the ~eigen3~ pkg-config module. conda-forge can supply
+Meson, Ninja, pkg-config, and that Eigen:
+
+#+begin_src bash
+conda install -c conda-forge meson ninja pkg-config 'eigen=3.4.*'
+#+end_src
+
+An unpinned ~eigen~ package on that channel currently resolves to
+5.0.1. This release builds with Eigen 3.4. If pkg-config does not
+find ~eigen3~, Meson fetches the Eigen 3.4.0 wrap in the repository.
+
+A default setup fetches vesin, gpulite, linkcell, minimage,
+readcon-core, and readcon-db when those libraries are not already
+installed. linkcell, minimage, and the two readcon projects need the
+Rust toolchain above. When chemfiles is not already installed, setup
+builds it with CMake. LAMMPS dump and XYZ files still read through the
+native parsers when chemfiles is left out.
+
+#+begin_src bash
+git clone https://github.com/d-SEAMS/seams-core
+cd seams-core
+git checkout v2.14.0
+meson setup build --prefix="$HOME/.local" --libdir=lib -Dwith_tests=false
+meson compile -C build
+meson install -C build
+#+end_src
+
+~--prefix~ is set at setup. ~meson install~ writes that prefix.
+~--libdir=lib~ places the shared libraries in ~$PREFIX/lib~. Put
+~$HOME/.local/bin~ on ~PATH~. The install writes ~seams.pc~,
+~seams-core.pc~, ~seams-lang.pc~, and
+~lib/cmake/seams/seams-config.cmake~. Point ~PKG_CONFIG_PATH~ at
+~$HOME/.local/lib/pkgconfig~ before compiling another program against
+those files.
+
+~-Dwith_tests=true~ is the Meson default and builds the Catch2 suite.
+~-Dwith_readcon=disabled~ skips readcon-core and readcon-db.
+~--wrap-mode=nodownload~ makes setup fail instead of fetching a
+subproject. Highway (~libhwy~ 1.3 or newer) is optional. A setup that
+does not find it leaves Highway off. The pixi environment below
+provides it.
+
+* pixi
+
+From a checkout of ~v2.14.0~:
+
+#+begin_src bash
+pixi run setup
+pixi run build
+./bbdir/seams --help
+./bbdir/seams --features
+#+end_src
+
+The default environment includes Highway and chemfiles. Environments
+~ira~, ~sphericart~, ~nauty~, and ~mpi~ add those libraries. Select one
+by name:
+
+#+begin_src bash
+pixi run -e ira build
+#+end_src
+
+The same ~-e~ flag takes ~sphericart~, ~nauty~, or ~mpi~.
+
+* OpenMP target offload
+
+The builds on this page leave ~with_openmp_offload~ disabled. The
+NVIDIA build is [[file:../user/howto/openmp-offload.org][OpenMP target offload]].
+
+* Verify
+
+With ~seams~ on ~PATH~, from the checkout:
+
+#+begin_src bash
+seams --help
+seams --version
+seams --features
+seams read input/traj/exampleTraj.lammpstrj
+#+end_src
+
+~seams --version~ prints ~seams 2.14.0~. The read of the bundled
+trajectory prints ~nop 250 frame 1 box 40 40 180.203~. ~--features~
+lists the backends compiled into that binary.
+
+LAMMPS, GROMACS, OpenMM, and PLUMED hooks follow ~-Dwith_lammps=auto~,
+~-Dwith_gromacs=auto~, ~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~.
+Each hook is built when its library is found. The engine pages are
+[[file:../user/howto/engine-lammps.org][LAMMPS]], [[file:../user/howto/engine-gromacs.org][GROMACS]],
+[[file:../user/howto/engine-openmm.org][OpenMM]], and [[file:../user/howto/engine-plumed.org][PLUMED]].
+The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
+[[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
+
+* Language bindings
+
+Each binding is its own repository. Use these install commands:
+
+- Python: ~pip install 'pydseamslib==2.14.0'~ from
+  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+- Lua and Fennel: clone [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+  and run ~luarocks make~ in the checkout.
+- R: ~remotes::install_github("d-SEAMS/dseams-r")~ from
+  [[https://github.com/d-SEAMS/dseams-r][dseams-r]].
+- Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~ from
+  [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]].
+- Rust: ~cargo add dseams@2.14.0~, or
+  ~cargo add dseams --git https://github.com/d-SEAMS/dseams-rs~ from
+  [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]].
+- Fortran: add [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
+  as an fpm Git dependency.
+
+[[file:../user/howto/bindings.org][Use a language binding]] lists what each one links.

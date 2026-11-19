@@ -1,0 +1,22 @@
+#+TITLE: User guide
+#+OPTIONS: toc:nil num:nil
+
+Recipes and worked examples, grouped by the job you came to do. The
+background for those jobs is
+[[file:../explanation/index.org][the explanation pages]].
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   classify
+   order
+   interfaces
+   confined
+   engines
+   languages
+   versions
+   paper
+   performance
+   ../explanation/index
+#+end_export

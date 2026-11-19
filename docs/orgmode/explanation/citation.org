@@ -7,11 +7,11 @@ Goswami, R.; Goswami, A.; Singh, J. K. d-SEAMS: Deferred Structural
 Elucidation Analysis for Molecular Simulations. /J. Chem. Inf. Model./
 2020, 60, 2169--2177.
 [[https://doi.org/10.1021/acs.jcim.0c00031][10.1021/acs.jcim.0c00031]]
-(arXiv:1909.09830).
+([[https://arxiv.org/abs/1909.09830][arXiv:1909.09830]]).
 
 #+begin_src bibtex
 @Article{Goswami2020,
-  author  = {Goswami, Rohit and Goswami, Amrita and Singh, Jayant Kumar},
+  author  = {Goswami, Rohit and Goswami, Amrita and Singh, Jayant K.},
   title   = {{d-SEAMS}: Deferred Structural Elucidation Analysis for Molecular Simulations},
   journal = {Journal of Chemical Information and Modeling},
   year    = {2020},
@@ -22,10 +22,59 @@ Elucidation Analysis for Molecular Simulations. /J. Chem. Inf. Model./
 }
 #+end_src
 
-The v2 engine paper targets Computer Physics Communications. Cite
-JCIM 2020 until that article has a DOI; then cite both (JCIM for the
-methods, CPC for the v2 engine).
+Cite the method paper when the reported result uses that method.
 
-Related method papers, only when the page uses that method: Nguyen
-and Molinero 2015 (CHILL+), Moore et al. 2010 (CHILL), ten Wolde
-et al. 1996 (local bond order).
+CHILL+: Nguyen, A. H.; Molinero, V. Identification of Clathrate
+Hydrates, Hexagonal Ice, Cubic Ice, and Liquid Water in Simulations:
+the CHILL+ Algorithm. /J. Phys. Chem. B/ 2015, 119, 9369--9376.
+[[https://doi.org/10.1021/jp510289t][10.1021/jp510289t]].
+
+#+begin_src bibtex
+@Article{Nguyen2015,
+  author  = {Nguyen, Andrew H. and Molinero, Valeria},
+  title   = {Identification of Clathrate Hydrates, Hexagonal Ice, Cubic Ice, and Liquid Water in Simulations: the {CHILL+} Algorithm},
+  journal = {The Journal of Physical Chemistry B},
+  year    = {2015},
+  volume  = {119},
+  number  = {29},
+  pages   = {9369--9376},
+  doi     = {10.1021/jp510289t},
+}
+#+end_src
+
+CHILL: Moore, E. B.; de la Llave, E.; Welke, K.; Scherlis, D. A.;
+Molinero, V. Freezing, melting and structure of ice in a hydrophilic
+nanopore. /Phys. Chem. Chem. Phys./ 2010, 12, 4124--4134.
+DOI 10.1039/b919724a.
+
+#+begin_src bibtex
+@Article{Moore2010,
+  author  = {Moore, Emily B. and de la Llave, Ezequiel and Welke, Kai and Scherlis, Damian A. and Molinero, Valeria},
+  title   = {Freezing, melting and structure of ice in a hydrophilic nanopore},
+  journal = {Physical Chemistry Chemical Physics},
+  year    = {2010},
+  volume  = {12},
+  number  = {16},
+  pages   = {4124--4134},
+  doi     = {10.1039/b919724a},
+}
+#+end_src
+
+Local bond order: ten Wolde, P. R.; Ruiz-Montero, M. J.; Frenkel, D.
+Numerical calculation of the rate of crystal nucleation in a
+Lennard-Jones system at moderate undercooling. /J. Chem. Phys./ 1996,
+104, 9932--9947.
+[[https://doi.org/10.1063/1.471721][10.1063/1.471721]].
+
+#+begin_src bibtex
+@Article{tenWolde1996,
+  author  = {ten Wolde, Pieter Rein and Ruiz-Montero, Maria J. and Frenkel, Daan},
+  title   = {Numerical calculation of the rate of crystal nucleation in a {Lennard-Jones} system at moderate undercooling},
+  journal = {The Journal of Chemical Physics},
+  year    = {1996},
+  volume  = {104},
+  number  = {24},
+  pages   = {9932--9947},
+  doi     = {10.1063/1.471721},
+}
+#+end_src

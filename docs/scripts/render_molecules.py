@@ -3385,13 +3385,13 @@ def fresh(directory, stem):
 
 
 def write_pages(out):
-    """Sphinx figure list. Paths are relative to docs/source/tutorials."""
+    """Sphinx figure list. Paths are relative to docs/source/user/tutorials."""
     lines = [
         "Molecule stills",
         "---------------",
         "",
-        "Drawn by ``python docs/scripts/render_molecules.py`` with chemparseplot.",
-        "The repository stores the script. The PNG files are produced at build time.",
+        "These views highlight the ice, ring, prism, cage, brine, interface, "
+        "and nucleation structures used throughout the tutorials.",
         "",
     ]
     order = (

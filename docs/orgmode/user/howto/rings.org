@@ -1,0 +1,48 @@
+#+TITLE: Primitive rings
+#+OPTIONS: toc:nil num:nil
+
+Count primitive rings on a frame you already have. The definition is
+on [[file:../../explanation/primitive-rings.org][Primitive rings]]. The
+learning path is [[file:../tutorials/rings.org][the rings tutorial]].
+
+* One frame
+
+~seams rings~ prints ~nop~, the number of primitive rings, and one
+histogram row for each size that occurs. The neighbour list is the
+cutoff list (default 3.5 Å). An orthorhombic cell uses the full CSR
+of that list. ~--type~ keeps one LAMMPS type. On the mixed TIP4P dump
+the oxygen is type 2. ~--max-ring~ is the largest ring (default 6).
+
+#+begin_src bash
+# excerpt: docs/orgmode/getting-started/quickstart.org
+seams rings input/traj/exampleTraj.lammpstrj --type 2
+#+end_src
+
+#+begin_example
+nop 250 rings 511
+3 37
+4 273
+5 34
+6 167
+#+end_example
+
+* From the C API
+
+~seams_rings_find~ then ~seams_rings_histogram~ is the same census.
+~counts[k]~ is the number of primitive rings of size ~k~. The buffer
+must be longer than the largest ring. On a 64-atom cubic cell the
+six-ring count is positive.
+
+#+begin_src c
+seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings);
+seams_rings_histogram(rings, counts, 13);
+#+end_src
+
+* A trajectory
+
+A ~--frame~ / ~--last~ walk on one worker (~--jobs 1~, the default)
+keeps one ring updater. A bond that did not change keeps its rings. A
+changed bond recomputes the sources next to it. The census matches a
+full search of that frame. ~--rebuild~ recomputes every frame. The
+measured speedups are on
+[[file:linkcell-carried.org][Linkcell neighbours and carried updates]].

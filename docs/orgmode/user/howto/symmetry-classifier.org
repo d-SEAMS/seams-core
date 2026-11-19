@@ -1,0 +1,53 @@
+#+TITLE: The symmetry classifier
+#+OPTIONS: toc:nil num:nil
+
+Name the ice shell of each oxygen. The shell, the bond cutoff, and
+the fit are on [[file:../../explanation/symmetry.org][Local symmetry]].
+This page is the command and the library call.
+
+* The CLI
+
+~seams symmetry~ prints the matcher backend, a space-group line, one
+shell overlay when a crystal shell matches, and a tally of the labels
+that occur. ~ice-Ih~, ~ice-Ic~ and ~ice-Isd~ appear when the frame
+has them. Unmatched atoms are the last count:
+
+#+begin_example
+shells ice-Ic N unmatched U
+#+end_example
+
+The per-atom codes are ice Ih (0), ice Ic (1), stacking-disordered
+(2), or -1. The command prints the names. Those labels, and the shell
+overlay, come from the built-in shell kernel. The scale-free residual
+ceiling on that kernel is 0.15.
+
+The backend line is ~ira~ when the build linked IRA, and ~kabsch~
+otherwise. spglib supplies the space group when it is linked. A build
+without spglib prints ~space-group off~. A cluster that matches one
+template also prints a ~whole~ overlay and a point-group line. The
+point-group line is ~off~ when SOFI is not linked.
+
+#+begin_src bash
+seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+The 4096-molecule cubic mW cell tallies ~shells ice-Ic 4096 unmatched 0~.
+The matching shell on that file is ice-Ic with rmsd 0.0119309, and the
+overlay names its backend ~kernel~.
+
+* The library
+
+~seams_frame_symmetry~ writes the same integer labels. The second
+argument is the residual ceiling. Pass 0.15 to match the command.
+The declaration is:
+
+#+begin_src c
+// excerpt: bindings/cxx/seams_lang.h
+int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels);
+#+end_src
+
+#+begin_src c
+seams_frame_symmetry(frame, 0.15, labels);
+#+end_src
+
+Python ~dseams.symmetry~ writes those labels from the same call.

@@ -1,15 +1,22 @@
 # Python
 
-The Python binding is pydseamslib on PyPI, `import dseams`. It lives in its own repository,
-[d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib), with its API reference, tutorials,
-tests and release notes. It links the engine through the C API
-(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
-(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
+Classify ice Ih from Python. The recording uses `input/traj/ice1h.lammpstrj`: `seams read` prints `nop 128`, and published CHILL+ at a 3.5 angstrom cutoff prints `nop 128 hexagonal 128`.
+
+```{eval-rst}
+.. include:: ../videos/embeds/python.rst
+```
+
+The binding is [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). `import dseams` is the array API over `libseams` (`include/seams.h`). `import pydseams` is the Frame API. The worked example and the symbol list are the [PydSEAMSlib documentation](https://d-seams.github.io/PydSEAMSlib/).
 
 ```bash
 pip install 'pydseamslib==2.14.0'
 ```
 
-The binding release with the same version as seams-core is built
-against that seams-core tag. `docs/orgmode/contributing/repositories.org`
-describes how the repositories fit together.
+The same two engine commands, without the binding:
+
+```bash
+seams read input/traj/ice1h.lammpstrj
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+Package names and the libraries they link are the {doc}`Python API </stable/python>`.

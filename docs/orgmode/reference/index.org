@@ -1,4 +1,4 @@
-#+TITLE: Lookup pages
+#+TITLE: API reference
 #+OPTIONS: toc:nil num:nil ^:nil
 
 Lookup pages for the engine. Tutorials and how-tos live elsewhere.
@@ -9,11 +9,50 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:cli.org][seams CLI]] | ~seams~ subcommands, flags, colors |
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
 | [[file:walk-compare.org][walk_compare]] | ~tests/walk_compare~ inputs and columns |
-| [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
-| [[file:api.org][API Reference]] | Doxygen comments, via doxyrest; the generated tree is =api/index= |
+| [[file:api.org][API map]] | Fronts and the header table |
+| [[https://docs.dseams.info/api/index.html][API Reference]] | Generated C++ pages (=api/index=) |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
-| [[file:cross-language.org][One task, three languages]] | CHILL+ on the cubic mW frame |
+| [[file:cross-language.org][One task, four fronts]] | CHILL+ on frame 1 of the cubic mW dump, 4096 cubic sites |
 | [[file:glossary.org][glossary]] | Engine terms |
-| [[file:../explanation/performance.org][Sitting tables]] | Medians from ~benchmarks/rc3-sitting.csv~ |
-| [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
+| [[file:../explanation/performance.org][Release-candidate sitting]] | Medians and interquartile ranges for the release-candidate comparison |
+| [[file:../explanation/trace-threads.org][Signature-search thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
 | [[file:release-2.14.org][2.14.0 release notes]] | API, engines, threads, and deprecations since v2.13.0 |
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   c-api
+   cpp-api
+   python-api
+   julia-api
+   r-api
+   rust-api
+   fortran-api
+   lua-api
+   cli-api
+   python-frame
+   cli
+   data-formats
+   walk-compare
+   api
+   nix
+   cross-language
+   glossary
+   release-2.14
+   ../capi/index
+   ../stable/index
+   ../stable/c
+   ../stable/cpp
+   ../stable/python
+   ../stable/fortran
+   ../stable/julia
+   ../stable/r
+   ../stable/lua
+   ../stable/rust
+   ../stable/cli
+   ../stable/science
+   ../lang/index
+   ../api/index
+#+end_export

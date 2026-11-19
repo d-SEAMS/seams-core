@@ -1,0 +1,24 @@
+#+TITLE: Engines
+#+OPTIONS: toc:nil num:nil
+
+Read a trajectory from LAMMPS, GROMACS, OpenMM, or PLUMED, or label the frame inside the run. The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in [[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/insitu-run
+   howto/engine-lammps
+   howto/engine-gromacs
+   howto/engine-openmm
+   howto/engine-plumed
+   howto/engine-insitu
+   howto/openmp-offload
+   ../engines/index
+   ../engines/lammps
+   ../engines/gromacs
+   ../engines/openmm
+   ../engines/plumed
+   ../engines/insitu
+   ../walkthrough/index
+#+end_export

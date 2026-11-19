@@ -1,0 +1,51 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "d-SEAMS",
+  "description": "d-SEAMS reads molecular-dynamics trajectories and names the ice in them: CHILL+, topological cages, primitive rings, and Steinhardt parameters, on one shared neighbour list. This repository is the C++ engine, the C API libseams, the C ABI libseams_lang, and the seams command.",
+  "folders": [
+    "docs/orgmode",
+    "docs/api",
+    "docs/engines",
+    "docs/tutorials",
+    "docs/examples",
+    "skills"
+  ],
+  "excludeFolders": [
+    "docs/build",
+    "docs/doctrees",
+    "docs/source",
+    "docs/doxygen-html",
+    "docs/videos",
+    "docs/records",
+    "docs/.cache",
+    "subprojects",
+    "third_party",
+    "tests",
+    "bbdir",
+    "benchmarks",
+    "bench",
+    "input",
+    "changelog.d",
+    ".pixi",
+    "archive",
+    "archived",
+    "old",
+    "deprecated",
+    "legacy"
+  ],
+  "excludeFiles": [
+    "LICENSE.md",
+    "license.md",
+    "CODE_OF_CONDUCT.md",
+    "code_of_conduct.md",
+    "NEWS.md"
+  ],
+  "rules": [
+    "Install the engine with conda install -c conda-forge libseams, or meson setup build && meson compile -C build.",
+    "seams reads a trajectory. TIP4P oxygen is --type 2. Monoatomic water such as mW is --type 1. The default cutoff is 3.5 angstrom.",
+    "include/seams.h is ABI 1. Handles are opaque. Destroy each handle once. A NULL buffer with a length pointer queries the count.",
+    "Python is pydseamslib (import dseams). Lua, R, Julia, Rust, and Fortran bindings are separate repositories at the same version.",
+    "Cite Goswami, Goswami, and Singh, J. Chem. Inf. Model. 2020, doi:10.1021/acs.jcim.0c00031.",
+    "Read AGENTS.md before editing seams-core. Do not weaken or delete a test to make the suite pass."
+  ]
+}

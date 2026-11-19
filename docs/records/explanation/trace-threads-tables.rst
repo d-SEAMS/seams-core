@@ -1,8 +1,10 @@
 .. list-table::
    :header-rows: 0
 
-   * - These tables are rendered from
-       ``benchmarks/trace-threads.csv``.
+   * - Signature cages on the sI and sII cells. ``threads`` is the
+       width that was requested. ``n`` is the number of timed calls.
+       The median of an even count is the mean of the two central
+       samples. ``iqr_ms`` is the type-7 interquartile range.
 
 signature cages, sI
 ^^^^^^^^^^^^^^^^^^^

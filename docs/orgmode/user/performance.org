@@ -1,0 +1,14 @@
+#+TITLE: Performance and comparisons
+#+OPTIONS: toc:nil num:nil
+
+What to time, how the literature codes were run, and where d-SEAMS sits next to them.
+
+#+begin_export rst
+.. toctree::
+   :maxdepth: 1
+
+   howto/benchmarks
+   howto/literature-h2h
+   howto/literature-reproduce
+   comparisons
+#+end_export

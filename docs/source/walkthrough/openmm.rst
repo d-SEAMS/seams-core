@@ -10,8 +10,7 @@ steps with the reporter's interval set to 1.
 
    openmm calls 2 atoms 8 cubic 8
 
-Both reports are entirely cubic. The docs job fails if OpenMM cannot
-be imported.
+Both reports are entirely cubic.
 
 .. figure:: figures/openmm.svg
    :alt: OpenMM reporter: two calls on an 8-atom cubic cell.

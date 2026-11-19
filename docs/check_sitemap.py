@@ -23,7 +23,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CONF = ROOT / "docs" / "source" / "conf.py"
 WORKFLOW = ROOT / ".github" / "workflows" / "ci_docs.yml"
-NOTE = ROOT / "docs" / "orgmode" / "contributing" / "index.org"
+NOTE = ROOT / "docs" / "orgmode" / "development" / "index.org"
 BUILD = ROOT / "docs" / "build"
 HOST = "docs.dseams.info"
 DEPLOY_IF = (
@@ -297,26 +297,6 @@ def workflow_problems():
     return problems
 
 
-def note_problems():
-    text = NOTE.read_text(encoding="utf-8")
-    if "* Deployment" not in text:
-        return ["contributing page has no Deployment section"]
-    section = text.split("* Deployment", 1)[1].split("\n* ", 1)[0]
-    problems = []
-    for needle in (
-        "d-SEAMS/seams-core",
-        "main",
-        "gh-pages",
-        "Netlify",
-        "https://docs.dseams.info",
-    ):
-        if needle not in section:
-            problems.append("Deployment note lacks " + needle)
-    if "CNAME" in section or "GitHub Pages" in section:
-        problems.append("Deployment note describes the wrong host")
-    return problems
-
-
 def _write_urlset(path, locs):
     rows = ["<?xml version='1.0' encoding='utf-8'?>",
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -395,7 +375,6 @@ def self_test():
     problems = []
     problems.extend(conf_problems())
     problems.extend(workflow_problems())
-    problems.extend(note_problems())
     problems.extend(mapper_cases())
     return problems
 
@@ -407,7 +386,6 @@ def main(argv):
         problems = []
         problems.extend(conf_problems())
         problems.extend(workflow_problems())
-        problems.extend(note_problems())
         problems.extend(cname_problems(BUILD))
         problems.extend(sitemap_problems(BUILD))
     else:

@@ -1,96 +1,136 @@
-#+TITLE: Repositories
+#+TITLE: Architecture
 #+OPTIONS: toc:nil num:nil
 
-d-SEAMS 2.14 is one C++ library plus the stable C API and C ABI that
-the language bindings call. ~linkcell::pairs_within~ owns the cutoff list.
-vesin is the fallback when linkcell is not built.
+d-SEAMS 2.14.0 is one C++ engine, ~libyodaLib~. Callers link
+~libseams~, ~libseams_lang~, or both. ~libseams~ (=include/seams.h=) is
+the C API. ~libseams_lang~ (=bindings/cxx/seams_lang.h=) is the C ABI.
+Each library links ~libyodaLib~. ~libseams_lang~ is a separate library
+from ~libseams~. The ~seams~ command is the command-line front on the
+same engine.
 
-| repository | product | role |
-|------------+---------+------|
-| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~, ~libseams~, ~libseams_lang~ | Engine, CLI, C API, language ABI, engine plugins |
-| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ | Python: ~import dseams~ and ~import pydseams~ |
-| [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | LuaRocks ~dseams~ | Lua and Fennel: ~require("dseams")~ |
-| [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ | R package |
-| [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | Julia packages over ~libseams_jll~ |
-| [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | ~dseams-sys~, ~dseams~ | Rust crates |
-| [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm ~dseams~ | Fortran modules |
-| [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell neighbours |
+The engine reads the trajectory. XYZ and LAMMPS dumps are built in.
+~.pdb~, ~.gro~, and ~.dcd~ need chemfiles, and ~.con~ needs readcon.
+Without chemfiles the command refuses ~.pdb~, ~.gro~, and ~.dcd~.
+Without readcon it refuses ~.con~. Every other suffix is read as a
+LAMMPS dump.
 
-Each binding pins a seams-core tag, builds or links ~libseams~ and
-~libseams_lang~ from it, and releases with the same version. PydSEAMSlib
-and yodaStruct take seams-core as a Meson subproject; the others build it
-at the pin in their CI or link an installed copy. No binding carries a
-second engine implementation. Building the engine needs no language
-toolchain beyond C and C++. [[file:../contributing/repositories.org][The
-repository map]] lists the pins and the release order.
+Optional drivers for LAMMPS, GROMACS, OpenMM, and PLUMED live in this
+repository.
+
+Building the engine and the ~seams~ command takes a C and C++
+toolchain. Python, Lua, R, Julia, Rust, and Fortran are not required
+for that build.
 
 #+begin_export rst
 .. mermaid::
 
    flowchart TD
-     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
-     NB["linkcell, vesin<br/>or gpulite"] --> LIB
-     LIB --> API[libseams]
-     API --> CLI["seams command"]
-     API --> LANG["C and C++ here"]
-     API --> BIND["Python, Lua, R, Julia,<br/>Rust, Fortran repositories"]
+     READ["XYZ, LAMMPS, and optional chemfiles and readcon"] --> ENG[libyodaLib]
+     CUT["Cutoff list"] --> ENG
+     ENG --> CAPI[libseams]
+     ENG --> ABI[libseams_lang]
+     CAPI --> CLI[seams]
 #+end_export
 
-* Why ~yoda~
+* Language packages
 
-The 2020 product was a single executable named ~yodaStruct~. That
-binary is gone. The compiled C++ surface kept the name so existing
-registrations stay findable: the PydSEAMSlib module is ~pydseams.yoda~
-(~_core~ and ~cyoda~ are aliases of ~yoda~). Lua helpers are
-~require("dseams")~; ~require("yoda")~ still resolves to that table.
-There is no ~yodaStruct~ executable in any d-SEAMS repository.
+Each language is its own package. The package calls this engine. It
+does not carry a second copy of a classifier. A package release carries
+the engine version it was built against, so ~pydseamslib==2.14.0~
+calls the 2.14.0 engine.
 
-* Builds
+| language | repository | package | calls |
+|----------+------------+---------+-------|
+| Python | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseamslib~ | ~libseams~ (~import dseams~) and ~libseams_lang~ (~import pydseams~) |
+| Lua, Fennel | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | Git source, ~require("dseams")~ | ~libseams~ |
+| R | [[https://github.com/d-SEAMS/dseams-r][dseams-r]] | ~dseams~ | ~libseams_lang~ |
+| Julia | [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]] | ~Dseams~, ~Seams~ | ~Dseams~ calls ~libseams_lang~. ~Seams~ calls ~libseams~. Both are distributed through ~libseams_jll~ |
+| Rust | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | ~dseams-sys~, ~dseams~ | ~libseams~ |
+| Fortran | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ | ~libseams~ |
 
-- *Nix flake*: ~nix build~ / ~nix develop~ in each repo. Optional
-  wrap-git backends stay off unless nixpkgs already provides them.
-- *pixi*: locked conda-forge toolchain in seams-core.
-- *Wheels*: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
+[[file:../user/howto/bindings.org][Use a language binding]] has the install
+commands.
 
-The 2020 CMake Nix derivation of ~yodaStruct~ is gone.
+* Why the name is yoda
 
-* Neighbour backends
+The 1.x executable was ~yodaStruct~. This repository builds ~seams~.
+It does not build ~yodaStruct~. The compiled Python module is
+~pydseams.yoda~. ~_core~ and ~cyoda~ are aliases of ~yoda~. Lua loads
+~require("dseams")~. ~require("yoda")~ is that table.
 
-- *linkcell* (optional, ~SEAMS_HAS_LINKCELL~): ~linkcell::pairs_within~
-  owns the cutoff list.
-- *vesin* (optional, ~SEAMS_HAS_VESIN~): the cutoff fallback when
-  linkcell is not built.
+* Cutoff list
 
-~seams --features~ prints both.
+The cutoff list is every pair inside the distance cutoff. The full
+list, which the ~seams~ command builds, picks a builder from the build
+and from the OpenMP team.
+
+With several OpenMP threads, an orthorhombic box and a box that carries
+tilt terms are searched with the engine's cell list. A search that
+returns a list is the cutoff list. One thread does not run that search.
+~linkcell::pairs_within~ (~lc_pairs_within_rows~) is the builder when
+the cell list did not supply the pairs, the build includes linkcell,
+and the call succeeds. [[https://github.com/d-SEAMS/linkcell][linkcell]]
+is that library. This repository asks for linkcell 0.4.2 or newer.
+linkcell's release number is its own, and the 2.14.0 tag does not
+name it. ~libyodaLib~ links one copy and exports the ~lc_~ symbols.
+
+Vesin fills the list when it is built and linkcell produced nothing:
+linkcell is absent, or the linkcell call failed. When neither library
+produced a list, the search continues with a cell list and then a
+direct loop over pairs.
+
+~seams --features~ prints the compile-time backends. ~linkcell
+pairs_within~ and ~vesin cutoff fallback~ are two of those lines, each
+~enabled~ or ~disabled~, among OpenMP, MPI, readers, and the other
+optional libraries. The printout is the build. It does not name which
+builder ran for a frame. A linkcell failure prints ~trying the next
+cutoff list~. A vesin failure prints ~falling back to brute force~.
+
+The bond graph is a separate choice. For ~seams cages~, ~--graph~ is
+~cutoff~, ~knn~, ~knn-union~, or ~seeded~, and ~seeded~ is the default
+for that command. The cutoff-list builder does not select the graph.
+Which graph the six-rings are found on, and why that is a different
+question from CHILL+, is [[file:chill-plus-vs-cages.org][CHILL+ versus cages]].
 
 * Device paths
 
-Optional CUDA via gpulite (~-Dwith_gpulite~) runs a resident TUM
-frame batch: linkcell k-NN, mutual four-nearest graph, primitive
-six-rings, HC/DDC. CHILL and \(q_{lm}\) stay on the host.
+Two optional device builds do different work.
 
-OpenMP target offload (~-Dwith_openmp_offload~, ~SEAMS_OFFLOAD~)
-covers Steinhardt Ylm and the TUM ice score (hop-bound six-rings
-and cage affiliation) on the same neighbour graph the host uses.
-Device CHILL+ is not a product. It is not gpulite.
+OpenMP target offload is the Meson option ~with_openmp_offload~. The
+default is disabled. The build covers Steinhardt \(Y_{lm}\) and the
+cage score, as hop-bound six-rings and cage affiliation, on the
+neighbour list the host built. ~SEAMS_OFFLOAD~ requests that path.
+The default is off, and ~0~ keeps the work on the host. ~seams cages~
+with ~--graph seeded~, the default, stays on the host either way.
+~seams chill~ and ~seams chill-plus~ run on the host.
 
-* Runtime knobs
+gpulite is the Meson option ~with_gpulite~. When that library is
+linked, the engine provides ~gpu::analyzeResident~, a CUDA batch of
+frames that stays on the device. The batch is the cage score: linkcell
+device k-nearest, the mutual four-nearest graph, primitive six-rings,
+and HC/DDC labels. It needs that device k-nearest. Without it, the
+call reports that the path is not built. The batch returns cage
+labels. It does not compute CHILL, CHILL+, or \(q_{lm}\). The ~seams~
+subcommands do not call ~gpu::analyzeResident~.
 
-Defaults live in the binary. An optional dotenv (~SEAMS_CONFIG~ or
-~./seams.env~) fills unset keys. The process environment wins the
-file; CLI flags win the environment. ~seams --print-config~ dumps
-the table. Keys: ~SEAMS_FRAME~ / ~LAST~ / ~JOBS~ / ~TYPE~ /
-~CUTOFF~ / ~K~ / ~GRAPH~ / ~RESIDENT~ / ~CELL~ / ~OFFLOAD~,
-~LINKCELL_TPP~ / ~BLOCK~, ~YODA_FENNEL_PATH~ / ~YODA_LUA_PATH~.
-Analysis choice is not this table.
+* Runtime settings
 
-* Ice score and the CHILL+ star
+Defaults are compiled into the binary. A dotenv file (~SEAMS_CONFIG~,
+or ~./seams.env~ when that file is present) fills keys that are still
+unset. The process environment overrides the file. A flag on the
+~seams~ command overrides the value for the setting that flag names.
+~seams --print-config~ prints the resolved values.
 
-Two classifiers live in ~libyodaLib~. They answer different questions
-and they do not imply each other. The argument is
-[[file:chill-plus-vs-cages.org][CHILL+ versus cages]].
+The keys choose frames, workers, the default graph, and whether
+offload was requested. The subcommand (~chill~, ~cages~, ~rings~, and
+the others) is not one of the keys. Compile-time Meson options are not
+in the file. [[file:../reference/cli.org][The command reference]] lists
+the keys and the defaults.
 
-~seams cages --graph~ chooses the bond graph the six-rings are found
-on: ~cutoff~, ~knn~, ~knn-union~, or ~seeded~ (CLI default). On a
-perfect cubic crystal the four graphs coincide. On a mixed nucleation
-dump they do not.
+* Two classifiers
+
+~libyodaLib~ holds both ice classifiers. CHILL and CHILL+ label a
+molecule from its four nearest neighbours. The cage score labels
+hexagonal-cage and double-diamond-cage membership. The two results do
+not imply each other. The argument, and the counts on the mixed TIP4P
+dump, are on [[file:chill-plus-vs-cages.org][CHILL+ versus cages]].

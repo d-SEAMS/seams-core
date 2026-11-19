@@ -1,0 +1,17 @@
+#+TITLE: Science gallery
+#+OPTIONS: toc:nil num:nil
+
+These pictures show the interface, brine, ring, cage, and nucleation examples.
+Each caption explains the colors and reports the corresponding molecular
+census.
+
+#+begin_export rst
+.. include:: gallery-captions.rst
+#+end_export
+
+The molecular views below highlight the structures discussed in the
+tutorials.
+
+#+begin_export rst
+.. include:: molecules.rst
+#+end_export

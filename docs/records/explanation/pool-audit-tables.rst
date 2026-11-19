@@ -1,9 +1,10 @@
 .. list-table::
    :header-rows: 0
 
-   * - Rendered from ``benchmarks/pool-audit.csv``.
-       Each size is one 32-row table: eight kernels at 1, 2, 4 and 8 threads.
-       ``median_ms`` and ``iqr_ms`` are recomputed from ``samples_ms``.
+   * - Eight kernels on ideal ice Ic, each at 1, 2, 4 and 8 threads.
+       ``n`` is the number of timed calls. The median of an even count
+       is the mean of the two central samples. ``iqr_ms`` is the
+       type-7 interquartile range.
 
 ice Ic, 4096 molecules
 ^^^^^^^^^^^^^^^^^^^^^^

@@ -5,12 +5,17 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import sys
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from check_seo import BASE_URL, MetadataParser
+from discoverability import lastmod_for
+
+NOT_LISTED = ("search.html", "genindex.html")
+ROBOTS = re.compile(r'<meta[^>]+name=["\']robots["\'][^>]*>', re.IGNORECASE)
 
 DESCRIPTION = (
     "Documentation for d-SEAMS, a molecular simulation trajectory analysis engine "
@@ -31,6 +36,14 @@ def sitemap_url(path: Path, root: Path) -> str:
     elif route.endswith(".html"):
         route = route[:-5]
     return BASE_URL + route.lower()
+
+
+def listed(path: Path, root: Path) -> bool:
+    """Pages a crawler should index: not search, genindex, 404 or a redirect stub."""
+    if path.relative_to(root).as_posix() in NOT_LISTED:
+        return False
+    source = path.read_text(encoding="utf-8", errors="replace")
+    return not any("noindex" in tag.lower() for tag in ROBOTS.findall(source))
 
 
 def _json_ld() -> str:
@@ -120,12 +133,15 @@ def finalize(root: Path) -> None:
         raise ValueError(f"{root}: no built HTML pages found")
     for page in pages:
         complete_page(page, root)
-    urls = [sitemap_url(page, root) for page in pages]
+    urls = [sitemap_url(page, root) for page in pages if listed(page, root)]
     ET.register_namespace("", "http://www.sitemaps.org/schemas/sitemap/0.9")
     urlset = ET.Element("{http://www.sitemaps.org/schemas/sitemap/0.9}urlset")
     for url in urls:
         node = ET.SubElement(urlset, "{http://www.sitemaps.org/schemas/sitemap/0.9}url")
         ET.SubElement(node, "{http://www.sitemaps.org/schemas/sitemap/0.9}loc").text = url
+        ET.SubElement(node, "{http://www.sitemaps.org/schemas/sitemap/0.9}lastmod").text = (
+            lastmod_for(url)
+        )
     ET.ElementTree(urlset).write(
         root / "sitemap.xml", encoding="utf-8", xml_declaration=True
     )
@@ -137,6 +153,12 @@ def self_test() -> None:
         page = root / "api-cpp" / "index.html"
         page.parent.mkdir()
         page.write_text("<html><head><title>C++ API</title></head></html>", encoding="utf-8")
+        for name in NOT_LISTED:
+            (root / name).write_text("<html><head><title>x</title></head></html>", encoding="utf-8")
+        (root / "404.html").write_text(
+            '<html><head><title>x</title><meta name="robots" content="noindex"></head></html>',
+            encoding="utf-8",
+        )
         finalize(root)
         source = page.read_text(encoding="utf-8")
         required = (
@@ -153,6 +175,9 @@ def self_test() -> None:
         locs = [node.text for node in tree.iter() if node.tag.endswith("loc")]
         if locs != ["https://docs.dseams.info/api-cpp/"]:
             raise ValueError("self-test sitemap omitted the page")
+        stamps = [node.text for node in tree.iter() if node.tag.endswith("lastmod")]
+        if len(stamps) != 1 or not stamps[0]:
+            raise ValueError("self-test sitemap has no lastmod")
 
 
 def main(argv: list[str]) -> int:

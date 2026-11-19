@@ -3,16 +3,20 @@
 """Write llms.txt, the plain-text map of the published d-SEAMS manual.
 
 The pages and their order come from the toctrees of docs/orgmode/index.org,
-one section per toctree caption. A page is an Org file under docs/orgmode,
-a Markdown page under docs/api, docs/engines or docs/tutorials (published
-as stable/, engines/ and fronts/), or an rst page under docs/source. Each
-line links the published HTML on https://docs.dseams.info with the page
-title and the first sentence of its prose. A last section links the
-language binding repositories.
+one section per top-level caption. Nested toctrees in those pages are
+walked in order, so a section index contributes its children. A page is
+an Org file under docs/orgmode, a Markdown page under docs/api,
+docs/engines or docs/tutorials (published as stable/, engines/ and
+fronts/), or a tracked rst page under docs/source. Rst that the build
+writes and git does not track is ignored, so the file is the same before
+and after a build. Each line links the Markdown twin of that page on
+https://docs.dseams.info (the file served beside the HTML) with the page
+title and the first sentence of its prose. A later section links the
+language binding repositories. An Optional section links the one-file manual.
 
-llms.txt is committed at the repository root and Sphinx copies it to the
-site root. ``--check`` exits 1 when the committed file differs from a
-fresh generation.
+llms.txt is committed at the repository root. The docs build writes the
+same text to the site root. ``--check`` exits 1 when the committed file
+differs from a fresh generation.
 
 >>> plain("Run ~seams rings~ on [[file:x.org][a frame]].")
 'Run seams rings on a frame.'
@@ -23,6 +27,7 @@ fresh generation.
 from __future__ import annotations
 
 import argparse
+import posixpath
 import re
 import sys
 from pathlib import Path
@@ -35,30 +40,25 @@ OUTPUT = ROOT / "llms.txt"
 
 TITLE = "d-SEAMS"
 SUMMARY = (
-    "d-SEAMS (seams-core) reads molecular-dynamics trajectories and names "
-    "the ice in them: CHILL and CHILL+, topological cages, primitive rings, "
-    "Steinhardt q_l, and ice and brine fronts, computed on one shared "
-    "neighbour list. This repository builds the C++ engine, the C API "
-    "libseams (include/seams.h), the C ABI libseams_lang that the language "
-    "bindings link, the seams command, and the LAMMPS, GROMACS, OpenMM, "
-    "PLUMED and in-situ engine drivers. The Python, Lua and Fennel, R, "
-    "Julia, Rust and Fortran bindings live in their own repositories and "
-    "release against the seams-core tag with the same version."
+    "d-SEAMS reads molecular-dynamics trajectories and classifies ice with "
+    "CHILL and CHILL+, topological cages, primitive rings, Steinhardt q_l, "
+    "and ice and brine fronts. Use it from the command line, a language "
+    "binding, or a supported simulation engine."
 )
 
 BINDINGS = (
     ("PydSEAMSlib", "https://github.com/d-SEAMS/PydSEAMSlib",
-     "Python binding, pydseamslib on PyPI (import dseams, import pydseams)."),
+     "Install the Python binding with pip install pydseamslib==2.14.0."),
     ("yodaStruct", "https://github.com/d-SEAMS/yodaStruct",
-     "Lua and Fennel binding, the LuaRocks package dseams (require(\"dseams\"))."),
+     "Clone the Lua and Fennel binding, then run luarocks make in the checkout."),
     ("dseams-r", "https://github.com/d-SEAMS/dseams-r",
-     "R binding, the R package dseams."),
+     "Install the R binding with remotes::install_github(\"d-SEAMS/dseams-r\")."),
     ("Dseams.jl", "https://github.com/d-SEAMS/Dseams.jl",
-     "Julia binding, the package Dseams over libseams_jll."),
+     "Install the Julia binding with Pkg.add(url=\"https://github.com/d-SEAMS/Dseams.jl\")."),
     ("dseams-rs", "https://github.com/d-SEAMS/dseams-rs",
-     "Rust binding, the crates dseams-sys and dseams."),
+     "Install the Rust binding with cargo add dseams@2.14.0."),
     ("dseams-fortran", "https://github.com/d-SEAMS/dseams-fortran",
-     "Fortran binding, the fpm package dseams."),
+     "Add the Fortran binding as an fpm Git dependency."),
 )
 
 PLUMED_PLUGIN = (
@@ -92,14 +92,35 @@ def toctrees(text):
             continue
         if stripped.startswith(":") or stripped == "":
             continue
-        if line.startswith("   ") and " " not in stripped and not stripped.startswith(".."):
+        if line.startswith("   ") and " " not in stripped and not stripped.startswith(".. "):
             current[1].append(stripped)
             continue
         current = None
-    return [(caption, names) for caption, names in trees if caption and names]
+    return [(caption, names) for caption, names in trees if names]
+
+
+def _tracked_source_rst():
+    """Rst pages that live in git. Sphinx writes the rest at build time."""
+    listed = set()
+    import subprocess
+
+    result = subprocess.run(
+        ["git", "ls-files", "-z", "--", "docs/source"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    for raw in result.stdout.split(b"\0"):
+        if raw.endswith(b".rst"):
+            listed.add(raw.decode())
+    return listed
+
+
+_TRACKED_RST = None
 
 
 def source_of(name):
+    global _TRACKED_RST
     org = ORG / (name + ".org")
     if org.is_file():
         return org
@@ -109,7 +130,10 @@ def source_of(name):
         if page.is_file():
             return page
     rst = DOCS / "source" / (name + ".rst")
-    if rst.is_file():
+    if _TRACKED_RST is None:
+        _TRACKED_RST = _tracked_source_rst()
+    key = rst.relative_to(ROOT).as_posix()
+    if key in _TRACKED_RST and rst.is_file():
         return rst
     return None
 
@@ -233,31 +257,46 @@ def title_and_paragraph(path):
     return title or path.stem, first_sentence(lead_paragraph(paragraphs))
 
 
+def walk_pages(name, seen, items):
+    """Append ``name`` and the pages named by its toctrees.
+
+    Entries are relative to the page that lists them. ``..`` climbs out
+    of that page's directory, the same way Sphinx resolves a toctree.
+    """
+    name = posixpath.normpath(name)
+    if name in seen:
+        return
+    path = source_of(name)
+    if path is None:
+        return
+    seen.add(name)
+    title, summary = title_and_paragraph(path)
+    entry = "- [{}]({}/{}.md)".format(title, SITE, name)
+    items.append(entry + (": " + summary if summary else ""))
+    if path.suffix != ".org":
+        return
+    parent = posixpath.dirname(name)
+    for _caption, children in toctrees(path.read_text(encoding="utf-8")):
+        for child in children:
+            walk_pages(posixpath.join(parent, child), seen, items)
+
+
 def render():
     index = (ORG / "index.org").read_text(encoding="utf-8")
     lines = ["# " + TITLE, "", "> " + SUMMARY, ""]
     lines.append(
-        "Each link below is a page of the published manual on {}. "
-        "Contributor instructions are on the Contributing and Repository "
-        "map pages.".format(SITE)
+        "Each link below is the Markdown twin of a page on {}, "
+        "served beside the HTML.".format(SITE)
     )
     lines.append("")
     seen = set()
     home_title, home_summary = title_and_paragraph(ORG / "index.org")
-    lines.extend(["## Start", "", "- [{}]({}/index.html): {}".format(home_title, SITE, home_summary), ""])
+    lines.extend(["## Start", "", "- [{}]({}/index.md): {}".format(home_title, SITE, home_summary), ""])
     seen.add("index")
     for caption, names in toctrees(index):
         items = []
         for name in names:
-            if name in seen:
-                continue
-            path = source_of(name)
-            if path is None:
-                continue
-            seen.add(name)
-            title, summary = title_and_paragraph(path)
-            entry = "- [{}]({}/{}.html)".format(title, SITE, name)
-            items.append(entry + (": " + summary if summary else ""))
+            walk_pages(name, seen, items)
         if items:
             lines.extend(["## " + caption, ""])
             lines.extend(items)
@@ -268,6 +307,14 @@ def render():
     lines.extend(["", "## PLUMED plugin", ""])
     for name, url, summary in PLUMED_PLUGIN:
         lines.append("- [{}]({}): {}".format(name, url, summary))
+    lines.append("")
+    lines.extend([
+        "## Optional",
+        "",
+        "- [Full manual in one file]({}/llms-full.txt): "
+        "Every page of the manual, concatenated, for a long context.".format(SITE),
+        "- [Project site](https://dseams.info): The d-SEAMS project page.",
+    ])
     return "\n".join(lines).rstrip() + "\n"
 
 

@@ -11,7 +11,7 @@ END = """## End card
 
 Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
 
-d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.
+d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh.
 
 Questions, issues, discussions and pull requests welcome
 """
@@ -32,6 +32,8 @@ def pages():
     docs = ROOT / "docs"
     for path in docs.rglob("*"):
         if not path.is_file() or path.resolve() == SELF:
+            continue
+        if ".cache" in path.relative_to(docs).parts:
             continue
         if path.suffix in {".md", ".org", ".rst", ".py"}:
             found.append(path)
@@ -67,6 +69,13 @@ def main():
                 continue
             fail("{} has an Odysee URL that is not the channel or an embed: {}".format(
                 path.relative_to(ROOT), url))
+    sys.path.insert(0, str(ROOT / "docs"))
+    from video_page import check_reader_copy  # noqa: E402
+
+    page = (ROOT / "docs" / "orgmode" / "videos" / "index.org").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "videos" / "README.md").read_text(encoding="utf-8")
+    bindings = (ROOT / "docs" / "orgmode" / "user" / "howto" / "bindings.org").read_text(encoding="utf-8")
+    check_reader_copy(page, readme, bindings)
     print("video cards ok ({} scripts)".format(len(scripts)))
     return 0
 

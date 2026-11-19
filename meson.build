@@ -1037,12 +1037,6 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
-    'docs_changelog',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],
-    suite: 'docs',
-    timeout: 60)
-  test(
     'release_versions',
     python3,
     args: [meson.project_source_root() / 'scripts' / 'check_release_version.py'],
@@ -1068,6 +1062,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_discoverability',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_discoverability.py', '--self-test'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_c_symbols',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
@@ -1080,6 +1080,18 @@ if get_option('with_cli') and get_option('with_tests')
     args: [meson.project_source_root() / 'docs' / 'check_api_coverage.py'],
     suite: 'docs',
     timeout: 60)
+  test(
+    'docs_redirects',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_redirects.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_binding_api',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_binding_api.py'],
+    suite: 'docs',
+    timeout: 300)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   tutorial_env.set('SEAMS_LIB', seams_api_lib.full_path())
@@ -1167,12 +1179,6 @@ if get_option('with_cli') and get_option('with_tests')
       suite: 'slow',
       timeout: 900)
   endforeach
-  test(
-    'docs_towncrier',
-    python3,
-    args: [meson.project_source_root() / 'docs' / 'check_towncrier.py'],
-    suite: 'docs',
-    timeout: 120)
   test(
     'docs_frame_tutorials',
     python3,
