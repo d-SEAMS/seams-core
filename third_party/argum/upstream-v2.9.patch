@@ -1,3 +1,13 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rohit Goswami <rgoswami@ieee.org>
+Date: Mon, 16 Nov 2026 07:50:20 -0600
+Subject: [PATCH] fix: squash the four local argum v2.9 patches
+
+Explicit static_cast fixes for -Wconversion/-Wsign-conversion/-Wshadow
+(49eddbd2, 5dd4e626), a Windows.h casing fix for MinGW (b9926795), and
+alias()/addHidden()/visible() for a hidden --colour-types alias
+(f31a388a). See third_party/argum/NOTICE.md for the full history.
+
 diff --git a/single-file/argum.h b/single-file/argum.h
 index ba4d6dc..19776e3 100644
 --- a/single-file/argum.h
