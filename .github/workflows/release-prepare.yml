@@ -66,7 +66,9 @@ jobs:
       - name: Install cocogitto
         run: |
           curl -fsSL -o /tmp/cog.tgz \
-            https://github.com/cocogitto/cocogitto/releases/download/6.3.0/cocogitto-6.3.0-x86_64-unknown-linux-musl.tar.gz
+            https://github.com/cocogitto/cocogitto/releases/download/7.0.0/cocogitto-7.0.0-x86_64-unknown-linux-musl.tar.gz
+          echo 'e03938ff2c4c86d71c00c0f3284dbbe95c5ca76fe34a51f33e945c23010d59bb  /tmp/cog.tgz' \
+            | sha256sum -c -
           tar -xzf /tmp/cog.tgz -C /tmp
           mkdir -p "$HOME/.local/bin"
           install -m 0755 /tmp/x86_64-unknown-linux-musl/cog "$HOME/.local/bin/cog"
