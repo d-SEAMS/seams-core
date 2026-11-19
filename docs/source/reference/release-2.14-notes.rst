@@ -409,7 +409,7 @@ Deprecated
 Removed
 -------
 
-- The d-SEAMS 2.0 manuscript, its benchmark campaign, the record tables and logs under ``benchmarks/``, and the paper reproduction pages leave this repository for the private paper repository; the records and figure data are the ``d-SEAMS/dseams2-benchmark-records`` and ``d-SEAMS/dseams2-paper-figure-data`` datasets. The performance pages show tables rendered once from those records (``docs/records``), and the asv harness and the timing scripts stay.
+- Benchmark records and figure data for the d-SEAMS 2.0 paper are the Hugging Face datasets ``d-SEAMS/dseams2-benchmark-records`` and ``d-SEAMS/dseams2-paper-figure-data``. The performance pages show the tables rendered from those records.
 
 Fixed
 -----
