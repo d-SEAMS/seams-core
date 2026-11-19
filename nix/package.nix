@@ -4,7 +4,6 @@
   meson,
   ninja,
   pkg-config,
-  unzip,
   fetchurl,
   eigen,
   blas,
@@ -19,24 +18,22 @@
 }:
 
 let
-  # Pinned to subprojects/backward-cpp.wrap's source/patch hashes. nixpkgs'
-  # own backward-cpp installs only a BackwardConfig.cmake meant for
+  # Pinned to subprojects/backward-cpp.wrap's source hash. nixpkgs' own
+  # backward-cpp installs only a BackwardConfig.cmake meant for
   # add_subdirectory()/add_backward(), not a find_package()-able target
   # (same as conda-forge's, see recipe/build-libseams.sh), so Meson's
   # dependency() cannot locate it and with_backward would otherwise have
   # to fall back to a wrap fetch the sandboxed build phase cannot make.
-  # Fetching the wrap's own two pieces here, as fixed-output derivations,
-  # and unpacking them into subprojects/backward-cpp-1.6 before configure
-  # reproduces exactly what Meson's wrap resolver would fetch and patch
+  # Fetching the upstream tarball here, as a fixed-output derivation,
+  # and unpacking it into subprojects/backward-cpp-1.6 before configure,
+  # with ../subprojects/packagefiles/backward-cpp (already part of src
+  # below) copied on top the same way the wrap's own patch_directory
+  # does, reproduces what Meson's wrap resolver would fetch and patch
   # itself, so with_backward stays enabled without any network access
   # during the actual build phase.
   backwardCppSrc = fetchurl {
     url = "https://github.com/bombela/backward-cpp/archive/refs/tags/v1.6.tar.gz";
     sha256 = "c654d0923d43f1cea23d086729673498e4741fb2457e806cfaeaea7b20c97c10";
-  };
-  backwardCppPatch = fetchurl {
-    url = "https://wrapdb.mesonbuild.com/v2/backward-cpp_1.6-6/get_patch";
-    sha256 = "2c952611584971cdcb04b5c4aeca3401f1fba9544e6203e08b933fd9c21427fc";
   };
 in
 stdenv.mkDerivation (finalAttrs: {
@@ -78,19 +75,20 @@ stdenv.mkDerivation (finalAttrs: {
     meson
     ninja
     pkg-config
-    unzip
   ];
 
   # Reproduces what Meson's wrap resolver does for backward-cpp.wrap: the
-  # upstream v1.6 tarball, then the WrapDB patch overlaid on top (it adds
-  # meson.build/meson_options.txt; upstream backward-cpp ships neither).
-  # Doing it here, from the two fetchurl derivations above, means the
-  # subproject's meson.build already exists before configure runs, so
-  # Meson's wrap resolver uses it directly and never needs network.
+  # upstream v1.6 tarball, then subprojects/packagefiles/backward-cpp's
+  # meson.build/meson_options.txt/LICENSE.build overlaid on top (upstream
+  # backward-cpp ships none of those three; see that directory for why
+  # its meson.build is trimmed of backward-cpp's own testexe_* targets).
+  # Doing it here means the subproject's meson.build already exists
+  # before configure runs, so Meson's wrap resolver uses it directly and
+  # never needs network.
   postPatch = ''
     mkdir -p subprojects/backward-cpp-1.6
     tar -xzf ${backwardCppSrc} --strip-components=1 -C subprojects/backward-cpp-1.6
-    unzip -o ${backwardCppPatch} -d subprojects
+    cp subprojects/packagefiles/backward-cpp/* subprojects/backward-cpp-1.6/
   '';
 
   buildInputs = [
