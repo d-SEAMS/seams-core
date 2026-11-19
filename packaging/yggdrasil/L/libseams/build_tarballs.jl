@@ -25,7 +25,8 @@ sources = [
 # The engine core, its stable C API (libseams), and the C ABI of the R and
 # Julia packages (libseams_lang). Every optional backend is off: those come
 # from wraps that would be downloaded during the build, or from libraries
-# that have no JLL yet.
+# that have no JLL yet. with_backward is off for the same reason: the
+# backward-cpp wrap would need a network fetch that nodownload forbids.
 script = raw"""
 cd ${WORKSPACE}/srcdir/seams-core
 
@@ -56,7 +57,8 @@ meson setup build \
     -Dwith_spglib=disabled \
     -Dwith_sphericart=disabled \
     -Dwith_nauty=disabled \
-    -Dwith_csm=disabled
+    -Dwith_csm=disabled \
+    -Dwith_backward=disabled
 ninja -C build -j${nproc} src/libyodaLib.${dlext} src/libseams.${dlext} bindings/libseams_lang.${dlext} seams${exeext}
 
 install -Dvm 755 build/src/libyodaLib.${dlext} "${libdir}/libyodaLib.${dlext}"
