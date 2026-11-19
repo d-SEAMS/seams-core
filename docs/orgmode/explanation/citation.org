@@ -4,8 +4,8 @@
 If you use this software, cite the methods paper.
 
 Goswami, R.; Goswami, A.; Singh, J. K. d-SEAMS: Deferred Structural
-Elucidation Analysis for Molecular Simulations. /J. Chem. Inf. Model./
-2020, 60, 2169--2177.
+Elucidation Analysis for Molecular Simulations. /Journal of Chemical
+Information and Modeling/ 2020, 60, 2169--2177.
 [[https://doi.org/10.1021/acs.jcim.0c00031][10.1021/acs.jcim.0c00031]]
 ([[https://arxiv.org/abs/1909.09830][arXiv:1909.09830]]).
 
@@ -26,7 +26,8 @@ Cite the method paper when the reported result uses that method.
 
 CHILL+: Nguyen, A. H.; Molinero, V. Identification of Clathrate
 Hydrates, Hexagonal Ice, Cubic Ice, and Liquid Water in Simulations:
-the CHILL+ Algorithm. /J. Phys. Chem. B/ 2015, 119, 9369--9376.
+the CHILL+ Algorithm. /The Journal of Physical Chemistry B/ 2015,
+119, 9369--9376.
 [[https://doi.org/10.1021/jp510289t][10.1021/jp510289t]].
 
 #+begin_src bibtex
@@ -44,7 +45,7 @@ the CHILL+ Algorithm. /J. Phys. Chem. B/ 2015, 119, 9369--9376.
 
 CHILL: Moore, E. B.; de la Llave, E.; Welke, K.; Scherlis, D. A.;
 Molinero, V. Freezing, melting and structure of ice in a hydrophilic
-nanopore. /Phys. Chem. Chem. Phys./ 2010, 12, 4124--4134.
+nanopore. /Physical Chemistry Chemical Physics/ 2010, 12, 4124--4134.
 DOI 10.1039/b919724a.
 
 #+begin_src bibtex
@@ -62,8 +63,8 @@ DOI 10.1039/b919724a.
 
 Local bond order: ten Wolde, P. R.; Ruiz-Montero, M. J.; Frenkel, D.
 Numerical calculation of the rate of crystal nucleation in a
-Lennard-Jones system at moderate undercooling. /J. Chem. Phys./ 1996,
-104, 9932--9947.
+Lennard-Jones system at moderate undercooling. /The Journal of
+Chemical Physics/ 1996, 104, 9932--9947.
 [[https://doi.org/10.1063/1.471721][10.1063/1.471721]].
 
 #+begin_src bibtex
