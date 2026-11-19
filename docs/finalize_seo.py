@@ -58,7 +58,9 @@ def _json_ld() -> str:
                 "applicationCategory": "ScientificApplication",
                 "operatingSystem": "Linux, macOS",
                 "url": BASE_URL,
+                # [[[cog import seams_version as v; cog.outl(f'                "softwareVersion": "{v.VERSION}",')]]]
                 "softwareVersion": "2.14.0",
+                # [[[end]]]
                 "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
                 "citation": "https://doi.org/10.1021/acs.jcim.0c00031",
             },

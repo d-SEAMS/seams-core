@@ -46,7 +46,7 @@ jobs:
       # find each other by runpath, as a downstream package uses them.
       - name: Run the installed libseams
         run: |
-          version=$(python3 scripts/check_release_version.py --print)
+          version=$(python3 ci/version/seams_version.py)
           test "$(env -u LD_LIBRARY_PATH "$SEAMS_PREFIX/bin/seams" --version)" = "seams ${version}"
           export PKG_CONFIG_PATH="$SEAMS_PREFIX/lib/pkgconfig"
           test "$(pkg-config --modversion seams)" = "${version}"
