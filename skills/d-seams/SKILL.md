@@ -5,7 +5,9 @@ license: MIT
 compatibility: "The engine builds with Meson. Python needs pydseamslib at the same version. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
 metadata:
   author: d-SEAMS
+  # [[[cog import seams_version as v; cog.outl(f'  version: "{v.VERSION}"')]]]
   version: "2.14.0"
+  # [[[end]]]
 ---
 
 # Use d-SEAMS
@@ -24,7 +26,9 @@ the same path with `.md`.
 conda-forge ships the engine, the headers, and the command:
 
 ```bash
+# [[[cog import seams_version as v; cog.outl(f"conda install -c conda-forge 'libseams={v.VERSION}'")]]]
 conda install -c conda-forge 'libseams=2.14.0'
+# [[[end]]]
 ```
 
 From a source checkout, with Eigen 3.4 available:
@@ -40,7 +44,9 @@ meson setup build && meson compile -C build
 Python is a separate package. Building this repository does not install it.
 
 ```bash
+# [[[cog import seams_version as v; cog.outl(f"pip install 'pydseamslib=={v.VERSION}'")]]]
 pip install 'pydseamslib==2.14.0'
+# [[[end]]]
 ```
 
 `import dseams` is the analysis API. `import pydseams` is the lower-level

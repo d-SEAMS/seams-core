@@ -1,0 +1,32 @@
+# cocogitto. The tag is vX.Y.Z (tag_prefix). towncrier owns CHANGELOG.md.
+# cogapp, not this program, rewrites the version copies. Its wheel ships a
+# `cog` script, so the hooks call `python -m cogapp` through pixi.
+from_latest_tag = true
+ignore_merge_commits = true
+disable_changelog = true
+tag_prefix = "v"
+# A wrap checkout left untracked must not block `cog bump --dry-run`.
+skip_untracked = true
+
+pre_bump_hooks = [
+  "python3 ci/version/seams_version.py set {{version}}",
+  "pixi r -e version release-cog",
+  "pixi r -e version python ci/version/build_notes.py {{version}}",
+]
+post_bump_hooks = [
+  "pixi r -e version version-drift",
+]
+
+[commit_types]
+feat = { changelog_title = "Added" }
+fix = { changelog_title = "Fixed" }
+perf = { changelog_title = "Changed" }
+refactor = { changelog_title = "Changed" }
+docs = { changelog_title = "Changed" }
+test = { changelog_title = "Changed" }
+build = { changelog_title = "Changed" }
+ci = { changelog_title = "Changed" }
+chore = { changelog_title = "Changed" }
+style = { changelog_title = "Changed" }
+revert = { changelog_title = "Changed" }
+release = { changelog_title = "Changed" }

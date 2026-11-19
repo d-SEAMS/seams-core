@@ -1,0 +1,99 @@
+#+TITLE: Cutting a seams-core release
+#+OPTIONS: toc:nil num:nil
+
+The numbered seams-core release cut. ~meson.build~ is the one place a
+person writes the version. Everything else in ~ci/version/files.txt~ is a
+cogapp copy. The tag prefix in ~cog.toml~ is ~v~.
+
+* One version, then the copies
+
+~ci/version/seams_version.py~ reads ~project(..., version: '...')~ from
+~meson.build~. ~pixi r -e version release-cog~ rewrites the copies.
+~pixi r -e version version-drift~ fails if a copy has drifted. The prek
+hook ~version-drift~ runs that check.
+
+Do not edit a copy by hand. Change ~meson.build~, or let ~cog bump~ do it,
+then run ~release-cog~.
+
+* The cut
+
+Work on ~main~, with the fragments for this version already in
+~changelog.d/~.
+
+1. Preview the notes.
+
+   #+begin_example
+   pixi r -e version towncrier-draft
+   #+end_example
+
+2. Ask cocogitto for the tag. ~--dry-run~ prints it and does not write.
+
+   #+begin_example
+   cog bump --auto --dry-run
+   #+end_example
+
+   Since ~v2.13.0~, two ~refactor!~ commits are on ~main~. Cocogitto
+   treats ~!~ as a breaking change, so ~--auto~ prints ~v3.0.0~. The
+   release in the tree is 2.14.0. Pin it:
+
+   #+begin_example
+   cog bump --version 2.14.0 --dry-run
+   #+end_example
+
+   That prints ~v2.14.0~. After this version is tagged, a later ~fix:~
+   commit makes ~--auto~ print the next patch.
+
+3. Run the bump. The ~cog.toml~ hooks write the version into
+   ~meson.build~, run ~release-cog~, and render ~changelog.d~ when that
+   version's heading is not already in ~CHANGELOG.md~. The 2.14.0 section
+   is already there, so the notes hook leaves it alone.
+
+   #+begin_example
+   cog bump --version 2.14.0
+   #+end_example
+
+4. Check the copies, then commit the bump if the hooks did not commit it
+   themselves.
+
+   #+begin_example
+   pixi r -e version version-drift
+   #+end_example
+
+5. Tag the commit that ~version-drift~ accepts. The tag is ~v~ plus the
+   version, annotated, on ~main~.
+
+   #+begin_example
+   git tag -a v2.14.0 -m "seams-core 2.14.0"
+   #+end_example
+
+6. Push the commit and the tag. ~.github/workflows/release.yml~ runs only
+   on a ~v*~ tag of ~d-SEAMS/seams-core~. It checks the tag against
+   ~meson.build~, checks the cogapp copies, and opens the GitHub release
+   with ~GITHUB_TOKEN~. It does not publish to a package registry.
+   ~ci_docs.yml~ updates ~gh-pages~ from ~main~, also with ~GITHUB_TOKEN~.
+   A tag push does not deploy the book.
+
+* After the tag
+
+conda-forge ~libseams~ takes ~recipe/recipe.yaml~. Fill the archive sha256
+once the tag exists. ~libseams_jll~ takes
+~packaging/yggdrasil/L/libseams/build_tarballs.jl~, including the commit
+the tag points at.
+
+The bindings release from their own repositories against this tag, in
+this order: PydSEAMSlib (PyPI), dseams-rs (crates.io), dseams-r (CRAN),
+Dseams.jl (General, after ~libseams_jll~), dseams-fortran (fpm), then
+dseams-plumed when its plugin version changes. yodaStruct is the Lua
+binding and is not locked to this number.
+
+* A fix on top of a release
+
+Branch from the tag, add a ~fix:~ commit and a fragment, and
+~cog bump --auto~. With the tag in place, that is the next patch.
+
+* What this replaces
+
+~pixi r -e version version-drift~ replaces ~scripts/check_release_version.py~.
+Towncrier replaces ~docs/check_towncrier.py~ and ~docs/check_changelog.py~.
+~.github/workflows/release-prepare.yml~ is the dry-run on a pull request
+and on ~workflow_dispatch~.

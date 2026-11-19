@@ -16,7 +16,9 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "seams";
+  # [[[cog import seams_version as v; cog.outl(f'  version = "{v.VERSION}";')]]]
   version = "2.14.0";
+  # [[[end]]]
 
   src = lib.fileset.toSource {
     root = ./..;
