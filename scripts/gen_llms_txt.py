@@ -68,6 +68,11 @@ PLUMED_PLUGIN = (
      "Companion repository for the d-SEAMS PLUMED plugin v0.4.1."),
 )
 
+LIBRARIES = (
+    ("linkcell", "https://linkcell.dseams.info/",
+     "Independent periodic linked-cell neighbour-list library."),
+)
+
 COPIED = {
     "stable": DOCS / "api",
     "engines": DOCS / "engines",
@@ -306,6 +311,9 @@ def render():
         lines.append("- [{}]({}): {}".format(name, url, summary))
     lines.extend(["", "## PLUMED plugin", ""])
     for name, url, summary in PLUMED_PLUGIN:
+        lines.append("- [{}]({}): {}".format(name, url, summary))
+    lines.extend(["", "## Libraries", ""])
+    for name, url, summary in LIBRARIES:
         lines.append("- [{}]({}): {}".format(name, url, summary))
     lines.append("")
     lines.extend([

@@ -171,6 +171,10 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/): d-SEAMS PLUMED plugin v0.4.1, plumID:26.018, tested with PLUMED v2.10 and master.
 - [dseams-plumed](https://github.com/d-SEAMS/dseams-plumed): Companion repository for the d-SEAMS PLUMED plugin v0.4.1.
 
+## Libraries
+
+- [linkcell](https://linkcell.dseams.info/): Independent periodic linked-cell neighbour-list library.
+
 ## Optional
 
 - [Full manual in one file](https://docs.dseams.info/llms-full.txt): Every page of the manual, concatenated, for a long context.
