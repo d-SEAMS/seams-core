@@ -362,4 +362,5 @@ towncrier = "==23.11.0"
 [feature.version.tasks]
 release-cog = { cmd = "python -m cogapp -I ci/version -r @ci/version/files.txt", description = "Regenerate every version copy from meson.build (ci/version/files.txt)" }
 version-drift = { cmd = "python -m cogapp -I ci/version --check @ci/version/files.txt", description = "Fail if a version copy differs from meson.build (prek version-drift hook)" }
+towncrier-check = { cmd = "python -m towncrier check", description = "Require a valid changelog fragment for the branch" }
 towncrier-draft = { cmd = "python -m towncrier build --draft", description = "Preview release notes" }

@@ -7,7 +7,9 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.14.0',
+# [[[cog import seams_version as v; cog.outl(f"  version: '{v.VERSION}',")]]]
+version: '2.14.0',
+# [[[end]]]
   default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
@@ -1000,6 +1002,7 @@ if get_option('with_cli') and get_option('with_tests')
   subdir('engines/e2e')
 
   python3 = find_program('python3', required: true)
+  pixi_program = find_program('pixi', required: true)
   test(
     'docs_language_examples',
     python3,
@@ -1035,6 +1038,32 @@ if get_option('with_cli') and get_option('with_tests')
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_prose.py'],
     suite: 'docs',
+    timeout: 60)
+  test(
+    'release_versions',
+    python3,
+    args: [meson.project_source_root() / 'scripts' / 'check_release_version.py'],
+    suite: ['docs', 'release'],
+    timeout: 60)
+  test(
+    'release_versions_selftest',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'check_release_version.py'],
+    suite: ['docs', 'release'],
+    timeout: 60)
+  test(
+    'release_version_drift',
+    pixi_program,
+    args: ['run', '--frozen', '-e', 'version', 'version-drift'],
+    workdir: meson.project_source_root(),
+    suite: ['docs', 'release'],
+    timeout: 60)
+  test(
+    'release_towncrier_draft',
+    pixi_program,
+    args: ['run', '--frozen', '-e', 'version', 'towncrier-draft'],
+    workdir: meson.project_source_root(),
+    suite: ['docs', 'release'],
     timeout: 60)
   test(
     'docs_llms_txt',

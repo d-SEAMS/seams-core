@@ -1,3 +1,8 @@
+# Copies of the release version, generated from meson.build by
+# ci/version/seams_version.py.
+# Regenerate: pixi run --frozen -e version release-cog
+# Check:      pixi run --frozen -e version version-drift
+meson.build
 pixi.toml
 towncrier.toml
 CITATION.cff

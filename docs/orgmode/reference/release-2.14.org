@@ -4,7 +4,10 @@
 These notes describe the user-visible changes since d-SEAMS 2.13.0.
 The upgrade from 2.13 is
 [[file:../user/howto/upgrade-2.14.org][the upgrade guide]].
-The rendered fragment list is CHANGELOG.md.
+
+#+begin_export rst
+.. include:: release-2.14-notes.rst
+#+end_export
 
 * Analysis
 

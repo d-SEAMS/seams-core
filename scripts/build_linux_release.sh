@@ -9,7 +9,7 @@ set -euo pipefail
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 cd "$root"
 
-version=$(python3 ci/version/seams_version.py)
+version=$(python3 scripts/check_release_version.py --print)
 if [[ -n ${VERSION:-} && $VERSION != "$version" ]]; then
   printf '%s\n' "VERSION=$VERSION does not match meson.build ($version)" >&2
   exit 1

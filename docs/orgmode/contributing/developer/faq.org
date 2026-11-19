@@ -22,9 +22,9 @@ rm -rf "$dest"
 git init "$dest"
 #+end_example
 
-This is a seams-core source-archive ownership bug, not a PydSEAMSlib
-wheel-build failure. A global ~safe.directory~ exception would hide the
-ownership error rather than correct the archive build.
+The release builder now preserves the container user's ownership during
+extraction and recreates each pinned readcon checkout from an empty
+directory.
 
 * Why a starved queue is rebuilt from the tag that already exists
 
@@ -53,6 +53,6 @@ A lookup of PyPI, conda-forge, crates.io or CRAN does not belong in
 package that is not published yet, fails or hangs the test, and the
 release sits in the queue behind it.
 
-Those checks stay in their own job.
-~pixi run --frozen -e version version-drift~ reads the git checkout. It
-does not talk to a registry, and it is the prek hook, not a meson test.
+Registry checks stay in their own job. The local ~version-drift~ and
+towncrier draft checks run in release-prepare CI and in the Meson release
+and documentation suites.

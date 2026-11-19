@@ -30,11 +30,13 @@ cocogitto.
 | Task | Environment | What it does |
 | release-cog | version | Rewrite every path in ~ci/version/files.txt~ from ~meson.build~ |
 | version-drift | version | Fail if one of those copies differs |
+| towncrier-check | version | Require a valid fragment for the branch |
 | towncrier-draft | version | Print the unreleased notes without writing them |
 
 #+begin_example
 pixi run --frozen -e version release-cog
 pixi run --frozen -e version version-drift
+pixi run --frozen -e version towncrier-check
 pixi run --frozen -e version towncrier-draft
 #+end_example
 
@@ -67,8 +69,8 @@ towncrier.
 | Workflow | Local command |
 | ~.github/workflows/ci_test.yml~ | ~meson test -C bbdir~ |
 | ~.github/workflows/ci_docs.yml~ | ~pixi run -e docs docbld~ |
-| ~.github/workflows/release-prepare.yml~ | ~pixi run --frozen -e version version-drift~ then ~cog bump --auto --dry-run~ |
-| ~.github/workflows/release.yml~ | ~python3 ci/version/seams_version.py~ and ~pixi run --frozen -e version version-drift~ |
+| ~.github/workflows/release-prepare.yml~ | version-drift, release metadata, towncrier check and draft, then ~cog bump --auto --dry-run~ |
+| ~.github/workflows/release.yml~ | ~scripts/check_release_version.py~ and cogapp ~--check~ |
 | ~.github/workflows/ci_packages.yml~ | the package meson setup in that workflow |
 
 ~release.yml~ publishes the GitHub release for a ~v*~ tag and uses
