@@ -105,3 +105,19 @@ class RingStatistics(_Arm):
     def _cell(self, cell):
         system, arm = cell
         return "rings", system, arm
+
+
+class SteinhardtQ6(_Arm):
+    """Local Steinhardt q_6 inside 3.5 A."""
+
+    params = [[
+        ("q6", system, arm)
+        for system in SYSTEMS
+        for arm in campaign.ARMS["q6"]
+        if campaign.applicable(arm, "q6", campaign.SYSTEM_MOLECULES[system])
+    ]]
+    param_names = ["cell"]
+
+    def _cell(self, cell):
+        workload, system, arm = cell
+        return workload, system, arm
