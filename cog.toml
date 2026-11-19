@@ -10,11 +10,11 @@ skip_untracked = true
 
 pre_bump_hooks = [
   "python3 ci/version/seams_version.py set {{version}}",
-  "pixi r -e version release-cog",
-  "pixi r -e version python ci/version/build_notes.py {{version}}",
+  "pixi run --frozen -e version release-cog",
+  "pixi run --frozen -e version python ci/version/build_notes.py {{version}}",
 ]
 post_bump_hooks = [
-  "pixi r -e version version-drift",
+  "pixi run --frozen -e version version-drift",
 ]
 
 [commit_types]
