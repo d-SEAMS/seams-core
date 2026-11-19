@@ -116,11 +116,15 @@ export PKG_CONFIG_PATH=$eigen_prefix/share/pkgconfig
 pkg-config --exists --print-errors "eigen3 >= 3.4.0"
 
 mkdir -p "$work/src"
-tar -C "$work/src" -xzf "$src_tar"
+# Root would keep the uid stored in the archive, and git would refuse
+# the readcon checkout.
+tar --no-same-owner -C "$work/src" -xzf "$src_tar"
 src=$work/src/seams-core-${version}
 # readcon-core v0.16.2, readcon-db v0.1.8. nodownload will not clone them.
+# The dist tree already has the wrap checkout, with no .git. Replace it.
 pin_repo() {
   local url=$1 sha=$2 dest=$3 got
+  rm -rf "$dest"
   git init "$dest"
   git -C "$dest" remote add origin "$url"
   git -C "$dest" fetch --depth 1 origin "$sha"
