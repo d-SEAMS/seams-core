@@ -28,6 +28,7 @@ import random
 import statistics
 import sys
 from collections import defaultdict
+from pathlib import Path
 
 SEED = 230220
 ROUNDS = 20
@@ -62,6 +63,7 @@ SUMMARY_FIELDS = (
     "call",
     "agree",
     "detail",
+    "thread_note",
     "boot_draws",
     "boot_seed",
     "code_revision",
@@ -263,6 +265,7 @@ def _blank_ratio():
         "aa_lo": "",
         "aa_hi": "",
         "call": "",
+        "thread_note": "",
     }
 
 
@@ -307,7 +310,31 @@ def _ratio_values(rows, left, right):
     return paired
 
 
-def assemble(records, full):
+def probe_note(path: Path):
+    rows = list(csv.DictReader(path.open(newline="", encoding="utf-8")))
+    if not rows:
+        raise SystemExit("thread probe csv is empty")
+    by_arm = defaultdict(list)
+    for row in rows:
+        key = (row["arm"], row["size"], row["operation"])
+        by_arm[key].append(int(row["os_threads"]))
+    parts = []
+    single = True
+    for key in sorted(by_arm):
+        values = by_arm[key]
+        if len(values) < 3:
+            raise SystemExit(f"thread probe has fewer than three samples for {key}")
+        low = min(values)
+        high = max(values)
+        if low != 1 or high != 1:
+            single = False
+        arm, size, operation = key
+        parts.append(f"{arm} {operation} {size} n={len(values)} {low}..{high}")
+    state = "yes" if single else "no"
+    return f"probe {'; '.join(parts)}; single_thread {state}"
+
+
+def assemble(records, full, probe):
     slots = _expected_slots()
     found = _index(records)
     if full:
@@ -397,6 +424,7 @@ def assemble(records, full):
                 "call": call,
                 "agree": "1" if agree else "0",
                 "detail": bag["detail"],
+                "thread_note": probe,
                 "boot_draws": str(BOOT_DRAWS),
                 "boot_seed": str(seed),
                 "code_revision": bag["revision"],
@@ -406,8 +434,8 @@ def assemble(records, full):
     return summaries
 
 
-def write_summary(records, path, full):
-    rows = assemble(records, full)
+def write_summary(records, path, full, probe):
+    rows = assemble(records, full, probe)
     with path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=SUMMARY_FIELDS, lineterminator="\n")
         writer.writeheader()
@@ -487,10 +515,12 @@ def self_check():
             continue
         for position, arm in enumerate(job["arm_order"]):
             records.append(_fake_row(job, position, arm, times[arm]))
-    rows = assemble(records, full=False)
+    rows = assemble(records, full=False, probe="probe self-check; single_thread yes")
     ratio = [row for row in rows if row["row_kind"] == "ratio"]
     if len(ratio) != 1 or ratio[0]["call"] != "faster" or ratio[0]["median_ratio"] != "0.500000":
         raise SystemExit(f"half-speed ratio was not faster: {ratio}")
+    if "probe " not in ratio[0]["thread_note"]:
+        raise SystemExit("ratio row did not include the thread probe note")
     if ratio[0]["code_revision"] == "" or ratio[0]["host"] == "":
         raise SystemExit("summary row dropped code_revision or host")
     broken = []
@@ -499,7 +529,11 @@ def self_check():
         copied["agree"] = "0"
         copied["max_abs"] = "1.0e-03"
         broken.append(copied)
-    bad = [row for row in assemble(broken, full=False) if row["row_kind"] == "ratio"]
+    bad = [
+        row
+        for row in assemble(broken, full=False, probe="probe self-check; single_thread yes")
+        if row["row_kind"] == "ratio"
+    ]
     if len(bad) != 1 or bad[0]["call"] != "correctness":
         raise SystemExit("a q6 mismatch was reported as a timing call")
     print("fas230 summary self-check ok")
@@ -509,6 +543,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--samples", default="")
     parser.add_argument("--summary", default="")
+    parser.add_argument("--thread-probe", default="benchmarks/fas230-thread-probe.csv")
     parser.add_argument("--self-check", action="store_true")
     args = parser.parse_args()
     if args.self_check:
@@ -517,9 +552,13 @@ def main():
     if not args.samples or not args.summary:
         print("usage: h2h_fas230_summary.py --samples S --summary O", file=sys.stderr)
         return 2
-    from pathlib import Path
-    records = list(csv.DictReader(Path(args.samples).open(newline="")))
-    write_summary(records, Path(args.summary), full=True)
+    records = list(csv.DictReader(Path(args.samples).open(newline="", encoding="utf-8")))
+    write_summary(
+        records,
+        Path(args.summary),
+        full=True,
+        probe=probe_note(Path(args.thread_probe)),
+    )
     print(f"wrote {args.summary}")
     return 0
 

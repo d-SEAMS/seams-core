@@ -69,3 +69,13 @@ def test_thread_probe_has_at_least_three_samples_per_arm():
         assert int(row["os_threads"]) >= 1, row
     for key, count in by_key.items():
         assert count >= 3, (key, count)
+
+
+def test_summary_cites_the_thread_probe():
+    summary = ROOT / "benchmarks" / "fas230-summary.csv"
+    rows = list(csv.DictReader(summary.open(newline="", encoding="utf-8")))
+    ratio = [row for row in rows if row["row_kind"] == "ratio"]
+    assert ratio, "summary has no ratio rows"
+    for row in ratio:
+        note = row.get("thread_note", "")
+        assert note.startswith("probe "), note
