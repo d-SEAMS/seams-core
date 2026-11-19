@@ -1,1 +1,0 @@
-Library calls narrow their OpenMP team when other processes hold the cores. Beside an idle resident 8-thread OpenMP team in its default wait, 8-thread CHILL+ on 110592-molecule ice Ic took 74 ms and now takes 7 ms, and the shell match went from 76 to 9 ms, with idle-machine times unchanged. `SEAMS_FAIR_WIDTH=0` keeps the requested width.

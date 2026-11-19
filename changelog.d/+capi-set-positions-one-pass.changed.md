@@ -1,1 +1,0 @@
-C API: `seams_system_stage_positions` makes `seams_system_set_positions` check and write the coordinates in one pass, into a second set of per-atom records that it swaps in only when every value is finite, at about 72 bytes per atom. By default a reload checks every coordinate first and writes in place, with no extra memory; either way a failed reload keeps the old frame.

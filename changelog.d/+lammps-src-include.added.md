@@ -1,1 +1,0 @@
-`-Dlammps_src_include=DIR` builds `compute dseams` against conda-forge LAMMPS, which installs `library.h` without the class headers. `scripts/fetch_lammps_headers.sh DEST` checks out `src` of the release that `lmp` reports and prints the directory.

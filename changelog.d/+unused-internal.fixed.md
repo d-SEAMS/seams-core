@@ -1,1 +1,0 @@
-Builds without OpenMP or chemfiles, such as dseams-r on macOS, no longer carry functions nothing calls, so Clang's `-Wunneeded-internal-declaration` and `-Wunused-function` stay quiet. The unused `tallyRing` in `shell2_count.cpp` and the per-atom counting path it served are gone, and helpers that only OpenMP or chemfiles builds call are compiled only there.

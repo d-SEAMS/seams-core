@@ -1,1 +1,0 @@
-A build with `-Dwith_tests=false`, including seams-core as a Meson subproject, registers no tests: the CLI, docs, C API, C ABI and engine plugin checks and their test programs follow `with_tests`, and the wrapped linkcell and minimage get the same `with_tests` and `with_examples`.

@@ -1,1 +1,0 @@
-`capi_thread_scale` runs `seams_cutoff_csr` and `seams_ql_cutoff` at 1, 2, 4 and 8 OpenMP threads on 110592-molecule ice Ic, requires every width to return the one-thread bytes, and logs the per-stage times.

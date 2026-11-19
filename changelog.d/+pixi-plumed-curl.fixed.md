@@ -1,1 +1,0 @@
-The linux-64 pixi lock keeps PLUMED 2.9, because a LAMMPS build that links PLUMED 2.10 needs glibc 2.38 and this lock is glibc 2.28. It also keeps libcurl before 8.10, because Julia 1.10.4 aborts in Downloads when that libcurl runs the socket callback during `curl_multi_cleanup`.

@@ -1,1 +1,0 @@
-A short LAMMPS frame no longer returns from the reading rank before `MPI_Gatherv`. Both ranks gather, and the frames that did read still print. On the 11-frame dump cut short, frames 1-10 stay whole and frame 11 keeps its header and two atoms.

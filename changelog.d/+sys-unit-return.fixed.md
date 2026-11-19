@@ -1,1 +1,0 @@
-`dseams-sys` declares the C functions that return nothing without `-> ()`, so `cargo clippy --all-targets` with warnings denied passes on the 1.85 MSRV toolchain as well as on current stable. `gen_sys.py` writes the declarations that way.

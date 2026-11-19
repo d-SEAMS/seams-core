@@ -1,1 +1,0 @@
-The Lua binding (d-SEAMS/yodaStruct) finds the Lua 5.4 module through the `lua` pkg-config name that conda-forge and Homebrew use, builds `dseams_ffi.lua` by default, and fetches the Fennel 1.5.3 compiler with a checked sha256 when none is installed.
