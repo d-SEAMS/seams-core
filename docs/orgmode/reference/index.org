@@ -15,4 +15,4 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:glossary.org][glossary]] | Engine terms |
 | [[file:../explanation/performance.org][Measured performance]] | Medians, distributions, and thread counts |
 | [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
-| [[file:release-2.14.org][2.14.1 release notes]] | API, engines, threads, and deprecations since v2.14.0 |
+| [[file:release-2.14.org][2.14.2 release notes]] | API, engines, threads, and deprecations since v2.14.0 |

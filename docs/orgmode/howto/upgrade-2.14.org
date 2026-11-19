@@ -3,7 +3,7 @@
 
 These notes describe the changes from d-SEAMS 2.13 to 2.14.
 The release notes are
-[[file:../reference/release-2.14.org][2.14.1]].
+[[file:../reference/release-2.14.org][2.14.2]].
 Rebuild the engine, then relink anything that should call ~libseams~.
 
 * C and C++
