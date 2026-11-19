@@ -56,3 +56,16 @@ def test_sitting_rows_have_resolvable_provenance():
         assert _object_exists(f"{base_ref}^{{commit}}"), base_ref
         assert _object_exists(f"{h2h_blob}^{{blob}}"), h2h_blob
         assert _object_exists(f"{fas_blob}^{{blob}}"), fas_blob
+
+
+def test_thread_probe_has_at_least_three_samples_per_arm():
+    probe = ROOT / "benchmarks" / "fas230-thread-probe.csv"
+    rows = list(csv.DictReader(probe.open(newline="", encoding="utf-8")))
+    assert rows, "thread probe csv is empty"
+    by_key = {}
+    for row in rows:
+        key = (row["arm"], row["size"], row["operation"])
+        by_key[key] = by_key.get(key, 0) + 1
+        assert int(row["os_threads"]) >= 1, row
+    for key, count in by_key.items():
+        assert count >= 3, (key, count)
