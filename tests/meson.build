@@ -12,6 +12,31 @@ if not catch2_dep.found() or not cppc.links(
     'catch2_with_main_dep')
 endif
 
+# rang.hpp colourizes franzblau/absor/topo_bulk/topo_one_dim's test output.
+rang_dep = dependency('rang', required: true, include_type: 'system',
+                      fallback: ['rang', 'rang_dep'])
+_rang_names = ['franzblau', 'topo_bulk', 'topo_one_dim', 'absor']
+
+# cxxopts.hpp backs tests/include/internal/options.h's Argv helper. Wrapped
+# so a future test that includes it needs no plumbing beyond this list; the
+# CLI itself parses with Argum (third_party/argum/argum.h), not cxxopts.
+cxxopts_dep = dependency('cxxopts', required: true, include_type: 'system',
+                         fallback: ['cxxopts', 'cxxopts_dep'])
+# Compiled at configure time so --wrap-mode=forcefallback and a plain
+# system cxxopts are both exercised, even though no test TU includes
+# tests/include/internal/options.h right now.
+if not cppc.compiles(
+    '#include <cxxopts.hpp>\n' +
+    'int main(int argc, char **argv) {\n' +
+    '  cxxopts::Options opts("seams-tests", "cxxopts wrap smoke check");\n' +
+    '  opts.add_options()("h,help", "Print usage");\n' +
+    '  return opts.parse(argc, argv).count("help") >= 0 ? 0 : 1;\n' +
+    '}\n',
+    dependencies: cxxopts_dep,
+    name: 'cxxopts wrap parses --help')
+  error('the cxxopts wrap did not compile a trivial --help parser')
+endif
+
 test_sources = {
   'franzblau': 'franzblau-test.cpp',
   'topo_bulk': 'topo_bulk-test.cpp',
@@ -160,7 +185,7 @@ foreach name, src : test_sources
     _timeout = 300
   endif
   _exe = executable('test_' + name, src,
-    dependencies: [yds_dep, catch2_dep],
+    dependencies: [yds_dep, catch2_dep] + (name in _rang_names ? [rang_dep] : []),
     link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
     cpp_args: _args,
     link_args: _test_link_args,

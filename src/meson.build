@@ -67,10 +67,31 @@ ydslib_sources = files(
 # It goes into the executables, never libyodaLib: its static
 # SignalHandling replaces the SIGSEGV handler of whatever process loads
 # the library, and Julia's GC safepoints fault on purpose.
-backward_src = []
-if cppc.has_header('execinfo.h')
-  backward_src = files('backward.cpp')
+#
+# backward.hpp comes from the backward-cpp wrap (header-only interface,
+# no DW/BFD/libunwind backend: none of those is enabled below, matching
+# the plain execinfo.h path this project has always used). A hermetic,
+# network-free build (conda-forge, Nix, Yggdrasil) sets with_backward
+# disabled; this stays an auto feature so that build does not need a
+# subproject fetch it cannot make.
+with_backward_opt = get_option('with_backward')
+backward_has_execinfo = cppc.has_header('execinfo.h')
+if with_backward_opt.enabled() and not backward_has_execinfo
+  error('with_backward=enabled but execinfo.h is not available')
 endif
+if with_backward_opt.disabled() or not backward_has_execinfo
+  backward_dep = dependency('backward-cpp-disabled-by-option', required: false)
+else
+  backward_dep = dependency(['backward-cpp-interface', 'Backward'],
+                            required: with_backward_opt.enabled(),
+                            include_type: 'system',
+                            fallback: ['backward-cpp', 'backward_interface_dep'],
+                            default_options: [
+                              'bfd=disabled', 'dw=disabled',
+                              'dwarf=disabled', 'libunwind=disabled',
+                            ])
+endif
+backward_src = backward_dep.found() ? files('backward.cpp') : []
 
 # gpu_residency.cpp calls dlopen/dlsym. A shared library that leaves
 # those undefined forces every consumer to add -ldl itself.
