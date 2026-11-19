@@ -119,6 +119,12 @@ def main() -> int:
         "eigen",
         "readcon-core",
         "readcon-db",
+        # WrapDB file wraps: their directory (e.g. backward-cpp-1.6)
+        # does not match their project() name, so src below would look
+        # in the wrong place even though each carries its own file.
+        "backward-cpp",
+        "cxxopts",
+        "rang",
     }
     for project, options in sorted(listed.items()):
         if project in third_party:
