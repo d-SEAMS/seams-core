@@ -61,8 +61,8 @@ needs backward-cpp when ~-Dwith_backward=enabled~ (the default is
 three is required by conda-forge/nixpkgs the way Eigen is, so a setup
 with no system package for one of them and no network falls back to
 its Meson wrap, and ~meson setup~ fails outright rather than silently
-dropping the dependency. That failure is correct, not a bug: it is
-the same choice ~--wrap-mode=nodownload~ makes on purpose above.
+dropping the dependency. That failure is intentional: it is
+~--wrap-mode=nodownload~, set on purpose above, doing what it is for.
 
 To build with no network, fetch every wrap once beforehand, while
 network is still available:
