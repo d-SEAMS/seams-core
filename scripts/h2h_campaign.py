@@ -54,6 +54,7 @@ import os
 import platform
 import re
 import resource
+import shutil
 import signal
 import subprocess
 import sys
@@ -767,10 +768,53 @@ def engine_tree() -> str:
 
 
 def lscpu_lines() -> list[str]:
-    done = subprocess.run(
-        ["lscpu"], capture_output=True, text=True, check=False, env={**os.environ, "LC_ALL": "C"},
-    )
-    return [line.rstrip() for line in done.stdout.splitlines() if line.strip()]
+    system = platform.system()
+    reason = "non-Linux platform" if system != "Linux" else "lscpu not found"
+    executable = shutil.which("lscpu") if system == "Linux" else None
+    if executable:
+        try:
+            done = subprocess.run(
+                ["lscpu"], capture_output=True, text=True, check=False,
+                env={**os.environ, "LC_ALL": "C"},
+            )
+        except OSError as exc:
+            reason = f"lscpu unavailable: {exc.strerror or exc.__class__.__name__}"
+        else:
+            lines = [line.rstrip() for line in done.stdout.splitlines() if line.strip()]
+            if done.returncode == 0 and lines:
+                return lines
+            reason = f"lscpu unavailable: exit {done.returncode}"
+
+    def sysctl(name: str) -> str:
+        if system != "Darwin" or not shutil.which("sysctl"):
+            return ""
+        try:
+            done = subprocess.run(
+                ["sysctl", "-n", name], capture_output=True, text=True, check=False,
+                env={**os.environ, "LC_ALL": "C"},
+            )
+        except OSError:
+            return ""
+        return done.stdout.strip() if done.returncode == 0 else ""
+
+    unavailable = f"unavailable ({reason})"
+    model = sysctl("machdep.cpu.brand_string") or platform.processor() or platform.machine()
+    logical = sysctl("hw.logicalcpu") or str(os.cpu_count() or unavailable)
+    physical = sysctl("hw.physicalcpu")
+    threads_per_core = unavailable
+    if logical.isdigit() and physical.isdigit() and int(physical):
+        threads_per_core = str(max(1, int(logical) // int(physical)))
+    return [
+        f"Model name: {model or unavailable}",
+        f"CPU family: {unavailable}",
+        f"Model: {unavailable}",
+        f"Stepping: {unavailable}",
+        f"CPU(s): {logical}",
+        f"Thread(s) per core: {threads_per_core}",
+        f"L2 cache: {sysctl('hw.l2cachesize') or unavailable}",
+        f"L3 cache: {sysctl('hw.l3cachesize') or unavailable}",
+        f"Hypervisor vendor: {unavailable}",
+    ]
 
 
 def lscpu_fields(lines: list[str]) -> dict:
@@ -1784,9 +1828,92 @@ def ratio_band(pairs) -> dict:
             "min": ratios[0], "max": ratios[-1]}
 
 
+def agreement_map(rows, run_id=None) -> dict:
+    return {
+        (r["workload"], r["system"], r["arm"]): r
+        for r in rows
+        if r.get("type") == "agreement"
+        and (run_id is None or r.get("run_id") == run_id)
+    }
+
+
+def comparison_status(workload: str, system: str, arm: str, agreements: dict) -> tuple[bool, str]:
+    row = agreements.get((workload, system, arm))
+    reference = agreements.get((workload, system, REFERENCE))
+    if row is None:
+        return False, "agreement unavailable"
+    if not row.get("equal"):
+        if workload == "rings":
+            return False, "ring outputs differ"
+        arm_oracle = row.get("matches_brute_force")
+        ref_oracle = reference.get("matches_brute_force") if reference else None
+        if arm_oracle is False and ref_oracle is False:
+            return False, "both differ from brute force"
+        if arm_oracle is False:
+            return False, "competitor differs from brute force"
+        if ref_oracle is False:
+            return False, "d-SEAMS differs from brute force"
+        return False, "neighbour outputs differ"
+    if workload != "rings":
+        if "matches_brute_force" not in row or not reference or (
+                "matches_brute_force" not in reference):
+            return False, "brute-force result unavailable"
+        if row["matches_brute_force"] is False and reference["matches_brute_force"] is False:
+            return False, "both differ from brute force"
+        if row["matches_brute_force"] is False:
+            return False, "competitor differs from brute force"
+        if reference["matches_brute_force"] is False:
+            return False, "d-SEAMS differs from brute force"
+    return True, ""
+
+
+def disagreement_classification(rows, run_id=None) -> list[dict]:
+    agreements = agreement_map(rows, run_id)
+    out = []
+    for (workload, system, arm), row in sorted(agreements.items()):
+        if arm in (REFERENCE, TWIN) or row.get("equal", True):
+            continue
+        reference = agreements.get((workload, system, REFERENCE), {})
+        if workload == "rings":
+            matching_side = "d-SEAMS reference"
+            reason_class = "different definition/cutoff convention"
+            if arm == "cycless":
+                detail = "spanning-cycle filtering differs from the primitive-ring reference"
+            elif arm == "fastatomstruct":
+                detail = "King-ring counts differ from the primitive-ring reference"
+            else:
+                detail = "ring definitions differ"
+        else:
+            arm_oracle = row.get("matches_brute_force")
+            ref_oracle = reference.get("matches_brute_force")
+            if arm_oracle is True and ref_oracle is not True:
+                matching_side = "competitor (brute force)"
+                reason_class = "d-SEAMS bug"
+                detail = "competitor matches the oracle and d-SEAMS does not"
+            elif ref_oracle is True and arm_oracle is not True:
+                matching_side = "d-SEAMS (brute force)"
+                reason_class = "different definition/cutoff convention"
+                detail = "strict four-neighbour selection differs at the ordering boundary"
+            elif arm_oracle is False and ref_oracle is False:
+                matching_side = "neither (brute force)"
+                reason_class = "tolerance"
+                detail = "equal-distance ordering at the four-neighbour boundary differs"
+            else:
+                matching_side = "undetermined"
+                reason_class = "competitor bug"
+                detail = "output differs from the reference without an oracle result"
+        out.append({
+            "workload": workload, "system": system, "arm": arm,
+            "matching_side": matching_side, "reason_class": reason_class,
+            "detail": detail,
+        })
+    return out
+
+
 def cell_summary(rows, run_id=None) -> list[dict]:
     good = sample_rows(rows, run_id)
     table = per_round(good)
+    agreements = agreement_map(rows, run_id)
     cells = sorted({(w, s) for (w, s, _a) in table})
     out = []
     for workload, system in cells:
@@ -1811,7 +1938,13 @@ def cell_summary(rows, run_id=None) -> list[dict]:
                 "paired_vs_reference": paired, "aa": aa,
             }
             if arm not in (REFERENCE, TWIN) and paired["n"] and aa["n"]:
-                if paired["min"] > aa["max"]:
+                comparable, reason = comparison_status(
+                    workload, system, arm, agreements,
+                )
+                entry["comparable"] = comparable
+                if not comparable:
+                    entry["verdict"] = f"not comparable: {reason}"
+                elif paired["min"] > aa["max"]:
                     entry["verdict"] = "seams faster"
                 elif paired["max"] < aa["min"]:
                     entry["verdict"] = "competitor faster"
@@ -1861,11 +1994,14 @@ def render_summary(rows, run_id=None) -> str:
                         if x["system"] == c["system"] and x["arm"] == REFERENCE), None)
             ratio = (c["wall_ms"]["median"] / ref["wall_ms"]["median"]
                      if ref and ref["wall_ms"].get("n") else float("nan"))
+            ratio_text = (
+                f"{ratio:.2f}" if c.get("comparable", True) else "-"
+            )
             band = c["aa"]
             band_text = (f"{band['min']:.3f}-{band['max']:.3f}" if band.get("n") else "-")
             out.append(
                 f"| {c['system']} | {c['molecules']} | {c['arm']} | {c['wall_ms']['n']} | "
-                f"{fmt_ms(c['wall_ms'])} | {ratio:.2f} | {band_text} | "
+                f"{fmt_ms(c['wall_ms'])} | {ratio_text} | {band_text} | "
                 f"{c['rss_peak_kb']['median'] / 1024:.1f} | "
                 f"{c['rss_delta_kb']['median'] / 1024:.1f} | "
                 f"{c['cpu_ms']['median']:.3f} | {c['os_threads']} | "
@@ -1883,18 +2019,45 @@ def render_summary(rows, run_id=None) -> str:
             if r["arm"] in (REFERENCE, TWIN):
                 continue
             if r["workload"] == "rings":
-                detail = (f"sizes {r['sizes_compared']}; " +
-                          (json.dumps(r["differences"], sort_keys=True) or "")
-                          if not r["equal"] else f"sizes {r['sizes_compared']}")
+                sizes = r.get("sizes_compared", [])
+                detail = (f"sizes {sizes}; " +
+                          (json.dumps(r.get("differences", {}), sort_keys=True) or "")
+                          if not r["equal"] else f"sizes {sizes}")
             else:
-                detail = (f"pairs {r['n_pairs']}; only reference {r.get('pairs_only_reference', '?')}; "
+                detail = (f"pairs {r.get('n_pairs', '?')}; "
+                          f"only reference {r.get('pairs_only_reference', '?')}; "
                           f"only arm {r.get('pairs_only_arm', '?')}; "
-                          f"rows {json.dumps(r['row_len_hist'], sort_keys=True)}")
+                          f"rows {json.dumps(r.get('row_len_hist', {}), sort_keys=True)}")
                 if "matches_brute_force" in r:
                     detail += f"; brute force {'match' if r['matches_brute_force'] else 'differs'}"
             out.append(f"| {r['workload']} | {r['system']} | {r['arm']} | "
                        f"{'yes' if r['equal'] else 'NO'} | {detail} |")
         out.append("")
+        classified = disagreement_classification(rows, run_id)
+        if classified:
+            out.append("## non-comparable output classification")
+            out.append("")
+            out.append("| workload | system | arm | matching side | reason class | detail |")
+            out.append("|---|---|---|---|---|---|")
+            for item in classified:
+                out.append(
+                    f"| {item['workload']} | {item['system']} | {item['arm']} | "
+                    f"{item['matching_side']} | {item['reason_class']} | {item['detail']} |"
+                )
+            out.append("")
+        oracle_failures = [
+            r for r in agreement
+            if r.get("arm") == REFERENCE and r.get("matches_brute_force") is False
+        ]
+        if oracle_failures:
+            failed = ", ".join(
+                f"{r['workload']}/{r['system']}" for r in oracle_failures
+            )
+            out.append(
+                f"d-SEAMS differs from the brute-force result in {failed}; "
+                "those cells have no speed verdict."
+            )
+            out.append("")
     gaps: dict = {}
     for r in rows:
         if (r.get("type") == "sample" and r.get("status") != "ok"
