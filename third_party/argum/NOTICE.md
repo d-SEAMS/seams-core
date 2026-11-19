@@ -16,9 +16,9 @@ applies to a vendored third-party header (see
 `subprojects/cxxopts.wrap`, `subprojects/backward-cpp.wrap` and
 `subprojects/rang.wrap` for headers that pass that test).
 
-More importantly, this copy is not pristine upstream argum: three
+More importantly, this copy is not pristine upstream argum: four
 follow-up commits patched it in place, and wrapping upstream verbatim
-would silently drop all three.
+would silently drop all four.
 
 * `49eddbd2` ("fix: make signed index conversions explicit") adds
   `static_cast`s so argum compiles clean under this project's
@@ -62,7 +62,10 @@ git apply /path/to/third_party/argum/upstream-v2.9.patch
 diff single-file/argum.h /path/to/third_party/argum/argum.h  # empty
 ```
 
+`upstream-v2.9.patch` is a one-commit mbox, so `git am` (instead of
+`git clone` + `git apply`) also applies it directly, with no
+whitespace warnings either way.
+
 The full source history, including the exact diff against upstream
-v2.9, is this repository's own history for this path
-(`git log --follow -- third_party/argum/argum.h` and its predecessor
-`src/include/external/argum.h`).
+v2.9, is this repository's own history for this path and the paths it
+was moved from (`git log --follow -- third_party/argum/argum.h`).
