@@ -83,7 +83,7 @@ seams prisms "$dump" --type 1
 The [[file:videos/index.org][videos]], the
 [[file:howto/migrate-1x.org][1.x migration]], the
 [[file:explanation/performance-h2h.org][performance tables]], and the
-[[file:reference/release-2.14.org][2.14.1 notes]] are the rest of this
+[[file:reference/release-2.14.org][2.14.2 notes]] are the rest of this
 release.
 
 d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
@@ -102,7 +102,7 @@ seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
 seams cages input/traj/ice1h.lammpstrj
 #+end_src
 
-2.14.1 ships ~libseams~ (~seams.h~), ~libseams_lang~, the C and C++
+2.14.2 ships ~libseams~ (~seams.h~), ~libseams_lang~, the C and C++
 APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines. The d-SEAMS
 PLUMED plugin is v0.4.1.
 #+begin_export rst
