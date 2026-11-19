@@ -42,7 +42,8 @@ What this tells you
 
 Over 5 ns at 230 K the hexagonal count moves from 733 to 741 and the
 ice run stays near 25.5 angstrom. The bulk ice holds no sodium, so the
-rejection coefficient is 0: the salt stays in the liquid. The stored
-labels and a fresh CHILL+ call name every oxygen the same way, which is
-the check that the front is the paper's front and not a second
-classifier.
+rejection coefficient is 0: the salt stays in the liquid. The printed
+line names hexagonal, liquid, interfacial, and cubic. The other
+oxygens are the 41 interfacial clathrate and 4 clathrate molecules in
+the figure, and 741 + 621 + 89 + 41 + 4 is the 1496 that agree. The
+stored labels and a fresh CHILL+ call name every oxygen the same way.
