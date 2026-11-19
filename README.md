@@ -32,7 +32,7 @@ seams cages water.lammpstrj
 
 C and C++ are documented here, as are the GROMACS, LAMMPS, OpenMM, PLUMED
 and in-situ engine drivers. Each other language binding is its own
-repository, released with the same version against the seams-core tag:
+repository.
 
 The d-SEAMS PLUMED plugin v0.4.1 has a
 [PLUMED-NEST egg](https://www.plumed-nest.org/eggs/26/018/)
