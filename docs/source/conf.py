@@ -772,6 +772,17 @@ html_theme_options = {
             "url": "/api-cpp/index.html",
             "resource": True,
         },
+        {
+            "title": "Libraries",
+            "children": [
+                {
+                    "title": "linkcell",
+                    "url": "https://linkcell.dseams.info",
+                    "summary": "Periodic linked-cell neighbour lists",
+                    "external": True,
+                },
+            ],
+        },
     ],
     "og_image_url": "https://docs.dseams.info/_static/og-dseams.png",
 }
