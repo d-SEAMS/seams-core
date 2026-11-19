@@ -21,6 +21,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Split docs reader text checks from live package-registry validation. Meson
   `docs_reader_text` now stays offline while still parsing install claims, and CI
   runs live registry claim checks in a dedicated docs workflow job.
+- The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
 
 ## [2.14.1] - 2026-11-16
 

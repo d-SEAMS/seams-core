@@ -9,17 +9,24 @@ name: Release
 # and Debian 12 each unpack that same tarball, compile
 # docs/examples/quickstart.c with pkg-config, and run it on an ice frame.
 # The upload waits for both jobs.
+# workflow_dispatch rebuilds an existing tag from that tag's tree.
 # GITHUB_TOKEN is the only credential;
 # nothing is published to a package registry.
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to rebuild, such as v2.14.1
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -33,10 +40,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ github.event.inputs.tag || github.ref }}
       - name: Tag names the release version
         id: version
         env:
-          TAG_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
         run: |
           python3 scripts/check_release_version.py --tag "$TAG_NAME"
           echo "version=$(python3 scripts/check_release_version.py --print)" >> "$GITHUB_OUTPUT"
@@ -69,6 +77,13 @@ jobs:
         env:
           OUT_DIR: ${{ github.workspace }}/dist
         run: |
+          set -euo pipefail
+          # The tag's script still populates readcon and then checks it
+          # out. The workflow commit replaces that tree first.
+          if [[ $GITHUB_EVENT_NAME == workflow_dispatch ]]; then
+            git fetch --depth 1 origin "$GITHUB_SHA"
+            git checkout "$GITHUB_SHA" -- scripts/build_linux_release.sh
+          fi
           docker run --rm \
             -e OUT_DIR \
             -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
@@ -225,7 +240,7 @@ jobs:
       - name: Create or update the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.ref_name }}
+          TAG_NAME: ${{ github.event.inputs.tag || github.ref_name }}
           VERSION: ${{ needs.build.outputs.version }}
           TARBALL_SHA256: ${{ needs.build.outputs.tarball_sha256 }}
         run: |
