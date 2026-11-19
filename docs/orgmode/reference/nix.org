@@ -45,14 +45,27 @@ From =nix/package.nix= (~pname = "seams"~, ~version = "2.14.0"~):
 | GMP, MPFR | required by the test suite (~test_ozaki~) |
 | Catch2 3 | tests |
 | BLAS, LAPACK | present in the sandbox. ~with_blas~ is an auto feature, so it stays off and the libraries are not linked. No engine call uses them |
-| Meson flags | ~with_tests=true~, ~with_cli=true~, ~with_mpi=false~, ~with_openmp_offload=false~ |
-| ~mesonAutoFeatures~ | ~disabled~ |
+| Meson flags | ~with_tests=true~, ~with_cli=true~, ~with_mpi=false~, ~with_openmp_offload=false~, ~with_backward=enabled~ |
+| ~mesonAutoFeatures~ | ~disabled~ (~with_backward~ is forced back on; see below) |
 | wrap mode | ~nodownload~ (Meson setup hook) |
 
-The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
-=input=, =templates=, and the wraps =readcon-core.wrap=,
-=readcon-db.wrap=, =linkcell.wrap=, =minimage.wrap=, =vesin.wrap=,
-=subprojects/packagefiles=, and =bindings= (the C ABI in =bindings/cxx=).
+The fileset is =meson.build=, =meson_options.txt=, =include=, =cmake=,
+=docs=, =src=, =scripts=, =third_party=, =engines=, =bench=,
+=gpu_host_kernels=, =benchmarks=, =tests=, =input=, =templates=, and
+the wraps =readcon-core.wrap=, =readcon-db.wrap=, =linkcell.wrap=,
+=minimage.wrap=, =vesin.wrap=, =cxxopts.wrap=, =rang.wrap=,
+=backward-cpp.wrap=, =subprojects/packagefiles=, and =bindings= (the
+C ABI in =bindings/cxx=).
+
+~with_backward~ stays enabled despite ~mesonAutoFeatures = "disabled"~:
+a ~postPatch~ phase fetches the pinned upstream v1.6 tarball and the
+WrapDB patch (the same two pieces =subprojects/backward-cpp.wrap=
+names) with two ~fetchurl~ derivations, and unpacks them into
+~subprojects/backward-cpp-1.6~ before Meson configures. Meson then
+finds that subproject's own ~meson.build~ already on disk and never
+needs network for it, the same mechanism
+=recipe/recipe.yaml= and =packaging/yggdrasil/L/libseams/build_tarballs.jl=
+use for the conda-forge and Yggdrasil packages.
 
 * What stays off
 
