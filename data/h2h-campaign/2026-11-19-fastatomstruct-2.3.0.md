@@ -1,7 +1,7 @@
-host bench-3f64f2db4e0d; core 1; Intel(R) Xeon(R) Processor; family 6 model 207 stepping 2; 8 cpus; 1 thread per core; L2 16 MiB (8 instances); L3 320 MiB (1 instance); hypervisor KVM; kernel 6.12.113+
+host bench-3f64f2db4e0d; core 0; Intel(R) Xeon(R) Processor; family 6 model 207 stepping 2; 8 cpus; 1 thread per core; L2 16 MiB (8 instances); L3 320 MiB (1 instance); hypervisor KVM; kernel 6.12.113+
 build release -O3; code of each run:
 
-- fas23-ice-ic: code_revision a726636b8fbf0baa368117c3a904c0a373abd4b0; base_revision c0208da6fba7265ac44e279a17c4dffa24e4aef4; engine_tree 9ecd000c053a07c1498f9b41092f16996a58b8e2; core 1
+- fas23-ice-ic-r4: code_revision 8fb28dc54dc4e20a67691cd83bae4f8854aaa707; base_revision c0208da6fba7265ac44e279a17c4dffa24e4aef4; engine_tree 753e0a3319ce6847568a878a3085f928f5a80d15; core 0
 
 arms:
 - fastatomstruct: fastatomstruct 2.3.0 (build release, commit 4a833a871dd26063381b2183a574b5011ba56eed, tag 2.3.0)
@@ -11,35 +11,35 @@ arms:
 
 | system | molecules | arm | n | wall ms | x seams | A/A band | peak MiB | delta MiB | cpu ms | threads | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ice_ic_1000 | 1000 | fastatomstruct | 8 | 24.829 (24.723-25.077) | 15.24 | 0.601-1.091 | 61.4 | 3.1 | 24.817 | 3 | seams faster |
-| ice_ic_1000 | 1000 | fastatomstruct_2_2 | 8 | 24.847 (24.808-24.949) | 15.25 | 0.601-1.091 | 62.2 | 3.0 | 24.844 | 3 | seams faster |
-| ice_ic_1000 | 1000 | seams | 8 | 1.630 (1.624-1.667) | 1.00 | 0.601-1.091 | 43.9 | 0.9 | 1.628 | 1 |  |
-| ice_ic_1000 | 1000 | seams_aa | 8 | 1.666 (1.650-1.692) | 1.02 | 0.601-1.091 | 43.9 | 0.9 | 1.664 | 1 |  |
-| ice_ic_10648 | 10648 | fastatomstruct | 8 | 1764.147 (1757.507-1803.799) | 123.82 | 0.969-1.020 | 77.9 | 18.2 | 1763.995 | 3 | seams faster |
-| ice_ic_10648 | 10648 | fastatomstruct_2_2 | 8 | 1827.344 (1805.975-1854.690) | 128.26 | 0.969-1.020 | 78.8 | 18.2 | 1827.244 | 3 | seams faster |
-| ice_ic_10648 | 10648 | seams | 8 | 14.247 (14.091-14.455) | 1.00 | 0.969-1.020 | 50.7 | 6.2 | 14.245 | 1 |  |
-| ice_ic_10648 | 10648 | seams_aa | 8 | 14.429 (14.246-14.587) | 1.01 | 0.969-1.020 | 50.7 | 6.2 | 14.426 | 1 |  |
-| ice_ic_110592 | 110592 | fastatomstruct | 6 | 565560.528 (561836.539-571198.541) | 3820.38 | 0.551-1.116 | 249.2 | 175.7 | 565483.798 | 3 | seams faster |
-| ice_ic_110592 | 110592 | fastatomstruct_2_2 | 6 | 586837.255 (574290.749-593809.651) | 3964.11 | 0.551-1.116 | 250.0 | 175.7 | 586746.077 | 3 | seams faster |
-| ice_ic_110592 | 110592 | seams | 8 | 148.038 (146.383-151.271) | 1.00 | 0.551-1.116 | 118.2 | 58.9 | 148.031 | 1 |  |
-| ice_ic_110592 | 110592 | seams_aa | 8 | 152.626 (147.753-156.756) | 1.03 | 0.551-1.116 | 118.2 | 58.9 | 152.624 | 1 |  |
+| ice_ic_1000 | 1000 | fastatomstruct | 8 | 24.986 (24.752-25.239) | 15.18 (not single-thread) | 0.879-1.034 | 62.1 | 3.1 | 24.984 | 3 | seams faster |
+| ice_ic_1000 | 1000 | fastatomstruct_2_2 | 8 | 24.995 (24.909-25.633) | 15.19 (not single-thread) | 0.879-1.034 | 62.9 | 3.0 | 24.991 | 3 | seams faster |
+| ice_ic_1000 | 1000 | seams | 8 | 1.646 (1.611-1.690) | 1.00 (not single-thread) | 0.879-1.034 | 44.7 | 0.9 | 1.644 | 1 |  |
+| ice_ic_1000 | 1000 | seams_aa | 8 | 1.641 (1.627-1.668) | 1.00 (not single-thread) | 0.879-1.034 | 44.6 | 0.9 | 1.639 | 1 |  |
+| ice_ic_10648 | 10648 | fastatomstruct | 8 | 1771.772 (1765.180-1782.253) | 124.00 (not single-thread) | 0.909-1.029 | 78.6 | 18.2 | 1771.680 | 3 | seams faster |
+| ice_ic_10648 | 10648 | fastatomstruct_2_2 | 8 | 1831.757 (1815.645-1851.246) | 128.19 (not single-thread) | 0.909-1.029 | 79.5 | 18.1 | 1831.657 | 3 | seams faster |
+| ice_ic_10648 | 10648 | seams | 8 | 14.289 (14.224-14.579) | 1.00 (not single-thread) | 0.909-1.029 | 51.4 | 6.2 | 14.286 | 1 |  |
+| ice_ic_10648 | 10648 | seams_aa | 8 | 14.494 (14.268-14.626) | 1.01 (not single-thread) | 0.909-1.029 | 51.4 | 6.2 | 14.490 | 1 |  |
+| ice_ic_110592 | 110592 | fastatomstruct | 6 | 603174.076 (586538.102-609036.252) | 4029.61 (not single-thread) | 0.695-1.103 | 249.9 | 175.8 | 603101.132 | 3 | seams faster |
+| ice_ic_110592 | 110592 | fastatomstruct_2_2 | 6 | 590552.738 (584425.311-596202.938) | 3945.29 (not single-thread) | 0.695-1.103 | 250.8 | 175.7 | 590484.225 | 3 | seams faster |
+| ice_ic_110592 | 110592 | seams | 8 | 149.685 (146.426-150.260) | 1.00 (not single-thread) | 0.695-1.103 | 118.9 | 58.9 | 149.684 | 1 |  |
+| ice_ic_110592 | 110592 | seams_aa | 8 | 147.394 (145.057-150.438) | 0.98 (not single-thread) | 0.695-1.103 | 118.9 | 58.9 | 147.392 | 1 |  |
 
 ## q6: wall ms, median (Q1-Q3), n per cell
 
 | system | molecules | arm | n | wall ms | x seams | A/A band | peak MiB | delta MiB | cpu ms | threads | verdict |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| ice_ic_1000 | 1000 | fastatomstruct | 8 | 2.749 (2.422-4.472) | 4.97 | 0.124-1.114 | 59.2 | 0.9 | 2.747 | 3 | no difference |
-| ice_ic_1000 | 1000 | fastatomstruct_2_2 | 8 | 2.741 (2.595-3.370) | 4.95 | 0.124-1.114 | 60.1 | 1.0 | 2.739 | 3 | no difference |
-| ice_ic_1000 | 1000 | seams | 8 | 0.553 (0.347-1.353) | 1.00 | 0.124-1.114 | 43.8 | 0.8 | 0.551 | 1 |  |
-| ice_ic_1000 | 1000 | seams_aa | 8 | 0.364 (0.350-0.371) | 0.66 | 0.124-1.114 | 43.8 | 0.8 | 0.362 | 1 |  |
-| ice_ic_10648 | 10648 | fastatomstruct | 8 | 66.052 (65.498-66.264) | 22.15 | 0.926-1.054 | 61.5 | 1.8 | 66.049 | 3 | seams faster |
-| ice_ic_10648 | 10648 | fastatomstruct_2_2 | 8 | 90.612 (89.058-91.815) | 30.38 | 0.926-1.054 | 62.4 | 1.8 | 90.589 | 3 | seams faster |
-| ice_ic_10648 | 10648 | seams | 8 | 2.983 (2.865-3.090) | 1.00 | 0.926-1.054 | 49.5 | 5.0 | 2.980 | 1 |  |
-| ice_ic_10648 | 10648 | seams_aa | 8 | 2.989 (2.906-3.090) | 1.00 | 0.926-1.054 | 49.5 | 5.0 | 2.986 | 1 |  |
-| ice_ic_110592 | 110592 | fastatomstruct | 8 | 5322.907 (5301.341-5364.740) | 177.17 | 0.819-1.224 | 83.0 | 9.6 | 5322.214 | 3 | seams faster |
-| ice_ic_110592 | 110592 | fastatomstruct_2_2 | 8 | 7282.628 (7196.485-7382.057) | 242.40 | 0.819-1.224 | 84.0 | 9.6 | 7282.347 | 3 | seams faster |
-| ice_ic_110592 | 110592 | seams | 8 | 30.044 (29.588-33.331) | 1.00 | 0.819-1.224 | 106.1 | 46.8 | 30.037 | 1 |  |
-| ice_ic_110592 | 110592 | seams_aa | 8 | 32.846 (30.587-33.348) | 1.09 | 0.819-1.224 | 106.1 | 46.8 | 32.843 | 1 |  |
+| ice_ic_1000 | 1000 | fastatomstruct | 8 | 2.413 (2.399-2.586) | 6.83 (not single-thread) | 0.278-1.050 | 59.9 | 0.9 | 2.411 | 3 | seams faster |
+| ice_ic_1000 | 1000 | fastatomstruct_2_2 | 8 | 2.565 (2.550-2.639) | 7.26 (not single-thread) | 0.278-1.050 | 60.9 | 1.0 | 2.563 | 3 | seams faster |
+| ice_ic_1000 | 1000 | seams | 8 | 0.353 (0.343-0.391) | 1.00 (not single-thread) | 0.278-1.050 | 44.5 | 0.8 | 0.351 | 1 |  |
+| ice_ic_1000 | 1000 | seams_aa | 8 | 0.354 (0.346-0.358) | 1.00 (not single-thread) | 0.278-1.050 | 44.5 | 0.8 | 0.352 | 1 |  |
+| ice_ic_10648 | 10648 | fastatomstruct | 8 | 65.730 (65.588-65.923) | 23.17 (not single-thread) | 0.974-1.042 | 62.2 | 1.8 | 65.727 | 3 | seams faster |
+| ice_ic_10648 | 10648 | fastatomstruct_2_2 | 8 | 90.862 (89.211-91.326) | 32.02 (not single-thread) | 0.974-1.042 | 63.1 | 1.8 | 90.860 | 3 | seams faster |
+| ice_ic_10648 | 10648 | seams | 8 | 2.837 (2.798-2.930) | 1.00 (not single-thread) | 0.974-1.042 | 50.2 | 5.0 | 2.835 | 1 |  |
+| ice_ic_10648 | 10648 | seams_aa | 8 | 2.812 (2.788-3.028) | 0.99 (not single-thread) | 0.974-1.042 | 50.1 | 5.0 | 2.809 | 1 |  |
+| ice_ic_110592 | 110592 | fastatomstruct | 8 | 5331.071 (5304.075-5443.660) | 172.25 (not single-thread) | 0.873-1.150 | 83.8 | 9.6 | 5330.774 | 3 | seams faster |
+| ice_ic_110592 | 110592 | fastatomstruct_2_2 | 8 | 7391.091 (7341.476-7526.439) | 238.81 (not single-thread) | 0.873-1.150 | 84.7 | 9.6 | 7390.775 | 3 | seams faster |
+| ice_ic_110592 | 110592 | seams | 8 | 30.950 (28.994-32.945) | 1.00 (not single-thread) | 0.873-1.150 | 106.8 | 46.8 | 30.941 | 1 |  |
+| ice_ic_110592 | 110592 | seams_aa | 8 | 32.059 (29.792-32.968) | 1.04 (not single-thread) | 0.873-1.150 | 106.8 | 46.8 | 32.056 | 1 |  |
 
 ## agreement with seams (same cell, round 0 output)
 
@@ -70,6 +70,8 @@ arms:
 - thread controls: every sample process is pinned to one CPU core via taskset with single-thread env vars (OMP, MKL, OPENBLAS, NUMBA, TBB, RAYON, POLARS, TOKIO, NUMEXPR, OVITO set to 1) and the tool's 1-thread API knob.
 - threads: observed OS threads in /proc/self/status after the timed call: 96/188 good samples had 1 OS thread; 92/188 good samples had >1 OS thread.
 - multi-thread tools (os_threads > 1 despite 1-thread controls and taskset): fastatomstruct (3).
+- x seams is one compute thread where compute_threads is 1. The count is taken over the sample from scheduled time in /proc/<pid>/task. An OS thread that stays parked does not count as compute.
+- x seams is marked not single-thread on every figure when a competitor did not stay on one compute thread.
 - seams/q6: sharp 3.5 A cutoff local Steinhardt q_6 via seams_steinhardt (qlbar skipped)
 - fastatomstruct/q6: Steinhardt q_l with near-hard radial weight p1=48 inside 3.5 A
 - fastatomstruct_2_2/q6: fastatomstruct 2.2.0 Steinhardt q_l with near-hard radial weight p1=48 inside 3.5 A
