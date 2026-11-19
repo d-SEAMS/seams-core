@@ -463,7 +463,10 @@ def check_campaign_records():
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     tree_cache: dict[str, str] = {}
     node = platform.node()
-    forbidden_paths = ("/cursor/", "/opt/", "/workspace/", "/home/", "/tmp/", "/agent/")
+    machine_prefixes = tuple(
+        p for p in (str(ROOT), os.path.expanduser("~"), tempfile.gettempdir()) if p and p != "/"
+    )
+    abs_path_re = re.compile(r'"/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+')
     for record_path in records:
         rows = hc.read_rows(record_path)
         assert rows, f"{record_path} is empty"
@@ -487,7 +490,11 @@ def check_campaign_records():
                 if row.get("type") == "sample" and row.get("status") == "ok":
                     if row.get("tool") == "seams":
                         assert row.get("os_threads") == 1, (record_path.name, idx, row)
-            if row.get("type") == "plan" and row.get("lanes") != ["inventory"]:
+            if row.get("type") == "plan" and (
+                "workloads" in row
+                or any(name in {lane.name for lane in hc.LANES}
+                       for name in (row.get("lanes") or []))
+            ):
                 assert int(row.get("rounds", 0)) >= 12, (record_path.name, idx, row)
         assert not hc.replaced_runs(rows), f"{record_path.name} contains replaced rescue runs"
         md_path = record_path.with_suffix(".md")
@@ -499,8 +506,9 @@ def check_campaign_records():
         assert (f"{ts['single']}/{ts['total']} good samples had 1 OS thread; "
                 f"{ts['multi']}/{ts['total']} good samples had >1 OS thread.") in md_text
         for path_text in (record_path.read_text(encoding="utf-8"), md_text):
-            for bad in forbidden_paths:
+            for bad in machine_prefixes:
                 assert bad not in path_text, f"{bad} leaked into {record_path.name}"
+            assert not abs_path_re.search(path_text), f"absolute path leaked into {record_path.name}"
             if node and len(node) > 3:
                 assert node not in path_text, f"hostname leaked into {record_path.name}"
 
