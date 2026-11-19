@@ -21,12 +21,6 @@ the same path with `.md`.
 
 ## Install
 
-conda-forge ships the engine, the headers, and the command:
-
-```bash
-conda install -c conda-forge 'libseams=2.14.0'
-```
-
 From a source checkout, with Eigen 3.4 available:
 
 ```bash
