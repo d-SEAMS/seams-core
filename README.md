@@ -43,7 +43,7 @@ tested with PLUMED v2.10 and master.
 | Language | Repository | Package |
 |----------|------------|---------|
 | Python | [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) | `pydseamslib` on PyPI (`import dseams`, `import pydseams`) |
-| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | LuaRocks `dseams` (`require("dseams")`) |
+| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | Git source (`require("dseams")`) |
 | R | [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r) | `dseams` |
 | Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams`, over `libseams_jll` |
 | Rust | [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs) | crates `dseams-sys`, `dseams` |
@@ -130,7 +130,7 @@ The corresponding `bibtex` entry is:
 The live builds are `pixi` + meson, or the Nix flake. This repository
 builds `libyodaLib`, `libseams`, `libseams_lang`, and the `seams` CLI.
 The language packages
-(`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
+(`pydseamslib`, the crates, the fpm package, the R and
 Julia packages) are built and released by their own repositories, listed
 above. `docs/orgmode/getting-started/install.org` has every install line.
 

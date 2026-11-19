@@ -120,7 +120,7 @@ is process-global.
 | Language | Repository | Package |
 | --- | --- | --- |
 | Python | d-SEAMS/PydSEAMSlib | `pydseamslib` |
-| Lua, Fennel | d-SEAMS/yodaStruct | LuaRocks `dseams` |
+| Lua, Fennel | d-SEAMS/yodaStruct | Git source, `require("dseams")` |
 | R | d-SEAMS/dseams-r | `dseams` |
 | Julia | d-SEAMS/Dseams.jl | `Dseams` |
 | Rust | d-SEAMS/dseams-rs | `dseams-sys`, `dseams` |
@@ -137,5 +137,5 @@ for editing the tree.
 - conda-forge chemfiles 0.10.4 fails an mmCIF read of an atom with no residue. The Meson build probes `cmake/mmcif_no_entity.mmcif` and vendors a patched chemfiles when the probe fails.
 - `.con` needs readcon-core. The Nix flake does not fetch that wrap.
 - `--jobs` needs an OpenMP build. `seams --features` reports whether OpenMP is on.
-- `require("dseams")` needs the LuaRocks rock from yodaStruct.
+- `require("dseams")` needs the module built from a yodaStruct checkout.
 - A bug report needs `seams --version`, `seams --features`, the command line, and a small dump.
