@@ -13,11 +13,16 @@ The binding is the fpm Git dependency `dseams` in [d-SEAMS/dseams-fortran](https
 dseams = { git = "https://github.com/d-SEAMS/dseams-fortran" }
 ```
 
-The same two engine commands, without the package:
+The same two engine commands, without the package, print the ice Ih census:
 
 ```bash
 seams read input/traj/ice1h.lammpstrj
 seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+```
+nop 128 frame 1 box 15.6457 14.7071 18.073
+nop 128 hexagonal 128
 ```
 
 Module names are the {doc}`Fortran API </stable/fortran>`.

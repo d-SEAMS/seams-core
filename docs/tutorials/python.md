@@ -12,11 +12,16 @@ The binding is [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). `i
 pip install 'pydseamslib==2.14.0'
 ```
 
-The same two engine commands, without the binding:
+The same two engine commands, without the binding, print the ice Ih census. The box is orthorhombic and every oxygen is hexagonal:
 
 ```bash
 seams read input/traj/ice1h.lammpstrj
 seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+```
+nop 128 frame 1 box 15.6457 14.7071 18.073
+nop 128 hexagonal 128
 ```
 
 Package names and the libraries they link are the {doc}`Python API </stable/python>`.

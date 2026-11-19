@@ -14,11 +14,16 @@ remotes::install_github("d-SEAMS/dseams-r")
 
 The package links `libseams_lang` (`bindings/cxx/seams_lang.h`).
 
-The same two engine commands, without the package:
+The same two engine commands, without the package, print the ice Ih census:
 
 ```bash
 seams read input/traj/ice1h.lammpstrj
 seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+```
+nop 128 frame 1 box 15.6457 14.7071 18.073
+nop 128 hexagonal 128
 ```
 
 The package name is the {doc}`R API </stable/r>`.
