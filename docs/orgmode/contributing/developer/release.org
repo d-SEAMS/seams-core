@@ -20,12 +20,13 @@ Work on ~main~, with the fragments for this version already in
 ~changelog.d/~.
 
 1. Set the next version in ~meson.build~ and the release date in
-   ~CITATION.cff~, regenerate every copy, and commit that prepared state.
+   ~CITATION.cff~ and ~codemeta.json~, regenerate every copy, and commit
+   that prepared state.
 
    #+begin_example
    pixi run --frozen -e version release-cog
    pixi run --frozen -e version version-drift
-   git add meson.build CITATION.cff
+   git add meson.build CITATION.cff codemeta.json
    git add -- $(cat ci/version/files.txt | grep -v '^#')
    git commit -m "chore(release): prepare 2.14.2 metadata"
    #+end_example
