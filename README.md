@@ -45,12 +45,9 @@ tested with PLUMED v2.10 and master.
 | Python | [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) | `pydseamslib` on PyPI (`import dseams`, `import pydseams`) |
 | Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | Git source (`require("dseams")`) |
 | R | [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r) | `dseams` |
-| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams`, over `libseams_jll` |
+| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams` |
 | Rust | [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs) | crates `dseams-sys`, `dseams` |
 | Fortran | [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran) | fpm `dseams` |
-
-`docs/orgmode/development/repositories.org` says what lives where and how
-to develop seams-core and a binding together.
 
 Periodic k-nearest neighbour search is
 [linkcell](https://github.com/d-SEAMS/linkcell).
@@ -59,8 +56,6 @@ Build with `pixi run setup && pixi run build && pixi run test`, or with
 the Nix flake: `nix build` and `nix develop`.
 
 Released versions live in [CHANGELOG.md](CHANGELOG.md) (Keep a Changelog).
-Unreleased notes are files under `changelog.d/`. The cut is
-`towncrier build --version X.Y.Z`.
 
 # Runtime configuration
 

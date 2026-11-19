@@ -246,7 +246,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Removed
 
-- The d-SEAMS 2.0 manuscript, its benchmark campaign, the record tables and logs under `benchmarks/`, and the paper reproduction pages leave this repository for the private paper repository; the records and figure data are the `d-SEAMS/dseams2-benchmark-records` and `d-SEAMS/dseams2-paper-figure-data` datasets. The performance pages show tables rendered once from those records (`docs/records`), and the asv harness and the timing scripts stay.
+- The d-SEAMS 2.0 manuscript, its benchmark campaign, the record tables and logs under `benchmarks/`, and the paper reproduction pages leave this repository. The records and figure data are the `d-SEAMS/dseams2-benchmark-records` and `d-SEAMS/dseams2-paper-figure-data` datasets. The performance pages show tables rendered once from those records (`docs/records`), and the asv harness and the timing scripts stay.
 
 ### Fixed
 
