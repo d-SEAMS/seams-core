@@ -18,15 +18,34 @@ version = v"2.14.0"
 # commit, so bundled/patches is not applied.
 const v2_14_0_tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
 
+# Pinned to subprojects/backward-cpp.wrap: v1.6's tag commit (the wrap's
+# source_hash is a GitHub tarball hash of this same commit; BinaryBuilder
+# refuses to take GitHub's generated tag archives directly, see
+# check_github_archive in BinaryBuilderBase.jl, so this is a GitSource
+# instead) and the same WrapDB patch zip. The clone plus the patch overlay
+# reproduce exactly what Meson's own wrap resolver would fetch for that
+# wrap: meson.build/meson_options.txt, which upstream backward-cpp does
+# not ship, land on top of the pristine checkout. with_backward below is
+# on because of these two, not despite nodownload: the subproject's
+# meson.build already exists before configure runs, so Meson's wrap
+# resolver uses it directly and never needs network.
+const backward_cpp_tag_sha = "3bb9240cb15459768adb3e7d963a20e1523a6294"
+const backward_cpp_patch_hash = "2c952611584971cdcb04b5c4aeca3401f1fba9544e6203e08b933fd9c21427fc"
+
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", v2_14_0_tag_sha),
+    GitSource("https://github.com/bombela/backward-cpp.git", backward_cpp_tag_sha;
+               tag = "v1.6", unpack_target = "seams-core/subprojects/backward-cpp-1.6"),
+    ArchiveSource("https://wrapdb.mesonbuild.com/v2/backward-cpp_1.6-6/get_patch",
+                  backward_cpp_patch_hash; unpack_target = "seams-core/subprojects"),
 ]
 
 # The engine core, its stable C API (libseams), and the C ABI of the R and
 # Julia packages (libseams_lang). Every optional backend is off: those come
 # from wraps that would be downloaded during the build, or from libraries
-# that have no JLL yet. with_backward is off for the same reason: the
-# backward-cpp wrap would need a network fetch that nodownload forbids.
+# that have no JLL yet. with_backward stays on: the two extra sources
+# above pre-seed its subproject directory, so Meson finds a buildable
+# backward-cpp already on disk and the nodownload below never applies to it.
 script = raw"""
 cd ${WORKSPACE}/srcdir/seams-core
 
@@ -58,7 +77,7 @@ meson setup build \
     -Dwith_sphericart=disabled \
     -Dwith_nauty=disabled \
     -Dwith_csm=disabled \
-    -Dwith_backward=disabled
+    -Dwith_backward=enabled
 ninja -C build -j${nproc} src/libyodaLib.${dlext} src/libseams.${dlext} bindings/libseams_lang.${dlext} seams${exeext}
 
 install -Dvm 755 build/src/libyodaLib.${dlext} "${libdir}/libyodaLib.${dlext}"
