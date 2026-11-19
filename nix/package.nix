@@ -11,6 +11,8 @@
   libhwy,
   gmp,
   mpfr,
+  cxxopts,
+  rang,
   llvmPackages,
 }:
 
@@ -33,6 +35,8 @@ stdenv.mkDerivation (finalAttrs: {
       ../subprojects/linkcell.wrap
       ../subprojects/minimage.wrap
       ../subprojects/vesin.wrap
+      ../subprojects/cxxopts.wrap
+      ../subprojects/rang.wrap
       ../subprojects/packagefiles
     ];
   };
@@ -51,11 +55,16 @@ stdenv.mkDerivation (finalAttrs: {
     libhwy
     gmp
     mpfr
+    cxxopts
+    rang
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
 
   # The meson setup hook already sets -Dwrap_mode=nodownload.
   # auto_features=enabled would force IRA/sphericart/nauty on and fail.
+  # with_backward is an auto feature too and stays off here: nixpkgs'
+  # backward-cpp has no find_package()-able target, so this build loses
+  # the pretty stack trace rather than fail to configure.
   mesonAutoFeatures = "disabled";
   mesonFlags = [
     (lib.mesonBool "with_tests" true)
@@ -65,8 +74,8 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   # Catch2 plus the seams read smoke test. Optional backends (vesin,
-  # readcon-core, IRA, sphericart, nauty) stay off unless nixpkgs
-  # already provides them; meson skips those probes.
+  # readcon-core, IRA, sphericart, nauty, backward) stay off unless
+  # nixpkgs already provides them; meson skips those probes.
   doCheck = true;
 
   meta = {
