@@ -86,7 +86,7 @@ def check_verdicts():
     got = {c["arm"]: c.get("verdict") for c in hc.cell_summary(rows)}
     assert got["slow"] == "seams faster", got
     assert got["fast"] == "competitor faster", got
-    assert got["level"] == "within A/A band", got
+    assert got["level"] == "no difference", got
     assert got["seams"] is None and got["seams_aa"] is None, got
     text = hc.render_summary(rows)
     assert "seams faster" in text and "competitor faster" in text
@@ -768,6 +768,44 @@ def check_campaign_leak_checker_negative_fixtures():
         ), (kind, fixture)
 
 
+def git_commit(token: str) -> str:
+    done = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{token}^{{commit}}"],
+        cwd=ROOT, capture_output=True, text=True, check=False)
+    return done.stdout.strip() if done.returncode == 0 else ""
+
+
+def git_reachable() -> set[str]:
+    listed = subprocess.check_output(
+        ["git", "rev-list", "--objects", "HEAD"], cwd=ROOT, text=True)
+    return {line.split()[0] for line in listed.splitlines() if line}
+
+
+def check_speed_verdict_noise():
+    arm = [3.5, 2.4, 3.0, 2.5, 7.2, 2.6, 7.0, 2.5]
+    ref = [1.3, 0.35, 0.7, 0.34, 2.8, 0.38, 1.6, 0.35]
+    paired = hc.ratio_band([a / b for a, b in zip(arm, ref)])
+    aa = hc.ratio_band([0.28, 1.06, 0.51, 1.11, 0.12, 0.92, 0.21, 1.09])
+    assert paired["min"] > aa["max"]
+    assert min(arm) <= max(ref)
+    assert hc.speed_verdict(arm, ref, paired, aa) == "no difference"
+    assert hc.speed_verdict(
+        [20.0, 21.0, 22.0], [10.0, 10.0, 10.0],
+        hc.ratio_band([2.0, 2.1, 2.2]), hc.ratio_band([0.99, 1.0, 1.01]),
+    ) == "seams faster"
+
+
+def check_thread_proof_counts_one_compute_thread():
+    snaps = [
+        [(1, "python", 0), (2, "sentry-transpor", 5), (3, "python", 0)],
+        [(1, "python", 1000), (2, "sentry-transpor", 5), (3, "python", 2_000_000)],
+    ]
+    proof = hc.thread_proof(snaps, wall_ns=2_000_000_000)
+    assert proof["os_threads_max"] == 3, proof
+    assert proof["compute_threads"] == 1, proof
+    assert sum(1 for item in proof["thread_exec"] if item["exec_ns"] == 0) == 1, proof
+
+
 def check_campaign_records():
     data_dir = ROOT / "data" / "h2h-campaign"
     if not data_dir.is_dir():
@@ -802,7 +840,18 @@ def check_campaign_records():
                         assert row.get("os_threads") == 1, (record_path.name, idx, row)
             assert plan_rounds_ok(row), (
                 record_path.name, idx, row.get("rounds"), row.get("min_rounds"))
-        assert not hc.replaced_runs(rows), f"{record_path.name} contains replaced rescue runs"
+        replaced = hc.replaced_runs(rows)
+        named = set()
+        for plan in rows:
+            if plan.get("type") != "plan":
+                continue
+            sup = plan.get("supersedes") or []
+            if isinstance(sup, str):
+                sup = [sup]
+            named.update(sup)
+        unmarked = set(replaced) - named
+        assert not unmarked, f"{record_path.name} replaces {sorted(unmarked)} without supersedes"
+        shown = hc.current_rows(rows)
         md_path = record_path.with_name(
             "2026-11-18-r3.md"
             if record_path.name == "2026-11-18-r2.jsonl"
@@ -810,9 +859,23 @@ def check_campaign_records():
         )
         assert md_path.is_file(), f"missing summary {md_path}"
         md_text = md_path.read_text(encoding="utf-8")
-        expected_md = hc.render_summary(rows) + hc.render_lanes(rows)
+        expected_md = hc.render_summary(shown) + hc.render_lanes(shown)
         assert md_text == expected_md, f"{md_path.name} does not match {record_path.name}"
-        ts = hc.thread_summary(rows)
+        ts = hc.thread_summary(shown)
+        reachable = git_reachable()
+        for idx, row in enumerate(shown, 1):
+            blob = row.get("harness_blob")
+            if blob:
+                assert blob in reachable, f"{record_path.name}:{idx} harness_blob {blob} is not in HEAD"
+            version = row.get("tool_version")
+            if not version:
+                continue
+            token = str(version).split()[0]
+            if not re.fullmatch(r"[0-9a-f]{7,40}", token):
+                continue
+            resolved = token if len(token) == 40 else git_commit(token)
+            assert resolved and resolved in reachable, (
+                f"{record_path.name}:{idx} tool_version {version} is not in HEAD")
         assert (f"{ts['single']}/{ts['total']} good samples had 1 OS thread; "
                 f"{ts['multi']}/{ts['total']} good samples had >1 OS thread.") in md_text
     campaign_files = sorted(data_dir.glob("*.jsonl")) + sorted(data_dir.glob("*.md"))

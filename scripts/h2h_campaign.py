@@ -60,6 +60,7 @@ import shutil
 import signal
 import subprocess
 import sys
+import threading
 import time
 import uuid
 import warnings
@@ -708,7 +709,8 @@ def workload_arms(workload: str, molecules: int | None = None, arm_filter=None) 
 
 def tool_version(tool: str, build: str | None = None) -> str:
     if tool == "seams":
-        return f"{head_revision()[:8]} {build or ''}".strip()
+        # The full commit, so git cat-file -e can resolve the measured binary's source.
+        return head_revision()
     try:
         return importlib.metadata.version(DIST_OF[tool])
     except importlib.metadata.PackageNotFoundError:
@@ -1156,7 +1158,11 @@ def cells_for(workloads, systems, frames: dict, arm_filter=None):
 
 
 def schedule(cells, rounds: int):
-    """Yield (round, position, order, workload, system, arm)."""
+    """Yield (round, position, order, workload, system, arm).
+
+    Odd rounds reverse the cell list and the arm list. Two successive rounds
+    are ABBA: forward, then the same arms in reverse.
+    """
     for r in range(rounds):
         flip = r % 2 == 1
         sequence = list(reversed(cells)) if flip else list(cells)
@@ -1194,6 +1200,57 @@ def idle_snapshot(core: int, window: float = 1.0) -> dict:
     }
 
 
+def task_snapshot(pid: int) -> list[tuple[int, str, int]]:
+    """One sample of a process's threads: id, command, scheduled nanoseconds."""
+    root = Path(f"/proc/{pid}/task")
+    found = []
+    if not root.is_dir():
+        return found
+    for entry in root.iterdir():
+        try:
+            tid = int(entry.name)
+            comm = (entry / "comm").read_text(encoding="ascii").strip()
+            exec_ns = int((entry / "schedstat").read_text(encoding="ascii").split()[0])
+        except (OSError, ValueError, IndexError):
+            continue
+        found.append((tid, comm, exec_ns))
+    return found
+
+
+def thread_proof(snaps: list[list[tuple[int, str, int]]], wall_ns: int) -> dict:
+    """How many OS threads existed, and how many accumulated scheduled time.
+
+    A thread counts as compute when it is the only one that ran, or when its
+    scheduled time is at least half the busiest thread and at least 50 us or
+    5 percent of the sample. A parked thread with no scheduled time does not.
+    """
+    by_tid: dict[int, dict] = {}
+    max_os = 0
+    for snap in snaps:
+        max_os = max(max_os, len(snap))
+        for tid, comm, exec_ns in snap:
+            rec = by_tid.setdefault(tid, {"comm": comm, "min": exec_ns, "max": exec_ns})
+            rec["comm"] = comm
+            rec["min"] = min(rec["min"], exec_ns)
+            rec["max"] = max(rec["max"], exec_ns)
+    roles = [
+        {"comm": rec["comm"], "exec_ns": rec["max"] - rec["min"]}
+        for rec in by_tid.values()
+    ]
+    roles.sort(key=lambda item: (-item["exec_ns"], item["comm"]))
+    active = [item for item in roles if item["exec_ns"] > 0]
+    if len(active) <= 1:
+        compute = len(active)
+    else:
+        busiest = active[0]["exec_ns"]
+        floor = max(50_000, int(0.05 * max(wall_ns, 1)))
+        compute = sum(
+            1 for item in active
+            if item["exec_ns"] >= floor or item["exec_ns"] * 2 >= busiest
+        )
+    return {"os_threads_max": max_os, "compute_threads": compute, "thread_exec": roles}
+
+
 def launch(argv, env, timeout):
     start = time.perf_counter()
     proc = subprocess.Popen(
@@ -1201,6 +1258,16 @@ def launch(argv, env, timeout):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
         start_new_session=True,
     )
+    snaps: list[list[tuple[int, str, int]]] = []
+    stop = threading.Event()
+
+    def watch() -> None:
+        while not stop.is_set():
+            snaps.append(task_snapshot(proc.pid))
+            stop.wait(0.02)
+
+    watcher = threading.Thread(target=watch, daemon=True)
+    watcher.start()
     try:
         out, err = proc.communicate(timeout=timeout)
         status = "ok" if proc.returncode == 0 else "error"
@@ -1208,7 +1275,11 @@ def launch(argv, env, timeout):
         os.killpg(proc.pid, signal.SIGKILL)
         out, err = proc.communicate()
         status = "timeout"
-    return status, proc.returncode, out, err, (time.perf_counter() - start) * 1e3
+    finally:
+        stop.set()
+        watcher.join(timeout=1)
+    elapsed_ns = int((time.perf_counter() - start) * 1e9)
+    return status, proc.returncode, out, err, (time.perf_counter() - start) * 1e3, thread_proof(snaps, elapsed_ns)
 
 
 def parse_worker(out: str):
@@ -1271,7 +1342,7 @@ def run_cells(args, workloads, record: Record, raw: Path, work: Path, core: str,
         if r == 0:
             argv += ["--canon", str(work / "canon")]
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        status, code, out, err, process_ms = launch(
+        status, code, out, err, process_ms, proof = launch(
             argv, worker_env(arm, arm_meta, arm_pythons), args.timeout)
         parsed = parse_worker(out) if status == "ok" else None
         if status == "ok" and parsed is None:
@@ -1281,6 +1352,7 @@ def run_cells(args, workloads, record: Record, raw: Path, work: Path, core: str,
             (raw / "stderr" / f"{label.replace(' ', '_').replace('/', '-')}.txt").write_text(
                 scrub(err), encoding="utf-8")
         row = {**base_row, "utc": stamp, "status": status, "process_wall_ms": round(process_ms, 1)}
+        row.update(proof)
         if status == "ok":
             row.update(parsed)
             row["position"] = position
@@ -1523,10 +1595,13 @@ def run_head_to_heads(args) -> int:
             "env": PINNED_ENV, "protocol": (
                 f"one cold call per fresh process (calls_per_sample=1, warmup_calls=0), "
                 f"pinned to core {core} via taskset with single-thread env vars and tool knobs (=1), "
-                "os_threads recorded per sample, arms interleaved per round, odd rounds reversed, "
+                "os_threads and compute_threads counted over the sample, "
+                "arms interleaved per round in ABBA order (forward, then reversed on odd rounds), "
                 "seams_aa is the A/A twin"
             ),
         }
+        if getattr(args, "supersedes", ""):
+            plan["supersedes"] = args.supersedes
         if args.min_rounds < MIN_ROUNDS:
             plan["round_note"] = (
                 f"n={args.rounds}; a cell whose sample exceeds about 300 s is capped at {CAP_MIN} "
@@ -1952,7 +2027,7 @@ def run_lanes(args) -> int:
         env = lane_env(by_name[cell["lane"]], cell, home, build)
         utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         clear_results(results, host)
-        status, code, out, err, process_ms = launch(argv, env, args.timeout * 2 + 120)
+        status, code, out, err, process_ms, _proof = launch(argv, env, args.timeout * 2 + 120)
         found_value = harvest(results, host, cell) if status == "ok" else None
         text = out + "\n" + err
         label = f"r{r} {cell['label']} {arm}"
@@ -2162,6 +2237,36 @@ def disagreement_classification(rows, run_id=None) -> list[dict]:
     return out
 
 
+def speed_verdict(arm_walls, ref_walls, paired, aa) -> str:
+    """A ratio inside the A/A band, or a wall-time range that meets the reference, is no difference."""
+    if not arm_walls or not ref_walls or not aa.get("n") or not ref_walls:
+        return "no difference"
+    ratio = stats(arm_walls)["median"] / stats(ref_walls)["median"]
+    inside = aa["min"] <= ratio <= aa["max"]
+    band_overlap = bool(paired.get("n")) and not (
+        paired["min"] > aa["max"] or paired["max"] < aa["min"])
+    ranges_overlap = min(arm_walls) <= max(ref_walls) and min(ref_walls) <= max(arm_walls)
+    if inside or band_overlap or ranges_overlap:
+        return "no difference"
+    if ratio > aa["max"]:
+        return "seams faster"
+    return "competitor faster"
+
+
+def single_compute(entry: dict) -> bool:
+    """True when the cell was not shown to use more than one compute thread.
+
+    Rows recorded before compute_threads exist stay unmarked. A cell that
+    counted threads and did not stay on one compute thread is not single-thread.
+    """
+    counted = entry.get("compute_threads")
+    if counted is None:
+        return True
+    if counted == 1:
+        return True
+    return int(entry.get("os_threads_max") or entry.get("os_threads") or 1) <= 1
+
+
 def cell_summary(rows, run_id=None) -> list[dict]:
     good = sample_rows(rows, run_id)
     table = per_round(good)
@@ -2181,12 +2286,16 @@ def cell_summary(rows, run_id=None) -> list[dict]:
             deltas = [x["rss_peak_kb"] - x["rss_before_kb"] for x in byround.values()]
             shared_ref = sorted(set(ref) & set(byround))
             paired = ratio_band([byround[r]["wall_ms"] / ref[r]["wall_ms"] for r in shared_ref])
+            counted = [x["compute_threads"] for x in byround.values() if "compute_threads" in x]
+            watched = [x.get("os_threads_max", x["os_threads"]) for x in byround.values()]
             entry = {
                 "workload": workload, "system": system, "arm": arm,
                 "molecules": next(iter(byround.values()))["molecules"],
                 "wall_ms": stats(walls), "cpu_ms": stats(cpus),
                 "rss_peak_kb": stats(peaks), "rss_delta_kb": stats(deltas),
                 "os_threads": max(x["os_threads"] for x in byround.values()),
+                "os_threads_max": max(watched) if watched else None,
+                "compute_threads": max(counted) if counted else None,
                 "paired_vs_reference": paired, "aa": aa,
             }
             if arm not in (REFERENCE, TWIN) and paired["n"] and aa["n"]:
@@ -2196,12 +2305,9 @@ def cell_summary(rows, run_id=None) -> list[dict]:
                 entry["comparable"] = comparable
                 if not comparable:
                     entry["verdict"] = f"not comparable: {reason}"
-                elif paired["min"] > aa["max"]:
-                    entry["verdict"] = "seams faster"
-                elif paired["max"] < aa["min"]:
-                    entry["verdict"] = "competitor faster"
                 else:
-                    entry["verdict"] = "within A/A band"
+                    entry["verdict"] = speed_verdict(
+                        walls, [item["wall_ms"] for item in ref.values()], paired, aa)
             out.append(entry)
     return out
 
@@ -2222,7 +2328,16 @@ def report_text(out: list[str]) -> str:
     return text
 
 
+def current_rows(rows, run_id=None):
+    """Rows that the report still uses. A superseded run stays in the file and leaves the table."""
+    if run_id is not None:
+        return [r for r in rows if r.get("run_id") in (None, run_id)]
+    replaced = set(replaced_runs(rows))
+    return [r for r in rows if r.get("run_id") not in replaced]
+
+
 def render_summary(rows, run_id=None) -> str:
+    rows = current_rows(rows, run_id)
     cells = cell_summary(rows, run_id)
     out = []
     shown = [r for r in rows if r.get("type") in ("sample", "asv")
@@ -2273,6 +2388,8 @@ def render_summary(rows, run_id=None) -> str:
             ratio_text = (
                 f"{ratio:.2f}" if c.get("comparable", True) else "-"
             )
+            if ratio_text != "-" and c["arm"] not in (REFERENCE, TWIN) and not single_compute(c):
+                ratio_text += " (not single-thread)"
             band = c["aa"]
             band_text = (f"{band['min']:.3f}-{band['max']:.3f}" if band.get("n") else "-")
             out.append(
@@ -2396,6 +2513,24 @@ def render_summary(rows, run_id=None) -> str:
                 f"- multi-thread tools (os_threads > 1 despite 1-thread controls and taskset): "
                 f"{multi_desc}."
             )
+        proved = [
+            c for c in cells
+            if c.get("compute_threads") == 1 and int(c.get("os_threads") or 1) > 1
+        ]
+        unlabeled = [
+            c for c in cells
+            if c["arm"] not in (REFERENCE, TWIN) and not single_compute(c)
+        ]
+        if proved:
+            out.append(
+                "- x seams is one compute thread where compute_threads is 1. "
+                "The count is taken over the sample from scheduled time in /proc/<pid>/task. "
+                "An OS thread that stays parked does not count as compute."
+            )
+        if unlabeled:
+            out.append(
+                "- x seams marked not single-thread did not stay on one compute thread."
+            )
         for key, text in notes:
             out.append(f"- {key}: {text}")
         out.append("")
@@ -2436,6 +2571,7 @@ def lane_stat_rows(rows, run_id=None) -> list[dict]:
 
 
 def render_lanes(rows, run_id=None) -> str:
+    rows = current_rows(rows, run_id)
     cells = lane_stat_rows(rows, run_id)
     if not cells:
         return ""
@@ -2615,6 +2751,8 @@ def main(argv=None) -> int:
     r.add_argument("--marker", default="")
     r.add_argument("--python", default="")
     r.add_argument("--resume", action="store_true")
+    r.add_argument("--supersedes", default="",
+                   help="run id this plan replaces; the old rows stay in the record")
     r.add_argument("--dry-run", action="store_true")
     r.add_argument("--verbose", action="store_true")
 
