@@ -1541,7 +1541,7 @@ if get_option('with_cli') and get_option('with_tests')
   # would relink libyodaLib and libseams under the tests that load them.
   # Every installed target is therefore built before the test starts.
   _installed_targets = [seams_api_lib, ydslib, seams_lang, seams_exe, brine_front_exe,
-                        science_front_exe, nucleation_pathway_exe]
+                        science_front_exe, nucleation_pathway_exe] + backward_cpp_installed
   foreach _optional : ['run_hook', 'lammps_plugin', 'gmx_seams', 'openmm_plugin', 'seams_plumed']
     if is_variable(_optional)
       _installed_targets += get_variable(_optional)
