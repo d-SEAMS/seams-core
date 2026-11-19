@@ -8,6 +8,8 @@ tool gets the same frame, the same cutoff and the same question.
 - cutoff: every pair closer than 3.5 A.
 - knn: the four nearest neighbours of every atom, candidates inside 5.0 A.
 - rings: Franzblau primitive rings of size 3 to 6 on the 3.5 A graph.
+  fastatomstruct answers the same sizes with King's shortest paths.
+- q6: local Steinhardt q_6 on the 3.5 A cutoff shell.
 
 One head-to-head sample is one fresh process. The process is pinned to one
 core via taskset with single-thread environment variables (OMP, MKL, OPENBLAS,
@@ -75,6 +77,9 @@ CUTOFF_A = proto.CUTOFF_A
 KNN = 4
 KNN_REACH_A = CUTOFF_A + 1.5
 MAX_RING = proto.MAX_RING
+Q6_ATOL = 1e-6
+# A cell whose sample exceeds about 300 s may stop at this many rounds.
+CAP_MIN = 6
 MIN_ROUNDS = 12
 ROUNDS = 12
 TIMEOUT_S = 900
@@ -82,24 +87,30 @@ TIMEOUT_S = 900
 HEAD_TO_HEADS = {
     "neighbours": ("cutoff", "knn"),
     "rings": ("rings",),
+    "q6": ("q6",),
 }
 
 # Frames. Ice is the orthorhombic Ih cell of h2h_freud_ovito.ice_positions
-# with ncell^3 * 8 molecules. The mixed frames are scripts/mixed_phase_frames.
+# with ncell^3 * 8 molecules. Ideal ice Ic cells follow h2h_protocol.ice_ic.
+# The mixed frames are scripts/mixed_phase_frames.
 # The mW frames are tracked mW water dumps. sII is the GenIce hydrate cell.
 ICE_CELLS = {"ice512": 4, "ice4096": 8, "ice32768": 16, "ice110592": 24}
+ICE_IC_CELLS = {"ice_ic_1000": 5, "ice_ic_10648": 11, "ice_ic_110592": 24}
 MIXED = ("interface", "stacking", "melted")
 DUMPS = {
     "mw_interface": "input/traj/interface_f0.lammpstrj",
     "mw_nucleation": "input/traj/nucleation_f1.lammpstrj",
     "sII": "input/traj/genice_sII.lammpstrj",
 }
-SYSTEMS = (*ICE_CELLS, *MIXED, *DUMPS)
+SYSTEMS = (*ICE_CELLS, *ICE_IC_CELLS, *MIXED, *DUMPS)
 SYSTEM_MOLECULES = {
     "ice512": 512,
     "ice4096": 4096,
     "ice32768": 32768,
     "ice110592": 110592,
+    "ice_ic_1000": 1000,
+    "ice_ic_10648": 10648,
+    "ice_ic_110592": 110592,
     "interface": 512,
     "stacking": 512,
     "melted": 512,
@@ -120,6 +131,7 @@ TOOL_OF = {
     "sqq": "sqq",
     "cycless": "cycless",
     "fastatomstruct": "fastatomstruct",
+    "fastatomstruct_2_2": "fastatomstruct",
 }
 DIST_OF = {
     "freud": "freud-analysis",
@@ -136,11 +148,21 @@ ARMS = {
     "cutoff": ("seams", "seams_aa", "freud", "ovito", "vesin", "mdapy", "pyscal3"),
     "knn": ("seams", "seams_aa", "freud", "ovito", "mdapy", "pyscal3"),
     "rings": ("seams", "seams_aa", "ovito", "rsm", "mdapy", "sqq", "fastatomstruct", "cycless"),
+    "q6": ("seams", "seams_aa", "fastatomstruct"),
+}
+# Arms that stay out of the default grid and are selected with --arms.
+SELECTABLE_ARMS = {
+    "rings": ("fastatomstruct_2_2",),
+    "q6": ("fastatomstruct_2_2",),
 }
 # Largest frame an arm is attempted on. A pure-Python census that needs
 # minutes on a few hundred molecules is not repeated on thousands.
 LIMITS = {("cycless", "rings"): 1000}
-ROUND_CAPS: dict = {}
+# King rings on the largest ice Ic cell take about ten minutes a sample.
+ROUND_CAPS = {
+    ("fastatomstruct", "rings", "ice_ic_110592"): CAP_MIN,
+    ("fastatomstruct_2_2", "rings", "ice_ic_110592"): CAP_MIN,
+}
 # What the timed call covers when it is not the same for every arm.
 ARM_NOTES = {
     "cycless/rings": "takes a graph, not positions: the 3.5 A graph is built before the timer",
@@ -151,6 +173,10 @@ ARM_NOTES = {
     "ovito/knn": "strict per-atom 4-nearest lists, symmetrised outside the timer to compare",
     "mdapy/knn": "strict per-atom 4-nearest lists, symmetrised outside the timer to compare",
     "pyscal3/knn": "strict per-atom 4-nearest lists, symmetrised outside the timer to compare",
+    "seams/q6": "sharp 3.5 A cutoff local Steinhardt q_6 via seams_steinhardt (qlbar skipped)",
+    "fastatomstruct/q6": "Steinhardt q_l with near-hard radial weight p1=48 inside 3.5 A",
+    "fastatomstruct_2_2/q6": "fastatomstruct 2.2.0 Steinhardt q_l with near-hard radial weight p1=48 inside 3.5 A",
+    "fastatomstruct_2_2/rings": "fastatomstruct 2.2.0 King's shortest-path rings for continuity",
 }
 # Ring sizes a tool reports. OVITO and SQQ do not report 3-rings.
 RING_SIZES = {"ovito": (4, 5, 6), "sqq": (4, 5, 6)}
@@ -162,9 +188,13 @@ PINNED_ENV = {
     "OMP_NUM_THREADS": "1",
     "OMP_DYNAMIC": "FALSE",
     "OMP_WAIT_POLICY": "PASSIVE",
+    "OMP_THREAD_LIMIT": "1",
     "MKL_NUM_THREADS": "1",
     "OPENBLAS_NUM_THREADS": "1",
     "NUMEXPR_NUM_THREADS": "1",
+    "BLIS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+    "GOTO_NUM_THREADS": "1",
     "RAYON_NUM_THREADS": "1",
     "NUMBA_NUM_THREADS": "1",
     "TBB_NUM_THREADS": "1",
@@ -212,6 +242,9 @@ def build_frame(name: str):
 
     if name in ICE_CELLS:
         pos, lengths = base.ice_positions(ICE_CELLS[name])
+    elif name in ICE_IC_CELLS:
+        pos, side = proto.ice_ic(ICE_IC_CELLS[name])
+        lengths = (side, side, side)
     elif name in MIXED:
         import mixed_phase_frames
 
@@ -278,6 +311,19 @@ def canonical(workload: str, raw, n: int, tool: str):
             "hist": {str(s): hist[s] for s in sizes},
             "total": int(sum(hist[s] for s in sizes)),
         }, None
+    if kind == "values":
+        arr = np.ascontiguousarray(raw[1], dtype=np.float64).reshape(-1)
+        finite = arr[np.isfinite(arr)]
+        out = {
+            "form": "values",
+            "count": int(arr.shape[0]),
+            "nonfinite": int(arr.shape[0] - finite.shape[0]),
+            "mean": float(np.mean(finite)) if finite.size else 0.0,
+            "min": float(np.min(finite)) if finite.size else 0.0,
+            "max": float(np.max(finite)) if finite.size else 0.0,
+            "values_digest": digest_of(arr),
+        }
+        return out, arr
     if kind == "csr":
         off = np.asarray(raw[1], dtype=np.int64)
         col = np.asarray(raw[2], dtype=np.int64)
@@ -340,6 +386,7 @@ class SeamsAdapter(Adapter):
         base.require(lib, lib.seams_set_num_threads(1), "threads")
         self.lib = lib
         self.system = base.frame_system(lib, pos, lengths)
+        self.n = int(pos.shape[0])
 
     def call(self, workload):
         lib, base, system = self.lib, self.base, self.system
@@ -356,6 +403,23 @@ class SeamsAdapter(Adapter):
             )
             lib.seams_rings_destroy(rings)
             return ("hist", {k: int(hist[k]) for k in range(3, MAX_RING + 1)})
+        if workload == "q6":
+            q6 = np.empty(self.n, dtype=np.float64)
+            base.require(
+                lib,
+                lib.seams_steinhardt(
+                    system,
+                    CUTOFF_A,
+                    1,
+                    6,
+                    q6.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+                    self.n,
+                    None,
+                    0,
+                ),
+                "q6",
+            )
+            return ("values", q6)
         found = ctypes.c_void_p()
         if workload == "cutoff":
             status = lib.seams_neighbours_build(system, CUTOFF_A, 1, 0, ctypes.byref(found))
@@ -551,17 +615,25 @@ class FastatomstructAdapter(Adapter):
     def prepare(self, pos, lengths, workload):
         import fastatomstruct as fs
 
-        fs.disable_telemetry()
-        fs.suppress_telemetry_notice()
+        if hasattr(fs, "disable_telemetry"):
+            fs.disable_telemetry()
+        if hasattr(fs, "suppress_telemetry_notice"):
+            fs.suppress_telemetry_notice()
         fs.set_num_threads(1)
         if fs.get_num_threads() != 1:
             raise RuntimeError("fastatomstruct did not accept one thread")
         self.fs = fs
         cell = np.diag(np.asarray(lengths, dtype=np.float64))
         self.atoms = fs.Atoms(pos, cell, [fs.Element.O] * int(pos.shape[0]))
+        # 2.3.0 reads a cell-less frame as non-periodic. These cells are periodic.
+        if hasattr(self.atoms, "set_pbc"):
+            self.atoms.set_pbc([True, True, True])
         self.cutoff = fs.analysis.distance.CutoffMode.Fixed(CUTOFF_A)
 
     def call(self, workload):
+        if workload == "q6":
+            values = self.fs.analysis.bond_order.q_l(self.atoms, 6, self.cutoff, 48)
+            return ("values", np.asarray(values, dtype=np.float64))
         sizes, counts = self.fs.analysis.rings.ring_size_distribution(
             self.atoms, self.cutoff, MAX_RING, self.fs.analysis.rings.RingMethod.King
         )
@@ -617,10 +689,21 @@ def adapter_for(arm: str) -> Adapter:
 
 
 def applicable(arm: str, workload: str, molecules: int | None = None) -> bool:
-    if arm not in ARMS[workload]:
+    if arm not in ARMS[workload] and arm not in SELECTABLE_ARMS.get(workload, ()):
         return False
     limit = LIMITS.get((arm, workload))
     return not (limit is not None and molecules is not None and molecules > limit)
+
+
+def workload_arms(workload: str, molecules: int | None = None, arm_filter=None) -> tuple[str, ...]:
+    """Default arms, plus selectable arms named in arm_filter. seams and seams_aa stay."""
+    if arm_filter:
+        candidates = (*ARMS[workload], *SELECTABLE_ARMS.get(workload, ()))
+        return tuple(
+            a for a in candidates
+            if (a in arm_filter or a in (REFERENCE, TWIN)) and applicable(a, workload, molecules)
+        )
+    return tuple(a for a in ARMS[workload] if applicable(a, workload, molecules))
 
 
 def tool_version(tool: str, build: str | None = None) -> str:
@@ -706,6 +789,9 @@ def run_worker(args) -> int:
         "warmup_calls": 0,
         "output": summary,
     }
+    raw_meta = os.environ.get("H2H_ARM_META", "")
+    if raw_meta:
+        row["tool_meta"] = json.loads(raw_meta)
     sys.stdout.write(json.dumps(row, sort_keys=True, allow_nan=False) + "\n")
     sys.stdout.flush()
     return 0
@@ -904,9 +990,71 @@ def stack_revisions() -> dict:
     return out
 
 
-def machine_row() -> dict:
+def parse_arm_pythons(specs) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for spec in specs or ():
+        arm, sep, path = spec.partition("=")
+        if not sep or arm not in TOOL_OF or not path:
+            raise SystemExit(f"invalid --arm-python {spec!r}; expected ARM=PYTHON")
+        out[arm] = path
+    return out
+
+
+def parse_arm_meta(specs) -> dict[str, dict[str, str]]:
+    out: dict[str, dict[str, str]] = {}
+    for spec in specs or ():
+        arm, sep1, rest = spec.partition("=")
+        key, sep2, val = rest.partition("=")
+        if not sep1 or not sep2 or arm not in TOOL_OF or not key:
+            raise SystemExit(f"invalid --arm-meta {spec!r}; expected ARM=KEY=VALUE")
+        out.setdefault(arm, {})[key] = val
+    return out
+
+
+def parse_round_caps(specs) -> dict[tuple[str, str, str], int]:
+    out: dict[tuple[str, str, str], int] = {}
+    for spec in specs or ():
+        lhs, sep, val = spec.partition("=")
+        parts = lhs.split("/")
+        if not sep or len(parts) != 3:
+            raise SystemExit(f"invalid --round-cap {spec!r}; expected ARM/WORKLOAD/SYSTEM=N")
+        n = int(val)
+        if n < CAP_MIN:
+            raise SystemExit(f"round cap {n} is below {CAP_MIN}")
+        out[(parts[0], parts[1], parts[2])] = n
+    return out
+
+
+def probe_arm_tool(python: str, arm: str, meta: dict[str, str] | None = None) -> dict:
+    """Version of one arm's interpreter. The interpreter path is not recorded."""
+    tool = TOOL_OF[arm]
+    info: dict = {"tool": tool}
+    dist = DIST_OF.get(tool)
+    if dist:
+        code = (
+            "import importlib.metadata, json, platform, numpy; "
+            f"print(json.dumps({{'python': platform.python_version(), 'numpy': numpy.__version__, "
+            f"'tool_version': importlib.metadata.version({dist!r})}}))"
+        )
+        carried = {k: os.environ[k] for k in CARRIED_ENV if k in os.environ and k != "VIRTUAL_ENV"}
+        done = subprocess.run(
+            [python, "-c", code],
+            cwd=ROOT,
+            env={**carried, **PINNED_ENV},
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if done.returncode == 0 and done.stdout.strip():
+            info.update(json.loads(done.stdout.strip().splitlines()[-1]))
+    if meta:
+        info["meta"] = dict(meta)
+    return info
+
+
+def machine_row(arm_pythons=None, arm_meta=None, default_python=None) -> dict:
     lines = lscpu_lines()
-    return {
+    row = {
         "type": "machine",
         "lscpu_lines": lines,
         "kernel_version": platform.version(),
@@ -924,6 +1072,16 @@ def machine_row() -> dict:
             tool: tool_version(tool) for tool in sorted(DIST_OF)
         },
     }
+    arm_pythons = arm_pythons or {}
+    arm_meta = arm_meta or {}
+    selected = sorted(set(arm_pythons) | set(arm_meta))
+    if selected:
+        py = default_python or sys.executable
+        row["arm_tools"] = {
+            arm: probe_arm_tool(arm_pythons.get(arm, py), arm, arm_meta.get(arm))
+            for arm in selected
+        }
+    return row
 
 
 class Record:
@@ -975,20 +1133,24 @@ def validate_core(spec: str) -> str:
     return str(cpu)
 
 
-def worker_env(arm: str) -> dict:
+def worker_env(arm: str, arm_meta=None, arm_pythons=None) -> dict:
     env = {k: os.environ[k] for k in CARRIED_ENV if k in os.environ}
     env.update(PINNED_ENV)
+    if arm_pythons and arm in arm_pythons:
+        env.pop("VIRTUAL_ENV", None)
     if TOOL_OF[arm] == "ovito" and os.environ.get(OVITO_LIBS_ENV):
         env["LD_LIBRARY_PATH"] = os.environ[OVITO_LIBS_ENV]
+    if arm_meta and arm in arm_meta:
+        env["H2H_ARM_META"] = json.dumps(arm_meta[arm], sort_keys=True)
     return env
 
 
-def cells_for(workloads, systems, frames: dict):
+def cells_for(workloads, systems, frames: dict, arm_filter=None):
     out = []
     for workload in workloads:
         for system in systems:
             n = frames[system]["molecules"]
-            arms = tuple(a for a in ARMS[workload] if applicable(a, workload, n))
+            arms = workload_arms(workload, n, arm_filter)
             out.append((workload, system, arms))
     return out
 
@@ -1057,11 +1219,16 @@ def parse_worker(out: str):
     return None
 
 
-def run_cells(args, workloads, record: Record, raw: Path, work: Path, core: str):
+def run_cells(args, workloads, record: Record, raw: Path, work: Path, core: str,
+              arm_pythons=None, arm_meta=None, round_caps=None):
     systems = args.systems or list(SYSTEMS)
     frames = write_frames(work / "frames", systems)
     python = args.python or sys.executable
-    cells = cells_for(workloads, systems, frames)
+    arm_pythons = arm_pythons or {}
+    arm_meta = arm_meta or {}
+    caps = {**ROUND_CAPS, **(round_caps or {})}
+    arm_filter = set(args.arms or [])
+    cells = cells_for(workloads, systems, frames, arm_filter)
     dead: set = set()
     done: set = set()
     if args.resume and record.path.exists():
@@ -1070,7 +1237,6 @@ def run_cells(args, workloads, record: Record, raw: Path, work: Path, core: str)
                 done.add((row["round"], row["workload"], row["system"], row["arm"]))
                 if row["status"] == "timeout":
                     dead.add((row["workload"], row["system"], row["arm"]))
-    arm_filter = set(args.arms or [])
     raw.mkdir(parents=True, exist_ok=True)
     (raw / "stderr").mkdir(exist_ok=True)
     log = open(raw / "driver.log", "a", encoding="utf-8")
@@ -1090,21 +1256,23 @@ def run_cells(args, workloads, record: Record, raw: Path, work: Path, core: str)
             "molecules": frames[system]["molecules"], "cell": f"{workload}/{system}",
             "core": core, "calls_per_sample": 1, "warmup_calls": 0,
         }
-        if r >= ROUND_CAPS.get((arm, workload, system), args.rounds):
+        if r >= caps.get((arm, workload, system), args.rounds):
             record.append({**base_row, "status": "skipped",
-                           "detail": f"capped at {ROUND_CAPS[(arm, workload, system)]} rounds"})
+                           "detail": f"capped at {caps[(arm, workload, system)]} rounds"})
             continue
         if key in dead:
             record.append({**base_row, "status": "skipped",
                            "detail": "an earlier round of this cell timed out"})
             continue
-        argv = ["taskset", "-c", core, python, str(Path(__file__).resolve()), "worker",
+        arm_py = arm_pythons.get(arm, python)
+        argv = ["taskset", "-c", core, arm_py, str(Path(__file__).resolve()), "worker",
                 "--arm", arm, "--workload", workload, "--system", system,
                 "--frames", str(work / "frames")]
         if r == 0:
             argv += ["--canon", str(work / "canon")]
         stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        status, code, out, err, process_ms = launch(argv, worker_env(arm), args.timeout)
+        status, code, out, err, process_ms = launch(
+            argv, worker_env(arm, arm_meta, arm_pythons), args.timeout)
         parsed = parse_worker(out) if status == "ok" else None
         if status == "ok" and parsed is None:
             status = "error"
@@ -1183,7 +1351,7 @@ def agreement_rows(record: Record, work: Path, frames: dict, workloads) -> list[
             by_arm.setdefault(r["arm"], []).append(r)
         n = frames[system]["molecules"]
         oracle = None
-        if workload != "rings" and n <= ORACLE_LIMIT:
+        if workload in ("cutoff", "knn") and n <= ORACLE_LIMIT:
             pos, lengths = load_frame(work / "frames", system)
             oracle = oracle_keys(workload, pos, lengths)
         ref_keys = None
@@ -1191,6 +1359,9 @@ def agreement_rows(record: Record, work: Path, frames: dict, workloads) -> list[
         if ref_path.exists():
             ref_keys = np.load(ref_path)
         ref_out = by_arm.get(REFERENCE, [{}])[0].get("output")
+        v22_out = by_arm.get("fastatomstruct_2_2", [{}])[0].get("output")
+        v22_path = work / "canon" / f"fastatomstruct_2_2.{workload}.{system}.npy"
+        v22_keys = np.load(v22_path) if v22_path.exists() else None
         for arm, samples in sorted(by_arm.items()):
             if (workload, system, arm) in written:
                 continue
@@ -1215,6 +1386,56 @@ def agreement_rows(record: Record, work: Path, frames: dict, workloads) -> list[
                     "differences": diffs,
                     "counts": mine["hist"],
                 })
+                if arm == "fastatomstruct" and v22_out:
+                    v22_sizes = [s for s in (3, 4, 5, 6)
+                                 if str(s) in mine["hist"] and str(s) in v22_out["hist"]]
+                    v22_diffs = {
+                        str(s): {"v2_2": v22_out["hist"][str(s)], "arm": mine["hist"][str(s)]}
+                        for s in v22_sizes if mine["hist"][str(s)] != v22_out["hist"][str(s)]
+                    }
+                    row["vs_2_2"] = {
+                        "arm": "fastatomstruct_2_2",
+                        "sizes_compared": v22_sizes,
+                        "equal": not v22_diffs,
+                        "differences": v22_diffs,
+                    }
+            elif workload == "q6":
+                vals_path = work / "canon" / f"{arm}.{workload}.{system}.npy"
+                vals = np.load(vals_path) if vals_path.exists() else None
+                row.update({
+                    "count": mine["count"],
+                    "nonfinite": mine["nonfinite"],
+                    "mean": mine["mean"],
+                    "min": mine["min"],
+                    "max": mine["max"],
+                    "atol": Q6_ATOL,
+                })
+                if vals is not None and ref_keys is not None and vals.shape == ref_keys.shape:
+                    delta = np.abs(vals - ref_keys)
+                    both_finite = bool(np.all(np.isfinite(vals)) and np.all(np.isfinite(ref_keys)))
+                    max_abs = float(np.max(delta)) if delta.size else 0.0
+                    mean_abs = float(np.mean(delta)) if delta.size else 0.0
+                    within = int(np.count_nonzero(delta <= Q6_ATOL))
+                    row.update({
+                        "max_abs": max_abs,
+                        "mean_abs": mean_abs,
+                        "within_atol": within,
+                        "equal": bool(both_finite and max_abs <= Q6_ATOL),
+                    })
+                else:
+                    row["equal"] = False
+                if (arm == "fastatomstruct" and vals is not None and v22_keys is not None
+                        and vals.shape == v22_keys.shape):
+                    v22_delta = np.abs(vals - v22_keys)
+                    v22_finite = bool(np.all(np.isfinite(vals)) and np.all(np.isfinite(v22_keys)))
+                    v22_max = float(np.max(v22_delta)) if v22_delta.size else 0.0
+                    v22_mean = float(np.mean(v22_delta)) if v22_delta.size else 0.0
+                    row["vs_2_2"] = {
+                        "arm": "fastatomstruct_2_2",
+                        "equal": bool(v22_finite and v22_max <= Q6_ATOL),
+                        "max_abs": v22_max,
+                        "mean_abs": v22_mean,
+                    }
             else:
                 keys_path = work / "canon" / f"{arm}.{workload}.{system}.npy"
                 keys = np.load(keys_path) if keys_path.exists() else None
@@ -1253,6 +1474,10 @@ def run_head_to_heads(args) -> int:
     core = validate_core(args.core)
     stamp = args.stamp
     run_id = args.run_id or uuid.uuid4().hex[:12]
+    arm_pythons = parse_arm_pythons(getattr(args, "arm_python", None))
+    arm_meta = parse_arm_meta(getattr(args, "arm_meta", None))
+    round_caps = parse_round_caps(getattr(args, "round_cap", None))
+    arm_filter = set(args.arms or [])
     if args.rounds < args.min_rounds:
         raise SystemExit(f"need at least {args.min_rounds} rounds, got {args.rounds}")
     if args.dry_run:
@@ -1261,7 +1486,7 @@ def run_head_to_heads(args) -> int:
         for name in systems:
             pos, _lengths = build_frame(name)
             for workload in workloads:
-                arms = [a for a in ARMS[workload] if applicable(a, workload, pos.shape[0])]
+                arms = list(workload_arms(workload, pos.shape[0], arm_filter))
                 total += len(arms) * args.rounds
                 print(f"{workload:7s} {name:14s} {pos.shape[0]:7d} {' '.join(arms)}")
         print(f"core {core} samples {total}")
@@ -1278,16 +1503,22 @@ def run_head_to_heads(args) -> int:
     record = Record(args.record, prov)
     work = Path(args.work)
     raw = Path(args.raw)
+    caps = {**ROUND_CAPS, **round_caps}
     if not (args.resume and has_plan(record.path, run_id)):
-        record.append({
+        plan = {
             "type": "plan", "workloads": workloads, "rounds": args.rounds,
-            "systems": args.systems or list(SYSTEMS), "arms": {w: list(ARMS[w]) for w in workloads},
+            "min_rounds": args.min_rounds,
+            "systems": args.systems or list(SYSTEMS),
+            "arms": {w: list(workload_arms(w, None, arm_filter)) for w in workloads},
             "limits": {f"{a}/{w}": v for (a, w), v in LIMITS.items()},
-            "round_caps": {"/".join(k): v for k, v in ROUND_CAPS.items()},
+            "round_caps": {"/".join(k): v for k, v in caps.items()},
             "arm_notes": ARM_NOTES,
-            "oracle": f"cutoff and knn with molecules <= {ORACLE_LIMIT}; rings and larger frames cross-checked against {REFERENCE} only",
+            "oracle": (
+                f"cutoff and knn with molecules <= {ORACLE_LIMIT}; "
+                f"rings, q6 and larger frames cross-checked against {REFERENCE}"
+            ),
             "timeout_s": args.timeout, "cutoff_A": CUTOFF_A, "knn": KNN,
-            "knn_reach_A": KNN_REACH_A, "max_ring": MAX_RING,
+            "knn_reach_A": KNN_REACH_A, "max_ring": MAX_RING, "q6_atol": Q6_ATOL,
             "calls_per_sample": 1, "warmup_calls": 0,
             "env": PINNED_ENV, "protocol": (
                 f"one cold call per fresh process (calls_per_sample=1, warmup_calls=0), "
@@ -1295,9 +1526,18 @@ def run_head_to_heads(args) -> int:
                 "os_threads recorded per sample, arms interleaved per round, odd rounds reversed, "
                 "seams_aa is the A/A twin"
             ),
-        })
-        record.append(machine_row())
-    frames, _cells = run_cells(args, workloads, record, raw, work, core)
+        }
+        if args.min_rounds < MIN_ROUNDS:
+            plan["round_note"] = (
+                f"n={args.rounds}; a cell whose sample exceeds about 300 s is capped at {CAP_MIN} "
+                "(King rings on ice Ic at 110592 molecules)"
+            )
+        record.append(plan)
+        record.append(machine_row(arm_pythons, arm_meta, args.python or sys.executable))
+    frames, _cells = run_cells(
+        args, workloads, record, raw, work, core,
+        arm_pythons=arm_pythons, arm_meta=arm_meta, round_caps=round_caps,
+    )
     agreement_rows(record, work, frames, workloads)
     if args.marker:
         marker = Path(args.marker)
@@ -1327,6 +1567,7 @@ class Lane:
 
 H2H_ASV_SYSTEMS = ("ice512", "ice110592")
 H2H_ASV_RINGS_ARMS = ("seams", "seams_aa", "ovito", "rsm", "mdapy")
+H2H_ASV_Q6_SYSTEMS = ("ice_ic_1000", "ice_ic_110592")
 
 LANES = (
     Lane("cutoff-ice-neighbours", "kernel", "benchmarks.CutoffIce.time_neighbours"),
@@ -1359,10 +1600,14 @@ LANES = (
          only=(("system", H2H_ASV_SYSTEMS),)),
     Lane("h2h-rings-time", "h2h", "campaign_h2h.RingStatistics.time_call", twin=False,
          only=(("system", H2H_ASV_SYSTEMS), ("arm", H2H_ASV_RINGS_ARMS))),
+    Lane("h2h-q6-time", "h2h", "campaign_h2h.SteinhardtQ6.time_call", twin=False,
+         only=(("system", H2H_ASV_Q6_SYSTEMS),)),
     Lane("h2h-neighbours-peakmem", "h2h", "campaign_h2h.NeighbourLists.peakmem_call",
          twin=False, only=(("system", ("ice110592",)),)),
     Lane("h2h-rings-peakmem", "h2h", "campaign_h2h.RingStatistics.peakmem_call",
          twin=False, only=(("system", ("ice110592",)), ("arm", H2H_ASV_RINGS_ARMS))),
+    Lane("h2h-q6-peakmem", "h2h", "campaign_h2h.SteinhardtQ6.peakmem_call", twin=False,
+         only=(("system", ("ice_ic_110592",)),)),
 )
 LANE_GROUPS = ("kernel", "rings", "scaling", "h2h")
 INVENTORY = "inventory"
@@ -1845,6 +2090,8 @@ def comparison_status(workload: str, system: str, arm: str, agreements: dict) ->
     if not row.get("equal"):
         if workload == "rings":
             return False, "ring outputs differ"
+        if workload == "q6":
+            return False, "q6 values differ"
         arm_oracle = row.get("matches_brute_force")
         ref_oracle = reference.get("matches_brute_force") if reference else None
         if arm_oracle is False and ref_oracle is False:
@@ -1854,16 +2101,17 @@ def comparison_status(workload: str, system: str, arm: str, agreements: dict) ->
         if ref_oracle is False:
             return False, "d-SEAMS differs from brute force"
         return False, "neighbour outputs differ"
-    if workload != "rings":
-        if "matches_brute_force" not in row or not reference or (
-                "matches_brute_force" not in reference):
-            return False, "brute-force result unavailable"
-        if row["matches_brute_force"] is False and reference["matches_brute_force"] is False:
-            return False, "both differ from brute force"
-        if row["matches_brute_force"] is False:
-            return False, "competitor differs from brute force"
-        if reference["matches_brute_force"] is False:
-            return False, "d-SEAMS differs from brute force"
+    if workload in ("rings", "q6"):
+        return True, ""
+    if "matches_brute_force" not in row or not reference or (
+            "matches_brute_force" not in reference):
+        return False, "brute-force result unavailable"
+    if row["matches_brute_force"] is False and reference["matches_brute_force"] is False:
+        return False, "both differ from brute force"
+    if row["matches_brute_force"] is False:
+        return False, "competitor differs from brute force"
+    if reference["matches_brute_force"] is False:
+        return False, "d-SEAMS differs from brute force"
     return True, ""
 
 
@@ -1883,6 +2131,10 @@ def disagreement_classification(rows, run_id=None) -> list[dict]:
                 detail = "King-ring counts differ from the primitive-ring reference"
             else:
                 detail = "ring definitions differ"
+        elif workload == "q6":
+            matching_side = "undetermined"
+            reason_class = "different definition/cutoff convention"
+            detail = "local q6 radial weighting differs from the sharp cutoff"
         else:
             arm_oracle = row.get("matches_brute_force")
             ref_oracle = reference.get("matches_brute_force")
@@ -1960,6 +2212,16 @@ def fmt_ms(s: dict) -> str:
     return f"{s['median']:.3f} ({s['q1']:.3f}-{s['q3']:.3f})"
 
 
+def report_text(out: list[str]) -> str:
+    """Join lines and stop on the last line, with no blank line after it."""
+    if not out:
+        return ""
+    text = "\n".join(out)
+    if not text.endswith("\n"):
+        text += "\n"
+    return text
+
+
 def render_summary(rows, run_id=None) -> str:
     cells = cell_summary(rows, run_id)
     out = []
@@ -1979,8 +2241,22 @@ def render_summary(rows, run_id=None) -> str:
         out.append("")
         out.extend(f"- {run}: code_revision {rev}; base_revision {base}; engine_tree {tree}; core {core}"
                    for run, found in revisions.items() for rev, base, tree, core in sorted(found))
+        arm_info: dict = {}
+        for r in shown:
+            if r.get("type") == "sample" and r.get("status") == "ok" and r.get("tool_meta"):
+                arm_info[r["arm"]] = (
+                    r.get("tool", "?"),
+                    r.get("tool_version", "?"),
+                    tuple(sorted(r["tool_meta"].items())),
+                )
+        if arm_info:
+            out.append("")
+            out.append("arms:")
+            for arm_name, (tool_name, ver, meta_items) in sorted(arm_info.items()):
+                extra = ", ".join(f"{k} {v}" for k, v in meta_items)
+                out.append(f"- {arm_name}: {tool_name} {ver} ({extra})")
     out.append("")
-    for workload in ("cutoff", "knn", "rings"):
+    for workload in ("cutoff", "knn", "rings", "q6"):
         subset = [c for c in cells if c["workload"] == workload]
         if not subset:
             continue
@@ -2018,11 +2294,28 @@ def render_summary(rows, run_id=None) -> str:
         for r in agreement:
             if r["arm"] in (REFERENCE, TWIN):
                 continue
+            ok = bool(r["equal"])
             if r["workload"] == "rings":
                 sizes = r.get("sizes_compared", [])
                 detail = (f"sizes {sizes}; " +
                           (json.dumps(r.get("differences", {}), sort_keys=True) or "")
                           if not r["equal"] else f"sizes {sizes}")
+                if "vs_2_2" in r:
+                    v22 = r["vs_2_2"]
+                    ok = ok and bool(v22["equal"])
+                    detail += ("; vs 2.2.0 yes" if v22["equal"]
+                               else "; vs 2.2.0 NO " + json.dumps(v22.get("differences", {}), sort_keys=True))
+            elif r["workload"] == "q6":
+                detail = (
+                    f"n={r.get('count', '?')}; mean={r.get('mean', 0.0):.8f}; "
+                    f"max_abs={r.get('max_abs', float('nan')):.3e}; "
+                    f"atol={r.get('atol', Q6_ATOL):.0e}"
+                )
+                if "vs_2_2" in r:
+                    v22 = r["vs_2_2"]
+                    ok = ok and bool(v22["equal"])
+                    detail += (f"; vs 2.2.0 {'yes' if v22['equal'] else 'NO'} "
+                               f"(max_abs={v22['max_abs']:.3e})")
             else:
                 detail = (f"pairs {r.get('n_pairs', '?')}; "
                           f"only reference {r.get('pairs_only_reference', '?')}; "
@@ -2030,8 +2323,11 @@ def render_summary(rows, run_id=None) -> str:
                           f"rows {json.dumps(r.get('row_len_hist', {}), sort_keys=True)}")
                 if "matches_brute_force" in r:
                     detail += f"; brute force {'match' if r['matches_brute_force'] else 'differs'}"
+            if r.get("samples_identical") is False:
+                ok = False
+                detail += "; rounds differ"
             out.append(f"| {r['workload']} | {r['system']} | {r['arm']} | "
-                       f"{'yes' if r['equal'] else 'NO'} | {detail} |")
+                       f"{'yes' if ok else 'NO'} | {detail} |")
         out.append("")
         classified = disagreement_classification(rows, run_id)
         if classified:
@@ -2103,7 +2399,7 @@ def render_summary(rows, run_id=None) -> str:
         for key, text in notes:
             out.append(f"- {key}: {text}")
         out.append("")
-    return "\n".join(out) + "\n"
+    return report_text(out)
 
 
 def lane_stat_rows(rows, run_id=None) -> list[dict]:
@@ -2203,7 +2499,10 @@ def render_lanes(rows, run_id=None) -> str:
                 detail = " ".join(c["detail"].split())[:160].replace("|", "/")
                 out.append(f"| {c['cell']} | {c['status']} | - | {detail} |")
         out.append("")
-    return "\n".join(out) + "\n"
+    body = report_text(out)
+    if not body:
+        return ""
+    return "\n" + body
 
 
 def run_groups(rows) -> list[list[str]]:
@@ -2294,10 +2593,16 @@ def main(argv=None) -> int:
     w.add_argument("--canon", default="")
 
     r = sub.add_parser("run", help="interleaved rounds over every cell")
-    r.add_argument("--head-to-head", choices=("neighbours", "rings", "all"), default="all")
+    r.add_argument("--head-to-head", choices=(*HEAD_TO_HEADS, "all"), default="all")
     r.add_argument("--workloads", nargs="*")
     r.add_argument("--systems", nargs="*", choices=SYSTEMS)
     r.add_argument("--arms", nargs="*", choices=sorted(TOOL_OF))
+    r.add_argument("--arm-python", action="append", default=[],
+                   help="per-arm Python executable as ARM=PYTHON")
+    r.add_argument("--arm-meta", action="append", default=[],
+                   help="per-arm provenance as ARM=KEY=VALUE")
+    r.add_argument("--round-cap", action="append", default=[],
+                   help="per-cell round cap as ARM/WORKLOAD/SYSTEM=N")
     r.add_argument("--rounds", type=int, default=ROUNDS)
     r.add_argument("--min-rounds", type=int, default=MIN_ROUNDS, help=argparse.SUPPRESS)
     r.add_argument("--core", required=True)

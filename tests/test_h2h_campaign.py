@@ -232,6 +232,9 @@ def check_canonical():
     ovito = hc.canonical("rings", hist, 8, "ovito")[0]
     assert seams["hist"] == {"3": 2, "4": 1, "5": 0, "6": 0} and seams["total"] == 3, seams
     assert ovito["hist"] == {"4": 1, "5": 0, "6": 0} and ovito["total"] == 1, ovito
+    vals, arr = hc.canonical("q6", ("values", [0.6, 0.65, 0.625]), 3, "fastatomstruct")
+    assert vals["form"] == "values" and vals["count"] == 3 and vals["nonfinite"] == 0, vals
+    assert math.isclose(vals["mean"], 0.625) and arr is not None and arr.shape == (3,)
 
 
 def check_arms():
@@ -239,11 +242,18 @@ def check_arms():
     assert not hc.applicable("vesin", "knn", 512)
     assert hc.applicable("cycless", "rings", 512)
     assert not hc.applicable("cycless", "rings", 4096)
+    assert hc.applicable("fastatomstruct_2_2", "rings", 1000)
+    assert hc.applicable("fastatomstruct_2_2", "q6", 10648)
+    assert "fastatomstruct_2_2" not in hc.workload_arms("rings", 1000)
+    selected = hc.workload_arms("rings", 1000, {"fastatomstruct", "fastatomstruct_2_2"})
+    assert selected == ("seams", "seams_aa", "fastatomstruct", "fastatomstruct_2_2"), selected
     assert hc.REFERENCE in hc.ARMS["cutoff"] and hc.TWIN in hc.ARMS["rings"]
     for workload, arms in hc.ARMS.items():
         assert arms[:2] == (hc.REFERENCE, hc.TWIN), (workload, arms)
     assert hc.MIN_ROUNDS >= 12 and hc.ROUNDS >= hc.MIN_ROUNDS
     for name, ncell in hc.ICE_CELLS.items():
+        assert hc.SYSTEM_MOLECULES[name] == 8 * (ncell ** 3), name
+    for name, ncell in hc.ICE_IC_CELLS.items():
         assert hc.SYSTEM_MOLECULES[name] == 8 * (ncell ** 3), name
     for name in (*hc.MIXED, *hc.DUMPS):
         pos, _ = hc.build_frame(name)
@@ -251,6 +261,108 @@ def check_arms():
     for key in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS",
                 "NUMBA_NUM_THREADS", "TBB_NUM_THREADS", "RAYON_NUM_THREADS"):
         assert hc.PINNED_ENV[key] == "1", key
+
+
+def check_ice_ic_and_cli_parsers():
+    pos, lengths = hc.build_frame("ice_ic_1000")
+    assert pos.shape == (1000, 3) and len(lengths) == 3, (pos.shape, lengths)
+    assert hc.parse_arm_pythons(["fastatomstruct=/usr/bin/python3"]) == {
+        "fastatomstruct": "/usr/bin/python3"
+    }
+    assert hc.parse_arm_meta(["fastatomstruct=tag=2.3.0", "fastatomstruct=build=release"]) == {
+        "fastatomstruct": {"tag": "2.3.0", "build": "release"}
+    }
+    assert hc.parse_round_caps(["fastatomstruct/rings/ice_ic_110592=6"]) == {
+        ("fastatomstruct", "rings", "ice_ic_110592"): 6
+    }
+    try:
+        hc.parse_round_caps(["fastatomstruct/rings/ice_ic_110592=5"])
+    except SystemExit:
+        pass
+    else:
+        raise AssertionError("a round cap below 6 was accepted")
+    assert hc.h2h_cell_runs({"cell": "('q6', 'ice_ic_1000', 'fastatomstruct')"})
+    assert not hc.h2h_cell_runs({"cell": "('q6', 'ice_ic_1000', 'ovito')"})
+
+
+def check_q6_and_vs22_summary():
+    rows = [
+        sample("rings", "ice_ic_1000", "seams", 0, 1.0),
+        sample("rings", "ice_ic_1000", "seams_aa", 0, 1.01),
+        sample("rings", "ice_ic_1000", "fastatomstruct", 0, 5.0),
+        sample("q6", "ice_ic_1000", "seams", 0, 0.5),
+        sample("q6", "ice_ic_1000", "seams_aa", 0, 0.51),
+        sample("q6", "ice_ic_1000", "fastatomstruct", 0, 2.0),
+        {
+            "type": "agreement", "workload": "rings", "system": "ice_ic_1000",
+            "molecules": 1000, "arm": "fastatomstruct", "reference": "seams",
+            "samples": 8, "samples_identical": True, "output_form": "histogram",
+            "sizes_compared": [3, 4, 5, 6], "equal": True, "differences": {},
+            "counts": {"3": 0, "4": 0, "5": 0, "6": 2000},
+            "vs_2_2": {"arm": "fastatomstruct_2_2", "sizes_compared": [3, 4, 5, 6],
+                       "equal": True, "differences": {}},
+        },
+        {
+            "type": "agreement", "workload": "q6", "system": "ice_ic_1000",
+            "molecules": 1000, "arm": "fastatomstruct", "reference": "seams",
+            "samples": 8, "samples_identical": True, "output_form": "values",
+            "count": 1000, "nonfinite": 0, "mean": 0.62853936, "atol": 1e-6,
+            "max_abs": 2e-5, "mean_abs": 2e-5, "within_atol": 0, "equal": False,
+            "vs_2_2": {"arm": "fastatomstruct_2_2", "equal": True,
+                       "max_abs": 0.0, "mean_abs": 0.0},
+        },
+    ]
+    text = hc.render_summary(rows)
+    assert "## q6: wall ms" in text, text
+    assert "vs 2.2.0 yes" in text, text
+    assert "| q6 | ice_ic_1000 | fastatomstruct | NO |" in text, text
+
+
+def check_agreement_rows_q6_and_vs22():
+    import numpy as np
+
+    prov = hc.provenance("run-q6", "2026-11-18", "0")
+    with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work_dir:
+        work = Path(work_dir)
+        canon = work / "canon"
+        canon.mkdir(parents=True, exist_ok=True)
+        path = work / "record.jsonl"
+        rec = hc.Record(path, prov)
+        frames = {"ice_ic_1000": {"molecules": 4}}
+        q_ref = np.array([0.62853936, 0.62853936, 0.62853936, 0.62853936], dtype=np.float64)
+        q_23 = q_ref + 1e-12
+        q_22 = q_ref + 2e-5
+        np.save(canon / "seams.q6.ice_ic_1000.npy", q_ref)
+        np.save(canon / "fastatomstruct.q6.ice_ic_1000.npy", q_23)
+        np.save(canon / "fastatomstruct_2_2.q6.ice_ic_1000.npy", q_22)
+        for arm, arr in (("seams", q_ref), ("fastatomstruct", q_23), ("fastatomstruct_2_2", q_22)):
+            summary, _ = hc.canonical("q6", ("values", arr), 4, "seams")
+            rec.append({
+                "type": "sample", "status": "ok", "workload": "q6", "system": "ice_ic_1000",
+                "arm": arm, "round": 0, "wall_ms": 1.0, "cpu_ms": 1.0,
+                "rss_peak_kb": 1000, "rss_before_kb": 900, "molecules": 4, "os_threads": 1,
+                "output": summary,
+            })
+        for arm, hist in (
+            ("seams", {3: 0, 4: 0, 5: 0, 6: 8}),
+            ("fastatomstruct", {3: 0, 4: 0, 5: 0, 6: 8}),
+            ("fastatomstruct_2_2", {3: 0, 4: 0, 5: 1, 6: 8}),
+        ):
+            summary, _ = hc.canonical("rings", ("hist", hist), 4, "seams")
+            rec.append({
+                "type": "sample", "status": "ok", "workload": "rings", "system": "ice_ic_1000",
+                "arm": arm, "round": 0, "wall_ms": 1.0, "cpu_ms": 1.0,
+                "rss_peak_kb": 1000, "rss_before_kb": 900, "molecules": 4, "os_threads": 1,
+                "output": summary,
+            })
+        added = hc.agreement_rows(rec, work, frames, ["rings", "q6"])
+        by_key = {(r["workload"], r["arm"]): r for r in added}
+        assert by_key[("q6", "fastatomstruct")]["equal"] is True
+        assert by_key[("q6", "fastatomstruct")]["vs_2_2"]["equal"] is False
+        assert by_key[("q6", "fastatomstruct_2_2")]["equal"] is False
+        assert by_key[("rings", "fastatomstruct")]["equal"] is True
+        assert by_key[("rings", "fastatomstruct")]["vs_2_2"]["equal"] is False
+        assert by_key[("rings", "fastatomstruct_2_2")]["equal"] is False
 
 
 def check_campaign_h2h_grid():
@@ -533,6 +645,46 @@ def check_cli_floor_and_plan():
         expected = 2 * hc.ROUNDS * (len(hc.ARMS["cutoff"]) + len(hc.ARMS["knn"]))
         assert f"samples {expected}" in plan.stdout, plan.stdout
         assert not Path(record).exists(), "a dry run wrote a record"
+        ice = subprocess.run(
+            [sys.executable, str(script), "run", "--head-to-head", "q6", "--systems",
+             "ice_ic_1000", "--rounds", "8", "--min-rounds", "6", "--core", "0",
+             "--stamp", "2026-11-18-test", "--dry-run",
+             "--arms", "seams", "seams_aa", "fastatomstruct", "fastatomstruct_2_2",
+             "--record", record, "--raw", raw, "--work", wdir],
+            capture_output=True, text=True, check=False)
+        assert ice.returncode == 0, ice.stderr
+        assert "fastatomstruct_2_2" in ice.stdout and "samples 32" in ice.stdout, ice.stdout
+
+
+def plan_rounds_ok(row) -> bool:
+    """Twelve rounds, unless the plan states a shorter floor of at least six."""
+    if row.get("type") != "plan":
+        return True
+    lane_names = {lane.name for lane in hc.LANES}
+    watched = ("workloads" in row or any(
+        name in lane_names for name in (row.get("lanes") or [])))
+    if not watched:
+        return True
+    floor = int(row.get("min_rounds", hc.MIN_ROUNDS))
+    if floor < hc.MIN_ROUNDS and (floor < 6 or not str(row.get("round_note") or "").strip()):
+        return False
+    return int(row.get("rounds", 0)) >= floor
+
+
+def check_short_protocol_floor():
+    assert plan_rounds_ok({"type": "plan", "workloads": ["rings"], "rounds": 12})
+    assert not plan_rounds_ok({"type": "plan", "workloads": ["rings"], "rounds": 8})
+    assert plan_rounds_ok({
+        "type": "plan", "workloads": ["rings", "q6"], "rounds": 8, "min_rounds": 6,
+        "round_note": "n=8; cells above about 300 s are capped at 6",
+    })
+    assert not plan_rounds_ok({
+        "type": "plan", "workloads": ["rings"], "rounds": 8, "min_rounds": 6,
+    })
+    assert not plan_rounds_ok({
+        "type": "plan", "workloads": ["rings"], "rounds": 5, "min_rounds": 5,
+        "round_note": "too short",
+    })
 
 
 def campaign_leaks(text: str, current_user: str = "", node: str = "") -> list[str]:
@@ -648,12 +800,8 @@ def check_campaign_records():
                 if row.get("type") == "sample" and row.get("status") == "ok":
                     if row.get("tool") == "seams":
                         assert row.get("os_threads") == 1, (record_path.name, idx, row)
-            if row.get("type") == "plan" and (
-                "workloads" in row
-                or any(name in {lane.name for lane in hc.LANES}
-                       for name in (row.get("lanes") or []))
-            ):
-                assert int(row.get("rounds", 0)) >= 12, (record_path.name, idx, row)
+            assert plan_rounds_ok(row), (
+                record_path.name, idx, row.get("rounds"), row.get("min_rounds"))
         assert not hc.replaced_runs(rows), f"{record_path.name} contains replaced rescue runs"
         md_path = record_path.with_name(
             "2026-11-18-r3.md"
