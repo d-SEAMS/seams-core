@@ -106,6 +106,22 @@
                     parent)
                 (funcall orig datum types with-self))))
 
+;; Org 9.7 can hand :type and :value back as deferred values. A member
+;; test against that value drops the block, and the page then shows the
+;; Org keywords or the raw role text. Force both fields to strings.
+(advice-add 'org-rst-export-block :override
+            (lambda (export-block _contents _info)
+              (let* ((raw-type (org-element-property :type export-block))
+                     (type (upcase (replace-regexp-in-string
+                                    "\\`[ \t\n\r]+\\|[ \t\n\r]+\\'" ""
+                                    (format "%s" (or raw-type "")))))
+                     (raw-value (org-element-property :value export-block))
+                     (value (if (stringp raw-value)
+                                raw-value
+                              (format "%s" (or raw-value "")))))
+                (when (member type '("RST" "REST" "RESTRUCTUREDTEXT"))
+                  value))))
+
 (setq org-export-with-section-numbers nil)
 (setq org-export-with-toc nil)
 (setq org-export-with-author nil)
