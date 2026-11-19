@@ -1,4 +1,4 @@
-# Releasing 2.14.1
+# Releasing 2.14.2
 
 This file is the seams-core release: the tag, the GitHub release, conda
 `libseams`, and `libseams_jll`. Nothing in it uploads. The language
@@ -16,14 +16,14 @@ Build with `-j2`. Do not install into `/usr/lib`.
 
 ```sh
 git checkout <release-commit>
-git tag -a v2.14.1 -m "d-SEAMS 2.14.1"
-git push https://github.com/d-SEAMS/seams-core.git v2.14.1
+git tag -a v2.14.2 -m "d-SEAMS 2.14.2"
+git push https://github.com/d-SEAMS/seams-core.git v2.14.2
 ```
 
 ## 2. GitHub release
 
 The tag push starts `.github/workflows/release.yml`, which cuts the
-`## [2.14.1]` section out of `CHANGELOG.md` and runs `gh release create`
+`## [2.14.2]` section out of `CHANGELOG.md` and runs `gh release create`
 with it as the notes. Check the release page once the job finishes.
 
 ## 3. conda `libseams`
@@ -33,9 +33,9 @@ with it as the notes. Check the release page once the job finishes.
 files) from the GitHub tag archive. Fill in the archive digest:
 
 ```sh
-curl -L -o seams-core-2.14.1.tar.gz \
-  https://github.com/d-SEAMS/seams-core/archive/refs/tags/v2.14.1.tar.gz
-sha256sum seams-core-2.14.1.tar.gz
+curl -L -o seams-core-2.14.2.tar.gz \
+  https://github.com/d-SEAMS/seams-core/archive/refs/tags/v2.14.2.tar.gz
+sha256sum seams-core-2.14.2.tar.gz
 ```
 
 Write that digest into `recipe/recipe.yaml` (`source.sha256`). Then:
@@ -63,7 +63,7 @@ exists); opening that pull request is the publish step.
 ## 4. Yggdrasil `libseams_jll`
 
 `packaging/yggdrasil/L/libseams/build_tarballs.jl` pins
-`v2_14_1_tag_sha`. If `git rev-parse v2.14.1^{commit}` is not that
+`v2_14_2_tag_sha`. If `git rev-parse v2.14.2^{commit}` is not that
 constant, replace it with the tag commit. Build locally:
 
 ```sh
@@ -73,13 +73,13 @@ julia build_tarballs.jl --deploy=local
 
 Copy `packaging/yggdrasil/L/libseams` into a Yggdrasil checkout and open
 that pull request. When it merges, the registry bot registers
-`libseams_jll` 2.14.1 in the Julia General registry, which Dseams.jl
+`libseams_jll` 2.14.2 in the Julia General registry, which Dseams.jl
 needs before it can register.
 
 ## 5. Language bindings
 
-Each binding moves its seams-core pin to `v2.14.1`, sets its version to
-2.14.1, and releases by the steps its own repository documents:
+Each binding moves its seams-core pin to `v2.14.2`, sets its version to
+2.14.2, and releases by the steps its own repository documents:
 
 | Repository | Package |
 |------------|---------|

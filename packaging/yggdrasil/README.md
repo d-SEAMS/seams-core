@@ -33,10 +33,10 @@ julia --project=ENV -e 'using Pkg; Pkg.develop(path="bindings/julia/Dseams"); Pk
 
 ## The source pin
 
-`build_tarballs.jl` sets `v2_14_1_tag_sha`. That constant is the stand-in
-for the v2.14.1 tag. It is the release-branch head
+`build_tarballs.jl` sets `v2_14_2_tag_sha`. That constant is the stand-in
+for the v2.14.2 tag. The tag does not exist yet, so the constant is still
 `e5b21f7fc8180a672248f797b0a5783cfb008540`. After the tag is created,
-replace the constant with `git rev-parse v2.14.1` when the tag points
+replace the constant with `git rev-parse v2.14.2` when the tag points
 somewhere else, then open the Yggdrasil pull request. Register
 `libseams_jll` before Dseams: the General registry resolves
 `libseams_jll` when Registrator runs.
@@ -44,6 +44,6 @@ somewhere else, then open the Yggdrasil pull request. Register
 ## The patches
 
 `bundled/patches` records the portability diff that is already contained
-in `v2_14_1_tag_sha` (non-x86 hosts, musl, libc++, optional BLAS). The
+in `v2_14_2_tag_sha` (non-x86 hosts, musl, libc++, optional BLAS). The
 recipe does not apply those patches. They stay in the tree as the record
 of that diff.
