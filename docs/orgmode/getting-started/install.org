@@ -1,7 +1,7 @@
 #+TITLE: Install the engine
 #+OPTIONS: toc:nil num:nil
 
-Release 2.14.0 provides the ~seams~ command, ~libyodaLib~, ~libseams~
+This release provides the ~seams~ command, ~libyodaLib~, ~libseams~
 (~include/seams.h~), and ~libseams_lang~ (~bindings/cxx/seams_lang.h~).
 Build it from source or with [[https://pixi.sh][pixi]]. Language
 bindings live in their own repositories; the last section gives their
@@ -32,7 +32,6 @@ native parsers when chemfiles is left out.
 #+begin_src bash
 git clone https://github.com/d-SEAMS/seams-core
 cd seams-core
-git checkout v2.14.0
 meson setup build --prefix="$HOME/.local" --libdir=lib -Dwith_tests=false
 meson compile -C build
 meson install -C build
@@ -55,7 +54,7 @@ provides it.
 
 * pixi
 
-From a checkout of ~v2.14.0~:
+From a checkout of this release:
 
 #+begin_src bash
 pixi run setup
@@ -90,7 +89,7 @@ seams --features
 seams read input/traj/exampleTraj.lammpstrj
 #+end_src
 
-~seams --version~ prints ~seams 2.14.0~. The read of the bundled
+~seams --version~ prints ~seams~ and the project version. The read of the bundled
 trajectory prints ~nop 250 frame 1 box 40 40 180.203~. ~--features~
 lists the backends compiled into that binary.
 
@@ -106,7 +105,7 @@ The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
 
 Each binding is its own repository. Use these install commands:
 
-- Python: ~pip install 'pydseamslib==2.14.0'~ from
+- Python: ~pip install pydseamslib~ from
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
 - Lua and Fennel: clone [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
   and run ~luarocks make~ in the checkout.
@@ -114,7 +113,7 @@ Each binding is its own repository. Use these install commands:
   [[https://github.com/d-SEAMS/dseams-r][dseams-r]].
 - Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~ from
   [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]].
-- Rust: ~cargo add dseams@2.14.0~, or
+- Rust: ~cargo add dseams~, or
   ~cargo add dseams --git https://github.com/d-SEAMS/dseams-rs~ from
   [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]].
 - Fortran: add [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]

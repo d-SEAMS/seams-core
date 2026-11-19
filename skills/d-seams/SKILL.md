@@ -34,7 +34,7 @@ meson setup build && meson compile -C build
 Python is a separate package. Building this repository does not install it.
 
 ```bash
-pip install 'pydseamslib==2.14.0'
+pip install pydseamslib
 ```
 
 `import dseams` is the analysis API. `import pydseams` is the lower-level
