@@ -26,8 +26,7 @@ Work on ~main~, with the fragments for this version already in
    #+begin_example
    pixi run --frozen -e version release-cog
    pixi run --frozen -e version version-drift
-   git add meson.build CITATION.cff codemeta.json
-   git add -- $(cat ci/version/files.txt | grep -v '^#')
+   git add -u
    git commit -m "chore(release): prepare 2.14.2 metadata"
    #+end_example
 
