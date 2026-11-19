@@ -781,6 +781,13 @@ def git_reachable() -> set[str]:
     return {line.split()[0] for line in listed.splitlines() if line}
 
 
+def git_exists(obj: str) -> bool:
+    done = subprocess.run(
+        ["git", "cat-file", "-e", obj],
+        cwd=ROOT, capture_output=True, check=False)
+    return done.returncode == 0
+
+
 def check_speed_verdict_noise():
     arm = [3.5, 2.4, 3.0, 2.5, 7.2, 2.6, 7.0, 2.5]
     ref = [1.3, 0.35, 0.7, 0.34, 2.8, 0.38, 1.6, 0.35]
@@ -818,28 +825,6 @@ def check_campaign_records():
     for record_path in records:
         rows = hc.read_rows(record_path)
         assert rows, f"{record_path} is empty"
-        for idx, row in enumerate(rows, 1):
-            assert row.get("code_dirty") is False, (record_path.name, idx, row.get("code_dirty"))
-            rev = row.get("code_revision", "")
-            assert rev, (record_path.name, idx)
-            if rev not in tree_cache:
-                anc = subprocess.run(
-                    ["git", "merge-base", "--is-ancestor", rev, head],
-                    cwd=ROOT, check=False)
-                assert anc.returncode == 0, f"{record_path.name}:{idx} {rev} is not an ancestor of {head}"
-                tree_cache[rev] = subprocess.check_output(
-                    ["git", "rev-parse", f"{rev}^{{tree}}"], cwd=ROOT, text=True).strip()
-            assert row.get("engine_tree") == tree_cache[rev], (
-                record_path.name, idx, row.get("engine_tree"), tree_cache[rev])
-            assert row.get("core") is not None and str(row["core"]).isdigit(), (record_path.name, idx)
-            if row.get("type") in ("sample", "asv"):
-                assert "calls_per_sample" in row and int(row["calls_per_sample"]) >= 1, (
-                    record_path.name, idx)
-                if row.get("type") == "sample" and row.get("status") == "ok":
-                    if row.get("tool") == "seams":
-                        assert row.get("os_threads") == 1, (record_path.name, idx, row)
-            assert plan_rounds_ok(row), (
-                record_path.name, idx, row.get("rounds"), row.get("min_rounds"))
         replaced = hc.replaced_runs(rows)
         named = set()
         for plan in rows:
@@ -851,6 +836,37 @@ def check_campaign_records():
             named.update(sup)
         unmarked = set(replaced) - named
         assert not unmarked, f"{record_path.name} replaces {sorted(unmarked)} without supersedes"
+        reachable = git_reachable()
+        for idx, row in enumerate(rows, 1):
+            assert row.get("code_dirty") is False, (record_path.name, idx, row.get("code_dirty"))
+            rev = row.get("code_revision", "")
+            assert rev, (record_path.name, idx)
+            if rev not in tree_cache:
+                anc = subprocess.run(
+                    ["git", "merge-base", "--is-ancestor", rev, head],
+                    cwd=ROOT, capture_output=True, check=False)
+                if anc.returncode == 0:
+                    tree_cache[rev] = subprocess.check_output(
+                        ["git", "rev-parse", f"{rev}^{{tree}}"], cwd=ROOT, text=True).strip()
+                else:
+                    tree_cache[rev] = ""
+            if tree_cache[rev]:
+                assert row.get("engine_tree") == tree_cache[rev], (
+                    record_path.name, idx, row.get("engine_tree"), tree_cache[rev])
+            elif row.get("run_id") not in replaced:
+                blob = row.get("harness_blob")
+                assert blob and git_exists(blob) and blob in reachable, (
+                    f"{record_path.name}:{idx} {rev} is not in this history and "
+                    f"harness_blob {blob} does not resolve")
+            assert row.get("core") is not None and str(row["core"]).isdigit(), (record_path.name, idx)
+            if row.get("type") in ("sample", "asv"):
+                assert "calls_per_sample" in row and int(row["calls_per_sample"]) >= 1, (
+                    record_path.name, idx)
+                if row.get("type") == "sample" and row.get("status") == "ok":
+                    if row.get("tool") == "seams":
+                        assert row.get("os_threads") == 1, (record_path.name, idx, row)
+            assert plan_rounds_ok(row), (
+                record_path.name, idx, row.get("rounds"), row.get("min_rounds"))
         shown = hc.current_rows(rows)
         md_path = record_path.with_name(
             "2026-11-18-r3.md"
@@ -862,11 +878,11 @@ def check_campaign_records():
         expected_md = hc.render_summary(shown) + hc.render_lanes(shown)
         assert md_text == expected_md, f"{md_path.name} does not match {record_path.name}"
         ts = hc.thread_summary(shown)
-        reachable = git_reachable()
         for idx, row in enumerate(shown, 1):
             blob = row.get("harness_blob")
             if blob:
-                assert blob in reachable, f"{record_path.name}:{idx} harness_blob {blob} is not in HEAD"
+                assert git_exists(blob) and blob in reachable, (
+                    f"{record_path.name}:{idx} harness_blob {blob} is not in HEAD")
             version = row.get("tool_version")
             if not version:
                 continue
@@ -874,8 +890,12 @@ def check_campaign_records():
             if not re.fullmatch(r"[0-9a-f]{7,40}", token):
                 continue
             resolved = token if len(token) == 40 else git_commit(token)
-            assert resolved and resolved in reachable, (
-                f"{record_path.name}:{idx} tool_version {version} is not in HEAD")
+            if resolved and resolved in reachable:
+                assert git_exists(resolved), (
+                    f"{record_path.name}:{idx} tool_version {version} is not an object")
+                continue
+            assert blob and git_exists(blob) and blob in reachable, (
+                f"{record_path.name}:{idx} tool_version {version} does not resolve")
         assert (f"{ts['single']}/{ts['total']} good samples had 1 OS thread; "
                 f"{ts['multi']}/{ts['total']} good samples had >1 OS thread.") in md_text
     campaign_files = sorted(data_dir.glob("*.jsonl")) + sorted(data_dir.glob("*.md"))
