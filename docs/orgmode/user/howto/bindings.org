@@ -6,7 +6,7 @@ the C ABI =libseams_lang= (=bindings/cxx/seams_lang.h=), and the ~seams~
 command.
 
 #+begin_export rst
-:doc:`C </stable/c>` and :doc:`C++ </stable/cpp>` document those libraries.
+:doc:`/stable/c` and :doc:`/stable/cpp` document those libraries.
 #+end_export
 
 Every other language is its own repository, with its own documentation,

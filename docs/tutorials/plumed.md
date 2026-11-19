@@ -3,7 +3,7 @@
 Use the [PLUMED engine page](../engines/plumed.md) to get the d-SEAMS
 PLUMED plugin v0.4.1.
 
-`SEAMS` reports three components on this page. `q6` is the mean local q6 and carries finite-difference derivatives, so `RESTRAINT` can bias it. `ice` is the published CHILL+ cubic fraction and `ring` is the fraction of atoms on a primitive six-ring. Those two components have no derivatives. The standalone PLUMED action (`dseams-plumed` v0.4.1) is indexed in [PLUMED-NEST egg 26.018](https://www.plumed-nest.org/eggs/26/018/).
+`SEAMS` with `MODE=all` reports five components. `q6` is the mean local q6 and carries finite-difference derivatives, so `RESTRAINT` can bias it. `ice` is the published CHILL+ cubic fraction. `ring` is the fraction of atoms on a primitive six-ring. `hexagonal` is the CHILL+ hexagonal count. `six` is the primitive six-ring count. The last four have no derivatives, and a `RESTRAINT` on them is rejected. `MODE=q6` and `MODE=q6bar` report only `q6`. The standalone PLUMED action (`dseams-plumed` v0.4.1) is indexed in [PLUMED-NEST egg 26.018](https://www.plumed-nest.org/eggs/26/018/).
 
 ```{eval-rst}
 .. include:: ../videos/embeds/plumed.rst

@@ -14,4 +14,13 @@ cd yodaStruct
 luarocks make
 ```
 
-Option tables and return values are the [Lua reference](https://d-seams.github.io/yodaStruct/reference/lua.html). Package names are the {doc}`Lua API </stable/lua>`.
+Option tables and return values are the [Lua reference](https://d-seams.github.io/yodaStruct/reference/lua.html).
+
+The recording uses `input/traj/ice1h.lammpstrj`. `seams read` prints `nop 128 frame 1`, and published CHILL+ at 3.5 angstrom prints `nop 128 hexagonal 128`:
+
+```bash
+seams read input/traj/ice1h.lammpstrj
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+Package names are the {doc}`Lua API </stable/lua>`.

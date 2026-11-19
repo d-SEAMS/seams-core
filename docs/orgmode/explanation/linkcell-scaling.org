@@ -1,6 +1,9 @@
 #+TITLE: Linkcell strong scaling
 #+OPTIONS: toc:nil num:nil ^:nil
 
+The linkcell manual is [[https://linkcell.dseams.info/][linkcell.dseams.info]].
+This page is how d-SEAMS uses that library.
+
 An orthorhombic frame is cut across ranks by linkcell's weighted
 recursive coordinate bisection of the periodic cell grid. d-SEAMS
 passes that bisection. linkcell's default method follows the bisection

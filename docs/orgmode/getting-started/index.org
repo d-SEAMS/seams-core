@@ -1,13 +1,19 @@
 #+TITLE: Getting started
 #+OPTIONS: toc:nil num:nil
 
-Install the engine, read one frame, and open the recording of that run.
+Install the engine, then classify one frame.
+
+The install page builds ~seams~ 2.14.0 from a source checkout or with
+pixi. The quickstart then classifies an eight-molecule cubic cell from
+C and from Python, and reads the bundled TIP4P frame
+~input/traj/exampleTraj.lammpstrj~ (250 oxygens, LAMMPS type 2). The
+videos page is the recording of that run.
 
 #+begin_export rst
 .. toctree::
    :maxdepth: 1
 
-   quickstart
    install
+   quickstart
    ../videos/index
 #+end_export

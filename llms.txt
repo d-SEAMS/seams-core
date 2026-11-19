@@ -10,9 +10,9 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 ## Getting started
 
-- [Getting started](https://docs.dseams.info/getting-started/index.md): Install the engine, read one frame, and open the recording of that run.
-- [Quickstart](https://docs.dseams.info/getting-started/quickstart.md): Install the engine, classify one cubic cell, then read one LAMMPS frame.
+- [Getting started](https://docs.dseams.info/getting-started/index.md): Install the engine, then classify one frame.
 - [Install the engine](https://docs.dseams.info/getting-started/install.md): Release 2.14.0 provides the seams command, libyodaLib, libseams (include/seams.h), and libseams_lang (bindings/cxx/seams_lang.h).
+- [Quickstart](https://docs.dseams.info/getting-started/quickstart.md): Install the engine, classify one cubic cell, then read one LAMMPS frame.
 - [Videos](https://docs.dseams.info/videos/index.md): Short screencasts of d-SEAMS in each language and tutorial are hosted on d-SEAMS on Odysee.
 
 ## User guide
@@ -92,7 +92,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Ice growing into brine](https://docs.dseams.info/user/tutorials/paper-brine.md): The front is the height where the crystal slabs stop.
 - [Ice-likeness along a short nucleation run](https://docs.dseams.info/user/tutorials/paper-nucleation.md): Ice-likeness here is the mean Lechner-Dellago \bar q_6.
 - [Science gallery](https://docs.dseams.info/user/tutorials/gallery.md): These pictures show the interface, brine, ring, cage, and nucleation examples.
-- [Science tutorials](https://docs.dseams.info/science/index.md): Three calculations from the papers, each using a small input: an ice-water interface, a brine freezing front, and clathrate cages.
+- [Science tutorials](https://docs.dseams.info/science/index.md): Three calculations from the papers: an ice-water interface, a brine freezing front, and the sII and sH cages.
 - [Ice/liquid interface and nucleation](https://docs.dseams.info/science/interface.md): The interface dump is input/traj/interface_f0.lammpstrj, 864 waters in a cell 23 by 22 by 53 angstrom.
 - [Brine freezing front](https://docs.dseams.info/science/brine.md): The d-SEAMS/brine-front-230K dataset provides the initial and final frames for a 20-pair loading.
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.md): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
@@ -112,7 +112,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [ClavisCage TRACE](https://docs.dseams.info/explanation/clavis-trace.md): ClavisCage 0.3.18 runs TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) on the same hydrate cells as d-SEAMS 2.14.0.
 - [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.md): primitive::RingUpdater returns the primitive rings of one neighbour graph.
 - [Interface and confined ice](https://docs.dseams.info/explanation/interface-order.md): Two published CHILL+ rules, on the same coordinates, with the thresholds left alone.
-- [Linkcell strong scaling](https://docs.dseams.info/explanation/linkcell-scaling.md): An orthorhombic frame is cut across ranks by linkcell's weighted recursive coordinate bisection of the periodic cell grid.
+- [Linkcell strong scaling](https://docs.dseams.info/explanation/linkcell-scaling.md): The linkcell manual is linkcell.dseams.info.
 - [Primitive rings and OVITO FindRings](https://docs.dseams.info/explanation/ovito-findrings.md): A ring is primitive when every pair of its vertices is as close along the ring as it is through the rest of the graph.
 - [Release-candidate sitting](https://docs.dseams.info/explanation/performance.md): The tables are the release-candidate sitting of d-SEAMS 2.14.0.
 - [Performance](https://docs.dseams.info/explanation/performance-h2h.md): Head-to-head times for ice Ic and a TIP4P/ice liquid at 884736 molecules.
@@ -132,7 +132,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 - [API reference](https://docs.dseams.info/reference/index.md): Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 - [Python Frame](https://docs.dseams.info/reference/python-frame.md): dseams.userframe.read in pydseamslib 2.14.0 returns a Frame over libseams_lang.
-- [seams CLI](https://docs.dseams.info/reference/cli.md): The engine command is seams. The parser is Argum (the same parser as eonclient).
+- [seams CLI](https://docs.dseams.info/reference/cli.md): The engine command is seams. The parser is Argum. Help, errors, ice-type counts, and --features are colorized through Argum's environmentColorStatus.
 - [Data Formats](https://docs.dseams.info/reference/data-formats.md): seams and the C++ readers share one suffix table.
 - [walk_compare](https://docs.dseams.info/reference/walk-compare.md): tests/walk_compare walks a LAMMPS dump and prints one row per frame.
 - [API map](https://docs.dseams.info/reference/api.md): Lookup for the C++ identifiers in src/include/internal.

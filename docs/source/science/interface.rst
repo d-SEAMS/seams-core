@@ -42,11 +42,13 @@ What this tells you
 
 The slab is a hexagonal ice block against liquid. 352 molecules are
 hexagonal, 434 are liquid, and 49 are the interfacial shell. One
-molecule is cubic. Along z the old floor bins count that molecule as
-its own layer and the cubicity of those nine bins is 1/9. The figure
-does not number it. The numbered index is the basal stack: six
-bilayers of hexagonal ice. The nucleus in the first saved frame is
-mixed: 47 cubic and 62 hexagonal molecules in a liquid of 3589.
-Molecule cubicity is 47/109. Along x, two of the fourteen layers are
-cubic-majority, so the layer cubicity is 2/14. That mixed stacking is
-the quantity the layer panel of the paper figure is drawn to show.
+molecule is cubic. The caption's 25 interfacial clathrate and 3
+clathrate molecules are the rest of the 864. Along z the old floor
+bins count the cubic molecule as its own layer and the cubicity of
+those nine bins is 1/9. The figure does not number it. The numbered
+index is the basal stack: six bilayers of hexagonal ice. The nucleus
+in the first saved frame is mixed: 47 cubic and 62 hexagonal molecules
+in a liquid of 3589, with 240 interfacial. Molecule cubicity is
+47/109. Along x, two of the fourteen layers are cubic-majority, so
+the layer cubicity is 2/14. That mixed stacking is the quantity the
+layer panel of the paper figure is drawn to show.

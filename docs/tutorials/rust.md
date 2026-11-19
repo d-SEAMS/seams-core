@@ -12,11 +12,16 @@ The binding is [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs). `dseam
 cargo add dseams@2.14.0
 ```
 
-The same two engine commands, without the crates:
+The same two engine commands, without the crates, print the ice Ih census:
 
 ```bash
 seams read input/traj/ice1h.lammpstrj
 seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+```
+
+```
+nop 128 frame 1 box 15.6457 14.7071 18.073
+nop 128 hexagonal 128
 ```
 
 Crate names are the {doc}`Rust API </stable/rust>`.

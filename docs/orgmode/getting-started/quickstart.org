@@ -6,8 +6,10 @@ Commands below are run from the repository root.
 
 * Install
 
-The build needs a C++ compiler, Eigen 3.4 or newer, and Rust (linkcell,
-minimage, and readcon).
+The build needs a C++20 compiler, Eigen 3.4, and Rust (linkcell,
+minimage, and readcon). The install page pins conda-forge ~eigen~ to
+the 3.4 series. An unpinned ~eigen~ package on that channel currently
+resolves to 5.0.1, and this release builds with Eigen 3.4.
 
 #+begin_src bash
 meson setup build -Dwith_tests=false

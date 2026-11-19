@@ -13,7 +13,8 @@ one thread.
 The [[https://www.plumed-nest.org/eggs/26/018/][d-SEAMS PLUMED plugin egg]]
 (plumID:26.018) uses v0.4.1 of the
 [[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed repository]].
-It is tested with PLUMED v2.10 and master.
+The build below uses PLUMED 2.9. A conda-forge LAMMPS package links
+that release, so PLUMED 2.10 stays in its own environment.
 
 Build ~libSeamsPlumed.so~ against conda-forge PLUMED 2.9. PLUMED 2.10
 lives in its own environment, because a conda-forge LAMMPS package links
