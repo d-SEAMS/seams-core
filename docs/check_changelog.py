@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Validate active towncrier fragments and their rendered order."""
+"""Validate active towncrier fragments and their rendered changelog sections."""
 
 from __future__ import annotations
 
+import difflib
 import pathlib
 import re
 import subprocess
 import sys
 import tempfile
 import tomllib
+from collections import Counter
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "towncrier.toml"
@@ -171,7 +173,7 @@ def check(fragments, rendered):
 
 
 def towncrier_draft():
-    """Render the configured draft that the tracked changelog must contain."""
+    """Render the release section the tracked changelog has to match."""
     match = RELEASE.search(CHANGELOG.read_text(encoding="utf-8"))
     if match is None:
         return None, "CHANGELOG.md has no release heading"
@@ -201,8 +203,394 @@ def towncrier_draft():
     return done.stdout[marker:].strip() + "\n", None
 
 
-def draft_matches_changelog(draft):
-    return draft.strip() in CHANGELOG.read_text(encoding="utf-8")
+def _section_spans(text):
+    """(version, start, end) for each released section, end exclusive."""
+    matches = list(RELEASE.finditer(text))
+    found = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        found.append((match.group(1), match.start(), end))
+    return found
+
+
+def section_entries(section):
+    """Ordered (category, body) entries rendered under one release heading."""
+    found = []
+    category = None
+    current = None
+
+    def close():
+        nonlocal current
+        if current is not None and category is not None:
+            body = "\n".join(current).strip()
+            if body:
+                found.append((category, body))
+        current = None
+
+    for line in section.splitlines():
+        if line.startswith("## "):
+            close()
+            continue
+        if line.startswith("### "):
+            close()
+            category = line[4:].strip()
+            continue
+        if line.startswith("- "):
+            close()
+            current = [line[2:]]
+            continue
+        if current is not None and (line.startswith(" ") or line.strip() == ""):
+            current.append(line[2:] if line.startswith("  ") else line)
+            continue
+        close()
+    close()
+    return found
+
+
+def _preview(entry):
+    line = entry.splitlines()[0].strip()
+    if len(line) > 80:
+        return line[:80]
+    return line
+
+
+def _edited(old, new):
+    if old == new:
+        return False
+    shorter = min(len(old), len(new))
+    if shorter >= 12 and (new.startswith(old) or old.startswith(new)):
+        return True
+    if shorter < 24:
+        return False
+    return difflib.SequenceMatcher(a=old, b=new, autojunk=False).ratio() >= 0.8
+
+
+def _grouped(items):
+    order = []
+    groups = {}
+    for category, entry in items:
+        if category not in groups:
+            order.append(category)
+            groups[category] = []
+        groups[category].append(entry)
+    return order, groups
+
+
+def _entry_errors(version, expected, actual, changelog_text):
+    if Counter(expected) == Counter(actual):
+        if expected != actual:
+            return ["{} entries are not in towncrier order".format(version)]
+        return [
+            "{} rendered section does not exactly match the towncrier draft".format(
+                version
+            )
+        ]
+    locations = {}
+    for name, start, end in _section_spans(changelog_text):
+        for category, entry in section_entries(changelog_text[start:end]):
+            locations.setdefault(entry, []).append((name, category))
+    exp_order, exp_groups = _grouped(expected)
+    act_order, act_groups = _grouped(actual)
+    categories = exp_order + [cat for cat in act_order if cat not in exp_groups]
+    errors = []
+    for category in categories:
+        exp_items = exp_groups.get(category, [])
+        act_items = act_groups.get(category, [])
+        if exp_items == act_items:
+            continue
+        missing = list((Counter(exp_items) - Counter(act_items)).elements())
+        extra = list((Counter(act_items) - Counter(exp_items)).elements())
+        unmatched_extra = extra[:]
+        for entry in missing:
+            hits = [
+                (name, cat)
+                for name, cat in locations.get(entry, [])
+                if not (name == version and cat == category)
+            ]
+            if hits:
+                found_version, found_category = hits[0]
+                errors.append(
+                    "entry is in the wrong section (found in {} {}, expected in {} {}): {}".format(
+                        found_version,
+                        found_category,
+                        version,
+                        category,
+                        _preview(entry),
+                    )
+                )
+                continue
+            partner = None
+            for candidate in unmatched_extra:
+                if _edited(entry, candidate):
+                    partner = candidate
+                    break
+            if partner is not None:
+                unmatched_extra.remove(partner)
+                errors.append(
+                    "{} has a stale or edited entry under {}: {}".format(
+                        version, category, _preview(entry)
+                    )
+                )
+            else:
+                errors.append(
+                    "{} is missing an entry under {}: {}".format(
+                        version, category, _preview(entry)
+                    )
+                )
+        for entry in unmatched_extra:
+            owners = [
+                cat
+                for cat, items in exp_groups.items()
+                if cat != category and entry in items
+            ]
+            if owners:
+                errors.append(
+                    "entry is in the wrong section (found in {} {}, expected in {} {}): {}".format(
+                        version,
+                        category,
+                        version,
+                        owners[0],
+                        _preview(entry),
+                    )
+                )
+                continue
+            errors.append(
+                "{} has an extra entry under {}: {}".format(
+                    version, category, _preview(entry)
+                )
+            )
+    if not errors:
+        errors.append(
+            "{} rendered section does not exactly match the towncrier draft".format(
+                version
+            )
+        )
+    unique = []
+    for error in errors:
+        if error not in unique:
+            unique.append(error)
+    return unique
+
+
+def changelog_errors(draft, changelog_text):
+    """Return errors when a sourced release section is not its rendered draft.
+
+    The draft has to be that section, not merely a substring of the file.
+    Towncrier defines the entry order.
+    """
+    match = RELEASE.search(draft)
+    if match is None:
+        return ["towncrier draft has no release heading"]
+    version = match.group(1)
+    body = None
+    for name, start, end in _section_spans(changelog_text):
+        if name == version:
+            body = changelog_text[start:end]
+            break
+    if body is None:
+        return [
+            "CHANGELOG.md has no [{}] section for the rendered fragments".format(
+                version
+            )
+        ]
+    expected = section_entries(draft)
+    actual = section_entries(body)
+    if body.strip() == draft.strip() and expected == actual:
+        return []
+    return _entry_errors(version, expected, actual, changelog_text)
+
+
+def rendered_changelog_status(draft, changelog_text):
+    """Exit status main uses for one changelog text. Non-zero means it fails."""
+    errors = changelog_errors(draft, changelog_text)
+    if errors:
+        return 1, errors
+    return 0, []
+
+
+def _bullet_spans(section):
+    lines = section.splitlines(keepends=True)
+    positions = []
+    offset = 0
+    for line in lines:
+        positions.append(offset)
+        offset += len(line)
+    indexes = [index for index, line in enumerate(lines) if line.startswith("- ")]
+    spans = []
+    for index in indexes:
+        end_index = len(lines)
+        for probe in range(index + 1, len(lines)):
+            if lines[probe].startswith(("- ", "### ", "## ")):
+                end_index = probe
+                break
+        start = positions[index]
+        end = positions[end_index] if end_index < len(lines) else len(section)
+        spans.append((start, end))
+    return spans
+
+
+def _section_text(text, version):
+    for name, start, end in _section_spans(text):
+        if name == version:
+            return start, end, text[start:end]
+    raise ValueError("CHANGELOG.md has no [{}] section".format(version))
+
+
+def extra_entry_changelog(text, version):
+    """Add one entry after the rendered draft, still inside the section.
+
+    The draft stays a contiguous substring, which is the case the old check
+    accepted.
+    """
+    start, end, section = _section_text(text, version)
+    if not _bullet_spans(section):
+        raise ValueError("{} has no rendered entries".format(version))
+    insert = "- Extra tracked entry that is not in the {} fragments.\n".format(
+        version
+    )
+    section = section.rstrip("\n") + "\n" + insert
+    return text[:start] + section + text[end:]
+
+
+def missing_entry_changelog(text, version):
+    """Drop the first rendered entry from a released section."""
+    start, end, section = _section_text(text, version)
+    spans = _bullet_spans(section)
+    if not spans:
+        raise ValueError("{} has no rendered entries".format(version))
+    begin, finish = spans[0]
+    section = section[:begin] + section[finish:]
+    return text[:start] + section + text[end:]
+
+
+def edited_entry_changelog(text, version):
+    """Change the text of the first rendered entry in place."""
+    start, end, section = _section_text(text, version)
+    spans = _bullet_spans(section)
+    if not spans:
+        raise ValueError("{} has no rendered entries".format(version))
+    begin, finish = spans[0]
+    block = section[begin:finish]
+    newline = block.find("\n")
+    if newline < 0:
+        block = block + " stale"
+    else:
+        block = block[:newline] + " stale" + block[newline:]
+    section = section[:begin] + block + section[finish:]
+    return text[:start] + section + text[end:]
+
+
+def _insert_in_first_category(section, block):
+    if not block.endswith("\n"):
+        block += "\n"
+    lines = section.splitlines(keepends=True)
+    for index, line in enumerate(lines):
+        if line.startswith("### "):
+            at = index + 1
+            if at < len(lines) and lines[at].strip() == "":
+                at += 1
+            lines.insert(at, block)
+            return "".join(lines)
+    raise ValueError("release section has no category heading")
+
+
+def wrong_section_changelog(text, version, destination):
+    """Move the first entry of version into a different released section."""
+    spans = {name: (begin, end) for name, begin, end in _section_spans(text)}
+    if version not in spans or destination not in spans:
+        raise ValueError("missing released section")
+    vstart, vend = spans[version]
+    dstart, dend = spans[destination]
+    if vend > dstart:
+        raise ValueError("destination section does not follow {}".format(version))
+    section = text[vstart:vend]
+    bullet_spans = _bullet_spans(section)
+    if not bullet_spans:
+        raise ValueError("{} has no rendered entries".format(version))
+    begin, finish = bullet_spans[0]
+    block = section[begin:finish]
+    removed = section[:begin] + section[finish:]
+    dest = _insert_in_first_category(text[dstart:dend], block)
+    return text[:vstart] + removed + text[vend:dstart] + dest + text[dend:]
+
+
+def reordered_changelog(text, version):
+    """Swap the first two entries. Towncrier order is then wrong."""
+    start, end, section = _section_text(text, version)
+    spans = _bullet_spans(section)
+    if len(spans) < 2:
+        raise ValueError("{} has fewer than two rendered entries".format(version))
+    a0, a1 = spans[0]
+    b0, b1 = spans[1]
+    if a1 > b0:
+        raise ValueError("rendered entries overlap")
+    section = section[:a0] + section[b0:b1] + section[a1:b0] + section[a0:a1] + section[b1:]
+    return text[:start] + section + text[end:]
+
+
+def draft_matches_changelog(draft, changelog_text=None):
+    if changelog_text is None:
+        changelog_text = CHANGELOG.read_text(encoding="utf-8")
+    return not changelog_errors(draft, changelog_text)
+
+
+def changelog_selftest(draft, changelog_text):
+    """Fail unless each tracked-content mutation makes the check exit non-zero."""
+    match = RELEASE.search(draft)
+    if match is None:
+        print("towncrier draft has no release heading", file=sys.stderr)
+        return 1
+    version = match.group(1)
+    if version != "2.14.0":
+        print(
+            "sourced release is {}, expected 2.14.0".format(version),
+            file=sys.stderr,
+        )
+        return 1
+    cases = (
+        (
+            "missing entry",
+            missing_entry_changelog(changelog_text, version),
+            ("missing an entry", "2.14.0"),
+        ),
+        (
+            "extra entry",
+            extra_entry_changelog(changelog_text, version),
+            ("extra entry", "2.14.0"),
+        ),
+        (
+            "stale or edited entry",
+            edited_entry_changelog(changelog_text, version),
+            ("stale or edited", "2.14.0"),
+        ),
+        (
+            "wrong section",
+            wrong_section_changelog(changelog_text, version, "2.13.0"),
+            ("wrong section", "2.14.0", "2.13.0"),
+        ),
+        (
+            "towncrier order",
+            reordered_changelog(changelog_text, version),
+            ("not in towncrier order", "2.14.0"),
+        ),
+    )
+    for name, mutated, needles in cases:
+        code, errors = rendered_changelog_status(draft, mutated)
+        blob = "\n".join(errors)
+        if code == 0 or any(needle not in blob for needle in needles):
+            print("{} selftest did not fail".format(name), file=sys.stderr)
+            if blob:
+                print(blob, file=sys.stderr)
+            return 1
+        if name == "extra entry" and draft.strip() not in mutated:
+            print(
+                "extra entry selftest does not keep the draft substring",
+                file=sys.stderr,
+            )
+            return 1
+        print("{} selftest exit {}:".format(name, code))
+        print(blob)
+    return 0
 
 
 def main(argv):
@@ -243,14 +631,12 @@ def main(argv):
     if draft_error is not None:
         print(draft_error, file=sys.stderr)
         return 1
-    if not draft_matches_changelog(draft):
-        print(
-            "CHANGELOG.md does not contain the towncrier draft from {}".format(
-                FRAGMENTS.relative_to(ROOT)
-            ),
-            file=sys.stderr,
-        )
-        return 1
+    code, errors = rendered_changelog_status(
+        draft, CHANGELOG.read_text(encoding="utf-8")
+    )
+    if code != 0:
+        print("\n".join(errors), file=sys.stderr)
+        return code
     if "--selftest" in argv:
         first_body = rst_body(fragments[0][2]).splitlines()[0]
         mutated_render = checked_render.replace(
@@ -263,6 +649,8 @@ def main(argv):
         mutated_draft = draft.replace(draft_line, draft_line + " mismatch", 1)
         if mutated_draft == draft or draft_matches_changelog(mutated_draft):
             print("fragment mismatch selftest did not fail", file=sys.stderr)
+            return 1
+        if changelog_selftest(draft, CHANGELOG.read_text(encoding="utf-8")) != 0:
             return 1
         print("changelog mismatch selftest ok")
         return 0
