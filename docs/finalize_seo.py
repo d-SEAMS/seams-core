@@ -12,6 +12,10 @@ from pathlib import Path
 
 from check_seo import BASE_URL, MetadataParser
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from project_version import project_version
+
 DESCRIPTION = (
     "Documentation for d-SEAMS, a molecular simulation trajectory analysis engine "
     "for ice, clathrates, rings, cages, and structural order."
@@ -45,7 +49,7 @@ def _json_ld() -> str:
                 "applicationCategory": "ScientificApplication",
                 "operatingSystem": "Linux, macOS",
                 "url": BASE_URL,
-                "softwareVersion": "2.14.0",
+                "softwareVersion": project_version(),
                 "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
                 "citation": "https://doi.org/10.1021/acs.jcim.0c00031",
             },
