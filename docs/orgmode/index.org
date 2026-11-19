@@ -51,6 +51,12 @@
       :class-card: sd-shadow-sm
 
       Cage membership: HC is ice Ih, DDC is ice Ic, else water.
+
+.. note::
+
+   The d-SEAMS 2.0 paper, *Incremental ring and cage algorithms for ice
+   structure analysis*, by Rohit Goswami, Amrita Goswami, Ruhila Goswami
+   and Jayant K. Singh, is coming soon.
 #+end_export
 
 * Overview
