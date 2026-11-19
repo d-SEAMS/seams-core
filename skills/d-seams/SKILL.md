@@ -2,7 +2,7 @@
 name: d-seams
 description: "Classify ice and hydrate cages in a molecular-dynamics trajectory with d-SEAMS. Use when installing the engine, running the seams CLI, calling libseams (seams.h) or pydseamslib (import dseams), or debugging CHILL+, cages, primitive rings, or Steinhardt q_l. Keywords: molecular dynamics, water, ice Ih, ice Ic, clathrate, cutoff, ABI."
 license: MIT
-compatibility: "The engine builds with Meson. Python needs pydseamslib at the same version. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
+compatibility: "The engine builds with Meson. Python is the package pydseamslib. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
 metadata:
   author: d-SEAMS
   version: "2.14.0"
