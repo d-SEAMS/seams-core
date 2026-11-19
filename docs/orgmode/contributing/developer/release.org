@@ -94,12 +94,11 @@ Branch from the tag, add a ~fix:~ commit and a fragment, and
 
 * What this replaces
 
-Cogapp replaces the version-copy assertions in
-~scripts/check_release_version.py~. That checker remains for the release
-heading, date, and tag assertions that cogapp does not cover. Plain
-towncrier replaces the release rendering in ~docs/check_towncrier.py~ and
-~docs/check_changelog.py~. Duplicate fragment bodies, every misnamed
-fragment, and hand-added duplicate release headings remain outside its
-native checks.
+Cogapp regenerates the version copies, and ~version-drift~ checks them.
+Plain towncrier checks changed fragments and drafts the notes in
+release-prepare; the pre-bump hook builds the CHANGELOG section.
+~scripts/check_release_version.py~ retains the release heading, date, and
+tag assertions. Duplicate fragment bodies, every misnamed fragment, and
+hand-added duplicate release headings remain outside the native checks.
 ~.github/workflows/release-prepare.yml~ is the dry-run on a pull request
 and on ~workflow_dispatch~.
