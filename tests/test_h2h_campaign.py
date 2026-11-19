@@ -10,6 +10,8 @@ No tool under test is imported and no sample is timed.
 """
 
 import json
+import getpass
+import ipaddress
 import math
 import os
 import platform
@@ -34,6 +36,14 @@ RESULT_COLUMNS = [
     "stats_ci_99_b", "stats_q_25", "stats_q_75", "stats_number", "stats_repeat",
     "samples", "profile",
 ]
+
+ALLOWED_EMAILS: frozenset[str] = frozenset()
+ALLOWED_PUBLIC_HOSTS = frozenset({
+    "dseams.github.io", "github.com", "pypi.org", "readthedocs.io", "zenodo.org",
+})
+FILE_SUFFIXES = frozenset({
+    "cpp", "jsonl", "lammpstrj", "md", "npy", "py", "so",
+})
 
 
 def sample(workload, system, arm, r, wall, os_threads=1, core="0"):
@@ -69,6 +79,10 @@ def check_verdicts():
     }
     rows = [sample("cutoff", "x", arm, r, wall)
             for arm, walls in arms.items() for r, wall in enumerate(walls)]
+    rows.extend({
+        "type": "agreement", "workload": "cutoff", "system": "x", "arm": arm,
+        "reference": "seams", "equal": True, "matches_brute_force": True,
+    } for arm in arms)
     got = {c["arm"]: c.get("verdict") for c in hc.cell_summary(rows)}
     assert got["slow"] == "seams faster", got
     assert got["fast"] == "competitor faster", got
@@ -76,6 +90,50 @@ def check_verdicts():
     assert got["seams"] is None and got["seams_aa"] is None, got
     text = hc.render_summary(rows)
     assert "seams faster" in text and "competitor faster" in text
+
+
+def check_disagreement_blocks_speed_verdicts():
+    rows = [
+        sample("knn", "x", "seams", r, 10.0) for r in range(6)
+    ] + [
+        sample("knn", "x", "seams_aa", r, 10.0) for r in range(6)
+    ] + [
+        sample("knn", "x", "wrong", r, 20.0) for r in range(6)
+    ] + [
+        {
+            "type": "agreement", "workload": "knn", "system": "x",
+            "arm": "seams", "reference": "seams", "equal": True,
+            "matches_brute_force": True,
+        },
+        {
+            "type": "agreement", "workload": "knn", "system": "x",
+            "arm": "wrong", "reference": "seams", "equal": False,
+            "matches_brute_force": False,
+        },
+    ]
+    wrong = next(c for c in hc.cell_summary(rows) if c["arm"] == "wrong")
+    assert wrong["verdict"].startswith("not comparable:"), wrong
+    assert "faster" not in wrong["verdict"] and "slower" not in wrong["verdict"], wrong
+    text = hc.render_summary(rows)
+    line = next(line for line in text.splitlines() if "| wrong |" in line)
+    assert "| - |" in line and "not comparable:" in line, line
+
+
+def check_disagreement_classification():
+    record = ROOT / "data" / "h2h-campaign" / "2026-11-18-r2.jsonl"
+    rows = hc.read_rows(record)
+    found = hc.disagreement_classification(rows)
+    assert len(found) == 15, found
+    assert sum(x["workload"] == "knn" for x in found) == 8, found
+    assert sum(x["workload"] == "rings" for x in found) == 7, found
+    assert {x["reason_class"] for x in found} <= {
+        "competitor bug", "different definition/cutoff convention",
+        "tolerance", "d-SEAMS bug",
+    }, found
+    stacking = [x for x in found if x["workload"] == "knn" and x["system"] == "stacking"]
+    assert len(stacking) == 3, stacking
+    assert all(x["matching_side"] == "neither (brute force)" for x in stacking), stacking
+    assert all(x["reason_class"] == "tolerance" for x in stacking), stacking
 
 
 def check_schedule():
@@ -123,6 +181,30 @@ def check_record():
         assert not hc.has_plan(path, "run-a")
         later.append({"type": "plan"})
         assert hc.has_plan(path, "run-a") and not hc.has_plan(path, "run-b")
+
+
+def check_machine_capture_without_lscpu():
+    real_which = hc.shutil.which
+    real_run = hc.subprocess.run
+    try:
+        hc.shutil.which = lambda _name: None
+        summary = hc.machine_summary()
+        assert summary["cpu_model"] and summary["lscpu"] and summary["lscpu_sha256"], summary
+        assert "unavailable (" in summary["lscpu"], summary
+
+        hc.shutil.which = lambda _name: "lscpu"
+
+        def missing_lscpu(command, *args, **kwargs):
+            if command == ["lscpu"]:
+                raise FileNotFoundError("missing")
+            return real_run(command, *args, **kwargs)
+
+        hc.subprocess.run = missing_lscpu
+        summary = hc.machine_summary()
+        assert summary["cpu_model"] and "unavailable (" in summary["lscpu"], summary
+    finally:
+        hc.shutil.which = real_which
+        hc.subprocess.run = real_run
 
 
 def check_scrub():
@@ -453,6 +535,85 @@ def check_cli_floor_and_plan():
         assert not Path(record).exists(), "a dry run wrote a record"
 
 
+def campaign_leaks(text: str, current_user: str = "", node: str = "") -> list[str]:
+    leaks = []
+    machine_prefixes = tuple(
+        p for p in (str(ROOT), os.path.expanduser("~"), tempfile.gettempdir())
+        if p and p != "/"
+    )
+    for prefix in machine_prefixes:
+        if prefix in text:
+            leaks.append("current-machine path")
+    user_path = re.compile(
+        r"(?:/(?:home|Users)/[A-Za-z0-9_.-]+(?:/|$)|"
+        r"[A-Za-z]:\\+Users\\+[A-Za-z0-9_.-]+(?:\\+|$))"
+    )
+    if user_path.search(text):
+        leaks.append("user path")
+    if current_user and len(current_user) > 2 and re.search(
+            rf"(?<![A-Za-z0-9_.-]){re.escape(current_user)}(?![A-Za-z0-9_.-])", text):
+        leaks.append("current username")
+    if node and len(node) > 3 and node in text:
+        leaks.append("current hostname")
+
+    token_parts = (
+        "ghp_", "github_pat_", "gho_", "hf_", "sk-", "AKIA", "xoxb-", "xoxp-",
+    )
+    if any(part in text for part in token_parts):
+        leaks.append("token")
+    assignment = re.compile(
+        r"(?im)\b[A-Za-z_][A-Za-z0-9_.-]*\s*=\s*"
+        r"(?:[0-9a-f]{32,}|[A-Za-z0-9+/]{40,}={0,2})\b"
+    )
+    if assignment.search(text):
+        leaks.append("secret assignment")
+
+    email_re = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
+    if any(email.lower() not in ALLOWED_EMAILS for email in email_re.findall(text)):
+        leaks.append("email")
+
+    ip_re = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
+    for candidate in ip_re.findall(text):
+        try:
+            address = ipaddress.ip_address(candidate)
+        except ValueError:
+            continue
+        if address.is_private or address.is_loopback or address.is_link_local:
+            leaks.append("private IP")
+            break
+
+    host_re = re.compile(
+        r"(?<![@A-Za-z0-9_-])"
+        r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}"
+        r"(?![A-Za-z0-9_-])"
+    )
+    for candidate in host_re.findall(text):
+        host = candidate.lower()
+        if host.rsplit(".", 1)[-1] in FILE_SUFFIXES:
+            continue
+        if host not in ALLOWED_PUBLIC_HOSTS:
+            leaks.append("hostname")
+            break
+    return leaks
+
+
+def check_campaign_leak_checker_negative_fixtures():
+    fixtures = {
+        "current username": "owner=" + getpass.getuser(),
+        "user path": "/" + "home" + "/sample/private.txt",
+        "windows user path": "C:" + "\\Users" + "\\sample\\private.txt",
+        "token": "token=" + "ghp" + "_" + "a" * 24,
+        "secret assignment": "credential=" + "a" * 48,
+        "email": "contact=" + "person" + "@" + "example.invalid",
+        "private IP": "address=" + ".".join(("10", "2", "3", "4")),
+        "hostname": "machine=" + "build" + "." + "internal",
+    }
+    for kind, fixture in fixtures.items():
+        assert campaign_leaks(
+            fixture, current_user=getpass.getuser(), node=platform.node()
+        ), (kind, fixture)
+
+
 def check_campaign_records():
     data_dir = ROOT / "data" / "h2h-campaign"
     if not data_dir.is_dir():
@@ -462,11 +623,6 @@ def check_campaign_records():
         return
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     tree_cache: dict[str, str] = {}
-    node = platform.node()
-    machine_prefixes = tuple(
-        p for p in (str(ROOT), os.path.expanduser("~"), tempfile.gettempdir()) if p and p != "/"
-    )
-    abs_path_re = re.compile(r'"/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+')
     for record_path in records:
         rows = hc.read_rows(record_path)
         assert rows, f"{record_path} is empty"
@@ -497,7 +653,11 @@ def check_campaign_records():
             ):
                 assert int(row.get("rounds", 0)) >= 12, (record_path.name, idx, row)
         assert not hc.replaced_runs(rows), f"{record_path.name} contains replaced rescue runs"
-        md_path = record_path.with_suffix(".md")
+        md_path = record_path.with_name(
+            "2026-11-18-r3.md"
+            if record_path.name == "2026-11-18-r2.jsonl"
+            else record_path.with_suffix(".md").name
+        )
         assert md_path.is_file(), f"missing summary {md_path}"
         md_text = md_path.read_text(encoding="utf-8")
         expected_md = hc.render_summary(rows) + hc.render_lanes(rows)
@@ -505,12 +665,14 @@ def check_campaign_records():
         ts = hc.thread_summary(rows)
         assert (f"{ts['single']}/{ts['total']} good samples had 1 OS thread; "
                 f"{ts['multi']}/{ts['total']} good samples had >1 OS thread.") in md_text
-        for path_text in (record_path.read_text(encoding="utf-8"), md_text):
-            for bad in machine_prefixes:
-                assert bad not in path_text, f"{bad} leaked into {record_path.name}"
-            assert not abs_path_re.search(path_text), f"absolute path leaked into {record_path.name}"
-            if node and len(node) > 3:
-                assert node not in path_text, f"hostname leaked into {record_path.name}"
+    campaign_files = sorted(data_dir.glob("*.jsonl")) + sorted(data_dir.glob("*.md"))
+    for path in campaign_files:
+        leaks = campaign_leaks(
+            path.read_text(encoding="utf-8"),
+            current_user=getpass.getuser(),
+            node=platform.node(),
+        )
+        assert not leaks, f"{path.name} contains sensitive data: {sorted(set(leaks))}"
 
 
 def main() -> int:
