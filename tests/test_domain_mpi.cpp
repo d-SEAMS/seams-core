@@ -57,10 +57,25 @@ molSys::PointCloud<molSys::Point<double>, double> iceCube(int cells) {
 int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   int rank = 0;
+  int nRanks = 1;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nRanks);
   chill::setSteinhardtAtomSplit(false);
   const double cutoff = 3.4;
   int bad = 0;
+  // The ring path stores gMeasured[kWorkRings] on the first orthorhombic
+  // call. A later edit that drops that slot fails here, on the same rank
+  // counts the MPI job launches.
+  if (nRanks > 1) {
+    const auto measured = iceCube(4);
+    seams::domain::distributedRings(measured, cutoff, 6, MPI_COMM_WORLD);
+#ifdef SEAMS_HAS_LINKCELL
+    if (!seams::domain::measuredCutReady(seams::domain::kWorkRings)) {
+      std::fprintf(stderr, "rank %d: measured ring cut is missing\n", rank);
+      bad++;
+    }
+#endif
+  }
   for (const auto &c : {tiltedFrame(16000, 78.4, 0.0, 0.0, 0.0, 4),
                         tiltedFrame(16000, 78.4, 9.0, 5.0, -7.0, 5)}) {
     for (const int depth : {4, 6, 8, 10}) {
@@ -91,8 +106,6 @@ int main(int argc, char **argv) {
       }
     }
   }
-  int nRanks = 1;
-  MPI_Comm_size(MPI_COMM_WORLD, &nRanks);
   {
     const double cutoff = 3.5;
     const auto base = iceCube(6);
