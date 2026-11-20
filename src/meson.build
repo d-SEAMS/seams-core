@@ -60,6 +60,7 @@ ydslib_sources = files(
   'structure_desc.cpp',
   'topo_one_dim.cpp',
   'topo_two_dim.cpp',
+  'trajectory.cpp',
 )
 
 # backward-cpp's crash handler symbolizes with backtrace_symbols, which

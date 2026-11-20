@@ -44,6 +44,7 @@
 #include <thread_team.hpp>
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
+#include <trajectory.hpp>
 #include <tum_offload.hpp>
 
 #include <array>
@@ -420,6 +421,27 @@ struct seams_topo : seams_object {
   std::vector<std::string> atom_keys;
   std::vector<int> ring_census;
   int hops = 0;
+};
+
+struct seams_msd : seams_object {
+  traj::MsdAccumulator acc;
+  seams_msd(std::size_t natoms, std::size_t max_lag, std::size_t origin_stride,
+            double dt, const double axis[3])
+      : acc(natoms, max_lag, origin_stride, dt, axis) {}
+};
+
+struct seams_hbond_tcf : seams_object {
+  traj::HbondLifetimeAccumulator acc;
+  seams_hbond_tcf(std::size_t max_lag, std::size_t origin_stride, double dt,
+                  bool directed)
+      : acc(max_lag, origin_stride, dt, directed) {}
+};
+
+struct seams_reorient : seams_object {
+  traj::ReorientationAccumulator acc;
+  seams_reorient(std::size_t n_vectors, std::size_t max_lag,
+                 std::size_t origin_stride, double dt)
+      : acc(n_vectors, max_lag, origin_stride, dt) {}
 };
 
 namespace {
@@ -3818,6 +3840,913 @@ seams_status seams_system_ids(const seams_system *sys, int *ids, size_t len) {
     ids[i] = sys->cloud.pts[static_cast<std::size_t>(i)].atomID;
   }
   return SEAMS_OK;
+}
+
+seams_status seams_mols(const seams_system *sys, int *mols, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || mols == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or mols is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "molecule id buffer is short");
+  }
+  for (int i = 0; i < sys->cloud.nop; ++i) {
+    mols[i] = sys->cloud.pts[static_cast<std::size_t>(i)].molID;
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_set_mols(seams_system *sys, const int *mols, size_t len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || mols == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or mols is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  const auto n = static_cast<std::size_t>(sys->cloud.nop);
+  if (len != n) {
+    return fail(SEAMS_ERR_RANGE, "molecule id length does not match atom count");
+  }
+  for (std::size_t i = 0; i < n; ++i) {
+    sys->cloud.pts[i].molID = mols[i];
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_molecule_centres(const seams_system *sys, const int *mols,
+                                    size_t mols_len, const double *masses,
+                                    size_t masses_len, int *mol_ids_out,
+                                    double *centres_out, size_t cap,
+                                    size_t *n_mols) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_mols == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or molecule count is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  const auto n = static_cast<std::size_t>(sys->cloud.nop);
+  if ((mols == nullptr && mols_len != 0) ||
+      (mols != nullptr && mols_len != n)) {
+    return fail(SEAMS_ERR_RANGE, "mols length must match atom count");
+  }
+  if ((masses == nullptr && masses_len != 0) ||
+      (masses != nullptr && masses_len != n)) {
+    return fail(SEAMS_ERR_RANGE, "masses length must match atom count");
+  }
+  if (masses != nullptr) {
+    for (std::size_t i = 0; i < n; ++i) {
+      if (!std::isfinite(masses[i]) || !(masses[i] > 0.0)) {
+        return fail(SEAMS_ERR_ARG, "masses must be finite and positive");
+      }
+    }
+  }
+  try {
+    const traj::BoxCell cell = traj::BoxCell::fromCloud(sys->cloud);
+    if (!cell.ok) {
+      return fail(SEAMS_ERR_BOX, "stored cell is invalid");
+    }
+    std::vector<double> xyz(3 * n);
+    std::vector<int> stored_mols;
+    if (mols == nullptr) {
+      stored_mols.resize(n);
+    }
+    for (std::size_t i = 0; i < n; ++i) {
+      xyz[3 * i] = sys->cloud.pts[i].x;
+      xyz[3 * i + 1] = sys->cloud.pts[i].y;
+      xyz[3 * i + 2] = sys->cloud.pts[i].z;
+      if (mols == nullptr) {
+        stored_mols[i] = sys->cloud.pts[i].molID;
+      }
+    }
+    std::vector<int> unique_mols;
+    std::vector<double> centres;
+    const int *use_mols = mols != nullptr ? mols : stored_mols.data();
+    if (!traj::moleculeCentres(xyz.data(), n, cell, use_mols, masses,
+                               unique_mols, centres)) {
+      return fail(SEAMS_ERR_ARG, "molecule centre assembly failed");
+    }
+    const std::size_t nm = unique_mols.size();
+    *n_mols = nm;
+    if (mol_ids_out == nullptr && centres_out == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap < nm) {
+      return fail(SEAMS_ERR_RANGE, "molecule output buffer is short");
+    }
+    if (mol_ids_out != nullptr && nm > 0) {
+      std::copy_n(unique_mols.data(), nm, mol_ids_out);
+    }
+    if (centres_out != nullptr && nm > 0) {
+      std::copy_n(centres.data(), 3 * nm, centres_out);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes,
+                                         size_t natoms, const double *boxes,
+                                         size_t nboxes, double *unwrapped,
+                                         size_t unwrapped_len) {
+  clear_error();
+  if (xyz == nullptr || boxes == nullptr || unwrapped == nullptr) {
+    return fail(SEAMS_ERR_NULL, "coordinates, boxes, or output is null");
+  }
+  if (nframes == 0 || natoms == 0) {
+    return fail(SEAMS_ERR_RANGE, "nframes and natoms must be positive");
+  }
+  if (nboxes != 1 && nboxes != nframes) {
+    return fail(SEAMS_ERR_RANGE, "nboxes must be 1 or nframes");
+  }
+  if (natoms > SIZE_MAX / 3 || nframes > SIZE_MAX / (3 * natoms)) {
+    return fail(SEAMS_ERR_RANGE, "coordinate count overflows size_t");
+  }
+  const std::size_t total = nframes * 3 * natoms;
+  if (unwrapped_len < total) {
+    return fail(SEAMS_ERR_RANGE, "unwrapped buffer is short");
+  }
+  for (std::size_t b = 0; b < nboxes; ++b) {
+    const traj::BoxCell cell = traj::BoxCell::fromBox9(boxes + 9 * b);
+    if (!cell.ok) {
+      return fail(SEAMS_ERR_BOX, "periodic box is invalid or non-finite");
+    }
+  }
+  if (!finite_coordinates(xyz, nframes * natoms)) {
+    return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+  }
+  try {
+    if (!traj::unwrapPositions(xyz, nframes, natoms, boxes, nboxes,
+                               unwrapped)) {
+      return fail(SEAMS_ERR_ARG, "failed to unwrap coordinates");
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_traj_unwrap_centres(
+    const double *xyz, size_t nframes, size_t natoms, const double *boxes,
+    size_t nboxes, const int *mols, size_t mols_len, const double *masses,
+    size_t masses_len, int *mol_ids_out, size_t mol_ids_cap,
+    double *centres_out, size_t centres_len, size_t *n_mols) {
+  clear_error();
+  if (xyz == nullptr || boxes == nullptr || mols == nullptr ||
+      n_mols == nullptr) {
+    return fail(SEAMS_ERR_NULL, "coordinates, boxes, mols, or n_mols is null");
+  }
+  if (nframes == 0 || natoms == 0) {
+    return fail(SEAMS_ERR_RANGE, "nframes and natoms must be positive");
+  }
+  if (nboxes != 1 && nboxes != nframes) {
+    return fail(SEAMS_ERR_RANGE, "nboxes must be 1 or nframes");
+  }
+  if (mols_len != natoms) {
+    return fail(SEAMS_ERR_RANGE, "mols_len must equal natoms");
+  }
+  if ((masses == nullptr && masses_len != 0) ||
+      (masses != nullptr && masses_len != natoms)) {
+    return fail(SEAMS_ERR_RANGE, "masses_len must equal natoms or 0");
+  }
+  if (natoms > SIZE_MAX / 3 || nframes > SIZE_MAX / (3 * natoms)) {
+    return fail(SEAMS_ERR_RANGE, "coordinate count overflows size_t");
+  }
+  for (std::size_t b = 0; b < nboxes; ++b) {
+    const traj::BoxCell cell = traj::BoxCell::fromBox9(boxes + 9 * b);
+    if (!cell.ok) {
+      return fail(SEAMS_ERR_BOX, "periodic box is invalid or non-finite");
+    }
+  }
+  if (!finite_coordinates(xyz, nframes * natoms)) {
+    return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+  }
+  if (masses != nullptr) {
+    for (std::size_t i = 0; i < natoms; ++i) {
+      if (!std::isfinite(masses[i]) || !(masses[i] > 0.0)) {
+        return fail(SEAMS_ERR_ARG, "masses must be finite and positive");
+      }
+    }
+  }
+  try {
+    std::vector<int> unique_mols;
+    std::vector<double> centres;
+    if (!traj::unwrapMoleculeCentres(xyz, nframes, natoms, boxes, nboxes, mols,
+                                     masses, unique_mols, centres)) {
+      return fail(SEAMS_ERR_ARG, "failed to unwrap molecule centres");
+    }
+    const std::size_t nm = unique_mols.size();
+    *n_mols = nm;
+    if (mol_ids_out == nullptr && centres_out == nullptr) {
+      return SEAMS_OK;
+    }
+    if (mol_ids_out != nullptr && mol_ids_cap < nm) {
+      return fail(SEAMS_ERR_RANGE, "mol_ids_out buffer is short");
+    }
+    if (centres_out != nullptr && centres_len < nframes * 3 * nm) {
+      return fail(SEAMS_ERR_RANGE, "centres_out buffer is short");
+    }
+    if (mol_ids_out != nullptr && nm > 0) {
+      std::copy_n(unique_mols.data(), nm, mol_ids_out);
+    }
+    if (centres_out != nullptr && !centres.empty()) {
+      std::copy(centres.begin(), centres.end(), centres_out);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_water_vectors(const seams_system *sys, int oxygen_type,
+                                 int hydrogen_type, int *mol_ids,
+                                 double *oh_mid, double *bisector, double *hh,
+                                 double *hh_unit, size_t cap,
+                                 size_t *n_waters) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_waters == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or n_waters is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (oxygen_type == hydrogen_type) {
+    return fail(SEAMS_ERR_ARG, "oxygen_type and hydrogen_type must differ");
+  }
+  try {
+    traj::WaterVectorsResult res;
+    if (!traj::waterOrientationVectors(sys->cloud, oxygen_type, hydrogen_type,
+                                       res)) {
+      return fail(SEAMS_ERR_BOX, "stored cell is invalid");
+    }
+    const std::size_t nw = res.molIds.size();
+    *n_waters = nw;
+    if (mol_ids == nullptr && oh_mid == nullptr && bisector == nullptr &&
+        hh == nullptr && hh_unit == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap < nw) {
+      return fail(SEAMS_ERR_RANGE, "water vector buffer is short");
+    }
+    if (mol_ids != nullptr && nw > 0) {
+      std::copy_n(res.molIds.data(), nw, mol_ids);
+    }
+    if (oh_mid != nullptr && nw > 0) {
+      std::copy_n(res.ohMidVectors.data(), 3 * nw, oh_mid);
+    }
+    if (bisector != nullptr && nw > 0) {
+      std::copy_n(res.bisectorUnit.data(), 3 * nw, bisector);
+    }
+    if (hh != nullptr && nw > 0) {
+      std::copy_n(res.hhVectors.data(), 3 * nw, hh);
+    }
+    if (hh_unit != nullptr && nw > 0) {
+      std::copy_n(res.hhUnit.data(), 3 * nw, hh_unit);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_molecule_dipoles(
+    const seams_system *sys, const int *mols, size_t mols_len,
+    const double *charges, size_t charges_len, int *mol_ids_out,
+    double *dipoles, double *unit_vectors, size_t cap, size_t *n_mols) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_mols == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or n_mols is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  const auto n = static_cast<std::size_t>(sys->cloud.nop);
+  if ((mols == nullptr && mols_len != 0) ||
+      (mols != nullptr && mols_len != n)) {
+    return fail(SEAMS_ERR_RANGE, "mols_len must equal atom count or 0");
+  }
+  if ((charges == nullptr && charges_len != 0) ||
+      (charges != nullptr && charges_len != n)) {
+    return fail(SEAMS_ERR_RANGE, "charges_len must equal atom count or 0");
+  }
+  if (charges != nullptr && !finite_scan<4>(charges, n)) {
+    return fail(SEAMS_ERR_ARG, "charges contain a non-finite value");
+  }
+  try {
+    traj::DipoleVectorsResult res;
+    if (!traj::moleculeDipoleVectors(sys->cloud, mols, charges, res)) {
+      return fail(SEAMS_ERR_BOX, "stored cell is invalid");
+    }
+    const std::size_t nm = res.molIds.size();
+    *n_mols = nm;
+    if (mol_ids_out == nullptr && dipoles == nullptr &&
+        unit_vectors == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap < nm) {
+      return fail(SEAMS_ERR_RANGE, "dipole output buffer is short");
+    }
+    if (mol_ids_out != nullptr && nm > 0) {
+      std::copy_n(res.molIds.data(), nm, mol_ids_out);
+    }
+    if (dipoles != nullptr && nm > 0) {
+      std::copy_n(res.dipoles.data(), 3 * nm, dipoles);
+    }
+    if (unit_vectors != nullptr && nm > 0) {
+      std::copy_n(res.unitVectors.data(), 3 * nm, unit_vectors);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_orientation_order(const double *vectors, size_t n_vectors,
+                                     const double axis[3], double *cos_theta,
+                                     double *p2, size_t cap, double *mean_p1,
+                                     double *mean_p2) {
+  clear_error();
+  if (axis == nullptr) {
+    return fail(SEAMS_ERR_NULL, "axis is null");
+  }
+  if (n_vectors > 0 && vectors == nullptr) {
+    return fail(SEAMS_ERR_NULL, "vectors is null");
+  }
+  if (cos_theta == nullptr && p2 == nullptr && mean_p1 == nullptr &&
+      mean_p2 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "at least one output pointer is required");
+  }
+  if ((cos_theta != nullptr || p2 != nullptr) && cap < n_vectors) {
+    return fail(SEAMS_ERR_RANGE, "per-vector output buffer is short");
+  }
+  if (!std::isfinite(axis[0]) || !std::isfinite(axis[1]) ||
+      !std::isfinite(axis[2])) {
+    return fail(SEAMS_ERR_ARG, "axis contains a non-finite number");
+  }
+  const double anorm =
+      std::sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+  if (!(anorm > 0.0) || !std::isfinite(anorm)) {
+    return fail(SEAMS_ERR_ARG, "axis must be non-zero");
+  }
+  if (n_vectors > 0 && !finite_coordinates(vectors, n_vectors)) {
+    return fail(SEAMS_ERR_ARG, "vectors contain a non-finite number");
+  }
+  try {
+    traj::OrientationOrderResult res;
+    if (!traj::axisOrderParameters(vectors, n_vectors, axis, res)) {
+      return fail(SEAMS_ERR_ARG, "orientation order computation failed");
+    }
+    if (cos_theta != nullptr && n_vectors > 0) {
+      std::copy_n(res.cosTheta.data(), n_vectors, cos_theta);
+    }
+    if (p2 != nullptr && n_vectors > 0) {
+      std::copy_n(res.p2.data(), n_vectors, p2);
+    }
+    if (mean_p1 != nullptr) {
+      *mean_p1 = res.meanP1;
+    }
+    if (mean_p2 != nullptr) {
+      *mean_p2 = res.meanP2;
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_msd_create(size_t natoms, size_t max_lag,
+                              size_t origin_stride, double dt,
+                              const double axis[3], seams_msd **out) {
+  clear_error();
+  if (out != nullptr) {
+    *out = nullptr;
+  }
+  if (axis == nullptr || out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "axis or output pointer is null");
+  }
+  if (natoms == 0 || origin_stride == 0) {
+    return fail(SEAMS_ERR_RANGE, "natoms and origin_stride must be positive");
+  }
+  if (!std::isfinite(dt) || !(dt > 0.0)) {
+    return fail(SEAMS_ERR_ARG, "dt must be finite and positive");
+  }
+  if (!std::isfinite(axis[0]) || !std::isfinite(axis[1]) ||
+      !std::isfinite(axis[2])) {
+    return fail(SEAMS_ERR_ARG, "axis contains a non-finite number");
+  }
+  const double anorm =
+      std::sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+  if (!(anorm > 0.0) || !std::isfinite(anorm)) {
+    return fail(SEAMS_ERR_ARG, "axis must be non-zero");
+  }
+  try {
+    auto holder =
+        std::make_unique<seams_msd>(natoms, max_lag, origin_stride, dt, axis);
+    if (!holder->acc.valid()) {
+      return fail(SEAMS_ERR_ARG, "invalid MSD accumulator parameters");
+    }
+    *out = static_cast<seams_msd *>(track(holder.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+void seams_msd_destroy(seams_msd *msd) {
+  clear_error();
+  if (claim(msd)) {
+    delete msd;
+  }
+}
+
+seams_status seams_msd_push(seams_msd *msd, const double *xyz, size_t natoms,
+                            const double *box9, size_t box_len) {
+  handle_guard guard(msd);
+  clear_error();
+  if (msd == nullptr || xyz == nullptr) {
+    return fail(SEAMS_ERR_NULL, "msd handle or coordinates is null");
+  }
+  if (natoms != msd->acc.numParticles()) {
+    return fail(SEAMS_ERR_RANGE, "natoms does not match accumulator");
+  }
+  if ((box9 == nullptr && box_len != 0) || (box9 != nullptr && box_len != 9)) {
+    return fail(SEAMS_ERR_RANGE, "box_len must be 9 with box9 or 0 without");
+  }
+  if (box9 != nullptr) {
+    const traj::BoxCell cell = traj::BoxCell::fromBox9(box9);
+    if (!cell.ok) {
+      return fail(SEAMS_ERR_BOX, "periodic box is invalid or non-finite");
+    }
+  }
+  if (!finite_coordinates(xyz, natoms)) {
+    return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+  }
+  try {
+    if (!msd->acc.push(xyz, natoms, box9)) {
+      return fail(SEAMS_ERR_STATE,
+                  "cannot mix wrapped and unwrapped frames on one accumulator");
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_msd_curve(const seams_msd *msd, double *lag_time,
+                             double *total, double *axial, double *lateral,
+                             size_t *n_origins, size_t cap, size_t *n_lags) {
+  read_guard guard(msd);
+  clear_error();
+  if (msd == nullptr || n_lags == nullptr) {
+    return fail(SEAMS_ERR_NULL, "msd handle or n_lags is null");
+  }
+  if (msd->acc.framesSeen() == 0) {
+    return fail(SEAMS_ERR_STATE, "msd accumulator has no frames");
+  }
+  try {
+    std::vector<double> lt;
+    std::vector<double> tot;
+    std::vector<double> ax;
+    std::vector<double> lat;
+    std::vector<std::size_t> orig;
+    msd->acc.curve(lt, tot, ax, lat, orig);
+    const std::size_t nl = lt.size();
+    *n_lags = nl;
+    if (lag_time == nullptr && total == nullptr && axial == nullptr &&
+        lateral == nullptr && n_origins == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap < nl) {
+      return fail(SEAMS_ERR_RANGE, "msd curve output buffer is short");
+    }
+    if (lag_time != nullptr && nl > 0) {
+      std::copy_n(lt.data(), nl, lag_time);
+    }
+    if (total != nullptr && nl > 0) {
+      std::copy_n(tot.data(), nl, total);
+    }
+    if (axial != nullptr && nl > 0) {
+      std::copy_n(ax.data(), nl, axial);
+    }
+    if (lateral != nullptr && nl > 0) {
+      std::copy_n(lat.data(), nl, lateral);
+    }
+    if (n_origins != nullptr && nl > 0) {
+      std::copy_n(orig.data(), nl, n_origins);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_msd_fit(const seams_msd *msd, double t_start, double t_end,
+                           double *d_total, double *d_axial, double *d_lateral,
+                           double *alpha) {
+  read_guard guard(msd);
+  clear_error();
+  if (msd == nullptr) {
+    return fail(SEAMS_ERR_NULL, "msd handle is null");
+  }
+  if (d_total == nullptr && d_axial == nullptr && d_lateral == nullptr &&
+      alpha == nullptr) {
+    return fail(SEAMS_ERR_NULL, "at least one fit output pointer is required");
+  }
+  if (!std::isfinite(t_start) || !std::isfinite(t_end)) {
+    return fail(SEAMS_ERR_ARG, "fit window bounds must be finite");
+  }
+  if (t_start < 0.0 ||
+      (!(t_start == 0.0 && t_end == 0.0) && t_end <= t_start)) {
+    return fail(SEAMS_ERR_RANGE, "invalid fit time window");
+  }
+  if (msd->acc.numLags() < 2) {
+    return fail(SEAMS_ERR_STATE, "msd fit needs at least two lag points");
+  }
+  try {
+    traj::DiffusionFitResult res;
+    if (!msd->acc.fit(t_start, t_end, res)) {
+      return fail(SEAMS_ERR_RANGE, "fewer than two lag points in fit window");
+    }
+    if (d_total != nullptr) {
+      *d_total = res.dTotal;
+    }
+    if (d_axial != nullptr) {
+      *d_axial = res.dAxial;
+    }
+    if (d_lateral != nullptr) {
+      *d_lateral = res.dLateral;
+    }
+    if (alpha != nullptr) {
+      *alpha = res.alpha;
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride,
+                                    double dt, int directed,
+                                    seams_hbond_tcf **out) {
+  clear_error();
+  if (out != nullptr) {
+    *out = nullptr;
+  }
+  if (out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "output pointer is null");
+  }
+  if (origin_stride == 0) {
+    return fail(SEAMS_ERR_RANGE, "origin_stride must be positive");
+  }
+  if (!std::isfinite(dt) || !(dt > 0.0)) {
+    return fail(SEAMS_ERR_ARG, "dt must be finite and positive");
+  }
+  try {
+    auto holder = std::make_unique<seams_hbond_tcf>(max_lag, origin_stride, dt,
+                                                    directed != 0);
+    if (!holder->acc.valid()) {
+      return fail(SEAMS_ERR_ARG, "invalid H-bond TCF parameters");
+    }
+    *out = static_cast<seams_hbond_tcf *>(track(holder.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+void seams_hbond_tcf_destroy(seams_hbond_tcf *tcf) {
+  clear_error();
+  if (claim(tcf)) {
+    delete tcf;
+  }
+}
+
+seams_status seams_hbond_tcf_push(seams_hbond_tcf *tcf, const int *donors,
+                                  const int *acceptors, size_t n_edges) {
+  handle_guard guard(tcf);
+  clear_error();
+  if (tcf == nullptr) {
+    return fail(SEAMS_ERR_NULL, "tcf handle is null");
+  }
+  if (n_edges > 0 && (donors == nullptr || acceptors == nullptr)) {
+    return fail(SEAMS_ERR_NULL, "donors or acceptors is null for non-empty edges");
+  }
+  try {
+    if (!tcf->acc.push(donors, acceptors, n_edges)) {
+      return fail(SEAMS_ERR_ARG, "failed to push H-bond edges");
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_hbond_tcf_curve(const seams_hbond_tcf *tcf, double *lag_time,
+                                   double *c_intermittent,
+                                   double *s_continuous, size_t *n_origins,
+                                   size_t cap, size_t *n_lags) {
+  read_guard guard(tcf);
+  clear_error();
+  if (tcf == nullptr || n_lags == nullptr) {
+    return fail(SEAMS_ERR_NULL, "tcf handle or n_lags is null");
+  }
+  if (tcf->acc.framesSeen() == 0) {
+    return fail(SEAMS_ERR_STATE, "tcf accumulator has no frames");
+  }
+  try {
+    std::vector<double> lt;
+    std::vector<double> chb;
+    std::vector<double> shb;
+    std::vector<std::size_t> orig;
+    tcf->acc.curve(lt, chb, shb, orig);
+    const std::size_t nl = lt.size();
+    *n_lags = nl;
+    if (lag_time == nullptr && c_intermittent == nullptr &&
+        s_continuous == nullptr && n_origins == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap < nl) {
+      return fail(SEAMS_ERR_RANGE, "tcf curve buffer is short");
+    }
+    if (lag_time != nullptr && nl > 0) {
+      std::copy_n(lt.data(), nl, lag_time);
+    }
+    if (c_intermittent != nullptr && nl > 0) {
+      std::copy_n(chb.data(), nl, c_intermittent);
+    }
+    if (s_continuous != nullptr && nl > 0) {
+      std::copy_n(shb.data(), nl, s_continuous);
+    }
+    if (n_origins != nullptr && nl > 0) {
+      std::copy_n(orig.data(), nl, n_origins);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_hbond_tcf_fit(const seams_hbond_tcf *tcf, double t_start,
+                                 double t_end, double *tau_c_int,
+                                 double *tau_c_exp, double *tau_s_int,
+                                 double *tau_s_exp) {
+  read_guard guard(tcf);
+  clear_error();
+  if (tcf == nullptr) {
+    return fail(SEAMS_ERR_NULL, "tcf handle is null");
+  }
+  if (tau_c_int == nullptr && tau_c_exp == nullptr && tau_s_int == nullptr &&
+      tau_s_exp == nullptr) {
+    return fail(SEAMS_ERR_NULL, "at least one lifetime output pointer is required");
+  }
+  if (!std::isfinite(t_start) || !std::isfinite(t_end)) {
+    return fail(SEAMS_ERR_ARG, "fit window bounds must be finite");
+  }
+  if (t_start < 0.0 ||
+      (!(t_start == 0.0 && t_end == 0.0) && t_end <= t_start)) {
+    return fail(SEAMS_ERR_RANGE, "invalid fit time window");
+  }
+  if (tcf->acc.numLags() < 2) {
+    return fail(SEAMS_ERR_STATE, "tcf fit needs at least two lag points");
+  }
+  try {
+    traj::DecayFitResult inter;
+    traj::DecayFitResult cont;
+    if (!tcf->acc.fit(t_start, t_end, inter, cont)) {
+      return fail(SEAMS_ERR_RANGE, "insufficient lag points in fit window");
+    }
+    if (tau_c_int != nullptr) {
+      *tau_c_int = inter.tauIntegral;
+    }
+    if (tau_c_exp != nullptr) {
+      *tau_c_exp = inter.tauExp;
+    }
+    if (tau_s_int != nullptr) {
+      *tau_s_int = cont.tauIntegral;
+    }
+    if (tau_s_exp != nullptr) {
+      *tau_s_exp = cont.tauExp;
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_reorient_create(size_t n_vectors, size_t max_lag,
+                                   size_t origin_stride, double dt,
+                                   seams_reorient **out) {
+  clear_error();
+  if (out != nullptr) {
+    *out = nullptr;
+  }
+  if (out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "output pointer is null");
+  }
+  if (n_vectors == 0 || origin_stride == 0) {
+    return fail(SEAMS_ERR_RANGE,
+                "n_vectors and origin_stride must be positive");
+  }
+  if (!std::isfinite(dt) || !(dt > 0.0)) {
+    return fail(SEAMS_ERR_ARG, "dt must be finite and positive");
+  }
+  try {
+    auto holder =
+        std::make_unique<seams_reorient>(n_vectors, max_lag, origin_stride, dt);
+    if (!holder->acc.valid()) {
+      return fail(SEAMS_ERR_ARG, "invalid reorientation parameters");
+    }
+    *out = static_cast<seams_reorient *>(track(holder.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+void seams_reorient_destroy(seams_reorient *reorient) {
+  clear_error();
+  if (claim(reorient)) {
+    delete reorient;
+  }
+}
+
+seams_status seams_reorient_push(seams_reorient *reorient,
+                                 const double *vectors, size_t n_vectors) {
+  handle_guard guard(reorient);
+  clear_error();
+  if (reorient == nullptr || vectors == nullptr) {
+    return fail(SEAMS_ERR_NULL, "reorient handle or vectors is null");
+  }
+  if (n_vectors != reorient->acc.numVectors()) {
+    return fail(SEAMS_ERR_RANGE, "n_vectors does not match accumulator");
+  }
+  if (!finite_coordinates(vectors, n_vectors)) {
+    return fail(SEAMS_ERR_ARG, "vectors contain a non-finite number");
+  }
+  try {
+    if (!reorient->acc.push(vectors, n_vectors)) {
+      return fail(SEAMS_ERR_ARG, "failed to push vectors");
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_reorient_curve(const seams_reorient *reorient,
+                                  double *lag_time, double *c1, double *c2,
+                                  size_t *n_origins, size_t cap,
+                                  size_t *n_lags) {
+  read_guard guard(reorient);
+  clear_error();
+  if (reorient == nullptr || n_lags == nullptr) {
+    return fail(SEAMS_ERR_NULL, "reorient handle or n_lags is null");
+  }
+  if (reorient->acc.framesSeen() == 0) {
+    return fail(SEAMS_ERR_STATE, "reorient accumulator has no frames");
+  }
+  try {
+    std::vector<double> lt;
+    std::vector<double> c1v;
+    std::vector<double> c2v;
+    std::vector<std::size_t> orig;
+    reorient->acc.curve(lt, c1v, c2v, orig);
+    const std::size_t nl = lt.size();
+    *n_lags = nl;
+    if (lag_time == nullptr && c1 == nullptr && c2 == nullptr &&
+        n_origins == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap < nl) {
+      return fail(SEAMS_ERR_RANGE, "reorient curve buffer is short");
+    }
+    if (lag_time != nullptr && nl > 0) {
+      std::copy_n(lt.data(), nl, lag_time);
+    }
+    if (c1 != nullptr && nl > 0) {
+      std::copy_n(c1v.data(), nl, c1);
+    }
+    if (c2 != nullptr && nl > 0) {
+      std::copy_n(c2v.data(), nl, c2);
+    }
+    if (n_origins != nullptr && nl > 0) {
+      std::copy_n(orig.data(), nl, n_origins);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start,
+                                double t_end, double *tau1_int,
+                                double *tau1_exp, double *tau2_int,
+                                double *tau2_exp) {
+  read_guard guard(reorient);
+  clear_error();
+  if (reorient == nullptr) {
+    return fail(SEAMS_ERR_NULL, "reorient handle is null");
+  }
+  if (tau1_int == nullptr && tau1_exp == nullptr && tau2_int == nullptr &&
+      tau2_exp == nullptr) {
+    return fail(SEAMS_ERR_NULL, "at least one tau output pointer is required");
+  }
+  if (!std::isfinite(t_start) || !std::isfinite(t_end)) {
+    return fail(SEAMS_ERR_ARG, "fit window bounds must be finite");
+  }
+  if (t_start < 0.0 ||
+      (!(t_start == 0.0 && t_end == 0.0) && t_end <= t_start)) {
+    return fail(SEAMS_ERR_RANGE, "invalid fit time window");
+  }
+  if (reorient->acc.numLags() < 2) {
+    return fail(SEAMS_ERR_STATE, "reorient fit needs at least two lag points");
+  }
+  try {
+    traj::DecayFitResult f1;
+    traj::DecayFitResult f2;
+    if (!reorient->acc.fit(t_start, t_end, f1, f2)) {
+      return fail(SEAMS_ERR_RANGE, "insufficient lag points in fit window");
+    }
+    if (tau1_int != nullptr) {
+      *tau1_int = f1.tauIntegral;
+    }
+    if (tau1_exp != nullptr) {
+      *tau1_exp = f1.tauExp;
+    }
+    if (tau2_int != nullptr) {
+      *tau2_int = f2.tauIntegral;
+    }
+    if (tau2_exp != nullptr) {
+      *tau2_exp = f2.tauExp;
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
 }
 
 } // extern "C"

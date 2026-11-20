@@ -1299,6 +1299,288 @@ static void fingerprint_contract(void) {
   truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
 }
 
+static void trajectory_contract(void) {
+  const char *fn = "seams_mols";
+  int mols_buf[N_MAX] = {0};
+  expect(seams_mols(NULL, mols_buf, (size_t)g_n), SEAMS_ERR_NULL, fn, "null sys");
+  expect(seams_mols(g_good, NULL, (size_t)g_n), SEAMS_ERR_NULL, fn, "null mols");
+  expect(seams_mols(g_empty, mols_buf, (size_t)g_n), SEAMS_ERR_STATE, fn, "empty sys");
+  expect(seams_mols(g_good, mols_buf, (size_t)(g_n - 1)), SEAMS_ERR_RANGE, fn, "short mols");
+  expect(seams_mols(g_good, mols_buf, (size_t)g_n), SEAMS_OK, fn, "valid");
+
+  fn = "seams_set_mols";
+  expect(seams_set_mols(NULL, mols_buf, (size_t)g_n), SEAMS_ERR_NULL, fn, "null sys");
+  expect(seams_set_mols(g_good, NULL, (size_t)g_n), SEAMS_ERR_NULL, fn, "null mols");
+  expect(seams_set_mols(g_empty, mols_buf, (size_t)g_n), SEAMS_ERR_STATE, fn, "empty sys");
+  expect(seams_set_mols(g_good, mols_buf, (size_t)(g_n - 1)), SEAMS_ERR_RANGE, fn, "wrong len");
+  expect(seams_set_mols(g_good, mols_buf, (size_t)g_n), SEAMS_OK, fn, "valid");
+
+  fn = "seams_molecule_centres";
+  size_t nm = 0;
+  double centres[3 * N_MAX] = {0};
+  double bad_mass[N_MAX] = {0};
+  expect(seams_molecule_centres(NULL, NULL, 0, NULL, 0, NULL, NULL, 0, &nm), SEAMS_ERR_NULL, fn,
+         "null sys");
+  expect(seams_molecule_centres(g_good, NULL, 0, NULL, 0, NULL, NULL, 0, NULL), SEAMS_ERR_NULL, fn,
+         "null n_mols");
+  expect(seams_molecule_centres(g_empty, NULL, 0, NULL, 0, NULL, NULL, 0, &nm), SEAMS_ERR_STATE, fn,
+         "empty sys");
+  expect(seams_molecule_centres(g_good, mols_buf, 1, NULL, 0, NULL, NULL, 0, &nm), SEAMS_ERR_RANGE,
+         fn, "bad mols_len");
+  expect(seams_molecule_centres(g_good, NULL, 0, bad_mass, (size_t)g_n, NULL, NULL, 0, &nm),
+         SEAMS_ERR_ARG, fn, "non-positive mass");
+  expect(seams_molecule_centres(g_good, NULL, 0, NULL, 0, NULL, NULL, 0, &nm), SEAMS_OK, fn,
+         "query");
+  expect(seams_molecule_centres(g_good, NULL, 0, NULL, 0, mols_buf, centres, 1, &nm),
+         SEAMS_ERR_RANGE, fn, "short cap");
+  expect(seams_molecule_centres(g_good, NULL, 0, NULL, 0, mols_buf, centres, nm, &nm), SEAMS_OK, fn,
+         "valid");
+
+  fn = "seams_traj_unwrap_positions";
+  const double box_ok[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+  const double box_bad[9] = {0, 0, 0, 0, 10, 10, 0, 0, 0};
+  const double xyz2[6] = {9.5, 1.0, 2.0, 0.5, 1.0, 2.0};
+  double xyz_nan[6] = {9.5, NAN, 2.0, 0.5, 1.0, 2.0};
+  double unwrap_out[6] = {0};
+  expect(seams_traj_unwrap_positions(NULL, 2, 1, box_ok, 1, unwrap_out, 6), SEAMS_ERR_NULL, fn,
+         "null xyz");
+  expect(seams_traj_unwrap_positions(xyz2, 2, 1, NULL, 1, unwrap_out, 6), SEAMS_ERR_NULL, fn,
+         "null boxes");
+  expect(seams_traj_unwrap_positions(xyz2, 2, 1, box_ok, 1, NULL, 6), SEAMS_ERR_NULL, fn,
+         "null out");
+  expect(seams_traj_unwrap_positions(xyz2, 0, 1, box_ok, 1, unwrap_out, 6), SEAMS_ERR_RANGE, fn,
+         "zero frames");
+  expect(seams_traj_unwrap_positions(xyz2, 2, 1, box_ok, 3, unwrap_out, 6), SEAMS_ERR_RANGE, fn,
+         "bad nboxes");
+  expect(seams_traj_unwrap_positions(xyz2, 2, 1, box_ok, 1, unwrap_out, 5), SEAMS_ERR_RANGE, fn,
+         "short out");
+  expect(seams_traj_unwrap_positions(xyz2, 2, 1, box_bad, 1, unwrap_out, 6), SEAMS_ERR_BOX, fn,
+         "bad box");
+  expect(seams_traj_unwrap_positions(xyz_nan, 2, 1, box_ok, 1, unwrap_out, 6), SEAMS_ERR_ARG, fn,
+         "nan xyz");
+  expect(seams_traj_unwrap_positions(xyz2, 2, 1, box_ok, 1, unwrap_out, 6), SEAMS_OK, fn, "valid");
+
+  fn = "seams_traj_unwrap_centres";
+  const double mol_xyz[12] = {9.8, 0, 0, 0.2, 0, 0, 0.3, 0, 0, 0.7, 0, 0};
+  const int mol_two[2] = {1, 1};
+  int mid_out[2] = {0};
+  expect(seams_traj_unwrap_centres(NULL, 2, 2, box_ok, 1, mol_two, 2, NULL, 0, NULL, 0, NULL, 0,
+                                   &nm),
+         SEAMS_ERR_NULL, fn, "null xyz");
+  expect(seams_traj_unwrap_centres(mol_xyz, 2, 2, box_ok, 1, mol_two, 2, NULL, 0, NULL, 0, NULL, 0,
+                                   NULL),
+         SEAMS_ERR_NULL, fn, "null nm");
+  expect(seams_traj_unwrap_centres(mol_xyz, 2, 2, box_ok, 1, mol_two, 1, NULL, 0, NULL, 0, NULL, 0,
+                                   &nm),
+         SEAMS_ERR_RANGE, fn, "bad mols_len");
+  expect(seams_traj_unwrap_centres(mol_xyz, 2, 2, box_bad, 1, mol_two, 2, NULL, 0, NULL, 0, NULL, 0,
+                                   &nm),
+         SEAMS_ERR_BOX, fn, "bad box");
+  expect(seams_traj_unwrap_centres(mol_xyz, 2, 2, box_ok, 1, mol_two, 2, NULL, 0, mid_out, 2,
+                                   unwrap_out, 3, &nm),
+         SEAMS_ERR_RANGE, fn, "short centres");
+  expect(seams_traj_unwrap_centres(mol_xyz, 2, 2, box_ok, 1, mol_two, 2, NULL, 0, mid_out, 2,
+                                   unwrap_out, 6, &nm),
+         SEAMS_OK, fn, "valid");
+
+  fn = "seams_water_vectors";
+  size_t nw = 0;
+  expect(seams_water_vectors(NULL, 1, 2, NULL, NULL, NULL, NULL, NULL, 0, &nw), SEAMS_ERR_NULL, fn,
+         "null sys");
+  expect(seams_water_vectors(g_good, 1, 2, NULL, NULL, NULL, NULL, NULL, 0, NULL), SEAMS_ERR_NULL,
+         fn, "null nw");
+  expect(seams_water_vectors(g_empty, 1, 2, NULL, NULL, NULL, NULL, NULL, 0, &nw), SEAMS_ERR_STATE,
+         fn, "empty sys");
+  expect(seams_water_vectors(g_good, 1, 1, NULL, NULL, NULL, NULL, NULL, 0, &nw), SEAMS_ERR_ARG, fn,
+         "same species");
+  expect(seams_water_vectors(g_good, 1, 2, NULL, NULL, NULL, NULL, NULL, 0, &nw), SEAMS_OK, fn,
+         "valid");
+
+  fn = "seams_molecule_dipoles";
+  double dip[3 * N_MAX] = {0};
+  double uvec[3 * N_MAX] = {0};
+  expect(seams_molecule_dipoles(NULL, NULL, 0, NULL, 0, NULL, NULL, NULL, 0, &nm), SEAMS_ERR_NULL,
+         fn, "null sys");
+  expect(seams_molecule_dipoles(g_empty, NULL, 0, NULL, 0, NULL, NULL, NULL, 0, &nm),
+         SEAMS_ERR_STATE, fn, "empty sys");
+  expect(seams_molecule_dipoles(g_good, NULL, 1, NULL, 0, NULL, NULL, NULL, 0, &nm),
+         SEAMS_ERR_RANGE, fn, "mols null with len");
+  expect(seams_molecule_dipoles(g_good, NULL, 0, NULL, 0, NULL, NULL, NULL, 0, &nm), SEAMS_OK, fn,
+         "query");
+  expect(seams_molecule_dipoles(g_good, NULL, 0, NULL, 0, mols_buf, dip, uvec, 1, &nm),
+         SEAMS_ERR_RANGE, fn, "short cap");
+  expect(seams_molecule_dipoles(g_good, NULL, 0, NULL, 0, mols_buf, dip, uvec, nm, &nm), SEAMS_OK,
+         fn, "valid");
+
+  fn = "seams_orientation_order";
+  const double vecs[6] = {0, 0, 1, 1, 0, 0};
+  const double z_axis[3] = {0, 0, 1};
+  const double zero_axis[3] = {0, 0, 0};
+  double ctheta[2] = {0}, p2buf[2] = {0}, mp1 = 0, mp2 = 0;
+  expect(seams_orientation_order(vecs, 2, NULL, ctheta, p2buf, 2, &mp1, &mp2), SEAMS_ERR_NULL, fn,
+         "null axis");
+  expect(seams_orientation_order(NULL, 2, z_axis, ctheta, p2buf, 2, &mp1, &mp2), SEAMS_ERR_NULL, fn,
+         "null vecs");
+  expect(seams_orientation_order(vecs, 2, z_axis, NULL, NULL, 0, NULL, NULL), SEAMS_ERR_NULL, fn,
+         "no outputs");
+  expect(seams_orientation_order(vecs, 2, zero_axis, NULL, NULL, 0, &mp1, &mp2), SEAMS_ERR_ARG, fn,
+         "zero axis");
+  expect(seams_orientation_order(vecs, 2, z_axis, ctheta, p2buf, 1, &mp1, &mp2), SEAMS_ERR_RANGE,
+         fn, "short cap");
+  expect(seams_orientation_order(vecs, 2, z_axis, ctheta, p2buf, 2, &mp1, &mp2), SEAMS_OK, fn,
+         "valid");
+
+  fn = "seams_msd_create";
+  seams_msd *msd = NULL;
+  expect(seams_msd_create(1, 4, 1, 1.0, NULL, &msd), SEAMS_ERR_NULL, fn, "null axis");
+  expect(seams_msd_create(1, 4, 1, 1.0, z_axis, NULL), SEAMS_ERR_NULL, fn, "null out");
+  expect(seams_msd_create(0, 4, 1, 1.0, z_axis, &msd), SEAMS_ERR_RANGE, fn, "zero natoms");
+  expect(seams_msd_create(1, 4, 0, 1.0, z_axis, &msd), SEAMS_ERR_RANGE, fn, "zero stride");
+  expect(seams_msd_create(1, 4, 1, -1.0, z_axis, &msd), SEAMS_ERR_ARG, fn, "negative dt");
+  expect(seams_msd_create(1, 4, 1, 1.0, zero_axis, &msd), SEAMS_ERR_ARG, fn, "zero axis");
+  expect(seams_msd_create(1, 4, 1, 1.0, z_axis, &msd), SEAMS_OK, fn, "valid");
+
+  fn = "seams_msd_curve";
+  size_t nlags = 0;
+  double lt[4] = {0}, mtot[4] = {0}, maxl[4] = {0}, mlat[4] = {0};
+  size_t norig[4] = {0};
+  expect(seams_msd_curve(NULL, NULL, NULL, NULL, NULL, NULL, 0, &nlags), SEAMS_ERR_NULL, fn,
+         "null msd");
+  expect(seams_msd_curve(msd, NULL, NULL, NULL, NULL, NULL, 0, &nlags), SEAMS_ERR_STATE, fn,
+         "empty msd");
+
+  fn = "seams_msd_fit";
+  double dtot = 0, dax = 0, dlat = 0, alpha = 0;
+  expect(seams_msd_fit(NULL, 0.0, 0.0, &dtot, NULL, NULL, NULL), SEAMS_ERR_NULL, fn, "null msd");
+  expect(seams_msd_fit(msd, 0.0, 0.0, NULL, NULL, NULL, NULL), SEAMS_ERR_NULL, fn, "no outputs");
+  expect(seams_msd_fit(msd, 0.0, 0.0, &dtot, NULL, NULL, NULL), SEAMS_ERR_STATE, fn, "too few lags");
+
+  fn = "seams_msd_push";
+  const double p0[3] = {0, 0, 0}, p1[3] = {0, 0, 1}, p2_pt[3] = {0, 0, 2};
+  const double pnan[3] = {NAN, 0, 0};
+  expect(seams_msd_push(NULL, p0, 1, NULL, 0), SEAMS_ERR_NULL, fn, "null msd");
+  expect(seams_msd_push(msd, NULL, 1, NULL, 0), SEAMS_ERR_NULL, fn, "null xyz");
+  expect(seams_msd_push(msd, p0, 2, NULL, 0), SEAMS_ERR_RANGE, fn, "wrong natoms");
+  expect(seams_msd_push(msd, p0, 1, box_ok, 3), SEAMS_ERR_RANGE, fn, "bad box_len");
+  expect(seams_msd_push(msd, p0, 1, box_bad, 9), SEAMS_ERR_BOX, fn, "bad box");
+  expect(seams_msd_push(msd, pnan, 1, NULL, 0), SEAMS_ERR_ARG, fn, "nan xyz");
+  expect(seams_msd_push(msd, p0, 1, NULL, 0), SEAMS_OK, fn, "frame 0");
+  expect(seams_msd_push(msd, p1, 1, box_ok, 9), SEAMS_ERR_STATE, fn, "mixed box mode");
+  expect(seams_msd_push(msd, p1, 1, NULL, 0), SEAMS_OK, fn, "frame 1");
+  expect(seams_msd_push(msd, p2_pt, 1, NULL, 0), SEAMS_OK, fn, "frame 2");
+
+  fn = "seams_msd_curve";
+  expect(seams_msd_curve(msd, lt, mtot, maxl, mlat, norig, 1, &nlags), SEAMS_ERR_RANGE, fn,
+         "short cap");
+  expect(seams_msd_curve(msd, lt, mtot, maxl, mlat, norig, 4, &nlags), SEAMS_OK, fn, "valid");
+
+  fn = "seams_msd_fit";
+  expect(seams_msd_fit(msd, 2.0, 1.0, &dtot, &dax, &dlat, &alpha), SEAMS_ERR_RANGE, fn,
+         "inverted window");
+  expect(seams_msd_fit(msd, NAN, 1.0, &dtot, &dax, &dlat, &alpha), SEAMS_ERR_ARG, fn, "nan window");
+  expect(seams_msd_fit(msd, 0.0, 0.0, &dtot, &dax, &dlat, &alpha), SEAMS_OK, fn, "valid");
+
+  fn = "seams_msd_destroy";
+  seams_msd_destroy(NULL);
+  cover(fn);
+  seams_msd_destroy(msd);
+  seams_msd_destroy(msd);
+  truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
+
+  fn = "seams_hbond_tcf_create";
+  seams_hbond_tcf *tcf = NULL;
+  expect(seams_hbond_tcf_create(4, 1, 1.0, 1, NULL), SEAMS_ERR_NULL, fn, "null out");
+  expect(seams_hbond_tcf_create(4, 0, 1.0, 1, &tcf), SEAMS_ERR_RANGE, fn, "zero stride");
+  expect(seams_hbond_tcf_create(4, 1, 0.0, 1, &tcf), SEAMS_ERR_ARG, fn, "zero dt");
+  expect(seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf), SEAMS_OK, fn, "valid");
+
+  fn = "seams_hbond_tcf_curve";
+  expect(seams_hbond_tcf_curve(NULL, NULL, NULL, NULL, NULL, 0, &nlags), SEAMS_ERR_NULL, fn,
+         "null tcf");
+  expect(seams_hbond_tcf_curve(tcf, NULL, NULL, NULL, NULL, 0, &nlags), SEAMS_ERR_STATE, fn,
+         "empty tcf");
+
+  fn = "seams_hbond_tcf_fit";
+  double tc_i = 0, tc_e = 0, ts_i = 0, ts_e = 0;
+  expect(seams_hbond_tcf_fit(NULL, 0.0, 0.0, &tc_i, NULL, NULL, NULL), SEAMS_ERR_NULL, fn,
+         "null tcf");
+  expect(seams_hbond_tcf_fit(tcf, 0.0, 0.0, NULL, NULL, NULL, NULL), SEAMS_ERR_NULL, fn,
+         "no outputs");
+  expect(seams_hbond_tcf_fit(tcf, 0.0, 0.0, &tc_i, NULL, NULL, NULL), SEAMS_ERR_STATE, fn,
+         "too few lags");
+
+  fn = "seams_hbond_tcf_push";
+  const int don[2] = {1, 2}, acc[2] = {3, 4};
+  expect(seams_hbond_tcf_push(NULL, don, acc, 2), SEAMS_ERR_NULL, fn, "null tcf");
+  expect(seams_hbond_tcf_push(tcf, NULL, acc, 2), SEAMS_ERR_NULL, fn, "null donors");
+  expect(seams_hbond_tcf_push(tcf, don, acc, 2), SEAMS_OK, fn, "frame 0");
+  expect(seams_hbond_tcf_push(tcf, don, acc, 1), SEAMS_OK, fn, "frame 1");
+
+  fn = "seams_hbond_tcf_curve";
+  expect(seams_hbond_tcf_curve(tcf, lt, mtot, maxl, norig, 1, &nlags), SEAMS_ERR_RANGE, fn,
+         "short cap");
+  expect(seams_hbond_tcf_curve(tcf, lt, mtot, maxl, norig, 4, &nlags), SEAMS_OK, fn, "valid");
+
+  fn = "seams_hbond_tcf_fit";
+  expect(seams_hbond_tcf_fit(tcf, 2.0, 1.0, &tc_i, &tc_e, &ts_i, &ts_e), SEAMS_ERR_RANGE, fn,
+         "inverted window");
+  expect(seams_hbond_tcf_fit(tcf, 0.0, 0.0, &tc_i, &tc_e, &ts_i, &ts_e), SEAMS_OK, fn, "valid");
+
+  fn = "seams_hbond_tcf_destroy";
+  seams_hbond_tcf_destroy(NULL);
+  cover(fn);
+  seams_hbond_tcf_destroy(tcf);
+  seams_hbond_tcf_destroy(tcf);
+  truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
+
+  fn = "seams_reorient_create";
+  seams_reorient *rot = NULL;
+  expect(seams_reorient_create(1, 4, 1, 1.0, NULL), SEAMS_ERR_NULL, fn, "null out");
+  expect(seams_reorient_create(0, 4, 1, 1.0, &rot), SEAMS_ERR_RANGE, fn, "zero n_vectors");
+  expect(seams_reorient_create(1, 4, 1, -0.5, &rot), SEAMS_ERR_ARG, fn, "negative dt");
+  expect(seams_reorient_create(1, 4, 1, 1.0, &rot), SEAMS_OK, fn, "valid");
+
+  fn = "seams_reorient_curve";
+  expect(seams_reorient_curve(NULL, NULL, NULL, NULL, NULL, 0, &nlags), SEAMS_ERR_NULL, fn,
+         "null rot");
+  expect(seams_reorient_curve(rot, NULL, NULL, NULL, NULL, 0, &nlags), SEAMS_ERR_STATE, fn,
+         "empty rot");
+
+  fn = "seams_reorient_fit";
+  expect(seams_reorient_fit(NULL, 0.0, 0.0, &tc_i, NULL, NULL, NULL), SEAMS_ERR_NULL, fn,
+         "null rot");
+  expect(seams_reorient_fit(rot, 0.0, 0.0, NULL, NULL, NULL, NULL), SEAMS_ERR_NULL, fn,
+         "no outputs");
+  expect(seams_reorient_fit(rot, 0.0, 0.0, &tc_i, NULL, NULL, NULL), SEAMS_ERR_STATE, fn,
+         "too few lags");
+
+  fn = "seams_reorient_push";
+  const double rv0[3] = {0, 0, 1}, rv1[3] = {0.6, 0, 0.8};
+  expect(seams_reorient_push(NULL, rv0, 1), SEAMS_ERR_NULL, fn, "null rot");
+  expect(seams_reorient_push(rot, NULL, 1), SEAMS_ERR_NULL, fn, "null vectors");
+  expect(seams_reorient_push(rot, rv0, 2), SEAMS_ERR_RANGE, fn, "wrong count");
+  expect(seams_reorient_push(rot, pnan, 1), SEAMS_ERR_ARG, fn, "nan vectors");
+  expect(seams_reorient_push(rot, rv0, 1), SEAMS_OK, fn, "frame 0");
+  expect(seams_reorient_push(rot, rv1, 1), SEAMS_OK, fn, "frame 1");
+
+  fn = "seams_reorient_curve";
+  expect(seams_reorient_curve(rot, lt, mtot, maxl, norig, 1, &nlags), SEAMS_ERR_RANGE, fn,
+         "short cap");
+  expect(seams_reorient_curve(rot, lt, mtot, maxl, norig, 4, &nlags), SEAMS_OK, fn, "valid");
+
+  fn = "seams_reorient_fit";
+  expect(seams_reorient_fit(rot, 2.0, 1.0, &tc_i, &tc_e, &ts_i, &ts_e), SEAMS_ERR_RANGE, fn,
+         "inverted window");
+  expect(seams_reorient_fit(rot, 0.0, 0.0, &tc_i, &tc_e, &ts_i, &ts_e), SEAMS_OK, fn, "valid");
+
+  fn = "seams_reorient_destroy";
+  seams_reorient_destroy(NULL);
+  cover(fn);
+  seams_reorient_destroy(rot);
+  seams_reorient_destroy(rot);
+  truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
+}
+
 /* ------------------------------------------------------------------ */
 
 static int coverage(const char *list) {
@@ -1351,6 +1633,7 @@ int main(int argc, char **argv) {
   cages_contract();
   brine_contract();
   fingerprint_contract();
+  trajectory_contract();
   seams_system_destroy(g_good);
   seams_system_destroy(g_empty);
   seams_system_destroy(g_nan);

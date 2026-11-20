@@ -552,6 +552,115 @@ struct BrineOptions {
   Axis axis = Axis::Z; /**< Front axis. */
 };
 
+/**
+ * @brief Per-molecule intact periodic centres.
+ * @ingroup seams_cpp
+ */
+struct MoleculeCentres {
+  std::vector<int> mol_ids;    /**< Unique molecule ids in appearance order. */
+  std::vector<double> centres; /**< Interleaved coordinates, 3 * n_mols doubles. */
+};
+
+/**
+ * @brief Per-water orientation vectors under minimum image.
+ * @ingroup seams_cpp
+ */
+struct WaterVectors {
+  std::vector<int> mol_ids;       /**< Water molecule ids. */
+  std::vector<double> oh_mid;     /**< Raw O-to-H-midpoint vectors, Angstrom. */
+  std::vector<double> bisector;   /**< Unit bisector vectors. */
+  std::vector<double> hh;         /**< Raw H1-to-H2 vectors, Angstrom. */
+  std::vector<double> hh_unit;    /**< Unit H1-to-H2 vectors. */
+};
+
+/**
+ * @brief Per-molecule dipole or geometric orientation vectors.
+ * @ingroup seams_cpp
+ */
+struct MoleculeDipoles {
+  std::vector<int> mol_ids;          /**< Unique molecule ids. */
+  std::vector<double> dipoles;       /**< Raw dipole or bond vectors, 3 * n_mols. */
+  std::vector<double> unit_vectors;  /**< Normalized orientation vectors, 3 * n_mols. */
+};
+
+/**
+ * @brief Axis-projected orientational order parameters P1 and P2.
+ * @ingroup seams_cpp
+ */
+struct OrientationOrder {
+  std::vector<double> cos_theta; /**< Per-vector cos(theta). */
+  std::vector<double> p2;        /**< Per-vector P2(cos(theta)). */
+  double mean_p1 = 0;            /**< Ensemble mean of cos(theta). */
+  double mean_p2 = 0;            /**< Ensemble mean of P2(cos(theta)). */
+};
+
+/**
+ * @brief Accumulated multi-origin MSD curves.
+ * @ingroup seams_cpp
+ */
+struct MsdCurve {
+  std::vector<double> lag_time;      /**< Lag times k * dt. */
+  std::vector<double> total;         /**< 3D total MSD. */
+  std::vector<double> axial;         /**< 1D axial MSD. */
+  std::vector<double> lateral;       /**< 2D lateral MSD. */
+  std::vector<std::size_t> n_origins; /**< Time-origin count at each lag. */
+};
+
+/**
+ * @brief Linear Einstein diffusion fit coefficients.
+ * @ingroup seams_cpp
+ */
+struct DiffusionFit {
+  double d_total = 0;   /**< 3D diffusion coefficient (slope / 6). */
+  double d_axial = 0;   /**< 1D axial diffusion coefficient (slope / 2). */
+  double d_lateral = 0; /**< 2D lateral diffusion coefficient (slope / 4). */
+  double alpha = 0;     /**< Log-log anomalous diffusion exponent. */
+};
+
+/**
+ * @brief Intermittent and continuous H-bond lifetime curves.
+ * @ingroup seams_cpp
+ */
+struct HbondLifetimeCurve {
+  std::vector<double> lag_time;       /**< Lag times k * dt. */
+  std::vector<double> c_intermittent; /**< Intermittent autocorrelation C_HB. */
+  std::vector<double> s_continuous;   /**< Continuous survival S_HB. */
+  std::vector<std::size_t> n_origins; /**< Time-origin count at each lag. */
+};
+
+/**
+ * @brief Integrated and single-exponential H-bond lifetimes.
+ * @ingroup seams_cpp
+ */
+struct HbondLifetimeFit {
+  double tau_c_int = 0; /**< Trapezoidal integral of C_HB. */
+  double tau_c_exp = 0; /**< Exponential decay time of C_HB. */
+  double tau_s_int = 0; /**< Trapezoidal integral of S_HB. */
+  double tau_s_exp = 0; /**< Exponential decay time of S_HB. */
+};
+
+/**
+ * @brief Accumulated C1 and C2 orientational correlation curves.
+ * @ingroup seams_cpp
+ */
+struct ReorientationCurve {
+  std::vector<double> lag_time;       /**< Lag times k * dt. */
+  std::vector<double> c1;             /**< First Legendre correlation C1. */
+  std::vector<double> c2;             /**< Second Legendre correlation C2. */
+  std::vector<std::size_t> n_origins; /**< Time-origin count at each lag. */
+};
+
+/**
+ * @brief Integrated and single-exponential reorientation times.
+ * @ingroup seams_cpp
+ */
+struct ReorientationFit {
+  double tau1_int = 0; /**< Trapezoidal integral of C1. */
+  double tau1_exp = 0; /**< Exponential decay time of C1. */
+  double tau2_int = 0; /**< Trapezoidal integral of C2. */
+  double tau2_exp = 0; /**< Exponential decay time of C2. */
+};
+
 namespace detail {
 
 inline void check(int status, const void *handle) {
@@ -922,6 +1031,184 @@ class Brine : public detail::Handle<seams_brine, seams_brine_destroy> {
   [[nodiscard]] Pockets pockets() const {
     Pockets out;
     detail::check(seams_brine_pockets(get(), &out.pockets, &out.reservoir_waters), get());
+    return out;
+  }
+};
+
+/**
+ * @brief Owned streaming MSD accumulator.
+ * @ingroup seams_cpp
+ */
+class Msd : public detail::Handle<seams_msd, seams_msd_destroy> {
+ public:
+  /**
+   * @brief Allocate a streaming MSD accumulator.
+   * @param natoms Particle count per frame.
+   * @param max_lag Maximum lag in frames, or 0 for all lags.
+   * @param origin_stride Frame stride between origins.
+   * @param dt Frame spacing in physical time units.
+   * @param axis Axial direction 3-vector.
+   */
+  Msd(std::size_t natoms, std::size_t max_lag, std::size_t origin_stride, double dt,
+      std::span<const double, 3> axis) {
+    seams_msd *raw = nullptr;
+    detail::check(seams_msd_create(natoms, max_lag, origin_stride, dt, axis.data(), &raw), nullptr);
+    *this = Msd(raw);
+  }
+
+  using detail::Handle<seams_msd, seams_msd_destroy>::Handle;
+
+  /** @brief Push one unwrapped coordinate frame. */
+  void push(std::span<const double> xyz) {
+    if (xyz.size() % 3 != 0) {
+      throw Error(SEAMS_ERR_ARG, "coordinates are not a multiple of 3");
+    }
+    detail::check(seams_msd_push(get(), xyz.data(), xyz.size() / 3, nullptr, 0), get());
+  }
+
+  /** @brief Push one periodic coordinate frame and unwrap incrementally. */
+  void push(std::span<const double> xyz, std::span<const double, 9> box9) {
+    if (xyz.size() % 3 != 0) {
+      throw Error(SEAMS_ERR_ARG, "coordinates are not a multiple of 3");
+    }
+    detail::check(seams_msd_push(get(), xyz.data(), xyz.size() / 3, box9.data(), 9), get());
+  }
+
+  /** @brief Copy out accumulated total, axial, and lateral MSD curves. */
+  [[nodiscard]] MsdCurve curve() const {
+    std::size_t nl = 0;
+    detail::check(seams_msd_curve(get(), nullptr, nullptr, nullptr, nullptr, nullptr, 0, &nl),
+                  get());
+    MsdCurve out;
+    out.lag_time.resize(nl);
+    out.total.resize(nl);
+    out.axial.resize(nl);
+    out.lateral.resize(nl);
+    out.n_origins.resize(nl);
+    detail::check(seams_msd_curve(get(), out.lag_time.data(), out.total.data(), out.axial.data(),
+                                  out.lateral.data(), out.n_origins.data(), nl, &nl),
+                  get());
+    return out;
+  }
+
+  /** @brief Fit Einstein diffusion coefficients over `[t_start, t_end]`. */
+  [[nodiscard]] DiffusionFit fit(double t_start = 0.0, double t_end = 0.0) const {
+    DiffusionFit out;
+    detail::check(
+        seams_msd_fit(get(), t_start, t_end, &out.d_total, &out.d_axial, &out.d_lateral, &out.alpha),
+        get());
+    return out;
+  }
+};
+
+/**
+ * @brief Owned streaming hydrogen-bond lifetime accumulator.
+ * @ingroup seams_cpp
+ */
+class HbondTcf : public detail::Handle<seams_hbond_tcf, seams_hbond_tcf_destroy> {
+ public:
+  /**
+   * @brief Allocate an H-bond lifetime accumulator.
+   * @param max_lag Maximum lag in frames, or 0 for all lags.
+   * @param origin_stride Frame stride between origins.
+   * @param dt Frame spacing.
+   * @param directed True for directed `(donor, acceptor)` edges.
+   */
+  HbondTcf(std::size_t max_lag, std::size_t origin_stride, double dt, bool directed = true) {
+    seams_hbond_tcf *raw = nullptr;
+    detail::check(seams_hbond_tcf_create(max_lag, origin_stride, dt, directed ? 1 : 0, &raw),
+                  nullptr);
+    *this = HbondTcf(raw);
+  }
+
+  using detail::Handle<seams_hbond_tcf, seams_hbond_tcf_destroy>::Handle;
+
+  /** @brief Push one frame's `(donor, acceptor)` arrays. */
+  void push(std::span<const int> donors, std::span<const int> acceptors) {
+    if (donors.size() != acceptors.size()) {
+      throw Error(SEAMS_ERR_ARG, "donors and acceptors differ in length");
+    }
+    detail::check(
+        seams_hbond_tcf_push(get(), donors.empty() ? nullptr : donors.data(),
+                             acceptors.empty() ? nullptr : acceptors.data(), donors.size()),
+        get());
+  }
+
+  /** @brief Read intermittent C_HB and continuous S_HB curves. */
+  [[nodiscard]] HbondLifetimeCurve curve() const {
+    std::size_t nl = 0;
+    detail::check(seams_hbond_tcf_curve(get(), nullptr, nullptr, nullptr, nullptr, 0, &nl), get());
+    HbondLifetimeCurve out;
+    out.lag_time.resize(nl);
+    out.c_intermittent.resize(nl);
+    out.s_continuous.resize(nl);
+    out.n_origins.resize(nl);
+    detail::check(seams_hbond_tcf_curve(get(), out.lag_time.data(), out.c_intermittent.data(),
+                                        out.s_continuous.data(), out.n_origins.data(), nl, &nl),
+                  get());
+    return out;
+  }
+
+  /** @brief Fit integrated and single-exponential lifetimes. */
+  [[nodiscard]] HbondLifetimeFit fit(double t_start = 0.0, double t_end = 0.0) const {
+    HbondLifetimeFit out;
+    detail::check(seams_hbond_tcf_fit(get(), t_start, t_end, &out.tau_c_int, &out.tau_c_exp,
+                                      &out.tau_s_int, &out.tau_s_exp),
+                  get());
+    return out;
+  }
+};
+
+/**
+ * @brief Owned streaming orientational correlation accumulator.
+ * @ingroup seams_cpp
+ */
+class Reorientation : public detail::Handle<seams_reorient, seams_reorient_destroy> {
+ public:
+  /**
+   * @brief Allocate a reorientation accumulator.
+   * @param n_vectors Molecular vector count per frame.
+   * @param max_lag Maximum lag in frames, or 0 for all lags.
+   * @param origin_stride Frame stride between origins.
+   * @param dt Frame spacing.
+   */
+  Reorientation(std::size_t n_vectors, std::size_t max_lag, std::size_t origin_stride, double dt) {
+    seams_reorient *raw = nullptr;
+    detail::check(seams_reorient_create(n_vectors, max_lag, origin_stride, dt, &raw), nullptr);
+    *this = Reorientation(raw);
+  }
+
+  using detail::Handle<seams_reorient, seams_reorient_destroy>::Handle;
+
+  /** @brief Push one frame of molecular 3-vectors. */
+  void push(std::span<const double> vectors) {
+    if (vectors.size() % 3 != 0) {
+      throw Error(SEAMS_ERR_ARG, "vectors length is not a multiple of 3");
+    }
+    detail::check(seams_reorient_push(get(), vectors.data(), vectors.size() / 3), get());
+  }
+
+  /** @brief Read C1 and C2 correlation curves. */
+  [[nodiscard]] ReorientationCurve curve() const {
+    std::size_t nl = 0;
+    detail::check(seams_reorient_curve(get(), nullptr, nullptr, nullptr, nullptr, 0, &nl), get());
+    ReorientationCurve out;
+    out.lag_time.resize(nl);
+    out.c1.resize(nl);
+    out.c2.resize(nl);
+    out.n_origins.resize(nl);
+    detail::check(seams_reorient_curve(get(), out.lag_time.data(), out.c1.data(), out.c2.data(),
+                                       out.n_origins.data(), nl, &nl),
+                  get());
+    return out;
+  }
+
+  /** @brief Fit integrated and single-exponential reorientation times. */
+  [[nodiscard]] ReorientationFit fit(double t_start = 0.0, double t_end = 0.0) const {
+    ReorientationFit out;
+    detail::check(seams_reorient_fit(get(), t_start, t_end, &out.tau1_int, &out.tau1_exp,
+                                     &out.tau2_int, &out.tau2_exp),
+                  get());
     return out;
   }
 };
@@ -1338,6 +1625,79 @@ class System : public detail::Handle<seams_system, seams_system_destroy> {
     return Brine(out);
   }
 
+  /** @brief Copy the stored molecule ids out. */
+  [[nodiscard]] std::vector<int> mols() const {
+    const auto n = static_cast<std::size_t>(count());
+    std::vector<int> out(n);
+    detail::check(seams_mols(get(), out.data(), out.size()), get());
+    return out;
+  }
+
+  /** @brief Replace the stored molecule ids on a loaded frame. */
+  void set_mols(std::span<const int> mol_ids) {
+    detail::check(seams_set_mols(get(), mol_ids.data(), mol_ids.size()), get());
+  }
+
+  /** @brief Intact periodic centres of molecules in this frame. */
+  [[nodiscard]] MoleculeCentres molecule_centres(std::span<const int> mol_ids = {},
+                                                 std::span<const double> masses = {}) const {
+    std::size_t nm = 0;
+    detail::check(seams_molecule_centres(get(), mol_ids.empty() ? nullptr : mol_ids.data(),
+                                         mol_ids.size(), masses.empty() ? nullptr : masses.data(),
+                                         masses.size(), nullptr, nullptr, 0, &nm),
+                  get());
+    MoleculeCentres out;
+    out.mol_ids.resize(nm);
+    out.centres.resize(3 * nm);
+    detail::check(seams_molecule_centres(get(), mol_ids.empty() ? nullptr : mol_ids.data(),
+                                         mol_ids.size(), masses.empty() ? nullptr : masses.data(),
+                                         masses.size(), out.mol_ids.data(), out.centres.data(), nm,
+                                         &nm),
+                  get());
+    return out;
+  }
+
+  /** @brief Water O-to-H-midpoint and H-to-H vectors under minimum image. */
+  [[nodiscard]] WaterVectors water_vectors(int oxygen_type, int hydrogen_type) const {
+    std::size_t nw = 0;
+    detail::check(seams_water_vectors(get(), oxygen_type, hydrogen_type, nullptr, nullptr, nullptr,
+                                      nullptr, nullptr, 0, &nw),
+                  get());
+    WaterVectors out;
+    out.mol_ids.resize(nw);
+    out.oh_mid.resize(3 * nw);
+    out.bisector.resize(3 * nw);
+    out.hh.resize(3 * nw);
+    out.hh_unit.resize(3 * nw);
+    detail::check(seams_water_vectors(get(), oxygen_type, hydrogen_type, out.mol_ids.data(),
+                                      out.oh_mid.data(), out.bisector.data(), out.hh.data(),
+                                      out.hh_unit.data(), nw, &nw),
+                  get());
+    return out;
+  }
+
+  /** @brief Per-molecule dipole or geometric orientation vectors. */
+  [[nodiscard]] MoleculeDipoles molecule_dipoles(std::span<const int> mol_ids = {},
+                                                 std::span<const double> charges = {}) const {
+    std::size_t nm = 0;
+    detail::check(seams_molecule_dipoles(get(), mol_ids.empty() ? nullptr : mol_ids.data(),
+                                         mol_ids.size(),
+                                         charges.empty() ? nullptr : charges.data(),
+                                         charges.size(), nullptr, nullptr, nullptr, 0, &nm),
+                  get());
+    MoleculeDipoles out;
+    out.mol_ids.resize(nm);
+    out.dipoles.resize(3 * nm);
+    out.unit_vectors.resize(3 * nm);
+    detail::check(seams_molecule_dipoles(get(), mol_ids.empty() ? nullptr : mol_ids.data(),
+                                         mol_ids.size(),
+                                         charges.empty() ? nullptr : charges.data(),
+                                         charges.size(), out.mol_ids.data(), out.dipoles.data(),
+                                         out.unit_vectors.data(), nm, &nm),
+                  get());
+    return out;
+  }
+
  private:
   [[nodiscard]] Classification classify(bool plus, const ChillOptions &options) {
     const auto n = static_cast<std::size_t>(count());
@@ -1423,6 +1783,74 @@ inline void set_num_threads(int n) { detail::check(seams_set_num_threads(n), nul
 [[nodiscard]] inline std::string_view ring_symmetry_name(RingSymmetry symmetry) {
   const char *text = seams_ring_symmetry_name(static_cast<int>(symmetry));
   return text == nullptr ? std::string_view() : std::string_view(text);
+}
+
+/**
+ * @brief Unwrap periodic coordinates across frames.
+ * @ingroup seams_cpp
+ */
+[[nodiscard]] inline std::vector<double> unwrap_positions(std::span<const double> xyz,
+                                                          std::size_t nframes, std::size_t natoms,
+                                                          std::span<const double> boxes) {
+  if (boxes.size() % 9 != 0) {
+    throw Error(SEAMS_ERR_RANGE, "boxes length is not a multiple of 9");
+  }
+  std::vector<double> out(nframes * 3 * natoms);
+  detail::check(seams_traj_unwrap_positions(xyz.data(), nframes, natoms, boxes.data(),
+                                            boxes.size() / 9, out.data(), out.size()),
+                nullptr);
+  return out;
+}
+
+/**
+ * @brief Assemble and unwrap periodic molecule centres across frames.
+ * @ingroup seams_cpp
+ */
+[[nodiscard]] inline MoleculeCentres unwrap_centres(std::span<const double> xyz,
+                                                    std::size_t nframes, std::size_t natoms,
+                                                    std::span<const double> boxes,
+                                                    std::span<const int> mols,
+                                                    std::span<const double> masses = {}) {
+  if (boxes.size() % 9 != 0) {
+    throw Error(SEAMS_ERR_RANGE, "boxes length is not a multiple of 9");
+  }
+  const std::size_t nboxes = boxes.size() / 9;
+  std::size_t nm = 0;
+  detail::check(seams_traj_unwrap_centres(xyz.data(), nframes, natoms, boxes.data(), nboxes,
+                                          mols.data(), mols.size(),
+                                          masses.empty() ? nullptr : masses.data(), masses.size(),
+                                          nullptr, 0, nullptr, 0, &nm),
+                nullptr);
+  MoleculeCentres out;
+  out.mol_ids.resize(nm);
+  out.centres.resize(nframes * 3 * nm);
+  detail::check(seams_traj_unwrap_centres(
+                    xyz.data(), nframes, natoms, boxes.data(), nboxes, mols.data(), mols.size(),
+                    masses.empty() ? nullptr : masses.data(), masses.size(), out.mol_ids.data(), nm,
+                    out.centres.data(), out.centres.size(), &nm),
+                nullptr);
+  return out;
+}
+
+/**
+ * @brief Axis-projected orientational order parameters P1 and P2.
+ * @ingroup seams_cpp
+ */
+[[nodiscard]] inline OrientationOrder orientation_order(std::span<const double> vectors,
+                                                        std::span<const double, 3> axis) {
+  if (vectors.size() % 3 != 0) {
+    throw Error(SEAMS_ERR_ARG, "vectors length is not a multiple of 3");
+  }
+  const std::size_t nv = vectors.size() / 3;
+  OrientationOrder out;
+  out.cos_theta.resize(nv);
+  out.p2.resize(nv);
+  detail::check(seams_orientation_order(nv == 0 ? nullptr : vectors.data(), nv, axis.data(),
+                                        nv == 0 ? nullptr : out.cos_theta.data(),
+                                        nv == 0 ? nullptr : out.p2.data(), nv, &out.mean_p1,
+                                        &out.mean_p2),
+                nullptr);
+  return out;
 }
 
 }  // namespace seams
