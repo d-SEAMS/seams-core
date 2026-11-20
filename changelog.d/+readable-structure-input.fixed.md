@@ -1,0 +1,1 @@
+`seams read` exits 2 and prints `cannot read <path>` when a PDB, GRO, DCD, or `.con` path is missing, empty, a directory, or not readable, and when a type filter keeps no atoms. A file that opens and contains atoms is unchanged.

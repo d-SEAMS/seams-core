@@ -784,6 +784,20 @@ test('cli_surface', find_program('python3'),
   workdir: meson.project_source_root(),
   env: {'SEAMS_HAS_CHEMFILES': chemfiles_dep.found() ? '1' : '0'},
   timeout: 600)
+if chemfiles_dep.found()
+  foreach _ext : ['pdb', 'gro', 'dcd']
+    test('read_unreadable_' + _ext, find_program('python3'),
+      args: [files('read_unreadable.py'), meson.project_build_root() / 'seams', _ext],
+      workdir: meson.project_source_root(),
+      timeout: 60)
+  endforeach
+endif
+if readcon_dep.found()
+  test('read_unreadable_con', find_program('python3'),
+    args: [files('read_unreadable.py'), meson.project_build_root() / 'seams', 'con'],
+    workdir: meson.project_source_root(),
+    timeout: 60)
+endif
 test('mw215_deck', find_program('python3'),
   args: [files('test_mw215_deck.py')],
   workdir: meson.project_source_root(),
