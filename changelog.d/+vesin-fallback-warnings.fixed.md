@@ -1,0 +1,1 @@
+The vesin 0.5.7 fallback builds under `-Werror` with GCC 15 and Clang 21. A wrap patch orders the `BoundingBox` initializers with the members, value-initializes `VesinNeighborList` instead of clearing it with `memset`, and leaves the debug-only allocation length unnamed in release builds.
