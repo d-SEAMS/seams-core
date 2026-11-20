@@ -74,6 +74,8 @@ seams_rdf
 seams_running_cn
 seams_coordination
 seams_hbonds
+seams_hbond_edges
+seams_quenched_analysis
 seams_density_axis
 seams_fingerprint
 seams_fingerprint_destroy

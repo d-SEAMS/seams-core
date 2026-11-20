@@ -814,6 +814,22 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_hbonds 460
 ```
 
+### seams_hbond_edges
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbond_edges 460
+```
+
+### seams_quenched_analysis
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_quenched_analysis 460 1082262 0
+```
+
 ### seams_density_axis
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -1199,6 +1215,38 @@ Ownership: No allocation.
 Errors: None.
 
 Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_HBOND_EDGE_WITH_GEOMETRY
+
+Purpose: Field mask bit that requests `seams_hbond_edge.d_DA` and `seams_hbond_edge.angle`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: None.
+
+Units: dimensionless.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_HBOND_EDGE_WITH_H
+
+Purpose: Field mask bit that requests `seams_hbond_edge.hydrogen`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: None.
+
+Units: dimensionless.
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -2952,6 +3000,61 @@ Errors: None.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_hbond_edge
+
+Purpose: C row type for one hydrogen-bond edge record. Callers initialize `size = sizeof(seams_hbond_edge)` on every element passed to `seams_hbond_edges`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: `size` is bytes (`sizeof(seams_hbond_edge)`); donor, acceptor, and hydrogen are 0-based atom indices; `d_DA` is Angstrom; `angle` is degrees.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_edges
+
+Purpose: Hydrogen-bond edges for one frame.
+
+The pair list is stable and deterministic: donor, then acceptor, then hydrogen index. donor and acceptor are frame indices over the stored atoms. When edges is non-NULL, every element must start with size set by the caller to sizeof(seams_hbond_edge); the library validates size and writes only up to that prefix per element.
+
+```c
+seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type, int hydrogen_type, double dist_cutoff, double angle_cutoff, int fields, seams_hbond_edge *edges, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `cutoff`, `oxygen_type`, `hydrogen_type`, `dist_cutoff`, `angle_cutoff`, `fields`, `edges`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `cutoff`: Donor-acceptor cutoff, Angstrom.
+- `oxygen_type`: Heavy-atom species filter as in seams_hbonds().
+- `hydrogen_type`: Hydrogen species (positive).
+- `dist_cutoff`: Acceptor-H distance, Angstrom.
+- `angle_cutoff`: O-O-H angle, degrees.
+- `fields`: Bitmask: SEAMS_HBOND_EDGE_WITH_H and/or SEAMS_HBOND_EDGE_WITH_GEOMETRY.
+- `edges`: Caller buffer with caller-set size on each element, or NULL to query.
+- `cap`: Capacity of `edges`. Ignored when `edges` is NULL.
+- `n_out`: Receives the edge count.
+
+Returns: SEAMS_OK, or the same error classes as seams_hbonds(), plus SEAMS_ERR_ARG when fields is unknown or size is invalid, and SEAMS_ERR_RANGE when cap is smaller than *n_out.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys, edges, and n_out. The call borrows sys and writes caller buffers only.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_hbonds
 
 Purpose: Hydrogen-bond count on one frame.
@@ -3699,6 +3802,76 @@ Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_quench_callback
+
+Purpose: Callback signature used by `seams_quenched_analysis`.
+
+Parameters: `xyz`, `n`, `box9`, `box_len`, `xyz_out`, `xyz_out_len`, `box9_out`, `box9_out_len`, `user_data`.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: positions are Angstrom, box is `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_quenched_analysis
+
+Purpose: Run CHILL+, ring census, and H-bonds on raw and quenched frames.
+
+The callback receives one frame and returns quenched coordinates. This call then runs CHILL+, primitive rings, and hydrogen-bond analysis on both raw and quenched frames and emits their per-frame differences.
+
+```c
+seams_status seams_quenched_analysis( seams_system *sys, seams_quench_callback callback, void *user_data, double cutoff, int type, int graph, int max_depth, int oxygen_type, int hydrogen_type, double dist_cutoff, double angle_cutoff, int *raw_labels, size_t raw_labels_len, int *quenched_labels, size_t quenched_labels_len, int counts_raw[9], int counts_quenched[9], int *rings_raw, int *rings_quenched, size_t ring_counts_len, int *hbond_raw, int *hbond_quenched, int *hbond_edge_delta, int *ring_count_delta, int *class_change_count);
+```
+
+Parameters: `sys`, `callback`, `user_data`, `cutoff`, `type`, `graph`, `max_depth`, `oxygen_type`, `hydrogen_type`, `dist_cutoff`, `angle_cutoff`, `raw_labels`, `raw_labels_len`, `quenched_labels`, `quenched_labels_len`, `counts_raw`, `counts_quenched`, `rings_raw`, `rings_quenched`, `ring_counts_len`, `hbond_raw`, `hbond_quenched`, `hbond_edge_delta`, `ring_count_delta`, `class_change_count`.
+
+- `sys`: Frame handle.
+- `callback`: Quench callback that writes output coordinates.
+- `user_data`: Opaque callback payload.
+- `cutoff`: Positive finite neighbour cutoff, Angstrom.
+- `type`: Species filter for neighbour, CHILL+, and rings.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `max_depth`: Primitive-ring depth, from 3 through 12.
+- `oxygen_type`: Heavy-atom species filter for H-bonds.
+- `hydrogen_type`: Hydrogen species filter for H-bonds.
+- `dist_cutoff`: Acceptor-H distance, Angstrom.
+- `angle_cutoff`: O-O-H angle, degrees.
+- `raw_labels`: Raw-frame CHILL+ labels, length at least atom count.
+- `raw_labels_len`: Length of `raw_labels`.
+- `quenched_labels`: Quenched-frame CHILL+ labels, length at least atom count.
+- `quenched_labels_len`: Length of `quenched_labels`.
+- `counts_raw`: Raw-frame CHILL+ population counts.
+- `counts_quenched`: Quenched-frame CHILL+ population counts.
+- `rings_raw`: Raw-frame primitive-ring histogram.
+- `rings_quenched`: Quenched-frame primitive-ring histogram.
+- `ring_counts_len`: Length of `rings_raw` and `rings_quenched`.
+- `hbond_raw`: Receives raw-frame H-bond edge count.
+- `hbond_quenched`: Receives quenched-frame H-bond edge count.
+- `hbond_edge_delta`: Receives symmetric-difference edge count between raw and quenched H-bond edge sets.
+- `ring_count_delta`: Receives sum over ring sizes of absolute raw-minus- quenched count differences.
+- `class_change_count`: Receives the atom count whose CHILL+ class changed.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns every output buffer, callback state, and sys. The call borrows callback pointers and writes caller buffers only.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_rdf
 
 Purpose: Partial radial distribution.
@@ -3807,6 +3980,47 @@ Ownership: The caller creates the object and frees it with the matching destroy 
 Errors: None. This is a type.
 
 Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_chordless
+
+Purpose: Chordless cycles of one size.
+
+A cycle is chordless when no edge of the graph joins two of its vertices that are not next to each other on the cycle. Every primitive ring is chordless; a chordless cycle need not be primitive. Each cycle is written once as size atom indices: it starts at its lowest index and runs towards the smaller of that atom's two cycle neighbours. Cycles are sorted lexicographically, so the list does not depend on the thread count.
+
+```c
+seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len);
+```
+
+Parameters: `nb`, `size`, `rings`, `rings_len`, `n_rings`, `per_atom`, `per_atom_len`.
+
+- `nb`: Graph from seams_neighbours_build().
+- `size`: Cycle length, from 3 through 12.
+- `rings`: Caller buffer of size times the cycle count ints, or NULL to skip the list.
+- `rings_len`: Length of rings in ints. Ignored when rings is NULL.
+- `n_rings`: Receives the cycle count. Required when rings is not NULL.
+- `per_atom`: Caller buffer of one int per atom, or NULL. Receives the number of cycles through each atom.
+- `per_atom_len`: Length of per_atom. Ignored when per_atom is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL. rings, n_rings and per_atom may not all be NULL. A short rings buffer returns SEAMS_ERR_RANGE after n_rings and per_atom are written.
+
+Ownership: The caller owns rings and per_atom. Indices are positions in the frame.
+
+Thread safety: Exclusive use of nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_six = 0;
+seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -4282,6 +4496,50 @@ Example:
 ```c
 size_t n_cages = 0, n_atoms = 0;
 seams_signature_cages(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "hc", &n_cages, &n_atoms);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_signature_cages_edge
+
+Purpose: Closed cages of one ring census with an explicit face-edge window.
+
+Same search as seams_signature_cages(). edge NULL or "" keeps the default window 2.65,3.15 in the coordinate units of the file. "none" leaves the cage bound to the face census.
+
+```c
+seams_status seams_signature_cages_edge(seams_system *sys, double cutoff, int type, int graph, const char *spec, const char *edge, size_t *n_cages, size_t *n_atoms);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `spec`, `edge`, `n_cages`, `n_atoms`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `spec`: Signature text such as "512" or "hc". Must be non-NULL.
+- `edge`: Face-edge window, or NULL. "none" turns the window off.
+- `n_cages`: Receives the cage count.
+- `n_atoms`: Receives the vertex count.
+
+Returns: Same codes as seams_cages_signature().
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. spec and edge are read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_cages = 0, n_atoms = 0;
+seams_signature_cages_edge(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", "none", &n_cages, &n_atoms);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -5180,91 +5438,6 @@ printf("d-SEAMS %s\n", seams_version_string());
 The tour call is in `docs/examples/c_api_tour.c`.
 
 Errors: None.
-
-Example: `docs/examples/c_api_tour.c`
-
-### seams_signature_cages_edge
-
-Purpose: Closed cages of one ring census with an explicit face-edge window.
-
-Same search as seams_signature_cages(). edge NULL or "" keeps the default window 2.65,3.15 in the coordinate units of the file. "none" leaves the cage bound to the face census.
-
-```c
-seams_status seams_signature_cages_edge(seams_system *sys, double cutoff, int type, int graph, const char *spec, const char *edge, size_t *n_cages, size_t *n_atoms);
-```
-
-Parameters: `sys`, `cutoff`, `type`, `graph`, `spec`, `edge`, `n_cages`, `n_atoms`.
-
-- `sys`: Frame handle.
-- `cutoff`: Positive finite cutoff, Angstrom.
-- `type`: Species filter.
-- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
-- `spec`: Signature text such as "512" or "hc". Must be non-NULL.
-- `edge`: Face-edge window, or NULL. "none" turns the window off.
-- `n_cages`: Receives the cage count.
-- `n_atoms`: Receives the vertex count.
-
-Returns: Same codes as seams_cages_signature().
-
-Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
-
-Ownership: The caller owns sys; the call borrows it. spec and edge are read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument.
-
-Thread safety: Exclusive use of sys.
-
-Units: as given for each parameter above.
-
-Example:
-
-```c
-size_t n_cages = 0, n_atoms = 0;
-seams_signature_cages_edge(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", "none", &n_cages, &n_atoms);
-```
-
-The tour call is in `docs/examples/c_api_tour.c`.
-
-Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
-
-Example: `docs/examples/c_api_tour.c`
-
-### seams_rings_chordless
-
-Purpose: Chordless cycles of one size.
-
-A cycle is chordless when no edge of the graph joins two of its vertices that are not next to each other on the cycle. Every primitive ring is chordless; a chordless cycle need not be primitive. Each cycle is written once as size atom indices: it starts at its lowest index and runs towards the smaller of that atom's two cycle neighbours. Cycles are sorted lexicographically, so the list does not depend on the thread count.
-
-```c
-seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len);
-```
-
-Parameters: `nb`, `size`, `rings`, `rings_len`, `n_rings`, `per_atom`, `per_atom_len`.
-
-- `nb`: Graph from seams_neighbours_build().
-- `size`: Cycle length, from 3 through 12.
-- `rings`: Caller buffer of size times the cycle count ints, or NULL to skip the list.
-- `rings_len`: Length of rings in ints. Ignored when rings is NULL.
-- `n_rings`: Receives the cycle count. Required when rings is not NULL.
-- `per_atom`: Caller buffer of one int per atom, or NULL. Receives the number of cycles through each atom.
-- `per_atom_len`: Length of per_atom. Ignored when per_atom is NULL.
-
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL. rings, n_rings and per_atom may not all be NULL. A short rings buffer returns SEAMS_ERR_RANGE after n_rings and per_atom are written.
-
-Ownership: The caller owns rings and per_atom. Indices are positions in the frame.
-
-Thread safety: Exclusive use of nb.
-
-Units: as given for each parameter above.
-
-Example:
-
-```c
-size_t n_six = 0;
-seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0);
-```
-
-The tour call is in `docs/examples/c_api_tour.c`.
-
-Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 <!-- API_SYMBOLS_END -->
