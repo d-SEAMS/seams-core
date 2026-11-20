@@ -691,10 +691,33 @@ def rel_input(path):
     return Path(path).resolve().relative_to(ROOT).as_posix()
 
 
-def input_line(topic, path, frames_read, label=None):
+def input_line(topic, path, frames_read):
     frames, atoms = dump_census(path)
     return "{} full input molecules {} frames {} file-frames {} file {}".format(
-        topic, atoms, frames_read, frames, rel_input(label or path)
+        topic, atoms, frames_read, frames, rel_input(path)
+    )
+
+
+def _input_fetch_module():
+    import importlib.util
+
+    script = ROOT / "input" / "fetch.py"
+    spec = importlib.util.spec_from_file_location("input_fetch", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def cubic_trajectory():
+    """The full mW cubic-ice trajectory, fetched through input/fetch.py.
+
+    SEAMS_CUBIC_TRAJ overrides the path, e.g. to the committed 7-frame
+    fixture for offline tests. Otherwise the pinned Hugging Face copy is
+    downloaded (and SHA-256 verified) the first time it is needed; a
+    failed fetch raises instead of silently falling back.
+    """
+    return _input_fetch_module().ensure(
+        "mW_cubic.lammpstrj", os.environ.get("SEAMS_CUBIC_TRAJ")
     )
 
 
@@ -821,8 +844,7 @@ def cages_full(seams, libdir, out):
 
 
 def rings_full(seams, libdir, out):
-    published = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
-    dump = Path(os.environ.get("SEAMS_CUBIC_TRAJ", published))
+    dump = cubic_trajectory()
     text = run_seams(
         seams,
         libdir,
@@ -839,7 +861,7 @@ def rings_full(seams, libdir, out):
         elif len(parts) == 2 and parts[0].isdigit():
             histogram.append("{} {}".format(parts[0], parts[1]))
     lines = [
-        input_line("rings", dump, 1, published),
+        input_line("rings", dump, 1),
         "rings full paper molecules 4096 frames 1 rings 8192",
         "rings full nop {} rings {}".format(nop, total),
         "rings full histogram {}".format(" ".join(histogram)),
