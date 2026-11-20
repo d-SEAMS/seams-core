@@ -615,7 +615,7 @@ _include_orphan_pages()
 # -- Project information -----------------------------------------------------
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
-author = "Rohit Goswami, Amrita Goswami, Ruhila S"
+author = "Rohit Goswami, Amrita Goswami, Ruhila Goswami"
 version = "2.14.0"
 release = "2.14.0"
 language = "en"
