@@ -117,6 +117,7 @@ T seams_frame_rdf2d
 T seams_frame_rdf2d_nbin
 T seams_frame_rdf_nbins
 T seams_frame_read
+T seams_frame_read_options
 T seams_frame_rings
 T seams_frame_select
 T seams_frame_set_positions

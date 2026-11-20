@@ -30,7 +30,7 @@ Its frame-mutation and order-parameter entries are
 
 ```{literalinclude} ../../../bindings/cxx/seams_lang.h
 :language: cpp
-:lines: 115-178
+:lines: 45-90,131-216
 ```
 
 `docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
@@ -192,6 +192,22 @@ Ownership: No allocation. This is a type.
 Errors: None.
 
 Units: handle
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_chemfiles_load_options
+
+Purpose: Name filters and explicit type assignments for chemfiles trajectory input.
+
+Parameters: residue and atom include arrays; residue and atom exclude arrays; NAME=ID type-map array
+
+Returns: The options structure itself.
+
+Ownership: The caller owns every string and array for the duration of the read call.
+
+Errors: Invalid arrays or type-map entries make seams_frame_read_options return NULL.
+
+Units: type IDs and array lengths are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
 
@@ -621,6 +637,22 @@ Ownership: The caller owns the frame and frees it with seams_frame_free.
 Errors: NULL. seams_last_error() names the reason.
 
 Units: frame index is dimensionless; coordinates in the file are angstrom
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_frame_read_options
+
+Purpose: Read one chemfiles-backed frame with residue and atom filters and explicit type assignments.
+
+Parameters: path; frame; type_filter; options
+
+Returns: A new seams_frame, or NULL when the call cannot build one.
+
+Ownership: The caller owns the frame and frees it with seams_frame_free; the caller retains the options arrays.
+
+Errors: NULL. seams_last_error() names an invalid option or read failure.
+
+Units: frame index and type IDs are dimensionless; coordinates in the file are angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
 

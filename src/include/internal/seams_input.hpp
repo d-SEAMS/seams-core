@@ -22,6 +22,8 @@
 #include <mol_sys.hpp>
 #include <ring.hpp>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -133,6 +135,18 @@ std::vector<std::vector<int>> readBonds(std::string filename);
 //! with or without chemfiles.
 int chemfilesSteps(const std::string &filename);
 
+//! Name-based filtering and species overrides for chemfiles input.
+//! Include lists are ORed within a category and ANDed between residue
+//! and atom categories. Exclusions take precedence. typeMap is consulted
+//! before chemfiles element inference.
+struct ChemfilesLoadOptions {
+  std::vector<std::string> residueNames;
+  std::vector<std::string> excludedResidueNames;
+  std::vector<std::string> atomNames;
+  std::vector<std::string> excludedAtomNames;
+  std::unordered_map<std::string, int> typeMap;
+};
+
 #ifdef SEAMS_HAS_CHEMFILES
 //! How one chemfiles step is turned into a cloud.
 //! typeFilter > 0 keeps that species number. guessOxygen keeps
@@ -144,6 +158,7 @@ struct ChemfilesRead {
   int typeFilter = -1;
   bool guessOxygen = false;
   std::string selection;
+  ChemfilesLoadOptions load;
 };
 
 molSys::PointCloud<molSys::Point<double>, double>
@@ -161,6 +176,12 @@ readChemfiles(std::string filename, int targetFrame,
 //! open chemfiles trajectory, in order. typeFilter -1 keeps every atom.
 //! Each cloud matches readChemfiles(filename, frame, cloud, typeFilter).
 //! A file chemfiles cannot read gives one empty cloud at frame first.
+void forEachChemfilesStep(
+    const std::string &filename, int first, int last, int typeFilter,
+    const ChemfilesLoadOptions &options,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn);
+
 void forEachChemfilesStep(
     const std::string &filename, int first, int last, int typeFilter,
     const std::function<void(
@@ -182,7 +203,8 @@ bool forEachChemfilesFrame(
 //! guesses oxygen.
 molSys::PointCloud<molSys::Point<double>, double>
 openFrame(const std::string &filename, int frame, int typeI,
-          const std::string &selection = {});
+          const std::string &selection = {},
+          const ChemfilesLoadOptions &options = {});
 
 #ifdef SEAMS_HAS_READCON
 //! Read a .con file through readcon-core. The cell lengths and angles

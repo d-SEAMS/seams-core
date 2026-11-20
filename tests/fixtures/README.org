@@ -1,0 +1,19 @@
+#+TITLE: Test fixture derivation
+
+* Confined-water trajectory
+
+=input/traj/confined_water_40.{gro,xtc}= contains the first three frames
+of the supplied 40-molecule TIP4P/2005 confined-water trajectory. The
+GRO carries the matching topology: framework residue =COF=, fluid
+residue =SOL=, and ghost residue =SOLX=.
+
+Recreate both files from a build with chemfiles enabled:
+
+#+begin_src sh
+sh tests/fixtures/derive_confined_water_fixture.sh BUILD-DIR \
+  /path/to/hb-40 input/traj/confined_water_40
+#+end_src
+
+The input prefix names =hb-40.gro= and =hb-40.xtc=. The helper reads
+three XTC frames with the GRO topology and writes the same frames to
+both output formats.

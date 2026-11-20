@@ -35,6 +35,10 @@ seams cages input/traj/il_tiny.lammpstrj
 ~neighbourListByIndex~, ~findBySignature~, ~seededCageAffiliation~).
 ~dseams.Frame~ calls the C API in =include/seams.h=.
 ~dseams.userframe.Frame~ calls =libseams_lang=.
+Chemfiles-aware language bindings can call ~seams_frame_read_options~
+with ~seams_chemfiles_load_options~. The structure carries residue and
+atom include/exclude arrays plus ~NAME=ID~ type-map entries; a null
+options pointer is identical to ~seams_frame_read~.
 
 * Headers
 

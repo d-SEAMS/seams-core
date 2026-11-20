@@ -19,6 +19,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -299,7 +300,7 @@ def library_file(name):
     compiler = os.environ.get("CC", "").strip()
     if compiler:
         found = subprocess.run(
-            [compiler, "-print-file-name=" + name],
+            [*shlex.split(compiler), "-print-file-name=" + name],
             text=True,
             capture_output=True,
         ).stdout.strip()

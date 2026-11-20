@@ -168,13 +168,76 @@ std::string extension_of(const std::string &path) {
   return path.substr(dot + 1);
 }
 
-Cloud load_path(const std::string &path, int frame, int typeI) {
+Cloud load_path(const std::string &path, int frame, int typeI,
+                const sinp::ChemfilesLoadOptions &options = {}) {
   // A missing CON path is an error. readCon clears the cloud and returns
   // it, which would look like an empty frame.
   if (extension_of(path) == "con" && !gen::file_exists(path)) {
     throw std::runtime_error("cannot read " + path);
   }
-  return sinp::openFrame(path, frame, typeI);
+  return sinp::openFrame(path, frame, typeI, {}, options);
+}
+
+bool copy_names(const char *const *values, int count,
+                std::vector<std::string> &out) {
+  if (count < 0 || (count > 0 && values == nullptr)) {
+    return false;
+  }
+  for (int i = 0; i < count; ++i) {
+    if (values[i] == nullptr || values[i][0] == '\0') {
+      return false;
+    }
+    out.emplace_back(values[i]);
+  }
+  return true;
+}
+
+bool load_options(const seams_chemfiles_load_options *input,
+                  sinp::ChemfilesLoadOptions &out) {
+  if (input == nullptr) {
+    return true;
+  }
+  if (!copy_names(input->resnames, input->resname_count,
+                  out.residueNames) ||
+      !copy_names(input->excluded_resnames, input->excluded_resname_count,
+                  out.excludedResidueNames) ||
+      !copy_names(input->atomnames, input->atomname_count, out.atomNames) ||
+      !copy_names(input->excluded_atomnames,
+                  input->excluded_atomname_count, out.excludedAtomNames) ||
+      input->type_map_count < 0 ||
+      (input->type_map_count > 0 && input->type_map == nullptr)) {
+    set_error("invalid chemfiles load options");
+    return false;
+  }
+  for (int i = 0; i < input->type_map_count; ++i) {
+    if (input->type_map[i] == nullptr) {
+      set_error("invalid chemfiles type map");
+      return false;
+    }
+    const std::string entry(input->type_map[i]);
+    const auto equals = entry.find('=');
+    if (equals == std::string::npos || equals == 0 ||
+        equals + 1 == entry.size()) {
+      set_error("chemfiles type map must use NAME=ID");
+      return false;
+    }
+    int id = 0;
+    const char *first = entry.data() + equals + 1;
+    const char *last = entry.data() + entry.size();
+    const auto parsed = std::from_chars(first, last, id);
+    if (parsed.ec != std::errc{} || parsed.ptr != last || id <= 0) {
+      set_error("chemfiles type map ID must be a positive integer");
+      return false;
+    }
+    const std::string name = entry.substr(0, equals);
+    const auto found = out.typeMap.find(name);
+    if (found != out.typeMap.end() && found->second != id) {
+      set_error("conflicting chemfiles type map for " + name);
+      return false;
+    }
+    out.typeMap[name] = id;
+  }
+  return true;
 }
 
 int resolve_type(const Cloud &cloud, int requested) {
@@ -507,6 +570,12 @@ int seams_path_nframes(const char *path) {
 }
 
 seams_frame *seams_frame_read(const char *path, int frame, int type_filter) {
+  return seams_frame_read_options(path, frame, type_filter, nullptr);
+}
+
+seams_frame *seams_frame_read_options(
+    const char *path, int frame, int type_filter,
+    const seams_chemfiles_load_options *options) {
   clear_error();
   if (path == nullptr) {
     set_error("path is null");
@@ -523,9 +592,13 @@ seams_frame *seams_frame_read(const char *path, int frame, int type_filter) {
   }
   clear_error();
   try {
+    sinp::ChemfilesLoadOptions parsedOptions;
+    if (!load_options(options, parsedOptions)) {
+      return nullptr;
+    }
     auto owned = std::make_unique<seams_frame>();
     seams_frame *out = owned.get();
-    out->cloud = load_path(path, frame, type_filter);
+    out->cloud = load_path(path, frame, type_filter, parsedOptions);
     if (out->cloud.currentFrame <= 0) {
       out->cloud.currentFrame = frame > 0 ? frame : 1;
     }

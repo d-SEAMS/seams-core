@@ -144,6 +144,8 @@ struct OneThread {
   int saved = omp_get_max_threads();
   OneThread() { omp_set_num_threads(1); }
   ~OneThread() { omp_set_num_threads(saved); }
+#else
+  OneThread() = default;
 #endif
   OneThread(const OneThread &) = delete;
   OneThread &operator=(const OneThread &) = delete;

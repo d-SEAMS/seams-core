@@ -45,6 +45,23 @@ extern "C" {
 
 typedef struct seams_frame seams_frame;
 
+/** Name filters and explicit type assignments for chemfiles-backed input.
+ * Each pointer names an array of count UTF-8 strings. Null arrays require
+ * a zero count. type_map entries use NAME=ID with a positive integer ID.
+ * Include lists are ORed within a category; exclusions take precedence. */
+typedef struct seams_chemfiles_load_options {
+  const char *const *resnames;
+  int resname_count;
+  const char *const *excluded_resnames;
+  int excluded_resname_count;
+  const char *const *atomnames;
+  int atomname_count;
+  const char *const *excluded_atomnames;
+  int excluded_atomname_count;
+  const char *const *type_map;
+  int type_map_count;
+} seams_chemfiles_load_options;
+
 /** @brief seams_lang_version. @ingroup lang_errors */
 const char *seams_lang_version(void);
 /** @brief seams_last_error. @ingroup lang_errors */
@@ -56,6 +73,11 @@ int seams_path_nframes(const char *path);
 /** Null when path is null or the file cannot be read.
  * seams_last_error() then names the reason. @ingroup lang_frame */
 seams_frame *seams_frame_read(const char *path, int frame, int type_filter);
+/** Read with chemfiles name filters and type assignments. options may be
+ * null, which is identical to seams_frame_read. @ingroup lang_frame */
+seams_frame *seams_frame_read_options(
+    const char *path, int frame, int type_filter,
+    const seams_chemfiles_load_options *options);
 /** @brief seams_frame. @ingroup lang_frame */
 seams_frame *seams_frame_from_arrays(const double *xyz, int n,
                                     const double *box9, const int *types,

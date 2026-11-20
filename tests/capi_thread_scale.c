@@ -20,7 +20,6 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#endif
 
 #define N_WIDTHS 4
 #define N_STAGES 4
@@ -88,11 +87,7 @@ static double *ice_ic(int cells, int *n_out) {
 }
 
 static void set_width(int width) {
-#ifdef _OPENMP
   omp_set_num_threads(width);
-#else
-  (void)width;
-#endif
 }
 
 static void take_stages(struct timing *t, double total) {
@@ -137,6 +132,7 @@ static void log_split(FILE *out, const char *name, const struct timing *t) {
   }
   fprintf(out, "\n");
 }
+#endif
 
 int main(int argc, char **argv) {
   if (argc < 2 || argc > 4) {
