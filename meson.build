@@ -1167,6 +1167,10 @@ if get_option('with_cli') and get_option('with_tests')
   # Off unless -Dpaper_full=true. The script then exits 77 and says so.
   paper_env = environment()
   paper_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  paper_env.set(
+    'SEAMS_CUBIC_TRAJ',
+    meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+  )
   if get_option('paper_full')
     paper_env.set('SEAMS_PAPER_FULL', '1')
   endif
