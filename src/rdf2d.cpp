@@ -17,7 +17,9 @@
 #include <rdf2d.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <exception>
 #include <limits>
 #include <vector>
 
@@ -377,6 +379,8 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 #ifdef SEAMS_HAS_MINIMAGE
   const gen::CellFrame cells = gen::makeCellFrame(yCloud);
 #endif
+  std::atomic<bool> failed(false);
+  std::exception_ptr err;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nop >= 512)
 #endif
@@ -387,20 +391,47 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 #pragma omp for schedule(dynamic, 16)
 #endif
     for (int iatom = 0; iatom < nop - 1; iatom++) {
-      const auto rest = static_cast<std::size_t>(nop - iatom - 1);
-      bool batched = false;
+      if (failed.load(std::memory_order_relaxed)) {
+        continue;
+      }
+      try {
+        const auto rest = static_cast<std::size_t>(nop - iatom - 1);
+        bool batched = false;
 #ifdef SEAMS_HAS_MINIMAGE
-      const std::size_t at = 3 * static_cast<std::size_t>(iatom);
-      batched = cells.ok && frame.ok &&
-                mi_dist2_euclidean_many(&cells.cell, &cells.xyz[at],
-                                        &cells.xyz[at + 3], rest,
-                                        row.data()) == 0;
+        const std::size_t at = 3 * static_cast<std::size_t>(iatom);
+        batched = cells.ok && frame.ok &&
+                  mi_dist2_many(&cells.cell, &cells.xyz[at],
+                                &cells.xyz[at + 3], rest,
+                                row.data()) == 0;
 #endif
-      for (std::size_t k = 0; k < rest; k++) {
-        const int jatom = iatom + 1 + static_cast<int>(k);
-        const double r2 =
-            batched ? row[k] : gen::periodicDistSq(frame, yCloud, iatom, jatom);
-        binPair(std::sqrt(r2), cutoff, binwidth, nbin, local.data());
+        for (std::size_t k = 0; k < rest; k++) {
+          const int jatom = iatom + 1 + static_cast<int>(k);
+          double r2 = 0.0;
+          if (batched) {
+            r2 = row[k];
+#ifdef SEAMS_HAS_MINIMAGE
+            if (!gen::smithInside(frame, r2)) {
+              r2 = gen::euclideanDistSq(cells, iatom, jatom);
+              if (r2 < 0.0) {
+                r2 = gen::periodicDistSq(frame, yCloud, iatom, jatom);
+              }
+            }
+#endif
+          } else {
+            r2 = gen::periodicDistSq(frame, yCloud, iatom, jatom);
+          }
+          binPair(std::sqrt(r2), cutoff, binwidth, nbin, local.data());
+        }
+      } catch (...) {
+        failed.store(true, std::memory_order_relaxed);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp critical
+#endif
+        {
+          if (!err) {
+            err = std::current_exception();
+          }
+        }
       }
     }
 #ifdef SEAMS_HAS_OPENMP
@@ -409,6 +440,9 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     for (std::size_t b = 0; b < local.size(); b++) {
       histogram[b] += local[b];
     }
+  }
+  if (err) {
+    std::rethrow_exception(err);
   }
 
   // Return the histogram

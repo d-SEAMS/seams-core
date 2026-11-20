@@ -2,10 +2,12 @@
 #include "../../tests/fresh_temp.hpp"
 #include "seams_lang.h"
 
+#include <algorithm>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <numbers>
 #include <string>
 #include <vector>
 
@@ -127,6 +129,111 @@ int chordless_selection() {
   return bad;
 }
 
+int rdf2d_elongated_triclinic() {
+  const double lx = 1.0e4;
+  const double ly = 12.0;
+  const double lz = 12.0;
+  const double xy = 3.0;
+  const double xz = 3.0;
+  const double yz = 0.0;
+  const int n = 40;
+  unsigned s = 12345;
+  auto u = [&]() {
+    s = s * 1103515245u + 12345u;
+    return static_cast<double>(s >> 8) / static_cast<double>(1 << 24);
+  };
+  std::vector<double> xyz;
+  std::vector<int> types(static_cast<std::size_t>(n), 1);
+  std::vector<int> ids;
+  for (int i = 0; i < n; ++i) {
+    const double fa = u();
+    const double fb = u();
+    const double fc = u();
+    xyz.push_back(fa * lx + fb * xy + fc * xz);
+    xyz.push_back(fb * ly + fc * yz);
+    xyz.push_back(fc * lz);
+    ids.push_back(i + 1);
+  }
+  const double box[9] = {0.0, 0.0, 0.0, lx, ly, lz, xy, xz, yz};
+  seams_frame *frame = seams_frame_from_arrays(xyz.data(), n, box, types.data(), ids.data());
+  int bad = check(frame != nullptr, "rdf2d elongated frame");
+  if (bad != 0) {
+    return bad;
+  }
+  const double cutoff = 0.5 * lx;
+  const double bw = 0.5;
+  const int nbin = seams_frame_rdf2d_nbin(cutoff, bw);
+  bad += check(nbin > 0, "rdf2d nbin > 0");
+  std::vector<double> r(static_cast<std::size_t>(nbin), 0.0);
+  std::vector<double> g(static_cast<std::size_t>(nbin), 0.0);
+  bad += check(seams_frame_rdf2d(frame, cutoff, bw, nullptr, r.data(), g.data()) == 0,
+               "seams_frame_rdf2d elongated");
+  seams_frame_free(frame);
+
+  auto exactMin = [&](double dx, double dy, double dz) {
+    const double kw = std::round(-dz / lz);
+    const double zw = dz + kw * lz;
+    const double y0w = dy + kw * yz;
+    const double jw = std::round(-y0w / ly);
+    const double yw = y0w + jw * ly;
+    const double x0w = dx + jw * xy + kw * xz;
+    const double xw = x0w + std::round(-x0w / lx) * lx;
+    double best = xw * xw + yw * yw + zw * zw;
+    const double R = std::sqrt(best);
+    const long k0 = static_cast<long>(std::floor((-dz - R) / lz)) - 1;
+    const long k1 = static_cast<long>(std::ceil((-dz + R) / lz)) + 1;
+    for (long k = k0; k <= k1; ++k) {
+      const double z = dz + static_cast<double>(k) * lz;
+      if (z * z > best) {
+        continue;
+      }
+      const double rem = std::sqrt(best - z * z);
+      const double y0 = dy + static_cast<double>(k) * yz;
+      const long j0 = static_cast<long>(std::floor((-y0 - rem) / ly)) - 1;
+      const long j1 = static_cast<long>(std::ceil((-y0 + rem) / ly)) + 1;
+      for (long j = j0; j <= j1; ++j) {
+        const double y = y0 + static_cast<double>(j) * ly;
+        const double x0 = dx + static_cast<double>(j) * xy + static_cast<double>(k) * xz;
+        const double ic = std::round(-x0 / lx);
+        for (double i = ic - 1.0; i <= ic + 1.0; i += 1.0) {
+          const double x = x0 + i * lx;
+          best = std::min(best, x * x + y * y + z * z);
+        }
+      }
+    }
+    return std::sqrt(best);
+  };
+
+  std::vector<int> hist(static_cast<std::size_t>(nbin), 0);
+  for (int i = 0; i < n; ++i) {
+    for (int j = i + 1; j < n; ++j) {
+      const double dist = exactMin(
+          xyz[3 * static_cast<std::size_t>(j)] - xyz[3 * static_cast<std::size_t>(i)],
+          xyz[3 * static_cast<std::size_t>(j) + 1] - xyz[3 * static_cast<std::size_t>(i) + 1],
+          xyz[3 * static_cast<std::size_t>(j) + 2] - xyz[3 * static_cast<std::size_t>(i) + 2]);
+      if (dist <= cutoff) {
+        hist[static_cast<std::size_t>(std::min(static_cast<int>(dist / bw), nbin - 1))] += 2;
+      }
+    }
+  }
+  const double volume = lx * ly * lz;
+  const double density = static_cast<double>(n) / volume;
+  int mismatches = 0;
+  for (int b = 0; b < nbin; ++b) {
+    const double rb = bw * (static_cast<double>(b) + 0.5);
+    const double factor = rb > lz ? lz / (2.0 * rb) : 1.0 - rb / (2.0 * lz);
+    const double binVol = 4.0 * std::numbers::pi * std::pow(bw, 3.0) *
+                          (std::pow(b + 1, 3.0) - std::pow(b, 3.0)) / 3.0;
+    const double refG = static_cast<double>(hist[static_cast<std::size_t>(b)]) /
+                        (binVol * static_cast<double>(n) * density * factor);
+    if (std::abs(g[static_cast<std::size_t>(b)] - refG) > 1e-10 * (1.0 + std::abs(refG))) {
+      ++mismatches;
+    }
+  }
+  bad += check(mismatches == 0, "seams_frame_rdf2d matches exact brute force");
+  return bad;
+}
+
 } // namespace
 
 int main() {
@@ -160,6 +267,7 @@ int main() {
     bad += check(seams_path_nframes(half.c_str()) == -1, "half xyz");
   }
   bad += chordless_selection();
+  bad += rdf2d_elongated_triclinic();
   std::filesystem::remove_all(root);
   return bad == 0 ? 0 : 1;
 }
