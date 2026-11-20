@@ -1512,26 +1512,25 @@ TEST_CASE("minimum image rejects a numerically degenerate tilted cell",
   REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
                                                  unresolved, unresolved),
                     std::runtime_error);
+}
 
-  // Extreme-aspect cell (~1e8): the slicer throws explicitly when binary64
-  // rounding prevents strict decrease, never returning a silently wrong image,
-  // while a non-stalling pair on the same cell stays exact.
-  const std::array<double, 3> stall = {-4859743.2640920915,
-                                       -0.0050198905816330854,
-                                       -0.031675054668108597};
-  REQUIRE_THROWS_AS(
-      gen::mic::euclideanIfShorter(1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, stall,
-                                   stall),
-      std::runtime_error);
-  const std::array<double, 3> okPair = {2500000.0, 0.02, -0.03};
-  const auto gotOk = gen::mic::euclideanIfShorter(
-      1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, okPair, okPair);
-  const double dOk[3] = {okPair[0], okPair[1], okPair[2]};
-  const double refOk =
-      exactImage(1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, dOk);
-  REQUIRE_THAT(std::sqrt(gotOk[0] * gotOk[0] + gotOk[1] * gotOk[1] +
-                         gotOk[2] * gotOk[2]),
-               Catch::Matchers::WithinRel(refOk, 1e-8));
+TEST_CASE("minimum image is exact on a 1e8-aspect LAMMPS-legal cell", "[pore]") {
+  // The first pair used to stop the slicer with "binary64 limits". Both pairs
+  // must match the reference to within a few ulps of the wrapped length.
+  const std::array<double, 3> pairs[] = {
+      {-4859743.2640920915, -0.0050198905816330854, -0.031675054668108597},
+      {2500000.0, 0.02, -0.03},
+  };
+  for (const auto &w : pairs) {
+    const auto got =
+        gen::mic::euclideanIfShorter(1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, w, w);
+    const double d[3] = {w[0], w[1], w[2]};
+    const double ref = exactImage(1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, d);
+    const double wrapped = std::sqrt(w[0] * w[0] + w[1] * w[1] + w[2] * w[2]);
+    REQUIRE_THAT(std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]),
+                 Catch::Matchers::WithinAbs(
+                     ref, 16.0 * std::numeric_limits<double>::epsilon() * wrapped));
+  }
 }
 
 TEST_CASE("minimum image basis cache is not poisoned by a throw", "[pore]") {
@@ -1638,4 +1637,172 @@ TEST_CASE("minimum image handles ordinary cells without spurious throws",
       REQUIRE(std::abs(cz - std::round(cz)) < 1e-9);
     }
   }
+}
+
+// Exact minimum image over the upper-triangular cell, enumerating k, then j,
+// then the two nearest i, inside the radius `bound`. Returns -1 when no
+// lattice point lies inside that radius.
+long double triangularImage(const double c[6], const double d[3], long double bound) {
+  const long double lx = c[0];
+  const long double ly = c[1];
+  const long double lz = c[2];
+  const long double xy = c[3];
+  const long double xz = c[4];
+  const long double yz = c[5];
+  long double best = bound * bound;
+  bool found = false;
+  const long double radius = std::sqrt(best);
+  const auto k0 = static_cast<long long>(std::floor((d[2] - radius) / lz)) - 1;
+  const auto k1 = static_cast<long long>(std::ceil((d[2] + radius) / lz)) + 1;
+  for (long long k = k0; k <= k1; ++k) {
+    const long double z = d[2] - static_cast<long double>(k) * lz;
+    const long double restZ = best - z * z;
+    if (restZ < 0.0L) {
+      continue;
+    }
+    const long double yc = d[1] - static_cast<long double>(k) * yz;
+    const long double ry = std::sqrt(restZ);
+    const auto j0 = static_cast<long long>(std::floor((yc - ry) / ly)) - 1;
+    const auto j1 = static_cast<long long>(std::ceil((yc + ry) / ly)) + 1;
+    for (long long j = j0; j <= j1; ++j) {
+      const long double y = yc - static_cast<long double>(j) * ly;
+      if (restZ - y * y < 0.0L) {
+        continue;
+      }
+      const long double xc = d[0] - static_cast<long double>(j) * xy -
+                             static_cast<long double>(k) * xz;
+      const auto ic = static_cast<long long>(std::floor(xc / lx));
+      for (long long i = ic; i <= ic + 1; ++i) {
+        const long double x = xc - static_cast<long double>(i) * lx;
+        const long double n = x * x + y * y + z * z;
+        if (n <= best) {
+          best = n;
+          found = true;
+        }
+      }
+    }
+  }
+  return found ? std::sqrt(best) : -1.0L;
+}
+
+// Library image of the fractional wrap `w` on cell `c`, checked against the
+// triangular reference: the call returns, the result is a lattice translate
+// of `w`, and its length matches to `rel`.
+void requireExactImage(const double c[6], const std::array<double, 3> &w, double rel) {
+  const auto got = gen::mic::euclideanIfShorter(c[0], c[1], c[2], c[3], c[4], c[5], w, w);
+  const double found = std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
+  const double d[3] = {w[0], w[1], w[2]};
+  const long double ref = triangularImage(c, d, static_cast<long double>(found) * (1.0L + 1e-12L));
+  REQUIRE(ref >= 0.0L);
+  REQUIRE_THAT(found, Catch::Matchers::WithinRel(static_cast<double>(ref), rel));
+  const double dv[3] = {got[0] - w[0], got[1] - w[1], got[2] - w[2]};
+  const double cz = dv[2] / c[2];
+  const double cy = (dv[1] - c[5] * cz) / c[1];
+  const double cx = (dv[0] - c[3] * cy - c[4] * cz) / c[0];
+  REQUIRE(std::abs(cx - std::round(cx)) < 1e-9);
+  REQUIRE(std::abs(cy - std::round(cy)) < 1e-9);
+  REQUIRE(std::abs(cz - std::round(cz)) < 1e-9);
+}
+
+TEST_CASE("minimum image does not stall on cells where the slicer used to throw",
+          "[pore]") {
+  // Cells and wraps printed by the round-6 gate (nine significant digits).
+  // Each threw "minimum-image slicer reached binary64 limits".
+  const double legal[][9] = {
+      {14.745736, 71.0592255, 3.85588635, 4.0013901, 3.48405873, 32.153036, 3.74272441,
+       51.6061307, 1.92794318},
+      {17.2569651, 4.67960859, 1.8394437, -4.97263683, -5.72362751, 0.627733896, 3.2803504,
+       2.65367124, 0.91972185},
+      {663.227964, 189.35351, 25.6360714, -285.603005, -145.440404, 74.3425649, 116.092277,
+       131.848038, 12.8180357},
+      {13.5686657, 3.46816642, 0.58590604, 4.27697286, 3.17231146, -1.25982259, 6.78433287,
+       0.0, 0.0},
+      {3.70116856, 0.868685911, 11.5064988, -0.23454385, -0.965981861, 0.395936338,
+       -0.117271925, 0.434342955, 0.0},
+      {186.992411, 313.299545, 10.4083736, 44.9603314, 42.4777125, 108.680464, 114.735062,
+       54.3402322, 5.2041868},
+      {0.576046042, 0.959331047, 0.711803081, -0.145219671, 0.106501407, -0.0340919453,
+       -0.307382152, 0.462619551, 0.35590154},
+      {11.9522972, 10.3268806, 0.687091899, -1.75540131, 2.32532548, 3.01871018, 5.97614862,
+       0.0, 0.0},
+      {2.07161518, 0.0703767252, 0.226021188, -0.649221026, 0.529175895, 0.0335878335,
+       1.03580759, 0.0, 0.0},
+      {58.196444, 53.3197415, 54.9325006, 29.098222, -29.098222, -26.6598708, 43.647333,
+       26.6598708, 0.0},
+  };
+  for (const auto &row : legal) {
+    requireExactImage(row, {row[6], row[7], row[8]}, 1e-14);
+  }
+  // The gate's brute-force 30.3714560195 is for the unrounded corner cell.
+  const auto corner = gen::mic::euclideanIfShorter(
+      58.196444, 53.3197415, 54.9325006, 29.098222, -29.098222, -26.6598708,
+      {43.647333, 26.6598708, 0.0}, {43.647333, 26.6598708, 0.0});
+  REQUIRE_THAT(std::sqrt(corner[0] * corner[0] + corner[1] * corner[1] + corner[2] * corner[2]),
+               Catch::Matchers::WithinAbs(30.3714560195, 1e-6));
+
+  // A 1e-14 tilt on a 10000 x 12 x 12 cell, where most of these wraps are
+  // already the minimum image.
+  const double tiny[6] = {10000.0, 12.0, 12.0, 1e-14, 1e-14, 0.0};
+  const std::array<double, 3> wraps[] = {
+      {5000.0, 0.0, 6.0},  {5000.0, 5.88, 6.0},  {5000.0, 6.0, 0.0},   {5000.0, 6.0, 6.0},
+      {-4900.0, 0.0, 6.0}, {-4900.0, 6.0, 0.0},  {-4900.0, 6.0, 6.0},  {-2500.0, 0.0, 6.0},
+      {-2500.0, 6.0, 0.0}, {-2500.0, 6.0, 6.0},  {2500.0, 5.88, 6.0},  {2500.0, 6.0, 5.88},
+  };
+  for (const auto &w : wraps) {
+    requireExactImage(tiny, w, 1e-14);
+  }
+  const auto first = gen::mic::euclideanIfShorter(tiny[0], tiny[1], tiny[2], tiny[3], tiny[4],
+                                                  tiny[5], wraps[0], wraps[0]);
+  REQUIRE_THAT(std::sqrt(first[0] * first[0] + first[1] * first[1] + first[2] * first[2]),
+               Catch::Matchers::WithinRel(5000.0036, 1e-9));
+}
+
+TEST_CASE("minimum image matches a triangular brute force on random legal cells",
+          "[pore]") {
+  // 1200 LAMMPS-legal cells with edge aspect at most 40; a quarter put one
+  // tilt on the +-edge/2 limit and a quarter put all three there. Each cell
+  // probes the seven face, edge, and body half-lattice points plus 17 random
+  // fractions.
+  std::mt19937_64 gen(20261120);
+  std::uniform_real_distribution<double> logScale(-1.0, 3.0);
+  std::uniform_real_distribution<double> logAspect(0.0, std::log10(40.0));
+  std::uniform_real_distribution<double> unit(0.0, 1.0);
+  std::uniform_real_distribution<double> half(-0.5, 0.5);
+  const double halves[][3] = {{0.5, 0.0, 0.0}, {0.0, 0.5, 0.0}, {0.0, 0.0, 0.5},
+                              {0.5, 0.5, 0.0}, {0.5, 0.0, 0.5}, {0.0, 0.5, 0.5},
+                              {0.5, 0.5, 0.5}};
+  int threw = 0;
+  long pairs = 0;
+  for (int cell = 0; cell < 1200; ++cell) {
+    const double base = std::pow(10.0, logScale(gen));
+    double edge[3] = {base, base * std::pow(10.0, logAspect(gen) * unit(gen)),
+                      base * std::pow(10.0, logAspect(gen))};
+    std::shuffle(edge, edge + 3, gen);
+    double c[6] = {edge[0], edge[1], edge[2], half(gen) * edge[0], half(gen) * edge[0],
+                   half(gen) * edge[1]};
+    if (cell % 4 == 1) {
+      c[3] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[0];
+    }
+    if (cell % 4 == 2) {
+      c[3] = 0.5 * edge[0];
+      c[4] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[0];
+      c[5] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[1];
+    }
+    for (int p = 0; p < 24; ++p) {
+      double f[3];
+      for (int k = 0; k < 3; ++k) {
+        f[k] = p < 7 ? halves[p][k] : half(gen);
+      }
+      const std::array<double, 3> w = {c[0] * f[0] + c[3] * f[1] + c[4] * f[2],
+                                       c[1] * f[1] + c[5] * f[2], c[2] * f[2]};
+      ++pairs;
+      try {
+        requireExactImage(c, w, 1e-14);
+      } catch (const std::runtime_error &) {
+        ++threw;
+      }
+    }
+  }
+  REQUIRE(pairs == 1200 * 24);
+  REQUIRE(threw == 0);
 }
