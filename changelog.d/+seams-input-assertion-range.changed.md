@@ -1,0 +1,1 @@
+`seams_input` assertion totals are nondeterministic under parallel scheduling, so exact-count claims were replaced with measured ranges. On this branch, 36 repeated runs observed `25182..26071` assertions.
