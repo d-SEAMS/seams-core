@@ -367,16 +367,23 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 #endif
 
 // Shared Euclidean minimum image. Callers are pore host-guest contacts,
-// site distances, water selection, and, for a box that is not a positive
-// cell, periodicDistSq and relDistFromPoint.
+// site distances, water selection, 2D RDF (rdf2::sampleRDF_AA /
+// seams_frame_rdf2d), and, for a box that is not a positive cell,
+// periodicDistSq and relDistFromPoint.
 //
 // A positive three-length box is orthorhombic and wraps each axis. A box
 // with fewer than six values does not read tilt slots. Inside the Smith
 // ball the fractional wrap is the minimum image. Outside it, the linked
-// minimage result (when available) and the fractional wrap are both refined
-// by mic::euclideanIfShorter. Its uncapped Selling reduction either returns
-// the shorter checked image or throws when binary64 cannot represent the
-// reduction reliably.
+// minimage result (when available, across scalar, batch, cached-frame, and
+// rdf2d paths) and the fractional wrap are both refined by
+// mic::euclideanIfShorter. Its uncapped Selling reduction skips
+// non-decreasing Lagrange ties, treats dot products within binary64 rounding
+// as obtuse (with a 26-neighbour and superbasis-difference follow-up when
+// not strictly obtuse), and throws explicitly on non-finite values, singular
+// bases, coefficients at or above 2^52, or unresolved slicer stalls without
+// poisoning the per-thread basis cache. At extreme aspect ratios (lx/ly >=
+// ~8e4), binary64 basis-update rounding can reach 1e-12 to 5.4e-9 relative
+// and a few ~1e8-aspect cells throw explicitly from the slicer.
 //
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
