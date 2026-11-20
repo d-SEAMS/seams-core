@@ -179,7 +179,7 @@ def liquid_frames(root=None):
     if not mw.is_file():
         subprocess.run(
             [sys.executable, str(root / "input" / "fetch.py"),
-             "dump-l.lammpstrj"],
+             "dump-l.lammpstrj", "--output-dir", str(traj)],
             check=True,
         )
     frames.append(read_lammps_first(mw, 1, "liquid-mw", "liquid-mw"))
