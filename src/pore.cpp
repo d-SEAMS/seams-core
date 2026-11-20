@@ -487,14 +487,24 @@ double diskArea(const std::vector<P2> &poly, double radius, double far, double f
         roots[nroot++] = root == 0.0 ? 0.0 : -bb / (2.0 * aa);
       }
       std::sort(roots, roots + nroot);
+      // A root within 1e-12 of an endpoint is the crossing at that vertex.
+      // Dropping it makes the edge a sector, and a Voronoi cell whose
+      // vertices share one radius then sums to the full disk. Clamp the
+      // root onto the segment and keep the point.
+      bool have = false;
+      double accepted = 0.0;
       for (int k = 0; k < nroot; ++k) {
-        const double t = roots[k];
-        if (k > 0 && t - roots[k - 1] < 1e-15) {
+        const double root = roots[k];
+        if (root < -1e-12 || root > 1.0 + 1e-12) {
           continue;
         }
-        if (t > 1e-12 && t < 1.0 - 1e-12) {
-          hits.push_back(P2{a.x + t * delta.x, a.y + t * delta.y});
+        const double t = std::clamp(root, 0.0, 1.0);
+        if (have && t - accepted < 1e-15) {
+          continue;
         }
+        have = true;
+        accepted = t;
+        hits.push_back(P2{a.x + t * delta.x, a.y + t * delta.y});
       }
     }
     auto tri = [](P2 u, P2 v) { return 0.5 * cross2(u, v); };
@@ -503,45 +513,20 @@ double diskArea(const std::vector<P2> &poly, double radius, double far, double f
     };
     if (ain && bin) {
       area += tri(a, b);
-    } else if (ain && !bin) {
-      // A root at the endpoint is dropped by the 1e-12 tolerance. That is
-      // a face vertex sitting on the circle. The edge then leaves the
-      // disk at a, and the contribution is the sector, not the triangle
-      // out to the far vertex.
-      if (hits.empty()) {
-        area += sector(a, b);
-      } else {
-        const P2 h = hits.front();
-        area += tri(a, h) + sector(h, b);
-      }
-    } else if (!ain && bin) {
-      if (hits.empty()) {
-        area += sector(a, b);
-      } else {
-        const P2 h = hits.back();
-        area += sector(a, h) + tri(h, b);
-      }
+    } else if (ain) {
+      // a is inside and b is outside. hits.back() is the exit. hits.front()
+      // can be a itself once an endpoint root is kept, and using it would
+      // throw the exit away.
+      const P2 h = hits.empty() ? b : hits.back();
+      area += tri(a, h) + sector(h, b);
+    } else if (bin) {
+      const P2 h = hits.empty() ? a : hits.front();
+      area += sector(a, h) + tri(h, b);
     } else if (hits.size() >= 2) {
       area += sector(a, hits.front()) + tri(hits.front(), hits.back()) + sector(hits.back(), b);
-    } else if (hits.size() == 1) {
-      // hypot(x, y)^2 can exceed x^2 + y^2, so a vertex built as a
-      // hypotenuse sits just outside the circle and its root falls
-      // inside the endpoint tolerance. The surviving root is a real
-      // crossing; the near endpoint stands in for the dropped one. A
-      // tangent in the middle of the edge has both ends well outside
-      // and adds no chord.
-      const P2 h = hits.front();
-      const double ar = std::abs(dot2(a, a) - r2);
-      const double br = std::abs(dot2(b, b) - r2);
-      const double tol = 1e-8 * std::max(r2, 1.0);
-      if (std::min(ar, br) <= tol && ar <= br) {
-        area += tri(a, h) + sector(h, b);
-      } else if (std::min(ar, br) <= tol) {
-        area += sector(a, h) + tri(h, b);
-      } else {
-        area += sector(a, b);
-      }
     } else {
+      // The edge misses the disk, or it touches at one interior point.
+      // Either way the chord has no area.
       area += sector(a, b);
     }
   }
@@ -851,11 +836,11 @@ int resolveAxis(const Cell &cell, int axis, const double *direction) {
     }
     return parallel;
   }
-  if (axis < 0) {
+  if (axis == -1) {
     return autoAxis(cell);
   }
-  if (axis > 2) {
-    throw std::out_of_range("axis is 0, 1, or 2");
+  if (axis < 0 || axis > 2) {
+    throw std::out_of_range("axis is -1, 0, 1, or 2");
   }
   return axis;
 }
@@ -1054,6 +1039,9 @@ Profiles poreProfiles(const Cloud &cloud, int type, int radial_bins, int azimuth
 HostGuest hostGuest(const Cloud &cloud, int guest_type, int framework_type, double cutoff) {
   if (guest_type <= 0) {
     throw std::out_of_range("guest type must be positive");
+  }
+  if (framework_type == guest_type) {
+    throw std::invalid_argument("framework type must differ from the guest type");
   }
   if (!std::isfinite(cutoff) || cutoff < 0.0) {
     throw std::out_of_range("cutoff must be non-negative");

@@ -3706,7 +3706,8 @@ SEAMS_API seams_status seams_density_fractional(seams_system *sys, int type, int
  * @brief Pore axis and centre, supplied or taken from the framework.
  *
  * axis 0, 1, or 2 selects that cell edge. axis -1 with direction NULL
- * selects the longest cell edge. A non-NULL direction must be parallel
+ * selects the longest cell edge. Any other negative axis is rejected.
+ * A non-NULL direction must be parallel
  * to a cell edge. centre_frac NULL places the centre at the periodic
  * centroid of the framework atoms in the perpendicular plane.
  * framework_type 0 uses every atom for that centroid.
@@ -3715,6 +3716,7 @@ SEAMS_API seams_status seams_density_fractional(seams_system *sys, int type, int
  * @param framework_type Species used to place an automatic centre. Zero
  *        keeps every atom.
  * @param axis 0, 1, 2, or -1 for the longest edge when direction is NULL.
+ *        Any other negative value is rejected.
  * @param direction Three Cartesian components parallel to a cell edge, or NULL.
  * @param direction_len 3 when direction is not NULL. Ignored otherwise.
  * @param centre_frac Three fractional coordinates, or NULL to detect the centre.
@@ -3758,8 +3760,12 @@ SEAMS_API seams_status seams_pore_frame(seams_system *sys, int framework_type, i
  * the face origin. Beyond the inscribed radius a corner point can be
  * closer to a neighbouring image, and the coordinate follows that
  * image. The radial shell is the annulus inside the Voronoi cell of the
- * perpendicular lattice. Azimuthal bins cover [-pi, pi) in the centred
- * face, and each sector is clipped to that face. The axial coordinate
+ * perpendicular lattice. A circle-edge crossing that lands on a vertex
+ * stays on that edge. Azimuthal bins cover [-pi, pi) in the centred
+ * face, and each sector is clipped to that face. Azimuth zero points
+ * along the perpendicular projection of cell edge (axis + 1) mod 3,
+ * with the component parallel to the pore axis removed. The angle
+ * increases towards the pore axis crossed with that direction. The axial coordinate
  * is the fractional cell coordinate, shifted by origin. A shell volume
  * is that area times the edge length. Mass density is the caller's mass
  * unit per cubic Angstrom. An amu mass gives amu per cubic Angstrom, and
@@ -3772,7 +3778,8 @@ SEAMS_API seams_status seams_pore_frame(seams_system *sys, int framework_type, i
  * @param azimuthal_bins Positive azimuthal bin count.
  * @param axial_bins Positive axial bin count.
  * @param r_max Outer radius in Angstrom. Zero covers the face.
- * @param axis 0, 1, 2, or -1 when direction is NULL.
+ * @param axis 0, 1, 2, or -1 when direction is NULL. Any other negative
+ *        value is rejected.
  * @param direction Three Cartesian components parallel to a cell edge, or NULL.
  * @param direction_len 3 when direction is not NULL. Ignored otherwise.
  * @param centre_frac Three fractional coordinates, or NULL to detect the centre.
@@ -3840,7 +3847,8 @@ SEAMS_API seams_status seams_pore_profiles(
  * @brief Nearest framework site and contact counts for each guest.
  *
  * guest_type must be positive. framework_type 0 keeps every atom of
- * another type. nearest_distance is negative when a guest has no
+ * another type. framework_type equal to guest_type is an error.
+ * nearest_distance is negative when a guest has no
  * framework atom. A contact is a framework atom at or inside cutoff
  * under the triclinic minimum image. contact_counts is row-major,
  * one row per guest and one column per framework type, types sorted.
@@ -3849,6 +3857,7 @@ SEAMS_API seams_status seams_pore_profiles(
  * @param sys Frame handle.
  * @param guest_type Positive guest species.
  * @param framework_type Framework species. Zero keeps every other type.
+ *        A value equal to guest_type is rejected.
  * @param cutoff Contact distance in Angstrom. Zero counts only a site
  *        at the same point. Negative is rejected.
  * @param guest_index Guest indices, or NULL to skip.

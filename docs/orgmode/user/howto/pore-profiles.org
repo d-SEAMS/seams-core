@@ -25,7 +25,8 @@ The C++ method is =System::fractional_density=.
 * Pore frame
 
 =seams_pore_frame= returns a unit axis and a centre. Axis -1 with a
-null direction selects the longest cell edge. A direction is accepted
+null direction selects the longest cell edge. Any other negative axis
+is rejected. A direction is accepted
 when it is parallel to one cell edge. A null centre is the periodic
 centroid of the framework atoms in the plane perpendicular to that
 edge. =framework_type= 0 uses every atom for the centroid.
@@ -46,8 +47,11 @@ is not a cell edge is rejected.
   Euclidean annulus inside the Voronoi cell of the perpendicular
   lattice, times the length of the pore edge.
 - Azimuthal bins cover [-pi, pi). The angle is taken in the centred
-  face. A sector volume is the area of that wedge inside the face,
-  times the same edge length.
+  face. Azimuth zero points along the perpendicular projection of cell
+  edge (axis + 1) mod 3, with the component parallel to the pore axis
+  removed, and the angle increases towards the pore axis crossed with
+  that direction. A sector volume is the area of that wedge inside the
+  face, times the same edge length.
 - Axial bins are the fractional slabs of =seams_density_fractional=
   along the pore edge.
 
@@ -60,8 +64,10 @@ out of the radial histogram and kept in the azimuthal histogram.
 * Host and guest
 
 =seams_host_guest= takes a positive guest type. =framework_type= 0
-keeps every atom of another type. For each guest the call reports the
-nearest framework atom under the triclinic minimum image, and the
+keeps every atom of another type. A framework type equal to the guest
+type is an error. For each guest the call reports the
+nearest framework atom under the triclinic minimum image, whether
+or not the optional minimage library is linked, and the
 number of framework atoms of each type at or inside =cutoff=. The
 contact matrix is row-major, one row per guest and one column per
 framework type, types sorted. A guest with no framework atom has

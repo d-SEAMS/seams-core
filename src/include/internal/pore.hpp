@@ -81,13 +81,16 @@ Profile fractionalAxis(const Cloud &cloud, int type, int bins, int axis, double 
 Profile alongDirection(const Cloud &cloud, int type, int bins, const double direction[3],
                        double origin, const double *masses);
 
-//! Pore axis and centre. axis < 0 and direction == nullptr selects the longest edge.
+//! Pore axis and centre. axis -1 and direction == nullptr selects the longest edge.
+//! Any other negative axis is rejected.
 //! centre_frac == nullptr selects the framework centroid in the perpendicular plane.
 Frame poreFrame(const Cloud &cloud, int framework_type, int axis, const double *direction,
                 const double *centre_frac);
 
 //! Radial, azimuthal, and axial profiles. The axis must be a cell edge.
-//! r_max <= 0 covers the perpendicular face. Masses follow fractionalAxis.
+//! r_max of zero covers the perpendicular face. A negative value is rejected.
+//! Azimuth zero points along the perpendicular projection of cell edge
+//! (axis + 1) mod 3. Masses follow fractionalAxis.
 Profiles poreProfiles(const Cloud &cloud, int type, int radial_bins, int azimuthal_bins,
                       int axial_bins, double r_max, int axis, const double *direction,
                       const double *centre_frac, int framework_type, double origin,
@@ -102,6 +105,7 @@ double clippedDiskArea(const std::vector<std::array<double, 2>> &polygon, double
 
 //! Nearest framework site and contact counts inside cutoff, one row per guest.
 //! framework_type 0 keeps every atom whose type is not guest_type.
+//! framework_type equal to guest_type is rejected.
 //! distance is negative when the guest has no framework atom.
 HostGuest hostGuest(const Cloud &cloud, int guest_type, int framework_type, double cutoff);
 

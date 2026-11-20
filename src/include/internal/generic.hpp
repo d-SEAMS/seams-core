@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <mol_sys.hpp>
@@ -201,7 +202,7 @@ makeFracBox(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
 // Displacement from (xj, yj, zj) to (xi, yi, zi). Orthorhombic axes wrap
 // independently. A tilt box wraps the fractional difference and maps it
 // back through H. That vector is the Euclidean minimum image while its
-// length stays below half the shortest edge.
+// length stays inside the Smith ball, half the narrowest face separation.
 inline std::array<double, 3> fracDelta(const FracBox &b, double xi, double yi,
                                        double zi, double xj, double yj,
                                        double zj) {
@@ -356,6 +357,55 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 }
 #endif
 
+// Shortest image of the fractional wrap. A lattice vector shorter than the
+// wrap differs from it by less than twice that length, and step i along a
+// moves the point by the face separation wx, so |i| <= floor(2D / wx).
+// The same bound holds for j and k. This is the Euclidean minimum image
+// when minimage is not linked, and when that library call fails.
+inline std::array<double, 3> triclinicImageSearch(const FracBox &b, double xi, double yi,
+                                                 double zi, double xj, double yj, double zj) {
+  const std::array<double, 3> wrapped = fracDelta(b, xi, yi, zi, xj, yj, zj);
+  double best2 = wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2];
+  std::array<double, 3> best = wrapped;
+  if (!(best2 > 0.0) || !(b.wx > 0.0 && b.wy > 0.0 && b.wz > 0.0)) {
+    return best;
+  }
+  const double reach = 2.0 * std::sqrt(best2);
+  const int ni = static_cast<int>(std::floor(reach / b.wx));
+  const int nj = static_cast<int>(std::floor(reach / b.wy));
+  const int nk = static_cast<int>(std::floor(reach / b.wz));
+  if (ni > 64 || nj > 64 || nk > 64) {
+    throw std::invalid_argument("minimum image search is unbounded for this box");
+  }
+  for (int i = -ni; i <= ni; ++i) {
+    for (int j = -nj; j <= nj; ++j) {
+      for (int k = -nk; k <= nk; ++k) {
+        const double dx = wrapped[0] + static_cast<double>(i) * b.lx + static_cast<double>(j) * b.xy +
+                          static_cast<double>(k) * b.xz;
+        const double dy = wrapped[1] + static_cast<double>(j) * b.ly + static_cast<double>(k) * b.yz;
+        const double dz = wrapped[2] + static_cast<double>(k) * b.lz;
+        const double d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 < best2) {
+          best2 = d2;
+          best = {dx, dy, dz};
+        }
+      }
+    }
+  }
+  return best;
+}
+
+// Shared Euclidean minimum image. Callers are pore host-guest contacts,
+// site distances, water selection, and, for a box that is not a positive
+// cell, periodicDistSq and relDistFromPoint.
+//
+// A positive three-length box is orthorhombic and wraps each axis. A box
+// with fewer than six values does not read tilt slots. Inside the Smith
+// ball the fractional wrap is the minimum image. Outside it the result is
+// minimage when that library is linked, and triclinicImageSearch otherwise.
+// A failed library call uses the same search. The fractional wrap is not
+// returned in place of a shorter image.
+//
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
 // box[3..6] are tilt factors xy, xz, yz, boxLow is the bound lo.
@@ -382,7 +432,21 @@ inline std::array<double, 3> triclinicMinImage(
       return {ed[0], ed[1], ed[2]};
     }
 #endif
-    return dr;
+    return triclinicImageSearch(b, xi, yi, zi, xj, yj, zj);
+  }
+  if (yCloud.box.size() < 6) {
+    std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
+    const double len[3] = {yCloud.box.size() > 0 ? yCloud.box[0] : 0.0,
+                           yCloud.box.size() > 1 ? yCloud.box[1] : 0.0,
+                           yCloud.box.size() > 2 ? yCloud.box[2] : 0.0};
+    for (int k = 0; k < 3; ++k) {
+      if (!(len[k] > 0.0)) {
+        continue;
+      }
+      raw[static_cast<std::size_t>(k)] -=
+          len[k] * std::floor(raw[static_cast<std::size_t>(k)] / len[k] + 0.5);
+    }
+    return raw;
   }
   const auto &box = yCloud.box;
   const auto &boxLow = yCloud.boxLow;

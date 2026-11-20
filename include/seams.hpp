@@ -413,7 +413,7 @@ struct PoreProfileOptions {
  */
 struct HostGuestOptions {
   int guest = 1;          /**< Positive guest species. */
-  int framework = 0;      /**< Framework species. Zero keeps every other type. */
+  int framework = 0;      /**< Framework species. Zero keeps every other type. Equal to guest is rejected. */
   double cutoff = 0;      /**< Contact distance, Angstrom. Zero counts a coincident site. */
 };
 
