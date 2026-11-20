@@ -888,6 +888,38 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_density_axis 4
 ```
 
+### seams_density_fractional
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_density_fractional 4
+```
+
+### seams_pore_frame
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_pore_frame 2
+```
+
+### seams_pore_profiles
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_pore_profiles 4 4 4
+```
+
+### seams_host_guest
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_host_guest 3 1
+```
+
 ### seams_fingerprint
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -7046,6 +7078,10 @@ seams_density_fractional(sys, 0, 4, 2, NULL, 0, 0.0, NULL, 0,
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_host_guest
 
 Purpose: Nearest framework site and contact counts for each guest.
@@ -7094,6 +7130,10 @@ seams_host_guest(sys, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &ng,
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_pore_frame
 
 Purpose: Pore axis and centre, supplied or taken from the framework.
@@ -7137,6 +7177,10 @@ seams_pore_frame(sys, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &index);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_pore_profiles
 
@@ -7205,6 +7249,10 @@ seams_pore_profiles(sys, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0,
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:
