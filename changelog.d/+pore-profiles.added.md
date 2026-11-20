@@ -1,0 +1,1 @@
+Fractional density profiles follow a triclinic cell axis or an arbitrary direction, with slab volumes taken from the cell. Pore profiles add a cell-edge axis and centre, cylindrical radial and azimuthal shells, and axial slabs, as number and mass density. Host-guest queries report the nearest framework site and contact counts by framework type.

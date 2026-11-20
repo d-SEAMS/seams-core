@@ -4,7 +4,7 @@ Rings
 
 Primitive rings and their histogram.
 
-The stable C interface provides 116 exported functions through ``include/seams.h``.
+The stable C interface provides 120 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_rings.c
    :language: c

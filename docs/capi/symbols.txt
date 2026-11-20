@@ -114,3 +114,7 @@ seams_reorient_destroy
 seams_reorient_push
 seams_reorient_curve
 seams_reorient_fit
+seams_density_fractional
+seams_pore_frame
+seams_pore_profiles
+seams_host_guest

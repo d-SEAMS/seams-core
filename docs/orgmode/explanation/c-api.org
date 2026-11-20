@@ -164,6 +164,10 @@ same length. The later call writes coordinates.
 | =seams_rdf= / =seams_running_cn= / =seams_coordination= | partial =g(r)= and the coordination number |
 | =seams_hbonds= | hydrogen-bond count |
 | =seams_density_axis= | number density along one cell axis |
+| =seams_density_fractional= | number and mass density along a cell axis or a Cartesian direction |
+| =seams_pore_frame= | pore axis and centre, supplied or taken from the framework |
+| =seams_pore_profiles= | radial, azimuthal, and axial densities about a pore axis |
+| =seams_host_guest= | nearest framework site and contact counts by framework type |
 | =seams_fingerprint= | topological key of the bonded graph |
 | =seams_prisms= | perfect and deformed prism counts |
 | =seams_monolayer= | primitive-ring histogram of a monolayer |

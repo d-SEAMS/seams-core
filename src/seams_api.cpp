@@ -22,6 +22,7 @@
 #include <chordless.hpp>
 #include <cluster.hpp>
 #include <density.hpp>
+#include <pore.hpp>
 #include <cage_affiliation.hpp>
 #include <cage_enum.hpp>
 #include <chill_plus_scheme.hpp>
@@ -3696,6 +3697,222 @@ seams_status seams_density_axis(seams_system *sys, int type, int bins, int axis,
   } catch (...) {
     remember();
     return SEAMS_ERR_INTERNAL;
+  }
+}
+
+static seams_status pore_status() {
+  try {
+    throw;
+  } catch (const pore::BoxError &ex) {
+    return fail(SEAMS_ERR_BOX, ex.what());
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::out_of_range &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (const std::exception &ex) {
+    return fail(SEAMS_ERR_INTERNAL, ex.what());
+  } catch (...) {
+    return fail(SEAMS_ERR_INTERNAL, "unknown error");
+  }
+}
+
+static void copy_profile(const pore::Profile &profile, double *coordinate, double *number_density,
+                         double *mass_density, double *volume) {
+  if (coordinate != nullptr) {
+    std::copy(profile.coordinate.begin(), profile.coordinate.end(), coordinate);
+  }
+  if (number_density != nullptr) {
+    std::copy(profile.number_density.begin(), profile.number_density.end(), number_density);
+  }
+  if (mass_density != nullptr) {
+    std::copy(profile.mass_density.begin(), profile.mass_density.end(), mass_density);
+  }
+  if (volume != nullptr) {
+    std::copy(profile.volume.begin(), profile.volume.end(), volume);
+  }
+}
+
+seams_status seams_density_fractional(seams_system *sys, int type, int bins, int axis,
+                                      const double *direction, size_t direction_len, double origin,
+                                      const double *masses, size_t masses_len, double *coordinate,
+                                      double *number_density, double *mass_density,
+                                      double *bin_volume, size_t cap, size_t *n_out) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "density output is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (direction != nullptr && direction_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "direction must hold 3 components");
+  }
+  if (masses != nullptr && masses_len != static_cast<size_t>(sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "masses length must equal the atom count");
+  }
+  try {
+    const pore::Profile profile =
+        direction == nullptr
+            ? pore::fractionalAxis(sys->cloud, type, bins, axis, origin, masses)
+            : pore::alongDirection(sys->cloud, type, bins, direction, origin, masses);
+    *n_out = profile.coordinate.size();
+    const bool any = coordinate != nullptr || number_density != nullptr || mass_density != nullptr ||
+                     bin_volume != nullptr;
+    if (!any) {
+      return SEAMS_OK;
+    }
+    if (cap < profile.coordinate.size()) {
+      return fail(SEAMS_ERR_RANGE, "profile buffer shorter than the bin count");
+    }
+    copy_profile(profile, coordinate, number_density, mass_density, bin_volume);
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
+  }
+}
+
+seams_status seams_pore_frame(seams_system *sys, int framework_type, int axis,
+                              const double *direction, size_t direction_len,
+                              const double *centre_frac, size_t centre_len, double *axis_out,
+                              double *centre_out, double *centre_frac_out, int *axis_index) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || axis_out == nullptr || centre_out == nullptr || centre_frac_out == nullptr ||
+      axis_index == nullptr) {
+    return fail(SEAMS_ERR_NULL, "a pore frame output pointer is NULL");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (direction != nullptr && direction_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "direction must hold 3 components");
+  }
+  if (centre_frac != nullptr && centre_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "centre must hold 3 fractional coordinates");
+  }
+  try {
+    const pore::Frame frame =
+        pore::poreFrame(sys->cloud, framework_type, axis, direction, centre_frac);
+    std::copy(frame.axis_unit, frame.axis_unit + 3, axis_out);
+    std::copy(frame.centre, frame.centre + 3, centre_out);
+    std::copy(frame.centre_frac, frame.centre_frac + 3, centre_frac_out);
+    *axis_index = frame.axis_index;
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
+  }
+}
+
+seams_status seams_pore_profiles(seams_system *sys, int type, int radial_bins, int azimuthal_bins,
+                                 int axial_bins, double r_max, int axis, const double *direction,
+                                 size_t direction_len, const double *centre_frac, size_t centre_len,
+                                 int framework_type, double origin, const double *masses,
+                                 size_t masses_len, double *radius, double *radial_number,
+                                 double *radial_mass, double *radial_volume, size_t radial_cap,
+                                 size_t *n_radial, double *theta, double *azimuthal_number,
+                                 double *azimuthal_mass, double *azimuthal_volume,
+                                 size_t azimuthal_cap, size_t *n_azimuthal, double *axial,
+                                 double *axial_number, double *axial_mass, double *axial_volume,
+                                 size_t axial_cap, size_t *n_axial) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_radial == nullptr || n_azimuthal == nullptr || n_axial == nullptr) {
+    return fail(SEAMS_ERR_NULL, "a profile count pointer is NULL");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (direction != nullptr && direction_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "direction must hold 3 components");
+  }
+  if (centre_frac != nullptr && centre_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "centre must hold 3 fractional coordinates");
+  }
+  if (masses != nullptr && masses_len != static_cast<size_t>(sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "masses length must equal the atom count");
+  }
+  try {
+    const pore::Profiles made = pore::poreProfiles(
+        sys->cloud, type, radial_bins, azimuthal_bins, axial_bins, r_max, axis, direction,
+        centre_frac, framework_type, origin, masses);
+    *n_radial = made.radial.coordinate.size();
+    *n_azimuthal = made.azimuthal.coordinate.size();
+    *n_axial = made.axial.coordinate.size();
+    const bool radial_any = radius != nullptr || radial_number != nullptr || radial_mass != nullptr ||
+                            radial_volume != nullptr;
+    const bool azimuthal_any = theta != nullptr || azimuthal_number != nullptr ||
+                               azimuthal_mass != nullptr || azimuthal_volume != nullptr;
+    const bool axial_any = axial != nullptr || axial_number != nullptr || axial_mass != nullptr ||
+                           axial_volume != nullptr;
+    if ((radial_any && radial_cap < made.radial.coordinate.size()) ||
+        (azimuthal_any && azimuthal_cap < made.azimuthal.coordinate.size()) ||
+        (axial_any && axial_cap < made.axial.coordinate.size())) {
+      return fail(SEAMS_ERR_RANGE, "profile buffer shorter than the bin count");
+    }
+    if (radial_any) {
+      copy_profile(made.radial, radius, radial_number, radial_mass, radial_volume);
+    }
+    if (azimuthal_any) {
+      copy_profile(made.azimuthal, theta, azimuthal_number, azimuthal_mass, azimuthal_volume);
+    }
+    if (axial_any) {
+      copy_profile(made.axial, axial, axial_number, axial_mass, axial_volume);
+    }
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
+  }
+}
+
+seams_status seams_host_guest(seams_system *sys, int guest_type, int framework_type, double cutoff,
+                              int *guest_index, int *nearest_index, int *nearest_type,
+                              double *nearest_distance, size_t guest_cap, size_t *n_guest,
+                              int *framework_types, size_t type_cap, size_t *n_types,
+                              int *contact_counts, size_t contact_cap) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_guest == nullptr || n_types == nullptr) {
+    return fail(SEAMS_ERR_NULL, "a count pointer is NULL");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  try {
+    const pore::HostGuest made = pore::hostGuest(sys->cloud, guest_type, framework_type, cutoff);
+    *n_guest = made.guest.size();
+    *n_types = made.framework_types.size();
+    const bool guest_any = guest_index != nullptr || nearest_index != nullptr ||
+                           nearest_type != nullptr || nearest_distance != nullptr;
+    const size_t contacts = made.guest.size() * made.framework_types.size();
+    if ((guest_any && guest_cap < made.guest.size()) ||
+        (framework_types != nullptr && type_cap < made.framework_types.size()) ||
+        (contact_counts != nullptr && contact_cap < contacts)) {
+      return fail(SEAMS_ERR_RANGE, "host-guest buffer shorter than the result");
+    }
+    if (guest_index != nullptr) {
+      std::copy(made.guest.begin(), made.guest.end(), guest_index);
+    }
+    if (nearest_index != nullptr) {
+      std::copy(made.nearest.begin(), made.nearest.end(), nearest_index);
+    }
+    if (nearest_type != nullptr) {
+      std::copy(made.nearest_type.begin(), made.nearest_type.end(), nearest_type);
+    }
+    if (nearest_distance != nullptr) {
+      std::copy(made.distance.begin(), made.distance.end(), nearest_distance);
+    }
+    if (framework_types != nullptr) {
+      std::copy(made.framework_types.begin(), made.framework_types.end(), framework_types);
+    }
+    if (contact_counts != nullptr) {
+      std::copy(made.contacts.begin(), made.contacts.end(), contact_counts);
+    }
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
   }
 }
 

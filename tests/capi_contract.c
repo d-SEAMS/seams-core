@@ -1819,6 +1819,135 @@ static void trajectory_contract(void) {
   truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
 }
 
+static void pore_contract(void) {
+  size_t n_out = 0;
+  const char *fn = "seams_density_fractional";
+  expect(seams_density_fractional(NULL, 0, 4, 2, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0,
+                                  &n_out),
+         SEAMS_ERR_NULL, fn, "NULL frame");
+  expect(seams_density_fractional(g_empty, 0, 4, 2, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL,
+                                  0, &n_out),
+         SEAMS_ERR_STATE, fn, "frame never filled");
+  expect(seams_density_fractional(g_good, 0, 4, 2, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0,
+                                  NULL),
+         SEAMS_ERR_NULL, fn, "NULL n_out");
+  expect(seams_density_fractional(g_good, 0, 0, 2, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0,
+                                  &n_out),
+         SEAMS_ERR_RANGE, fn, "zero bins");
+  expect(seams_density_fractional(g_good, 0, 4, 3, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0,
+                                  &n_out),
+         SEAMS_ERR_RANGE, fn, "axis 3");
+  const double short_dir[2] = {0.0, 0.0};
+  expect(seams_density_fractional(g_good, 0, 4, 2, short_dir, 2, 0.0, NULL, 0, NULL, NULL, NULL,
+                                  NULL, 0, &n_out),
+         SEAMS_ERR_RANGE, fn, "short direction");
+  const double zero_dir[3] = {0.0, 0.0, 0.0};
+  expect(seams_density_fractional(g_good, 0, 4, 2, zero_dir, 3, 0.0, NULL, 0, NULL, NULL, NULL,
+                                  NULL, 0, &n_out),
+         SEAMS_ERR_ARG, fn, "zero direction");
+  double bad_mass = -1.0;
+  expect(seams_density_fractional(g_good, 1, 4, 2, NULL, 0, 0.0, &bad_mass, 1, NULL, NULL, NULL,
+                                  NULL, 0, &n_out),
+         SEAMS_ERR_RANGE, fn, "masses shorter than the atom count");
+  double masses[N_MAX];
+  for (int i = 0; i < g_n; ++i) {
+    masses[i] = 1.0;
+  }
+  masses[0] = -1.0;
+  expect(seams_density_fractional(g_good, 0, 4, 2, NULL, 0, 0.0, masses, (size_t)g_n, NULL, NULL,
+                                  NULL, NULL, 0, &n_out),
+         SEAMS_ERR_ARG, fn, "negative mass");
+  expect(seams_density_fractional(g_good, 0, 4, 2, NULL, 0, 0.0, NULL, 0, g_dbuf, NULL, NULL, NULL,
+                                  3, &n_out),
+         SEAMS_ERR_RANGE, fn, "short column");
+  truth(n_out == 4, fn, "short column still reports the bin count");
+  expect(seams_density_fractional(g_good, 0, 4, 2, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0,
+                                  &n_out),
+         SEAMS_OK, fn, "query");
+  truth(n_out == 4, fn, "four bins");
+  expect(seams_density_fractional(g_good, 0, 4, 2, NULL, 0, 0.0, NULL, 0, g_dbuf, g_dbuf2, g_dbuf3,
+                                  g_dbuf, 4, &n_out),
+         SEAMS_OK, fn, "filled columns");
+
+  fn = "seams_pore_frame";
+  double axis[3], centre[3], frac[3];
+  int index = -1;
+  expect(seams_pore_frame(NULL, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &index),
+         SEAMS_ERR_NULL, fn, "NULL frame");
+  expect(seams_pore_frame(g_empty, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &index),
+         SEAMS_ERR_STATE, fn, "frame never filled");
+  expect(seams_pore_frame(g_good, 0, -1, NULL, 0, NULL, 0, NULL, centre, frac, &index),
+         SEAMS_ERR_NULL, fn, "NULL axis");
+  expect(seams_pore_frame(g_good, 0, 3, NULL, 0, NULL, 0, axis, centre, frac, &index),
+         SEAMS_ERR_RANGE, fn, "axis 3");
+  expect(seams_pore_frame(g_good, 0, -1, short_dir, 2, NULL, 0, axis, centre, frac, &index),
+         SEAMS_ERR_RANGE, fn, "short direction");
+  const double diagonal[3] = {1.0, 1.0, 0.0};
+  expect(seams_pore_frame(g_good, 0, -1, diagonal, 3, NULL, 0, axis, centre, frac, &index),
+         SEAMS_ERR_ARG, fn, "direction is not a cell edge");
+  expect(seams_pore_frame(g_good, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &index), SEAMS_OK,
+         fn, "longest edge");
+  truth(index == 0, fn, "equal edges keep axis 0");
+
+  fn = "seams_pore_profiles";
+  size_t nr = 0, nt = 0, ns = 0;
+  expect(seams_pore_profiles(NULL, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                             NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_ERR_NULL, fn, "NULL frame");
+  expect(seams_pore_profiles(g_empty, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                             NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_ERR_STATE, fn, "frame never filled");
+  expect(seams_pore_profiles(g_good, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                             NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_ERR_NULL, fn, "NULL radial count");
+  expect(seams_pore_profiles(g_good, 0, 0, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                             NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_ERR_RANGE, fn, "zero radial bins");
+  expect(seams_pore_profiles(g_good, 0, 4, 4, 4, -1.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                             NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_ERR_RANGE, fn, "negative r_max");
+  expect(seams_pore_profiles(g_good, 0, 4, 4, 4, 0.0, 2, diagonal, 3, NULL, 0, 0, 0.0, NULL, 0,
+                             NULL, NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL,
+                             NULL, NULL, NULL, 0, &ns),
+         SEAMS_ERR_ARG, fn, "direction is not a cell edge");
+  expect(seams_pore_profiles(g_good, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, g_dbuf,
+                             NULL, NULL, NULL, 3, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_ERR_RANGE, fn, "short radial column");
+  expect(seams_pore_profiles(g_good, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                             NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL,
+                             NULL, NULL, 0, &ns),
+         SEAMS_OK, fn, "query");
+  truth(nr == 4 && nt == 4 && ns == 4, fn, "four bins on each profile");
+
+  fn = "seams_host_guest";
+  size_t ng = 0, nty = 0;
+  expect(seams_host_guest(NULL, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &ng, NULL, 0, &nty, NULL, 0),
+         SEAMS_ERR_NULL, fn, "NULL frame");
+  expect(seams_host_guest(g_empty, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &ng, NULL, 0, &nty, NULL,
+                          0),
+         SEAMS_ERR_STATE, fn, "frame never filled");
+  expect(seams_host_guest(g_good, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, NULL, NULL, 0, &nty, NULL,
+                          0),
+         SEAMS_ERR_NULL, fn, "NULL guest count");
+  expect(seams_host_guest(g_good, 0, 0, 3.5, NULL, NULL, NULL, NULL, 0, &ng, NULL, 0, &nty, NULL, 0),
+         SEAMS_ERR_RANGE, fn, "guest type 0");
+  expect(seams_host_guest(g_good, 1, 0, -1.0, NULL, NULL, NULL, NULL, 0, &ng, NULL, 0, &nty, NULL,
+                          0),
+         SEAMS_ERR_RANGE, fn, "negative cutoff");
+  expect(seams_host_guest(g_good, 1, 0, 3.5, g_ibuf, NULL, NULL, NULL, 1, &ng, NULL, 0, &nty, NULL,
+                          0),
+         SEAMS_ERR_RANGE, fn, "short guest column");
+  expect(seams_host_guest(g_good, 1, 0, 0.0, NULL, NULL, NULL, NULL, 0, &ng, NULL, 0, &nty, NULL, 0),
+         SEAMS_OK, fn, "query");
+  truth(ng == (size_t)g_n && nty == 0, fn, "every atom is a guest and no framework type remains");
+}
+
 /* ------------------------------------------------------------------ */
 
 static int coverage(const char *list) {
@@ -1873,6 +2002,7 @@ int main(int argc, char **argv) {
   brine_contract();
   fingerprint_contract();
   trajectory_contract();
+  pore_contract();
   seams_system_destroy(g_good);
   seams_system_destroy(g_empty);
   seams_system_destroy(g_nan);

@@ -20,6 +20,7 @@ seams_chill_plus_n
 seams_contact_pairs
 seams_coordination
 seams_density_axis
+seams_density_fractional
 seams_directed_hbonds
 seams_domains
 seams_fingerprint
@@ -36,6 +37,7 @@ seams_hbond_tcf_destroy
 seams_hbond_tcf_fit
 seams_hbond_tcf_push
 seams_hbonds
+seams_host_guest
 seams_label_name
 seams_last_error
 seams_last_error_message
@@ -58,6 +60,8 @@ seams_neighbours_knn
 seams_neighbours_nrows
 seams_orientation_order
 seams_path_nframes
+seams_pore_frame
+seams_pore_profiles
 seams_prisms
 seams_q4q6
 seams_q4q6_n

@@ -41,6 +41,7 @@ ydslib_sources = files(
   'phase.cpp',
   'pntCorrespondence.cpp',
   'density.cpp',
+  'pore.cpp',
   'rdf.cpp',
   'rdf2d.cpp',
   'ring.cpp',
