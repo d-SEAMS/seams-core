@@ -30,6 +30,17 @@ cp "$root/topol.top" "$root/md.mdp" "$work/"
 # libseams is instrumented and libgromacs is not, so libasan is not the
 # first library this process maps. The tool itself is built without the
 # sanitizer: an instrumented main makes gmx_fio_open jump to address 0.
+# Preloading the thread runtime does the same on an xtc or trr (the
+# interceptor sends gmx_fio_open to address 0) and this binary is not
+# linked with that runtime, so the symbols stay undefined. plumed and
+# gmx abort if it is preloaded. The unsanitized tool reads the xtc.
+if [ -f "$libdir/libyodaLib.so" ] && grep -a -q '__tsan_' "$libdir/libyodaLib.so"; then
+  unsan=${SEAMS_UNSANITIZED_PREFIX:-}
+  if [ -n "$unsan" ] && [ -x "$unsan/engines/gmx-seams" ]; then
+    tool=$unsan/engines/gmx-seams
+    libdir=$unsan/src
+  fi
+fi
 env -u LIBRARY_PATH \
   ASAN_OPTIONS="verify_asan_link_order=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}" \
   LD_LIBRARY_PATH="$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \

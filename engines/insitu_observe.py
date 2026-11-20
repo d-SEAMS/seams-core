@@ -14,7 +14,7 @@ except ImportError:
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "adapters" / "python"))
 build = Path(sys.argv[1]) if len(sys.argv) > 1 else root / "build"
-libs = list(build.rglob("libseams_lang.so"))
+libs = list(build.rglob("libseams_lang.dylib" if sys.platform == "darwin" else "libseams_lang.so"))
 if not libs:
     print("libseams_lang.so was not built")
     sys.exit(77)

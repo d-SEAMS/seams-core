@@ -1887,11 +1887,12 @@ TEST_CASE("reader edges on real files", "[seams_input]") {
     out << "";
   }
   REQUIRE(sinp::nLammpsFrames(empty.string()) == 0);
-  int seen = 0;
+  // Two threads call the visitor at once. A plain int would race.
+  std::atomic<int> seen{0};
   sinp::forEachLammpsFrame(empty.string(), 1, 2, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            1, -1, 1);
-  REQUIRE(seen == 0);
+  REQUIRE(seen.load() == 0);
   sinp::dropLammpsDumpIndex(empty.string());
 
   const auto two = dir / "two.lammpstrj";
@@ -1904,16 +1905,16 @@ TEST_CASE("reader edges on real files", "[seams_input]") {
         << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
         << "ITEM: ATOMS id type x y z\n1 1 1 0 0\n";
   }
-  seen = 0;
+  seen.store(0);
   sinp::forEachLammpsFrame(two.string(), 1, 2, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            2, 0, 1);
-  REQUIRE(seen == 2);
-  seen = 0;
+  REQUIRE(seen.load() == 2);
+  seen.store(0);
   sinp::forEachLammpsFrame(two.string(), 1, 2, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            1, 5, 2);
-  REQUIRE(seen == 0);
+  REQUIRE(seen.load() == 0);
   sinp::dropLammpsDumpIndex(two.string());
 
   {
@@ -2133,16 +2134,16 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
   REQUIRE(cloud.nop == 0);
   sinp::dropLammpsDumpIndex(flipped.string());
 
-  int seen = 0;
+  std::atomic<int> seen{0};
   sinp::forEachLammpsFrame(spaced.string(), 1, 1, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            1, -1, 1);
-  REQUIRE(seen == 0);
-  seen = 0;
+  REQUIRE(seen.load() == 0);
+  seen.store(0);
   sinp::forEachLammpsFrame(spaced.string(), 1, 1, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            2, 0, 1);
-  REQUIRE(seen == 1);
+  REQUIRE(seen.load() == 1);
   sinp::dropLammpsDumpIndex(spaced.string());
 
   const auto bonds = dir / "rings.txt";
@@ -2157,11 +2158,11 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
   REQUIRE(rings.empty());
   fs::permissions(bonds, fs::perms::owner_all);
 
-  seen = 0;
+  seen.store(0);
   sinp::forEachLammpsFrame(spaced.string(), 1, 9, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            1, 0, 1);
-  REQUIRE(seen == 1);
+  REQUIRE(seen.load() == 1);
   for (int n = 0; n < 64; ++n) {
     cloud = sinp::readLammpsTrj(noZ.string(), 1, cloud);
   }
@@ -2279,11 +2280,11 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
   REQUIRE(cloud.nop == 1);
   sinp::dropLammpsDumpIndex(negativeCount.string());
 
-  seen = 0;
+  seen.store(0);
   sinp::forEachLammpsFrame(spaced.string(), 1, 1, -1,
-                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen++; },
+                           [&](int, molSys::PointCloud<molSys::Point<double>, double> &) { seen.fetch_add(1); },
                            1, 0, 1);
-  REQUIRE(seen == 1);
+  REQUIRE(seen.load() == 1);
 
   const auto cut = dir / "cut.lammpstrj";
   {

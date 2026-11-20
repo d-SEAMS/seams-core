@@ -1,0 +1,47 @@
+Julia and R cannot host the address or thread runtime. The unsanitized
+libseams is used for those two processes only. detect_leaks stays on,
+and alloc_dealloc_mismatch is not disabled for the rest of the suite.
+
+Julia, conda GCC 14.3 libasan preloaded, halt_on_error=1.
+
+The process aborts in jl_init_llvm before any seams call:
+
+  SUMMARY: AddressSanitizer: alloc-dealloc-mismatch in operator delete(void*, unsigned long)
+  #8  std::pair::~pair bits/stl_pair.h:302
+  #9  createTargetMachine src/jitlayers.cpp:1414
+  #11 jl_init_llvm src/codegen.cpp:10485
+  allocated by operator new(unsigned long) libstdc++-v3/libsupc++/new_op.cc:50
+
+Julia's libstdc++ is GCC 15.3. operator new calls malloc inside that
+DSO, and the sized operator delete is intercepted.
+
+ASAN_OPTIONS=alloc_dealloc_mismatch=0 on this host alone lets startup
+finish. dlopen of the address-sanitized libseams.so returns a handle.
+LeakSanitizer then aborts on Julia's own startup allocations. No frame
+is in seams, and the frames are not Python or matplotlib, so
+scripts/lsan.supp does not name them:
+
+  loaded Ptr{Nothing}(...)
+  SUMMARY: AddressSanitizer: 245566 byte(s) leaked in 39 allocation(s).
+  #1 malloc_s src/support/dtypes.h:368
+  #2 init_stdio_handle src/init.c:485
+  #4 ijl_init_ src/init.c:711
+
+ThreadSanitizer preload aborts in Julia's loader. Julia dlopens
+libpcre2-8 with RTLD_DEEPBIND, which the runtime rejects:
+
+  You are trying to dlopen a libpcre2-8 shared library with RTLD_DEEPBIND
+  flag which is incompatible with sanitizer runtime
+  #4 ijl_load_dynamic_library src/dlload.c:430
+
+Rscript, halt_on_error=1, detect_leaks=0. The same SEGV happens with
+the conda GCC 14.3 libasan, the GCC 14 system libasan, libasan.so.8,
+and with verify_asan_link_order=0. No sanitized R is installed.
+
+  ERROR: AddressSanitizer: SEGV on unknown address 0x0 (pc 0x0)
+  #1 R_XDRDecodeInteger libR.so
+  #2 gzfile_read libR.so
+  SUMMARY: AddressSanitizer: SEGV
+
+ThreadSanitizer preload of Rscript exits with signal 11 and writes no
+diagnostic. The unsanitized dseams package is what this host loads.

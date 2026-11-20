@@ -1,9 +1,9 @@
 // The cutoff neighbour list, local Steinhardt q_l, the ring census, CHILL
 // and CHILL+, the shell match, rings with their symmetry codes, cages,
-// prisms, the monolayer census and the 2D RDF at one, two, four and eight
-// OpenMP threads. Every width must return the one-thread arrays exactly:
-// the same CSR entries in the same order, the same labels, rings and
-// counts, and the same floating-point bits.
+// prisms, the monolayer census, the 2D RDF and the k-nearest graph at one,
+// two, four and eight OpenMP threads. Every width must return the
+// one-thread arrays exactly: the same CSR entries in the same order, the
+// same labels, rings and counts, and the same floating-point bits.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -678,12 +678,13 @@ TEST_CASE("rings, their symmetry codes and the cage planes are the same at every
     const Width team(width);
     REQUIRE(ringsOf(sys.handle, 0) == serialSet);
     REQUIRE(primitive::ringNetwork(idx, 6) == serialRings);
-    const auto aff = ring::cageAffiliation(six, idx);
-    REQUIRE(aff.hc == wantAff.hc);
-    REQUIRE(aff.ddc == wantAff.ddc);
-    const auto planes = ring::stackingPlanes(six, idx);
-    REQUIRE(planes.basal == wantPlanes.basal);
-    REQUIRE(planes.equatorial == wantPlanes.equatorial);
+    const auto both = ring::cagePlanes(six, idx);
+    REQUIRE(both.affiliation.hc == wantAff.hc);
+    REQUIRE(both.affiliation.ddc == wantAff.ddc);
+    REQUIRE(both.planes.basal == wantPlanes.basal);
+    REQUIRE(both.planes.equatorial == wantPlanes.equatorial);
+    REQUIRE(ring::cageAffiliation(six, idx).hc == wantAff.hc);
+    REQUIRE(ring::stackingPlanes(six, idx).equatorial == wantPlanes.equatorial);
   }
 }
 
@@ -802,6 +803,117 @@ TEST_CASE("the monolayer census, the 2D RDF and k-nearest rows are the same at e
     requireSameBits(lengths, serialLengths);
     REQUIRE(mutual == serialMutual);
     REQUIRE(all == serialAll);
+  }
+}
+
+struct KnnGraph {
+  Csr csr;
+  std::uint64_t hash = 0;
+};
+
+std::uint64_t fnv(const std::vector<int> &a, std::uint64_t h) {
+  for (const int v : a) {
+    h ^= static_cast<std::uint32_t>(v);
+    h *= 1099511628211ULL;
+  }
+  return h;
+}
+
+KnnGraph knnOf(seams_system *handle, int k, int type, int mutual) {
+  KnnGraph out;
+  seams_neighbours *nb = nullptr;
+  REQUIRE(seams_neighbours_knn(handle, k, 3.5, type, mutual, &nb) == SEAMS_OK);
+  std::size_t nOffsets = 0;
+  std::size_t nnz = 0;
+  REQUIRE(seams_neighbours_copy(nb, nullptr, 0, &nOffsets, nullptr, 0, &nnz) == SEAMS_OK);
+  out.csr.offsets.resize(nOffsets);
+  out.csr.cols.resize(nnz);
+  REQUIRE(seams_neighbours_copy(nb, out.csr.offsets.data(), nOffsets, &nOffsets,
+                                out.csr.cols.data(), nnz, &nnz) == SEAMS_OK);
+  seams_neighbours_destroy(nb);
+  out.csr.ok = true;
+  out.hash = fnv(out.csr.cols, fnv(out.csr.offsets, 1469598103934665603ULL));
+  return out;
+}
+
+// The k-nearest rows by cloud index from the atom-ID list, self dropped.
+Csr knnListCsr(const Cloud &cloud, int k, int typeI, bool mutual) {
+  const auto rows = nneigh::neighbourListByIndex(
+      cloud, nneigh::kNearestNeighbourList(cloud, k, 5.0, typeI, mutual));
+  Csr out;
+  out.ok = true;
+  out.offsets.assign(1, 0);
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (static_cast<std::size_t>(i) < rows.size()) {
+      for (const int j : rows[static_cast<std::size_t>(i)]) {
+        if (j != i) {
+          out.cols.push_back(j);
+        }
+      }
+    }
+    out.offsets.push_back(static_cast<int>(out.cols.size()));
+  }
+  return out;
+}
+
+TEST_CASE("k-nearest graphs are the same at every width and match the earlier linkcell rows",
+          "[thread_invariance][c_api][knn]") {
+  // The hashes are the C API rows from linkcell 349e893 with its atomic
+  // mesh scatter, one thread. The lattice frame has exact distance ties,
+  // which the search breaks by index.
+  REQUIRE(kFixedWidth);
+  struct Frame {
+    const char *name;
+    Cloud cloud;
+    std::vector<int> types;
+    int type;
+    std::uint64_t want[3];
+  };
+  const Cloud lattice = iceIc(32768);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 31);
+  const Cloud liquid = randomCloud(30000, 66.0, 67.0, 68.0, 37);
+  const std::vector<Frame> frames = {
+      {"lattice", lattice, {}, 0,
+       {0xee307785d366539fULL, 0xee307785d366539fULL, 0xe9357d84c38f2603ULL}},
+      {"warm", warm, {}, 0,
+       {0xc9fefc1ba481aa13ULL, 0xfec482b02e871997ULL, 0xa9b2ddb3e155735bULL}},
+      {"liquid", liquid, {}, 0,
+       {0xa5ca0e068151fe27ULL, 0x65c83d6ec747bb07ULL, 0x7b928f9bec46ba55ULL}},
+      {"mixed", warm, everyFifthType2(warm.nop), 1,
+       {0x8046d12f60225287ULL, 0x1ace7dd818939e1dULL, 0x438ca2a7eeb68cc9ULL}},
+  };
+  const int ks[3] = {4, 4, 6};
+  const int mutuals[3] = {1, 0, 0};
+  for (const auto &frame : frames) {
+    System sys(frame.cloud, frame.types.empty() ? nullptr : &frame.types);
+    Cloud typed = frame.cloud;
+    typed.idIndexMap.clear();
+    for (int i = 0; i < typed.nop; ++i) {
+      typed.idIndexMap[typed.pts[static_cast<std::size_t>(i)].atomID] = i;
+    }
+    for (std::size_t i = 0; i < frame.types.size(); ++i) {
+      typed.pts[i].type = frame.types[i];
+    }
+    for (int g = 0; g < 3; ++g) {
+      INFO(frame.name << " k " << ks[g] << " mutual " << mutuals[g]);
+      KnnGraph serial;
+      for (const int width : kWidths) {
+        INFO("width " << width);
+        const Width team(width);
+        const KnnGraph got = knnOf(sys.handle, ks[g], frame.type, mutuals[g]);
+        if (width == 1) {
+          serial = got;
+          REQUIRE(got.csr.cols.size() > static_cast<std::size_t>(frame.cloud.nop));
+          CHECK(got.hash == frame.want[g]);
+        }
+        REQUIRE(got.csr.offsets == serial.csr.offsets);
+        REQUIRE(got.csr.cols == serial.csr.cols);
+        const Csr listed = knnListCsr(typed, ks[g], frame.type > 0 ? frame.type : 1,
+                                      mutuals[g] != 0);
+        REQUIRE(listed.offsets == serial.csr.offsets);
+        REQUIRE(listed.cols == serial.csr.cols);
+      }
+    }
   }
 }
 

@@ -14,6 +14,7 @@
 
 #include <topo_one_dim.hpp>
 #include <neighbours.hpp>
+#include <topo_bulk.hpp>
 
 #include <utility>
 
@@ -246,94 +247,9 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
   // predicates below are the ones the all-pairs loop used to call, in the
   // same (iring, jring) order, and they do not rewrite the ring vectors.
   const int nAtoms = static_cast<int>(nList.size());
-  std::vector<int> off(static_cast<std::size_t>(nAtoms) + 1, 0);
-  std::vector<int> col;
-  int indexTeam = 1;
-#ifdef SEAMS_HAS_OPENMP
-  if (totalRingNum >= 2048 && !omp_in_parallel()) {
-    indexTeam = omp_get_max_threads();
-  }
-#endif
-  if (indexTeam > 1) {
-#ifdef SEAMS_HAS_OPENMP
-    // Row t counts, then places, the rings of thread t's contiguous
-    // block, so every atom's slice lists its rings in ascending order.
-    std::vector<int> blockAt(static_cast<std::size_t>(indexTeam) *
-                                 static_cast<std::size_t>(nAtoms),
-                             0);
-#pragma omp parallel num_threads(indexTeam)
-    {
-      const int tid = omp_get_thread_num();
-      const int width = omp_get_num_threads();
-      const int lo = static_cast<int>(1LL * totalRingNum * tid / width);
-      const int hi = static_cast<int>(1LL * totalRingNum * (tid + 1) / width);
-      int *mine = blockAt.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nAtoms);
-      for (int i = lo; i < hi; ++i) {
-        for (const int atom : rings[static_cast<std::size_t>(i)]) {
-          if (atom >= 0 && atom < nAtoms) {
-            ++mine[atom];
-          }
-        }
-      }
-#pragma omp barrier
-#pragma omp for schedule(static)
-      for (int atom = 0; atom < nAtoms; ++atom) {
-        int total = 0;
-        for (int t = 0; t < width; ++t) {
-          total += blockAt[static_cast<std::size_t>(t) * static_cast<std::size_t>(nAtoms) +
-                           static_cast<std::size_t>(atom)];
-        }
-        off[static_cast<std::size_t>(atom) + 1] = total;
-      }
-#pragma omp single
-      {
-        for (int atom = 0; atom < nAtoms; ++atom) {
-          off[static_cast<std::size_t>(atom) + 1] += off[static_cast<std::size_t>(atom)];
-        }
-        col.resize(static_cast<std::size_t>(off[static_cast<std::size_t>(nAtoms)]));
-      }
-#pragma omp for schedule(static)
-      for (int atom = 0; atom < nAtoms; ++atom) {
-        int at = off[static_cast<std::size_t>(atom)];
-        for (int t = 0; t < width; ++t) {
-          int &slot = blockAt[static_cast<std::size_t>(t) * static_cast<std::size_t>(nAtoms) +
-                              static_cast<std::size_t>(atom)];
-          const int count = slot;
-          slot = at;
-          at += count;
-        }
-      }
-      int *dst = col.data();
-      for (int i = lo; i < hi; ++i) {
-        for (const int atom : rings[static_cast<std::size_t>(i)]) {
-          if (atom >= 0 && atom < nAtoms) {
-            dst[mine[atom]++] = i;
-          }
-        }
-      }
-    }
-#endif
-  } else {
-    for (int i = 0; i < totalRingNum; ++i) {
-      for (const int atom : rings[static_cast<std::size_t>(i)]) {
-        if (atom >= 0 && atom < nAtoms) {
-          ++off[static_cast<std::size_t>(atom) + 1];
-        }
-      }
-    }
-    for (int atom = 0; atom < nAtoms; ++atom) {
-      off[static_cast<std::size_t>(atom) + 1] += off[static_cast<std::size_t>(atom)];
-    }
-    col.resize(static_cast<std::size_t>(off[static_cast<std::size_t>(nAtoms)]));
-    std::vector<int> cursor(off.begin(), off.end() - 1);
-    for (int i = 0; i < totalRingNum; ++i) {
-      for (const int atom : rings[static_cast<std::size_t>(i)]) {
-        if (atom >= 0 && atom < nAtoms) {
-          col[static_cast<std::size_t>(cursor[static_cast<std::size_t>(atom)]++)] = i;
-        }
-      }
-    }
-  }
+  const auto ringIndex = ring::buildRingSearchIndex(rings, nAtoms, false);
+  const auto &off = ringIndex.ringOff;
+  const auto &col = ringIndex.ringCol;
 
   auto strictPair = [&](int iring, int jring) -> bool {
     auto &basal1 = const_cast<std::vector<int> &>(rings[static_cast<std::size_t>(iring)]);

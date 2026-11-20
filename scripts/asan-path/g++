@@ -1,11 +1,6 @@
-#!/bin/sh
-# The video tapes invoke g++ by name. Drop the preloaded sanitizer the
-# same way the c++ wrapper does, so the compiler is not leak-checked.
-case $0 in
-  */*) _wrap_dir=${0%/*} ;;
-  *) _wrap_dir=. ;;
-esac
-here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
+# Same reason as scripts/asan-path/gcc: g++ is not a seams binary.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 real=${REAL_CXX:-}
 if [ -z "$real" ]; then
   old_ifs=$IFS
@@ -24,4 +19,41 @@ if [ -z "$real" ]; then
   exit 1
 fi
 unset LD_PRELOAD
+if [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
+  rtdir=$(dirname "$TSAN_RUNTIME")
+  link=1
+  for arg in "$@"; do
+    case $arg in
+      -c|-E|-M|-MM) link=0 ;;
+    esac
+  done
+  if [ "$link" = 1 ]; then
+    # clang -fopenmp asks for libomp, which lives next to Archer.
+    omplib=
+    if [ -n "${OMP_TOOL_LIBRARIES:-}" ] && [ -f "$OMP_TOOL_LIBRARIES" ]; then
+      omplib=$(dirname "$OMP_TOOL_LIBRARIES")
+    fi
+    if [ -n "$omplib" ]; then
+      exec clang++ -fsanitize=thread -shared-libsan -Wl,-rpath,"$rtdir" \
+        -L"$omplib" -Wl,-rpath,"$omplib" "$@"
+    fi
+    exec clang++ -fsanitize=thread -shared-libsan -Wl,-rpath,"$rtdir" "$@"
+  fi
+  exec clang++ -fsanitize=thread "$@"
+fi
+# A snippet that links the sanitized libseams has to be instrumented
+# too. Otherwise the address runtime faults while binding C++ symbols.
+if [ -n "${ASAN_TEST_PRELOAD:-}" ] && [ -f "$ASAN_TEST_PRELOAD" ]; then
+  link=1
+  needs=0
+  for arg in "$@"; do
+    case $arg in
+      -c|-E|-M|-MM) link=0 ;;
+      -lseams|-lseams_lang|-llammps) needs=1 ;;
+    esac
+  done
+  if [ "$link" = 1 ] && [ "$needs" = 1 ]; then
+    exec "$real" -fsanitize=address,undefined "$@"
+  fi
+fi
 exec "$real" "$@"

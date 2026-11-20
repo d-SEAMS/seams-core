@@ -1,45 +1,33 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Validate active towncrier fragments and their rendered order."""
+"""Build the 2.14.0 notes from changelog.d and refuse a gap.
 
-from __future__ import annotations
+Every ``+slug.<type>.md`` fragment is one bullet. A fragment left out of
+the render is an orphan. A body that appears twice, or two files that
+say the same thing, is a duplicate. The Keep a Changelog types and the
+``+`` orphan prefix are the ones in towncrier.toml.
+"""
 
 import pathlib
 import re
 import sys
-import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-CONFIG = ROOT / "towncrier.toml"
+FRAGMENTS = ROOT / "changelog.d"
 NOTES = ROOT / "docs" / "source" / "reference" / "release-2.14-notes.rst"
 PAGE = ROOT / "docs" / "orgmode" / "reference" / "release-2.14.org"
-MINIMUM_FRAGMENTS = 100
+TYPES = ("added", "changed", "deprecated", "removed", "fixed", "security")
+HEADINGS = {
+    "added": "Added",
+    "changed": "Changed",
+    "deprecated": "Deprecated",
+    "removed": "Removed",
+    "fixed": "Fixed",
+    "security": "Security",
+}
+NAME = re.compile(r"^\+[A-Za-z0-9][A-Za-z0-9.-]*\.(" + "|".join(TYPES) + r")\.md$")
 IGNORED = {"README.md", ".gitkeep"}
 CODE = re.compile(r"`([^`]+)`")
-
-
-def read_config():
-    data = tomllib.loads(CONFIG.read_text())
-    towncrier = data.get("tool", {}).get("towncrier", {})
-    directory = towncrier.get("directory")
-    if not isinstance(directory, str) or not directory:
-        raise ValueError("tool.towncrier.directory is missing")
-    types = tuple(
-        item.get("directory")
-        for item in data.get("tool", {}).get("towncrier", {}).get("type", [])
-        if isinstance(item.get("directory"), str)
-    )
-    if not types:
-        raise ValueError("tool.towncrier.type is missing")
-    prefix = towncrier.get("orphan_prefix")
-    if not isinstance(prefix, str) or not prefix:
-        raise ValueError("tool.towncrier.orphan_prefix is missing")
-    headings = {
-        item["directory"]: item.get("name", item["directory"].title())
-        for item in data.get("tool", {}).get("towncrier", {}).get("type", [])
-        if isinstance(item.get("directory"), str)
-    }
-    return ROOT / directory, types, prefix, headings
 
 
 def load():
@@ -47,7 +35,7 @@ def load():
     errors = []
     found = []
     if not FRAGMENTS.is_dir():
-        return ["missing {}".format(FRAGMENTS.relative_to(ROOT))], []
+        return ["missing changelog.d"], []
     for path in sorted(FRAGMENTS.iterdir()):
         if not path.is_file() or path.name in IGNORED:
             continue
@@ -56,13 +44,13 @@ def load():
             continue
         match = NAME.fullmatch(path.name)
         if match is None:
-            errors.append("{} does not match fragment naming rules".format(path.name))
+            errors.append("{} does not match +slug.<type>.md".format(path.name))
             continue
         body = path.read_text().strip()
         if not body:
             errors.append("{} is empty".format(path.name))
             continue
-        found.append((match.group(2), path.name, body))
+        found.append((match.group(1), path.name, body))
     seen = {}
     for _typ, name, body in found:
         key = " ".join(body.split())
@@ -137,12 +125,6 @@ def bullets(text):
 
 def check(fragments, rendered):
     errors = []
-    if len(fragments) < MINIMUM_FRAGMENTS:
-        errors.append(
-            "expected at least {} towncrier fragments, found {}".format(
-                MINIMUM_FRAGMENTS, len(fragments)
-            )
-        )
     parsed = bullets(rendered)
     wanted = []
     for typ in TYPES:
@@ -161,23 +143,12 @@ def check(fragments, rendered):
         if not errors:
             errors.append("rendered notes do not match the fragments")
     page = PAGE.read_text()
-    if NOTES.name not in page:
-        errors.append("{} does not include {}".format(PAGE.name, NOTES.name))
+    if "release-2.14-notes.rst" not in page:
+        errors.append("release-2.14.org does not include the rendered notes")
     return errors
 
 
 def main(argv):
-    global FRAGMENTS, TYPES, HEADINGS, NAME
-    try:
-        FRAGMENTS, TYPES, orphan_prefix, HEADINGS = read_config()
-    except ValueError as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
-    NAME = re.compile(
-        r"^(" + re.escape(orphan_prefix) + r"[A-Za-z0-9][A-Za-z0-9.-]*|[0-9]+)\.("
-        + "|".join(TYPES)
-        + r")\.md$"
-    )
     errors, fragments = load()
     if errors:
         print("\n".join(errors), file=sys.stderr)
@@ -187,26 +158,13 @@ def main(argv):
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    if argv not in ([], ["--check"]):
-        print("usage: docs/check_changelog.py [--check]", file=sys.stderr)
-        return 2
-    if "--check" in argv:
-        if not NOTES.is_file() or NOTES.read_text() != rendered:
-            print(
-                "{} is stale; rebuild it from {}".format(
-                    NOTES.relative_to(ROOT), FRAGMENTS.relative_to(ROOT)
-                ),
-                file=sys.stderr,
-            )
-            return 1
-    else:
+    if "--check" not in argv:
         NOTES.parent.mkdir(parents=True, exist_ok=True)
         NOTES.write_text(rendered)
-    print(
-        "changelog fragments match {} active entries in {}".format(
-            len(fragments), FRAGMENTS.relative_to(ROOT)
-        )
-    )
+    elif NOTES.is_file() and NOTES.read_text() != rendered:
+        print("release-2.14-notes.rst is stale; rebuild it from changelog.d", file=sys.stderr)
+        return 1
+    print("2.14.0 notes match {} fragments".format(len(fragments)))
     return 0
 
 

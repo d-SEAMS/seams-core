@@ -4,7 +4,8 @@ The nucleation, nanotube, monolayer, and in-plane RDF trajectories
 are figshare project 73545. This checkout has the cubic mW lattice,
 the sI unit, and the mixed TIP4P example.
 
-Python is ``pip install 'pydseamslib==2.14.0'``. On the cubic lattice CHILL+
+Python is ``pip install "pydseamslib==$(python3 scripts/project_version.py)"``.
+On the cubic lattice CHILL+
 is 4096 cubic and the cage score is 4096 double-diamond. The same
 cubic count is what the R and Julia fronts report.
 """

@@ -1,0 +1,35 @@
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
+# Same fallback as Rscript. Some tests invoke R rather than Rscript.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+prefix=${SEAMS_UNSANITIZED_PREFIX:-}
+if [ -n "$prefix" ] && [ -f "$prefix/src/libseams.so" ]; then
+  unset LD_PRELOAD
+  export SEAMS_LIB=$prefix/src/libseams.so
+  export LD_LIBRARY_PATH=$prefix/src:$prefix/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  if [ -d "$prefix/docs-r-lib" ]; then
+    export DSEAMS_R_LIB=$prefix/docs-r-lib
+    export R_LIBS=$prefix/docs-r-lib${R_LIBS:+:$R_LIBS}
+  fi
+elif [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *"$TSAN_RUNTIME"*) ;;
+    *) LD_PRELOAD=$TSAN_RUNTIME${LD_PRELOAD:+:$LD_PRELOAD} ;;
+  esac
+  export LD_PRELOAD
+fi
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/R" ]; then
+    found=$dir/R
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "R is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

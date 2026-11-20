@@ -1,8 +1,7 @@
 #!/bin/sh
 # Copyright (c) d-SEAMS developers
 # Build the linux-64 pixi stack and run the full Meson suite.
-# A failure exits non-zero. These optional cases may skip. Any other
-# skip is a failure. Expected failures stay allowed.
+# A failure exits non-zero. Any skip is a failure.
 set -eu
 
 prefix=${CONDA_PREFIX:?pixi must export CONDA_PREFIX}
@@ -15,6 +14,17 @@ export LD_LIBRARY_PATH="$prefix/lib:$prefix/lib.AVX2_256${LD_LIBRARY_PATH:+:$LD_
 # headers of the same release.
 scratch=${RUNNER_TEMP:-$(mktemp -d)}
 lammps_src=$(sh scripts/fetch_lammps_headers.sh "$scratch/lammps-src")
+# docs_render_molecules executes from the default environment and needs a
+# Python that imports bpy. Resolve it from the cycles environment explicitly.
+pixi install -e cycles
+cycles_python=$(
+  pixi run -e cycles python - <<'PY'
+import sys
+import bpy
+print(sys.executable)
+PY
+)
+export MOLECULES_BPY="$cycles_python"
 
 meson setup build --buildtype=release \
   -Dwith_tests=true -Dwith_cli=true \
@@ -35,33 +45,28 @@ import re
 import sys
 
 text = open("build/suite.txt", encoding="utf-8").read()
-optional = {
-    "sqq_sh_triclinic",
-    "docs_paper_interface_full",
-    "docs_paper_cages_full",
-    "docs_paper_rings_full",
-    "docs_paper_brine_full",
-    "docs_paper_nucleation_full",
-    "docs_paper_reproduce_full",
-    "docs_render_molecules",
-}
 
 def count(name):
     match = re.search(rf"^{name}:\s+(\d+)\s*$", text, re.M)
     return int(match.group(1)) if match else 0
 
+# pin_host runs its placement checks only with eight cpus or more
+# (tests/pin_host.py says why); on the four-cpu runners it reports a skip.
+ALLOWED_SKIPS = {"pin_host"}
+
 skipped = []
+allowed = []
 for line in text.splitlines():
     match = re.match(r"^\s*\d+/\d+\s+(.*?)\s+SKIP\b", line)
     if match:
-        skipped.append(match.group(1).rsplit(":", 1)[-1])
-unexpected = [name for name in skipped if name not in optional]
+        name = match.group(1).rsplit(":", 1)[-1]
+        (allowed if name in ALLOWED_SKIPS else skipped).append(name)
 failed = count("Fail")
-if failed or unexpected:
+if failed or skipped:
     sys.exit(
-        "suite failed={} unexpected_skips={}".format(failed, ", ".join(unexpected))
+        "suite failed={} skipped={}".format(failed, ", ".join(skipped))
     )
-print("suite failed=0 skipped={} optional".format(len(skipped)))
+print("suite failed=0 skipped=0 allowed={}".format(", ".join(allowed) or "none"))
 PY
 # Skips alone leave meson at status 0. A failed test or a crash does not.
 if [ "$status" -ne 0 ]; then
