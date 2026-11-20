@@ -1,0 +1,1 @@
+Deprecate using `pydseams.Trajectory` as an alias of single-frame `pydseams.Frame`; single-frame constructor keywords and single-frame attribute delegation on `pydseams.Trajectory` now emit `DeprecationWarning` in favor of `pydseams.Frame`.

@@ -51,8 +51,9 @@ Its frame-mutation and order-parameter entries are
 
 ## Concepts
 
-`System`, `Neighbours`, `Rings`, `Cages`, `Fingerprint`, and `Brine` are
-move-only. The destructor frees the C handle. Copying is deleted.
+`System`, `Neighbours`, `Rings`, `Cages`, `Fingerprint`, `Brine`, `Msd`,
+`HbondTcf`, and `Reorientation` are move-only. The destructor frees the C
+handle. Copying is deleted.
 
 A status other than success throws `seams::Error`. `what()` is
 `seams_handle_error`. `code()` is the status integer. `status()` is the

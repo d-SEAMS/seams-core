@@ -424,6 +424,103 @@ int main(int argc, char **argv) {
        mix);
   printf("capi seams_site_table %d\n", count_label(kinds, seams_system_count(mix), SEAMS_SITE_WATER_O));
 
+  const size_t mix_n = (size_t)seams_system_count(mix);
+  int *mix_mols = calloc(mix_n, sizeof(int));
+  need("mols", seams_mols(mix, mix_mols, mix_n), mix);
+  printf("capi seams_mols %zu\n", mix_n);
+  need("setmols", seams_set_mols(mix, mix_mols, mix_n), mix);
+  printf("capi seams_set_mols %zu\n", mix_n);
+
+  size_t nmols = 0;
+  need("mcentq", seams_molecule_centres(mix, NULL, 0, NULL, 0, NULL, NULL, 0, &nmols), mix);
+  printf("capi seams_molecule_centres %zu\n", nmols);
+
+  const double demo_box[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+  const double demo_wrapped[6] = {9.5, 1.0, 2.0, 0.5, 1.0, 2.0};
+  double demo_unwrapped[6] = {0};
+  need("unwrap", seams_traj_unwrap_positions(demo_wrapped, 2, 1, demo_box, 1, demo_unwrapped, 6),
+       NULL);
+  printf("capi seams_traj_unwrap_positions %.1f\n", demo_unwrapped[3]);
+
+  const double demo_mxyz[12] = {9.8, 0, 0, 0.2, 0, 0, 0.4, 0, 0, 0.8, 0, 0};
+  const int demo_mols[2] = {1, 1};
+  size_t demo_nm = 0;
+  double demo_centres[6] = {0};
+  need("unwrapc",
+       seams_traj_unwrap_centres(demo_mxyz, 2, 2, demo_box, 1, demo_mols, 2, NULL, 0, NULL, 0,
+                                 demo_centres, 6, &demo_nm),
+       NULL);
+  printf("capi seams_traj_unwrap_centres %zu %.1f\n", demo_nm, demo_centres[3]);
+
+  size_t nwaters = 0;
+  need("wvecq", seams_water_vectors(mix, 2, 1, NULL, NULL, NULL, NULL, NULL, 0, &nwaters), mix);
+  double *wbis = calloc(3 * (nwaters ? nwaters : 1), sizeof(double));
+  need("wvec", seams_water_vectors(mix, 2, 1, NULL, NULL, wbis, NULL, NULL, nwaters, &nwaters),
+       mix);
+  printf("capi seams_water_vectors %zu\n", nwaters);
+
+  size_t ndip = 0;
+  need("dipq", seams_molecule_dipoles(mix, NULL, 0, NULL, 0, NULL, NULL, NULL, 0, &ndip), mix);
+  printf("capi seams_molecule_dipoles %zu\n", ndip);
+
+  const double zaxis[3] = {0, 0, 1};
+  double mean_p1 = 0, mean_p2 = 0;
+  need("oord", seams_orientation_order(wbis, nwaters, zaxis, NULL, NULL, 0, &mean_p1, &mean_p2),
+       NULL);
+  printf("capi seams_orientation_order %.3f %.3f\n", mean_p1, mean_p2);
+
+  seams_msd *msd = NULL;
+  need("msdc", seams_msd_create(1, 4, 1, 1.0, zaxis, &msd), NULL);
+  printf("capi seams_msd_create ok\n");
+  const double m0[3] = {0, 0, 0}, m1[3] = {0, 0, 2}, m2[3] = {0, 0, 4};
+  need("msdp0", seams_msd_push(msd, m0, 1, NULL, 0), msd);
+  need("msdp1", seams_msd_push(msd, m1, 1, NULL, 0), msd);
+  need("msdp2", seams_msd_push(msd, m2, 1, NULL, 0), msd);
+  printf("capi seams_msd_push 3\n");
+  size_t msd_lags = 0;
+  need("msdq", seams_msd_curve(msd, NULL, NULL, NULL, NULL, NULL, 0, &msd_lags), msd);
+  printf("capi seams_msd_curve %zu\n", msd_lags);
+  double dtot = 0, dax = 0, dlat = 0, malpha = 0;
+  need("msdf", seams_msd_fit(msd, 0.0, 0.0, &dtot, &dax, &dlat, &malpha), msd);
+  printf("capi seams_msd_fit %.1f\n", malpha);
+  seams_msd_destroy(msd);
+  printf("capi seams_msd_destroy ok\n");
+
+  seams_hbond_tcf *hbt = NULL;
+  need("hbtc", seams_hbond_tcf_create(4, 1, 1.0, 1, &hbt), NULL);
+  printf("capi seams_hbond_tcf_create ok\n");
+  const int hd[2] = {1, 2}, ha[2] = {3, 4};
+  need("hbtp0", seams_hbond_tcf_push(hbt, hd, ha, 2), hbt);
+  need("hbtp1", seams_hbond_tcf_push(hbt, hd, ha, 1), hbt);
+  printf("capi seams_hbond_tcf_push 2\n");
+  size_t hbt_lags = 0;
+  need("hbtq", seams_hbond_tcf_curve(hbt, NULL, NULL, NULL, NULL, 0, &hbt_lags), hbt);
+  printf("capi seams_hbond_tcf_curve %zu\n", hbt_lags);
+  double tci = 0, tsi = 0;
+  need("hbtf", seams_hbond_tcf_fit(hbt, 0.0, 0.0, &tci, NULL, &tsi, NULL), hbt);
+  printf("capi seams_hbond_tcf_fit %.2f %.2f\n", tci, tsi);
+  seams_hbond_tcf_destroy(hbt);
+  printf("capi seams_hbond_tcf_destroy ok\n");
+
+  seams_reorient *rot = NULL;
+  need("rotc", seams_reorient_create(1, 4, 1, 1.0, &rot), NULL);
+  printf("capi seams_reorient_create ok\n");
+  const double rv0[3] = {0, 0, 1}, rv1[3] = {0.6, 0, 0.8};
+  need("rotp0", seams_reorient_push(rot, rv0, 1), rot);
+  need("rotp1", seams_reorient_push(rot, rv1, 1), rot);
+  printf("capi seams_reorient_push 2\n");
+  size_t rot_lags = 0;
+  need("rotq", seams_reorient_curve(rot, NULL, NULL, NULL, NULL, 0, &rot_lags), rot);
+  printf("capi seams_reorient_curve %zu\n", rot_lags);
+  double r1i = 0, r2i = 0;
+  need("rotf", seams_reorient_fit(rot, 0.0, 0.0, &r1i, NULL, &r2i, NULL), rot);
+  printf("capi seams_reorient_fit %.2f %.2f\n", r1i, r2i);
+  seams_reorient_destroy(rot);
+  printf("capi seams_reorient_destroy ok\n");
+
+  free(mix_mols);
+  free(wbis);
+
   seams_rings_destroy(rings);
   seams_neighbours_destroy(nb);
   seams_neighbours_destroy(knn);
