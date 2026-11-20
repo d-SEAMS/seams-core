@@ -79,22 +79,29 @@ molfiles (VMD molfile plugins)
     molfiles/src/abinitplugin.c: Rob Lahaye's terms. The code may be
       included only while it is part of an open-source project, never in
       a closed-source one. There is no other licence text.
-    molfiles/src/dtrplugin.cxx, molfiles/src/dtrplugin.hxx,
-    molfiles/src/maeffplugin.cxx: BSD-3-Clause, Copyright 2009
-      D. E. Shaw Research, LLC.
+    molfiles/src/dmsplugin.cxx, molfiles/src/dtrplugin.cxx,
+    molfiles/src/dtrplugin.hxx, molfiles/src/maeffplugin.cxx:
+    BSD-3-Clause, Copyright 2009 D. E. Shaw Research, LLC. dmsplugin
+    links the system SQLite3. SQLite is not compiled from this tree
+    and its sources are not part of the vendored chemfiles.
     molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
       Regents of the University of California (Bill Ross, UCSF). They may
       be distributed if the notice is kept unmodified and changes to the
       rest of the file are noted in comments.
+      cmake/patches/chemfiles-0.10.4-molfile-sources.patch bounds the
+      %s scans in ReadPARM7.h and notes that change in the file.
   Compiled plugins (external/CMakeLists.txt after
   cmake/patches/chemfiles-0.10.4-molfiles.patch): abinitplugin,
-  bgfplugin, binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,
-  dlpolyplugin, dtrplugin, gamessplugin, gromacsplugin, jsplugin,
-  maeffplugin, mdfplugin, moldenplugin, namdbinplugin, parm7plugin,
-  parmplugin, pqrplugin, psfplugin, rst7plugin, tinkerplugin,
-  vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
-  vaspxdatcarplugin, vaspxmlplugin, vtfplugin, xbgfplugin and xsfplugin,
-  with hash.c and the headers they include.
+  bgfplugin, binposplugin, carplugin, corplugin, cpmdlogplugin,
+  cpmdplugin, cubeplugin, dlpolyplugin, dmsplugin, dtrplugin,
+  gamessplugin, gaussianplugin, gromacsplugin, jsplugin, maeffplugin,
+  mdfplugin, moldenplugin, namdbinplugin, parm7plugin, parmplugin,
+  pqrplugin, psfplugin, rst7plugin, tinkerplugin, vasp5xdatcarplugin,
+  vaspoutcarplugin, vaspposcarplugin, vaspxdatcarplugin, vaspxmlplugin,
+  vtfplugin, xbgfplugin and xsfplugin, with hash.c and the headers they
+  include. cpmdlogplugin and gaussianplugin are the CPMD and Gaussian
+  log readers. Their sources were wrapped in `#if false` until
+  molfile_plugin.h grew the three QM fields they write.
 pugixml
   License: MIT
   Text: pugixml/LICENSE.md

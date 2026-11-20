@@ -134,7 +134,7 @@ for editing the tree.
 
 - The 1.x command was `yodaStruct -c lua_inputs/config.yml`. The command in this tree is `seams`.
 - A sheared LAMMPS dump already carries its tilt factors. Keep that cell. Replacing it with the diagonal of the bound spans drops pairs that cross a tilted face.
-- conda-forge chemfiles 0.10.4 has 3 of the 33 VMD molfile readers and fails an mmCIF read of an atom with no residue. The Meson build probes it with `cmake/chemfiles_mmcif_probe.cpp` and vendors a patched chemfiles when the probe fails.
+- conda-forge chemfiles 0.10.4 has 3 of the 37 VMD molfile readers and fails an mmCIF read of an atom with no residue. The Meson build probes it with `cmake/chemfiles_mmcif_probe.cpp` and vendors a patched chemfiles when the probe fails.
 - `.con` needs readcon-core. The Nix flake does not fetch that wrap.
 - `--jobs` needs an OpenMP build. `seams --features` reports whether OpenMP is on.
 - `require("dseams")` needs the module built from a yodaStruct checkout.

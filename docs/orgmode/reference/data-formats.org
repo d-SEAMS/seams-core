@@ -10,7 +10,7 @@ not the frame index).
 | ~.lammpstrj~, ~.dump~, ~.lammps~, anything else | LAMMPS dump text | yes |
 | ~.xyz~ | ~sinp::readXYZ~ | yes |
 | ~.pdb~, ~.gro~, ~.dcd~, ~.xtc~, ~.trr~, ~.nc~ | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
-| the 30 VMD molfile suffixes (see [[*VMD molfile readers][VMD molfile readers]]) | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
+| the 33 VMD molfile suffixes (see [[*VMD molfile readers][VMD molfile readers]]) | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
 | ~.con~ | ~sinp::readCon~ | only with ~SEAMS_HAS_READCON~ |
 
 The CLI takes the substring after the last ~.~ and compares it to
@@ -241,16 +241,20 @@ provides chemfiles. ~seams --features~ then prints ~chemfiles: enabled~.
 * VMD molfile readers
 
 The chemfiles d-SEAMS links reads every VMD molfile format that
-chemfiles 0.10.4 can compile and that returns atoms: 30 plugins and 33
+chemfiles 0.10.4 can compile and that returns atoms: 33 plugins and 37
 formats. chemfiles itself enables three (TRJ, PSF, Molden).
-~cmake/patches/chemfiles-0.10.4-molfiles.patch~ adds the rest to the
-patched 0.10.4 that Meson and CMake build. Configure keeps an installed
-chemfiles only when ~cmake/chemfiles_mmcif_probe.cpp~ finds all 33
-names and counts the frame of ~cmake/molfile_water.rst7~. An unpatched
-0.10.x has three, so configure prints, for example,
+~cmake/patches/chemfiles-0.10.4-molfiles.patch~ adds the rest, including
+the g96 reader already inside ~gromacsplugin~, the DESRES ~.dms~ reader
+(linked to the system SQLite3) and the CPMD and Gaussian log readers.
+~cmake/patches/chemfiles-0.10.4-molfile-sources.sh~ adds the three QM
+fields those log plugins write and the hostile-file fixes, then repacks
+~molfiles.tar.gz~. Configure keeps an installed chemfiles only when
+~cmake/chemfiles_mmcif_probe.cpp~ finds all 37 names and counts the
+frame of ~cmake/molfile_water.rst7~. An unpatched 0.10.x has three, so
+configure prints, for example,
 
 #+begin_src text
-Message: system chemfiles has 3 of 33 VMD molfile readers; missing ABINIT, ...; building patched 0.10.4, which has all of them
+Message: system chemfiles has 3 of 37 VMD molfile readers; missing ABINIT, ...; building patched 0.10.4, which has all of them
 #+end_src
 
 and builds the patched copy. No build links a chemfiles with fewer
@@ -264,7 +268,7 @@ frame is at the origin.
 
 | format | suffix | plugin | authors (plugin ~author~ field) | copyright and licence |
 |--------+--------+--------+---------------------------------+-----------------------|
-| TRJ | ~.trj~ | gromacsplugin | David Norris, Justin Gullingsrud, Magnus Lundborg; ~Gromacs.h~ implements the 3dfcoord algorithm of Frans van Hoesel | University of Illinois, NCSA |
+| TRJ | ~.trj~ | gromacsplugin | David Norris, Justin Gullingsrud (~trj_plugin.author~); ~Gromacs.h~ implements the 3dfcoord algorithm of Frans van Hoesel. Magnus Lundborg is ~gro_plugin.author~ and Axel Kohlmeyer is ~trr_plugin.author~, in the same file | University of Illinois, NCSA |
 | PSF (topology) | ~.psf~ | psfplugin | Justin Gullingsrud, John Stone | University of Illinois, NCSA |
 | Molden | ~.molden~ | moldenplugin | Markus Dittrich, Jan Saam, Alexey Titov | University of Illinois, NCSA |
 | ABINIT | none | abinitplugin | Rob Lahaye (Sungkyunkwan University) | Rob Lahaye; only as part of an open-source project |
@@ -297,6 +301,10 @@ frame is at the origin.
 | VTF trajectory format | ~.vtf~ | vtfplugin | Olaf Lenz, Henri Menke | University of Illinois, NCSA (~molfiles/LICENSE~) |
 | Internal Paratool Format | ~.xbgf~ | xbgfplugin | Peter Freddolino | University of Illinois, NCSA |
 | (Animated) XCrySDen Structure File | ~.xsf~ | xsfplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| DESRES Molecular Structure | ~.dms~ | dmsplugin | D. E. Shaw Research, LLC: Justin Gullingsrud | D. E. Shaw Research, LLC, BSD-3-Clause; links the system SQLite3, which is not part of the vendored source |
+| Gromacs g96 | ~.g96~ | gromacsplugin | David Norris, Justin Gullingsrud (~g96_plugin.author~) | University of Illinois, NCSA |
+| CPMD 3.x output | ~.out~ | cpmdlogplugin | Axel Kohlmeyer | University of Illinois, NCSA |
+| Gaussian Logfile (g94,g98,g03) | none (~.log~ is GAMESS) | gaussianplugin | Axel Kohlmeyer, Markus Dittrich, Jan Saam | University of Illinois, NCSA |
 
 "University of Illinois, NCSA" is the University of Illinois Open
 Source License of the Board of Trustees of the University of Illinois
@@ -305,30 +313,52 @@ marks a plugin source with no notice of its own, which that file covers.
 ~LICENSE.note~ gives the terms of every part of the chemfiles build and
 ~AUTHORS~ names its authors.
 
-Not built, with the reason:
+Not built, with the reason. This is every remaining plugin source in
+~molfiles/src~, plus the readers inside a built plugin that are not
+registered:
 
 | plugin | reason |
 |--------+--------|
 | cifplugin | chemfiles lists it, but ~molfiles.tar.gz~ has no source for it |
-| crdplugin, and vtfplugin's ~vcf~ reader | the file has no atom count; VMD takes it from a topology loaded first, which ~Molfile<F>~ cannot pass |
+| ~mmcif.cxx~ | an unfinished stub. chemfiles reads mmCIF through gemmi |
+| crdplugin (~crd~, ~crdbox~), and vtfplugin's ~vcf~ reader | the file has no atom count; VMD takes it from a topology loaded first, which ~Molfile<F>~ cannot pass |
 | babelplugin | runs an external Open Babel ~babel~ through ~system()~ and reads nothing itself |
 | basissetplugin | basis sets only, no atoms |
-| msms, grasp, molemesh, off, raster3d, stl | graphics meshes only |
-| avs, biomocca, brix, ccp4, dsn6, dx, edm, fs4, grd, grid, map, pbeq, phi, plt, situs, spider, uhbd, vaspchgcar, vaspparchg | volumetric data only |
+| hoomdplugin | needs ~expat.h~. The frozen pixi env ships ~libexpat~ and no header |
+| webpdbplugin | needs a Tcl interpreter and fetches a PDB over the network |
+| dcdplugin, lammpsplugin, mol2plugin, netcdfplugin, pdbplugin, pdbxplugin, tngplugin, xyzplugin | chemfiles 0.10.4 already has its own reader and writer for each |
+| gromacsplugin's ~gro~, ~trr~ and ~xtc~ readers | chemfiles already reads ~.gro~, ~.trr~ and ~.xtc~. The ~g96~ reader in the same file is registered; chemfiles has no G96 reader |
+| amira, grasp, molemesh, msms, off, ply, raster3d, stl | graphics meshes only |
+| avs, biomocca, brix, ccp4, dsn6, dx, edm, fs4, grd, grid, map, pbeq, phi, plt, situs, spider, uhbd, vaspchgcar, vaspparchg, vtk | volumetric data only |
 
 ~Molfile<F>~ reads atoms, so none of these could be a chemfiles
 format. Their sources still ship in the fetched ~molfiles.tar.gz~.
 
-The patch also fixes three crashes and a hang the new plugins hit in
-chemfiles' ~Molfile<F>~: counting frames passed a null timestep (rst7
-crashed on a valid file), an empty file reached the plugin (rst7
+The patch also fixes crashes and hangs the plugins hit.
+In chemfiles' ~Molfile<F>~: counting frames passed a null timestep
+(rst7 crashed on a valid file), an empty file reached the plugin (rst7
 crashed), a plugin that found no atoms sized the frame from 0 or -1,
 and rst7 looped forever when its second line was missing or held only
-spaces and tabs. An empty file is now the chemfiles error ~the file at
-'PATH' is empty~, such an AMBER7 restart ~the AMBER7 restart at 'PATH'
-has no atom count on its second line~, and a file without atoms ~the
-VMDFMT_<F> plugin found no atoms in 'PATH'~; ~sinp::openFrame~ returns
-an empty cloud for each.
+spaces and tabs. Inside the plugins, after
+~chemfiles-0.10.4-molfile-sources.sh~: an InsightII MDF truncated on
+~@molecule~ looped, an AMBER7 parm token longer than the scan buffer
+smashed the stack, a long VTF line or a negative or huge atom id
+overflowed the heap, a VTF token one byte longer than its field did the
+same, an AMBER7 restart whose atom count does not fit in the file
+looped, and a VMD Tinker file with that kind of count did too. A dense
+reader that reports more atoms than the file has bytes is an error too
+(VTF ids stay sparse, and that plugin caps them). A whitespace-only
+mmCIF, a LAMMPS Data file with no section, a LAMMPS atom count that
+does not fit, and an XDR record longer than the file are errors as
+well. An empty file is the chemfiles error ~the file
+at 'PATH' is empty~, an AMBER7 restart with no count on its second line
+is ~the AMBER7 restart at 'PATH' has no atom count on its second line~,
+and a file without atoms is ~the FORMAT plugin found no atoms in
+'PATH'~. FORMAT is the C++ enum name. TRJ, PSF and MOLDEN have no
+~VMDFMT_~ prefix. Every reader the patch adds is ~VMDFMT_<F>~ (for
+example ~VMDFMT_RST7~). ~sinp::openFrame~ returns an empty cloud for
+each. A file the plugin itself refuses is ~could not open the file at
+'PATH' with FORMAT plugin~.
 
 * eOn ~.con~
 

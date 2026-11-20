@@ -434,7 +434,7 @@ Analysis choice (which command) is not this table.
 | ~xyz~ | ~sinp::readXYZ~ | always |
 | ~con~ | ~sinp::readCon~ | ~SEAMS_HAS_READCON~. Otherwise the command fails: ~readcon-core is not in this build~ |
 | ~pdb~, ~gro~, ~dcd~, ~xtc~, ~trr~, ~nc~ | ~sinp::readChemfiles~ | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
-| the 30 VMD molfile suffixes below | ~sinp::readChemfiles~ (chemfiles' VMD molfile readers) | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
+| the 33 VMD molfile suffixes below | ~sinp::readChemfiles~ (chemfiles' VMD molfile readers) | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
 | anything else | LAMMPS dump (~readLammpsTrjO~ / ~readLammpsTrj~) | always |
 
 A missing reader does not parse those suffixes as LAMMPS dumps.
@@ -457,11 +457,14 @@ that reads each and the holder of that plugin's copyright and licence:
 | ~cube~ | Gaussian Cube | cubeplugin | University of Illinois, NCSA |
 | ~dlpolyconfig~ | DL_POLY CONFIG | dlpolyplugin | University of Illinois, NCSA |
 | ~dlpolyhist~ | DL_POLY_C HISTORY | dlpolyplugin | University of Illinois, NCSA |
+| ~dms~ | DESRES Molecular Structure | dmsplugin | D. E. Shaw Research, LLC, BSD-3-Clause |
 | ~dtr~ | DESRES Trajectory | dtrplugin | D. E. Shaw Research, LLC, BSD-3-Clause |
+| ~g96~ | Gromacs g96 | gromacsplugin | University of Illinois, NCSA |
 | ~js~ | js | jsplugin | University of Illinois, NCSA |
 | ~log~ | GAMESS | gamessplugin | University of Illinois, NCSA |
 | ~mae~ | Maestro File | maeffplugin | D. E. Shaw Research, LLC, BSD-3-Clause |
 | ~mdf~ | InsightII MDF | mdfplugin | University of Illinois, NCSA |
+| ~out~ | CPMD 3.x output | cpmdlogplugin | University of Illinois, NCSA |
 | ~parm~ | AMBER Parm | parmplugin | University of Illinois, NCSA; ~ReadPARM.h~ Regents of the University of California |
 | ~parm7~ | AMBER7 Parm | parm7plugin | University of Illinois, NCSA; ~ReadPARM7.h~ Regents of the University of California |
 | ~pqr~ | PQR | pqrplugin | University of Illinois, NCSA |
@@ -478,8 +481,10 @@ that reads each and the holder of that plugin's copyright and licence:
 
 PSF, AMBER Parm, AMBER7 Parm, InsightII MDF and VTF structure format
 files hold a topology and no coordinates, so every atom of such a frame
-is at the origin. ABINIT, DL_POLY_4 HISTORY and VMD Tinker have no
-suffix of their own and the CLI does not reach them.
+is at the origin. ABINIT, DL_POLY_4 HISTORY, VMD Tinker and Gaussian
+Logfile have no suffix of their own (Gaussian's ~.log~ is already
+GAMESS) and the CLI does not reach them. ~.out~ is CPMD 3.x output;
+nothing else in this tree uses that suffix for a trajectory.
 [[file:data-formats.org][Data Formats]] lists every reader with its
 authors, and ~LICENSE.note~ gives each licence.
 

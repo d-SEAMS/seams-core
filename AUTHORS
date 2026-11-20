@@ -47,10 +47,18 @@ gemmi (headers)
   gemmi/include/gemmi/third_party/tao (PEGTL): Dr. Colin Hirsch and
     Daniel Frey; MIT
 lzma (liblzma from XZ Utils)
-  Authors: Lasse Collin, Igor Pavlov and the XZ Utils contributors
+  Authors: Lasse Collin, Igor Pavlov, Kevin Springle, Wei Dai and the
+    XZ Utils contributors. Kevin Springle and Wei Dai wrote the SHA-256
+    implementation (lzma/src/liblzma/check/sha256.c and the credit in
+    lzma/src/liblzma/api/lzma.h).
   License: public domain
 mmtf-cpp (headers)
-  Authors: University of California San Diego
+  Authors: Gabriel Studer, Gerardo Tauriello, Daniel Farrell
+    (mmtf-cpp/include/mmtf/structure_data.hpp). Based on mmtf_c by
+    Julien Ferte, with Anthony Bradley and Thomas Holder, and
+    contributions from Yana Valasatava, Gazal Kalyan and Alexander Rose.
+    Copyright holder in mmtf-cpp/LICENSE: University of California
+    San Diego
   License: MIT
   Includes msgpack-c (mmtf-cpp/msgpack-c): FURUHASHI Sadayuki, KONDO
     Takatoshi, Vladimir Volodko, MIZUKI Hirata and the msgpack-c
@@ -74,11 +82,17 @@ molfiles (VMD molfile plugins)
     carplugin, pqrplugin: Eamon Caddigan
     corplugin: Eamon Caddigan, John Stone
     cpmdplugin, cubeplugin, xsfplugin: Axel Kohlmeyer, John Stone
+    cpmdlogplugin: Axel Kohlmeyer
     dlpolyplugin: John Stone (DL_POLY HISTORY readers), Alin M Elena
       (DL_POLY CONFIG reader)
+    dmsplugin: D. E. Shaw Research, LLC (Justin Gullingsrud)
     dtrplugin, maeffplugin: D. E. Shaw Research
     gamessplugin: Jan Saam, Markus Dittrich, Johan Strumpfer
-    gromacsplugin: David Norris, Justin Gullingsrud, Magnus Lundborg
+    gaussianplugin: Axel Kohlmeyer, Markus Dittrich, Jan Saam
+    gromacsplugin: David Norris, Justin Gullingsrud, Magnus Lundborg,
+      Axel Kohlmeyer (trr_plugin; g96_plugin is David Norris and
+      Justin Gullingsrud, trj_plugin the same, gro_plugin adds
+      Magnus Lundborg)
     jsplugin, tinkerplugin: John Stone
     mdfplugin: Eamon Caddigan, Axel Kohlmeyer
     moldenplugin: Markus Dittrich, Jan Saam, Alexey Titov
@@ -94,8 +108,8 @@ molfiles (VMD molfile plugins)
   Files with their own copyright holders and terms:
     abinitplugin.c: Rob Lahaye, Sungkyunkwan University; may be used only
       as part of an open-source project
-    dtrplugin.cxx, dtrplugin.hxx, maeffplugin.cxx: D. E. Shaw Research,
-      LLC; BSD-3-Clause
+    dmsplugin.cxx, dtrplugin.cxx, dtrplugin.hxx, maeffplugin.cxx:
+      D. E. Shaw Research, LLC; BSD-3-Clause
     ReadPARM.h, ReadPARM7.h: Regents of the University of California,
       code by Bill Ross (UCSF); distributable with the notice kept
       unmodified and changes noted
