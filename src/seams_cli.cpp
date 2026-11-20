@@ -280,6 +280,7 @@ bool forEachInputFrame(const std::string &path, int first, int last,
       // an empty first frame is recorded here and thrown after it returns.
       bool stopped = false;
       bool emptyFirst = false;
+      bool sawFrame = false;
       const int start = std::max(1, first);
       sinp::forEachConFrame(path, first, lastFrame,
                             [&](int frame, Cloud &cloud) {
@@ -293,9 +294,13 @@ bool forEachInputFrame(const std::string &path, int first, int last,
                                 stopped = true;
                                 return;
                               }
+                              sawFrame = true;
                               fn(frame, cloud);
                             });
-      if (emptyFirst) {
+      // A reader that accepts the file and yields no frame, such as an
+      // empty GRO, never calls this callback. That first requested frame
+      // is empty.
+      if (emptyFirst || !sawFrame) {
         throw std::runtime_error("cannot read " + path);
       }
       return true;
@@ -309,6 +314,7 @@ bool forEachInputFrame(const std::string &path, int first, int last,
       const int filter = typeFilter > 0 ? typeFilter : -1;
       bool stopped = false;
       bool emptyFirst = false;
+      bool sawFrame = false;
       const int start = std::max(1, first);
       sinp::forEachChemfilesStep(path, first, lastFrame, filter, options,
                                  [&](int frame, Cloud &cloud) {
@@ -322,9 +328,13 @@ bool forEachInputFrame(const std::string &path, int first, int last,
                                      stopped = true;
                                      return;
                                    }
+                                   sawFrame = true;
                                    fn(frame, cloud);
                                  });
-      if (emptyFirst) {
+      // A reader that accepts the file and yields no frame, such as an
+      // empty GRO, never calls this callback. That first requested frame
+      // is empty.
+      if (emptyFirst || !sawFrame) {
         throw std::runtime_error("cannot read " + path);
       }
       return true;
