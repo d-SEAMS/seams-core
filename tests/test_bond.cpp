@@ -828,22 +828,21 @@ TEST_CASE("a one-hydrogen donor is directed and absent from the two-H list", "[b
   REQUIRE(edges[0].acceptor == 1);
 }
 
-TEST_CASE("nearest donor-type heavy atom owns a shared molID", "[bond]") {
+TEST_CASE("nearest heavy atom owns hydrogen before donor filtering", "[bond]") {
   const auto cloud = combinedCloud(
       {20.0, 20.0, 20.0},
-      {{8, 5, 0.0, 2.0, 0.0}, {11, 5, 1.0, 0.0, 0.0}, {8, 9, 2.9, 0.0, 0.0}},
-      {{5, 1.9, 0.0, 0.0}}, 2);
-  const double hToN = 0.9;
-  const double hToO = std::sqrt(1.9 * 1.9 + 2.0 * 2.0);
-  const double oToA = std::sqrt(2.9 * 2.9 + 2.0 * 2.0);
-  REQUIRE(hToN < hToO);
-  REQUIRE(oToA > 3.5);
-  const auto fromN = bond::directedHydrogenBonds(cloud, 3.5, 2.42, 30.0, {8, 11}, {8}, 2, true);
+      {{10, 100, 0.0, 1.5, 0.0},
+       {11, 100, 1.0, 0.0, 0.0},
+       {6, 100, 3.29, 0.0, 0.0},
+       {8, 200, 2.9, 0.0, 0.0}},
+      {{100, 1.9, 0.0, 0.0}, {100, 2.2, 0.0, 0.0}}, 2);
+  REQUIRE(bond::directedHydrogenBonds(cloud, 3.5, 2.42, 30.0, {10}, {8}, 2, true).empty());
+  const auto fromN =
+      bond::directedHydrogenBonds(cloud, 3.5, 2.42, 30.0, {11}, {8}, 2, true);
   REQUIRE(fromN.size() == 1);
   REQUIRE(fromN[0].donor == 1);
-  REQUIRE(fromN[0].hydrogen == 3);
-  REQUIRE(fromN[0].acceptor == 2);
-  REQUIRE(bond::directedHydrogenBonds(cloud, 3.5, 2.42, 30.0, {8}, {8}, 2, true).empty());
+  REQUIRE(fromN[0].hydrogen == 4);
+  REQUIRE(fromN[0].acceptor == 3);
 }
 
 TEST_CASE("symmetrised directed pairs match the two-H water list", "[bond]") {

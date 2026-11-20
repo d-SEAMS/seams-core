@@ -148,10 +148,29 @@ def framework():
     frame.close()
 
 
+def short_metadata_is_rejected():
+    try:
+        seams_hbonds.Frame.from_clouds(
+            [0, 0, 0, 2.8, 0, 0],
+            [1, 0, 0],
+            [0, 0, 0, 20, 20, 20, 0, 0, 0],
+            [8],
+            [1, 2],
+            [2],
+            [1],
+        )
+    except seams_hbonds.SeamsError as exc:
+        if exc.status != 4:
+            fail("short heavy_types status {}".format(exc.status))
+    else:
+        fail("short heavy_types was accepted")
+
+
 def main():
     linear()
     triclinic_bond()
     framework()
+    short_metadata_is_rejected()
     print("directed hbonds ok")
 
 

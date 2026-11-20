@@ -351,7 +351,7 @@ std::vector<bond::DirectedHydrogenBond> bond::directedHydrogenBonds(
   if (donors.count(hydrogenType) != 0 || acceptors.count(hydrogenType) != 0) {
     return edges;
   }
-  std::unordered_map<int, std::vector<int>> donorsByMol;
+  std::unordered_map<int, std::vector<int>> heaviesByMol;
   std::vector<int> hydrogens;
   hydrogens.reserve(static_cast<std::size_t>(std::max(cloud.nop, 0)));
   for (int i = 0; i < cloud.nop; ++i) {
@@ -360,32 +360,32 @@ std::vector<bond::DirectedHydrogenBond> bond::directedHydrogenBonds(
       hydrogens.push_back(i);
       continue;
     }
-    if (donors.count(point.type) != 0) {
-      donorsByMol[point.molID].push_back(i);
-    }
+    heaviesByMol[point.molID].push_back(i);
   }
   std::vector<std::vector<int>> hydrogensOnDonor(static_cast<std::size_t>(std::max(cloud.nop, 0)));
   for (const int hydrogen : hydrogens) {
     const auto &hpoint = cloud.pts[static_cast<std::size_t>(hydrogen)];
-    const auto found = donorsByMol.find(hpoint.molID);
-    if (found == donorsByMol.end()) {
+    const auto found = heaviesByMol.find(hpoint.molID);
+    if (found == heaviesByMol.end()) {
       continue;
     }
     int best = -1;
     double best2 = 0.0;
-    for (const int donor : found->second) {
-      const auto dr = gen::relDist(cloud, donor, hydrogen);
+    for (const int heavy : found->second) {
+      const auto dr = gen::relDist(cloud, heavy, hydrogen);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (best < 0 || d2 < best2) {
-        best = donor;
+        best = heavy;
         best2 = d2;
       }
     }
-    if (best >= 0) {
+    if (best >= 0 &&
+        donors.count(cloud.pts[static_cast<std::size_t>(best)].type) != 0) {
       hydrogensOnDonor[static_cast<std::size_t>(best)].push_back(hydrogen);
     }
   }
   const auto neighbours = nneigh::getNewNeighbourListByIndex(cloud, pairCutoff);
+  const double pair2 = pairCutoff * pairCutoff;
   const double dist2 = distCutoff * distCutoff;
   for (int donor = 0; donor < cloud.nop; ++donor) {
     const auto &owned = hydrogensOnDonor[static_cast<std::size_t>(donor)];
@@ -407,7 +407,7 @@ std::vector<bond::DirectedHydrogenBond> bond::directedHydrogenBonds(
       }
       const auto oo = gen::relDist(cloud, acceptor, donor);
       const double oo2 = oo[0] * oo[0] + oo[1] * oo[1] + oo[2] * oo[2];
-      if (!(oo2 > 0.0) || !std::isfinite(oo2)) {
+      if (!(oo2 > 0.0) || oo2 >= pair2 || !std::isfinite(oo2)) {
         continue;
       }
       const std::vector<double> ooVec{oo[0], oo[1], oo[2]};

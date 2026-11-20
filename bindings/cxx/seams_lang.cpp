@@ -635,15 +635,16 @@ seams_frame *seams_frame_from_hydrogen_cloud(
       const int *types = hydrogen ? hydrogen_types : heavy_types;
       const int *ids = hydrogen ? hydrogen_ids : heavy_ids;
       const int *mols = hydrogen ? hydrogen_mols : heavy_mols;
-      if (!std::isfinite(xyz[3 * local]) || !std::isfinite(xyz[3 * local + 1]) ||
-          !std::isfinite(xyz[3 * local + 2])) {
+      const std::size_t offset = static_cast<std::size_t>(3) * static_cast<std::size_t>(local);
+      if (!std::isfinite(xyz[offset]) || !std::isfinite(xyz[offset + 1]) ||
+          !std::isfinite(xyz[offset + 2])) {
         set_error("a coordinate is not finite");
         return nullptr;
       }
       auto &point = cloud.pts[static_cast<std::size_t>(i)];
-      point.x = xyz[3 * local];
-      point.y = xyz[3 * local + 1];
-      point.z = xyz[3 * local + 2];
+      point.x = xyz[offset];
+      point.y = xyz[offset + 1];
+      point.z = xyz[offset + 2];
       point.type = types[local];
       point.atomID = ids != nullptr ? ids[local] : i + 1;
       point.molID = mols != nullptr ? mols[local] : point.atomID;

@@ -120,6 +120,25 @@ class Frame:
         box9 = _doubles(box)
         if len(box9) != 9:
             raise SeamsError(2, "box length is 9")
+        heavy_types_array = _ints(heavy_types)
+        heavy_mol_ids_array = _ints(heavy_mol_ids)
+        heavy_ids_array = _ints(heavy_ids) if heavy_ids is not None else None
+        hydrogen_types_array = _ints(hydrogen_types) if hydrogen_types is not None else None
+        hydrogen_mol_ids_array = _ints(hydrogen_mol_ids) if hydrogen_mol_ids is not None else None
+        hydrogen_ids_array = _ints(hydrogen_ids) if hydrogen_ids is not None else None
+        lengths = (
+            ("heavy_types", heavy_types_array, n_heavy),
+            ("heavy_mol_ids", heavy_mol_ids_array, n_heavy),
+            ("heavy_ids", heavy_ids_array, n_heavy),
+            ("hydrogen_types", hydrogen_types_array, n_hydrogen),
+            ("hydrogen_mol_ids", hydrogen_mol_ids_array, n_hydrogen),
+            ("hydrogen_ids", hydrogen_ids_array, n_hydrogen),
+        )
+        for name, values, expected in lengths:
+            if values is not None and len(values) != expected:
+                raise SeamsError(4, "{} length must equal {}".format(name, expected))
+            if values is None and expected and name in ("hydrogen_types", "hydrogen_mol_ids"):
+                raise SeamsError(4, "{} length must equal {}".format(name, expected))
         handle = lib.seams_system_create()
         if not handle:
             raise SeamsError(1, "frame handle was not created")
@@ -127,14 +146,14 @@ class Frame:
             handle,
             heavy,
             n_heavy,
-            _ints(heavy_types),
-            _ints(heavy_ids) if heavy_ids is not None else None,
-            _ints(heavy_mol_ids),
+            heavy_types_array,
+            heavy_ids_array,
+            heavy_mol_ids_array,
             hydrogen if n_hydrogen else None,
             n_hydrogen,
-            _ints(hydrogen_types) if n_hydrogen else None,
-            _ints(hydrogen_ids) if hydrogen_ids is not None else None,
-            _ints(hydrogen_mol_ids) if n_hydrogen else None,
+            hydrogen_types_array if n_hydrogen else None,
+            hydrogen_ids_array,
+            hydrogen_mol_ids_array if n_hydrogen else None,
             box9,
             9,
         )
