@@ -10,21 +10,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <array>
-#include <cerrno>
+#include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <fstream>
 #include <string>
-#include <string_view>
-#include <vector>
-
-#include <poll.h>
-#include <spawn.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-extern char **environ;
 
 namespace {
 
@@ -87,121 +76,36 @@ const char *kFile =
 struct CliResult {
   int status = -1;
   std::string out;
-  std::string err;
 };
-
-void appendPipe(int fd, std::string &dest, bool &open) {
-  char buf[1024];
-  const ssize_t got = ::read(fd, buf, sizeof buf);
-  if (got > 0) {
-    dest.append(buf, buf + static_cast<std::size_t>(got));
-  } else {
-    open = false;
-  }
-}
 
 CliResult cliRead(const fs::path &path) {
   CliResult cli;
   const char *bin = std::getenv("SEAMS_BIN");
   if (bin == nullptr || bin[0] == '\0') {
-    cli.err = "SEAMS_BIN is unset";
+    cli.out = "SEAMS_BIN is unset";
     return cli;
   }
-  int outfd[2] = {-1, -1};
-  int errfd[2] = {-1, -1};
-  if (pipe(outfd) != 0 || pipe(errfd) != 0) {
-    cli.err = "pipe failed";
+  const std::string command = "\"" + std::string(bin) +
+                              "\" --type -1 read \"" + path.string() +
+                              "\" 2>&1";
+#if defined(_WIN32)
+  FILE *pipe = _popen(command.c_str(), "r");
+#else
+  FILE *pipe = popen(command.c_str(), "r");
+#endif
+  if (pipe == nullptr) {
+    cli.out = "CLI failed to start";
     return cli;
   }
-  posix_spawn_file_actions_t actions;
-  posix_spawn_file_actions_init(&actions);
-  posix_spawn_file_actions_adddup2(&actions, outfd[1], STDOUT_FILENO);
-  posix_spawn_file_actions_adddup2(&actions, errfd[1], STDERR_FILENO);
-  posix_spawn_file_actions_addclose(&actions, outfd[0]);
-  posix_spawn_file_actions_addclose(&actions, outfd[1]);
-  posix_spawn_file_actions_addclose(&actions, errfd[0]);
-  posix_spawn_file_actions_addclose(&actions, errfd[1]);
-
-  std::vector<std::string> store;
-  for (char **env = environ; env != nullptr && *env != nullptr; ++env) {
-    const std::string_view row(*env);
-    if (row.rfind("FORCE_COLOR=", 0) == 0 ||
-        row.rfind("CLICOLOR_FORCE=", 0) == 0) {
-      continue;
-    }
-    store.emplace_back(*env);
+  char buffer[1024];
+  while (std::fgets(buffer, sizeof buffer, pipe) != nullptr) {
+    cli.out += buffer;
   }
-  store.emplace_back("NO_COLOR=1");
-  std::vector<char *> envp;
-  envp.reserve(store.size() + 1);
-  for (std::string &row : store) {
-    envp.push_back(row.data());
-  }
-  envp.push_back(nullptr);
-
-  std::string binCopy(bin);
-  std::string typeFlag = "--type";
-  std::string minus = "-1";
-  std::string readCmd = "read";
-  std::string pathCopy = path.string();
-  char *argv[] = {binCopy.data(), typeFlag.data(), minus.data(),
-                  readCmd.data(), pathCopy.data(), nullptr};
-  pid_t pid = 0;
-  const int spawned =
-      posix_spawn(&pid, binCopy.c_str(), &actions, nullptr, argv, envp.data());
-  posix_spawn_file_actions_destroy(&actions);
-  close(outfd[1]);
-  close(errfd[1]);
-  if (spawned != 0) {
-    close(outfd[0]);
-    close(errfd[0]);
-    cli.err = "posix_spawn failed";
-    return cli;
-  }
-
-  bool outOpen = true;
-  bool errOpen = true;
-  while (outOpen || errOpen) {
-    pollfd fds[2];
-    nfds_t slots = 0;
-    int outSlot = -1;
-    int errSlot = -1;
-    if (outOpen) {
-      fds[slots].fd = outfd[0];
-      fds[slots].events = POLLIN;
-      outSlot = static_cast<int>(slots);
-      slots += 1;
-    }
-    if (errOpen) {
-      fds[slots].fd = errfd[0];
-      fds[slots].events = POLLIN;
-      errSlot = static_cast<int>(slots);
-      slots += 1;
-    }
-    const int polled = poll(fds, slots, -1);
-    if (polled < 0) {
-      if (errno == EINTR) {
-        continue;
-      }
-      break;
-    }
-    if (outSlot >= 0 &&
-        (fds[outSlot].revents & (POLLIN | POLLHUP | POLLERR)) != 0) {
-      appendPipe(outfd[0], cli.out, outOpen);
-    }
-    if (errSlot >= 0 &&
-        (fds[errSlot].revents & (POLLIN | POLLHUP | POLLERR)) != 0) {
-      appendPipe(errfd[0], cli.err, errOpen);
-    }
-  }
-  close(outfd[0]);
-  close(errfd[0]);
-  int status = 0;
-  if (waitpid(pid, &status, 0) < 0 || !WIFEXITED(status)) {
-    cli.status = -1;
-    return cli;
-  }
-  cli.status = WEXITSTATUS(status);
+#if defined(_WIN32)
+  cli.status = _pclose(pipe);
+#else
+  cli.status = pclose(pipe);
+#endif
   return cli;
 }
 
@@ -263,7 +167,6 @@ void expectWater(const fs::path &path) {
 
   const CliResult cli = cliRead(path);
   INFO(cli.out);
-  INFO(cli.err);
   REQUIRE(cli.status == 0);
   REQUIRE(cli.out.find("nop 9") != std::string::npos);
   REQUIRE(cli.out.find("frame 1") != std::string::npos);

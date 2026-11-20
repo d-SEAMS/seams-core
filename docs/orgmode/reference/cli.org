@@ -433,7 +433,7 @@ Analysis choice (which command) is not this table.
 |--------+--------+-------------------|
 | ~xyz~ | ~sinp::readXYZ~ | always |
 | ~con~ | ~sinp::readCon~ | ~SEAMS_HAS_READCON~. Otherwise the command fails: ~readcon-core is not in this build~ |
-| ~pdb~, ~gro~, ~dcd~, ~xtc~, ~trr~, ~nc~ | ~sinp::readChemfiles~ | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
+| ~pdb~, ~gro~, ~dcd~, ~xtc~, ~trr~, ~nc~, ~lammpsdata~ | ~sinp::readChemfiles~ | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
 | anything else | LAMMPS dump (~readLammpsTrjO~ / ~readLammpsTrj~) | always |
 
 A missing reader does not parse those suffixes as LAMMPS dumps.
