@@ -195,7 +195,7 @@ if openmp_dep_ok
       # Linux clang prints libomp.so. Apple clang links libomp.dylib, and
       # -print-file-name=libomp.so then returns the bare name, so the
       # runpath was never recorded and dyld aborted on @rpath/libomp.dylib.
-      _omp_names = ['libomp.so']
+      _omp_names = ['libomp.so', 'libomp.so.5']
       if host_machine.system() == 'darwin'
         _omp_names = ['libomp.dylib']
       endif
@@ -233,14 +233,16 @@ endif
 # use the same compilers and OpenMP link line. ``cc`` on PATH is not that
 # compiler: a pixi environment's cc is conda's gcc, and its glibc 2.28
 # sysroot cannot resolve the host compiler's GLIBC and libomp symbols.
-_snippet_cc = meson.get_compiler('c').cmd_array()[0]
-_snippet_cxx = cppc.cmd_array()[0]
+_snippet_cc_cmd = meson.get_compiler('c').cmd_array()
+_snippet_cxx_cmd = cppc.cmd_array()
+_snippet_cc = ' '.join(_snippet_cc_cmd)
+_snippet_cxx = ' '.join(_snippet_cxx_cmd)
 # AddressSanitizer is preloaded so Python can host libseams. That preload
 # makes the compiler driver and cc1 fail LeakSanitizer. The wrappers drop
 # it and exec the compiler meson used to build the library.
 _asan_wrap = get_option('b_sanitize').contains('address')
-_real_cc = _snippet_cc
-_real_cxx = _snippet_cxx
+_real_cc = _snippet_cc_cmd[0]
+_real_cxx = _snippet_cxx_cmd[0]
 if _asan_wrap
   _asan_bin = meson.project_source_root() / 'scripts' / 'asan-path'
   _snippet_cc = _asan_bin / 'cc'
@@ -1061,6 +1063,30 @@ if get_option('with_cli') and get_option('with_tests')
     workdir: meson.project_source_root() / 'scripts',
     suite: 'docs',
     timeout: 60)
+  test(
+    'docs_llms_txt_mismatch_selftest',
+    python3,
+    args: [meson.project_source_root() / 'scripts' / 'gen_llms_txt.py', '--selftest'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_changelog',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_towncrier',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_towncrier.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_changelog_controls',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'test_changelog_checks.py'],
+    suite: 'docs',
+    timeout: 120)
   test(
     'docs_discoverability',
     python3,

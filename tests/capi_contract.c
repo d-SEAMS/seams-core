@@ -14,6 +14,7 @@
 #include "seams.h"
 
 #include <float.h>
+#include <limits.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -696,6 +697,21 @@ static seams_status p_hbonds(seams_system *sys, double cutoff, size_t len) {
   int n_bonds = 0;
   return seams_hbonds(sys, cutoff, 1, 2, 2.42, 30.0, g_null_out ? NULL : &n_bonds);
 }
+static seams_status p_hbond_edges(seams_system *sys, double cutoff, size_t len) {
+  seams_hbond_edge *edges = NULL;
+  if (!g_null_out) {
+    edges = calloc(len > 0 ? len : 1, sizeof(seams_hbond_edge));
+    for (size_t i = 0; i < (len > 0 ? len : 1); ++i) {
+      edges[i].size = sizeof(seams_hbond_edge);
+    }
+  }
+  size_t n_out = 0;
+  seams_status rc = seams_hbond_edges(sys, cutoff, 1, 2, 2.42, 30.0,
+                                      SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY,
+                                      edges, len, g_null_out ? NULL : &n_out);
+  free(edges);
+  return rc;
+}
 static seams_status p_density(seams_system *sys, double cutoff, size_t len) {
   (void)cutoff;
   size_t n_out = 0;
@@ -736,6 +752,31 @@ static seams_status p_monolayer(seams_system *sys, double cutoff, size_t len) {
 static seams_status p_site_table(seams_system *sys, double cutoff, size_t len) {
   (void)cutoff;
   return seams_site_table(sys, "1=waterO", g_null_out ? NULL : g_ibuf, len);
+}
+
+static seams_status passthrough_quench(const double *xyz, size_t n, const double *box9,
+                                       size_t box_len, double *xyz_out, size_t xyz_out_len,
+                                       double *box9_out, size_t box9_out_len, void *user_data) {
+  (void)user_data;
+  if (xyz == NULL || box9 == NULL || xyz_out == NULL || xyz_out_len < 3 * n || box_len != 9) {
+    return SEAMS_ERR_NULL;
+  }
+  memcpy(xyz_out, xyz, sizeof(double) * 3 * n);
+  if (box9_out != NULL && box9_out_len == 9) {
+    memcpy(box9_out, box9, sizeof(double) * 9);
+  }
+  return SEAMS_OK;
+}
+
+static seams_status p_quenched(seams_system *sys, double cutoff, size_t len) {
+  int counts_raw[9] = {0}, counts_q[9] = {0};
+  int rings_raw[16] = {0}, rings_q[16] = {0};
+  int h_raw = 0, h_q = 0, edge_delta = 0, ring_delta = 0, class_delta = 0;
+  const size_t n = len;
+  return seams_quenched_analysis(
+      sys, passthrough_quench, NULL, cutoff, 0, SEAMS_GRAPH_CUTOFF, 6, 1, 2, 2.42, 30.0,
+      g_null_out ? NULL : g_ibuf, n, g_null_out ? NULL : g_ibuf2, n, counts_raw, counts_q,
+      rings_raw, rings_q, 16, &h_raw, &h_q, &edge_delta, &ring_delta, &class_delta);
 }
 
 /* need is the shortest accepted buffer length for P_LEN probes. */
@@ -795,7 +836,9 @@ static void analysis_contract(void) {
   probe("seams_running_cn", p_running_cn, C | L | O, 20);
   probe("seams_coordination", p_coordination, C | O, 0);
   probe("seams_hbonds", p_hbonds, C | O, 0);
+  probe("seams_hbond_edges", p_hbond_edges, C | O, (size_t)g_n);
   probe("seams_density_axis", p_density, L | O, 10);
+  probe("seams_quenched_analysis", p_quenched, C | O, (size_t)g_n);
   probe("seams_fingerprint", p_fingerprint, C | O | G, 0);
   probe("seams_contact_pairs", p_contacts, O, 0);
   probe("seams_domains", p_domains, C | O, 0);
@@ -843,6 +886,55 @@ static void analysis_contract(void) {
          "hydrogen type 0");
   expect(seams_hbonds(g_good, 3.5, 1, 2, NAN, 30.0, &(int){0}), SEAMS_ERR_RANGE, "seams_hbonds",
          "NaN distance cutoff");
+  {
+    size_t hb_n = 0;
+    seams_hbond_edge hb_row[1];
+    hb_row[0].size = sizeof(hb_row[0]);
+    expect(seams_hbond_edges(g_good, 3.5, 1, 2, 2.42, 30.0, SEAMS_HBOND_EDGE_WITH_H, NULL, 0,
+                             &hb_n),
+           SEAMS_OK, "seams_hbond_edges", "query mode");
+    expect(seams_hbond_edges(g_good, 3.5, 1, 2, 2.42, 30.0, 7, hb_row, 1, &hb_n), SEAMS_ERR_ARG,
+           "seams_hbond_edges", "unknown fields");
+    hb_row[0].size = 0;
+    expect(seams_hbond_edges(g_good, 3.5, 1, 2, 2.42, 30.0, SEAMS_HBOND_EDGE_WITH_H, hb_row, 1,
+                             &hb_n),
+           SEAMS_ERR_ARG, "seams_hbond_edges", "zero struct size");
+    hb_row[0].size = 2;
+    expect(seams_hbond_edges(g_good, 3.5, 1, 2, 2.42, 30.0, SEAMS_HBOND_EDGE_WITH_H, hb_row, 1,
+                             &hb_n),
+           SEAMS_ERR_ARG, "seams_hbond_edges", "tiny struct size");
+    hb_row[0].size = sizeof(hb_row[0]);
+    if (hb_n > 0) {
+      expect(seams_hbond_edges(g_good, 3.5, 1, 2, 2.42, 30.0, SEAMS_HBOND_EDGE_WITH_H, hb_row,
+                               hb_n - 1, &hb_n),
+             SEAMS_ERR_RANGE, "seams_hbond_edges", "short edge buffer");
+    }
+  }
+  {
+    int counts_raw[9] = {0}, counts_q[9] = {0};
+    int rings_raw[16] = {0}, rings_q[16] = {0};
+    int h_raw = 0, h_q = 0, ed = 0, rd = 0, cd = 0;
+    expect(seams_quenched_analysis(g_good, passthrough_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 2,
+                                   1, 2, 2.42, 30.0, g_ibuf, (size_t)g_n, g_ibuf2, (size_t)g_n,
+                                   counts_raw, counts_q, rings_raw, rings_q, 16, &h_raw, &h_q,
+                                   &ed, &rd, &cd),
+           SEAMS_ERR_RANGE, "seams_quenched_analysis", "max_depth 2");
+    expect(seams_quenched_analysis(g_good, passthrough_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF,
+                                   13, 1, 2, 2.42, 30.0, g_ibuf, (size_t)g_n, g_ibuf2, (size_t)g_n,
+                                   counts_raw, counts_q, rings_raw, rings_q, 16, &h_raw, &h_q,
+                                   &ed, &rd, &cd),
+           SEAMS_ERR_RANGE, "seams_quenched_analysis", "max_depth 13");
+    expect(seams_quenched_analysis(g_good, passthrough_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF,
+                                   INT_MAX, 1, 2, 2.42, 30.0, g_ibuf, (size_t)g_n, g_ibuf2,
+                                   (size_t)g_n, counts_raw, counts_q, rings_raw, rings_q, 16,
+                                   &h_raw, &h_q, &ed, &rd, &cd),
+           SEAMS_ERR_RANGE, "seams_quenched_analysis", "max_depth INT_MAX");
+    expect(seams_quenched_analysis(g_good, passthrough_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6,
+                                   1, 0, 2.42, 30.0, g_ibuf, (size_t)g_n, g_ibuf2, (size_t)g_n,
+                                   counts_raw, counts_q, rings_raw, rings_q, 16, &h_raw, &h_q,
+                                   &ed, &rd, &cd),
+           SEAMS_ERR_ARG, "seams_quenched_analysis", "hydrogen type 0");
+  }
   expect(seams_monolayer(g_good, 3.5, 0, 6, NAN, g_ibuf, 7), SEAMS_ERR_RANGE, "seams_monolayer",
          "NaN sheet area");
   expect(seams_monolayer(g_good, 3.5, 0, 6, 0.0, g_ibuf, 7), SEAMS_ERR_RANGE, "seams_monolayer",

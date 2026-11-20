@@ -30,7 +30,7 @@ Its frame-mutation and order-parameter entries are
 
 ```{literalinclude} ../../../bindings/cxx/seams_lang.h
 :language: cpp
-:lines: 115-178
+:lines: 45-90,131-216
 ```
 
 `docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
@@ -163,6 +163,22 @@ from `seams.hpp`.
 
 ## Symbol reference
 
+### SEAMS_HBOND_EDGE_WITH_H
+
+Purpose: Field-mask bit used with `seams_frame_hbond_edges` to populate hydrogen indices.
+
+Parameters: none
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
+Units: dimensionless
+
+Example: `docs/examples/lang_ice.c`
+
 ### seams_frame
 
 Purpose: Opaque frame used by the language bindings.
@@ -176,6 +192,22 @@ Ownership: No allocation. This is a type.
 Errors: None.
 
 Units: handle
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_chemfiles_load_options
+
+Purpose: Name filters and explicit type assignments for chemfiles trajectory input.
+
+Parameters: residue and atom include arrays; residue and atom exclude arrays; NAME=ID type-map array
+
+Returns: The options structure itself.
+
+Ownership: The caller owns every string and array for the duration of the read call.
+
+Errors: Invalid arrays or type-map entries make seams_frame_read_options return NULL.
+
+Units: type IDs and array lengths are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
 
@@ -339,6 +371,22 @@ Units: coordinates and box lengths in angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
 
+### seams_frame_hbond_edges
+
+Purpose: Export per-frame hydrogen-bond edges through the language ABI with deterministic `(donor, acceptor, hydrogen)` ordering.
+
+Parameters: frame; cutoff; oxygen_type; hydrogen_type; dist_cutoff; angle_cutoff; fields; donor; acceptor; hydrogen; d_DA; angle; cap; n_out
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
+Units: donor, acceptor, and hydrogen are 0-based indices; d_DA in angstrom; angle in degrees.
+
+Example: `docs/examples/lang_ice.c`
+
 ### seams_frame_ids
 
 Purpose: Pointer to the atom ids stored on the frame.
@@ -483,6 +531,12 @@ Units: cutoff in angstrom; coordinates in angstrom; order parameters are dimensi
 
 Example: `docs/examples/minimal_cpp.cpp`
 
+```c
+// excerpt: bindings/cxx/seams_lang.h
+int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
+                      double *q6, double *q4bar, double *q6bar);
+```
+
 ### seams_frame_q4_q6_chill
 
 Purpose: Write q4, q6, and CHILL+ from one cutoff list.
@@ -498,6 +552,13 @@ Errors: A non-zero code. seams_last_error() holds the detail.
 Units: cutoff in angstrom; coordinates in angstrom; order parameters are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
+
+```c
+// excerpt: bindings/cxx/seams_lang.h
+int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
+                            double *q4, double *q6, double *q4bar,
+                            double *q6bar, int *labels, int counts9[9]);
+```
 
 ### seams_frame_rdf
 
@@ -579,6 +640,22 @@ Units: frame index is dimensionless; coordinates in the file are angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
 
+### seams_frame_read_options
+
+Purpose: Read one chemfiles-backed frame with residue and atom filters and explicit type assignments.
+
+Parameters: path; frame; type_filter; options
+
+Returns: A new seams_frame, or NULL when the call cannot build one.
+
+Ownership: The caller owns the frame and frees it with seams_frame_free; the caller retains the options arrays.
+
+Errors: NULL. seams_last_error() names an invalid option or read failure.
+
+Units: frame index and type IDs are dimensionless; coordinates in the file are angstrom
+
+Example: `docs/examples/minimal_cpp.cpp`
+
 ### seams_frame_rings
 
 Purpose: Histogram of primitive rings.
@@ -610,6 +687,11 @@ Errors: A non-zero code. seams_last_error() holds the detail.
 Units: type and molecule ids are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
+
+```c
+// excerpt: bindings/cxx/seams_lang.h
+int seams_frame_select(seams_frame *frame, int type, const int *mols, int nmol);
+```
 
 ### seams_frame_set_positions
 
@@ -667,7 +749,7 @@ Parameters: frame; cutoff; type; graph; spec; cage_index; vertices; cap; n_verti
 
 Returns: Zero on success. A non-zero value is the seams_status code.
 
-Ownership: The caller owns every buffer it passed. The frame stays with its owner. vertices may be null when the call only asks for the length.
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
 
 Errors: A non-zero code. seams_last_error() holds the detail.
 
@@ -683,7 +765,7 @@ Parameters: frame; cutoff; type; graph; spec; edge; cage_index; vertices; cap; n
 
 Returns: Zero on success. A non-zero value is the seams_status code.
 
-Ownership: The caller owns every buffer it passed. The frame stays with its owner. vertices may be null when the call only asks for the length. edge is read during the call.
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
 
 Errors: A non-zero code. seams_last_error() holds the detail.
 
@@ -786,6 +868,22 @@ Errors: A non-zero code. seams_last_error() holds the detail.
 Units: dt and tau in the caller's time unit; types are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_hbond_edges
+
+Purpose: Companion C API entry point that shares the same edge-list format as `seams_frame_hbond_edges`.
+
+Parameters: see `docs/api/c.md`.
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
+Units: Same as the C API entry point.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_lang_version
 

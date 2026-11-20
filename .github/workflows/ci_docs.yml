@@ -165,7 +165,7 @@ jobs:
           echo "VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
 
       - name: Ice Ih, the C and C++ APIs, and science tutorials
-        run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
+        run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_changelog docs_towncrier docs_core_counts docs_capi_examples docs_capi_symbols docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
       # The Python snippets import dseams and pydseams from pydseamslib,
       # built from d-SEAMS/PydSEAMSlib against this checkout of the engine.

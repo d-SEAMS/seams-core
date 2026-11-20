@@ -73,6 +73,7 @@ test_sources = {
   'wide_cell': 'test_wide_cell.cpp',
   'offset_limit': 'test_offset_limit.cpp',
   'prism_empty': 'test_prism_empty.cpp',
+  'keep_axial_name': 'test_keep_axial_name.cpp',
   'basal_needle': 'test_basal_needle.cpp',
   'ddc_copies': 'test_ddc_copies.cpp',
   'hc_template': 'test_hc_template.cpp',
@@ -85,6 +86,23 @@ if readcon_dep.found()
 endif
 if chemfiles_dep.found()
   test_sources += {'chemfiles_io': 'test_chemfiles_io.cpp'}
+  executable(
+    'derive_confined_water_fixture',
+    'fixtures/derive_confined_water_fixture.cpp',
+    dependencies: chemfiles_dep,
+    build_by_default: false,
+  )
+  if get_option('with_cli')
+    test(
+      'confined_water_cli',
+      find_program('python3'),
+      args: [
+        files('test_confined_water_cli.py'),
+        meson.project_build_root() / 'seams',
+        meson.project_source_root() / 'input' / 'traj' / 'confined_water_40',
+      ],
+    )
+  endif
 endif
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any

@@ -177,6 +177,11 @@ initializers (Argum does not write defaults into the help).
 | ~--format KIND~ | ~text~ | ~Output format: text (default) or json~ |
 | ~--strict-input~ | off | ~Fail when a requested frame produces no atoms~ |
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
+| ~--resname NAME[,NAME...]~ | unset | Keep chemfiles residues with these names |
+| ~--exclude-resname NAME[,NAME...]~ | unset | Exclude chemfiles residues with these names |
+| ~--atomname NAME[,NAME...]~ | unset | Keep chemfiles atoms with these names |
+| ~--exclude-atomname NAME[,NAME...]~ | unset | Exclude chemfiles atoms with these names |
+| ~--type-map NAME=ID[,NAME=ID...]~ | unset | Override chemfiles atom names with positive type IDs |
 | ~--water-types T,U~ | unset | ~Neighbour graph on these LAMMPS types only (OW). Substrate and ions never enter the 4-NN list. A type that is not in the frame is an error~ |
 | ~--mol SPEC~ | unset | ~Water oxygens by molecule: water, or ids such as 1,5-12. Neighbours, CHILL, CHILL+, rings and cages then ignore ions. A missing id is an error~ |
 | ~--rule NAME~ | published ~chill+~ | ~chill-plus rule: chill+ (published default) or ovito-chill+. A path to a readable file is scanned for a rule or chill-plus key. Comments are skipped. The file is not executed as Lua or YAML~. ~CHILL_PLUS_RULE~ fills an unset flag |
@@ -248,6 +253,33 @@ the read (type 0 then becomes 1).
 A mixed-type dump that is not the water guess needs ~--type I~.
 ~density-z~ treats ~0~ as every atom, not the oxygen guess.
 See [[file:../user/howto/ionic-liquid.org][Ionic-liquid dumps]].
+
+* Chemfiles name filters
+
+~--resname~ and ~--atomname~ are include filters. Comma-separated
+names within one flag are alternatives; residue and atom filters are
+both required when both are present. ~--exclude-resname~ and
+~--exclude-atomname~ take precedence over includes. Names are exact and
+case-sensitive.
+
+~--type-map NAME=ID~ assigns a positive d-SEAMS type before chemfiles
+element inference. Several assignments may be comma-separated. This is
+useful when force-field atom names encode chemically distinct sites.
+Without a map, names of the form ~X_suffix~ use the element prefix ~X~;
+for example, ~O_2~, ~N_2~, ~C_3~, ~C_2~, ~C_R~, and ~H_~ become their
+atomic-number types instead of type 0. Map every carbon site separately
+when the analysis must distinguish those force-field names.
+
+For topology-free trajectories, d-SEAMS uses a same-stem topology when
+present: ~run.xtc~, ~run.trr~, and ~run.nc~ use ~run.gro~; ~run.dcd~
+uses ~run.pdb~. The topology supplies residue and atom names for these
+filters and mappings.
+
+#+begin_src bash
+seams chill-plus confined.xtc --frame 1 --last 3 \
+  --exclude-resname SOLX --exclude-atomname MW \
+  --type-map O_2=21,N_2=22,C_3=23,C_2=24,C_R=25,H_=26 --type 8
+#+end_src
 
 * ~--water-types~
 
@@ -401,7 +433,7 @@ Analysis choice (which command) is not this table.
 |--------+--------+-------------------|
 | ~xyz~ | ~sinp::readXYZ~ | always |
 | ~con~ | ~sinp::readCon~ | ~SEAMS_HAS_READCON~. Otherwise the command fails: ~readcon-core is not in this build~ |
-| ~pdb~, ~gro~, ~dcd~ | ~sinp::readChemfiles~ | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
+| ~pdb~, ~gro~, ~dcd~, ~xtc~, ~trr~, ~nc~ | ~sinp::readChemfiles~ | ~SEAMS_HAS_CHEMFILES~. Otherwise the command fails: ~chemfiles is not in this build~ |
 | anything else | LAMMPS dump (~readLammpsTrjO~ / ~readLammpsTrj~) | always |
 
 A missing reader does not parse those suffixes as LAMMPS dumps.

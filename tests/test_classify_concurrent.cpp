@@ -4,7 +4,9 @@
 #include <local_symmetry.hpp>
 #include <seams_c_api.h>
 
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 #include <cmath>
 #include <cstdio>
@@ -99,8 +101,10 @@ double minimg(double d, double L) {
 } // namespace
 
 TEST_CASE("two classify calls run at once", "[symmetry]") {
+#ifdef _OPENMP
   const int saved = omp_get_max_threads();
   omp_set_num_threads(1);
+#endif
 
   const Eigen::MatrixXd small = iceBlock(1);
   const Eigen::MatrixXd large = iceBlock(2);
@@ -158,7 +162,9 @@ TEST_CASE("two classify calls run at once", "[symmetry]") {
   right.join();
   REQUIRE(gotS == serialS);
   REQUIRE(gotL == serialL);
+#ifdef _OPENMP
   omp_set_num_threads(saved);
+#endif
 }
 
 TEST_CASE("ideal ice cosines are the raw dot product and the azimuthal projection",
@@ -218,8 +224,10 @@ TEST_CASE("ideal ice cosines are the raw dot product and the azimuthal projectio
 }
 
 TEST_CASE("a dense shell keeps the crystal neighbours", "[symmetry]") {
+#ifdef _OPENMP
   const int saved = omp_get_max_threads();
   omp_set_num_threads(1);
+#endif
 
   const Eigen::MatrixXd ice = iceBlock(3);
   const int nIce = static_cast<int>(ice.rows());
@@ -281,5 +289,7 @@ TEST_CASE("a dense shell keeps the crystal neighbours", "[symmetry]") {
       REQUIRE(both[static_cast<size_t>(i)] == static_cast<int>(symm::Kind::iceIc));
     }
   }
+#ifdef _OPENMP
   omp_set_num_threads(saved);
+#endif
 }

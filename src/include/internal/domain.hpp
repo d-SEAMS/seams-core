@@ -144,6 +144,11 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag = 0
 //! Later calls with the same tag are ignored.
 void captureLocalWork(int workTag, const double *perLocal, int nLocal, MPI_Comm comm);
 
+//! True when the measured cell weights for @a workTag have been stored.
+//! False when the linkcell cut is absent, or when that analysis has not
+//! recorded a cut yet.
+bool measuredCutReady(int workTag);
+
 //! 0 chooses the cheaper of the block and cell cuts, 1 forces the block cut, 2 the cell cut.
 //! The choice adds the thickest ghost fraction to the heaviest-rank load.
 void setCutMode(int mode);

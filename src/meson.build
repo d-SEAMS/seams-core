@@ -289,6 +289,18 @@ if get_option('with_tests')
   _capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con')
   test('seams_c_api', seams_api_test, timeout: 180, env: _capi_env)
 
+  # A small standalone C example: export hbond edges for a real fixture
+  # frame, then confirm the quenched hook gives zero deltas for an
+  # identity callback.
+  capi_identity_quench_test = executable(
+    'capi_identity_quench',
+    files('../docs/examples/capi_identity_quench.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    c_args: ['-I' + meson.current_build_dir()])
+  test('capi_identity_quench', capi_identity_quench_test,
+    args: [meson.project_source_root()])
+
   rings_chordless_test = executable(
     'test_rings_chordless',
     files('../tests/test_rings_chordless.c'),

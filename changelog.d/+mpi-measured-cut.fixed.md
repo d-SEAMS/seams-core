@@ -1,0 +1,1 @@
+An MPI build without linkcell compiles again. `distributedRings` reads the measured cell weights only when that linkcell slot exists, and a multi-rank run fails if the ring measurement was not stored.

@@ -43,7 +43,7 @@ def gfortran_link():
     ``-lgfortran`` misses the runtime next to ``gfortran-15``.
     """
     found = subprocess.run(
-        [fortran_compiler(), "-print-file-name=libgfortran.so"],
+        [*shlex.split(fortran_compiler()), "-print-file-name=libgfortran.so"],
         text=True,
         capture_output=True,
         check=False,
@@ -62,4 +62,4 @@ def openmp_link():
 def link_command(compiler, args):
     """``compiler`` plus ``args``, with the OpenMP link line at the end."""
     extra = [flag for flag in openmp_link() if flag not in args]
-    return [compiler, *args, *extra]
+    return [*shlex.split(compiler), *args, *extra]

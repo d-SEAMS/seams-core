@@ -58,8 +58,10 @@
 #include <memory>
 #include <mutex>
 #include <new>
+#include <numeric>
 #include <set>
 #include <string>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -681,6 +683,138 @@ rdf::PartialRdf partial_of(const Cloud &cloud, double rmax, int bins, int type_i
   Cloud work = unified_copy(cloud, type_i, typ);
   const int j = type_j > 0 ? type_j : typ;
   return rdf::partialRdf(work, typ, j, rmax, bins_used);
+}
+
+struct hbond_edge_internal {
+  int donor = -1;
+  int acceptor = -1;
+  int hydrogen = -1;
+  double d_DA = NAN;
+  double angle = NAN;
+};
+
+std::vector<hbond_edge_internal>
+hbond_edges_detailed(const Cloud &cloud, double cutoff, int oxygen_type, int hydrogen_type,
+                     double dist_cutoff, double angle_cutoff, bool with_h,
+                     bool with_geometry) {
+  Cloud heavy;
+  Cloud hydro;
+  heavy.box = cloud.box;
+  heavy.boxLow = cloud.boxLow;
+  hydro.box = cloud.box;
+  hydro.boxLow = cloud.boxLow;
+  std::vector<int> heavy_to_frame;
+  std::vector<int> hydro_to_frame;
+  for (int i = 0; i < cloud.nop; ++i) {
+    const auto &point = cloud.pts[static_cast<std::size_t>(i)];
+    if (point.type == hydrogen_type) {
+      hydro.pts.push_back(point);
+      hydro_to_frame.push_back(i);
+    } else if (oxygen_type <= 0 || point.type == oxygen_type) {
+      heavy.pts.push_back(point);
+      if (oxygen_type <= 0) {
+        heavy.pts.back().type = 1;
+      }
+      heavy_to_frame.push_back(i);
+    }
+  }
+  heavy.nop = static_cast<int>(heavy.pts.size());
+  hydro.nop = static_cast<int>(hydro.pts.size());
+  for (int i = 0; i < heavy.nop; ++i) {
+    heavy.idIndexMap[heavy.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+  for (int i = 0; i < hydro.nop; ++i) {
+    hydro.idIndexMap[hydro.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+  std::vector<hbond_edge_internal> out;
+  if (heavy.nop == 0 || hydro.nop == 0) {
+    return out;
+  }
+  const int typ = oxygen_type > 0 ? oxygen_type : 1;
+  auto rows = nneigh::neighListO(cutoff, heavy, typ);
+  auto molIDlist = molSys::hAtomMolList(hydro, heavy);
+  std::unordered_map<int, std::vector<int>> donor_h_by_mol;
+  for (const auto &row : molIDlist) {
+    if (row.size() < 3) {
+      continue;
+    }
+    donor_h_by_mol[row[0]].push_back(row[1]);
+    donor_h_by_mol[row[0]].push_back(row[2]);
+  }
+  for (const auto &row : rows) {
+    if (row.size() < 2) {
+      continue;
+    }
+    const auto it_i = heavy.idIndexMap.find(row[0]);
+    if (it_i == heavy.idIndexMap.end()) {
+      continue;
+    }
+    const int iatom = it_i->second;
+    for (std::size_t j = 1; j < row.size(); ++j) {
+      const auto it_j = heavy.idIndexMap.find(row[j]);
+      if (it_j == heavy.idIndexMap.end()) {
+        continue;
+      }
+      const int jatom = it_j->second;
+      if (iatom >= jatom) {
+        continue;
+      }
+      const int donors[2] = {iatom, jatom};
+      const int acceptors[2] = {jatom, iatom};
+      bool accepted = false;
+      for (int d = 0; d < 2 && !accepted; ++d) {
+        const int donor = donors[d];
+        const int acceptor = acceptors[d];
+        const auto donor_it = donor_h_by_mol.find(heavy.pts[static_cast<std::size_t>(donor)].molID);
+        if (donor_it == donor_h_by_mol.end()) {
+          continue;
+        }
+        const auto oo = gen::relDist(heavy, acceptor, donor);
+        const std::vector<double> oo_vec{oo[0], oo[1], oo[2]};
+        const double oo_len = std::sqrt(oo[0] * oo[0] + oo[1] * oo[1] + oo[2] * oo[2]);
+        const double dist2 = dist_cutoff * dist_cutoff;
+        for (const int hindex : donor_it->second) {
+          if (hindex < 0 || hindex >= hydro.nop) {
+            continue;
+          }
+          const auto oh = gen::relDistFromPoint(
+              heavy, acceptor, hydro.pts[static_cast<std::size_t>(hindex)].x,
+              hydro.pts[static_cast<std::size_t>(hindex)].y,
+              hydro.pts[static_cast<std::size_t>(hindex)].z);
+          const double oh2 = oh[0] * oh[0] + oh[1] * oh[1] + oh[2] * oh[2];
+          if (oh2 >= dist2) {
+            continue;
+          }
+          const std::vector<double> oh_vec{oh[0], oh[1], oh[2]};
+          const double angle = gen::radDeg(gen::eigenVecAngle(oo_vec, oh_vec));
+          if (angle > angle_cutoff) {
+            continue;
+          }
+          hbond_edge_internal edge;
+          edge.donor = heavy_to_frame[static_cast<std::size_t>(donor)];
+          edge.acceptor = heavy_to_frame[static_cast<std::size_t>(acceptor)];
+          edge.hydrogen = with_h ? hydro_to_frame[static_cast<std::size_t>(hindex)] : -1;
+          if (with_geometry) {
+            edge.d_DA = oo_len;
+            edge.angle = angle;
+          }
+          out.push_back(edge);
+          accepted = true;
+          break;
+        }
+      }
+    }
+  }
+  std::sort(out.begin(), out.end(), [](const hbond_edge_internal &a, const hbond_edge_internal &b) {
+    if (a.donor != b.donor) {
+      return a.donor < b.donor;
+    }
+    if (a.acceptor != b.acceptor) {
+      return a.acceptor < b.acceptor;
+    }
+    return a.hydrogen < b.hydrogen;
+  });
+  return out;
 }
 
 } // namespace
@@ -2703,6 +2837,9 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
         hydro.pts.push_back(point);
       } else if (oxygen_type <= 0 || point.type == oxygen_type) {
         heavy.pts.push_back(point);
+        if (oxygen_type <= 0) {
+          heavy.pts.back().type = 1;
+        }
       }
     }
     heavy.nop = static_cast<int>(heavy.pts.size());
@@ -2717,7 +2854,7 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
       *n_bonds = 0;
       return SEAMS_OK;
     }
-    const int typ = heavy.pts[0].type;
+    const int typ = oxygen_type > 0 ? oxygen_type : 1;
     auto rows = nneigh::neighListO(cutoff, heavy, typ);
     auto net = bond::populateHbondsWithInputClouds(heavy, hydro, rows, dist_cutoff,
                                                    angle_cutoff);
@@ -2728,6 +2865,251 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
       }
     }
     *n_bonds = edges / 2;
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type,
+                               int hydrogen_type, double dist_cutoff, double angle_cutoff,
+                               int fields, seams_hbond_edge *edges, size_t cap, size_t *n_out) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "hbond edge output is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(cutoff) || !std::isfinite(dist_cutoff) || !std::isfinite(angle_cutoff)) {
+    return fail(SEAMS_ERR_RANGE, "cutoffs must be positive");
+  }
+  if (hydrogen_type <= 0) {
+    return fail(SEAMS_ERR_ARG, "hydrogen type must be positive");
+  }
+  if ((fields & ~(SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY)) != 0) {
+    return fail(SEAMS_ERR_ARG, "unknown hbond edge fields");
+  }
+  try {
+    const auto fair = use_threads();
+    const bool with_h = (fields & SEAMS_HBOND_EDGE_WITH_H) != 0;
+    const bool with_geometry = (fields & SEAMS_HBOND_EDGE_WITH_GEOMETRY) != 0;
+    const auto detailed = hbond_edges_detailed(sys->cloud, cutoff, oxygen_type, hydrogen_type,
+                                               dist_cutoff, angle_cutoff, with_h,
+                                               with_geometry);
+    *n_out = detailed.size();
+    if (edges == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap > 0 && edges[0].size < sizeof(uint32_t)) {
+      return fail(SEAMS_ERR_ARG, "hbond edge struct size is invalid");
+    }
+    if (cap < detailed.size()) {
+      return fail(SEAMS_ERR_RANGE, "buffer is short");
+    }
+    if (detailed.empty()) {
+      return SEAMS_OK;
+    }
+    const std::size_t elem_size = edges[0].size;
+    auto *raw_out = reinterpret_cast<unsigned char *>(edges);
+    for (std::size_t i = 0; i < detailed.size(); ++i) {
+      uint32_t row_size = 0;
+      std::memcpy(&row_size, raw_out + i * elem_size, sizeof(row_size));
+      if (row_size != elem_size) {
+        return fail(SEAMS_ERR_ARG, "hbond edge struct size mismatch");
+      }
+    }
+    const std::size_t copy_bytes = std::min(elem_size, sizeof(seams_hbond_edge));
+    for (std::size_t i = 0; i < detailed.size(); ++i) {
+      seams_hbond_edge row{};
+      row.size = static_cast<uint32_t>(elem_size);
+      row.donor = static_cast<uint32_t>(detailed[i].donor);
+      row.acceptor = static_cast<uint32_t>(detailed[i].acceptor);
+      row.hydrogen = detailed[i].hydrogen >= 0
+                         ? static_cast<uint32_t>(detailed[i].hydrogen)
+                         : UINT32_MAX;
+      row.d_DA = detailed[i].d_DA;
+      row.angle = detailed[i].angle;
+      std::memcpy(raw_out + i * elem_size, &row, copy_bytes);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_quenched_analysis(
+    seams_system *sys, seams_quench_callback callback, void *user_data, double cutoff, int type,
+    int graph, int max_depth, int oxygen_type, int hydrogen_type, double dist_cutoff,
+    double angle_cutoff, int *raw_labels, size_t raw_labels_len, int *quenched_labels,
+    size_t quenched_labels_len, int counts_raw[9], int counts_quenched[9], int *rings_raw,
+    int *rings_quenched, size_t ring_counts_len, int *hbond_raw, int *hbond_quenched,
+    int *hbond_edge_delta, int *ring_count_delta, int *class_change_count) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || callback == nullptr || raw_labels == nullptr || quenched_labels == nullptr ||
+      rings_raw == nullptr || rings_quenched == nullptr || hbond_raw == nullptr ||
+      hbond_quenched == nullptr || hbond_edge_delta == nullptr || ring_count_delta == nullptr ||
+      class_change_count == nullptr) {
+    return fail(SEAMS_ERR_NULL, "quenched analysis inputs are null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(cutoff) || !std::isfinite(dist_cutoff) || !std::isfinite(angle_cutoff)) {
+    return fail(SEAMS_ERR_RANGE, "cutoffs must be positive");
+  }
+  if (max_depth < 3 || max_depth > 12) {
+    return fail(SEAMS_ERR_RANGE, "max_depth must be from 3 to 12");
+  }
+  if (ring_counts_len < static_cast<size_t>(max_depth) + 1) {
+    return fail(SEAMS_ERR_RANGE, "ring buffer is short");
+  }
+  if (hydrogen_type <= 0) {
+    return fail(SEAMS_ERR_ARG, "hydrogen type must be positive");
+  }
+  if (graph != SEAMS_GRAPH_CUTOFF && graph != SEAMS_GRAPH_MUTUAL) {
+    return fail(SEAMS_ERR_ARG, "graph is cutoff or mutual");
+  }
+  const size_t n = static_cast<size_t>(sys->cloud.nop);
+  if (raw_labels_len < n || quenched_labels_len < n) {
+    return fail(SEAMS_ERR_RANGE, "label buffer is short");
+  }
+  try {
+    const auto fair = use_threads();
+    auto analyse_one = [&](Cloud frame_cloud, int *labels_out, int counts9[9], int *rings_out,
+                           int *hbond_out, std::vector<hbond_edge_internal> &edges_out) -> seams_status {
+      int typ = 0;
+      Cloud work = unified_copy(frame_cloud, type, typ);
+      auto nlist = bond_rows(work, cutoff, typ, graph);
+      chill::applyChillPlus(work, nlist, chill::chillPlusRule(""), false);
+      write_ice_labels(work, type, labels_out, counts9);
+      auto idx = nneigh::neighbourListByIndex(work, nlist);
+      auto rings = primitive::ringNetwork(idx, max_depth);
+      std::fill(rings_out, rings_out + ring_counts_len, 0);
+      for (const auto &ring : rings) {
+        const int size = static_cast<int>(ring.size());
+        if (size >= 0 && static_cast<size_t>(size) < ring_counts_len) {
+          rings_out[size] += 1;
+        }
+      }
+      edges_out = hbond_edges_detailed(frame_cloud, cutoff, oxygen_type, hydrogen_type, dist_cutoff,
+                                       angle_cutoff, true, true);
+      *hbond_out = static_cast<int>(edges_out.size());
+      return SEAMS_OK;
+    };
+
+    Cloud raw_cloud = sys->cloud;
+    std::vector<hbond_edge_internal> raw_edges;
+    seams_status rc = analyse_one(raw_cloud, raw_labels, counts_raw, rings_raw, hbond_raw, raw_edges);
+    if (rc != SEAMS_OK) {
+      return rc;
+    }
+
+    double raw_box9[9];
+    {
+      double H[3][3];
+      double origin[3];
+      nneigh::dumpBoundsToH(sys->cloud.box, sys->cloud.boxLow, H, origin);
+      raw_box9[0] = origin[0];
+      raw_box9[1] = origin[1];
+      raw_box9[2] = origin[2];
+      raw_box9[3] = H[0][0];
+      raw_box9[4] = H[1][1];
+      raw_box9[5] = H[2][2];
+      raw_box9[6] = H[1][0];
+      raw_box9[7] = H[2][0];
+      raw_box9[8] = H[2][1];
+    }
+    std::vector<double> xyz_in(3 * n);
+    std::vector<double> xyz_out(3 * n);
+    for (size_t i = 0; i < n; ++i) {
+      xyz_in[3 * i] = sys->cloud.pts[i].x;
+      xyz_in[3 * i + 1] = sys->cloud.pts[i].y;
+      xyz_in[3 * i + 2] = sys->cloud.pts[i].z;
+    }
+    std::memcpy(xyz_out.data(), xyz_in.data(), xyz_in.size() * sizeof(double));
+    double box_out[9];
+    std::memcpy(box_out, raw_box9, sizeof(box_out));
+    rc = callback(xyz_in.data(), n, raw_box9, 9, xyz_out.data(), xyz_out.size(), box_out, 9, user_data);
+    if (rc != SEAMS_OK) {
+      return fail(rc, "quenched callback failed");
+    }
+    Cloud quenched_cloud = sys->cloud;
+    for (size_t i = 0; i < n; ++i) {
+      const double x = xyz_out[3 * i];
+      const double y = xyz_out[3 * i + 1];
+      const double z = xyz_out[3 * i + 2];
+      if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)) {
+        return fail(SEAMS_ERR_ARG, "quenched callback returned non-finite coordinates");
+      }
+      quenched_cloud.pts[i].x = x;
+      quenched_cloud.pts[i].y = y;
+      quenched_cloud.pts[i].z = z;
+    }
+    if (!finite_box(box_out)) {
+      return fail(SEAMS_ERR_BOX, "quenched box contains a non-finite number");
+    }
+    if (!nneigh::setBoxFromLammpsEdges(quenched_cloud.box, quenched_cloud.boxLow, box_out[0],
+                                       box_out[1], box_out[2], box_out[3], box_out[4], box_out[5],
+                                       box_out[6], box_out[7], box_out[8])) {
+      return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
+    }
+    std::vector<hbond_edge_internal> quenched_edges;
+    rc = analyse_one(quenched_cloud, quenched_labels, counts_quenched, rings_quenched, hbond_quenched,
+                     quenched_edges);
+    if (rc != SEAMS_OK) {
+      return rc;
+    }
+    std::set<std::tuple<int, int, int>> raw_set;
+    std::set<std::tuple<int, int, int>> quenched_set;
+    for (const auto &edge : raw_edges) {
+      raw_set.emplace(edge.donor, edge.acceptor, edge.hydrogen);
+    }
+    for (const auto &edge : quenched_edges) {
+      quenched_set.emplace(edge.donor, edge.acceptor, edge.hydrogen);
+    }
+    int shared = 0;
+    auto it_r = raw_set.begin();
+    auto it_q = quenched_set.begin();
+    while (it_r != raw_set.end() && it_q != quenched_set.end()) {
+      if (*it_r == *it_q) {
+        ++shared;
+        ++it_r;
+        ++it_q;
+      } else if (*it_r < *it_q) {
+        ++it_r;
+      } else {
+        ++it_q;
+      }
+    }
+    *hbond_edge_delta =
+        static_cast<int>(raw_set.size() + quenched_set.size() - static_cast<size_t>(2 * shared));
+    int ring_delta = 0;
+    for (size_t i = 0; i < ring_counts_len; ++i) {
+      ring_delta += std::abs(rings_raw[i] - rings_quenched[i]);
+    }
+    *ring_count_delta = ring_delta;
+    int changed = 0;
+    for (size_t i = 0; i < n; ++i) {
+      if (raw_labels[i] != quenched_labels[i]) {
+        ++changed;
+      }
+    }
+    *class_change_count = changed;
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");

@@ -1,6 +1,8 @@
 #ifndef SEAMS_LANG_H_
 #define SEAMS_LANG_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,6 +45,23 @@ extern "C" {
 
 typedef struct seams_frame seams_frame;
 
+/** Name filters and explicit type assignments for chemfiles-backed input.
+ * Each pointer names an array of count UTF-8 strings. Null arrays require
+ * a zero count. type_map entries use NAME=ID with a positive integer ID.
+ * Include lists are ORed within a category; exclusions take precedence. */
+typedef struct seams_chemfiles_load_options {
+  const char *const *resnames;
+  int resname_count;
+  const char *const *excluded_resnames;
+  int excluded_resname_count;
+  const char *const *atomnames;
+  int atomname_count;
+  const char *const *excluded_atomnames;
+  int excluded_atomname_count;
+  const char *const *type_map;
+  int type_map_count;
+} seams_chemfiles_load_options;
+
 /** @brief seams_lang_version. @ingroup lang_errors */
 const char *seams_lang_version(void);
 /** @brief seams_last_error. @ingroup lang_errors */
@@ -54,6 +73,11 @@ int seams_path_nframes(const char *path);
 /** Null when path is null or the file cannot be read.
  * seams_last_error() then names the reason. @ingroup lang_frame */
 seams_frame *seams_frame_read(const char *path, int frame, int type_filter);
+/** Read with chemfiles name filters and type assignments. options may be
+ * null, which is identical to seams_frame_read. @ingroup lang_frame */
+seams_frame *seams_frame_read_options(
+    const char *path, int frame, int type_filter,
+    const seams_chemfiles_load_options *options);
 /** @brief seams_frame. @ingroup lang_frame */
 seams_frame *seams_frame_from_arrays(const double *xyz, int n,
                                     const double *box9, const int *types,
@@ -143,6 +167,17 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);
 /** @brief seams_frame_neighbour_pairs. @ingroup lang_order */
 int seams_frame_neighbour_pairs(const seams_frame *frame);
+
+/** H-bond edge export. Rows are sorted by (donor, acceptor, hydrogen).
+ * donor and acceptor are frame indices. hydrogen is UINT32_MAX when
+ * SEAMS_HBOND_EDGE_WITH_H is not requested. fields is the same bitmask as
+ * seams_hbond_edges in seams.h. Any non-null output column needs cap rows.
+ * n_out receives the edge count. */
+int seams_frame_hbond_edges(seams_frame *frame, double cutoff, int oxygen_type,
+                            int hydrogen_type, double dist_cutoff,
+                            double angle_cutoff, int fields, uint32_t *donor,
+                            uint32_t *acceptor, uint32_t *hydrogen,
+                            double *d_DA, double *angle, int cap, int *n_out);
 
 /** Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
  * Lechner-Dellago average; the local values do not use that pass.
