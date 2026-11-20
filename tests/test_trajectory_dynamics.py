@@ -127,6 +127,84 @@ def test_trajectory_container_not_frame_alias_and_deprecation(tmp_path: Path):
         _ = traj.n_atoms
 
 
+_EXAMPLE_TRAJ = Path(__file__).resolve().parents[1] / "input" / "traj" / "exampleTraj.lammpstrj"
+
+
+def test_legacy_trajectory_constructor_returns_frame_with_warning():
+    with pytest.deprecated_call(match="deprecated"):
+        frame = ds.Trajectory(str(_EXAMPLE_TRAJ))
+    assert isinstance(frame, ds.Frame)
+    assert not isinstance(frame, ds.Trajectory)
+
+    with pytest.deprecated_call(match="deprecated"):
+        typed = ds.Trajectory(_EXAMPLE_TRAJ, atom_type=2)
+    assert isinstance(typed, ds.Frame)
+    assert typed.n_atoms == 250
+
+    # The warning comes before any read. pydseamslib's Frame reads lazily and
+    # does not raise here; the libseams fallback frame reads eagerly and does.
+    with pytest.deprecated_call(match="deprecated"):
+        try:
+            ds.Trajectory("/no/such/trajectory.lammpstrj", atom_type=2)
+        except (FileNotFoundError, OSError, RuntimeError, ValueError):
+            pass
+
+
+def test_new_trajectory_api_does_not_warn():
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", DeprecationWarning)
+        traj = ds.Trajectory.open(_EXAMPLE_TRAJ, atom_type=2)
+        assert isinstance(traj, ds.Trajectory)
+        assert isinstance(traj[0], ds.Frame)
+        assert isinstance(traj[:1], ds.Trajectory)
+        assert isinstance(ds.Trajectory.from_file(_EXAMPLE_TRAJ), ds.Trajectory)
+        assert isinstance(ds.Trajectory.from_frames([traj[0]]), ds.Trajectory)
+
+
+_HAS_LEGACY_FRAME = hasattr(ds.Frame, "classify_chill_plus")
+
+
+@pytest.mark.skipif(not _HAS_LEGACY_FRAME, reason="pydseamslib Frame is not installed")
+def test_pydseamslib_trajectory_alias_workflow_still_runs():
+    # PydSEAMSlib tests/python/test_user_api.py::test_trajectory_alias, less
+    # its identity check: Trajectory is a sequence class now.
+    with pytest.deprecated_call(match="deprecated"):
+        traj = ds.Trajectory(str(_EXAMPLE_TRAJ.resolve()))
+    counts = traj.classify_chill_plus()
+    assert counts["hexagonal"] == 0
+    assert counts["water"] == 241
+    assert counts["interClathrate"] == 9
+    assert traj.filename == str(_EXAMPLE_TRAJ.resolve())
+    traj.load_frame(1)
+    assert traj.frame == 1
+
+    with pytest.deprecated_call(match="deprecated"):
+        typed = ds.Trajectory(str(_EXAMPLE_TRAJ), atom_type=2)
+    assert typed.atom_type == 2
+    assert typed.classify_chill_plus()["water"] == 241
+
+
+@pytest.mark.skipif(not _HAS_LEGACY_FRAME, reason="pydseamslib Frame is not installed")
+def test_frame_attributes_on_sequence_warn_and_delegate():
+    traj = ds.Trajectory.open(_EXAMPLE_TRAJ)
+    with pytest.deprecated_call(match="deprecated"):
+        counts = traj.classify_chill_plus()
+    assert counts["water"] == 241
+    with pytest.deprecated_call(match="deprecated"):
+        assert traj.filename == str(_EXAMPLE_TRAJ.resolve())
+    with pytest.deprecated_call(match="deprecated"):
+        assert traj.frame == 1
+    with pytest.deprecated_call(match="deprecated"):
+        _ = traj.bonds_by_index
+    with pytest.deprecated_call(match="deprecated"):
+        with pytest.raises(AttributeError, match="in place"):
+            traj.load_frame(2)
+    with pytest.raises(AttributeError):
+        _ = traj.no_such_frame_attribute
+
+
 def test_triclinic_and_time_varying_box_unwrapping_oracle():
     n_frames = 40
     n_mols = 5

@@ -25,10 +25,13 @@ True
 2
 #+end_src
 
-Code written against the older ~Trajectory = Frame~ alias continues to run and
-emits a ~DeprecationWarning~ when single-frame ~Frame~ constructor keywords or
-single-frame attributes are used on ~Trajectory~. New code uses ~pydseams.Frame~
-for one configuration and ~pydseams.Trajectory~ for a frame sequence.
+Code written against the older ~Trajectory = Frame~ alias continues to run with
+a ~DeprecationWarning~: ~Trajectory(path, atom_type=...)~ and the other
+single-frame constructor calls return a ~pydseams.Frame~, so ~classify_chill_plus~,
+~load_frame~, and ~filename~ behave as before. ~Frame~ attributes read from a
+~Trajectory~ sequence warn and use its first frame. ~Trajectory is Frame~ is no
+longer true. New code uses ~pydseams.Frame~ for one configuration and
+~Trajectory.open~ for a frame sequence.
 
 * Periodic molecule unwrapping
 

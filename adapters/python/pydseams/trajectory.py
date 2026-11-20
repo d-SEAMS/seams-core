@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ctypes
+import os
 import warnings
 from collections.abc import Iterable, Iterator, Sequence
 from contextlib import contextmanager
@@ -55,8 +56,22 @@ _LEGACY_FRAME_ATTRS = frozenset(
         "pairs",
         "domains",
         "to_ase",
+        "classify_chill_plus",
+        "load_frame",
+        "filename",
+        "frame",
+        "seeded_affiliation",
+        "bonds_by_index",
     }
 )
+_IN_PLACE_FRAME_ATTRS = frozenset({"load_frame"})
+
+
+def _legacy_frame_class():
+    """The single-frame class the old ``Trajectory`` alias pointed at."""
+    import pydseams as _pkg
+
+    return getattr(_pkg, "Frame", CtypesFrame)
 
 
 @dataclass(frozen=True)
@@ -1603,11 +1618,16 @@ class Trajectory(Sequence):
     integer indexing ``traj[i]`` (including negative indices), and lazy slicing
     ``traj[start:stop:step]``.
 
-    Legacy callers that pass single-frame ``Frame`` keyword arguments
-    (``frame=``, ``cloud=``, ``h_cloud=``, ``region=``, ``periodic=``) or access
-    single-frame ``Frame`` attributes directly on a ``Trajectory`` instance
-    receive a :class:`DeprecationWarning` and remain functional during the
-    2.14 deprecation cycle.
+    Open a trajectory file with :meth:`Trajectory.open`. Calling the old
+    single-frame constructor, ``Trajectory(path, ...)`` with a file path or with
+    ``Frame`` keyword arguments (``frame=``, ``cloud=``, ``h_cloud=``,
+    ``region=``, ``symbols=``, ``cell_rotation=``, ``periodic=``), still
+    returns a single :class:`~pydseams.frame.Frame` with every ``Frame`` method
+    (``classify_chill_plus``, ``load_frame``, ``filename``, ...) and emits a
+    :class:`DeprecationWarning`. ``Frame`` attributes read from a ``Trajectory``
+    sequence delegate to its first frame and also warn; ``load_frame``, which
+    reloads a ``Frame`` in place, raises after the warning. ``Trajectory is
+    Frame`` is no longer true.
     """
 
     def __new__(
@@ -1627,10 +1647,12 @@ class Trajectory(Sequence):
         symbols=None,
         cell_rotation=None,
         periodic=None,
+        _sequence: bool = False,
         **_kwargs,
     ):
-        legacy_single_frame = (
-            frame is not None
+        legacy_single_frame = not _sequence and (
+            isinstance(source, (str, os.PathLike))
+            or frame is not None
             or cloud is not None
             or h_cloud is not None
             or region is not None
@@ -1640,15 +1662,14 @@ class Trajectory(Sequence):
         )
         if legacy_single_frame:
             warnings.warn(
-                "Using pydseams.Trajectory with single-frame Frame arguments is "
-                "deprecated since 2.14.2; use pydseams.Frame or pydseams.read() "
-                "for single frames, or Trajectory.open() for trajectories.",
+                "Calling pydseams.Trajectory(...) as the single-frame Frame "
+                "constructor is deprecated since 2.14.2 and returns a Frame; use "
+                "pydseams.Frame or pydseams.read() for one frame, or "
+                "Trajectory.open() for a multi-frame sequence.",
                 DeprecationWarning,
                 stacklevel=2,
             )
-            import pydseams as _pkg
-
-            frame_cls = getattr(_pkg, "Frame", CtypesFrame)
+            frame_cls = _legacy_frame_class()
             if frame_cls is CtypesFrame:
                 if source is None:
                     raise TypeError("source path is required")
@@ -1688,6 +1709,7 @@ class Trajectory(Sequence):
         *,
         dt: float = 1.0,
         frames=None,
+        _sequence: bool = False,
         _indices: range | tuple[int, ...] | None = None,
         _array_backing: tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray | None] | None = None,
         **_unused,
@@ -1756,6 +1778,7 @@ class Trajectory(Sequence):
             cutoff=cutoff,
             bonded=bonded,
             dt=dt,
+            _sequence=True,
         )
 
     from_file = open
@@ -1917,6 +1940,7 @@ class Trajectory(Sequence):
                 cutoff=self._cutoff,
                 bonded=self._bonded,
                 dt=sub_dt,
+                _sequence=True,
                 _indices=sub_indices,
             )
 
@@ -1932,7 +1956,9 @@ class Trajectory(Sequence):
         raise TypeError(f"Trajectory indices must be integers or slices, got {type(item).__name__}")
 
     def __getattr__(self, name: str):
-        if name in _LEGACY_FRAME_ATTRS:
+        if not name.startswith("_") and (
+            name in _LEGACY_FRAME_ATTRS or hasattr(_legacy_frame_class(), name)
+        ):
             warnings.warn(
                 f"Accessing Frame attribute {name!r} on pydseams.Trajectory is "
                 "deprecated since 2.14.2 because Trajectory is now a multi-frame "
@@ -1940,6 +1966,12 @@ class Trajectory(Sequence):
                 DeprecationWarning,
                 stacklevel=2,
             )
+            if name in _IN_PLACE_FRAME_ATTRS:
+                raise AttributeError(
+                    f"{name!r} reloads a single Frame in place and has no "
+                    "Trajectory equivalent; index the sequence (traj[k - 1]) or "
+                    "call pydseams.read(path, frame=k)."
+                )
             if len(self) == 0:
                 raise AttributeError(name)
             return getattr(self[0], name)
