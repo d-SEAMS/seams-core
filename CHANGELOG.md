@@ -278,6 +278,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - CHILL+ defaults to the cutoff list on the CLI, the C API, the LAMMPS `compute dseams`, and every language binding. The mutual four-nearest list is `graph = mutual`. On `input/traj/exampleTraj.lammpstrj` (oxygen, type 2) the cutoff list is 9 interClathrate and 241 water; the mutual list is 1 clathrate, 7 interClathrate, and 242 water. The docs tutorials run against the `pydseamslib` 2.14.0 package built from d-SEAMS/PydSEAMSlib.
 - Clang builds record the directory of clang's `libomp.so` as a runpath, so the libraries, tests and libFuzzer harnesses start without `LD_LIBRARY_PATH` with an EESSI LLVM and with the apt.llvm.org packages, whose `libomp` lives in `/usr/lib/llvm-<version>/lib`.
 - Engine checks load the plugin from the build tree. A copy staged under an install destdir is left alone.
+- Fixed two README source links so they resolve in-tree: the clang-format configuration now links to `./.clang-format`, and the related-pages note now links to `docs/orgmode/user/index.org` instead of a generated `pages.html`.
 - Keep BondClassifier at the 2.13 layout, three doubles and one int. Open edges are an argument of classifyBond, so a caller that passes the struct by value is unchanged.
 - Keep a diamond shell while eight good (4,2,1) signatures, or the ambiguous band, are still reachable. The old count stopped once four bad rows made nine good signatures unreachable.
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
