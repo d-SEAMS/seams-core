@@ -1285,6 +1285,9 @@ void reduceReferenceBasis(LongVec basis[3]) {
     bool changed = false;
     for (int k = 1; k < 3 && !changed; ++k) {
       for (int j = k - 1; j >= 0; --j) {
+        if (std::abs(mu[k][j]) <= 0.5L + 1e-12L) {
+          continue;
+        }
         const long double q = std::round(mu[k][j]);
         if (q != 0.0L) {
           basis[k] = longSubtract(basis[k], longScale(q, basis[j]));
@@ -1509,4 +1512,130 @@ TEST_CASE("minimum image rejects a numerically degenerate tilted cell",
   REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
                                                  unresolved, unresolved),
                     std::runtime_error);
+
+  // Extreme-aspect cell (~1e8): the slicer throws explicitly when binary64
+  // rounding prevents strict decrease, never returning a silently wrong image,
+  // while a non-stalling pair on the same cell stays exact.
+  const std::array<double, 3> stall = {-4859743.2640920915,
+                                       -0.0050198905816330854,
+                                       -0.031675054668108597};
+  REQUIRE_THROWS_AS(
+      gen::mic::euclideanIfShorter(1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, stall,
+                                   stall),
+      std::runtime_error);
+  const std::array<double, 3> okPair = {2500000.0, 0.02, -0.03};
+  const auto gotOk = gen::mic::euclideanIfShorter(
+      1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, okPair, okPair);
+  const double dOk[3] = {okPair[0], okPair[1], okPair[2]};
+  const double refOk =
+      exactImage(1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0, dOk);
+  REQUIRE_THAT(std::sqrt(gotOk[0] * gotOk[0] + gotOk[1] * gotOk[1] +
+                         gotOk[2] * gotOk[2]),
+               Catch::Matchers::WithinRel(refOk, 1e-8));
+}
+
+TEST_CASE("minimum image basis cache is not poisoned by a throw", "[pore]") {
+  // Fill all four per-thread cache slots with valid tilted cells.
+  const double fillers[][6] = {
+      {11.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+      {12.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+      {13.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+      {14.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+  };
+  const std::array<double, 3> probe = {4.0, 4.0, 4.0};
+  for (const auto &cell : fillers) {
+    const auto res = gen::mic::euclideanIfShorter(
+        cell[0], cell[1], cell[2], cell[3], cell[4], cell[5], probe, probe);
+    REQUIRE(std::isfinite(res[0]));
+  }
+
+  // Trigger a throw inside obtuseSuperbasis (lagrangeReduce coefficient >= 2^52)
+  // and verify that repeating the identical call throws again instead of
+  // serving the evicted slot's previous superbasis.
+  const std::array<double, 3> vec = {0.4, 0.4, 0.4};
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, 1.0, 1.0, 5.0e15, 0.0,
+                                                 0.0, vec, vec),
+                    std::runtime_error);
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, 1.0, 1.0, 5.0e15, 0.0,
+                                                 0.0, vec, vec),
+                    std::runtime_error);
+
+  // Also test a range-overflow throw inside obtuseSuperbasis.
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0e200, 1.0, 1.0, 0.0, 0.0,
+                                                 0.0, vec, vec),
+                    std::runtime_error);
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0e200, 1.0, 1.0, 0.0, 0.0,
+                                                 0.0, vec, vec),
+                    std::runtime_error);
+
+  // Subsequent valid cell still produces the exact lattice image.
+  const std::array<double, 3> raw = {431.0, 5.0, 9.0};
+  const auto cloud = triclinic(1000.0, 12.0, 20.4, 500.0, -350.0, 0.0);
+  const auto box = gen::makeFracBox(cloud);
+  const auto wrapped = gen::fracDelta(box, raw[0], raw[1], raw[2], 0.0, 0.0, 0.0);
+  const auto got = gen::mic::euclideanIfShorter(1000.0, 12.0, 20.4, 500.0,
+                                                -350.0, 0.0, raw, wrapped);
+  const double d[3] = {wrapped[0], wrapped[1], wrapped[2]};
+  const double ref = exactImage(1000.0, 12.0, 20.4, 500.0, -350.0, 0.0, d);
+  REQUIRE_THAT(std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]),
+               Catch::Matchers::WithinAbs(ref, 1e-10));
+}
+
+TEST_CASE("minimum image handles ordinary cells without spurious throws",
+          "[pore]") {
+  const double s3 = std::sqrt(3.0);
+  const double cells[][6] = {
+      {20.0, 20.0 * s3 / 2.0, 20.0 * std::sqrt(2.0 / 3.0), 10.0, 10.0,
+       20.0 / (2.0 * s3)},
+      {2.5527, 2.5527 * s3 / 2.0, 2.5527 * std::sqrt(2.0 / 3.0), 2.5527 / 2.0,
+       2.5527 / 2.0, 2.5527 / (2.0 * s3)},
+      {14.142135623730951, 12.24744871391589, 11.547005383792516,
+       7.0710678118654755, 7.0710678118654755, 4.08248290463863},
+      {20.0, 20.0, 20.0, 1.0e-16, 0.0, 0.0},
+      {20.0, 20.0, 20.0, 1.0e-12, 0.0, 0.0},
+      {20.0, 20.0, 20.0, 1.0e-12, 1.0e-12, 1.0e-12},
+      {1000.0, 12.0, 20.4, 500.0, -350.0, 0.0},
+      {1000.0, 12.0, 20.4, 500.0, -350.0, -6.0},
+      {25.0, 21.650635094610966, 30.0, 12.5, 3.3, 1.1},
+      {25.0, 21.65063509461097, 30.0, 12.5, 3.3, 1.1},
+  };
+  std::mt19937_64 gen(20261121);
+  std::uniform_real_distribution<double> u(-0.5, 0.5);
+  for (const auto &c : cells) {
+    auto cloud = triclinic(c[0], c[1], c[2], c[3], c[4], c[5]);
+    const auto box = gen::makeFracBox(cloud);
+    REQUIRE(box.ok);
+    for (int pair = 0; pair < 32; ++pair) {
+      const double f[3] = {pair == 0 ? 0.49 : u(gen),
+                           pair == 0 ? 0.47 : u(gen),
+                           pair == 0 ? 0.46 : u(gen)};
+      const double p[3] = {c[0] * f[0] + c[3] * f[1] + c[4] * f[2],
+                           c[1] * f[1] + c[5] * f[2], c[2] * f[2]};
+      const auto wrapped = gen::fracDelta(box, p[0], p[1], p[2], 0.0, 0.0, 0.0);
+      const std::array<double, 3> raw = {p[0], p[1], p[2]};
+      const auto gotMic = gen::mic::euclideanIfShorter(
+          c[0], c[1], c[2], c[3], c[4], c[5], raw, wrapped);
+      const auto gotApi =
+          gen::triclinicMinImage(cloud, p[0], p[1], p[2], 0.0, 0.0, 0.0);
+      const double d[3] = {wrapped[0], wrapped[1], wrapped[2]};
+      const double ref = exactImage(c[0], c[1], c[2], c[3], c[4], c[5], d);
+      const double normMic = std::sqrt(gotMic[0] * gotMic[0] +
+                                       gotMic[1] * gotMic[1] +
+                                       gotMic[2] * gotMic[2]);
+      const double normApi = std::sqrt(gotApi[0] * gotApi[0] +
+                                       gotApi[1] * gotApi[1] +
+                                       gotApi[2] * gotApi[2]);
+      REQUIRE_THAT(normMic, Catch::Matchers::WithinAbs(ref, 1e-10));
+      REQUIRE_THAT(normApi, Catch::Matchers::WithinAbs(ref, 1e-10));
+      // Check lattice membership of gotMic - wrapped in H.
+      const double dv[3] = {gotMic[0] - wrapped[0], gotMic[1] - wrapped[1],
+                            gotMic[2] - wrapped[2]};
+      const double cz = dv[2] / c[2];
+      const double cy = (dv[1] - c[5] * cz) / c[1];
+      const double cx = (dv[0] - c[3] * cy - c[4] * cz) / c[0];
+      REQUIRE(std::abs(cx - std::round(cx)) < 1e-9);
+      REQUIRE(std::abs(cy - std::round(cy)) < 1e-9);
+      REQUIRE(std::abs(cz - std::round(cz)) < 1e-9);
+    }
+  }
 }

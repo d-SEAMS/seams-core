@@ -395,3 +395,194 @@ TEST_CASE("seams_host_guest refines minimage on an x-elongated cell",
   REQUIRE_THAT(report.nearest_distance[0],
                Catch::Matchers::WithinAbs(best, 1e-8));
 }
+
+namespace {
+
+// Provably exact minimum image for upper-triangular H (lx, ly, lz, xy, xz, yz):
+// z bounds k, y bounds j, and for fixed (j, k) rounding selects optimal i.
+double bruteTriclinicDist(double lx, double ly, double lz, double xy, double xz,
+                          double yz, double dx, double dy, double dz) {
+  const double kw = std::round(-dz / lz);
+  const double zw = dz + kw * lz;
+  const double y0w = dy + kw * yz;
+  const double jw = std::round(-y0w / ly);
+  const double yw = y0w + jw * ly;
+  const double x0w = dx + jw * xy + kw * xz;
+  const double xw = x0w + std::round(-x0w / lx) * lx;
+  double best = xw * xw + yw * yw + zw * zw;
+  const double R = std::sqrt(best);
+  const long k0 = static_cast<long>(std::floor((-dz - R) / lz)) - 1;
+  const long k1 = static_cast<long>(std::ceil((-dz + R) / lz)) + 1;
+  for (long k = k0; k <= k1; ++k) {
+    const double z = dz + static_cast<double>(k) * lz;
+    if (z * z > best) {
+      continue;
+    }
+    const double rem = std::sqrt(best - z * z);
+    const double y0 = dy + static_cast<double>(k) * yz;
+    const long j0 = static_cast<long>(std::floor((-y0 - rem) / ly)) - 1;
+    const long j1 = static_cast<long>(std::ceil((-y0 + rem) / ly)) + 1;
+    for (long j = j0; j <= j1; ++j) {
+      const double y = y0 + static_cast<double>(j) * ly;
+      const double x0 = dx + static_cast<double>(j) * xy + static_cast<double>(k) * xz;
+      const double ic = std::round(-x0 / lx);
+      for (double i = ic - 1.0; i <= ic + 1.0; i += 1.0) {
+        const double x = x0 + i * lx;
+        best = std::min(best, x * x + y * y + z * z);
+      }
+    }
+  }
+  return std::sqrt(best);
+}
+
+}  // namespace
+
+TEST_CASE("System host_guest does not poison the basis cache after an error",
+          "[pore][system]") {
+  const double fillers[][6] = {
+      {11.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+      {12.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+      {13.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+      {14.0, 10.0, 10.0, 1.0, 0.0, 0.0},
+  };
+  for (const auto &c : fillers) {
+    seams::System sys;
+    const std::array<double, 9> box = {0.0, 0.0, 0.0, c[0], c[1], c[2], c[3], c[4], c[5]};
+    const std::vector<double> xyz = {5.5, 5.0, 5.0, 0.0, 0.0, 0.0};
+    const std::vector<int> types = {1, 2};
+    sys.set_frame(xyz, box, types);
+    seams::HostGuestOptions opt;
+    opt.guest = 1;
+    opt.framework = 2;
+    opt.cutoff = 2.0;
+    const auto rep = sys.host_guest(opt);
+    REQUIRE(rep.nearest_distance.size() == 1);
+  }
+
+  // xy = 5e15 with lx = 1 preserves lx = 1 exactly in binary64 bound spans
+  // while forcing Lagrange reduction to throw on coefficient >= 2^52.
+  seams::System badSys;
+  const std::array<double, 9> badBox = {0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 5.0e15, 0.0, 0.0};
+  const std::vector<double> badXyz = {0.5, 0.5, 0.5, 0.0, 0.0, 0.0};
+  const std::vector<int> badTypes = {1, 2};
+  badSys.set_frame(badXyz, badBox, badTypes);
+  seams::HostGuestOptions opt;
+  opt.guest = 1;
+  opt.framework = 2;
+  opt.cutoff = 1.0;
+  REQUIRE_THROWS_AS(badSys.host_guest(opt), seams::Error);
+  REQUIRE_THROWS_AS(badSys.host_guest(opt), seams::Error);
+}
+
+TEST_CASE("System host_guest and seams_rdf succeed on ordinary triclinic cells",
+          "[pore][system]") {
+  const double s3 = std::sqrt(3.0);
+  struct NamedCell {
+    double lx, ly, lz, xy, xz, yz;
+    double rmax;
+  };
+  const NamedCell cells[] = {
+      {20.0, 20.0 * s3 / 2.0, 20.0 * std::sqrt(2.0 / 3.0), 10.0, 10.0,
+       20.0 / (2.0 * s3), 12.0},
+      {14.142135623730951, 12.24744871391589, 11.547005383792516,
+       7.0710678118654755, 7.0710678118654755, 4.08248290463863, 8.0},
+      {20.0, 20.0, 20.0, 1.0e-16, 0.0, 0.0, 12.0},
+      {20.0, 20.0, 20.0, 1.0e-12, 0.0, 0.0, 12.0},
+      {20.0, 20.0, 20.0, 1.0e-12, 1.0e-12, 1.0e-12, 12.0},
+      {1000.0, 12.0, 20.4, 500.0, -350.0, 0.0, 12.0},
+      {25.0, 21.650635094610966, 30.0, 12.5, 3.3, 1.1, 12.0},
+  };
+  std::mt19937_64 rng(20261121);
+  std::uniform_real_distribution<double> u(0.0, 1.0);
+  for (const auto &c : cells) {
+    const std::array<double, 9> box = {0.0, 0.0, 0.0, c.lx, c.ly, c.lz, c.xy, c.xz, c.yz};
+    // 1) host_guest against exact brute force.
+    {
+      const int nguest = 40;
+      std::vector<double> xyz;
+      std::vector<int> types;
+      for (int i = 0; i < nguest; ++i) {
+        const double f[3] = {u(rng), u(rng), u(rng)};
+        xyz.insert(xyz.end(), {c.lx * f[0] + c.xy * f[1] + c.xz * f[2],
+                               c.ly * f[1] + c.yz * f[2], c.lz * f[2]});
+        types.push_back(1);
+      }
+      xyz.insert(xyz.end(), {0.0, 0.0, 0.0});
+      types.push_back(2);
+      seams::System sys;
+      sys.set_frame(xyz, box, types);
+      seams::HostGuestOptions opt;
+      opt.guest = 1;
+      opt.framework = 2;
+      opt.cutoff = 1.0;
+      const auto rep = sys.host_guest(opt);
+      REQUIRE(rep.nearest_distance.size() == static_cast<std::size_t>(nguest));
+      for (int i = 0; i < nguest; ++i) {
+        const double ref = bruteTriclinicDist(
+            c.lx, c.ly, c.lz, c.xy, c.xz, c.yz, xyz[3 * static_cast<std::size_t>(i)],
+            xyz[3 * static_cast<std::size_t>(i) + 1],
+            xyz[3 * static_cast<std::size_t>(i) + 2]);
+        REQUIRE_THAT(rep.nearest_distance[static_cast<std::size_t>(i)],
+                     Catch::Matchers::WithinAbs(ref, 1e-9));
+      }
+    }
+    // 2) seams_rdf succeeds past the Smith ball (rmax = c.rmax, exercising
+    //    periodicDistSq -> euclideanIfShorter) and matches exact brute force
+    //    within the single-image ball.
+    {
+      const int natoms = 60;
+      std::vector<double> xyz;
+      std::vector<int> types;
+      for (int i = 0; i < natoms; ++i) {
+        const double f[3] = {u(rng), u(rng), u(rng)};
+        xyz.insert(xyz.end(), {c.lx * f[0] + c.xy * f[1] + c.xz * f[2],
+                               c.ly * f[1] + c.yz * f[2], c.lz * f[2]});
+        types.push_back(1);
+      }
+      seams::System sys;
+      sys.set_frame(xyz, box, types);
+      seams::DistributionOptions opt;
+      opt.rmax = c.rmax;
+      opt.bins = 10;
+      const auto dist = sys.rdf(opt);
+      long gotPairs = 0;
+      for (int count : dist.count) {
+        gotPairs += count;
+      }
+      REQUIRE(gotPairs > 0);
+
+      // Single-image ball check against brute force.
+      const double bcz = c.xy * c.yz - c.ly * c.xz;
+      const double wx = c.lx * c.ly * c.lz /
+                        std::sqrt(c.ly * c.lz * c.ly * c.lz +
+                                  c.xy * c.lz * c.xy * c.lz + bcz * bcz);
+      const double wy = c.ly * c.lz / std::sqrt(c.lz * c.lz + c.yz * c.yz);
+      const double wz = c.lz;
+      const double innerRmax = 0.45 * std::min({wx, wy, wz});
+      seams::DistributionOptions innerOpt;
+      innerOpt.rmax = innerRmax;
+      innerOpt.bins = 10;
+      const auto innerDist = sys.rdf(innerOpt);
+      long innerGot = 0;
+      for (int count : innerDist.count) {
+        innerGot += count;
+      }
+      long innerRef = 0;
+      for (int i = 0; i < natoms; ++i) {
+        for (int j = i + 1; j < natoms; ++j) {
+          const double r = bruteTriclinicDist(
+              c.lx, c.ly, c.lz, c.xy, c.xz, c.yz,
+              xyz[3 * static_cast<std::size_t>(j)] - xyz[3 * static_cast<std::size_t>(i)],
+              xyz[3 * static_cast<std::size_t>(j) + 1] -
+                  xyz[3 * static_cast<std::size_t>(i) + 1],
+              xyz[3 * static_cast<std::size_t>(j) + 2] -
+                  xyz[3 * static_cast<std::size_t>(i) + 2]);
+          if (r <= innerRmax) {
+            innerRef += 1;
+          }
+        }
+      }
+      REQUIRE(innerGot == innerRef);
+    }
+  }
+}

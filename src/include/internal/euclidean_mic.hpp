@@ -12,15 +12,19 @@
 // Euclidean minimum image for a triclinic cell. The fractional wrap is the
 // nearest image only inside the Smith ball. Past that ball the closest
 // lattice point is Babai rounding in a Selling superbasis, followed by the
-// Sommer–Feder–Shalvi slicer.
+// Sommer-Feder-Shalvi slicer.
 //
 // None of the reduction loops has an iteration cap. Every accepted Lagrange,
-// Selling, or slicer step must strictly lower a non-negative, finite squared
-// norm, evaluated in long double over binary64 vectors. There are finitely
-// many binary64 vectors below the initial norm, which is a (very loose)
-// termination bound. A slicer gain below long-double resolution is converged
-// at that numeric precision. Other failures to decrease, and bases that cannot
-// be represented as full rank, throw instead of returning an unchecked image.
+// Selling, or slicer step strictly lowers a non-negative, finite squared norm
+// (evaluated in long double for Selling and the slicer over binary64 vectors),
+// giving a finite termination bound. Lagrange preconditions Selling and skips
+// non-decreasing ties (such as FCC primitive or hexagonal xy = lx/2). Selling
+// treats dot products within binary64 rounding as obtuse and undoes a step
+// that cannot lower the norm sum; when the resulting superbasis is not
+// strictly obtuse, the slicer follows up with a 26-neighbour and
+// superbasis-difference descent. Non-finite values, singular bases, lattice
+// coefficients at or above 2^52, and unresolved slicer stalls throw explicitly
+// without poisoning the per-thread basis cache.
 
 #include <algorithm>
 #include <array>
@@ -71,6 +75,7 @@ struct Obtuse {
   double halfN2[8]{};
   double inv[3][3]{};
   int idx[3] = {0, 1, 2};
+  bool strictlyObtuse = false;
   bool ok = false;
 };
 
@@ -126,7 +131,7 @@ inline void lagrangeReduce(Vec3 v[3]) {
           const Vec3 reduced = add(v[i], scale(-q, v[j]));
           const double before = n2(v[i]);
           const double after = n2(reduced);
-          if (!std::isfinite(after) || after > before) {
+          if (!std::isfinite(after)) {
             throw std::runtime_error(
                 "minimum-image Lagrange reduction reached binary64 limits");
           }
@@ -147,12 +152,16 @@ inline void sellingSteps(Vec3 v[4]) {
   for (;;) {
     int si = -1;
     int sj = -1;
-    for (int i = 0; i < 3 && si < 0; i++) {
+    double bestDot = 0.0;
+    for (int i = 0; i < 3; i++) {
       for (int j = i + 1; j < 4; j++) {
-        if (dot(v[i], v[j]) > 0.0) {
+        const double d = dot(v[i], v[j]);
+        const double slack = 16.0 * std::numeric_limits<double>::epsilon() *
+                             std::sqrt(n2(v[i]) * n2(v[j]));
+        if (d > slack && d > bestDot) {
+          bestDot = d;
           si = i;
           sj = j;
-          break;
         }
       }
     }
@@ -164,6 +173,10 @@ inline void sellingSteps(Vec3 v[4]) {
       before += n2Long(v[i]);
     }
     const Vec3 taken = v[si];
+    Vec3 saved[4];
+    for (int k = 0; k < 4; k++) {
+      saved[k] = v[k];
+    }
     for (int k = 0; k < 4; k++) {
       if (k != si && k != sj) {
         v[k] = add(v[k], taken);
@@ -174,9 +187,15 @@ inline void sellingSteps(Vec3 v[4]) {
     for (int i = 0; i < 4; i++) {
       after += n2Long(v[i]);
     }
-    if (!std::isfinite(after) || !(after < before)) {
+    if (!std::isfinite(after)) {
       throw std::runtime_error(
           "minimum-image Selling reduction reached binary64 limits");
+    }
+    if (!(after < before)) {
+      for (int k = 0; k < 4; k++) {
+        v[k] = saved[k];
+      }
+      return;
     }
   }
 }
@@ -238,6 +257,7 @@ inline Obtuse finish(const Vec3 v[4]) {
     }
   }
   relevantOf(v, o);
+  o.strictlyObtuse = alreadyObtuse(v);
   o.ok = have && bestAbs > 1e-18;
   return o;
 }
@@ -323,21 +343,91 @@ inline Vec3 babai(const Obtuse &s, Vec3 y) {
           y.z - (z0 * b0.z + z1 * b1.z + z2 * b2.z)};
 }
 
+inline Vec3 descendNeighbors(const Obtuse &s, Vec3 x) {
+  const Vec3 b0 = s.v[s.idx[0]];
+  const Vec3 b1 = s.v[s.idx[1]];
+  const Vec3 b2 = s.v[s.idx[2]];
+  const Vec3 nb0 = scale(-1.0, b0);
+  const Vec3 nb1 = scale(-1.0, b1);
+  const Vec3 nb2 = scale(-1.0, b2);
+  const Vec3 dirs[19] = {
+      b0,
+      b1,
+      b2,
+      add(b0, b1),
+      add(b0, nb1),
+      add(b0, b2),
+      add(b0, nb2),
+      add(b1, b2),
+      add(b1, nb2),
+      add(add(b0, b1), b2),
+      add(add(b0, b1), nb2),
+      add(add(b0, nb1), b2),
+      add(add(nb0, b1), b2),
+      add(s.v[0], scale(-1.0, s.v[1])),
+      add(s.v[0], scale(-1.0, s.v[2])),
+      add(s.v[0], scale(-1.0, s.v[3])),
+      add(s.v[1], scale(-1.0, s.v[2])),
+      add(s.v[1], scale(-1.0, s.v[3])),
+      add(s.v[2], scale(-1.0, s.v[3])),
+  };
+  double halfN2[19];
+  for (int k = 0; k < 19; k++) {
+    halfN2[k] = 0.5 * n2(dirs[k]);
+    if (!std::isfinite(halfN2[k])) {
+      throw std::runtime_error(
+          "minimum-image slicer projection exceeds binary64 range");
+    }
+  }
+  for (;;) {
+    double bestGain = 0.0;
+    int at = -1;
+    double sign = 0.0;
+    for (int k = 0; k < 19; k++) {
+      const double projection = dot(x, dirs[k]);
+      if (!std::isfinite(projection)) {
+        throw std::runtime_error(
+            "minimum-image slicer projection exceeds binary64 range");
+      }
+      const double gain = std::abs(projection) - halfN2[k];
+      if (gain > bestGain) {
+        bestGain = gain;
+        at = k;
+        sign = projection > 0.0 ? 1.0 : -1.0;
+      }
+    }
+    if (at < 0) {
+      return x;
+    }
+    const Vec3 next = add(x, scale(-sign, dirs[at]));
+    const long double before = n2Long(x);
+    const long double after = n2Long(next);
+    if (!std::isfinite(n2(next))) {
+      throw std::runtime_error("minimum-image slicer reached binary64 limits");
+    }
+    if (!(after < before)) {
+      const long double resolution =
+          16.0L * std::numeric_limits<long double>::epsilon() *
+          std::max(before, 1.0L);
+      if (static_cast<long double>(bestGain) <= resolution) {
+        return x;
+      }
+      throw std::runtime_error("minimum-image slicer reached binary64 limits");
+    }
+    x = next;
+  }
+}
+
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 y) {
   if (!s.ok) {
     throw std::runtime_error(
         "minimum-image cell is numerically singular in binary64");
   }
-  return descend(s, babai(s, y));
-}
-
-inline bool engineIsShort(Vec3 a, Vec3 b, Vec3 c) {
-  const double scaleLen = std::max(std::abs(a.x) + std::abs(b.y) + std::abs(c.z), 1.0);
-  const double tol = 1e-10 * scaleLen;
-  return std::abs(a.y) <= tol && std::abs(a.z) <= tol && std::abs(b.z) <= tol &&
-         std::abs(b.x) <= 0.5 * std::abs(a.x) + tol &&
-         std::abs(c.x) <= 0.5 * std::abs(a.x) + tol &&
-         std::abs(c.y) <= 0.5 * std::abs(b.y) + tol;
+  Vec3 x = descend(s, babai(s, y));
+  if (!s.strictlyObtuse) {
+    x = descendNeighbors(s, x);
+  }
+  return x;
 }
 
 struct Cached {
@@ -368,13 +458,15 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
   const int i = hand;
   hand = (hand + 1) % 4;
   Cached &slot = slots[i];
-  for (int k = 0; k < 6; k++) {
-    slot.key[k] = key[k];
-  }
   const Vec3 a{lx, 0.0, 0.0};
   const Vec3 b{xy, ly, 0.0};
   const Vec3 c{xz, yz, lz};
-  slot.s = obtuseSuperbasis(a, b, c);
+  slot.filled = false;
+  const Obtuse s = obtuseSuperbasis(a, b, c);
+  for (int k = 0; k < 6; k++) {
+    slot.key[k] = key[k];
+  }
+  slot.s = s;
   slot.filled = true;
   return slot;
 }
