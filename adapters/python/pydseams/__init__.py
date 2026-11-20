@@ -1,5 +1,5 @@
 # Copyright (c) d-SEAMS developers
-"""d-SEAMS Python front end with multi-frame Trajectory and time-correlation tools."""
+"""d-SEAMS Python front end with multi-frame TrajectorySequence and time-correlation tools."""
 
 from __future__ import annotations
 
@@ -69,7 +69,7 @@ from .trajectory import (  # noqa: E402
     ReorientationAccumulator,
     ReorientationFit,
     ReorientationResult,
-    Trajectory,
+    TrajectorySequence,
     UnwrappedCentresResult,
     fit_diffusion,
     fit_exponential_tau,
@@ -84,7 +84,10 @@ from .trajectory import (  # noqa: E402
     water_vectors,
 )
 
-open_trajectory = Trajectory.open
+# Trajectory stays the single-frame Frame alias for all of 2.14.x; a future
+# major version may rebind it to TrajectorySequence.
+Trajectory = Frame
+open_trajectory = TrajectorySequence.open
 
 _EXTRA_EXPORTS = [
     "DiffusionFit",
@@ -100,6 +103,7 @@ _EXTRA_EXPORTS = [
     "ReorientationFit",
     "ReorientationResult",
     "Trajectory",
+    "TrajectorySequence",
     "UnwrappedCentresResult",
     "fit_diffusion",
     "fit_exponential_tau",

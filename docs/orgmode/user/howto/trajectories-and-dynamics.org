@@ -3,20 +3,21 @@
 
 Confined-water trajectories wrap molecules across periodic boundaries, split
 transport into axial and in-plane components, and track orientational and
-hydrogen-bond relaxation over thousands of frames. ~pydseams.Trajectory~,
+hydrogen-bond relaxation over thousands of frames. ~pydseams.TrajectorySequence~,
 =include/seams.h=, and =include/seams.hpp= provide multi-frame streaming,
 triclinic minimum-image unwrapping, per-molecule orientation vectors, and
 bounded-lag multi-origin accumulators.
 
-* Multi-frame ~Trajectory~ container
+* Multi-frame ~TrajectorySequence~ container
 
-~pydseams.Trajectory~ opens a LAMMPS dump or any chemfiles-supported trajectory
-for lazy iteration, ~len~, positive and negative indexing, and ~start:stop:step~
-slicing without loading every frame into memory at once.
+~pydseams.open_trajectory~ returns a ~pydseams.TrajectorySequence~ over a
+LAMMPS dump or any chemfiles-supported trajectory, for lazy iteration, ~len~,
+positive and negative indexing, and ~start:stop:step~ slicing without loading
+every frame into memory at once.
 
 #+begin_src python
 >>> import pydseams
->>> traj = pydseams.Trajectory.open("input/traj/nucleation_three.lammpstrj")
+>>> traj = pydseams.open_trajectory("input/traj/nucleation_three.lammpstrj")
 >>> len(traj)
 3
 >>> traj[0].n_atoms == traj[-1].n_atoms
@@ -25,13 +26,19 @@ True
 2
 #+end_src
 
-Code written against the older ~Trajectory = Frame~ alias continues to run with
-a ~DeprecationWarning~: ~Trajectory(path, atom_type=...)~ and the other
-single-frame constructor calls return a ~pydseams.Frame~, so ~classify_chill_plus~,
-~load_frame~, and ~filename~ behave as before. ~Frame~ attributes read from a
-~Trajectory~ sequence warn and use its first frame. ~Trajectory is Frame~ is no
-longer true. New code uses ~pydseams.Frame~ for one configuration and
-~Trajectory.open~ for a frame sequence.
+~pydseams.Trajectory~ names a different class. Throughout 2.14.x it stays an
+alias of the single-frame ~pydseams.Frame~, so ~Trajectory is Frame~ holds and
+~Trajectory(path, atom_type=...)~, ~classify_chill_plus~, ~load_frame~, and
+~filename~ behave as before. A future major version may rebind ~Trajectory~ to
+the sequence class.
+
+#+begin_src python
+>>> import pydseams
+>>> pydseams.Trajectory is pydseams.Frame
+True
+>>> isinstance(pydseams.open_trajectory("input/traj/exampleTraj.lammpstrj"), pydseams.TrajectorySequence)
+True
+#+end_src
 
 * Periodic molecule unwrapping
 
@@ -47,7 +54,7 @@ between saved frames.
 
 #+begin_src python
 >>> import pydseams
->>> traj = pydseams.Trajectory.open("input/traj/nucleation_three.lammpstrj")
+>>> traj = pydseams.open_trajectory("input/traj/nucleation_three.lammpstrj")
 >>> unwrapped = traj.unwrap_centres()
 >>> unwrapped.centres.shape
 (3, 4096, 3)
@@ -67,7 +74,7 @@ ensemble means \(\langle P_1\rangle\) and \(\langle P_2\rangle\).
 
 #+begin_src python
 >>> import pydseams
->>> traj = pydseams.Trajectory.open("input/traj/exampleTraj.lammpstrj", all_atoms=True)
+>>> traj = pydseams.open_trajectory("input/traj/exampleTraj.lammpstrj", all_atoms=True)
 >>> wv = pydseams.water_vectors(traj[0], oxygen_type=2, hydrogen_type=1)
 >>> wv.bisector.shape
 (250, 3)

@@ -1,11 +1,9 @@
 # Copyright (c) d-SEAMS developers
-"""Multi-frame Trajectory container, PBC unwrapping, molecular dipoles, and TCFs."""
+"""Multi-frame TrajectorySequence, PBC unwrapping, molecular dipoles, and TCFs."""
 
 from __future__ import annotations
 
 import ctypes
-import os
-import warnings
 from collections.abc import Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -27,52 +25,6 @@ _CHEMFILES_EXTS = {
     ".mmtf",
 }
 _LAMMPS_EXTS = {".lammpstrj", ".dump", ".lammps", ".trj"}
-
-_LEGACY_FRAME_ATTRS = frozenset(
-    {
-        "chill_plus",
-        "chill",
-        "cages",
-        "cages_by_signature",
-        "rings",
-        "ring_sizes",
-        "ring_histogram",
-        "cloud",
-        "positions",
-        "box",
-        "box_low",
-        "n_atoms",
-        "atom_type",
-        "cutoff",
-        "q4",
-        "q6",
-        "q6_bar",
-        "ql",
-        "steinhardt",
-        "hbonds",
-        "density",
-        "rdf",
-        "coordination",
-        "pairs",
-        "domains",
-        "to_ase",
-        "classify_chill_plus",
-        "load_frame",
-        "filename",
-        "frame",
-        "seeded_affiliation",
-        "bonds_by_index",
-    }
-)
-_IN_PLACE_FRAME_ATTRS = frozenset({"load_frame"})
-
-
-def _legacy_frame_class():
-    """The single-frame class the old ``Trajectory`` alias pointed at."""
-    import pydseams as _pkg
-
-    return getattr(_pkg, "Frame", CtypesFrame)
-
 
 @dataclass(frozen=True)
 class MoleculeCentresResult:
@@ -678,7 +630,7 @@ def _normalize_boxes_sequence(cell, nframes: int) -> np.ndarray:
 
 def unwrap_positions(positions_or_traj, cell=None) -> np.ndarray:
     """Unwrap periodic coordinates across frames (orthorhombic or triclinic)."""
-    if isinstance(positions_or_traj, Trajectory):
+    if isinstance(positions_or_traj, TrajectorySequence):
         return positions_or_traj.unwrap_positions()
     if cell is None:
         raise ValueError("cell is required when unwrapping a coordinate array")
@@ -710,7 +662,7 @@ def unwrap_centres(
     masses=None,
 ) -> UnwrappedCentresResult:
     """Assemble intact periodic molecule centres per frame and unwrap across time."""
-    if isinstance(positions_or_traj, Trajectory):
+    if isinstance(positions_or_traj, TrajectorySequence):
         return positions_or_traj.unwrap_centres(mol_ids=mol_ids, masses=masses)
     if cell is None:
         raise ValueError("cell is required when unwrapping a coordinate array")
@@ -1609,110 +1561,30 @@ def water_hbond_edges(
     return edges
 
 
-class Trajectory(Sequence):
+class TrajectorySequence(Sequence):
     """Multi-frame container with lazy/streaming I/O, slicing, and dynamics.
 
-    In d-SEAMS <= 2.14.1, ``pydseams.Trajectory`` was an alias of
-    :class:`~pydseams.frame.Frame`. Starting in 2.14.2, ``Trajectory`` is a
-    genuine multi-frame sequence supporting ``len(traj)``, ``for frame in traj``,
-    integer indexing ``traj[i]`` (including negative indices), and lazy slicing
-    ``traj[start:stop:step]``.
+    Supports ``len(traj)``, ``for frame in traj``, integer indexing
+    ``traj[i]`` (including negative indices), and lazy slicing
+    ``traj[start:stop:step]``. Open a file with
+    :func:`pydseams.open_trajectory` (or :meth:`TrajectorySequence.open`).
 
-    Open a trajectory file with :meth:`Trajectory.open`. Calling the old
-    single-frame constructor, ``Trajectory(path, ...)`` with a file path or with
-    ``Frame`` keyword arguments (``frame=``, ``cloud=``, ``h_cloud=``,
-    ``region=``, ``symbols=``, ``cell_rotation=``, ``periodic=``), still
-    returns a single :class:`~pydseams.frame.Frame` with every ``Frame`` method
-    (``classify_chill_plus``, ``load_frame``, ``filename``, ...) and emits a
-    :class:`DeprecationWarning`. ``Frame`` attributes read from a ``Trajectory``
-    sequence delegate to its first frame and also warn; ``load_frame``, which
-    reloads a ``Frame`` in place, raises after the warning. ``Trajectory is
-    Frame`` is no longer true.
+    ``pydseams.Trajectory`` is not this class: throughout 2.14.x it stays an
+    alias of the single-frame :class:`~pydseams.frame.Frame`.
     """
-
-    def __new__(
-        cls,
-        source=None,
-        frame=None,
-        atom_type=None,
-        cutoff=None,
-        bonded="auto",
-        region=None,
-        all_atoms=False,
-        *,
-        dt: float = 1.0,
-        frames=None,
-        cloud=None,
-        h_cloud=None,
-        symbols=None,
-        cell_rotation=None,
-        periodic=None,
-        _sequence: bool = False,
-        **_kwargs,
-    ):
-        legacy_single_frame = not _sequence and (
-            isinstance(source, (str, os.PathLike))
-            or frame is not None
-            or cloud is not None
-            or h_cloud is not None
-            or region is not None
-            or symbols is not None
-            or cell_rotation is not None
-            or periodic is not None
-        )
-        if legacy_single_frame:
-            warnings.warn(
-                "Calling pydseams.Trajectory(...) as the single-frame Frame "
-                "constructor is deprecated since 2.14.2 and returns a Frame; use "
-                "pydseams.Frame or pydseams.read() for one frame, or "
-                "Trajectory.open() for a multi-frame sequence.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            frame_cls = _legacy_frame_class()
-            if frame_cls is CtypesFrame:
-                if source is None:
-                    raise TypeError("source path is required")
-                return _load_frame_at_step(
-                    Path(source),
-                    1 if frame is None else int(frame),
-                    atom_type=atom_type,
-                    all_atoms=all_atoms,
-                    cutoff=cutoff,
-                    bonded=bonded,
-                )
-            return frame_cls(
-                filename=source,
-                frame=frame,
-                atom_type=atom_type,
-                cutoff=cutoff,
-                bonded=bonded,
-                region=region,
-                all_atoms=all_atoms,
-                cloud=cloud,
-                h_cloud=h_cloud,
-                symbols=symbols,
-                cell_rotation=cell_rotation,
-                periodic=True if periodic is None else periodic,
-            )
-        return super().__new__(cls)
 
     def __init__(
         self,
         source=None,
-        frame=None,
+        *,
         atom_type=None,
         cutoff=None,
         bonded="auto",
-        region=None,
         all_atoms=False,
-        *,
         dt: float = 1.0,
         frames=None,
-        _sequence: bool = False,
         _indices: range | tuple[int, ...] | None = None,
         _array_backing: tuple[np.ndarray, np.ndarray, np.ndarray | None, np.ndarray | None] | None = None,
-        **_unused,
     ):
         if not (float(dt) > 0.0) or not np.isfinite(dt):
             raise ValueError("dt must be finite and positive")
@@ -1739,7 +1611,7 @@ class Trajectory(Sequence):
 
         if source is None:
             raise TypeError(
-                "Trajectory requires a path, frames=..., or Trajectory.from_arrays(...)"
+                "TrajectorySequence requires a path, frames=..., or TrajectorySequence.from_arrays(...)"
             )
         if isinstance(source, (str, Path)):
             p = Path(source).resolve()
@@ -1757,7 +1629,7 @@ class Trajectory(Sequence):
             self._indices = range(len(materialized)) if _indices is None else _indices
             return
 
-        raise TypeError(f"unsupported Trajectory source: {type(source)!r}")
+        raise TypeError(f"unsupported TrajectorySequence source: {type(source)!r}")
 
     @classmethod
     def open(
@@ -1769,7 +1641,7 @@ class Trajectory(Sequence):
         cutoff: float | None = None,
         bonded: str = "auto",
         dt: float = 1.0,
-    ) -> Trajectory:
+    ) -> TrajectorySequence:
         """Open a multi-frame trajectory file lazily without reading all frames."""
         return cls(
             source=path,
@@ -1778,14 +1650,13 @@ class Trajectory(Sequence):
             cutoff=cutoff,
             bonded=bonded,
             dt=dt,
-            _sequence=True,
         )
 
     from_file = open
 
     @classmethod
-    def from_frames(cls, frames: Iterable, *, dt: float = 1.0) -> Trajectory:
-        """Construct a Trajectory from an iterable of Frame objects."""
+    def from_frames(cls, frames: Iterable, *, dt: float = 1.0) -> TrajectorySequence:
+        """Construct a TrajectorySequence from an iterable of Frame objects."""
         return cls(frames=frames, dt=dt)
 
     @classmethod
@@ -1799,18 +1670,9 @@ class Trajectory(Sequence):
         dt: float = 1.0,
         cutoff: float | None = None,
         bonded: str = "cutoff",
-    ) -> Trajectory:
-        """Build a multi-frame Trajectory from (T, N, 3) positions and cell(s)."""
+    ) -> TrajectorySequence:
+        """Build a multi-frame TrajectorySequence from (T, N, 3) positions and cell(s)."""
         arr = np.asarray(positions, dtype=np.float64)
-        if arr.ndim == 2 and arr.shape[1] == 3:
-            warnings.warn(
-                "Passing single-frame (N, 3) positions to Trajectory.from_arrays "
-                "is deprecated since 2.14.2; pass (T, N, 3) for trajectories or "
-                "use Frame.from_arrays for a single frame.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            arr = arr[None, :, :]
         if arr.ndim != 3 or arr.shape[2] != 3 or arr.shape[0] == 0 or arr.shape[1] == 0:
             raise ValueError("positions must have shape (n_frames, n_atoms, 3)")
         xyz_seq = np.ascontiguousarray(arr, dtype=np.float64)
@@ -1918,7 +1780,7 @@ class Trajectory(Sequence):
             step = item.step if item.step is not None else 1
             sub_dt = self.dt * abs(step)
             if self._array_backing is not None:
-                return Trajectory(
+                return TrajectorySequence(
                     atom_type=self._atom_type,
                     all_atoms=self._all_atoms,
                     cutoff=self._cutoff,
@@ -1928,19 +1790,18 @@ class Trajectory(Sequence):
                     _array_backing=self._array_backing,
                 )
             if self._frames is not None:
-                return Trajectory(
+                return TrajectorySequence(
                     frames=self._frames,
                     dt=sub_dt,
                     _indices=sub_indices,
                 )
-            return Trajectory(
+            return TrajectorySequence(
                 source=self._path,
                 atom_type=self._atom_type,
                 all_atoms=self._all_atoms,
                 cutoff=self._cutoff,
                 bonded=self._bonded,
                 dt=sub_dt,
-                _sequence=True,
                 _indices=sub_indices,
             )
 
@@ -1950,36 +1811,14 @@ class Trajectory(Sequence):
             if idx < 0:
                 idx += n
             if idx < 0 or idx >= n:
-                raise IndexError(f"Trajectory index {item} out of range for {n} frames")
+                raise IndexError(f"TrajectorySequence index {item} out of range for {n} frames")
             return self._frame_at_pos(idx)
 
-        raise TypeError(f"Trajectory indices must be integers or slices, got {type(item).__name__}")
-
-    def __getattr__(self, name: str):
-        if not name.startswith("_") and (
-            name in _LEGACY_FRAME_ATTRS or hasattr(_legacy_frame_class(), name)
-        ):
-            warnings.warn(
-                f"Accessing Frame attribute {name!r} on pydseams.Trajectory is "
-                "deprecated since 2.14.2 because Trajectory is now a multi-frame "
-                "container; use pydseams.Frame, pydseams.read(), or traj[0].",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            if name in _IN_PLACE_FRAME_ATTRS:
-                raise AttributeError(
-                    f"{name!r} reloads a single Frame in place and has no "
-                    "Trajectory equivalent; index the sequence (traj[k - 1]) or "
-                    "call pydseams.read(path, frame=k)."
-                )
-            if len(self) == 0:
-                raise AttributeError(name)
-            return getattr(self[0], name)
-        raise AttributeError(f"{type(self).__name__!r} object has no attribute {name!r}")
+        raise TypeError(f"TrajectorySequence indices must be integers or slices, got {type(item).__name__}")
 
     def __repr__(self) -> str:
         src = str(self._path.name) if self._path is not None else "in-memory"
-        return f"Trajectory(source={src!r}, n_frames={len(self)}, dt={self.dt})"
+        return f"TrajectorySequence(source={src!r}, n_frames={len(self)}, dt={self.dt})"
 
     def unwrap_positions(self) -> np.ndarray:
         """Stream frames and return PBC-unwrapped coordinates of shape (T, N, 3)."""
@@ -1989,7 +1828,7 @@ class Trajectory(Sequence):
             frames_xyz.append(xyz)
             boxes.append(box9)
         if not frames_xyz:
-            raise ValueError("Trajectory has no frames")
+            raise ValueError("TrajectorySequence has no frames")
         stacked = np.stack(frames_xyz, axis=0)
         box_arr = np.stack(boxes, axis=0)
         return unwrap_positions(stacked, box_arr)
@@ -2005,7 +1844,7 @@ class Trajectory(Sequence):
             if first_mols is None:
                 first_mols = m_arr
         if not frames_xyz:
-            raise ValueError("Trajectory has no frames")
+            raise ValueError("TrajectorySequence has no frames")
         stacked = np.stack(frames_xyz, axis=0)
         box_arr = np.stack(boxes, axis=0)
         use_mols = first_mols if mol_ids is None else mol_ids
@@ -2058,7 +1897,7 @@ class Trajectory(Sequence):
             else:
                 raise ValueError("kind must be 'bisector', 'hh', or 'dipole'")
         if not per_frame_vecs:
-            raise ValueError("Trajectory has no frames")
+            raise ValueError("TrajectorySequence has no frames")
         all_vecs = np.concatenate(per_frame_vecs, axis=0)
         return orientation_order(all_vecs, axis=axis)
 
@@ -2097,7 +1936,7 @@ class Trajectory(Sequence):
                     )
                 acc.push(pts, cell=box9)
             if acc is None:
-                raise ValueError("Trajectory has no frames")
+                raise ValueError("TrajectorySequence has no frames")
             res = acc.curve()
             fit_res = (
                 acc.fit(fit_window[0], fit_window[1])

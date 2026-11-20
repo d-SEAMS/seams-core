@@ -26,7 +26,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:ionic-liquid.org][Ionic-liquid dumps]] | Keep one species with ~--type~; unlike-pair ~seams rdf --pair-types I,J~; confined \(\rho(z)\) |
 | [[https://d-seams.github.io/PydSEAMSlib/][ASE and solvis]] | ~to_ase~ and ~to_solvis~. The ice Ih calls are on [[file:../../reference/python-frame.org][Python Frame]] |
 | [[file:confined-ice.org][Confined ice]] | Nanotube and monolayer classification |
-| [[file:trajectories-and-dynamics.org][Trajectories, dipoles, and time-correlation functions]] | Multi-frame ~Trajectory~, triclinic unwrapping, water dipoles, axial/lateral MSD, \(C_{\text{HB}}\)/\(S_{\text{HB}}\), and \(C_1\)/\(C_2\) |
+| [[file:trajectories-and-dynamics.org][Trajectories, dipoles, and time-correlation functions]] | Multi-frame ~TrajectorySequence~, triclinic unwrapping, water dipoles, axial/lateral MSD, \(C_{\text{HB}}\)/\(S_{\text{HB}}\), and \(C_1\)/\(C_2\) |
 | [[file:science-front.org][Basal profiles and nucleation]] | Layer profile on one frame, and the critical-size census |
 | [[file:from-trajectory.org][From a trajectory to the ice front]] | CHILL+, rings, and the front on a dump in ~input/traj/~ |
 | [[file:engine-gromacs.org][GROMACS]] | Build ~gmx-seams~ and read the CHILL+ census |

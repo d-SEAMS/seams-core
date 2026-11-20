@@ -1,5 +1,5 @@
 # Copyright (c) d-SEAMS developers
-"""Analytic-oracle and negative-control tests for pydseams Trajectory and dynamics."""
+"""Analytic-oracle and negative-control tests for pydseams TrajectorySequence and dynamics."""
 
 from __future__ import annotations
 
@@ -72,9 +72,9 @@ def _write_multiframe_pdb(path: Path, frames_xyz: np.ndarray, box_len: float) ->
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def test_trajectory_container_not_frame_alias_and_deprecation(tmp_path: Path):
-    assert ds.Trajectory is not ds.Frame
-    assert not issubclass(ds.Trajectory, ds.Frame)
+def test_trajectory_sequence_container(tmp_path: Path):
+    assert ds.TrajectorySequence is not ds.Frame
+    assert not issubclass(ds.TrajectorySequence, ds.Frame)
 
     rng = np.random.default_rng(42)
     n_frames = 6
@@ -92,7 +92,7 @@ def test_trajectory_container_not_frame_alias_and_deprecation(tmp_path: Path):
     dump_path = tmp_path / "water6.lammpstrj"
     _write_multiframe_lammps_dump(dump_path, xyz, 12.0, types, mols)
 
-    traj = ds.Trajectory.open(dump_path, all_atoms=True, dt=0.2)
+    traj = ds.open_trajectory(dump_path, all_atoms=True, dt=0.2)
     assert len(traj) == 6
     assert traj[0].n_atoms == 12
     assert traj[-1].n_atoms == 12
@@ -103,7 +103,7 @@ def test_trajectory_container_not_frame_alias_and_deprecation(tmp_path: Path):
 
     # Slicing is lazy and scales dt by step.
     sub = traj[1:6:2]
-    assert isinstance(sub, ds.Trajectory)
+    assert isinstance(sub, ds.TrajectorySequence)
     assert len(sub) == 3
     assert sub.dt == pytest.approx(0.4)
     streamed = [fr for fr in sub]
@@ -113,96 +113,81 @@ def test_trajectory_container_not_frame_alias_and_deprecation(tmp_path: Path):
     # Chemfiles multi-frame PDB streaming check.
     pdb_path = tmp_path / "water6.pdb"
     _write_multiframe_pdb(pdb_path, xyz, 12.0)
-    pdb_traj = ds.Trajectory.open(pdb_path, all_atoms=True, dt=0.5)
+    pdb_traj = ds.open_trajectory(pdb_path, all_atoms=True, dt=0.5)
     assert len(pdb_traj) == 6
     assert len(pdb_traj[::3]) == 2
     assert pdb_traj[-1].n_atoms == 12
-
-    # Legacy alias deprecation paths still work and emit DeprecationWarning.
-    with pytest.deprecated_call(match="deprecated"):
-        legacy_frame = ds.Trajectory(str(dump_path), frame=2)
-    assert isinstance(legacy_frame, ds.Frame)
-
-    with pytest.deprecated_call(match="deprecated"):
-        _ = traj.n_atoms
 
 
 _EXAMPLE_TRAJ = Path(__file__).resolve().parents[1] / "input" / "traj" / "exampleTraj.lammpstrj"
 
 
-def test_legacy_trajectory_constructor_returns_frame_with_warning():
-    with pytest.deprecated_call(match="deprecated"):
-        frame = ds.Trajectory(str(_EXAMPLE_TRAJ))
-    assert isinstance(frame, ds.Frame)
-    assert not isinstance(frame, ds.Trajectory)
-
-    with pytest.deprecated_call(match="deprecated"):
-        typed = ds.Trajectory(_EXAMPLE_TRAJ, atom_type=2)
-    assert isinstance(typed, ds.Frame)
-    assert typed.n_atoms == 250
-
-    # The warning comes before any read. pydseamslib's Frame reads lazily and
-    # does not raise here; the libseams fallback frame reads eagerly and does.
-    with pytest.deprecated_call(match="deprecated"):
-        try:
-            ds.Trajectory("/no/such/trajectory.lammpstrj", atom_type=2)
-        except (FileNotFoundError, OSError, RuntimeError, ValueError):
-            pass
+def test_trajectory_stays_the_frame_alias():
+    assert ds.Trajectory is ds.Frame
+    assert {"Frame", "Trajectory", "TrajectorySequence", "open_trajectory"} <= set(ds.__all__)
+    traj = ds.open_trajectory(_EXAMPLE_TRAJ, atom_type=2)
+    assert type(traj) is ds.TrajectorySequence
+    assert not isinstance(traj, ds.Trajectory)
+    assert isinstance(traj[0], ds.Trajectory)
 
 
-def test_new_trajectory_api_does_not_warn():
+def test_trajectory_sequence_api_does_not_warn():
     import warnings
 
     with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        traj = ds.open_trajectory(_EXAMPLE_TRAJ, atom_type=2)
+        assert len(traj) == 1
+        assert traj[0].n_atoms == 250
+        assert isinstance(traj[:1], ds.TrajectorySequence)
+        assert isinstance(ds.TrajectorySequence(_EXAMPLE_TRAJ), ds.TrajectorySequence)
+        assert isinstance(ds.TrajectorySequence.open(_EXAMPLE_TRAJ), ds.TrajectorySequence)
+        assert isinstance(ds.TrajectorySequence.from_file(_EXAMPLE_TRAJ), ds.TrajectorySequence)
+        assert isinstance(ds.TrajectorySequence.from_frames([traj[0]]), ds.TrajectorySequence)
+
+
+def test_trajectory_sequence_has_no_frame_constructor_or_attributes():
+    import warnings
+
+    with pytest.raises(TypeError):
+        ds.TrajectorySequence(_EXAMPLE_TRAJ, 1)
+    with pytest.raises(TypeError):
+        ds.TrajectorySequence(_EXAMPLE_TRAJ, frame=1)
+    with pytest.raises(ValueError, match="n_frames, n_atoms, 3"):
+        ds.TrajectorySequence.from_arrays(np.zeros((4, 3)), [10.0, 10.0, 10.0])
+    traj = ds.open_trajectory(_EXAMPLE_TRAJ)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        for name in ("n_atoms", "classify_chill_plus", "filename", "load_frame", "positions"):
+            with pytest.raises(AttributeError):
+                getattr(traj, name)
+
+
+_HAS_PYDSEAMSLIB_FRAME = hasattr(ds.Frame, "classify_chill_plus")
+
+
+@pytest.mark.skipif(not _HAS_PYDSEAMSLIB_FRAME, reason="pydseamslib Frame is not installed")
+def test_pydseamslib_trajectory_alias_workflow():
+    import warnings
+
+    # PydSEAMSlib tests/python/test_user_api.py::test_trajectory_alias, run
+    # through this adapter, plus the other Frame attributes the alias carries.
+    with warnings.catch_warnings():
         warnings.simplefilter("error", DeprecationWarning)
-        traj = ds.Trajectory.open(_EXAMPLE_TRAJ, atom_type=2)
-        assert isinstance(traj, ds.Trajectory)
-        assert isinstance(traj[0], ds.Frame)
-        assert isinstance(traj[:1], ds.Trajectory)
-        assert isinstance(ds.Trajectory.from_file(_EXAMPLE_TRAJ), ds.Trajectory)
-        assert isinstance(ds.Trajectory.from_frames([traj[0]]), ds.Trajectory)
+        from pydseams import Frame, Trajectory
 
-
-_HAS_LEGACY_FRAME = hasattr(ds.Frame, "classify_chill_plus")
-
-
-@pytest.mark.skipif(not _HAS_LEGACY_FRAME, reason="pydseamslib Frame is not installed")
-def test_pydseamslib_trajectory_alias_workflow_still_runs():
-    # PydSEAMSlib tests/python/test_user_api.py::test_trajectory_alias, less
-    # its identity check: Trajectory is a sequence class now.
-    with pytest.deprecated_call(match="deprecated"):
-        traj = ds.Trajectory(str(_EXAMPLE_TRAJ.resolve()))
-    counts = traj.classify_chill_plus()
-    assert counts["hexagonal"] == 0
-    assert counts["water"] == 241
-    assert counts["interClathrate"] == 9
-    assert traj.filename == str(_EXAMPLE_TRAJ.resolve())
-    traj.load_frame(1)
-    assert traj.frame == 1
-
-    with pytest.deprecated_call(match="deprecated"):
-        typed = ds.Trajectory(str(_EXAMPLE_TRAJ), atom_type=2)
-    assert typed.atom_type == 2
-    assert typed.classify_chill_plus()["water"] == 241
-
-
-@pytest.mark.skipif(not _HAS_LEGACY_FRAME, reason="pydseamslib Frame is not installed")
-def test_frame_attributes_on_sequence_warn_and_delegate():
-    traj = ds.Trajectory.open(_EXAMPLE_TRAJ)
-    with pytest.deprecated_call(match="deprecated"):
+        assert Trajectory is Frame
+        traj = Trajectory(str(_EXAMPLE_TRAJ.resolve()))
         counts = traj.classify_chill_plus()
-    assert counts["water"] == 241
-    with pytest.deprecated_call(match="deprecated"):
+        assert counts["hexagonal"] == 0
+        assert counts["water"] == 241
+        assert counts["interClathrate"] == 9
         assert traj.filename == str(_EXAMPLE_TRAJ.resolve())
-    with pytest.deprecated_call(match="deprecated"):
+        traj.load_frame(1)
         assert traj.frame == 1
-    with pytest.deprecated_call(match="deprecated"):
-        _ = traj.bonds_by_index
-    with pytest.deprecated_call(match="deprecated"):
-        with pytest.raises(AttributeError, match="in place"):
-            traj.load_frame(2)
-    with pytest.raises(AttributeError):
-        _ = traj.no_such_frame_attribute
+        typed = Trajectory(str(_EXAMPLE_TRAJ), atom_type=2)
+        assert typed.atom_type == 2
+        assert typed.classify_chill_plus()["water"] == 241
 
 
 def test_triclinic_and_time_varying_box_unwrapping_oracle():
@@ -254,7 +239,7 @@ def test_triclinic_and_time_varying_box_unwrapping_oracle():
             for a in range(3):
                 wrapped_atoms[f, 3 * m + a] = _wrap_triclinic(o_pos + rel[a], boxes[f])
 
-    traj = ds.Trajectory.from_arrays(wrapped_atoms, boxes, mol_ids=mols, dt=0.1)
+    traj = ds.TrajectorySequence.from_arrays(wrapped_atoms, boxes, mol_ids=mols, dt=0.1)
     res = traj.unwrap_centres(masses=masses)
     assert np.array_equal(res.mol_ids, np.arange(1, n_mols + 1))
     assert np.allclose(res.centres, true_com, atol=1e-10)
@@ -342,7 +327,7 @@ def test_ballistic_and_anisotropic_brownian_msd_oracles():
     raw = (vel[None, :] * t_grid[:, None])[:, None, :]
     wrapped = _wrap_triclinic(raw, box)
 
-    traj_bal = ds.Trajectory.from_arrays(wrapped, box, dt=dt)
+    traj_bal = ds.TrajectorySequence.from_arrays(wrapped, box, dt=dt)
     msd_bal = traj_bal.msd(axis=axis, fit_window=(0.2, 4.0))
     assert np.allclose(msd_bal.axial, (v_par**2) * (msd_bal.lag_time**2), atol=1e-11)
     assert np.allclose(msd_bal.lateral, (v_lat**2) * (msd_bal.lag_time**2), atol=1e-11)
@@ -370,7 +355,7 @@ def test_ballistic_and_anisotropic_brownian_msd_oracles():
     unwrapped = np.cumsum(steps, axis=0)
     wrapped_br = _wrap_triclinic(unwrapped, [0, 0, 0, 12.0, 12.0, 12.0, 2.0, 0.0, 0.0])
 
-    traj_br = ds.Trajectory.from_arrays(
+    traj_br = ds.TrajectorySequence.from_arrays(
         wrapped_br, [0, 0, 0, 12.0, 12.0, 12.0, 2.0, 0.0, 0.0], dt=dt_br
     )
     msd_br = traj_br.msd(axis=axis, max_lag=80, fit_window=(0.25, 2.0))
@@ -382,7 +367,7 @@ def test_ballistic_and_anisotropic_brownian_msd_oracles():
 
     # 3. Negative control: purely axial motion has zero lateral MSD
     axial_only = (e_hat[None, :] * np.arange(12, dtype=np.float64)[:, None])[:, None, :]
-    res_ax = ds.Trajectory.from_arrays(axial_only, [50.0, 50.0, 50.0], dt=1.0).msd(axis=axis)
+    res_ax = ds.TrajectorySequence.from_arrays(axial_only, [50.0, 50.0, 50.0], dt=1.0).msd(axis=axis)
     assert np.allclose(res_ax.lateral, 0.0, atol=1e-24)
     assert np.allclose(res_ax.axial, res_ax.total, atol=1e-12)
 
