@@ -322,6 +322,7 @@ inline bool euclideanDelta(
 // its batch kernels.
 struct CellFrame {
   mi_cell cell{};
+  FracBox box{};
   std::vector<double> xyz;
   bool ok = false;
 };
@@ -332,6 +333,7 @@ makeCellFrame(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   if (!pointCloudCell(yCloud, &f.cell)) {
     return f;
   }
+  f.box = makeFracBox(yCloud);
   const std::size_t n = yCloud.pts.size();
   f.xyz.resize(3 * n);
   for (std::size_t i = 0; i < n; i++) {
@@ -351,7 +353,16 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
                                 dr) != 0) {
     return -1.0;
   }
-  return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+  const std::size_t ii = 3 * static_cast<std::size_t>(i);
+  const std::size_t jj = 3 * static_cast<std::size_t>(j);
+  const std::array<double, 3> raw = {f.xyz[ii] - f.xyz[jj],
+                                     f.xyz[ii + 1] - f.xyz[jj + 1],
+                                     f.xyz[ii + 2] - f.xyz[jj + 2]};
+  const auto refined =
+      mic::euclideanIfShorter(f.box.lx, f.box.ly, f.box.lz, f.box.xy, f.box.xz,
+                              f.box.yz, raw, {dr[0], dr[1], dr[2]});
+  return refined[0] * refined[0] + refined[1] * refined[1] +
+         refined[2] * refined[2];
 }
 #endif
 
@@ -562,7 +573,14 @@ inline void batchPeriodicDistSq(
           const double q[3] = {qs[3 * k], qs[3 * k + 1], qs[3 * k + 2]};
           double ed[3] = {0.0, 0.0, 0.0};
           if (mi_displacement_euclidean(&cell, q, p, ed) == 0) {
-            distSq[k] = ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
+            const std::array<double, 3> raw = {atom.x - q[0], atom.y - q[1],
+                                               atom.z - q[2]};
+            const auto refined = mic::euclideanIfShorter(
+                b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, {ed[0], ed[1], ed[2]});
+            distSq[k] = refined[0] * refined[0] + refined[1] * refined[1] +
+                        refined[2] * refined[2];
+          } else {
+            distSq[k] = periodicDistSq(b, yCloud, iatom, jatom[k]);
           }
         }
         return;

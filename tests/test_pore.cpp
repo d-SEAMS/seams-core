@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <neighbours.hpp>
 #include <numbers>
 #include <pore.hpp>
@@ -1495,5 +1496,17 @@ TEST_CASE("minimum image rejects a numerically degenerate tilted cell",
   const std::array<double, 3> displacement = {0.4, 0.4 * ly, 0.4};
   REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, ly, 1.0, 0.5, 0.25, 0.0,
                                                  displacement, displacement),
+                    std::runtime_error);
+
+  const std::array<double, 3> finite = {0.25, 0.25, 0.25};
+  const std::array<double, 3> nonfinite = {
+      std::numeric_limits<double>::infinity(), 0.0, 0.0};
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                                                 finite, nonfinite),
+                    std::runtime_error);
+
+  const std::array<double, 3> unresolved = {1.0e16, 0.0, 0.0};
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
+                                                 unresolved, unresolved),
                     std::runtime_error);
 }

@@ -57,11 +57,12 @@ inline Vec3 scale(double s, Vec3 v) { return {s * v.x, s * v.y, s * v.z}; }
 // Half away from zero, matching a truncation after adding just under 1/2.
 inline double roundAway(double x) {
   constexpr double kIntegral = 4503599627370496.0;
-  if (std::abs(x) < kIntegral) {
-    const double t = x + std::copysign(0.49999999999999994, x);
-    return static_cast<double>(static_cast<long long>(t));
+  if (!std::isfinite(x) || std::abs(x) >= kIntegral) {
+    throw std::runtime_error(
+        "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
-  return x;
+  const double t = x + std::copysign(0.49999999999999994, x);
+  return static_cast<double>(static_cast<long long>(t));
 }
 
 struct Obtuse {
@@ -199,6 +200,9 @@ inline double invertColumns(const Vec3 cols[3], double inv[3][3]) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       inv[i][j] = cof[i][j] * invdet;
+      if (!std::isfinite(inv[i][j])) {
+        return 0.0;
+      }
     }
   }
   return std::abs(det);
@@ -264,6 +268,10 @@ inline Vec3 descend(const Obtuse &s, Vec3 x) {
     for (int k = 0; k < 8; k++) {
       const double projection =
           x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
+      if (!std::isfinite(projection)) {
+        throw std::runtime_error(
+            "minimum-image slicer projection exceeds binary64 range");
+      }
       const double gain = std::abs(projection) - s.halfN2[k];
       if (gain > bestGain) {
         bestGain = gain;
@@ -299,6 +307,10 @@ inline Vec3 babai(const Obtuse &s, Vec3 y) {
   const double yv[3] = {y.x, y.y, y.z};
   for (int k = 0; k < 3; k++) {
     c[k] = s.inv[0][k] * yv[0] + s.inv[1][k] * yv[1] + s.inv[2][k] * yv[2];
+    if (!std::isfinite(c[k])) {
+      throw std::runtime_error(
+          "minimum-image Babai coefficient exceeds binary64 range");
+    }
   }
   const double z0 = roundAway(c[0]);
   const double z1 = roundAway(c[1]);
@@ -376,12 +388,21 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
 inline std::array<double, 3>
 euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double yz,
                    const std::array<double, 3> &raw, const std::array<double, 3> &wrapped) {
+  for (double value : wrapped) {
+    if (!std::isfinite(value)) {
+      throw std::runtime_error("minimum-image candidate is not finite");
+    }
+  }
   const Cached &slot = cachedBasis(lx, ly, lz, xy, xz, yz);
   (void)raw;
   const Vec3 w{wrapped[0], wrapped[1], wrapped[2]};
   const Vec3 euc = closestDisplacement(slot.s, w);
   const double f2 = n2(w);
   const double e2 = n2(euc);
+  if (!std::isfinite(f2) || !std::isfinite(e2)) {
+    throw std::runtime_error(
+        "minimum-image squared norm exceeds binary64 range");
+  }
   if (e2 < f2) {
     return {euc.x, euc.y, euc.z};
   }
