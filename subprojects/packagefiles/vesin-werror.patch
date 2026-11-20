@@ -1,0 +1,57 @@
+diff --git a/vesin/src/cpu_cell_list.cpp b/vesin/src/cpu_cell_list.cpp
+--- a/vesin/src/cpu_cell_list.cpp
++++ b/vesin/src/cpu_cell_list.cpp
+@@ -305,7 +305,13 @@ template <typename scalar_t, size_t N>
+ using array_ptr = scalar_t (*)[N];
+ 
+ template <typename scalar_t, size_t N>
+-static array_ptr<scalar_t, N> alloc(array_ptr<scalar_t, N> ptr, size_t size, size_t new_size) {
++static array_ptr<scalar_t, N> alloc(array_ptr<scalar_t, N> ptr,
++#ifdef NDEBUG
++                                     size_t,
++#else
++                                     size_t size,
++#endif
++                                     size_t new_size) {
+     auto* new_ptr = reinterpret_cast<scalar_t(*)[N]>(std::realloc(ptr, new_size * sizeof(scalar_t[N])));
+ 
+     if (new_ptr == nullptr) {
+@@ -321,7 +327,13 @@ static array_ptr<scalar_t, N> alloc(array_ptr<scalar_t, N> ptr, size_t size, siz
+ }
+ 
+ template <typename scalar_t>
+-static scalar_t* alloc(scalar_t* ptr, size_t size, size_t new_size) {
++static scalar_t* alloc(scalar_t* ptr,
++#ifdef NDEBUG
++                      size_t,
++#else
++                      size_t size,
++#endif
++                      size_t new_size) {
+     auto* new_ptr = reinterpret_cast<scalar_t*>(std::realloc(ptr, new_size * sizeof(scalar_t)));
+ 
+     if (new_ptr == nullptr) {
+diff --git a/vesin/src/types.hpp b/vesin/src/types.hpp
+--- a/vesin/src/types.hpp
++++ b/vesin/src/types.hpp
+@@ -20,8 +20,8 @@ public:
+     BoundingBox(Matrix matrix, const bool periodic[3]):
+         matrix_(matrix),
+         periodic_({periodic[0], periodic[1], periodic[2]}),
+-        max_positions_({-1e300, -1e300, -1e300}),
+-        min_positions_({1e300, 1e300, 1e300}) {
++        min_positions_({1e300, 1e300, 1e300}),
++        max_positions_({-1e300, -1e300, -1e300}) {
+ 
+         // find number of periodic directions and their indices
+         int n_periodic = 0;
+diff --git a/vesin/src/vesin.cpp b/vesin/src/vesin.cpp
+--- a/vesin/src/vesin.cpp
++++ b/vesin/src/vesin.cpp
+@@ -136,5 +136,5 @@ extern "C" void vesin_free(VesinNeighborList* neighbors) {
+         return;
+     }
+ 
+-    std::memset(neighbors, 0, sizeof(VesinNeighborList));
++    *neighbors = VesinNeighborList{};
+ }

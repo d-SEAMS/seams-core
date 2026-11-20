@@ -73,6 +73,7 @@ test_sources = {
   'wide_cell': 'test_wide_cell.cpp',
   'offset_limit': 'test_offset_limit.cpp',
   'prism_empty': 'test_prism_empty.cpp',
+  'keep_axial_name': 'test_keep_axial_name.cpp',
   'basal_needle': 'test_basal_needle.cpp',
   'ddc_copies': 'test_ddc_copies.cpp',
   'hc_template': 'test_hc_template.cpp',

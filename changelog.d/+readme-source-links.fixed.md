@@ -1,0 +1,1 @@
+Fixed two README source links so they resolve in-tree: the clang-format configuration now links to `./.clang-format`, and the related-pages note now links to `docs/orgmode/user/index.org` instead of a generated `pages.html`.
