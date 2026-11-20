@@ -253,6 +253,50 @@ TEST_CASE("water names and a selection split oxygen from hydrogen",
   fs::remove(path);
 }
 
+TEST_CASE("confined-fluid names filter residues and map force-field sites",
+          "[chemfiles][confined]") {
+  const std::string path = "traj/confined_water_40.gro";
+  sinp::ChemfilesRead request;
+  request.frame = 1;
+  request.typeFilter = -1;
+  request.load.excludedResidueNames = {"SOLX"};
+  request.load.excludedAtomNames = {"MW"};
+  request.load.typeMap = {
+      {"O_2", 21}, {"N_2", 22}, {"C_3", 23},
+      {"C_2", 24}, {"C_R", 25}, {"H_", 26},
+  };
+  Cloud cloud;
+  cloud = sinp::readChemfiles(path, cloud, request);
+  REQUIRE(cloud.nop == 1320);
+
+  std::map<int, int> count;
+  for (const auto &atom : cloud.pts) {
+    count[atom.type] += 1;
+  }
+  REQUIRE(count[8] == 40);
+  REQUIRE(count[1] == 80);
+  REQUIRE(count[21] == 60);
+  REQUIRE(count[22] == 60);
+  REQUIRE(count[23] == 120);
+  REQUIRE(count[24] == 120);
+  REQUIRE(count[25] == 360);
+  REQUIRE(count[26] == 480);
+
+  request.load.typeMap.clear();
+  Cloud fallback;
+  fallback = sinp::readChemfiles(path, fallback, request);
+  REQUIRE(fallback.nop == cloud.nop);
+  for (const auto &atom : fallback.pts) {
+    REQUIRE(atom.type > 0);
+  }
+
+  request.load.residueNames = {"SOL"};
+  request.load.atomNames = {"OW", "HW1", "HW2"};
+  Cloud water;
+  water = sinp::readChemfiles(path, water, request);
+  REQUIRE(water.nop == 120);
+}
+
 TEST_CASE("a numeric dump guesses type 2 and then type 1", "[chemfiles]") {
   const auto path = dseams_test::freshFile("dseams_chem_types.xyz");
   {

@@ -75,12 +75,54 @@ bool oxygenToken(const std::string &token) {
 
 bool hydrogenToken(const std::string &token) {
   const std::string name = upperToken(token);
-  return name == "H" || name == "HW" || name == "HO";
+  if (name == "H" || name == "HW" || name == "HO") {
+    return true;
+  }
+  return name.size() > 2 && name.rfind("HW", 0) == 0 &&
+         digitsOnly(name.substr(2));
+}
+
+int uffElement(const std::string &token) {
+  const auto underscore = token.find('_');
+  if (underscore == std::string::npos || underscore < 1 || underscore > 2) {
+    return 0;
+  }
+  std::string symbol = token.substr(0, underscore);
+  if (!std::isalpha(static_cast<unsigned char>(symbol[0])) ||
+      (symbol.size() == 2 &&
+       !std::isalpha(static_cast<unsigned char>(symbol[1])))) {
+    return 0;
+  }
+  symbol[0] =
+      static_cast<char>(std::toupper(static_cast<unsigned char>(symbol[0])));
+  if (symbol.size() == 2) {
+    symbol[1] =
+        static_cast<char>(std::tolower(static_cast<unsigned char>(symbol[1])));
+  }
+  if (const auto number = chemfiles::Atom(symbol).atomic_number()) {
+    return static_cast<int>(*number);
+  }
+  return 0;
+}
+
+int mappedSpecies(const chemfiles::Atom &atom,
+                  const sinp::ChemfilesLoadOptions &options) {
+  for (const auto &token : {atom.name(), atom.type()}) {
+    const auto found = options.typeMap.find(token);
+    if (found != options.typeMap.end()) {
+      return found->second;
+    }
+  }
+  return 0;
 }
 
 // Numeric LAMMPS types stay numbers. Element names become atomic numbers,
 // and the water names OW/HW do too when the table has no entry for them.
-int speciesOf(const chemfiles::Atom &atom) {
+int speciesOf(const chemfiles::Atom &atom,
+              const sinp::ChemfilesLoadOptions &options) {
+  if (const int mapped = mappedSpecies(atom, options)) {
+    return mapped;
+  }
   // The token checks run even when the table already has an atomic
   // number. Chemfiles numbers O and H, and also numbers HO as holmium,
   // so a later return would skip the water-name compares entirely.
@@ -105,6 +147,12 @@ int speciesOf(const chemfiles::Atom &atom) {
   if (hydrogen) {
     return 1;
   }
+  if (const int number = uffElement(atom.name())) {
+    return number;
+  }
+  if (const int number = uffElement(atom.type())) {
+    return number;
+  }
   return 0;
 }
 
@@ -120,6 +168,31 @@ void rememberId(molSys::PointCloud<molSys::Point<double>, double> &cloud) {
   cloud.idIndexMap[cloud.pts.back().atomID] = idx;
 }
 
+bool hasName(const std::vector<std::string> &names,
+             const std::string &name) {
+  return std::find(names.begin(), names.end(), name) != names.end();
+}
+
+bool atomWanted(const chemfiles::Topology &topology, std::size_t index,
+                const sinp::ChemfilesLoadOptions &options) {
+  const std::string &atomName = topology[index].name();
+  if ((!options.atomNames.empty() &&
+       !hasName(options.atomNames, atomName)) ||
+      hasName(options.excludedAtomNames, atomName)) {
+    return false;
+  }
+  std::string residueName;
+  if (const auto residue = topology.residue_for_atom(index)) {
+    residueName = residue->name();
+  }
+  if ((!options.residueNames.empty() &&
+       !hasName(options.residueNames, residueName)) ||
+      hasName(options.excludedResidueNames, residueName)) {
+    return false;
+  }
+  return true;
+}
+
 void applyCell(molSys::PointCloud<molSys::Point<double>, double> &cloud,
                const chemfiles::UnitCell &cell) {
   if (cell.shape() == chemfiles::UnitCell::INFINITE) {
@@ -132,6 +205,24 @@ void applyCell(molSys::PointCloud<molSys::Point<double>, double> &cloud,
   nneigh::setBoxFromLengthsAngles(cloud.box, cloud.boxLow, lengths[0],
                                  lengths[1], lengths[2], angles[0], angles[1],
                                  angles[2]);
+}
+
+std::string topologyFor(const std::string &filename) {
+  const auto ext = extensionOf(filename);
+  const auto dot = filename.find_last_of('.');
+  std::string topology;
+  if (ext == "dcd") {
+    topology = filename.substr(0, dot) + ".pdb";
+  } else if (ext == "xtc" || ext == "trr" || ext == "nc") {
+    topology = filename.substr(0, dot) + ".gro";
+  }
+  if (!topology.empty()) {
+    std::ifstream probe(topology);
+    if (probe) {
+      return topology;
+    }
+  }
+  return {};
 }
 
 #endif
@@ -252,7 +343,11 @@ int visitChemFrame(const chemfiles::Frame &frame, const std::size_t *ids,
     int numericTwos = 0;
     for (std::size_t i = 0; i < n; ++i) {
       const int number = atomicNumberOf(topology[i]);
-      const int species = speciesOf(topology[i]);
+      if (!atomWanted(topology, i, request.load)) {
+        wanted[i] = 0;
+        continue;
+      }
+      const int species = speciesOf(topology[i], request.load);
       const bool oxygenName = oxygenToken(topology[i].name());
       const bool oxygenType = oxygenToken(topology[i].type());
       const bool hydrogenName = hydrogenToken(topology[i].name());
@@ -279,7 +374,7 @@ int visitChemFrame(const chemfiles::Frame &frame, const std::size_t *ids,
       if (!wanted[i]) {
         continue;
       }
-      int species = speciesOf(topology[i]);
+      int species = speciesOf(topology[i], request.load);
       const int number = atomicNumberOf(topology[i]);
       // A file with no names and no elements is one species.
       // A GROMACS TRR is that case, and the live module labels it type 1.
@@ -337,15 +432,7 @@ sinp::readChemfiles(std::string filename,
     chemfilesError = "mmCIF file has no data_ block";
     return yCloud;
   }
-  std::string topology;
-  if (extensionOf(filename) == "dcd") {
-    const auto dot = filename.find_last_of('.');
-    const auto pdb = filename.substr(0, dot) + ".pdb";
-    std::ifstream probe(pdb);
-    if (probe) {
-      topology = pdb;
-    }
-  }
+  const std::string topology = topologyFor(filename);
   ChemVisit ctx{&request, &yCloud};
   std::string error;
   std::size_t nsteps = 0;
@@ -394,19 +481,13 @@ int visitChemRange(const chemfiles::Frame &frame, std::size_t step, void *user) 
 
 void sinp::forEachChemfilesStep(
     const std::string &filename, int first, int last, int typeFilter,
+    const ChemfilesLoadOptions &options,
     const std::function<void(
         int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn) {
-  std::string topology;
-  if (extensionOf(filename) == "dcd") {
-    const auto dot = filename.find_last_of('.');
-    const auto pdb = filename.substr(0, dot) + ".pdb";
-    std::ifstream probe(pdb);
-    if (probe) {
-      topology = pdb;
-    }
-  }
+  const std::string topology = topologyFor(filename);
   ChemRange range;
   range.request.typeFilter = typeFilter;
+  range.request.load = options;
   range.fn = &fn;
   const std::size_t from = static_cast<std::size_t>(std::max(first, 1) - 1);
   const std::size_t to = last > 0 ? static_cast<std::size_t>(last - 1)
@@ -425,6 +506,14 @@ void sinp::forEachChemfilesStep(
     molSys::PointCloud<molSys::Point<double>, double> empty;
     fn(std::max(first, 1), empty);
   }
+}
+
+void sinp::forEachChemfilesStep(
+    const std::string &filename, int first, int last, int typeFilter,
+    const std::function<void(
+        int, molSys::PointCloud<molSys::Point<double>, double> &)> &fn) {
+  forEachChemfilesStep(filename, first, last, typeFilter,
+                       ChemfilesLoadOptions{}, fn);
 }
 
 bool sinp::forEachChemfilesFrame(
@@ -729,7 +818,8 @@ bool dumpFrameIsOneToN(const std::string &path, int frame) {
 
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::openFrame(const std::string &filename, int frame, int typeI,
-                const std::string &selection) {
+                const std::string &selection,
+                const ChemfilesLoadOptions &options) {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   if (extensionOf(filename) == "con") {
 #ifdef SEAMS_HAS_READCON
@@ -743,6 +833,7 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
   ChemfilesRead request;
   request.frame = frame;
   request.selection = selection;
+  request.load = options;
   if (!selection.empty()) {
     request.typeFilter = typeI > 0 ? typeI : -1;
   } else if (typeI < 0) {

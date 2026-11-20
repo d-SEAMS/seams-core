@@ -99,6 +99,19 @@ if get_option('with_tests')
   )
   test('seams_lang_frames', seams_frames_test, timeout: 60)
 
+  if chemfiles_dep.found()
+    test(
+      'chemfiles_load_options_python',
+      find_program('python3', required: true),
+      args: [
+        meson.project_source_root() / 'tests' / 'test_chemfiles_options.py',
+        seams_lang.full_path(),
+        meson.project_source_root() / 'input' / 'traj' / 'confined_water_40.gro',
+      ],
+      depends: seams_lang,
+    )
+  endif
+
   # ctypes checks of libseams_lang and libyodaLib. The language bindings
   # live in their own repositories; see docs/orgmode/contributing/repositories.org.
   if get_option('with_cli') and not get_option('b_sanitize').contains('address')

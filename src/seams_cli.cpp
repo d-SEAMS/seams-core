@@ -42,6 +42,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -88,7 +89,13 @@ const char *iceName(molSys::atom_state_type s) {
   return "unclassified";
 }
 
-Cloud load(const std::string &path, int frame, int typeI) {
+bool chemfilesSuffix(std::string_view ext) {
+  return ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
+         ext == "trr" || ext == "nc";
+}
+
+Cloud load(const std::string &path, int frame, int typeI,
+           const sinp::ChemfilesLoadOptions &options = {}) {
   Cloud cloud;
   const auto ext = path.substr(path.find_last_of('.') + 1);
   if (ext == "xyz") {
@@ -106,10 +113,14 @@ Cloud load(const std::string &path, int frame, int typeI) {
     throw std::runtime_error("readcon-core is not in this build; CON input needs it");
 #endif
   }
-  if (ext == "pdb" || ext == "gro" || ext == "dcd") {
+  if (chemfilesSuffix(ext)) {
 #ifdef SEAMS_HAS_CHEMFILES
     const int filter = typeI < 0 ? -1 : (typeI > 0 ? typeI : -1);
-    return sinp::readChemfiles(path, frame, cloud, filter);
+    sinp::ChemfilesRead request;
+    request.frame = frame;
+    request.typeFilter = filter;
+    request.load = options;
+    return sinp::readChemfiles(path, cloud, request);
 #else
     throw std::runtime_error("chemfiles is not in this build; " + ext + " input needs it");
 #endif
@@ -143,6 +154,56 @@ std::string_view trimView(std::string_view s) {
   return s.substr(first, last - first + 1);
 }
 
+void appendNameList(std::string_view value, std::vector<std::string> &out) {
+  std::size_t begin = 0;
+  while (begin <= value.size()) {
+    const auto comma = value.find(',', begin);
+    const auto token = trimView(value.substr(
+        begin, comma == std::string_view::npos ? value.size() - begin
+                                               : comma - begin));
+    if (token.empty()) {
+      throw std::invalid_argument("empty name in filter");
+    }
+    out.emplace_back(token);
+    if (comma == std::string_view::npos) {
+      break;
+    }
+    begin = comma + 1;
+  }
+}
+
+void appendTypeMap(std::string_view value,
+                   std::unordered_map<std::string, int> &out) {
+  std::size_t begin = 0;
+  while (begin <= value.size()) {
+    const auto comma = value.find(',', begin);
+    const auto entry = trimView(value.substr(
+        begin, comma == std::string_view::npos ? value.size() - begin
+                                               : comma - begin));
+    const auto equals = entry.find('=');
+    if (equals == std::string_view::npos) {
+      throw std::invalid_argument("bad --type-map (want NAME=ID)");
+    }
+    const auto name = trimView(entry.substr(0, equals));
+    const auto idText = trimView(entry.substr(equals + 1));
+    const int id = parseIntegral<int>(idText);
+    if (name.empty() || id <= 0) {
+      throw std::invalid_argument(
+          "bad --type-map (NAME must be nonempty and ID positive)");
+    }
+    const auto found = out.find(std::string(name));
+    if (found != out.end() && found->second != id) {
+      throw std::invalid_argument("conflicting --type-map for " +
+                                  std::string(name));
+    }
+    out[std::string(name)] = id;
+    if (comma == std::string_view::npos) {
+      break;
+    }
+    begin = comma + 1;
+  }
+}
+
 //! How a frame range is read: an indexed LAMMPS dump, one XYZ frame, or a
 //! reader that loads frame by frame until one is missing
 enum class FrameSource { dump, xyz, serial };
@@ -153,7 +214,7 @@ FrameSource frameSource(const std::string &path) {
   if (ext == "xyz") {
     return FrameSource::xyz;
   }
-  if (ext == "con" || ext == "pdb" || ext == "gro" || ext == "dcd") {
+  if (ext == "con" || chemfilesSuffix(ext)) {
     return FrameSource::serial;
   }
   return FrameSource::dump;
@@ -161,13 +222,15 @@ FrameSource frameSource(const std::string &path) {
 
 template <typename Fn>
 bool forEachInputFrame(const std::string &path, int first, int last,
-                       int typeFilter, int nThreads, Fn &&fn, int part = 0,
+                       int typeFilter, int nThreads,
+                       const sinp::ChemfilesLoadOptions &options, Fn &&fn,
+                       int part = 0,
                        int parts = 1) {
   const FrameSource source = frameSource(path);
   if (source == FrameSource::xyz) {
     // last is an int, so last <= 0 || last >= 1 holds for every value.
     if (first <= 1) {
-      Cloud cloud = load(path, 1, typeFilter);
+      Cloud cloud = load(path, 1, typeFilter, options);
       fn(1, cloud);
     }
     return true;
@@ -206,20 +269,23 @@ bool forEachInputFrame(const std::string &path, int first, int last,
     {
       const int filter = typeFilter > 0 ? typeFilter : -1;
       bool stopped = false;
-      sinp::forEachChemfilesStep(path, first, lastFrame, filter, [&](int frame, Cloud &cloud) {
-        if (stopped || (cloud.nop == 0 && frame != std::max(1, first))) {
-          stopped = true;
-          return;
-        }
-        fn(frame, cloud);
-        stopped = cloud.nop == 0;
-      });
+      sinp::forEachChemfilesStep(path, first, lastFrame, filter, options,
+                                [&](int frame, Cloud &cloud) {
+                                  if (stopped ||
+                                      (cloud.nop == 0 &&
+                                       frame != std::max(1, first))) {
+                                    stopped = true;
+                                    return;
+                                  }
+                                  fn(frame, cloud);
+                                  stopped = cloud.nop == 0;
+                                });
       return true;
     }
 #endif
     const int stop = last;
     for (int frame = std::max(1, first); frame <= stop; ++frame) {
-      Cloud cloud = load(path, frame, typeFilter);
+      Cloud cloud = load(path, frame, typeFilter, options);
       if (cloud.nop == 0 && frame != std::max(1, first)) {
         break;
       }
@@ -2046,6 +2112,7 @@ int main(int argc, char *argv[]) {
   std::string outputFormat = "text";
   std::string chillRule;
   bool chillRuleSet = false;
+  sinp::ChemfilesLoadOptions loadOptions;
 
   const char *progname = argv[0];
   Parser parser;
@@ -2126,6 +2193,41 @@ int main(int argc, char *argv[]) {
                        "density-z: 0 is every atom)")
                  .handler([&](std::string_view value) {
                    typeI = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--resname")
+                 .argName("NAME[,NAME...]")
+                 .help("Keep chemfiles residues with these names")
+                 .handler([&](std::string_view value) {
+                   appendNameList(value, loadOptions.residueNames);
+                 }));
+
+  parser.add(Option("--exclude-resname")
+                 .argName("NAME[,NAME...]")
+                 .help("Exclude chemfiles residues with these names")
+                 .handler([&](std::string_view value) {
+                   appendNameList(value, loadOptions.excludedResidueNames);
+                 }));
+
+  parser.add(Option("--atomname")
+                 .argName("NAME[,NAME...]")
+                 .help("Keep chemfiles atoms with these names")
+                 .handler([&](std::string_view value) {
+                   appendNameList(value, loadOptions.atomNames);
+                 }));
+
+  parser.add(Option("--exclude-atomname")
+                 .argName("NAME[,NAME...]")
+                 .help("Exclude chemfiles atoms with these names")
+                 .handler([&](std::string_view value) {
+                   appendNameList(value, loadOptions.excludedAtomNames);
+                 }));
+
+  parser.add(Option("--type-map")
+                 .argName("NAME=ID[,NAME=ID...]")
+                 .help("Override chemfiles atom names with positive type IDs")
+                 .handler([&](std::string_view value) {
+                   appendTypeMap(value, loadOptions.typeMap);
                  }));
 
   parser.add(Option("--l")
@@ -2844,7 +2946,7 @@ int main(int argc, char *argv[]) {
       return cmdDomains(os, cloud, cutoff, siteTable, domainKind);
     }
     if (cmd == "hbonds") {
-      Cloud hCloud = load(file, cloud.currentFrame, htype);
+      Cloud hCloud = load(file, cloud.currentFrame, htype, loadOptions);
       return cmdHbonds(os, cloud, hCloud, cutoff, typeI, hdist, hangle,
                        allDonors);
     }
@@ -2880,7 +2982,7 @@ int main(int argc, char *argv[]) {
 #endif
     Cloud cloud;
     try {
-      cloud = load(file, frame, loadType);
+      cloud = load(file, frame, loadType, loadOptions);
     } catch (...) {
       std::cerr << colorizer.error(exceptionText()) << "\n";
       return 2;
@@ -2903,7 +3005,7 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<FrameCarry> walkCarry;
   auto processFrame = [&](int fr, Cloud &cloud) {
         if (typeFilter <= 0 && cloud.nop == 0) {
-          cloud = load(file, cloud.currentFrame, loadType);
+          cloud = load(file, cloud.currentFrame, loadType, loadOptions);
         }
         std::ostringstream line;
         FrameCarry fresh(false);
@@ -2942,7 +3044,8 @@ int main(int argc, char *argv[]) {
   // before the gather leaves the other rank blocked in MPI_Gatherv.
   std::string frameError;
   try {
-    forEachInputFrame(file, lo, hi, typeFilter, jobs, processFrame, part, parts);
+    forEachInputFrame(file, lo, hi, typeFilter, jobs, loadOptions,
+                      processFrame, part, parts);
   } catch (...) {
     frameError = exceptionText();
     std::cerr << colorizer.error(frameError) << "\n";
