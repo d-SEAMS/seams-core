@@ -448,16 +448,6 @@ def main():
     if ruled.returncode != 0:
         sys.stderr.write("env rule failed\n" + ruled.stderr)
         return 1
-    for args in (
-        ["read", "missing-cli.pdb"],
-        ["read", "missing-cli.gro"],
-        ["--frame", "1", "--last", "2", "read", "missing-cli.pdb"],
-        ["--frame", "1", "--last", "2", "read", "missing-cli.dcd"],
-    ):
-        probed = run(seams, args)
-        if probed.returncode != 0:
-            sys.stderr.write("aborted " + " ".join(args) + " " + str(probed.returncode) + "\n")
-            return 1
     off = os.environ.copy()
     off["SEAMS_OFFLOAD"] = "1"
     reached = run(seams, ["cages", ice, "--type", "1", "--graph", "cutoff"], off)
@@ -512,14 +502,9 @@ def main():
         ["pairs", ions, "--site", "1=waterO"],
         ["pairs", ions, "--site", "1=waterH"],
         ["pairs", ions, "--site", "1=solvent"],
-        ["--frame", "1", "--last", "2", "read", "missing-range.gro"],
-        ["--frame", "1", "--last", "2", "read", "missing-range.dcd"],
         ["--frame", "5", "--last", "6", "read", "input/xyz/configuration.xyz"],
         ["read", "input/baretraj"],
         ["--frame", "1", "--last", "2", "read", "input/baretraj"],
-        ["--type", "0", "read", "missing-type.pdb"],
-        ["--type", "2", "read", "missing-type.pdb"],
-        ["--type", "-1", "read", "missing-type.gro"],
         ["f4", ions, "--type", "0", "--htype", "1"],
         ["rdf", ions, "--type", "0"],
         ["cn", ions, "--type", "0"],
@@ -548,17 +533,12 @@ def main():
         ["rdf", tip, "--bins", "0", "--type", "2"],
         ["cn", empty, "--type", "1"],
         ["hbonds", ice, "--type", "1", "--htype", "1", "--hdist", "0.1"],
-        ["read", "missing-edge.pdb"],
-        ["read", "missing-edge.gro"],
-        ["read", "missing-edge.dcd"],
-        ["--frame", "1", "--last", "2", "read", "missing-edge.pdb"],
         ["read", gro],
         ["read", pdb],
         ["--frame", "1", "--last", "2", "read", gro],
         ["--frame", "1", "--last", "3", "read", gro],
         ["--frame", "1", "--last", "2", "read", pdb],
         ["--type", "0", "read", pdb],
-        ["--type", "2", "read", pdb],
         ["--type", "-1", "read", gro],
         ["--format", "json", "--frame", "1", "--last", "2", "read", gro],
         ["--jobs", "2", "--frame", "1", "--last", "2", "read", "input/xyz/configuration.xyz"],
@@ -587,7 +567,6 @@ def main():
         ["cages", ice, "--type", "1", "--signature", "512", "--guest-types", "9",
          "--guest-radius", "1", "--shape"],
         ["--frame", "1", "--last", "2", "chill", gro, "--type", "0"],
-        ["hbonds", pdb, "--type", "0", "--htype", "1", "--donors"],
         ["density-z", empty, "--type", "0", "--bins", "0", "--axis", "z"],
         ["cn", pdb, "--type", "0", "--bins", "0"],
         ["rdf", pdb, "--type", "-1", "--bins", "2"],
@@ -604,6 +583,21 @@ def main():
             sys.stderr.write("aborted " + " ".join(args) + " " + str(result.returncode) + "\n")
             failed = True
     for args in (
+        ["read", "missing-cli.pdb"],
+        ["read", "missing-cli.gro"],
+        ["--frame", "1", "--last", "2", "read", "missing-cli.pdb"],
+        ["--frame", "1", "--last", "2", "read", "missing-cli.dcd"],
+        ["--frame", "1", "--last", "2", "read", "missing-range.gro"],
+        ["--frame", "1", "--last", "2", "read", "missing-range.dcd"],
+        ["--type", "0", "read", "missing-type.pdb"],
+        ["--type", "2", "read", "missing-type.pdb"],
+        ["--type", "-1", "read", "missing-type.gro"],
+        ["read", "missing-edge.pdb"],
+        ["read", "missing-edge.gro"],
+        ["read", "missing-edge.dcd"],
+        ["--frame", "1", "--last", "2", "read", "missing-edge.pdb"],
+        ["--type", "2", "read", pdb],
+        ["hbonds", pdb, "--type", "0", "--htype", "1", "--donors"],
         ["read", "missing-edge.con"],
         ["--pair-types", "nope", "rdf", tip],
         ["--site", "zz=cationHead", "pairs", tip],
