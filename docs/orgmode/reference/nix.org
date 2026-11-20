@@ -58,14 +58,17 @@ the wraps =readcon-core.wrap=, =readcon-db.wrap=, =linkcell.wrap=,
 C ABI in =bindings/cxx=).
 
 ~with_backward~ stays enabled despite ~mesonAutoFeatures = "disabled"~:
-a ~postPatch~ phase fetches the pinned upstream v1.6 tarball and the
-WrapDB patch (the same two pieces =subprojects/backward-cpp.wrap=
-names) with two ~fetchurl~ derivations, and unpacks them into
-~subprojects/backward-cpp-1.6~ before Meson configures. Meson then
-finds that subproject's own ~meson.build~ already on disk and never
-needs network for it, the same mechanism
-=recipe/recipe.yaml= and =packaging/yggdrasil/L/libseams/build_tarballs.jl=
-use for the conda-forge and Yggdrasil packages.
+one ~fetchurl~ derivation pulls the pinned upstream v1.6 tarball
+(=subprojects/backward-cpp.wrap='s own ~source_url~/~source_hash~),
+and a ~postPatch~ phase unpacks it into
+~subprojects/backward-cpp-1.6~ and copies
+=subprojects/packagefiles/backward-cpp= (already part of the
+derivation's source fileset above) on top of it, the same three files
+the wrap's own ~patch_directory~ overlays. Meson then finds that
+subproject's own ~meson.build~ already on disk and never needs
+network for it, the same mechanism =recipe/recipe.yaml= and
+=packaging/yggdrasil/L/libseams/build_tarballs.jl= use for the
+conda-forge and Yggdrasil packages.
 
 * What stays off
 

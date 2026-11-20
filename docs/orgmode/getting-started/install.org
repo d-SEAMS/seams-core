@@ -78,12 +78,15 @@ into ~subprojects/packagecache~ and extracts them, after which
 resolves every one of them from disk, with no further network access.
 The packaged builds that must stay fully offline (~recipe/recipe.yaml~
 for conda-forge, ~packaging/yggdrasil/L/libseams/build_tarballs.jl~ for
-Yggdrasil, and ~nix/package.nix~'s ~fetchurl~ pair) use the same
-mechanism for backward-cpp specifically: each pre-seeds
-~subprojects/backward-cpp-1.6~ from the wrap's own pinned
-~source_hash~/~patch_hash~ before the network-free build script runs,
-so Meson finds that one subproject already on disk without needing
-~meson subprojects download~ to have covered it too.
+Yggdrasil, and ~nix/package.nix~'s ~fetchurl~) use the same mechanism
+for backward-cpp specifically: each fetches the upstream tarball
+pinned to the wrap's own ~source_hash~, then overlays
+~subprojects/packagefiles/backward-cpp~ on top of it (the same three
+files the wrap's own ~patch_directory~ applies; the wrap carries no
+~patch_hash~, since nothing is fetched for that part), landing
+~subprojects/backward-cpp-1.6~ already on disk before the
+network-free build script runs, so Meson finds that one subproject
+without needing ~meson subprojects download~ to have covered it too.
 
 * pixi
 
