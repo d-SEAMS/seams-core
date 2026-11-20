@@ -10,6 +10,82 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.2] - 2026-11-19
+
+### Changed
+
+- Public documentation now contains reader instructions and scientific results only. Maintainer workflows, repository policy, provenance pins, and video-production notes have moved out of the published manual.
+
+### Fixed
+
+- Split docs reader text checks from live package-registry validation. Meson
+  `docs_reader_text` now stays offline while still parsing install claims, and CI
+  runs live registry claim checks in a dedicated docs workflow job.
+- The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
+- `docs_science_tutorials` keeps a 180 s timeout. An AddressSanitizer build runs the test serially instead of allowing 900 s: under contention the tutorial took 212 s, and alone it took 22.6 s.
+
+## [2.14.1] - 2026-11-16
+
+### Added
+
+- The release upload now checks the linux-x86_64 tarball in fresh Ubuntu
+  22.04, Rocky Linux 9, and Debian 12 containers. Each check compiles
+  `docs/examples/quickstart.c` with the `pkg-config` flags for `seams` and
+  runs it on an eight-molecule ice frame.
+- The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
+
+### Changed
+
+- The pixi full-suite now fails whenever a test is skipped, so a passing
+  run confirms that the required analyses and documentation checks all ran.
+
+  `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
+  `compute dseams`; Meson errors unless `lammps_src_include` points to
+  matching sources.
+- Linux release binaries build inside manylinux_2_28 and need glibc 2.28 or newer.
+- On glibc the first library call raises the heap trim threshold to 256 MiB and the mmap threshold to 32 MiB, so the buffers one call frees are reused by the next instead of being faulted in again. The same call varied by 10 to 30 percent between runs before. The setting is process-wide; `SEAMS_MALLOC_TUNE=0` skips it, and a caller that set `MALLOC_*_` or a `glibc.malloc` tunable keeps its own values.
+- The k-nearest neighbour graph scales with OpenMP threads. linkcell 0.4.3 scatters the k-nearest mesh by bin owner, builds the graph rows and the CSR in the search's own parallel region and keeps a one-thread search on one thread; no OpenMP team is started for the call. Neighbour order is unchanged, ties included, at every thread count. On 110592-molecule ice Ic in the omp-scaling sitting of source tree 1c41a929, `seams_neighbours_knn` with four neighbours takes 40.6, 22.5, 13.0 and 7.9 ms at 1, 2, 4 and 8 threads instead of 58.2, 45.6, 37.0 and 33.2; on 884736 molecules it takes 62.5 ms at 8 threads instead of 279.8. In the same sitting OVITO takes 17.7 ms, mdapy 2.0.0 17.0 ms, freud 3.6.1 23.7 ms and pyscal3 4.1.0 103.5 ms for the same graph at 8 threads.
+- Rings with symmetry codes build the atom-to-ring index on the team and no longer copy a frame whose rings all have one size before the cage and prism passes. `seams_rings_find` on 110592-molecule ice Ic takes 31.3 ms at 8 threads instead of 36.6, 4.1 times faster than 1 thread instead of 3.5, and 302 ms instead of 358 on 884736 molecules. The 1-thread times are no slower, and every label is identical to the previous build at 1, 3 and 8 threads.
+- The linux-x86_64 archive loads the system OpenMP runtime (`libgomp1` on Debian and Ubuntu, `libgomp` on RHEL).
+- The linux-x86_64 release notes record the glibc version, OpenMP runtime, pkg-config prefix, and binding versions measured for that build.
+
+### Fixed
+
+- Source archives now include every subproject, the patched chemfiles
+  source, and pinned tutorial inputs, so users can build and test in
+  offline environments.
+- The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
+- The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
+- Malformed MOL2 and mmCIF files that chemfiles refuses now report a read error through the C API and every language binding instead of returning a frame with zero atoms.
+- A ThreadSanitizer death fails the TSan C API suite. The suite runs with `exitcode=0` so that the libgomp barrier races do not fail it, and that was also the exit status of a FATAL, a CHECK failure or a deadly signal, in the suite and in each `capi_cpp_ref` it starts, so a crashed reference still left "capi suite ok". `abort_on_error=1` makes such a death SIGABRT, and `tests/capi_tsan_gate.py` passes the suite only on exit 0, a "capi suite ok" line, and no ThreadSanitizer output but data races among the main thread and the libgomp workers it started.
+- The docs publish job drew every molecule still twice at 4096 px and 256 samples, so Publish the book sat on the runner for hours. The delivered pictures are 2048 px, and a denoised 64-sample frame at that size matches the old stills. The job now stops if it runs for more than two hours.
+- Library calls cope better when other processes keep the cores busy. Placement reads the threads other processes have runnable: beside a few it narrows the team to the free cpus and leaves it unplaced, and beside half the mask or more it leaves the team to the scheduler and runs the cutoff list, cutoff q_l, CHILL+ and the shell match as stages whose chunks linkcell's pool claims, so no stage waits for a worker the scheduler has parked. A lone team narrower than the mask is not pinned. Linkcell's pool keeps the requested width when the OpenMP team is narrowed, the k-nearest graph passes are handed out in parts, a full-width fork that waits out a time slice halves the team at once, and the frame calls of the R and Julia fronts narrow as the C API does. Beside an 8-thread spinner on 8 cores, the 884736-molecule k-nearest graph takes 114 ms bound and 110 ms unbound instead of 345 and 365 (OVITO 209 and 207), and on 110592 molecules 20.0 ms bound and 19.1 ms unbound instead of 54.5 and 59.1 (OVITO 28.2 and 28.3). q6 on 110592 molecules takes 12.2 ms bound and 11.1 ms unbound (OVITO 23.6 and 23.2).
+- Worker placement now stays inside the host mask and is undone when the call returns. `SEAMS_PIN=0` leaves placement to the host. `OMP_PROC_BIND`, `OMP_PLACES`, `GOMP_CPU_AFFINITY`, `KMP_AFFINITY`, and a caller already bound to one cpu are left as the host set them. Several copies of the program share the mask in disjoint slices instead of all pinning worker i to cpu i.
+- An unbound 8-thread team no longer stalls when another thread is runnable. When the team fills the mask on an otherwise idle machine, workers take one allowed cpu each unless `OMP_PROC_BIND` is already set, and linkcell's pool keeps that cpu list instead of inheriting the caller's pin. With only `OMP_NUM_THREADS=8`, neighbours and q6 on 110592-molecule ice Ic take 2.4 ms each in one fresh process, ahead of the 13.0 ms (OVITO q6) and 17.0 ms (mdapy k-nearest graph) rival times.
+- `docs_science_tutorials` and the science snippet pages run the Julia and R tutorials from the bindings they moved to. With `julia` on PATH, the Julia leg runs `examples/science_tutorials.jl` of the developed Dseams.jl against this build's libseams; with `Rscript`, the R leg runs the `examples/science_tutorials.R` that the installed dseams package carries. They ran `docs/examples/science_tutorials.jl`, `science_tutorials.R` and `science_r.c`, which left with the bindings, and failed wherever Julia or R was installed. A missing Dseams.jl or dseams fails the tutorial and names the binding.
+- Ring and cage search diagnostics stay on the calling thread. Concurrent searches no longer share the process-global profile, phase and split records, and an OpenMP team copies the calling thread's flags when it starts.
+- The k-nearest degree scan starts after the linkcell pool joins, so it no longer reads a row while that row is still being stored.
+- The cage invariance fuzzer sizes its trial pool to the CPUs the process may run on.
+- C API fuzzers built with `b_sanitize=thread` link `-fsanitize=thread,fuzzer` and the shared thread runtime.
+- A ThreadSanitizer build gives plumed, gmx and lmp the unsanitized plugin, because those hosts cannot map `libclang_rt.tsan`. Interpreter shims map that runtime before they dlopen `libseams`.
+- The serial LAMMPS hook calls `lammps_mpi_finalize` after `lammps_close`, which frees the ReadData and Run commands the stub would otherwise leave allocated. The MPI build still calls `MPI_Finalize`.
+- `docs_science_tutorials` keeps a 180 s timeout, and allows 900 s when `b_sanitize` is set. Alone under AddressSanitizer the tutorial takes about 24 s; in the full sanitizer suite it shares the cores and takes more than 180 s.
+- The fused k-nearest graph and linkcell's stage runner are used when that library provides `lc_knearest_csr` and `lc_team_run`. A linkcell 0.4.2 build keeps the in-tree graph and the OpenMP stages.
+- `docs_video_tapes` compares the seams census and the rest of the recording, and no longer treats a LAMMPS warning or its docs URL as part of that result.
+- `docs_sh_cell` compiles its header snippet with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
+- The sanitizer suite does not preload libasan into the meson test process. Interpreter wrappers and the cargo test runner map it for the process that hosts libseams. Host shells, compilers, and `mpirun` do not inherit it. `pin_host` exports the runtime only to its MPI ranks, turns off Open MPI's memory patcher for that launch, and turns leak detection off for those ranks. Open MPI and PMIx keep allocations until the rank exits, and those frames are not added to the suppression list.
+- `chill::cutoffSolid` calls `seams::ylm::ylmAdd8` only when `SEAMS_YLM_AVX512` is set. That function is built only on x86-64. The call used to stay in the binary at -O0 on every other machine, and a debug macOS arm64 link failed with the symbol undefined. `ylm_add8_o0` compiles that file at -O0 without the flag and rejects an undefined `ylmAdd8`.
+- `scripts/sanitize_thread.sh` links with the host `ld`. The conda `ld` took `libdl.so.2` from the conda sysroot and libc from the host, so meson rejected `-fsanitize=thread`. `scripts/build_tsan_openmp.sh` builds Archer from the LLVM release that matches clang. A libomp from an older release left `__kmpc_dispatch_deinit` undefined when the tests loaded it.
+- `pin_host` is registered on Linux only. It reads cpu masks with `sched_getaffinity` and the proc filesystem, and the placement it checks exists only on Linux. On macOS it stopped at the missing `libyodaLib.so`, and it could not have passed with the dylib either.
+- The default pixi environment installs OpenMM on macOS, so `docs_engine_openmm` and the engine walkthrough run it there. The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
+- `seams.pc` and the other pkg-config files in the Linux tarball use `prefix=${pcfiledir}/../..`, so the link line follows wherever the tarball is unpacked.
+- `seams_system_read` in the Linux tarball reads .con files, because the release build turns the readcon reader on.
+- The release recipe enables the .con reader when `SEAMS_WITH_READCON=enabled`. A checkout that already contains the readcon wrap leaves the reader off, as does the conda-forge archive.
+- The four-process placement check runs on a four-cpu mask. Each process keeps one cpu, and a sample counts that cpu. A lone process still has to show two cpus in the same sample.
+- The docs workflow check reads `contents: write` from the build-deploy job and stops at the next job.
+- The documentation build rewrites sitemap entries to lowercase extensionless routes after the link and metadata pass, and video end cards no longer include publication-status text.
+- d-SEAMS builds against an installed chemfiles 0.10.4 or a later 0.10 release, including the copy in Chemfiles_jll. The build finds it through `-Dchemfiles_dir`, pkg-config or the CMake package. A cross build with `-Dwith_chemfiles=auto` that finds no chemfiles stops with an error that lists the places it searched, and never builds a copy for the build machine. The option `-Duse_vendored_chemfiles` takes `auto`, `enabled` or `disabled`. CMake builds take `SEAMS_CHEMFILES_DIR` and `SEAMS_USE_VENDORED_CHEMFILES`. With an installed chemfiles 0.10.4, d-SEAMS refuses a MOL2 file with no counts line and an mmCIF file with no `label_entity_id` column and an unset `label_seq_id`. Each gives a message where it used to crash.
+
 ## [2.14.0] - 2026-11-15
 
 ### Added
