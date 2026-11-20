@@ -1989,8 +1989,11 @@ SEAMS_API seams_status seams_system_set_hydrogen_frame(
  * dist_cutoff. The angle is kept when it is less than or equal to
  * angle_cutoff. The pair list keeps a donor and acceptor only when their
  * minimum image is strictly below pair_cutoff, on an orthorhombic or
- * triclinic cell. Each hydrogen is assigned to the nearest donor-type
- * heavy atom that shares its molID, and the lower index wins a tie.
+ * triclinic cell. For a triclinic cell, every face separation must be at
+ * least twice pair_cutoff; a thinner cell can miss valid pairs. Each
+ * hydrogen is assigned to the nearest heavy atom that shares its molID,
+ * then kept only when that atom's type is in donor_types. The lower index
+ * wins a distance tie.
  * exclude_same_mol of 1 drops a pair that shares a molID. An empty donor
  * set or acceptor set writes zero edges. Atoms whose type equals
  * hydrogen_type are hydrogens and are never donors or acceptors.

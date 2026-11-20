@@ -92,7 +92,6 @@ RAW = {
         ("seams_system_destroy", "Free a frame handle.", "sys", "handle"),
         ("seams_system_set_frame", "Store points and a general LAMMPS cell.", "sys; xyz; n; box9; types; ids", "coordinates and box lengths in angstrom; n is a dimensionless count"),
         ("seams_system_set_hydrogen_frame", "Store a heavy-atom cloud and a separate hydrogen cloud.", "sys; heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9; box_len", "coordinates and box lengths in angstrom"),
-        ("seams_system_set_hydrogen_frame", "Store a heavy-atom cloud and a separate hydrogen cloud.", "sys; heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9; box_len", "coordinates and box lengths in angstrom"),
         ("seams_system_set_ortho", "Store points and an orthorhombic cell.", "sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids", "origin and edge lengths in angstrom"),
         ("SEAMS_CAGE_BOTH", "Atom that belongs to both cage types.", "none", "dimensionless code 3"),
         ("SEAMS_CAGE_CUBIC", "Atom that belongs only to a double-diamond cage.", "none", "dimensionless code 2"),
