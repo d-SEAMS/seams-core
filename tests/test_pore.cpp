@@ -140,31 +140,92 @@ double nearestAxisRadius(const Face2 &face, double du, double dv) {
   return best;
 }
 
-double coveringRadius(const double u[2], const double v[2]) {
-  double b1[2] = {u[0], u[1]};
-  double b2[2] = {v[0], v[1]};
+struct Reduced2 {
+  double b1[2];
+  double b2[2];
+  double cover;
+  double inscribed;
+};
+
+Reduced2 reduceLattice(const double u[2], const double v[2]) {
+  Reduced2 out{{u[0], u[1]}, {v[0], v[1]}, 0.0, 0.0};
   for (int step = 0; step < 32; ++step) {
-    const double n1 = b1[0] * b1[0] + b1[1] * b1[1];
-    const double n2 = b2[0] * b2[0] + b2[1] * b2[1];
+    const double n1 = out.b1[0] * out.b1[0] + out.b1[1] * out.b1[1];
+    const double n2 = out.b2[0] * out.b2[0] + out.b2[1] * out.b2[1];
     if (n1 > n2) {
-      std::swap(b1[0], b2[0]);
-      std::swap(b1[1], b2[1]);
+      std::swap(out.b1[0], out.b2[0]);
+      std::swap(out.b1[1], out.b2[1]);
     }
-    const double base = b1[0] * b1[0] + b1[1] * b1[1];
-    const double m = std::round((b1[0] * b2[0] + b1[1] * b2[1]) / base);
+    const double base = out.b1[0] * out.b1[0] + out.b1[1] * out.b1[1];
+    const double m = std::round((out.b1[0] * out.b2[0] + out.b1[1] * out.b2[1]) / base);
     if (m == 0.0) {
-      if (b1[0] * b2[0] + b1[1] * b2[1] < 0.0) {
-        b2[0] = -b2[0];
-        b2[1] = -b2[1];
+      if (out.b1[0] * out.b2[0] + out.b1[1] * out.b2[1] < 0.0) {
+        out.b2[0] = -out.b2[0];
+        out.b2[1] = -out.b2[1];
       }
-      const double cross = std::abs(b1[0] * b2[1] - b1[1] * b2[0]);
-      return std::hypot(b1[0], b1[1]) * std::hypot(b2[0], b2[1]) *
-             std::hypot(b1[0] - b2[0], b1[1] - b2[1]) / (2.0 * cross);
+      const double cross = std::abs(out.b1[0] * out.b2[1] - out.b1[1] * out.b2[0]);
+      const double e1 = std::hypot(out.b1[0], out.b1[1]);
+      const double e2 = std::hypot(out.b2[0], out.b2[1]);
+      const double e3 = std::hypot(out.b1[0] - out.b2[0], out.b1[1] - out.b2[1]);
+      out.cover = e1 * e2 * e3 / (2.0 * cross);
+      out.inscribed = 0.5 * std::min(e1, std::min(e2, e3));
+      return out;
     }
-    b2[0] -= m * b1[0];
-    b2[1] -= m * b1[1];
+    out.b2[0] -= m * out.b1[0];
+    out.b2[1] -= m * out.b1[1];
   }
-  return 0.0;
+  return out;
+}
+
+double coveringRadius(const double u[2], const double v[2]) { return reduceLattice(u, v).cover; }
+
+// Polar area of the Voronoi cell of a reduced lattice clipped by a disk.
+// The six Voronoi-relevant vectors are ±b1, ±b2, ±(b1−b2).
+double voronoiPolar(const Reduced2 &lat, double radius) {
+  const double w[6][2] = {
+      {lat.b1[0], lat.b1[1]},
+      {-lat.b1[0], -lat.b1[1]},
+      {lat.b2[0], lat.b2[1]},
+      {-lat.b2[0], -lat.b2[1]},
+      {lat.b1[0] - lat.b2[0], lat.b1[1] - lat.b2[1]},
+      {lat.b2[0] - lat.b1[0], lat.b2[1] - lat.b1[1]},
+  };
+  const int steps = 1 << 14;
+  double sum = 0.0;
+  for (int i = 0; i < steps; ++i) {
+    const double theta = (static_cast<double>(i) + 0.5) * 2.0 * kPi / static_cast<double>(steps);
+    const double c = std::cos(theta);
+    const double s = std::sin(theta);
+    double rho = 1e300;
+    for (const auto &edge : w) {
+      const double along = c * edge[0] + s * edge[1];
+      if (along > 0.0) {
+        rho = std::min(rho, 0.5 * (edge[0] * edge[0] + edge[1] * edge[1]) / along);
+      }
+    }
+    const double used = std::min(radius, rho);
+    sum += 0.5 * used * used;
+  }
+  return sum * (2.0 * kPi / static_cast<double>(steps));
+}
+
+template <class VolumeAt>
+void requireVolumeNearCover(double cover, double volume, VolumeAt &&volumeAt) {
+  const double scales[] = {1.0 - 1e-15, 1.0 - 1e-13, 1.0 - 1e-12, 1.0};
+  for (double scale : scales) {
+    REQUIRE_THAT(volumeAt(cover * scale), Catch::Matchers::WithinRel(volume, 1e-8));
+  }
+  // The exit crossing and the entry crossing swap roles when a vertex
+  // lies on the circle. That shows up at R and within a few ULPs of R.
+  // The correct caps there are far smaller than 1e-8 of the cell.
+  double radius = cover;
+  for (int step = 0; step < 6; ++step) {
+    radius = std::nextafter(radius, 0.0);
+  }
+  for (int step = -6; step <= 6; ++step) {
+    REQUIRE_THAT(volumeAt(radius), Catch::Matchers::WithinRel(volume, 1e-8));
+    radius = std::nextafter(radius, 1.0e300);
+  }
 }
 
 std::vector<std::array<double, 2>> centredFace(const Face2 &face) {
@@ -958,14 +1019,15 @@ TEST_CASE("a shell at the covering radius is the cell, not the disk", "[pore]") 
     const double volume = cell[0] * cell[1] * cell[2];
     REQUIRE(cover > 0.0);
     // Vertices of the perpendicular lattice sit on this radius. A shell
-    // just inside it is the cell minus caps of relative size about 1e-11.
-    // The dropped-root disk is pi r^2 L, which is 1.209 V, 1.274 V, and
-    // 1.329 V on these three cells.
-    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+    // at R, just inside it, and a few ULPs either side is the cell. The
+    // dropped-root disk is pi r^2 L, which is 1.209 V, 1.274 V, and
+    // 1.329 V on these three cells. Using the entry hit in place of the
+    // exit hit is several percent off at these radii.
+    requireVolumeNearCover(cover, volume, [&](double radius) {
       const auto profiles =
-          pore::poreProfiles(cloud, 0, 1, 1, 1, cover * scale, 2, nullptr, centre, 0, 0.0, nullptr);
-      REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
-    }
+          pore::poreProfiles(cloud, 0, 1, 1, 1, radius, 2, nullptr, centre, 0, 0.0, nullptr);
+      return profiles.radial.volume[0];
+    });
   }
 }
 
@@ -987,18 +1049,35 @@ TEST_CASE("random cells match a Monte Carlo shell at the covering radius", "[por
     const double cover = coveringRadius(face.eu, face.ev);
     const double volume = lx * ly * lz;
     REQUIRE(cover > 0.0);
-    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+    requireVolumeNearCover(cover, volume, [&](double radius) {
       const auto profiles =
-          pore::poreProfiles(cloud, 0, 1, 1, 1, cover * scale, 2, nullptr, centre, 0, 0.0, nullptr);
-      REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
-      if (scale == 1.0 - 1e-13) {
-        const double sampled = monteCarloShell(face, cover * scale, gen);
-        // 40000 uniform face samples. The standard error near a full cell
-        // is well under a percent, and the disk answer is more than 15
-        // percent high on a hexagonal lattice.
-        REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(sampled, 0.02));
-      }
+          pore::poreProfiles(cloud, 0, 1, 1, 1, radius, 2, nullptr, centre, 0, 0.0, nullptr);
+      return profiles.radial.volume[0];
+    });
+    // 0.6 R is inside the cell on a round lattice and clips a long one.
+    // If it already covers the cell, half the inradius is a disk strictly
+    // smaller than the face, so the sample is not the cell volume.
+    const Reduced2 reduced = reduceLattice(face.eu, face.ev);
+    double partial = 0.6 * cover;
+    double polar = voronoiPolar(reduced, partial) * face.axial;
+    if (!(polar < 0.85 * volume)) {
+      partial = 0.5 * reduced.inscribed;
+      polar = voronoiPolar(reduced, partial) * face.axial;
     }
+    REQUIRE(polar > 0.0);
+    REQUIRE(polar < 0.85 * volume);
+    const auto partial_profiles =
+        pore::poreProfiles(cloud, 0, 1, 1, 1, partial, 2, nullptr, centre, 0, 0.0, nullptr);
+    const double shell = partial_profiles.radial.volume[0];
+    // 2^14 midpoint steps. On seed 20261120 the largest relative gap is
+    // 1.2e-8, and the shell is between 0.43 and 0.60 of the cell. 1e-6
+    // still rejects a shell that returns the whole cell.
+    REQUIRE_THAT(shell, Catch::Matchers::WithinRel(polar, 1e-6));
+    const double sampled = monteCarloShell(face, partial, gen);
+    // 40000 samples of a shell that covers only part of the face. The
+    // largest relative gap on this seed is 0.010. A 0.02 band rejects the
+    // cell volume and a several-percent hit swap.
+    REQUIRE_THAT(shell, Catch::Matchers::WithinRel(sampled, 0.02));
   }
 }
 
@@ -1013,15 +1092,14 @@ TEST_CASE("a centred face clipped at its long corner keeps the polygon", "[pore]
     }
     REQUIRE(face_area > 0.0);
     REQUIRE(far > 0.0);
-    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
-      const double radius = far * scale;
+    requireVolumeNearCover(far, face_area, [&](double radius) {
       const double got = pore::clippedDiskArea(corners, radius, far * 2.0, 0.0);
-      // The two long corners stick out by a relative 1e-12, so the clip
-      // differs from the polygon by about 1e-11. The dropped-root result
-      // is the disk, pi r^2, which is larger than the face.
-      REQUIRE_THAT(got, Catch::Matchers::WithinRel(face_area, 1e-8));
+      // At the long corner and a few ULPs around it the clip is the
+      // polygon. The dropped-root result is the disk, and the entry hit
+      // in place of the exit hit misses the polygon by several percent.
       REQUIRE_THAT(got, Catch::Matchers::WithinRel(polarClip(corners, radius), 1e-7));
-    }
+      return got;
+    });
   };
   check(13.543853, 15.493012, -9.327033);
   std::mt19937_64 gen(11);
@@ -1092,7 +1170,7 @@ TEST_CASE("minimum image does not read past a three length box", "[pore]") {
   REQUIRE_THAT(raw[2], Catch::Matchers::WithinAbs(4.0, 1e-12));
 }
 
-TEST_CASE("the lattice search is the Euclidean minimum image", "[pore]") {
+TEST_CASE("the Selling minimum image matches a brute-force search", "[pore]") {
   const double lx = 10.0;
   const double ly = 12.0;
   const double lz = 14.0;
@@ -1135,7 +1213,10 @@ TEST_CASE("the lattice search is the Euclidean minimum image", "[pore]") {
       if (wrapped > image + 1e-6) {
         disagree += 1;
       }
-      const auto searched = gen::triclinicImageSearch(box, a[0], a[1], a[2], b[0], b[1], b[2]);
+      const auto wrapped_vec = gen::fracDelta(box, a[0], a[1], a[2], b[0], b[1], b[2]);
+      const std::array<double, 3> raw = {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
+      const auto searched = gen::mic::euclideanIfShorter(box.lx, box.ly, box.lz, box.xy, box.xz,
+                                                        box.yz, raw, wrapped_vec);
       const double found =
           std::sqrt(searched[0] * searched[0] + searched[1] * searched[1] + searched[2] * searched[2]);
       REQUIRE_THAT(found, Catch::Matchers::WithinAbs(image, 1e-8));
@@ -1147,4 +1228,82 @@ TEST_CASE("the lattice search is the Euclidean minimum image", "[pore]") {
     }
   }
   REQUIRE(disagree > 0);
+}
+
+double bruteImage(double lx, double ly, double lz, double xy, double xz, double yz, const double d[3],
+                  int n) {
+  double best = 1e300;
+  for (int i = -n; i <= n; ++i) {
+    for (int j = -n; j <= n; ++j) {
+      for (int k = -n; k <= n; ++k) {
+        const double x = d[0] + static_cast<double>(i) * lx + static_cast<double>(j) * xy +
+                         static_cast<double>(k) * xz;
+        const double y = d[1] + static_cast<double>(j) * ly + static_cast<double>(k) * yz;
+        const double z = d[2] + static_cast<double>(k) * lz;
+        best = std::min(best, std::sqrt(x * x + y * y + z * z));
+      }
+    }
+  }
+  return best;
+}
+
+TEST_CASE("minimum image on a long tilted cell matches brute force", "[pore]") {
+  const double channels[][4] = {
+      {12.0, 12.0, 100.0, 0.5}, {12.0, 12.0, 400.0, 0.5}, {12.0, 12.0, 1000.0, 0.5},
+      {10.0, 10.0, 2000.0, 1e-6},
+  };
+  for (const auto &cell : channels) {
+    auto cloud = triclinic(cell[0], cell[1], cell[2], cell[3], 0.0, 0.0);
+    const double a[3] = {1.0, 1.0, 1.0};
+    const double b[3] = {5.0, 6.0, 0.45 * cell[2]};
+    const auto got = gen::triclinicMinImage(cloud, b[0], b[1], b[2], a[0], a[1], a[2]);
+    const double found = std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
+    const double d[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+    const double ref = bruteImage(cell[0], cell[1], cell[2], cell[3], 0.0, 0.0, d, 3);
+    REQUIRE_THAT(found, Catch::Matchers::WithinAbs(ref, 1e-8));
+  }
+
+  std::mt19937_64 gen(77);
+  std::uniform_real_distribution<double> length(5.0, 15.0);
+  std::uniform_real_distribution<double> unit(0.0, 1.0);
+  std::uniform_real_distribution<double> mild(-0.5, 0.5);
+  std::uniform_real_distribution<double> steep(-2.5, 2.5);
+  int longer = 0;
+  for (int trial = 0; trial < 400; ++trial) {
+    const bool over = trial % 2 == 0;
+    const double lx = length(gen);
+    const double ly = length(gen);
+    const double lz = length(gen);
+    const double xy = (over ? steep(gen) : mild(gen)) * lx;
+    const double xz = (over ? steep(gen) : mild(gen)) * lx;
+    const double yz = (over ? steep(gen) : mild(gen)) * ly;
+    Cloud cloud;
+    REQUIRE(nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.4, -1.2, 2.0, lx, ly, lz, xy, xz,
+                                          yz));
+    for (int pair = 0; pair < 25; ++pair) {
+      auto place = [&](double s0, double s1, double s2, double out[3]) {
+        out[0] = 0.4 + lx * s0 + xy * s1 + xz * s2;
+        out[1] = -1.2 + ly * s1 + yz * s2;
+        out[2] = 2.0 + lz * s2;
+      };
+      double left[3];
+      double right[3];
+      place(unit(gen) * 3.0 - 1.0, unit(gen) * 3.0 - 1.0, unit(gen) * 3.0 - 1.0, left);
+      place(unit(gen), unit(gen), unit(gen), right);
+      const auto got =
+          gen::triclinicMinImage(cloud, left[0], left[1], left[2], right[0], right[1], right[2]);
+      const double found = std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
+      const double d[3] = {left[0] - right[0], left[1] - right[1], left[2] - right[2]};
+      const double ref = bruteImage(lx, ly, lz, xy, xz, yz, d, 9);
+      const auto wrapped = gen::fracDelta(gen::makeFracBox(cloud), left[0], left[1], left[2], right[0],
+                                          right[1], right[2]);
+      const double wrap =
+          std::sqrt(wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2]);
+      if (wrap > ref + 1e-9) {
+        longer += 1;
+      }
+      REQUIRE_THAT(found, Catch::Matchers::WithinAbs(ref, 1e-8));
+    }
+  }
+  REQUIRE(longer > 0);
 }

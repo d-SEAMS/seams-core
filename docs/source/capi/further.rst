@@ -1765,7 +1765,7 @@ Number and mass density along a cell axis or a Cartesian direction.
     Number density, or NULL to skip.
 
 ``mass_density``
-    Mass density, or NULL to skip.
+    Mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
 
 ``bin_volume``
     Bin volume in cubic Angstrom, or NULL to skip.
@@ -1801,7 +1801,7 @@ Pore axis and centre, supplied or taken from the framework.
     Species used to place an automatic centre. Zero keeps every atom.
 
 ``axis``
-    0, 1, 2, or -1 for the longest edge when direction is NULL.
+    0, 1, 2, or -1 for the longest edge when direction is NULL. Any other negative value is rejected.
 
 ``direction``
     Three Cartesian components parallel to a cell edge, or NULL.
@@ -1829,7 +1829,7 @@ Pore axis and centre, supplied or taken from the framework.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-axis 0, 1, or 2 selects that cell edge. axis -1 with direction NULL selects the longest cell edge. A non-NULL direction must be parallel to a cell edge. centre_frac NULL places the centre at the periodic centroid of the framework atoms in the perpendicular plane. framework_type 0 uses every atom for that centroid.
+axis 0, 1, or 2 selects that cell edge. axis -1 with direction NULL selects the longest cell edge. Any other negative axis is rejected. A non-NULL direction must be parallel to a cell edge. centre_frac NULL places the centre at the periodic centroid of the framework atoms in the perpendicular plane. framework_type 0 uses every atom for that centroid.
 
 @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns the three output arrays. Each holds three doubles. The library keeps no pointer. @par Thread safety Exclusive use of sys. @par Example @code double axis[3], centre[3], frac[3]; int index = -1; seams_pore_frame(sys, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &index); @endcode
 
@@ -1864,7 +1864,7 @@ Radial, azimuthal, and axial densities about a pore axis.
     Outer radius in Angstrom. Zero covers the face.
 
 ``axis``
-    0, 1, 2, or -1 when direction is NULL.
+    0, 1, 2, or -1 when direction is NULL. Any other negative value is rejected.
 
 ``direction``
     Three Cartesian components parallel to a cell edge, or NULL.
@@ -1897,7 +1897,7 @@ Radial, azimuthal, and axial densities about a pore axis.
     Radial number density, or NULL to skip.
 
 ``radial_mass``
-    Radial mass density, or NULL to skip.
+    Radial mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
 
 ``radial_volume``
     Radial shell volume, or NULL to skip.
@@ -1915,7 +1915,7 @@ Radial, azimuthal, and axial densities about a pore axis.
     Azimuthal number density, or NULL to skip.
 
 ``azimuthal_mass``
-    Azimuthal mass density, or NULL to skip.
+    Azimuthal mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
 
 ``azimuthal_volume``
     Azimuthal sector volume, or NULL to skip.
@@ -1933,7 +1933,7 @@ Radial, azimuthal, and axial densities about a pore axis.
     Axial number density, or NULL to skip.
 
 ``axial_mass``
-    Axial mass density, or NULL to skip.
+    Axial mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
 
 ``axial_volume``
     Axial slab volume, or NULL to skip.
@@ -1946,7 +1946,7 @@ Radial, azimuthal, and axial densities about a pore axis.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-The axis is a cell edge, as in seams_pore_frame(). r_max 0 covers the perpendicular face. Radial bins run from 0 to r_max. Azimuthal bins cover [-pi, pi). The axial coordinate is the fractional cell coordinate, shifted by origin. Shell volumes are the Euclidean annulus or sector inside the perpendicular face, times the edge length. Pass NULL columns to query the three bin counts.
+The axis is a cell edge, as in seams_pore_frame(). r_max 0 covers the perpendicular face. Radial bins run from 0 to r_max. The radial coordinate is the distance to the nearest periodic image of the pore axis. Within the inscribed radius of the centred face that image is the face origin. Beyond the inscribed radius a corner point can be closer to a neighbouring image, and the coordinate follows that image. The radial shell is the annulus inside the Voronoi cell of the perpendicular lattice. A circle-edge crossing that lands on a vertex stays on that edge. Azimuthal bins cover [-pi, pi) in the centred face, and each sector is clipped to that face. Azimuth zero points along the perpendicular projection of cell edge (axis + 1) mod 3, with the component parallel to the pore axis removed. The angle increases towards the pore axis crossed with that direction. The axial coordinate is the fractional cell coordinate, shifted by origin. A shell volume is that area times the edge length. Mass density is the caller's mass unit per cubic Angstrom. An amu mass gives amu per cubic Angstrom, and times 1.66054 that is grams per cubic centimetre. Pass NULL columns to query the three bin counts.
 
 @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns every column. The library keeps no pointer. @par Thread safety Exclusive use of sys. @par Example @code size_t nr = 0, nt = 0, ns = 0; seams_pore_profiles(sys, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0, &nr, NULL, NULL, NULL, NULL, 0, &nt, NULL, NULL, NULL, NULL, 0, &ns); @endcode
 
@@ -1969,7 +1969,7 @@ Nearest framework site and contact counts for each guest.
     Positive guest species.
 
 ``framework_type``
-    Framework species. Zero keeps every other type.
+    Framework species. Zero keeps every other type. A value equal to guest_type is rejected.
 
 ``cutoff``
     Contact distance in Angstrom. Zero counts only a site at the same point. Negative is rejected.
@@ -2009,7 +2009,7 @@ Nearest framework site and contact counts for each guest.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-guest_type must be positive. framework_type 0 keeps every atom of another type. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.
+guest_type must be positive. framework_type 0 keeps every atom of another type. framework_type equal to guest_type is an error. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.
 
 @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns every column. The library keeps no pointer. @par Thread safety Exclusive use of sys. @par Example @code size_t ng = 0, nt = 0; seams_host_guest(sys, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &ng, NULL, 0, &nt, NULL, 0); @endcode
 

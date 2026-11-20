@@ -4,6 +4,7 @@
 
 #include <seams.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <random>
@@ -251,12 +252,25 @@ TEST_CASE("seams_pore_profiles at the covering radius returns the cell volume", 
     options.axis = 2;
     options.use_centre = true;
     options.centre_fractional = {0.5, 0.5, 0.5};
-    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+    const double scales[] = {1.0 - 1e-15, 1.0 - 1e-13, 1.0 - 1e-12, 1.0};
+    for (double scale : scales) {
       options.r_max = cover * scale;
       const auto profiles = sys.pore_profiles(options);
-      // Caps beyond the circle are about 1e-11 of the cell. The disk
-      // pi r^2 L is 1.209 V on the hex cell and larger on the other two.
+      // Caps beyond the circle are about 1e-11 of the cell at 1e-12, and
+      // far smaller at one ULP. The disk pi r^2 L is 1.209 V on the hex
+      // cell. The entry hit in place of the exit hit is several percent off
+      // at R and within a few ULPs of R.
       REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
+    }
+    double radius = cover;
+    for (int step = 0; step < 6; ++step) {
+      radius = std::nextafter(radius, 0.0);
+    }
+    for (int step = -6; step <= 6; ++step) {
+      options.r_max = radius;
+      const auto profiles = sys.pore_profiles(options);
+      REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
+      radius = std::nextafter(radius, 1.0e300);
     }
   };
   for (const auto &cell : named) {
@@ -308,4 +322,41 @@ TEST_CASE("System rejects a negative axis other than -1 and a repeated type", "[
   REQUIRE(report.guest_index.size() == 1);
   REQUIRE(report.framework_types.size() == 1);
   REQUIRE(report.framework_types[0] == 5);
+}
+
+TEST_CASE("seams_host_guest on a long tilted cell matches brute force", "[pore][system]") {
+  const double cells[][4] = {
+      {12.0, 12.0, 100.0, 0.5}, {12.0, 12.0, 400.0, 0.5}, {12.0, 12.0, 1000.0, 0.5},
+      {10.0, 10.0, 2000.0, 1.0e-6},
+  };
+  for (const auto &cell : cells) {
+    const double lx = cell[0];
+    const double ly = cell[1];
+    const double lz = cell[2];
+    const double xy = cell[3];
+    const std::vector<double> xyz = {1.0, 1.0, 1.0, 5.0, 6.0, 0.45 * lz};
+    const std::vector<int> types = {1, 2};
+    const std::array<double, 9> box = {0.0, 0.0, 0.0, lx, ly, lz, xy, 0.0, 0.0};
+    seams::System sys;
+    sys.set_frame(xyz, box, types);
+    seams::HostGuestOptions options;
+    options.guest = 1;
+    options.framework = 2;
+    options.cutoff = 3.0;
+    const auto report = sys.host_guest(options);
+    double best = 1e300;
+    const double d[3] = {xyz[3] - xyz[0], xyz[4] - xyz[1], xyz[5] - xyz[2]};
+    for (int i = -3; i <= 3; ++i) {
+      for (int j = -3; j <= 3; ++j) {
+        for (int k = -3; k <= 3; ++k) {
+          const double x = d[0] + i * lx + j * xy;
+          const double y = d[1] + j * ly;
+          const double z = d[2] + k * lz;
+          best = std::min(best, std::sqrt(x * x + y * y + z * z));
+        }
+      }
+    }
+    REQUIRE(report.nearest_distance.size() == 1);
+    REQUIRE_THAT(report.nearest_distance[0], Catch::Matchers::WithinAbs(best, 1e-8));
+  }
 }
