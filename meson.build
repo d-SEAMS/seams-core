@@ -233,14 +233,16 @@ endif
 # use the same compilers and OpenMP link line. ``cc`` on PATH is not that
 # compiler: a pixi environment's cc is conda's gcc, and its glibc 2.28
 # sysroot cannot resolve the host compiler's GLIBC and libomp symbols.
-_snippet_cc = meson.get_compiler('c').cmd_array()[0]
-_snippet_cxx = cppc.cmd_array()[0]
+_snippet_cc_cmd = meson.get_compiler('c').cmd_array()
+_snippet_cxx_cmd = cppc.cmd_array()
+_snippet_cc = ' '.join(_snippet_cc_cmd)
+_snippet_cxx = ' '.join(_snippet_cxx_cmd)
 # AddressSanitizer is preloaded so Python can host libseams. That preload
 # makes the compiler driver and cc1 fail LeakSanitizer. The wrappers drop
 # it and exec the compiler meson used to build the library.
 _asan_wrap = get_option('b_sanitize').contains('address')
-_real_cc = _snippet_cc
-_real_cxx = _snippet_cxx
+_real_cc = _snippet_cc_cmd[0]
+_real_cxx = _snippet_cxx_cmd[0]
 if _asan_wrap
   _asan_bin = meson.project_source_root() / 'scripts' / 'asan-path'
   _snippet_cc = _asan_bin / 'cc'
