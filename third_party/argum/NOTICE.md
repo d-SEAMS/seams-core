@@ -2,9 +2,10 @@
 
 `argum.h` is the single-header amalgamation of
 [gershnik/argum](https://github.com/gershnik/argum), Eugene Gershnik's
-command-line argument parser, BSD-licensed (see the header comment at
-the top of the file for the exact terms and a link to the upstream
-`LICENSE`). `src/seams_cli.cpp` uses it for `--help`, `--version` and
+command-line argument parser. The terms are the BSD 3-Clause License,
+Copyright (c) 2022, Eugene Gershnik, in `LICENSE` beside `argum.h`.
+That is the file the header comment names; it is upstream argum v2.9's
+`LICENSE` unchanged. `src/seams_cli.cpp` uses it for `--help`, `--version` and
 every other CLI flag through `Argum::Parser` and `Argum::Colorizer`.
 
 ## Why this is not a Meson wrap

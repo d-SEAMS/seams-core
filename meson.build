@@ -55,6 +55,13 @@ run_command(
   files('tests/backward_overlay.py'),
   check: true,
 )
+# Every third_party tree with source must ship its own licence file.
+# NOTICE.md does not count, and argum's file must be upstream v2.9.
+run_command(
+  _carry_python,
+  files('tests/vendored_licenses.py'),
+  check: true,
+)
 
 # Global accumulator variables (eOn pattern)
 _args = []

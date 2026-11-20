@@ -127,7 +127,8 @@ stdenv.mkDerivation (finalAttrs: {
   meta = {
     description = "d-SEAMS C++ engine and seams CLI";
     homepage = "https://dseams.info";
-    license = lib.licenses.mit;
+    # The CLI links third_party/argum (BSD-3-Clause). csm is off here.
+    license = with lib.licenses; [ mit bsd3 ];
     mainProgram = "seams";
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };

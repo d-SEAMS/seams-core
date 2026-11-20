@@ -85,8 +85,12 @@ about:
   homepage: https://dseams.info
   repository: https://github.com/d-SEAMS/seams-core
   documentation: https://docs.dseams.info
-  license: MIT
-  license_file: LICENSE
+  # The seams CLI always compiles third_party/argum (BSD-3-Clause).
+  # csm stays off in this recipe, so its GPL-2.0 text is not shipped.
+  license: MIT AND BSD-3-Clause
+  license_file:
+    - LICENSE
+    - third_party/argum/LICENSE
   summary: d-SEAMS structural analysis engine for molecular simulations of water and ice
   description: |
     d-SEAMS (Deferred Structural Elucidation Analysis for Molecular

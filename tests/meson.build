@@ -773,6 +773,14 @@ test('backward_overlay_selftest', find_program('python3'),
   args: [files('backward_overlay.py'), '--self-test'],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('vendored_licenses', find_program('python3'),
+  args: [files('vendored_licenses.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('vendored_licenses_selftest', find_program('python3'),
+  args: [files('vendored_licenses.py'), '--self-test'],
+  workdir: meson.project_source_root(),
+  timeout: 60)
 test('cycless_pentagon', find_program('python3'),
   args: [files('test_cycless_pentagon.py'),
          seams_api_lib.full_path()],

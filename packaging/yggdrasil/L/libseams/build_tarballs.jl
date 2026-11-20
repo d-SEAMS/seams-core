@@ -89,6 +89,8 @@ install -Dvm 644 include/seams.h "${includedir}/seams.h"
 install -Dvm 644 build/src/seams_version.h "${includedir}/seams_version.h"
 install -Dvm 644 bindings/cxx/seams_lang.h "${includedir}/seams/seams_lang.h"
 install_license LICENSE
+cp third_party/argum/LICENSE "${WORKSPACE}/srcdir/LICENSE.argum"
+install_license "${WORKSPACE}/srcdir/LICENSE.argum"
 """
 
 # C++20 headers (<concepts>, <span>, <ranges>) are missing from the default
