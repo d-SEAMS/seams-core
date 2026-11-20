@@ -10,6 +10,7 @@
 
 #include <ira_sofi.hpp>
 #include <seams_c_api.h>
+#include <team_run.hpp>
 #include <thread_team.hpp>
 
 #include <Eigen/Dense>
@@ -1183,14 +1184,14 @@ int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9
   double *cx = cols.x;
   double *cy = cols.y;
   double *cz = cols.z;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (n >= 16384 && !omp_in_parallel())
-#endif
-  for (int i = 0; i < n; i++) {
-    cx[i] = xyz[3 * i];
-    cy[i] = xyz[3 * i + 1];
-    cz[i] = xyz[3 * i + 2];
-  }
+  seams::team::forRange(static_cast<std::size_t>(n), 8192,
+                        [&](std::size_t from, std::size_t to, int) {
+                          for (std::size_t i = from; i < to; i++) {
+                            cx[i] = xyz[3 * i];
+                            cy[i] = xyz[3 * i + 1];
+                            cz[i] = xyz[3 * i + 2];
+                          }
+                        });
   symm::classifyIceArrays(cols.x, cols.y, cols.z, n, lat, labels, shell_rmsd);
   return 0;
 }

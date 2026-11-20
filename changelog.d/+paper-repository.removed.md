@@ -1,1 +1,1 @@
-Benchmark records and figure data for the d-SEAMS 2.0 paper are the Hugging Face datasets `d-SEAMS/dseams2-benchmark-records` and `d-SEAMS/dseams2-paper-figure-data`. The performance pages show the tables rendered from those records.
+Benchmark records and figure data for the d-SEAMS 2.0 paper are the Hugging Face datasets `d-SEAMS/dseams2-benchmark-records` and `d-SEAMS/dseams2-paper-figure-data`. The performance pages show tables produced from those records.
