@@ -448,6 +448,9 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#dseams-chill-plus">Dseams.chill_plus</a></li>
 <li><a class="reference internal" href="#dseams-engine-version">Dseams.engine_version</a></li>
 <li><a class="reference internal" href="#dseams-example-path">Dseams.example_path</a></li>
+<li><a class="reference internal" href="#dseams-features">Dseams.features</a></li>
+<li><a class="reference internal" href="#dseams-has-chemfiles">Dseams.has_chemfiles</a></li>
+<li><a class="reference internal" href="#dseams-has-readcon">Dseams.has_readcon</a></li>
 <li><a class="reference internal" href="#dseams-ice-ih-path">Dseams.ice_ih_path</a></li>
 <li><a class="reference internal" href="#dseams-jump-tau90">Dseams.jump_tau90</a></li>
 <li><a class="reference internal" href="#dseams-library-path">Dseams.library_path</a></li>
@@ -552,6 +555,27 @@ data-aria-dark="Switch to auto color mode">
 </div>
 <p>example_path(name) Path of a trajectory shipped with the package. `ice1h.lammpstrj` is a 128-molecule ice Ih cell, `exampleTraj.lammpstrj` a TIP4P/ice frame and `nucleation_f1.lammpstrj` a frame of an mW nucleation run.</p>
 </section>
+<section id="dseams-features">
+<h3>Dseams.features<a class="headerlink" href="#dseams-features" title="Link to this heading">¶</a></h3>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">features</span><span class="p">()</span><span class="w"> </span><span class="n">Optional</span><span class="w"> </span><span class="n">reader</span><span class="w"> </span><span class="n">backends</span><span class="w"> </span><span class="n">supported</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="sb">`libseams_lang`</span><span class="p">,</span><span class="w"> </span><span class="n">returned</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="sb">`(chemfiles = Bool, readcon = Bool)`</span>
+</span></pre></div>
+</div>
+<p>features() Optional reader backends supported by the loaded `libseams_lang`, returned as `(chemfiles = Bool, readcon = Bool)`. ```jldoctest julia&gt; using Dseams julia&gt; keys(features()) == (:chemfiles, :readcon) true ```</p>
+</section>
+<section id="dseams-has-chemfiles">
+<h3>Dseams.has_chemfiles<a class="headerlink" href="#dseams-has-chemfiles" title="Link to this heading">¶</a></h3>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">has_chemfiles</span><span class="p">()</span><span class="w"> </span><span class="sb">`true`</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="n">engine</span><span class="w"> </span><span class="n">was</span><span class="w"> </span><span class="n">built</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">chemfiles</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="p">(</span><span class="n">PDB</span><span class="p">,</span><span class="w"> </span><span class="n">GRO</span><span class="p">,</span><span class="w"> </span><span class="n">DCD</span><span class="p">,</span><span class="w"> </span><span class="n">CIF</span><span class="p">,</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">related</span><span class="w"> </span><span class="n">trajectory</span><span class="w"> </span><span class="n">formats</span><span class="p">),</span><span class="w"> </span><span class="sb">`false`</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">only</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">native</span><span class="w"> </span><span class="n">LAMMPS</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">XYZ</span><span class="w"> </span><span class="n">readers</span><span class="w"> </span><span class="n">are</span><span class="w"> </span><span class="n">built</span><span class="w"> </span><span class="k">in</span>
+</span></pre></div>
+</div>
+<p>has_chemfiles() `true` when the loaded engine was built with chemfiles support (PDB, GRO, DCD, CIF, and related trajectory formats), `false` when only the native LAMMPS and XYZ readers are built in. ```jldoctest julia&gt; using Dseams julia&gt; has_chemfiles() isa Bool true ```</p>
+</section>
+<section id="dseams-has-readcon">
+<h3>Dseams.has_readcon<a class="headerlink" href="#dseams-has-readcon" title="Link to this heading">¶</a></h3>
+<div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">has_readcon</span><span class="p">()</span><span class="w"> </span><span class="sb">`true`</span><span class="w"> </span><span class="n">when</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="n">engine</span><span class="w"> </span><span class="n">was</span><span class="w"> </span><span class="n">built</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="sb">`readcon-core`</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="sb">`.con`</span><span class="w"> </span><span class="n">trajectories</span><span class="p">,</span><span class="w"> </span><span class="sb">`false`</span><span class="w"> </span><span class="n">otherwise</span>
+</span></pre></div>
+</div>
+<p>has_readcon() `true` when the loaded engine was built with `readcon-core` support for `.con` trajectories, `false` otherwise. ```jldoctest julia&gt; using Dseams julia&gt; has_readcon() isa Bool true ```</p>
+</section>
 <section id="dseams-ice-ih-path">
 <h3>Dseams.ice_ih_path<a class="headerlink" href="#dseams-ice-ih-path" title="Link to this heading">¶</a></h3>
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">ice_ih_path</span><span class="p">()</span><span class="w"> </span><span class="n">Path</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Ice</span><span class="w"> </span><span class="n">Ih</span><span class="w"> </span><span class="n">example</span><span class="p">,</span><span class="w"> </span><span class="sb">`example_path(&quot;ice1h.lammpstrj&quot;)`</span><span class="o">.</span>
@@ -599,7 +623,7 @@ data-aria-dark="Switch to auto color mode">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">nframes</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="w"> </span><span class="kt">Number</span><span class="w"> </span><span class="n">of</span><span class="w"> </span><span class="n">frames</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">trajectory</span>
 </span></pre></div>
 </div>
-<p>nframes(path) Number of frames in a trajectory. An XYZ file counts as one.</p>
+<p>nframes(path) Number of frames in a trajectory. Native LAMMPS dumps and XYZ files are always supported; PDB, GRO, and other chemfiles formats are counted when [`has_chemfiles`](&#64;ref) is `true`.</p>
 </section>
 <section id="dseams-nop">
 <h3>Dseams.nop<a class="headerlink" href="#dseams-nop" title="Link to this heading">¶</a></h3>
@@ -627,7 +651,7 @@ data-aria-dark="Switch to auto color mode">
 <div class="highlight-julia notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">read_frame</span><span class="p">(</span><span class="n">path</span><span class="p">;</span><span class="w"> </span><span class="n">frame</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="n">Read</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">frame</span>
 </span></pre></div>
 </div>
-<p>read_frame(path; frame=1, type=0) Read one frame. `frame` is 1-based. `type = 0` guesses oxygen. A positive type keeps that species. A negative type keeps every atom. A frame that holds no atoms, or none of the kept `type`, is a valid frame with `nop(frame) == 0`, and every analysis accepts it. A `frame` below 1, or past the last one in the file, throws [`SeamsError`](&#64;ref); neither gives an empty frame.</p>
+<p>read_frame(path; frame=1, type=0) Read one frame. Native LAMMPS trajectory dumps and XYZ files are always supported; PDB, GRO, DCD, and CIF require [`has_chemfiles`](&#64;ref), and `.con` files require [`has_readcon`](&#64;ref). `frame` is 1-based. `type = 0` guesses oxygen. A positive type keeps that species. A negative type keeps every atom. A frame that holds no atoms, or none of the kept `type`, is a valid frame with `nop(frame) == 0`, and every analysis accepts it. A `frame` below 1, or past the la</p>
 </section>
 <section id="dseams-set-library">
 <h3>Dseams.set_library!<a class="headerlink" href="#dseams-set-library" title="Link to this heading">¶</a></h3>
@@ -765,82 +789,91 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.example_path</span></code></p></td>
 <td><p>no direct C call</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.ice_ih_path</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.features</span></code></p></td>
 <td><p>no direct C call</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.jump_tau90</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">seams_frames_jump_tau90</span></code></p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.library_path</span></code></p></td>
-<td><p>no direct C call</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.module</span></code></p></td>
-<td><p>no direct C call</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.mutable</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.has_chemfiles</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_free</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.neighbour_pairs</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.has_readcon</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_free</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.ice_ih_path</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.jump_tau90</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_frames_jump_tau90</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.library_path</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.module</span></code></p></td>
+<td><p>no direct C call</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.mutable</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_free</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.neighbour_pairs</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_neighbour_pairs</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_frame_neighbours</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.nframes</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.nframes</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_path_nframes</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.nop</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.nop</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_chill_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_frame_nop</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.primitive_rings</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.primitive_rings</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_rings</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.q4_q6</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.q4_q6</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_q4_q6</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.read_frame</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.read_frame</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_read</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.set_library!</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.set_library!</span></code></p></td>
 <td><p>no direct C call</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.signature_cages</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.signature_cages</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_signature</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.steinhardt</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.steinhardt</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_steinhardt</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_frame_steinhardt_graph</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.struct</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.struct</span></code></p></td>
 <td><p>no direct C call</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.symmetry</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Dseams.symmetry</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_frame_symmetry</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.chill_plus</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.chill_plus</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_chill_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.const</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.const</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_set_num_threads</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_version_string</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.module</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.module</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_set_num_threads</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_version_string</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.num_threads</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.num_threads</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_get_num_threads</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_set_ortho</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.q4q6</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.q4q6</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_q4q6</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_system_count</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.set_num_threads</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.set_num_threads</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_set_num_threads</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.set_ortho!</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.set_ortho!</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_system_set_ortho</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.six_rings</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.six_rings</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_rings_destroy</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_find</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_fraction</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_rings_histogram</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.struct</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.struct</span></code></p></td>
 <td><p>no direct C call</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.version</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Seams.version</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams_set_num_threads</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_version_string</span></code></p></td>
 </tr>
 </tbody>

@@ -48,6 +48,30 @@ example_path(name) Path of a trajectory shipped with the package
 
 example_path(name) Path of a trajectory shipped with the package. `ice1h.lammpstrj` is a 128-molecule ice Ih cell, `exampleTraj.lammpstrj` a TIP4P/ice frame and `nucleation_f1.lammpstrj` a frame of an mW nucleation run.
 
+### Dseams.features {#dseams-features}
+
+```julia
+features() Optional reader backends supported by the loaded `libseams_lang`, returned as `(chemfiles = Bool, readcon = Bool)`
+```
+
+features() Optional reader backends supported by the loaded `libseams_lang`, returned as `(chemfiles = Bool, readcon = Bool)`. ```jldoctest julia> using Dseams julia> keys(features()) == (:chemfiles, :readcon) true ```
+
+### Dseams.has_chemfiles {#dseams-has-chemfiles}
+
+```julia
+has_chemfiles() `true` when the loaded engine was built with chemfiles support (PDB, GRO, DCD, CIF, and related trajectory formats), `false` when only the native LAMMPS and XYZ readers are built in
+```
+
+has_chemfiles() `true` when the loaded engine was built with chemfiles support (PDB, GRO, DCD, CIF, and related trajectory formats), `false` when only the native LAMMPS and XYZ readers are built in. ```jldoctest julia> using Dseams julia> has_chemfiles() isa Bool true ```
+
+### Dseams.has_readcon {#dseams-has-readcon}
+
+```julia
+has_readcon() `true` when the loaded engine was built with `readcon-core` support for `.con` trajectories, `false` otherwise
+```
+
+has_readcon() `true` when the loaded engine was built with `readcon-core` support for `.con` trajectories, `false` otherwise. ```jldoctest julia> using Dseams julia> has_readcon() isa Bool true ```
+
 ### Dseams.ice_ih_path {#dseams-ice-ih-path}
 
 ```julia
@@ -102,7 +126,7 @@ neighbour_pairs(frame; cutoff=3.5, type=0, graph=”cutoff”) Directed pairs in
 nframes(path) Number of frames in a trajectory
 ```
 
-nframes(path) Number of frames in a trajectory. An XYZ file counts as one.
+nframes(path) Number of frames in a trajectory. Native LAMMPS dumps and XYZ files are always supported; PDB, GRO, and other chemfiles formats are counted when \[`has_chemfiles`\](@ref) is `true`.
 
 ### Dseams.nop {#dseams-nop}
 
@@ -134,7 +158,7 @@ q4_q6(frame; cutoff=3.5, type=0) Local and Lechner-Dellago q4 and q6 on the cuto
 read_frame(path; frame=1, type=0) Read one frame
 ```
 
-read_frame(path; frame=1, type=0) Read one frame. `frame` is 1-based. `type = 0` guesses oxygen. A positive type keeps that species. A negative type keeps every atom. A frame that holds no atoms, or none of the kept `type`, is a valid frame with `nop(frame) == 0`, and every analysis accepts it. A `frame` below 1, or past the last one in the file, throws \[`SeamsError`\](@ref); neither gives an empty frame.
+read_frame(path; frame=1, type=0) Read one frame. Native LAMMPS trajectory dumps and XYZ files are always supported; PDB, GRO, DCD, and CIF require \[`has_chemfiles`\](@ref), and `.con` files require \[`has_readcon`\](@ref). `frame` is 1-based. `type = 0` guesses oxygen. A positive type keeps that species. A negative type keeps every atom. A frame that holds no atoms, or none of the kept `type`, is a valid frame with `nop(frame) == 0`, and every analysis accepts it. A `frame` below 1, or past the la
 
 ### Dseams.set_library! {#dseams-set-library}
 
@@ -267,6 +291,9 @@ Each native call and the `seams.h` or `seams_lang.h` function it uses. The C col
 | Dseams.chill_plus | seams_frame_chill_plus |
 | Dseams.engine_version | seams_lang_version, seams_last_error |
 | Dseams.example_path | no direct C call |
+| Dseams.features | no direct C call |
+| Dseams.has_chemfiles | seams_frame_free |
+| Dseams.has_readcon | seams_frame_free |
 | Dseams.ice_ih_path | no direct C call |
 | Dseams.jump_tau90 | seams_frames_jump_tau90 |
 | Dseams.library_path | no direct C call |

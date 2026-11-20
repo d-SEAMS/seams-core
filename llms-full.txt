@@ -4358,7 +4358,7 @@ and versioned 2.14.0:
 | Python | PydSEAMSlib (pydseams) and the supplied dseams module | PydSEAMSlib | pydseamslib: import dseams and import pydseams |
 | Lua, Fennel | yodaStruct (1.x) | yodaStruct | Git source, require("dseams") |
 | R | none | dseams-r | dseams |
-| Julia | none | Dseams.jl | Dseams and Seams, over libseams_jll |
+| Julia | none | Dseams.jl | Dseams and Seams |
 | Rust | none | dseams-rs | crates dseams-sys and dseams |
 | Fortran | none | dseams-fortran | fpm Git dependency dseams |
 
@@ -4579,8 +4579,7 @@ command.
 [C](../../stable/c.md) and [C++](../../stable/cpp.md) document those libraries.
 
 Every other language is its own repository, with its own documentation,
-tests, and releases. A binding’s version is the seams-core version it was
-built against. The Python release for this engine is `pydseamslib` 2.14.0.
+tests, and releases. The Python package for this engine is `pydseamslib` 2.14.0.
 Each repository’s README has the install command.
 
 ## Languages {#languages}
@@ -4590,7 +4589,7 @@ Each repository’s README has the install command.
 | Python | d-SEAMS/PydSEAMSlib | pydseamslib | libseams, libseams_lang |
 | Lua, Fennel | d-SEAMS/yodaStruct | Git source, require("dseams") | libseams |
 | R | d-SEAMS/dseams-r | dseams | libseams_lang |
-| Julia | d-SEAMS/Dseams.jl | Dseams, engine from libseams_jll | libseams_lang, libseams |
+| Julia | d-SEAMS/Dseams.jl | Dseams | libseams_lang, libseams |
 | Rust | d-SEAMS/dseams-rs | crates dseams-sys, dseams | libseams |
 | Fortran | d-SEAMS/dseams-fortran | fpm Git dependency dseams | libseams |
 
@@ -4601,9 +4600,8 @@ Each repository’s README has the install command.
 `libseams_lang`, documented on the
 [Python Frame](../../reference/python-frame.md) page.
 `Dseams` calls `libseams_lang` for a frame and `libseams` for the
-re-exported `seams_*` functions. `libseams_jll` supplies the engine
-binary. The same repository includes `Seams`, an example of the
-`libseams` C API.
+re-exported `seams_*` functions. The same repository includes `Seams`,
+an example of the `libseams` C API.
 The R package compiles the engine it ships, and the calls in its README
 use `libseams_lang`.
 
@@ -7121,7 +7119,7 @@ calls the 2.14.0 engine.
 | Python | PydSEAMSlib | pydseamslib | libseams (import dseams) and libseams_lang (import pydseams) |
 | Lua, Fennel | yodaStruct | Git source, require("dseams") | libseams |
 | R | dseams-r | dseams | libseams_lang |
-| Julia | Dseams.jl | Dseams, Seams | Dseams calls libseams_lang. Seams calls libseams. Both are distributed through libseams_jll |
+| Julia | Dseams.jl | Dseams, Seams | Dseams calls libseams_lang. Seams calls libseams. |
 | Rust | dseams-rs | dseams-sys, dseams | libseams |
 | Fortran | dseams-fortran | fpm Git dependency dseams | libseams |
 
@@ -12568,7 +12566,7 @@ The upgrade from 2.13 is
 
 - Every public symbol of the C headers and the C++ language header is listed in the reference pages with its parameters, return value, ownership, and error behavior. `docs_api_coverage` fails when a public symbol is missing from that list or a listed symbol is not in the header. Each binding repository checks its own language the same way.
 - A repeated neighbourhood builds its bond list once, the first time that ball is seen.
-- The language bindings move to their own repositories, each released with the seams-core version it binds: Python to d-SEAMS/PydSEAMSlib (`pydseamslib`, `import dseams` and `import pydseams`), Lua and Fennel to d-SEAMS/yodaStruct (LuaRocks `dseams`), R to d-SEAMS/dseams-r, Julia to d-SEAMS/Dseams.jl, Rust to d-SEAMS/dseams-rs (crates `dseams-sys` and `dseams`), and Fortran to d-SEAMS/dseams-fortran (fpm `dseams`). seams-core builds the engine, the C API `libseams`, the C ABI `libseams_lang`, the `seams` CLI and the engine drivers, and releases conda `libseams` and the Yggdrasil recipe for `libseams_jll`. The Meson options `with_python`, `with_lua`, `fennel_lua`, `with_fortran`, `julia_wrap`, `r_libs_user` and `system_libseams` are removed with the bindings they built. The docs run their Python snippets against the installed `pydseamslib` of the same version. `docs/orgmode/development/repositories.org` maps the repositories, the pins and the release order.
+- The language bindings move to their own repositories: Python to d-SEAMS/PydSEAMSlib (`pydseamslib`, `import dseams` and `import pydseams`), Lua and Fennel to d-SEAMS/yodaStruct (LuaRocks `dseams`), R to d-SEAMS/dseams-r, Julia to d-SEAMS/Dseams.jl, Rust to d-SEAMS/dseams-rs (crates `dseams-sys` and `dseams`), and Fortran to d-SEAMS/dseams-fortran (fpm `dseams`). seams-core builds the engine, the C API `libseams`, the C ABI `libseams_lang`, the `seams` CLI and the engine drivers, and releases conda `libseams` and the Yggdrasil recipe for `libseams_jll`. The Meson options `with_python`, `with_lua`, `fennel_lua`, `with_fortran`, `julia_wrap`, `r_libs_user` and `system_libseams` are removed with the bindings they built. The docs run their Python snippets against the installed `pydseamslib`. `docs/orgmode/development/repositories.org` maps the repositories, the pins and the release order.
 - The Python and Lua bindings read neighbour lists through `seams_neighbours_copy` instead of the deprecated `seams_neighbours_csr` borrow, which stays only for ABI 1 callers.
 - Neighbours, CHILL, CHILL+, rings and cages can keep water oxygens by atom type or by molecule, and leave ions out of that graph.
   `seams --mol water` uses the atom that appears once in a multi-atom molecule.

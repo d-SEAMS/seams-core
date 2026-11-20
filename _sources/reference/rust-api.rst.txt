@@ -510,6 +510,24 @@ seams::diamond8
 
    pub fn diamond8 () -> (Vec<f64>, f64)
 
+seams::has_chemfiles
+~~~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams::has_chemfiles
+
+.. code-block:: rust
+
+   pub fn has_chemfiles () -> bool
+
+seams::has_readcon
+~~~~~~~~~~~~~~~~~~
+
+.. api-symbol: seams::has_readcon
+
+.. code-block:: rust
+
+   pub fn has_readcon () -> bool
+
 seams::label_name
 ~~~~~~~~~~~~~~~~~
 
@@ -686,6 +704,10 @@ Each native call and the ``seams.h`` or ``seams_lang.h`` function it uses. The C
    * - ``seams::abi``
      - ``seams_abi``
    * - ``seams::diamond8``
+     - no direct C call
+   * - ``seams::has_chemfiles``
+     - no direct C call
+   * - ``seams::has_readcon``
      - no direct C call
    * - ``seams::label_name``
      - ``seams_label_name``

@@ -9,8 +9,7 @@ command.
 [C](../../stable/c.md) and [C++](../../stable/cpp.md) document those libraries.
 
 Every other language is its own repository, with its own documentation,
-tests, and releases. A binding’s version is the seams-core version it was
-built against. The Python release for this engine is `pydseamslib` 2.14.0.
+tests, and releases. The Python package for this engine is `pydseamslib` 2.14.0.
 Each repository’s README has the install command.
 
 ## Languages {#languages}
@@ -20,7 +19,7 @@ Each repository’s README has the install command.
 | Python | d-SEAMS/PydSEAMSlib | pydseamslib | libseams, libseams_lang |
 | Lua, Fennel | d-SEAMS/yodaStruct | Git source, require("dseams") | libseams |
 | R | d-SEAMS/dseams-r | dseams | libseams_lang |
-| Julia | d-SEAMS/Dseams.jl | Dseams, engine from libseams_jll | libseams_lang, libseams |
+| Julia | d-SEAMS/Dseams.jl | Dseams | libseams_lang, libseams |
 | Rust | d-SEAMS/dseams-rs | crates dseams-sys, dseams | libseams |
 | Fortran | d-SEAMS/dseams-fortran | fpm Git dependency dseams | libseams |
 
@@ -31,9 +30,8 @@ Each repository’s README has the install command.
 `libseams_lang`, documented on the
 [Python Frame](../../reference/python-frame.md) page.
 `Dseams` calls `libseams_lang` for a frame and `libseams` for the
-re-exported `seams_*` functions. `libseams_jll` supplies the engine
-binary. The same repository includes `Seams`, an example of the
-`libseams` C API.
+re-exported `seams_*` functions. The same repository includes `Seams`,
+an example of the `libseams` C API.
 The R package compiles the engine it ships, and the calls in its README
 use `libseams_lang`.
 

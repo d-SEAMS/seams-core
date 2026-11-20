@@ -34,7 +34,7 @@ calls the 2.14.0 engine.
 | Python | PydSEAMSlib | pydseamslib | libseams (import dseams) and libseams_lang (import pydseams) |
 | Lua, Fennel | yodaStruct | Git source, require("dseams") | libseams |
 | R | dseams-r | dseams | libseams_lang |
-| Julia | Dseams.jl | Dseams, Seams | Dseams calls libseams_lang. Seams calls libseams. Both are distributed through libseams_jll |
+| Julia | Dseams.jl | Dseams, Seams | Dseams calls libseams_lang. Seams calls libseams. |
 | Rust | dseams-rs | dseams-sys, dseams | libseams |
 | Fortran | dseams-fortran | fpm Git dependency dseams | libseams |
 

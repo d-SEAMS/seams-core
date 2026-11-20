@@ -488,8 +488,7 @@ the C ABI <code class="docutils literal notranslate"><span class="pre">libseams_
 command.</p>
 <p><a class="reference internal" href="../../stable/c.html"><span class="doc">C</span></a> and <a class="reference internal" href="../../stable/cpp.html"><span class="doc">C++</span></a> document those libraries.</p>
 <p>Every other language is its own repository, with its own documentation,
-tests, and releases. A binding’s version is the seams-core version it was
-built against. The Python release for this engine is <code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> 2.14.0.
+tests, and releases. The Python package for this engine is <code class="docutils literal notranslate"><span class="pre">pydseamslib</span></code> 2.14.0.
 Each repository’s README has the install command.</p>
 <section id="languages">
 <h2>Languages<a class="headerlink" href="#languages" title="Link to this heading">¶</a></h2>
@@ -520,7 +519,7 @@ Each repository’s README has the install command.</p>
 </tr>
 <tr class="row-odd"><td><p>Julia</p></td>
 <td><p><a class="reference external" href="https://github.com/d-SEAMS/Dseams.jl">d-SEAMS/Dseams.jl</a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Dseams</span></code>, engine from <code class="docutils literal notranslate"><span class="pre">libseams_jll</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Dseams</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>, <code class="docutils literal notranslate"><span class="pre">libseams</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Rust</p></td>
@@ -543,9 +542,8 @@ Each repository’s README has the install command.</p>
 <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>, documented on the
 <a class="reference external" href="../../reference/python-frame.html">Python Frame</a> page.
 <code class="docutils literal notranslate"><span class="pre">Dseams</span></code> calls <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code> for a frame and <code class="docutils literal notranslate"><span class="pre">libseams</span></code> for the
-re-exported <code class="docutils literal notranslate"><span class="pre">seams_*</span></code> functions. <code class="docutils literal notranslate"><span class="pre">libseams_jll</span></code> supplies the engine
-binary. The same repository includes <code class="docutils literal notranslate"><span class="pre">Seams</span></code>, an example of the
-<code class="docutils literal notranslate"><span class="pre">libseams</span></code> C API.
+re-exported <code class="docutils literal notranslate"><span class="pre">seams_*</span></code> functions. The same repository includes <code class="docutils literal notranslate"><span class="pre">Seams</span></code>,
+an example of the <code class="docutils literal notranslate"><span class="pre">libseams</span></code> C API.
 The R package compiles the engine it ships, and the calls in its README
 use <code class="docutils literal notranslate"><span class="pre">libseams_lang</span></code>.</p>
 </section>

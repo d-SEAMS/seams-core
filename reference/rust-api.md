@@ -348,6 +348,18 @@ pub fn abi () -> i32
 pub fn diamond8 () -> (Vec<f64>, f64)
 ```
 
+### seams::has_chemfiles {#seams-has-chemfiles}
+
+```rust
+pub fn has_chemfiles () -> bool
+```
+
+### seams::has_readcon {#seams-has-readcon}
+
+```rust
+pub fn has_readcon () -> bool
+```
+
 ### seams::label_name {#seams-label-name}
 
 ```rust
@@ -448,6 +460,8 @@ Each native call and the `seams.h` or `seams_lang.h` function it uses. The C col
 | seams::System | seams_system, seams_system_destroy |
 | seams::abi | seams_abi |
 | seams::diamond8 | no direct C call |
+| seams::has_chemfiles | no direct C call |
+| seams::has_readcon | no direct C call |
 | seams::label_name | seams_label_name |
 | seams::nframes | seams_path_nframes |
 | seams::num_threads | seams_get_num_threads |
