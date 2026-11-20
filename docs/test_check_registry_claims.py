@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from check_registry_claims import check_registry_pages
-from registry_claims import RegistryError
+from registry_claims import RegistryError, claims
 
 
 class RegistryClaimsSelfTest(unittest.TestCase):
@@ -47,6 +47,9 @@ class RegistryClaimsSelfTest(unittest.TestCase):
         self.assertEqual(package_count, 1)
         self.assertEqual(len(errors), 1)
         self.assertIn("live registry check failed", errors[0])
+
+    def test_local_pip_install_is_not_a_registry_claim(self):
+        self.assertEqual(list(claims("Build the wheel with `pip install .`.")), [])
 
 
 if __name__ == "__main__":

@@ -134,7 +134,9 @@ def claims(line: str):
         r"(?:==([A-Za-z0-9_.+-]+))?",
         plain,
     ):
-        yield "pip", match.group(1).rstrip(".,;:"), (match.group(2) or "*").rstrip(".,;:")
+        package = match.group(1).rstrip(".,;:")
+        if package:
+            yield "pip", package, (match.group(2) or "*").rstrip(".,;:")
 
     match = re.search(r"\b(?:conda|mamba)\s+install\b(.*)", plain)
     if match:
