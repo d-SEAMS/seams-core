@@ -31,6 +31,12 @@ def main():
         "#endif\n"
     ).format(major=major, minor=minor, patch=patch, version=version, number=number)
     (dest / "seams_version.h").write_text(body, encoding="utf-8")
+    (dest / "Doxyfile_version.cfg").write_text(
+        'PROJECT_NUMBER          = "v{}"\n'.format(version), encoding="utf-8"
+    )
+    (dest / "Doxyfile_version_plain.cfg").write_text(
+        'PROJECT_NUMBER          = "{}"\n'.format(version), encoding="utf-8"
+    )
     return 0
 
 

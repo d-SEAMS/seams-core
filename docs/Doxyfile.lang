@@ -1,4 +1,5 @@
 PROJECT_NAME           = seams_lang
+@INCLUDE               = "docs/source/doxygen-include/Doxyfile_version.cfg"
 OUTPUT_DIRECTORY       = docs/lang-cpp
 INPUT                  = bindings/cxx/seams_lang.h
 EXAMPLE_PATH           = docs/examples
