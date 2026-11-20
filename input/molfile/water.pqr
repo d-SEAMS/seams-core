@@ -1,0 +1,5 @@
+REMARK   one water molecule
+ATOM      1  OW  SOL     1       0.000   0.000   0.000 -0.8340 1.5200
+ATOM      2  HW1 SOL     1       0.957   0.000   0.000  0.4170 0.4000
+ATOM      3  HW2 SOL     1      -0.240   0.927   0.000  0.4170 0.4000
+END

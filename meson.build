@@ -425,24 +425,39 @@ if chemfiles_opt.disabled()
 else
   fs = import('fs')
   chemfiles_dep = dependency('chemfiles', required: false)
-  # conda-forge 0.10.4 writes an mmCIF atom with no residue as
-  # label_seq_id "." and omits label_entity_id. The reader dereferences
-  # that missing column. Reading the written file throws, and a write
-  # followed by a read in the same process segfaults inside
-  # mmCIFFormat::read. The probe also counts the steps of a MOL2 molecule
-  # with an empty counts line, where 0.10.4 segfaults. A library that
-  # fails either is replaced by tag 0.10.4 plus cmake/patches/.
+  # The build reads every VMD molfile format chemfiles can compile, so an
+  # installed chemfiles must register all 33 molfile readers of
+  # cmake/patches/chemfiles-0.10.4-molfiles.patch and count an rst7 frame.
+  # An unpatched 0.10.x registers three. conda-forge 0.10.4 also writes an
+  # mmCIF atom with no residue as label_seq_id "." and omits
+  # label_entity_id. The reader dereferences that missing column. Reading
+  # the written file throws, and a write followed by a read in the same
+  # process segfaults inside mmCIFFormat::read. The probe also counts the
+  # steps of a MOL2 molecule with an empty counts line, where 0.10.4
+  # segfaults. A library that fails any of these is replaced by tag 0.10.4
+  # plus cmake/patches/.
   _chemfiles_system_ok = false
+  _chemfiles_system_dep = chemfiles_dep
+  _chemfiles_probe_args = [
+    '-DSEAMS_MMCIF_PROBE="' + meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif' + '"',
+    '-DSEAMS_RST7_PROBE="' + meson.project_source_root() / 'cmake' / 'molfile_water.rst7' + '"',
+  ]
   if chemfiles_dep.found()
-    _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
     _mmcif_run = cppc.run(
       fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
-      args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'],
+      args: _chemfiles_probe_args,
       dependencies: chemfiles_dep,
-      name: 'chemfiles reads an mmCIF atom with no residue id and a truncated MOL2')
+      name: 'chemfiles has every VMD molfile reader, reads an mmCIF atom with no residue id and a truncated MOL2')
     _chemfiles_system_ok = _mmcif_run.compiled() and _mmcif_run.returncode() == 0
-    if not _chemfiles_system_ok
+    if _mmcif_run.compiled() and _mmcif_run.returncode() == 7
+      message('system chemfiles has ' + _mmcif_run.stdout().strip()
+              + '; building patched 0.10.4, which has all of them')
+    elif _mmcif_run.compiled() and _mmcif_run.returncode() == 8
+      message('system chemfiles cannot count the frames of an AMBER7 restart; building patched 0.10.4')
+    elif not _chemfiles_system_ok
       message('system chemfiles fails the mmCIF or MOL2 probe; building patched 0.10.4')
+    endif
+    if not _chemfiles_system_ok
       # dependency() has no way to drop a found library. This name is
       # not a package. It clears the rejected system copy so the fetch
       # below is the one that gets linked.
@@ -458,6 +473,7 @@ else
     _chem_patch_ids = []
     foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
                       'patches/chemfiles-0.10.4-frame-visit.patch',
+                      'patches/chemfiles-0.10.4-molfiles.patch',
                       'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                       'CMakeLists.txt', 'ChemfilesDep.cmake']
       _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]

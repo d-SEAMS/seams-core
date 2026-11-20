@@ -10,9 +10,9 @@ fi
 
 # Every optional backend that is not a conda-forge package is off, and
 # nodownload makes a missing subproject an error instead of a fetch.
-# chemfiles stays off until conda-forge ships one that passes the
-# mmCIF probe (cmake/chemfiles_mmcif_probe.cpp); the build would
-# otherwise download and patch 0.10.4.
+# chemfiles stays off until conda-forge ships one that passes
+# cmake/chemfiles_mmcif_probe.cpp (all 33 VMD molfile readers, mmCIF and
+# MOL2); the build would otherwise download and patch 0.10.4.
 meson setup _build_lib ${MESON_ARGS} \
   --wrap-mode=nodownload \
   -Dwith_tests=false \

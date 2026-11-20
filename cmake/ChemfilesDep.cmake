@@ -1,6 +1,9 @@
 # Copyright (c) d-SEAMS developers
 # Optional chemfiles dependency. On by default.
-# An installed copy is kept only when it can read
+# An installed copy is kept only when cmake/chemfiles_mmcif_probe.cpp
+# passes. It must register the 33 VMD molfile readers of
+# cmake/patches/chemfiles-0.10.4-molfiles.patch (an unpatched 0.10.x has
+# three), count the frame of cmake/molfile_water.rst7, and read
 # cmake/mmcif_no_entity.mmcif. chemfiles 0.10.4 wrote a missing residue
 # id as "." and the reader then dereferenced the absent label_entity_id
 # column. A failing probe, or no installed copy, builds tag 0.10.4 and
@@ -8,6 +11,8 @@
 # numeric seq id and treats a missing entity id as residue 0.
 # cmake/patches/chemfiles-0.10.4-mol2.patch rejects a MOL2 molecule with an
 # empty counts line, which 0.10.4 indexed as counts[0].
+# cmake/patches/chemfiles-0.10.4-molfiles.patch builds every molfile
+# plugin that reads atoms and fixes the Molfile<F> crashes those plugins hit.
 # SEAMS_CHEMFILES_FORCE_VENDORED skips the installed copy. The Meson
 # fallback sets it after its own probe has already rejected the system
 # library, so this file does not probe twice and does not import the
@@ -23,6 +28,7 @@ if(SEAMS_WITH_CHEMFILES)
     set(_seams_probe_src ${CMAKE_CURRENT_LIST_DIR}/chemfiles_probe)
     set(_seams_probe_bin ${CMAKE_BINARY_DIR}/seams-chemfiles-mmcif-probe)
     set(_seams_probe_mmcif ${CMAKE_CURRENT_LIST_DIR}/mmcif_no_entity.mmcif)
+    set(_seams_probe_rst7 ${CMAKE_CURRENT_LIST_DIR}/molfile_water.rst7)
     execute_process(
       COMMAND ${CMAKE_COMMAND} -S ${_seams_probe_src} -B ${_seams_probe_bin}
               -DCMAKE_BUILD_TYPE=Release
@@ -43,12 +49,19 @@ if(SEAMS_WITH_CHEMFILES)
       endif()
       if(_seams_probe_bld EQUAL 0 AND EXISTS ${_seams_probe_exe})
         execute_process(
-          COMMAND ${_seams_probe_exe} ${_seams_probe_mmcif}
+          COMMAND ${_seams_probe_exe} ${_seams_probe_mmcif} ${_seams_probe_rst7}
           RESULT_VARIABLE _seams_probe_run
           OUTPUT_VARIABLE _seams_probe_out
           ERROR_VARIABLE _seams_probe_err)
+        string(STRIP "${_seams_probe_out}" _seams_probe_out)
         if(_seams_probe_run EQUAL 0)
           set(_seams_chemfiles_system_ok TRUE)
+        elseif(_seams_probe_run EQUAL 7)
+          message(STATUS
+            "system chemfiles has ${_seams_probe_out}; building patched 0.10.4, which has all of them")
+        elseif(_seams_probe_run EQUAL 8)
+          message(STATUS
+            "system chemfiles cannot count the frames of an AMBER7 restart; building patched 0.10.4")
         else()
           message(STATUS
             "system chemfiles fails the mmCIF or MOL2 probe (exit ${_seams_probe_run}); building patched 0.10.4")
@@ -67,7 +80,7 @@ if(SEAMS_WITH_CHEMFILES)
       GIT_REPOSITORY https://github.com/chemfiles/chemfiles.git
       GIT_TAG 0.10.4
       GIT_SHALLOW TRUE
-      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && (patch -p1 -R -s -f --dry-run -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-molfiles.patch > /dev/null 2>&1 || patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-molfiles.patch) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(CHFL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(CHFL_BUILD_DOCUMENTATION OFF CACHE BOOL "" FORCE)

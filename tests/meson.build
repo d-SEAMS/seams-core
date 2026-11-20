@@ -147,6 +147,27 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _test_link_args += ['-Wl,--end-group']
 endif
 
+if chemfiles_dep.found()
+  _probe_src = meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'
+  _configure_args = [
+    files('test_chemfiles_configure.py'),
+    meson.project_build_root() / 'meson-logs' / 'meson-log.txt',
+    executable('chemfiles_probe_linked', _probe_src,
+      cpp_args: _chemfiles_probe_args,
+      dependencies: chemfiles_dep,
+      link_args: _test_link_args,
+      build_rpath: _test_rpath),
+  ]
+  if _chemfiles_system_dep.found()
+    _configure_args += [executable('chemfiles_probe_system', _probe_src,
+      cpp_args: _chemfiles_probe_args,
+      dependencies: _chemfiles_system_dep)]
+  endif
+  test('chemfiles_configure', find_program('python3'),
+    args: _configure_args,
+    env: _test_env)
+endif
+
 # seams.h and the seams_version.h generated beside libseams.
 _api_incdirs = [include_directories('../include', '../src')]
 

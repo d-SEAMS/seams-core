@@ -1,0 +1,961 @@
+# Copyright (c) d-SEAMS developers
+# Build every VMD molfile plugin that chemfiles 0.10.4 lists as "not yet
+# enabled but that should compile without issue" and whose reader returns
+# atoms, and register each reader as a chemfiles format. With the three
+# default plugins (gromacs, molden, psf) that is 30 plugins and 33 molfile
+# formats. Left out: cifplugin (no source in molfiles.tar.gz), crdplugin and
+# vtfplugin's vcf reader (no atom count without a separate topology),
+# babelplugin (runs an external babel), basissetplugin (no atoms), and the
+# graphics and volumetric plugins, which Molfile<F> cannot read atoms from.
+# Every plugin source still ships in molfiles.tar.gz.
+#
+# Molfile<F> also changes for the new plugins: nsteps() counts into scratch
+# buffers instead of a null timestep (rst7 crashed on a valid file), an
+# empty file is an error before a plugin sees it (rst7 crashed on one),
+# and a plugin that reports no atoms is an error instead of a std::vector
+# length error.
+diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
+index 0e032b1..6d45f1b 100644
+--- a/external/CMakeLists.txt
++++ b/external/CMakeLists.txt
+@@ -175,7 +175,36 @@ mark_as_advanced(FORCE
+ # VMD molfile: https://github.com/chemfiles/molfiles
+ # ==========
+ set(VMD_MOLFILE_PLUGINS
+-    gromacsplugin moldenplugin psfplugin
++    gromacsplugin
++    moldenplugin
++    psfplugin
++    abinitplugin
++    bgfplugin
++    binposplugin
++    carplugin
++    corplugin
++    cpmdplugin
++    cubeplugin
++    dlpolyplugin
++    dtrplugin
++    gamessplugin
++    jsplugin
++    maeffplugin
++    mdfplugin
++    namdbinplugin
++    parm7plugin
++    parmplugin
++    pqrplugin
++    rst7plugin
++    tinkerplugin
++    vasp5xdatcarplugin
++    vaspoutcarplugin
++    vaspposcarplugin
++    vaspxdatcarplugin
++    vaspxmlplugin
++    vtfplugin
++    xbgfplugin
++    xsfplugin
+ )
+ 
+ external_library(molfiles)
+diff --git a/include/chemfiles/formats/Molfile.hpp b/include/chemfiles/formats/Molfile.hpp
+index d7fba49..445a662 100644
+--- a/include/chemfiles/formats/Molfile.hpp
++++ b/include/chemfiles/formats/Molfile.hpp
+@@ -29,6 +29,36 @@ enum MolfileFormat {
+     TRJ,                ///< Gromacs .trj file format
+     PSF,                ///< PSF topology files
+     MOLDEN,             ///< Molden file format
++    VMDFMT_ABINIT,
++    VMDFMT_BGF,
++    VMDFMT_BINPOS,
++    VMDFMT_CAR,
++    VMDFMT_COR,
++    VMDFMT_CPMD,
++    VMDFMT_CUBE,
++    VMDFMT_DLPOLYHIST,
++    VMDFMT_DLPOLY3HIST,
++    VMDFMT_DLPOLYCONFIG,
++    VMDFMT_DTR,
++    VMDFMT_GAMESS,
++    VMDFMT_JS,
++    VMDFMT_MAE,
++    VMDFMT_MDF,
++    VMDFMT_NAMDBIN,
++    VMDFMT_PARM7,
++    VMDFMT_PARM,
++    VMDFMT_PQR,
++    VMDFMT_RST7,
++    VMDFMT_TINKER,
++    VMDFMT_VASP_XDATCAR5,
++    VMDFMT_OUTCAR,
++    VMDFMT_POSCAR,
++    VMDFMT_XDATCAR,
++    VMDFMT_XML,
++    VMDFMT_VSF,
++    VMDFMT_VTF,
++    VMDFMT_XBGF,
++    VMDFMT_XSF,
+ };
+ 
+ /// A thin wrapper around the vmd plugin functions
+@@ -90,6 +120,36 @@ template<> const FormatMetadata& format_metadata<Molfile<DCD>>();
+ template<> const FormatMetadata& format_metadata<Molfile<TRJ>>();
+ template<> const FormatMetadata& format_metadata<Molfile<PSF>>();
+ template<> const FormatMetadata& format_metadata<Molfile<MOLDEN>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_ABINIT>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_BGF>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_BINPOS>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_CAR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_COR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_CPMD>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_CUBE>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_DLPOLYHIST>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_DLPOLY3HIST>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_DLPOLYCONFIG>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_DTR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_GAMESS>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_JS>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_MAE>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_MDF>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_NAMDBIN>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_PARM7>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_PARM>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_PQR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_RST7>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_TINKER>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_VASP_XDATCAR5>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_OUTCAR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_POSCAR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_XDATCAR>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_XML>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_VSF>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_VTF>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_XBGF>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_XSF>>();
+ 
+ } // namespace chemfiles
+ 
+diff --git a/src/FormatFactory.cpp b/src/FormatFactory.cpp
+index d29b41c..077441f 100644
+--- a/src/FormatFactory.cpp
++++ b/src/FormatFactory.cpp
+@@ -53,6 +53,36 @@ namespace chemfiles {
+     extern template class Molfile<TRJ>;
+     extern template class Molfile<PSF>;
+     extern template class Molfile<MOLDEN>;
++    extern template class Molfile<VMDFMT_ABINIT>;
++    extern template class Molfile<VMDFMT_BGF>;
++    extern template class Molfile<VMDFMT_BINPOS>;
++    extern template class Molfile<VMDFMT_CAR>;
++    extern template class Molfile<VMDFMT_COR>;
++    extern template class Molfile<VMDFMT_CPMD>;
++    extern template class Molfile<VMDFMT_CUBE>;
++    extern template class Molfile<VMDFMT_DLPOLYHIST>;
++    extern template class Molfile<VMDFMT_DLPOLY3HIST>;
++    extern template class Molfile<VMDFMT_DLPOLYCONFIG>;
++    extern template class Molfile<VMDFMT_DTR>;
++    extern template class Molfile<VMDFMT_GAMESS>;
++    extern template class Molfile<VMDFMT_JS>;
++    extern template class Molfile<VMDFMT_MAE>;
++    extern template class Molfile<VMDFMT_MDF>;
++    extern template class Molfile<VMDFMT_NAMDBIN>;
++    extern template class Molfile<VMDFMT_PARM7>;
++    extern template class Molfile<VMDFMT_PARM>;
++    extern template class Molfile<VMDFMT_PQR>;
++    extern template class Molfile<VMDFMT_RST7>;
++    extern template class Molfile<VMDFMT_TINKER>;
++    extern template class Molfile<VMDFMT_VASP_XDATCAR5>;
++    extern template class Molfile<VMDFMT_OUTCAR>;
++    extern template class Molfile<VMDFMT_POSCAR>;
++    extern template class Molfile<VMDFMT_XDATCAR>;
++    extern template class Molfile<VMDFMT_XML>;
++    extern template class Molfile<VMDFMT_VSF>;
++    extern template class Molfile<VMDFMT_VTF>;
++    extern template class Molfile<VMDFMT_XBGF>;
++    extern template class Molfile<VMDFMT_XSF>;
+ }
+ using namespace chemfiles;
+ 
+@@ -89,6 +119,36 @@ FormatFactory::FormatFactory() {
+     this->add_format<TRRFormat>();
+     this->add_format<XTCFormat>();
+     this->add_format<XYZFormat>();
++    this->add_format<Molfile<VMDFMT_ABINIT>>();
++    this->add_format<Molfile<VMDFMT_BGF>>();
++    this->add_format<Molfile<VMDFMT_BINPOS>>();
++    this->add_format<Molfile<VMDFMT_CAR>>();
++    this->add_format<Molfile<VMDFMT_COR>>();
++    this->add_format<Molfile<VMDFMT_CPMD>>();
++    this->add_format<Molfile<VMDFMT_CUBE>>();
++    this->add_format<Molfile<VMDFMT_DLPOLYHIST>>();
++    this->add_format<Molfile<VMDFMT_DLPOLY3HIST>>();
++    this->add_format<Molfile<VMDFMT_DLPOLYCONFIG>>();
++    this->add_format<Molfile<VMDFMT_DTR>>();
++    this->add_format<Molfile<VMDFMT_GAMESS>>();
++    this->add_format<Molfile<VMDFMT_JS>>();
++    this->add_format<Molfile<VMDFMT_MAE>>();
++    this->add_format<Molfile<VMDFMT_MDF>>();
++    this->add_format<Molfile<VMDFMT_NAMDBIN>>();
++    this->add_format<Molfile<VMDFMT_PARM7>>();
++    this->add_format<Molfile<VMDFMT_PARM>>();
++    this->add_format<Molfile<VMDFMT_PQR>>();
++    this->add_format<Molfile<VMDFMT_RST7>>();
++    this->add_format<Molfile<VMDFMT_TINKER>>();
++    this->add_format<Molfile<VMDFMT_VASP_XDATCAR5>>();
++    this->add_format<Molfile<VMDFMT_OUTCAR>>();
++    this->add_format<Molfile<VMDFMT_POSCAR>>();
++    this->add_format<Molfile<VMDFMT_XDATCAR>>();
++    this->add_format<Molfile<VMDFMT_XML>>();
++    this->add_format<Molfile<VMDFMT_VSF>>();
++    this->add_format<Molfile<VMDFMT_VTF>>();
++    this->add_format<Molfile<VMDFMT_XBGF>>();
++    this->add_format<Molfile<VMDFMT_XSF>>();
+ }
+ 
+ FormatFactory& FormatFactory::get() {
+diff --git a/src/formats/Molfile.cpp b/src/formats/Molfile.cpp
+index 3faea57..76b2670 100644
+--- a/src/formats/Molfile.cpp
++++ b/src/formats/Molfile.cpp
+@@ -8,6 +8,7 @@ extern "C" {
+ }
+ 
+ #include <cassert>
++#include <cstdio>
+ #include <cstdint>
+ #include <array>
+ #include <string>
+@@ -52,6 +53,36 @@ namespace chemfiles {
+     PLUGINS_DATA(TRJ,     gromacsplugin, trj,    false);
+     PLUGINS_DATA(PSF,     psfplugin,     psf,    false);
+     PLUGINS_DATA(MOLDEN,  moldenplugin,  molden, false);
++    PLUGINS_DATA(VMDFMT_ABINIT, abinitplugin, ABINIT, false);
++    PLUGINS_DATA(VMDFMT_BGF, bgfplugin, bgf, false);
++    PLUGINS_DATA(VMDFMT_BINPOS, binposplugin, binpos, false);
++    PLUGINS_DATA(VMDFMT_CAR, carplugin, car, false);
++    PLUGINS_DATA(VMDFMT_COR, corplugin, cor, false);
++    PLUGINS_DATA(VMDFMT_CPMD, cpmdplugin, cpmd, false);
++    PLUGINS_DATA(VMDFMT_CUBE, cubeplugin, cube, false);
++    PLUGINS_DATA(VMDFMT_DLPOLYHIST, dlpolyplugin, dlpolyhist, false);
++    PLUGINS_DATA(VMDFMT_DLPOLY3HIST, dlpolyplugin, dlpoly3hist, false);
++    PLUGINS_DATA(VMDFMT_DLPOLYCONFIG, dlpolyplugin, dlpolyconfig, false);
++    PLUGINS_DATA(VMDFMT_DTR, dtrplugin, dtr, false);
++    PLUGINS_DATA(VMDFMT_GAMESS, gamessplugin, gamess, false);
++    PLUGINS_DATA(VMDFMT_JS, jsplugin, js, false);
++    PLUGINS_DATA(VMDFMT_MAE, maeffplugin, mae, false);
++    PLUGINS_DATA(VMDFMT_MDF, mdfplugin, mdf, false);
++    PLUGINS_DATA(VMDFMT_NAMDBIN, namdbinplugin, namdbin, false);
++    PLUGINS_DATA(VMDFMT_PARM7, parm7plugin, parm7, false);
++    PLUGINS_DATA(VMDFMT_PARM, parmplugin, parm, false);
++    PLUGINS_DATA(VMDFMT_PQR, pqrplugin, pqr, false);
++    PLUGINS_DATA(VMDFMT_RST7, rst7plugin, rst7, false);
++    PLUGINS_DATA(VMDFMT_TINKER, tinkerplugin, tinker, false);
++    PLUGINS_DATA(VMDFMT_VASP_XDATCAR5, vasp5xdatcarplugin, VASP_XDATCAR5, false);
++    PLUGINS_DATA(VMDFMT_OUTCAR, vaspoutcarplugin, OUTCAR, false);
++    PLUGINS_DATA(VMDFMT_POSCAR, vaspposcarplugin, POSCAR, false);
++    PLUGINS_DATA(VMDFMT_XDATCAR, vaspxdatcarplugin, XDATCAR, false);
++    PLUGINS_DATA(VMDFMT_XML, vaspxmlplugin, xml, false);
++    PLUGINS_DATA(VMDFMT_VSF, vtfplugin, vsf, false);
++    PLUGINS_DATA(VMDFMT_VTF, vtfplugin, vtf, false);
++    PLUGINS_DATA(VMDFMT_XBGF, xbgfplugin, xbgf, false);
++    PLUGINS_DATA(VMDFMT_XSF, xsfplugin, xsf, false);
+ }
+ 
+ #undef PLUGINS_FUNCTIONS
+@@ -131,6 +162,21 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
+         );
+     }
+ 
++    // Several plugins read their first lines without checking for end of
++    // file, then crash or loop. A DESRES trajectory is a directory, which
++    // reads as an error rather than as end of file, and goes to its plugin.
++    {
++        std::FILE* probe = std::fopen(path_.c_str(), "rb");
++        if (probe != nullptr) {
++            int first = std::fgetc(probe);
++            bool empty = first == EOF && std::ferror(probe) == 0;
++            std::fclose(probe);
++            if (empty) {
++                throw format_error("the file at '{}' is empty", path_);
++            }
++        }
++    }
++
+     if (plugin_data_.init()) {
+         throw format_error(
+             "could not initialize the {} plugin", plugin_data_.format()
+@@ -170,6 +216,17 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
+         );
+     }
+ 
++    // A plugin that finds no atoms reports 0 or -1 (unknown). Sizing the
++    // frame from either throws from std::vector or reads garbage.
++    if (natoms_ <= 0) {
++        plugin_handle_->close_file_read(data_);
++        data_ = nullptr;
++        plugin_data_.fini();
++        throw format_error(
++            "the {} plugin found no atoms in '{}'", plugin_data_.format(), path_
++        );
++    }
++
+     read_topology();
+ }
+ 
+@@ -245,8 +302,15 @@ template <MolfileFormat F> size_t Molfile<F>::nsteps() {
+     }
+     size_t n = 0;
+     int status = MOLFILE_SUCCESS;
++    // rst7 and other plugins write through the timestep without the null
++    // check the molfile API asks for, so count into scratch buffers.
++    std::vector<float> scratch_coords(3 * static_cast<size_t>(natoms_));
++    std::vector<float> scratch_velocities(3 * static_cast<size_t>(natoms_));
+     while (true) {
+-        status = read_next_timestep(nullptr);
++        molfile_timestep_t scratch{nullptr, nullptr, 0, 0, 0, 90, 90, 90, 0};
++        scratch.coords = scratch_coords.data();
++        scratch.velocities = scratch_velocities.data();
++        status = read_next_timestep(&scratch);
+         if (status == MOLFILE_SUCCESS) {
+             n++;
+         } else {
+@@ -380,6 +444,36 @@ template <MolfileFormat F> void Molfile<F>::read_topology() {
+ template class chemfiles::Molfile<TRJ>;
+ template class chemfiles::Molfile<PSF>;
+ template class chemfiles::Molfile<MOLDEN>;
++template class chemfiles::Molfile<VMDFMT_ABINIT>;
++template class chemfiles::Molfile<VMDFMT_BGF>;
++template class chemfiles::Molfile<VMDFMT_BINPOS>;
++template class chemfiles::Molfile<VMDFMT_CAR>;
++template class chemfiles::Molfile<VMDFMT_COR>;
++template class chemfiles::Molfile<VMDFMT_CPMD>;
++template class chemfiles::Molfile<VMDFMT_CUBE>;
++template class chemfiles::Molfile<VMDFMT_DLPOLYHIST>;
++template class chemfiles::Molfile<VMDFMT_DLPOLY3HIST>;
++template class chemfiles::Molfile<VMDFMT_DLPOLYCONFIG>;
++template class chemfiles::Molfile<VMDFMT_DTR>;
++template class chemfiles::Molfile<VMDFMT_GAMESS>;
++template class chemfiles::Molfile<VMDFMT_JS>;
++template class chemfiles::Molfile<VMDFMT_MAE>;
++template class chemfiles::Molfile<VMDFMT_MDF>;
++template class chemfiles::Molfile<VMDFMT_NAMDBIN>;
++template class chemfiles::Molfile<VMDFMT_PARM7>;
++template class chemfiles::Molfile<VMDFMT_PARM>;
++template class chemfiles::Molfile<VMDFMT_PQR>;
++template class chemfiles::Molfile<VMDFMT_RST7>;
++template class chemfiles::Molfile<VMDFMT_TINKER>;
++template class chemfiles::Molfile<VMDFMT_VASP_XDATCAR5>;
++template class chemfiles::Molfile<VMDFMT_OUTCAR>;
++template class chemfiles::Molfile<VMDFMT_POSCAR>;
++template class chemfiles::Molfile<VMDFMT_XDATCAR>;
++template class chemfiles::Molfile<VMDFMT_XML>;
++template class chemfiles::Molfile<VMDFMT_VSF>;
++template class chemfiles::Molfile<VMDFMT_VTF>;
++template class chemfiles::Molfile<VMDFMT_XBGF>;
++template class chemfiles::Molfile<VMDFMT_XSF>;
+ 
+ template<> const FormatMetadata& chemfiles::format_metadata<Molfile<TRJ>>() {
+     static FormatMetadata metadata;
+@@ -442,3 +536,603 @@ template<> const FormatMetadata& chemfiles::format_metadata<Molfile<MOLDEN>>() {
+     metadata.residues = false;
+     return metadata;
+ }
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_ABINIT>>() {
++    static FormatMetadata metadata;
++    metadata.name = "ABINIT";
++    metadata.extension = nullopt;
++    metadata.description = "ABINIT (VMD molfile abinitplugin, reader ABINIT)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_BGF>>() {
++    static FormatMetadata metadata;
++    metadata.name = "MSI Biograf Format";
++    metadata.extension = ".bgf";
++    metadata.description = "MSI Biograf Format (VMD molfile bgfplugin, reader bgf)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_BINPOS>>() {
++    static FormatMetadata metadata;
++    metadata.name = "Scripps Binpos";
++    metadata.extension = ".binpos";
++    metadata.description = "Scripps Binpos (VMD molfile binposplugin, reader binpos)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = false;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_CAR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "InsightII car";
++    metadata.extension = ".car";
++    metadata.description = "InsightII car (VMD molfile carplugin, reader car)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_COR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "CHARMM Coordinates";
++    metadata.extension = ".cor";
++    metadata.description = "CHARMM Coordinates (VMD molfile corplugin, reader cor)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_CPMD>>() {
++    static FormatMetadata metadata;
++    metadata.name = "CPMD";
++    metadata.extension = ".cpmd";
++    metadata.description = "CPMD (VMD molfile cpmdplugin, reader cpmd)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = false;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_CUBE>>() {
++    static FormatMetadata metadata;
++    metadata.name = "Gaussian Cube";
++    metadata.extension = ".cube";
++    metadata.description = "Gaussian Cube (VMD molfile cubeplugin, reader cube)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_DLPOLYHIST>>() {
++    static FormatMetadata metadata;
++    metadata.name = "DL_POLY_C HISTORY";
++    metadata.extension = ".dlpolyhist";
++    metadata.description = "DL_POLY_C HISTORY (VMD molfile dlpolyplugin, reader dlpolyhist)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_DLPOLY3HIST>>() {
++    static FormatMetadata metadata;
++    metadata.name = "DL_POLY_4 HISTORY";
++    metadata.extension = nullopt;
++    metadata.description = "DL_POLY_4 HISTORY (VMD molfile dlpolyplugin, reader dlpoly3hist)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_DLPOLYCONFIG>>() {
++    static FormatMetadata metadata;
++    metadata.name = "DL_POLY CONFIG";
++    metadata.extension = ".dlpolyconfig";
++    metadata.description = "DL_POLY CONFIG (VMD molfile dlpolyplugin, reader dlpolyconfig)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_DTR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "DESRES Trajectory";
++    metadata.extension = ".dtr";
++    metadata.description = "DESRES Trajectory (VMD molfile dtrplugin, reader dtr)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = false;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_GAMESS>>() {
++    static FormatMetadata metadata;
++    metadata.name = "GAMESS";
++    metadata.extension = ".log";
++    metadata.description = "GAMESS (VMD molfile gamessplugin, reader gamess)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_JS>>() {
++    static FormatMetadata metadata;
++    metadata.name = "js";
++    metadata.extension = ".js";
++    metadata.description = "js (VMD molfile jsplugin, reader js)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_MAE>>() {
++    static FormatMetadata metadata;
++    metadata.name = "Maestro File";
++    metadata.extension = ".mae";
++    metadata.description = "Maestro File (VMD molfile maeffplugin, reader mae)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_MDF>>() {
++    static FormatMetadata metadata;
++    metadata.name = "InsightII MDF";
++    metadata.extension = ".mdf";
++    metadata.description = "InsightII MDF (VMD molfile mdfplugin, reader mdf)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = false;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_NAMDBIN>>() {
++    static FormatMetadata metadata;
++    metadata.name = "NAMD Binary Coordinates";
++    metadata.extension = ".coor";
++    metadata.description = "NAMD Binary Coordinates (VMD molfile namdbinplugin, reader namdbin)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = false;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_PARM7>>() {
++    static FormatMetadata metadata;
++    metadata.name = "AMBER7 Parm";
++    metadata.extension = ".parm7";
++    metadata.description = "AMBER7 Parm (VMD molfile parm7plugin, reader parm7)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = false;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_PARM>>() {
++    static FormatMetadata metadata;
++    metadata.name = "AMBER Parm";
++    metadata.extension = ".parm";
++    metadata.description = "AMBER Parm (VMD molfile parmplugin, reader parm)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = false;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_PQR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "PQR";
++    metadata.extension = ".pqr";
++    metadata.description = "PQR (VMD molfile pqrplugin, reader pqr)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_RST7>>() {
++    static FormatMetadata metadata;
++    metadata.name = "AMBER7 Restart";
++    metadata.extension = ".rst7";
++    metadata.description = "AMBER7 Restart (VMD molfile rst7plugin, reader rst7)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = false;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_TINKER>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VMD Tinker";
++    metadata.extension = nullopt;
++    metadata.description = "VMD Tinker (VMD molfile tinkerplugin, reader tinker)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_VASP_XDATCAR5>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VASP_XDATCAR5";
++    metadata.extension = ".VASP_XDATCAR5";
++    metadata.description = "VASP_XDATCAR5 (VMD molfile vasp5xdatcarplugin, reader VASP_XDATCAR5)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_OUTCAR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VASP_OUTCAR";
++    metadata.extension = ".OUTCAR";
++    metadata.description = "VASP_OUTCAR (VMD molfile vaspoutcarplugin, reader OUTCAR)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_POSCAR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VASP_POSCAR";
++    metadata.extension = ".POSCAR";
++    metadata.description = "VASP_POSCAR (VMD molfile vaspposcarplugin, reader POSCAR)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_XDATCAR>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VASP_XDATCAR";
++    metadata.extension = ".XDATCAR";
++    metadata.description = "VASP_XDATCAR (VMD molfile vaspxdatcarplugin, reader XDATCAR)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_XML>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VASP_xml";
++    metadata.extension = ".xml";
++    metadata.description = "VASP_xml (VMD molfile vaspxmlplugin, reader xml)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_VSF>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VTF structure format";
++    metadata.extension = ".vsf";
++    metadata.description = "VTF structure format (VMD molfile vtfplugin, reader vsf)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = false;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_VTF>>() {
++    static FormatMetadata metadata;
++    metadata.name = "VTF trajectory format";
++    metadata.extension = ".vtf";
++    metadata.description = "VTF trajectory format (VMD molfile vtfplugin, reader vtf)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_XBGF>>() {
++    static FormatMetadata metadata;
++    metadata.name = "Internal Paratool Format";
++    metadata.extension = ".xbgf";
++    metadata.description = "Internal Paratool Format (VMD molfile xbgfplugin, reader xbgf)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_XSF>>() {
++    static FormatMetadata metadata;
++    metadata.name = "(Animated) XCrySDen Structure File";
++    metadata.extension = ".xsf";
++    metadata.description = "(Animated) XCrySDen Structure File (VMD molfile xsfplugin, reader xsf)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}

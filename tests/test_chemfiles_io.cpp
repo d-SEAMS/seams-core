@@ -15,6 +15,7 @@
 #include <fstream>
 #include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -386,6 +387,121 @@ TEST_CASE("a MOL2 molecule with no counts line is an error", "[chemfiles]") {
   fs::remove(mol2);
 }
 #endif
+
+namespace {
+
+// The 27 extensions cmake/patches/chemfiles-0.10.4-molfiles.patch adds for
+// its 30 readers. ABINIT, DL_POLY_4 HISTORY and VMD Tinker have none.
+const char *const molfileExtensions[] = {
+    "bgf", "binpos", "car", "cor", "cpmd", "cube", "dlpolyconfig",
+    "dlpolyhist", "dtr", "js", "log", "mae", "mdf", "coor", "parm",
+    "parm7", "pqr", "rst7", "OUTCAR", "POSCAR", "XDATCAR",
+    "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"};
+
+std::string chemfilesOpenError(const fs::path &path) {
+  try {
+    chemfiles::Trajectory trajectory(path.string());
+  } catch (const chemfiles::Error &err) {
+    return err.what();
+  }
+  return {};
+}
+
+} // namespace
+
+TEST_CASE("every VMD molfile reader is registered", "[chemfiles][molfile]") {
+  std::set<std::string> names;
+  for (const auto &format : chemfiles::formats_list()) {
+    names.insert(format.get().name);
+  }
+  for (const char *name :
+       {"TRJ", "PSF", "Molden", "ABINIT", "MSI Biograf Format",
+        "Scripps Binpos", "InsightII car", "CHARMM Coordinates", "CPMD",
+        "Gaussian Cube", "DL_POLY_C HISTORY", "DL_POLY_4 HISTORY",
+        "DL_POLY CONFIG", "DESRES Trajectory", "GAMESS", "js",
+        "Maestro File", "InsightII MDF", "NAMD Binary Coordinates",
+        "AMBER7 Parm", "AMBER Parm", "PQR", "AMBER7 Restart", "VMD Tinker",
+        "VASP_XDATCAR5", "VASP_OUTCAR", "VASP_POSCAR", "VASP_XDATCAR",
+        "VASP_xml", "VTF structure format", "VTF trajectory format",
+        "Internal Paratool Format", "(Animated) XCrySDen Structure File"}) {
+    INFO(name);
+    REQUIRE(names.count(name) == 1);
+  }
+}
+
+TEST_CASE("PQR, cube and AMBER7 restart frames hold the water molecule",
+          "[chemfiles][molfile]") {
+  const double water[3][3] = {{0, 0, 0}, {0.957, 0, 0}, {-0.24, 0.927, 0}};
+  for (const char *path :
+       {"molfile/water.pqr", "molfile/water.cube", "molfile/water.rst7"}) {
+    INFO(path);
+    REQUIRE(sinp::chemfilesSteps(path) == 1);
+    Cloud cloud = sinp::openFrame(path, 1, -1);
+    REQUIRE(cloud.nop == 3);
+    for (std::size_t i = 0; i < 3; ++i) {
+      REQUIRE_THAT(cloud.pts[i].x, Catch::Matchers::WithinAbs(water[i][0], 1e-5));
+      REQUIRE_THAT(cloud.pts[i].y, Catch::Matchers::WithinAbs(water[i][1], 1e-5));
+      REQUIRE_THAT(cloud.pts[i].z, Catch::Matchers::WithinAbs(water[i][2], 1e-5));
+    }
+  }
+}
+
+TEST_CASE("an XSF frame carries its 10 A cell", "[chemfiles][molfile]") {
+  REQUIRE(sinp::chemfilesSteps("molfile/water.xsf") == 1);
+  Cloud cloud = sinp::openFrame("molfile/water.xsf", 1, -1);
+  REQUIRE(cloud.nop == 3);
+  REQUIRE(cloud.box.size() >= 3);
+  for (std::size_t k = 0; k < 3; ++k) {
+    REQUIRE_THAT(cloud.box[k], Catch::Matchers::WithinAbs(10.0, 1e-5));
+  }
+  REQUIRE_THAT(cloud.pts[1].x, Catch::Matchers::WithinAbs(0.957, 1e-5));
+  // The plugin wraps the third atom, at x = -0.24, into the cell.
+  REQUIRE_THAT(cloud.pts[2].x, Catch::Matchers::WithinAbs(9.76, 1e-5));
+  REQUIRE_THAT(cloud.pts[2].y, Catch::Matchers::WithinAbs(0.927, 1e-5));
+}
+
+TEST_CASE("each molfile extension reaches its reader", "[chemfiles][molfile]") {
+  // Only the molfile wrapper reports an empty file this way, so the
+  // message proves the extension picked a molfile reader, and no plugin
+  // runs on the empty file.
+  const auto dir = dseams_test::freshDir();
+  for (const char *ext : molfileExtensions) {
+    const auto path = dir / (std::string("empty.") + ext);
+    { std::ofstream out(path); }
+    INFO(path.string());
+    REQUIRE(chemfilesOpenError(path).find("is empty") != std::string::npos);
+    REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+    REQUIRE(sinp::openFrame(path.string(), 1, -1).nop == 0);
+  }
+  const auto unknown = dir / "empty.zzz";
+  { std::ofstream out(unknown); }
+  REQUIRE(chemfilesOpenError(unknown).find("can not find a format") !=
+          std::string::npos);
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a molfile plugin that finds no atoms is an error",
+          "[chemfiles][molfile]") {
+  // Unpatched, nsteps() hands rst7 a null timestep and an atom count of
+  // zero sizes the frame from garbage; both crashed the process.
+  const auto dir = dseams_test::freshDir();
+  const auto title = dir / "title.rst7";
+  {
+    std::ofstream out(title);
+    out << "a title and nothing else\n";
+  }
+  REQUIRE(chemfilesOpenError(title).find("found no atoms") != std::string::npos);
+  REQUIRE(sinp::chemfilesSteps(title.string()) == -1);
+  REQUIRE(sinp::openFrame(title.string(), 1, -1).nop == 0);
+  // A DESRES trajectory is a directory. It is not "empty"; its plugin
+  // reports the missing frames.
+  const auto dtr = dir / "none.dtr";
+  fs::create_directories(dtr);
+  const auto dtrError = chemfilesOpenError(dtr);
+  REQUIRE_FALSE(dtrError.empty());
+  REQUIRE(dtrError.find("is empty") == std::string::npos);
+  fs::remove_all(dir);
+}
 
 TEST_CASE("one open chemfiles trajectory gives the clouds of single reads",
           "[chemfiles]") {

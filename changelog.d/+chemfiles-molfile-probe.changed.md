@@ -1,0 +1,1 @@
+Configure keeps an installed chemfiles only when it has all 33 VMD molfile readers and counts the frame of an AMBER7 restart. An unpatched 0.10.x has three, so configure prints how many it has and which are missing, and builds the patched 0.10.4. No build links a chemfiles with fewer readers.
