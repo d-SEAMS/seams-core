@@ -28,6 +28,7 @@ seams_fingerprint_key
 seams_fingerprint_rings
 seams_get_num_threads
 seams_handle_error
+seams_hbond_edges
 seams_hbonds
 seams_label_name
 seams_last_error
@@ -46,6 +47,7 @@ seams_q4q6
 seams_q4q6_n
 seams_q6bar
 seams_ql
+seams_quenched_analysis
 seams_rdf
 seams_ring_symmetry_name
 seams_rings_chordless

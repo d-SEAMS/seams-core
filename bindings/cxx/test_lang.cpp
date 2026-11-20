@@ -414,12 +414,100 @@ int main(int argc, char **argv) {
   if (allTypes == nullptr) {
     return fail("type filter");
   }
+  int hb_n = -1;
+  if (seams_frame_hbond_edges(allTypes, 3.5, 2, 1, 2.42, 30.0, 0, nullptr, nullptr, nullptr,
+                              nullptr, nullptr, 0, &hb_n) != 0) {
+    seams_frame_free(allTypes);
+    return fail("hbond edge query");
+  }
+  if (hb_n < 0) {
+    seams_frame_free(allTypes);
+    return fail("hbond edge count");
+  }
+  std::vector<uint32_t> donor(static_cast<std::size_t>(std::max(hb_n, 1)));
+  std::vector<uint32_t> acceptor(static_cast<std::size_t>(std::max(hb_n, 1)));
+  std::vector<uint32_t> hydrogen(static_cast<std::size_t>(std::max(hb_n, 1)));
+  std::vector<double> dDA(static_cast<std::size_t>(std::max(hb_n, 1)));
+  std::vector<double> angleDeg(static_cast<std::size_t>(std::max(hb_n, 1)));
+  int hb_n_copy = hb_n;
+  if (seams_frame_hbond_edges(allTypes, 3.5, 2, 1, 2.42, 30.0, 3, donor.data(), acceptor.data(),
+                              hydrogen.data(), dDA.data(), angleDeg.data(), hb_n_copy,
+                              &hb_n_copy) != 0) {
+    seams_frame_free(allTypes);
+    return fail("hbond edge copy");
+  }
+  if (hb_n_copy != hb_n) {
+    seams_frame_free(allTypes);
+    return fail("hbond edge count changed");
+  }
+  if (hb_n > 0) {
+    int hb_short = hb_n;
+    if (seams_frame_hbond_edges(allTypes, 3.5, 2, 1, 2.42, 30.0, 3, donor.data(),
+                                acceptor.data(), hydrogen.data(), dDA.data(), angleDeg.data(),
+                                hb_n - 1, &hb_short) == 0) {
+      seams_frame_free(allTypes);
+      return fail("hbond edge short buffer accepted");
+    }
+  }
+  for (int i = 1; i < hb_n; ++i) {
+    const bool sorted = (donor[static_cast<std::size_t>(i - 1)] <
+                         donor[static_cast<std::size_t>(i)]) ||
+                        (donor[static_cast<std::size_t>(i - 1)] ==
+                             donor[static_cast<std::size_t>(i)] &&
+                         acceptor[static_cast<std::size_t>(i - 1)] <
+                             acceptor[static_cast<std::size_t>(i)]) ||
+                        (donor[static_cast<std::size_t>(i - 1)] ==
+                             donor[static_cast<std::size_t>(i)] &&
+                         acceptor[static_cast<std::size_t>(i - 1)] ==
+                             acceptor[static_cast<std::size_t>(i)] &&
+                         hydrogen[static_cast<std::size_t>(i - 1)] <=
+                             hydrogen[static_cast<std::size_t>(i)]);
+    if (!sorted) {
+      seams_frame_free(allTypes);
+      return fail("hbond edge order");
+    }
+  }
   seams_frame_free(allTypes);
   seams_frame *guess = seams_frame_read(tip4p.c_str(), 1, 0);
   if (guess == nullptr) {
     return fail("type guess");
   }
   seams_frame_free(guess);
+
+  {
+    const double mix_xyz[18] = {
+        0.0,  0.0,  0.0,  0.96, 0.0,  0.0, 0.0, 0.96, 0.0,
+        2.8,  0.0,  0.0,  3.76, 0.0,  0.0, 2.8, 0.96, 0.0,
+    };
+    const double mix_box[9] = {0.0, 0.0, 0.0, 20.0, 20.0, 20.0, 0.0, 0.0, 0.0};
+    const int mix_types[6] = {2, 1, 1, 3, 1, 1};
+    const int mix_mols[6] = {1, 1, 1, 2, 2, 2};
+    const int mix_ids[6] = {1, 2, 3, 4, 5, 6};
+    seams_frame *mix_heavy =
+        seams_frame_from_species(mix_xyz, 6, mix_box, mix_types, mix_ids, mix_mols);
+    if (mix_heavy == nullptr) {
+      return fail("mixed heavy frame");
+    }
+    int mix_n = -1;
+    if (seams_frame_hbond_edges(mix_heavy, 3.5, 0, 1, 2.42, 30.0, 3, nullptr, nullptr, nullptr,
+                                nullptr, nullptr, 0, &mix_n) != 0) {
+      seams_frame_free(mix_heavy);
+      return fail("mixed heavy hbond query");
+    }
+    if (mix_n != 1) {
+      seams_frame_free(mix_heavy);
+      return fail("mixed heavy hbond count");
+    }
+    uint32_t md = 0, ma = 0, mh_idx = 0;
+    double mda = 0.0, mang = 0.0;
+    if (seams_frame_hbond_edges(mix_heavy, 3.5, 0, 1, 2.42, 30.0, 3, &md, &ma, &mh_idx, &mda,
+                                &mang, 1, &mix_n) != 0 ||
+        md != 0 || ma != 3 || mh_idx != 1) {
+      seams_frame_free(mix_heavy);
+      return fail("mixed heavy hbond edge indices");
+    }
+    seams_frame_free(mix_heavy);
+  }
 
   int types4[4] = {2, 2, 1, 1};
   int ids4[4] = {10, 11, 12, 13};

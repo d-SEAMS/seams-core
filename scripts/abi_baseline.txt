@@ -30,6 +30,7 @@ T seams_fingerprint_key
 T seams_fingerprint_rings
 T seams_get_num_threads
 T seams_handle_error
+T seams_hbond_edges
 T seams_hbonds
 T seams_label_name
 T seams_last_error
@@ -48,6 +49,7 @@ T seams_q4q6
 T seams_q4q6_n
 T seams_q6bar
 T seams_ql
+T seams_quenched_analysis
 T seams_rdf
 T seams_ring_symmetry_name
 T seams_rings_chordless
@@ -99,6 +101,7 @@ T seams_frame_chordless
 T seams_frame_free
 T seams_frame_from_arrays
 T seams_frame_from_species
+T seams_frame_hbond_edges
 T seams_frame_ids
 T seams_frame_index
 T seams_frame_monolayer

@@ -1,6 +1,8 @@
 #ifndef SEAMS_LANG_H_
 #define SEAMS_LANG_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -143,6 +145,17 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);
 /** @brief seams_frame_neighbour_pairs. @ingroup lang_order */
 int seams_frame_neighbour_pairs(const seams_frame *frame);
+
+/** H-bond edge export. Rows are sorted by (donor, acceptor, hydrogen).
+ * donor and acceptor are frame indices. hydrogen is UINT32_MAX when
+ * SEAMS_HBOND_EDGE_WITH_H is not requested. fields is the same bitmask as
+ * seams_hbond_edges in seams.h. Any non-null output column needs cap rows.
+ * n_out receives the edge count. */
+int seams_frame_hbond_edges(seams_frame *frame, double cutoff, int oxygen_type,
+                            int hydrogen_type, double dist_cutoff,
+                            double angle_cutoff, int fields, uint32_t *donor,
+                            uint32_t *acceptor, uint32_t *hydrogen,
+                            double *d_DA, double *angle, int cap, int *n_out);
 
 /** Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
  * Lechner-Dellago average; the local values do not use that pass.

@@ -37,6 +37,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #ifndef SEAMS_LANG_VERSION
@@ -188,6 +189,138 @@ int resolve_type(const Cloud &cloud, int requested) {
 
 bool keep_atom(int atom_type, int requested) {
   return requested <= 0 || atom_type == requested;
+}
+
+struct HbEdge {
+  uint32_t donor = 0;
+  uint32_t acceptor = 0;
+  uint32_t hydrogen = UINT32_MAX;
+  double d_DA = NAN;
+  double angle = NAN;
+};
+
+std::vector<HbEdge> hbond_edges_lang(const Cloud &cloud, double cutoff, int oxygen_type,
+                                     int hydrogen_type, double dist_cutoff, double angle_cutoff,
+                                     bool with_h, bool with_geometry) {
+  Cloud heavy;
+  Cloud hydro;
+  heavy.box = cloud.box;
+  heavy.boxLow = cloud.boxLow;
+  hydro.box = cloud.box;
+  hydro.boxLow = cloud.boxLow;
+  std::vector<int> heavy_to_frame;
+  std::vector<int> hydro_to_frame;
+  for (int i = 0; i < cloud.nop; ++i) {
+    const auto &point = cloud.pts[static_cast<std::size_t>(i)];
+    if (point.type == hydrogen_type) {
+      hydro.pts.push_back(point);
+      hydro_to_frame.push_back(i);
+    } else if (oxygen_type <= 0 || point.type == oxygen_type) {
+      heavy.pts.push_back(point);
+      if (oxygen_type <= 0) {
+        heavy.pts.back().type = 1;
+      }
+      heavy_to_frame.push_back(i);
+    }
+  }
+  heavy.nop = static_cast<int>(heavy.pts.size());
+  hydro.nop = static_cast<int>(hydro.pts.size());
+  for (int i = 0; i < heavy.nop; ++i) {
+    heavy.idIndexMap[heavy.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+  for (int i = 0; i < hydro.nop; ++i) {
+    hydro.idIndexMap[hydro.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+  std::vector<HbEdge> out;
+  if (heavy.nop == 0 || hydro.nop == 0) {
+    return out;
+  }
+  const int typ = oxygen_type > 0 ? oxygen_type : 1;
+  auto rows = nneigh::neighListO(cutoff, heavy, typ);
+  auto molIDlist = molSys::hAtomMolList(hydro, heavy);
+  std::unordered_map<int, std::vector<int>> donor_h_by_mol;
+  for (const auto &row : molIDlist) {
+    if (row.size() < 3) {
+      continue;
+    }
+    donor_h_by_mol[row[0]].push_back(row[1]);
+    donor_h_by_mol[row[0]].push_back(row[2]);
+  }
+  for (const auto &row : rows) {
+    if (row.size() < 2) {
+      continue;
+    }
+    const auto it_i = heavy.idIndexMap.find(row[0]);
+    if (it_i == heavy.idIndexMap.end()) {
+      continue;
+    }
+    const int iatom = it_i->second;
+    for (std::size_t j = 1; j < row.size(); ++j) {
+      const auto it_j = heavy.idIndexMap.find(row[j]);
+      if (it_j == heavy.idIndexMap.end()) {
+        continue;
+      }
+      const int jatom = it_j->second;
+      if (iatom >= jatom) {
+        continue;
+      }
+      const int donors[2] = {iatom, jatom};
+      const int acceptors[2] = {jatom, iatom};
+      bool accepted = false;
+      for (int d = 0; d < 2 && !accepted; ++d) {
+        const int donor = donors[d];
+        const int acceptor = acceptors[d];
+        const auto donor_it = donor_h_by_mol.find(heavy.pts[static_cast<std::size_t>(donor)].molID);
+        if (donor_it == donor_h_by_mol.end()) {
+          continue;
+        }
+        const auto oo = gen::relDist(heavy, acceptor, donor);
+        const std::vector<double> oo_vec{oo[0], oo[1], oo[2]};
+        const double oo_len = std::sqrt(oo[0] * oo[0] + oo[1] * oo[1] + oo[2] * oo[2]);
+        const double dist2 = dist_cutoff * dist_cutoff;
+        for (const int hindex : donor_it->second) {
+          if (hindex < 0 || hindex >= hydro.nop) {
+            continue;
+          }
+          const auto oh = gen::relDistFromPoint(
+              heavy, acceptor, hydro.pts[static_cast<std::size_t>(hindex)].x,
+              hydro.pts[static_cast<std::size_t>(hindex)].y,
+              hydro.pts[static_cast<std::size_t>(hindex)].z);
+          const double oh2 = oh[0] * oh[0] + oh[1] * oh[1] + oh[2] * oh[2];
+          if (oh2 >= dist2) {
+            continue;
+          }
+          const std::vector<double> oh_vec{oh[0], oh[1], oh[2]};
+          const double ang = gen::radDeg(gen::eigenVecAngle(oo_vec, oh_vec));
+          if (ang > angle_cutoff) {
+            continue;
+          }
+          HbEdge edge{};
+          edge.donor = static_cast<uint32_t>(heavy_to_frame[static_cast<std::size_t>(donor)]);
+          edge.acceptor = static_cast<uint32_t>(heavy_to_frame[static_cast<std::size_t>(acceptor)]);
+          edge.hydrogen = with_h ? static_cast<uint32_t>(hydro_to_frame[static_cast<std::size_t>(hindex)])
+                                 : UINT32_MAX;
+          if (with_geometry) {
+            edge.d_DA = oo_len;
+            edge.angle = ang;
+          }
+          out.push_back(edge);
+          accepted = true;
+          break;
+        }
+      }
+    }
+  }
+  std::sort(out.begin(), out.end(), [](const HbEdge &a, const HbEdge &b) {
+    if (a.donor != b.donor) {
+      return a.donor < b.donor;
+    }
+    if (a.acceptor != b.acceptor) {
+      return a.acceptor < b.acceptor;
+    }
+    return a.hydrogen < b.hydrogen;
+  });
+  return out;
 }
 
 void write_ice_labels(seams_frame *frame, int type, int *labels, int counts9[9]);
@@ -1218,6 +1351,69 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 
 int seams_frame_neighbour_pairs(const seams_frame *frame) {
   return frame == nullptr ? -1 : frame->neighbour_pairs;
+}
+
+int seams_frame_hbond_edges(seams_frame *frame, double cutoff, int oxygen_type,
+                            int hydrogen_type, double dist_cutoff, double angle_cutoff,
+                            int fields, uint32_t *donor, uint32_t *acceptor,
+                            uint32_t *hydrogen, double *d_DA, double *angle, int cap,
+                            int *n_out) {
+  clear_error();
+  if (frame == nullptr || n_out == nullptr) {
+    set_error("hbond edges need a frame and output length");
+    return 1;
+  }
+  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(cutoff) || !std::isfinite(dist_cutoff) || !std::isfinite(angle_cutoff)) {
+    set_error("cutoffs must be finite and positive");
+    return 1;
+  }
+  if (hydrogen_type <= 0) {
+    set_error("hydrogen type must be positive");
+    return 1;
+  }
+  constexpr int with_h_mask = 1;
+  constexpr int with_geom_mask = 2;
+  if ((fields & ~(with_h_mask | with_geom_mask)) != 0) {
+    set_error("unknown hbond edge fields");
+    return 1;
+  }
+  const bool with_h = (fields & with_h_mask) != 0;
+  const bool with_geometry = (fields & with_geom_mask) != 0;
+  try {
+    const auto rows = hbond_edges_lang(frame->cloud, cutoff, oxygen_type, hydrogen_type,
+                                       dist_cutoff, angle_cutoff, with_h, with_geometry);
+    *n_out = static_cast<int>(rows.size());
+    if (donor == nullptr && acceptor == nullptr && hydrogen == nullptr && d_DA == nullptr &&
+        angle == nullptr) {
+      return 0;
+    }
+    if (cap < *n_out) {
+      set_error("hbond edge buffers are short");
+      return 1;
+    }
+    for (int i = 0; i < *n_out; ++i) {
+      if (donor != nullptr) {
+        donor[i] = rows[static_cast<std::size_t>(i)].donor;
+      }
+      if (acceptor != nullptr) {
+        acceptor[i] = rows[static_cast<std::size_t>(i)].acceptor;
+      }
+      if (hydrogen != nullptr) {
+        hydrogen[i] = rows[static_cast<std::size_t>(i)].hydrogen;
+      }
+      if (d_DA != nullptr) {
+        d_DA[i] = rows[static_cast<std::size_t>(i)].d_DA;
+      }
+      if (angle != nullptr) {
+        angle[i] = rows[static_cast<std::size_t>(i)].angle;
+      }
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
 }
 
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,

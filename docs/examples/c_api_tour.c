@@ -54,6 +54,24 @@ static void diamond8(double *xyz, double *edge) {
   *edge = a;
 }
 
+static seams_status tour_quench(const double *xyz, size_t n, const double *box9, size_t box_len,
+                                double *xyz_out, size_t xyz_out_len, double *box9_out,
+                                size_t box9_out_len, void *user_data) {
+  (void)user_data;
+  if (xyz == NULL || box9 == NULL || xyz_out == NULL || xyz_out_len < 3 * n || box_len != 9) {
+    return SEAMS_ERR_NULL;
+  }
+  for (size_t i = 0; i < n; ++i) {
+    xyz_out[3 * i] = 25.0 * (double)i;
+    xyz_out[3 * i + 1] = 0.0;
+    xyz_out[3 * i + 2] = 0.0;
+  }
+  if (box9_out != NULL && box9_out_len == 9) {
+    memcpy(box9_out, box9, sizeof(double) * 9);
+  }
+  return SEAMS_OK;
+}
+
 int main(int argc, char **argv) {
   const char *root = argc > 1 ? argv[1] : ".";
   char ice[512], si[512], tip[512];
@@ -331,6 +349,37 @@ int main(int argc, char **argv) {
   int bonds = 0;
   need("hb", seams_hbonds(mix, 3.5, 2, 1, 2.42, 30.0, &bonds), mix);
   printf("capi seams_hbonds %d\n", bonds);
+  size_t n_edges = 0;
+  need("hbeq", seams_hbond_edges(mix, 3.5, 2, 1, 2.42, 30.0,
+                                 SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, NULL,
+                                 0, &n_edges),
+       mix);
+  seams_hbond_edge *edges = calloc(n_edges ? n_edges : 1, sizeof(seams_hbond_edge));
+  for (size_t i = 0; i < (n_edges ? n_edges : 1); ++i) {
+    edges[i].size = sizeof(seams_hbond_edge);
+  }
+  need("hbe", seams_hbond_edges(mix, 3.5, 2, 1, 2.42, 30.0,
+                                SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, edges,
+                                n_edges, &n_edges),
+       mix);
+  printf("capi seams_hbond_edges %zu\n", n_edges);
+  seams_quench_callback cb = tour_quench;
+  int *raw_labels = calloc((size_t)seams_system_count(mix), sizeof(int));
+  int *q_labels = calloc((size_t)seams_system_count(mix), sizeof(int));
+  int raw_counts[9] = {0}, q_counts[9] = {0};
+  int raw_rings[16] = {0}, q_rings[16] = {0};
+  int hb_raw = 0, hb_q = 0, edge_delta = 0, ring_delta = 0, class_delta = 0;
+  need("quench",
+       seams_quenched_analysis(mix, cb, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, 2, 1, 2.42, 30.0,
+                               raw_labels, (size_t)seams_system_count(mix), q_labels,
+                               (size_t)seams_system_count(mix), raw_counts, q_counts, raw_rings,
+                               q_rings, 16, &hb_raw, &hb_q, &edge_delta, &ring_delta,
+                               &class_delta),
+       mix);
+  if (hb_raw == 0 || edge_delta == 0) {
+    die("quench", SEAMS_ERR_INTERNAL, mix);
+  }
+  printf("capi seams_quenched_analysis %d %d %d\n", edge_delta, ring_delta, class_delta);
   size_t dens_n = 0;
   need("densq", seams_density_axis(mix, 2, 4, 2, NULL, NULL, 0, &dens_n), mix);
   double *zz = calloc(dens_n ? dens_n : 1, sizeof(double));
@@ -399,6 +448,9 @@ int main(int argc, char **argv) {
   free(rc);
   free(cnr);
   free(cnv);
+  free(edges);
+  free(raw_labels);
+  free(q_labels);
   free(zz);
   free(rho);
   free(key);

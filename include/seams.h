@@ -103,6 +103,7 @@
 #include "seams_version.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -249,6 +250,30 @@ typedef struct seams_cage_set seams_cage_set;
 typedef struct seams_brine seams_brine;
 /** @brief Topological fingerprint of one bonded frame. Free with seams_fingerprint_destroy(). */
 typedef struct seams_topo seams_topo;
+
+/**
+ * @brief Callback that returns quenched coordinates for one frame.
+ *
+ * The callback receives one frame and writes the quenched coordinates into
+ * @p xyz_out (3 * n doubles) and, optionally, a replacement box into
+ * @p box9_out (nine doubles). Returning ::SEAMS_OK accepts @p xyz_out as the
+ * quenched frame. Returning an error aborts the quenched analysis call.
+ *
+ * @param xyz Input coordinates, 3 * n doubles.
+ * @param n Atom count.
+ * @param box9 Input cell, nine doubles (ox, oy, oz, lx, ly, lz, xy, xz, yz).
+ * @param box_len Always 9.
+ * @param xyz_out Output coordinates, 3 * n doubles.
+ * @param xyz_out_len Always 3 * n.
+ * @param box9_out Optional output box. May be NULL to keep @p box9.
+ * @param box9_out_len 9 when @p box9_out is non-NULL, else 0.
+ * @param user_data Opaque caller pointer passed through unchanged.
+ * @return ::SEAMS_OK, or another ::seams_status to reject this frame.
+ */
+typedef seams_status (*seams_quench_callback)(const double *xyz, size_t n, const double *box9,
+                                              size_t box_len, double *xyz_out, size_t xyz_out_len,
+                                              double *box9_out, size_t box9_out_len,
+                                              void *user_data);
 
 /** @} */
 
@@ -1836,6 +1861,113 @@ SEAMS_API seams_status seams_coordination(seams_system *sys, double rmax, int bi
 SEAMS_API seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
                                     int hydrogen_type, double dist_cutoff,
                                     double angle_cutoff, int *n_bonds);
+
+/** @brief Hydrogen-bond edge record for one donor-acceptor pair. */
+typedef struct seams_hbond_edge {
+  uint32_t size;     /**< Caller-set sizeof(seams_hbond_edge) on every element. */
+  uint32_t donor;    /**< Donor heavy-atom index in the frame. */
+  uint32_t acceptor; /**< Acceptor heavy-atom index in the frame. */
+  uint32_t hydrogen; /**< Donor hydrogen index, or UINT32_MAX when omitted. */
+  double d_DA;       /**< Donor-acceptor distance in Angstrom, or NaN when omitted. */
+  double angle;      /**< O-O-H angle in degrees, or NaN when omitted. */
+} seams_hbond_edge;
+
+enum {
+  SEAMS_HBOND_EDGE_WITH_H = 1,       /**< Populate seams_hbond_edge.hydrogen. */
+  SEAMS_HBOND_EDGE_WITH_GEOMETRY = 2 /**< Populate d_DA and angle. */
+};
+
+/**
+ * @brief Hydrogen-bond edges for one frame.
+ *
+ * The pair list is stable and deterministic: donor, then acceptor, then
+ * hydrogen index. donor and acceptor are frame indices over the stored atoms.
+ * When edges is non-NULL, every element must start with size set by the
+ * caller to sizeof(seams_hbond_edge); the library validates size and writes
+ * only up to that prefix per element.
+ *
+ * @param sys Frame handle.
+ * @param cutoff Donor-acceptor cutoff, Angstrom.
+ * @param oxygen_type Heavy-atom species filter as in seams_hbonds().
+ * @param hydrogen_type Hydrogen species (positive).
+ * @param dist_cutoff Acceptor-H distance, Angstrom.
+ * @param angle_cutoff O-O-H angle, degrees.
+ * @param fields Bitmask: SEAMS_HBOND_EDGE_WITH_H and/or
+ *        SEAMS_HBOND_EDGE_WITH_GEOMETRY.
+ * @param edges Caller buffer with caller-set size on each element, or NULL to query.
+ * @param cap Capacity of @p edges. Ignored when @p edges is NULL.
+ * @param n_out Receives the edge count.
+ * @return ::SEAMS_OK, or the same error classes as seams_hbonds(), plus
+ *         ::SEAMS_ERR_ARG when fields is unknown or size is invalid, and
+ *         ::SEAMS_ERR_RANGE when cap is smaller than *n_out.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys, edges, and n_out. The call borrows sys and writes
+ * caller buffers only.
+ * @par Thread safety
+ * Exclusive use of sys.
+ */
+SEAMS_API seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type,
+                                         int hydrogen_type, double dist_cutoff,
+                                         double angle_cutoff, int fields,
+                                         seams_hbond_edge *edges, size_t cap, size_t *n_out);
+
+/**
+ * @brief Run CHILL+, ring census, and H-bonds on raw and quenched frames.
+ *
+ * The callback receives one frame and returns quenched coordinates. This call
+ * then runs CHILL+, primitive rings, and hydrogen-bond analysis on both raw
+ * and quenched frames and emits their per-frame differences.
+ * @param sys Frame handle.
+ * @param callback Quench callback that writes output coordinates.
+ * @param user_data Opaque callback payload.
+ * @param cutoff Positive finite neighbour cutoff, Angstrom.
+ * @param type Species filter for neighbour, CHILL+, and rings.
+ * @param graph ::SEAMS_GRAPH_CUTOFF or ::SEAMS_GRAPH_MUTUAL.
+ * @param max_depth Primitive-ring depth, from 3 through 12.
+ * @param oxygen_type Heavy-atom species filter for H-bonds.
+ * @param hydrogen_type Hydrogen species filter for H-bonds.
+ * @param dist_cutoff Acceptor-H distance, Angstrom.
+ * @param angle_cutoff O-O-H angle, degrees.
+ * @param raw_labels Raw-frame CHILL+ labels, length at least atom count.
+ * @param raw_labels_len Length of @p raw_labels.
+ * @param quenched_labels Quenched-frame CHILL+ labels, length at least atom count.
+ * @param quenched_labels_len Length of @p quenched_labels.
+ * @param counts_raw Raw-frame CHILL+ population counts.
+ * @param counts_quenched Quenched-frame CHILL+ population counts.
+ * @param rings_raw Raw-frame primitive-ring histogram.
+ * @param rings_quenched Quenched-frame primitive-ring histogram.
+ * @param ring_counts_len Length of @p rings_raw and @p rings_quenched.
+ * @param hbond_raw Receives raw-frame H-bond edge count.
+ * @param hbond_quenched Receives quenched-frame H-bond edge count.
+ * @param hbond_edge_delta Receives symmetric-difference edge count between raw
+ *        and quenched H-bond edge sets.
+ * @param ring_count_delta Receives sum over ring sizes of absolute raw-minus-
+ *        quenched count differences.
+ * @param class_change_count Receives the atom count whose CHILL+ class changed.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns every output buffer, callback state, and sys. The call
+ * borrows callback pointers and writes caller buffers only.
+ * @par Thread safety
+ * Exclusive use of sys.
+ */
+SEAMS_API seams_status seams_quenched_analysis(
+    seams_system *sys, seams_quench_callback callback, void *user_data, double cutoff, int type,
+    int graph, int max_depth, int oxygen_type, int hydrogen_type, double dist_cutoff,
+    double angle_cutoff, int *raw_labels, size_t raw_labels_len, int *quenched_labels,
+    size_t quenched_labels_len, int counts_raw[9], int counts_quenched[9], int *rings_raw,
+    int *rings_quenched, size_t ring_counts_len, int *hbond_raw, int *hbond_quenched,
+    int *hbond_edge_delta, int *ring_count_delta, int *class_change_count);
 
 /**
  * @brief Number density along one cell axis.

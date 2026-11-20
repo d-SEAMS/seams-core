@@ -1,6 +1,7 @@
 /* Copyright (c) d-SEAMS developers */
 #include "seams.h"
 
+#include <limits.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +39,68 @@ static int diamond(int nrep, double *xyz, double box[9]) {
   box[3] = box[4] = box[5] = nrep * a;
   box[6] = box[7] = box[8] = 0.0;
   return n;
+}
+
+typedef struct quench_probe_data {
+  int called;
+} quench_probe_data;
+
+static seams_status spread_quench(const double *xyz, size_t n, const double *box9,
+                                  size_t box_len, double *xyz_out, size_t xyz_out_len,
+                                  double *box9_out, size_t box9_out_len, void *user_data) {
+  quench_probe_data *probe = (quench_probe_data *)user_data;
+  if (xyz == NULL || box9 == NULL || xyz_out == NULL || xyz_out_len < 3 * n || box_len != 9) {
+    return SEAMS_ERR_NULL;
+  }
+  if (probe != NULL) {
+    probe->called += 1;
+  }
+  for (size_t i = 0; i < n; ++i) {
+    xyz_out[3 * i] = 20.0 * (double)i + 5.0;
+    xyz_out[3 * i + 1] = 5.0;
+    xyz_out[3 * i + 2] = 5.0;
+  }
+  if (box9_out != NULL && box9_out_len == 9) {
+    box9_out[0] = 0.0;
+    box9_out[1] = 0.0;
+    box9_out[2] = 0.0;
+    box9_out[3] = 25.0 * (double)(n + 1);
+    box9_out[4] = 25.0;
+    box9_out[5] = 25.0;
+    box9_out[6] = 0.0;
+    box9_out[7] = 0.0;
+    box9_out[8] = 0.0;
+  }
+  return SEAMS_OK;
+}
+
+static seams_status fail_quench(const double *xyz, size_t n, const double *box9, size_t box_len,
+                                double *xyz_out, size_t xyz_out_len, double *box9_out,
+                                size_t box9_out_len, void *user_data) {
+  (void)xyz;
+  (void)n;
+  (void)box9;
+  (void)box_len;
+  (void)xyz_out;
+  (void)xyz_out_len;
+  (void)box9_out;
+  (void)box9_out_len;
+  (void)user_data;
+  return SEAMS_ERR_ARG;
+}
+
+static seams_status bad_box_quench(const double *xyz, size_t n, const double *box9,
+                                   size_t box_len, double *xyz_out, size_t xyz_out_len,
+                                   double *box9_out, size_t box9_out_len, void *user_data) {
+  (void)user_data;
+  if (xyz == NULL || box9 == NULL || xyz_out == NULL || xyz_out_len < 3 * n || box_len != 9 ||
+      box9_out == NULL || box9_out_len != 9) {
+    return SEAMS_ERR_NULL;
+  }
+  memcpy(xyz_out, xyz, sizeof(double) * 3 * n);
+  memcpy(box9_out, box9, sizeof(double) * 9);
+  box9_out[3] = -1.0;
+  return SEAMS_OK;
 }
 
 int main(void) {
@@ -437,6 +500,226 @@ int main(void) {
   int n_hbonds = -1;
   expect(seams_hbonds(sys, 3.5, 1, 2, 2.42, 30.0, &n_hbonds) == SEAMS_OK, "hbonds");
   expect(n_hbonds == 0, "no hydrogens");
+
+  if (sample != NULL) {
+    seams_system *hbs = seams_system_create();
+    expect(hbs != NULL, "hbond fixture create");
+    expect(seams_system_read(hbs, sample, 1, -1) == SEAMS_OK, "hbond fixture read");
+    size_t n_edges = 0;
+    expect(seams_hbond_edges(hbs, 3.5, 2, 1, 2.42, 30.0,
+                             SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, NULL, 0,
+                             &n_edges) == SEAMS_OK,
+           "hbond edge query");
+    seams_hbond_edge *edges_a = calloc(n_edges, sizeof(seams_hbond_edge));
+    seams_hbond_edge *edges_b = calloc(n_edges, sizeof(seams_hbond_edge));
+    expect(edges_a != NULL && edges_b != NULL, "hbond edge buffers");
+    for (size_t i = 0; i < n_edges; ++i) {
+      edges_a[i].size = sizeof(seams_hbond_edge);
+      edges_b[i].size = sizeof(seams_hbond_edge);
+    }
+    expect(seams_hbond_edges(hbs, 3.5, 2, 1, 2.42, 30.0,
+                             SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, edges_a,
+                             n_edges, &n_edges) == SEAMS_OK,
+           "hbond edges first");
+    size_t n_edges_b = n_edges;
+    expect(seams_hbond_edges(hbs, 3.5, 2, 1, 2.42, 30.0,
+                             SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, edges_b,
+                             n_edges_b, &n_edges_b) == SEAMS_OK,
+           "hbond edges second");
+    expect(n_edges_b == n_edges, "hbond edge repeat count");
+    expect(memcmp(edges_a, edges_b, n_edges * sizeof(seams_hbond_edge)) == 0,
+           "hbond edges deterministic bytes");
+    if (n_edges > 1) {
+      edges_b[1].size = 0;
+      expect(seams_hbond_edges(hbs, 3.5, 2, 1, 2.42, 30.0,
+                               SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, edges_b,
+                               n_edges, &n_edges_b) == SEAMS_ERR_ARG,
+             "hbond edge mismatched element size rejected");
+    }
+    for (size_t i = 1; i < n_edges; ++i) {
+      const seams_hbond_edge prev = edges_a[i - 1];
+      const seams_hbond_edge now = edges_a[i];
+      const int sorted = (prev.donor < now.donor) ||
+                         (prev.donor == now.donor && prev.acceptor < now.acceptor) ||
+                         (prev.donor == now.donor && prev.acceptor == now.acceptor &&
+                          prev.hydrogen <= now.hydrogen);
+      expect(sorted, "hbond edge sort");
+    }
+
+    const size_t nh = (size_t)seams_system_count(hbs);
+    int *labels_raw = calloc(nh > 0 ? nh : 1, sizeof(int));
+    int *labels_q = calloc(nh > 0 ? nh : 1, sizeof(int));
+    expect(labels_raw != NULL && labels_q != NULL, "quench label buffers");
+    int counts_raw[9] = {0};
+    int counts_q[9] = {0};
+    int rings_raw[8] = {0};
+    int rings_q[8] = {0};
+    int h_raw = -1;
+    int h_q = -1;
+    int edge_delta = -1;
+    int ring_delta = -1;
+    int class_delta = -1;
+    quench_probe_data probe = {0};
+    expect(seams_quenched_analysis(hbs, spread_quench, &probe, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, 2,
+                                   1, 2.42, 30.0, labels_raw, nh, labels_q, nh, counts_raw,
+                                   counts_q, rings_raw, rings_q, 8, &h_raw, &h_q, &edge_delta,
+                                   &ring_delta, &class_delta) == SEAMS_OK,
+           "quenched analysis");
+    expect(probe.called == 1, "quench callback called");
+    expect(h_raw >= 0 && h_q >= 0, "hbond counts nonnegative");
+    expect(edge_delta >= 0, "hbond edge delta");
+    expect(ring_delta >= 0, "ring delta nonnegative");
+    expect(class_delta >= 0, "class delta nonnegative");
+
+    /* Regression 1: callback failure must populate last and handle error messages. */
+    expect(seams_quenched_analysis(hbs, fail_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, 2, 1,
+                                   2.42, 30.0, labels_raw, nh, labels_q, nh, counts_raw, counts_q,
+                                   rings_raw, rings_q, 8, &h_raw, &h_q, &edge_delta, &ring_delta,
+                                   &class_delta) == SEAMS_ERR_ARG,
+           "quench callback error status");
+    expect(seams_last_error_message()[0] != '\0', "quench callback sets last error");
+    expect(seams_handle_error(hbs)[0] != '\0', "quench callback sets handle error");
+
+    /* Regression 2: invalid replacement box from callback must fail with SEAMS_ERR_BOX. */
+    expect(seams_quenched_analysis(hbs, bad_box_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, 2, 1,
+                                   2.42, 30.0, labels_raw, nh, labels_q, nh, counts_raw, counts_q,
+                                   rings_raw, rings_q, 8, &h_raw, &h_q, &edge_delta, &ring_delta,
+                                   &class_delta) == SEAMS_ERR_BOX,
+           "quench invalid replacement box rejected");
+
+    /* Regression 5: max_depth outside 3..12 (including INT_MAX) must return SEAMS_ERR_RANGE. */
+    {
+      int rings_big[16] = {0};
+      expect(seams_quenched_analysis(hbs, spread_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 13, 2,
+                                     1, 2.42, 30.0, labels_raw, nh, labels_q, nh, counts_raw,
+                                     counts_q, rings_big, rings_q, 16, &h_raw, &h_q, &edge_delta,
+                                     &ring_delta, &class_delta) == SEAMS_ERR_RANGE,
+             "quench max_depth 13 rejected");
+      expect(seams_quenched_analysis(hbs, spread_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, INT_MAX,
+                                     2, 1, 2.42, 30.0, labels_raw, nh, labels_q, nh, counts_raw,
+                                     counts_q, rings_big, rings_q, 16, &h_raw, &h_q, &edge_delta,
+                                     &ring_delta, &class_delta) == SEAMS_ERR_RANGE,
+             "quench max_depth INT_MAX rejected");
+    }
+
+    free(labels_raw);
+    free(labels_q);
+    free(edges_a);
+    free(edges_b);
+    seams_system_destroy(hbs);
+  }
+
+  /* Regressions 3 and 4: mixed heavy species with oxygen_type <= 0 and quenched analysis
+   * with type <= 0 on a mixed O/H frame must preserve real hydrogen bonds. */
+  {
+    FILE *dump = fopen("capi_mixed_heavy.lammpstrj", "w");
+    expect(dump != NULL, "create mixed heavy dump");
+    if (dump != NULL) {
+      fputs("ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n6\n"
+            "ITEM: BOX BOUNDS pp pp pp\n0.0 20.0\n0.0 20.0\n0.0 20.0\n"
+            "ITEM: ATOMS id mol type x y z\n"
+            "1 1 2 0.0 0.0 0.0\n"
+            "2 1 1 0.96 0.0 0.0\n"
+            "3 1 1 0.0 0.96 0.0\n"
+            "4 2 3 2.8 0.0 0.0\n"
+            "5 2 1 3.76 0.0 0.0\n"
+            "6 2 1 2.8 0.96 0.0\n",
+            dump);
+      fclose(dump);
+      seams_system *mh = seams_system_create();
+      expect(mh != NULL, "mixed heavy create");
+      expect(seams_system_read(mh, "capi_mixed_heavy.lammpstrj", 1, -1) == SEAMS_OK,
+             "mixed heavy read");
+      int n_mix_hb = -1;
+      expect(seams_hbonds(mh, 3.5, 0, 1, 2.42, 30.0, &n_mix_hb) == SEAMS_OK,
+             "mixed heavy seams_hbonds");
+      expect(n_mix_hb == 1, "mixed heavy seams_hbonds finds bond");
+      size_t n_mix_edges = 0;
+      expect(seams_hbond_edges(mh, 3.5, 0, 1, 2.42, 30.0,
+                               SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, NULL, 0,
+                               &n_mix_edges) == SEAMS_OK,
+             "mixed heavy edge query");
+      expect(n_mix_edges == 1, "mixed heavy hbond_edges finds bond");
+      if (n_mix_edges == 1) {
+        seams_hbond_edge row = {0};
+        expect(seams_hbond_edges(mh, 3.5, 0, 1, 2.42, 30.0,
+                                 SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, &row, 1,
+                                 &n_mix_edges) == SEAMS_ERR_ARG,
+               "hbond edge zero struct size rejected");
+        row.size = 2;
+        expect(seams_hbond_edges(mh, 3.5, 0, 1, 2.42, 30.0,
+                                 SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, &row, 1,
+                                 &n_mix_edges) == SEAMS_ERR_ARG,
+               "hbond edge tiny struct size rejected");
+        row.size = sizeof(row);
+        expect(seams_hbond_edges(mh, 3.5, 0, 1, 2.42, 30.0,
+                                 SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY, &row, 1,
+                                 &n_mix_edges) == SEAMS_OK,
+               "mixed heavy edge copy");
+        expect(row.size == sizeof(row) && row.donor == 0 && row.acceptor == 3 &&
+                   row.hydrogen == 1,
+               "mixed heavy edge indices");
+
+        /* Regression 6: prefix-sized and extended-sized caller structs. */
+        struct prefix_edge {
+          uint32_t size;
+          uint32_t donor;
+          uint32_t acceptor;
+          uint32_t hydrogen;
+        };
+        struct padded_prefix {
+          struct prefix_edge head;
+          unsigned char canary[16];
+        } pbuf;
+        memset(pbuf.canary, 0xA5, sizeof(pbuf.canary));
+        pbuf.head.size = sizeof(struct prefix_edge);
+        expect(seams_hbond_edges(mh, 3.5, 0, 1, 2.42, 30.0,
+                                 SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY,
+                                 (seams_hbond_edge *)&pbuf.head, 1, &n_mix_edges) == SEAMS_OK,
+               "hbond edge prefix struct copy");
+        int canary_ok = 1;
+        for (size_t k = 0; k < sizeof(pbuf.canary); ++k) {
+          if (pbuf.canary[k] != 0xA5) {
+            canary_ok = 0;
+          }
+        }
+        expect(canary_ok && pbuf.head.size == sizeof(struct prefix_edge) && pbuf.head.donor == 0 &&
+                   pbuf.head.acceptor == 3 && pbuf.head.hydrogen == 1,
+               "hbond edge prefix struct preserves canary");
+
+        struct larger_edge {
+          seams_hbond_edge base;
+          unsigned char tail[8];
+        } lbuf;
+        memset(&lbuf, 0, sizeof(lbuf));
+        memset(lbuf.tail, 0x5A, sizeof(lbuf.tail));
+        lbuf.base.size = sizeof(struct larger_edge);
+        expect(seams_hbond_edges(mh, 3.5, 0, 1, 2.42, 30.0,
+                                 SEAMS_HBOND_EDGE_WITH_H | SEAMS_HBOND_EDGE_WITH_GEOMETRY,
+                                 (seams_hbond_edge *)&lbuf.base, 1, &n_mix_edges) == SEAMS_OK,
+               "hbond edge extended struct copy");
+        int tail_ok = 1;
+        for (size_t k = 0; k < sizeof(lbuf.tail); ++k) {
+          if (lbuf.tail[k] != 0x5A) {
+            tail_ok = 0;
+          }
+        }
+        expect(tail_ok && lbuf.base.size == sizeof(struct larger_edge) && lbuf.base.donor == 0 &&
+                   lbuf.base.acceptor == 3 && lbuf.base.hydrogen == 1 &&
+                   isfinite(lbuf.base.d_DA) && isfinite(lbuf.base.angle),
+               "hbond edge extended struct preserves tail");
+      }
+      int lraw[6] = {0}, lq[6] = {0}, craw[9] = {0}, cq[9] = {0}, rraw[8] = {0}, rq[8] = {0};
+      int hr = -1, hq = -1, ed = -1, rd = -1, cd = -1;
+      expect(seams_quenched_analysis(mh, spread_quench, NULL, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, 0, 1,
+                                     2.42, 30.0, lraw, 6, lq, 6, craw, cq, rraw, rq, 8, &hr, &hq,
+                                     &ed, &rd, &cd) == SEAMS_OK,
+             "mixed heavy quenched analysis type 0");
+      expect(hr == 1 && hq == 0 && ed == 1, "quenched analysis type 0 keeps raw hbonds");
+      seams_system_destroy(mh);
+      remove("capi_mixed_heavy.lammpstrj");
+    }
+  }
   size_t n_rho = 0;
   expect(seams_density_axis(sys, 0, 8, 2, NULL, NULL, 0, &n_rho) == SEAMS_OK, "density");
   expect(n_rho == 8, "density bins");
