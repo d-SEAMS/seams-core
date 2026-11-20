@@ -79,9 +79,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   # Reproduces what Meson's wrap resolver does for backward-cpp.wrap: the
   # upstream v1.6 tarball, then subprojects/packagefiles/backward-cpp's
-  # meson.build/meson_options.txt/LICENSE.build overlaid on top (upstream
-  # backward-cpp ships none of those three; see that directory for why
-  # its meson.build is trimmed of backward-cpp's own testexe_* targets).
+  # meson.build/meson_options.txt/LICENSE.build/backward.hpp overlaid on
+  # top. Upstream ships no Meson files. backward.hpp is the header this
+  # repository vendored (upstream 1d43bfea), not the v1.6 tag's copy.
+  # meson.build is trimmed of backward-cpp's own testexe_* targets.
   # Doing it here means the subproject's meson.build already exists
   # before configure runs, so Meson's wrap resolver uses it directly and
   # never needs network.

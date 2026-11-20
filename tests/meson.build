@@ -765,6 +765,14 @@ test('option_names', find_program('python3'),
          meson.project_build_root()],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('backward_overlay', find_program('python3'),
+  args: [files('backward_overlay.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('backward_overlay_selftest', find_program('python3'),
+  args: [files('backward_overlay.py'), '--self-test'],
+  workdir: meson.project_source_root(),
+  timeout: 60)
 test('cycless_pentagon', find_program('python3'),
   args: [files('test_cycless_pentagon.py'),
          seams_api_lib.full_path()],

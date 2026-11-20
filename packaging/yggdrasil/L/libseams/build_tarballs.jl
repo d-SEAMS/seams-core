@@ -24,8 +24,10 @@ const v2_14_0_tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
 # check_github_archive in BinaryBuilderBase.jl, so this is a GitSource
 # instead), then the same ../../../../subprojects/packagefiles/backward-cpp
 # the wrap's own patch_directory applies: meson.build/meson_options.txt/
-# LICENSE.build, which upstream backward-cpp does not ship, trimmed of
-# backward-cpp's upstream testexe_* targets (see that directory for why).
+# LICENSE.build, which upstream backward-cpp does not ship, plus
+# backward.hpp from the header this repository vendored (upstream
+# 1d43bfea, not the v1.6 tag). meson.build is trimmed of backward-cpp's
+# upstream testexe_* targets (see that directory for why).
 # with_backward below is on because of these two, not despite nodownload:
 # the subproject's meson.build already exists before configure runs, so
 # Meson's wrap resolver uses it directly and never needs network.

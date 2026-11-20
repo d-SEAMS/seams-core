@@ -5,10 +5,14 @@ source_filename = backward-cpp-1.6.tar.gz
 source_hash = c654d0923d43f1cea23d086729673498e4741fb2457e806cfaeaea7b20c97c10
 source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/backward-cpp_1.6-6/backward-cpp-1.6.tar.gz
 # subprojects/packagefiles/backward-cpp overlays WrapDB's own
-# backward-cpp_1.6-6 packaging (LICENSE.build, meson.build,
-# meson_options.txt unchanged) minus the testexe_* default targets; see
-# that directory's meson.build for why. The upstream v1.6 source pin
-# above is untouched.
+# backward-cpp_1.6-6 packaging. meson.build drops the testexe_* default
+# targets (see that file). backward.hpp is the header this repository
+# vendored: byte-identical to upstream commit 1d43bfea (v1.6 plus the
+# 27 commits after the tag), copied over the v1.6 tarball. diff_files
+# is not used. Meson skips wrap patches once a subproject directory
+# already contains meson.build, and the offline recipes pre-seed that
+# directory by copying this overlay, so the header has to be in the
+# overlay itself.
 patch_directory = backward-cpp
 
 [provide]

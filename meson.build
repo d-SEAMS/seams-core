@@ -45,6 +45,17 @@ if _dist_python.found()
   meson.add_dist_script(_dist_python, files('scripts/dist_strip_vcs.py'))
 endif
 
+# The wrap overlay's backward.hpp must stay the header this tree
+# vendored. Meson skips wrap patches when the subproject directory
+# already has a meson.build, which is how the offline recipes pre-seed
+# it, so this check runs at configure rather than only inside a test.
+_carry_python = find_program('python3', native: true, required: true)
+run_command(
+  _carry_python,
+  files('tests/backward_overlay.py'),
+  check: true,
+)
+
 # Global accumulator variables (eOn pattern)
 _args = []
 _link_args = []
