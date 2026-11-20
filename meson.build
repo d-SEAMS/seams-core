@@ -1076,6 +1076,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_changelog_controls',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'test_changelog_checks.py'],
+    suite: 'docs',
+    timeout: 120)
+  test(
     'docs_discoverability',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_discoverability.py', '--self-test'],
