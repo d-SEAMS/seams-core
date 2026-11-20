@@ -376,14 +376,18 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 // ball the fractional wrap is the minimum image. Outside it, the linked
 // minimage result (when available, across scalar, batch, cached-frame, and
 // rdf2d paths) and the fractional wrap are both refined by
-// mic::euclideanIfShorter. Its uncapped Selling reduction skips
-// non-decreasing Lagrange ties, treats dot products within binary64 rounding
-// as obtuse (with a 26-neighbour and superbasis-difference follow-up when
-// not strictly obtuse), and throws explicitly on non-finite values, singular
-// bases, coefficients at or above 2^52, or unresolved slicer stalls without
-// poisoning the per-thread basis cache. At extreme aspect ratios (lx/ly >=
-// ~8e4), binary64 basis-update rounding can reach 1e-12 to 5.4e-9 relative
-// and a few ~1e8-aspect cells throw explicitly from the slicer.
+// mic::euclideanIfShorter. It reduces the cell with Lagrange and Selling,
+// re-evaluates the reduced vectors from their integer coordinates with an
+// error-free dot product,
+// and descends from the Babai point over the shortest member of each coset
+// of L / 2L, which contains every Voronoi-relevant vector. That descent stops
+// in the Voronoi cell, so the result is the minimum image on every legal
+// cell. A step that cannot lower the binary64 norm ends the descent instead
+// of throwing. Non-finite values, singular bases, and coefficients at or
+// above 2^52 throw without poisoning the per-thread basis cache. The
+// returned length is within about ten binary64 ulps of the wrapped
+// displacement's length, so the relative error grows only when that wrap is
+// much longer than the image (at cell aspect ratios of about 1e3 and above).
 //
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
