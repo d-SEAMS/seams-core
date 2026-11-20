@@ -2,6 +2,7 @@
 """The TIP4P overhead script's hinge, and one reporter step on a small box."""
 
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,9 +31,15 @@ def main() -> int:
         return 1
     state = save_state(simulation)
     plain = time_plain(simulation, state, 1)
-    elapsed, reports = time_insitu(simulation, state, lib, 1, 2)
+    with tempfile.TemporaryDirectory(prefix="seams-tip4p-") as tmp:
+        dump = Path(tmp) / "insitu.lammpstrj"
+        elapsed, reports = time_insitu(simulation, state, lib, 1, 2, dump)
+        frames = dump.read_text().count("ITEM: TIMESTEP")
     if plain < 0.0 or elapsed < 0.0 or reports < 1:
         print(f"plain {plain} insitu {elapsed} reports {reports}", file=sys.stderr)
+        return 1
+    if frames != reports or Path(tmp).exists():
+        print(f"dump frames {frames} reports {reports} left {Path(tmp).exists()}", file=sys.stderr)
         return 1
     print(f"tip4p waters {simulation.topology.getNumResidues()} reports {reports}")
     return 0

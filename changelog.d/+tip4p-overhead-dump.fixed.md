@@ -1,0 +1,1 @@
+`tip4p_overhead` and `engines/openmm/bench_overhead.py` no longer write the reporter's LAMMPS dump as `unused` in the working directory, which for the test was the source root. The dump goes to a temporary directory that is removed afterwards, and the test checks that every report reached it.

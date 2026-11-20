@@ -141,7 +141,7 @@ if get_option('with_tests')
       'tip4p_overhead',
       find_program('python3', required: true),
       args: [meson.project_source_root() / 'tests' / 'test_tip4p_overhead.py'],
-      workdir: meson.project_source_root(),
+      workdir: meson.current_build_dir(),
       env: _tip4p_env,
       depends: [seams_lang],
       timeout: 180,

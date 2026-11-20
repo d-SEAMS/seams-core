@@ -10,6 +10,7 @@ time.
 import os
 import statistics
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -47,13 +48,14 @@ def time_plain(simulation, state, steps):
     return time.perf_counter() - start
 
 
-def time_insitu(simulation, state, lib, interval, steps):
+def time_insitu(simulation, state, lib, interval, steps, dump):
+    """Time steps with the reporter, which writes its LAMMPS dump to dump."""
     import time
 
     simulation.reporters.clear()
     restore(simulation, state)
     engine = InSitu(library=str(lib), cutoff=3.5)
-    simulation.reporters.append(DseamsReporter(engine, "unused", interval=interval))
+    simulation.reporters.append(DseamsReporter(engine, str(dump), interval=interval))
     start = time.perf_counter()
     simulation.step(steps)
     elapsed = time.perf_counter() - start
@@ -65,19 +67,21 @@ def run_box(box_nm, lib, steps, intervals, trials):
     simulation, _oxygens = build_simulation(box_nm, threads=1)
     waters = simulation.topology.getNumResidues()
     state = save_state(simulation)
-    time_plain(simulation, state, steps)
-    time_insitu(simulation, state, lib, intervals[-1], steps)
     rows = []
-    for interval in intervals:
-        plain = []
-        insitu = []
-        for _ in range(trials):
-            plain.append(time_plain(simulation, state, steps))
-            elapsed, _reports = time_insitu(simulation, state, lib, interval, steps)
-            insitu.append(elapsed)
-        overhead = [b - a for a, b in zip(plain, insitu)]
-        median, hinge = hinges(overhead)
-        rows.append((interval, median, hinge))
+    with tempfile.TemporaryDirectory(prefix="seams-tip4p-") as tmp:
+        dump = Path(tmp) / "insitu.lammpstrj"
+        time_plain(simulation, state, steps)
+        time_insitu(simulation, state, lib, intervals[-1], steps, dump)
+        for interval in intervals:
+            plain = []
+            insitu = []
+            for _ in range(trials):
+                plain.append(time_plain(simulation, state, steps))
+                elapsed, _reports = time_insitu(simulation, state, lib, interval, steps, dump)
+                insitu.append(elapsed)
+            overhead = [b - a for a, b in zip(plain, insitu)]
+            median, hinge = hinges(overhead)
+            rows.append((interval, median, hinge))
     return waters, rows
 
 
