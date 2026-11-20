@@ -299,8 +299,7 @@ if get_option('with_tests')
     include_directories: include_directories('../include'),
     c_args: ['-I' + meson.current_build_dir()])
   test('capi_identity_quench', capi_identity_quench_test,
-    args: [meson.project_source_root()],
-    timeout: 60)
+    args: [meson.project_source_root()])
 
   rings_chordless_test = executable(
     'test_rings_chordless',
