@@ -1,12 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <generic.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <neighbours.hpp>
 #include <numbers>
 #include <pore.hpp>
+#include <random>
 #include <stdexcept>
 #include <vector>
 
@@ -135,6 +138,104 @@ double nearestAxisRadius(const Face2 &face, double du, double dv) {
     }
   }
   return best;
+}
+
+double coveringRadius(const double u[2], const double v[2]) {
+  double b1[2] = {u[0], u[1]};
+  double b2[2] = {v[0], v[1]};
+  for (int step = 0; step < 32; ++step) {
+    const double n1 = b1[0] * b1[0] + b1[1] * b1[1];
+    const double n2 = b2[0] * b2[0] + b2[1] * b2[1];
+    if (n1 > n2) {
+      std::swap(b1[0], b2[0]);
+      std::swap(b1[1], b2[1]);
+    }
+    const double base = b1[0] * b1[0] + b1[1] * b1[1];
+    const double m = std::round((b1[0] * b2[0] + b1[1] * b2[1]) / base);
+    if (m == 0.0) {
+      if (b1[0] * b2[0] + b1[1] * b2[1] < 0.0) {
+        b2[0] = -b2[0];
+        b2[1] = -b2[1];
+      }
+      const double cross = std::abs(b1[0] * b2[1] - b1[1] * b2[0]);
+      return std::hypot(b1[0], b1[1]) * std::hypot(b2[0], b2[1]) *
+             std::hypot(b1[0] - b2[0], b1[1] - b2[1]) / (2.0 * cross);
+    }
+    b2[0] -= m * b1[0];
+    b2[1] -= m * b1[1];
+  }
+  return 0.0;
+}
+
+std::vector<std::array<double, 2>> centredFace(const Face2 &face) {
+  const double sign[4][2] = {{-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0}};
+  std::vector<std::array<double, 2>> corners;
+  for (const auto &s : sign) {
+    corners.push_back({0.5 * (s[0] * face.eu[0] + s[1] * face.ev[0]),
+                       0.5 * (s[0] * face.eu[1] + s[1] * face.ev[1])});
+  }
+  const double turn = corners[0][0] * corners[1][1] - corners[0][1] * corners[1][0];
+  if (turn < 0.0) {
+    std::reverse(corners.begin(), corners.end());
+  }
+  return corners;
+}
+
+double ringArea(const std::vector<std::array<double, 2>> &poly) {
+  double area = 0.0;
+  const int n = static_cast<int>(poly.size());
+  for (int i = 0; i < n; ++i) {
+    const auto &a = poly[static_cast<std::size_t>(i)];
+    const auto &b = poly[static_cast<std::size_t>((i + 1) % n)];
+    area += a[0] * b[1] - a[1] * b[0];
+  }
+  return 0.5 * std::abs(area);
+}
+
+// Midpoint polar integral of the disk clipped to a convex ring about the origin.
+// 2^14 steps. The full disk is several times the face on the cells below, so
+// a 1e-7 relative band still rejects that answer.
+double polarClip(const std::vector<std::array<double, 2>> &poly, double radius) {
+  const int n = static_cast<int>(poly.size());
+  const int steps = 1 << 14;
+  double sum = 0.0;
+  for (int i = 0; i < steps; ++i) {
+    const double theta = (static_cast<double>(i) + 0.5) * 2.0 * kPi / static_cast<double>(steps);
+    const double c = std::cos(theta);
+    const double s = std::sin(theta);
+    double rho = 1e300;
+    for (int edge = 0; edge < n; ++edge) {
+      const auto &a = poly[static_cast<std::size_t>(edge)];
+      const auto &b = poly[static_cast<std::size_t>((edge + 1) % n)];
+      const double ex = b[0] - a[0];
+      const double ey = b[1] - a[1];
+      const double den = c * ey - s * ex;
+      if (!(std::abs(den) > 1e-18)) {
+        continue;
+      }
+      const double t = (a[0] * ey - a[1] * ex) / den;
+      const double u = (s * a[0] - c * a[1]) / den;
+      if (t > 0.0 && u >= -1e-9 && u <= 1.0 + 1e-9) {
+        rho = std::min(rho, t);
+      }
+    }
+    const double r = std::min(radius, rho);
+    sum += 0.5 * r * r;
+  }
+  return sum * (2.0 * kPi / static_cast<double>(steps));
+}
+
+double monteCarloShell(const Face2 &face, double radius, std::mt19937_64 &gen) {
+  std::uniform_real_distribution<double> unit(-0.5, 0.5);
+  const int samples = 40000;
+  int inside = 0;
+  for (int i = 0; i < samples; ++i) {
+    if (nearestAxisRadius(face, unit(gen), unit(gen)) <= radius) {
+      inside += 1;
+    }
+  }
+  const double face_area = std::abs(face.eu[0] * face.ev[1] - face.eu[1] * face.ev[0]);
+  return (static_cast<double>(inside) / static_cast<double>(samples)) * face_area * face.axial;
 }
 
 } // namespace
@@ -840,4 +941,210 @@ TEST_CASE("a shifted guest keeps the same nearest framework site", "[pore]") {
   REQUIRE(after.nearest_type[0] == before.nearest_type[0]);
   REQUIRE_THAT(after.distance[0], Catch::Matchers::WithinAbs(before.distance[0], 1e-9));
   REQUIRE(after.contacts == before.contacts);
+}
+
+TEST_CASE("a shell at the covering radius is the cell, not the disk", "[pore]") {
+  const double cells[][6] = {
+      {20.0, 10.0 * std::sqrt(3.0), 8.0, 10.0, 0.0, 0.0},
+      {10.0, 12.0, 14.0, 4.5, -3.0, 5.5},
+      {10.0, 8.0, 12.0, 2.0, 1.0, -1.5},
+  };
+  const double centre[3] = {0.5, 0.5, 0.5};
+  for (const auto &cell : cells) {
+    auto cloud = triclinic(cell[0], cell[1], cell[2], cell[3], cell[4], cell[5]);
+    addAtom(cloud, 1, 0.1, 0.2, 0.3);
+    const Face2 face = faceOf(cell[0], cell[1], cell[2], cell[3], cell[4], cell[5], 2);
+    const double cover = coveringRadius(face.eu, face.ev);
+    const double volume = cell[0] * cell[1] * cell[2];
+    REQUIRE(cover > 0.0);
+    // Vertices of the perpendicular lattice sit on this radius. A shell
+    // just inside it is the cell minus caps of relative size about 1e-11.
+    // The dropped-root disk is pi r^2 L, which is 1.209 V, 1.274 V, and
+    // 1.329 V on these three cells.
+    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+      const auto profiles =
+          pore::poreProfiles(cloud, 0, 1, 1, 1, cover * scale, 2, nullptr, centre, 0, 0.0, nullptr);
+      REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
+    }
+  }
+}
+
+TEST_CASE("random cells match a Monte Carlo shell at the covering radius", "[pore]") {
+  std::mt19937_64 gen(20261120);
+  std::uniform_real_distribution<double> length(6.0, 16.0);
+  std::uniform_real_distribution<double> tilt(-0.9, 0.9);
+  const double centre[3] = {0.5, 0.5, 0.5};
+  for (int trial = 0; trial < 24; ++trial) {
+    const double lx = length(gen);
+    const double ly = length(gen);
+    const double lz = length(gen);
+    const double xy = tilt(gen) * lx;
+    const double xz = tilt(gen) * lx;
+    const double yz = tilt(gen) * ly;
+    auto cloud = triclinic(lx, ly, lz, xy, xz, yz);
+    addAtom(cloud, 1, 0.1, 0.2, 0.3);
+    const Face2 face = faceOf(lx, ly, lz, xy, xz, yz, 2);
+    const double cover = coveringRadius(face.eu, face.ev);
+    const double volume = lx * ly * lz;
+    REQUIRE(cover > 0.0);
+    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+      const auto profiles =
+          pore::poreProfiles(cloud, 0, 1, 1, 1, cover * scale, 2, nullptr, centre, 0, 0.0, nullptr);
+      REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
+      if (scale == 1.0 - 1e-13) {
+        const double sampled = monteCarloShell(face, cover * scale, gen);
+        // 40000 uniform face samples. The standard error near a full cell
+        // is well under a percent, and the disk answer is more than 15
+        // percent high on a hexagonal lattice.
+        REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(sampled, 0.02));
+      }
+    }
+  }
+}
+
+TEST_CASE("a centred face clipped at its long corner keeps the polygon", "[pore]") {
+  auto check = [](double lx, double ly, double xy) {
+    const Face2 face = faceOf(lx, ly, 10.0, xy, 0.0, 0.0, 2);
+    const auto corners = centredFace(face);
+    const double face_area = ringArea(corners);
+    double far = 0.0;
+    for (const auto &corner : corners) {
+      far = std::max(far, std::hypot(corner[0], corner[1]));
+    }
+    REQUIRE(face_area > 0.0);
+    REQUIRE(far > 0.0);
+    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+      const double radius = far * scale;
+      const double got = pore::clippedDiskArea(corners, radius, far * 2.0, 0.0);
+      // The two long corners stick out by a relative 1e-12, so the clip
+      // differs from the polygon by about 1e-11. The dropped-root result
+      // is the disk, pi r^2, which is larger than the face.
+      REQUIRE_THAT(got, Catch::Matchers::WithinRel(face_area, 1e-8));
+      REQUIRE_THAT(got, Catch::Matchers::WithinRel(polarClip(corners, radius), 1e-7));
+    }
+  };
+  check(13.543853, 15.493012, -9.327033);
+  std::mt19937_64 gen(11);
+  std::uniform_real_distribution<double> length(6.0, 16.0);
+  std::uniform_real_distribution<double> tilt(-0.8, 0.8);
+  for (int trial = 0; trial < 16; ++trial) {
+    const double lx = length(gen);
+    const double ly = length(gen);
+    check(lx, ly, tilt(gen) * std::min(lx, ly));
+  }
+}
+
+TEST_CASE("only axis -1 is automatic", "[pore]") {
+  auto cloud = ortho(8.0, 9.0, 14.0);
+  addAtom(cloud, 1, 1.0, 1.0, 1.0);
+  REQUIRE_THROWS_AS(pore::poreFrame(cloud, 0, -7, nullptr, nullptr), std::out_of_range);
+  REQUIRE_THROWS_AS(
+      pore::poreProfiles(cloud, 0, 1, 1, 1, 1.0, -7, nullptr, nullptr, 0, 0.0, nullptr),
+      std::out_of_range);
+  REQUIRE_THROWS_AS(
+      pore::poreProfiles(cloud, 0, 1, 1, 1, -1.0, 2, nullptr, nullptr, 0, 0.0, nullptr),
+      std::out_of_range);
+  const auto frame = pore::poreFrame(cloud, 0, -1, nullptr, nullptr);
+  REQUIRE(frame.axis_index == 2);
+}
+
+TEST_CASE("a guest type equal to the framework type is rejected", "[pore]") {
+  auto cloud = ortho(10.0, 10.0, 10.0);
+  addAtom(cloud, 3, 1.0, 1.0, 1.0);
+  addAtom(cloud, 4, 2.0, 2.0, 2.0);
+  REQUIRE_THROWS_AS(pore::hostGuest(cloud, 3, 3, 1.0), std::invalid_argument);
+  const auto report = pore::hostGuest(cloud, 3, 0, 5.0);
+  REQUIRE(report.guest.size() == 1);
+  REQUIRE(report.nearest.size() == 1);
+  REQUIRE(report.nearest[0] == 1);
+}
+
+TEST_CASE("azimuth zero points along the next cell edge", "[pore]") {
+  auto cloud = ortho(10.0, 12.0, 14.0);
+  addAtom(cloud, 1, 6.0, 6.0, 7.0);
+  const double centre[3] = {0.5, 0.5, 0.5};
+  const auto profiles =
+      pore::poreProfiles(cloud, 0, 1, 4, 1, 0.0, 2, nullptr, centre, 0, 0.0, nullptr);
+  REQUIRE(profiles.azimuthal.coordinate.size() == 4);
+  int occupied = -1;
+  for (int bin = 0; bin < 4; ++bin) {
+    if (profiles.azimuthal.number_density[static_cast<std::size_t>(bin)] > 0.0) {
+      REQUIRE(occupied < 0);
+      occupied = bin;
+    }
+  }
+  REQUIRE(occupied == 2);
+  REQUIRE_THAT(profiles.azimuthal.coordinate[2], Catch::Matchers::WithinAbs(kPi / 4.0, 1e-12));
+}
+
+TEST_CASE("minimum image does not read past a three length box", "[pore]") {
+  Cloud cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const auto wrapped = gen::triclinicMinImage(cloud, 0.2, 0.0, 0.0, 9.9, 0.0, 0.0);
+  REQUIRE_THAT(wrapped[0], Catch::Matchers::WithinAbs(0.3, 1e-12));
+  REQUIRE_THAT(wrapped[1], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(wrapped[2], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  cloud.box = {0.0, 10.0, 10.0};
+  const auto raw = gen::triclinicMinImage(cloud, 1.0, 12.0, -6.0, 0.0, 0.0, 0.0);
+  REQUIRE_THAT(raw[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(raw[1], Catch::Matchers::WithinAbs(2.0, 1e-12));
+  REQUIRE_THAT(raw[2], Catch::Matchers::WithinAbs(4.0, 1e-12));
+}
+
+TEST_CASE("the lattice search is the Euclidean minimum image", "[pore]") {
+  const double lx = 10.0;
+  const double ly = 12.0;
+  const double lz = 14.0;
+  const double xy = 4.5;
+  const double xz = -3.0;
+  const double yz = 5.5;
+  auto cloud = triclinic(lx, ly, lz, xy, xz, yz);
+  const auto box = gen::makeFracBox(cloud);
+  REQUIRE(box.ok);
+  int disagree = 0;
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      for (int k = 0; k < 2; ++k) {
+      const double s[3] = {(static_cast<double>(i) + 0.17) / 4.0, (static_cast<double>(j) + 0.41) / 4.0,
+                           (static_cast<double>(k) + 0.63) / 2.0};
+      const double t[3] = {(static_cast<double>((i + 1) % 3) + 0.5) / 3.0,
+                           (static_cast<double>((j + 1) % 3) + 0.2) / 3.0,
+                           (static_cast<double>(k % 3) + 0.8) / 3.0};
+      const double a[3] = {lx * s[0] + xy * s[1] + xz * s[2], ly * s[1] + yz * s[2], lz * s[2]};
+      const double b[3] = {lx * t[0] + xy * t[1] + xz * t[2], ly * t[1] + yz * t[2], lz * t[2]};
+      double ds[3] = {s[0] - t[0], s[1] - t[1], s[2] - t[2]};
+      for (double &component : ds) {
+        component -= std::round(component);
+      }
+      const double wx = lx * ds[0] + xy * ds[1] + xz * ds[2];
+      const double wy = ly * ds[1] + yz * ds[2];
+      const double wz = lz * ds[2];
+      const double wrapped = std::sqrt(wx * wx + wy * wy + wz * wz);
+      double image = 1e300;
+      for (int ia = -4; ia <= 4; ++ia) {
+        for (int ib = -4; ib <= 4; ++ib) {
+          for (int ic = -4; ic <= 4; ++ic) {
+            const double dx = wx - (ia * lx + ib * xy + ic * xz);
+            const double dy = wy - (ib * ly + ic * yz);
+            const double dz = wz - ic * lz;
+            image = std::min(image, std::sqrt(dx * dx + dy * dy + dz * dz));
+          }
+        }
+      }
+      if (wrapped > image + 1e-6) {
+        disagree += 1;
+      }
+      const auto searched = gen::triclinicImageSearch(box, a[0], a[1], a[2], b[0], b[1], b[2]);
+      const double found =
+          std::sqrt(searched[0] * searched[0] + searched[1] * searched[1] + searched[2] * searched[2]);
+      REQUIRE_THAT(found, Catch::Matchers::WithinAbs(image, 1e-8));
+      const auto via = gen::triclinicMinImage(cloud, a[0], a[1], a[2], b[0], b[1], b[2]);
+      const double library =
+          std::sqrt(via[0] * via[0] + via[1] * via[1] + via[2] * via[2]);
+      REQUIRE_THAT(library, Catch::Matchers::WithinAbs(image, 1e-8));
+      }
+    }
+  }
+  REQUIRE(disagree > 0);
 }

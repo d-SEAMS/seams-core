@@ -6,6 +6,8 @@
 
 #include <array>
 #include <cmath>
+#include <random>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -26,6 +28,50 @@ std::array<double, 3> cartesian(const std::array<double, 9> &box, double sx, dou
   const double xz = box[7];
   const double yz = box[8];
   return {box[0] + lx * sx + xy * sy + xz * sz, box[1] + ly * sy + yz * sz, box[2] + lz * sz};
+}
+
+double coveringRadius(double u0, double u1, double v0, double v1) {
+  double b1[2] = {u0, u1};
+  double b2[2] = {v0, v1};
+  for (int step = 0; step < 32; ++step) {
+    if (b1[0] * b1[0] + b1[1] * b1[1] > b2[0] * b2[0] + b2[1] * b2[1]) {
+      std::swap(b1[0], b2[0]);
+      std::swap(b1[1], b2[1]);
+    }
+    const double base = b1[0] * b1[0] + b1[1] * b1[1];
+    const double m = std::round((b1[0] * b2[0] + b1[1] * b2[1]) / base);
+    if (m == 0.0) {
+      if (b1[0] * b2[0] + b1[1] * b2[1] < 0.0) {
+        b2[0] = -b2[0];
+        b2[1] = -b2[1];
+      }
+      const double cross = std::abs(b1[0] * b2[1] - b1[1] * b2[0]);
+      return std::hypot(b1[0], b1[1]) * std::hypot(b2[0], b2[1]) *
+             std::hypot(b1[0] - b2[0], b1[1] - b2[1]) / (2.0 * cross);
+    }
+    b2[0] -= m * b1[0];
+    b2[1] -= m * b1[1];
+  }
+  return 0.0;
+}
+
+double poreCover(double lx, double ly, double lz, double xy, double xz, double yz) {
+  const double c2 = xz * xz + yz * yz + lz * lz;
+  const double along[3] = {xz, yz, lz};
+  const double axial = std::sqrt(c2);
+  const double eaxis[3] = {along[0] / axial, along[1] / axial, along[2] / axial};
+  const double pu = (lx * along[0]) / c2;
+  const double pv = (xy * along[0] + ly * along[1]) / c2;
+  const double raw_u[3] = {lx - pu * along[0], -pu * along[1], -pu * along[2]};
+  const double raw_v[3] = {xy - pv * along[0], ly - pv * along[1], -pv * along[2]};
+  const double nu = std::sqrt(raw_u[0] * raw_u[0] + raw_u[1] * raw_u[1] + raw_u[2] * raw_u[2]);
+  const double e1[3] = {raw_u[0] / nu, raw_u[1] / nu, raw_u[2] / nu};
+  double e2[3] = {eaxis[1] * e1[2] - eaxis[2] * e1[1], eaxis[2] * e1[0] - eaxis[0] * e1[2],
+                  eaxis[0] * e1[1] - eaxis[1] * e1[0]};
+  const double n2 = std::sqrt(e2[0] * e2[0] + e2[1] * e2[1] + e2[2] * e2[2]);
+  const double ev0 = raw_v[0] * e1[0] + raw_v[1] * e1[1] + raw_v[2] * e1[2];
+  const double ev1 = (raw_v[0] * e2[0] + raw_v[1] * e2[1] + raw_v[2] * e2[2]) / n2;
+  return coveringRadius(nu, 0.0, ev0, ev1);
 }
 
 }  // namespace
@@ -184,4 +230,82 @@ TEST_CASE("System host guest uses the triclinic minimum image", "[pore][system]"
                  Catch::Matchers::WithinAbs(expect_distance[static_cast<std::size_t>(g)], 1e-8));
     REQUIRE(report.contacts[static_cast<std::size_t>(g)] == expect_contacts[static_cast<std::size_t>(g)]);
   }
+}
+
+TEST_CASE("seams_pore_profiles at the covering radius returns the cell volume", "[pore][system]") {
+  const double named[][6] = {
+      {20.0, 10.0 * std::sqrt(3.0), 8.0, 10.0, 0.0, 0.0},
+      {10.0, 12.0, 14.0, 4.5, -3.0, 5.5},
+      {10.0, 8.0, 12.0, 2.0, 1.0, -1.5},
+  };
+  auto expect = [](double lx, double ly, double lz, double xy, double xz, double yz) {
+    const double cover = poreCover(lx, ly, lz, xy, xz, yz);
+    const double volume = lx * ly * lz;
+    REQUIRE(cover > 0.0);
+    const std::array<double, 9> box = {0.0, 0.0, 0.0, lx, ly, lz, xy, xz, yz};
+    const std::vector<double> xyz = {0.1, 0.2, 0.3};
+    const std::vector<int> types = {1};
+    seams::System sys;
+    sys.set_frame(xyz, box, types);
+    seams::PoreProfileOptions options;
+    options.axis = 2;
+    options.use_centre = true;
+    options.centre_fractional = {0.5, 0.5, 0.5};
+    for (double scale : {1.0 - 1e-13, 1.0 - 1e-12}) {
+      options.r_max = cover * scale;
+      const auto profiles = sys.pore_profiles(options);
+      // Caps beyond the circle are about 1e-11 of the cell. The disk
+      // pi r^2 L is 1.209 V on the hex cell and larger on the other two.
+      REQUIRE_THAT(profiles.radial.volume[0], Catch::Matchers::WithinRel(volume, 1e-8));
+    }
+  };
+  for (const auto &cell : named) {
+    expect(cell[0], cell[1], cell[2], cell[3], cell[4], cell[5]);
+  }
+  std::mt19937_64 gen(20261120);
+  std::uniform_real_distribution<double> length(6.0, 16.0);
+  std::uniform_real_distribution<double> tilt(-0.9, 0.9);
+  for (int trial = 0; trial < 8; ++trial) {
+    const double lx = length(gen);
+    const double ly = length(gen);
+    const double lz = length(gen);
+    expect(lx, ly, lz, tilt(gen) * lx, tilt(gen) * lx, tilt(gen) * ly);
+  }
+}
+
+TEST_CASE("System rejects a negative axis other than -1 and a repeated type", "[pore][system]") {
+  seams::System sys;
+  const std::vector<double> xyz = {1.0, 1.0, 1.0, 4.0, 1.0, 1.0};
+  const std::vector<int> types = {2, 5};
+  const std::array<double, 9> box = {0.0, 0.0, 0.0, 10.0, 9.0, 8.0, 0.0, 0.0, 0.0};
+  sys.set_frame(xyz, box, types);
+  seams::PoreProfileOptions profiles;
+  profiles.axis = -7;
+  profiles.r_max = 1.0;
+  try {
+    sys.pore_profiles(profiles);
+    FAIL("axis -7 was accepted");
+  } catch (const seams::Error &error) {
+    REQUIRE(error.code() == SEAMS_ERR_RANGE);
+  }
+  profiles.axis = -1;
+  profiles.r_max = 0.0;
+  const auto made = sys.pore_profiles(profiles);
+  REQUIRE(made.radial.volume.size() == 1);
+  REQUIRE_THAT(made.radial.volume[0], Catch::Matchers::WithinRel(10.0 * 9.0 * 8.0, 1e-8));
+  seams::HostGuestOptions same;
+  same.guest = 2;
+  same.framework = 2;
+  same.cutoff = 3.0;
+  try {
+    sys.host_guest(same);
+    FAIL("a repeated guest and framework type was accepted");
+  } catch (const seams::Error &error) {
+    REQUIRE(error.code() == SEAMS_ERR_ARG);
+  }
+  same.framework = 0;
+  const auto report = sys.host_guest(same);
+  REQUIRE(report.guest_index.size() == 1);
+  REQUIRE(report.framework_types.size() == 1);
+  REQUIRE(report.framework_types[0] == 5);
 }
