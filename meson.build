@@ -195,7 +195,7 @@ if openmp_dep_ok
       # Linux clang prints libomp.so. Apple clang links libomp.dylib, and
       # -print-file-name=libomp.so then returns the bare name, so the
       # runpath was never recorded and dyld aborted on @rpath/libomp.dylib.
-      _omp_names = ['libomp.so']
+      _omp_names = ['libomp.so', 'libomp.so.5']
       if host_machine.system() == 'darwin'
         _omp_names = ['libomp.dylib']
       endif
