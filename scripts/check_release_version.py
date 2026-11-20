@@ -16,6 +16,7 @@ writes the version to stdout.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -34,12 +35,34 @@ def read(name):
     return (ROOT / name).read_text(encoding="utf-8")
 
 
+def codemeta_version(text):
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise SystemExit("codemeta.json: invalid JSON ({})".format(exc))
+    version = data.get("version")
+    if not isinstance(version, str) or not version:
+        raise SystemExit("codemeta.json: missing version")
+    return version
+
+
 def versions():
     found = {
         "meson.build": first(r"^project\([^)]*?version:\s*'([^']+)'", read("meson.build"), "meson.build"),
         "pixi.toml": first(r'^\[workspace\][^\[]*?^version\s*=\s*"([^"]+)"', read("pixi.toml"), "pixi.toml"),
         "recipe/recipe.yaml": first(r'^context:\s*\n\s+version:\s*"([^"]+)"', read("recipe/recipe.yaml"), "recipe/recipe.yaml"),
         "CITATION.cff": first(r'^version:\s*"?([^"\s]+)"?', read("CITATION.cff"), "CITATION.cff"),
+        "codemeta.json": codemeta_version(read("codemeta.json")),
+        "skills/d-seams/SKILL.md": first(
+            r'^metadata:\s*\n(?:[ \t]+[^\n]*\n)*?[ \t]+version:\s*"?([^"\s]+)"?',
+            read("skills/d-seams/SKILL.md"),
+            "skills/d-seams/SKILL.md",
+        ),
+        "packaging/yggdrasil/L/libseams/build_tarballs.jl": first(
+            r'^version\s*=\s*v"([^"]+)"',
+            read("packaging/yggdrasil/L/libseams/build_tarballs.jl"),
+            "packaging/yggdrasil/L/libseams/build_tarballs.jl",
+        ),
     }
     return found
 
