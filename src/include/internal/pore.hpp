@@ -8,6 +8,7 @@
 
 #include <mol_sys.hpp>
 
+#include <array>
 #include <stdexcept>
 #include <vector>
 
@@ -24,8 +25,15 @@
  *  equally thick in the projection coordinate's density of states.
  *
  *  Cylindrical shells are Euclidean distances to a pore axis parallel to a
- *  cell edge. The shell volume is the area of the annulus inside the
- *  perpendicular face, times the length of that edge.
+ *  cell edge. The radial coordinate is the distance to the nearest
+ *  periodic image of that axis. Within the inscribed radius of the
+ *  centred perpendicular face the nearest image is the face origin.
+ *  Beyond it, a corner of the centred face can lie closer to a
+ *  neighbouring image, and the coordinate follows that image. The shell
+ *  volume is the area of the annulus inside the Voronoi cell of the
+ *  perpendicular lattice, times the length of the edge, so a uniform
+ *  fluid stays flat. The azimuth is the angle in the centred face, and
+ *  its sector is clipped to that face.
  */
 
 namespace pore {
@@ -84,6 +92,13 @@ Profiles poreProfiles(const Cloud &cloud, int type, int radial_bins, int azimuth
                       int axial_bins, double r_max, int axis, const double *direction,
                       const double *centre_frac, int framework_type, double origin,
                       const double *masses);
+
+//! Area of a convex polygon clipped to the disk of `radius` centred at the
+//! origin. Vertices are an (x, y) ring. A non-positive radius returns 0.
+//! Once `radius` reaches `cover`, the result is `full`, which is the
+//! polygon's own area when the disk contains it.
+double clippedDiskArea(const std::vector<std::array<double, 2>> &polygon, double radius,
+                       double cover, double full);
 
 //! Nearest framework site and contact counts inside cutoff, one row per guest.
 //! framework_type 0 keeps every atom whose type is not guest_type.

@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numbers>
 #include <stdexcept>
 #include <utility>
@@ -300,7 +301,13 @@ Profile project(const Cloud &cloud, int type, int bins, double origin, const dou
     const double a = org + static_cast<double>(i) / static_cast<double>(bins);
     const double b = org + static_cast<double>(i + 1) / static_cast<double>(bins);
     double measure = 0.0;
-    if (b <= 1.0) {
+    // A bin that starts at or past the wrap lives entirely in the next
+    // cell image. Measuring from 0 up to b-1 counts every earlier slab
+    // again, so the volumes no longer sum to the cell.
+    if (a >= 1.0) {
+      measure = cubeMeasure(geom.g, geom.shift + (a - 1.0) * geom.span,
+                             geom.shift + (b - 1.0) * geom.span);
+    } else if (b <= 1.0) {
       measure = cubeMeasure(geom.g, geom.shift + a * geom.span, geom.shift + b * geom.span);
     } else {
       measure = cubeMeasure(geom.g, geom.shift + a * geom.span, geom.shift + geom.span);
@@ -333,8 +340,12 @@ struct Plane {
   double axial = 0;
   double face = 0;
   double far = 0;
+  double cover = 0;
   std::vector<P2> polygon;
+  std::vector<P2> voronoi;
 };
+
+std::vector<P2> voronoiCell(const Plane &plane);
 
 int parallelAxis(const Cell &cell, const double direction[3]) {
   const double dw = direction[2] / cell.lz;
@@ -415,6 +426,14 @@ Plane planeOf(const Cell &cell, int axis) {
   for (const P2 &p : plane.polygon) {
     plane.far = std::max(plane.far, std::hypot(p.x, p.y));
   }
+  plane.voronoi = voronoiCell(plane);
+  plane.cover = 0.0;
+  for (const P2 &p : plane.voronoi) {
+    plane.cover = std::max(plane.cover, std::hypot(p.x, p.y));
+  }
+  if (!(plane.cover > 0.0)) {
+    throw BoxError("box is not a positive cell");
+  }
   return plane;
 }
 
@@ -485,13 +504,43 @@ double diskArea(const std::vector<P2> &poly, double radius, double far, double f
     if (ain && bin) {
       area += tri(a, b);
     } else if (ain && !bin) {
-      const P2 h = hits.empty() ? b : hits.front();
-      area += tri(a, h) + sector(h, b);
+      // A root at the endpoint is dropped by the 1e-12 tolerance. That is
+      // a face vertex sitting on the circle. The edge then leaves the
+      // disk at a, and the contribution is the sector, not the triangle
+      // out to the far vertex.
+      if (hits.empty()) {
+        area += sector(a, b);
+      } else {
+        const P2 h = hits.front();
+        area += tri(a, h) + sector(h, b);
+      }
     } else if (!ain && bin) {
-      const P2 h = hits.empty() ? a : hits.back();
-      area += sector(a, h) + tri(h, b);
+      if (hits.empty()) {
+        area += sector(a, b);
+      } else {
+        const P2 h = hits.back();
+        area += sector(a, h) + tri(h, b);
+      }
     } else if (hits.size() >= 2) {
       area += sector(a, hits.front()) + tri(hits.front(), hits.back()) + sector(hits.back(), b);
+    } else if (hits.size() == 1) {
+      // hypot(x, y)^2 can exceed x^2 + y^2, so a vertex built as a
+      // hypotenuse sits just outside the circle and its root falls
+      // inside the endpoint tolerance. The surviving root is a real
+      // crossing; the near endpoint stands in for the dropped one. A
+      // tangent in the middle of the edge has both ends well outside
+      // and adds no chord.
+      const P2 h = hits.front();
+      const double ar = std::abs(dot2(a, a) - r2);
+      const double br = std::abs(dot2(b, b) - r2);
+      const double tol = 1e-8 * std::max(r2, 1.0);
+      if (std::min(ar, br) <= tol && ar <= br) {
+        area += tri(a, h) + sector(h, b);
+      } else if (std::min(ar, br) <= tol) {
+        area += sector(a, h) + tri(h, b);
+      } else {
+        area += sector(a, b);
+      }
     } else {
       area += sector(a, b);
     }
@@ -551,6 +600,73 @@ std::vector<P2> clipConvex(std::vector<P2> subject, const std::vector<P2> &clip)
   return subject;
 }
 
+// Voronoi cell of the perpendicular lattice. Its points are closer to
+// the pore axis than to any periodic image of that axis, and its area
+// is the face area. Radial shells are disks clipped to this cell, so
+// the shell volume matches the nearest-image radius.
+std::vector<P2> voronoiCell(const Plane &plane) {
+  const double box = plane.far * 4.0 + 1.0;
+  std::vector<P2> poly = {{-box, -box}, {box, -box}, {box, box}, {-box, box}};
+  const double limit = 2.0 * plane.far + 1.0;
+  const double lu = std::hypot(plane.eu.x, plane.eu.y);
+  const double lv = std::hypot(plane.ev.x, plane.ev.y);
+  const double span = std::max(plane.face, 1e-30);
+  const int ni = static_cast<int>(std::ceil(limit * lv / span)) + 2;
+  const int nj = static_cast<int>(std::ceil(limit * lu / span)) + 2;
+  struct Site {
+    double r2;
+    int i;
+    int j;
+  };
+  std::vector<Site> sites;
+  for (int i = -ni; i <= ni; ++i) {
+    for (int j = -nj; j <= nj; ++j) {
+      if (i == 0 && j == 0) {
+        continue;
+      }
+      const P2 w{static_cast<double>(i) * plane.eu.x + static_cast<double>(j) * plane.ev.x,
+                 static_cast<double>(i) * plane.eu.y + static_cast<double>(j) * plane.ev.y};
+      const double r2 = dot2(w, w);
+      if (r2 > 0.0 && r2 <= limit * limit) {
+        sites.push_back(Site{r2, i, j});
+      }
+    }
+  }
+  std::sort(sites.begin(), sites.end(), [](const Site &a, const Site &b) {
+    if (a.r2 != b.r2) {
+      return a.r2 < b.r2;
+    }
+    if (a.i != b.i) {
+      return a.i < b.i;
+    }
+    return a.j < b.j;
+  });
+  for (const Site &site : sites) {
+    const P2 w{static_cast<double>(site.i) * plane.eu.x + static_cast<double>(site.j) * plane.ev.x,
+               static_cast<double>(site.i) * plane.eu.y + static_cast<double>(site.j) * plane.ev.y};
+    const P2 mid{0.5 * w.x, 0.5 * w.y};
+    // rot90ccw(w) = (-wy, wx). The interior (the origin side) is to the left.
+    P2 dir{-w.y, w.x};
+    const double dir_n = std::hypot(dir.x, dir.y);
+    if (!(dir_n > 0.0)) {
+      continue;
+    }
+    dir.x /= dir_n;
+    dir.y /= dir_n;
+    const P2 inward{-dir.y, dir.x};
+    const double reach = box * 8.0 + 1.0;
+    const P2 a{mid.x - reach * dir.x, mid.y - reach * dir.y};
+    const P2 b{mid.x + reach * dir.x, mid.y + reach * dir.y};
+    const P2 c{b.x + reach * inward.x, b.y + reach * inward.y};
+    const P2 d{a.x + reach * inward.x, a.y + reach * inward.y};
+    poly = clipConvex(poly, std::vector<P2>{a, b, c, d});
+    if (poly.empty()) {
+      break;
+    }
+  }
+  return poly;
+}
+
 double wedgeArea(const Plane &plane, double theta0, double theta1) {
   const double span = theta1 - theta0;
   if (!(span > 0.0)) {
@@ -568,18 +684,70 @@ double wedgeArea(const Plane &plane, double theta0, double theta1) {
     };
     return std::abs(shoelace(clipConvex(plane.polygon, wedge)));
   };
-  if (span <= kPi) {
+  // The clipping triangle covers the sector only while its chord stays
+  // outside the face. reach is about 4*far, so that fails above about
+  // 151 degrees, and at span = pi the three points are collinear and
+  // the triangle has no area. Pieces of at most pi/2 keep the chord
+  // outside the face.
+  constexpr double kPiece = 0.5 * kPi;
+  if (span <= kPiece) {
     return piece(theta0, theta1);
   }
-  const double mid = 0.5 * (theta0 + theta1);
-  return piece(theta0, mid) + piece(mid, theta1);
+  const int pieces = static_cast<int>(std::ceil(span / kPiece - 1e-15));
+  double area = 0.0;
+  for (int i = 0; i < pieces; ++i) {
+    const double a0 = theta0 + span * (static_cast<double>(i) / static_cast<double>(pieces));
+    const double a1 = theta0 + span * (static_cast<double>(i + 1) / static_cast<double>(pieces));
+    area += piece(a0, a1);
+  }
+  return area;
 }
 
+// Position in the centred perpendicular face. Each face coordinate is
+// wrapped into [-1/2, 1/2). The azimuth and the automatic centre use
+// this map. The radial coordinate does not: past the inscribed radius
+// it follows the nearest image of the pore axis.
 void perpOf(const Plane &plane, const double s[3], double cu, double cv, double &x, double &y) {
   const double du = wrapHalf(s[plane.iu] - cu);
   const double dv = wrapHalf(s[plane.iv] - cv);
   x = du * plane.eu.x + dv * plane.ev.x;
   y = du * plane.eu.y + dv * plane.ev.y;
+}
+
+void imageSearch(const Plane &plane, int &ni, int &nj) {
+  const double limit = 2.0 * plane.far + 1.0;
+  const double lu = std::hypot(plane.eu.x, plane.eu.y);
+  const double lv = std::hypot(plane.ev.x, plane.ev.y);
+  const double span = std::max(plane.face, 1e-30);
+  ni = static_cast<int>(std::ceil(limit * lv / span)) + 2;
+  nj = static_cast<int>(std::ceil(limit * lu / span)) + 2;
+}
+
+// Displacement from the nearest periodic image of the pore axis.
+// (du, dv) are the centred fractional coordinates, already in [-1/2, 1/2).
+void nearestAxis(const Plane &plane, double du, double dv, double &x, double &y) {
+  int ni = 0;
+  int nj = 0;
+  imageSearch(plane, ni, nj);
+  double best = std::numeric_limits<double>::infinity();
+  double bx = 0.0;
+  double by = 0.0;
+  for (int i = -ni; i <= ni; ++i) {
+    for (int j = -nj; j <= nj; ++j) {
+      const double px = (du + static_cast<double>(i)) * plane.eu.x +
+                        (dv + static_cast<double>(j)) * plane.ev.x;
+      const double py = (du + static_cast<double>(i)) * plane.eu.y +
+                        (dv + static_cast<double>(j)) * plane.ev.y;
+      const double r2 = px * px + py * py;
+      if (r2 < best) {
+        best = r2;
+        bx = px;
+        by = py;
+      }
+    }
+  }
+  x = bx;
+  y = by;
 }
 
 struct Centre2 {
@@ -713,6 +881,16 @@ double angleOf(double y, double x) {
 
 } // namespace
 
+double clippedDiskArea(const std::vector<std::array<double, 2>> &polygon, double radius,
+                       double cover, double full) {
+  std::vector<P2> poly;
+  poly.reserve(polygon.size());
+  for (const auto &point : polygon) {
+    poly.push_back(P2{point[0], point[1]});
+  }
+  return diskArea(poly, radius, cover, full);
+}
+
 Profile fractionalAxis(const Cloud &cloud, int type, int bins, int axis, double origin,
                        const double *masses) {
   requireBins(bins);
@@ -825,8 +1003,11 @@ Profiles poreProfiles(const Cloud &cloud, int type, int radial_bins, int azimuth
   for (int i = 0; i < radial_bins; ++i) {
     const double inner = dr * static_cast<double>(i);
     const double outer = dr * static_cast<double>(i + 1);
-    double area = diskArea(plane.polygon, outer, plane.far, plane.face) -
-                  diskArea(plane.polygon, inner, plane.far, plane.face);
+    // plane.far is the centred-face vertex radius, which is at least the
+    // Voronoi covering radius. The early return then hands back the exact
+    // face area once the disk covers the centred face.
+    double area = diskArea(plane.voronoi, outer, plane.far, plane.face) -
+                  diskArea(plane.voronoi, inner, plane.far, plane.face);
     if (area < 0.0) {
       area = 0.0;
     }
@@ -843,7 +1024,12 @@ Profiles poreProfiles(const Cloud &cloud, int type, int radial_bins, int azimuth
     double x = 0.0;
     double y = 0.0;
     perpOf(plane, sample.s, cu, cv, x, y);
-    const double radius = std::hypot(x, y);
+    const double du = wrapHalf(sample.s[plane.iu] - cu);
+    const double dv = wrapHalf(sample.s[plane.iv] - cv);
+    double xr = 0.0;
+    double yr = 0.0;
+    nearestAxis(plane, du, dv, xr, yr);
+    const double radius = std::hypot(xr, yr);
     if (radius <= reach) {
       int bin = static_cast<int>(std::floor(radius / dr));
       if (bin >= radial_bins) {
@@ -874,7 +1060,6 @@ HostGuest hostGuest(const Cloud &cloud, int guest_type, int framework_type, doub
   }
   const Cell cell = cellOf(cloud);
   requireCell(cell);
-  const gen::FracBox box = gen::makeFracBox(cloud);
   std::vector<int> guests;
   std::vector<int> frames;
   for (int i = 0; i < static_cast<int>(cloud.pts.size()); ++i) {
@@ -907,7 +1092,8 @@ HostGuest hostGuest(const Cloud &cloud, int guest_type, int framework_type, doub
     bool have = false;
     for (int index : frames) {
       const auto &site = cloud.pts[static_cast<std::size_t>(index)];
-      const auto delta = gen::fracDelta(box, guest.x, guest.y, guest.z, site.x, site.y, site.z);
+      const auto delta =
+          gen::triclinicMinImage(cloud, guest.x, guest.y, guest.z, site.x, site.y, site.z);
       const double r2 = delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2];
       if (!have || r2 < best) {
         have = true;

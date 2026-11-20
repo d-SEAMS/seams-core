@@ -363,6 +363,13 @@ inline std::array<double, 3> triclinicMinImage(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double xi,
     double yi, double zi, double xj, double yj, double zj) {
   const FracBox b = makeFracBox(yCloud);
+  // A three-length box is orthorhombic. makeFracBox already recovered the
+  // edge lengths, and the fractional wrap is the minimum image on every
+  // axis. The tilt recovery below reads box[3..5], which that box does not
+  // have.
+  if (b.ok && !b.triclinic) {
+    return fracDelta(b, xi, yi, zi, xj, yj, zj);
+  }
   if (b.ok && b.triclinic) {
     const auto dr = fracDelta(b, xi, yi, zi, xj, yj, zj);
     const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];

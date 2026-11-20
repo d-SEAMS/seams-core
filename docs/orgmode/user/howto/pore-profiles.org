@@ -38,16 +38,24 @@ is not a cell edge is rejected.
 =seams_pore_profiles= returns three histograms.
 
 - Radial bins run from 0 to =r_max=. =r_max= 0 covers the perpendicular
-  face. A shell volume is the area of the Euclidean annulus inside that
-  face, times the length of the pore edge.
-- Azimuthal bins cover [-pi, pi). A sector volume is the area of that
-  wedge inside the face, times the same edge length.
+  face. The radial coordinate is the distance to the nearest periodic
+  image of the pore axis. Within the inscribed radius of the centred
+  face that image is the face origin. Beyond the inscribed radius a
+  point near a corner can be closer to a neighbouring image, and the
+  coordinate follows that image. A shell volume is the area of the
+  Euclidean annulus inside the Voronoi cell of the perpendicular
+  lattice, times the length of the pore edge.
+- Azimuthal bins cover [-pi, pi). The angle is taken in the centred
+  face. A sector volume is the area of that wedge inside the face,
+  times the same edge length.
 - Axial bins are the fractional slabs of =seams_density_fractional=
   along the pore edge.
 
-Number density and mass density are both written. An atom beyond
-=r_max= is left out of the radial histogram and kept in the azimuthal
-histogram.
+Number density and mass density are both written. Mass density is the
+caller's mass unit per cubic Angstrom. A mass in amu is amu per cubic
+Angstrom, and multiplying by 1.66054 gives grams per cubic centimetre.
+The library does not apply that factor. An atom beyond =r_max= is left
+out of the radial histogram and kept in the azimuthal histogram.
 
 * Host and guest
 

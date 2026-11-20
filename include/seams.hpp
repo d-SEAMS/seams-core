@@ -334,7 +334,8 @@ struct DensityProfile {
 struct FractionalProfile {
   std::vector<double> coordinate;     /**< Bin centres. Fractional, or radians for azimuth. */
   std::vector<double> number_density; /**< Atoms per cubic Angstrom. */
-  std::vector<double> mass_density;   /**< Mass per cubic Angstrom. Mass 1 when masses is empty. */
+  std::vector<double> mass_density;   /**< Caller mass units per cubic Angstrom. Mass 1 when masses is empty.
+                                         An amu mass is amu per cubic Angstrom; times 1.66054 it is g/cm^3. */
   std::vector<double> volume;         /**< Bin volume, cubic Angstrom. */
 };
 

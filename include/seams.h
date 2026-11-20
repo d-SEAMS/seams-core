@@ -3643,7 +3643,10 @@ SEAMS_API seams_status seams_reorient_fit(const seams_reorient *reorient,
  * bin along a cell edge has volume V/n. An arbitrary direction bins the
  * projection of the reduced cell, and each bin volume is the measure of
  * that slice. Number density is atoms per cubic Angstrom. Mass density
- * uses the caller masses, or mass 1 when masses is NULL.
+ * is the caller's mass unit per cubic Angstrom, or mass 1 when masses
+ * is NULL. A mass given in amu is therefore amu per cubic Angstrom, and
+ * multiplying by 1.66054 converts that density to grams per cubic
+ * centimetre. The library does not apply the factor.
  * @{
  */
 
@@ -3667,7 +3670,9 @@ SEAMS_API seams_status seams_reorient_fit(const seams_reorient *reorient,
  *        masses is not NULL.
  * @param coordinate Bin centres, or NULL to skip.
  * @param number_density Number density, or NULL to skip.
- * @param mass_density Mass density, or NULL to skip.
+ * @param mass_density Mass density in the caller's mass units per cubic
+ *        Angstrom, or NULL to skip. An amu mass gives amu per cubic
+ *        Angstrom; times 1.66054 that is grams per cubic centimetre.
  * @param bin_volume Bin volume in cubic Angstrom, or NULL to skip.
  * @param cap Capacity of each non-NULL column.
  * @param n_out Receives the bin count.
@@ -3747,10 +3752,18 @@ SEAMS_API seams_status seams_pore_frame(seams_system *sys, int framework_type, i
  * @brief Radial, azimuthal, and axial densities about a pore axis.
  *
  * The axis is a cell edge, as in seams_pore_frame(). r_max 0 covers the
- * perpendicular face. Radial bins run from 0 to r_max. Azimuthal bins
- * cover [-pi, pi). The axial coordinate is the fractional cell coordinate,
- * shifted by origin. Shell volumes are the Euclidean annulus or sector
- * inside the perpendicular face, times the edge length. Pass NULL columns
+ * perpendicular face. Radial bins run from 0 to r_max. The radial
+ * coordinate is the distance to the nearest periodic image of the pore
+ * axis. Within the inscribed radius of the centred face that image is
+ * the face origin. Beyond the inscribed radius a corner point can be
+ * closer to a neighbouring image, and the coordinate follows that
+ * image. The radial shell is the annulus inside the Voronoi cell of the
+ * perpendicular lattice. Azimuthal bins cover [-pi, pi) in the centred
+ * face, and each sector is clipped to that face. The axial coordinate
+ * is the fractional cell coordinate, shifted by origin. A shell volume
+ * is that area times the edge length. Mass density is the caller's mass
+ * unit per cubic Angstrom. An amu mass gives amu per cubic Angstrom, and
+ * times 1.66054 that is grams per cubic centimetre. Pass NULL columns
  * to query the three bin counts.
  *
  * @param sys Frame handle.
@@ -3771,19 +3784,25 @@ SEAMS_API seams_status seams_pore_frame(seams_system *sys, int framework_type, i
  *        masses is not NULL.
  * @param radius Radial bin centres, or NULL to skip.
  * @param radial_number Radial number density, or NULL to skip.
- * @param radial_mass Radial mass density, or NULL to skip.
+ * @param radial_mass Radial mass density in the caller's mass units per
+ *        cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic
+ *        Angstrom; times 1.66054 that is grams per cubic centimetre.
  * @param radial_volume Radial shell volume, or NULL to skip.
  * @param radial_cap Capacity of each non-NULL radial column.
  * @param n_radial Receives the radial bin count.
  * @param theta Azimuthal bin centres in radians, or NULL to skip.
  * @param azimuthal_number Azimuthal number density, or NULL to skip.
- * @param azimuthal_mass Azimuthal mass density, or NULL to skip.
+ * @param azimuthal_mass Azimuthal mass density in the caller's mass units
+ *        per cubic Angstrom, or NULL to skip. An amu mass gives amu per
+ *        cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
  * @param azimuthal_volume Azimuthal sector volume, or NULL to skip.
  * @param azimuthal_cap Capacity of each non-NULL azimuthal column.
  * @param n_azimuthal Receives the azimuthal bin count.
  * @param axial Axial bin centres, or NULL to skip.
  * @param axial_number Axial number density, or NULL to skip.
- * @param axial_mass Axial mass density, or NULL to skip.
+ * @param axial_mass Axial mass density in the caller's mass units per
+ *        cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic
+ *        Angstrom; times 1.66054 that is grams per cubic centimetre.
  * @param axial_volume Axial slab volume, or NULL to skip.
  * @param axial_cap Capacity of each non-NULL axial column.
  * @param n_axial Receives the axial bin count.
