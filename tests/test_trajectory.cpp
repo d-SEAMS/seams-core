@@ -325,7 +325,29 @@ TEST_CASE("Ballistic and anisotropic MSD with arbitrary axis and negative contro
     }
 
     const auto fit = msdAll.fit(0.25, 4.0);
+    CHECK(fit.alpha_fitted);
     CHECK(fit.alpha == Catch::Approx(2.0).margin(1e-10));
+  }
+
+  SECTION("A skipped log-log fit reports NaN alpha, not zero") {
+    const std::array<double, 3> xAxis = {1.0, 0.0, 0.0};
+    // One origin: lag 1 moves 1e-11 (MSD 1e-22 < 1e-20), lag 2 moves 2.
+    seams::Msd msd(1, 0, 10, 1.0, xAxis);
+    for (const double x : {0.0, 1e-11, 2.0}) {
+      msd.push(std::array<double, 3>{x, 0.0, 0.0});
+    }
+    const auto fit = msd.fit(0.0, 2.0);
+    CHECK_FALSE(fit.alpha_fitted);
+    CHECK(std::isnan(fit.alpha));
+    CHECK(fit.d_total == Catch::Approx(1.0 / 3.0).margin(1e-12));
+    CHECK(fit.d_axial == Catch::Approx(1.0).margin(1e-12));
+
+    traj::DiffusionFitResult res;
+    REQUIRE(traj::fitDiffusionCurve({0.0, 1.0}, {0.0, 1.0}, {0.0, 1.0},
+                                    {0.0, 0.0}, 0.0, 1.0, res));
+    CHECK_FALSE(res.alphaFitted);
+    CHECK(std::isnan(res.alpha));
+    CHECK(res.dTotal == Catch::Approx(1.0 / 6.0).margin(1e-14));
   }
 
   SECTION("Negative controls: stationary and purely lateral motion") {

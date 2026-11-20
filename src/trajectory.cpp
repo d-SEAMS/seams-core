@@ -934,6 +934,7 @@ bool fitDiffusionCurve(const std::vector<double> &lagTime,
     const auto regAlpha = fitWeightedLine(logT, logMsd, logW);
     if (regAlpha.ok) {
       out.alpha = regAlpha.slope;
+      out.alphaFitted = true;
     }
   }
   return true;

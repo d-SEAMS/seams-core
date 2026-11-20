@@ -309,6 +309,28 @@ def test_ballistic_and_anisotropic_brownian_msd_oracles():
     assert np.allclose(res_ax.axial, res_ax.total, atol=1e-12)
 
 
+def test_skipped_loglog_fit_reports_nan_alpha():
+    # One origin: lag 1 moves 1e-11 (MSD 1e-22 < 1e-20), lag 2 moves 2.
+    acc = ds.MsdAccumulator(1, origin_stride=10, dt=1.0, axis=(1.0, 0.0, 0.0))
+    for x in (0.0, 1e-11, 2.0):
+        acc.push(np.array([[x, 0.0, 0.0]]))
+    fit = acc.fit(0.0, 2.0)
+    assert np.isnan(fit.alpha)
+    assert not fit.alpha_fitted
+    assert fit.d_total == pytest.approx(1.0 / 3.0, abs=1e-12)
+    assert fit.d_axial == pytest.approx(1.0, abs=1e-12)
+
+    # The pure-Python fitter agrees, including a two-point line.
+    py_fit = ds.fit_diffusion([0.0, 1.0], [0.0, 1.0], t_start=0.0, t_end=1.0)
+    assert np.isnan(py_fit.alpha)
+    assert not py_fit.alpha_fitted
+    assert py_fit.d_total == pytest.approx(1.0 / 6.0, abs=1e-14)
+
+    ballistic = ds.fit_diffusion([0.0, 1.0, 2.0, 3.0], [0.0, 1.0, 4.0, 9.0], t_start=1.0, t_end=3.0)
+    assert ballistic.alpha_fitted
+    assert ballistic.alpha == pytest.approx(2.0, abs=1e-12)
+
+
 def test_dipole_orientation_and_order_parameter_oracles():
     # Fibonacci sphere of 600 nearly uniform directions -> <P1> ~ 0, <P2> ~ 0
     n_pts = 600

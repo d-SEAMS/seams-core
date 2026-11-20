@@ -114,6 +114,13 @@ class DiffusionFit:
     d_axial: float
     d_lateral: float
     alpha: float
+    """Log-log exponent; NaN when the window has fewer than two lags with
+    t > 0 and MSD > 1e-20, so the log-log fit was skipped."""
+
+    @property
+    def alpha_fitted(self) -> bool:
+        """False when the log-log fit was skipped and ``alpha`` is NaN."""
+        return not np.isnan(self.alpha)
 
     @property
     def d_total_cm2_s(self) -> float:
@@ -968,7 +975,7 @@ def fit_diffusion(
     s_ax = float(np.polyfit(tx, ax[mask], 1)[0])
     s_lat = float(np.polyfit(tx, lat[mask], 1)[0])
     pos = mask & (lt > 0.0) & (tot > 1e-20)
-    alpha = float(np.polyfit(np.log(lt[pos]), np.log(tot[pos]), 1)[0]) if np.count_nonzero(pos) >= 2 else 0.0
+    alpha = float(np.polyfit(np.log(lt[pos]), np.log(tot[pos]), 1)[0]) if np.count_nonzero(pos) >= 2 else float("nan")
     return DiffusionFit(
         d_total=s_tot / 6.0,
         d_axial=s_ax / 2.0,

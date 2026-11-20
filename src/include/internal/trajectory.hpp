@@ -22,6 +22,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <limits>
 #include <vector>
 
 /**
@@ -206,7 +207,10 @@ struct DiffusionFitResult {
   double dTotal = 0.0;
   double dAxial = 0.0;
   double dLateral = 0.0;
-  double alpha = 0.0;
+  /// NaN unless alphaFitted: the window needs two lags with t > 0 and
+  /// MSD_total > 1e-20 for the log-log fit.
+  double alpha = std::numeric_limits<double>::quiet_NaN();
+  bool alphaFitted = false;
   double r2Total = 0.0;
 };
 

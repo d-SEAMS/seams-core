@@ -24,7 +24,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -614,7 +616,9 @@ struct DiffusionFit {
   double d_total = 0;   /**< 3D diffusion coefficient (slope / 6). */
   double d_axial = 0;   /**< 1D axial diffusion coefficient (slope / 2). */
   double d_lateral = 0; /**< 2D lateral diffusion coefficient (slope / 4). */
-  double alpha = 0;     /**< Log-log anomalous diffusion exponent. */
+  /** Log-log anomalous diffusion exponent, NaN when the fit was skipped. */
+  double alpha = std::numeric_limits<double>::quiet_NaN();
+  bool alpha_fitted = false; /**< False when the window had < 2 usable log-log lags. */
 };
 
 /**
@@ -1097,6 +1101,7 @@ class Msd : public detail::Handle<seams_msd, seams_msd_destroy> {
     detail::check(
         seams_msd_fit(get(), t_start, t_end, &out.d_total, &out.d_axial, &out.d_lateral, &out.alpha),
         get());
+    out.alpha_fitted = !std::isnan(out.alpha);
     return out;
   }
 };

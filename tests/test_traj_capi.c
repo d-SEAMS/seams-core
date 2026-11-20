@@ -120,5 +120,56 @@ int main(void) {
   fails += check_close(alpha, 2.0, 1e-10, "ballistic_alpha");
   seams_msd_destroy(msd);
 
+  /* 2b. Skipped log-log fit: alpha is NaN, the Einstein slope stays exact. One
+   * origin; lag 1 moves 1e-11 (MSD 1e-22 < 1e-20), lag 2 moves 2. */
+  {
+    const double x_axis[3] = {1.0, 0.0, 0.0};
+    seams_msd *skip = NULL;
+    if (seams_msd_create(1, 0, 10, 1.0, x_axis, &skip) != SEAMS_OK) {
+      return 1;
+    }
+    const double xs[3] = {0.0, 1e-11, 2.0};
+    for (int f = 0; f < 3; ++f) {
+      const double p[3] = {xs[f], 0.0, 0.0};
+      if (seams_msd_push(skip, p, 1, NULL, 0) != SEAMS_OK) {
+        return 1;
+      }
+    }
+    double dtot = -1.0, dax = -1.0, dlat = -1.0, a = 0.0;
+    if (seams_msd_fit(skip, 0.0, 2.0, &dtot, &dax, &dlat, &a) != SEAMS_OK) {
+      fprintf(stderr, "FAIL skipped-alpha status: %s\n", seams_last_error_message());
+      return 1;
+    }
+    if (!isnan(a)) {
+      fprintf(stderr, "FAIL skipped_alpha_nan: got %.12g\n", a);
+      ++fails;
+    }
+    fails += check_close(dtot, 1.0 / 3.0, 1e-12, "skipped_alpha_d_total");
+    fails += check_close(dax, 1.0, 1e-12, "skipped_alpha_d_axial");
+    fails += check_close(dlat, 0.0, 1e-12, "skipped_alpha_d_lateral");
+    seams_msd_destroy(skip);
+
+    /* Two frames leave one positive lag: the line fits, alpha does not. */
+    seams_msd *two = NULL;
+    if (seams_msd_create(1, 0, 1, 1.0, x_axis, &two) != SEAMS_OK) {
+      return 1;
+    }
+    const double q0[3] = {0.0, 0.0, 0.0}, q1[3] = {1.0, 0.0, 0.0};
+    if (seams_msd_push(two, q0, 1, NULL, 0) != SEAMS_OK ||
+        seams_msd_push(two, q1, 1, NULL, 0) != SEAMS_OK) {
+      return 1;
+    }
+    a = 0.0;
+    if (seams_msd_fit(two, 0.0, 1.0, &dtot, NULL, NULL, &a) != SEAMS_OK) {
+      return 1;
+    }
+    if (!isnan(a)) {
+      fprintf(stderr, "FAIL two_point_alpha_nan: got %.12g\n", a);
+      ++fails;
+    }
+    fails += check_close(dtot, 1.0 / 6.0, 1e-12, "two_point_d_total");
+    seams_msd_destroy(two);
+  }
+
   return fails == 0 ? 0 : 1;
 }

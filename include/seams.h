@@ -3059,9 +3059,13 @@ SEAMS_API seams_status seams_msd_curve(const seams_msd *msd, double *lag_time,
  * @param d_total Receives 3D diffusion coefficient, or NULL.
  * @param d_axial Receives 1D axial diffusion coefficient, or NULL.
  * @param d_lateral Receives 2D lateral diffusion coefficient, or NULL.
- * @param alpha Receives log-log anomalous exponent, or NULL.
- * @return ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE; ::SEAMS_ERR_RANGE;
- *         ::SEAMS_ERR_ARG; ::SEAMS_ERR_NOMEM.
+ * @param alpha Receives the log-log anomalous exponent, or NULL. Receives NaN
+ *        when the window holds fewer than two lags with t > 0 and
+ *        MSD_total > 1e-20, so the log-log fit was skipped; test it with
+ *        isnan(). The diffusion coefficients are still the linear fit.
+ * @return ::SEAMS_OK when the linear fit succeeded, including a skipped
+ *         log-log fit (alpha NaN); ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE;
+ *         ::SEAMS_ERR_RANGE; ::SEAMS_ERR_ARG; ::SEAMS_ERR_NOMEM.
  * @par Ownership
  * Writes scalar outputs owned by the caller.
  * @par Thread safety

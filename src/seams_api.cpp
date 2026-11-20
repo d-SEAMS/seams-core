@@ -56,6 +56,7 @@
 #include <cstring>
 #include <exception>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <new>
@@ -4414,7 +4415,8 @@ seams_status seams_msd_fit(const seams_msd *msd, double t_start, double t_end,
       *d_lateral = res.dLateral;
     }
     if (alpha != nullptr) {
-      *alpha = res.alpha;
+      *alpha = res.alphaFitted ? res.alpha
+                               : std::numeric_limits<double>::quiet_NaN();
     }
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {

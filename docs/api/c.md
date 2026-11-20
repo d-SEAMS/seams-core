@@ -3955,9 +3955,9 @@ Parameters: `msd`, `t_start`, `t_end`, `d_total`, `d_axial`, `d_lateral`, `alpha
 - `d_total`: Receives 3D diffusion coefficient, or NULL.
 - `d_axial`: Receives 1D axial diffusion coefficient, or NULL.
 - `d_lateral`: Receives 2D lateral diffusion coefficient, or NULL.
-- `alpha`: Receives log-log anomalous exponent, or NULL.
+- `alpha`: Receives the log-log anomalous exponent, or NULL. Receives NaN when the window holds fewer than two lags with t > 0 and MSD_total > 1e-20, so the log-log fit was skipped; test it with isnan(). The diffusion coefficients are still the linear fit.
 
-Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+Returns: SEAMS_OK when the linear fit succeeded, including a skipped log-log fit (alpha NaN); SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
 
 Ownership: Writes scalar outputs owned by the caller.
 

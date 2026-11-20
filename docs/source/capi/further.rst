@@ -1266,9 +1266,9 @@ Linear Einstein diffusion fit on an MSD accumulator.
     Receives 2D lateral diffusion coefficient, or NULL.
 
 ``alpha``
-    Receives log-log anomalous exponent, or NULL.
+    Receives the log-log anomalous exponent, or NULL. Receives NaN when the window holds fewer than two lags with t > 0 and MSD_total > 1e-20, so the log-log fit was skipped; test it with isnan(). The diffusion coefficients are still the linear fit.
 
-Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE; ::SEAMS_ERR_RANGE; ::SEAMS_ERR_ARG; ::SEAMS_ERR_NOMEM.
+Returns: ::SEAMS_OK when the linear fit succeeded, including a skipped log-log fit (alpha NaN); ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE; ::SEAMS_ERR_RANGE; ::SEAMS_ERR_ARG; ::SEAMS_ERR_NOMEM.
 
 Fits MSD_total = 6 D_total t + c, MSD_axial = 2 D_axial t + c, and MSD_lateral = 4 D_lateral t + c over [t_start, t_end]. Pass t_start = 0 and t_end = 0 for the default [0.1 t_max, 0.5 t_max] window.
 
