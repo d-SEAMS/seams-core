@@ -1,0 +1,138 @@
+Licences of the code a seams-core build compiles from chemfiles
+
+seams-core itself is under the MIT licence; see LICENSE.
+
+With chemfiles on (-Dwith_chemfiles=auto, the default, or enabled) and no
+installed chemfiles that passes cmake/chemfiles_mmcif_probe.cpp, Meson and
+CMake fetch chemfiles 0.10.4, apply cmake/patches/, and build
+libseams-chemfiles. Meson installs it as libseams-chemfiles.so.0.10 beside
+libyodaLib. That library holds compiled code from chemfiles and from the
+libraries chemfiles bundles, each under its own licence, listed below. The
+paths are inside the fetched chemfiles source; each archive in its
+external/ directory unpacks to a directory of the same name. Only the
+files the build compiles or includes are listed; the other files of those
+archives stay in the build tree and are not distributed. AUTHORS names the
+authors of each part.
+
+The conditions on redistribution:
+
+- All parts: keep the copyright notices and licence texts. A binary
+  distribution reproduces them in its documentation. The BSD, NCSA and
+  similar licences also forbid using a holder's name to endorse a derived
+  product.
+- gemmi (MPL-2.0): its files stay under MPL-2.0, and whoever ships them,
+  also inside a binary, makes their source available under MPL-2.0.
+- molfiles/src/abinitplugin.c: its author allows the code "for as long as
+  it is part of an open source project" and does "not allow" it "to be
+  part of any closed source project". The build compiles it.
+- molfiles/src/ReadPARM.h and molfiles/src/ReadPARM7.h: their notice is
+  kept unmodified and any change to the rest of the file is noted in
+  comments. The build compiles them (parm and parm7 plugins).
+
+seams-core is open source (MIT) and is not sold, which meets the ABINIT
+condition. It binds anyone who redistributes a build that contains
+libseams-chemfiles too: that build may not become part of closed-source
+software.
+
+
+chemfiles 0.10.4, with cmake/patches/chemfiles-0.10.4-*.patch
+  License: BSD-3-Clause
+  Text: LICENSE
+  include/chemfiles/external/optional.hpp: BSL-1.0, text at the end of
+    this file
+  include/chemfiles/external/span.hpp: MIT, text in the file header
+  include/chemfiles/external/string_view.hpp: BSL-1.0, text at the end
+    of this file
+  The patches in cmake/patches are by the d-SEAMS developers, under
+  seams-core's MIT licence.
+
+Libraries in external/ that the build compiles:
+
+bzip2
+  License: bzip2-1.0.6 (BSD-style)
+  Text: bzip2/LICENSE
+fmt
+  License: MIT
+  Text: fmt/LICENSE.rst
+gemmi (headers; chemfiles' CIF and mmCIF readers include them)
+  License: MPL-2.0, https://mozilla.org/MPL/2.0/
+  gemmi/include/gemmi/third_party/tao (PEGTL): MIT, text in
+    gemmi/include/gemmi/third_party/tao/LICENSE
+lzma (liblzma)
+  License: public domain
+  Text: lzma/COPYING
+mmtf-cpp (headers)
+  License: MIT
+  Text: mmtf-cpp/LICENSE
+  mmtf-cpp/msgpack-c: BSL-1.0, with its copies of Boost.Preprocessor and
+    Boost.Predef, also BSL-1.0 (text at the end of this file)
+molfiles (VMD molfile plugins)
+  License: University of Illinois Open Source License (NCSA), for every
+    compiled file not listed below
+  Text: molfiles/LICENSE
+  Most files carry "(C) Copyright ... The Board of Trustees of the
+  University of Illinois". Compiled files with no notice of their own
+  (periodic_table.h, unit_conversion.h, vaspplugin.h, the five VASP
+  plugins, vtfplugin.c, xsfplugin.cxx) are covered by molfiles/LICENSE
+  as part of the plugin distribution.
+  Compiled files under other terms, each with its text in its own header:
+    molfiles/src/abinitplugin.c: Rob Lahaye's terms. The code may be
+      included only while it is part of an open-source project, never in
+      a closed-source one. There is no other licence text.
+    molfiles/src/dtrplugin.cxx, molfiles/src/dtrplugin.hxx,
+    molfiles/src/maeffplugin.cxx: BSD-3-Clause, Copyright 2009
+      D. E. Shaw Research, LLC.
+    molfiles/src/ReadPARM.h, molfiles/src/ReadPARM7.h: Copyright 1992
+      Regents of the University of California (Bill Ross, UCSF). They may
+      be distributed if the notice is kept unmodified and changes to the
+      rest of the file are noted in comments.
+  Compiled plugins (external/CMakeLists.txt after
+  cmake/patches/chemfiles-0.10.4-molfiles.patch): abinitplugin,
+  bgfplugin, binposplugin, carplugin, corplugin, cpmdplugin, cubeplugin,
+  dlpolyplugin, dtrplugin, gamessplugin, gromacsplugin, jsplugin,
+  maeffplugin, mdfplugin, moldenplugin, namdbinplugin, parm7plugin,
+  parmplugin, pqrplugin, psfplugin, rst7plugin, tinkerplugin,
+  vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
+  vaspxdatcarplugin, vaspxmlplugin, vtfplugin, xbgfplugin and xsfplugin,
+  with hash.c and the headers they include.
+pugixml
+  License: MIT
+  Text: pugixml/LICENSE.md
+tng (TNG trajectory library)
+  License: BSD-3-Clause, except the files below
+  Text: tng/COPYING
+  tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
+    Aladdin Enterprises, text in each file header
+toml11 (headers)
+  License: MIT
+  Text: toml11/LICENSE
+zlib
+  License: Zlib
+  Text: zlib/zlib.h
+
+
+The Boost Software License 1.0 text, for the BSL-1.0 parts above:
+
+Boost Software License - Version 1.0 - August 17th, 2003
+
+Permission is hereby granted, free of charge, to any person or organization
+obtaining a copy of the software and accompanying documentation covered by
+this license (the "Software") to use, reproduce, display, distribute,
+execute, and transmit the Software, and to prepare derivative works of the
+Software, and to permit third-parties to whom the Software is furnished to
+do so, all subject to the following:
+
+The copyright notices in the Software and this entire statement, including
+the above license grant, this restriction and the following disclaimer,
+must be included in all copies of the Software, in whole or in part, and
+all derivative works of the Software, unless such copies or derivative
+works are solely in the form of machine-executable object code generated by
+a source language processor.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.

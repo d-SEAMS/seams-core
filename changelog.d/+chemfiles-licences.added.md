@@ -1,0 +1,1 @@
+`LICENSE.note` and `AUTHORS` give the licence and the authors of every part of the chemfiles build that d-SEAMS compiles and installs as `libseams-chemfiles`, down to the molfile plugin files under their own terms. The Data Formats page lists each molfile reader with its authors and copyright holder.
