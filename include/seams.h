@@ -1959,6 +1959,13 @@ typedef struct seams_directed_hbond {
  * Exclusive use of sys.
  * @par Example
  * @code
+ * const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+ * const double hydrogen[] = {1, 0, 0};
+ * const int heavy_types[] = {8, 8};
+ * const int heavy_mols[] = {1, 2};
+ * const int hydrogen_types[] = {2};
+ * const int hydrogen_mols[] = {1};
+ * const double box9[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
  * seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols,
  *                                 hydrogen, 1, hydrogen_types, NULL, hydrogen_mols,
  *                                 box9, 9);

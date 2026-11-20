@@ -5512,6 +5512,13 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+const double hydrogen[] = {1, 0, 0};
+const int heavy_types[] = {8, 8};
+const int heavy_mols[] = {1, 2};
+const int hydrogen_types[] = {2};
+const int hydrogen_mols[] = {1};
+const double box9[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
 seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols,
                                 hydrogen, 1, hydrogen_types, NULL, hydrogen_mols,
                                 box9, 9);
@@ -5574,7 +5581,6 @@ The tour call is in `docs/examples/c_api_tour.c`.
 Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
-
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:
