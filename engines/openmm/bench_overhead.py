@@ -10,6 +10,7 @@ time.
 import os
 import statistics
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -53,11 +54,13 @@ def time_insitu(simulation, state, lib, interval, steps):
     simulation.reporters.clear()
     restore(simulation, state)
     engine = InSitu(library=str(lib), cutoff=3.5)
-    simulation.reporters.append(DseamsReporter(engine, "unused", interval=interval))
-    start = time.perf_counter()
-    simulation.step(steps)
-    elapsed = time.perf_counter() - start
-    simulation.reporters.clear()
+    with tempfile.TemporaryDirectory(prefix="seams-bench-overhead-") as scratch:
+        dump = os.path.join(scratch, "insitu.lammpstrj")
+        simulation.reporters.append(DseamsReporter(engine, dump, interval=interval))
+        start = time.perf_counter()
+        simulation.step(steps)
+        elapsed = time.perf_counter() - start
+        simulation.reporters.clear()
     return elapsed, len(engine.frames)
 
 

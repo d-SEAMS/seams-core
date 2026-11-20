@@ -1,7 +1,9 @@
 # Copyright (c) d-SEAMS developers
 """The TIP4P overhead script's hinge, and one reporter step on a small box."""
 
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +32,17 @@ def main() -> int:
         return 1
     state = save_state(simulation)
     plain = time_plain(simulation, state, 1)
-    elapsed, reports = time_insitu(simulation, state, lib, 1, 2)
+    here = os.getcwd()
+    with tempfile.TemporaryDirectory(prefix="seams-tip4p-cwd-") as scratch:
+        os.chdir(scratch)
+        try:
+            elapsed, reports = time_insitu(simulation, state, lib, 1, 2)
+        finally:
+            os.chdir(here)
+        left = sorted(os.listdir(scratch))
+    if left:
+        print(f"time_insitu wrote {left} into its working directory", file=sys.stderr)
+        return 1
     if plain < 0.0 or elapsed < 0.0 or reports < 1:
         print(f"plain {plain} insitu {elapsed} reports {reports}", file=sys.stderr)
         return 1
