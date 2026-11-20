@@ -16,9 +16,10 @@
 //
 // The relevant vectors are found once per cell. Every Voronoi-relevant vector
 // is, up to sign, the shortest member of one of the seven nonzero cosets of
-// L / 2L, and Fincke-Pohst enumeration finds each coset's shortest member.
-// A point that none of them shortens lies in the Voronoi cell of the origin,
-// so the slicer's stopping point is the minimum image.
+// L / 2L. A superbasis that is obtuse beyond rounding gives those as its
+// subset sums; otherwise Fincke-Pohst enumeration finds each coset's
+// shortest member. A point that none of them shortens lies in the Voronoi
+// cell of the origin, so the slicer's stopping point is the minimum image.
 // The reduced vectors are re-evaluated from their integer coordinates in the
 // cell before any of this, so reduction rounding does not leave the lattice.
 //
@@ -202,11 +203,25 @@ inline double roundingSlack(Vec3 a, Vec3 b) {
   return 16.0 * std::numeric_limits<double>::epsilon() * std::sqrt(n2(a) * n2(b));
 }
 
+// A superbasis whose dot products are all negative beyond rounding is
+// strictly obtuse, and its seven subset sums are then the Voronoi-relevant
+// vectors (Conway and Sloane). Otherwise the coset minima are enumerated.
 inline bool relevantOf(const Vec3 v[4], const int idx[3], Obtuse &o) {
-  const Vec3 basis[3] = {v[idx[0]], v[idx[1]], v[idx[2]]};
-  Vec3 u[7];
-  if (!cosetMinima(basis, u)) {
-    return false;
+  bool strict = true;
+  for (int i = 0; i < 3 && strict; i++) {
+    for (int j = i + 1; j < 4; j++) {
+      if (!(dot(v[i], v[j]) < -roundingSlack(v[i], v[j]))) {
+        strict = false;
+        break;
+      }
+    }
+  }
+  Vec3 u[7] = {v[0], v[1], v[2], v[3], add(v[0], v[1]), add(v[0], v[2]), add(v[0], v[3])};
+  if (!strict) {
+    const Vec3 basis[3] = {v[idx[0]], v[idx[1]], v[idx[2]]};
+    if (!cosetMinima(basis, u)) {
+      return false;
+    }
   }
   for (int k = 0; k < 8; k++) {
     const Vec3 r = (k < 7) ? u[k] : Vec3{};
@@ -354,7 +369,10 @@ inline Obtuse finish(const Vec3 v[4]) {
   for (int i = 0; i < 4; i++) {
     o.v[i] = v[i];
   }
+  // Every triple of a superbasis spans the same cell volume, so Babai takes
+  // the most orthogonal one, |det| / (|b0| |b1| |b2|).
   double bestAbs = 0.0;
+  double bestScore = 0.0;
   bool have = false;
   for (int drop = 0; drop < 4; drop++) {
     int idx[3];
@@ -367,7 +385,10 @@ inline Obtuse finish(const Vec3 v[4]) {
     const Vec3 cols[3] = {v[idx[0]], v[idx[1]], v[idx[2]]};
     double inv[3][3];
     const double absDet = invertColumns(cols, inv);
-    if (absDet > bestAbs) {
+    const double score =
+        absDet / (std::sqrt(n2(cols[0])) * std::sqrt(n2(cols[1])) * std::sqrt(n2(cols[2])));
+    if (absDet > 0.0 && score > bestScore) {
+      bestScore = score;
       bestAbs = absDet;
       have = true;
       for (int k = 0; k < 3; k++) {
