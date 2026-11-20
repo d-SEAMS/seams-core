@@ -1,0 +1,1 @@
+`chill::cutoffSolid` calls `seams::ylm::ylmAdd8` only when `SEAMS_YLM_AVX512` is set. That function is built only on x86-64. The call used to stay in the binary at -O0 on every other machine, and a debug macOS arm64 link failed with the symbol undefined. `ylm_add8_o0` compiles that file at -O0 without the flag and rejects an undefined `ylmAdd8`.
