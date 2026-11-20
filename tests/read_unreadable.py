@@ -3,11 +3,12 @@
 usage: read_unreadable.py SEAMS EXT
 
 EXT is pdb, gro, dcd, or con. For that one format the script runs
-`seams read` on three paths:
+`seams read` and `seams --frame 1 --last 2 read` on four paths:
 
   * a path that does not exist
   * an empty file
-  * a file whose mode is 000
+  * a file whose mode is 000, which this process cannot read
+  * a directory
 
 Each run must exit 2, write nothing to stdout, and print this stderr line:
 
@@ -27,15 +28,25 @@ import tempfile
 EXTENSIONS = ("pdb", "gro", "dcd", "con")
 
 
-def check(seams, path):
-    proc = subprocess.run([seams, "read", path], capture_output=True, text=True)
+def check(seams, args, path):
+    command = [seams, *args, path]
+    try:
+        proc = subprocess.run(command, capture_output=True, text=True, timeout=30)
+    except subprocess.TimeoutExpired as exc:
+        return (
+            "command " + " ".join(command) + "\n"
+            "timed out\n"
+            "stdout " + repr(exc.stdout) + "\n"
+            "stderr " + repr(exc.stderr)
+        )
     expected = "cannot read " + path
     lines = proc.stderr.splitlines()
+    shown = " ".join(args + [os.path.basename(path)])
     if proc.returncode == 2 and proc.stdout == "" and expected in lines:
-        print("ok " + os.path.basename(path) + " exit " + str(proc.returncode))
+        print("ok " + shown + " exit " + str(proc.returncode))
         return None
     return (
-        "path " + path + "\n"
+        "command " + " ".join(command) + "\n"
         "exit " + str(proc.returncode) + "\n"
         "stdout " + repr(proc.stdout) + "\n"
         "stderr " + repr(proc.stderr) + "\n"
@@ -67,17 +78,38 @@ def main():
         with open(blocked, "wb") as handle:
             handle.write(b"blocked")
         os.chmod(blocked, 0)
+        directory = os.path.join(tmp, "directory." + ext)
+        os.mkdir(directory)
         try:
-            for path in (missing, empty, blocked):
-                detail = check(seams, path)
-                if detail is not None:
-                    print(detail, file=sys.stderr)
-                    failures.append(os.path.basename(path))
+            with open(blocked, "rb") as handle:
+                handle.read(1)
+        except PermissionError:
+            denied = True
+        else:
+            denied = False
+        if not denied:
+            print("mode 000 file is still readable: " + blocked, file=sys.stderr)
+            failures.append(os.path.basename(blocked))
+        try:
+            commands = (
+                ["read"],
+                ["--frame", "1", "--last", "2", "read"],
+            )
+            for path in (missing, empty, blocked, directory):
+                for args in commands:
+                    detail = check(seams, args, path)
+                    if detail is not None:
+                        print(detail, file=sys.stderr)
+                        failures.append(" ".join(args + [os.path.basename(path)]))
         finally:
             os.chmod(blocked, stat.S_IRUSR | stat.S_IWUSR)
     finally:
         for name in os.listdir(tmp):
-            os.remove(os.path.join(tmp, name))
+            path = os.path.join(tmp, name)
+            if os.path.isdir(path) and not os.path.islink(path):
+                os.rmdir(path)
+            else:
+                os.remove(path)
         os.rmdir(tmp)
     if failures:
         print("failed: " + ", ".join(failures), file=sys.stderr)

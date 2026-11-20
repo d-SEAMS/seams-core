@@ -32,6 +32,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -42,6 +43,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -97,8 +99,14 @@ bool chemfilesSuffix(std::string_view ext) {
 // readCon and readChemfiles print an open error and return an empty cloud.
 // A missing or unreadable PDB, GRO, DCD, or CON path has to fail the
 // command, or `seams read` exits 0 with nop 0. file_exists is not enough:
-// a mode-000 file exists and still cannot be opened.
+// a mode-000 file exists and still cannot be opened. ifstream is not
+// enough either: open(2) on a directory returns a descriptor, and the
+// stream then reports success.
 bool opensForRead(const std::string &path) {
+  std::error_code ec;
+  if (!std::filesystem::is_regular_file(path, ec) || ec) {
+    return false;
+  }
   std::ifstream in(path, std::ios::binary);
   return static_cast<bool>(in);
 }

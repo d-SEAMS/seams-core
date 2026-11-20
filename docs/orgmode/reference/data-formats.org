@@ -61,9 +61,9 @@ seeded hexagonal 0 cubic 0 both 0 water 0~. ~--graph~ replaces
 seeded signature SPEC cages 0 atoms 0~.
 ~seams read~ on a missing dump prints ~nop 0~ and returns 0.
 A missing, empty, or unreadable ~.pdb~, ~.gro~, ~.dcd~, or ~.con~
-path makes the CLI throw ~cannot read PATH~ and exit 2. A type
-filter that keeps no atoms does the same. A ~.pdb~, ~.gro~, or
-~.dcd~ path on a build without chemfiles throws
+path, including a directory, makes the CLI throw ~cannot read PATH~
+and exit 2. A type filter that keeps no atoms does the same. A
+~.pdb~, ~.gro~, or ~.dcd~ path on a build without chemfiles throws
 ~chemfiles is not in this build~.
 
 ~sinp::nLammpsFrames~ is ~0~ when the file cannot be read.
