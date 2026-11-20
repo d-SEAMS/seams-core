@@ -24,8 +24,6 @@ vesin_lib = static_library('vesin',
   vesin_sources,
   include_directories: vesin_inc,
   cpp_args: vesin_cpp_args,
-  # Upstream sources; a parent -Dwerror=true must not fail on their warnings.
-  override_options: ['werror=false'],
   install: false)
 
 vesin_dep = declare_dependency(
