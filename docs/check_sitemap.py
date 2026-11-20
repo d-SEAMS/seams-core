@@ -266,6 +266,56 @@ def conf_problems():
     return problems
 
 
+_JOB_HEADER = re.compile(r"^  ([A-Za-z0-9_-]+):\s*$")
+
+
+def job_body(text, name):
+    """Lines of one job, from the line after its name to the next job."""
+    lines = text.splitlines()
+    start = None
+    for index, line in enumerate(lines):
+        match = _JOB_HEADER.match(line)
+        if match and match.group(1) == name:
+            start = index + 1
+            break
+    if start is None:
+        return None
+    body = []
+    for line in lines[start:]:
+        if _JOB_HEADER.match(line):
+            break
+        body.append(line)
+    return body
+
+
+def job_contents_write(body):
+    """True when this job's own permissions map sets contents to write."""
+    in_permissions = False
+    for line in body:
+        if re.match(r"^    permissions:\s*$", line):
+            in_permissions = True
+            continue
+        if not in_permissions:
+            continue
+        if re.match(r"^      contents:\s*write\s*$", line):
+            return True
+        if line.strip() and not line.startswith("      "):
+            in_permissions = False
+    return False
+
+
+def deploy_permission_problems(text):
+    """contents: write counts only inside the build-deploy job.
+
+    The scan stops at the next job header, so a later job's permission
+    does not satisfy this check.
+    """
+    body = job_body(text, "build-deploy")
+    if body is None or not job_contents_write(body):
+        return ["build-deploy is missing permissions: contents: write"]
+    return []
+
+
 def workflow_problems():
     text = WORKFLOW.read_text(encoding="utf-8")
     problems = []
@@ -280,20 +330,17 @@ def workflow_problems():
     for secret in ("NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID", "netlify-cli"):
         if secret in text:
             problems.append("ci_docs.yml still references " + secret)
-    block = (
-        "  build-deploy:\n"
-        "    runs-on: ubuntu-latest\n"
-        "    permissions:\n"
-        "      contents: write\n"
-    )
-    if block not in text:
-        problems.append("build-deploy is missing permissions: contents: write")
+    problems.extend(deploy_permission_problems(text))
     if "python3 docs/check_mermaid.py" not in text:
         problems.append("Mermaid check is missing")
     if "lycheeverse/lychee-action@" not in text:
         problems.append("Lychee check is missing")
     if "python3 docs/check_sitemap.py\n" not in text:
         problems.append("sitemap file check is missing from ci_docs.yml")
+    if text.count("--max-retries 5") != 2 or text.count("--retry-wait-time 10") != 2:
+        problems.append("link checks do not retry transient failures five times")
+    if "keep_files: false" not in text or "force_orphan: true" not in text:
+        problems.append("Pages deploy does not replace the old publish tree")
     return problems
 
 
@@ -335,6 +382,8 @@ def mapper_cases():
         (build / "CNAME").unlink()
 
         bad_cases = [
+            (["https://docs.dseams.info/index.html"], "canonical"),
+            (["https://docs.dseams.info/contributing/index.html"], "canonical"),
             (["https://docs.dseams.info/en/index.html"], "en/index.html"),
             (["https://example.com/index.html"], "outside"),
             (["https://docs.dseams.info/missing.html"], "missing.html"),
@@ -371,11 +420,50 @@ def mapper_cases():
     return problems
 
 
+def permission_cases():
+    """A later job's contents: write must not pass the build-deploy check."""
+    problems = []
+    other_only = "\n".join([
+        "jobs:",
+        "  build-deploy:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - name: Note",
+        "        run: echo contents: write",
+        "  publish:",
+        "    runs-on: ubuntu-latest",
+        "    permissions:",
+        "      contents: write",
+        "",
+    ])
+    if not deploy_permission_problems(other_only):
+        problems.append("contents: write on another job was accepted")
+    owned = "\n".join([
+        "jobs:",
+        "  build-deploy:",
+        "    runs-on: ubuntu-latest",
+        "    permissions:",
+        "      contents: write",
+        "    steps:",
+        "      - run: echo ok",
+        "  publish:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - run: echo later",
+        "",
+    ])
+    got = deploy_permission_problems(owned)
+    if got:
+        problems.append("build-deploy contents: write was rejected: " + "; ".join(got))
+    return problems
+
+
 def self_test():
     problems = []
     problems.extend(conf_problems())
     problems.extend(workflow_problems())
     problems.extend(mapper_cases())
+    problems.extend(permission_cases())
     return problems
 
 
