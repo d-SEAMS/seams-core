@@ -1,0 +1,1 @@
+`meson test` now fails `source_tree_untracked_check` when the run leaves an untracked, non-ignored file in the source tree that was not there when `source_tree_untracked_snapshot` ran before the other tests.

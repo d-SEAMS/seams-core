@@ -2315,3 +2315,20 @@ if get_option('with_tests')
     endforeach
   endif
 endif
+
+# Tests must not write into the source tree. Meson runs a non-parallel test
+# alone once every earlier test has finished, in descending priority, so the
+# snapshot runs before every other test and the check after them all.
+_git = find_program('git', required: false)
+_untracked_py = find_program('python3', required: false)
+if _git.found() and _untracked_py.found()
+  _untracked_state = meson.project_build_root() / 'source-tree-untracked.txt'
+  foreach _mode : [['snapshot', 100000], ['check', -100000]]
+    test('source_tree_untracked_' + _mode[0], _untracked_py,
+      args: [meson.project_source_root() / 'tests' / 'source_tree_untracked.py',
+        _mode[0], _git.full_path(), meson.project_source_root(), _untracked_state],
+      priority: _mode[1],
+      is_parallel: false,
+      timeout: 60)
+  endforeach
+endif
