@@ -1653,12 +1653,17 @@ if get_option('with_cli') and get_option('with_tests')
   # the frame and the palette, which a 2048 px, 64-sample draw already shows.
   molecule_env.set('MOLECULES_SCALE', '1')
   molecule_env.set('MOLECULES_SAMPLES', '64')
+  # ice-ic reads the full mW cubic trajectory. Offline tests stay on the
+  # committed 7-frame fixture instead of fetching from Hugging Face.
+  molecule_env.set(
+    'SEAMS_CUBIC_TRAJ',
+    meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+  )
   test(
     'docs_render_molecules',
     python3,
     args: [
       meson.project_source_root() / 'docs' / 'test_render_molecules.py',
-      '--slug', 'ice-ih',
       '--out', meson.project_build_root() / 'molecule-stills',
       '--libdir', meson.project_build_root() / 'src',
     ],
