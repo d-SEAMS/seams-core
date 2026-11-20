@@ -102,7 +102,7 @@ SKIP_PARTS = {
 SKIP_FILES = {
     "explanation/cutoff-rings-tables.rst",
     "explanation/performance-overview-tables.rst",
-    "explanation/pool-audit-tables.rst",
+    "explanation/thread-scaling-tables.rst",
     "howto/pool-audit-v5-tables.rst",
     "reference/release-2.14-notes.rst",
     "videos/players.rst",

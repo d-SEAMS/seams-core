@@ -452,7 +452,7 @@ def _include_orphan_pages():
     included = _toctree_docnames()
     skip_prefixes = (
         "explanation/cutoff-rings-tables.rst",
-        "explanation/pool-audit-tables.rst",
+        "explanation/thread-scaling-tables.rst",
         "explanation/performance-tables.rst",
         "explanation/performance-h2h-tables.rst",
         "explanation/sitting-large-tables.rst",
@@ -675,7 +675,7 @@ exclude_patterns = [
     "videos/players.rst",
     "videos/embeds/**",
     "explanation/cutoff-rings-tables.rst",
-    "explanation/pool-audit-tables.rst",
+    "explanation/thread-scaling-tables.rst",
     "explanation/performance-tables.rst",
     "explanation/performance-h2h-tables.rst",
     "explanation/sitting-large-tables.rst",
