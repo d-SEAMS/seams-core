@@ -350,6 +350,19 @@ TEST_CASE("forEachLammpsFrame deals frames to parts in serpentine order",
   }
 }
 
+TEST_CASE("forEachLammpsFrame reaches EOF when the range ends at trajectory end",
+          "[seams_input]") {
+  std::vector<int> got;
+  sinp::forEachLammpsFrame(
+      "traj/bcc-real-30.fixture.lammpstrj", 28, 0, 1,
+      [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+        REQUIRE(cloud.currentFrame == frame);
+        got.push_back(frame);
+      },
+      1);
+  REQUIRE(got == std::vector<int>{28, 29, 30});
+}
+
 TEST_CASE("empty NUMBER OF ATOMS frames are valid snapshots",
           "[seams_input]") {
   const auto dump = writeEmptyMiddleDump();
