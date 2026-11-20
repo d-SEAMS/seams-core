@@ -831,6 +831,42 @@ test('chill_mixed',
   env: _test_env,
   timeout: 120)
 
+test('trajectory',
+  executable('test_trajectory', 'test_trajectory.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
+
+test('traj_capi',
+  executable('test_traj_capi', 'test_traj_capi.c',
+    link_with: seams_api_lib,
+    include_directories: include_directories('../include'),
+    c_args: ['-I' + meson.project_build_root() / 'src'],
+    link_args: ['-lm'],
+    build_rpath: _test_rpath),
+  env: _test_env,
+  timeout: 60)
+
+_traj_py_env = environment()
+_traj_py_env.prepend('PYTHONPATH', meson.project_source_root() / 'adapters' / 'python')
+_traj_py_env.set('SEAMS_LIB', seams_api_lib.full_path())
+_traj_py_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+if chemfiles_libdir != ''
+  _traj_py_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+endif
+test('trajectory_python', find_program('python3'),
+  args: ['-m', 'pytest', '-v', files('test_trajectory_dynamics.py')],
+  workdir: meson.project_build_root(),
+  env: _traj_py_env,
+  depends: [seams_api_lib],
+  timeout: 180)
+
 # shared_module is a Mach-O bundle on Darwin, and DYLD_INSERT_LIBRARIES
 # loads only a dylib. LD_PRELOAD takes the module as built.
 if host_machine.system() == 'darwin'

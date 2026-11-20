@@ -240,6 +240,65 @@ int main(int argc, char **argv) {
     if (tally != cycles.per_atom) {
       return 1;
     }
+
+    // Trajectory unwrapping, dipoles, order parameters, and TCF RAII wrappers.
+    {
+      const std::vector<double> w_xyz = {0.0, 0.0, 0.0, 0.75, 0.0, 0.58, -0.75, 0.0, 0.58};
+      const std::vector<int> w_types = {1, 2, 2};
+      const std::vector<int> w_mols = {7, 7, 7};
+      const std::array<double, 3> w_origin = {0.0, 0.0, 0.0};
+      const std::array<double, 3> w_lengths = {10.0, 10.0, 10.0};
+      const std::array<double, 3> z_axis = {0.0, 0.0, 1.0};
+      seams::System wsys;
+      wsys.set_ortho(w_xyz, w_origin, w_lengths, w_types);
+      wsys.set_mols(w_mols);
+      if (wsys.mols() != w_mols) {
+        return 1;
+      }
+      const auto mc = wsys.molecule_centres();
+      const auto wv = wsys.water_vectors(1, 2);
+      const std::vector<double> q = {-0.8476, 0.4238, 0.4238};
+      const auto dip = wsys.molecule_dipoles({}, q);
+      const auto ord = seams::orientation_order(wv.bisector, z_axis);
+      if (mc.mol_ids.size() != 1 || mc.mol_ids[0] != 7 || wv.mol_ids.size() != 1 ||
+          dip.dipoles.size() != 3 || std::abs(ord.mean_p1 - 1.0) > 1e-12 ||
+          std::abs(ord.mean_p2 - 1.0) > 1e-12) {
+        return 1;
+      }
+
+      const std::array<double, 9> box9 = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0};
+      seams::Msd msd(1, 4, 1, 1.0, z_axis);
+      for (int f = 0; f < 5; ++f) {
+        std::vector<double> p = {std::fmod(1.0 + 2.0 * f, 10.0), 1.0,
+                                 std::fmod(1.0 + 3.0 * f, 10.0)};
+        msd.push(p, box9);
+      }
+      const auto mc_fit = msd.fit(1.0, 4.0);
+      if (std::abs(mc_fit.alpha - 2.0) > 1e-10) {
+        return 1;
+      }
+
+      seams::HbondTcf hb(4, 1, 1.0, false);
+      const std::array<int, 1> d0 = {0};
+      const std::array<int, 1> a1 = {1};
+      hb.push(d0, a1);
+      hb.push({}, {});
+      hb.push(d0, a1);
+      const auto hbc = hb.curve();
+      if (hbc.lag_time.size() != 3 || std::abs(hbc.c_intermittent[2] - 1.0) > 1e-12 ||
+          std::abs(hbc.s_continuous[2] - 0.0) > 1e-12) {
+        return 1;
+      }
+
+      seams::Reorientation reo(1, 3, 1, 1.0);
+      reo.push(std::vector<double>{0.0, 0.0, 1.0});
+      reo.push(std::vector<double>{1.0, 0.0, 0.0});
+      const auto rc = reo.curve();
+      if (rc.lag_time.size() != 2 || std::abs(rc.c1[1]) > 1e-12 ||
+          std::abs(rc.c2[1] + 0.5) > 1e-12) {
+        return 1;
+      }
+    }
   } catch (const std::exception &ex) {
     std::cerr << ex.what() << "\n";
     return 1;

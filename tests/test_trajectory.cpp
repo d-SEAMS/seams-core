@@ -1,0 +1,299 @@
+//-----------------------------------------------------------------------------------
+// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
+//
+// Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
+//-----------------------------------------------------------------------------------
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+
+#include "seams.hpp"
+#include <trajectory.hpp>
+
+#include <array>
+#include <cmath>
+#include <numbers>
+#include <random>
+#include <vector>
+
+namespace {
+
+std::array<double, 3> wrapTriclinic(const std::array<double, 3> &r,
+                                    const double box9[9]) {
+  const double ox = box9[0], oy = box9[1], oz = box9[2];
+  const double lx = box9[3], ly = box9[4], lz = box9[5];
+  const double xy = box9[6], xz = box9[7], yz = box9[8];
+  double sz = (r[2] - oz) / lz;
+  double sy = (r[1] - oy - yz * sz) / ly;
+  double sx = (r[0] - ox - xy * sy - xz * sz) / lx;
+  sx -= std::floor(sx);
+  sy -= std::floor(sy);
+  sz -= std::floor(sz);
+  return {ox + lx * sx + xy * sy + xz * sz, oy + ly * sy + yz * sz,
+          oz + lz * sz};
+}
+
+} // namespace
+
+TEST_CASE("Triclinic multi-crossing unwrapping and straddling molecule centres",
+          "[trajectory][unwrap]") {
+  const double box9[9] = {-2.0, 1.5, -0.5, 11.0, 12.0, 13.0, 3.2, -1.8, 2.4};
+  constexpr std::size_t nFrames = 35;
+  constexpr std::size_t nMols = 3;
+  constexpr std::size_t nAtoms = 3 * nMols;
+
+  const std::vector<int> mols = {10, 10, 10, 20, 20, 20, 30, 30, 30};
+  const std::vector<double> masses = {15.9994, 1.00794, 1.00794,
+                                      15.9994, 1.00794, 1.00794,
+                                      15.9994, 1.00794, 1.00794};
+  const double mTot = 15.9994 + 2.0 * 1.00794;
+
+  // Rigid water geometry relative to oxygen.
+  const std::array<std::array<double, 3>, 3> rel = {{
+      {0.0, 0.0, 0.0},
+      {0.75695, 0.0, 0.58588},
+      {-0.75695, 0.0, 0.58588},
+  }};
+  const std::array<double, 3> comShift = {
+      (1.00794 * (rel[1][0] + rel[2][0])) / mTot,
+      (1.00794 * (rel[1][1] + rel[2][1])) / mTot,
+      (1.00794 * (rel[1][2] + rel[2][2])) / mTot,
+  };
+
+  std::vector<double> trueCom(nFrames * 3 * nMols, 0.0);
+  std::vector<double> wrappedAtoms(nFrames * 3 * nAtoms, 0.0);
+
+  const std::array<std::array<double, 3>, nMols> r0 = {{
+      {-1.8, 1.7, -0.3}, // right near box corner so H atoms straddle PBC
+      {5.0, 8.0, 11.9},
+      {2.0, 3.0, 4.0},
+  }};
+  const std::array<std::array<double, 3>, nMols> vel = {{
+      {1.7, -1.5, 1.9},
+      {-2.1, 1.8, -1.6},
+      {0.9, 2.2, 1.4},
+  }};
+
+  for (std::size_t f = 0; f < nFrames; ++f) {
+    const double t = static_cast<double>(f);
+    for (std::size_t m = 0; m < nMols; ++m) {
+      const std::array<double, 3> oPos = {
+          r0[m][0] + vel[m][0] * t,
+          r0[m][1] + vel[m][1] * t,
+          r0[m][2] + vel[m][2] * t,
+      };
+      // Frame 0 wrapped anchor determines global lattice image offset.
+      const auto oWrap0 = wrapTriclinic(r0[m], box9);
+      const std::array<double, 3> latticeShift = {
+          oWrap0[0] - r0[m][0],
+          oWrap0[1] - r0[m][1],
+          oWrap0[2] - r0[m][2],
+      };
+      trueCom[(f * nMols + m) * 3 + 0] = oPos[0] + comShift[0] + latticeShift[0];
+      trueCom[(f * nMols + m) * 3 + 1] = oPos[1] + comShift[1] + latticeShift[1];
+      trueCom[(f * nMols + m) * 3 + 2] = oPos[2] + comShift[2] + latticeShift[2];
+
+      for (std::size_t a = 0; a < 3; ++a) {
+        const std::array<double, 3> rawAtom = {
+            oPos[0] + rel[a][0],
+            oPos[1] + rel[a][1],
+            oPos[2] + rel[a][2],
+        };
+        const auto wAtom = wrapTriclinic(rawAtom, box9);
+        const std::size_t idx = (f * nAtoms + 3 * m + a) * 3;
+        wrappedAtoms[idx + 0] = wAtom[0];
+        wrappedAtoms[idx + 1] = wAtom[1];
+        wrappedAtoms[idx + 2] = wAtom[2];
+      }
+    }
+  }
+
+  const auto res = seams::unwrap_centres(
+      wrappedAtoms, nFrames, nAtoms, std::span<const double>(box9, 9), mols,
+      masses);
+  REQUIRE(res.mol_ids == std::vector<int>{10, 20, 30});
+  REQUIRE(res.centres.size() == trueCom.size());
+  for (std::size_t i = 0; i < trueCom.size(); ++i) {
+    CHECK(res.centres[i] == Catch::Approx(trueCom[i]).margin(1e-11));
+  }
+}
+
+TEST_CASE("Ballistic and anisotropic MSD with arbitrary axis and negative controls",
+          "[trajectory][msd]") {
+  const std::array<double, 3> axis = {1.0, 2.0, 2.0}; // norm = 3
+  const double dt = 0.25;
+  constexpr std::size_t nFrames = 25;
+
+  SECTION("Ballistic motion wrapped into periodic cell matches exact v^2 t^2") {
+    const double box9[9] = {0, 0, 0, 9.0, 10.0, 11.0, 1.5, -0.5, 1.0};
+    // v = 1.2 * e_hat + 0.8 * e_perp, where e_hat = (1,2,2)/3 and e_perp = (2,-1,0)/sqrt(5)
+    const double vPar = 1.2;
+    const double vPerp = 0.8;
+    const double inv5 = 1.0 / std::sqrt(5.0);
+    const std::array<double, 3> vel = {
+        vPar * (1.0 / 3.0) + vPerp * (2.0 * inv5),
+        vPar * (2.0 / 3.0) - vPerp * (1.0 * inv5),
+        vPar * (2.0 / 3.0),
+    };
+
+    seams::Msd msdAll(1, 0, 1, dt, axis);
+    seams::Msd msdBounded(1, 10, 1, dt, axis);
+    for (std::size_t f = 0; f < nFrames; ++f) {
+      const double t = static_cast<double>(f) * dt;
+      const std::array<double, 3> pos = {
+          1.0 + vel[0] * t, 2.0 + vel[1] * t, 3.0 + vel[2] * t};
+      const auto w = wrapTriclinic(pos, box9);
+      msdAll.push(w, std::span<const double, 9>(box9, 9));
+      msdBounded.push(w, std::span<const double, 9>(box9, 9));
+    }
+
+    const auto cAll = msdAll.curve();
+    const auto cBnd = msdBounded.curve();
+    REQUIRE(cAll.lag_time.size() == nFrames);
+    REQUIRE(cBnd.lag_time.size() == 11);
+
+    for (std::size_t k = 0; k < cAll.lag_time.size(); ++k) {
+      const double t = static_cast<double>(k) * dt;
+      CHECK(cAll.axial[k] == Catch::Approx(vPar * vPar * t * t).margin(1e-11));
+      CHECK(cAll.lateral[k] == Catch::Approx(vPerp * vPerp * t * t).margin(1e-11));
+      CHECK(cAll.total[k] ==
+            Catch::Approx((vPar * vPar + vPerp * vPerp) * t * t).margin(1e-11));
+      if (k < cBnd.lag_time.size()) {
+        CHECK(cBnd.total[k] == Catch::Approx(cAll.total[k]).margin(1e-12));
+      }
+    }
+
+    const auto fit = msdAll.fit(0.25, 4.0);
+    CHECK(fit.alpha == Catch::Approx(2.0).margin(1e-10));
+  }
+
+  SECTION("Negative controls: stationary and purely lateral motion") {
+    seams::Msd msdStatic(2, 8, 1, 1.0, axis);
+    const std::vector<double> fixed = {1.0, 2.0, 3.0, -1.0, 0.5, 4.0};
+    for (int f = 0; f < 6; ++f) {
+      msdStatic.push(fixed);
+    }
+    const auto cs = msdStatic.curve();
+    for (double val : cs.total) {
+      CHECK(val == Catch::Approx(0.0).margin(1e-15));
+    }
+
+    // Motion strictly perpendicular to axis (1, 2, 2): direction (2, -1, 0).
+    seams::Msd msdLat(1, 8, 1, 1.0, axis);
+    for (int f = 0; f < 6; ++f) {
+      const std::array<double, 3> p = {2.0 * f, -1.0 * f, 0.0};
+      msdLat.push(p);
+    }
+    const auto cl = msdLat.curve();
+    for (std::size_t k = 1; k < cl.lag_time.size(); ++k) {
+      CHECK(cl.axial[k] == Catch::Approx(0.0).margin(1e-24));
+      CHECK(cl.lateral[k] == Catch::Approx(cl.total[k]).margin(1e-12));
+    }
+  }
+}
+
+TEST_CASE("Water vectors, generic dipoles, and axis order parameters",
+          "[trajectory][dipole]") {
+  const std::array<double, 9> box9 = {0, 0, 0, 10.0, 10.0, 10.0, 0, 0, 0};
+  // Place O near z = 9.9 and H1, H2 wrapped across z = 0 boundary (+z bisector).
+  const double dOhZ = 0.58588;
+  const double dOhX = 0.75695;
+  const std::vector<double> xyz = {
+      5.0,          5.0, 9.9,                 // O
+      5.0 + dOhX,   5.0, 9.9 + dOhZ - 10.0,   // H1 wrapped
+      5.0 - dOhX,   5.0, 9.9 + dOhZ - 10.0,   // H2 wrapped
+  };
+  const std::vector<int> types = {2, 1, 1};
+  const std::vector<int> ids = {1, 2, 3};
+  const std::vector<int> mols = {7, 7, 7};
+
+  seams::System sys;
+  sys.set_frame(xyz, box9, types, ids);
+  sys.set_mols(mols);
+
+  const auto wv = sys.water_vectors(2, 1);
+  REQUIRE(wv.mol_ids == std::vector<int>{7});
+  CHECK(wv.oh_mid[0] == Catch::Approx(0.0).margin(1e-12));
+  CHECK(wv.oh_mid[1] == Catch::Approx(0.0).margin(1e-12));
+  CHECK(wv.oh_mid[2] == Catch::Approx(dOhZ).margin(1e-12));
+  CHECK(wv.bisector[2] == Catch::Approx(1.0).margin(1e-12));
+  // H1 -> H2 points along -x.
+  CHECK(wv.hh[0] == Catch::Approx(-2.0 * dOhX).margin(1e-12));
+  CHECK(wv.hh_unit[0] == Catch::Approx(-1.0).margin(1e-12));
+
+  // Charge-weighted SPC/E dipole matches bisector direction and exact magnitude.
+  const std::vector<double> qSpce = {-0.8476, 0.4238, 0.4238};
+  const auto dipQ = sys.molecule_dipoles(mols, qSpce);
+  CHECK(dipQ.dipoles[2] == Catch::Approx(2.0 * 0.4238 * dOhZ).margin(1e-12));
+  CHECK(dipQ.unit_vectors[2] == Catch::Approx(1.0).margin(1e-12));
+
+  // Charge-free generic orientation matches O -> H-midpoint!
+  const auto dipGeom = sys.molecule_dipoles();
+  CHECK(dipGeom.dipoles[2] == Catch::Approx(dOhZ).margin(1e-12));
+  CHECK(dipGeom.unit_vectors[2] == Catch::Approx(1.0).margin(1e-12));
+
+  // Axis order parameters: z-axis gives P1=1, P2=1 for bisector and P1=0, P2=-0.5 for HH.
+  const std::array<double, 3> zAxis = {0.0, 0.0, 1.0};
+  const auto ordBis = seams::orientation_order(wv.bisector, zAxis);
+  CHECK(ordBis.mean_p1 == Catch::Approx(1.0).margin(1e-12));
+  CHECK(ordBis.mean_p2 == Catch::Approx(1.0).margin(1e-12));
+
+  const auto ordHh = seams::orientation_order(wv.hh_unit, zAxis);
+  CHECK(ordHh.mean_p1 == Catch::Approx(0.0).margin(1e-12));
+  CHECK(ordHh.mean_p2 == Catch::Approx(-0.5).margin(1e-12));
+
+  // Negative control: symmetric octahedral 6-vector set has <P1> = 0 and <P2> = 0.
+  const std::vector<double> octa = {
+      1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1};
+  const auto ordIso = seams::orientation_order(octa, zAxis);
+  CHECK(ordIso.mean_p1 == Catch::Approx(0.0).margin(1e-14));
+  CHECK(ordIso.mean_p2 == Catch::Approx(0.0).margin(1e-14));
+}
+
+TEST_CASE("Continuous vs intermittent H-bond lifetime and rigid-rotor reorientation",
+          "[trajectory][tcf]") {
+  SECTION("Exact blinking H-bond negative control: S_HB dies while C_HB recovers") {
+    seams::HbondTcf tcf(0, 1, 1.0, true);
+    const std::vector<int> d1 = {1}, a1 = {2};
+    const std::vector<int> empty;
+    // Frame 0: {(1,2)}, Frame 1: {}, Frame 2: {(1,2)}
+    tcf.push(d1, a1);
+    tcf.push(empty, empty);
+    tcf.push(d1, a1);
+    const auto c = tcf.curve();
+    REQUIRE(c.lag_time.size() == 3);
+    CHECK(c.c_intermittent[0] == Catch::Approx(1.0));
+    CHECK(c.s_continuous[0] == Catch::Approx(1.0));
+    // Lag 1: origins 0 ({(1,2)} -> {}) and 1 ({} -> {(1,2)}), denom = 1 + 0 = 1, num = 0.
+    CHECK(c.c_intermittent[1] == Catch::Approx(0.0));
+    CHECK(c.s_continuous[1] == Catch::Approx(0.0));
+    // Lag 2: origin 0 ({(1,2)} -> {} -> {(1,2)}): intermittent = 1, continuous = 0!
+    CHECK(c.c_intermittent[2] == Catch::Approx(1.0));
+    CHECK(c.s_continuous[2] == Catch::Approx(0.0));
+  }
+
+  SECTION("Rigid rotor exact C1(t) = cos(w t) and C2(t) = 0.5*(3 cos^2(w t) - 1)") {
+    const double dt = 0.05;
+    const double omega = 1.3;
+    constexpr std::size_t nFrames = 30;
+    seams::Reorientation rot(2, 0, 1, dt);
+    for (std::size_t f = 0; f < nFrames; ++f) {
+      const double theta = omega * static_cast<double>(f) * dt;
+      const std::vector<double> vecs = {
+          std::cos(theta), std::sin(theta), 0.0,
+          0.0, std::cos(theta), std::sin(theta),
+      };
+      rot.push(vecs);
+    }
+    const auto rc = rot.curve();
+    REQUIRE(rc.lag_time.size() == nFrames);
+    for (std::size_t k = 0; k < nFrames; ++k) {
+      const double wt = omega * static_cast<double>(k) * dt;
+      const double wantC1 = std::cos(wt);
+      const double wantC2 = 0.5 * (3.0 * wantC1 * wantC1 - 1.0);
+      CHECK(rc.c1[k] == Catch::Approx(wantC1).margin(1e-12));
+      CHECK(rc.c2[k] == Catch::Approx(wantC2).margin(1e-12));
+    }
+  }
+}
