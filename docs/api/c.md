@@ -822,6 +822,22 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_hbond_edges 460
 ```
 
+### seams_system_set_hydrogen_frame
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_set_hydrogen_frame 3
+```
+
+### seams_directed_hbonds
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_directed_hbonds 1
+```
+
 ### seams_quenched_analysis
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -5440,6 +5456,125 @@ The tour call is in `docs/examples/c_api_tour.c`.
 Errors: None.
 
 Example: `docs/examples/c_api_tour.c`
+
+### seams_directed_hbond
+
+Purpose: C row type for one directed hydrogen bond. Callers initialize `size = sizeof(seams_directed_hbond)` on every element passed to `seams_directed_hbonds`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: `size` is bytes; donor, hydrogen, and acceptor are 0-based frame indices; `d_AH` and `d_DA` are Angstrom; `angle` is degrees and is 0 for a linear donor-hydrogen-acceptor geometry.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_hydrogen_frame
+
+Purpose: Store a heavy-atom cloud and a separate hydrogen cloud.
+
+Heavies occupy frame indices [0, n_heavy). Hydrogens follow, in the order given, so a hydrogen cloud index h is frame index n_heavy + h. A null id pointer numbers that cloud from 1 across the whole frame. A null mol pointer sets each molID to that atom's id, which pairs no hydrogen with a heavy atom. Pass molecule ids to attach each hydrogen to a heavy atom. A failed call leaves the previous frame in place.
+
+```c
+seams_status seams_system_set_hydrogen_frame( seams_system *sys, const double *heavy_xyz, size_t n_heavy, const int *heavy_types, const int *heavy_ids, const int *heavy_mols, const double *hydrogen_xyz, size_t n_hydrogen, const int *hydrogen_types, const int *hydrogen_ids, const int *hydrogen_mols, const double *box9, size_t box_len);
+```
+
+Parameters: `sys`, `heavy_xyz`, `n_heavy`, `heavy_types`, `heavy_ids`, `heavy_mols`, `hydrogen_xyz`, `n_hydrogen`, `hydrogen_types`, `hydrogen_ids`, `hydrogen_mols`, `box9`, `box_len`.
+
+- `sys`: Frame handle.
+- `heavy_xyz`: Interleaved heavy coordinates, Angstrom.
+- `n_heavy`: Heavy-atom count. Must be positive.
+- `heavy_types`: One species per heavy atom.
+- `heavy_ids`: One id per heavy atom, or NULL for 1..n_heavy.
+- `heavy_mols`: One molID per heavy atom, or NULL to copy the atom id.
+- `hydrogen_xyz`: Interleaved hydrogen coordinates, Angstrom.
+- `n_hydrogen`: Hydrogen count. Zero allows the hydrogen pointers to be NULL.
+- `hydrogen_types`: One species per hydrogen, required when n_hydrogen is positive.
+- `hydrogen_ids`: One id per hydrogen, or NULL to continue after the heavies.
+- `hydrogen_mols`: One molID per hydrogen, or NULL to copy the atom id.
+- `box9`: ox, oy, oz, lx, ly, lz, xy, xz, yz.
+- `box_len`: Length of box9. Must be 9.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: The call replaces the frame on success and clears the handle error on entry.
+
+Ownership: The caller owns sys and every buffer. The call copies the values and keeps no pointer.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols,
+                                hydrogen, 1, hydrogen_types, NULL, hydrogen_mols,
+                                box9, 9);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_directed_hbonds
+
+Purpose: Directed hydrogen-bond edges for selected donor and acceptor types.
+
+Each edge is one accepting hydrogen. Rows are sorted by donor, then hydrogen, then acceptor, as frame indices. The angle is acceptor-first. The donor-acceptor vector is the minimum image of acceptor minus donor. The acceptor-hydrogen vector is the minimum image of acceptor minus the hydrogen. A linear donor-hydrogen-acceptor geometry has angle 0 degrees. The acceptor-hydrogen distance is kept only when it is strictly below dist_cutoff. The angle is kept when it is less than or equal to angle_cutoff. The pair list keeps a donor and acceptor only when their minimum image is strictly below pair_cutoff, on an orthorhombic or triclinic cell. Each hydrogen is assigned to the nearest donor-type heavy atom that shares its molID, and the lower index wins a tie. exclude_same_mol of 1 drops a pair that shares a molID. An empty donor set or acceptor set writes zero edges. Atoms whose type equals hydrogen_type are hydrogens and are never donors or acceptors. Water-water and water-framework counts are two calls with different type sets. When edges is non-NULL, every element must start with size set to sizeof(seams_directed_hbond).
+
+```c
+seams_status seams_directed_hbonds( seams_system *sys, double pair_cutoff, double dist_cutoff, double angle_cutoff, const int *donor_types, size_t n_donor_types, const int *acceptor_types, size_t n_acceptor_types, int hydrogen_type, int exclude_same_mol, seams_directed_hbond *edges, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `pair_cutoff`, `dist_cutoff`, `angle_cutoff`, `donor_types`, `n_donor_types`, `acceptor_types`, `n_acceptor_types`, `hydrogen_type`, `exclude_same_mol`, `edges`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `pair_cutoff`: Positive finite donor-acceptor cutoff, Angstrom.
+- `dist_cutoff`: Positive finite acceptor-hydrogen cutoff, Angstrom.
+- `angle_cutoff`: Positive finite acceptor-first angle, degrees.
+- `donor_types`: Species that may donate. NULL only when the count is 0.
+- `n_donor_types`: Length of donor_types. Zero writes no edges.
+- `acceptor_types`: Species that may accept. NULL only when the count is 0.
+- `n_acceptor_types`: Length of acceptor_types. Zero writes no edges.
+- `hydrogen_type`: Positive hydrogen species, distinct from both type sets.
+- `exclude_same_mol`: 1 drops a shared molID, 0 keeps it.
+- `edges`: Caller buffer, or NULL to query the count.
+- `cap`: Capacity of edges. Ignored when edges is NULL.
+- `n_out`: Receives the edge count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys, the type arrays, edges, and n_out. The call borrows them and writes caller buffers only.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int donors[] = {8};
+const int acceptors[] = {10};
+size_t n_out = 0;
+seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1,
+                      NULL, 0, &n_out);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:

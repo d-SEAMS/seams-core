@@ -363,6 +363,32 @@ int main(int argc, char **argv) {
                                 n_edges, &n_edges),
        mix);
   printf("capi seams_hbond_edges %zu\n", n_edges);
+  seams_system *directed = seams_system_create();
+  const double heavy_d[] = {0, 0, 0, 2.8, 0, 0};
+  const double hyd_d[] = {1, 0, 0};
+  const int ht_d[] = {8, 8};
+  const int hm_d[] = {1, 2};
+  const int yt_d[] = {2};
+  const int ym_d[] = {1};
+  const double box_d[9] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  need("hframe",
+       seams_system_set_hydrogen_frame(directed, heavy_d, 2, ht_d, NULL, hm_d, hyd_d, 1, yt_d,
+                                       NULL, ym_d, box_d, 9),
+       directed);
+  printf("capi seams_system_set_hydrogen_frame %d\n", seams_system_count(directed));
+  const int don_d[] = {8};
+  size_t n_dir = 0;
+  need("hdirq",
+       seams_directed_hbonds(directed, 3.5, 2.42, 30.0, don_d, 1, don_d, 1, 2, 1, NULL, 0, &n_dir),
+       directed);
+  seams_directed_hbond row;
+  row.size = sizeof(row);
+  need("hdir",
+       seams_directed_hbonds(directed, 3.5, 2.42, 30.0, don_d, 1, don_d, 1, 2, 1, &row, n_dir,
+                             &n_dir),
+       directed);
+  printf("capi seams_directed_hbonds %zu\n", n_dir);
+  seams_system_destroy(directed);
   seams_quench_callback cb = tour_quench;
   int *raw_labels = calloc((size_t)seams_system_count(mix), sizeof(int));
   int *q_labels = calloc((size_t)seams_system_count(mix), sizeof(int));

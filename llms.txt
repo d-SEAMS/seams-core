@@ -111,6 +111,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Citation](https://docs.dseams.info/explanation/citation.md): If you use this software, cite the methods paper.
 - [ClavisCage TRACE](https://docs.dseams.info/explanation/clavis-trace.md): ClavisCage 0.3.18 runs TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025, 10.1021/acs.jctc.5c01459) on the same hydrate cells as d-SEAMS 2.14.0.
 - [Carried rings and the hop ball](https://docs.dseams.info/explanation/hop-ball.md): primitive::RingUpdater returns the primitive rings of one neighbour graph.
+- [Directed hydrogen bonds](https://docs.dseams.info/explanation/hydrogen-bonds.md): A directed hydrogen bond names the donor heavy atom, the hydrogen, and the acceptor heavy atom.
 - [Interface and confined ice](https://docs.dseams.info/explanation/interface-order.md): Two published CHILL+ rules, on the same coordinates, with the thresholds left alone.
 - [Linkcell strong scaling](https://docs.dseams.info/explanation/linkcell-scaling.md): The linkcell manual is linkcell.dseams.info.
 - [Primitive rings and OVITO FindRings](https://docs.dseams.info/explanation/ovito-findrings.md): A ring is primitive when every pair of its vertices is as close along the ring as it is through the rest of the graph.

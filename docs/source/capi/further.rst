@@ -4,7 +4,7 @@ Further analyses
 
 Brine fronts, topology, and the remaining exports.
 
-The stable C interface provides 87 exported functions through ``include/seams.h``.
+The stable C interface provides 89 exported functions through ``include/seams.h``.
 
 .. _capi-seams_brine_analyse:
 
@@ -404,6 +404,61 @@ Returns: ::SEAMS_OK, or the same error classes as seams_hbonds(), plus ::SEAMS_E
 The pair list is stable and deterministic: donor, then acceptor, then hydrogen index. donor and acceptor are frame indices over the stored atoms. When edges is non-NULL, every element must start with size set by the caller to sizeof(seams_hbond_edge); the library validates size and writes only up to that prefix per element.
 
 @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys, edges, and n_out. The call borrows sys and writes caller buffers only. @par Thread safety Exclusive use of sys.
+
+.. _capi-seams_directed_hbonds:
+
+seams_directed_hbonds
+---------------------
+
+
+.. code-block:: c
+
+   seams_status seams_directed_hbonds( seams_system *sys, double pair_cutoff, double dist_cutoff, double angle_cutoff, const int *donor_types, size_t n_donor_types, const int *acceptor_types, size_t n_acceptor_types, int hydrogen_type, int exclude_same_mol, seams_directed_hbond *edges, size_t cap, size_t *n_out)
+
+Directed hydrogen-bond edges for selected donor and acceptor types.
+
+``sys``
+    Frame handle.
+
+``pair_cutoff``
+    Positive finite donor-acceptor cutoff, Angstrom.
+
+``dist_cutoff``
+    Positive finite acceptor-hydrogen cutoff, Angstrom.
+
+``angle_cutoff``
+    Positive finite acceptor-first angle, degrees.
+
+``donor_types``
+    Species that may donate. NULL only when the count is 0.
+
+``n_donor_types``
+    Length of donor_types. Zero writes no edges.
+
+``acceptor_types``
+    Species that may accept. NULL only when the count is 0.
+
+``n_acceptor_types``
+    Length of acceptor_types. Zero writes no edges.
+
+``hydrogen_type``
+    Positive hydrogen species, distinct from both type sets.
+
+``exclude_same_mol``
+    1 drops a shared molID, 0 keeps it.
+
+``edges``
+    Caller buffer, or NULL to query the count.
+
+``cap``
+    Capacity of edges. Ignored when edges is NULL.
+
+``n_out``
+    Receives the edge count.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+Each edge is one accepting hydrogen. Rows are sorted by donor, then hydrogen, then acceptor, as frame indices. The angle is acceptor-first. The donor-acceptor vector is the minimum image of acceptor minus donor. The acceptor-hydrogen vector is the minimum image of acceptor minus the hydrogen. A linear donor-hydrogen-acceptor geometry has angle 0 degrees. The acceptor-hydrogen distance is kept only when it is strictly below dist_cutoff. The angle is kept when it is less than or equal to angle_cutoff. The pair list keeps a donor and acceptor only when their minimum image is strictly below pair_cutoff, on an orthorhombic or triclinic cell. Each hydrogen is assigned to the nearest donor-type heavy atom that shares its molID, and the lower index wins a tie. exclude_same_mol of 1 drops a pair that shares a molID. An empty donor set or acceptor set writes zero edges. Atoms whose type equals hydrogen_type are hydrogens and are never donors or acceptors. Water-water and water-framework counts are two calls with different type sets. When edges is non-NULL, every element must start with size set to sizeof(seams_directed_hbond). @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys, the type arrays, edges, and n_out. The call borrows them and writes caller buffers only. @par Thread safety Exclusive use of sys. @par Example @code const int donors[] = {8}; const int acceptors[] = {10}; size_t n_out = 0; seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, NULL, 0, &n_out); @endcode
 
 .. _capi-seams_quenched_analysis:
 

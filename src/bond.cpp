@@ -16,9 +16,12 @@
 #include <bond.hpp>
 #include <generic.hpp>
 #include <index_cast.hpp>
+#include <neighbours.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace {
 
@@ -319,6 +322,129 @@ std::vector<std::vector<int>> bond::populateHbondsFromDonors(
   }
 
   return hBondNet;
+}
+
+namespace {
+
+double length3(const std::array<double, 3> &v) {
+  return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+} // namespace
+
+std::vector<bond::DirectedHydrogenBond> bond::directedHydrogenBonds(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    double pairCutoff, double distCutoff, double angleCutoff,
+    const std::vector<int> &donorTypes, const std::vector<int> &acceptorTypes,
+    int hydrogenType, bool excludeSameMol) {
+  std::vector<DirectedHydrogenBond> edges;
+  if (donorTypes.empty() || acceptorTypes.empty() || hydrogenType <= 0) {
+    return edges;
+  }
+  if (!(pairCutoff > 0.0) || !(distCutoff > 0.0) || !(angleCutoff > 0.0) ||
+      !std::isfinite(pairCutoff) || !std::isfinite(distCutoff) ||
+      !std::isfinite(angleCutoff)) {
+    return edges;
+  }
+  const std::unordered_set<int> donors(donorTypes.begin(), donorTypes.end());
+  const std::unordered_set<int> acceptors(acceptorTypes.begin(), acceptorTypes.end());
+  if (donors.count(hydrogenType) != 0 || acceptors.count(hydrogenType) != 0) {
+    return edges;
+  }
+  std::unordered_map<int, std::vector<int>> donorsByMol;
+  std::vector<int> hydrogens;
+  hydrogens.reserve(static_cast<std::size_t>(std::max(cloud.nop, 0)));
+  for (int i = 0; i < cloud.nop; ++i) {
+    const auto &point = cloud.pts[static_cast<std::size_t>(i)];
+    if (point.type == hydrogenType) {
+      hydrogens.push_back(i);
+      continue;
+    }
+    if (donors.count(point.type) != 0) {
+      donorsByMol[point.molID].push_back(i);
+    }
+  }
+  std::vector<std::vector<int>> hydrogensOnDonor(static_cast<std::size_t>(std::max(cloud.nop, 0)));
+  for (const int hydrogen : hydrogens) {
+    const auto &hpoint = cloud.pts[static_cast<std::size_t>(hydrogen)];
+    const auto found = donorsByMol.find(hpoint.molID);
+    if (found == donorsByMol.end()) {
+      continue;
+    }
+    int best = -1;
+    double best2 = 0.0;
+    for (const int donor : found->second) {
+      const auto dr = gen::relDist(cloud, donor, hydrogen);
+      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      if (best < 0 || d2 < best2) {
+        best = donor;
+        best2 = d2;
+      }
+    }
+    if (best >= 0) {
+      hydrogensOnDonor[static_cast<std::size_t>(best)].push_back(hydrogen);
+    }
+  }
+  const auto neighbours = nneigh::getNewNeighbourListByIndex(cloud, pairCutoff);
+  const double dist2 = distCutoff * distCutoff;
+  for (int donor = 0; donor < cloud.nop; ++donor) {
+    const auto &owned = hydrogensOnDonor[static_cast<std::size_t>(donor)];
+    if (owned.empty() || donor >= static_cast<int>(neighbours.size())) {
+      continue;
+    }
+    const auto &dpoint = cloud.pts[static_cast<std::size_t>(donor)];
+    const auto &row = neighbours[static_cast<std::size_t>(donor)];
+    for (const int acceptor : row) {
+      if (acceptor == donor || acceptor < 0 || acceptor >= cloud.nop) {
+        continue;
+      }
+      const auto &apoint = cloud.pts[static_cast<std::size_t>(acceptor)];
+      if (apoint.type == hydrogenType || acceptors.count(apoint.type) == 0) {
+        continue;
+      }
+      if (excludeSameMol && apoint.molID == dpoint.molID) {
+        continue;
+      }
+      const auto oo = gen::relDist(cloud, acceptor, donor);
+      const double oo2 = oo[0] * oo[0] + oo[1] * oo[1] + oo[2] * oo[2];
+      if (!(oo2 > 0.0) || !std::isfinite(oo2)) {
+        continue;
+      }
+      const std::vector<double> ooVec{oo[0], oo[1], oo[2]};
+      for (const int hydrogen : owned) {
+        const auto &hpoint = cloud.pts[static_cast<std::size_t>(hydrogen)];
+        const auto oh = gen::relDistFromPoint(cloud, acceptor, hpoint.x, hpoint.y, hpoint.z);
+        const double oh2 = oh[0] * oh[0] + oh[1] * oh[1] + oh[2] * oh[2];
+        if (!(oh2 > 0.0) || oh2 >= dist2 || !std::isfinite(oh2)) {
+          continue;
+        }
+        const std::vector<double> ohVec{oh[0], oh[1], oh[2]};
+        const double angle = gen::radDeg(gen::eigenVecAngle(ooVec, ohVec));
+        if (!std::isfinite(angle) || angle > angleCutoff) {
+          continue;
+        }
+        DirectedHydrogenBond edge;
+        edge.donor = donor;
+        edge.hydrogen = hydrogen;
+        edge.acceptor = acceptor;
+        edge.d_AH = length3(oh);
+        edge.d_DA = length3(oo);
+        edge.angle = angle;
+        edges.push_back(edge);
+      }
+    }
+  }
+  std::sort(edges.begin(), edges.end(),
+            [](const DirectedHydrogenBond &a, const DirectedHydrogenBond &b) {
+              if (a.donor != b.donor) {
+                return a.donor < b.donor;
+              }
+              if (a.hydrogen != b.hydrogen) {
+                return a.hydrogen < b.hydrogen;
+              }
+              return a.acceptor < b.acceptor;
+            });
+  return edges;
 }
 
 /**

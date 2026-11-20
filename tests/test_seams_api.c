@@ -103,6 +103,89 @@ static seams_status bad_box_quench(const double *xyz, size_t n, const double *bo
   return SEAMS_OK;
 }
 
+static int near(double got, double want, double tol) {
+  return got > want - tol && got < want + tol;
+}
+
+static void directed_cloud_contract(void) {
+  const double box[9] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+  const double hydrogen[] = {1, 0, 0};
+  const int heavy_types[] = {8, 8};
+  const int heavy_mols[] = {1, 2};
+  const int hydrogen_types[] = {2};
+  const int hydrogen_mols[] = {1};
+  seams_system *sys = seams_system_create();
+  expect(sys != NULL, "directed frame create");
+  expect(seams_system_set_hydrogen_frame(NULL, heavy, 2, heavy_types, NULL, heavy_mols, hydrogen, 1,
+                                         hydrogen_types, NULL, hydrogen_mols, box, 9) == SEAMS_ERR_NULL,
+         "directed frame null system");
+  expect(seams_system_set_hydrogen_frame(sys, NULL, 2, heavy_types, NULL, heavy_mols, hydrogen, 1,
+                                         hydrogen_types, NULL, hydrogen_mols, box, 9) == SEAMS_ERR_NULL,
+         "directed frame null heavy");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 0, heavy_types, NULL, heavy_mols, hydrogen, 1,
+                                         hydrogen_types, NULL, hydrogen_mols, box, 9) == SEAMS_ERR_RANGE,
+         "directed frame no heavies");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, NULL, NULL, heavy_mols, hydrogen, 1,
+                                         hydrogen_types, NULL, hydrogen_mols, box, 9) == SEAMS_ERR_NULL,
+         "directed frame null types");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols, hydrogen, 1,
+                                         hydrogen_types, NULL, hydrogen_mols, box, 9) == SEAMS_OK,
+         "directed frame");
+  expect(seams_system_count(sys) == 3, "directed frame count");
+  const int donors[] = {8};
+  const int acceptors[] = {8};
+  size_t n_out = 99;
+  expect(seams_directed_hbonds(NULL, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, NULL, 0,
+                               &n_out) == SEAMS_ERR_NULL,
+         "directed null system");
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, NULL, 0,
+                               NULL) == SEAMS_ERR_NULL,
+         "directed null count");
+  expect(seams_directed_hbonds(sys, 0.0, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, NULL, 0,
+                               &n_out) == SEAMS_ERR_RANGE,
+         "directed zero pair cutoff");
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 0.0, donors, 1, acceptors, 1, 2, 1, NULL, 0,
+                               &n_out) == SEAMS_ERR_RANGE,
+         "directed zero angle");
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, NULL, 1, acceptors, 1, 2, 1, NULL, 0,
+                               &n_out) == SEAMS_ERR_NULL,
+         "directed null donor set");
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 8, 1, NULL, 0,
+                               &n_out) == SEAMS_ERR_ARG,
+         "directed hydrogen type overlaps");
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 0, acceptors, 1, 2, 1, NULL, 0,
+                               &n_out) == SEAMS_OK,
+         "directed empty donor set");
+  expect(n_out == 0, "directed empty donor count");
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, NULL, 0,
+                               &n_out) == SEAMS_OK,
+         "directed query");
+  expect(n_out == 1, "directed linear count");
+  seams_directed_hbond row;
+  row.size = sizeof(row);
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, &row, 0,
+                               &n_out) == SEAMS_ERR_RANGE,
+         "directed short buffer");
+  row.size = 4;
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, &row, 1,
+                               &n_out) == SEAMS_ERR_ARG,
+         "directed short struct");
+  row.size = sizeof(row);
+  expect(seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1, &row, 1,
+                               &n_out) == SEAMS_OK,
+         "directed copy");
+  expect(row.donor == 0 && row.hydrogen == 2 && row.acceptor == 1, "directed indices");
+  expect(near(row.d_DA, 2.8, 1e-12) && near(row.d_AH, 1.8, 1e-12) && near(row.angle, 0.0, 1e-8),
+         "directed linear geometry");
+  const int ids[] = {4, 4};
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, ids, heavy_mols, hydrogen, 1,
+                                         hydrogen_types, NULL, hydrogen_mols, box, 9) == SEAMS_ERR_ARG,
+         "directed duplicate ids");
+  expect(seams_system_count(sys) == 3, "failed hydrogen frame keeps the previous frame");
+  seams_system_destroy(sys);
+}
+
 int main(void) {
   expect(seams_abi() == SEAMS_ABI, "abi");
   expect(seams_version_major() == SEAMS_VERSION_MAJOR, "major");
@@ -760,6 +843,7 @@ int main(void) {
          "cages find");
   seams_cages_destroy(again_cages);
 
+  directed_cloud_contract();
   seams_system_destroy(sys);
   free(xyz);
   free(labels);

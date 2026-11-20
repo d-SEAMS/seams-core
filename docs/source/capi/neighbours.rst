@@ -4,7 +4,7 @@ Neighbours
 
 Build a neighbour list and read it back.
 
-The stable C interface provides 87 exported functions through ``include/seams.h``.
+The stable C interface provides 89 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_neighbours.c
    :language: c

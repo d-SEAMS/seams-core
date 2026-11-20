@@ -712,6 +712,25 @@ static seams_status p_hbond_edges(seams_system *sys, double cutoff, size_t len) 
   free(edges);
   return rc;
 }
+static seams_status p_directed(seams_system *sys, double cutoff, size_t len) {
+  const int donors[] = {1};
+  const int acceptors[] = {1};
+  seams_directed_hbond *edges = NULL;
+  if (!g_null_out) {
+    edges = calloc(len > 0 ? len : 1, sizeof(*edges));
+    if (edges == NULL) {
+      return SEAMS_ERR_NOMEM;
+    }
+    for (size_t i = 0; i < (len > 0 ? len : 1); ++i) {
+      edges[i].size = sizeof(*edges);
+    }
+  }
+  size_t n_out = 0;
+  seams_status rc = seams_directed_hbonds(sys, cutoff, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1,
+                                          edges, len, g_null_out ? NULL : &n_out);
+  free(edges);
+  return rc;
+}
 static seams_status p_density(seams_system *sys, double cutoff, size_t len) {
   (void)cutoff;
   size_t n_out = 0;
@@ -809,6 +828,49 @@ static void probe(const char *fn, probe_fn f, unsigned flags, size_t need) {
   expect(f(g_good, 3.5, len), SEAMS_OK, fn, "valid call");
 }
 
+static void hydrogen_frame_contract(void) {
+  const char *fn = "seams_system_set_hydrogen_frame";
+  const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+  const double hydrogen[] = {1, 0, 0};
+  const int types[] = {1, 1};
+  const int htypes[] = {2};
+  const int mols[] = {1, 2};
+  const int hmols[] = {1};
+  const double box[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+  seams_system *sys = seams_system_create();
+  expect(seams_system_set_hydrogen_frame(NULL, heavy, 2, types, NULL, mols, hydrogen, 1, htypes,
+                                         NULL, hmols, box, 9),
+         SEAMS_ERR_NULL, fn, "NULL sys");
+  expect(seams_system_set_hydrogen_frame(sys, NULL, 2, types, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, box, 9),
+         SEAMS_ERR_NULL, fn, "NULL heavy coordinates");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, types, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, NULL, 9),
+         SEAMS_ERR_NULL, fn, "NULL box");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 0, types, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, box, 9),
+         SEAMS_ERR_RANGE, fn, "zero heavies");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, NULL, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, box, 9),
+         SEAMS_ERR_NULL, fn, "NULL heavy types");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, types, NULL, mols, NULL, 1, htypes, NULL,
+                                         hmols, box, 9),
+         SEAMS_ERR_NULL, fn, "NULL hydrogen coordinates");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, types, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, box, 6),
+         SEAMS_ERR_RANGE, fn, "short box");
+  double bad[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+  bad[3] = 0;
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, types, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, bad, 9),
+         SEAMS_ERR_BOX, fn, "zero edge");
+  expect(seams_system_set_hydrogen_frame(sys, heavy, 2, types, NULL, mols, hydrogen, 1, htypes, NULL,
+                                         hmols, box, 9),
+         SEAMS_OK, fn, "linear water");
+  truth(seams_system_count(sys) == 3, fn, "three atoms");
+  seams_system_destroy(sys);
+}
+
 static void analysis_contract(void) {
   const unsigned C = P_CUTOFF, L = P_LEN, O = P_NULLOUT, G = P_GRAPH;
   for (int i = 0; i < g_n; ++i) {
@@ -837,6 +899,7 @@ static void analysis_contract(void) {
   probe("seams_coordination", p_coordination, C | O, 0);
   probe("seams_hbonds", p_hbonds, C | O, 0);
   probe("seams_hbond_edges", p_hbond_edges, C | O, (size_t)g_n);
+  probe("seams_directed_hbonds", p_directed, C | O, 8);
   probe("seams_density_axis", p_density, L | O, 10);
   probe("seams_quenched_analysis", p_quenched, C | O, (size_t)g_n);
   probe("seams_fingerprint", p_fingerprint, C | O | G, 0);
@@ -1344,6 +1407,7 @@ int main(int argc, char **argv) {
   frame_io_contract();
   finite_scan_contract();
   read_contract(argv[2]);
+  hydrogen_frame_contract();
   analysis_contract();
   extreme_cells_contract();
   neighbours_contract();

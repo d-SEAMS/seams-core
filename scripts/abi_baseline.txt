@@ -22,6 +22,7 @@ T seams_chill_plus_n
 T seams_contact_pairs
 T seams_coordination
 T seams_density_axis
+T seams_directed_hbonds
 T seams_domains
 T seams_fingerprint
 T seams_fingerprint_atom
@@ -80,6 +81,7 @@ T seams_system_positions
 T seams_system_read
 T seams_system_set_atoms
 T seams_system_set_frame
+T seams_system_set_hydrogen_frame
 T seams_system_set_ortho
 T seams_system_set_positions
 T seams_system_stage_positions
@@ -98,8 +100,10 @@ T seams_frame_chill_plus
 T seams_frame_chill_plus_rule
 T seams_frame_chill_rings
 T seams_frame_chordless
+T seams_frame_directed_hbonds
 T seams_frame_free
 T seams_frame_from_arrays
+T seams_frame_from_hydrogen_cloud
 T seams_frame_from_species
 T seams_frame_hbond_edges
 T seams_frame_ids

@@ -716,6 +716,15 @@ test('fuzz_cage_shift_permute', _fuzz_cage,
   timeout: 10800,
   suite: 'heavy',
   is_parallel: false)
+_directed_env = environment()
+_directed_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_directed_env.set('SEAMS_LIB', seams_api_lib.full_path())
+test('directed_hbonds', find_program('python3'),
+  args: [files('test_directed_hbonds.py')],
+  workdir: meson.project_source_root(),
+  env: _directed_env,
+  depends: [seams_api_lib],
+  timeout: 30)
 test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),

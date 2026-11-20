@@ -20,6 +20,7 @@ These pages are for understanding. They are not recipes.
 | [[file:trace-assembly.org][TRACE and signature cages]] | Hydrogen-bond cages and \(V-E+F=2\) |
 | [[file:stacking-disorder.org][Stacking disorder]] | Why a ring census separates cubic ice from hexagonal ice |
 | [[file:hop-ball.org][Carried rings]] | Which rings a changed bond can touch |
+| [[file:hydrogen-bonds.org][Directed hydrogen bonds]] | Donor, hydrogen, and acceptor, with separate type sets |
 | [[file:trace-threads.org][Signature thread controls]] | Team size, the OpenMP wait, and the kernel timings |
 | [[file:performance.org][Release-candidate sitting]] | Medians and interquartile ranges for the release-candidate comparison |
 | [[file:performance-overview.org][Performance overview]] | Overview of the performance comparisons |
@@ -41,6 +42,7 @@ These pages are for understanding. They are not recipes.
    citation
    clavis-trace
    hop-ball
+   hydrogen-bonds
    interface-order
    linkcell-scaling
    ovito-findrings

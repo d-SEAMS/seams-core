@@ -6,6 +6,7 @@ seams_system_set_ortho
 seams_system_read
 seams_path_nframes
 seams_system_count
+seams_system_set_hydrogen_frame
 seams_system_natoms
 seams_system_set_positions
 seams_system_stage_positions
@@ -75,6 +76,7 @@ seams_running_cn
 seams_coordination
 seams_hbonds
 seams_hbond_edges
+seams_directed_hbonds
 seams_quenched_analysis
 seams_density_axis
 seams_fingerprint

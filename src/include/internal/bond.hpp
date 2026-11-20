@@ -115,6 +115,38 @@ std::vector<std::vector<int>> populateHbondsFromDonors(
     const std::vector<int> &donorHs, double distCutoff = 2.42,
     double angleCutoff = 30.0);
 
+//! One directed hydrogen bond. Indices are positions in the single cloud
+//! passed to directedHydrogenBonds. Angle is degrees, acceptor-first:
+//! the two vectors are the minimum image of acceptor minus donor and the
+//! minimum image of acceptor minus the hydrogen. A linear
+//! donor-hydrogen-acceptor geometry has angle 0.
+struct DirectedHydrogenBond {
+  int donor = -1;
+  int hydrogen = -1;
+  int acceptor = -1;
+  double d_AH = 0.0;
+  double d_DA = 0.0;
+  double angle = 0.0;
+};
+
+//! Directed donor-hydrogen-acceptor edges on one cloud.
+//!
+//! Atoms whose type equals hydrogenType are hydrogens. Every other atom is
+//! a heavy atom. Each hydrogen is given to the nearest heavy atom of a
+//! donor type that shares its molID; the lower index wins an equal
+//! distance. A hydrogen with no such heavy atom donates nothing. An edge is
+//! kept when the acceptor-hydrogen minimum image is strictly shorter than
+//! distCutoff and the acceptor-first angle is less than or equal to
+//! angleCutoff. The neighbour list keeps a donor-acceptor pair only when
+//! its minimum image is strictly shorter than pairCutoff. excludeSameMol
+//! drops a pair that shares a molID. An empty donor or acceptor type list
+//! returns no edges. Results are sorted by donor, hydrogen, acceptor.
+std::vector<DirectedHydrogenBond> directedHydrogenBonds(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    double pairCutoff, double distCutoff, double angleCutoff,
+    const std::vector<int> &donorTypes, const std::vector<int> &acceptorTypes,
+    int hydrogenType, bool excludeSameMol = true);
+
 //! Calculates the distance of the hydrogen bond between O and H (of different
 //! atoms), given the respective pointClouds and the indices to each atom
 double getHbondDistanceOH(

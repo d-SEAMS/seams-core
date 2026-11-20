@@ -134,6 +134,26 @@ int main(int argc, char **argv) {
   }
   std::printf("%s atoms 46 clathrate %d q6 %.3f rings %d\n", seams_lang_version(), counts[4],
               mean, rings[5] + rings[6]);
+  const double heavy_hb[] = {0, 0, 0, 2.8, 0, 0};
+  const double hyd_hb[] = {1, 0, 0};
+  const int heavy_type_hb[] = {8, 8};
+  const int heavy_mol_hb[] = {1, 2};
+  const int hyd_type_hb[] = {2};
+  const int hyd_mol_hb[] = {1};
+  const double cell_hb[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  const int donor_hb[] = {8};
+  seams_frame *hb = seams_frame_from_hydrogen_cloud(
+      heavy_hb, 2, heavy_type_hb, nullptr, heavy_mol_hb, hyd_hb, 1, hyd_type_hb, nullptr,
+      hyd_mol_hb, cell_hb);
+  int n_hb = 0;
+  if (hb == nullptr ||
+      seams_frame_directed_hbonds(hb, 3.5, 2.42, 30.0, donor_hb, 1, donor_hb, 1, 2, 1, nullptr,
+                                  nullptr, nullptr, nullptr, nullptr, nullptr, 0, &n_hb) != 0 ||
+      n_hb != 1) {
+    seams_frame_free(hb);
+    return 1;
+  }
+  seams_frame_free(hb);
   seams_frame_free(frame);
   return 0;
 }

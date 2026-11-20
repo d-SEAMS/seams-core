@@ -91,6 +91,8 @@ RAW = {
         ("seams_system_create", "Allocate an empty frame handle.", "none", "handle"),
         ("seams_system_destroy", "Free a frame handle.", "sys", "handle"),
         ("seams_system_set_frame", "Store points and a general LAMMPS cell.", "sys; xyz; n; box9; types; ids", "coordinates and box lengths in angstrom; n is a dimensionless count"),
+        ("seams_system_set_hydrogen_frame", "Store a heavy-atom cloud and a separate hydrogen cloud.", "sys; heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9; box_len", "coordinates and box lengths in angstrom"),
+        ("seams_system_set_hydrogen_frame", "Store a heavy-atom cloud and a separate hydrogen cloud.", "sys; heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9; box_len", "coordinates and box lengths in angstrom"),
         ("seams_system_set_ortho", "Store points and an orthorhombic cell.", "sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids", "origin and edge lengths in angstrom"),
         ("SEAMS_CAGE_BOTH", "Atom that belongs to both cage types.", "none", "dimensionless code 3"),
         ("SEAMS_CAGE_CUBIC", "Atom that belongs only to a double-diamond cage.", "none", "dimensionless code 2"),
@@ -127,6 +129,8 @@ RAW = {
         ("seams_contact_pairs", "Count mutual nearest unlike contacts of a site table.", "sys; site_spec; n_pairs; n_cation; n_anion", "dimensionless counts"),
         ("seams_coordination", "Coordination number integrated to rmax.", "sys; rmax; bins; type_i; type_j; cn", "rmax in angstrom; cn is dimensionless"),
         ("seams_density_axis", "Number density along one cell axis.", "sys; type; bins; axis; z; rho; cap; n_out", "z in angstrom; rho is number density"),
+        ("seams_directed_hbond", "One directed hydrogen bond: donor, hydrogen, acceptor.", "size; donor; hydrogen; acceptor; d_AH; d_DA; angle", "indices are dimensionless; distances in angstrom; angle in degrees"),
+        ("seams_directed_hbonds", "Directed hydrogen-bond edges for selected donor and acceptor types.", "sys; pair_cutoff; dist_cutoff; angle_cutoff; donor_types; n_donor_types; acceptor_types; n_acceptor_types; hydrogen_type; exclude_same_mol; edges; cap; n_out", "distances in angstrom; angle in degrees; indices are dimensionless"),
         ("seams_domains", "Largest polar or apolar domain.", "sys; cutoff; site_spec; subset; n_subset; largest; percolation", "cutoff in angstrom; percolation is dimensionless"),
         ("seams_fingerprint", "Topological fingerprint of the bonded graph.", "sys; cutoff; type; k; graph; hops; color_types; out", "cutoff in angstrom; hops is a dimensionless depth"),
         ("seams_fingerprint_atom", "Local key of one atom.", "fp; index; buf; cap; n_out", "text"),
@@ -184,7 +188,9 @@ def cxx_rows():
     add("seams_frame_chill_plus_rule", "Write CHILL+ labels for a named rule.", "frame; cutoff; type; graph; rule; labels; counts9", cut + "; rule is text")
     add("seams_frame_chill_rings", "Run CHILL+ and primitive rings on one neighbour list.", "frame; cutoff; type; graph; max_ring; skin; labels; counts9; ring_counts; ring_counts_len; times", cut + "; skin in angstrom; phase times in seconds")
     add("seams_frame_free", "Free a language-binding frame.", "frame", "handle")
+    add("seams_frame_directed_hbonds", "Directed hydrogen-bond edges sorted by donor, hydrogen, and acceptor.", "frame; pair_cutoff; dist_cutoff; angle_cutoff; donor_types; n_donor_types; acceptor_types; n_acceptor_types; hydrogen_type; exclude_same_mol; donor; hydrogen; acceptor; d_AH; d_DA; angle; cap; n_out", "distances in angstrom; angle in degrees; indices are dimensionless")
     add("seams_frame_from_arrays", "Build a frame from coordinates and a cell.", "xyz; n; box9; types; ids", "coordinates and box lengths in angstrom")
+    add("seams_frame_from_hydrogen_cloud", "Build a frame from a heavy-atom cloud and a separate hydrogen cloud.", "heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9", "coordinates and box lengths in angstrom")
     add("seams_frame_from_species", "Build a frame and keep molecule ids.", "xyz; n; box9; types; ids; mols", "coordinates and box lengths in angstrom")
     add("seams_frame_ids", "Pointer to the atom ids stored on the frame.", "frame", "dimensionless ids")
     add("seams_frame_index", "Return the frame index that was read.", "frame", "dimensionless index, 1-based in the file")
