@@ -42,7 +42,11 @@ host_system = host_machine.system()
 
 _dist_python = find_program('python3', 'python', required: false)
 if _dist_python.found()
-  meson.add_dist_script(_dist_python, files('scripts/dist_strip_vcs.py'))
+  # A seams-core release archive runs this script. A superproject's
+  # `meson dist --include-subprojects` must not.
+  if not meson.is_subproject()
+    meson.add_dist_script(_dist_python, files('scripts/dist_strip_vcs.py'))
+  endif
 endif
 
 # Global accumulator variables (eOn pattern)
