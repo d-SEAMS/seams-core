@@ -9,11 +9,13 @@ not the frame index).
 |--------+--------+------------------|
 | ~.lammpstrj~, ~.dump~, ~.lammps~, anything else | LAMMPS dump text | yes |
 | ~.xyz~ | ~sinp::readXYZ~ | yes |
-| ~.pdb~, ~.gro~, ~.dcd~ | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
+| ~.pdb~, ~.gro~, ~.dcd~, ~.xtc~, ~.trr~, ~.nc~ | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
+| the 30 VMD molfile suffixes (see [[*VMD molfile readers][VMD molfile readers]]) | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
 | ~.con~ | ~sinp::readCon~ | only with ~SEAMS_HAS_READCON~ |
 
 The CLI takes the substring after the last ~.~ and compares it to
-~xyz~, ~con~, ~pdb~, ~gro~, and ~dcd~. The comparison is exact, so
+~xyz~, ~con~, ~pdb~, ~gro~, ~dcd~, ~xtc~, ~trr~, ~nc~, and the molfile
+suffixes. The comparison is exact, so
 ~foo.xyz/dump~ is a LAMMPS dump. A path with no dot is a LAMMPS dump.
 ~seams --features~ reports chemfiles and readcon-core. The 2.14
 Python frame is documented on [[file:python-frame.org][Python Frame]].
@@ -61,8 +63,8 @@ seeded hexagonal 0 cubic 0 both 0 water 0~. ~--graph~ replaces
 seeded signature SPEC cages 0 atoms 0~.
 ~seams read~ on a missing dump prints ~nop 0~ and returns 0.
 A missing ~.con~ path makes the CLI throw ~cannot read PATH~.
-A ~.pdb~, ~.gro~, or ~.dcd~ path on a build without chemfiles throws
-~chemfiles is not in this build~.
+A chemfiles suffix (~.pdb~, ~.gro~, ~.dcd~, a molfile suffix, ...) on a
+build without chemfiles throws ~chemfiles is not in this build~.
 
 ~sinp::nLammpsFrames~ is ~0~ when the file cannot be read.
 ~sinp::forEachLammpsFrame~ is a no-op when that count is ~0~, or
@@ -208,12 +210,13 @@ The CLI routes ~.xyz~ here and does not apply ~--type~ on the read.
 Classification still receives ~--type~ and sees the types assigned
 above.
 
-* chemfiles (PDB, GRO, DCD)
+* chemfiles (PDB, GRO, DCD, XTC, TRR, NetCDF, VMD molfile)
 
 Compiled when Meson finds chemfiles (~SEAMS_HAS_CHEMFILES~). The CLI
-opens ~.pdb~, ~.gro~, and ~.dcd~ only. The C++ entry
-~sinp::readChemfiles~ accepts any path chemfiles can open. A ~.dcd~
-beside a ~.pdb~ of the same stem uses that PDB as topology.
+opens ~.pdb~, ~.gro~, ~.dcd~, ~.xtc~, ~.trr~, ~.nc~ and the molfile
+suffixes below. The C++ entry ~sinp::readChemfiles~ and ~sinp::openFrame~
+accept any path chemfiles can open. A ~.dcd~ beside a ~.pdb~ of the same
+stem uses that PDB as topology.
 
 Frame ~N~ is step ~N-1~. ~--type I~ with ~I > 0~ keeps that species
 number. ~--type 0~ and a negative type keep every atom. Species is
@@ -234,6 +237,95 @@ zero steps throws ~std::runtime_error("XYZ read failed: the file has no frames")
 
 A flake build leaves chemfiles off. The default pixi environment
 provides chemfiles. ~seams --features~ then prints ~chemfiles: enabled~.
+
+* VMD molfile readers
+
+The chemfiles d-SEAMS links reads every VMD molfile format that
+chemfiles 0.10.4 can compile and that returns atoms: 30 plugins and 33
+formats. chemfiles itself enables three (TRJ, PSF, Molden).
+~cmake/patches/chemfiles-0.10.4-molfiles.patch~ adds the rest to the
+patched 0.10.4 that Meson and CMake build. Configure keeps an installed
+chemfiles only when ~cmake/chemfiles_mmcif_probe.cpp~ finds all 33
+names and counts the frame of ~cmake/molfile_water.rst7~. An unpatched
+0.10.x has three, so configure prints, for example,
+
+#+begin_src text
+Message: system chemfiles has 3 of 33 VMD molfile readers; missing ABINIT, ...; building patched 0.10.4, which has all of them
+#+end_src
+
+and builds the patched copy. No build links a chemfiles with fewer
+readers. ~-Dwith_chemfiles=disabled~ is the only way to have none.
+
+The format is picked from the suffix, compared exactly. A format with
+no suffix is reached through chemfiles by name (~chemfiles::Trajectory(path,
+'r', "ABINIT")~), not through ~sinp::openFrame~ or the CLI. Readers
+marked topology read atoms and no coordinates; every position of such a
+frame is at the origin.
+
+| format | suffix | plugin | authors (plugin ~author~ field) | copyright and licence |
+|--------+--------+--------+---------------------------------+-----------------------|
+| TRJ | ~.trj~ | gromacsplugin | David Norris, Justin Gullingsrud, Magnus Lundborg; ~Gromacs.h~ implements the 3dfcoord algorithm of Frans van Hoesel | University of Illinois, NCSA |
+| PSF (topology) | ~.psf~ | psfplugin | Justin Gullingsrud, John Stone | University of Illinois, NCSA |
+| Molden | ~.molden~ | moldenplugin | Markus Dittrich, Jan Saam, Alexey Titov | University of Illinois, NCSA |
+| ABINIT | none | abinitplugin | Rob Lahaye (Sungkyunkwan University) | Rob Lahaye; only as part of an open-source project |
+| MSI Biograf Format | ~.bgf~ | bgfplugin | Peter Freddolino | University of Illinois, NCSA |
+| Scripps Binpos | ~.binpos~ | binposplugin | Brian Bennion | University of Illinois, NCSA |
+| InsightII car | ~.car~ | carplugin | Eamon Caddigan | University of Illinois, NCSA |
+| CHARMM Coordinates | ~.cor~ | corplugin | Eamon Caddigan, John Stone | University of Illinois, NCSA |
+| CPMD | ~.cpmd~ | cpmdplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA |
+| Gaussian Cube | ~.cube~ | cubeplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA |
+| DL_POLY_C HISTORY | ~.dlpolyhist~ | dlpolyplugin | John Stone | University of Illinois, NCSA |
+| DL_POLY_4 HISTORY | none | dlpolyplugin | John Stone | University of Illinois, NCSA |
+| DL_POLY CONFIG | ~.dlpolyconfig~ | dlpolyplugin | Alin M Elena | University of Illinois, NCSA |
+| DESRES Trajectory | ~.dtr~ (a directory) | dtrplugin | D. E. Shaw Research | D. E. Shaw Research, LLC, BSD-3-Clause |
+| GAMESS | ~.log~ | gamessplugin | Jan Saam, Markus Dittrich, Johan Strumpfer | University of Illinois, NCSA |
+| js | ~.js~ | jsplugin | John Stone | University of Illinois, NCSA |
+| Maestro File | ~.mae~ | maeffplugin | D. E. Shaw Research | D. E. Shaw Research, LLC, BSD-3-Clause |
+| InsightII MDF (topology) | ~.mdf~ | mdfplugin | Eamon Caddigan, Axel Kohlmeyer | University of Illinois, NCSA |
+| NAMD Binary Coordinates | ~.coor~ | namdbinplugin | James Phillips, Justin Gullingsrud | University of Illinois, NCSA |
+| AMBER7 Parm (topology) | ~.parm7~ | parm7plugin | Brian Bennion, Justin Gullingsrud, John Stone | University of Illinois, NCSA; ~ReadPARM7.h~ Regents of the University of California (Bill Ross, UCSF), notice kept unmodified |
+| AMBER Parm (topology) | ~.parm~ | parmplugin | Justin Gullingsrud, John Stone | University of Illinois, NCSA; ~ReadPARM.h~ Regents of the University of California (Bill Ross, UCSF), notice kept unmodified |
+| PQR | ~.pqr~ | pqrplugin | Eamon Caddigan | University of Illinois, NCSA |
+| AMBER7 Restart | ~.rst7~ | rst7plugin | Brian Bennion, Axel Kohlmeyer | University of Illinois, NCSA |
+| VMD Tinker | none (~.arc~ is chemfiles' own Tinker) | tinkerplugin | John Stone | University of Illinois, NCSA |
+| VASP_XDATCAR5 | ~.VASP_XDATCAR5~ | vasp5xdatcarplugin | Sung Sakong | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| VASP_OUTCAR | ~.OUTCAR~ | vaspoutcarplugin | Sung Sakong | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| VASP_POSCAR | ~.POSCAR~ | vaspposcarplugin | Sung Sakong | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| VASP_XDATCAR | ~.XDATCAR~ | vaspxdatcarplugin | Sung Sakong | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| VASP_xml | ~.xml~ | vaspxmlplugin | Sung Sakong | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| VTF structure format (topology) | ~.vsf~ | vtfplugin | Olaf Lenz, Henri Menke | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| VTF trajectory format | ~.vtf~ | vtfplugin | Olaf Lenz, Henri Menke | University of Illinois, NCSA (~molfiles/LICENSE~) |
+| Internal Paratool Format | ~.xbgf~ | xbgfplugin | Peter Freddolino | University of Illinois, NCSA |
+| (Animated) XCrySDen Structure File | ~.xsf~ | xsfplugin | Axel Kohlmeyer, John Stone | University of Illinois, NCSA (~molfiles/LICENSE~) |
+
+"University of Illinois, NCSA" is the University of Illinois Open
+Source License of the Board of Trustees of the University of Illinois
+(Theoretical and Computational Biophysics Group, UIUC). "(~molfiles/LICENSE~)"
+marks a plugin source with no notice of its own, which that file covers.
+~LICENSE.note~ gives the terms of every part of the chemfiles build and
+~AUTHORS~ names its authors.
+
+Not built, with the reason:
+
+| plugin | reason |
+|--------+--------|
+| cifplugin | chemfiles lists it, but ~molfiles.tar.gz~ has no source for it |
+| crdplugin, and vtfplugin's ~vcf~ reader | the file has no atom count; VMD takes it from a topology loaded first, which ~Molfile<F>~ cannot pass |
+| babelplugin | runs an external Open Babel ~babel~ through ~system()~ and reads nothing itself |
+| basissetplugin | basis sets only, no atoms |
+| msms, grasp, molemesh, off, raster3d, stl | graphics meshes only |
+| avs, biomocca, brix, ccp4, dsn6, dx, edm, fs4, grd, grid, map, pbeq, phi, plt, situs, spider, uhbd, vaspchgcar, vaspparchg | volumetric data only |
+
+~Molfile<F>~ reads atoms, so none of these could be a chemfiles
+format. Their sources still ship in the fetched ~molfiles.tar.gz~.
+
+The patch also fixes three crashes the new plugins hit in chemfiles'
+~Molfile<F>~: counting frames passed a null timestep (rst7 crashed on a
+valid file), an empty file reached the plugin (rst7 crashed),
+and a plugin that found no atoms sized the frame from 0 or -1. An empty
+file is now the chemfiles error ~the file at 'PATH' is empty~, and a
+file without atoms ~the VMDFMT_<F> plugin found no atoms in 'PATH'~;
+~sinp::openFrame~ returns an empty cloud for both.
 
 * eOn ~.con~
 
