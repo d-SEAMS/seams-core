@@ -4,7 +4,7 @@
 You label one frame two ways.
 CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
-Install ~pydseamslib~ 2.14.0 with ~pip install 'pydseamslib==2.14.0'~ and import ~from dseams import userframe~, the frame over ~libseams_lang~.
+Install ~pydseamslib~ with ~pip install pydseamslib~ and import ~from dseams import userframe~, the frame over ~libseams_lang~.
 
 * The mixed TIP4P frame
 

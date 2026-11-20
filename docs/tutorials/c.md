@@ -1,6 +1,6 @@
 # C tutorial
 
-Label the eight-atom cubic cell with `seams.h` and print the library version. The program is `docs/examples/ice.c`. It prints `2.14.0 cubic 8`.
+Label the eight-atom cubic cell with `seams.h` and print the library version. The program is `docs/examples/ice.c`. It prints the project version and `cubic 8`.
 
 ```{eval-rst}
 .. include:: ../videos/embeds/c.rst

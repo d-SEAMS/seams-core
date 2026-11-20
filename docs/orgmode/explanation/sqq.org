@@ -2,7 +2,7 @@
 #+OPTIONS: toc:nil num:nil
 
 SQQ 0.5.8 counts shortest-path chordless rings of size 4, 5 and 6.
-d-SEAMS 2.14.0 counts primitive rings, and that census includes
+d-SEAMS counts primitive rings, and that census includes
 3-rings, which SQQ does not search. On a crystal the two censuses
 are the same list. On a disordered hydrogen-bond network they are
 not, and an ice label that reads those rings moves with them.

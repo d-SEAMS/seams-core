@@ -1,4 +1,4 @@
-# Releasing 2.14.0
+# Releasing seams-core
 
 This file is the seams-core release: the tag, the GitHub release, conda
 `libseams`, and `libseams_jll`. Nothing in it uploads. The language
@@ -10,21 +10,27 @@ not publish: `.github/workflows/release.yml` runs only when
 `github.repository == 'd-SEAMS/seams-core'`, with `GITHUB_TOKEN`. No other
 token is added for this repository.
 
-Build with `-j2`. Do not install into `/usr/lib`.
+Build with `-j2`. Do not install into `/usr/lib`. Let `VERSION` be the
+Meson project version:
+
+```sh
+VERSION=$(python3 scripts/check_release_version.py --print)
+```
 
 ## 1. Tag
 
 ```sh
 git checkout <release-commit>
-git tag -a v2.14.0 -m "d-SEAMS 2.14.0"
-git push https://github.com/d-SEAMS/seams-core.git v2.14.0
+git tag -a "v${VERSION}" -m "d-SEAMS ${VERSION}"
+git push https://github.com/d-SEAMS/seams-core.git "v${VERSION}"
 ```
 
 ## 2. GitHub release
 
 The tag push starts `.github/workflows/release.yml`, which cuts the
-`## [2.14.0]` section out of `CHANGELOG.md` and runs `gh release create`
-with it as the notes. Check the release page once the job finishes.
+`## [X.Y.Z]` section (matching `${VERSION}`) out of `CHANGELOG.md` and
+runs `gh release create` with it as the notes. Check the release page
+once the job finishes.
 
 ## 3. conda `libseams`
 
@@ -33,9 +39,9 @@ with it as the notes. Check the release page once the job finishes.
 files) from the GitHub tag archive. Fill in the archive digest:
 
 ```sh
-curl -L -o seams-core-2.14.0.tar.gz \
-  https://github.com/d-SEAMS/seams-core/archive/refs/tags/v2.14.0.tar.gz
-sha256sum seams-core-2.14.0.tar.gz
+curl -L -o "seams-core-${VERSION}.tar.gz" \
+  "https://github.com/d-SEAMS/seams-core/archive/refs/tags/v${VERSION}.tar.gz"
+sha256sum "seams-core-${VERSION}.tar.gz"
 ```
 
 Write that digest into `recipe/recipe.yaml` (`source.sha256`). Then:
@@ -50,8 +56,8 @@ exists); opening that pull request is the publish step.
 
 ## 4. Yggdrasil `libseams_jll`
 
-`packaging/yggdrasil/L/libseams/build_tarballs.jl` pins
-`v2_14_0_tag_sha`. If `git rev-parse v2.14.0^{commit}` is not that
+`packaging/yggdrasil/L/libseams/build_tarballs.jl` pins the tag commit
+(`tag_sha`). If `git rev-parse "v${VERSION}^{commit}"` is not that
 constant, replace it with the tag commit. Build locally:
 
 ```sh
@@ -61,13 +67,13 @@ julia build_tarballs.jl --deploy=local
 
 Copy `packaging/yggdrasil/L/libseams` into a Yggdrasil checkout and open
 that pull request. When it merges, the registry bot registers
-`libseams_jll` 2.14.0 in the Julia General registry, which Dseams.jl
-needs before it can register.
+`libseams_jll` for `${VERSION}` in the Julia General registry, which
+Dseams.jl needs before it can register.
 
 ## 5. Language bindings
 
-Each binding moves its seams-core pin to `v2.14.0`, sets its version to
-2.14.0, and releases by the steps its own repository documents:
+Each binding moves its seams-core pin to `v${VERSION}`, sets its version
+to `${VERSION}`, and releases by the steps its own repository documents:
 
 | Repository | Package |
 |------------|---------|
@@ -80,6 +86,6 @@ Each binding moves its seams-core pin to `v2.14.0`, sets its version to
 
 The first five can go in any order. Dseams.jl waits for `libseams_jll`.
 The core Docs workflow installs `pydseamslib` from the PydSEAMSlib
-`v2.14.0` tag, so the published core documentation needs that tag.
+`v${VERSION}` tag, so the published core documentation needs that tag.
 `docs/orgmode/development/repositories.org` has the pin locations and the
 release order in one place.

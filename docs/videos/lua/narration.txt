@@ -1,4 +1,4 @@
-Both interpreters print 2.14.0 and cubic 8. The LuaJIT FFI loads the same library and prints ffi ok.
+Both interpreters print the project version and cubic 8. The LuaJIT FFI loads the same library and prints ffi ok.
 
 The mixed dump keeps 250 oxygens. The guest frame is clathrate 46, with 184 neighbour entries and ring sizes through 8.
 

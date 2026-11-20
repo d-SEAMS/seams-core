@@ -99,7 +99,7 @@ seams_version_string
 
    const char *seams_version_string(void)
 
-Version text, for example "2.14.0".
+Version text of the built library.
 
 Returns: Pointer to a static string. Never NULL.
 

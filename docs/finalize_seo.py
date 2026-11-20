@@ -12,7 +12,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from check_seo import BASE_URL, MetadataParser
-from discoverability import lastmod_for
+from discoverability import lastmod_for, project_version
 
 NOT_LISTED = ("search.html", "genindex.html")
 ROBOTS = re.compile(r'<meta[^>]+name=["\']robots["\'][^>]*>', re.IGNORECASE)
@@ -58,7 +58,7 @@ def _json_ld() -> str:
                 "applicationCategory": "ScientificApplication",
                 "operatingSystem": "Linux, macOS",
                 "url": BASE_URL,
-                "softwareVersion": "2.14.0",
+                "softwareVersion": project_version(),
                 "license": "https://spdx.org/licenses/GPL-3.0-or-later.html",
                 "citation": "https://doi.org/10.1021/acs.jcim.0c00031",
             },
@@ -171,6 +171,11 @@ def self_test() -> None:
         )
         if not all(item in source for item in required):
             raise ValueError("self-test did not add all metadata")
+        blob = source.split('<script type="application/ld+json">', 1)[1].split("</script>", 1)[0]
+        payload = json.loads(blob)
+        apps = [node for node in payload["@graph"] if node.get("@type") == "SoftwareApplication"]
+        if len(apps) != 1 or apps[0].get("softwareVersion") != project_version():
+            raise ValueError("softwareVersion is not the project version")
         tree = ET.parse(root / "sitemap.xml")
         locs = [node.text for node in tree.iter() if node.tag.endswith("loc")]
         if locs != ["https://docs.dseams.info/api-cpp/"]:

@@ -9,7 +9,7 @@ Classify ice Ih from Rust. The recording uses `input/traj/ice1h.lammpstrj`: `sea
 The binding is [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs). `dseams-sys` is the raw FFI for `include/seams.h`. `dseams` is the safe wrapper.
 
 ```bash
-cargo add dseams@2.14.0
+cargo add dseams
 ```
 
 The same two engine commands, without the crates, print the ice Ih census:

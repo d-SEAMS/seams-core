@@ -319,7 +319,7 @@ SEAMS_API int seams_version_minor(void);
 SEAMS_API int seams_version_patch(void);
 
 /**
- * @brief Version text, for example "2.14.0".
+ * @brief Version text of the built library.
  * @return Pointer to a static string. Never NULL.
  * @par Ownership
  * The caller does not free it.

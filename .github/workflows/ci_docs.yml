@@ -130,6 +130,7 @@ jobs:
       - name: C++ API docs
         run: |
           sudo apt-get update && sudo apt-get install -y doxygen
+          python3 scripts/doxygen_version_header.py
           doxygen docs/Doxyfile.lang
 
       - name: Build the library the examples call
