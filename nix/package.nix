@@ -16,7 +16,20 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "seams";
-  version = "2.14.0";
+  version =
+    let
+      afterProject = builtins.elemAt (lib.splitString "\nproject(" ("\n" + builtins.readFile ../meson.build)) 1;
+      projectBlock = builtins.head (lib.splitString ")" afterProject);
+      lines = lib.splitString "\n" projectBlock;
+      matchLine =
+        line:
+        builtins.match "[ \t]*version:[ \t]*'([0-9]+\\.[0-9]+\\.[0-9]+)',?[ \t]*" line;
+      matches = lib.filter (m: m != null) (map matchLine lines);
+    in
+    if matches == [ ] then
+      throw "Could not extract project version from project() block in ../meson.build"
+    else
+      builtins.head (builtins.head matches);
 
   src = lib.fileset.toSource {
     root = ./..;
