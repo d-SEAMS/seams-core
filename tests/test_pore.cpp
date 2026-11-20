@@ -1075,8 +1075,10 @@ TEST_CASE("random cells match a Monte Carlo shell at the covering radius", "[por
     REQUIRE_THAT(shell, Catch::Matchers::WithinRel(polar, 1e-6));
     const double sampled = monteCarloShell(face, partial, gen);
     // 40000 samples of a shell that covers only part of the face. The
-    // largest relative gap on this seed is 0.010. A 0.02 band rejects the
-    // cell volume and a several-percent hit swap.
+    // largest relative gap on this seed is 0.010. This 0.02 band is a
+    // stochastic sanity check (about 3.5 standard deviations), not the
+    // accuracy gate: the deterministic polar comparison above is the 1e-6
+    // gate and rejects biases that this band can hide.
     REQUIRE_THAT(shell, Catch::Matchers::WithinRel(sampled, 0.02));
   }
 }
@@ -1247,39 +1249,221 @@ double bruteImage(double lx, double ly, double lz, double xy, double xz, double 
   return best;
 }
 
+struct LongVec {
+  long double x;
+  long double y;
+  long double z;
+};
+
+long double longDot(LongVec a, LongVec b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+LongVec longSubtract(LongVec a, LongVec b) {
+  return {a.x - b.x, a.y - b.y, a.z - b.z};
+}
+
+LongVec longScale(long double scale, LongVec value) {
+  return {scale * value.x, scale * value.y, scale * value.z};
+}
+
+void reduceReferenceBasis(LongVec basis[3]) {
+  for (;;) {
+    LongVec orthogonal[3];
+    long double mu[3][3] = {};
+    long double norm[3] = {};
+    for (int i = 0; i < 3; ++i) {
+      orthogonal[i] = basis[i];
+      for (int j = 0; j < i; ++j) {
+        mu[i][j] = longDot(basis[i], orthogonal[j]) / norm[j];
+        orthogonal[i] =
+            longSubtract(orthogonal[i], longScale(mu[i][j], orthogonal[j]));
+      }
+      norm[i] = longDot(orthogonal[i], orthogonal[i]);
+    }
+    bool changed = false;
+    for (int k = 1; k < 3 && !changed; ++k) {
+      for (int j = k - 1; j >= 0; --j) {
+        const long double q = std::round(mu[k][j]);
+        if (q != 0.0L) {
+          basis[k] = longSubtract(basis[k], longScale(q, basis[j]));
+          changed = true;
+          break;
+        }
+      }
+      if (!changed &&
+          norm[k] < (0.99L - mu[k][k - 1] * mu[k][k - 1]) * norm[k - 1]) {
+        std::swap(basis[k], basis[k - 1]);
+        changed = true;
+      }
+    }
+    if (!changed) {
+      return;
+    }
+  }
+}
+
+double exactImage(double lx, double ly, double lz, double xy, double xz,
+                  double yz, const double d[3]) {
+  LongVec basis[3] = {{lx, 0.0L, 0.0L}, {xy, ly, 0.0L}, {xz, yz, lz}};
+  reduceReferenceBasis(basis);
+  LongVec orthogonal[3];
+  long double mu[3][3] = {};
+  long double norm[3] = {};
+  for (int i = 0; i < 3; ++i) {
+    orthogonal[i] = basis[i];
+    for (int j = 0; j < i; ++j) {
+      mu[i][j] = longDot(basis[i], orthogonal[j]) / norm[j];
+      orthogonal[i] =
+          longSubtract(orthogonal[i], longScale(mu[i][j], orthogonal[j]));
+    }
+    norm[i] = longDot(orthogonal[i], orthogonal[i]);
+  }
+  const LongVec target = {d[0], d[1], d[2]};
+  LongVec babai = target;
+  for (int i = 2; i >= 0; --i) {
+    const long double q = std::round(longDot(babai, orthogonal[i]) / norm[i]);
+    babai = longSubtract(babai, longScale(q, basis[i]));
+  }
+  long double best2 = longDot(babai, babai);
+  long double coordinate[3];
+  for (int i = 0; i < 3; ++i) {
+    coordinate[i] = longDot(target, orthogonal[i]) / norm[i];
+  }
+  const long double width2 = std::sqrt(best2 / norm[2]);
+  for (long long i2 = static_cast<long long>(std::ceil(coordinate[2] - width2));
+       i2 <= static_cast<long long>(std::floor(coordinate[2] + width2)); ++i2) {
+    const long double error2 = coordinate[2] - static_cast<long double>(i2);
+    const long double radius2 = error2 * error2 * norm[2];
+    if (radius2 > best2) {
+      continue;
+    }
+    const long double centre1 =
+        coordinate[1] - static_cast<long double>(i2) * mu[2][1];
+    const long double width1 = std::sqrt((best2 - radius2) / norm[1]);
+    for (long long i1 = static_cast<long long>(std::ceil(centre1 - width1));
+         i1 <= static_cast<long long>(std::floor(centre1 + width1)); ++i1) {
+      const long double error1 = centre1 - static_cast<long double>(i1);
+      const long double radius1 = radius2 + error1 * error1 * norm[1];
+      if (radius1 > best2) {
+        continue;
+      }
+      const long double centre0 = coordinate[0] -
+                                  static_cast<long double>(i2) * mu[2][0] -
+                                  static_cast<long double>(i1) * mu[1][0];
+      const long double width0 = std::sqrt((best2 - radius1) / norm[0]);
+      for (long long i0 = static_cast<long long>(std::ceil(centre0 - width0));
+           i0 <= static_cast<long long>(std::floor(centre0 + width0)); ++i0) {
+        const LongVec lattice = {static_cast<long double>(i0) * basis[0].x +
+                                     static_cast<long double>(i1) * basis[1].x +
+                                     static_cast<long double>(i2) * basis[2].x,
+                                 static_cast<long double>(i0) * basis[0].y +
+                                     static_cast<long double>(i1) * basis[1].y +
+                                     static_cast<long double>(i2) * basis[2].y,
+                                 static_cast<long double>(i0) * basis[0].z +
+                                     static_cast<long double>(i1) * basis[1].z +
+                                     static_cast<long double>(i2) * basis[2].z};
+        const LongVec delta = longSubtract(target, lattice);
+        best2 = std::min(best2, longDot(delta, delta));
+      }
+    }
+  }
+  return std::sqrt(static_cast<double>(best2));
+}
+
 TEST_CASE("minimum image on a long tilted cell matches brute force", "[pore]") {
-  const double channels[][4] = {
-      {12.0, 12.0, 100.0, 0.5}, {12.0, 12.0, 400.0, 0.5}, {12.0, 12.0, 1000.0, 0.5},
-      {10.0, 10.0, 2000.0, 1e-6},
+  const double channels[][6] = {
+      {12.0, 12.0, 100.0, 0.5, 0.0, 0.0},
+      {12.0, 12.0, 400.0, 0.5, 0.0, 0.0},
+      {12.0, 12.0, 1000.0, 0.5, 0.0, 0.0},
+      {10.0, 10.0, 2000.0, 1e-6, 0.0, 0.0},
+      {10000.0, 12.0, 12.0, 3.0, 3.0, 0.0},
+      {1000000.0, 1.0, 1.0, 0.5, 0.5, 0.5},
   };
+  std::mt19937_64 namedGen(4242);
+  std::uniform_real_distribution<double> fractional(-0.5, 0.5);
   for (const auto &cell : channels) {
-    auto cloud = triclinic(cell[0], cell[1], cell[2], cell[3], 0.0, 0.0);
-    const double a[3] = {1.0, 1.0, 1.0};
-    const double b[3] = {5.0, 6.0, 0.45 * cell[2]};
-    const auto got = gen::triclinicMinImage(cloud, b[0], b[1], b[2], a[0], a[1], a[2]);
-    const double found = std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
-    const double d[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
-    const double ref = bruteImage(cell[0], cell[1], cell[2], cell[3], 0.0, 0.0, d, 3);
+    auto cloud =
+        triclinic(cell[0], cell[1], cell[2], cell[3], cell[4], cell[5]);
+    for (int pair = 0; pair < 64; ++pair) {
+      const double sf[3] = {fractional(namedGen), fractional(namedGen),
+                            fractional(namedGen)};
+      const double tf[3] = {fractional(namedGen), fractional(namedGen),
+                            fractional(namedGen)};
+      const double a[3] = {cell[0] * sf[0] + cell[3] * sf[1] + cell[4] * sf[2],
+                           cell[1] * sf[1] + cell[5] * sf[2], cell[2] * sf[2]};
+      const double b[3] = {cell[0] * tf[0] + cell[3] * tf[1] + cell[4] * tf[2],
+                           cell[1] * tf[1] + cell[5] * tf[2], cell[2] * tf[2]};
+      const auto got =
+          gen::triclinicMinImage(cloud, b[0], b[1], b[2], a[0], a[1], a[2]);
+      const double found =
+          std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
+      const double d[3] = {b[0] - a[0], b[1] - a[1], b[2] - a[2]};
+      const double ref =
+          exactImage(cell[0], cell[1], cell[2], cell[3], cell[4], cell[5], d);
+      REQUIRE_THAT(found, Catch::Matchers::WithinAbs(ref, 1e-8));
+    }
+  }
+
+  // The gate's seed and cell count. Restricting the tilts to LAMMPS limits
+  // makes every generated cell physically representable while retaining the
+  // large aspect ratios that exposed the fractional-start bug.
+  std::mt19937_64 gen(4242);
+  std::uniform_real_distribution<double> logLength(-3.0, 3.0);
+  std::uniform_real_distribution<double> half(-0.5, 0.5);
+  int longer = 0;
+  for (int trial = 0; trial < 4000; ++trial) {
+    const double lx = std::pow(10.0, logLength(gen));
+    const double ly = std::pow(10.0, logLength(gen));
+    const double lz = std::pow(10.0, logLength(gen));
+    const double xy = half(gen) * lx;
+    const double xz = half(gen) * lx;
+    const double yz = half(gen) * ly;
+    Cloud cloud;
+    REQUIRE(nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.4, -1.2,
+                                          2.0, lx, ly, lz, xy, xz, yz));
+    const double sf[3] = {half(gen), half(gen), half(gen)};
+    const double tf[3] = {half(gen), half(gen), half(gen)};
+    const double left[3] = {0.4 + lx * sf[0] + xy * sf[1] + xz * sf[2],
+                            -1.2 + ly * sf[1] + yz * sf[2], 2.0 + lz * sf[2]};
+    const double right[3] = {0.4 + lx * tf[0] + xy * tf[1] + xz * tf[2],
+                             -1.2 + ly * tf[1] + yz * tf[2], 2.0 + lz * tf[2]};
+    const auto got = gen::triclinicMinImage(cloud, left[0], left[1], left[2],
+                                            right[0], right[1], right[2]);
+    const double found =
+        std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
+    const double d[3] = {left[0] - right[0], left[1] - right[1],
+                         left[2] - right[2]};
+    const double ref = exactImage(lx, ly, lz, xy, xz, yz, d);
+    const auto wrapped =
+        gen::fracDelta(gen::makeFracBox(cloud), left[0], left[1], left[2],
+                       right[0], right[1], right[2]);
+    const double wrap =
+        std::sqrt(wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] +
+                  wrapped[2] * wrapped[2]);
+    if (wrap > ref + 1e-9) {
+      longer += 1;
+    }
     REQUIRE_THAT(found, Catch::Matchers::WithinAbs(ref, 1e-8));
   }
 
-  std::mt19937_64 gen(77);
+  // Preserve the original over-tilted seed set as well as the gate sweep.
+  std::mt19937_64 legacyGen(77);
   std::uniform_real_distribution<double> length(5.0, 15.0);
   std::uniform_real_distribution<double> unit(0.0, 1.0);
   std::uniform_real_distribution<double> mild(-0.5, 0.5);
   std::uniform_real_distribution<double> steep(-2.5, 2.5);
-  int longer = 0;
   for (int trial = 0; trial < 400; ++trial) {
     const bool over = trial % 2 == 0;
-    const double lx = length(gen);
-    const double ly = length(gen);
-    const double lz = length(gen);
-    const double xy = (over ? steep(gen) : mild(gen)) * lx;
-    const double xz = (over ? steep(gen) : mild(gen)) * lx;
-    const double yz = (over ? steep(gen) : mild(gen)) * ly;
+    const double lx = length(legacyGen);
+    const double ly = length(legacyGen);
+    const double lz = length(legacyGen);
+    const double xy = (over ? steep(legacyGen) : mild(legacyGen)) * lx;
+    const double xz = (over ? steep(legacyGen) : mild(legacyGen)) * lx;
+    const double yz = (over ? steep(legacyGen) : mild(legacyGen)) * ly;
     Cloud cloud;
-    REQUIRE(nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.4, -1.2, 2.0, lx, ly, lz, xy, xz,
-                                          yz));
+    REQUIRE(nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.4, -1.2,
+                                          2.0, lx, ly, lz, xy, xz, yz));
     for (int pair = 0; pair < 25; ++pair) {
       auto place = [&](double s0, double s1, double s2, double out[3]) {
         out[0] = 0.4 + lx * s0 + xy * s1 + xz * s2;
@@ -1288,22 +1472,28 @@ TEST_CASE("minimum image on a long tilted cell matches brute force", "[pore]") {
       };
       double left[3];
       double right[3];
-      place(unit(gen) * 3.0 - 1.0, unit(gen) * 3.0 - 1.0, unit(gen) * 3.0 - 1.0, left);
-      place(unit(gen), unit(gen), unit(gen), right);
-      const auto got =
-          gen::triclinicMinImage(cloud, left[0], left[1], left[2], right[0], right[1], right[2]);
-      const double found = std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
-      const double d[3] = {left[0] - right[0], left[1] - right[1], left[2] - right[2]};
+      place(unit(legacyGen) * 3.0 - 1.0, unit(legacyGen) * 3.0 - 1.0,
+            unit(legacyGen) * 3.0 - 1.0, left);
+      place(unit(legacyGen), unit(legacyGen), unit(legacyGen), right);
+      const auto got = gen::triclinicMinImage(cloud, left[0], left[1], left[2],
+                                              right[0], right[1], right[2]);
+      const double found =
+          std::sqrt(got[0] * got[0] + got[1] * got[1] + got[2] * got[2]);
+      const double d[3] = {left[0] - right[0], left[1] - right[1],
+                           left[2] - right[2]};
       const double ref = bruteImage(lx, ly, lz, xy, xz, yz, d, 9);
-      const auto wrapped = gen::fracDelta(gen::makeFracBox(cloud), left[0], left[1], left[2], right[0],
-                                          right[1], right[2]);
-      const double wrap =
-          std::sqrt(wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2]);
-      if (wrap > ref + 1e-9) {
-        longer += 1;
-      }
       REQUIRE_THAT(found, Catch::Matchers::WithinAbs(ref, 1e-8));
     }
   }
   REQUIRE(longer > 0);
+}
+
+TEST_CASE("minimum image rejects a numerically degenerate tilted cell",
+          "[pore]") {
+  const double phi = (1.0 + std::sqrt(5.0)) / 2.0;
+  const double ly = std::pow(phi, -120.0);
+  const std::array<double, 3> displacement = {0.4, 0.4 * ly, 0.4};
+  REQUIRE_THROWS_AS(gen::mic::euclideanIfShorter(1.0, ly, 1.0, 0.5, 0.25, 0.0,
+                                                 displacement, displacement),
+                    std::runtime_error);
 }

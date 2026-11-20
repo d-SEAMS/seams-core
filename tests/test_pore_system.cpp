@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <random>
 #include <utility>
 #include <vector>
@@ -359,4 +360,38 @@ TEST_CASE("seams_host_guest on a long tilted cell matches brute force", "[pore][
     REQUIRE(report.nearest_distance.size() == 1);
     REQUIRE_THAT(report.nearest_distance[0], Catch::Matchers::WithinAbs(best, 1e-8));
   }
+}
+
+TEST_CASE("seams_host_guest refines minimage on an x-elongated cell",
+          "[pore][system]") {
+  constexpr double lx = 10000.0;
+  constexpr double ly = 12.0;
+  constexpr double lz = 12.0;
+  constexpr double xy = 3.0;
+  constexpr double xz = 3.0;
+  const std::vector<double> xyz = {5000.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  const std::vector<int> types = {1, 2};
+  const std::array<double, 9> box = {0.0, 0.0, 0.0, lx, ly, lz, xy, xz, 0.0};
+  seams::System sys;
+  sys.set_frame(xyz, box, types);
+  seams::HostGuestOptions options;
+  options.guest = 1;
+  options.framework = 2;
+  options.cutoff = 3.0;
+  const auto report = sys.host_guest(options);
+
+  double best = std::numeric_limits<double>::infinity();
+  for (int j = -500; j <= 500; ++j) {
+    for (int k = -500; k <= 500; ++k) {
+      const double shiftedX = xyz[0] + j * xy + k * xz;
+      const int i = static_cast<int>(std::round(-shiftedX / lx));
+      const double x = shiftedX + i * lx;
+      const double y = j * ly;
+      const double z = k * lz;
+      best = std::min(best, std::sqrt(x * x + y * y + z * z));
+    }
+  }
+  REQUIRE(report.nearest_distance.size() == 1);
+  REQUIRE_THAT(report.nearest_distance[0],
+               Catch::Matchers::WithinAbs(best, 1e-8));
 }

@@ -9,17 +9,25 @@
 #ifndef SEAMS_EUCLIDEAN_MIC_H_
 #define SEAMS_EUCLIDEAN_MIC_H_
 
-// Euclidean minimum image for a triclinic cell when libminimage is not
-// linked. The fractional wrap is the nearest image only inside the Smith
-// ball. Past that ball the closest lattice point is Babai rounding in a
-// Selling superbasis, then the Sommer–Feder–Shalvi slicer. This is the
-// same reduction libminimage applies, so a build without that library
-// still rejects the longer fractional image.
+// Euclidean minimum image for a triclinic cell. The fractional wrap is the
+// nearest image only inside the Smith ball. Past that ball the closest
+// lattice point is Babai rounding in a Selling superbasis, followed by the
+// Sommer–Feder–Shalvi slicer.
+//
+// None of the reduction loops has an iteration cap. Every accepted Lagrange,
+// Selling, or slicer step must strictly lower a non-negative, finite squared
+// norm, evaluated in long double over binary64 vectors. There are finitely
+// many binary64 vectors below the initial norm, which is a (very loose)
+// termination bound. A slicer gain below long-double resolution is converged
+// at that numeric precision. Other failures to decrease, and bases that cannot
+// be represented as full rank, throw instead of returning an unchecked image.
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstddef>
 #include <limits>
+#include <stdexcept>
 #include <utility>
 
 namespace gen {
@@ -33,6 +41,12 @@ struct Vec3 {
 };
 
 inline double n2(Vec3 v) { return v.x * v.x + v.y * v.y + v.z * v.z; }
+
+inline long double n2Long(Vec3 v) {
+  return static_cast<long double>(v.x) * v.x +
+         static_cast<long double>(v.y) * v.y +
+         static_cast<long double>(v.z) * v.z;
+}
 
 inline double dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
 
@@ -54,7 +68,6 @@ struct Obtuse {
   Vec3 v[4]{};
   double rel[3][8]{};
   double halfN2[8]{};
-  double gram[8][8]{};
   double inv[3][3]{};
   int idx[3] = {0, 1, 2};
   bool ok = false;
@@ -73,18 +86,15 @@ inline void relevantOf(const Vec3 v[4], Obtuse &o) {
     o.rel[0][k] = vecs[k].x;
     o.rel[1][k] = vecs[k].y;
     o.rel[2][k] = vecs[k].z;
-    o.halfN2[k] = (k < 7) ? 0.5 * n2(vecs[k]) * (1.0 + 1e-12)
-                          : std::numeric_limits<double>::infinity();
-    for (int j = 0; j < 8; j++) {
-      o.gram[k][j] = dot(vecs[k], vecs[j]);
-    }
+    o.halfN2[k] =
+        (k < 7) ? 0.5 * n2(vecs[k]) : std::numeric_limits<double>::infinity();
   }
 }
 
-inline bool alreadyObtuse(const Vec3 v[4], double tol) {
+inline bool alreadyObtuse(const Vec3 v[4]) {
   for (int i = 0; i < 3; i++) {
     for (int j = i + 1; j < 4; j++) {
-      if (dot(v[i], v[j]) > tol) {
+      if (dot(v[i], v[j]) > 0.0) {
         return false;
       }
     }
@@ -93,7 +103,7 @@ inline bool alreadyObtuse(const Vec3 v[4], double tol) {
 }
 
 inline void lagrangeReduce(Vec3 v[3]) {
-  for (int pass = 0; pass < 24; pass++) {
+  for (;;) {
     for (int i = 1; i < 3; i++) {
       int j = i;
       while (j > 0 && n2(v[j]) < n2(v[j - 1])) {
@@ -112,8 +122,17 @@ inline void lagrangeReduce(Vec3 v[3]) {
         }
         const double q = roundAway(dot(v[i], v[j]) / lj);
         if (q != 0.0) {
-          v[i] = add(v[i], scale(-q, v[j]));
-          changed = true;
+          const Vec3 reduced = add(v[i], scale(-q, v[j]));
+          const double before = n2(v[i]);
+          const double after = n2(reduced);
+          if (!std::isfinite(after) || after > before) {
+            throw std::runtime_error(
+                "minimum-image Lagrange reduction reached binary64 limits");
+          }
+          if (after < before) {
+            v[i] = reduced;
+            changed = true;
+          }
         }
       }
     }
@@ -123,13 +142,13 @@ inline void lagrangeReduce(Vec3 v[3]) {
   }
 }
 
-inline bool sellingSteps(Vec3 v[4], double tol, int budget) {
-  for (int step = 0; step < budget; step++) {
+inline void sellingSteps(Vec3 v[4]) {
+  for (;;) {
     int si = -1;
     int sj = -1;
     for (int i = 0; i < 3 && si < 0; i++) {
       for (int j = i + 1; j < 4; j++) {
-        if (dot(v[i], v[j]) > tol) {
+        if (dot(v[i], v[j]) > 0.0) {
           si = i;
           sj = j;
           break;
@@ -137,7 +156,11 @@ inline bool sellingSteps(Vec3 v[4], double tol, int budget) {
       }
     }
     if (si < 0) {
-      return true;
+      return;
+    }
+    long double before = 0.0L;
+    for (int i = 0; i < 4; i++) {
+      before += n2Long(v[i]);
     }
     const Vec3 taken = v[si];
     for (int k = 0; k < 4; k++) {
@@ -146,8 +169,15 @@ inline bool sellingSteps(Vec3 v[4], double tol, int budget) {
       }
     }
     v[si] = scale(-1.0, taken);
+    long double after = 0.0L;
+    for (int i = 0; i < 4; i++) {
+      after += n2Long(v[i]);
+    }
+    if (!std::isfinite(after) || !(after < before)) {
+      throw std::runtime_error(
+          "minimum-image Selling reduction reached binary64 limits");
+    }
   }
-  return false;
 }
 
 // Inverse of the matrix with columns cols[0..2]. inv is stored so that
@@ -210,60 +240,58 @@ inline Obtuse finish(const Vec3 v[4]) {
 
 inline Obtuse obtuseSuperbasis(Vec3 a, Vec3 b, Vec3 c) {
   const Vec3 original[4] = {a, b, c, scale(-1.0, add(add(a, b), c))};
-  const double scaleLen = std::max(n2(a) + n2(b) + n2(c), 1.0);
-  const double tol = 1e-10 * scaleLen;
-  if (alreadyObtuse(original, tol)) {
+  for (const Vec3 &v : original) {
+    if (!std::isfinite(n2(v))) {
+      throw std::runtime_error("minimum-image cell exceeds binary64 range");
+    }
+  }
+  if (alreadyObtuse(original)) {
     return finish(original);
   }
   Vec3 reduced[3] = {a, b, c};
   lagrangeReduce(reduced);
   Vec3 v[4] = {reduced[0], reduced[1], reduced[2],
                scale(-1.0, add(add(reduced[0], reduced[1]), reduced[2]))};
-  if (sellingSteps(v, tol, 64) || sellingSteps(v, tol, 1000)) {
-    return finish(v);
-  }
-  Obtuse failed = finish(original);
-  failed.ok = false;
-  return failed;
+  sellingSteps(v);
+  return finish(v);
 }
 
 inline Vec3 descend(const Obtuse &s, Vec3 x) {
-  double t[8];
-  for (int k = 0; k < 8; k++) {
-    t[k] = x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
+  for (;;) {
+    double bestGain = 0.0;
+    int at = -1;
+    double sign = 0.0;
+    for (int k = 0; k < 8; k++) {
+      const double projection =
+          x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
+      const double gain = std::abs(projection) - s.halfN2[k];
+      if (gain > bestGain) {
+        bestGain = gain;
+        at = k;
+        sign = projection > 0.0 ? 1.0 : -1.0;
+      }
+    }
+    if (at < 0) {
+      return x;
+    }
+    const Vec3 next = {x.x - sign * s.rel[0][at], x.y - sign * s.rel[1][at],
+                       x.z - sign * s.rel[2][at]};
+    const long double before = n2Long(x);
+    const long double after = n2Long(next);
+    if (!std::isfinite(n2(next))) {
+      throw std::runtime_error("minimum-image slicer reached binary64 limits");
+    }
+    if (!(after < before)) {
+      const long double resolution =
+          16.0L * std::numeric_limits<long double>::epsilon() *
+          std::max(before, 1.0L);
+      if (static_cast<long double>(bestGain) <= resolution) {
+        return x;
+      }
+      throw std::runtime_error("minimum-image slicer reached binary64 limits");
+    }
+    x = next;
   }
-  for (int iter = 0; iter < 64; iter++) {
-    double g[8];
-    for (int k = 0; k < 8; k++) {
-      g[k] = std::abs(t[k]) - s.halfN2[k];
-    }
-    const auto larger = [](int i, double gi, int j, double gj) {
-      return gj > gi ? std::pair<int, double>{j, gj} : std::pair<int, double>{i, gi};
-    };
-    const auto p01 = larger(0, g[0], 1, g[1]);
-    const auto p23 = larger(2, g[2], 3, g[3]);
-    const auto p45 = larger(4, g[4], 5, g[5]);
-    const auto p03 = larger(p01.first, p01.second, p23.first, p23.second);
-    const auto p46 = larger(p45.first, p45.second, 6, g[6]);
-    const auto best = larger(p03.first, p03.second, p46.first, p46.second);
-    const double gain = best.second;
-    const int at = best.first;
-    const double f = gain > 0.0 ? (t[at] > 0.0 ? 1.0 : -1.0) : 0.0;
-    x.x -= f * s.rel[0][at];
-    x.y -= f * s.rel[1][at];
-    x.z -= f * s.rel[2][at];
-    for (int k = 0; k < 8; k++) {
-      t[k] -= f * s.gram[at][k];
-    }
-    bool any = false;
-    for (int k = 0; k < 8; k++) {
-      any = any || std::abs(t[k]) > s.halfN2[k];
-    }
-    if (!any) {
-      break;
-    }
-  }
-  return x;
 }
 
 inline Vec3 babai(const Obtuse &s, Vec3 y) {
@@ -283,36 +311,12 @@ inline Vec3 babai(const Obtuse &s, Vec3 y) {
           y.z - (z0 * b0.z + z1 * b1.z + z2 * b2.z)};
 }
 
-inline Vec3 shell(Vec3 a, Vec3 b, Vec3 c, Vec3 y) {
-  Vec3 best = y;
-  double best2 = n2(y);
-  for (int r = 0; r <= 16; r++) {
-    for (int i = -r; i <= r; i++) {
-      for (int j = -r; j <= r; j++) {
-        for (int k = -r; k <= r; k++) {
-          if (r > 0 && std::abs(i) != r && std::abs(j) != r && std::abs(k) != r) {
-            continue;
-          }
-          const Vec3 d = {y.x - (i * a.x + j * b.x + k * c.x),
-                          y.y - (i * a.y + j * b.y + k * c.y),
-                          y.z - (i * a.z + j * b.z + k * c.z)};
-          const double d2 = n2(d);
-          if (d2 < best2) {
-            best2 = d2;
-            best = d;
-          }
-        }
-      }
-    }
-  }
-  return best;
-}
-
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 y) {
-  if (s.ok) {
-    return descend(s, babai(s, y));
+  if (!s.ok) {
+    throw std::runtime_error(
+        "minimum-image cell is numerically singular in binary64");
   }
-  return shell(s.v[0], s.v[1], s.v[2], y);
+  return descend(s, babai(s, y));
 }
 
 inline bool engineIsShort(Vec3 a, Vec3 b, Vec3 c) {
@@ -327,7 +331,6 @@ inline bool engineIsShort(Vec3 a, Vec3 b, Vec3 c) {
 struct Cached {
   double key[6]{};
   Obtuse s{};
-  bool engineStart = false;
   bool filled = false;
 };
 
@@ -360,7 +363,6 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
   const Vec3 b{xy, ly, 0.0};
   const Vec3 c{xz, yz, lz};
   slot.s = obtuseSuperbasis(a, b, c);
-  slot.engineStart = engineIsShort(a, b, c);
   slot.filled = true;
   return slot;
 }
@@ -375,13 +377,12 @@ inline std::array<double, 3>
 euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double yz,
                    const std::array<double, 3> &raw, const std::array<double, 3> &wrapped) {
   const Cached &slot = cachedBasis(lx, ly, lz, xy, xz, yz);
-  const Vec3 y{raw[0], raw[1], raw[2]};
+  (void)raw;
   const Vec3 w{wrapped[0], wrapped[1], wrapped[2]};
-  const Vec3 euc = (slot.engineStart && slot.s.ok) ? descend(slot.s, w)
-                                                    : closestDisplacement(slot.s, y);
+  const Vec3 euc = closestDisplacement(slot.s, w);
   const double f2 = n2(w);
   const double e2 = n2(euc);
-  if (e2 + 1e-12 * (1.0 + f2) < f2) {
+  if (e2 < f2) {
     return {euc.x, euc.y, euc.z};
   }
   return wrapped;

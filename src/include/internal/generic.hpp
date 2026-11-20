@@ -361,11 +361,11 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 //
 // A positive three-length box is orthorhombic and wraps each axis. A box
 // with fewer than six values does not read tilt slots. Inside the Smith
-// ball the fractional wrap is the minimum image. Outside it the result is
-// minimage when that library is linked. If the library is absent, or its
-// call fails, the result is mic::euclideanIfShorter, the Selling reduction
-// with no image-count cap. The fractional wrap is not returned in place of
-// a shorter image, and an elongated cell does not fail the call.
+// ball the fractional wrap is the minimum image. Outside it, the linked
+// minimage result (when available) and the fractional wrap are both refined
+// by mic::euclideanIfShorter. Its uncapped Selling reduction either returns
+// the shorter checked image or throws when binary64 cannot represent the
+// reduction reliably.
 //
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
@@ -389,12 +389,16 @@ inline std::array<double, 3> triclinicMinImage(
     }
 #ifdef SEAMS_HAS_MINIMAGE
     double ed[3] = {0.0, 0.0, 0.0};
+    const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
     if (euclideanDelta(yCloud, xi, yi, zi, xj, yj, zj, ed)) {
-      return {ed[0], ed[1], ed[2]};
+      return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw,
+                                     {ed[0], ed[1], ed[2]});
     }
-#endif
+    return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
+#else
     const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
     return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
+#endif
   }
   if (yCloud.box.size() < 6) {
     std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
@@ -471,10 +475,16 @@ periodicDistSq(const FracBox &b,
     }
 #ifdef SEAMS_HAS_MINIMAGE
     double ed[3] = {0.0, 0.0, 0.0};
+    const std::array<double, 3> raw = {atom.x - pj.x, atom.y - pj.y,
+                                       atom.z - pj.z};
     if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z, ed)) {
-      return ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
+      const auto euc = mic::euclideanIfShorter(
+          b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, {ed[0], ed[1], ed[2]});
+      return euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
     }
-    return r2;
+    const auto euc = mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz,
+                                             raw, wrapped);
+    return euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
 #else
     const std::array<double, 3> raw = {atom.x - pj.x, atom.y - pj.y, atom.z - pj.z};
     const auto euc = mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz,
@@ -626,10 +636,12 @@ inline std::array<double, 3> relDistFromPoint(
     }
 #ifdef SEAMS_HAS_MINIMAGE
     double ed[3] = {0.0, 0.0, 0.0};
+    const std::array<double, 3> raw = {atom.x - xj, atom.y - yj, atom.z - zj};
     if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, xj, yj, zj, ed)) {
-      return {ed[0], ed[1], ed[2]};
+      return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw,
+                                     {ed[0], ed[1], ed[2]});
     }
-    return dr;
+    return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
 #else
     const std::array<double, 3> raw = {atom.x - xj, atom.y - yj, atom.z - zj};
     return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
