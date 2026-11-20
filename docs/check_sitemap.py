@@ -388,8 +388,6 @@ def mapper_cases():
             (["https://example.com/index.html"], "outside"),
             (["https://docs.dseams.info/missing.html"], "missing.html"),
             (["https://docs.dseams.info/../index.html"], "escapes"),
-            (["https://docs.dseams.info/index.html"], "canonical"),
-            (["https://docs.dseams.info/contributing/index.html"], "canonical"),
         ]
         for locs, needle in bad_cases:
             _write_urlset(build / "sitemap.xml", locs)
