@@ -5,7 +5,7 @@ Draft cues converted from captions.srt. Final wording and timing are recorded la
 
 1
 00:00:00.320 --> 00:00:16.000 line:95% align:center size:80%
-Both interpreters print 2.14.0 and cubic 8. The LuaJIT FFI loads the same library and prints ffi ok.
+Both interpreters print the project version and cubic 8. The LuaJIT FFI loads the same library and prints ffi ok.
 
 2
 00:00:16.300 --> 00:00:34.000 line:95% align:center size:80%

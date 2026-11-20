@@ -34,6 +34,18 @@ def present(number, text):
     return re.search(r"(?<![\d.])" + re.escape(number) + r"(?![\d.])", text) is not None
 
 
+def project_version(root):
+    text = (Path(root) / "meson.build").read_text(encoding="utf-8")
+    match = re.search(r"^project\([^)]*?version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'", text, re.M)
+    if match is None:
+        fail("meson.build has no project version")
+    return match.group(1)
+
+
+def expand_version(text, version):
+    return text.replace("<version>", version)
+
+
 def stable(text):
     """Drop run-to-run timers and the LAMMPS release banner. The census lines stay exact."""
     text = re.sub(r"LAMMPS \([^)]*\)", "LAMMPS (VERSION)", text)
@@ -225,15 +237,7 @@ def scenes_of(folder):
     return parsed
 
 
-def check_folder(folder, env, root, record, absent):
-    parsed = scenes_of(folder)
-    narration = (folder / "narration.txt").read_text().strip()
-    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", narration) if part.strip()]
-    if len(paragraphs) != len(parsed):
-        fail("{} narration has {} paragraphs for {} scenes".format(folder.name, len(paragraphs), len(parsed)))
-    script = (folder / "script.md").read_text()
-    if leaked(script) or leaked(narration):
-        fail("{} contains a local path".format(folder.name))
+def check_captions(folder):
     srt = (folder / "captions.srt").read_text()
     vtt = (folder / "captions.vtt").read_text()
     if "WEBVTT" not in vtt or "line:95%" not in vtt:
@@ -249,6 +253,41 @@ def check_folder(folder, env, root, record, absent):
             timing = block.splitlines()[1]
             if timing not in vtt:
                 fail("{} vtt was not converted from srt ({})".format(folder.name, timing))
+
+
+def check_static_folder(folder, version):
+    parsed = scenes_of(folder)
+    narration = (folder / "narration.txt").read_text().strip()
+    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", narration) if part.strip()]
+    if len(paragraphs) != len(parsed):
+        fail("{} narration has {} paragraphs for {} scenes".format(folder.name, len(paragraphs), len(parsed)))
+    script = (folder / "script.md").read_text()
+    if leaked(script) or leaked(narration):
+        fail("{} contains a local path".format(folder.name))
+    check_captions(folder)
+    path = folder / "recorded.txt"
+    have = path.read_text() if path.is_file() else ""
+    expanded = expand_version(have, version)
+    for item in parsed:
+        for expect in item["expects"]:
+            needle = expand_version(expect, version)
+            if needle not in expanded:
+                fail("{} {} missing {!r} in recorded.txt".format(folder.name, item["name"], needle))
+    missing = [number for number in tokens(narration) if not present(number, expanded)]
+    if missing:
+        fail("{} narration numbers missing from recorded.txt: {}".format(folder.name, ", ".join(missing)))
+
+
+def check_folder(folder, env, root, record, absent, version):
+    parsed = scenes_of(folder)
+    narration = (folder / "narration.txt").read_text().strip()
+    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", narration) if part.strip()]
+    if len(paragraphs) != len(parsed):
+        fail("{} narration has {} paragraphs for {} scenes".format(folder.name, len(paragraphs), len(parsed)))
+    script = (folder / "script.md").read_text()
+    if leaked(script) or leaked(narration):
+        fail("{} contains a local path".format(folder.name))
+    check_captions(folder)
     recorded = []
     held = False
     for item in parsed:
@@ -286,8 +325,9 @@ def check_folder(folder, env, root, record, absent):
             continue
         text = "\n".join(stdout)
         for expect in item["expects"]:
-            if expect not in text:
-                fail("{} {} missing {!r}\n{}".format(folder.name, item["name"], expect, text[-500:]))
+            needle = expand_version(expect, version)
+            if needle not in text:
+                fail("{} {} missing {!r}\n{}".format(folder.name, item["name"], needle, text[-500:]))
         recorded.append("## {}\n{}".format(item["name"], clean(text)))
     path = folder / "recorded.txt"
     have = path.read_text() if path.is_file() else ""
@@ -296,7 +336,7 @@ def check_folder(folder, env, root, record, absent):
         # still matches its own section, the narration, which quotes the
         # skipped scene too, is not checked, and --record does not rewrite it.
         sections = {}
-        for block in re.split(r"(?m)^(?=## )", have):
+        for block in re.split(r"(?m)^(?=## )", expand_version(have, version)):
             if block.startswith("## "):
                 sections[block.splitlines()[0]] = block.rstrip() + "\n"
         for block in recorded:
@@ -309,9 +349,10 @@ def check_folder(folder, env, root, record, absent):
     if record:
         path.write_text(got)
         have = got
-    if stable(have) != stable(got):
+    expanded = expand_version(have, version)
+    if stable(expanded) != stable(got):
         fail("{} recorded.txt does not match the tape output".format(folder.name))
-    missing = [number for number in tokens(narration) if not present(number, path.read_text())]
+    missing = [number for number in tokens(narration) if not present(number, expanded)]
     if missing:
         fail("{} narration numbers missing from recorded.txt: {}".format(folder.name, ", ".join(missing)))
     print(folder.name, "scenes", len(parsed), "recorded ok")
@@ -407,10 +448,13 @@ def main():
     # repositories (dseams-fortran, Dseams.jl, yodaStruct, dseams-r,
     # dseams-rs). Those repositories replay them; this tree checks only
     # their embeds above.
+    version = project_version(root)
+    for name in MOVED_TAPES:
+        check_static_folder(videos / name, version)
     folders = [videos / name for name in CUTS if name not in MOVED_TAPES]
     absent = []
     for folder in folders:
-        check_folder(folder, env, root, record, absent)
+        check_folder(folder, env, root, record, absent, version)
     if absent:
         for line in absent:
             print("skipped:", line)

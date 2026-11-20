@@ -6,7 +6,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 ## Start
 
-- [d-SEAMS](https://docs.dseams.info/index.md): d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
+- [d-SEAMS](https://docs.dseams.info/index.md): d-SEAMS reads a molecular-dynamics trajectory and names the ice in it.
 
 ## Getting started
 

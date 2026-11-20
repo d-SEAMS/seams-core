@@ -59,14 +59,37 @@ H2 = re.compile(r"^## .+")
 def _version_problems():
     version = pub.project_version()
     problems = []
-    if version != "2.14.2":
-        problems.append("meson project version is {}, expected 2.14.2".format(version))
     conf = (DOCS / "source" / "conf.py").read_text(encoding="utf-8")
-    if (
-        'version = "{}"'.format(version) not in conf
-        and "version = project_version()" not in conf
+    tree = ast.parse(conf)
+    assigned = {}
+    for node in tree.body:
+        if (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+        ):
+            assigned[node.targets[0].id] = node.value
+
+    def _is_project_version_call(expr):
+        return (
+            isinstance(expr, ast.Call)
+            and not expr.args
+            and not expr.keywords
+            and isinstance(expr.func, ast.Attribute)
+            and expr.func.attr == "project_version"
+            and isinstance(expr.func.value, ast.Name)
+            and expr.func.value.id == "discoverability"
+        )
+
+    ver_expr = assigned.get("version")
+    rel_expr = assigned.get("release")
+    if not _is_project_version_call(ver_expr):
+        problems.append("conf.py version must call discoverability.project_version()")
+    if not (
+        _is_project_version_call(rel_expr)
+        or (isinstance(rel_expr, ast.Name) and rel_expr.id == "version")
     ):
-        problems.append("conf.py version does not match meson")
+        problems.append("conf.py release does not match derived version {}".format(version))
     return problems
 
 

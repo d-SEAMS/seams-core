@@ -55,7 +55,7 @@
 
 * Overview
 
-d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
+d-SEAMS reads a molecular-dynamics trajectory and names the ice in it.
 The name is Deferred Structural Elucidation Analysis for Molecular
 Simulations. This release of the repository is the C++ engine
 ~libyodaLib~, the C API ~libseams~ (~include/seams.h~), the header-only

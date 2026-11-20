@@ -8,7 +8,7 @@ Set Padding 0
 # duration 16.00
 # test docs_video_tapes
 # test lua_examples
-# expect 2.14.0 cubic 8
+# expect <version> cubic 8
 # expect ffi ok
 Hide
 Type 'PS1='"'"'$ '"'"''
