@@ -1,0 +1,783 @@
+# Copyright (c) d-SEAMS developers
+# Edits inside chemfiles' molfiles.tar.gz, applied by
+# chemfiles-0.10.4-molfile-sources.sh before chemfiles unpacks the archive.
+#
+# molfile_plugin.h gains the three QM fields cpmdlogplugin and
+# gaussianplugin write (have_esp, have_internals, shell_symmetry), and
+# those two plugins are compiled instead of being wrapped in `#if false`.
+#
+# Hostile files:
+#   mdfplugin stops when the molecule section is truncated.
+#   ReadPARM7.h bounds every %s to its buffer. The file's own notice
+#   requires that change to be noted in comments; it is.
+#   vtfplugin no longer walks off its line buffer, rejects a negative or
+#   huge atom id, checks realloc, and refuses a token that does not fit
+#   the molfile field.
+#   rst7plugin rejects an atom count that does not fit in the bytes left
+#   in the file, and stops when a coordinate scan comes up short.
+#   tinkerplugin does the same for its atom count, and stops at EOF when
+#   the count line has no newline.
+diff -ruN molfiles-a/molfiles/CMakeLists.txt molfiles-b/molfiles/CMakeLists.txt
+--- molfiles-a/molfiles/CMakeLists.txt	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/CMakeLists.txt	2026-11-20 21:08:20.990240902 +0000
+@@ -24,3 +24,12 @@
+ 
+ include_directories(include)
+ add_library(molfiles OBJECT ${MOLFILES_SRC})
++# d-SEAMS: dmsplugin includes sqlite3.h. The chemfiles CMakeLists.txt finds
++# SQLite3 and sets SEAMS_SQLITE3_TARGET before adding this directory.
++# Linking here is in the directory that creates the target. The chemfiles
++# library also links the same target, because an OBJECT library's link
++# interface is not carried by $<TARGET_OBJECTS>.
++if(SEAMS_SQLITE3_TARGET)
++    target_include_directories(molfiles PRIVATE ${SQLite3_INCLUDE_DIRS})
++    target_link_libraries(molfiles PUBLIC ${SEAMS_SQLITE3_TARGET})
++endif()
+diff -ruN molfiles-a/molfiles/include/molfile_plugin.h molfiles-b/molfiles/include/molfile_plugin.h
+--- molfiles-a/molfiles/include/molfile_plugin.h	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/include/molfile_plugin.h	2026-11-20 20:59:15.657087143 +0000
+@@ -343,6 +343,11 @@
+   int have_carthessian;         /**< hessian in cartesian coords available  */
+   int have_inthessian;          /**< hessian in internal coords available  */
+   int have_normalmodes;         /**< normal modes available  */
++  /* VMD ABI fields the QM log plugins write. chemfiles' snapshot of this
++     header stopped before them, which is why those plugins were wrapped
++     in `#if false`. */
++  int have_esp;                 /**< electrostatic potential available */
++  int have_internals;           /**< internal coordinates available */
+ } molfile_qm_metadata_t;
+ 
+ 
+@@ -389,6 +394,7 @@
+                              *   E.g. S={0 0 0}, Px={1 0 0}, Dxy={1 1 0}, or Fyyz={0 2 1}. 
+                              */
+   int *shell_types;         /**< type for each shell in basis */
++  int *shell_symmetry;          /**< symmetry code for each shell */
+ } molfile_qm_basis_t;
+ 
+ 
+diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlogplugin.c
+--- molfiles-a/molfiles/src/cpmdlogplugin.c	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/cpmdlogplugin.c	2026-11-20 20:59:15.657087143 +0000
+@@ -1,4 +1,4 @@
+-#if false
++#if 1 /* molfile_qm_* now has the fields this plugin writes */
+ 
+ /***************************************************************************
+  *cr
+diff -ruN molfiles-a/molfiles/src/gaussianplugin.c molfiles-b/molfiles/src/gaussianplugin.c
+--- molfiles-a/molfiles/src/gaussianplugin.c	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/gaussianplugin.c	2026-11-20 20:59:15.657087143 +0000
+@@ -1,4 +1,4 @@
+-#if false
++#if 1 /* molfile_qm_* now has the fields this plugin writes */
+ 
+ /***************************************************************************
+  *cr
+diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugin.cxx
+--- molfiles-a/molfiles/src/mdfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/mdfplugin.cxx	2026-11-20 20:59:15.661087160 +0000
+@@ -169,7 +169,12 @@
+ 
+   // Count the atoms in each molecule
+   while ( line[0] != '#' ) {
+-    fgets(line, LINESIZE, fd);
++    // A file that ends on the @molecule line used to leave `line` unchanged
++    // (still starting with '@'), skip the inner loop, and spin.
++    if (!fgets(line, LINESIZE, fd)) {
++      fclose(fd);
++      return NULL;
++    }
+ 
+     // Count atoms until a new molecule or the end of the section is reached
+     while ( (line[0] != '@') && (line[0] != '#') ) {
+diff -ruN molfiles-a/molfiles/src/parm7plugin.cxx molfiles-b/molfiles/src/parm7plugin.cxx
+--- molfiles-a/molfiles/src/parm7plugin.cxx	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/parm7plugin.cxx	2026-11-20 21:27:40.284591929 +0000
+@@ -16,6 +16,7 @@
+  ***************************************************************************/
+ 
+ #include <string.h>
++#include <sys/stat.h>
+ #include "molfile_plugin.h"
+ #include "ReadPARM7.h"
+ 
+@@ -41,6 +42,23 @@
+   }
+ 
+   *natoms = prm->Natom;
++  // Natom and the bond tables come from the header. A count that does
++  // not fit in the file, or a negative one, would allocate until the
++  // process dies. Reject it before the arrays are sized.
++  {
++    struct stat st;
++    const int sized = stat(filename, &st) == 0 && S_ISREG(st.st_mode);
++    const long bonds = (long)prm->Nbonh + (long)prm->Nbona;
++    const int atoms_fit = !sized || prm->Natom <= 0 ||
++        (unsigned long)prm->Natom <= (unsigned long)st.st_size;
++    const int bonds_fit = !sized || bonds <= 0 ||
++        (unsigned long)bonds <= (unsigned long)st.st_size;
++    if (prm->Natom < 0 || bonds < 0 || !atoms_fit || !bonds_fit) {
++      delete prm;
++      close_parm7_file(fd, popn);
++      return NULL;
++    }
++  }
+   parmdata *p = new parmdata;
+   memset(p, 0, sizeof(parmdata));
+   p->prm = prm;
+diff -ruN molfiles-a/molfiles/src/ReadPARM7.h molfiles-b/molfiles/src/ReadPARM7.h
+--- molfiles-a/molfiles/src/ReadPARM7.h	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/ReadPARM7.h	2026-11-20 20:59:15.661087160 +0000
+@@ -18,6 +18,9 @@
+  *     Methods get_parm7_atom, get_parm7_bond, get_hydrogen_bond,
+  *     get_parm7_natoms, get_parm7_nbonds, get_parm7_boxInfo were added in 
+  *     order to convert from prm.c parlance to VMD conventions.
++ *     d-SEAMS: the %s scans in read_parm7_flag and read_parm7_header are
++ *     bounded to the destination buffer. A missing field fails the read
++ *     instead of writing past the buffer.
+  ***************************************************************************/
+ 
+ /*
+@@ -75,8 +78,12 @@
+ static int read_parm7_flag(FILE *file, const char *flag, const char *format) {
+   char buf[1024];
+     
+-  /* read the %FLAG text */
+-  fscanf(file, "%s\n", buf);
++  /* read the %FLAG text. Width is one less than buf[1024]. */
++  if (fscanf(file, "%1023s\n", buf) != 1) {
++    printf("AMBER 7 parm read error, at flag section %s,\n", flag);
++    printf("        expected %%FLAG but the field was missing\n");
++    return 0; /* read of flag data failed */
++  }
+   if (strcmp("%FLAG", buf)) {
+     printf("AMBER 7 parm read error, at flag section %s,\n", flag);
+     printf("        expected %%FLAG but got %s\n", buf);
+@@ -84,7 +91,11 @@
+   }
+ 
+   /* read field name specifier */
+-  fscanf(file, "%s\n", buf);
++  if (fscanf(file, "%1023s\n", buf) != 1) {
++    printf("AMBER 7 parm read error at flag section %s,\n", flag);
++    printf("      the flag field was missing\n");
++    return 0; /* read of flag data failed */
++  }
+   if (flag != NULL) {
+     if (strcmp(flag, buf)) {
+       printf("AMBER 7 parm read error at flag section %s,\n", flag);
+@@ -94,7 +105,11 @@
+   }
+ 
+   /* read format string */
+-  fscanf(file, "%s\n", buf);
++  if (fscanf(file, "%1023s\n", buf) != 1) {
++    printf("AMBER 7 parm read error at flag section %s,\n", flag);
++    printf("      the format field was missing\n");
++    return 0; /* read of flag data failed */
++  }
+   if (format != NULL) {
+     if (strcmp(format, buf)) {
+       if ( (!strcmp(flag, "TITLE") || !strcmp(flag, "CTITLE") )
+@@ -367,22 +382,36 @@
+   /* READ VERSION */
+   fgets(sdum, 512, file);
+ 
+-  /* READ TITLE */
+-  fscanf(file, "%s\n", sdum); // "%FLAG"
++  /* READ TITLE. sdum is char[512]; the width leaves room for the terminator. */
++  if (fscanf(file, "%511s\n", sdum) != 1) { // "%FLAG"
++    printf("AMBER 7 parm read error, can't find TITLE flag.\n");
++    delete prm;
++    return NULL;
++  }
+   if (strcmp("%FLAG", sdum)) {
+     printf("AMBER 7 parm read error, can't find TITLE flag.\n");
+     printf("        expected %%FLAG, got %s\n", sdum);
+     delete prm;
+     return NULL;
+   }
+-  fscanf(file, "%s\n", sdum); // "TITLE" or "CTITLE"
++  if (fscanf(file, "%511s\n", sdum) != 1) { // "TITLE" or "CTITLE"
++    printf("AMBER 7 parm read error, at flag section TITLE,\n");
++    printf("        the TITLE field was missing\n");
++    delete prm;
++    return NULL;
++  }
+   if (strcmp("TITLE", sdum) && strcmp("CTITLE", sdum)) {
+     printf("AMBER 7 parm read error, at flag section TITLE,\n");
+     printf("        expected TITLE or CTITLE but got %s,\n", sdum);
+     delete prm;
+     return NULL;
+   }
+-  fscanf(file, "%s\n", sdum); // "FORMAT (20a4)"
++  if (fscanf(file, "%511s\n", sdum) != 1) { // "FORMAT (20a4)"
++    printf("AMBER 7 parm read error, at flag section TITLE,\n");
++    printf("        the FORMAT field was missing\n");
++    delete prm;
++    return NULL;
++  }
+   if (strcmp(sdum, "%FORMAT(20a4)") && strcmp(sdum, "%FORMAT(a80)")) {
+     printf("AMBER 7 parm read error, at flag section TITLE,\n");
+     printf("        expected %%FLAG but got %s,\n", sdum);
+diff -ruN molfiles-a/molfiles/src/rst7plugin.c molfiles-b/molfiles/src/rst7plugin.c
+--- molfiles-a/molfiles/src/rst7plugin.c	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/rst7plugin.c	2026-11-20 20:59:15.673087209 +0000
+@@ -92,15 +92,68 @@
+   data->file = fd;
+   vmdcon_printf(VMDCON_INFO, "rst7plugin) The Restartcrd has %d atoms.\n",numats);
+ 
++  /* A count larger than the bytes still in the file cannot be a real
++     restart: each atom needs at least one byte of coordinate text, and
++     velocities the same again. Scanning `numats` times used to spin on
++     EOF when the count was a multi-billion integer. */
++  if (numats < 0) {
++    vmdcon_printf(VMDCON_ERROR, "rst7plugin) atom count is negative\n");
++    free(data);
++    fclose(fd);
++    return NULL;
++  }
++  {
++    long here = ftell(fd);
++    long end = -1;
++    long room;
++    long need = (long)numats;
++    if (here >= 0 && fseek(fd, 0, SEEK_END) == 0)
++      end = ftell(fd);
++    if (here < 0 || end < here || fseek(fd, here, SEEK_SET) != 0) {
++      vmdcon_printf(VMDCON_ERROR, "rst7plugin) could not measure the file\n");
++      free(data);
++      fclose(fd);
++      return NULL;
++    }
++    room = end - here;
++    if (data->has_vels) {
++      if (need > room / 2) {
++        vmdcon_printf(VMDCON_ERROR,
++          "rst7plugin) atom count %d does not fit in the file\n", numats);
++        free(data);
++        fclose(fd);
++        return NULL;
++      }
++    } else if (need > room) {
++      vmdcon_printf(VMDCON_ERROR,
++        "rst7plugin) atom count %d does not fit in the file\n", numats);
++      free(data);
++      fclose(fd);
++      return NULL;
++    }
++  }
++
+   /* skip over coordinate data */
+   for (i=0; i<numats; i++) {
+     j = fscanf(fd, "%f%f%f", &x, &y, &z);
++    if (j != 3) {
++      vmdcon_printf(VMDCON_ERROR, "rst7plugin) coordinate scan ended early\n");
++      free(data);
++      fclose(fd);
++      return NULL;
++    }
+   }
+ 
+   /* skip over velocity data, if present */
+   if (data->has_vels) {
+     for (i=0; i<numats; i++) {
+       j = fscanf(fd, "%f%f%f", &x, &y, &z);
++      if (j != 3) {
++        vmdcon_printf(VMDCON_ERROR, "rst7plugin) velocity scan ended early\n");
++        free(data);
++        fclose(fd);
++        return NULL;
++      }
+     }
+   }
+   
+diff -ruN molfiles-a/molfiles/src/tinkerplugin.c molfiles-b/molfiles/src/tinkerplugin.c
+--- molfiles-a/molfiles/src/tinkerplugin.c	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/tinkerplugin.c	2026-11-20 20:59:15.673087209 +0000
+@@ -61,11 +61,43 @@
+   i = fscanf(data->file, "%d", natoms);
+   if (i < 1) {
+     fprintf(stderr, "\n\nread) ERROR: tinker file '%s' should have the number of atoms in the first line.\n", filename);
++    fclose(fd);
++    free(data->file_name);
++    free(data);
+     return NULL;
+   }
++  if (*natoms < 0) {
++    fprintf(stderr, "tinker) atom count is negative in '%s'\n", filename);
++    fclose(fd);
++    free(data->file_name);
++    free(data);
++    return NULL;
++  }
++  /* The count is a dense atom count. It cannot exceed the bytes left in
++     the file, or the reader allocates that many atoms and then scans. */
++  {
++    long here = ftell(fd);
++    long end = -1;
++    if (here >= 0 && fseek(fd, 0, SEEK_END) == 0)
++      end = ftell(fd);
++    if (here < 0 || end < here || fseek(fd, here, SEEK_SET) != 0 ||
++        (long)*natoms > (end - here)) {
++      fprintf(stderr, "tinker) atom count %d does not fit in '%s'\n",
++              *natoms, filename);
++      fclose(fd);
++      free(data->file_name);
++      free(data);
++      return NULL;
++    }
++  }
+   data->numatoms=*natoms;
+ 
+-  while (getc(fd) != '\n'); /* skip rest of this line */
++  {
++    int ch;
++    /* A missing newline used to spin: getc returns EOF, which is not '\n'. */
++    while ((ch = getc(fd)) != '\n' && ch != EOF)
++      ;
++  }
+  
+   return data;
+ }
+diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.c
+--- molfiles-a/molfiles/src/vtfplugin.c	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-20 20:59:15.673087209 +0000
+@@ -139,7 +139,10 @@
+  ***************************************************/
+ static void vtf_error(const char *msg, const char *line) {
+   char message[255];
+-  sprintf(message, "vtfplugin:%d: error: %s: \"%s\"\n",    
++  if (line == NULL)
++    line = "";
++  /* The line can be longer than this buffer. snprintf stops. */
++  snprintf(message, sizeof(message), "vtfplugin:%d: error: %s: \"%s\"\n",
+           vtf_lineno, msg, line);
+ 
+ /* #if vmdplugin_ABIVERSION > 13 */
+@@ -225,12 +228,21 @@
+       /* last char is not a newline */
+       /* enlarge the buffer */
+       buffer_size += 255;
+-      buffer = realloc(buffer, buffer_size);
+-      /* TODO: error handling */
+-      /* reposition s */
++      {
++        char *grown = realloc(buffer, (size_t)buffer_size);
++        if (grown == NULL) {
++          sfree(buffer);
++          buffer = NULL;
++          buffer_size = 0;
++          return NULL;
++        }
++        buffer = grown;
++      }
++      /* reposition s. bytes_left is the room left in the new buffer,
++         not that room added to the room already consumed. */
+       l = strlen(buffer);
+       s = buffer + l;
+-      bytes_left += buffer_size - l;
++      bytes_left = buffer_size - l;
+       vtf_lineno--;
+     }
+   } while (1);
+@@ -263,15 +275,29 @@
+  * Parse ATOM
+  ***************************************************/
+ /* Create new atoms so that after the call max_aid atoms are there */
+-static void vtf_create_atoms_as_needed(int max_aid, vtf_data *d) {
++/* Past this, a hostile id would allocate until the process dies.
++   A real VTF structure is far smaller. */
++#define VTF_MAX_ATOMS 10000000u
++
++static int vtf_create_atoms_as_needed(unsigned int max_aid, vtf_data *d) {
+   /* create new atoms as needed */
+-  if (d->natoms < max_aid+1) {
++  if (max_aid >= VTF_MAX_ATOMS) {
++    vtf_error("atom id is larger than this reader accepts", "");
++    return -1;
++  }
++  if (d->natoms < (int)max_aid+1) {
+     int aid;
++    molfile_atom_t *grown;
+       /* fill up with default atoms */
+-      d->atoms = realloc(d->atoms, (max_aid+1)*sizeof(molfile_atom_t));
+-      for (aid = d->natoms; aid <= max_aid; aid++)
++      grown = realloc(d->atoms, ((size_t)max_aid+1)*sizeof(molfile_atom_t));
++      if (grown == NULL) {
++        vtf_error("out of memory creating atoms", "");
++        return -1;
++      }
++      d->atoms = grown;
++      for (aid = d->natoms; aid <= (int)max_aid; aid++)
+         d->atoms[aid] = default_atom;
+-      d->natoms = max_aid+1;
++      d->natoms = (int)max_aid+1;
+ #ifdef _USE_TCL
+     if (d->read_mode != VTF_MOLFILE) {
+       /* fill up with default userdata */
+@@ -280,6 +306,7 @@
+     }
+ #endif
+   }
++  return 0;
+ }
+ 
+ /* Parse the aid specifier.
+@@ -288,11 +315,26 @@
+    the list is empty (i.e. it only contains -1), the default atom is
+    to be modified.
+  */
++static int vtf_specifier_is_negative(const char *s) {
++  while (*s == ' ' || *s == '\t')
++    s++;
++  return *s == '-';
++}
++
++static int *vtf_grow_aid_list(int *aid_list, unsigned int size) {
++  int *grown;
++  if (size > (unsigned int)(2147483647u / sizeof(int)))
++    return NULL;
++  grown = realloc(aid_list, (size_t)size * sizeof(int));
++  return grown;
++}
++
+ static int *vtf_parse_aid_specifier(char *s, vtf_data *d) {
+   int n;
+-  unsigned int aid, from, to, offset;
++  unsigned int aid, from, to, offset, count;
+   unsigned int size = 0;
+   int *aid_list = NULL;
++  int *grown;
+ 
+   if (s[0] == 'd') {
+     /* DEFAULT */
+@@ -305,6 +347,14 @@
+     while (1) {
+       from = d->natoms;
+ 
++      /* glibc %u accepts a leading sign and wraps a negative id into a
++         huge unsigned value. Reject the sign before scanning. */
++      if (vtf_specifier_is_negative(s)) {
++        vtf_error("negative atom id", s);
++        sfree(aid_list);
++        return NULL;
++      }
++
+       if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
+         /* RANGE */
+         if (from > to) { 
+@@ -312,23 +362,62 @@
+           sfree(aid_list);
+           return NULL;
+         }
+-        vtf_create_atoms_as_needed(to, d);
++        if (to >= VTF_MAX_ATOMS || (to - from) >= VTF_MAX_ATOMS) {
++          vtf_error("atom id is larger than this reader accepts", s);
++          sfree(aid_list);
++          return NULL;
++        }
++        if (vtf_create_atoms_as_needed(to, d) != 0) {
++          sfree(aid_list);
++          return NULL;
++        }
+         /* add the range to the aid list */
+         offset = size;
+-        size += to-from+1;
+-        aid_list = realloc(aid_list, size*sizeof(int));
++        count = to - from + 1;
++        if (size > ~0u - count) {
++          vtf_error("atom id range does not fit", s);
++          sfree(aid_list);
++          return NULL;
++        }
++        size += count;
++        grown = vtf_grow_aid_list(aid_list, size);
++        if (grown == NULL) {
++          vtf_error("out of memory reading atom ids", s);
++          sfree(aid_list);
++          return NULL;
++        }
++        aid_list = grown;
+         for (aid = from; aid <= to; aid++) {
+-          aid_list[offset] = aid;
++          aid_list[offset] = (int)aid;
+           offset++;
+         }
+ 
+       } else if (sscanf(s, " %u%n", &to, &n) == 1) {
+         /* SINGLE AID */
+-        vtf_create_atoms_as_needed(to, d);
++        if (to >= VTF_MAX_ATOMS) {
++          vtf_error("atom id is larger than this reader accepts", s);
++          sfree(aid_list);
++          return NULL;
++        }
++        if (vtf_create_atoms_as_needed(to, d) != 0) {
++          sfree(aid_list);
++          return NULL;
++        }
+         /* add the aid to the aid_list */
++        if (size == ~0u) {
++          vtf_error("atom id list does not fit", s);
++          sfree(aid_list);
++          return NULL;
++        }
+         size += 1;
+-        aid_list = realloc(aid_list, size*sizeof(int));
+-        aid_list[size - 1] = to;
++        grown = vtf_grow_aid_list(aid_list, size);
++        if (grown == NULL) {
++          vtf_error("out of memory reading atom ids", s);
++          sfree(aid_list);
++          return NULL;
++        }
++        aid_list = grown;
++        aid_list[size - 1] = (int)to;
+ 
+       } else {
+         /* ERROR */
+@@ -355,7 +444,13 @@
+   }
+ 
+   /* Terminate the list with -1 */
+-  aid_list = realloc(aid_list, (size+1)*sizeof(int));
++  grown = vtf_grow_aid_list(aid_list, size + 1);
++  if (grown == NULL) {
++    vtf_error("out of memory reading atom ids", s);
++    sfree(aid_list);
++    return NULL;
++  }
++  aid_list = grown;
+   aid_list[size] = -1;
+   return aid_list;
+ }
+@@ -384,10 +479,14 @@
+   /* HANDLE THE AID SPECIFIER */
+ 
+   /* save the aid specifier */
+-  if (sscanf(s, " %255s%n", aid_specifier, &n) < 1) {
++  if (sscanf(s, " %254s%n", aid_specifier, &n) < 1) {
+     vtf_error("atom specifier is missing", line);
+     return MOLFILE_ERROR;
+   }
++  if (s[n] != '\0' && !isspace((unsigned char)s[n])) {
++    vtf_error("atom specifier is longer than this reader accepts", line);
++    return MOLFILE_ERROR;
++  }
+   s += n;
+ 
+   aid_list = vtf_parse_aid_specifier(aid_specifier, d);
+@@ -406,7 +505,12 @@
+   
+   /* handle the keywords */
+   rest_is_userdata = 0;
+-  while (sscanf(s, " %255s%n", keyword, &n) == 1) {
++  while (sscanf(s, " %254s%n", keyword, &n) == 1) {
++    if (s[n] != '\0' && !isspace((unsigned char)s[n])) {
++      vtf_error("keyword is longer than this reader accepts", line);
++      sfree(aid_list);
++      return MOLFILE_ERROR;
++    }
+     s += n;
+ #ifdef DEBUG
+     printf("keyword: \"%s\" rest: \"%s\"\n", keyword, s);
+@@ -414,7 +518,12 @@
+     switch (tolower(keyword[0])) {
+     case 'n': {
+       /* name */
+-      if (sscanf(s, " %16s%n", atom.name, &n) == 1) {
++      if (sscanf(s, " %15s%n", atom.name, &n) == 1) {
++        if (s[n] != '\0' && !isspace((unsigned char)s[n])) {
++          vtf_error("name is longer than the molfile field", line);
++          sfree(aid_list);
++          return MOLFILE_ERROR;
++        }
+         AIDLOOP(strcpy(cur_atom->name, atom.name));
+       } else {
+         vtf_error("could not get name in atom record", line);
+@@ -425,7 +534,12 @@
+     }
+     case 't': {
+       /* type */
+-      if (sscanf(s, " %16s%n", atom.type, &n) == 1) {
++      if (sscanf(s, " %15s%n", atom.type, &n) == 1) {
++        if (s[n] != '\0' && !isspace((unsigned char)s[n])) {
++          vtf_error("type is longer than the molfile field", line);
++          sfree(aid_list);
++          return MOLFILE_ERROR;
++        }
+         AIDLOOP(strcpy(cur_atom->type, atom.type));
+       } else {
+         vtf_error("could not get type in atom record", line);
+@@ -459,7 +573,12 @@
+       } else if (strcmp(keyword, "res") == 0 || 
+                  strcmp(keyword, "resname") == 0) {
+         /* resname */
+-        if (sscanf(s, " %8s%n", atom.resname, &n) == 1) {
++        if (sscanf(s, " %7s%n", atom.resname, &n) == 1) {
++          if (s[n] != '\0' && !isspace((unsigned char)s[n])) {
++            vtf_error("resname is longer than the molfile field", line);
++            sfree(aid_list);
++            return MOLFILE_ERROR;
++          }
+           AIDLOOP(strcpy(cur_atom->resname, atom.resname));
+         } else {
+           vtf_error("could not get resname in atom record", line);
+@@ -478,7 +597,12 @@
+     }
+     case 's': {
+       /* segid */
+-      if (sscanf(s, " %8s%n", atom.segid, &n) == 1) {
++      if (sscanf(s, " %7s%n", atom.segid, &n) == 1) {
++        if (s[n] != '\0' && !isspace((unsigned char)s[n])) {
++          vtf_error("segid is longer than the molfile field", line);
++          sfree(aid_list);
++          return MOLFILE_ERROR;
++        }
+         AIDLOOP(strcpy(cur_atom->segid, atom.segid));
+       } else {
+         vtf_error("could not get segid in atom record", line);
+@@ -662,17 +786,34 @@
+   s = line;
+ 
+   while (1) {
++    if (vtf_specifier_is_negative(s)) {
++      vtf_error("negative bond id", s);
++      return MOLFILE_ERROR;
++    }
+     if (sscanf(s, " %u::%u%n", &from, &to, &n) == 2) {
+       /* chain specifier */
++      int *from_grown;
++      int *to_grown;
+       if (from > to) {
+         vtf_error("bad chain specifier (from > to):", s); 
+         return MOLFILE_ERROR;
+       }
++      if ((to - from) >= VTF_MAX_ATOMS || d->nbonds > (int)(VTF_MAX_ATOMS - (to - from))) {
++        vtf_error("bond id is larger than this reader accepts", s);
++        return MOLFILE_ERROR;
++      }
+       bid = d->nbonds;
+-      d->nbonds += to-from;
+-      d->from = realloc(d->from, d->nbonds*sizeof(int));
+-      d->to = realloc(d->to, d->nbonds*sizeof(int));
+-      /* TODO: error handling */
++      d->nbonds += (int)(to-from);
++      from_grown = realloc(d->from, (size_t)d->nbonds*sizeof(int));
++      to_grown = realloc(d->to, (size_t)d->nbonds*sizeof(int));
++      if (from_grown == NULL || to_grown == NULL) {
++        d->from = from_grown != NULL ? from_grown : d->from;
++        d->to = to_grown != NULL ? to_grown : d->to;
++        vtf_error("out of memory reading bonds", s);
++        return MOLFILE_ERROR;
++      }
++      d->from = from_grown;
++      d->to = to_grown;
+       for (aid = from; aid < to; aid++) {
+         /*printf("creating bond from %d to %d\n", aid, aid+1);*/
+         d->from[bid] = aid+1;
+@@ -681,12 +822,25 @@
+       }
+     } else if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
+       /* single bond specifier */
++      int *from_grown;
++      int *to_grown;
++      if (from >= VTF_MAX_ATOMS || to >= VTF_MAX_ATOMS) {
++        vtf_error("bond id is larger than this reader accepts", s);
++        return MOLFILE_ERROR;
++      }
+       d->nbonds += 1;
+-      d->from = realloc(d->from, d->nbonds*sizeof(int));
+-      d->to = realloc(d->to, d->nbonds*sizeof(int));
+-      /* TODO: error handling */
+-      d->from[d->nbonds-1] = from+1;
+-      d->to[d->nbonds-1] = to+1;
++      from_grown = realloc(d->from, (size_t)d->nbonds*sizeof(int));
++      to_grown = realloc(d->to, (size_t)d->nbonds*sizeof(int));
++      if (from_grown == NULL || to_grown == NULL) {
++        d->from = from_grown != NULL ? from_grown : d->from;
++        d->to = to_grown != NULL ? to_grown : d->to;
++        vtf_error("out of memory reading bonds", s);
++        return MOLFILE_ERROR;
++      }
++      d->from = from_grown;
++      d->to = to_grown;
++      d->from[d->nbonds-1] = (int)from+1;
++      d->to[d->nbonds-1] = (int)to+1;
+     } else {
+       vtf_error("bad bond specifier", s);
+       return MOLFILE_ERROR;
+@@ -789,7 +943,7 @@
+       /* ATOM RECORD */
+     case 'a': {
+       /* Remove the "atom" keyword" */
+-     sscanf(line, " %255s%n", s, &n);
++     sscanf(line, " %254s%n", s, &n);
+       line += n;
+     }
+     case '0':
+@@ -811,7 +965,7 @@
+       /* BOND RECORD */
+     case 'b': {
+       /* Remove the "bond" keyword" */
+-      sscanf(line, " %255s%n", s, &n);
++      sscanf(line, " %254s%n", s, &n);
+       line += n;
+       d->return_code = vtf_parse_bond(line, d);
+       break;
+@@ -821,7 +975,7 @@
+     case 'u':
+     case 'p': {
+       /* Remove the "pbc"/"unitcell" keyword */
+-      sscanf(line, " %255s%n", s, &n);
++      sscanf(line, " %254s%n", s, &n);
+       line += n;
+       d->return_code = vtf_parse_pbc(line, d);
+       break;
+@@ -831,7 +985,7 @@
+     case 'c': 
+     case 't': {
+       /* Remove the "timestep" or "coordinates" keyword */
+-      sscanf(line, " %255s%n", s, &n);
++      sscanf(line, " %254s%n", s, &n);
+       line += n;
+     }
+     case 'i': 
+@@ -1040,7 +1194,7 @@
+       case 'c': 
+       case 't':
+         /* Remove the "timestep" or "coordinates" keyword */
+-        sscanf(line, " %255s%n", s, &n);
++        sscanf(line, " %254s%n", s, &n);
+         line += n;
+       case 'i': 
+       case 'o': 
+@@ -1096,7 +1250,7 @@
+       case 'u':
+       case 'p': {
+         /* Remove the "pbc"/"unitcell" keyword */
+-        sscanf(line, " %255s%n", s, &n);
++        sscanf(line, " %254s%n", s, &n);
+         line += n;
+         if (vtf_parse_pbc(line, d) != MOLFILE_SUCCESS) 
+           return MOLFILE_ERROR;
+@@ -1106,7 +1260,7 @@
+         /* USER DATA RECORD */
+       case 'd': {
+         /* Remove the "data" keyword */
+-        sscanf(line, " %255s%n", s, &n);
++        sscanf(line, " %254s%n", s, &n);
+ #ifdef _USE_TCL
+         if (d->read_mode == VTF_USERDATA) {
+           line += n;
+@@ -1120,7 +1274,7 @@
+       case 'c': 
+       case 't': {
+         /* Remove the "timestep" or "coordinates" keyword */
+-        sscanf(line, " %255s%n", s, &n);
++        sscanf(line, " %254s%n", s, &n);
+         line += n;
+       }
+       case 'i': 

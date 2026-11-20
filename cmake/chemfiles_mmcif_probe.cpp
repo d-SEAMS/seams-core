@@ -4,7 +4,7 @@
 //
 // It first lists the registered formats. cmake/patches/
 // chemfiles-0.10.4-molfiles.patch builds every VMD molfile plugin that
-// reads atoms and registers 33 molfile formats. An unpatched 0.10.x
+// reads atoms and registers 37 molfile formats. An unpatched 0.10.x
 // registers only TRJ, PSF and Molden. Any missing name exits 7 and prints
 // how many are present and which are missing, so the build never keeps a
 // library with fewer readers. It then counts the frames of
@@ -38,7 +38,7 @@
 
 // The molfile format names the patched library registers. Keep in step
 // with cmake/patches/chemfiles-0.10.4-molfiles.patch and the reader table
-// in docs/orgmode/data-formats.org.
+// in docs/orgmode/reference/data-formats.org.
 static const char *const molfileFormats[] = {
     "TRJ",
     "PSF",
@@ -73,6 +73,10 @@ static const char *const molfileFormats[] = {
     "VTF trajectory format",
     "Internal Paratool Format",
     "(Animated) XCrySDen Structure File",
+    "DESRES Molecular Structure",
+    "Gromacs g96",
+    "CPMD 3.x output",
+    "Gaussian Logfile (g94,g98,g03)",
 };
 
 int main(int argc, char **argv) {

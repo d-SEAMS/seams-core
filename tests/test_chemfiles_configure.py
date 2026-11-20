@@ -15,7 +15,7 @@ import re
 import subprocess
 import sys
 
-EXPECTED = 33
+EXPECTED = 37
 
 
 def run(probe):

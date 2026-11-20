@@ -1,0 +1,86 @@
+# Copyright (c) d-SEAMS developers
+# Bounds that stop a hostile file from crashing or hanging a reader
+# chemfiles already ships, and the SQLite3 dependency of the
+# installed package.
+diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
+--- host-a/cmake/chemfiles-config.cmake.in	2026-11-20 21:36:58.585449641 +0000
++++ host-b/cmake/chemfiles-config.cmake.in	2026-11-20 21:36:58.633449741 +0000
+@@ -1,5 +1,10 @@
+ @PACKAGE_INIT@
+ 
++include(CMakeFindDependencyMacro)
++# dmsplugin links the system SQLite3. The imported target has to exist
++# before chemfiles' link interface names it.
++find_dependency(SQLite3)
++
+ include("${CMAKE_CURRENT_LIST_DIR}/chemfiles-targets.cmake")
+ check_required_components("@PROJECT_NAME@")
+ 
+diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
+--- host-a/src/files/XDRFile.cpp	2026-11-20 21:27:50.480599988 +0000
++++ host-b/src/files/XDRFile.cpp	2026-11-20 21:27:56.436604876 +0000
+@@ -28,8 +28,18 @@
+ void XDRFile::read_opaque(std::vector<char>& data) {
+     const uint32_t count = read_single_u32();
+     const uint32_t num_filler = (4 - (count % 4)) % 4;
+-    data.resize(static_cast<size_t>(count + num_filler));
+-    read_char(data.data(), count + num_filler);
++    // count + padding can wrap a uint32. A random TPR/TRR/XTC then
++    // resizes a vector to gigabytes and the process dies.
++    const uint64_t need = static_cast<uint64_t>(count) + num_filler;
++    const uint64_t here = tell();
++    const uint64_t size = file_size();
++    if (here > size || need > size - here) {
++        throw file_error(
++            "XDR record of {} bytes does not fit in the file at '{}'", need, this->path()
++        );
++    }
++    data.resize(static_cast<size_t>(need));
++    read_char(data.data(), static_cast<size_t>(need));
+     data.resize(count);
+ }
+ 
+diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
+--- host-a/src/formats/LAMMPSData.cpp	2026-11-20 21:27:50.476599985 +0000
++++ host-b/src/formats/LAMMPSData.cpp	2026-11-20 21:27:54.860603570 +0000
+@@ -4,6 +4,7 @@
+ #include <cstdint>
+ #include <cassert>
+ #include <cmath>
++#include <sys/stat.h>
+ 
+ #include <tuple>
+ #include <array>
+@@ -291,9 +292,13 @@
+             // Even if all parameters are 0, set shape to TRICLINIC
+             shape = UnitCell::TRICLINIC;
+         } else {
+-            // End of the header, get the section and break
++            // End of the header. A line that is not a section used to fall
++            // into unreachable() once asserts are compiled out, and the
++            // process spun. It is an error in the file.
+             current_section_ = get_section(line);
+-            assert(current_section_ != NOT_A_SECTION);
++            if (current_section_ == NOT_A_SECTION) {
++                throw format_error("expected section name, got '{}'", line);
++            }
+             break;
+         }
+     }
+@@ -366,6 +371,16 @@
+     }
+     style_ = atom_style(atom_style_name_);
+ 
++    // One atom is at least one byte. A count past the end of the file
++    // is how "2000000000 atoms" allocates until the process dies.
++    struct stat st;
++    if (stat(file_.path().c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
++        natoms_ > static_cast<size_t>(st.st_size)) {
++        throw format_error(
++            "LAMMPS Data atom count {} does not fit in '{}'", natoms_, file_.path()
++        );
++    }
++
+     frame.resize(natoms_);
+     auto positions = frame.positions();
+     auto residues = std::unordered_map<size_t, Residue>();

@@ -1,25 +1,63 @@
 # Copyright (c) d-SEAMS developers
-# Build every VMD molfile plugin that chemfiles 0.10.4 lists as "not yet
-# enabled but that should compile without issue" and whose reader returns
-# atoms, and register each reader as a chemfiles format. With the three
-# default plugins (gromacs, molden, psf) that is 30 plugins and 33 molfile
-# formats. Left out: cifplugin (no source in molfiles.tar.gz), crdplugin and
-# vtfplugin's vcf reader (no atom count without a separate topology),
-# babelplugin (runs an external babel), basissetplugin (no atoms), and the
-# graphics and volumetric plugins, which Molfile<F> cannot read atoms from.
-# Every plugin source still ships in molfiles.tar.gz.
+# Build every VMD molfile plugin that returns atoms and that this tree can
+# compile, and register each reader as a chemfiles format. With the three
+# default plugins (gromacs, molden, psf) that is 33 plugins and 37 molfile
+# formats. gromacsplugin also registers its g96 reader; chemfiles has no
+# G96 reader of its own. dmsplugin links the system SQLite3. cpmdlogplugin
+# and gaussianplugin compile once molfile_plugin.h has the QM fields they
+# write. That header edit, and the fixes for hostile files, are applied to
+# molfiles.tar.gz by chemfiles-0.10.4-molfile-sources.sh.
 #
-# Molfile<F> also changes for the new plugins: nsteps() counts into scratch
+# Left unbuilt, each for a reason recorded in
+# docs/orgmode/reference/data-formats.org: cifplugin (no source), crdplugin
+# and vtfplugin's vcf reader (no atom count without a topology), babelplugin
+# (runs an external babel), basissetplugin (no atoms), hoomdplugin (needs
+# expat.h, which the frozen env does not ship), webpdbplugin (Tcl and a
+# network fetch), the plugins chemfiles already implements itself, and the
+# graphics and volumetric plugins, which Molfile<F> cannot read atoms from.
+#
+# Molfile<F> also changes for these plugins: nsteps() counts into scratch
 # buffers instead of a null timestep (rst7 crashed on a valid file), an
 # empty file is an error before a plugin sees it (rst7 crashed on one),
 # an AMBER7 restart without an atom count on its second line is an error
 # (rst7 looped forever on one), and a plugin that reports no atoms is an
 # error instead of a std::vector length error.
-diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
-index 0e032b1..6d45f1b 100644
---- a/external/CMakeLists.txt
-+++ b/external/CMakeLists.txt
-@@ -175,7 +175,36 @@ mark_as_advanced(FORCE
+diff -ruN cf-diff-a/CMakeLists.txt cf-diff-b/CMakeLists.txt
+--- cf-diff-a/CMakeLists.txt	2026-11-20 21:28:14.148620184 +0000
++++ cf-diff-b/CMakeLists.txt	2026-11-20 21:28:14.152620187 +0000
+@@ -80,6 +80,20 @@
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CHEMFILES_SANITIZERS}")
+ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CHEMFILES_SANITIZERS}")
+ 
++# dmsplugin reads a DESRES .dms database. SQLite3 is the system (or
++# conda) library; chemfiles does not vendor it. Finding it here makes the
++# imported target visible to this directory and to the molfiles subdirectory.
++# molfiles is an OBJECT library, and $<TARGET_OBJECTS:molfiles> does not
++# carry link flags, so the chemfiles target links the same library below.
++find_package(SQLite3 REQUIRED)
++if(TARGET SQLite3::SQLite3)
++    set(SEAMS_SQLITE3_TARGET SQLite3::SQLite3)
++elseif(TARGET SQLite::SQLite3)
++    set(SEAMS_SQLITE3_TARGET SQLite::SQLite3)
++else()
++    message(FATAL_ERROR "SQLite3 was found without an imported target")
++endif()
++
+ add_subdirectory(external)
+ 
+ # We need to use a separated library for non-dll-exported classes that have an
+@@ -161,6 +175,7 @@
+     ${ZLIB_LIBRARIES}
+     ${LIBLZMA_LIBRARY}
+     ${BZIP2_LIBRARIES}
++    ${SEAMS_SQLITE3_TARGET}
+ )
+ 
+ if(WIN32)
+diff -ruN cf-diff-a/external/CMakeLists.txt cf-diff-b/external/CMakeLists.txt
+--- cf-diff-a/external/CMakeLists.txt	2026-11-20 21:28:14.140620177 +0000
++++ cf-diff-b/external/CMakeLists.txt	2026-11-20 21:28:14.144620180 +0000
+@@ -175,9 +175,43 @@
  # VMD molfile: https://github.com/chemfiles/molfiles
  # ==========
  set(VMD_MOLFILE_PLUGINS
@@ -54,14 +92,36 @@ index 0e032b1..6d45f1b 100644
 +    vtfplugin
 +    xbgfplugin
 +    xsfplugin
++    dmsplugin
++    cpmdlogplugin
++    gaussianplugin
  )
  
++# dmsplugin is compiled here. The parent CMakeLists.txt has already found
++# SQLite3 and set SEAMS_SQLITE3_TARGET; molfiles/CMakeLists.txt links it.
  external_library(molfiles)
-diff --git a/include/chemfiles/formats/Molfile.hpp b/include/chemfiles/formats/Molfile.hpp
-index d7fba49..445a662 100644
---- a/include/chemfiles/formats/Molfile.hpp
-+++ b/include/chemfiles/formats/Molfile.hpp
-@@ -29,6 +29,36 @@ enum MolfileFormat {
+ list(APPEND EXTERNAL_INCLUDES ${CMAKE_CURRENT_BINARY_DIR}/molfiles/include)
+ 
+@@ -205,13 +239,8 @@
+ # ==========
+ # These plugins do not compile or link
+ # ==========
+-# error: no member named 'have_esp' in 'molfile_qm_metadata_t'
+-#       cpmdlogplugin
+-# Needs to link the sqlite3 library
+-#       dmsplugin
+-# error: no member named 'have_esp' in 'molfile_qm_metadata_t'
+-#       gaussianplugin
+-# Needs to link to some XML parser
++# cpmdlogplugin, gaussianplugin and dmsplugin are compiled above.
++# Needs to link to some XML parser (expat). Not in the frozen pixi env.
+ #       hoomdplugin
+ # The code is not yet written ...
+ #       mmcif
+diff -ruN cf-diff-a/include/chemfiles/formats/Molfile.hpp cf-diff-b/include/chemfiles/formats/Molfile.hpp
+--- cf-diff-a/include/chemfiles/formats/Molfile.hpp	2026-11-20 21:28:14.156620192 +0000
++++ cf-diff-b/include/chemfiles/formats/Molfile.hpp	2026-11-20 21:28:14.156620192 +0000
+@@ -29,6 +29,40 @@
      TRJ,                ///< Gromacs .trj file format
      PSF,                ///< PSF topology files
      MOLDEN,             ///< Molden file format
@@ -95,10 +155,14 @@ index d7fba49..445a662 100644
 +    VMDFMT_VTF,
 +    VMDFMT_XBGF,
 +    VMDFMT_XSF,
++    VMDFMT_DMS,
++    VMDFMT_G96,
++    VMDFMT_CPMDLOG,
++    VMDFMT_GAUSSIAN,
  };
  
  /// A thin wrapper around the vmd plugin functions
-@@ -90,6 +120,36 @@ template<> const FormatMetadata& format_metadata<Molfile<DCD>>();
+@@ -90,6 +124,40 @@
  template<> const FormatMetadata& format_metadata<Molfile<TRJ>>();
  template<> const FormatMetadata& format_metadata<Molfile<PSF>>();
  template<> const FormatMetadata& format_metadata<Molfile<MOLDEN>>();
@@ -132,14 +196,17 @@ index d7fba49..445a662 100644
 +template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_VTF>>();
 +template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_XBGF>>();
 +template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_XSF>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_DMS>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_G96>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_CPMDLOG>>();
++template<> const FormatMetadata& format_metadata<Molfile<VMDFMT_GAUSSIAN>>();
  
  } // namespace chemfiles
  
-diff --git a/src/FormatFactory.cpp b/src/FormatFactory.cpp
-index d29b41c..077441f 100644
---- a/src/FormatFactory.cpp
-+++ b/src/FormatFactory.cpp
-@@ -53,6 +53,36 @@ namespace chemfiles {
+diff -ruN cf-diff-a/src/FormatFactory.cpp cf-diff-b/src/FormatFactory.cpp
+--- cf-diff-a/src/FormatFactory.cpp	2026-11-20 21:28:14.164620198 +0000
++++ cf-diff-b/src/FormatFactory.cpp	2026-11-20 21:28:14.164620198 +0000
+@@ -53,6 +53,40 @@
      extern template class Molfile<TRJ>;
      extern template class Molfile<PSF>;
      extern template class Molfile<MOLDEN>;
@@ -173,10 +240,14 @@ index d29b41c..077441f 100644
 +    extern template class Molfile<VMDFMT_VTF>;
 +    extern template class Molfile<VMDFMT_XBGF>;
 +    extern template class Molfile<VMDFMT_XSF>;
++    extern template class Molfile<VMDFMT_DMS>;
++    extern template class Molfile<VMDFMT_G96>;
++    extern template class Molfile<VMDFMT_CPMDLOG>;
++    extern template class Molfile<VMDFMT_GAUSSIAN>;
  }
  using namespace chemfiles;
  
-@@ -89,6 +119,36 @@ FormatFactory::FormatFactory() {
+@@ -89,6 +123,40 @@
      this->add_format<TRRFormat>();
      this->add_format<XTCFormat>();
      this->add_format<XYZFormat>();
@@ -210,24 +281,28 @@ index d29b41c..077441f 100644
 +    this->add_format<Molfile<VMDFMT_VTF>>();
 +    this->add_format<Molfile<VMDFMT_XBGF>>();
 +    this->add_format<Molfile<VMDFMT_XSF>>();
++    this->add_format<Molfile<VMDFMT_DMS>>();
++    this->add_format<Molfile<VMDFMT_G96>>();
++    this->add_format<Molfile<VMDFMT_CPMDLOG>>();
++    this->add_format<Molfile<VMDFMT_GAUSSIAN>>();
  }
  
  FormatFactory& FormatFactory::get() {
-diff --git a/src/formats/Molfile.cpp b/src/formats/Molfile.cpp
-index 3faea57..fb9c8cc 100644
---- a/src/formats/Molfile.cpp
-+++ b/src/formats/Molfile.cpp
-@@ -8,7 +8,9 @@ extern "C" {
+diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
+--- cf-diff-a/src/formats/Molfile.cpp	2026-11-20 21:28:14.172620205 +0000
++++ cf-diff-b/src/formats/Molfile.cpp	2026-11-20 21:28:14.172620205 +0000
+@@ -8,7 +8,10 @@
  }
  
  #include <cassert>
 +#include <cstdio>
  #include <cstdint>
 +#include <cstring>
++#include <sys/stat.h>
  #include <array>
  #include <string>
  #include <vector>
-@@ -52,6 +54,36 @@ namespace chemfiles {
+@@ -52,6 +55,40 @@
      PLUGINS_DATA(TRJ,     gromacsplugin, trj,    false);
      PLUGINS_DATA(PSF,     psfplugin,     psf,    false);
      PLUGINS_DATA(MOLDEN,  moldenplugin,  molden, false);
@@ -261,10 +336,14 @@ index 3faea57..fb9c8cc 100644
 +    PLUGINS_DATA(VMDFMT_VTF, vtfplugin, vtf, false);
 +    PLUGINS_DATA(VMDFMT_XBGF, xbgfplugin, xbgf, false);
 +    PLUGINS_DATA(VMDFMT_XSF, xsfplugin, xsf, false);
++    PLUGINS_DATA(VMDFMT_DMS, dmsplugin, dms, false);
++    PLUGINS_DATA(VMDFMT_G96, gromacsplugin, g96, false);
++    PLUGINS_DATA(VMDFMT_CPMDLOG, cpmdlogplugin, cpmdlog, false);
++    PLUGINS_DATA(VMDFMT_GAUSSIAN, gaussianplugin, gaussian, false);
  }
  
  #undef PLUGINS_FUNCTIONS
-@@ -131,6 +163,41 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
+@@ -131,6 +168,41 @@
          );
      }
  
@@ -306,7 +385,7 @@ index 3faea57..fb9c8cc 100644
      if (plugin_data_.init()) {
          throw format_error(
              "could not initialize the {} plugin", plugin_data_.format()
-@@ -170,6 +237,17 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
+@@ -170,6 +242,34 @@
          );
      }
  
@@ -321,10 +400,27 @@ index 3faea57..fb9c8cc 100644
 +        );
 +    }
 +
++    // A dense reader cannot store more atoms than the file has bytes.
++    // VTF atom ids are sparse, so a short file may name a high id; those
++    // two plugins cap the id themselves.
++    if (F != VMDFMT_VSF && F != VMDFMT_VTF) {
++        struct stat st;
++        if (stat(path_.c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
++            static_cast<uint64_t>(natoms_) > static_cast<uint64_t>(st.st_size)) {
++            plugin_handle_->close_file_read(data_);
++            data_ = nullptr;
++            plugin_data_.fini();
++            throw format_error(
++                "the {} plugin's atom count ({}) does not fit in '{}'",
++                plugin_data_.format(), natoms_, path_
++            );
++        }
++    }
++
      read_topology();
  }
  
-@@ -245,8 +323,15 @@ template <MolfileFormat F> size_t Molfile<F>::nsteps() {
+@@ -245,8 +345,15 @@
      }
      size_t n = 0;
      int status = MOLFILE_SUCCESS;
@@ -341,7 +437,7 @@ index 3faea57..fb9c8cc 100644
          if (status == MOLFILE_SUCCESS) {
              n++;
          } else {
-@@ -380,6 +465,36 @@ template <MolfileFormat F> void Molfile<F>::read_topology() {
+@@ -380,6 +487,40 @@
  template class chemfiles::Molfile<TRJ>;
  template class chemfiles::Molfile<PSF>;
  template class chemfiles::Molfile<MOLDEN>;
@@ -375,13 +471,27 @@ index 3faea57..fb9c8cc 100644
 +template class chemfiles::Molfile<VMDFMT_VTF>;
 +template class chemfiles::Molfile<VMDFMT_XBGF>;
 +template class chemfiles::Molfile<VMDFMT_XSF>;
++template class chemfiles::Molfile<VMDFMT_DMS>;
++template class chemfiles::Molfile<VMDFMT_G96>;
++template class chemfiles::Molfile<VMDFMT_CPMDLOG>;
++template class chemfiles::Molfile<VMDFMT_GAUSSIAN>;
  
  template<> const FormatMetadata& chemfiles::format_metadata<Molfile<TRJ>>() {
      static FormatMetadata metadata;
-@@ -442,3 +557,603 @@ template<> const FormatMetadata& chemfiles::format_metadata<Molfile<MOLDEN>>() {
-     metadata.residues = false;
-     return metadata;
- }
+@@ -432,6 +573,686 @@
+ 
+     metadata.read = true;
+     metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
 +
 +template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_ABINIT>>() {
 +    static FormatMetadata metadata;
@@ -982,3 +1092,76 @@ index 3faea57..fb9c8cc 100644
 +    metadata.residues = false;
 +    return metadata;
 +}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_DMS>>() {
++    static FormatMetadata metadata;
++    metadata.name = "DESRES Molecular Structure";
++    metadata.extension = ".dms";
++    metadata.description = "DESRES Molecular Structure (VMD molfile dmsplugin, reader dms)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = true;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_G96>>() {
++    static FormatMetadata metadata;
++    metadata.name = "Gromacs g96";
++    metadata.extension = ".g96";
++    metadata.description = "Gromacs g96 (VMD molfile gromacsplugin, reader g96)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_CPMDLOG>>() {
++    static FormatMetadata metadata;
++    metadata.name = "CPMD 3.x output";
++    metadata.extension = ".out";
++    metadata.description = "CPMD 3.x output (VMD molfile cpmdlogplugin, reader cpmdlog)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
++    metadata.memory = false;
++
++    metadata.positions = true;
++    metadata.velocities = false;
++    metadata.unit_cell = false;
++    metadata.atoms = true;
++    metadata.bonds = false;
++    metadata.residues = false;
++    return metadata;
++}
++
++template<> const FormatMetadata& chemfiles::format_metadata<Molfile<VMDFMT_GAUSSIAN>>() {
++    static FormatMetadata metadata;
++    metadata.name = "Gaussian Logfile (g94,g98,g03)";
++    metadata.extension = nullopt;
++    metadata.description = "Gaussian Logfile (g94,g98,g03) (VMD molfile gaussianplugin, reader gaussian)";
++    metadata.reference = "https://www.ks.uiuc.edu/Research/vmd/plugins/molfile/";
++
++    metadata.read = true;
++    metadata.write = false;
+     metadata.memory = false;
+ 
+     metadata.positions = true;

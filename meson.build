@@ -426,7 +426,7 @@ else
   fs = import('fs')
   chemfiles_dep = dependency('chemfiles', required: false)
   # The build reads every VMD molfile format chemfiles can compile, so an
-  # installed chemfiles must register all 33 molfile readers of
+  # installed chemfiles must register all 37 molfile readers of
   # cmake/patches/chemfiles-0.10.4-molfiles.patch and count an rst7 frame.
   # An unpatched 0.10.x registers three. conda-forge 0.10.4 also writes an
   # mmCIF atom with no residue as label_seq_id "." and omits
@@ -449,13 +449,17 @@ else
       dependencies: chemfiles_dep,
       name: 'chemfiles has every VMD molfile reader, reads an mmCIF atom with no residue id and a truncated MOL2')
     _chemfiles_system_ok = _mmcif_run.compiled() and _mmcif_run.returncode() == 0
-    if _mmcif_run.compiled() and _mmcif_run.returncode() == 7
+    if not _mmcif_run.compiled()
+      message('system chemfiles probe failed to compile; building patched 0.10.4')
+    elif _mmcif_run.returncode() == 7
       message('system chemfiles has ' + _mmcif_run.stdout().strip()
               + '; building patched 0.10.4, which has all of them')
-    elif _mmcif_run.compiled() and _mmcif_run.returncode() == 8
+    elif _mmcif_run.returncode() == 8
       message('system chemfiles cannot count the frames of an AMBER7 restart; building patched 0.10.4')
-    elif not _chemfiles_system_ok
-      message('system chemfiles fails the mmCIF or MOL2 probe; building patched 0.10.4')
+    elif _mmcif_run.returncode() != 0
+      message('system chemfiles fails the AMBER7 restart, mmCIF, or MOL2 probe (exit '
+              + _mmcif_run.returncode().to_string()
+              + '); building patched 0.10.4')
     endif
     if not _chemfiles_system_ok
       # dependency() has no way to drop a found library. This name is
@@ -474,6 +478,9 @@ else
     foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
                       'patches/chemfiles-0.10.4-frame-visit.patch',
                       'patches/chemfiles-0.10.4-molfiles.patch',
+                      'patches/chemfiles-0.10.4-molfile-sources.patch',
+                      'patches/chemfiles-0.10.4-molfile-sources.sh',
+                      'patches/chemfiles-0.10.4-hostile.patch',
                       'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                       'CMakeLists.txt', 'ChemfilesDep.cmake']
       _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]

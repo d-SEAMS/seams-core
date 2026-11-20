@@ -1,9 +1,39 @@
 # Copyright (c) d-SEAMS developers
-diff --git a/src/formats/mmCIF.cpp b/src/formats/mmCIF.cpp
-index 41389ee..9f7d597 100644
---- a/src/formats/mmCIF.cpp
-+++ b/src/formats/mmCIF.cpp
-@@ -313,8 +313,15 @@ void mmCIFFormat::read(Frame& frame) {
+diff -ruN mmc-a/src/formats/mmCIF.cpp mmc-b/src/formats/mmCIF.cpp
+--- mmc-a/src/formats/mmCIF.cpp	2026-11-20 21:27:50.472599981 +0000
++++ mmc-b/src/formats/mmCIF.cpp	2026-11-20 21:27:52.976602021 +0000
+@@ -84,11 +84,29 @@
+         }
+ 
+         auto line_split = split(line, ' ');
++        // A line of only spaces splits to nothing. Indexing it crashes.
++        if (line_split.empty()) {
++            continue;
++        }
+         if (line_split.size() > 1 && line[0] == '_') {
+             in_loop = false;
+         }
+ 
+-        if (line_split[0] == "_cell_length_a" || line_split[0] == "_cell.length_a") {
++        if (line_split.size() < 2) {
++            if (line_split[0] == "_cell_length_a" || line_split[0] == "_cell.length_a" ||
++                line_split[0] == "_cell_length_b" || line_split[0] == "_cell.length_b" ||
++                line_split[0] == "_cell_length_c" || line_split[0] == "_cell.length_c" ||
++                line_split[0] == "_cell_angle_alpha" || line_split[0] == "_cell.angle_alpha" ||
++                line_split[0] == "_cell_angle_beta" || line_split[0] == "_cell.angle_beta" ||
++                line_split[0] == "_cell_angle_gamma" || line_split[0] == "_cell.angle_gamma" ||
++                line_split[0] == "_entry.id") {
++                throw format_error(
++                    "mmCIF tag '{}' in '{}' has no value", line_split[0], file_.path()
++                );
++            }
++        }
++
++        if (line_split.size() > 1 && (line_split[0] == "_cell_length_a" || line_split[0] == "_cell.length_a")) {
+             lengths[0] = cif_to_double(line_split[1].to_string());
+         }
+ 
+@@ -313,8 +331,15 @@
          auto resid_text = line_split[label_seq_id->second];
  
          try {
@@ -21,7 +51,7 @@ index 41389ee..9f7d597 100644
              } else {
                  resid = parse<int64_t>(line_split[label_seq_id->second]);
              }
-@@ -426,6 +433,14 @@ void mmCIFFormat::write(const Frame& frame) {
+@@ -426,6 +451,14 @@
          }
  
          const auto& atom = frame[i];

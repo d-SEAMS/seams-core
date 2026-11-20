@@ -95,9 +95,9 @@ const char *iceName(molSys::atom_state_type s) {
 bool chemfilesSuffix(std::string_view ext) {
   static constexpr std::string_view molfile[] = {
       "trj", "psf", "molden", "bgf", "binpos", "car", "cor", "cpmd", "cube",
-      "dlpolyconfig", "dlpolyhist", "dtr", "js", "log", "mae", "mdf", "coor",
-      "parm", "parm7", "pqr", "rst7", "OUTCAR", "POSCAR", "XDATCAR",
-      "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"};
+      "dlpolyconfig", "dlpolyhist", "dms", "dtr", "g96", "js", "log", "mae",
+      "mdf", "coor", "out", "parm", "parm7", "pqr", "rst7", "OUTCAR", "POSCAR",
+      "XDATCAR", "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"};
   if (ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
       ext == "trr" || ext == "nc") {
     return true;
