@@ -319,13 +319,16 @@ Not built, with the reason:
 ~Molfile<F>~ reads atoms, so none of these could be a chemfiles
 format. Their sources still ship in the fetched ~molfiles.tar.gz~.
 
-The patch also fixes three crashes the new plugins hit in chemfiles'
-~Molfile<F>~: counting frames passed a null timestep (rst7 crashed on a
-valid file), an empty file reached the plugin (rst7 crashed),
-and a plugin that found no atoms sized the frame from 0 or -1. An empty
-file is now the chemfiles error ~the file at 'PATH' is empty~, and a
-file without atoms ~the VMDFMT_<F> plugin found no atoms in 'PATH'~;
-~sinp::openFrame~ returns an empty cloud for both.
+The patch also fixes three crashes and a hang the new plugins hit in
+chemfiles' ~Molfile<F>~: counting frames passed a null timestep (rst7
+crashed on a valid file), an empty file reached the plugin (rst7
+crashed), a plugin that found no atoms sized the frame from 0 or -1,
+and rst7 looped forever when its second line was missing or held only
+spaces and tabs. An empty file is now the chemfiles error ~the file at
+'PATH' is empty~, such an AMBER7 restart ~the AMBER7 restart at 'PATH'
+has no atom count on its second line~, and a file without atoms ~the
+VMDFMT_<F> plugin found no atoms in 'PATH'~; ~sinp::openFrame~ returns
+an empty cloud for each.
 
 * eOn ~.con~
 

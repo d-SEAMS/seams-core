@@ -12,8 +12,9 @@
 # Molfile<F> also changes for the new plugins: nsteps() counts into scratch
 # buffers instead of a null timestep (rst7 crashed on a valid file), an
 # empty file is an error before a plugin sees it (rst7 crashed on one),
-# and a plugin that reports no atoms is an error instead of a std::vector
-# length error.
+# an AMBER7 restart without an atom count on its second line is an error
+# (rst7 looped forever on one), and a plugin that reports no atoms is an
+# error instead of a std::vector length error.
 diff --git a/external/CMakeLists.txt b/external/CMakeLists.txt
 index 0e032b1..6d45f1b 100644
 --- a/external/CMakeLists.txt
@@ -213,18 +214,20 @@ index d29b41c..077441f 100644
  
  FormatFactory& FormatFactory::get() {
 diff --git a/src/formats/Molfile.cpp b/src/formats/Molfile.cpp
-index 3faea57..76b2670 100644
+index 3faea57..fb9c8cc 100644
 --- a/src/formats/Molfile.cpp
 +++ b/src/formats/Molfile.cpp
-@@ -8,6 +8,7 @@ extern "C" {
+@@ -8,7 +8,9 @@ extern "C" {
  }
  
  #include <cassert>
 +#include <cstdio>
  #include <cstdint>
++#include <cstring>
  #include <array>
  #include <string>
-@@ -52,6 +53,36 @@ namespace chemfiles {
+ #include <vector>
+@@ -52,6 +54,36 @@ namespace chemfiles {
      PLUGINS_DATA(TRJ,     gromacsplugin, trj,    false);
      PLUGINS_DATA(PSF,     psfplugin,     psf,    false);
      PLUGINS_DATA(MOLDEN,  moldenplugin,  molden, false);
@@ -261,7 +264,7 @@ index 3faea57..76b2670 100644
  }
  
  #undef PLUGINS_FUNCTIONS
-@@ -131,6 +162,21 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
+@@ -131,6 +163,41 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
          );
      }
  
@@ -280,10 +283,30 @@ index 3faea57..76b2670 100644
 +        }
 +    }
 +
++    // rst7plugin takes the atom count from the first field of the second
++    // line, read into 82 bytes. When that line is missing or holds only
++    // spaces and tabs, it retries the same buffer forever.
++    if (F == VMDFMT_RST7) {
++        std::FILE* rst = std::fopen(path_.c_str(), "rb");
++        if (rst != nullptr) {
++            char title[82];
++            char line[82];
++            bool counted = std::fgets(title, 82, rst) != nullptr &&
++                           std::fgets(line, 82, rst) != nullptr &&
++                           line[std::strspn(line, " \t")] != '\0';
++            std::fclose(rst);
++            if (!counted) {
++                throw format_error(
++                    "the AMBER7 restart at '{}' has no atom count on its second line", path_
++                );
++            }
++        }
++    }
++
      if (plugin_data_.init()) {
          throw format_error(
              "could not initialize the {} plugin", plugin_data_.format()
-@@ -170,6 +216,17 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
+@@ -170,6 +237,17 @@ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compres
          );
      }
  
@@ -301,7 +324,7 @@ index 3faea57..76b2670 100644
      read_topology();
  }
  
-@@ -245,8 +302,15 @@ template <MolfileFormat F> size_t Molfile<F>::nsteps() {
+@@ -245,8 +323,15 @@ template <MolfileFormat F> size_t Molfile<F>::nsteps() {
      }
      size_t n = 0;
      int status = MOLFILE_SUCCESS;
@@ -318,7 +341,7 @@ index 3faea57..76b2670 100644
          if (status == MOLFILE_SUCCESS) {
              n++;
          } else {
-@@ -380,6 +444,36 @@ template <MolfileFormat F> void Molfile<F>::read_topology() {
+@@ -380,6 +465,36 @@ template <MolfileFormat F> void Molfile<F>::read_topology() {
  template class chemfiles::Molfile<TRJ>;
  template class chemfiles::Molfile<PSF>;
  template class chemfiles::Molfile<MOLDEN>;
@@ -355,7 +378,7 @@ index 3faea57..76b2670 100644
  
  template<> const FormatMetadata& chemfiles::format_metadata<Molfile<TRJ>>() {
      static FormatMetadata metadata;
-@@ -442,3 +536,603 @@ template<> const FormatMetadata& chemfiles::format_metadata<Molfile<MOLDEN>>() {
+@@ -442,3 +557,603 @@ template<> const FormatMetadata& chemfiles::format_metadata<Molfile<MOLDEN>>() {
      metadata.residues = false;
      return metadata;
  }

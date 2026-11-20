@@ -483,16 +483,25 @@ TEST_CASE("each molfile extension reaches its reader", "[chemfiles][molfile]") {
 TEST_CASE("a molfile plugin that finds no atoms is an error",
           "[chemfiles][molfile]") {
   // Unpatched, nsteps() hands rst7 a null timestep and an atom count of
-  // zero sizes the frame from garbage; both crashed the process.
+  // zero sizes the frame from garbage; both crashed the process. With no
+  // field on its second line, rst7 loops forever.
   const auto dir = dseams_test::freshDir();
-  const auto title = dir / "title.rst7";
-  {
-    std::ofstream out(title);
-    out << "a title and nothing else\n";
+  const auto write = [&](const char *name, const char *text) {
+    const auto path = dir / name;
+    std::ofstream out(path, std::ios::binary);
+    out << text;
+    return path;
+  };
+  const auto words = write("words.rst7", "a title\nno count here\n");
+  REQUIRE(chemfilesOpenError(words).find("found no atoms") != std::string::npos);
+  REQUIRE(sinp::chemfilesSteps(words.string()) == -1);
+  REQUIRE(sinp::openFrame(words.string(), 1, -1).nop == 0);
+  for (const auto &uncounted : {write("title.rst7", "a title and nothing else\n"),
+                                write("spaces.rst7", "a title\n  \t ")}) {
+    REQUIRE(chemfilesOpenError(uncounted).find("no atom count") != std::string::npos);
+    REQUIRE(sinp::chemfilesSteps(uncounted.string()) == -1);
+    REQUIRE(sinp::openFrame(uncounted.string(), 1, -1).nop == 0);
   }
-  REQUIRE(chemfilesOpenError(title).find("found no atoms") != std::string::npos);
-  REQUIRE(sinp::chemfilesSteps(title.string()) == -1);
-  REQUIRE(sinp::openFrame(title.string(), 1, -1).nop == 0);
   // A DESRES trajectory is a directory. It is not "empty"; its plugin
   // reports the missing frames.
   const auto dtr = dir / "none.dtr";
