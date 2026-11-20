@@ -60,6 +60,12 @@ struct BoxCell {
    */
   [[nodiscard]] std::array<double, 3> micDelta(double dx, double dy,
                                                double dz) const noexcept;
+
+  /**
+   * @brief Fractional-lattice minimum-image displacement H * (ds - round(ds)).
+   */
+  [[nodiscard]] std::array<double, 3> fracMicDelta(double dx, double dy,
+                                                   double dz) const noexcept;
 };
 
 /**

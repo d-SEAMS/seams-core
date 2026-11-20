@@ -23,9 +23,9 @@ def _load_downstream_pydseams():
             if str(cand) not in __path__:
                 __path__.append(str(cand))
             spec = importlib.util.spec_from_file_location(
-                "_pydseams_downstream",
+                __name__,
                 str(init_py),
-                submodule_search_locations=[str(cand)],
+                submodule_search_locations=list(__path__),
             )
             if spec is not None and spec.loader is not None:
                 mod = importlib.util.module_from_spec(spec)

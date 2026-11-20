@@ -317,6 +317,22 @@ std::array<double, 3> BoxCell::micDelta(double dx, double dy,
   return {rx, ry, rz};
 }
 
+std::array<double, 3> BoxCell::fracMicDelta(double dx, double dy,
+                                            double dz) const noexcept {
+  if (!triclinic) {
+    return {dx - lx * std::nearbyint(dx / lx),
+            dy - ly * std::nearbyint(dy / ly),
+            dz - lz * std::nearbyint(dz / lz)};
+  }
+  const double sz = dz / lz;
+  const double sy = (dy - yz * sz) / ly;
+  const double sx = (dx - xy * sy - xz * sz) / lx;
+  const double dsx = sx - std::nearbyint(sx);
+  const double dsy = sy - std::nearbyint(sy);
+  const double dsz = sz - std::nearbyint(sz);
+  return {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};
+}
+
 TrajectoryUnwrapper::TrajectoryUnwrapper(std::size_t nParticles) {
   reset(nParticles);
 }
@@ -348,10 +364,10 @@ bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
   } else {
     for (std::size_t i = 0; i < nParticles_; ++i) {
       const std::size_t base = 3 * i;
-      const double dx = xyz[base] - prevWrapped_[base];
-      const double dy = xyz[base + 1] - prevWrapped_[base + 1];
-      const double dz = xyz[base + 2] - prevWrapped_[base + 2];
-      const auto step = cell.micDelta(dx, dy, dz);
+      const double dx = xyz[base] - currentUnwrapped_[base];
+      const double dy = xyz[base + 1] - currentUnwrapped_[base + 1];
+      const double dz = xyz[base + 2] - currentUnwrapped_[base + 2];
+      const auto step = cell.fracMicDelta(dx, dy, dz);
       currentUnwrapped_[base] += step[0];
       currentUnwrapped_[base + 1] += step[1];
       currentUnwrapped_[base + 2] += step[2];
