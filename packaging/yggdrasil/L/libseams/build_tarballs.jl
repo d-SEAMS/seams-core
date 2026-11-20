@@ -10,16 +10,16 @@ name = "libseams"
 version = v"2.14.0"
 
 # BinaryBuilder refuses GitHub's generated archives, and seams-core publishes
-# no release tarball, so the tree is pinned by commit. v2.14.0 is not tagged.
-# v2_14_0_tag_sha is the stand-in for that tag: the release-candidate commit
-# on origin/release/2.14-merge. When the tag exists, replace this value with
-# `git rev-parse v2.14.0` if the tag is a different commit. The portable
-# sources, optional-BLAS meson logic, and non-x86 guards are already in this
-# commit, so bundled/patches is not applied.
-const v2_14_0_tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
+# no release tarball, so the tree is pinned by commit. Before `v$(version)` is
+# tagged, `tag_sha` stands in for that tag (the release-candidate commit).
+# When the tag exists, replace this value with `git rev-parse "v$(version)^{commit}"`
+# if the tag is a different commit. The portable sources, optional-BLAS meson
+# logic, and non-x86 guards are already in this commit, so bundled/patches is
+# not applied.
+const tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
 
 sources = [
-    GitSource("https://github.com/d-SEAMS/seams-core.git", v2_14_0_tag_sha),
+    GitSource("https://github.com/d-SEAMS/seams-core.git", tag_sha),
 ]
 
 # The engine core, its stable C API (libseams), and the C ABI of the R and

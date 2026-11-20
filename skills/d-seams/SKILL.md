@@ -10,7 +10,7 @@ metadata:
 
 # Use d-SEAMS
 
-d-SEAMS 2.14 reads a trajectory and names the ice. This repository is the
+d-SEAMS reads a trajectory and names the ice. This repository is the
 C++ engine (`libyodaLib`), the C API `libseams`, the C ABI `libseams_lang`,
 and the `seams` command. Cite Goswami, Goswami, and Singh, J. Chem. Inf.
 Model. 2020, https://doi.org/10.1021/acs.jcim.0c00031.
