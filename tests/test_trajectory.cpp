@@ -11,6 +11,7 @@
 #include "seams.hpp"
 #include <trajectory.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <numbers>
@@ -117,6 +118,165 @@ TEST_CASE("Triclinic multi-crossing unwrapping and straddling molecule centres",
   for (std::size_t i = 0; i < trueCom.size(); ++i) {
     CHECK(res.centres[i] == Catch::Approx(trueCom[i]).margin(1e-11));
   }
+}
+
+namespace {
+
+std::array<double, 3> roundedFractionalImage(const std::array<double, 3> &d,
+                                             const double box9[9]) {
+  const double lx = box9[3], ly = box9[4], lz = box9[5];
+  const double xy = box9[6], xz = box9[7], yz = box9[8];
+  const double sz = d[2] / lz;
+  const double sy = (d[1] - yz * sz) / ly;
+  const double sx = (d[0] - xy * sy - xz * sz) / lx;
+  const double tx = sx - std::nearbyint(sx);
+  const double ty = sy - std::nearbyint(sy);
+  const double tz = sz - std::nearbyint(sz);
+  return {lx * tx + xy * ty + xz * tz, ly * ty + yz * tz, lz * tz};
+}
+
+std::array<double, 3> bruteForceImage(const std::array<double, 3> &d,
+                                      const double box9[9], int range) {
+  const double lx = box9[3], ly = box9[4], lz = box9[5];
+  const double xy = box9[6], xz = box9[7], yz = box9[8];
+  std::array<double, 3> best = d;
+  double best2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+  for (int i = -range; i <= range; ++i) {
+    for (int j = -range; j <= range; ++j) {
+      for (int k = -range; k <= range; ++k) {
+        const std::array<double, 3> c = {d[0] - lx * i - xy * j - xz * k,
+                                         d[1] - ly * j - yz * k,
+                                         d[2] - lz * k};
+        const double c2 = c[0] * c[0] + c[1] * c[1] + c[2] * c[2];
+        if (c2 < best2) {
+          best2 = c2;
+          best = c;
+        }
+      }
+    }
+  }
+  return best;
+}
+
+double dist3(const std::array<double, 3> &a, const std::array<double, 3> &b) {
+  return std::hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+}
+
+double norm3(const std::array<double, 3> &a) {
+  return std::hypot(a[0], a[1], a[2]);
+}
+
+} // namespace
+
+TEST_CASE("Unwrapping takes the Euclidean image on a skewed LAMMPS cell",
+          "[trajectory][unwrap][triclinic]") {
+  // LAMMPS-legal tilts: |xy| <= lx/2, |xz| <= lx/2, |yz| <= ly/2.
+  const double box0[9] = {0.0,         0.0,        0.0,
+                          18.03850526, 10.63623724, 11.40838967,
+                          -8.77049545, 6.89505882,  2.90161048};
+  REQUIRE(std::abs(box0[6]) <= 0.5 * box0[3]);
+  REQUIRE(std::abs(box0[7]) <= 0.5 * box0[3]);
+  REQUIRE(std::abs(box0[8]) <= 0.5 * box0[4]);
+
+  const std::array<double, 3> rawDelta = {-16.98407757, -4.19565342,
+                                          8.11028162};
+  const std::array<double, 3> euclid = {3.42737868, 3.53897334, -3.29810805};
+  const auto frac = roundedFractionalImage(rawDelta, box0);
+  // Rounding each fractional coordinate lands one a-vector away.
+  REQUIRE(dist3(frac, euclid) == Catch::Approx(box0[3]).margin(1e-7));
+  REQUIRE(norm3(frac) > norm3(euclid) + 9.0);
+
+  const auto cell0 = traj::BoxCell::fromBox9(box0);
+  REQUIRE(cell0.ok);
+  REQUIRE(cell0.triclinic);
+  const auto mic = cell0.micDelta(rawDelta[0], rawDelta[1], rawDelta[2]);
+  const auto search =
+      cell0.micDeltaSearch(rawDelta[0], rawDelta[1], rawDelta[2]);
+  CHECK(dist3({mic[0], mic[1], mic[2]}, euclid) < 1e-7);
+  CHECK(dist3({search[0], search[1], search[2]}, euclid) < 1e-7);
+
+  // Frame 2 is the same cell scaled by 3%; the pair scales with it, so the
+  // rounded fractional step is again one (scaled) a-vector off.
+  constexpr double scale = 1.03;
+  double box1[9];
+  std::copy_n(box0, 9, box1);
+  for (int i = 3; i < 9; ++i) {
+    box1[i] *= scale;
+  }
+  REQUIRE(std::abs(box1[6]) <= 0.5 * box1[3]);
+  REQUIRE(std::abs(box1[7]) <= 0.5 * box1[3]);
+  REQUIRE(std::abs(box1[8]) <= 0.5 * box1[4]);
+
+  const std::array<double, 3> u0 = {4.1, 2.7, 5.3};
+  const std::array<double, 3> u1 = {u0[0] + euclid[0], u0[1] + euclid[1],
+                                    u0[2] + euclid[2]};
+  const std::array<double, 3> u2 = {u1[0] + scale * euclid[0],
+                                    u1[1] + scale * euclid[1],
+                                    u1[2] + scale * euclid[2]};
+  const double *frameBoxes[3] = {box0, box0, box1};
+  const std::array<std::array<double, 3>, 3> truth = {u0, u1, u2};
+
+  std::vector<double> boxes(27);
+  std::vector<double> wrapped(9);
+  for (int f = 0; f < 3; ++f) {
+    std::copy_n(frameBoxes[f], 9, boxes.begin() + 9 * f);
+    const auto w = wrapTriclinic(truth[f], frameBoxes[f]);
+    std::copy(w.begin(), w.end(), wrapped.begin() + 3 * f);
+  }
+  const std::array<double, 3> raw2 = {wrapped[6] - u1[0], wrapped[7] - u1[1],
+                                      wrapped[8] - u1[2]};
+  const std::array<double, 3> step2 = {scale * euclid[0], scale * euclid[1],
+                                       scale * euclid[2]};
+  REQUIRE(dist3(roundedFractionalImage(raw2, box1), step2) ==
+          Catch::Approx(box1[3]).margin(1e-7));
+
+  std::vector<double> out(9, 0.0);
+  REQUIRE(traj::unwrapPositions(wrapped.data(), 3, 1, boxes.data(), 3,
+                                out.data()));
+  // The first frame is already in the cell, so no lattice offset is needed.
+  for (int f = 0; f < 3; ++f) {
+    for (int k = 0; k < 3; ++k) {
+      CHECK(out[3 * f + k] == Catch::Approx(truth[f][k]).margin(1e-9));
+    }
+  }
+
+  const auto res = seams::unwrap_positions(wrapped, 3, 1, boxes);
+  REQUIRE(res.size() == 9);
+  for (std::size_t i = 0; i < 9; ++i) {
+    CHECK(res[i] == Catch::Approx(out[i]).margin(1e-12));
+  }
+}
+
+TEST_CASE("Minimum image matches brute force on random LAMMPS-legal cells",
+          "[trajectory][unwrap][triclinic]") {
+  std::mt19937_64 rng(20261120);
+  std::uniform_real_distribution<double> len(1.0, 30.0);
+  std::uniform_real_distribution<double> tilt(-0.5, 0.5);
+  std::uniform_real_distribution<double> frac(-1.5, 1.5);
+  int roundedMisses = 0;
+  for (int n = 0; n < 2000; ++n) {
+    const double lx = len(rng), ly = len(rng), lz = len(rng);
+    const double box9[9] = {0.0,       0.0,       0.0,       lx,       ly,
+                            lz,        tilt(rng) * lx, tilt(rng) * lx,
+                            tilt(rng) * ly};
+    const double a = frac(rng), b = frac(rng), c = frac(rng);
+    const std::array<double, 3> d = {lx * a + box9[6] * b + box9[7] * c,
+                                     ly * b + box9[8] * c, lz * c};
+    const auto cell = traj::BoxCell::fromBox9(box9);
+    REQUIRE(cell.ok);
+    const double want = norm3(bruteForceImage(d, box9, 16));
+    const auto mic = cell.micDelta(d[0], d[1], d[2]);
+    const auto search = cell.micDeltaSearch(d[0], d[1], d[2]);
+    CHECK(norm3({mic[0], mic[1], mic[2]}) ==
+          Catch::Approx(want).margin(1e-9));
+    CHECK(norm3({search[0], search[1], search[2]}) ==
+          Catch::Approx(want).margin(1e-9));
+    if (norm3(roundedFractionalImage(d, box9)) > want + 1e-9) {
+      ++roundedMisses;
+    }
+  }
+  // The sample must contain cells where rounding is not the minimum image.
+  CHECK(roundedMisses > 100);
 }
 
 TEST_CASE("Ballistic and anisotropic MSD with arbitrary axis and negative controls",

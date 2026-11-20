@@ -267,23 +267,24 @@ std::array<double, 3> BoxCell::micDelta(double dx, double dy,
   const double sz = dz / lz;
   const double sy = (dy - yz * sz) / ly;
   const double sx = (dx - xy * sy - xz * sz) / lx;
-  const double nx0 = std::nearbyint(sx);
-  const double ny0 = std::nearbyint(sy);
-  const double nz0 = std::nearbyint(sz);
-  const double dsx = sx - nx0;
-  const double dsy = sy - ny0;
-  const double dsz = sz - nz0;
-  double rx = lx * dsx + xy * dsy + xz * dsz;
-  double ry = ly * dsy + yz * dsz;
-  double rz = lz * dsz;
-  double r2 = rx * rx + ry * ry + rz * rz;
-  if (std::sqrt(r2) + 1e-12 < halfMin) {
+  const double dsx = sx - std::nearbyint(sx);
+  const double dsy = sy - std::nearbyint(sy);
+  const double dsz = sz - std::nearbyint(sz);
+  const double rx = lx * dsx + xy * dsy + xz * dsz;
+  const double ry = ly * dsy + yz * dsz;
+  const double rz = lz * dsz;
+  if (std::sqrt(rx * rx + ry * ry + rz * rz) + 1e-12 < halfMin) {
     return {rx, ry, rz};
   }
 #ifdef SEAMS_HAS_MINIMAGE
+  // minimage takes LAMMPS dump bounds, which widen lx and ly by the tilts.
+  const double xlo = std::min({0.0, xy, xz, xy + xz});
+  const double xhi = std::max({0.0, xy, xz, xy + xz});
+  const double ylo = std::min(0.0, yz);
+  const double yhi = std::max(0.0, yz);
   mi_cell cell;
-  if (mi_cell_from_lammps(ox, ox + lx, oy, oy + ly, oz, oz + lz, xy, xz, yz,
-                          &cell) == 0) {
+  if (mi_cell_from_lammps_bounds(lx + xhi - xlo, ly + yhi - ylo, lz, xy, xz,
+                                 yz, ox + xlo, oy + ylo, oz, &cell) == 0) {
     const double zero[3] = {0.0, 0.0, 0.0};
     const double target[3] = {dx, dy, dz};
     double dr[3] = {0.0, 0.0, 0.0};
@@ -292,12 +293,45 @@ std::array<double, 3> BoxCell::micDelta(double dx, double dy,
     }
   }
 #endif
-  for (int ix = -2; ix <= 2; ++ix) {
-    for (int iy = -2; iy <= 2; ++iy) {
-      for (int iz = -2; iz <= 2; ++iz) {
-        if (ix == 0 && iy == 0 && iz == 0) {
-          continue;
-        }
+  return micDeltaSearch(dx, dy, dz);
+}
+
+std::array<double, 3> BoxCell::micDeltaSearch(double dx, double dy,
+                                              double dz) const noexcept {
+  if (!triclinic) {
+    return {dx - lx * std::nearbyint(dx / lx),
+            dy - ly * std::nearbyint(dy / ly),
+            dz - lz * std::nearbyint(dz / lz)};
+  }
+  const double sz = dz / lz;
+  const double sy = (dy - yz * sz) / ly;
+  const double sx = (dx - xy * sy - xz * sz) / lx;
+  const double dsx = sx - std::nearbyint(sx);
+  const double dsy = sy - std::nearbyint(sy);
+  const double dsz = sz - std::nearbyint(sz);
+  double rx = lx * dsx + xy * dsy + xz * dsz;
+  double ry = ly * dsy + yz * dsz;
+  double rz = lz * dsz;
+  double r2 = rx * rx + ry * ry + rz * rz;
+  // The minimum image v = H t is no longer than the fractional image r, and
+  // |t_i| <= |v| * |row i of H^-1|, which bounds every lattice shift to try.
+  const double g0 = std::sqrt(1.0 / (lx * lx) + (xy * xy) / (lx * lx * ly * ly) +
+                              std::pow((xy * yz - xz * ly) / (lx * ly * lz), 2));
+  const double g1 = std::sqrt(1.0 / (ly * ly) + (yz * yz) / (ly * ly * lz * lz));
+  const double g2 = 1.0 / lz;
+  const double rmax = std::sqrt(r2) * (1.0 + 1e-12);
+  const auto lo = [](double ds, double span) {
+    return static_cast<long>(std::ceil(ds - span));
+  };
+  const auto hi = [](double ds, double span) {
+    return static_cast<long>(std::floor(ds + span));
+  };
+  const long ix0 = lo(dsx, rmax * g0), ix1 = hi(dsx, rmax * g0);
+  const long iy0 = lo(dsy, rmax * g1), iy1 = hi(dsy, rmax * g1);
+  const long iz0 = lo(dsz, rmax * g2), iz1 = hi(dsz, rmax * g2);
+  for (long ix = ix0; ix <= ix1; ++ix) {
+    for (long iy = iy0; iy <= iy1; ++iy) {
+      for (long iz = iz0; iz <= iz1; ++iz) {
         const double tx = dsx - static_cast<double>(ix);
         const double ty = dsy - static_cast<double>(iy);
         const double tz = dsz - static_cast<double>(iz);
@@ -315,22 +349,6 @@ std::array<double, 3> BoxCell::micDelta(double dx, double dy,
     }
   }
   return {rx, ry, rz};
-}
-
-std::array<double, 3> BoxCell::fracMicDelta(double dx, double dy,
-                                            double dz) const noexcept {
-  if (!triclinic) {
-    return {dx - lx * std::nearbyint(dx / lx),
-            dy - ly * std::nearbyint(dy / ly),
-            dz - lz * std::nearbyint(dz / lz)};
-  }
-  const double sz = dz / lz;
-  const double sy = (dy - yz * sz) / ly;
-  const double sx = (dx - xy * sy - xz * sz) / lx;
-  const double dsx = sx - std::nearbyint(sx);
-  const double dsy = sy - std::nearbyint(sy);
-  const double dsz = sz - std::nearbyint(sz);
-  return {lx * dsx + xy * dsy + xz * dsz, ly * dsy + yz * dsz, lz * dsz};
 }
 
 TrajectoryUnwrapper::TrajectoryUnwrapper(std::size_t nParticles) {
@@ -367,7 +385,7 @@ bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
       const double dx = xyz[base] - currentUnwrapped_[base];
       const double dy = xyz[base + 1] - currentUnwrapped_[base + 1];
       const double dz = xyz[base + 2] - currentUnwrapped_[base + 2];
-      const auto step = cell.fracMicDelta(dx, dy, dz);
+      const auto step = cell.micDelta(dx, dy, dz);
       currentUnwrapped_[base] += step[0];
       currentUnwrapped_[base + 1] += step[1];
       currentUnwrapped_[base + 2] += step[2];

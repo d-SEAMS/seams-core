@@ -1498,10 +1498,30 @@ def _mic_vectors_np(delta: np.ndarray, box9: np.ndarray) -> np.ndarray:
     dsx = sx - np.round(sx)
     dsy = sy - np.round(sy)
     dsz = sz - np.round(sz)
-    out = np.empty_like(delta)
-    out[..., 0] = lx * dsx + xy * dsy + xz * dsz
-    out[..., 1] = ly * dsy + yz * dsz
-    out[..., 2] = lz * dsz
+    h = np.array([[lx, xy, xz], [0.0, ly, yz], [0.0, 0.0, lz]], dtype=np.float64)
+    ds = np.stack([dsx, dsy, dsz], axis=-1)
+    base = ds @ h.T
+    out = base.copy()
+    if out.size == 0:
+        return out
+    # Rounding each fractional coordinate is not the Euclidean minimum image
+    # on a tilted cell. The minimum image is no longer than the rounded one,
+    # and |t_i| <= |v| * |row i of H^-1| bounds the lattice shifts to try.
+    best2 = np.einsum("...i,...i->...", out, out)
+    rmax = float(np.sqrt(best2.max())) * (1.0 + 1e-12)
+    spans = rmax * np.linalg.norm(np.linalg.inv(h), axis=1)
+    ranges = [np.arange(int(np.ceil(-0.5 - s)), int(np.floor(0.5 + s)) + 1) for s in spans]
+    for ix in ranges[0]:
+        for iy in ranges[1]:
+            for iz in ranges[2]:
+                if ix == 0 and iy == 0 and iz == 0:
+                    continue
+                cand = base - h @ np.array([ix, iy, iz], dtype=np.float64)
+                c2 = np.einsum("...i,...i->...", cand, cand)
+                better = c2 < best2
+                if np.any(better):
+                    out[better] = cand[better]
+                    best2[better] = c2[better]
     return out
 
 

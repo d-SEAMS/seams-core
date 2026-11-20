@@ -34,9 +34,13 @@ for one configuration and ~pydseams.Trajectory~ for a frame sequence.
 
 ~unwrap_centres~ and ~seams_traj_unwrap_centres~ assemble each molecule onto its
 anchor atom inside every frame before computing mass-weighted or geometric
-centres, then accumulate fractional minimum-image displacements across frames.
+centres, then accumulate Euclidean minimum-image displacements across frames.
 Orthogonal, tilted triclinic, and time-varying NPT nine-number cells
-(~ox, oy, oz, lx, ly, lz, xy, xz, yz~) are accepted.
+(~ox, oy, oz, lx, ly, lz, xy, xz, yz~) are accepted. Each step is the shortest
+lattice image in the frame's own cell. On a tilted cell this can differ by a
+whole lattice vector from rounding each fractional coordinate. Unwrapping is
+exact while each molecule moves less than half the shortest lattice vector
+between saved frames.
 
 #+begin_src python
 >>> import pydseams

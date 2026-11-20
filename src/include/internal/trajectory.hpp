@@ -56,16 +56,22 @@ struct BoxCell {
   void toBox9(double out[9]) const noexcept;
 
   /**
-   * @brief Minimum-image Cartesian displacement for raw delta (dx, dy, dz).
+   * @brief Euclidean minimum-image Cartesian displacement for raw delta
+   * (dx, dy, dz).
+   *
+   * Uses minimage's reduced-basis search when built with it, otherwise
+   * micDeltaSearch. Independent rounding of fractional coordinates is not
+   * the minimum image on a tilted cell.
    */
   [[nodiscard]] std::array<double, 3> micDelta(double dx, double dy,
                                                double dz) const noexcept;
 
   /**
-   * @brief Fractional-lattice minimum-image displacement H * (ds - round(ds)).
+   * @brief Euclidean minimum image by exhaustive search over the lattice
+   * shifts that can beat the fractional image.
    */
-  [[nodiscard]] std::array<double, 3> fracMicDelta(double dx, double dy,
-                                                   double dz) const noexcept;
+  [[nodiscard]] std::array<double, 3> micDeltaSearch(double dx, double dy,
+                                                     double dz) const noexcept;
 };
 
 /**

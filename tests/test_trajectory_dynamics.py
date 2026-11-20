@@ -182,6 +182,71 @@ def test_triclinic_and_time_varying_box_unwrapping_oracle():
     assert np.allclose(res.centres, true_com, atol=1e-10)
 
 
+_SKEWED_CELL = np.array(
+    [0.0, 0.0, 0.0, 18.03850526, 10.63623724, 11.40838967, -8.77049545, 6.89505882, 2.90161048]
+)
+_SKEWED_EUCLID_STEP = np.array([3.42737868, 3.53897334, -3.29810805])
+
+
+def _rounded_fractional_image(delta: np.ndarray, box9: np.ndarray) -> np.ndarray:
+    _ox, _oy, _oz, lx, ly, lz, xy, xz, yz = map(float, box9)
+    h = np.array([[lx, xy, xz], [0.0, ly, yz], [0.0, 0.0, lz]])
+    s = np.linalg.solve(h, delta)
+    return h @ (s - np.round(s))
+
+
+def test_skewed_triclinic_unwrap_takes_euclidean_image_across_cell_change():
+    box0 = _SKEWED_CELL
+    lx, ly = box0[3], box0[4]
+    assert abs(box0[6]) <= lx / 2 and abs(box0[7]) <= lx / 2 and abs(box0[8]) <= ly / 2
+    raw = np.array([-16.98407757, -4.19565342, 8.11028162])
+    frac = _rounded_fractional_image(raw, box0)
+    assert np.linalg.norm(frac - _SKEWED_EUCLID_STEP) == pytest.approx(lx, abs=1e-7)
+
+    scale = 1.03
+    box1 = box0.copy()
+    box1[3:] *= scale
+    boxes = np.stack([box0, box0, box1])
+    u0 = np.array([4.1, 2.7, 5.3])
+    u1 = u0 + _SKEWED_EUCLID_STEP
+    u2 = u1 + scale * _SKEWED_EUCLID_STEP
+    truth = np.stack([u0, u1, u2])[:, None, :]
+    wrapped = np.stack([_wrap_triclinic(truth[f], boxes[f]) for f in range(3)])
+    raw2 = wrapped[2, 0] - u1
+    assert np.linalg.norm(
+        _rounded_fractional_image(raw2, box1) - scale * _SKEWED_EUCLID_STEP
+    ) == pytest.approx(scale * lx, abs=1e-7)
+
+    out = ds.unwrap_positions(wrapped, boxes)
+    assert np.allclose(out, truth, atol=1e-9)
+
+
+def test_python_minimum_image_matches_brute_force_on_skewed_cells():
+    from pydseams.trajectory import _mic_vectors_np
+
+    rng = np.random.default_rng(20261120)
+    shifts = np.stack(
+        np.meshgrid(*(np.arange(-16, 17),) * 3, indexing="ij"), axis=-1
+    ).reshape(-1, 3)
+    rounded_misses = 0
+    for _ in range(200):
+        lx, ly, lz = rng.uniform(1.0, 30.0, 3)
+        box9 = np.array(
+            [0.0, 0.0, 0.0, lx, ly, lz, rng.uniform(-0.5, 0.5) * lx,
+             rng.uniform(-0.5, 0.5) * lx, rng.uniform(-0.5, 0.5) * ly]
+        )
+        h = np.array([[lx, box9[6], box9[7]], [0.0, ly, box9[8]], [0.0, 0.0, lz]])
+        deltas = rng.uniform(-1.5, 1.5, size=(8, 3)) @ h.T
+        got = _mic_vectors_np(deltas, box9)
+        for d, g in zip(deltas, got):
+            cand = d[None, :] - shifts @ h.T
+            want = np.sqrt(np.min(np.einsum("ij,ij->i", cand, cand)))
+            assert np.linalg.norm(g) == pytest.approx(want, abs=1e-9)
+            if np.linalg.norm(_rounded_fractional_image(d, box9)) > want + 1e-9:
+                rounded_misses += 1
+    assert rounded_misses > 0
+
+
 def test_ballistic_and_anisotropic_brownian_msd_oracles():
     # 1. Ballistic oracle along arbitrary channel axis e = (1, 1, 2) / sqrt(6)
     axis = np.array([1.0, 1.0, 2.0])

@@ -50,6 +50,48 @@ int main(void) {
     fails += check_close(unwrapped[i], truth[i] + shift[i % 3], 1e-11, "triclinic_unwrap");
   }
 
+  /* 1b. Skewed LAMMPS-legal cell where rounding each fractional coordinate
+   * picks an image one a-vector longer than the Euclidean one; the third frame
+   * scales the cell by 3%. */
+  {
+    const double c0[9] = {0.0, 0.0, 0.0, 18.03850526, 10.63623724, 11.40838967,
+                          -8.77049545, 6.89505882, 2.90161048};
+    const double scale = 1.03;
+    double boxes[27];
+    for (int f = 0; f < 3; ++f) {
+      for (int i = 0; i < 9; ++i) {
+        boxes[9 * f + i] = (f == 2 && i >= 3) ? scale * c0[i] : c0[i];
+      }
+    }
+    const double e[3] = {3.42737868, 3.53897334, -3.29810805};
+    double u[9] = {4.1, 2.7, 5.3};
+    for (int k = 0; k < 3; ++k) {
+      u[3 + k] = u[k] + e[k];
+      u[6 + k] = u[3 + k] + scale * e[k];
+    }
+    double w[9];
+    for (int f = 0; f < 3; ++f) {
+      const double *b = boxes + 9 * f;
+      double sz = u[3 * f + 2] / b[5];
+      double sy = (u[3 * f + 1] - b[8] * sz) / b[4];
+      double sx = (u[3 * f] - b[6] * sy - b[7] * sz) / b[3];
+      sx -= floor(sx);
+      sy -= floor(sy);
+      sz -= floor(sz);
+      w[3 * f + 0] = b[3] * sx + b[6] * sy + b[7] * sz;
+      w[3 * f + 1] = b[4] * sy + b[8] * sz;
+      w[3 * f + 2] = b[5] * sz;
+    }
+    double uw[9] = {0};
+    if (seams_traj_unwrap_positions(w, 3, 1, boxes, 3, uw, 9) != SEAMS_OK) {
+      fprintf(stderr, "FAIL skewed unwrap status: %s\n", seams_last_error_message());
+      return 1;
+    }
+    for (int i = 0; i < 9; ++i) {
+      fails += check_close(uw[i], u[i], 1e-9, "skewed_cell_euclidean_unwrap");
+    }
+  }
+
   /* 2. Streaming MSD with axial vs lateral split */
   const double z_axis[3] = {0.0, 0.0, 1.0};
   seams_msd *msd = NULL;
