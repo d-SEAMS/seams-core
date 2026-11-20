@@ -1836,6 +1836,15 @@ void captureLocalWork(int workTag, const double *perLocal, int nLocal, MPI_Comm 
 #endif
 }
 
+bool measuredCutReady(int workTag) {
+#ifdef SEAMS_HAS_LINKCELL
+  return workTag > 0 && workTag < 5 && gMeasured[workTag].ready;
+#else
+  (void)workTag;
+  return false;
+#endif
+}
+
 const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double cutoff,
                                                        int maxDepth, MPI_Comm comm) {
   int rank = 0;
@@ -1861,7 +1870,14 @@ const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double
   // itself ends near 7.8 A on this crystal, but a skin of that radius
   // made the wall longer, so the gather stays at ringHops cutoffs.
   const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm, kWorkRings);
+  // gMeasured is the per-analysis cell weights from the first call. It is
+  // declared with the linkcell cut; without that cut the block partition
+  // stays in place and there is no slot to read.
+#ifdef SEAMS_HAS_LINKCELL
   const bool measure = !gMeasured[kWorkRings].ready;
+#else
+  const bool measure = false;
+#endif
   std::vector<double> sourceUs;
   if (measure) {
     sourceUs.assign(static_cast<std::size_t>(std::max(work.cloud.nop, 0)), 0.0);
