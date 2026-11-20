@@ -1,0 +1,1 @@
+`seams` reads the 30 VMD molfile suffixes (`.pqr`, `.xsf`, `.cube`, `.rst7`, `.parm7`, `.mae`, `.POSCAR`, `.OUTCAR`, ...) with chemfiles. It read them as LAMMPS dumps and found no atoms. A `.log` or `.xml` path is now GAMESS or VASP output, not a LAMMPS dump.

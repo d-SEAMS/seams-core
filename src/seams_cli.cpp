@@ -89,9 +89,25 @@ const char *iceName(molSys::atom_state_type s) {
   return "unclassified";
 }
 
+// The VMD molfile extensions: chemfiles' trj, psf and molden, and those
+// cmake/patches/chemfiles-0.10.4-molfiles.patch registers. Every chemfiles
+// this build accepts has them; see cmake/chemfiles_mmcif_probe.cpp.
 bool chemfilesSuffix(std::string_view ext) {
-  return ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
-         ext == "trr" || ext == "nc";
+  static constexpr std::string_view molfile[] = {
+      "trj", "psf", "molden", "bgf", "binpos", "car", "cor", "cpmd", "cube",
+      "dlpolyconfig", "dlpolyhist", "dtr", "js", "log", "mae", "mdf", "coor",
+      "parm", "parm7", "pqr", "rst7", "OUTCAR", "POSCAR", "XDATCAR",
+      "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"};
+  if (ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
+      ext == "trr" || ext == "nc") {
+    return true;
+  }
+  for (const auto name : molfile) {
+    if (ext == name) {
+      return true;
+    }
+  }
+  return false;
 }
 
 Cloud load(const std::string &path, int frame, int typeI,

@@ -102,6 +102,15 @@ if chemfiles_dep.found()
         meson.project_source_root() / 'input' / 'traj' / 'confined_water_40',
       ],
     )
+    test(
+      'molfile_cli',
+      find_program('python3'),
+      args: [
+        files('test_molfile_cli.py'),
+        meson.project_build_root() / 'seams',
+        meson.project_source_root() / 'input',
+      ],
+    )
   endif
 endif
 
