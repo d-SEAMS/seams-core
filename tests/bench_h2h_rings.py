@@ -29,6 +29,18 @@ import numpy as np
 MIN_REPEATS = 6
 WARMUP_CALLS = 2
 HEXAGONAL_RING_SIZE = 6
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def ensure_cubic_trajectory() -> None:
+    """Fetch input/traj/mW_cubic.lammpstrj through input/fetch.py if absent."""
+    cubic = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    if cubic.is_file():
+        return
+    subprocess.run(
+        [sys.executable, str(ROOT / "input" / "fetch.py"), "mW_cubic.lammpstrj"],
+        check=True,
+    )
 
 
 @dataclass(frozen=True)
@@ -642,6 +654,7 @@ def main() -> None:
         flush=True,
     )
 
+    ensure_cubic_trajectory()
     generated_specs: list[DatasetSpec] = []
     for name, path, rep in [
         ("orth-1e5", "input/traj/mW_cubic.lammpstrj", (3, 3, 3)),
