@@ -3322,12 +3322,12 @@ Units: as given for each parameter above.
 Example:
 
 ```c
-const int d[1] = {1}, a[1] = {2};
+const int don[1] = {1}, acc[1] = {2};
 seams_hbond_tcf *tcf = NULL;
 size_t nlags = 0;
 seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf);
-seams_hbond_tcf_push(tcf, d, a, 1);
-seams_hbond_tcf_push(tcf, d, a, 1);
+seams_hbond_tcf_push(tcf, don, acc, 1);
+seams_hbond_tcf_push(tcf, don, acc, 1);
 seams_hbond_tcf_curve(tcf, NULL, NULL, NULL, NULL, 0, &nlags);
 seams_hbond_tcf_destroy(tcf);
 ```
@@ -3401,12 +3401,12 @@ Units: as given for each parameter above.
 Example:
 
 ```c
-const int d[2] = {1, 2}, a[2] = {3, 4};
+const int don[2] = {1, 2}, acc[2] = {3, 4};
 seams_hbond_tcf *tcf = NULL;
 double tc = 0, ts = 0;
 seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf);
-seams_hbond_tcf_push(tcf, d, a, 2);
-seams_hbond_tcf_push(tcf, d, a, 1);
+seams_hbond_tcf_push(tcf, don, acc, 2);
+seams_hbond_tcf_push(tcf, don, acc, 1);
 seams_hbond_tcf_fit(tcf, 0.0, 0.0, &tc, NULL, &ts, NULL);
 seams_hbond_tcf_destroy(tcf);
 ```
@@ -3445,10 +3445,10 @@ Units: as given for each parameter above.
 Example:
 
 ```c
-const int d[1] = {1}, a[1] = {2};
+const int don[1] = {1}, acc[1] = {2};
 seams_hbond_tcf *tcf = NULL;
 seams_hbond_tcf_create(8, 1, 1.0, 1, &tcf);
-seams_hbond_tcf_push(tcf, d, a, 1);
+seams_hbond_tcf_push(tcf, don, acc, 1);
 seams_hbond_tcf_destroy(tcf);
 ```
 

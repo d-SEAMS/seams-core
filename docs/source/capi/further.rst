@@ -1350,7 +1350,7 @@ Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_NOMEM.
 
 Duplicate edges within the same frame are deduplicated before updating intermittent C_HB(t) and continuous survival S_HB(t).
 
-@par Ownership The library copies edge ids and keeps no caller pointer. @par Thread safety Exclusive use of tcf. @par Example @code const int d[1] = {1}, a[1] = {2}; seams_hbond_tcf \*tcf = NULL; seams_hbond_tcf_create(8, 1, 1.0, 1, &tcf); seams_hbond_tcf_push(tcf, d, a, 1); seams_hbond_tcf_destroy(tcf); @endcode
+@par Ownership The library copies edge ids and keeps no caller pointer. @par Thread safety Exclusive use of tcf. @par Example @code const int don[1] = {1}, acc[1] = {2}; seams_hbond_tcf \*tcf = NULL; seams_hbond_tcf_create(8, 1, 1.0, 1, &tcf); seams_hbond_tcf_push(tcf, don, acc, 1); seams_hbond_tcf_destroy(tcf); @endcode
 
 .. _capi-seams_hbond_tcf_curve:
 
@@ -1387,7 +1387,7 @@ Read intermittent C_HB(t) and continuous S_HB(t) lifetime curves.
 
 Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE; ::SEAMS_ERR_RANGE; ::SEAMS_ERR_NOMEM.
 
-@par Ownership The caller owns all output buffers. @par Thread safety Read-only on tcf. @par Example @code const int d[1] = {1}, a[1] = {2}; seams_hbond_tcf \*tcf = NULL; size_t nlags = 0; seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf); seams_hbond_tcf_push(tcf, d, a, 1); seams_hbond_tcf_push(tcf, d, a, 1); seams_hbond_tcf_curve(tcf, NULL, NULL, NULL, NULL, 0, &nlags); seams_hbond_tcf_destroy(tcf); @endcode
+@par Ownership The caller owns all output buffers. @par Thread safety Read-only on tcf. @par Example @code const int don[1] = {1}, acc[1] = {2}; seams_hbond_tcf \*tcf = NULL; size_t nlags = 0; seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf); seams_hbond_tcf_push(tcf, don, acc, 1); seams_hbond_tcf_push(tcf, don, acc, 1); seams_hbond_tcf_curve(tcf, NULL, NULL, NULL, NULL, 0, &nlags); seams_hbond_tcf_destroy(tcf); @endcode
 
 .. _capi-seams_hbond_tcf_fit:
 
@@ -1426,7 +1426,7 @@ Returns: ::SEAMS_OK; ::SEAMS_ERR_NULL; ::SEAMS_ERR_STATE; ::SEAMS_ERR_RANGE; ::S
 
 Pass t_start = 0 and t_end = 0 to fit across the full positive decay range.
 
-@par Ownership Writes scalar outputs owned by the caller. @par Thread safety Read-only on tcf. @par Example @code const int d[2] = {1, 2}, a[2] = {3, 4}; seams_hbond_tcf \*tcf = NULL; double tc = 0, ts = 0; seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf); seams_hbond_tcf_push(tcf, d, a, 2); seams_hbond_tcf_push(tcf, d, a, 1); seams_hbond_tcf_fit(tcf, 0.0, 0.0, &tc, NULL, &ts, NULL); seams_hbond_tcf_destroy(tcf); @endcode
+@par Ownership Writes scalar outputs owned by the caller. @par Thread safety Read-only on tcf. @par Example @code const int don[2] = {1, 2}, acc[2] = {3, 4}; seams_hbond_tcf \*tcf = NULL; double tc = 0, ts = 0; seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf); seams_hbond_tcf_push(tcf, don, acc, 2); seams_hbond_tcf_push(tcf, don, acc, 1); seams_hbond_tcf_fit(tcf, 0.0, 0.0, &tc, NULL, &ts, NULL); seams_hbond_tcf_destroy(tcf); @endcode
 
 .. _capi-seams_reorient_create:
 
