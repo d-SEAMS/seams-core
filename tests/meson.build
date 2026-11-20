@@ -964,6 +964,17 @@ test('mw215_frame', find_program('python3'),
   workdir: meson.project_source_root(),
   timeout: 600)
 
+test('pore_system',
+  executable('test_pore_system', 'test_pore_system.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  env: _test_env,
+  timeout: 120)
+
 test('omp_threads',
   executable('test_omp_threads', 'test_omp_threads.cpp',
     dependencies: [yds_dep, catch2_dep],

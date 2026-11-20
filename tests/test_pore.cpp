@@ -1,11 +1,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <neighbours.hpp>
 #include <numbers>
 #include <pore.hpp>
 #include <stdexcept>
+#include <vector>
 
 namespace {
 
@@ -61,6 +64,77 @@ void requireFlat(const pore::Profile &profile, double density) {
     REQUIRE_THAT(profile.mass_density[i], Catch::Matchers::WithinRel(density, 1e-9));
     REQUIRE(profile.volume[i] > 0.0);
   }
+}
+
+double volumeSum(const pore::Profile &profile) {
+  double sum = 0.0;
+  for (double volume : profile.volume) {
+    sum += volume;
+  }
+  return sum;
+}
+
+struct Face2 {
+  double eu[2];
+  double ev[2];
+  double axial;
+};
+
+Face2 faceOf(double lx, double ly, double lz, double xy, double xz, double yz, int axis) {
+  const double lattice[3][3] = {
+      {lx, 0.0, 0.0},
+      {xy, ly, 0.0},
+      {xz, yz, lz},
+  };
+  const double *along = lattice[axis];
+  const double axial2 = along[0] * along[0] + along[1] * along[1] + along[2] * along[2];
+  const double axial = std::sqrt(axial2);
+  const double eaxis[3] = {along[0] / axial, along[1] / axial, along[2] / axial};
+  const int iu = (axis + 1) % 3;
+  const int iv = (axis + 2) % 3;
+  auto dot = [](const double a[3], const double b[3]) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  };
+  const double pu = dot(lattice[iu], along) / axial2;
+  const double pv = dot(lattice[iv], along) / axial2;
+  double raw_u[3];
+  double raw_v[3];
+  for (int k = 0; k < 3; ++k) {
+    raw_u[k] = lattice[iu][k] - pu * along[k];
+    raw_v[k] = lattice[iv][k] - pv * along[k];
+  }
+  const double nu = std::sqrt(dot(raw_u, raw_u));
+  double e1[3];
+  for (int k = 0; k < 3; ++k) {
+    e1[k] = raw_u[k] / nu;
+  }
+  double e2[3] = {eaxis[1] * e1[2] - eaxis[2] * e1[1], eaxis[2] * e1[0] - eaxis[0] * e1[2],
+                  eaxis[0] * e1[1] - eaxis[1] * e1[0]};
+  const double n2 = std::sqrt(dot(e2, e2));
+  for (int k = 0; k < 3; ++k) {
+    e2[k] /= n2;
+  }
+  Face2 face;
+  face.axial = axial;
+  face.eu[0] = dot(raw_u, e1);
+  face.eu[1] = dot(raw_u, e2);
+  face.ev[0] = dot(raw_v, e1);
+  face.ev[1] = dot(raw_v, e2);
+  return face;
+}
+
+double nearestAxisRadius(const Face2 &face, double du, double dv) {
+  double best = 1e300;
+  for (int i = -3; i <= 3; ++i) {
+    for (int j = -3; j <= 3; ++j) {
+      const double x = (du + static_cast<double>(i)) * face.eu[0] +
+                       (dv + static_cast<double>(j)) * face.ev[0];
+      const double y = (du + static_cast<double>(i)) * face.eu[1] +
+                       (dv + static_cast<double>(j)) * face.ev[1];
+      best = std::min(best, std::hypot(x, y));
+    }
+  }
+  return best;
 }
 
 } // namespace
@@ -379,6 +453,375 @@ TEST_CASE("host guest nearest image and contacts follow the triclinic cell", "[p
   const auto touch = pore::hostGuest(coincident, 1, 2, 0.0);
   REQUIRE_THAT(touch.distance[0], Catch::Matchers::WithinAbs(0.0, 0.0));
   REQUIRE(touch.contacts[0] == 1);
+}
+
+TEST_CASE("shifted direction bins sum to the cell volume", "[pore]") {
+  auto cube = ortho(10.0, 10.0, 10.0);
+  addAtom(cube, 1, 5.0, 5.0, 5.0);
+  const double zdir[3] = {0.0, 0.0, 1.0};
+  for (double origin : {0.0, 0.3, 0.6, 0.9}) {
+    const auto profile = pore::alongDirection(cube, 0, 4, zdir, origin, nullptr);
+    for (double volume : profile.volume) {
+      REQUIRE_THAT(volume, Catch::Matchers::WithinAbs(250.0, 1e-9));
+    }
+    REQUIRE_THAT(volumeSum(profile), Catch::Matchers::WithinAbs(1000.0, 1e-9));
+  }
+
+  const double directions[][3] = {
+      {1.0, 1.0, 0.0}, {1.0, 2.0, 3.0}, {-1.0, 0.5, 2.0}, {1.0, -1.0, 1.0}, {1.0, 1e-7, 0.0},
+  };
+  const double origins[] = {0.0, 0.37, 0.61, 0.9};
+  const double skew_lx = 10.0;
+  const double skew_ly = 12.0;
+  const double skew_lz = 14.0;
+  const double skew_v = skew_lx * skew_ly * skew_lz;
+  auto skew = triclinic(skew_lx, skew_ly, skew_lz, 4.5, -3.0, 5.5);
+  addAtom(skew, 1, 1.0, 1.0, 1.0);
+  auto tilted = triclinic(10.0, 8.0, 12.0, 2.0, 1.0, -1.5);
+  addAtom(tilted, 1, 1.0, 1.0, 1.0);
+  const double tilted_v = 10.0 * 8.0 * 12.0;
+  for (const auto &direction : directions) {
+    for (double origin : origins) {
+      const auto on_cube = pore::alongDirection(cube, 0, 7, direction, origin, nullptr);
+      const auto on_skew = pore::alongDirection(skew, 0, 7, direction, origin, nullptr);
+      const auto on_tilt = pore::alongDirection(tilted, 0, 5, direction, origin, nullptr);
+      REQUIRE_THAT(volumeSum(on_cube), Catch::Matchers::WithinRel(1000.0, 1e-9));
+      REQUIRE_THAT(volumeSum(on_skew), Catch::Matchers::WithinRel(skew_v, 1e-9));
+      REQUIRE_THAT(volumeSum(on_tilt), Catch::Matchers::WithinRel(tilted_v, 1e-9));
+      for (double volume : on_cube.volume) {
+        REQUIRE(volume > 0.0);
+      }
+    }
+  }
+}
+
+TEST_CASE("a uniform fluid is flat for every pore binning", "[pore]") {
+  const double side = 10.0;
+  const double volume = side * side * side;
+  const int bins = 4;
+  const int n = 4;
+  for (double origin : {0.0, 0.3, 0.6, 0.9}) {
+    auto cloud = ortho(side, side, side);
+    for (int ix = 0; ix < n; ++ix) {
+      for (int iy = 0; iy < n; ++iy) {
+        for (int iz = 0; iz < bins; ++iz) {
+          const double sz = std::fmod(origin + (static_cast<double>(iz) + 0.5) / bins, 1.0);
+          placeFrac(cloud, 1, side, side, side, 0.0, 0.0, 0.0,
+                    (static_cast<double>(ix) + 0.5) / n, (static_cast<double>(iy) + 0.5) / n, sz);
+        }
+      }
+    }
+    const double direction[3] = {0.0, 0.0, 1.0};
+    const double density = static_cast<double>(n * n * bins) / volume;
+    const auto along = pore::alongDirection(cloud, 0, bins, direction, origin, nullptr);
+    requireFlat(along, density);
+    const auto axis = pore::fractionalAxis(cloud, 0, bins, 2, origin, nullptr);
+    requireFlat(axis, density);
+  }
+
+  auto cube = ortho(side, side, side);
+  const int grid = 16;
+  for (int ix = 0; ix < grid; ++ix) {
+    for (int iy = 0; iy < grid; ++iy) {
+      for (int iz = 0; iz < grid; ++iz) {
+        placeFrac(cube, 1, side, side, side, 0.0, 0.0, 0.0,
+                  (static_cast<double>(ix) + 0.5) / grid, (static_cast<double>(iy) + 0.5) / grid,
+                  (static_cast<double>(iz) + 0.5) / grid);
+      }
+    }
+  }
+  const double density = static_cast<double>(grid * grid * grid) / volume;
+  const double diagonal[3] = {1.0, 2.0, 3.0};
+  const auto diagonal_profile = pore::alongDirection(cube, 0, bins, diagonal, 0.61, nullptr);
+  REQUIRE_THAT(volumeSum(diagonal_profile), Catch::Matchers::WithinRel(volume, 1e-9));
+  // A cubic lattice projected on (1, 2, 3) is not a perfect Riemann sum of
+  // the slice: the four densities sit about 2% off N/V and the gap does
+  // not close when the grid is refined, because the direction is rational
+  // in the lattice. A cumulative bin volume, the failure at a nonzero
+  // origin, moves the density by tens of percent. The volume sum above is
+  // the exact pin.
+  for (std::size_t i = 0; i < diagonal_profile.number_density.size(); ++i) {
+    REQUIRE(diagonal_profile.volume[i] > 0.0);
+    REQUIRE_THAT(diagonal_profile.number_density[i], Catch::Matchers::WithinRel(density, 0.03));
+    REQUIRE_THAT(diagonal_profile.mass_density[i],
+                 Catch::Matchers::WithinRel(diagonal_profile.number_density[i], 1e-12));
+  }
+
+  const double centre[3] = {0.5, 0.5, 0.5};
+  const auto two = pore::poreProfiles(cube, 0, 4, 2, bins, 0.0, 2, nullptr, centre, 0, 0.0, nullptr);
+  REQUIRE_THAT(two.azimuthal.volume[0], Catch::Matchers::WithinRel(0.5 * volume, 1e-8));
+  REQUIRE_THAT(two.azimuthal.volume[1], Catch::Matchers::WithinRel(0.5 * volume, 1e-8));
+  requireFlat(two.azimuthal, density);
+  requireFlat(two.axial, density);
+  REQUIRE_THAT(volumeSum(two.radial), Catch::Matchers::WithinRel(volume, 1e-8));
+  // On this 16^3 lattice the outer ring holds 640 points against 595
+  // expected from the shell volume, 7.6% high, and the inner disks are
+  // 4.5% low. The volumes of those disks are the analytic pi r^2 L.
+  // A zero shell, the half-turn wedge failure, is many orders larger.
+  for (std::size_t i = 0; i < two.radial.volume.size(); ++i) {
+    if (two.radial.volume[i] > 1e-8 * volume) {
+      REQUIRE_THAT(two.radial.number_density[i], Catch::Matchers::WithinRel(density, 0.08));
+    }
+  }
+
+  const double lx = 10.0;
+  const double ly = 12.0;
+  const double lz = 14.0;
+  const double xy = 4.5;
+  const double xz = -3.0;
+  const double yz = 5.5;
+  const double skew_v = lx * ly * lz;
+  auto skew = triclinic(lx, ly, lz, xy, xz, yz);
+  for (int ix = 0; ix < grid; ++ix) {
+    for (int iy = 0; iy < grid; ++iy) {
+      for (int iz = 0; iz < grid; ++iz) {
+        placeFrac(skew, 1, lx, ly, lz, xy, xz, yz, (static_cast<double>(ix) + 0.5) / grid,
+                  (static_cast<double>(iy) + 0.5) / grid, (static_cast<double>(iz) + 0.5) / grid);
+      }
+    }
+  }
+  const double skew_density = static_cast<double>(grid * grid * grid) / skew_v;
+  const auto skew_bins =
+      pore::poreProfiles(skew, 0, 4, 2, bins, 0.0, 2, nullptr, centre, 0, 0.61, nullptr);
+  REQUIRE_THAT(volumeSum(skew_bins.azimuthal), Catch::Matchers::WithinRel(skew_v, 1e-8));
+  REQUIRE_THAT(skew_bins.azimuthal.volume[0], Catch::Matchers::WithinRel(0.5 * skew_v, 1e-6));
+  REQUIRE_THAT(skew_bins.azimuthal.volume[1], Catch::Matchers::WithinRel(0.5 * skew_v, 1e-6));
+  // The fractional grid is not aligned with the skewed azimuth or with
+  // the shifted axial slabs, so the counts are not exactly equal. A
+  // zero sector volume produces densities near 1e15.
+  for (const pore::Profile *profile : {&skew_bins.azimuthal, &skew_bins.axial}) {
+    REQUIRE_THAT(volumeSum(*profile), Catch::Matchers::WithinRel(skew_v, 1e-8));
+    for (std::size_t i = 0; i < profile->volume.size(); ++i) {
+      REQUIRE(profile->volume[i] > 0.0);
+      REQUIRE_THAT(profile->number_density[i], Catch::Matchers::WithinRel(skew_density, 0.25));
+      REQUIRE_THAT(profile->mass_density[i],
+                   Catch::Matchers::WithinRel(profile->number_density[i], 1e-12));
+    }
+  }
+  REQUIRE_THAT(volumeSum(skew_bins.radial), Catch::Matchers::WithinRel(skew_v, 1e-6));
+  for (std::size_t i = 0; i < skew_bins.radial.volume.size(); ++i) {
+    if (skew_bins.radial.volume[i] > 1e-6 * skew_v) {
+      REQUIRE_THAT(skew_bins.radial.number_density[i], Catch::Matchers::WithinRel(skew_density, 0.25));
+    }
+  }
+}
+
+TEST_CASE("two azimuthal bins have the half-cell volume", "[pore]") {
+  auto cube = ortho(10.0, 10.0, 10.0);
+  addAtom(cube, 1, 5.0, 5.0, 5.0);
+  const double centre[3] = {0.5, 0.5, 0.5};
+  for (int bins : {1, 2, 3, 4}) {
+    const auto profiles =
+        pore::poreProfiles(cube, 0, 2, bins, 1, 0.0, 2, nullptr, centre, 0, 0.0, nullptr);
+    REQUIRE_THAT(volumeSum(profiles.azimuthal), Catch::Matchers::WithinRel(1000.0, 1e-8));
+    if (bins == 2) {
+      REQUIRE_THAT(profiles.azimuthal.volume[0], Catch::Matchers::WithinRel(500.0, 1e-8));
+      REQUIRE_THAT(profiles.azimuthal.volume[1], Catch::Matchers::WithinRel(500.0, 1e-8));
+    }
+  }
+}
+
+TEST_CASE("a corner radius is the nearest pore-axis image", "[pore]") {
+  const double lx = 20.0;
+  const double ly = 10.0 * std::sqrt(3.0);
+  const double lz = 8.0;
+  const double xy = 10.0;
+  auto cloud = triclinic(lx, ly, lz, xy, 0.0, 0.0);
+  const double centre[3] = {0.5, 0.5, 0.5};
+  // Fractional (0, 0) is a corner of the centred hexagonal face. The
+  // centred-face distance is half the long diagonal. The nearest image
+  // of the axis is half the short diagonal.
+  placeFrac(cloud, 1, lx, ly, lz, xy, 0.0, 0.0, 0.0, 0.0, 0.5);
+  const Face2 face = faceOf(lx, ly, lz, xy, 0.0, 0.0, 2);
+  const double centred = std::hypot(-0.5 * face.eu[0] - 0.5 * face.ev[0],
+                                    -0.5 * face.eu[1] - 0.5 * face.ev[1]);
+  const double nearest = nearestAxisRadius(face, -0.5, -0.5);
+  REQUIRE(centred > nearest + 5.0);
+  REQUIRE_THAT(nearest, Catch::Matchers::WithinAbs(10.0, 1e-8));
+  const auto profiles =
+      pore::poreProfiles(cloud, 0, 24, 4, 1, 24.0, 2, nullptr, centre, 0, 0.0, nullptr);
+  int occupied = -1;
+  for (int i = 0; i < 24; ++i) {
+    if (profiles.radial.number_density[static_cast<std::size_t>(i)] > 0.0) {
+      REQUIRE(occupied < 0);
+      occupied = i;
+    }
+  }
+  REQUIRE(occupied >= 0);
+  const double dr = 1.0;
+  const double lo = dr * static_cast<double>(occupied);
+  const double hi = dr * static_cast<double>(occupied + 1);
+  REQUIRE(nearest >= lo - 1e-8);
+  REQUIRE(nearest < hi + 1e-8);
+  REQUIRE(centred > hi);
+  REQUIRE_THAT(volumeSum(profiles.radial), Catch::Matchers::WithinRel(lx * ly * lz, 1e-8));
+}
+
+TEST_CASE("a disk edge on a face vertex does not jump the shell volume", "[pore]") {
+  const double lx = 20.0;
+  const double ly = 10.0 * std::sqrt(3.0);
+  const double lz = 30.0;
+  const double xy = -10.0;
+  const double xz = 6.0;
+  const double yz = -8.0;
+  auto cloud = triclinic(lx, ly, lz, xy, xz, yz);
+  addAtom(cloud, 1, 0.0, 0.0, 0.0);
+  const Face2 face = faceOf(lx, ly, lz, xy, xz, yz, 2);
+  const double centre[3] = {0.5, 0.5, 0.5};
+  double vertex = 1e300;
+  for (double s : {-1.0, 1.0}) {
+    for (double t : {-1.0, 1.0}) {
+      vertex = std::min(vertex, std::hypot(0.5 * (s * face.eu[0] + t * face.ev[0]),
+                                           0.5 * (s * face.eu[1] + t * face.ev[1])));
+    }
+  }
+  std::array<pore::Profile, 3> shells;
+  int index = 0;
+  for (double scale : {1.0 - 1e-9, 1.0, 1.0 + 1e-9}) {
+    const auto profiles = pore::poreProfiles(cloud, 0, 2, 1, 1, 2.0 * vertex * scale, 2, nullptr,
+                                             centre, 0, 0.0, nullptr);
+    shells[static_cast<std::size_t>(index++)] = profiles.radial;
+    REQUIRE_THAT(volumeSum(profiles.radial), Catch::Matchers::WithinRel(lx * ly * lz, 1e-6));
+  }
+  for (int bin = 0; bin < 2; ++bin) {
+    const double left = shells[0].volume[static_cast<std::size_t>(bin)];
+    const double mid = shells[1].volume[static_cast<std::size_t>(bin)];
+    const double right = shells[2].volume[static_cast<std::size_t>(bin)];
+    // A vertex that lands on the bin edge used to move more than a
+    // thousand cubic angstroms between the two shells. The smooth change
+    // across 1e-9 in the radius is far smaller.
+    REQUIRE_THAT(mid, Catch::Matchers::WithinAbs(left, 1e-2));
+    REQUIRE_THAT(mid, Catch::Matchers::WithinAbs(right, 1e-2));
+  }
+
+  // The radial shell clips the Voronoi cell, whose vertices share one
+  // radius, so the public profiles above stay continuous even if a
+  // circle through a single vertex is mis-counted. The centred face
+  // does not: its short and long corners differ, and the gate's
+  // counterexample is that polygon. A root that falls on the vertex
+  // used to be dropped and the whole edge counted.
+  std::vector<std::array<double, 2>> corners;
+  const double sign[4][2] = {{-1.0, -1.0}, {1.0, -1.0}, {1.0, 1.0}, {-1.0, 1.0}};
+  for (const auto &s : sign) {
+    corners.push_back({0.5 * (s[0] * face.eu[0] + s[1] * face.ev[0]),
+                       0.5 * (s[0] * face.eu[1] + s[1] * face.ev[1])});
+  }
+  const double turn = corners[0][0] * corners[1][1] - corners[0][1] * corners[1][0];
+  if (turn < 0.0) {
+    std::reverse(corners.begin(), corners.end());
+  }
+  const double cover = 2.0 * vertex + 1.0;
+  std::array<double, 3> areas{};
+  int area_index = 0;
+  for (double scale : {1.0 - 1e-9, 1.0, 1.0 + 1e-9}) {
+    areas[static_cast<std::size_t>(area_index++)] =
+        pore::clippedDiskArea(corners, vertex * scale, cover, 0.0);
+  }
+  REQUIRE_THAT(areas[1], Catch::Matchers::WithinAbs(areas[0], 1e-4));
+  REQUIRE_THAT(areas[1], Catch::Matchers::WithinAbs(areas[2], 1e-4));
+}
+
+TEST_CASE("host guest contacts match a brute-force minimum image", "[pore]") {
+  const double ox = 1.0;
+  const double oy = -2.0;
+  const double oz = 0.5;
+  const double lx = 10.0;
+  const double ly = 12.0;
+  const double lz = 14.0;
+  const double xy = 4.5;
+  const double xz = -3.0;
+  const double yz = 5.5;
+  const double cutoff = 6.0;
+  auto cloud = triclinic(lx, ly, lz, xy, xz, yz);
+  // The dump origin is not zero. Shift every Cartesian point.
+  auto place = [&](int type, double sx, double sy, double sz) {
+    const double x = ox + lx * sx + xy * sy + xz * sz;
+    const double y = oy + ly * sy + yz * sz;
+    const double z = oz + lz * sz;
+    addAtom(cloud, type, x, y, z);
+  };
+  std::vector<std::array<double, 3>> guest_frac;
+  std::vector<std::array<double, 3>> frame_frac;
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
+      for (int k = 0; k < 2; ++k) {
+        const double s[3] = {(static_cast<double>(i) + 0.17) / 4.0,
+                             (static_cast<double>(j) + 0.41) / 4.0,
+                             (static_cast<double>(k) + 0.63) / 2.0};
+        place(1, s[0], s[1], s[2]);
+        guest_frac.push_back({s[0], s[1], s[2]});
+      }
+    }
+  }
+  const int nguest = static_cast<int>(guest_frac.size());
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      for (int k = 0; k < 3; ++k) {
+        const double s[3] = {(static_cast<double>(i) + 0.5) / 3.0,
+                             (static_cast<double>(j) + 0.2) / 3.0,
+                             (static_cast<double>(k) + 0.8) / 3.0};
+        place(2, s[0], s[1], s[2]);
+        frame_frac.push_back({s[0], s[1], s[2]});
+      }
+    }
+  }
+  int wrap_disagrees = 0;
+  std::vector<double> expect_distance(static_cast<std::size_t>(nguest), 0.0);
+  std::vector<int> expect_index(static_cast<std::size_t>(nguest), -1);
+  std::vector<int> expect_contacts(static_cast<std::size_t>(nguest), 0);
+  for (int g = 0; g < nguest; ++g) {
+    const auto gf = guest_frac[static_cast<std::size_t>(g)];
+    double best = 1e300;
+    int best_index = -1;
+    int contacts = 0;
+    for (int f = 0; f < static_cast<int>(frame_frac.size()); ++f) {
+      const auto ff = frame_frac[static_cast<std::size_t>(f)];
+      double ds[3] = {gf[0] - ff[0], gf[1] - ff[1], gf[2] - ff[2]};
+      for (double &component : ds) {
+        component -= std::round(component);
+      }
+      const double wx = lx * ds[0] + xy * ds[1] + xz * ds[2];
+      const double wy = ly * ds[1] + yz * ds[2];
+      const double wz = lz * ds[2];
+      const double wrapped = std::sqrt(wx * wx + wy * wy + wz * wz);
+      double image = 1e300;
+      for (int ia = -4; ia <= 4; ++ia) {
+        for (int ib = -4; ib <= 4; ++ib) {
+          for (int ic = -4; ic <= 4; ++ic) {
+            const double dx = wx - (static_cast<double>(ia) * lx + static_cast<double>(ib) * xy +
+                                    static_cast<double>(ic) * xz);
+            const double dy = wy - (static_cast<double>(ib) * ly + static_cast<double>(ic) * yz);
+            const double dz = wz - static_cast<double>(ic) * lz;
+            image = std::min(image, std::sqrt(dx * dx + dy * dy + dz * dz));
+          }
+        }
+      }
+      if (wrapped > image + 1e-6) {
+        wrap_disagrees += 1;
+      }
+      if (image < best) {
+        best = image;
+        best_index = nguest + f;
+      }
+      if (image <= cutoff) {
+        contacts += 1;
+      }
+    }
+    expect_distance[static_cast<std::size_t>(g)] = best;
+    expect_index[static_cast<std::size_t>(g)] = best_index;
+    expect_contacts[static_cast<std::size_t>(g)] = contacts;
+  }
+  REQUIRE(wrap_disagrees > 0);
+  const auto report = pore::hostGuest(cloud, 1, 0, cutoff);
+  REQUIRE(report.guest.size() == static_cast<std::size_t>(nguest));
+  REQUIRE(report.framework_types.size() == 1);
+  REQUIRE(report.framework_types[0] == 2);
+  for (int g = 0; g < nguest; ++g) {
+    REQUIRE(report.nearest[static_cast<std::size_t>(g)] == expect_index[static_cast<std::size_t>(g)]);
+    REQUIRE_THAT(report.distance[static_cast<std::size_t>(g)],
+                 Catch::Matchers::WithinAbs(expect_distance[static_cast<std::size_t>(g)], 1e-8));
+    REQUIRE(report.contacts[static_cast<std::size_t>(g)] == expect_contacts[static_cast<std::size_t>(g)]);
+  }
 }
 
 TEST_CASE("a shifted guest keeps the same nearest framework site", "[pore]") {
