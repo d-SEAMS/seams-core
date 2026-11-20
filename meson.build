@@ -2333,6 +2333,9 @@ if _git.found() and _untracked_py.found()
       is_parallel: false,
       timeout: 60)
   endforeach
+  test('source_tree_untracked_selftest', _untracked_py,
+    args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_selftest.py', _git.full_path()],
+    timeout: 60)
   test('source_tree_untracked_parallel', _untracked_py,
     args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_parallel.py',
       find_program('meson').full_path(), meson.project_source_root(), meson.project_build_root()],

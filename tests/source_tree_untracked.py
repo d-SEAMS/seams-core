@@ -12,6 +12,8 @@ of the ``meson test`` process that launched the test, plus the ``--repeat``
 iteration. ``check`` reads only the snapshot of its own generation and
 consumes it, and fails when that snapshot is missing or names another
 generation, so a check-only run never accepts an older or foreign snapshot.
+Processes are read from /proc, or from ps where /proc is missing or cannot
+read a process. Both modes fail when neither can.
 
 Usage: source_tree_untracked.py {snapshot,check} GIT SOURCE_ROOT STATE_DIR
 """
@@ -38,23 +40,44 @@ def untracked(git: str, root: Path) -> set[str] | None:
     return {p.decode("utf-8", "surrogateescape") for p in listed.stdout.split(b"\0") if p}
 
 
+PROC = Path("/proc")
+
+
+class NoProcessTable(Exception):
+    """Neither /proc nor ps can describe a process."""
+
+
 def process_info(pid: int) -> tuple[int, str, list[str]] | None:
-    """Parent pid, start time and argv of pid, or None if it is gone."""
-    proc = Path("/proc") / str(pid)
-    if Path("/proc/self/stat").is_file():
+    """Parent pid, start time and argv of pid, or None if it is gone.
+
+    /proc is read when it is mounted; a pid it cannot read is asked of ps.
+    """
+    proc = PROC / str(pid)
+    gone = False
+    if (PROC / "self" / "stat").is_file():
         try:
             stat = (proc / "stat").read_text()
             argv = (proc / "cmdline").read_bytes().decode("utf-8", "surrogateescape").split("\0")
+        except FileNotFoundError:
+            gone = True
         except OSError:
+            pass
+        else:
+            # comm, field 2, may hold spaces and parentheses.
+            fields = stat[stat.rindex(")") + 2 :].split()
+            return int(fields[1]), fields[19], [a for a in argv if a]
+    try:
+        out = subprocess.run(
+            ["ps", "-o", "ppid=", "-o", "lstart=", "-o", "command=", "-p", str(pid)],
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        # A pid absent from a readable /proc is gone; ps could only agree.
+        if gone:
             return None
-        # comm, field 2, may hold spaces and parentheses.
-        fields = stat[stat.rindex(")") + 2 :].split()
-        return int(fields[1]), fields[19], [a for a in argv if a]
-    out = subprocess.run(
-        ["ps", "-o", "ppid=", "-o", "lstart=", "-o", "command=", "-p", str(pid)],
-        capture_output=True,
-        text=True,
-    )
+        where = f"{proc} is unreadable" if (PROC / "self" / "stat").is_file() else f"{PROC} is not mounted"
+        raise NoProcessTable(f"{where} and ps is not on PATH, so process {pid} cannot be inspected") from None
     words = out.stdout.split()
     if out.returncode != 0 or len(words) < 7:
         return None
@@ -96,6 +119,14 @@ def owner_alive(name: str) -> bool:
 
 
 def main(argv: list[str]) -> int:
+    try:
+        return run(argv)
+    except NoProcessTable as err:
+        print(f"cannot identify the meson test run that launched this test: {err}", file=sys.stderr)
+        return 1
+
+
+def run(argv: list[str]) -> int:
     if len(argv) != 5 or argv[1] not in ("snapshot", "check"):
         print(__doc__, file=sys.stderr)
         return 2
