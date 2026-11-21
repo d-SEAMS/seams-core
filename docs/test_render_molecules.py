@@ -24,6 +24,10 @@ EXPECTED = {name: _hex(COLOR[name]) for name in (
     "hexagonal", "cubic", "interfacial", "clathrate", "interClathrate", "water",
 )}
 
+# ice-ic exercises the fetched mW cubic trajectory (input/fetch.py), not
+# just the committed ice1h.lammpstrj that ice-ih reads.
+SLUGS = ("ice-ih", "ice-ic")
+
 
 def fail(message):
     print(message, file=sys.stderr)
@@ -105,14 +109,20 @@ def main():
     if color.returncode != 0:
         return color.returncode
     args = list(sys.argv[1:])
+    if "--slug" in args:
+        index = args.index("--slug")
+        del args[index : index + 2]
     if "--engine" not in args:
         args = ["--engine", "cycles", *args]
-    done = subprocess.run([sys.executable, str(SCRIPT), *args], check=False)
-    if done.returncode != 0:
-        return done.returncode
-    if "--out" in args:
-        out = Path(args[args.index("--out") + 1])
-        pngs = sorted(out.glob("*/overlay.png")) if out.is_dir() else []
+    out_dir = Path(args[args.index("--out") + 1]) if "--out" in args else None
+    for slug in SLUGS:
+        done = subprocess.run(
+            [sys.executable, str(SCRIPT), "--slug", slug, *args], check=False
+        )
+        if done.returncode != 0:
+            return done.returncode
+    if out_dir is not None:
+        pngs = sorted(out_dir.glob("*/overlay.png")) if out_dir.is_dir() else []
         if pngs:
             frame = subprocess.run(
                 [sys.executable, str(ROOT / "docs" / "scripts" / "check_frame.py"), *map(str, pngs)],

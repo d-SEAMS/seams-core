@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
     }
   };
   {
-    const std::string liquid = trajOf("dump-l.lammpstrj");
+    const std::string liquid = trajOf("liquid-real-30.fixture.lammpstrj");
     const std::string slab = trajOf("interface_f0.lammpstrj");
     const std::string cell = trajOf("genice_sI.lammpstrj");
     molSys::PointCloud<molSys::Point<double>, double> cloud;

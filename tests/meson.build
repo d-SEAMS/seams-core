@@ -666,8 +666,8 @@ _check_device_host = executable('check_device_host', 'check_device_host.cpp',
 # Both checks exit 1 on any mismatch. levi:<q> is the PG(2, q) incidence
 # graph, with 12, 54 and 375 six-rings through each vertex for q = 2, 3, 5.
 _device_host_cases = {
-  'mW_cutoff': ['traj/mW_cubic.lammpstrj', '1', '1', '3.5', '2', 'cutoff'],
-  'mW_knn': ['traj/mW_cubic.lammpstrj', '1', '1', '3.5', '2', 'knn'],
+  'mW_cutoff': ['traj/cubic-real-7.fixture.lammpstrj', '1', '1', '3.5', '2', 'cutoff'],
+  'mW_knn': ['traj/cubic-real-7.fixture.lammpstrj', '1', '1', '3.5', '2', 'knn'],
   'example_cutoff': ['traj/exampleTraj.lammpstrj', '1', '2', '3.5', '2', 'cutoff'],
   'example_knn': ['traj/exampleTraj.lammpstrj', '1', '2', '3.5', '2', 'knn'],
   'levi2': ['levi:2', '2'],
@@ -700,7 +700,7 @@ test('gpu_kernels_host',
   timeout: 120)
 
 _invariance_cases = {
-  'mW': ['traj/mW_cubic.lammpstrj', '1', '3.5', '1', '1'],
+  'mW': ['traj/cubic-real-7.fixture.lammpstrj', '1', '3.5', '1', '1'],
   'example': ['traj/exampleTraj.lammpstrj', '1', '3.5', '2', '1'],
 }
 foreach name, args : _invariance_cases
@@ -716,15 +716,15 @@ test('invariance_missing_input', _check_invariance,
   env: _test_env,
   should_fail: true)
 test('invariance_empty_frame', _check_invariance,
-  args: ['traj/mW_cubic.lammpstrj', '1', '3.5', '9'],
+  args: ['traj/cubic-real-7.fixture.lammpstrj', '1', '3.5', '9'],
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   should_fail: true)
 # 1000 translations and 1000 permutations on every ordinary frame, plus
 # the eight half-box shifts. A frame above 2048 atoms is checked at one
 # trial. Degree above 80 is every vertex at cap 4. Degree above 40 is
-# every vertex at cap 6. One optimized search of dump-l is 8.7 s and of
-# dump-bcc is 3.8 s. 201 frames, three searches, is 7493 s.
+# every vertex at cap 6. The compact liquid, BCC, and cubic fixtures retain
+# the dense and crystalline graph cases without requiring network access.
 # The limit is 10800 s. A skip fails the run. Heavy cases
 # are serial so they do not steal the Levi graph's core.
 test('fuzz_cage_shift_permute', _fuzz_cage,
@@ -752,6 +752,10 @@ test('h2h_harness', find_program('python3'),
   workdir: meson.project_source_root(),
   env: _test_env,
   timeout: 120)
+test('bench_h2h_fetch', find_program('python3'),
+  args: [files('test_bench_h2h_fetch.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
 test('ion_shell_rings', find_program('python3'),
   args: [files('test_ion_shell_rings.py'), meson.project_build_root() / 'seams'],
   workdir: meson.project_source_root(),

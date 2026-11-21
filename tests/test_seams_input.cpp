@@ -241,7 +241,7 @@ std::string writeEmptyMiddleDump() {
 
 TEST_CASE("nLammpsFrames counts ITEM: TIMESTEP markers", "[seams_input]") {
   REQUIRE(sinp::nLammpsFrames("missing/nonexistent.lammpstrj") == 0);
-  REQUIRE(sinp::nLammpsFrames("traj/mW_cubic.lammpstrj") == 11);
+  REQUIRE(sinp::nLammpsFrames("traj/cubic-real-7.fixture.lammpstrj") == 7);
   const auto tiny = writeTinyDump();
   sinp::dropLammpsDumpIndex(tiny);
   REQUIRE(sinp::nLammpsFrames(tiny) == 3);
@@ -285,16 +285,18 @@ TEST_CASE("sequential load_frame walks keep the live dump position",
   sinp::dropLammpsDumpIndex(tiny);
 }
 
-TEST_CASE("indexed last-frame read of mW_cubic matches a full scan",
+TEST_CASE("indexed last real frame read matches a full scan",
           "[seams_input]") {
-  REQUIRE(sinp::nLammpsFrames("traj/mW_cubic.lammpstrj") == 11);
+  REQUIRE(sinp::nLammpsFrames("traj/cubic-real-7.fixture.lammpstrj") == 7);
   molSys::PointCloud<molSys::Point<double>, double> a, b;
-  auto last = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 11, a, 1);
-  auto first = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, b, 1);
+  auto last = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 7, a, 1);
+  auto first = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, b, 1);
   REQUIRE(last.nop == first.nop);
   REQUIRE(last.nop == 4096);
-  REQUIRE(last.currentFrame == 11);
+  REQUIRE(last.pts.back().atomID == 4096);
+  REQUIRE(last.currentFrame == 7);
   REQUIRE(first.currentFrame == 1);
+  REQUIRE(last.pts.back().x != first.pts.back().x);
 }
 
 TEST_CASE("forEachLammpsFrame matches sequential reads", "[seams_input]") {
@@ -325,13 +327,13 @@ TEST_CASE("forEachLammpsFrame matches sequential reads", "[seams_input]") {
 TEST_CASE("forEachLammpsFrame deals frames to parts in serpentine order",
           "[seams_input]") {
   // Frames 2 to 11 in rounds of three, odd rounds reversed: {2, 3, 4},
-  // {7, 6, 5}, {8, 9, 10}, {-, -, 11}
+  // {7, 6, 5}, {8, 9, 10}, {-, -, 11}.
   const std::vector<std::vector<int>> expected = {
       {2, 7, 8}, {3, 6, 9}, {4, 5, 10, 11}, {}};
   for (int part = 0; part < 4; part++) {
     std::vector<int> seen(12, 0);
     sinp::forEachLammpsFrame(
-        "traj/mW_cubic.lammpstrj", 2, 11, 1,
+        "traj/bcc-real-30.fixture.lammpstrj", 2, 11, 1,
         [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
           seen[static_cast<std::size_t>(frame)] =
               cloud.currentFrame == frame ? 1 : -1;
@@ -346,6 +348,19 @@ TEST_CASE("forEachLammpsFrame deals frames to parts in serpentine order",
     }
     REQUIRE(got == expected[static_cast<std::size_t>(part)]);
   }
+}
+
+TEST_CASE("forEachLammpsFrame reaches EOF when the range ends at trajectory end",
+          "[seams_input]") {
+  std::vector<int> got;
+  sinp::forEachLammpsFrame(
+      "traj/bcc-real-30.fixture.lammpstrj", 28, 0, 1,
+      [&](int frame, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+        REQUIRE(cloud.currentFrame == frame);
+        got.push_back(frame);
+      },
+      1);
+  REQUIRE(got == std::vector<int>{28, 29, 30});
 }
 
 TEST_CASE("empty NUMBER OF ATOMS frames are valid snapshots",
@@ -500,7 +515,7 @@ TEST_CASE("readChemfiles matches the hand-rolled LAMMPS reader", "[seams_input]"
   struct Fixture {
     const char *path;
     int filter;
-  } cases[] = {{"traj/mW_cubic.lammpstrj", 1},
+  } cases[] = {{"traj/cubic-real-7.fixture.lammpstrj", 1},
                {"traj/exampleTraj.lammpstrj", 2}};
 
   for (const auto &fx : cases) {

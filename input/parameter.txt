@@ -9,6 +9,7 @@
 // The xyz file should be inside a folder called xyz
 
 // trajFile=./input/traj/dump.lammpstrj
+// Fetch these full inputs first with: python3 input/fetch.py
 // trajFile=./input/traj/dump-bcc.lammpstrj
 trajFile=./input/traj/mW_cubic.lammpstrj
 // trajFile=./input/traj/dump-l.lammpstrj

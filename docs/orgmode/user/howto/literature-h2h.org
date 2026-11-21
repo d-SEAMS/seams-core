@@ -41,6 +41,10 @@ hexagonal primitives, so the box has no tilt. The supercells are 128,
 512 atoms of type 1. The box edge is 11.808 Å, the number density is
 0.311 Å^{-3}, and the median number of neighbours inside 3.5 Å is 56.
 The script labels that frame =liquid-mw=.
+When the full liquid trajectory is absent, the script invokes
+=python3 input/fetch.py dump-l.lammpstrj=.  That shared helper downloads
+the pinned =d-SEAMS/seams-core-inputs= revision and verifies its SHA-256
+digest before installing it.
 =input/traj/exampleTraj.lammpstrj= contributes its 250 type-2
 oxygens, phase =tip4p-o=. =input/traj/genice_sI.lammpstrj= is 46
 oxygens and =input/traj/genice_sII.lammpstrj= is 136.

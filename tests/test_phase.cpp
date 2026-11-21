@@ -132,7 +132,7 @@ TEST_CASE("ice XXI library rejects a 152-site simple-cubic BCT packing",
   sI = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, sI, 1);
   REQUIRE_FALSE(phase::iceXXILibrary(sI).match);
   molSys::PointCloud<molSys::Point<double>, double> ic;
-  ic = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, ic, 1);
+  ic = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, ic, 1);
   REQUIRE_FALSE(phase::iceXXILibrary(ic).match);
 }
 
@@ -235,7 +235,7 @@ TEST_CASE("frameDensity uses the triclinic cell volume", "[phase]") {
 TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",
           "[phase]") {
   molSys::PointCloud<molSys::Point<double>, double> ic;
-  ic = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, ic, 1);
+  ic = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, ic, 1);
   const auto rhoI = phase::localDensity(ic, 3.5);
   double meanI = 0.0;
   for (double r : rhoI) {

@@ -52,6 +52,27 @@ jobs:
       - run: pixi run test
       - run: pixi run install
 
+  full-trajectories:
+    runs-on: ubuntu-latest
+    env:
+      UCX_TLS: tcp,self,sm
+      OMPI_MCA_pml: ob1
+      OMPI_MCA_btl: ^openib
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        with:
+          environments: default
+          cache-key: pixi-full-trajectories-
+      - name: Fetch checksum-pinned full trajectories
+        run: pixi run python input/fetch.py
+      - name: Configure full trajectory tests
+        run: pixi run meson setup build-full-trajectories -Dwith_full_trajectory_tests=true
+      - name: Build
+        run: pixi run ninja -C build-full-trajectories
+      - name: Test full trajectories
+        run: pixi run meson test -C build-full-trajectories --print-errorlogs --suite full-trajectories
+
   # Plain char is unsigned on aarch64, ppc64le and s390x. The x86_64
   # runner gets the same semantics from -funsigned-char, so a char used
   # as a signed value fails here without an ARM runner. The heavy suite

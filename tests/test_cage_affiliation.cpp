@@ -144,7 +144,7 @@ TEST_CASE("seeded affiliation on an empty framed cloud is empty",
 TEST_CASE("cageAffiliation matches the greedy classification on mW",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
@@ -403,9 +403,9 @@ TEST_CASE("AffiliationUpdater equals batch across the mW trajectory",
           "[cage_affiliation]") {
   ring::AffiliationUpdater updater;
   nneigh::SkinNeighborList skin(3.5, 2.0, 1);
-  for (int frame = 1; frame <= 11; frame++) {
+  for (int frame = 1; frame <= 7; frame++) {
     molSys::PointCloud<molSys::Point<double>, double> yCloud;
-    yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", frame, yCloud, 1);
+    yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", frame, yCloud, 1);
     auto nList = skin.update(yCloud);
     auto idx = nneigh::neighbourListByIndex(yCloud, nList);
     auto six = sixMembered(primitive::ringNetwork(idx, 7));
@@ -439,9 +439,9 @@ std::map<std::string, int> cageCensus(const ring::CageAffiliation &flags) {
 TEST_CASE("cage census matches the rebuild on every frame", "[cage_affiliation]") {
   ring::AffiliationUpdater updater;
   nneigh::SkinNeighborList skin(3.5, 2.0, 1);
-  for (int frame = 1; frame <= 11; ++frame) {
+  for (int frame = 1; frame <= 7; ++frame) {
     molSys::PointCloud<molSys::Point<double>, double> yCloud;
-    yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", frame, yCloud, 1);
+    yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", frame, yCloud, 1);
     auto nList = skin.update(yCloud);
     auto idx = nneigh::neighbourListByIndex(yCloud, nList);
     auto six = sixMembered(primitive::ringNetwork(idx, 7));
@@ -455,7 +455,7 @@ TEST_CASE("cage census matches the rebuild on every frame", "[cage_affiliation]"
 
   // A bond removed on each step, so the census is not a copy of frame 1.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto rows = nneigh::neighbourListByIndex(
       yCloud, nneigh::neighListO(3.5, yCloud, 1));
   ring::AffiliationUpdater churn;
@@ -488,7 +488,7 @@ TEST_CASE("cage census matches the rebuild on every frame", "[cage_affiliation]"
 TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
 
@@ -535,7 +535,7 @@ TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
 TEST_CASE("AffiliationUpdater matches batch when every neighbour row changes",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
   auto six = sixMembered(primitive::ringNetwork(idx, 7));
@@ -567,7 +567,7 @@ TEST_CASE("AffiliationUpdater matches batch when every neighbour row changes",
 TEST_CASE("AffiliationUpdater matches an unsorted ring list and an empty frame",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
   auto six = sixMembered(primitive::ringNetwork(idx, 7));
@@ -630,7 +630,7 @@ TEST_CASE("AffiliationUpdater falls back when the ring set churns",
   // Every new ring is dirty. Past the batch fraction that has to call
   // fellBack before returning, or the following frames never store a diff.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
   auto six = sixMembered(primitive::ringNetwork(idx, 7));
@@ -707,7 +707,7 @@ TEST_CASE("cage membership is not a function of the four-neighbour star",
   // configuration displaces second-shell atoms only, which changes no
   // coordinate and no edge inside the star.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
 
@@ -809,7 +809,7 @@ TEST_CASE("cage membership is not a function of the four-neighbour star",
 TEST_CASE("seeded affiliation: structural zero, consistency, recovery",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
   auto six = sixMembered(primitive::ringNetwork(idx, 7));
@@ -874,7 +874,7 @@ TEST_CASE("seeded affiliation: structural zero, consistency, recovery",
 TEST_CASE("ring-adjacent completion: identity on a crystal, empty on nothing",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
   auto six = sixMembered(primitive::ringNetwork(idx, 7));

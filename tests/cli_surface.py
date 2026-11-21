@@ -171,7 +171,7 @@ def main():
         # The rest of this surface reads pdb, gro, and dcd.
         return 77
     tip = "input/traj/exampleTraj.lammpstrj"
-    cubic = "input/traj/mW_cubic.lammpstrj"
+    cubic = "input/traj/cubic-real-7.fixture.lammpstrj"
     guest = "input/traj/genice_sI.lammpstrj"
     work = tempfile.mkdtemp(prefix="dseams-cli-")
     three = os.path.join(work, "three.lammpstrj")

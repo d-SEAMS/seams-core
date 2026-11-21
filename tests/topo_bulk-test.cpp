@@ -474,7 +474,7 @@ TEST_CASE("indexed findHC and findDDC match the convenience overloads",
 
 TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
@@ -489,7 +489,7 @@ TEST_CASE("topoBulkAnalysis on mW cubic trajectory", "[topo_bulk]") {
 
 TEST_CASE("bulkPolygonRingAnalysis on mW cubic trajectory", "[topo_bulk]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
@@ -700,7 +700,7 @@ TEST_CASE("DDC cage assembly is independent of ring enumeration order",
   // order the ring network was enumerated in. The per-ring classification
   // and the cage partition must both survive any permutation of the input.
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
   auto nList = nneigh::neighListO(3.5, yCloud, 1);
   auto idx = nneigh::neighbourListByIndex(yCloud, nList);
@@ -746,7 +746,7 @@ TEST_CASE("Cage counts are invariant under atom relabelling",
   // selected by the atom-index key.
   using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
   Cloud yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
   const int n = yCloud.nop;
 
@@ -858,7 +858,7 @@ TEST_CASE("Cage objects are invariant under a periodic translation",
     return out;
   };
   Cloud cloud;
-  cloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, cloud, 1);
+  cloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, cloud, 1);
   REQUIRE(cloud.nop == 4096);
   const auto reference = cagesOf(cloud);
   int ddc = 0;

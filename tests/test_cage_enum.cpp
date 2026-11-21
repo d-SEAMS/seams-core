@@ -278,7 +278,7 @@ TEST_CASE("findBySignature(hc) and findBySignature(ddc) match findHC/findDDC "
           "on mW cubic",
           "[cage_enum]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
 
   auto nList = nneigh::neighListO(3.5, yCloud, 1);

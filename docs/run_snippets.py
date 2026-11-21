@@ -218,6 +218,14 @@ def base_env(build):
     return env
 
 
+def fixture_inputs(text, env):
+    """Use committed offline inputs when the test environment provides them."""
+    cubic = env.get("SEAMS_CUBIC_TRAJ")
+    if cubic:
+        text = text.replace("input/traj/mW_cubic.lammpstrj", cubic)
+    return text
+
+
 def run(cmd, env, cwd=ROOT):
     done = subprocess.run(cmd, env=env, cwd=cwd, text=True, capture_output=True)
     if done.returncode != 0:
@@ -987,6 +995,7 @@ def execute_page(path, build):
                 run_source(build, env, excerpt)
                 ran += 1
                 continue
+            body = fixture_inputs(body, env)
             if lang == "c" and is_prototype(body):
                 prototypes.append(body)
                 continue
