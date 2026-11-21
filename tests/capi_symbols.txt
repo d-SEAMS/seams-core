@@ -39,6 +39,7 @@ seams_hbonds
 seams_label_name
 seams_last_error
 seams_last_error_message
+seams_lsi
 seams_molecule_centres
 seams_molecule_dipoles
 seams_mols
@@ -75,12 +76,14 @@ seams_rings_count
 seams_rings_destroy
 seams_rings_find
 seams_rings_fraction
+seams_rings_from_csr
 seams_rings_histogram
 seams_rings_histogram_n
 seams_rings_labels
 seams_rings_labels_n
 seams_rings_nrings
 seams_rings_vertices
+seams_rings_winding
 seams_running_cn
 seams_set_mols
 seams_set_num_threads
@@ -105,6 +108,7 @@ seams_system_set_positions
 seams_system_stage_positions
 seams_system_symmetry
 seams_system_types
+seams_tetrahedral_order
 seams_traj_unwrap_centres
 seams_traj_unwrap_positions
 seams_version

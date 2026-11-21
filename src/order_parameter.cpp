@@ -22,7 +22,166 @@
 #include <vector>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 #include <unordered_map>
+
+namespace {
+
+struct RadialPartner {
+  double distance;
+  std::array<double, 3> direction;
+};
+
+std::vector<int> selectedAtoms(const std::vector<int> &selection, int n,
+                               const char *name) {
+  if (selection.empty()) {
+    std::vector<int> all(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; ++i) {
+      all[static_cast<std::size_t>(i)] = i;
+    }
+    return all;
+  }
+  std::vector<int> checked = selection;
+  for (const int atom : checked) {
+    if (atom < 0 || atom >= n) {
+      throw std::invalid_argument(std::string(name) +
+                                  " selection is outside the cloud");
+    }
+  }
+  return checked;
+}
+
+std::vector<RadialPartner> partnerShell(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const gen::FracBox &box, int centre, const std::vector<int> &partners) {
+  const auto &origin = cloud.pts[static_cast<std::size_t>(centre)];
+  std::vector<RadialPartner> shell;
+  shell.reserve(partners.size());
+  for (const int partner : partners) {
+    if (partner == centre) {
+      continue;
+    }
+    const auto &point = cloud.pts[static_cast<std::size_t>(partner)];
+    const auto dr = gen::fracDelta(box, point.x, point.y, point.z, origin.x,
+                                   origin.y, origin.z);
+    const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+    if (!(r2 > 0.0)) {
+      throw std::invalid_argument(
+          "a selected centre and partner occupy the same position");
+    }
+    const double r = std::sqrt(r2);
+    shell.push_back(
+        {r, {dr[0] / r, dr[1] / r, dr[2] / r}});
+  }
+  std::sort(shell.begin(), shell.end(),
+            [](const RadialPartner &a, const RadialPartner &b) {
+              return a.distance < b.distance;
+            });
+  return shell;
+}
+
+} // namespace
+
+std::vector<double> topoparam::tetrahedralOrder(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<int> &centres, const std::vector<int> &partners,
+    TetrahedralNeighbours convention, double cutoff) {
+  const auto box = gen::makeFracBox(cloud);
+  if (!box.ok) {
+    throw std::invalid_argument("tetrahedral order requires a valid cell");
+  }
+  if (convention == TetrahedralNeighbours::WithinCutoff &&
+      (!(cutoff > 0.0) || !std::isfinite(cutoff))) {
+    throw std::invalid_argument("tetrahedral cutoff must be positive");
+  }
+  const int n = static_cast<int>(cloud.pts.size());
+  const auto centreAtoms = selectedAtoms(centres, n, "centre");
+  const auto partnerAtoms = selectedAtoms(partners, n, "partner");
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  std::vector<double> result(centreAtoms.size(), nan);
+  for (std::size_t row = 0; row < centreAtoms.size(); ++row) {
+    auto shell = partnerShell(cloud, box, centreAtoms[row], partnerAtoms);
+    if (convention == TetrahedralNeighbours::NearestFour) {
+      if (shell.size() > 4) {
+        shell.resize(4);
+      }
+    } else {
+      const auto outside =
+          std::upper_bound(shell.begin(), shell.end(), cutoff,
+                           [](double r, const RadialPartner &entry) {
+                             return r < entry.distance;
+                           });
+      shell.erase(outside, shell.end());
+    }
+    const std::size_t neighbours = shell.size();
+    if (neighbours < 4) {
+      continue;
+    }
+    double angular = 0.0;
+    for (std::size_t j = 0; j < neighbours; ++j) {
+      for (std::size_t k = j + 1; k < neighbours; ++k) {
+        const auto &u = shell[j].direction;
+        const auto &v = shell[k].direction;
+        const double shifted =
+            u[0] * v[0] + u[1] * v[1] + u[2] * v[2] + 1.0 / 3.0;
+        angular += shifted * shifted;
+      }
+    }
+    // An isotropic pair has <(cos psi + 1/3)^2> = 4/9, so this factor puts
+    // the ideal-gas mean at zero for every N; it is 3/8 at N = 4.
+    const double norm =
+        9.0 / (2.0 * static_cast<double>(neighbours) *
+               static_cast<double>(neighbours - 1));
+    result[row] = 1.0 - norm * angular;
+  }
+  return result;
+}
+
+std::vector<double> topoparam::localStructureIndex(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<int> &centres, const std::vector<int> &partners,
+    double cutoff) {
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    throw std::invalid_argument("LSI cutoff must be positive");
+  }
+  const auto box = gen::makeFracBox(cloud);
+  if (!box.ok) {
+    throw std::invalid_argument("LSI requires a valid cell");
+  }
+  const int n = static_cast<int>(cloud.pts.size());
+  const auto centreAtoms = selectedAtoms(centres, n, "centre");
+  const auto partnerAtoms = selectedAtoms(partners, n, "partner");
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  std::vector<double> result(centreAtoms.size(), nan);
+  for (std::size_t row = 0; row < centreAtoms.size(); ++row) {
+    const auto shell =
+        partnerShell(cloud, box, centreAtoms[row], partnerAtoms);
+    const auto outside =
+        std::upper_bound(shell.begin(), shell.end(), cutoff,
+                         [](double r, const RadialPartner &entry) {
+                           return r < entry.distance;
+                         });
+    // Shiratani-Sasai: N neighbours inside the cutoff give N gaps, the last
+    // one reaching the first neighbour beyond it.
+    const auto gaps = static_cast<std::size_t>(outside - shell.begin());
+    if (gaps == 0 || outside == shell.end()) {
+      continue;
+    }
+    double mean = 0.0;
+    for (std::size_t i = 0; i < gaps; ++i) {
+      mean += shell[i + 1].distance - shell[i].distance;
+    }
+    mean /= static_cast<double>(gaps);
+    double variance = 0.0;
+    for (std::size_t i = 0; i < gaps; ++i) {
+      const double delta =
+          shell[i + 1].distance - shell[i].distance - mean;
+      variance += delta * delta;
+    }
+    result[row] = variance / static_cast<double>(gaps);
+  }
+  return result;
+}
 
 /**
  * @details The average height of prism blocks remains relatively constant. We

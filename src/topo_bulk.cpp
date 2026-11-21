@@ -1711,42 +1711,12 @@ ring::RingSearchIndex ring::buildRingSearchIndex(
       ring::buildRingSearchIndex(rings, static_cast<int>(yCloud.pts.size()));
   // The claim key is the ring's atoms and its unwrapped shift, not the
   // absolute position. positionRank stays available for callers that want
-  // the coordinate order; it is not the cage order.
-  const auto box = gen::makeFracBox(yCloud);
-  index.ringShift.assign(rings.size(), {0, 0, 0});
-  if (box.ok) {
-    const int nAtoms = static_cast<int>(yCloud.pts.size());
-    const int nRings = static_cast<int>(rings.size());
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
-#endif
-    for (int r = 0; r < nRings; r++) {
-      const auto &ring = rings[static_cast<std::size_t>(r)];
-      std::array<int, 3> wind{0, 0, 0};
-      bool inFrame = true;
-      for (size_t i = 0; i < ring.size() && inFrame; i++) {
-        const int a = ring[i];
-        const int b = ring[(i + 1) % ring.size()];
-        if (a < 0 || b < 0 || a >= nAtoms || b >= nAtoms) {
-          inFrame = false;
-          break;
-        }
-        const auto &pa = yCloud.pts[static_cast<size_t>(a)];
-        const auto &pb = yCloud.pts[static_cast<size_t>(b)];
-        const auto mic = gen::fracDelta(box, pb.x, pb.y, pb.z, pa.x, pa.y, pa.z);
-        const double raw[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
-        const double len[3] = {box.lx, box.ly, box.lz};
-        for (int k = 0; k < 3; k++) {
-          if (!(len[k] > 0.0)) {
-            continue;
-          }
-          wind[static_cast<size_t>(k)] +=
-              static_cast<int>(std::lround((raw[k] - mic[static_cast<size_t>(k)]) / len[k]));
-        }
-      }
-      if (inFrame) {
-        index.ringShift[static_cast<std::size_t>(r)] = wind;
-      }
+  // the coordinate order; it is not the cage order. The cage order keys on
+  // the summed bond images, the negative of the winding.
+  index.ringShift = ring::ringWindings(rings, yCloud);
+  for (auto &shift : index.ringShift) {
+    for (int &component : shift) {
+      component = -component;
     }
   }
   return index;
@@ -1797,8 +1767,9 @@ namespace {
 
 // Lattice image of the minimum-image step from a to b. The same wrap as
 // gen::fracDelta: orthorhombic axes use floor(d/L + 1/2), a tilt box wraps
-// the fractional coordinates with round. Summed around a cycle the images
-// are the winding. A contractible ring sums to zero.
+// the fractional coordinates with round. The step is the raw difference
+// minus this image, and the raw differences cancel around a cycle, so the
+// images sum to minus the winding. A contractible ring sums to zero.
 std::array<int, 3> bondImage(const gen::FracBox &box, double ax, double ay,
                              double az, double bx, double by, double bz) {
   if (!box.triclinic) {
@@ -1818,6 +1789,46 @@ std::array<int, 3> bondImage(const gen::FracBox &box, double ax, double ay,
           static_cast<int>(std::round(syB - syA)),
           static_cast<int>(std::round(szB - szA))};
 }
+
+} // namespace
+
+std::vector<std::array<int, 3>> ring::ringWindings(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  std::vector<std::array<int, 3>> winding(rings.size(), {0, 0, 0});
+  const auto box = gen::makeFracBox(yCloud);
+  if (!box.ok) {
+    return winding;
+  }
+  const int nAtoms = static_cast<int>(yCloud.pts.size());
+  const int nRings = static_cast<int>(rings.size());
+  for (const auto &cycle : rings) {
+    for (const int atom : cycle) {
+      if (atom < 0 || atom >= nAtoms) {
+        throw std::invalid_argument("ring vertex is outside the cloud");
+      }
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (int r = 0; r < nRings; ++r) {
+    const auto &cycle = rings[static_cast<std::size_t>(r)];
+    auto &sum = winding[static_cast<std::size_t>(r)];
+    for (std::size_t i = 0; i < cycle.size(); ++i) {
+      const auto &a = yCloud.pts[static_cast<std::size_t>(cycle[i])];
+      const auto &b =
+          yCloud.pts[static_cast<std::size_t>(cycle[(i + 1) % cycle.size()])];
+      const auto image = bondImage(box, a.x, a.y, a.z, b.x, b.y, b.z);
+      for (std::size_t axis = 0; axis < 3; ++axis) {
+        sum[axis] -= image[axis];
+      }
+    }
+  }
+  return winding;
+}
+
+namespace {
 
 bool ringContracts(const gen::FracBox &box,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,

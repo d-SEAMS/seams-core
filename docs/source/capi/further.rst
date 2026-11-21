@@ -4,7 +4,94 @@ Further analyses
 
 Brine fronts, topology, and the remaining exports.
 
-The stable C interface provides 112 exported functions through ``include/seams.h``.
+The stable C interface provides 116 exported functions through ``include/seams.h``.
+
+.. _capi-seams_tetrahedral_order:
+
+seams_tetrahedral_order
+-----------------------
+
+
+.. code-block:: c
+
+   seams_status seams_tetrahedral_order( seams_system *sys, const int *centres, size_t n_centres, const int *partners, size_t n_partners, int convention, double cutoff, double *q, size_t q_len)
+
+Errington-Debenedetti tetrahedral order for arbitrary selections.
+
+``sys``
+    Frame handle.
+
+``centres``
+    Centre indices, or NULL when n_centres is zero.
+
+``n_centres``
+    Centre count. Zero means every atom.
+
+``partners``
+    Partner indices, or NULL when n_partners is zero.
+
+``n_partners``
+    Partner count. Zero means every atom.
+
+``convention``
+    One ::seams_tetrahedral_neighbours value. Any other value returns ::SEAMS_ERR_ARG.
+
+``cutoff``
+    Positive finite cutoff in WITHIN_CUTOFF mode; ignored in NEAREST_FOUR mode.
+
+``q``
+    Caller buffer, one value per selected centre.
+
+``q_len``
+    Length of q.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+centres and partners contain zero-based frame indices. A NULL pointer with zero length selects every atom. A centre is excluded from its own partner shell. q = 1 - 9/(2 N (N-1)) sum_{j<k} (cos psi_jk + 1/3)^2 over the N shell neighbours: a perfect tetrahedron is 1 and an ideal gas averages 0. NEAREST_FOUR uses the four nearest selected partners, N = 4 and the Errington-Debenedetti factor 3/8, and ignores cutoff. WITHIN_CUTOFF uses every selected partner at or inside cutoff. In both modes a centre with fewer than four neighbours receives quiet NaN.
+
+@par Handle access Non-const only because the call clears the handle error slot. @par Ownership The caller owns every selection and output buffer. @par Thread safety Exclusive use of sys.
+
+.. _capi-seams_lsi:
+
+seams_lsi
+---------
+
+
+.. code-block:: c
+
+   seams_status seams_lsi(seams_system *sys, const int *centres, size_t n_centres, const int *partners, size_t n_partners, double cutoff, double *lsi, size_t lsi_len)
+
+Local Structure Index for arbitrary selections.
+
+``sys``
+    Frame handle.
+
+``centres``
+    Centre indices, or NULL when n_centres is zero.
+
+``n_centres``
+    Centre count. Zero means every atom.
+
+``partners``
+    Partner indices, or NULL when n_partners is zero.
+
+``n_partners``
+    Partner count. Zero means every atom.
+
+``cutoff``
+    Positive finite shell cutoff.
+
+``lsi``
+    Caller buffer, one value per selected centre.
+
+``lsi_len``
+    Length of lsi.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+Shiratani-Sasai index. For each centre, selected-partner distances are sorted, r_1 < ... < r_N <= cutoff < r_{N+1}. The result is the population variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the first partner beyond cutoff. A centre with no partner inside cutoff, or none beyond it, receives quiet NaN.
+
+@par Handle access Non-const only because the call clears the handle error slot. @par Ownership The caller owns every selection and output buffer. @par Thread safety Exclusive use of sys.
 
 .. _capi-seams_brine_analyse:
 

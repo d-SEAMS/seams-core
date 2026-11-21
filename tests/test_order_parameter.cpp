@@ -11,6 +11,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
@@ -37,6 +38,157 @@ makeCloud(const std::vector<std::array<double, 3>> &coords,
   }
   cloud.nop = static_cast<int>(coords.size());
   return cloud;
+}
+
+TEST_CASE("tetrahedral order has analytic neighbour conventions",
+          "[order_parameter][tetrahedral]") {
+  auto cloud = makeCloud({
+      {50.0, 50.0, 50.0},
+      {51.0, 51.0, 51.0},
+      {51.0, 49.0, 49.0},
+      {49.0, 51.0, 49.0},
+      {49.0, 49.0, 51.0},
+      {50.0, 50.0, 52.0},
+  });
+  const std::vector<int> centre{0};
+  const std::vector<int> tetrahedralPartners{1, 2, 3, 4};
+  const auto nearest = topoparam::tetrahedralOrder(
+      cloud, centre, {}, topoparam::TetrahedralNeighbours::NearestFour, 0.0);
+  const auto cutoff = topoparam::tetrahedralOrder(
+      cloud, centre, tetrahedralPartners,
+      topoparam::TetrahedralNeighbours::WithinCutoff, 2.0);
+  REQUIRE_THAT(nearest[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(cutoff[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  const auto crowded = topoparam::tetrahedralOrder(
+      cloud, centre, {}, topoparam::TetrahedralNeighbours::WithinCutoff, 2.1);
+  REQUIRE(std::isfinite(crowded[0]));
+  REQUIRE(std::abs(crowded[0] - 1.0) > 1e-3);
+
+  const std::vector<int> threePartners{1, 2, 3};
+  const auto sparse = topoparam::tetrahedralOrder(
+      cloud, centre, threePartners,
+      topoparam::TetrahedralNeighbours::NearestFour, 0.0);
+  REQUIRE(std::isnan(sparse[0]));
+}
+
+TEST_CASE("tetrahedral order of a square-planar shell is one half",
+          "[order_parameter][tetrahedral]") {
+  // Four right angles and two straight angles: the sum is 4/3 and
+  // 1 - (3/8)(4/3) = 1/2.
+  auto cloud = makeCloud({
+      {50.0, 50.0, 50.0},
+      {51.0, 50.0, 50.0},
+      {49.0, 50.0, 50.0},
+      {50.0, 51.0, 50.0},
+      {50.0, 49.0, 50.0},
+  });
+  const auto nearest = topoparam::tetrahedralOrder(
+      cloud, {0}, {}, topoparam::TetrahedralNeighbours::NearestFour, 0.0);
+  const auto cutoff = topoparam::tetrahedralOrder(
+      cloud, {0}, {}, topoparam::TetrahedralNeighbours::WithinCutoff, 1.5);
+  REQUIRE_THAT(nearest[0], Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(cutoff[0], Catch::Matchers::WithinAbs(0.5, 1e-12));
+}
+
+namespace {
+
+// Uniform [0, 1) from the top 53 bits of mt19937_64, whose output sequence
+// is fixed by the standard; std::uniform_real_distribution is not.
+double unitDraw(std::mt19937_64 &engine) {
+  return static_cast<double>(engine() >> 11) * 0x1.0p-53;
+}
+
+struct SampleMean {
+  double mean;
+  double standardError;
+  std::size_t count;
+};
+
+// Centres in one configuration share neighbours, so their q values are
+// correlated; the error is taken over the independent configurations.
+SampleMean idealGasTetrahedral(topoparam::TetrahedralNeighbours convention,
+                               int particles, double cutoff) {
+  constexpr int kConfigurations = 20;
+  constexpr double kBox = 20.0;
+  std::mt19937_64 engine(20261120);
+  std::vector<double> configurationMeans;
+  std::size_t count = 0;
+  for (int config = 0; config < kConfigurations; ++config) {
+    std::vector<std::array<double, 3>> coords(
+        static_cast<std::size_t>(particles));
+    for (auto &point : coords) {
+      for (auto &x : point) {
+        x = kBox * unitDraw(engine);
+      }
+    }
+    const auto q = topoparam::tetrahedralOrder(makeCloud(coords, kBox), {},
+                                               {}, convention, cutoff);
+    double sum = 0.0;
+    std::size_t finite = 0;
+    for (const double value : q) {
+      if (std::isfinite(value)) {
+        sum += value;
+        ++finite;
+      }
+    }
+    configurationMeans.push_back(sum / static_cast<double>(finite));
+    count += finite;
+  }
+  const auto n = static_cast<double>(configurationMeans.size());
+  double mean = 0.0;
+  for (const double value : configurationMeans) {
+    mean += value;
+  }
+  mean /= n;
+  double squares = 0.0;
+  for (const double value : configurationMeans) {
+    squares += (value - mean) * (value - mean);
+  }
+  const double sampleVariance = squares / (n - 1.0);
+  return {mean, std::sqrt(sampleVariance / n), count};
+}
+
+} // namespace
+
+TEST_CASE("tetrahedral order of an ideal gas averages zero",
+          "[order_parameter][tetrahedral]") {
+  SECTION("four nearest neighbours") {
+    const auto sample = idealGasTetrahedral(
+        topoparam::TetrahedralNeighbours::NearestFour, 64, 0.0);
+    REQUIRE(sample.count == 1280);
+    REQUIRE(std::abs(sample.mean) < 3.0 * sample.standardError);
+  }
+  SECTION("every neighbour inside the cutoff") {
+    const auto sample = idealGasTetrahedral(
+        topoparam::TetrahedralNeighbours::WithinCutoff, 256, 4.0);
+    REQUIRE(sample.count >= 1000);
+    REQUIRE(std::abs(sample.mean) < 3.0 * sample.standardError);
+  }
+}
+
+TEST_CASE("local structure index includes the gap beyond the cutoff",
+          "[order_parameter][lsi]") {
+  // Inside 3.7: 2.8, 2.9, 3.1, 3.5; first beyond: 4.2. The gaps 0.1, 0.2,
+  // 0.4, 0.7 have mean 0.35 and population variance 0.21 / 4 = 0.0525.
+  auto cloud = makeCloud({
+      {50.0, 50.0, 50.0},
+      {52.8, 50.0, 50.0},
+      {50.0, 52.9, 50.0},
+      {50.0, 50.0, 53.1},
+      {46.5, 50.0, 50.0},
+      {50.0, 45.8, 50.0},
+  });
+  const auto lsi = topoparam::localStructureIndex(cloud, {0}, {}, 3.7);
+  REQUIRE_THAT(lsi[0], Catch::Matchers::WithinAbs(0.0525, 1e-12));
+
+  const auto noneBeyond =
+      topoparam::localStructureIndex(cloud, {0}, {1, 2, 3, 4}, 3.7);
+  REQUIRE(std::isnan(noneBeyond[0]));
+  const auto noneInside = topoparam::localStructureIndex(cloud, {0}, {}, 2.0);
+  REQUIRE(std::isnan(noneInside[0]));
+  const auto single = topoparam::localStructureIndex(cloud, {0}, {1, 5}, 3.7);
+  REQUIRE_THAT(single[0], Catch::Matchers::WithinAbs(0.0, 1e-12));
 }
 
 // Regression test for projAreaSingleRing return order.

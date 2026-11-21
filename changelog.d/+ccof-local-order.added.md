@@ -1,0 +1,1 @@
+The stable C API (`seams_tetrahedral_order`, `seams_lsi`) and the language ABI (`seams_frame_tetrahedral`, `seams_frame_lsi`) compute Errington-Debenedetti tetrahedral order and the Shiratani-Sasai Local Structure Index for independent centre and partner selections. The four-nearest and cutoff-shell conventions are explicit, and a centre whose shell is too small gets NaN.

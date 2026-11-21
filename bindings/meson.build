@@ -131,6 +131,24 @@ if get_option('with_tests')
       depends: [seams_lang],
       timeout: 180,
     )
+    test(
+      'topology_local_order_python',
+      find_program('pytest', required: true),
+      args: ['-q', '-p', 'no:cacheprovider',
+             meson.project_source_root() / 'tests' / 'test_topology_local_order.py'],
+      env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+      depends: [seams_lang],
+      timeout: 180,
+    )
+    test(
+      'local_order_reference_python',
+      find_program('pytest', required: true),
+      args: ['-q', '-p', 'no:cacheprovider',
+             meson.project_source_root() / 'tests' / 'test_local_order_reference.py'],
+      env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+      depends: [seams_lang],
+      timeout: 180,
+    )
     _tip4p_env = environment()
     _tip4p_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
     _tip4p_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')

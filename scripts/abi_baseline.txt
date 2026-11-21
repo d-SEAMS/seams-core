@@ -41,6 +41,7 @@ T seams_hbonds
 T seams_label_name
 T seams_last_error
 T seams_last_error_message
+T seams_lsi
 T seams_molecule_centres
 T seams_molecule_dipoles
 T seams_mols
@@ -77,12 +78,14 @@ T seams_rings_count
 T seams_rings_destroy
 T seams_rings_find
 T seams_rings_fraction
+T seams_rings_from_csr
 T seams_rings_histogram
 T seams_rings_histogram_n
 T seams_rings_labels
 T seams_rings_labels_n
 T seams_rings_nrings
 T seams_rings_vertices
+T seams_rings_winding
 T seams_running_cn
 T seams_set_mols
 T seams_set_num_threads
@@ -107,6 +110,7 @@ T seams_system_set_positions
 T seams_system_stage_positions
 T seams_system_symmetry
 T seams_system_types
+T seams_tetrahedral_order
 T seams_traj_unwrap_centres
 T seams_traj_unwrap_positions
 T seams_version
@@ -131,6 +135,7 @@ T seams_frame_from_species
 T seams_frame_hbond_edges
 T seams_frame_ids
 T seams_frame_index
+T seams_frame_lsi
 T seams_frame_monolayer
 T seams_frame_neighbour_pairs
 T seams_frame_neighbours
@@ -145,6 +150,7 @@ T seams_frame_rdf2d_nbin
 T seams_frame_rdf_nbins
 T seams_frame_read
 T seams_frame_read_options
+T seams_frame_ring_winding
 T seams_frame_rings
 T seams_frame_select
 T seams_frame_set_positions
@@ -155,9 +161,11 @@ T seams_frame_signature_vertices_edge
 T seams_frame_steinhardt
 T seams_frame_steinhardt_graph
 T seams_frame_symmetry
+T seams_frame_tetrahedral
 T seams_frame_types
 T seams_frame_wl
 T seams_frames_jump_tau90
+T seams_graph_rings
 T seams_lang_version
 T seams_last_error
 T seams_path_nframes

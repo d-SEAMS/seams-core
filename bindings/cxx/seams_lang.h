@@ -118,6 +118,26 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
                       const char *graph, int max_depth, int *counts,
                       int counts_len);
 
+/** Primitive rings of caller CSR. Directed edges are symmetrized. histogram
+ * has max_depth + 1 entries. ring_offsets has n_rings + 1 entries and
+ * vertices holds their concatenated zero-based indices. NULL row buffers
+ * query n_rings and n_vertices; otherwise both capacities are checked.
+ * This is the entry used by Python rings_from_csr. @ingroup lang_rings */
+int seams_graph_rings(const int *offsets, int n_offsets, const int *columns,
+                      int n_columns, int max_depth, int *histogram,
+                      int histogram_len, int *ring_offsets,
+                      int ring_offsets_cap, int *vertices, int vertices_cap,
+                      int *n_rings, int *n_vertices);
+
+/** Oriented periodic winding along axis and whole-cycle contractibility for
+ * packed rings returned by seams_graph_rings. The winding sums the
+ * minimum-image bond steps in packed vertex order, in cell vectors: one
+ * crossing along +x is +1 on axis 0. @ingroup lang_rings */
+int seams_frame_ring_winding(const seams_frame *frame,
+                             const int *ring_offsets, int n_rings,
+                             const int *vertices, int n_vertices, int axis,
+                             int *axis_winding, int *contractible);
+
 /** Chordless cycles of one size, from 3 through 12. A cycle is chordless
  * when no bond joins two of its atoms that are not next to each other on
  * it. graph is "cutoff" (NULL or "") or "mutual", the same graphs the C
@@ -211,6 +231,23 @@ int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
                             double *q4, double *q6, double *q4bar,
                             double *q6bar, int *labels, int counts9[9]);
+
+/** Errington-Debenedetti q for arbitrary zero-based centre and partner
+ * selections. Empty selections mean all atoms. convention 0 is four nearest;
+ * convention 1 is every partner within cutoff. Fewer than four writes NaN.
+ * @ingroup lang_order */
+int seams_frame_tetrahedral(seams_frame *frame, const int *centres,
+                            int n_centres, const int *partners,
+                            int n_partners, int convention, double cutoff,
+                            double *q);
+
+/** Shiratani-Sasai Local Structure Index for the same arbitrary selections:
+ * the variance of the N radial gaps from the nearest partner to the first
+ * partner beyond cutoff. No partner inside cutoff, or none beyond it, writes
+ * NaN. @ingroup lang_order */
+int seams_frame_lsi(seams_frame *frame, const int *centres, int n_centres,
+                    const int *partners, int n_partners, double cutoff,
+                    double *lsi);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 /** Repeated prototypes. The documented declarations are above. @ingroup lang_order */
