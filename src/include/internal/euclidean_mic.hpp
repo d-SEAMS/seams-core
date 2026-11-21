@@ -12,18 +12,17 @@
 // Euclidean minimum image for a triclinic cell. The fractional wrap is the
 // nearest image only inside the Smith ball. Past that ball the closest
 // lattice point is found by the Sommer-Feder-Shalvi slicer over the
-// Voronoi-relevant vectors, started from the wrap itself when the longest
-// cell edge is at most 64 times the shortest edge and its square is at most
-// 32 times the square of the longest reduced vector, and otherwise from
-// Babai rounding in a Selling superbasis.
+// Voronoi-relevant vectors, started from the wrap itself when probes along
+// the cell edges and corners settle within the wrap step cap, and otherwise
+// from Babai rounding in a Selling superbasis.
 //
 // The relevant vectors are found once per cell. Every Voronoi-relevant vector
 // is, up to sign, the shortest member of one of the seven nonzero cosets of
 // L / 2L. A superbasis that is obtuse beyond rounding gives those as its
-// subset sums; otherwise Fincke-Pohst enumeration finds each coset's
-// shortest member. A point that none of them shortens lies in the Voronoi
-// cell of the origin, so the slicer's stopping point is the minimum image.
-// The reduced and relevant vectors are re-evaluated from their integer
+// subset sums; otherwise LLL-reduced Fincke-Pohst enumeration finds each
+// coset's shortest member. A point that none of them shortens lies in the
+// Voronoi cell of the origin, so the slicer's stopping point is the minimum
+// image. The reduced and relevant vectors are re-evaluated from their integer
 // coordinates in the cell, so reduction rounding does not leave the lattice.
 //
 // The slicer runs in binary64 and carries the integer coordinates of the
@@ -69,6 +68,24 @@ inline long double n2Long(Vec3 v) {
   return static_cast<long double>(v.x) * v.x +
          static_cast<long double>(v.y) * v.y +
          static_cast<long double>(v.z) * v.z;
+}
+
+inline long double dotLong(Vec3 a, Vec3 b) {
+  return static_cast<long double>(a.x) * b.x +
+         static_cast<long double>(a.y) * b.y +
+         static_cast<long double>(a.z) * b.z;
+}
+
+// Evaluates |a|^2 < |b|^2 as (a - b) . (a + b) < 0 in extended precision so
+// steps along a short basis vector do not cancel against a large orthogonal
+// component.
+inline bool shorterLong(Vec3 a, Vec3 b) {
+  const long double dx = static_cast<long double>(a.x) - b.x;
+  const long double dy = static_cast<long double>(a.y) - b.y;
+  const long double dz = static_cast<long double>(a.z) - b.z;
+  return dx * (static_cast<long double>(a.x) + b.x) +
+         dy * (static_cast<long double>(a.y) + b.y) +
+         dz * (static_cast<long double>(a.z) + b.z) < 0.0L;
 }
 
 inline double dot(Vec3 a, Vec3 b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
@@ -141,15 +158,20 @@ inline double integerDot(const double (&n)[N], const double (&x)[N]) {
 }
 
 struct Obtuse {
-  Vec3 v[4]{};
-  // Integer coordinates of v[k] and of each relevant vector in (a, b, c).
-  double coef[4][3]{};
+  // Hot wrap-path fields first so they stay contiguous in L1 cache.
   double rel[3][8]{};
-  double relCoef[3][8]{};
   double halfN2[8]{};
   // dot(rel_i, rel_j), so a binary64 slicer step can update every
   // projection with one subtraction instead of a fresh dot product.
   double gram[8][8]{};
+  // Largest squared row of inv: |Babai coefficient|^2 <= n2(y) * maxInvN2.
+  double maxInvN2 = 0.0;
+  bool fractional = false;
+  bool ok = false;
+  Vec3 v[4]{};
+  // Integer coordinates of v[k] and of each relevant vector in (a, b, c).
+  double coef[4][3]{};
+  double relCoef[3][8]{};
   double inv[3][3]{};
   // Rows of the upper-triangular cell, a = (lx, 0, 0), b = (xy, ly, 0),
   // c = (xz, yz, lz), by component.
@@ -160,13 +182,9 @@ struct Obtuse {
   Split splitY[3]{};
   Split splitZ[3]{};
   double maxRelN2 = 0.0;
-  // Largest squared row of inv: |Babai coefficient|^2 <= n2(y) * maxInvN2.
-  double maxInvN2 = 0.0;
   // max |component| of each vector of the Babai triple.
   double babaiMax[3]{};
   int idx[3] = {0, 1, 2};
-  bool fractional = false;
-  bool ok = false;
 };
 
 // a + b as sum + error, exactly (Knuth TwoSum).
@@ -212,15 +230,6 @@ inline Vec3 latticeVector(const Obtuse &s, const double n[3]) {
   return latticeTranslate(s, Vec3{}, negated);
 }
 
-inline Vec3 combination(const Vec3 b[3], long long z0, long long z1, long long z2) {
-  const long double c0 = static_cast<long double>(z0);
-  const long double c1 = static_cast<long double>(z1);
-  const long double c2 = static_cast<long double>(z2);
-  return {static_cast<double>(c0 * b[0].x + c1 * b[1].x + c2 * b[2].x),
-          static_cast<double>(c0 * b[0].y + c1 * b[1].y + c2 * b[2].y),
-          static_cast<double>(c0 * b[0].z + c1 * b[1].z + c2 * b[2].z)};
-}
-
 inline long long firstWithParity(long double low, int parity) {
   long long n = static_cast<long long>(std::ceil(low));
   if (((n % 2) + 2) % 2 != parity) {
@@ -229,103 +238,236 @@ inline long long firstWithParity(long double low, int parity) {
   return n;
 }
 
-// Shortest member of each nonzero coset of L / 2L, the parity class of the
-// coordinates in `basis`. Fincke-Pohst runs over the norm-sorted basis with
-// each coset's shortest {-1, 0, 1}^3 member as its radius. `out` holds the
-// coordinates of each member in `basis`. Returns false when the Gram-Schmidt
-// norms are not positive and finite.
-inline bool cosetMinima(const Vec3 basis[3], long long out[7][3]) {
-  constexpr long double kWidth = kIntegral;
-  int order[3] = {0, 1, 2};
-  std::sort(order, order + 3,
-            [&](int p, int q) { return n2(basis[p]) < n2(basis[q]); });
-  const Vec3 b[3] = {basis[order[0]], basis[order[1]], basis[order[2]]};
-  long double g[3][3];
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      g[i][j] = static_cast<long double>(b[i].x) * b[j].x +
-                static_cast<long double>(b[i].y) * b[j].y +
-                static_cast<long double>(b[i].z) * b[j].z;
-    }
-  }
-  const long double q0 = g[0][0];
-  const long double m10 = g[1][0] / q0;
-  const long double q1 = g[1][1] - m10 * g[1][0];
-  const long double m20 = g[2][0] / q0;
-  const long double m21 = (g[2][1] - m20 * g[1][0]) / q1;
-  const long double q2 = g[2][2] - m20 * g[2][0] - m21 * m21 * q1;
-  if (!(std::isfinite(q0) && std::isfinite(q1) && std::isfinite(q2) && q0 > 0.0L &&
-        q1 > 0.0L && q2 > 0.0L && std::isfinite(m10) && std::isfinite(m20) &&
-        std::isfinite(m21))) {
-    return false;
-  }
+inline long long nearestWithParity(long double c, int parity) {
+  const long double shifted = (c - static_cast<long double>(parity)) * 0.5L;
+  return 2LL * static_cast<long long>(std::llround(shifted)) + parity;
+}
 
-  long long best[8][3]{};
-  long double bestN2[8];
-  for (long double &n : bestN2) {
-    n = std::numeric_limits<long double>::infinity();
-  }
-  const auto keep = [&](int coset, long long z0, long long z1, long long z2) {
-    const long double n = n2Long(combination(b, z0, z1, z2));
-    if (n < bestN2[coset]) {
-      bestN2[coset] = n;
-      best[coset][0] = z0;
-      best[coset][1] = z1;
-      best[coset][2] = z2;
+// Shortest member of each nonzero coset of L / 2L, the parity class of the
+// coordinates in `basis`. The basis is first 3D LLL-reduced in long double
+// with an exact integer unimodular transform (which preserves L / 2L), so
+// the Gram-Schmidt norms satisfy q0 <= (4/3) q1 and q1 <= (4/3) q2.
+// Enumeration then compares candidates by exact Gram-Schmidt norm
+// differences without adding and subtracting q2 * z2^2, and minimizes z0
+// directly, keeping the work O(1) independent of aspect ratio.
+inline bool cosetMinima(const Vec3 basis[3], const double basisCoef[3][3], long long out[7][3]) {
+  constexpr long double kWidth = kIntegral;
+  constexpr long double kEps = std::numeric_limits<long double>::epsilon();
+  long long U[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  long double B[3][3]{};
+  long double Bs[3][3]{};
+  long double mu[3][3]{};
+  long double q[3]{};
+  const auto dot3 = [](const long double a[3], const long double b[3]) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  };
+  const auto evalB = [&]() {
+    for (int i = 0; i < 3; i++) {
+      const long double u0 = static_cast<long double>(U[i][0]);
+      const long double u1 = static_cast<long double>(U[i][1]);
+      const long double u2 = static_cast<long double>(U[i][2]);
+      B[i][0] = u0 * basis[0].x + u1 * basis[1].x + u2 * basis[2].x;
+      B[i][1] = u0 * basis[0].y + u1 * basis[1].y + u2 * basis[2].y;
+      B[i][2] = u0 * basis[0].z + u1 * basis[1].z + u2 * basis[2].z;
     }
   };
-  for (int z0 = -1; z0 <= 1; z0++) {
-    for (int z1 = -1; z1 <= 1; z1++) {
-      for (int z2 = -1; z2 <= 1; z2++) {
-        const int coset = (z0 & 1) | ((z1 & 1) << 1) | ((z2 & 1) << 2);
-        if (coset != 0) {
-          keep(coset, z0, z1, z2);
+  const auto gso = [&]() -> bool {
+    for (int i = 0; i < 3; i++) {
+      for (int m = 0; m < 3; m++) {
+        Bs[i][m] = B[i][m];
+      }
+      for (int j = 0; j < i; j++) {
+        mu[i][j] = dot3(B[i], Bs[j]) / q[j];
+        if (!std::isfinite(mu[i][j])) {
+          return false;
+        }
+        for (int m = 0; m < 3; m++) {
+          Bs[i][m] -= mu[i][j] * Bs[j][m];
+        }
+      }
+      for (int j = 0; j < i; j++) {
+        const long double corr = dot3(Bs[i], Bs[j]) / q[j];
+        if (!std::isfinite(corr)) {
+          return false;
+        }
+        mu[i][j] += corr;
+        for (int m = 0; m < 3; m++) {
+          Bs[i][m] -= corr * Bs[j][m];
+        }
+      }
+      q[i] = dot3(Bs[i], Bs[i]);
+      if (!(std::isfinite(q[i]) && q[i] > 0.0L)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  evalB();
+  if (!gso()) {
+    return false;
+  }
+  int k = 1;
+  int guard = 0;
+  while (k < 3 && guard++ < 1000) {
+    for (int j = k - 1; j >= 0; j--) {
+      if (std::abs(mu[k][j]) > 0.5001L) {
+        const long double rq = std::round(mu[k][j]);
+        if (!(std::abs(rq) < kWidth)) {
+          return false;
+        }
+        const long long qi = static_cast<long long>(rq);
+        if (qi != 0) {
+          for (int m = 0; m < 3; m++) {
+            const long double next =
+                static_cast<long double>(U[k][m]) - rq * static_cast<long double>(U[j][m]);
+            if (!(std::abs(next) < kWidth)) {
+              return false;
+            }
+            U[k][m] -= qi * U[j][m];
+          }
+          evalB();
+          if (!gso()) {
+            return false;
+          }
         }
       }
     }
+    if (q[k] >= (0.99L - mu[k][k - 1] * mu[k][k - 1]) * q[k - 1]) {
+      k++;
+    } else {
+      for (int m = 0; m < 3; m++) {
+        std::swap(U[k][m], U[k - 1][m]);
+      }
+      evalB();
+      if (!gso()) {
+        return false;
+      }
+      k = k > 1 ? k - 1 : 1;
+    }
   }
+  if (guard >= 1000) {
+    return false;
+  }
+
+  long double C[3][3];
+  for (int i = 0; i < 3; i++) {
+    for (int m = 0; m < 3; m++) {
+      C[i][m] = static_cast<long double>(U[i][0]) * basisCoef[0][m] +
+                static_cast<long double>(U[i][1]) * basisCoef[1][m] +
+                static_cast<long double>(U[i][2]) * basisCoef[2][m];
+    }
+  }
+  const auto cellL1 = [&](long long z0, long long z1, long long z2) -> long double {
+    long double s = 0.0L;
+    for (int m = 0; m < 3; m++) {
+      s += std::abs(static_cast<long double>(z0) * C[0][m] +
+                    static_cast<long double>(z1) * C[1][m] +
+                    static_cast<long double>(z2) * C[2][m]);
+    }
+    return s;
+  };
 
   for (int coset = 1; coset < 8; coset++) {
     const int p0 = coset & 1;
     const int p1 = (coset >> 1) & 1;
     const int p2 = (coset >> 2) & 1;
-    const long double bound = bestN2[coset] * (1.0L + 1e-12L);
-    const long double w2 = std::sqrt(bound / q2);
-    if (!(w2 < kWidth)) {
+
+    long long z2Best = p2;
+    const long double c1Seed = -mu[2][1] * static_cast<long double>(z2Best);
+    if (!(std::abs(c1Seed) < kWidth)) {
       return false;
     }
-    for (long long z2 = firstWithParity(-w2, p2); z2 <= w2; z2 += 2) {
-      const long double t2 = static_cast<long double>(z2);
-      const long double r2 = bound - q2 * t2 * t2;
-      if (r2 < 0.0L) {
+    long long z1Best = nearestWithParity(c1Seed, p1);
+    long double e1Best = static_cast<long double>(z1Best) - c1Seed;
+    const long double c0Seed = -(mu[1][0] * static_cast<long double>(z1Best) +
+                                 mu[2][0] * static_cast<long double>(z2Best));
+    if (!(std::abs(c0Seed) < kWidth)) {
+      return false;
+    }
+    long long z0Best = nearestWithParity(c0Seed, p0);
+    long double e0Best = static_cast<long double>(z0Best) - c0Seed;
+    long double l1Best = cellL1(z0Best, z1Best, z2Best);
+
+    const auto remNorm2 = [&]() -> long double {
+      return q[1] * e1Best * e1Best + q[0] * e0Best * e0Best;
+    };
+    const auto z2Limit = [&]() -> long double {
+      const long double rem = remNorm2();
+      return std::sqrt(static_cast<long double>(z2Best * z2Best) +
+                       (rem / q[2]) * (1.0L + 1e-9L));
+    };
+    long double w2 = z2Limit();
+    if (!(std::isfinite(w2) && w2 < kWidth)) {
+      return false;
+    }
+    // Sign symmetry (-z0, -z1, -z2) preserves both parity and norm, so z2 >= 0 suffices.
+    for (long long z2 = p2; static_cast<long double>(z2) <= w2; z2 += 2) {
+      const long long dz2 = z2 * z2 - z2Best * z2Best;
+      const long double rem = remNorm2();
+      const long double budget1 =
+          (dz2 == 0 ? 0.0L : -q[2] * static_cast<long double>(dz2)) +
+          rem * (1.0L + 64.0L * kEps);
+      if (budget1 < 0.0L) {
         continue;
       }
-      const long double c1 = -m21 * t2;
-      const long double w1 = std::sqrt(r2 / q1);
-      if (!(std::abs(c1) + w1 < kWidth)) {
+      const long double c1 = -mu[2][1] * static_cast<long double>(z2);
+      const long double w1 = std::sqrt((budget1 / q[1]) * (1.0L + 1e-9L));
+      if (!(std::isfinite(w1) && std::abs(c1) + w1 < kWidth)) {
         return false;
       }
-      for (long long z1 = firstWithParity(c1 - w1, p1); z1 <= c1 + w1; z1 += 2) {
+      for (long long z1 = firstWithParity(c1 - w1, p1);
+           static_cast<long double>(z1) <= c1 + w1; z1 += 2) {
         const long double e1 = static_cast<long double>(z1) - c1;
-        const long double r1 = r2 - q1 * e1 * e1;
-        if (r1 < 0.0L) {
-          continue;
-        }
-        const long double c0 = -(m10 * static_cast<long double>(z1) + m20 * t2);
-        const long double w0 = std::sqrt(r1 / q0);
-        if (!(std::abs(c0) + w0 < kWidth)) {
+        const long double c0 = -(mu[1][0] * static_cast<long double>(z1) +
+                                 mu[2][0] * static_cast<long double>(z2));
+        if (!(std::abs(c0) < kWidth)) {
           return false;
         }
-        for (long long z0 = firstWithParity(c0 - w0, p0); z0 <= c0 + w0; z0 += 2) {
-          keep(coset, z0, z1, z2);
+        const long long z0Near = nearestWithParity(c0, p0);
+        for (long long off = -2; off <= 2; off += 2) {
+          const long long z0 = z0Near + off;
+          const long double e0 = static_cast<long double>(z0) - c0;
+          const long double diff =
+              (z2 == z2Best ? 0.0L
+                            : q[2] * static_cast<long double>(z2 * z2 - z2Best * z2Best)) +
+              q[1] * (e1 * e1 - e1Best * e1Best) +
+              q[0] * (e0 * e0 - e0Best * e0Best);
+          const long double diffScale =
+              (z2 == z2Best ? 0.0L
+                            : q[2] * static_cast<long double>(z2 * z2 + z2Best * z2Best)) +
+              q[1] * (e1 * e1 + e1Best * e1Best) +
+              q[0] * (e0 * e0 + e0Best * e0Best);
+          const long double curTol = 64.0L * kEps * diffScale;
+          bool better = diff < -curTol;
+          long double l1Cand = 0.0L;
+          if (better) {
+            l1Cand = cellL1(z0, z1, z2);
+          } else if (diff <= curTol) {
+            l1Cand = cellL1(z0, z1, z2);
+            better = l1Cand < l1Best - 0.5L;
+          }
+          if (better) {
+            z0Best = z0;
+            z1Best = z1;
+            z2Best = z2;
+            e1Best = e1;
+            e0Best = e0;
+            l1Best = l1Cand;
+            w2 = z2Limit();
+          }
         }
       }
     }
-  }
 
-  for (int k = 0; k < 7; k++) {
-    for (int i = 0; i < 3; i++) {
-      out[k][order[i]] = best[k + 1][i];
+    for (int m = 0; m < 3; m++) {
+      const long double cm = static_cast<long double>(z0Best) * U[0][m] +
+                             static_cast<long double>(z1Best) * U[1][m] +
+                             static_cast<long double>(z2Best) * U[2][m];
+      if (!(std::abs(cm) < kWidth)) {
+        return false;
+      }
+      out[coset - 1][m] = z0Best * U[0][m] + z1Best * U[1][m] + z2Best * U[2][m];
     }
   }
   return true;
@@ -335,23 +477,35 @@ inline double roundingSlack(Vec3 a, Vec3 b) {
   return 16.0 * std::numeric_limits<double>::epsilon() * std::sqrt(n2(a) * n2(b));
 }
 
-// A superbasis whose dot products are all negative beyond rounding is
-// strictly obtuse, and its seven subset sums are then the Voronoi-relevant
-// vectors (Conway and Sloane). Otherwise the coset minima are enumerated.
+// A superbasis whose dot products are all non-positive beyond rounding is
+// obtuse (including exact-zero orthogonal pairs), and its seven subset sums
+// are coset minima of L / 2L containing every Voronoi-relevant vector
+// (Conway and Sloane). Otherwise the coset minima are enumerated.
 // Each relevant vector is evaluated from its integer coordinates in the cell.
 inline bool relevantOf(Obtuse &o) {
   const Vec3 *v = o.v;
-  bool strict = true;
-  for (int i = 0; i < 3 && strict; i++) {
+  bool obtuse = true;
+  for (int m = 0; m < 3; m++) {
+    if (o.coef[0][m] + o.coef[1][m] + o.coef[2][m] + o.coef[3][m] != 0.0) {
+      obtuse = false;
+      break;
+    }
+  }
+  for (int i = 0; i < 3 && obtuse; i++) {
     for (int j = i + 1; j < 4; j++) {
-      if (!(dot(v[i], v[j]) < -roundingSlack(v[i], v[j]))) {
-        strict = false;
+      const long double px = static_cast<long double>(v[i].x) * v[j].x;
+      const long double py = static_cast<long double>(v[i].y) * v[j].y;
+      const long double pz = static_cast<long double>(v[i].z) * v[j].z;
+      const long double d = px + py + pz;
+      const long double absSum = std::abs(px) + std::abs(py) + std::abs(pz);
+      if (!(d <= -16.0L * std::numeric_limits<long double>::epsilon() * absSum)) {
+        obtuse = false;
         break;
       }
     }
   }
   double coef[7][3];
-  if (strict) {
+  if (obtuse) {
     const int pairs[3] = {1, 2, 3};
     for (int k = 0; k < 4; k++) {
       for (int m = 0; m < 3; m++) {
@@ -365,8 +519,14 @@ inline bool relevantOf(Obtuse &o) {
     }
   } else {
     const Vec3 basis[3] = {v[o.idx[0]], v[o.idx[1]], v[o.idx[2]]};
+    double basisCoef[3][3];
+    for (int i = 0; i < 3; i++) {
+      for (int m = 0; m < 3; m++) {
+        basisCoef[i][m] = o.coef[o.idx[i]][m];
+      }
+    }
     long long z[7][3];
-    if (!cosetMinima(basis, z)) {
+    if (!cosetMinima(basis, basisCoef, z)) {
       return false;
     }
     for (int k = 0; k < 7; k++) {
@@ -396,11 +556,15 @@ inline bool relevantOf(Obtuse &o) {
     }
     o.halfN2[k] = (k < 7) ? 0.5 * n2(r) : std::numeric_limits<double>::infinity();
     if (k < 7) {
-      if (!std::isfinite(o.halfN2[k])) {
+      if (!(std::isfinite(o.halfN2[k]) &&
+            o.halfN2[k] >= std::numeric_limits<double>::min())) {
         return false;
       }
       o.maxRelN2 = std::max(o.maxRelN2, n2(r));
     }
+  }
+  if (!(o.maxRelN2 < std::numeric_limits<double>::max() / 64.0)) {
+    return false;
   }
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
@@ -437,7 +601,7 @@ inline void lagrangeReduce(Vec3 v[3]) {
     for (int i = 1; i < 3; i++) {
       for (int j = i - 1; j >= 0; j--) {
         const double lj = n2(v[j]);
-        if (lj < 1e-30) {
+        if (!(lj > 0.0)) {
           continue;
         }
         const double q = roundAway(dot(v[i], v[j]) / lj);
@@ -512,37 +676,64 @@ inline void sellingSteps(Vec3 v[4]) {
   }
 }
 
+inline long double detLong(Vec3 a, Vec3 b, Vec3 c) {
+  const long double ax = a.x, ay = a.y, az = a.z;
+  const long double bx = b.x, by = b.y, bz = b.z;
+  const long double cx = c.x, cy = c.y, cz = c.z;
+  return ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) +
+         az * (bx * cy - by * cx);
+}
+
 // Inverse of the matrix with columns cols[0..2]. inv is stored so that
-// coeff k is sum_i inv[i][k] * y[i]. Returns |det|, or 0 when singular.
+// coeff k is sum_i inv[i][k] * y[i]. Returns the scale-invariant
+// orthogonality |det| / (|a| |b| |c|), or 0 when singular.
 inline double invertColumns(const Vec3 cols[3], double inv[3][3]) {
   const Vec3 &a = cols[0];
   const Vec3 &b = cols[1];
   const Vec3 &c = cols[2];
-  const double det = a.x * (b.y * c.z - b.z * c.y) - a.y * (b.x * c.z - b.z * c.x) +
-                     a.z * (b.x * c.y - b.y * c.x);
-  if (!std::isfinite(det) || std::abs(det) < 1e-18) {
+  const long double ax = a.x, ay = a.y, az = a.z;
+  const long double bx = b.x, by = b.y, bz = b.z;
+  const long double cx = c.x, cy = c.y, cz = c.z;
+  const long double det = ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) +
+                          az * (bx * cy - by * cx);
+  const long double normProd =
+      std::sqrt(n2Long(a)) * std::sqrt(n2Long(b)) * std::sqrt(n2Long(c));
+  if (!(std::isfinite(det) && std::isfinite(normProd) && normProd > 0.0L)) {
     return 0.0;
   }
-  const double invdet = 1.0 / det;
-  const double cof[3][3] = {
-      {b.y * c.z - b.z * c.y, a.z * c.y - a.y * c.z, a.y * b.z - a.z * b.y},
-      {b.z * c.x - b.x * c.z, a.x * c.z - a.z * c.x, a.z * b.x - a.x * b.z},
-      {b.x * c.y - b.y * c.x, a.y * c.x - a.x * c.y, a.x * b.y - a.y * b.x}};
+  const long double score = std::abs(det) / normProd;
+  if (!(std::isfinite(score) && score > 1e-18L)) {
+    return 0.0;
+  }
+  const long double cof[3][3] = {
+      {by * cz - bz * cy, az * cy - ay * cz, ay * bz - az * by},
+      {bz * cx - bx * cz, ax * cz - az * cx, az * bx - ax * bz},
+      {bx * cy - by * cx, ay * cx - ax * cy, ax * by - ay * bx}};
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
-      inv[i][j] = cof[i][j] * invdet;
+      inv[i][j] = static_cast<double>(cof[i][j] / det);
       if (!std::isfinite(inv[i][j])) {
         return 0.0;
       }
     }
   }
-  return std::abs(det);
+  return static_cast<double>(score);
 }
+
+constexpr int kFractionalSteps = 4;
+
+inline int descendFast(const Obtuse &s, Vec3 &x, int cap);
 
 inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[4][3]) {
   Obtuse o;
   const Vec3 cell[3] = {a, b, c};
+  double maxEdgeN2 = 0.0;
   for (int k = 0; k < 3; k++) {
+    const double edge = n2(cell[k]);
+    if (!(std::isfinite(edge) && edge >= std::numeric_limits<double>::min())) {
+      return o;
+    }
+    maxEdgeN2 = std::max(maxEdgeN2, edge);
     o.cellX[k] = cell[k].x;
     o.cellY[k] = cell[k].y;
     o.cellZ[k] = cell[k].z;
@@ -550,38 +741,14 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
     o.splitY[k] = split(cell[k].y);
     o.splitZ[k] = split(cell[k].z);
   }
-  double longestEdge = 0.0;
-  double shortestEdge = std::numeric_limits<double>::infinity();
-  double longestReduced = 0.0;
   for (int i = 0; i < 4; i++) {
     o.v[i] = v[i];
-    longestReduced = std::max(longestReduced, n2(v[i]));
     for (int m = 0; m < 3; m++) {
       o.coef[i][m] = coef[i][m];
     }
-    if (i < 3) {
-      const double edge = n2(cell[i]);
-      longestEdge = std::max(longestEdge, edge);
-      shortestEdge = std::min(shortestEdge, edge);
-    }
   }
-  // Both scales are powers of two, so the products are exact in binary64.
-  // Comparing an edge with a reduced vector for equality flips when the two
-  // meet (FCC, both squared lengths 400) and a 1e-9 Angstrom change makes
-  // the reduced vector the shorter one. A factor of 32 on the squared
-  // lengths keeps those cells, and every compact cell measured out to
-  // orthogonal aspect 10 (squared ratio at most about 14), on the wrap
-  // path. legal-elong sits near 43 and still starts at Babai. The edge
-  // aspect cap (64, squared factor 4096) keeps a long needle whose reduced
-  // vector happens to be almost as long as its long edge on the Babai path,
-  // where the coefficient is re-evaluated.
-  constexpr double kWrapSlack = 32.0;
-  constexpr double kWrapAspect2 = 4096.0;
-  o.fractional = longestEdge <= longestReduced * kWrapSlack &&
-                 longestEdge <= shortestEdge * kWrapAspect2;
   // Every triple of a superbasis spans the same cell volume, so Babai takes
   // the most orthogonal one, |det| / (|b0| |b1| |b2|).
-  double bestAbs = 0.0;
   double bestScore = 0.0;
   bool have = false;
   for (int drop = 0; drop < 4; drop++) {
@@ -594,12 +761,9 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
     }
     const Vec3 cols[3] = {v[idx[0]], v[idx[1]], v[idx[2]]};
     double inv[3][3];
-    const double absDet = invertColumns(cols, inv);
-    const double score =
-        absDet / (std::sqrt(n2(cols[0])) * std::sqrt(n2(cols[1])) * std::sqrt(n2(cols[2])));
-    if (absDet > 0.0 && score > bestScore) {
+    const double score = invertColumns(cols, inv);
+    if (score > bestScore) {
       bestScore = score;
-      bestAbs = absDet;
       have = true;
       for (int k = 0; k < 3; k++) {
         o.idx[k] = idx[k];
@@ -609,7 +773,7 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
       }
     }
   }
-  if (!have || !(bestAbs > 1e-18)) {
+  if (!have || !(bestScore > 1e-18)) {
     return o;
   }
   for (int k = 0; k < 3; k++) {
@@ -617,7 +781,42 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
     o.maxInvN2 = std::max(o.maxInvN2, o.inv[0][k] * o.inv[0][k] + o.inv[1][k] * o.inv[1][k] +
                                           o.inv[2][k] * o.inv[2][k]);
   }
+  if (!(std::isfinite(o.maxInvN2) && o.maxInvN2 > 0.0)) {
+    return o;
+  }
   o.ok = relevantOf(o);
+  // Scale-invariant wrap-path gate: directly probe 0.375 * each cell edge and
+  // 0.375 * the four antipodal cell corners with descendFast. Compact cells and
+  // arbitrarily long near-orthogonal slabs settle in 0-3 steps; skewed cells
+  // where wrap points routinely hit the step cap go straight to Babai.
+  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
+  if (o.ok && maxEdgeN2 < kRange) {
+    bool fits = true;
+    for (int j = 0; j < 3; j++) {
+      Vec3 probe = scale(0.375, cell[j]);
+      if (descendFast(o, probe, kFractionalSteps) >= kFractionalSteps) {
+        fits = false;
+        break;
+      }
+    }
+    if (fits) {
+      const Vec3 corners[4] = {
+          {0.375 * (a.x + b.x + c.x), 0.375 * (a.y + b.y + c.y), 0.375 * (a.z + b.z + c.z)},
+          {0.375 * (a.x + b.x - c.x), 0.375 * (a.y + b.y - c.y), 0.375 * (a.z + b.z - c.z)},
+          {0.375 * (a.x - b.x + c.x), 0.375 * (a.y - b.y + c.y), 0.375 * (a.z - b.z + c.z)},
+          {0.375 * (a.x - b.x - c.x), 0.375 * (a.y - b.y - c.y), 0.375 * (a.z - b.z - c.z)},
+      };
+      int cornerHits = 0;
+      for (int j = 0; j < 4; j++) {
+        Vec3 probe = corners[j];
+        if (descendFast(o, probe, kFractionalSteps) >= kFractionalSteps) {
+          cornerHits++;
+        }
+      }
+      fits = cornerHits <= 1;
+    }
+    o.fractional = fits;
+  }
   return o;
 }
 
@@ -627,6 +826,16 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
 // the upper-triangular cell (a, b, c), recovered by back-substitution and
 // returned in coef. The result must still span the cell volume.
 inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) {
+  const double xs[3] = {a.x, b.x, c.x};
+  const double ys[3] = {0.0, b.y, c.y};
+  const auto evalFromCoef = [&](const double (&n)[3]) -> Vec3 {
+    if (!(std::abs(n[0]) < kIntegral && std::abs(n[1]) < kIntegral &&
+          std::abs(n[2]) < kIntegral)) {
+      throw std::runtime_error(
+          "minimum-image lattice coefficient exceeds binary64 integer precision");
+    }
+    return {integerDot(n, xs), integerDot(n, ys), n[2] * c.z};
+  };
   for (int k = 0; k < 4; k++) {
     const long double n2c = std::round(static_cast<long double>(v[k].z) / c.z);
     const long double n1 =
@@ -640,18 +849,119 @@ inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) 
     }
     const double n[3] = {static_cast<double>(n0), static_cast<double>(n1),
                          static_cast<double>(n2c)};
-    const double xs[3] = {a.x, b.x, c.x};
-    const double ys[3] = {0.0, b.y, c.y};
-    v[k] = {integerDot(n, xs), integerDot(n, ys), n[2] * c.z};
+    v[k] = evalFromCoef(n);
     for (int m = 0; m < 3; m++) {
       coef[k][m] = n[m];
     }
   }
-  const Vec3 cols[3] = {v[0], v[1], v[2]};
-  double inv[3][3];
-  const double volume = std::abs(a.x * b.y * c.z);
-  if (!(std::abs(invertColumns(cols, inv) - volume) <= 1e-6 * volume)) {
+  const long double volume =
+      std::abs(static_cast<long double>(a.x) * b.y * c.z);
+  const long double detV = std::abs(detLong(v[0], v[1], v[2]));
+  if (!(volume > 0.0L && std::isfinite(volume) && std::isfinite(detV) &&
+        std::abs(detV - volume) <= 1e-6L * volume)) {
     throw std::runtime_error("minimum-image reduction left the lattice in binary64");
+  }
+  // Exact-integer Lagrange size-reduction in extended precision: if binary64
+  // rounding in Lagrange/Selling shifted a long reduced vector by many short
+  // vectors during back-substitution, pull it back to mutual orthogonality
+  // without ever leaving the lattice.
+  for (int pass = 0; pass < 32; pass++) {
+    for (int i = 1; i < 3; i++) {
+      int j = i;
+      while (j > 0 && n2Long(v[j]) < n2Long(v[j - 1])) {
+        std::swap(v[j], v[j - 1]);
+        for (int m = 0; m < 3; m++) {
+          std::swap(coef[j][m], coef[j - 1][m]);
+        }
+        j--;
+      }
+    }
+    bool changed = false;
+    for (int i = 1; i < 3; i++) {
+      for (int j = i - 1; j >= 0; j--) {
+        const long double lj = n2Long(v[j]);
+        if (!(lj > 0.0L)) {
+          continue;
+        }
+        const long double qd = std::round(dotLong(v[i], v[j]) / lj);
+        if (!std::isfinite(qd) || qd == 0.0L) {
+          continue;
+        }
+        double nextCoef[3];
+        for (int m = 0; m < 3; m++) {
+          const long double nc =
+              static_cast<long double>(coef[i][m]) - qd * static_cast<long double>(coef[j][m]);
+          if (!(std::abs(nc) < kIntegral)) {
+            throw std::runtime_error(
+                "minimum-image lattice coefficient exceeds binary64 integer precision");
+          }
+          nextCoef[m] = static_cast<double>(nc);
+        }
+        const Vec3 next = evalFromCoef(nextCoef);
+        if (shorterLong(next, v[i])) {
+          v[i] = next;
+          for (int m = 0; m < 3; m++) {
+            coef[i][m] = nextCoef[m];
+          }
+          changed = true;
+        }
+      }
+    }
+    if (!changed) {
+      break;
+    }
+  }
+  for (int m = 0; m < 3; m++) {
+    coef[3][m] = -(coef[0][m] + coef[1][m] + coef[2][m]);
+  }
+  v[3] = evalFromCoef(coef[3]);
+  // Keep the superbasis obtuse after any integer Lagrange cleanup.
+  for (int iter = 0; iter < 64; iter++) {
+    int pi = -1;
+    int pj = -1;
+    long double best = 0.0L;
+    for (int i = 0; i < 3; i++) {
+      for (int j = i + 1; j < 4; j++) {
+        const long double d = dotLong(v[i], v[j]);
+        if (d > best) {
+          best = d;
+          pi = i;
+          pj = j;
+        }
+      }
+    }
+    if (pi < 0) {
+      break;
+    }
+    double nextCoef[4][3];
+    Vec3 nextV[4];
+    for (int k = 0; k < 4; k++) {
+      for (int m = 0; m < 3; m++) {
+        if (k == pi) {
+          nextCoef[k][m] = -coef[pi][m];
+        } else if (k == pj) {
+          nextCoef[k][m] = coef[pj][m];
+        } else {
+          nextCoef[k][m] = coef[k][m] + coef[pi][m];
+        }
+      }
+      nextV[k] = evalFromCoef(nextCoef[k]);
+    }
+    long double before = 0.0L;
+    long double after = 0.0L;
+    for (int k = 0; k < 4; k++) {
+      before += n2Long(v[k]);
+      after += n2Long(nextV[k]);
+    }
+    if (!(after < before)) {
+      break;
+    }
+    for (int k = 0; k < 4; k++) {
+      v[k] = nextV[k];
+      for (int m = 0; m < 3; m++) {
+        coef[k][m] = nextCoef[k][m];
+      }
+    }
   }
 }
 
@@ -714,7 +1024,7 @@ inline int descend(const Obtuse &s, Vec3 &x, double n[3], int cap) {
     }
     const Vec3 next = {x.x - sign * s.rel[0][at], x.y - sign * s.rel[1][at],
                        x.z - sign * s.rel[2][at]};
-    const bool lower = Precise ? n2Long(next) < n2Long(x) : n2(next) < n2(x);
+    const bool lower = shorterLong(next, x);
     if (!lower) {
       rejected |= 1u << at;
       continue;
@@ -805,7 +1115,7 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
     }
     requireIntegral(m);
     const Vec3 next = latticeTranslate(s, w, m);
-    if (!(n2Long(next) < n2Long(best))) {
+    if (!shorterLong(next, best)) {
       return best;
     }
     best = next;
@@ -815,84 +1125,80 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
   }
 }
 
-constexpr int kFractionalSteps = 4;
-
-// Wrap-path slicer. Gain is maintained with the stored Gram matrix, the same
-// recurrence the direct cell descent uses, so a compact cell that finishes
-// in one or two steps does not rebuild eight dot products per step. A step
-// is applied only when its gain is positive; the cap sends anything still
-// moving on to Babai.
+// Wrap-path slicer. Uses 8-element arrays so the compiler vectorizes the
+// initial projections, gain differences, and Gram updates, selects the best
+// gain with a branchless 7-way reduction tree, and exits immediately when
+// no projection exceeds its half-norm. Hitting `cap` falls back to Babai.
 inline int descendFast(const Obtuse &s, Vec3 &x, int cap) {
-  double t0 = x.x * s.rel[0][0] + x.y * s.rel[1][0] + x.z * s.rel[2][0];
-  double t1 = x.x * s.rel[0][1] + x.y * s.rel[1][1] + x.z * s.rel[2][1];
-  double t2 = x.x * s.rel[0][2] + x.y * s.rel[1][2] + x.z * s.rel[2][2];
-  double t3 = x.x * s.rel[0][3] + x.y * s.rel[1][3] + x.z * s.rel[2][3];
-  double t4 = x.x * s.rel[0][4] + x.y * s.rel[1][4] + x.z * s.rel[2][4];
-  double t5 = x.x * s.rel[0][5] + x.y * s.rel[1][5] + x.z * s.rel[2][5];
-  double t6 = x.x * s.rel[0][6] + x.y * s.rel[1][6] + x.z * s.rel[2][6];
-  double t7 = x.x * s.rel[0][7] + x.y * s.rel[1][7] + x.z * s.rel[2][7];
-  const double h0 = s.halfN2[0];
-  const double h1 = s.halfN2[1];
-  const double h2 = s.halfN2[2];
-  const double h3 = s.halfN2[3];
-  const double h4 = s.halfN2[4];
-  const double h5 = s.halfN2[5];
-  const double h6 = s.halfN2[6];
-  const double h7 = s.halfN2[7];
-  int steps = 0;
-  while (steps < cap) {
-    const double g0 = std::abs(t0) - h0;
-    const double g1 = std::abs(t1) - h1;
-    const double g2 = std::abs(t2) - h2;
-    const double g3 = std::abs(t3) - h3;
-    const double g4 = std::abs(t4) - h4;
-    const double g5 = std::abs(t5) - h5;
-    const double g6 = std::abs(t6) - h6;
-    const double g7 = std::abs(t7) - h7;
-    int at = 0;
-    double best = g0;
-    double sign = t0 > 0.0 ? 1.0 : -1.0;
-    if (g1 > best) { best = g1; at = 1; sign = t1 > 0.0 ? 1.0 : -1.0; }
-    if (g2 > best) { best = g2; at = 2; sign = t2 > 0.0 ? 1.0 : -1.0; }
-    if (g3 > best) { best = g3; at = 3; sign = t3 > 0.0 ? 1.0 : -1.0; }
-    if (g4 > best) { best = g4; at = 4; sign = t4 > 0.0 ? 1.0 : -1.0; }
-    if (g5 > best) { best = g5; at = 5; sign = t5 > 0.0 ? 1.0 : -1.0; }
-    if (g6 > best) { best = g6; at = 6; sign = t6 > 0.0 ? 1.0 : -1.0; }
-    if (g7 > best) { best = g7; at = 7; sign = t7 > 0.0 ? 1.0 : -1.0; }
-    if (!(best > 0.0)) {
-      break;
-    }
-    x.x -= sign * s.rel[0][at];
-    x.y -= sign * s.rel[1][at];
-    x.z -= sign * s.rel[2][at];
-    const double *row = s.gram[at];
-    t0 -= sign * row[0];
-    t1 -= sign * row[1];
-    t2 -= sign * row[2];
-    t3 -= sign * row[3];
-    t4 -= sign * row[4];
-    t5 -= sign * row[5];
-    t6 -= sign * row[6];
-    t7 -= sign * row[7];
-    steps++;
+  double t[8];
+  for (int k = 0; k < 8; k++) {
+    t[k] = x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
   }
-  return steps;
+  const auto larger = [](int i, double gi, int j, double gj) {
+    return gj > gi ? std::pair<int, double>{j, gj} : std::pair<int, double>{i, gi};
+  };
+  for (int iter = 0; iter < cap; iter++) {
+    double g[8];
+    for (int k = 0; k < 8; k++) {
+      g[k] = std::abs(t[k]) - s.halfN2[k];
+    }
+    const auto p01 = larger(0, g[0], 1, g[1]);
+    const auto p23 = larger(2, g[2], 3, g[3]);
+    const auto p45 = larger(4, g[4], 5, g[5]);
+    const auto p03 = larger(p01.first, p01.second, p23.first, p23.second);
+    const auto p46 = larger(p45.first, p45.second, 6, g[6]);
+    const auto best = larger(p03.first, p03.second, p46.first, p46.second);
+    if (!(best.second > 0.0)) {
+      return iter;
+    }
+    const int at = best.first;
+    const double f = t[at] > 0.0 ? 1.0 : -1.0;
+    x.x -= f * s.rel[0][at];
+    x.y -= f * s.rel[1][at];
+    x.z -= f * s.rel[2][at];
+    for (int k = 0; k < 8; k++) {
+      t[k] -= f * s.gram[at][k];
+    }
+    unsigned any = 0;
+    for (int k = 0; k < 8; k++) {
+      any |= static_cast<unsigned>(std::abs(t[k]) > s.halfN2[k]);
+    }
+    if (!any) {
+      return iter + 1;
+    }
+  }
+  return cap;
 }
 
-// The fast path does not carry coefficients. Recover them from the upper
-// triangular cell when a result has to be re-evaluated. The steps are a few
-// lattice vectors, so the long-double quotient rounds to the exact integer.
-inline void recoverCoefficient(const Obtuse &s, Vec3 w, Vec3 y, double n[3]) {
-  const long double dz =
-      (static_cast<long double>(w.z) - y.z) / s.cellZ[2];
-  const long double dy =
-      ((static_cast<long double>(w.y) - y.y) - dz * s.cellY[2]) / s.cellY[1];
-  const long double dx = ((static_cast<long double>(w.x) - y.x) - dy * s.cellX[1] -
-                          dz * s.cellX[2]) /
-                         s.cellX[0];
-  n[0] = std::round(static_cast<double>(dx));
-  n[1] = std::round(static_cast<double>(dy));
-  n[2] = std::round(static_cast<double>(dz));
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
+  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
+  const auto kept = [w2](double x2) { return x2 >= (1.0 / 256.0) * w2; };
+  double n[3] = {0.0, 0.0, 0.0};
+  double z[3];
+  double scale = 0.0;
+  const Vec3 rounded = babai(s, w, z, scale);
+  if (scale <= 2.0 * maxAbs(w) && w2 < kRange) {
+    const double r2 = n2(rounded);
+    if (r2 <= w2) {
+      Vec3 y = rounded;
+      const int steps = descendFast(s, y, 3);
+      if (steps < 3) {
+        const double y2 = n2(y);
+        if (kept(y2)) {
+          return y2 < w2 ? y : w;
+        }
+      }
+    }
+  }
+  addBabai(s, z, n);
+  requireIntegral(n);
+  Vec3 x = latticeTranslate(s, w, n);
+  descend<false>(s, x, n, std::numeric_limits<int>::max());
+  const Vec3 ref = refine(s, w, n);
+  return n2(ref) < w2 ? ref : w;
 }
 
 // Binary64 results are kept only when nothing cancelled far below |w|: the
@@ -900,63 +1206,34 @@ inline void recoverCoefficient(const Obtuse &s, Vec3 w, Vec3 y, double n[3]) {
 // 2 max|w|, a Babai descent takes at most two steps, a wrap descent takes
 // at most three steps, and the image is at least |w| / 16. Every other
 // image is re-evaluated from its lattice coefficients.
-inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w) {
+inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
+  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (!s.ok) {
     throw std::runtime_error(
         "minimum-image cell is numerically singular in binary64");
   }
-  const double w2 = n2(w);
   if (!(w2 * s.maxInvN2 < kIntegral * kIntegral)) {
     throw std::runtime_error(
         "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
-  const auto kept = [w2](Vec3 x) { return 256.0 * n2(x) >= w2; };
-  double n[3] = {0.0, 0.0, 0.0};
-  Vec3 x = w;
-  if (s.fractional) {
-    Vec3 y = x;
+  if (s.fractional && w2 < kRange) {
+    Vec3 y = w;
     const int steps = descendFast(s, y, kFractionalSteps);
-    // Stopped inside the cap (at most three steps): the image is kept when
-    // it is still at least |w|/16. Hitting the cap discards the partial
-    // move and starts Babai from the wrap.
-    if (steps < kFractionalSteps && (steps == 0 || kept(y))) {
-      return y;
-    }
+    // Stopped inside the cap (at most three steps): keep y when it has not
+    // cancelled below |w|/16. Heavy cancellation or hitting the cap discards
+    // the partial move and starts Babai from the wrap.
     if (steps < kFractionalSteps) {
-      recoverCoefficient(s, w, y, n);
-      return refine(s, w, n);
+      const double y2 = n2(y);
+      if (y2 >= (1.0 / 256.0) * w2) {
+        return y2 < w2 ? y : w;
+      }
     }
   }
-  double z[3];
-  double scale = 0.0;
-  const Vec3 rounded = babai(s, x, z, scale);
-  const bool plain = scale <= 2.0 * maxAbs(w);
-  double stepped[3] = {0.0, 0.0, 0.0};
-  if (plain) {
-    x = rounded;
-    const int steps = descend<false>(s, x, stepped, std::numeric_limits<int>::max());
-    if (steps <= 2 && n2(rounded) <= w2 && kept(x)) {
-      return x;
-    }
-  }
-  addBabai(s, z, n);
-  requireIntegral(n);
-  if (plain) {
-    n[0] += stepped[0];
-    n[1] += stepped[1];
-    n[2] += stepped[2];
-    return refine(s, w, n);
-  }
-  const Vec3 start = latticeTranslate(s, w, n);
-  x = start;
-  if (descend<false>(s, x, n, std::numeric_limits<int>::max()) == 0) {
-    // Binary64 can miss a step whose squared-norm drop is below an ulp
-    // of |x|^2 (a needle of aspect 5e8 drops n^2 by 1.25 on a value near
-    // 5e16). The extended-precision pass takes that step, and it returns
-    // immediately when every binary64 gain is already non-positive.
-    return refine(s, w, n);
-  }
-  return refine(s, w, n);
+  return closestBabai(s, w, w2);
+}
+
+inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w) {
+  return closestDisplacement(s, w, n2(w));
 }
 
 struct Cached {
@@ -1009,25 +1286,22 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
 inline std::array<double, 3>
 euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double yz,
                    const std::array<double, 3> &raw, const std::array<double, 3> &wrapped) {
-  for (double value : wrapped) {
-    if (!std::isfinite(value)) {
-      throw std::runtime_error("minimum-image candidate is not finite");
-    }
-  }
-  const Cached &slot = cachedBasis(lx, ly, lz, xy, xz, yz);
   (void)raw;
   const Vec3 w{wrapped[0], wrapped[1], wrapped[2]};
-  const Vec3 euc = closestDisplacement(slot.s, w);
   const double f2 = n2(w);
-  const double e2 = n2(euc);
-  if (!std::isfinite(f2) || !std::isfinite(e2)) {
+  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
+  if (!(f2 < kRange)) {
+    for (double value : wrapped) {
+      if (!std::isfinite(value)) {
+        throw std::runtime_error("minimum-image candidate is not finite");
+      }
+    }
     throw std::runtime_error(
         "minimum-image squared norm exceeds binary64 range");
   }
-  if (e2 < f2) {
-    return {euc.x, euc.y, euc.z};
-  }
-  return wrapped;
+  const Cached &slot = cachedBasis(lx, ly, lz, xy, xz, yz);
+  const Vec3 euc = closestDisplacement(slot.s, w, f2);
+  return {euc.x, euc.y, euc.z};
 }
 
 } // namespace mic

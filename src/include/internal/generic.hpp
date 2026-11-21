@@ -240,7 +240,7 @@ inline double fracDistSq(const FracBox &b, double xi, double yi, double zi,
 // ball is a fractional wrap. An orthorhombic wrap is that image on every
 // axis, including past half an edge.
 inline bool smithInside(const FracBox &b, double r2) {
-  return b.ok && (!b.triclinic || std::sqrt(r2) + 1e-12 < b.halfMin);
+  return b.ok && (!b.triclinic || std::sqrt(r2) < b.halfMin * (1.0 - 1e-12));
 }
 
 // Exact Euclidean minimum-image refinement of a triclinic displacement vector
@@ -378,10 +378,9 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 // rdf2d paths) and the fractional wrap are both refined by
 // mic::euclideanIfShorter. It reduces the cell with Lagrange and Selling,
 // re-evaluates the reduced vectors from their integer coordinates with an
-// error-free dot product, and descends from the fractional wrap when the
-// longest edge is at most 64 times the shortest edge and its square is at
-// most 32 times the square of the longest reduced vector, or from the Babai
-// point otherwise, over the shortest member of each coset of L / 2L,
+// error-free dot product, and descends from the fractional wrap when probes
+// along the cell edges and corners settle within the wrap step cap, or from
+// the Babai point otherwise, over the shortest member of each coset of L / 2L,
 // which contains every Voronoi-relevant vector. That descent stops in the Voronoi cell, so
 // the result is the minimum image on every legal cell. Results that
 // cancelled heavily are re-evaluated from their integer coefficients and
