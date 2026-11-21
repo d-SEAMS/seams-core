@@ -191,6 +191,9 @@ struct Obtuse {
   // Largest squared row of inv: |Babai coefficient|^2 <= n2(y) * maxInvN2.
   double maxInvN2 = 0.0;
   bool fractional = false;
+  // Wrap images often cancel below |w| / 16, so the wrap descent records
+  // its steps on the way down.
+  bool recordWrap = false;
   bool ok = false;
   Vec3 v[4]{};
   // Integer coordinates of v[k] and of each relevant vector in (a, b, c).
@@ -776,13 +779,13 @@ inline double invertColumns(const Vec3 cols[3], double inv[3][3]) {
 }
 
 constexpr int kFractionalSteps = 4;
-// A wrap descent that has not settled after this many steps starts over
-// from Babai. Its path fits 4 bits per step in 64 bits.
-constexpr int kWrapSteps = 16;
+// A binary64 descent from the Babai point that has not settled after this
+// many steps continues in extended precision.
+constexpr int kSlicerSteps = 16;
 
 template <bool Track = false, bool Record = false>
-int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n = nullptr,
-                unsigned long long *path = nullptr);
+inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n = nullptr,
+                       unsigned long long *path = nullptr);
 
 inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[4][3]) {
   Obtuse o;
@@ -876,6 +879,16 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
       fits = cornerHits <= 1;
     }
     o.fractional = fits;
+    // A fractional wrap is at most half the summed edge lengths long. When
+    // the shortest superbasis vector is below 1/16 of that, wrap images
+    // cancel below |w| / 16 often enough that the descent records its steps
+    // on the way down rather than running again.
+    double shortest = n2(v[0]);
+    for (int i = 1; i < 4; i++) {
+      shortest = std::min(shortest, n2(v[i]));
+    }
+    const double edges = std::sqrt(n2(a)) + std::sqrt(n2(b)) + std::sqrt(n2(c));
+    o.recordWrap = 1024.0 * shortest < edges * edges;
   }
   return o;
 }
@@ -1190,10 +1203,10 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
 // gain with a branchless 7-way reduction tree, and exits immediately when
 // no projection exceeds its half-norm. Hitting `cap` falls back to Babai.
 // With Track, the integer cell coordinates of each step are added to n.
-// With Record (cap at most kWrapSteps), path gets 4 bits per step, the
-// first step highest: 2 * k + (sign < 0) for the relevant vector k taken.
+// With Record (cap at most 16), path gets 4 bits per step, the first step
+// highest: 2 * k + (sign < 0) for the relevant vector k taken.
 template <bool Track, bool Record>
-int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path) {
+inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path) {
   unsigned long long code = 0;
   double t[8];
   for (int k = 0; k < 8; k++) {
@@ -1301,8 +1314,8 @@ inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
   requireIntegral(n);
   Vec3 x = latticeTranslate(s, w, n);
   Vec3 y = x;
-  const int steps = descendFast<true>(s, y, kWrapSteps, n);
-  if (steps < kWrapSteps) {
+  const int steps = descendFast<true>(s, y, kSlicerSteps, n);
+  if (steps < kSlicerSteps) {
     requireIntegral(n);
     if (steps > 0) {
       x = latticeTranslate(s, w, n);
@@ -1315,10 +1328,10 @@ inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
   return n2(ref) < w2 ? ref : w;
 }
 
-// A wrap descent from w that settled in the binary64 Voronoi test at y
-// after `steps` steps recorded in `path`. The steps subtract relevant
-// vectors with sign +-1, so replaying them repeats every rounding exactly;
-// the rounding of each subtraction and the low part of each relevant vector
+// A short wrap descent from w whose image y cancelled below |w| / 16, with
+// its `steps` steps recorded in `path`. The steps subtract relevant vectors
+// with sign +-1, so replaying them repeats every rounding exactly; the
+// rounding of each subtraction and the low part of each relevant vector
 // give the image as y + lo to about eps^2 per step, and the steps its
 // integer cell coordinates n. That image is kept when y clears the Voronoi
 // cell by twice |lo|_1, which makes it the minimum image; otherwise (a near
@@ -1358,16 +1371,29 @@ inline Vec3 certifyWrap(const Obtuse &s, Vec3 w, double w2, Vec3 y, unsigned lon
   return n2(ref) < w2 ? ref : w;
 }
 
+// certifyWrap for a cell that does not record its wrap steps: the descent
+// from w runs again, recording.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline Vec3 recertifyWrap(const Obtuse &s, Vec3 w, double w2) {
+  Vec3 y = w;
+  unsigned long long path = 0;
+  const int steps = descendFast<false, true>(s, y, kFractionalSteps, nullptr, &path);
+  if (steps < kFractionalSteps) {
+    return certifyWrap(s, w, w2, y, path, steps);
+  }
+  return closestBabai(s, w, w2);
+}
+
 // Binary64 results are kept only when nothing cancelled far below |w|: the
 // Babai rounding subtracts lattice vectors with sum |z_i| max|b_i| at most
 // 2 max|w|, a Babai descent takes at most two steps, a wrap descent takes
 // at most three steps, and the image is at least |w| / 16. Every other
-// image is re-evaluated from its lattice coefficients: a wrap descent that
-// settles within kWrapSteps through certifyWrap, anything else through
-// closestBabai.
-#if defined(__GNUC__) || defined(__clang__)
-__attribute__((always_inline))
-#endif
+// image is re-evaluated from its lattice coefficients: a short wrap descent
+// that cancelled through certifyWrap, anything else through closestBabai.
+// Recording the wrap steps costs every descent a little, so only cells that
+// expect cancellation do it; elsewhere a cancelled descent runs again.
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (!s.ok) {
@@ -1380,16 +1406,25 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
   }
   if (s.fractional && w2 < kRange) {
     Vec3 y = w;
-    unsigned long long path = 0;
-    const int steps = descendFast<false, true>(s, y, kWrapSteps, nullptr, &path);
+    if (s.recordWrap) {
+      unsigned long long path = 0;
+      const int steps = descendFast<false, true>(s, y, kFractionalSteps, nullptr, &path);
+      if (steps < kFractionalSteps) {
+        const double y2 = n2(y);
+        if (y2 >= (1.0 / 256.0) * w2) {
+          return y2 < w2 ? y : w;
+        }
+        return certifyWrap(s, w, w2, y, path, steps);
+      }
+      return closestBabai(s, w, w2);
+    }
+    const int steps = descendFast(s, y, kFractionalSteps);
     if (steps < kFractionalSteps) {
       const double y2 = n2(y);
       if (y2 >= (1.0 / 256.0) * w2) {
         return y2 < w2 ? y : w;
       }
-    }
-    if (steps < kWrapSteps) {
-      return certifyWrap(s, w, w2, y, path, steps);
+      return recertifyWrap(s, w, w2);
     }
   }
   return closestBabai(s, w, w2);
