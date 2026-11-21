@@ -42,7 +42,9 @@ openmm = ">=8.6.1,<9"
 [tasks]
 setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true"
 build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
-test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
+install-pydseamslib = "sh scripts/install_pydseamslib.sh"
+ensure-pydseamslib = "sh scripts/install_pydseamslib.sh --if-missing"
+test = { cmd = "meson test -C bbdir -v", depends-on = ["build", "ensure-pydseamslib"] }
 render-molecules = "python docs/scripts/render_molecules.py"
 install = { cmd = "meson install -C bbdir", depends-on = ["build"] }
 setup-bindings = { cmd = "meson setup bbdir-lang --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_cli=true" }
@@ -72,7 +74,7 @@ lcov --remove bbdir-cov/meson-logs/coverage.info \
   --ignore-errors unused && \
 genhtml bbdir-cov/meson-logs/coverage.info --branch-coverage \
   --config-file .lcovrc --output-directory bbdir-cov/meson-logs/coveragereport
-""", depends-on = ["coverage-build"] }
+""", depends-on = ["coverage-build", "ensure-pydseamslib"] }
 
 [environments]
 # linux-64-glibc239 is the plumed210 feature's platform. Keeping it off

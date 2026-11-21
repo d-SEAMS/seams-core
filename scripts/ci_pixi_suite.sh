@@ -26,6 +26,9 @@ PY
 )
 export MOLECULES_BPY="$cycles_python"
 
+# The docs snippet and doc-block tests import dseams and pydseams from pydseamslib.
+sh scripts/install_pydseamslib.sh --if-missing
+
 meson setup build --buildtype=release \
   -Dwith_tests=true -Dwith_cli=true \
   -Dwith_gromacs=enabled -Dwith_lammps=enabled \

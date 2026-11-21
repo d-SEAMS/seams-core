@@ -59,7 +59,9 @@ BINDING = ("dseams", "pydseams")
 
 
 def install_hint():
-    return "install it with: pip install pydseamslib=={}".format(project_version())
+    return "install it with: pip install pydseamslib=={} (or sh scripts/install_pydseamslib.sh)".format(
+        project_version()
+    )
 
 
 class Skip(Exception):
