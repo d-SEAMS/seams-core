@@ -272,6 +272,18 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_coder_oob.tng", "TNG", kTngErr},
            // MMTF atomIdList had a duplicate atom id before the model's atomSkip_
            Refused{"fuzz_mmtf_atomskip.mmtf", "MMTF", "before current model offset"},
+           // short CSSR unit cell line passed to string_view::substr(38)
+           Refused{"fuzz_cssr_short_line.cssr", "CSSR", "too short"},
+           // short SDF bond line passed to string_view::substr(6, 3)
+           Refused{"fuzz_sdf_short_bond.sdf", "SDF", "bond line is too small"},
+           // msgpack array32 declaring 536M elements in a 5-byte MMTF file
+           Refused{"fuzz_mmtf_huge_array.mmtf", "MMTF", "array size overflow"},
+           // zero-length msgpack string called memcpy with a null pointer
+           Refused{"fuzz_mmtf_empty_str.mmtf", "MMTF", "Expected msgpack type to be MAP"},
+           // compressed XTC delta overflowed int32_t
+           Refused{"fuzz_xtc_int_overflow.xtc", "XTC", "integer overflow during decompression"},
+           // truncated TNG header failed tng_util_trajectory_open after allocating handle
+           Refused{"fuzz_tng_open_leak.tng", "TNG", kTngErr},
        }) {
     requireRefused(item);
   }
@@ -302,6 +314,13 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   REQUIRE(pdb.error.empty());
   REQUIRE(pdb.steps == 1);
   REQUIRE(pdb.natoms == 0);
+
+  // A nucleic residue with P and no O3' must not dereference end() in
+  // link_standard_residue_bonds().
+  const auto pdbNucleic = readAll("hostile/fuzz_pdb_nucleic_no_o3.pdb", "PDB");
+  REQUIRE(pdbNucleic.error.empty());
+  REQUIRE(pdbNucleic.steps == 1);
+  REQUIRE(pdbNucleic.natoms == 2);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",

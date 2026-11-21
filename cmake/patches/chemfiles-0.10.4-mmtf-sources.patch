@@ -14,9 +14,14 @@
 # mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp: converting
 #   an empty msgpack array into a C array no longer dereferences its null
 #   element pointer, as the vector and std::array adaptors already did.
-diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp
---- mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 00:18:48.000000000 +0000
-+++ mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 02:17:56.000000000 +0000
+# mmtf-cpp/include/mmtf/map_decoder.hpp: reject empty buffers and pass
+#   msgpack::unpack_limit bounded by buffer size so declared array/map/str
+#   counts cannot trigger multi-GB allocations.
+# mmtf-cpp/msgpack-c/include/msgpack/v2/create_object_visitor.hpp: skip
+#   memcpy when size == 0 to avoid passing a null source pointer.
+diff -ruN mmtf-a/mmtf-cpp/include/mmtf/binary_decoder.hpp mmtf-b/mmtf-cpp/include/mmtf/binary_decoder.hpp
+--- mmtf-a/mmtf-cpp/include/mmtf/binary_decoder.hpp	2020-10-25 17:06:08.000000000 +0000
++++ mmtf-b/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 06:22:02.027844023 +0000
 @@ -122,6 +122,10 @@
      template<typename Int>
      void decodeDivide_(const std::vector<Int>& input, float const divisor,
@@ -145,9 +150,33 @@ diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp mmtf-cpp-b/mmtf-cp
      output.clear();
      output.reserve(input.size());
      float inv_div = float(1) / divisor;
-diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp mmtf-cpp-b/mmtf-cpp/include/mmtf/msgpack_decoders.hpp
---- mmtf-cpp-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp	2026-11-21 00:18:48.000000000 +0000
-+++ mmtf-cpp-b/mmtf-cpp/include/mmtf/msgpack_decoders.hpp	2026-11-21 02:17:56.000000000 +0000
+diff -ruN mmtf-a/mmtf-cpp/include/mmtf/map_decoder.hpp mmtf-b/mmtf-cpp/include/mmtf/map_decoder.hpp
+--- mmtf-a/mmtf-cpp/include/mmtf/map_decoder.hpp	2020-10-25 17:06:08.000000000 +0000
++++ mmtf-b/mmtf-cpp/include/mmtf/map_decoder.hpp	2026-11-21 06:58:30.355428218 +0000
+@@ -163,7 +163,19 @@
+ }
+ 
+ inline void MapDecoder::initFromBuffer(const char* buffer, std::size_t size) {
+-    msgpack::unpack(object_handle_, buffer, size);
++    if (size == 0) {
++        throw DecodeError("Empty MMTF buffer");
++    }
++    std::size_t max_items = size > 0xffffffffu ? 0xffffffffu : size;
++    msgpack::unpack_limit limit(
++        max_items,
++        max_items / 2,
++        max_items,
++        max_items,
++        max_items,
++        128
++    );
++    msgpack::unpack(object_handle_, buffer, size, MSGPACK_NULLPTR, MSGPACK_NULLPTR, limit);
+     initFromObject(object_handle_.get());
+ }
+ 
+diff -ruN mmtf-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp mmtf-b/mmtf-cpp/include/mmtf/msgpack_decoders.hpp
+--- mmtf-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp	2020-10-25 17:06:08.000000000 +0000
++++ mmtf-b/mmtf-cpp/include/mmtf/msgpack_decoders.hpp	2026-11-21 06:22:02.031844018 +0000
 @@ -20,6 +20,10 @@
  
  #include <msgpack.hpp>
@@ -176,9 +205,9 @@ diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp mmtf-cpp-b/mmtf-
          md.checkExtraKeys();
          return obj;
      }
-diff -ruN mmtf-cpp-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp mmtf-cpp-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp
---- mmtf-cpp-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2026-11-21 00:18:48.000000000 +0000
-+++ mmtf-cpp-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2026-11-21 02:17:56.000000000 +0000
+diff -ruN mmtf-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp mmtf-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp
+--- mmtf-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2020-10-25 17:09:39.000000000 +0000
++++ mmtf-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2026-11-21 06:22:02.031844018 +0000
 @@ -28,13 +28,15 @@
      msgpack::object const& operator()(msgpack::object const& o, T* v) const {
          if (o.type != msgpack::type::ARRAY) { throw msgpack::type_error(); }
@@ -202,3 +231,33 @@ diff -ruN mmtf-cpp-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp mm
          return o;
      }
  };
+diff -ruN mmtf-a/mmtf-cpp/msgpack-c/include/msgpack/v2/create_object_visitor.hpp mmtf-b/mmtf-cpp/msgpack-c/include/msgpack/v2/create_object_visitor.hpp
+--- mmtf-a/mmtf-cpp/msgpack-c/include/msgpack/v2/create_object_visitor.hpp	2020-10-25 17:09:39.000000000 +0000
++++ mmtf-b/mmtf-cpp/msgpack-c/include/msgpack/v2/create_object_visitor.hpp	2026-11-21 07:09:44.533082084 +0000
+@@ -114,7 +114,7 @@
+         }
+         else {
+             char* tmp = static_cast<char*>(zone().allocate_align(size, MSGPACK_ZONE_ALIGNOF(char)));
+-            std::memcpy(tmp, v, size);
++            if (size > 0) std::memcpy(tmp, v, size);
+             obj->via.str.ptr = tmp;
+         }
+         obj->via.str.size = size;
+@@ -130,7 +130,7 @@
+         }
+         else {
+             char* tmp = static_cast<char*>(zone().allocate_align(size, MSGPACK_ZONE_ALIGNOF(char)));
+-            std::memcpy(tmp, v, size);
++            if (size > 0) std::memcpy(tmp, v, size);
+             obj->via.bin.ptr = tmp;
+         }
+         obj->via.bin.size = size;
+@@ -146,7 +146,7 @@
+         }
+         else {
+             char* tmp = static_cast<char*>(zone().allocate_align(size, MSGPACK_ZONE_ALIGNOF(char)));
+-            std::memcpy(tmp, v, size);
++            if (size > 0) std::memcpy(tmp, v, size);
+             obj->via.ext.ptr = tmp;
+         }
+         obj->via.ext.size = static_cast<uint32_t>(size - 1);

@@ -27,6 +27,8 @@
 #   tng_compress_uncompress[_float]_bounded and Ptngc_unpack_array_bounded;
 #   unpack_array_triplet and unpack_array_stop_bits check ptr < end before
 #   every byte read and bound coding parameters and bit counts.
+#   tng_util_trajectory_open closes the handle on failure instead of
+#   leaking it.
 diff -ruN tng-a/tng/include/compression/coder.h tng-b/tng/include/compression/coder.h
 --- tng-a/tng/include/compression/coder.h	2021-11-30 12:10:11.000000000 +0000
 +++ tng-b/tng/include/compression/coder.h	2026-11-21 06:24:35.219270434 +0000
@@ -683,7 +685,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
                                                    unsigned long* prec_hi,
 diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
 --- tng-a/tng/src/lib/tng_io.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/lib/tng_io.c	2026-11-21 06:26:40.382497412 +0000
++++ tng-b/tng/src/lib/tng_io.c	2026-11-21 06:58:30.691427336 +0000
 @@ -33,6 +33,7 @@
  #endif
  
@@ -2157,3 +2159,22 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          {
              for (j = 0; j < *n_particles; j++)
              {
+@@ -14361,6 +14578,10 @@
+     if (mode == 'w')
+     {
+         stat = tng_output_file_set(*tng_data_p, filename);
++        if (stat != TNG_SUCCESS)
++        {
++            tng_util_trajectory_close(tng_data_p);
++        }
+         return (stat);
+     }
+     tng_input_file_set(*tng_data_p, filename);
+@@ -14372,6 +14593,7 @@
+ 
+     if (stat != TNG_SUCCESS)
+     {
++        tng_util_trajectory_close(tng_data_p);
+         return (stat);
+     }
+ 

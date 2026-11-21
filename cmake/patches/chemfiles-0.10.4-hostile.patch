@@ -19,9 +19,12 @@
 #   file), an SMI square brace must hold an atom, the extended XYZ comment
 #   parser stops at an '=' with no name before it instead of looping, PDB
 #   CONECT records are ignored with a warning when no atoms have been read
-#   yet, MMTF atom_id checks atom indices and model offsets with
-#   FormatError instead of assert(), and S_ISREG is defined where the C
-#   library lacks it (MSVC).
+#   yet, PDB nucleic linking checks O3' and O5' before dereferencing, CSSR
+#   and SDF check line lengths before substr, XTC checks compressed
+#   coordinate sums for int32 overflow, TNGFile guards its handle in its
+#   constructor, MMTF catches msgpack unpack/type errors and atom_id checks
+#   atom indices and model offsets with FormatError instead of assert(),
+#   and S_ISREG is defined where the C library lacks it (MSVC).
 diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
 --- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 06:14:16.829019226 +0000
 +++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 06:22:02.139843893 +0000
@@ -291,9 +294,43 @@ diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
      }
  
      // now that we know all the variables, compute the size of a single record
+diff -ruN host-a/src/files/TNGFile.cpp host-b/src/files/TNGFile.cpp
+--- host-a/src/files/TNGFile.cpp	2026-11-21 06:14:16.849019156 +0000
++++ host-b/src/files/TNGFile.cpp	2026-11-21 06:58:26.715437741 +0000
+@@ -13,12 +13,20 @@
+ #define CHECK(x) check_tng_error((x), (STRING(x)))
+ 
+ TNGFile::TNGFile(std::string path, File::Mode mode): File(std::move(path), mode, File::DEFAULT), handle_(nullptr) {
++    struct TngHandleGuard {
++        tng_trajectory_t* ptr;
++        ~TngHandleGuard() {
++            if (ptr != nullptr && *ptr != nullptr) {
++                tng_util_trajectory_close(ptr);
++            }
++        }
++    } guard{&handle_};
++
+     CHECK(tng_util_trajectory_open(this->path().c_str(), mode, &handle_));
+ 
+     if (mode == File::READ) {
+         auto status = tng_file_headers_read(handle_, TNG_USE_HASH);
+         if (status != TNG_SUCCESS) {
+-            tng_util_trajectory_close(&handle_);
+             throw file_error("could not open the file at '{}'", this->path());
+         }
+     }
+@@ -40,6 +48,8 @@
+ 
+         CHECK(tng_file_headers_write(handle_, TNG_USE_HASH));
+     }
++
++    guard.ptr = nullptr;
+ }
+ 
+ TNGFile::~TNGFile() {
 diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
 --- host-a/src/files/XDRFile.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/files/XDRFile.cpp	2026-11-21 06:22:02.139843893 +0000
++++ host-b/src/files/XDRFile.cpp	2026-11-21 07:09:42.409090652 +0000
 @@ -28,8 +28,12 @@
  void XDRFile::read_opaque(std::vector<char>& data) {
      const uint32_t count = read_single_u32();
@@ -405,7 +442,27 @@ diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
              throw file_error("buffer overrun during decompression of XTC coordinates");
          }
          if (run > 0) {
-@@ -466,6 +489,9 @@
+@@ -434,9 +457,16 @@
+             for (int k = 0; k < run; k += 3) {
+                 decodeints(compressed_data_, state, smallidx, sizesmall, thiscoord);
+                 ++read_idx;
+-                thiscoord[0] += prevcoord[0] - smallnum;
+-                thiscoord[1] += prevcoord[1] - smallnum;
+-                thiscoord[2] += prevcoord[2] - smallnum;
++                for (size_t c = 0; c < 3; ++c) {
++                    int64_t val = static_cast<int64_t>(thiscoord[c]) +
++                                  static_cast<int64_t>(prevcoord[c]) -
++                                  static_cast<int64_t>(smallnum);
++                    if (val < std::numeric_limits<int32_t>::min() ||
++                        val > std::numeric_limits<int32_t>::max()) {
++                        throw file_error("integer overflow during decompression of XTC coordinates");
++                    }
++                    thiscoord[c] = static_cast<int32_t>(val);
++                }
+                 if (k == 0) {
+                     // interchange first with second atom
+                     // for better compression of water molecules
+@@ -466,6 +496,9 @@
              ++write_idx;
              thiscoord_fl = span<float>(data.data() + write_idx * 3, 3);
          }
@@ -417,7 +474,7 @@ diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
              smallnum = smaller;
 diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
 --- host-a/src/formats/CSSR.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/CSSR.cpp	2026-11-21 06:22:02.139843893 +0000
++++ host-b/src/formats/CSSR.cpp	2026-11-21 06:58:11.083478047 +0000
 @@ -5,6 +5,7 @@
  #include <array>
  #include <memory>
@@ -426,7 +483,26 @@ diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
  #include <vector>
  
  #include "chemfiles/types.hpp"
-@@ -88,8 +89,9 @@
+@@ -76,8 +77,16 @@
+ 
+     // Read unit cell
+     Vector3D lengths, angles;
+-    scan(file_.readline().substr(38), lengths[0], lengths[1], lengths[2]);
+-    scan(file_.readline().substr(21), angles[0], angles[1], angles[2]);
++    auto line = file_.readline();
++    if (line.length() < 38) {
++        throw format_error("CSSR unit cell lengths line is too short: '{}'", line);
++    }
++    scan(line.substr(38), lengths[0], lengths[1], lengths[2]);
++    line = file_.readline();
++    if (line.length() < 21) {
++        throw format_error("CSSR unit cell angles line is too short: '{}'", line);
++    }
++    scan(line.substr(21), angles[0], angles[1], angles[2]);
+     frame.set_cell({lengths, angles});
+ 
+     size_t natoms = 0;
+@@ -88,8 +97,9 @@
      // Title line
      file_.readline();
  
@@ -438,7 +514,7 @@ diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
      for (size_t i=0; i<natoms; i++) {
          auto line = file_.readline();
          unsigned atom_id = 0;
-@@ -125,17 +127,25 @@
+@@ -125,17 +135,25 @@
          atom.set_charge(charge);
          frame.add_atom(std::move(atom), position);
  
@@ -702,8 +778,21 @@ diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTraje
              if (duplicate_check[atomid]) {
 diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
 --- host-a/src/formats/MMTF.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/MMTF.cpp	2026-11-21 06:45:21.131437508 +0000
-@@ -625,26 +625,46 @@
++++ host-b/src/formats/MMTF.cpp	2026-11-21 06:58:24.343443917 +0000
+@@ -104,6 +104,12 @@
+         mmtf::decodeFromBuffer(structure_, data, size);
+     } catch (const mmtf::DecodeError& e) { // rethrow as a chemfiles error
+         throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
++    } catch (const msgpack::unpack_error& e) {
++        throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
++    } catch (const msgpack::type_error& e) {
++        throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
++    } catch (const std::exception& e) {
++        throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
+     }
+ 
+     if (!structure_.hasConsistentData()) {
+@@ -625,26 +631,46 @@
  // the initial atom index if it exists.
  size_t MMTFFormat::atom_id(size_t mmtf_id) {
      if (!mmtf::isDefaultValue(structure_.atomIdList)) {
@@ -759,7 +848,7 @@ diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
  }
 diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
 --- host-a/src/formats/PDB.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/PDB.cpp	2026-11-21 06:45:21.127437530 +0000
++++ host-b/src/formats/PDB.cpp	2026-11-21 07:09:34.157123904 +0000
 @@ -467,6 +467,13 @@
  
  void PDBFormat::read_CONECT(Frame& frame, string_view line) {
@@ -774,6 +863,58 @@ diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
      auto line_length = trim(line).length();
  
      // Helper lambdas
+@@ -581,6 +588,7 @@
+ 
+         if (link_previous_nucleic &&
+             five_prime_phosphorus != atom_name_to_index.end() &&
++            three_prime_oxygen != atom_name_to_index.end() &&
+             resid == previous_residue_id + 1 )
+         {
+             link_previous_nucleic = false;
+@@ -594,7 +602,7 @@
+         }
+ 
+         // A special case missed by the standards committee????
+-        if (atom_name_to_index.count("HO5'") != 0) {
++        if (atom_name_to_index.count("HO5'") != 0 && atom_name_to_index.count("O5'") != 0) {
+             frame.add_bond(atom_name_to_index["HO5'"], atom_name_to_index["O5'"]);
+         }
+ 
+diff -ruN host-a/src/formats/SDF.cpp host-b/src/formats/SDF.cpp
+--- host-a/src/formats/SDF.cpp	2026-11-21 06:14:16.849019156 +0000
++++ host-b/src/formats/SDF.cpp	2026-11-21 06:58:16.823463357 +0000
+@@ -60,6 +60,11 @@
+     file_.readline(); // Comment line - skip it
+ 
+     line = file_.readline();
++    if (line.length() < 6) {
++        throw format_error(
++            "counts line is too small for SDF: '{}'", line
++        );
++    }
+     auto natoms = parse<size_t>(line.substr(0, 3));
+     auto nbonds = parse<size_t>(line.substr(3, 3));
+ 
+@@ -117,9 +122,19 @@
+ 
+     for (size_t i=0; i<nbonds; i++) {
+         line = file_.readline();
++        if (line.length() < 9) {
++            throw format_error(
++                "bond line is too small for SDF: '{}'", line
++            );
++        }
+         auto atom_1 = parse<size_t>(line.substr(0, 3));
+         auto atom_2 = parse<size_t>(line.substr(3, 3));
+         auto order = parse<size_t>(line.substr(6, 3));
++        if (atom_1 == 0 || atom_2 == 0) {
++            throw format_error(
++                "invalid 0-based atom index in SDF bond line: '{}'", line
++            );
++        }
+ 
+         Bond::BondOrder bond_order;
+         switch (order) {
 diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
 --- host-a/src/formats/SMI.cpp	2026-11-21 06:14:16.849019156 +0000
 +++ host-b/src/formats/SMI.cpp	2026-11-21 06:22:02.143843888 +0000
