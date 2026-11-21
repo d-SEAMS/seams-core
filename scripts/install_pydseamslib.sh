@@ -9,13 +9,37 @@
 # importable in the active Python environment.
 # Extra arguments go to pip, e.g. a different interpreter's -m pip.
 set -eu
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+tree=$(git -C "$root" rev-parse HEAD^{tree})
 if [ "${1:-}" = "--if-missing" ]; then
   shift
-  if python -c "import dseams, pydseams; assert hasattr(pydseams.Frame, 'classify_chill_plus')" >/dev/null 2>&1; then
+  if SEAMS_ROOT="$root" SEAMS_TREE="$tree" python - <<'PY'
+import json
+import os
+import sys
+from pathlib import Path
+
+root = Path(os.environ["SEAMS_ROOT"]).resolve()
+expected_tree = os.environ["SEAMS_TREE"]
+import dseams  # noqa: F401
+import pydseams
+if not hasattr(pydseams.Frame, "classify_chill_plus"):
+    raise SystemExit("pydseams probe: Frame.classify_chill_plus is missing")
+stamp = Path(pydseams.__file__).resolve().parent / ".seams-core-build.json"
+if not stamp.is_file():
+    raise SystemExit(f"pydseams probe: missing install stamp {stamp}")
+info = json.loads(stamp.read_text(encoding="utf-8"))
+stamp_root = Path(info.get("root", "")).resolve()
+stamp_tree = str(info.get("tree", ""))
+if stamp_root != root:
+    raise SystemExit(f"pydseams probe: expected root {root}, found {stamp_root}")
+if stamp_tree != expected_tree:
+    raise SystemExit(f"pydseams probe: expected tree {expected_tree}, found {stamp_tree}")
+PY
+  then
     exit 0
   fi
 fi
-root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 ref=${PYDSEAMSLIB_REF:-main}
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -31,3 +55,17 @@ for wrap in "$root"/subprojects/*.wrap; do
 done
 cp -R "$root/subprojects/packagefiles/." "$work/PydSEAMSlib/subprojects/packagefiles/"
 python -m pip install "$@" "$work/PydSEAMSlib"
+SEAMS_ROOT="$root" SEAMS_TREE="$tree" python - <<'PY'
+import json
+import os
+from pathlib import Path
+
+import pydseams
+
+stamp = Path(pydseams.__file__).resolve().parent / ".seams-core-build.json"
+stamp.write_text(
+    json.dumps({"root": os.environ["SEAMS_ROOT"], "tree": os.environ["SEAMS_TREE"]}, sort_keys=True)
+    + "\n",
+    encoding="utf-8",
+)
+PY
