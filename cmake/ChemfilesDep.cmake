@@ -15,12 +15,13 @@
 # plugin that reads atoms and fixes the Molfile<F> crashes those plugins hit.
 # cmake/patches/chemfiles-0.10.4-external-sources.sh then repacks the
 # bundled archives: molfiles.tar.gz with the QM fields, the two log
-# plugins and the hostile-file fixes (molfile-sources.patch), tng.tar.gz
-# and mmtf-cpp.tar.gz with their hostile-file fixes (tng-sources.patch,
-# mmtf-sources.patch). cmake/patches/chemfiles-0.10.4-hostile.patch
-# stops malformed files from crashing or hanging the native readers
-# (mmCIF, LAMMPS Data, XDR/XTC/TRR, TPR, DCD, Amber NetCDF, CSSR, GRO,
-# SMI) and the shared text and binary file layers.
+# plugins and the hostile-file fixes (molfile-sources.patch), and
+# tng.tar.gz, mmtf-cpp.tar.gz and gemmi.tar.gz with their hostile-file
+# fixes (tng-sources.patch, mmtf-sources.patch, gemmi-sources.patch).
+# cmake/patches/chemfiles-0.10.4-hostile.patch stops malformed files
+# from crashing, leaking or hanging the native readers (PDB, MMTF, TNG,
+# mmCIF, LAMMPS Data, MOL2, XDR/XTC/TRR, TPR, DCD, Amber NetCDF, CSSR,
+# SDF, GRO, SMI) and the shared text and binary file layers.
 # SEAMS_CHEMFILES_FORCE_VENDORED skips the installed copy. The Meson
 # fallback sets it after its own probe has already rejected the system
 # library, so this file does not probe twice and does not import the

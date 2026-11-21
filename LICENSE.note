@@ -56,6 +56,9 @@ fmt
   Text: fmt/LICENSE.rst
 gemmi (headers; chemfiles' CIF and mmCIF readers include them)
   License: MPL-2.0, https://mozilla.org/MPL/2.0/
+  cmake/patches/chemfiles-0.10.4-gemmi-sources.patch checks signed integer
+    overflow in gemmi/include/gemmi/atox.hpp and gemmi/include/gemmi/numb.hpp;
+    the modified headers stay under MPL-2.0.
   gemmi/include/gemmi/third_party/tao (PEGTL): MIT, text in
     gemmi/include/gemmi/third_party/tao/LICENSE
 lzma (liblzma)
@@ -65,8 +68,8 @@ mmtf-cpp (headers)
   License: MIT
   Text: mmtf-cpp/LICENSE
   cmake/patches/chemfiles-0.10.4-mmtf-sources.patch checks the binary
-    decoder's lengths and integer arithmetic, and the length of a
-    transform matrix.
+    decoder's lengths and integer arithmetic, the length of a transform
+    matrix, and the chainsPerModel/groupsPerChain totals in structure_data.hpp.
   mmtf-cpp/msgpack-c: BSL-1.0, with its copies of Boost.Preprocessor and
     Boost.Predef, also BSL-1.0 (text at the end of this file). The same
     patch changes msgpack/v1/adaptor/carray.hpp, which converted an empty
@@ -115,8 +118,11 @@ tng (TNG trajectory library)
   License: BSD-3-Clause, except the files below
   Text: tng/COPYING
   cmake/patches/chemfiles-0.10.4-tng-sources.patch checks the block,
-    molecule, mapping and data sizes read from the file in
-    tng/src/lib/tng_io.c, and the particles each frame set has values for.
+    molecule, mapping, navigation, compression and data sizes read from the
+    file in tng/src/lib/tng_io.c, tng/src/compression/coder.c and
+    tng/src/compression/tng_compress.c, bounds allocations against the file
+    size, frees temporary blocks on error paths, and checks the particles
+    each frame set has values for.
   tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
     Aladdin Enterprises, text in each file header
 toml11 (headers)
