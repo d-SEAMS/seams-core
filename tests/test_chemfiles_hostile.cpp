@@ -342,6 +342,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_block_leak.tng", "TNG", kTngErr},
            // VTF atom id 4294967295 does not fit in the signed index
            Refused{"fuzz_vtf_huge_aid.vtf", "VTF structure format", "could not open"},
+           // A declared id whose atom table would exceed 4 GiB
+           Refused{"fuzz_vtf_atom_4gib.vtf", "VTF trajectory format", "could not open"},
            // binpos atom count would allocate about 8 GB; the file is shorter
            Refused{"fuzz_binpos_8gb_alloc.binpos", "Scripps Binpos", "could not open"},
            // XTC2 packed stream writes past the output or indexes magic_bits

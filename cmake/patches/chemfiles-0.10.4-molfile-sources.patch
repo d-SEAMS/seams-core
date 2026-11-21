@@ -7022,8 +7022,14 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
 +static int vtf_create_atoms_as_needed(unsigned int max_aid, vtf_data *d) {
    /* create new atoms as needed */
 -  if (d->natoms < max_aid+1) {
++  /* The id is the one the file declared. It has to fit in the signed
++     index, the product has to fit in size_t, and the table has to be a
++     single block of at most 4 GiB. A million-atom range is far smaller.
++     A larger table is refused before realloc, which would abort under
++     the allocator's size limit instead of returning NULL. */
 +  if (max_aid >= (unsigned int)INT_MAX
-+      || (size_t)max_aid + 1u > (size_t)-1 / sizeof(molfile_atom_t)) {
++      || (size_t)max_aid + 1u > (size_t)-1 / sizeof(molfile_atom_t)
++      || (size_t)max_aid + 1u > ((size_t)4096 << 20) / sizeof(molfile_atom_t)) {
 +    vtf_error("atom id does not fit", "");
 +    return -1;
 +  }
