@@ -11,10 +11,21 @@
 // It then counts the steps of a MOL2 molecule with an empty counts line.
 // 0.10.4 indexes the empty split and segfaults, so the probe dies; a
 // patched reader throws a format error, which passes.
+//
+// Last, it reads a LAMMPS Data file whose header holds a line that is
+// neither a keyword nor a section name. 0.10.4 guards that with an assert,
+// which a release build compiles out, and then spins in unreachable().
+// A patched reader throws a format error. An alarm turns the spin into a
+// signal death, so the probe fails instead of hanging the configure step.
+// Windows has no alarm and skips this step.
 #include <chemfiles.hpp>
 
 #include <cmath>
 #include <iostream>
+
+#if !defined(_WIN32)
+#include <unistd.h>
+#endif
 
 #ifndef SEAMS_MMCIF_PROBE
 #define SEAMS_MMCIF_PROBE ""
@@ -58,5 +69,17 @@ int main(int argc, char **argv) {
     (void)truncated.nsteps();
   } catch (const std::exception &) {
   }
+#if !defined(_WIN32)
+  static const char lammps[] =
+      "bad header\n\n1 atoms\n0.0 0.0 0.0 abc origin\n\nAtoms\n\n";
+  alarm(20);
+  try {
+    auto bad = chemfiles::Trajectory::memory_reader(lammps, sizeof lammps - 1,
+                                                    "LAMMPS Data");
+    (void)bad.read();
+  } catch (const std::exception &) {
+  }
+  alarm(0);
+#endif
   return 0;
 }

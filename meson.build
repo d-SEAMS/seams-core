@@ -439,10 +439,10 @@ else
       fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
       args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'],
       dependencies: chemfiles_dep,
-      name: 'chemfiles reads an mmCIF atom with no residue id and a truncated MOL2')
+      name: 'chemfiles reads an mmCIF atom with no residue id, a truncated MOL2 and a bad LAMMPS Data header')
     _chemfiles_system_ok = _mmcif_run.compiled() and _mmcif_run.returncode() == 0
     if not _chemfiles_system_ok
-      message('system chemfiles fails the mmCIF or MOL2 probe; building patched 0.10.4')
+      message('system chemfiles fails the mmCIF, MOL2 or LAMMPS Data probe; building patched 0.10.4')
       # dependency() has no way to drop a found library. This name is
       # not a package. It clears the rejected system copy so the fetch
       # below is the one that gets linked.
@@ -457,7 +457,7 @@ else
     # runs only on a fetch.
     _chem_patch_ids = []
     foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
-                      'patches/chemfiles-0.10.4-frame-visit.patch',
+                      'patches/chemfiles-0.10.4-frame-visit.patch', 'patches/chemfiles-0.10.4-lammpsdata-section.patch',
                       'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                       'CMakeLists.txt', 'ChemfilesDep.cmake']
       _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]
