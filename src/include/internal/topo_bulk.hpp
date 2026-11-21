@@ -90,7 +90,8 @@ struct RingSearchIndex {
     return ringOff.empty() ? 0 : static_cast<int>(ringOff.size()) - 1;
   }
   std::vector<int> atomRank;
-  //! Integer minimum-image winding of each ring. Empty if no box was supplied.
+  //! Summed minimum-image bond lattice images of each ring, the negative of
+  //! ringWindings. Empty if no box was supplied.
   std::vector<std::array<int, 3>> ringShift;
 };
 
@@ -112,9 +113,10 @@ buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms,
 [[nodiscard]] std::vector<int>
 positionRank(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
-//! Integer lattice winding of every ring. Component k is the sum of the
-//! minimum-image lattice shifts around the cycle along periodic cell axis k.
-//! A contractible ring has {0, 0, 0}. Throws std::invalid_argument when a
+//! Oriented integer winding of every ring. Component k is the sum of the
+//! minimum-image bond steps, traversed in ring order, in units of periodic
+//! cell vector k: a ring that crosses the cell once along +x is +1 on axis
+//! 0. A contractible ring has {0, 0, 0}. Throws std::invalid_argument when a
 //! vertex is outside the cloud. A cloud without a valid box returns zeros.
 [[nodiscard]] std::vector<std::array<int, 3>> ringWindings(
     const std::vector<std::vector<int>> &rings,

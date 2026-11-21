@@ -149,8 +149,11 @@ The stable C entry is ~seams_rings_from_csr~.  The existing
 The language ABI used by Python is ~seams_graph_rings~; its first call with
 null packed-row buffers queries their lengths.
 
-When geometry accompanies the graph, ~ring::ringWindings~ sums the integer
-minimum-image lattice shift around each cycle.  ~seams_rings_winding~ and
+When geometry accompanies the graph, ~ring::ringWindings~ sums the
+minimum-image bond steps around each cycle in its listed vertex order and
+expresses the total in cell vectors.  The result is the oriented integer
+winding: a ring that crosses the cell once along \(+x\) is \(+1\) on axis 0,
+and the reverse traversal is \(-1\).  ~seams_rings_winding~ and
 ~seams_frame_ring_winding~ report the signed component along a selected pore
 axis.  A ring is contractible only when all three components are zero.  Thus
 an axis winding of zero does not by itself imply contractibility.

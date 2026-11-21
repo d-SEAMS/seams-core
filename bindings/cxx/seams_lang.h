@@ -129,8 +129,10 @@ int seams_graph_rings(const int *offsets, int n_offsets, const int *columns,
                       int ring_offsets_cap, int *vertices, int vertices_cap,
                       int *n_rings, int *n_vertices);
 
-/** Signed periodic winding along axis and whole-cycle contractibility for
- * packed rings returned by seams_graph_rings. @ingroup lang_rings */
+/** Oriented periodic winding along axis and whole-cycle contractibility for
+ * packed rings returned by seams_graph_rings. The winding sums the
+ * minimum-image bond steps in packed vertex order, in cell vectors: one
+ * crossing along +x is +1 on axis 0. @ingroup lang_rings */
 int seams_frame_ring_winding(const seams_frame *frame,
                              const int *ring_offsets, int n_rings,
                              const int *vertices, int n_vertices, int axis,

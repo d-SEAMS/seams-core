@@ -8,6 +8,7 @@ import os
 import random
 import statistics
 
+import pytest
 
 lib = ctypes.CDLL(os.environ["SEAMS_LANG_LIB"])
 c_int_p = ctypes.POINTER(ctypes.c_int)
@@ -145,30 +146,45 @@ def test_explicit_graph_ring_histogram() -> None:
     assert histogram[6] == 1
 
 
-def test_periodic_axis_winding() -> None:
+WINDING_CASES = [
+    # A triangle at 1, 4, 7 in a cell of 9 steps +3 three times: one +L.
+    ("+x", [1, 4, 4, 4, 4, 4, 7, 4, 4], [1, 0, 0], 0),
+    ("-x", [7, 4, 4, 4, 4, 4, 1, 4, 4], [-1, 0, 0], 0),
+    ("+y", [4, 1, 4, 4, 4, 4, 4, 7, 4], [0, 1, 0], 0),
+    ("contractible", [2, 4, 4, 4, 4, 4, 3, 4, 4], [0, 0, 0], 1),
+]
+
+
+@pytest.mark.parametrize(
+    "xyz, expected, expected_contractible",
+    [case[1:] for case in WINDING_CASES],
+    ids=[case[0] for case in WINDING_CASES],
+)
+def test_periodic_axis_winding(
+    xyz: list[float], expected: list[int], expected_contractible: int
+) -> None:
     rings, _ = rings_from_csr([0, 1, 2, 3], [1, 2, 0], 3)
-    frame = make_frame(
-        [1, 4, 4, 4, 4, 4, 7, 4, 4],
-        [0, 0, 0, 9, 9, 9, 0, 0, 0],
-    )
+    assert rings == [[0, 1, 2]]
+    frame = make_frame(xyz, [0, 0, 0, 9, 9, 9, 0, 0, 0])
     try:
         packed = ints(rings[0])
         offsets = ints([0, len(rings[0])])
-        winding = (ctypes.c_int * 1)()
-        contractible = (ctypes.c_int * 1)()
-        rc = lib.seams_frame_ring_winding(
-            frame,
-            offsets,
-            1,
-            packed,
-            len(packed),
-            0,
-            winding,
-            contractible,
-        )
-        assert rc == 0
-        assert winding[0] != 0
-        assert contractible[0] == 0
+        for axis in range(3):
+            winding = (ctypes.c_int * 1)(99)
+            contractible = (ctypes.c_int * 1)(99)
+            rc = lib.seams_frame_ring_winding(
+                frame,
+                offsets,
+                1,
+                packed,
+                len(packed),
+                axis,
+                winding,
+                contractible,
+            )
+            assert rc == 0
+            assert winding[0] == expected[axis]
+            assert contractible[0] == expected_contractible
     finally:
         lib.seams_frame_free(frame)
 

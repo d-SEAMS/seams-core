@@ -407,7 +407,7 @@ int main(int argc, char **argv) {
   }
   seams_frame_free(analytic);
 
-  const double windingXyz[9] = {1, 4, 4, 4, 4, 4, 7, 4, 4};
+  // A triangle at 1, 4, 7 in a cell of 9 steps +3 three times: one +L.
   const double windingBox[9] = {0, 0, 0, 9, 9, 9, 0, 0, 0};
   const int triangleOff[4] = {0, 1, 2, 3};
   const int triangleCol[3] = {1, 2, 0};
@@ -416,23 +416,43 @@ int main(int argc, char **argv) {
   int triangleVertices[3] = {};
   int triangleRings = 0;
   int triangleVertexCount = 0;
-  analytic =
-      seams_frame_from_arrays(windingXyz, 3, windingBox, nullptr, nullptr);
-  if (analytic == nullptr ||
-      seams_graph_rings(triangleOff, 4, triangleCol, 3, 3, triangleHist,
-                        4, trianglePackedOff, 2, triangleVertices, 3,
-                        &triangleRings, &triangleVertexCount) != 0) {
+  if (seams_graph_rings(triangleOff, 4, triangleCol, 3, 3, triangleHist, 4,
+                        trianglePackedOff, 2, triangleVertices, 3,
+                        &triangleRings, &triangleVertexCount) != 0 ||
+      triangleRings != 1 || triangleVertices[0] != 0 ||
+      triangleVertices[1] != 1 || triangleVertices[2] != 2) {
     return fail("language winding ring");
   }
-  int axisWinding[1] = {};
-  int isContractible[1] = {1};
-  if (seams_frame_ring_winding(analytic, trianglePackedOff, triangleRings,
-                               triangleVertices, triangleVertexCount, 0,
-                               axisWinding, isContractible) != 0 ||
-      axisWinding[0] == 0 || isContractible[0] != 0) {
-    return fail("language ring winding");
+  struct WindingCase {
+    double xyz[9];
+    int winding[3];
+    int contractible;
+  };
+  const WindingCase windingCases[4] = {
+      {{1, 4, 4, 4, 4, 4, 7, 4, 4}, {1, 0, 0}, 0},
+      {{7, 4, 4, 4, 4, 4, 1, 4, 4}, {-1, 0, 0}, 0},
+      {{4, 1, 4, 4, 4, 4, 4, 7, 4}, {0, 1, 0}, 0},
+      {{2, 4, 4, 4, 4, 4, 3, 4, 4}, {0, 0, 0}, 1},
+  };
+  for (const auto &windingCase : windingCases) {
+    analytic = seams_frame_from_arrays(windingCase.xyz, 3, windingBox,
+                                       nullptr, nullptr);
+    if (analytic == nullptr) {
+      return fail("language winding frame");
+    }
+    for (int axis = 0; axis < 3; ++axis) {
+      int axisWinding[1] = {99};
+      int isContractible[1] = {99};
+      if (seams_frame_ring_winding(analytic, trianglePackedOff, triangleRings,
+                                   triangleVertices, triangleVertexCount,
+                                   axis, axisWinding, isContractible) != 0 ||
+          axisWinding[0] != windingCase.winding[axis] ||
+          isContractible[0] != windingCase.contractible) {
+        return fail("language ring winding");
+      }
+    }
+    seams_frame_free(analytic);
   }
-  seams_frame_free(analytic);
 
   if (seams_frame_prisms(nullptr, 3.5, 2, 6, nullptr, nullptr, nullptr) == 0) {
     return fail("null prisms");

@@ -1711,8 +1711,14 @@ ring::RingSearchIndex ring::buildRingSearchIndex(
       ring::buildRingSearchIndex(rings, static_cast<int>(yCloud.pts.size()));
   // The claim key is the ring's atoms and its unwrapped shift, not the
   // absolute position. positionRank stays available for callers that want
-  // the coordinate order; it is not the cage order.
+  // the coordinate order; it is not the cage order. The cage order keys on
+  // the summed bond images, the negative of the winding.
   index.ringShift = ring::ringWindings(rings, yCloud);
+  for (auto &shift : index.ringShift) {
+    for (int &component : shift) {
+      component = -component;
+    }
+  }
   return index;
 }
 
@@ -1761,8 +1767,9 @@ namespace {
 
 // Lattice image of the minimum-image step from a to b. The same wrap as
 // gen::fracDelta: orthorhombic axes use floor(d/L + 1/2), a tilt box wraps
-// the fractional coordinates with round. Summed around a cycle the images
-// are the winding. A contractible ring sums to zero.
+// the fractional coordinates with round. The step is the raw difference
+// minus this image, and the raw differences cancel around a cycle, so the
+// images sum to minus the winding. A contractible ring sums to zero.
 std::array<int, 3> bondImage(const gen::FracBox &box, double ax, double ay,
                              double az, double bx, double by, double bz) {
   if (!box.triclinic) {
@@ -1814,7 +1821,7 @@ std::vector<std::array<int, 3>> ring::ringWindings(
           yCloud.pts[static_cast<std::size_t>(cycle[(i + 1) % cycle.size()])];
       const auto image = bondImage(box, a.x, a.y, a.z, b.x, b.y, b.z);
       for (std::size_t axis = 0; axis < 3; ++axis) {
-        sum[axis] += image[axis];
+        sum[axis] -= image[axis];
       }
     }
   }

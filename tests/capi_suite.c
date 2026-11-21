@@ -978,32 +978,58 @@ static void analytic_topology_and_order(void) {
   }
   seams_system_destroy(sys);
 
-  sys = seams_system_create();
+  /* A triangle at 1, 4, 7 in a cell of 9 steps +3 three times: one +L. */
   const double periodic_box[9] = {0, 0, 0, 9, 9, 9, 0, 0, 0};
-  const double winding_xyz[9] = {1, 4, 4, 4, 4, 4, 7, 4, 4};
+  const struct {
+    const char *name;
+    double xyz[9];
+    int winding[3];
+    int contractible;
+  } windings[4] = {
+      {"+x", {1, 4, 4, 4, 4, 4, 7, 4, 4}, {1, 0, 0}, 0},
+      {"-x", {7, 4, 4, 4, 4, 4, 1, 4, 4}, {-1, 0, 0}, 0},
+      {"+y", {4, 1, 4, 4, 4, 4, 4, 7, 4}, {0, 1, 0}, 0},
+      {"contractible", {2, 4, 4, 4, 4, 4, 3, 4, 4}, {0, 0, 0}, 1},
+  };
   const int offsets[4] = {0, 1, 2, 3};
   const int columns[3] = {1, 2, 0};
-  seams_rings *rings = NULL;
-  if (sys == NULL ||
-      seams_system_set_atoms(sys, winding_xyz, 3, periodic_box, 9, NULL,
-                             NULL) != SEAMS_OK ||
-      seams_rings_from_csr(offsets, 4, columns, 3, 3, sys, &rings) !=
-          SEAMS_OK) {
-    fault("explicit graph rings");
-  } else {
-    int histogram[4] = {0};
-    int winding[1] = {0};
-    int contractible[1] = {1};
-    if (seams_rings_histogram_n(rings, histogram, 4) != SEAMS_OK ||
-        histogram[3] != 1 ||
-        seams_rings_winding(rings, 0, winding, 1, contractible, 1) !=
-            SEAMS_OK ||
-        winding[0] == 0 || contractible[0] != 0) {
-      fault("periodic graph winding");
+  for (int c = 0; c < 4; ++c) {
+    sys = seams_system_create();
+    seams_rings *rings = NULL;
+    if (sys == NULL ||
+        seams_system_set_atoms(sys, windings[c].xyz, 3, periodic_box, 9,
+                               NULL, NULL) != SEAMS_OK ||
+        seams_rings_from_csr(offsets, 4, columns, 3, 3, sys, &rings) !=
+            SEAMS_OK) {
+      fault("explicit graph rings");
+    } else {
+      int histogram[4] = {0};
+      int vertices[3] = {0};
+      size_t n_vertices = 0;
+      if (seams_rings_histogram_n(rings, histogram, 4) != SEAMS_OK ||
+          histogram[3] != 1 ||
+          seams_rings_vertices(rings, 0, vertices, 3, &n_vertices) !=
+              SEAMS_OK ||
+          n_vertices != 3 || vertices[0] != 0 || vertices[1] != 1 ||
+          vertices[2] != 2) {
+        fault("explicit graph ring order");
+      }
+      for (int axis = 0; axis < 3; ++axis) {
+        int winding[1] = {99};
+        int contractible[1] = {99};
+        if (seams_rings_winding(rings, axis, winding, 1, contractible, 1) !=
+                SEAMS_OK ||
+            winding[0] != windings[c].winding[axis] ||
+            contractible[0] != windings[c].contractible) {
+          fprintf(stderr, "winding %s axis %d: %d contractible %d\n",
+                  windings[c].name, axis, winding[0], contractible[0]);
+          fault("periodic graph winding");
+        }
+      }
     }
+    seams_rings_destroy(rings);
+    seams_system_destroy(sys);
   }
-  seams_rings_destroy(rings);
-  seams_system_destroy(sys);
 }
 
 int main(int argc, char **argv) {

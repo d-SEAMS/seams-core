@@ -1277,9 +1277,12 @@ SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index,
 /**
  * @brief Periodic-axis winding and contractibility of every ring.
  *
- * axis_winding receives the signed integer lattice winding along axis
- * (0, 1, or 2). contractible receives 1 exactly when all three winding
- * components are zero. Either output may be NULL, but not both. Geometry must
+ * axis_winding receives the oriented integer winding along axis (0, 1, or
+ * 2): the minimum-image bond steps summed in the order seams_rings_vertices()
+ * lists the ring, in units of that cell vector. A ring that crosses the cell
+ * once along +x is +1 on axis 0; the reverse traversal is -1. contractible
+ * receives 1 exactly when all three winding components are zero. Either
+ * output may be NULL, but not both. Geometry must
  * have been supplied to seams_rings_from_csr(), or carried by
  * seams_rings_find().
  * @param rings Ring handle.

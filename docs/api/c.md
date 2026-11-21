@@ -5628,7 +5628,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Periodic-axis winding and contractibility of every ring.
 
-axis_winding receives the signed integer lattice winding along axis (0, 1, or 2). contractible receives 1 exactly when all three winding components are zero. Either output may be NULL, but not both. Geometry must have been supplied to seams_rings_from_csr(), or carried by seams_rings_find().
+axis_winding receives the oriented integer winding along axis (0, 1, or 2): the minimum-image bond steps summed in the order seams_rings_vertices() lists the ring, in units of that cell vector. A ring that crosses the cell once along +x is +1 on axis 0; the reverse traversal is -1. contractible receives 1 exactly when all three winding components are zero. Either output may be NULL, but not both. Geometry must have been supplied to seams_rings_from_csr(), or carried by seams_rings_find().
 
 ```c
 seams_status seams_rings_winding( const seams_rings *rings, int axis, int *axis_winding, size_t axis_winding_len, int *contractible, size_t contractible_len);
