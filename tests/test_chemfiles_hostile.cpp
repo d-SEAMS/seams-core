@@ -311,6 +311,18 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            // Amber NetCDF file declaring 536M atoms with neither coordinates nor velocities
            Refused{"fuzz_ncrst_huge_atoms.ncrst", "Amber Restart",
                    "neither coordinates nor velocities"},
+           // CONECT line with no atom id passed empty string_view to decode_hybrid36
+           Refused{"fuzz_pdb_short_conect.pdb", "PDB", "could not read atomic number"},
+           // GAMESS basis set hitting EOF before TOTAL NUMBER leaked basis_set shells
+           Refused{"fuzz_gamess_basis_leak.gms", "GAMESS", "could not open"},
+           // TNG frame set with overflowing first_frame + n_frames
+           Refused{"fuzz_tng_frameset_overflow.tng", "TNG", kTngErr},
+           // XTC compressed coordinate thiscoord + minint overflowed int32_t
+           Refused{"fuzz_xtc_minint_overflow.xtc", "XTC",
+                   "integer overflow during decompression"},
+           // LAMMPS Data Velocities section with out-of-range atom index
+           Refused{"fuzz_lammpsdata_vel_oob.lmp", "LAMMPS Data",
+                   "invalid atom index 2147483647"},
        }) {
     requireRefused(item);
   }
@@ -361,6 +373,12 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   REQUIRE(lmp.error.empty());
   REQUIRE(lmp.steps == 1);
   REQUIRE(lmp.natoms == 1);
+
+  // A PDB HELIX record with helix type 0 must not underflow HELIX_TYPES[type - 1].
+  const auto pdbHelix = readAll("hostile/fuzz_pdb_helix_zero.pdb", "PDB");
+  REQUIRE(pdbHelix.error.empty());
+  REQUIRE(pdbHelix.steps == 1);
+  REQUIRE(pdbHelix.natoms == 1);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",
