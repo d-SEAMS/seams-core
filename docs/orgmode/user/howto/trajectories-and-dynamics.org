@@ -105,6 +105,22 @@ All three correlation accumulators keep a ring buffer of ~max_lag + 1~ frames
   together with trapezoidal integral and single-exponential relaxation times
   \(\tau_1\) and \(\tau_2\).
 
+Coordinates are in Angstrom and ~dt~ is the time between saved frames in
+whatever unit the caller picks. MSD values are then in \(\text{Å}^2\), lag
+times in that unit, and diffusion coefficients in \(\text{Å}^2\) per that unit.
+With ~dt~ in ps, ~DiffusionFit.d_total_cm2_s~ converts \(\text{Å}^2/\text{ps}\)
+to \(\text{cm}^2/\text{s}\). Lifetimes and relaxation times are in the unit of
+~dt~.
+
+~TrajectorySequence~ matches atoms across frames by atom ID, because a LAMMPS
+dump may list atoms in a different order each frame. ~unwrap_positions~,
+~unwrap_centres~, and ~msd~ return rows in the first frame's atom order, and
+when molecule IDs come from the file the molecule-level paths require each atom
+to keep its first-frame molecule. ~reorientation~ computes each frame's vectors
+in the first frame's atom order and matches them by molecule ID. Arrays passed in
+directly, such as ~reorientation(vectors=...)~ or ~reorientation_tcf~, are
+taken row for row as the same particles in every frame.
+
 #+begin_src python
 >>> import pydseams
 >>> acc = pydseams.HbondLifetimeAccumulator(max_lag=4, origin_stride=1, dt=1.0)
