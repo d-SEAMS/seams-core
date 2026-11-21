@@ -2333,32 +2333,41 @@ endif
 # alone once every earlier test has finished, in descending priority, so the
 # snapshot runs before every other test and the check after them all. Each
 # meson test process keeps its own snapshot in the state directory, because
-# several runs may share this build directory. meson test -C takes the top
-# build directory, which is not this project's when seams-core is a subproject.
+# several runs may share this build directory. A subproject does not register
+# these four: a consumer's meson test would otherwise run them, and
+# source_tree_untracked_parallel drives meson test -C on a build directory.
 if get_option('with_tests')
-  _git = find_program('git', required: true)
   _untracked_py = find_program('python3', required: true)
-  _untracked_state = meson.project_build_root() / 'source-tree-untracked'
-  foreach _mode : [['snapshot', 100000], ['check', -100000]]
-    test('source_tree_untracked_' + _mode[0], _untracked_py,
-      args: [meson.project_source_root() / 'tests' / 'source_tree_untracked.py',
-        _mode[0], _git.full_path(), meson.project_source_root(), _untracked_state],
-      priority: _mode[1],
-      is_parallel: false,
+  _untracked_meson = find_program('meson')
+  if not meson.is_subproject()
+    _git = find_program('git', required: true)
+    _untracked_state = meson.project_build_root() / 'source-tree-untracked'
+    foreach _mode : [['snapshot', 100000], ['check', -100000]]
+      test('source_tree_untracked_' + _mode[0], _untracked_py,
+        args: [meson.project_source_root() / 'tests' / 'source_tree_untracked.py',
+          _mode[0], _git.full_path(), meson.project_source_root(), _untracked_state],
+        priority: _mode[1],
+        is_parallel: false,
+        timeout: 60)
+    endforeach
+    test('source_tree_untracked_selftest', _untracked_py,
+      args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_selftest.py', _git.full_path()],
       timeout: 60)
-  endforeach
-  test('source_tree_untracked_selftest', _untracked_py,
-    args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_selftest.py', _git.full_path()],
-    timeout: 60)
-  test('source_tree_untracked_parallel', _untracked_py,
-    args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_parallel.py',
-      find_program('meson').full_path(), meson.project_source_root(), meson.global_build_root(),
-      meson.project_name()],
-    is_parallel: false,
-    timeout: 300)
+    test('source_tree_untracked_parallel', _untracked_py,
+      args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_parallel.py',
+        _untracked_meson.full_path(), meson.project_source_root(), meson.global_build_root(),
+        meson.project_name()],
+      is_parallel: false,
+      timeout: 300)
+    test('source_tree_untracked_not_in_subproject', _untracked_py,
+      args: [meson.project_source_root() / 'tests' / 'subproject_consumer.py', 'source-tree-hidden',
+        _untracked_meson.full_path(), meson.project_source_root(), meson.global_build_root(),
+        '', meson.current_build_dir() / 'source-tree-hidden'],
+      timeout: 600)
+  endif
   test('with_tests_false_registers_none', _untracked_py,
     args: [meson.project_source_root() / 'tests' / 'subproject_consumer.py', 'with-tests-false',
-      find_program('meson').full_path(), meson.project_source_root(), meson.global_build_root(),
+      _untracked_meson.full_path(), meson.project_source_root(), meson.global_build_root(),
       '', meson.current_build_dir() / 'with-tests-false'],
     timeout: 600)
 endif

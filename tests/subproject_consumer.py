@@ -9,6 +9,9 @@ WORK_DIR is removed first and afterwards.
 MODE with-tests-false: -Dseams-core:with_tests=false must register no test,
 because a consumer runs every test its subprojects register.
 
+MODE source-tree-hidden: -Dseams-core:with_tests=true must not register the
+four source_tree_untracked_* tests. Those belong to a top-level build only.
+
 MODE build-dirs: with -Dseams-core:with_tests=true, the scripts that take
 seams-core's build directory (option_names.py, check_no_rebuild.py and the
 examples/c/check_installed.py helpers) must find the parent build directory
@@ -65,11 +68,39 @@ def helpers(source: Path):
     return module
 
 
-def with_tests_false(meson: str, build: Path) -> list[str]:
+_SOURCE_TREE_TESTS = (
+    "source_tree_untracked_snapshot",
+    "source_tree_untracked_check",
+    "source_tree_untracked_selftest",
+    "source_tree_untracked_parallel",
+)
+
+
+def listed_tests(meson: str, build: Path) -> tuple[list[str], list[dict]]:
     listed = run([meson, "introspect", "--tests", build])
     if listed.returncode != 0:
-        return [listed.stdout + listed.stderr + "meson introspect --tests failed"]
-    return [f"registered with -Dseams-core:with_tests=false: {t['name']}" for t in json.loads(listed.stdout)]
+        return [listed.stdout + listed.stderr + "meson introspect --tests failed"], []
+    return [], json.loads(listed.stdout)
+
+
+def with_tests_false(meson: str, build: Path) -> list[str]:
+    errors, tests = listed_tests(meson, build)
+    if errors:
+        return errors
+    return [f"registered with -Dseams-core:with_tests=false: {t['name']}" for t in tests]
+
+
+def source_tree_hidden(meson: str, build: Path) -> list[str]:
+    errors, tests = listed_tests(meson, build)
+    if errors:
+        return errors
+    names = [t["name"] for t in tests]
+    hidden = [name for name in names if any(name.endswith(stem) for stem in _SOURCE_TREE_TESTS)]
+    if hidden:
+        return [f"registered in a subproject: {name}" for name in hidden]
+    if not names:
+        return ["-Dseams-core:with_tests=true registered no tests"]
+    return []
 
 
 def build_dirs(meson: str, source: Path, seams: str, build: Path) -> list[str]:
@@ -102,7 +133,7 @@ def build_dirs(meson: str, source: Path, seams: str, build: Path) -> list[str]:
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 7 or argv[1] not in ("with-tests-false", "build-dirs"):
+    if len(argv) != 7 or argv[1] not in ("with-tests-false", "source-tree-hidden", "build-dirs"):
         print(__doc__, file=sys.stderr)
         return 2
     mode, meson = argv[1], argv[2]
@@ -119,6 +150,8 @@ def main(argv: list[str]) -> int:
             return 1
         if mode == "with-tests-false":
             errors = with_tests_false(meson, build)
+        elif mode == "source-tree-hidden":
+            errors = source_tree_hidden(meson, build)
         else:
             errors = build_dirs(meson, source, seams, build.resolve())
     finally:
@@ -129,6 +162,8 @@ def main(argv: list[str]) -> int:
         return 1
     if mode == "with-tests-false":
         print(f"-D{PROJECT}:with_tests=false registers no tests in a consumer")
+    elif mode == "source-tree-hidden":
+        print("a subproject with tests on does not register the source-tree checks")
     else:
         print("build-directory scripts find the parent build directory of a subproject")
     return 0
