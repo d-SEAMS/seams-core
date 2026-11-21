@@ -323,6 +323,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            // LAMMPS Data Velocities section with out-of-range atom index
            Refused{"fuzz_lammpsdata_vel_oob.lmp", "LAMMPS Data",
                    "invalid atom index 2147483647"},
+           // TNG compressed block claiming petabyte uncompressed_len before header check
+           Refused{"fuzz_tng_uncompress_size.tng", "TNG", kTngErr},
        }) {
     requireRefused(item);
   }
