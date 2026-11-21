@@ -62,6 +62,10 @@ namespace mic {
 namespace {
 
 constexpr double kIntegral = 4503599627370496.0;
+// Fractional residuals this close to an integer are the near-lattice case
+// (a lattice vector plus a small Cartesian offset). Random fractional wraps
+// fail the first axis. The length check, not this tolerance, is the certificate.
+constexpr double kSmithTol = 0.05;
 
 struct Vec3 {
   double x = 0.0;
@@ -189,6 +193,12 @@ struct Obtuse {
   // dot(rel_i, rel_j), so a binary64 slicer step can update every
   // projection with one subtraction instead of a fresh dot product.
   double gram[8][8]{};
+  // Precomputed per-box Voronoi certificate bounds for the final slicer
+  // projections t[0..6] after at most three wrap steps.
+  double tCut[8]{};
+  double tSlope[8]{};
+  double maxRelLo1 = 0.0;
+  double tRes = 0.0;
   // rel[m][k] + relLo[m][k] is the relevant vector to about eps^2.
   double relLo[3][8]{};
   // Voronoi test with rounding margins (see voronoiRoom).
@@ -226,6 +236,8 @@ struct Obtuse {
   // length of a lattice image that is still inside the open ball of radius
   // λ1/2. inv* = 1/edge, for the fractional residual.
   double smithLim2 = 0.0;
+  double smithZ0 = -1.0;
+  double smithZ1 = std::numeric_limits<double>::infinity();
   double invX = 0.0;
   double invY = 0.0;
   double invZ = 0.0;
@@ -647,6 +659,100 @@ inline bool relevantOf(Obtuse &o) {
           o.rel[0][i] * o.rel[0][j] + o.rel[1][i] * o.rel[1][j] + o.rel[2][i] * o.rel[2][j];
     }
   }
+  // Precompute rigorous per-box margins so a short wrap descent (<= 3 steps)
+  // can certify Voronoi interior directly from its final projections t[0..6].
+  {
+    constexpr long double kEpsD = std::numeric_limits<double>::epsilon();
+    constexpr long double kEpsL = std::numeric_limits<long double>::epsilon();
+    long double relTail[7]{};
+    long double relErrInf[7]{};
+    long double relL1[7]{};
+    long double relInf[7]{};
+    long double maxLo1 = 0.0L;
+    long double maxTail = 0.0L;
+    for (int k = 0; k < 7; k++) {
+      const long double termSum =
+          std::abs(static_cast<long double>(coef[k][0])) *
+              std::abs(static_cast<long double>(o.cellX[0])) +
+          std::abs(static_cast<long double>(coef[k][1])) *
+              (std::abs(static_cast<long double>(o.cellX[1])) +
+               std::abs(static_cast<long double>(o.cellY[1]))) +
+          std::abs(static_cast<long double>(coef[k][2])) *
+              (std::abs(static_cast<long double>(o.cellX[2])) +
+               std::abs(static_cast<long double>(o.cellY[2])) +
+               std::abs(static_cast<long double>(o.cellZ[2])));
+      relTail[k] = 64.0L * kEpsD * kEpsD * termSum + 0x1p-1000L;
+      maxTail = std::max(maxTail, relTail[k]);
+      long double loInf = 0.0L;
+      long double loL1 = 0.0L;
+      long double rInf = 0.0L;
+      long double l1 = 0.0L;
+      for (int m = 0; m < 3; m++) {
+        const long double rm = std::abs(static_cast<long double>(o.rel[m][k]));
+        const long double lm = std::abs(static_cast<long double>(o.relLo[m][k]));
+        rInf = std::max(rInf, rm);
+        loInf = std::max(loInf, lm);
+        loL1 += lm;
+        l1 += rm + lm;
+      }
+      relInf[k] = rInf;
+      relL1[k] = l1;
+      relErrInf[k] = loInf + relTail[k];
+      maxLo1 = std::max(maxLo1, loL1 + 3.0L * relTail[k]);
+    }
+    o.maxRelLo1 = std::isfinite(static_cast<double>(maxLo1))
+                      ? static_cast<double>(maxLo1)
+                      : std::numeric_limits<double>::infinity();
+    const long double resScaled = 32.0L * maxLo1 + 0x1p55L * maxTail;
+    o.tRes = std::isfinite(static_cast<double>(resScaled))
+                 ? static_cast<double>(resScaled)
+                 : std::numeric_limits<double>::infinity();
+    for (int k = 0; k < 7; k++) {
+      long double maxG = 0.0L;
+      long double maxGErr = 0.0L;
+      long double exactSelf = 0.0L;
+      long double absSelf = 0.0L;
+      for (int a = 0; a < 7; a++) {
+        long double exactG = 0.0L;
+        long double absG = 0.0L;
+        for (int m = 0; m < 3; m++) {
+          const long double ra =
+              static_cast<long double>(o.rel[m][a]) + static_cast<long double>(o.relLo[m][a]);
+          const long double rk =
+              static_cast<long double>(o.rel[m][k]) + static_cast<long double>(o.relLo[m][k]);
+          exactG += ra * rk;
+          absG += std::abs(ra * rk);
+        }
+        if (a == k) {
+          exactSelf = exactG;
+          absSelf = absG;
+        }
+        const long double gErr =
+            std::abs(static_cast<long double>(o.gram[a][k]) - exactG) +
+            16.0L * kEpsL * absG + relL1[a] * relTail[k] + relL1[k] * relTail[a] +
+            relTail[a] * relTail[k];
+        maxGErr = std::max(maxGErr, gErr);
+        maxG = std::max(maxG, std::abs(static_cast<long double>(o.gram[a][k])));
+      }
+      const long double halfExact =
+          0.5L * exactSelf -
+          (relL1[k] * relTail[k] + 0.5L * relTail[k] * relTail[k] + 8.0L * kEpsL * absSelf);
+      const long double baseCut = std::min(static_cast<long double>(o.cut[k]), halfExact);
+      const long double slope = 2.0L * (8.0L * kEpsD * relInf[k] + relErrInf[k]);
+      const long double cst = 2.0L * (3.0L * maxGErr + 8.0L * kEpsD * maxG) + 0x1p-1000L;
+      const double tc = static_cast<double>(baseCut - cst);
+      const double ts = static_cast<double>(slope);
+      if (std::isfinite(tc) && std::isfinite(ts)) {
+        o.tCut[k] = tc;
+        o.tSlope[k] = ts;
+      } else {
+        o.tCut[k] = -1.0;
+        o.tSlope[k] = 0.0;
+      }
+    }
+    o.tCut[7] = std::numeric_limits<double>::infinity();
+    o.tSlope[7] = 0.0;
+  }
   o.invX = 1.0 / o.cellX[0];
   o.invY = 1.0 / o.cellY[1];
   o.invZ = 1.0 / o.cellZ[2];
@@ -680,6 +786,9 @@ inline bool relevantOf(Obtuse &o) {
   if (minLower > 0.0 && std::isfinite(minLower)) {
     const double radius = 0.5 * minLower;
     o.smithLim2 = radius * radius * (1.0 - 0x1p-40);
+    const double lzAbs = std::abs(o.cellZ[2]);
+    o.smithZ0 = kSmithTol * lzAbs;
+    o.smithZ1 = (1.0 - kSmithTol) * lzAbs;
   }
   return true;
 }
@@ -834,9 +943,9 @@ constexpr int kFractionalSteps = 4;
 // many steps continues in extended precision.
 constexpr int kSlicerSteps = 16;
 
-template <bool Track = false, bool Record = false>
+template <bool Track = false, bool Record = false, bool OutT = false>
 inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n = nullptr,
-                       unsigned long long *path = nullptr);
+                       unsigned long long *path = nullptr, double *tOut = nullptr);
 
 inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[4][3]) {
   Obtuse o;
@@ -1270,63 +1379,91 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
 // With Track, the integer cell coordinates of each step are added to n.
 // With Record (cap at most 16), path gets 4 bits per step, the first step
 // highest: 2 * k + (sign < 0) for the relevant vector k taken.
-template <bool Track, bool Record>
+template <bool Track, bool Record, bool OutT>
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((optimize("O3,tree-vectorize")))
 #endif
-inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path) {
+inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path,
+                       double *tOut) {
   unsigned long long code = 0;
+  double xx = x.x;
+  double xy = x.y;
+  double xz = x.z;
   double t[8];
   for (int k = 0; k < 8; k++) {
-    t[k] = x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
+    t[k] = xx * s.rel[0][k] + xy * s.rel[1][k] + xz * s.rel[2][k];
   }
-  const auto larger = [](int i, double gi, int j, double gj) {
-    return gj > gi ? std::pair<int, double>{j, gj} : std::pair<int, double>{i, gi};
-  };
   for (int iter = 0; iter < cap; iter++) {
     double g[8];
     for (int k = 0; k < 8; k++) {
       g[k] = std::abs(t[k]) - s.halfN2[k];
     }
-    const auto p01 = larger(0, g[0], 1, g[1]);
-    const auto p23 = larger(2, g[2], 3, g[3]);
-    const auto p45 = larger(4, g[4], 5, g[5]);
-    const auto p03 = larger(p01.first, p01.second, p23.first, p23.second);
-    const auto p46 = larger(p45.first, p45.second, 6, g[6]);
-    const auto best = larger(p03.first, p03.second, p46.first, p46.second);
-    if (!(best.second > 0.0)) {
+    const bool c01 = g[1] > g[0];
+    const double m01 = c01 ? g[1] : g[0];
+    const int i01 = c01 ? 1 : 0;
+    const bool c23 = g[3] > g[2];
+    const double m23 = c23 ? g[3] : g[2];
+    const int i23 = c23 ? 3 : 2;
+    const bool c45 = g[5] > g[4];
+    const double m45 = c45 ? g[5] : g[4];
+    const int i45 = c45 ? 5 : 4;
+    const bool c03 = m23 > m01;
+    const double m03 = c03 ? m23 : m01;
+    const int i03 = c03 ? i23 : i01;
+    const bool c46 = g[6] > m45;
+    const double m46 = c46 ? g[6] : m45;
+    const int i46 = c46 ? 6 : i45;
+    const bool c06 = m46 > m03;
+    const double bestG = c06 ? m46 : m03;
+    const int at = c06 ? i46 : i03;
+    if (!(bestG > 0.0)) {
+      x = {xx, xy, xz};
       if constexpr (Record) {
         *path = code;
       }
+      if constexpr (OutT) {
+        for (int k = 0; k < 8; k++) {
+          tOut[k] = t[k];
+        }
+      }
       return iter;
     }
-    const int at = best.first;
-    const double f = t[at] > 0.0 ? 1.0 : -1.0;
+    const bool pos = t[at] > 0.0;
+    const double f = pos ? 1.0 : -1.0;
     if constexpr (Record) {
-      code = (code << 4) | static_cast<unsigned long long>(2 * at + (t[at] > 0.0 ? 0 : 1));
+      code = (code << 4) | static_cast<unsigned long long>(2 * at + (pos ? 0 : 1));
     }
-    x.x -= f * s.rel[0][at];
-    x.y -= f * s.rel[1][at];
-    x.z -= f * s.rel[2][at];
+    xx -= f * s.rel[0][at];
+    xy -= f * s.rel[1][at];
+    xz -= f * s.rel[2][at];
     if constexpr (Track) {
       for (int m = 0; m < 3; m++) {
         n[m] += f * s.relCoef[m][at];
       }
     }
-    for (int k = 0; k < 8; k++) {
-      t[k] -= f * s.gram[at][k];
-    }
-    unsigned any = 0;
-    for (int k = 0; k < 8; k++) {
-      any |= static_cast<unsigned>(std::abs(t[k]) > s.halfN2[k]);
-    }
-    if (!any) {
-      if constexpr (Record) {
-        *path = code;
+    if (iter + 1 < cap) {
+      for (int k = 0; k < 8; k++) {
+        t[k] -= f * s.gram[at][k];
       }
-      return iter + 1;
+      unsigned any = 0;
+      for (int k = 0; k < 8; k++) {
+        any |= static_cast<unsigned>(std::abs(t[k]) > s.halfN2[k]);
+      }
+      if (!any) {
+        x = {xx, xy, xz};
+        if constexpr (Record) {
+          *path = code;
+        }
+        if constexpr (OutT) {
+          for (int k = 0; k < 8; k++) {
+            tOut[k] = t[k];
+          }
+        }
+        return iter + 1;
+      }
     }
   }
+  x = {xx, xy, xz};
   if constexpr (Record) {
     *path = code;
   }
@@ -1358,7 +1495,7 @@ inline bool insideVoronoi(const Obtuse &s, Vec3 x) { return voronoiRoom(s, x) > 
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
 #endif
-inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
+inline Vec3 closestBabai(const Obtuse &s, const Vec3 &w, double w2) {
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   const auto kept = [w2](double x2) { return x2 >= (1.0 / 256.0) * w2; };
   double n[3] = {0.0, 0.0, 0.0};
@@ -1396,60 +1533,133 @@ inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
   return n2(ref) < w2 ? ref : w;
 }
 
-// A short wrap descent from w whose image y cancelled below |w| / 16, with
-// its `steps` steps recorded in `path`. The steps subtract relevant vectors
-// with sign +-1, so replaying them repeats every rounding exactly; the
-// rounding of each subtraction and the low part of each relevant vector
-// give the image as y + lo to about eps^2 per step, and the steps its
-// integer cell coordinates n. That image is kept when y clears the Voronoi
-// cell by twice |lo|_1, which makes it the minimum image; otherwise (a near
-// tie) the image is re-evaluated from n and the extended-precision slicer
-// continues from it.
+// Replay helper for the rare near-tie fallback: recover integer cell
+// coordinates n from the recorded path and run extended-precision refine.
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
 #endif
-inline Vec3 certifyWrap(const Obtuse &s, Vec3 w, double w2, Vec3 y, unsigned long long path,
-                        int steps) {
-  const double room = voronoiRoom(s, y);
-  Vec3 x = w;
-  Vec3 lo{};
+inline Vec3 refineFromPath(const Obtuse &s, Vec3 w, double w2, unsigned long long path,
+                           int steps) {
   double n[3] = {0.0, 0.0, 0.0};
   for (int i = steps - 1; i >= 0; i--) {
     const unsigned code = static_cast<unsigned>(path >> (4 * i)) & 15u;
     const int at = static_cast<int>(code >> 1);
     const double f = (code & 1u) != 0 ? -1.0 : 1.0;
-    Vec3 next = x;
-    next.x -= f * s.rel[0][at];
-    next.y -= f * s.rel[1][at];
-    next.z -= f * s.rel[2][at];
-    lo.x += sumError(x.x, -f * s.rel[0][at], next.x) - f * s.relLo[0][at];
-    lo.y += sumError(x.y, -f * s.rel[1][at], next.y) - f * s.relLo[1][at];
-    lo.z += sumError(x.z, -f * s.rel[2][at], next.z) - f * s.relLo[2][at];
     for (int m = 0; m < 3; m++) {
       n[m] += f * s.relCoef[m][at];
     }
-    x = next;
-  }
-  const double moved = std::abs(lo.x) + std::abs(lo.y) + std::abs(lo.z);
-  if (x.x == y.x && x.y == y.y && x.z == y.z && room > 2.0 * moved) {
-    const Vec3 image = add(y, lo);
-    return n2(image) < w2 ? image : w;
   }
   const Vec3 ref = refine(s, w, n);
   return n2(ref) < w2 ? ref : w;
 }
 
-// certifyWrap for a cell that does not record its wrap steps: the descent
-// from w runs again, recording.
+// Slow fallback when the fast tFinal certificate does not clear its margin:
+// check voronoiRoom(y) > 2 |lo|_1 first, then recover integer coordinates n
+// from the recorded path and run extended-precision refine.
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
 #endif
-inline Vec3 recertifyWrap(const Obtuse &s, Vec3 w, double w2) {
+inline Vec3 certifySlow(const Obtuse &s, const Vec3 &w, double w2, const Vec3 &y,
+                        const Vec3 &x, const Vec3 &lo, double moved,
+                        unsigned long long path, int steps) {
+  if (x.x == y.x && x.y == y.y && x.z == y.z && voronoiRoom(s, y) > 2.0 * moved) {
+    const Vec3 image = add(y, lo);
+    return n2(image) < w2 ? image : w;
+  }
+  return refineFromPath(s, w, w2, path, steps);
+}
+
+// A short wrap descent from w whose image y cancelled below |w| / 16, with
+// its `steps` steps recorded in `path` and final projections in `tFinal`.
+// The steps subtract relevant vectors with sign +-1, so replaying them
+// repeats every rounding exactly; the rounding of each subtraction and the
+// low part of each relevant vector give the image as y + lo to about eps^2
+// per step. When tFinal clears the precomputed per-box Voronoi margins,
+// y + lo is the unique minimum image without calling voronoiRoom or refine.
+// For a single step with exact/tiny relLo, IEEE-754 round-to-nearest already
+// guarantees |y - y_exact| <= 1.5 eps |y|_1, avoiding the TwoSum replay too.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline, optimize("O3,tree-vectorize")))
+#endif
+inline Vec3 certifyWrapT(const Obtuse &s, double wx, double wy, double wz, double w2,
+                         double yx, double yy, double yz, unsigned long long path, int steps,
+                         const double tFinal[8]) {
+  const double wn = std::abs(wx) + std::abs(wy) + std::abs(wz);
+  unsigned tOk = 1u;
+  for (int k = 0; k < 8; k++) {
+    tOk &= static_cast<unsigned>(std::abs(tFinal[k]) + s.tSlope[k] * wn < s.tCut[k]);
+  }
+  const Vec3 y{yx, yy, yz};
+  const Vec3 w{wx, wy, wz};
+  if (steps == 1 && tOk != 0u) {
+    const double y1 = std::abs(yx) + std::abs(yy) + std::abs(yz);
+    if (y1 > 0x1p-900 && s.maxRelLo1 <= 0x1p-52 * y1) {
+      return n2(y) < w2 ? y : w;
+    }
+  }
+  static constexpr double kSign[2] = {1.0, -1.0};
+  double xx = wx;
+  double xy = wy;
+  double xz = wz;
+  double lox = 0.0;
+  double loy = 0.0;
+  double loz = 0.0;
+  const auto replayStep = [&](unsigned code) {
+    const int at = static_cast<int>(code >> 1);
+    const double f = kSign[code & 1u];
+    const double rx = -f * s.rel[0][at];
+    const double ry = -f * s.rel[1][at];
+    const double rz = -f * s.rel[2][at];
+    const double nx = xx + rx;
+    const double ny = xy + ry;
+    const double nz = xz + rz;
+    lox += sumError(xx, rx, nx) - f * s.relLo[0][at];
+    loy += sumError(xy, ry, ny) - f * s.relLo[1][at];
+    loz += sumError(xz, rz, nz) - f * s.relLo[2][at];
+    xx = nx;
+    xy = ny;
+    xz = nz;
+  };
+  if (steps == 2) {
+    replayStep(static_cast<unsigned>(path >> 4) & 15u);
+    replayStep(static_cast<unsigned>(path) & 15u);
+  } else if (steps == 3) {
+    replayStep(static_cast<unsigned>(path >> 8) & 15u);
+    replayStep(static_cast<unsigned>(path >> 4) & 15u);
+    replayStep(static_cast<unsigned>(path) & 15u);
+  } else {
+    for (int i = steps - 1; i >= 0; i--) {
+      replayStep(static_cast<unsigned>(path >> (4 * i)) & 15u);
+    }
+  }
+  const double moved = std::abs(lox) + std::abs(loy) + std::abs(loz);
+  const Vec3 image{yx + lox, yy + loy, yz + loz};
+  const double img1 = std::abs(image.x) + std::abs(image.y) + std::abs(image.z);
+#if defined(__GNUC__) || defined(__clang__)
+  if (__builtin_expect(xx == yx && xy == yy && xz == yz && tOk != 0u &&
+                           moved <= 0x1p-20 * img1 && wn * 0x1p-47 + s.tRes <= img1,
+                       1)) {
+#else
+  if (xx == yx && xy == yy && xz == yz && tOk != 0u && moved <= 0x1p-20 * img1 &&
+      wn * 0x1p-47 + s.tRes <= img1) {
+#endif
+    return n2(image) < w2 ? image : w;
+  }
+  return certifySlow(s, w, w2, y, Vec3{xx, xy, xz}, Vec3{lox, loy, loz}, moved, path, steps);
+}
+
+// certifyWrapT for a cell that does not record its wrap steps: the descent
+// from w runs again, recording.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline, optimize("O3,tree-vectorize")))
+#endif
+inline Vec3 recertifyWrap(const Obtuse &s, const Vec3 &w, double w2) {
   Vec3 y = w;
   unsigned long long path = 0;
-  const int steps = descendFast<false, true>(s, y, kFractionalSteps, nullptr, &path);
+  double tFinal[8];
+  const int steps = descendFast<false, true, true>(s, y, kFractionalSteps, nullptr, &path, tFinal);
   if (steps < kFractionalSteps) {
-    return certifyWrap(s, w, w2, y, path, steps);
+    return certifyWrapT(s, w.x, w.y, w.z, w2, y.x, y.y, y.z, path, steps, tFinal);
   }
   return closestBabai(s, w, w2);
 }
@@ -1457,18 +1667,13 @@ inline Vec3 recertifyWrap(const Obtuse &s, Vec3 w, double w2) {
 // Nearest integer, half away from zero, or false when x is not a safe
 // binary64 integer coefficient.
 inline bool nearestInt(double x, double &n) {
-  if (!std::isfinite(x) || !(std::abs(x) < kIntegral)) {
+  if (!(std::abs(x) < kIntegral)) {
     return false;
   }
   const double t = x + std::copysign(0.49999999999999994, x);
   n = static_cast<double>(static_cast<long long>(t));
   return true;
 }
-
-// Fractional residuals this close to an integer are the near-lattice case
-// (a lattice vector plus a small Cartesian offset). Random fractional wraps
-// fail the first axis. The length check, not this tolerance, is the certificate.
-constexpr double kSmithTol = 0.05;
 
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((always_inline))
@@ -1594,8 +1799,7 @@ inline bool hotPlain(const Obtuse &s, Vec3 w, double w2, Vec3 &out, int &steps) 
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
 #endif
-inline Vec3 coldResolve(const Obtuse &s, Vec3 w, double w2, Vec3 partial, int steps,
-                        unsigned long long path) {
+inline Vec3 coldResolve(const Obtuse &s, const Vec3 &w, double w2, const Vec3 &partial, int steps) {
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (s.smithLim2 > 0.0 && w2 > s.smithLim2 && w2 < kRange) {
     double nx = 0.0;
@@ -1605,9 +1809,6 @@ inline Vec3 coldResolve(const Obtuse &s, Vec3 w, double w2, Vec3 partial, int st
     if (smithCandidate(s, w, nx, ny, nz) && smithFromN(s, w, w2, nx, ny, nz, image)) {
       return image;
     }
-  }
-  if (s.fractional && w2 < kRange && steps >= 0 && steps < kFractionalSteps && s.recordWrap) {
-    return certifyWrap(s, w, w2, partial, path, steps);
   }
   // The hot budget is four steps. Every measured wrap that hits it is the
   // minimum one or two slicer steps later, so continue from that image
@@ -1634,7 +1835,7 @@ inline Vec3 coldResolve(const Obtuse &s, Vec3 w, double w2, Vec3 partial, int st
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
 #endif
-inline bool trySmith(const Obtuse &s, Vec3 w, double w2, Vec3 &out) {
+inline bool trySmith(const Obtuse &s, const Vec3 &w, double w2, Vec3 &out) {
   double nx = 0.0;
   double ny = 0.0;
   double nz = 0.0;
@@ -1644,46 +1845,100 @@ inline bool trySmith(const Obtuse &s, Vec3 w, double w2, Vec3 &out) {
   return smithFromN(s, w, w2, nx, ny, nz, out);
 }
 
-// Missed keep-test. A residual inside the Smith ball is accepted here; a
-// recorded cancellation is certified; the step cap goes to Babai.
+// Recording slicer. Runs at O3+vectorize with the descent loop directly
+// inlined so there is no call overhead or stack copy of t[8] on kept wraps.
+// Near-lattice residuals inside the Smith ball are filtered in 3 instructions
+// on |w.z| before descending; cancelled descents certify from t[0..6].
 #if defined(__GNUC__) || defined(__clang__)
-__attribute__((noinline, optimize("O3")))
+__attribute__((noinline, optimize("O3,tree-vectorize")))
 #endif
-inline Vec3 recordMiss(const Obtuse &s, Vec3 w, double w2, Vec3 y, unsigned long long path,
-                       int steps) {
-  double nx = 0.0;
-  double ny = 0.0;
-  double nz = 0.0;
-  Vec3 image;
-  if (smithCandidate(s, w, nx, ny, nz) && smithFromN(s, w, w2, nx, ny, nz, image)) {
-    return image;
+inline Vec3 recordDisplacement(const Obtuse &s, double wx, double wy, double wz, double w2) {
+  const double az = std::abs(wz);
+#if defined(__GNUC__) || defined(__clang__)
+  if (__builtin_expect(az < s.smithZ0 || az > s.smithZ1, 0)) {
+#else
+  if (az < s.smithZ0 || az > s.smithZ1) {
+#endif
+    const double z = wz * s.invZ;
+    double nz = 0.0;
+    if (nearestInt(z, nz) && std::abs(z - nz) < kSmithTol) {
+      const double y = (wy - z * s.cellY[2]) * s.invY;
+      double ny = 0.0;
+      if (nearestInt(y, ny) && std::abs(y - ny) < kSmithTol) {
+        Vec3 image;
+        if (trySmith(s, Vec3{wx, wy, wz}, w2, image)) {
+          return image;
+        }
+      }
+    }
+  }
+  unsigned long long code = 0;
+  double xx = wx;
+  double xy = wy;
+  double xz = wz;
+  double t[8];
+  for (int k = 0; k < 8; k++) {
+    t[k] = xx * s.rel[0][k] + xy * s.rel[1][k] + xz * s.rel[2][k];
+  }
+  int steps = kFractionalSteps;
+  for (int iter = 0; iter < kFractionalSteps - 1; iter++) {
+    double g[8];
+    for (int k = 0; k < 8; k++) {
+      g[k] = std::abs(t[k]) - s.halfN2[k];
+    }
+    const bool c01 = g[1] > g[0];
+    const double m01 = c01 ? g[1] : g[0];
+    const int i01 = c01 ? 1 : 0;
+    const bool c23 = g[3] > g[2];
+    const double m23 = c23 ? g[3] : g[2];
+    const int i23 = c23 ? 3 : 2;
+    const bool c45 = g[5] > g[4];
+    const double m45 = c45 ? g[5] : g[4];
+    const int i45 = c45 ? 5 : 4;
+    const bool c03 = m23 > m01;
+    const double m03 = c03 ? m23 : m01;
+    const int i03 = c03 ? i23 : i01;
+    const bool c46 = g[6] > m45;
+    const double m46 = c46 ? g[6] : m45;
+    const int i46 = c46 ? 6 : i45;
+    const bool c06 = m46 > m03;
+    const double bestG = c06 ? m46 : m03;
+    const int at = c06 ? i46 : i03;
+    if (!(bestG > 0.0)) {
+      steps = iter;
+      break;
+    }
+    const bool pos = t[at] > 0.0;
+    const double f = pos ? 1.0 : -1.0;
+    code = (code << 4) | static_cast<unsigned long long>(2 * at + (pos ? 0 : 1));
+    xx -= f * s.rel[0][at];
+    xy -= f * s.rel[1][at];
+    xz -= f * s.rel[2][at];
+    for (int k = 0; k < 8; k++) {
+      t[k] -= f * s.gram[at][k];
+    }
+  }
+  if (steps == kFractionalSteps) {
+    unsigned any = 0;
+    for (int k = 0; k < 8; k++) {
+      any |= static_cast<unsigned>(std::abs(t[k]) > s.halfN2[k]);
+    }
+    if (!any) {
+      steps = kFractionalSteps - 1;
+    }
   }
   if (steps < kFractionalSteps) {
-    return certifyWrap(s, w, w2, y, path, steps);
-  }
-  return closestBabai(s, w, w2);
-}
-
-// Recording slicer. The miss edge is a separate call, so the kept image does
-// not share registers with Smith or Babai.
-#if defined(__GNUC__) || defined(__clang__)
-__attribute__((noinline))
-#endif
-inline Vec3 recordDisplacement(const Obtuse &s, Vec3 w, double w2) {
-  Vec3 y = w;
-  unsigned long long path = 0;
-  const int steps = descendFast<false, true>(s, y, kFractionalSteps, nullptr, &path);
-  if (steps < kFractionalSteps) {
-    const double y2 = n2(y);
+    const double y2 = xx * xx + xy * xy + xz * xz;
 #if defined(__GNUC__) || defined(__clang__)
     if (__builtin_expect(y2 >= (1.0 / 256.0) * w2, 1)) {
 #else
     if (y2 >= (1.0 / 256.0) * w2) {
 #endif
-      return y2 < w2 ? y : w;
+      return y2 < w2 ? Vec3{xx, xy, xz} : Vec3{wx, wy, wz};
     }
+    return certifyWrapT(s, wx, wy, wz, w2, xx, xy, xz, code, steps, t);
   }
-  return recordMiss(s, w, w2, y, path, steps);
+  return closestBabai(s, Vec3{wx, wy, wz}, w2);
 }
 
 // Non-cancelling wrap. Names neither recertify nor Babai; the failure
@@ -1691,7 +1946,7 @@ inline Vec3 recordDisplacement(const Obtuse &s, Vec3 w, double w2) {
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((always_inline))
 #endif
-inline Vec3 plainDisplacement(const Obtuse &s, Vec3 w, double w2) {
+inline Vec3 plainDisplacement(const Obtuse &s, const Vec3 &w, double w2) {
   Vec3 out;
   int steps = -1;
 #if defined(__GNUC__) || defined(__clang__)
@@ -1701,24 +1956,23 @@ inline Vec3 plainDisplacement(const Obtuse &s, Vec3 w, double w2) {
 #endif
     return out;
   }
-  return coldResolve(s, w, w2, out, steps, 0);
+  return coldResolve(s, w, w2, out, steps);
 }
 
 // Binary64 results are kept only when nothing cancelled far below |w|: the
 // Babai rounding subtracts lattice vectors with sum |z_i| max|b_i| at most
 // 2 max|w|, a Babai descent takes at most two steps, a wrap descent takes
 // at most three steps, and the image is at least |w| / 16. A short wrap
-// that cancelled is certified from its recorded steps, or recorded on a
-// second descent when the cell does not record. A wrap that uses the whole
-// four-step budget is continued for two slicer steps and kept when that
-// image has not cancelled; otherwise it goes to Babai. Those fallbacks are
-// one separate call. On a compact cell a residual inside the Smith ball is
-// accepted before the descent, and only when the first fractional coordinate
-// is already within 0.05 of an integer, so a random wrap does not call it.
+// that cancelled is certified from its recorded steps and final projections,
+// or recorded on a second descent when the cell does not record. A wrap that
+// uses the whole four-step budget is continued for two slicer steps and kept
+// when that image has not cancelled; otherwise it goes to Babai. Any vector
+// already inside the certified Smith ball (|w|^2 < smithLim2) is its own
+// unique minimum image and returns immediately.
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((always_inline))
 #endif
-inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
+inline Vec3 closestDisplacement(const Obtuse &s, const Vec3 &w, double w2) {
   if (!s.ok) {
     throw std::runtime_error(
         "minimum-image cell is numerically singular in binary64");
@@ -1727,13 +1981,16 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
     throw std::runtime_error(
         "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
+  if (w2 < s.smithLim2) {
+    return w;
+  }
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
 #if defined(__GNUC__) || defined(__clang__)
-  if (__builtin_expect(s.recordWrap, 0)) {
+  if (__builtin_expect(s.recordWrap && w2 < kRange, 0)) {
 #else
-  if (s.recordWrap) {
+  if (s.recordWrap && w2 < kRange) {
 #endif
-    return recordDisplacement(s, w, w2);
+    return recordDisplacement(s, w.x, w.y, w.z, w2);
   }
 #if defined(__GNUC__) || defined(__clang__)
   if (__builtin_expect(!(s.fractional && w2 < kRange), 0)) {
@@ -1742,13 +1999,16 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
 #endif
     return closestBabai(s, w, w2);
   }
-  // Compact cells only. The residual test is the common case and rejects
-  // a random wrap on the first axis, so the Smith call is not on that path.
-  // A near-lattice residual falls through into trySmith.
-  if (s.smithHot && w2 > s.smithLim2) {
-    double nz = 0.0;
-    const double z = w.z * s.invZ;
-    if (nearestInt(z, nz) && std::abs(z - nz) < kSmithTol) {
+  // Compact cells only. The 3-instruction |w.z| filter rejects 90% of random
+  // wraps without division or integer conversion; a near-lattice residual
+  // falls through into trySmith.
+  if (s.smithHot) {
+    const double az = std::abs(w.z);
+#if defined(__GNUC__) || defined(__clang__)
+    if (__builtin_expect(az < s.smithZ0 || az > s.smithZ1, 0)) {
+#else
+    if (az < s.smithZ0 || az > s.smithZ1) {
+#endif
       Vec3 image;
       if (trySmith(s, w, w2, image)) {
         return image;
@@ -1777,14 +2037,17 @@ inline bool sameKey(const double *a, const double *b) {
   return true;
 }
 
-inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, double xz,
-                                 double yz) {
-  thread_local Cached slots[4];
-  thread_local int hand = 0;
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline const Cached &fillCachedBasis(Cached (&slots)[4], int &hand, const Cached *&lastSlot,
+                                     double lx, double ly, double lz,
+                                     double xy, double xz, double yz) {
   const double key[6] = {lx, ly, lz, xy, xz, yz};
-  for (const Cached &slot : slots) {
-    if (slot.filled && sameKey(slot.key, key)) {
-      return slot;
+  for (int idx = 0; idx < 4; idx++) {
+    if (slots[idx].filled && sameKey(slots[idx].key, key)) {
+      lastSlot = &slots[idx];
+      return slots[idx];
     }
   }
   const int i = hand;
@@ -1793,6 +2056,9 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
   const Vec3 a{lx, 0.0, 0.0};
   const Vec3 b{xy, ly, 0.0};
   const Vec3 c{xz, yz, lz};
+  if (lastSlot == &slot) {
+    lastSlot = nullptr;
+  }
   slot.filled = false;
   const Obtuse s = obtuseSuperbasis(a, b, c);
   for (int k = 0; k < 6; k++) {
@@ -1800,7 +2066,24 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
   }
   slot.s = s;
   slot.filled = true;
+  lastSlot = &slot;
   return slot;
+}
+
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
+inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, double xz,
+                                 double yz) {
+  thread_local Cached slots[4];
+  thread_local int hand = 0;
+  thread_local const Cached *lastSlot = nullptr;
+  const Cached *mru = lastSlot;
+  if (mru != nullptr && mru->key[0] == lx && mru->key[1] == ly && mru->key[2] == lz &&
+      mru->key[3] == xy && mru->key[4] == xz && mru->key[5] == yz) {
+    return *mru;
+  }
+  return fillCachedBasis(slots, hand, lastSlot, lx, ly, lz, xy, xz, yz);
 }
 
 } // namespace
