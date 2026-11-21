@@ -1,5 +1,5 @@
 // Copyright (c) d-SEAMS developers
-/* Ice Ih has 256 primitive six-rings at 3.5 angstroms. */
+/* Ice Ih has 256 primitive six-rings at 3.5 angstroms: 64 basal, 192 prismatic. */
 #include "seams.h"
 
 #include <stdio.h>
@@ -52,7 +52,7 @@ int main(void) {
       return 1;
     }
   }
-  if (basal != 64 || prismatic != 141 || hexagon != 51) {
+  if (basal != 64 || prismatic != 192 || hexagon != 0) {
     fprintf(stderr, "symmetry %d %d %d\n", basal, prismatic, hexagon);
     return 1;
   }

@@ -1,11 +1,14 @@
 // Copyright (c) d-SEAMS developers
 // Census of seams_rings_find on ideal ice Ih.
 //
-// The fingerprints and symmetry counts are the output of the all-pairs
-// prism pass at ee53b952, on the orthorhombic cell of
-// scripts/gen_ideal_ice.py, cutoff 3.5 A, depth 6. Ring vertices are
-// hashed after a rotation-invariant mix, then sorted, so the fingerprint
-// does not depend on the order seams_rings_find returns the rings.
+// The symmetry counts follow from the lattice: each molecule sits in one
+// puckered basal layer, whose hexagons number half its molecules, and the
+// other 3N/2 of the 2N six-rings are prismatic faces of hexagonal cages.
+// The fingerprints pin which rings carry which code, on the orthorhombic
+// cell of scripts/gen_ideal_ice.py, cutoff 3.5 A, depth 6. Ring vertices
+// are hashed after a rotation-invariant mix, then sorted, so the
+// fingerprint does not depend on the order seams_rings_find returns the
+// rings.
 
 #include "ice_ih.hpp"
 #include "seams.h"
@@ -80,8 +83,9 @@ Census run(int nx, int ny, int nz, int threads) {
   return census;
 }
 
-void expectOracle(const Census &census, int molecules, int basal, int prismatic, int hexagon,
-                  std::uint64_t fingerprint) {
+void expectOracle(const Census &census, int molecules, std::uint64_t fingerprint) {
+  const int basal = molecules / 2;
+  const int prismatic = 3 * molecules / 2;
   REQUIRE(census.count == 2 * molecules);
   REQUIRE(census.hist[6] == 2 * molecules);
   REQUIRE(census.hist[3] == 0);
@@ -89,26 +93,26 @@ void expectOracle(const Census &census, int molecules, int basal, int prismatic,
   REQUIRE(census.hist[5] == 0);
   REQUIRE(census.sym[SEAMS_RING_HC_BASAL] == basal);
   REQUIRE(census.sym[SEAMS_RING_HC_PRISMATIC] == prismatic);
-  REQUIRE(census.sym[SEAMS_RING_HEXAGON] == hexagon);
+  REQUIRE(census.sym[SEAMS_RING_HEXAGON] == 0);
   REQUIRE(census.sym[SEAMS_RING_PRISM] == 0);
   REQUIRE(census.sym[SEAMS_RING_DEFORMED_PRISM] == 0);
   REQUIRE(census.sym[SEAMS_RING_MIXED_PRISM] == 0);
-  REQUIRE(basal + prismatic + hexagon == census.count);
+  REQUIRE(basal + prismatic == census.count);
   REQUIRE(census.fingerprint == fingerprint);
 }
 
 } // namespace
 
-TEST_CASE("ice Ih ring census matches the all-pairs prism pass", "[rings_ih]") {
+TEST_CASE("ice Ih ring census puts every six-ring on a hexagonal cage", "[rings_ih]") {
   const Census small = run(8, 8, 8, 1);
-  expectOracle(small, 4096, 2040, 5484, 668, 0x9a85272a79e027b7ULL);
+  expectOracle(small, 4096, 0x03e0b97b3f5999a7ULL);
   const Census mid = run(16, 16, 16, 1);
-  expectOracle(mid, 32768, 16368, 46308, 2860, 0x59fb29dea3ffde41ULL);
+  expectOracle(mid, 32768, 0xe4a9479327642547ULL);
 }
 
 TEST_CASE("ice Ih ring census is the same at eight threads", "[rings_ih]") {
   const Census small = run(8, 8, 8, 8);
-  expectOracle(small, 4096, 2040, 5484, 668, 0x9a85272a79e027b7ULL);
+  expectOracle(small, 4096, 0x03e0b97b3f5999a7ULL);
   const Census mid = run(16, 16, 16, 8);
-  expectOracle(mid, 32768, 16368, 46308, 2860, 0x59fb29dea3ffde41ULL);
+  expectOracle(mid, 32768, 0xe4a9479327642547ULL);
 }

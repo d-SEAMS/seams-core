@@ -1621,8 +1621,11 @@ void refine_ring_labels(const seams_rings *rings) {
     for (int i = 0; i < nop && i + 1 < static_cast<int>(rings->offsets.size()); ++i) {
       const int a = rings->offsets[static_cast<std::size_t>(i)];
       const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
+      // cageAffiliation and findPrisms read a row from its second entry,
+      // as neighbourListByIndex writes it.
       auto &row = rings->idx[static_cast<std::size_t>(i)];
-      row.reserve(static_cast<std::size_t>(std::max(0, b - a)));
+      row.reserve(static_cast<std::size_t>(std::max(0, b - a)) + 1);
+      row.push_back(i);
       for (int k = a; k < b; ++k) {
         row.push_back(rings->cols[static_cast<std::size_t>(k)]);
       }
