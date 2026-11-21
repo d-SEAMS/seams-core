@@ -726,7 +726,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
                                                    unsigned long* prec_hi,
 diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
 --- tng-a/tng/src/lib/tng_io.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/lib/tng_io.c	2026-11-21 07:59:41.836510445 +0000
++++ tng-b/tng/src/lib/tng_io.c	2026-11-21 08:07:41.200980423 +0000
 @@ -33,6 +33,7 @@
  #endif
  
@@ -956,13 +956,6 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
 -        if (tng_file_input_numerical(tng_data, &molecule->n_chains, sizeof(molecule->n_chains),
 -                                     hash_mode, &md5_state, __LINE__)
 -            == TNG_CRITICAL)
--        {
--            return (TNG_CRITICAL);
--        }
--
--        if (tng_file_input_numerical(tng_data, &molecule->n_residues, sizeof(molecule->n_residues),
--                                     hash_mode, &md5_state, __LINE__)
--            == TNG_CRITICAL)
 +        /* the counts are stored in the molecule only once its arrays exist */
 +        if (tng_file_input_numerical(tng_data, &n_chains, sizeof(n_chains), hash_mode,
 +                                     &md5_state, __LINE__)
@@ -977,7 +970,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
              return (TNG_CRITICAL);
          }
 -
--        if (tng_file_input_numerical(tng_data, &molecule->n_atoms, sizeof(molecule->n_atoms),
+-        if (tng_file_input_numerical(tng_data, &molecule->n_residues, sizeof(molecule->n_residues),
 -                                     hash_mode, &md5_state, __LINE__)
 -            == TNG_CRITICAL)
 +        if (n_chains < 0 || n_chains > max_count || n_residues < 0 || n_residues > max_count
@@ -987,6 +980,13 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
              return (TNG_CRITICAL);
          }
  
+-        if (tng_file_input_numerical(tng_data, &molecule->n_atoms, sizeof(molecule->n_atoms),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
+-        {
+-            return (TNG_CRITICAL);
+-        }
+-
 -        tng_data->n_particles += molecule->n_atoms * tng_data->molecule_cnt_list[i];
 -
 -        if (molecule->n_chains > 0)
@@ -1888,7 +1888,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          data->dependency = 0;
          if (is_particle_data == TNG_TRUE)
          {
-@@ -5106,6 +5364,29 @@
+@@ -5106,6 +5364,46 @@
  
      n_frames_div = (n_frames - 1) / stride_length + 1;
  
@@ -1909,6 +1909,23 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
 +                __FILE__, __LINE__);
 +        return (TNG_CRITICAL);
 +    }
++    {
++        int64_t alloc_elem = (datatype == TNG_CHAR_DATA) ? (int64_t)sizeof(char*) : size;
++        if (n_frames_div > INT64_MAX / alloc_elem / n_values / tot_n_particles)
++        {
++            fprintf(stderr, "TNG library: Data block (%s) is too large. %s: %d\n", block->name,
++                    __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++        if (tng_data->input_file_len > 0
++            && (n_frames_div * alloc_elem * n_values * tot_n_particles) / 4096
++                   > tng_data->input_file_len + 1)
++        {
++            fprintf(stderr, "TNG library: Data block (%s) allocation exceeds file size bound. %s: %d\n",
++                    block->name, __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++    }
 +    expected_len = n_frames_div * size * n_values;
 +    if (is_particle_data == TNG_TRUE)
 +    {
@@ -1918,7 +1935,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      contents = (char*)malloc(block_data_len);
      if (!contents)
      {
-@@ -5116,6 +5397,7 @@
+@@ -5116,6 +5414,7 @@
      if (fread(contents, block_data_len, 1, tng_data->input_file) == 0)
      {
          fprintf(stderr, "TNG library: Cannot read block. %s: %d\n", __FILE__, __LINE__);
@@ -1926,7 +1943,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          return (TNG_CRITICAL);
      }
  
-@@ -5126,19 +5408,17 @@
+@@ -5126,19 +5425,17 @@
  
      if (codec_id != TNG_UNCOMPRESSED)
      {
@@ -1951,7 +1968,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                  {
                      fprintf(stderr,
                              "TNG library: Could not read tng compressed block data. %s: %d\n",
-@@ -5159,15 +5439,43 @@
+@@ -5159,15 +5456,43 @@
                  }
                  /*         fprintf(stderr, "TNG library: After compression: %" PRId64 "\n", block->block_contents_size); */
                  break;
@@ -1996,7 +2013,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      {
          if (is_particle_data == TNG_TRUE)
          {
-@@ -5203,7 +5511,15 @@
+@@ -5203,7 +5528,15 @@
                      second_dim_values = first_dim_values[j];
                      for (k = 0; k < n_values; k++)
                      {
@@ -2013,7 +2030,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                          if (second_dim_values[k])
                          {
                              free(second_dim_values[k]);
-@@ -5216,7 +5532,8 @@
+@@ -5216,7 +5549,8 @@
                              free(contents);
                              return (TNG_CRITICAL);
                          }
@@ -2023,7 +2040,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                          offset += len;
                      }
                  }
-@@ -5228,7 +5545,15 @@
+@@ -5228,7 +5562,15 @@
              {
                  for (j = 0; j < n_values; j++)
                  {
@@ -2040,7 +2057,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                      if (data->strings[0][i][j])
                      {
                          free(data->strings[0][i][j]);
-@@ -5240,7 +5565,8 @@
+@@ -5240,7 +5582,8 @@
                          free(contents);
                          return (TNG_CRITICAL);
                      }
@@ -2050,7 +2067,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                      offset += len;
                  }
              }
-@@ -5248,14 +5574,22 @@
+@@ -5248,14 +5591,22 @@
      }
      else
      {
@@ -2077,7 +2094,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          }
          /* Endianness is handled by the TNG compression library. TNG compressed blocks are always
           * written as little endian by the compression library. */
-@@ -5269,7 +5603,7 @@
+@@ -5269,7 +5620,7 @@
                          for (i = 0; i < full_data_len; i += size)
                          {
                              if (tng_data->input_endianness_swap_func_32(
@@ -2086,7 +2103,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                                  != TNG_SUCCESS)
                              {
                                  fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
-@@ -5285,7 +5619,7 @@
+@@ -5285,7 +5636,7 @@
                          for (i = 0; i < full_data_len; i += size)
                          {
                              if (tng_data->input_endianness_swap_func_64(
@@ -2095,7 +2112,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                                  != TNG_SUCCESS)
                              {
                                  fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
-@@ -8508,33 +8842,8 @@
+@@ -8508,33 +8859,8 @@
                  tng_data->non_tr_particle_data[i].values = 0;
              }
  
@@ -2131,7 +2148,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (tng_data->non_tr_particle_data[i].block_name)
              {
-@@ -8556,27 +8865,8 @@
+@@ -8556,27 +8882,8 @@
                  tng_data->non_tr_data[i].values = 0;
              }
  
@@ -2161,7 +2178,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (tng_data->non_tr_data[i].block_name)
              {
-@@ -8612,36 +8902,8 @@
+@@ -8612,36 +8919,8 @@
                  frame_set->tr_particle_data[i].values = 0;
              }
  
@@ -2200,7 +2217,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (frame_set->tr_particle_data[i].block_name)
              {
-@@ -8663,28 +8925,8 @@
+@@ -8663,28 +8942,8 @@
                  frame_set->tr_data[i].values = 0;
              }
  
@@ -2231,7 +2248,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (frame_set->tr_data[i].block_name)
              {
-@@ -9704,6 +9946,12 @@
+@@ -9704,6 +9963,12 @@
  
      fseeko(tng_data->input_file, file_pos, SEEK_SET);
  
@@ -2244,7 +2261,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      *n = first_frame + n_frames;
  
      return (TNG_SUCCESS);
-@@ -10084,6 +10332,10 @@
+@@ -10084,6 +10349,10 @@
  
      *n = tng_data->n_trajectory_frame_sets = cnt;
  
@@ -2255,7 +2272,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      *frame_set = orig_frame_set;
      /* The mapping block in the original frame set has been freed when reading
       * other frame sets. */
-@@ -11856,6 +12108,12 @@
+@@ -11856,6 +12125,12 @@
          data->values = 0;
          /* FIXME: Memory leak from strings. */
          data->strings              = 0;
@@ -2268,7 +2285,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          data->last_retrieved_frame = -1;
      }
  
-@@ -13421,6 +13679,16 @@
+@@ -13421,6 +13696,16 @@
          default: size = sizeof(double);
      }
  
@@ -2285,7 +2302,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      *n_frames           = tng_max_i64(1, data->n_frames);
      *n_values_per_frame = data->n_values_per_frame;
      *stride_length      = data->stride_length;
-@@ -13451,7 +13719,7 @@
+@@ -13451,7 +13736,7 @@
      else
      {
          i_step = (*n_particles) * (*n_values_per_frame);
@@ -2294,7 +2311,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          {
              for (j = 0; j < *n_particles; j++)
              {
-@@ -14361,6 +14629,10 @@
+@@ -14361,6 +14646,10 @@
      if (mode == 'w')
      {
          stat = tng_output_file_set(*tng_data_p, filename);
@@ -2305,7 +2322,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          return (stat);
      }
      tng_input_file_set(*tng_data_p, filename);
-@@ -14372,6 +14644,7 @@
+@@ -14372,6 +14661,7 @@
  
      if (stat != TNG_SUCCESS)
      {

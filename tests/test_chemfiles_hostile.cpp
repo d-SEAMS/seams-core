@@ -327,6 +327,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_uncompress_size.tng", "TNG", kTngErr},
            // TNG variable-atom frame set leaked molecule_cnt_list in tng_num_frame_sets_get
            Refused{"fuzz_tng_molcnt_leak.tng", "TNG", kTngErr},
+           // TNG particle data allocation exceeded file size bound (24 TB calloc)
+           Refused{"fuzz_tng_alloc_bound.tng", "TNG", kTngErr},
        }) {
     requireRefused(item);
   }
