@@ -1,8 +1,62 @@
 # Copyright (c) d-SEAMS developers
+# The writer stores a numeric seq id and the reader treats a missing
+# entity id as residue 0 (0.10.4 wrote "." and then dereferenced the
+# absent label_entity_id column). A whitespace line or a tag without a
+# value is skipped or an error, never indexed. The writer prints "?" for
+# an empty value and replaces whitespace inside one, so a row keeps its
+# columns; the reader maps "?" and "." back to empty names and types.
+# A row with the wrong column count, a row without its model column, and
+# a table without coordinates or atom labels are errors.
 diff -ruN mmc-a/src/formats/mmCIF.cpp mmc-b/src/formats/mmCIF.cpp
---- mmc-a/src/formats/mmCIF.cpp	2026-11-20 21:27:50.472599981 +0000
-+++ mmc-b/src/formats/mmCIF.cpp	2026-11-20 21:27:52.976602021 +0000
-@@ -84,11 +84,29 @@
+--- mmc-a/src/formats/mmCIF.cpp	2026-11-20 22:43:55.000000000 +0000
++++ mmc-b/src/formats/mmCIF.cpp	2026-11-21 00:54:50.000000000 +0000
+@@ -1,6 +1,7 @@
+ // Chemfiles, a modern library for chemistry file reading and writing
+ // Copyright (C) Guillaume Fraux and contributors -- BSD license
+ 
++#include <cctype>
+ #include <cassert>
+ #include <cstdint>
+ #include <map>
+@@ -56,6 +57,37 @@
+ /// CIF files store which digits are insignificant, we need to remove this
+ static double cif_to_double(std::string line);
+ 
++// The reader splits rows on whitespace and does not understand CIF quoting,
++// so a written value must be a single non-empty token.
++static std::string cif_token(const std::string& value) {
++    if (value.empty()) {
++        return "?";
++    }
++    auto token = value;
++    for (auto& c: token) {
++        if (std::isspace(static_cast<unsigned char>(c))) {
++            c = '_';
++        }
++    }
++    return token;
++}
++
++static std::string cif_value(string_view token) {
++    if (token == "?" || token == ".") {
++        return "";
++    }
++    return token.to_string();
++}
++
++// The model number in an _atom_site line
++static size_t model_number(string_view line, size_t column) {
++    auto line_split = split(line, ' ');
++    if (column >= line_split.size()) {
++        throw format_error("line '{}' has no model number in column {}", line, column + 1);
++    }
++    return parse<size_t>(line_split[column]);
++}
++
+ void mmCIFFormat::init_() {
+     if (file_.mode() == File::WRITE) {
+         return;
+@@ -84,11 +116,29 @@
          }
  
          auto line_split = split(line, ' ');
@@ -33,8 +87,109 @@ diff -ruN mmc-a/src/formats/mmCIF.cpp mmc-b/src/formats/mmCIF.cpp
              lengths[0] = cif_to_double(line_split[1].to_string());
          }
  
-@@ -313,8 +331,15 @@
-         auto resid_text = line_split[label_seq_id->second];
+@@ -140,7 +190,11 @@
+ 
+     do {
+         if (line.find("_atom_site") != std::string::npos) {
+-            auto atom_label = trim(line).substr(11).to_string();
++            auto trimmed = trim(line);
++            if (trimmed.size() < 11) {
++                throw format_error("invalid _atom_site entry '{}' in '{}'", line, file_.path());
++            }
++            auto atom_label = trimmed.substr(11).to_string();
+             atom_site_map_[atom_label] = current_index++;
+ 
+             position = file_.tellpos();
+@@ -164,6 +218,19 @@
+         throw format_error("could not find _atom_site.Cartn_x in '{}'", file_.path());
+     }
+ 
++    if (atom_site_map_.find("Cartn_y") == atom_site_map_.end()) {
++        throw format_error("could not find _atom_site.Cartn_y in '{}'", file_.path());
++    }
++
++    if (atom_site_map_.find("Cartn_z") == atom_site_map_.end()) {
++        throw format_error("could not find _atom_site.Cartn_z in '{}'", file_.path());
++    }
++
++    if (atom_site_map_.find("label_atom_id") == atom_site_map_.end() &&
++        atom_site_map_.find("label") == atom_site_map_.end()) {
++        throw format_error("could not find _atom_site.label_atom_id in '{}'", file_.path());
++    }
++
+     auto model_position = atom_site_map_.find("pdbx_PDB_model_num");
+     // Do we have a special extension for multiple modes?
+     if (model_position == atom_site_map_.end()) {
+@@ -173,7 +240,7 @@
+     }
+ 
+     // Ok, let's look at the sites now to note where models start
+-    auto last_position = parse<size_t>(split(line, ' ')[model_position->second]);
++    auto last_position = model_number(line, model_position->second);
+ 
+     do {
+         position = file_.tellpos();
+@@ -184,8 +251,7 @@
+             break;
+         }
+ 
+-        auto line_split = split(line, ' ');
+-        size_t current_position = parse<size_t>(line_split[model_position->second]);
++        size_t current_position = model_number(line, model_position->second);
+ 
+         if (current_position != last_position) {
+             steps_positions_.push_back(position);
+@@ -250,12 +316,17 @@
+ 
+     auto model_position = atom_site_map_.find("pdbx_PDB_model_num");
+ 
++    size_t columns = 0;
++    for (const auto& column: atom_site_map_) {
++        columns = std::max(columns, column.second + 1);
++    }
++
+     auto position = file_.tellpos();
+ 
+     size_t last_position = 0;
+     if (model_position != atom_site_map_.end()) {
+         auto line = file_.readline();
+-        last_position = parse<size_t>(split(line, ' ')[model_position->second]);
++        last_position = model_number(line, model_position->second);
+         // Reset file position so that the loop below can start by reading the
+         // first line
+         file_.seekpos(position);
+@@ -268,9 +339,11 @@
+             break;
+         }
+ 
+-        if (line_split.size() != atom_site_map_.size()) {
++        // Every index in atom_site_map_ is below the column count; with a
++        // repeated label the map has fewer entries than columns.
++        if (line_split.size() != columns) {
+             throw format_error("line '{}' has {} items not {}",
+-                line, line_split.size(), atom_site_map_.size()
++                line, line_split.size(), columns
+             );
+         }
+ 
+@@ -284,8 +357,8 @@
+         }
+ 
+         Atom atom(
+-            line_split[label_atom_id->second].to_string(),
+-            line_split[type_symbol].to_string()
++            cif_value(line_split[label_atom_id->second]),
++            cif_value(line_split[type_symbol])
+         );
+ 
+         if (label_alt_id != atom_site_map_.end() &&
+@@ -310,13 +383,21 @@
+ 
+         auto atom_id = frame.size() - 1;
+         int64_t resid = 0;
+-        auto resid_text = line_split[label_seq_id->second];
++        auto resid_text = label_seq_id != atom_site_map_.end() ?
++            line_split[label_seq_id->second] : string_view(".");
  
          try {
 -            if (resid_text == ".") { // In this case, we need to use the entity id
@@ -49,9 +204,12 @@ diff -ruN mmc-a/src/formats/mmCIF.cpp mmc-b/src/formats/mmCIF.cpp
 +                    resid = 0;
 +                }
              } else {
-                 resid = parse<int64_t>(line_split[label_seq_id->second]);
+-                resid = parse<int64_t>(line_split[label_seq_id->second]);
++                resid = parse<int64_t>(resid_text);
              }
-@@ -426,6 +451,14 @@
+         } catch (const Error& e) {
+             throw format_error("invalid CIF residue or entity numeric: {}", e.what());
+@@ -426,11 +507,20 @@
          }
  
          const auto& atom = frame[i];
@@ -65,4 +223,13 @@ diff -ruN mmc-a/src/formats/mmCIF.cpp mmc-b/src/formats/mmCIF.cpp
 +        }
  
          file_.print("{} {: <5} {: <2} {: <4} {} {: >3} {} {: >4} {:8.3f} {:8.3f} {:8.3f} {} {} {}\n",
-                 pdbgroup, atoms_, atom.type(), atom.name(), ".", compid,
+-                pdbgroup, atoms_, atom.type(), atom.name(), ".", compid,
+-                asymid, seq_id, positions[i][0], positions[i][1], positions[i][2],
+-                atom.charge(), auth_asymid, models_
++                pdbgroup, atoms_, cif_token(atom.type()), cif_token(atom.name()), ".",
++                cif_token(compid), cif_token(asymid), seq_id,
++                positions[i][0], positions[i][1], positions[i][2],
++                atom.charge(), cif_token(auth_asymid), models_
+         );
+     }
+ 

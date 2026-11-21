@@ -1,0 +1,68 @@
+ Entering Gaussian System, Link 0=g03
+ Input=water.com
+ Output=water.log
+ Initial command:
+ /opt/g03/l1.exe /tmp/Gau-1.inp -scrdir=/tmp/
+ Entering Link 1 = /opt/g03/l1.exe PID=      1.
+
+ Copyright (c) 1988,1990,1992,1993,1995,1998,2003, Gaussian, Inc.
+                  All Rights Reserved.
+
+ ****************************************
+ Gaussian 03:  x86-Linux-G03RevB.04  2-Mar-2003
+                  1-Jan-2024
+ ****************************************
+ %mem=1MW
+ ----------------------
+ #P HF/STO-3G SP IOP(6/7=3)
+ ----------------------
+ 1/38=1/1;
+ 99/5=1,9=1/99;
+ Leave Link    1 at Mon Jan  1 00:00:00 2024, MaxMem=    1048576 cpu:       0.1
+ (Enter /opt/g03/l101.exe)
+ -----
+ water
+ -----
+ Symbolic Z-matrix:
+ Charge =  0 Multiplicity = 1
+ O                     0.        0.        0.
+ H                     0.757     0.586     0.
+ H                    -0.757     0.586     0.
+
+ Leave Link  101 at Mon Jan  1 00:00:00 2024, MaxMem=    1048576 cpu:       0.1
+ (Enter /opt/g03/l202.exe)
+                          Input orientation:
+ ---------------------------------------------------------------------
+ Center     Atomic     Atomic              Coordinates (Angstroms)
+ Number     Number      Type              X           Y           Z
+ ---------------------------------------------------------------------
+    1          8             0        0.000000    0.000000    0.000000
+    2          1             0        0.757000    0.586000    0.000000
+    3          1             0       -0.757000    0.586000    0.000000
+ ---------------------------------------------------------------------
+ Standard basis: STO-3G (5D, 7F)
+     7 basis functions,    21 primitive gaussians,     7 cartesian basis functions
+     5 alpha electrons        5 beta electrons
+     Molecular Orbital Coefficients
+                           1         2         3         4         5
+                           O         O         O         O         O
+     EIGENVALUES --   -20.25    -1.25    -0.59    -0.45    -0.39
+   1 1   O  1S          0.99   -0.23    0.00   -0.10    0.00
+   2        2S          0.03    0.84    0.00    0.52    0.00
+   3        2PX         0.00    0.00    0.61    0.00    0.00
+   4        2PY        -0.00   -0.12    0.00    0.77    0.00
+   5        2PZ         0.00    0.00    0.00    0.00    1.00
+   6 2   H  1S         -0.01    0.16    0.44   -0.27    0.00
+   7 3   H  1S         -0.01    0.16   -0.44   -0.27    0.00
+                           6         7
+                           V         V
+     EIGENVALUES --     0.58     0.69
+   1 1   O  1S         -0.13    0.00
+   2        2S          0.88    0.00
+   3        2PX         0.00    0.98
+   4        2PY        -0.74    0.00
+   5        2PZ         0.00    0.00
+   6 2   H  1S         -0.79   -0.84
+   7 3   H  1S         -0.79    0.84
+ SCF Done:  E(RHF) =  -74.9629   A.U. after    5 cycles
+ Normal termination of Gaussian 03 at Mon Jan  1 00:00:01 2024.

@@ -1,0 +1,764 @@
+# Copyright (c) d-SEAMS developers
+# Edits inside chemfiles' tng.tar.gz, applied by
+# chemfiles-0.10.4-external-sources.sh before chemfiles unpacks the archive.
+#
+# Hostile files, tng/src/lib/tng_io.c:
+#   Block headers and contents must fit in the file, and the block name
+#   read is checked. tng_freadstr terminates what it reads.
+#   The molecules block bounds every count by the block size, allocates
+#   zeroed arrays before it stores the counts, checks the molecule count
+#   product, requires chains, residues and atoms to add up, and checks
+#   every read. A block that fails leaves no molecules behind, since the
+#   callers go on after a failed block.
+#   Data blocks check their counts, strides, particle range and lengths
+#   against the block, refuse codecs this build cannot decode, and copy
+#   or byte-swap only the values read. gzip data must inflate to the
+#   recorded size.
+diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
+--- tng-a/tng/src/lib/tng_io.c	2026-11-21 00:05:04.000000000 +0000
++++ tng-b/tng/src/lib/tng_io.c	2026-11-21 00:54:55.000000000 +0000
+@@ -617,7 +617,9 @@
+         }
+     } while ((temp[count - 1] != '\0') && (count < TNG_MAX_STR_LEN));
+ 
+-    temp_alloc = (char*)realloc(*str, count);
++    /* A string of TNG_MAX_STR_LEN bytes is stored without its terminator,
++     * so keep room for one. */
++    temp_alloc = (char*)realloc(*str, count + 1);
+     if (!temp_alloc)
+     {
+         fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, line_nr);
+@@ -627,7 +629,8 @@
+     }
+     *str = temp_alloc;
+ 
+-    strncpy(*str, temp, count);
++    memcpy(*str, temp, count);
++    (*str)[count] = '\0';
+ 
+     if (hash_mode == TNG_USE_HASH)
+     {
+@@ -1095,6 +1098,19 @@
+         return (TNG_CRITICAL);
+     }
+ 
++    /* The readers size their buffers from these, so both parts of the
++     * block must be inside the file. */
++    if (block->header_contents_size < 0
++        || block->header_contents_size > tng_data->input_file_len - start_pos
++        || block->block_contents_size < 0
++        || block->block_contents_size
++                   > tng_data->input_file_len - start_pos - block->header_contents_size)
++    {
++        fprintf(stderr, "TNG library: Block sizes do not fit in the file. %s: %d\n", __FILE__,
++                __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     if (tng_file_input_numerical(tng_data, &block->id, sizeof(block->id), TNG_SKIP_HASH, 0, __LINE__)
+         == TNG_CRITICAL)
+     {
+@@ -1107,7 +1123,11 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &block->name, TNG_SKIP_HASH, 0, __LINE__);
++    if (tng_freadstr(tng_data, &block->name, TNG_SKIP_HASH, 0, __LINE__) != TNG_SUCCESS)
++    {
++        fprintf(stderr, "TNG library: Cannot read block name. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_file_input_numerical(tng_data, &block->block_version, sizeof(block->block_version),
+                                  TNG_SKIP_HASH, 0, __LINE__)
+@@ -2459,7 +2479,10 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &chain->name, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &chain->name, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_file_input_numerical(tng_data, &chain->n_residues, sizeof(chain->n_residues), hash_mode,
+                                  md5_state, __LINE__)
+@@ -2526,7 +2549,10 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &residue->name, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &residue->name, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_file_input_numerical(tng_data, &residue->n_atoms, sizeof(residue->n_atoms), hash_mode,
+                                  md5_state, __LINE__)
+@@ -2593,9 +2619,15 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &atom->name, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &atom->name, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+-    tng_freadstr(tng_data, &atom->atom_type, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &atom->atom_type, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+     return (TNG_SUCCESS);
+ }
+@@ -2763,11 +2795,12 @@
+  * @return TNG_SUCCESS (0) if successful or TNG_CRITICAL (2) if a major
+  * error has occured.
+  */
+-static tng_function_status tng_molecules_block_read(struct tng_trajectory*      tng_data,
+-                                                    const struct tng_gen_block* block,
+-                                                    const char                  hash_mode)
++static tng_function_status tng_molecules_block_contents_read(struct tng_trajectory*      tng_data,
++                                                             const struct tng_gen_block* block,
++                                                             const char                  hash_mode)
+ {
+     int64_t        start_pos, i, j, k, l;
++    int64_t        n_molecules, n_chains, n_residues, n_atoms, n_bonds, max_count;
+     tng_molecule_t molecule;
+     tng_chain_t    chain;
+     tng_residue_t  residue;
+@@ -2783,9 +2816,6 @@
+ 
+     start_pos = ftello(tng_data->input_file);
+ 
+-    /* FIXME: Does not check if the size of the contents matches the expected
+-     * size or if the contents can be read. */
+-
+     if (tng_data->molecules)
+     {
+         for (i = 0; i < tng_data->n_molecules; i++)
+@@ -2802,27 +2832,34 @@
+         md5_init(&md5_state);
+     }
+ 
+-    if (tng_file_input_numerical(tng_data, &tng_data->n_molecules, sizeof(tng_data->n_molecules),
++    if (tng_file_input_numerical(tng_data, &n_molecules, sizeof(n_molecules),
+                                  hash_mode, &md5_state, __LINE__)
+         == TNG_CRITICAL)
+     {
+         return (TNG_CRITICAL);
+     }
+ 
+-    if (tng_data->molecules)
++    /* Every molecule, chain, residue, atom and bond takes at least eight
++     * bytes of the block, which bounds all the counts read below. */
++    max_count = block->block_contents_size / 8;
++    if (n_molecules < 0 || n_molecules > max_count)
+     {
+-        free(tng_data->molecules);
++        fprintf(stderr, "TNG library: Invalid number of molecules %" PRId64 ". %s: %d\n",
++                n_molecules, __FILE__, __LINE__);
++        return (TNG_CRITICAL);
+     }
+ 
+     tng_data->n_particles = 0;
+ 
+-    tng_data->molecules =
+-            (struct tng_molecule*)malloc(tng_data->n_molecules * sizeof(struct tng_molecule));
++    /* zeroed, so that tng_molecule_destroy() can free a partly read molecule */
++    tng_data->molecules = (struct tng_molecule*)calloc(n_molecules ? n_molecules : 1,
++                                                       sizeof(struct tng_molecule));
+     if (!tng_data->molecules)
+     {
+         fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+         return (TNG_CRITICAL);
+     }
++    tng_data->n_molecules = n_molecules;
+ 
+     if (!tng_data->var_num_atoms_flag)
+     {
+@@ -2830,7 +2867,8 @@
+         {
+             free(tng_data->molecule_cnt_list);
+         }
+-        tng_data->molecule_cnt_list = (int64_t*)malloc(sizeof(int64_t) * tng_data->n_molecules);
++        tng_data->molecule_cnt_list =
++                (int64_t*)calloc(n_molecules ? n_molecules : 1, sizeof(int64_t));
+         if (!tng_data->molecule_cnt_list)
+         {
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+@@ -2843,8 +2881,6 @@
+     {
+         molecule = &tng_data->molecules[i];
+ 
+-        molecule->name = 0;
+-
+         if (tng_file_input_numerical(tng_data, &molecule->id, sizeof(molecule->id), hash_mode,
+                                      &md5_state, __LINE__)
+             == TNG_CRITICAL)
+@@ -2852,8 +2888,10 @@
+             return (TNG_CRITICAL);
+         }
+ 
+-        /*         fprintf(stderr, "TNG library: Read id: %" PRId64 " offset: %d\n", molecule->id, offset);*/
+-        tng_freadstr(tng_data, &molecule->name, hash_mode, &md5_state, __LINE__);
++        if (tng_freadstr(tng_data, &molecule->name, hash_mode, &md5_state, __LINE__) != TNG_SUCCESS)
++        {
++            return (TNG_CRITICAL);
++        }
+ 
+         if (tng_file_input_numerical(tng_data, &molecule->quaternary_str,
+                                      sizeof(molecule->quaternary_str), hash_mode, &md5_state, __LINE__)
+@@ -2872,85 +2910,55 @@
+             }
+         }
+ 
+-        if (tng_file_input_numerical(tng_data, &molecule->n_chains, sizeof(molecule->n_chains),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
++        /* the counts are stored in the molecule only once its arrays exist */
++        if (tng_file_input_numerical(tng_data, &n_chains, sizeof(n_chains), hash_mode,
++                                     &md5_state, __LINE__)
++                    == TNG_CRITICAL
++            || tng_file_input_numerical(tng_data, &n_residues, sizeof(n_residues), hash_mode,
++                                        &md5_state, __LINE__)
++                       == TNG_CRITICAL
++            || tng_file_input_numerical(tng_data, &n_atoms, sizeof(n_atoms), hash_mode,
++                                        &md5_state, __LINE__)
++                       == TNG_CRITICAL)
+         {
+             return (TNG_CRITICAL);
+         }
+-
+-        if (tng_file_input_numerical(tng_data, &molecule->n_residues, sizeof(molecule->n_residues),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
++        if (n_chains < 0 || n_chains > max_count || n_residues < 0 || n_residues > max_count
++            || n_atoms < 0 || n_atoms > max_count)
+         {
++            fprintf(stderr, "TNG library: Invalid molecule sizes. %s: %d\n", __FILE__, __LINE__);
+             return (TNG_CRITICAL);
+         }
+ 
+-        if (tng_file_input_numerical(tng_data, &molecule->n_atoms, sizeof(molecule->n_atoms),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
+-        {
+-            return (TNG_CRITICAL);
+-        }
+-
+-        tng_data->n_particles += molecule->n_atoms * tng_data->molecule_cnt_list[i];
+-
+-        if (molecule->n_chains > 0)
+-        {
+-            molecule->chains = (struct tng_chain*)malloc(molecule->n_chains * sizeof(struct tng_chain));
+-            if (!molecule->chains)
+-            {
+-                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                return (TNG_CRITICAL);
+-            }
+-
+-            chain = molecule->chains;
+-        }
+-        else
+-        {
+-            chain = 0;
+-        }
+-
+-        if (molecule->n_residues > 0)
++        if (!tng_data->var_num_atoms_flag)
+         {
+-            molecule->residues =
+-                    (struct tng_residue*)malloc(molecule->n_residues * sizeof(struct tng_residue));
+-            if (!molecule->residues)
++            int64_t cnt = tng_data->molecule_cnt_list[i];
++            if (cnt < 0 || (n_atoms > 0 && cnt > (INT64_MAX - tng_data->n_particles) / n_atoms))
+             {
+-                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                if (molecule->chains)
+-                {
+-                    free(molecule->chains);
+-                    molecule->chains = 0;
+-                }
++                fprintf(stderr, "TNG library: Invalid molecule count %" PRId64 ". %s: %d\n", cnt,
++                        __FILE__, __LINE__);
+                 return (TNG_CRITICAL);
+             }
+-
+-            residue = molecule->residues;
+-        }
+-        else
+-        {
+-            residue = 0;
++            tng_data->n_particles += n_atoms * cnt;
+         }
+ 
+-        molecule->atoms = (struct tng_atom*)malloc(molecule->n_atoms * sizeof(struct tng_atom));
+-        if (!molecule->atoms)
++        molecule->chains =
++                (struct tng_chain*)calloc(n_chains ? n_chains : 1, sizeof(struct tng_chain));
++        molecule->residues =
++                (struct tng_residue*)calloc(n_residues ? n_residues : 1, sizeof(struct tng_residue));
++        molecule->atoms = (struct tng_atom*)calloc(n_atoms ? n_atoms : 1, sizeof(struct tng_atom));
++        if (!molecule->chains || !molecule->residues || !molecule->atoms)
+         {
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-            if (molecule->chains)
+-            {
+-                free(molecule->chains);
+-                molecule->chains = 0;
+-            }
+-            if (molecule->residues)
+-            {
+-                free(molecule->residues);
+-                molecule->residues = 0;
+-            }
+             return (TNG_CRITICAL);
+         }
++        molecule->n_chains   = n_chains;
++        molecule->n_residues = n_residues;
++        molecule->n_atoms    = n_atoms;
+ 
+-        atom = molecule->atoms;
++        chain   = molecule->chains;
++        residue = molecule->residues;
++        atom    = molecule->atoms;
+ 
+         if (molecule->n_chains > 0)
+         {
+@@ -2959,28 +2967,36 @@
+             {
+                 chain->molecule = molecule;
+ 
+-                chain->name = 0;
+-
+-                tng_chain_data_read(tng_data, chain, hash_mode, &md5_state);
+-
+-                if (j == 0)
++                if (tng_chain_data_read(tng_data, chain, hash_mode, &md5_state) != TNG_SUCCESS)
+                 {
+-                    chain->residues = molecule->residues;
+-                    residue         = chain->residues;
++                    return (TNG_CRITICAL);
+                 }
+-                else
++                if (chain->n_residues < 0
++                    || chain->n_residues > molecule->n_residues - (residue - molecule->residues))
+                 {
+-                    chain->residues = residue;
++                    fprintf(stderr, "TNG library: Chain has more residues than its molecule. %s: %d\n",
++                            __FILE__, __LINE__);
++                    return (TNG_CRITICAL);
+                 }
+ 
++                chain->residues = residue;
++
+                 /* Read the residues of the chain */
+                 for (k = 0; k < chain->n_residues; k++)
+                 {
+                     residue->chain = chain;
+ 
+-                    residue->name = 0;
+-
+-                    tng_residue_data_read(tng_data, residue, hash_mode, &md5_state);
++                    if (tng_residue_data_read(tng_data, residue, hash_mode, &md5_state) != TNG_SUCCESS)
++                    {
++                        return (TNG_CRITICAL);
++                    }
++                    if (residue->n_atoms < 0
++                        || residue->n_atoms > molecule->n_atoms - (atom - molecule->atoms))
++                    {
++                        fprintf(stderr, "TNG library: Residue has more atoms than its molecule. %s: %d\n",
++                                __FILE__, __LINE__);
++                        return (TNG_CRITICAL);
++                    }
+ 
+                     residue->atoms_offset = atom - molecule->atoms;
+                     /* Read the atoms of the residue */
+@@ -2988,10 +3004,10 @@
+                     {
+                         atom->residue = residue;
+ 
+-                        atom->name      = 0;
+-                        atom->atom_type = 0;
+-
+-                        tng_atom_data_read(tng_data, atom, hash_mode, &md5_state);
++                        if (tng_atom_data_read(tng_data, atom, hash_mode, &md5_state) != TNG_SUCCESS)
++                        {
++                            return (TNG_CRITICAL);
++                        }
+ 
+                         atom++;
+                     }
+@@ -3008,9 +3024,17 @@
+                 {
+                     residue->chain = 0;
+ 
+-                    residue->name = 0;
+-
+-                    tng_residue_data_read(tng_data, residue, hash_mode, &md5_state);
++                    if (tng_residue_data_read(tng_data, residue, hash_mode, &md5_state) != TNG_SUCCESS)
++                    {
++                        return (TNG_CRITICAL);
++                    }
++                    if (residue->n_atoms < 0
++                        || residue->n_atoms > molecule->n_atoms - (atom - molecule->atoms))
++                    {
++                        fprintf(stderr, "TNG library: Residue has more atoms than its molecule. %s: %d\n",
++                                __FILE__, __LINE__);
++                        return (TNG_CRITICAL);
++                    }
+ 
+                     residue->atoms_offset = atom - molecule->atoms;
+                     /* Read the atoms of the residue */
+@@ -3018,7 +3042,10 @@
+                     {
+                         atom->residue = residue;
+ 
+-                        tng_atom_data_read(tng_data, atom, hash_mode, &md5_state);
++                        if (tng_atom_data_read(tng_data, atom, hash_mode, &md5_state) != TNG_SUCCESS)
++                        {
++                            return (TNG_CRITICAL);
++                        }
+ 
+                         atom++;
+                     }
+@@ -3031,47 +3058,46 @@
+                 {
+                     atom->residue = 0;
+ 
+-                    atom->name      = 0;
+-                    atom->atom_type = 0;
+-
+-                    tng_atom_data_read(tng_data, atom, hash_mode, &md5_state);
++                    if (tng_atom_data_read(tng_data, atom, hash_mode, &md5_state) != TNG_SUCCESS)
++                    {
++                        return (TNG_CRITICAL);
++                    }
+ 
+                     atom++;
+                 }
+             }
+         }
+ 
+-        if (tng_file_input_numerical(tng_data, &molecule->n_bonds, sizeof(molecule->n_bonds),
+-                                     hash_mode, &md5_state, __LINE__)
++        /* Entries not covered by a chain or residue would never be read */
++        if (atom - molecule->atoms != molecule->n_atoms
++            || (molecule->n_chains > 0 && residue - molecule->residues != molecule->n_residues))
++        {
++            fprintf(stderr, "TNG library: Molecule residue or atom counts do not add up. %s: %d\n",
++                    __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++
++        if (tng_file_input_numerical(tng_data, &n_bonds, sizeof(n_bonds), hash_mode, &md5_state,
++                                     __LINE__)
+             == TNG_CRITICAL)
+         {
+             return (TNG_CRITICAL);
+         }
++        if (n_bonds < 0 || n_bonds > max_count)
++        {
++            fprintf(stderr, "TNG library: Invalid number of bonds. %s: %d\n", __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
+ 
+-        if (molecule->n_bonds > 0)
++        if (n_bonds > 0)
+         {
+-            tng_data->molecules[i].bonds =
+-                    (struct tng_bond*)malloc(molecule->n_bonds * sizeof(struct tng_bond));
++            molecule->bonds = (struct tng_bond*)calloc(n_bonds, sizeof(struct tng_bond));
+             if (!molecule->bonds)
+             {
+                 fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                if (molecule->chains)
+-                {
+-                    free(molecule->chains);
+-                    molecule->chains = 0;
+-                }
+-                if (molecule->residues)
+-                {
+-                    free(molecule->residues);
+-                    molecule->residues = 0;
+-                }
+-                if (molecule->atoms)
+-                {
+-                    free(molecule->atoms);
+-                    molecule->atoms = 0;
+-                }
+                 return (TNG_CRITICAL);
+             }
++            molecule->n_bonds = n_bonds;
+ 
+             bond = molecule->bonds;
+ 
+@@ -3128,6 +3154,29 @@
+     return (TNG_SUCCESS);
+ }
+ 
++static tng_function_status tng_molecules_block_read(struct tng_trajectory*      tng_data,
++                                                    const struct tng_gen_block* block,
++                                                    const char                  hash_mode)
++{
++    int64_t             i;
++    tng_function_status stat = tng_molecules_block_contents_read(tng_data, block, hash_mode);
++
++    /* Callers go on after a failed block, they must not see the molecules,
++     * chains, residues and atoms that were never read. */
++    if (stat != TNG_SUCCESS && tng_data->molecules)
++    {
++        for (i = 0; i < tng_data->n_molecules; i++)
++        {
++            tng_molecule_destroy(tng_data, &tng_data->molecules[i]);
++        }
++        free(tng_data->molecules);
++        tng_data->molecules   = 0;
++        tng_data->n_molecules = 0;
++        tng_data->n_particles = 0;
++    }
++    return (stat);
++}
++
+ /**
+  * @brief Write a molecules block.
+  * @param tng_data is a trajectory data container.
+@@ -4467,6 +4516,13 @@
+         fprintf(stderr, "TNG library: Error uncompressing gzipped data. %s: %d\n", __FILE__, __LINE__);
+         return (TNG_FAILURE);
+     }
++    if ((int64_t)new_len != uncompressed_len)
++    {
++        free(dest);
++        fprintf(stderr, "TNG library: Gzipped data is shorter than its block. %s: %d\n", __FILE__,
++                __LINE__);
++        return (TNG_FAILURE);
++    }
+ 
+     free(*data);
+ 
+@@ -4962,7 +5018,8 @@
+                                          md5_state_t*                md5_state)
+ {
+     int64_t                    i, j, k, tot_n_particles, n_frames_div, offset;
+-    int64_t                    full_data_len;
++    int64_t                    full_data_len, expected_len;
++    char*                      values_start;
+     int                        size, len;
+     char ***                   first_dim_values, **second_dim_values;
+     tng_data_t                 data;
+@@ -4982,6 +5039,14 @@
+         default: size = sizeof(double);
+     }
+ 
++    if (n_values <= 0 || n_frames <= 0 || stride_length <= 0 || n_particles < 0 || block_data_len <= 0
++        || block_data_len > tng_data->input_file_len)
++    {
++        fprintf(stderr, "TNG library: Invalid data block (%s) dimensions. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     if (n_particles > 0)
+     {
+         is_particle_data = TNG_TRUE;
+@@ -5004,6 +5069,12 @@
+     {
+         stat = tng_data_find(tng_data, block->id, &data);
+     }
++    if (stat == TNG_SUCCESS && data->datatype != datatype)
++    {
++        fprintf(stderr, "TNG library: Data block (%s) changes its data type. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_data->current_trajectory_frame_set_input_file_pos > 0)
+     {
+@@ -5106,6 +5177,29 @@
+ 
+     n_frames_div = (n_frames - 1) / stride_length + 1;
+ 
++    /* The values of the block go to [num_first_particle, num_first_particle
++     * + n_particles) of an array of tot_n_particles: check that range, and
++     * that neither the array nor the block size overflows. */
++    if (is_particle_data == TNG_TRUE
++        && (tot_n_particles <= 0 || num_first_particle < 0 || n_particles > tot_n_particles
++            || num_first_particle > tot_n_particles - n_particles))
++    {
++        fprintf(stderr, "TNG library: Data block (%s) particles are out of range. %s: %d\n",
++                block->name, __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    if (n_frames_div > INT64_MAX / size / n_values / tot_n_particles)
++    {
++        fprintf(stderr, "TNG library: Data block (%s) is too large. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    expected_len = n_frames_div * size * n_values;
++    if (is_particle_data == TNG_TRUE)
++    {
++        expected_len *= n_particles;
++    }
++
+     contents = (char*)malloc(block_data_len);
+     if (!contents)
+     {
+@@ -5116,6 +5210,7 @@
+     if (fread(contents, block_data_len, 1, tng_data->input_file) == 0)
+     {
+         fprintf(stderr, "TNG library: Cannot read block. %s: %d\n", __FILE__, __LINE__);
++        free(contents);
+         return (TNG_CRITICAL);
+     }
+ 
+@@ -5126,16 +5221,13 @@
+ 
+     if (codec_id != TNG_UNCOMPRESSED)
+     {
+-        full_data_len = n_frames_div * size * n_values;
+-        if (is_particle_data == TNG_TRUE)
+-        {
+-            full_data_len *= n_particles;
+-        }
++        full_data_len = expected_len;
+         switch (codec_id)
+         {
+             case TNG_XTC_COMPRESSION:
+                 fprintf(stderr, "TNG library: XTC compression not implemented yet.\n");
+-                break;
++                free(contents);
++                return (TNG_CRITICAL);
+             case TNG_TNG_COMPRESSION:
+                 /*            fprintf(stderr, "TNG library: Before TNG uncompression: %" PRId64 "\n", block->block_contents_size);*/
+                 if (tng_uncompress(tng_data, block, datatype, &contents, full_data_len) != TNG_SUCCESS)
+@@ -5159,15 +5251,33 @@
+                 }
+                 /*         fprintf(stderr, "TNG library: After compression: %" PRId64 "\n", block->block_contents_size); */
+                 break;
++            default:
++                fprintf(stderr, "TNG library: Unknown compression codec %" PRId64 ". %s: %d\n",
++                        codec_id, __FILE__, __LINE__);
++                free(contents);
++                return (TNG_CRITICAL);
+         }
+     }
+     else
+     {
+         full_data_len = block_data_len;
+     }
++    /* Strings have a variable length, the other types exactly fill the block. */
++    if (datatype != TNG_CHAR_DATA)
++    {
++        if (full_data_len < expected_len)
++        {
++            fprintf(stderr, "TNG library: Data block (%s) is too short. %s: %d\n", block->name,
++                    __FILE__, __LINE__);
++            free(contents);
++            return (TNG_CRITICAL);
++        }
++        full_data_len = expected_len;
++    }
+ 
+     /* Allocate memory */
+-    if (!data->values || data->n_frames != n_frames || data->n_values_per_frame != n_values)
++    if (!data->values || data->n_frames != n_frames || data->n_values_per_frame != n_values
++        || data->stride_length != stride_length)
+     {
+         if (is_particle_data == TNG_TRUE)
+         {
+@@ -5203,7 +5313,15 @@
+                     second_dim_values = first_dim_values[j];
+                     for (k = 0; k < n_values; k++)
+                     {
+-                        len = tng_min_size(strlen(contents + offset) + 1, TNG_MAX_STR_LEN);
++                        if (offset >= full_data_len)
++                        {
++                            fprintf(stderr, "TNG library: Data block (%s) has too few strings. %s: %d\n",
++                                    block->name, __FILE__, __LINE__);
++                            free(contents);
++                            return (TNG_CRITICAL);
++                        }
++                        len = tng_min_size(strnlen(contents + offset, full_data_len - offset) + 1,
++                                           TNG_MAX_STR_LEN);
+                         if (second_dim_values[k])
+                         {
+                             free(second_dim_values[k]);
+@@ -5216,7 +5334,8 @@
+                             free(contents);
+                             return (TNG_CRITICAL);
+                         }
+-                        strncpy(second_dim_values[k], contents + offset, len);
++                        memcpy(second_dim_values[k], contents + offset, len - 1);
++                        second_dim_values[k][len - 1] = '\0';
+                         offset += len;
+                     }
+                 }
+@@ -5228,7 +5347,15 @@
+             {
+                 for (j = 0; j < n_values; j++)
+                 {
+-                    len = tng_min_size(strlen(contents + offset) + 1, TNG_MAX_STR_LEN);
++                    if (offset >= full_data_len)
++                    {
++                        fprintf(stderr, "TNG library: Data block (%s) has too few strings. %s: %d\n",
++                                block->name, __FILE__, __LINE__);
++                        free(contents);
++                        return (TNG_CRITICAL);
++                    }
++                    len = tng_min_size(strnlen(contents + offset, full_data_len - offset) + 1,
++                                       TNG_MAX_STR_LEN);
+                     if (data->strings[0][i][j])
+                     {
+                         free(data->strings[0][i][j]);
+@@ -5240,7 +5367,8 @@
+                         free(contents);
+                         return (TNG_CRITICAL);
+                     }
+-                    strncpy(data->strings[0][i][j], contents + offset, len);
++                    memcpy(data->strings[0][i][j], contents + offset, len - 1);
++                    data->strings[0][i][j][len - 1] = '\0';
+                     offset += len;
+                 }
+             }
+@@ -5248,15 +5376,12 @@
+     }
+     else
+     {
++        values_start = (char*)data->values;
+         if (is_particle_data)
+         {
+-            memcpy((char*)data->values + n_frames_div * size * n_values * num_first_particle,
+-                   contents, full_data_len);
+-        }
+-        else
+-        {
+-            memcpy(data->values, contents, full_data_len);
++            values_start += n_frames_div * size * n_values * num_first_particle;
+         }
++        memcpy(values_start, contents, full_data_len);
+         /* Endianness is handled by the TNG compression library. TNG compressed blocks are always
+          * written as little endian by the compression library. */
+         if (codec_id != TNG_TNG_COMPRESSION)
+@@ -5269,7 +5394,7 @@
+                         for (i = 0; i < full_data_len; i += size)
+                         {
+                             if (tng_data->input_endianness_swap_func_32(
+-                                        tng_data, (uint32_t*)((char*)data->values + i))
++                                        tng_data, (uint32_t*)(values_start + i))
+                                 != TNG_SUCCESS)
+                             {
+                                 fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
+@@ -5285,7 +5410,7 @@
+                         for (i = 0; i < full_data_len; i += size)
+                         {
+                             if (tng_data->input_endianness_swap_func_64(
+-                                        tng_data, (uint64_t*)((char*)data->values + i))
++                                        tng_data, (uint64_t*)(values_start + i))
+                                 != TNG_SUCCESS)
+                             {
+                                 fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",

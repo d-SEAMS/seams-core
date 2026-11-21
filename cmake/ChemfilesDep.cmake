@@ -13,12 +13,14 @@
 # empty counts line, which 0.10.4 indexed as counts[0].
 # cmake/patches/chemfiles-0.10.4-molfiles.patch builds every molfile
 # plugin that reads atoms and fixes the Molfile<F> crashes those plugins hit.
-# cmake/patches/chemfiles-0.10.4-external-sources.sh then repacks
-# molfiles.tar.gz with the QM fields, the two log plugins and the
-# hostile-file fixes (molfile-sources.patch). cmake/patches/chemfiles-0.10.4-hostile.patch
-# stops a whitespace mmCIF, a LAMMPS Data file with no section, a
-# LAMMPS atom count that does not fit, and an over-long XDR record
-# from crashing or hanging.
+# cmake/patches/chemfiles-0.10.4-external-sources.sh then repacks the
+# bundled archives: molfiles.tar.gz with the QM fields, the two log
+# plugins and the hostile-file fixes (molfile-sources.patch), tng.tar.gz
+# and mmtf-cpp.tar.gz with their hostile-file fixes (tng-sources.patch,
+# mmtf-sources.patch). cmake/patches/chemfiles-0.10.4-hostile.patch
+# stops malformed files from crashing or hanging the native readers
+# (mmCIF, LAMMPS Data, XDR/XTC/TRR, TPR, DCD, Amber NetCDF, CSSR, GRO,
+# SMI) and the shared text and binary file layers.
 # SEAMS_CHEMFILES_FORCE_VENDORED skips the installed copy. The Meson
 # fallback sets it after its own probe has already rejected the system
 # library, so this file does not probe twice and does not import the
@@ -103,7 +105,7 @@ if(SEAMS_WITH_CHEMFILES)
       GIT_REPOSITORY https://github.com/chemfiles/chemfiles.git
       GIT_TAG 0.10.4
       GIT_SHALLOW TRUE
-      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && (patch -p1 -R -s -f --dry-run -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-molfiles.patch > /dev/null 2>&1 || patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-molfiles.patch) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-external-sources.sh molfiles molfile-sources && (patch -p1 -R -s -f --dry-run -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-hostile.patch > /dev/null 2>&1 || patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-hostile.patch) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && (patch -p1 -R -s -f --dry-run -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-molfiles.patch > /dev/null 2>&1 || patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-molfiles.patch) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-external-sources.sh molfiles molfile-sources && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-external-sources.sh tng tng-sources && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-external-sources.sh mmtf-cpp mmtf-sources && (patch -p1 -R -s -f --dry-run -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-hostile.patch > /dev/null 2>&1 || patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-hostile.patch) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(CHFL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(CHFL_BUILD_DOCUMENTATION OFF CACHE BOOL "" FORCE)

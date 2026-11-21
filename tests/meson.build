@@ -86,6 +86,7 @@ if readcon_dep.found()
 endif
 if chemfiles_dep.found()
   test_sources += {'chemfiles_io': 'test_chemfiles_io.cpp'}
+  test_sources += {'chemfiles_hostile': 'test_chemfiles_hostile.cpp'}
   executable(
     'derive_confined_water_fixture',
     'fixtures/derive_confined_water_fixture.cpp',

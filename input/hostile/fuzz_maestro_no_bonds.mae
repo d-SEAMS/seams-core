@@ -1,0 +1,27 @@
+{
+  s_m_m2io_version
+  :::
+  2.0.0
+}
+
+f_m_ct {
+  s_m_title
+  :::
+  water
+  m_atom[3] {
+    # First column is atom index #
+    i_m_mmod_type
+    r_m_x_coord
+    r_m_y_coord
+    r_m_z_coord
+    i_m_residue_number
+    s_m_pdb_residue_name
+    i_m_atomic_number
+    s_m_pdb_atom_name
+    :::
+    1 16 0.000000 0.000000 0.000000 1 "HOH " 8 " O  "
+    2 42 0.757000 0.586000 0.000000 1 "HOH " 1 " H1 "
+    3 42 -0.757000 0.586000 0.000000 1 "HOH " 1 " H2 "
+    :::
+  }
+}

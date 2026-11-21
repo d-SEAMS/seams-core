@@ -1,0 +1,142 @@
+# Copyright (c) d-SEAMS developers
+# Edits inside chemfiles' mmtf-cpp.tar.gz, applied by
+# chemfiles-0.10.4-external-sources.sh before chemfiles unpacks the archive.
+#
+# Hostile files, mmtf-cpp/include/mmtf/binary_decoder.hpp:
+#   Run-length pairs must be complete, with non-negative runs that add up
+#   to no more than the binary's declared length; the decoder reserved the
+#   sum of the runs before (53 GB for a 65 kB file).
+#   Delta and recursive-index sums that overflow their integer type, a
+#   string length below one and a zero divisor are decode errors. A binary
+#   shorter than its 12-byte header is an error from both constructors.
+diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp
+--- mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 00:18:48.000000000 +0000
++++ mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 00:54:55.000000000 +0000
+@@ -122,6 +122,10 @@
+     template<typename Int>
+     void decodeDivide_(const std::vector<Int>& input, float const divisor,
+                        std::vector<float>& output) const;
++
++    // throws if value does not fit in Int
++    template<typename Int>
++    Int checkedSum_(int64_t value) const;
+ };
+ 
+ // *************************************************************************
+@@ -213,6 +217,11 @@
+ inline BinaryDecoder::BinaryDecoder(const std::string& str,
+                                     const std::string& key)
+                                    : key_(key) {
++    if (str.size() < 12) {
++        std::stringstream err;
++        err << "The '" + key + "' entry is too short " << str.size();
++        throw DecodeError(err.str());
++    }
+     this->initFromData(str.data(), str.size());
+ }
+ 
+@@ -420,6 +429,16 @@
+ }
+ 
+ // checks
++template<typename Int>
++Int BinaryDecoder::checkedSum_(int64_t value) const {
++    if (value < std::numeric_limits<Int>::min() || value > std::numeric_limits<Int>::max()) {
++        std::stringstream err;
++        err << "Integer overflow while decoding binary '" << key_ << "'";
++        throw DecodeError(err.str());
++    }
++    return Int(value);
++}
++
+ inline void BinaryDecoder::checkLength_(int32_t exp_length) const {
+     if (length_ != exp_length) {
+         std::stringstream err;
+@@ -479,6 +498,11 @@
+     char NULL_BYTE = 0x00;
+     // check parameter
+     const int32_t str_len = parameter_;
++    if (str_len <= 0) {
++        std::stringstream err;
++        err << "Invalid string length " << str_len << " for binary '" << key_ << "'";
++        throw DecodeError(err.str());
++    }
+     checkDivisibleBy_(str_len);
+     // prepare memory
+     output.resize(encodedDataLength_ / str_len);
+@@ -494,15 +518,30 @@
+ void BinaryDecoder::runLengthDecode_(const std::vector<Int>& input,
+                       std::vector<IntOut>& output) const {
+     // we work with pairs of numbers
+-    checkDivisibleBy_(2);
+-    // find out size of resulting vector (for speed)
+-    size_t out_size = 0;
++    if (input.size() % 2 != 0) {
++        std::stringstream err;
++        err << "Run-length encoded binary '" << key_ << "' has an odd number of values";
++        throw DecodeError(err.str());
++    }
++    // the run lengths come from the file, check them against the declared
++    // length before allocating anything
++    int64_t out_size = 0;
+     for (size_t i = 0; i < input.size(); i += 2) {
++        if (input[i + 1] < 0) {
++            std::stringstream err;
++            err << "Negative run length " << input[i + 1] << " in binary '" << key_ << "'";
++            throw DecodeError(err.str());
++        }
+         out_size += input[i + 1];
++        if (out_size > length_) {
++            std::stringstream err;
++            err << "Run lengths in binary '" << key_ << "' exceed its length " << length_;
++            throw DecodeError(err.str());
++        }
+     }
+     // reserve space (for speed)
+     output.clear();
+-    output.reserve(out_size);
++    output.reserve(static_cast<size_t>(out_size));
+     // get data
+     for (size_t i = 0; i < input.size(); i += 2) {
+         const IntOut value = IntOut(input[i]);
+@@ -524,13 +563,13 @@
+     // get data
+     output.push_back(input[0]);
+     for (size_t i = 1; i < input.size(); ++i) {
+-        output.push_back(output[i - 1] + input[i]);
++        output.push_back(checkedSum_<Int>(int64_t(output[i - 1]) + input[i]));
+     }
+ }
+ template<typename Int>
+ void BinaryDecoder::deltaDecode_(std::vector<Int>& in_out) const {
+     for (size_t i = 1; i < in_out.size(); ++i) {
+-        in_out[i] = in_out[i - 1] + in_out[i];
++        in_out[i] = checkedSum_<Int>(int64_t(in_out[i - 1]) + in_out[i]);
+     }
+ }
+ 
+@@ -550,11 +589,11 @@
+     output.clear();
+     output.reserve(out_size);
+     // get data
+-    Int cur_val = 0;
++    int64_t cur_val = 0;
+     for (size_t i = 0; i < input.size(); ++i) {
+-        cur_val += input[i];
++        cur_val = checkedSum_<Int>(cur_val + input[i]);
+         if (input[i] != min_int && input[i] != max_int) {
+-            output.push_back(cur_val);
++            output.push_back(Int(cur_val));
+             cur_val = 0;
+         }
+     }
+@@ -565,6 +604,9 @@
+ void BinaryDecoder::decodeDivide_(const std::vector<Int>& input, float const divisor,
+                                   std::vector<float>& output) const {
+     // reserve space and get inverted divisor (for speed)
++    if (divisor == 0) {
++        throw DecodeError("Zero divisor for binary '" + key_ + "'");
++    }
+     output.clear();
+     output.reserve(input.size());
+     float inv_div = float(1) / divisor;
