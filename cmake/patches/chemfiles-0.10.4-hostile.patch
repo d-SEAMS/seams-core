@@ -1576,7 +1576,7 @@ diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
              }
 diff -ruN host-a/src/formats/XYZ.cpp host-b/src/formats/XYZ.cpp
 --- host-a/src/formats/XYZ.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/XYZ.cpp	2026-11-21 06:22:02.143843888 +0000
++++ host-b/src/formats/XYZ.cpp	2026-11-21 11:59:22.554310255 +0000
 @@ -443,6 +443,11 @@
          while (!done()) {
              skip_whitespace();
@@ -1589,6 +1589,20 @@ diff -ruN host-a/src/formats/XYZ.cpp host-b/src/formats/XYZ.cpp
              if (!name.empty() && current() == '=') {
                  advance();
              } else {
+@@ -622,9 +627,11 @@
+             continue;
+         }
+ 
+-        if (repeat == 0) {
++        constexpr size_t MAX_EXTENDED_XYZ_PROPERTIES = 4096;
++        if (repeat == 0 || repeat > MAX_EXTENDED_XYZ_PROPERTIES
++            || properties.size() > MAX_EXTENDED_XYZ_PROPERTIES - repeat) {
+             warning("Extended XYZ", "invalid type repeat for {} in Properties='{}'", name, input);
+-            continue;
++            return {};
+         } else if (repeat == 1) {
+             properties.emplace_back(extended_property{name, type});
+         } else {
 diff -ruN host-a/src/parse.cpp host-b/src/parse.cpp
 --- host-a/src/parse.cpp	2026-11-21 06:14:16.849019156 +0000
 +++ host-b/src/parse.cpp	2026-11-21 07:41:48.204016589 +0000

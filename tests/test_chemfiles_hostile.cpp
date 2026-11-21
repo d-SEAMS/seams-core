@@ -415,6 +415,13 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   const auto missingXbgf = readAll("hostile/does_not_exist_xbgf.xbgf",
                                    "Internal Paratool Format");
   REQUIRE_FALSE(missingXbgf.error.empty());
+
+  // An extended XYZ Properties repeat count of 32147483647 must not spin
+  // allocating billions of property entries.
+  const auto xyzRepeat = readAll("hostile/fuzz_xyz_huge_repeat.xyz", "XYZ");
+  REQUIRE(xyzRepeat.error.empty());
+  REQUIRE(xyzRepeat.steps == 1);
+  REQUIRE(xyzRepeat.natoms == 1);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",
