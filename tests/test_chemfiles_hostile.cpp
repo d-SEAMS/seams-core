@@ -351,6 +351,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_xtc2_index_oob.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_xtc2_index_neg1123.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_xtc2_index_m1.tng", "TNG", kTngErr},
+           // XTC3 auxiliary table larger than the coordinate block
+           Refused{"fuzz_tng_xtc3_huge_table.tng", "TNG", kTngErr},
            // Streams written by the broken Huffman length sort are not decodable
            Refused{"fuzz_tng_bwlzh_roundtrip.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_xtc3_roundtrip.tng", "TNG", kTngErr},

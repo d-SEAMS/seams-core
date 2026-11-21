@@ -2606,7 +2606,11 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
 -    int bwlzh_buf_len = (int)(((unsigned int)(*ptr)[0]) | (((unsigned int)(*ptr)[1]) << 8)
 -                              | (((unsigned int)(*ptr)[2]) << 16) | (((unsigned int)(*ptr)[3]) << 24));
 +    int bwlzh_buf_len;
-+    if (nvals < 0 || (size_t)nvals > (size_t)-1 / sizeof(**vals) || xtc3_need(*ptr, 4))
++    /* The table cannot be longer than the coordinate block being unpacked,
++       and it has to fit in one 4 GiB allocation. */
++    if (nvals < 0 || nvals > xtc3_out_len
++        || (size_t)nvals > ((size_t)4096 << 20) / sizeof(**vals)
++        || (size_t)nvals > (size_t)-1 / sizeof(**vals) || xtc3_need(*ptr, 4))
 +    {
 +        return 1;
 +    }
@@ -2633,7 +2637,11 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
 -    int base_buf_len = (int)(((unsigned int)(*ptr)[0]) | (((unsigned int)(*ptr)[1]) << 8)
 -                             | (((unsigned int)(*ptr)[2]) << 16) | (((unsigned int)(*ptr)[3]) << 24));
 +    int base_buf_len;
-+    if (nvals < 0 || (size_t)nvals > (size_t)-1 / sizeof(**vals) || xtc3_need(*ptr, 4))
++    /* The table cannot be longer than the coordinate block being unpacked,
++       and it has to fit in one 4 GiB allocation. */
++    if (nvals < 0 || nvals > xtc3_out_len
++        || (size_t)nvals > ((size_t)4096 << 20) / sizeof(**vals)
++        || (size_t)nvals > (size_t)-1 / sizeof(**vals) || xtc3_need(*ptr, 4))
 +    {
 +        return 1;
 +    }
