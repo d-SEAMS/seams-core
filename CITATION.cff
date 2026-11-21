@@ -15,8 +15,10 @@ authors:
   - family-names: Goswami
     given-names: Rohit
     orcid: "https://orcid.org/0000-0002-2393-8056"
-  - family-names: S
+  - family-names: Goswami
     given-names: Ruhila
+    orcid: "https://orcid.org/0000-0002-5443-9356"
+    affiliation: "Faculty of Life and Environmental Sciences, University of Iceland"
 preferred-citation:
   type: article
   title: "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations"
