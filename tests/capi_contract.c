@@ -880,6 +880,150 @@ static void hydrogen_frame_contract(void) {
   seams_system_destroy(sys);
 }
 
+static seams_system *small_frame(const double *xyz, size_t n, double edge) {
+  const double box[9] = {0, 0, 0, edge, edge, edge, 0, 0, 0};
+  seams_system *sys = seams_system_create();
+  if (sys != NULL && seams_system_set_atoms(sys, xyz, n, box, 9, NULL, NULL) != SEAMS_OK) {
+    seams_system_destroy(sys);
+    return NULL;
+  }
+  return sys;
+}
+
+static void csr_fails(const int *offsets, size_t offsets_len, const int *columns,
+                      size_t columns_len, int max_depth, const seams_system *geometry,
+                      seams_status want, const char *what) {
+  static int sentinel;
+  seams_rings *out = (seams_rings *)(void *)&sentinel;
+  expect(seams_rings_from_csr(offsets, offsets_len, columns, columns_len, max_depth, geometry,
+                              &out),
+         want, "seams_rings_from_csr", what);
+  truth(out == NULL, "seams_rings_from_csr", "a failed call leaves *out NULL");
+}
+
+/* Every rejected input of seams_rings_from_csr and seams_rings_winding. */
+static void explicit_graph_contract(void) {
+  const size_t over = (size_t)INT_MAX + 1;
+  const int off[4] = {0, 1, 2, 3};
+  const int col[3] = {1, 2, 0};
+  const int off_late[4] = {1, 1, 2, 3};
+  const int off_short[4] = {0, 1, 2, 2};
+  const int off_back[4] = {0, 2, 1, 3};
+  const int col_out[3] = {1, 2, 3};
+  const int col_neg[3] = {1, 2, -1};
+  expect(seams_rings_from_csr(off, 4, col, 3, 3, NULL, NULL), SEAMS_ERR_NULL,
+         "seams_rings_from_csr", "NULL output");
+  csr_fails(NULL, 4, col, 3, 3, NULL, SEAMS_ERR_NULL, "NULL offsets");
+  csr_fails(off, 4, NULL, 3, 3, NULL, SEAMS_ERR_NULL, "NULL columns with a count");
+  csr_fails(off, 0, col, 3, 3, NULL, SEAMS_ERR_RANGE, "no offsets");
+  csr_fails(off, over + 1, col, 3, 3, NULL, SEAMS_ERR_RANGE, "vertex count above INT_MAX");
+  csr_fails(off, 4, col, over, 3, NULL, SEAMS_ERR_RANGE, "column count above INT_MAX");
+  csr_fails(off, 4, col, 3, 2, NULL, SEAMS_ERR_RANGE, "max_depth below 3");
+  csr_fails(off, 4, col, 3, 13, NULL, SEAMS_ERR_RANGE, "max_depth above 12");
+  csr_fails(off, 4, col, 3, 3, g_empty, SEAMS_ERR_STATE, "geometry never filled");
+  csr_fails(off, 4, col, 3, 3, g_good, SEAMS_ERR_RANGE, "geometry atom count differs");
+  csr_fails(off_late, 4, col, 3, 3, NULL, SEAMS_ERR_ARG, "offsets do not start at zero");
+  csr_fails(off_short, 4, col, 3, 3, NULL, SEAMS_ERR_ARG, "offsets do not span the columns");
+  csr_fails(off_back, 4, col, 3, 3, NULL, SEAMS_ERR_ARG, "offsets decrease");
+  csr_fails(off, 4, col_out, 3, 3, NULL, SEAMS_ERR_ARG, "column past the last vertex");
+  csr_fails(off, 4, col_neg, 3, 3, NULL, SEAMS_ERR_ARG, "negative column");
+
+  const char *fn = "seams_rings_winding";
+  int winding[1] = {0};
+  int contractible[1] = {0};
+  seams_rings *bare = NULL;
+  expect(seams_rings_from_csr(off, 4, col, 3, 3, NULL, &bare), SEAMS_OK,
+         "seams_rings_from_csr", "triangle without geometry");
+  expect(seams_rings_winding(bare, 0, winding, 1, contractible, 1), SEAMS_ERR_STATE, fn,
+         "rings without geometry");
+  seams_rings_destroy(bare);
+
+  const double triangle[9] = {1, 4, 4, 4, 4, 4, 7, 4, 4};
+  seams_system *sys = small_frame(triangle, 3, 9.0);
+  seams_rings *rings = NULL;
+  truth(sys != NULL, fn, "triangle frame");
+  expect(seams_rings_from_csr(off, 4, col, 3, 3, sys, &rings), SEAMS_OK,
+         "seams_rings_from_csr", "triangle with geometry");
+  expect(seams_rings_winding(NULL, 0, winding, 1, contractible, 1), SEAMS_ERR_NULL, fn,
+         "NULL rings");
+  expect(seams_rings_winding(rings, 0, NULL, 1, NULL, 1), SEAMS_ERR_NULL, fn,
+         "both outputs NULL");
+  expect(seams_rings_winding(rings, -1, winding, 1, contractible, 1), SEAMS_ERR_RANGE, fn,
+         "negative axis");
+  expect(seams_rings_winding(rings, 3, winding, 1, contractible, 1), SEAMS_ERR_RANGE, fn,
+         "axis past z");
+  expect(seams_rings_winding(rings, 0, winding, 0, contractible, 1), SEAMS_ERR_RANGE, fn,
+         "short winding buffer");
+  expect(seams_rings_winding(rings, 0, winding, 1, contractible, 0), SEAMS_ERR_RANGE, fn,
+         "short contractible buffer");
+  expect(seams_rings_winding(rings, 0, NULL, 0, contractible, 1), SEAMS_OK, fn,
+         "contractible only");
+  truth(contractible[0] == 0, fn, "the triangle winds once");
+  expect(seams_rings_winding(rings, 0, winding, 1, NULL, 0), SEAMS_OK, fn, "winding only");
+  truth(winding[0] == 1, fn, "the triangle winds +1 along x");
+  seams_rings_destroy(rings);
+  seams_system_destroy(sys);
+}
+
+/* Every rejected input of seams_tetrahedral_order and seams_lsi that the
+ * generic probe does not reach. */
+static void local_order_contract(void) {
+  const size_t over = (size_t)INT_MAX + 1;
+  const int centre[1] = {0};
+  const int negative[1] = {-1};
+  int outside[1];
+  outside[0] = g_n;
+  double value[1] = {0};
+  const int near4 = SEAMS_TETRAHEDRAL_NEAREST_FOUR;
+
+  const char *fn = "seams_tetrahedral_order";
+  expect(seams_tetrahedral_order(g_good, NULL, 1, NULL, 0, near4, 0.0, value, 1), SEAMS_ERR_NULL,
+         fn, "NULL centres with a count");
+  expect(seams_tetrahedral_order(g_good, centre, 1, NULL, 1, near4, 0.0, value, 1),
+         SEAMS_ERR_NULL, fn, "NULL partners with a count");
+  expect(seams_tetrahedral_order(g_good, centre, over, NULL, 0, near4, 0.0, value, 1),
+         SEAMS_ERR_RANGE, fn, "centre count above INT_MAX");
+  expect(seams_tetrahedral_order(g_good, centre, 1, centre, over, near4, 0.0, value, 1),
+         SEAMS_ERR_RANGE, fn, "partner count above INT_MAX");
+  expect(seams_tetrahedral_order(g_good, centre, 1, NULL, 0, 2, 0.0, value, 1), SEAMS_ERR_ARG,
+         fn, "unknown convention");
+  expect(seams_tetrahedral_order(g_good, centre, 1, NULL, 0, -1, 0.0, value, 1), SEAMS_ERR_ARG,
+         fn, "negative convention");
+  expect(seams_tetrahedral_order(g_good, outside, 1, NULL, 0, near4, 0.0, value, 1),
+         SEAMS_ERR_ARG, fn, "centre past the last atom");
+  expect(seams_tetrahedral_order(g_good, negative, 1, NULL, 0, near4, 0.0, value, 1),
+         SEAMS_ERR_ARG, fn, "negative centre");
+  expect(seams_tetrahedral_order(g_good, centre, 1, outside, 1, near4, 0.0, value, 1),
+         SEAMS_ERR_ARG, fn, "partner past the last atom");
+  expect(seams_tetrahedral_order(g_good, centre, 1, NULL, 0, near4, NAN, value, 1), SEAMS_OK, fn,
+         "nearest four ignores the cutoff");
+
+  const double stacked[15] = {50, 50, 50, 50, 50, 50, 52, 50, 50, 50, 52, 50, 50, 50, 52};
+  seams_system *sys = small_frame(stacked, 5, 100.0);
+  truth(sys != NULL, fn, "coincident frame");
+  expect(seams_tetrahedral_order(sys, centre, 1, NULL, 0, near4, 0.0, value, 1), SEAMS_ERR_ARG,
+         fn, "partner on the centre");
+
+  fn = "seams_lsi";
+  expect(seams_lsi(g_good, NULL, 1, NULL, 0, 3.5, value, 1), SEAMS_ERR_NULL, fn,
+         "NULL centres with a count");
+  expect(seams_lsi(g_good, centre, 1, NULL, 1, 3.5, value, 1), SEAMS_ERR_NULL, fn,
+         "NULL partners with a count");
+  expect(seams_lsi(g_good, centre, over, NULL, 0, 3.5, value, 1), SEAMS_ERR_RANGE, fn,
+         "centre count above INT_MAX");
+  expect(seams_lsi(g_good, centre, 1, centre, over, 3.5, value, 1), SEAMS_ERR_RANGE, fn,
+         "partner count above INT_MAX");
+  expect(seams_lsi(g_good, outside, 1, NULL, 0, 3.5, value, 1), SEAMS_ERR_ARG, fn,
+         "centre past the last atom");
+  expect(seams_lsi(g_good, negative, 1, NULL, 0, 3.5, value, 1), SEAMS_ERR_ARG, fn,
+         "negative centre");
+  expect(seams_lsi(g_good, centre, 1, outside, 1, 3.5, value, 1), SEAMS_ERR_ARG, fn,
+         "partner past the last atom");
+  expect(seams_lsi(sys, centre, 1, NULL, 0, 3.5, value, 1), SEAMS_ERR_ARG, fn,
+         "partner on the centre");
+  seams_system_destroy(sys);
+}
+
 static void analysis_contract(void) {
   const unsigned C = P_CUTOFF, L = P_LEN, O = P_NULLOUT, G = P_GRAPH;
   for (int i = 0; i < g_n; ++i) {
@@ -924,19 +1068,15 @@ static void analysis_contract(void) {
     g_ibuf[i] = 0;
   }
   seams_rings *explicit_rings = NULL;
-  expect(seams_rings_from_csr(NULL, (size_t)g_n + 1, NULL, 0, 6, g_good,
-                              &explicit_rings),
-         SEAMS_ERR_NULL, "seams_rings_from_csr", "NULL offsets");
   expect(seams_rings_from_csr(g_ibuf, (size_t)g_n + 1, NULL, 0, 6,
                               g_good, &explicit_rings),
          SEAMS_OK, "seams_rings_from_csr", "empty explicit graph");
-  expect(seams_rings_winding(explicit_rings, 3, g_ibuf, (size_t)g_n,
-                             g_ibuf2, (size_t)g_n),
-         SEAMS_ERR_RANGE, "seams_rings_winding", "bad periodic axis");
   expect(seams_rings_winding(explicit_rings, 0, g_ibuf, (size_t)g_n,
                              g_ibuf2, (size_t)g_n),
          SEAMS_OK, "seams_rings_winding", "empty winding list");
   seams_rings_destroy(explicit_rings);
+  explicit_graph_contract();
+  local_order_contract();
 
   /* Arguments the generic probe does not reach. */
   size_t a = 0, b = 0;
