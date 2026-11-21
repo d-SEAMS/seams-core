@@ -48,11 +48,32 @@ def checkout(name):
             "{} is not in docs/.cache/bindings and SEAMS_NO_NETWORK=1 forbids cloning".format(name)
         )
     if not (dest / ".git").is_dir():
-        # A dist tree keeps the sources and drops .git. An online run replaces
-        # that snapshot so the check still tracks the binding heads.
-        if dest.exists():
-            shutil.rmtree(dest)
-        subprocess.check_call(["git", "clone", "--quiet", "--depth", "1", REPOS[name], str(dest)])
+        # A dist tree keeps the sources and drops .git. Clone beside it and
+        # swap only after the clone succeeds, so a network failure leaves the
+        # snapshot in place for a later offline run.
+        staging = dest.with_name(".{}.partial".format(dest.name))
+        if staging.exists():
+            shutil.rmtree(staging)
+        try:
+            subprocess.check_call(
+                ["git", "clone", "--quiet", "--depth", "1", REPOS[name], str(staging)]
+            )
+        except BaseException:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
+        if not dest.exists():
+            os.rename(staging, dest)
+        else:
+            previous = dest.with_name(".{}.previous".format(dest.name))
+            if previous.exists():
+                shutil.rmtree(previous)
+            os.rename(dest, previous)
+            try:
+                os.rename(staging, dest)
+            except BaseException:
+                os.rename(previous, dest)
+                raise
+            shutil.rmtree(previous)
     else:
         subprocess.check_call(["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin", "HEAD"])
         subprocess.check_call(["git", "-C", str(dest), "reset", "--quiet", "--hard", "FETCH_HEAD"])
