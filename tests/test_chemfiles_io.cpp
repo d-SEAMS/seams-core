@@ -593,7 +593,10 @@ TEST_CASE("a header count or a truncated text file is an error",
   refuseAs(write("rand.tpr", std::string(512, '\x5a')), "TPR", "does not fit");
   refuseAs(write("huge.psf", "PSF\n\n       1 !NTITLE\n REMARKS\n\n  2000000000 !NATOM\n"),
            "PSF", "does not fit");
-  refuseAs(write("huge.POSCAR", "title\n2000000000\n"), "VASP_POSCAR", "does not fit");
+  refuseAs(write("trunc.POSCAR", "title\n2000000000\n"), "VASP_POSCAR",
+           "could not open");
+  refuseAs(write("huge.POSCAR", "title\n1.0\n1 0 0\n0 1 0\n0 0 1\n2000000000\n"),
+           "VASP_POSCAR", "does not fit");
   refuseAs(write("huge.VASP_XDATCAR5", "title\n2000000000\n"), "VASP_XDATCAR5",
            "does not fit");
   refuseAs(write("huge.parm7",
