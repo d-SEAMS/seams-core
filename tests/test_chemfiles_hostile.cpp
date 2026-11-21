@@ -364,6 +364,11 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            // Streams written by the broken Huffman length sort are not decodable
            Refused{"fuzz_tng_bwlzh_roundtrip.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_xtc3_roundtrip.tng", "TNG", kTngErr},
+           // GAMESS basis function count -26 sized calloc(3*-26) for the
+           // angular momenta; 65536 has a square that wraps the int
+           // product sizing the coefficient table
+           Refused{"fuzz_gamess_wavef_negative.gms", "GAMESS", "could not open"},
+           Refused{"fuzz_gamess_wavef_square.gms", "GAMESS", "could not open"},
        }) {
     requireRefused(item);
   }

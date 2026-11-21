@@ -2500,7 +2500,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    }
    free(data->qm_timestep);
    free(data->format_specific_data);
-@@ -969,6 +991,11 @@
+@@ -969,11 +991,26 @@
    if (!analyze_traj(data, gms)) {
      printf("gamessplugin) WARNING: Truncated or abnormally terminated file!\n\n");
    }
@@ -2512,7 +2512,22 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
  
    /* provide VMD with the proper number of atoms */
-@@ -1096,17 +1123,30 @@
+   *natoms = data->numatoms;
+ 
++  /* wavef_size is read from the file, and get_wavefunction() sizes its
++   * coefficient table as wavef_size*wavef_size in int. A negative size,
++   * or one whose square does not fit in an int, is refused before any
++   * array is sized by it. */
++  if (data->wavef_size < 0 || data->wavef_size > 46340) {
++    printf("gamessplugin) ERROR: %d cartesian basis functions is out of range\n",
++           data->wavef_size);
++    return FALSE;
++  }
++
+   /* Read the first frame*/
+   read_first_frame(data);
+ 
+@@ -1096,17 +1133,30 @@
   * actually a GAMESS file;
   *
   **********************************************************/
@@ -2545,7 +2560,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    for (i=0; i<3; i++) word[i][0] = '\0';
  
  
-@@ -1135,8 +1175,9 @@
+@@ -1135,8 +1185,9 @@
  
    if (gms->have_pcgamess) {
      if (strstr(buffer,"version") != NULL) {
@@ -2557,7 +2572,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        sscanf(buffer, "%*s %*s %*s %*s %*s %*s %d", &build);
        sscanf(versionstr, "%1d%*s", &ver);
        printf("gamessplugin) Firefly build = %d %d\n", 
-@@ -1150,7 +1191,7 @@
+@@ -1150,7 +1201,7 @@
      /* extract the version number if possible; otherwise
       * return empty string */
      if (strstr(buffer,"=") != NULL) {
@@ -2566,7 +2581,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        versionstr[16] = '\0';
      }
      
-@@ -1263,15 +1304,15 @@
+@@ -1263,15 +1314,15 @@
      GET_LINE(buffer, data->file);
  
      /* store it */
@@ -2585,7 +2600,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    }
  
    printf("gamessplugin) GAMESS used %d compute processes \n", nproc);
-@@ -1316,7 +1357,7 @@
+@@ -1316,7 +1367,7 @@
     * GBASIS used; copy it over into the gbasis variable
     * of qmdata_t */
    GET_LINE(buffer, data->file);
@@ -2594,7 +2609,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
   
  
    /* in case we're using a pople style basis set, i.e. 
-@@ -1452,6 +1493,7 @@
+@@ -1452,6 +1503,7 @@
  
    GET_LINE(buffer, data->file);
    strncpy(data->runtitle,trimright(buffer),sizeof(data->runtitle));
@@ -2602,7 +2617,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
    return TRUE;
  } 
-@@ -1517,7 +1559,9 @@
+@@ -1517,7 +1569,9 @@
        }
        goto_keyline(data->file, "UNITS =", NULL);
        GET_LINE(buffer, data->file);
@@ -2613,7 +2628,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        bohr = !strcmp(units, "BOHR");
        
        /* Find beginning of $FMOXYZ input card */
-@@ -1605,12 +1649,22 @@
+@@ -1605,12 +1659,22 @@
      }
      if (n!=5 && n!=6) break;
  
@@ -2638,7 +2653,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
      atm->atomicnum = floor(atomicnum+0.5); /* nuclear charge */
      /*printf("coor: %s %d %f %f %f\n", atm->type, atm->atomicnum, x, y, z);*/
     
-@@ -1665,16 +1719,27 @@
+@@ -1665,16 +1729,27 @@
      GET_LINE(buffer, file);
  
      /* skip " INPUT CARD>" at the beginning of the line */
@@ -2668,7 +2683,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
      if (isalpha(element[0]))
        atm->atomicnum = get_pte_idx_from_string(element);
      else if (isdigit(element[0])) 
-@@ -1811,6 +1876,7 @@
+@@ -1811,6 +1886,7 @@
      GET_LINE(buffer, data->file);;
    }
    strncpy(data->geometry, trimright(temp+7), sizeof(data->geometry)); 
@@ -2676,7 +2691,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    printf("gamessplugin) Coordinate type used is %s \n", data->geometry);
  
    while ( (temp=strstr(buffer,"CITYP =")) == NULL ) {
-@@ -1974,6 +2040,7 @@
+@@ -1974,6 +2050,7 @@
      GET_LINE(buffer, data->file);;
    }
    strncpy(data->geometry, trimright(temp+7), sizeof(data->geometry)); 
@@ -2684,7 +2699,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    printf("gamessplugin) Coordinate type used is %s \n", data->geometry);
  
    fseek(data->file, filepos, SEEK_SET);
-@@ -2014,12 +2081,15 @@
+@@ -2014,12 +2091,15 @@
    if (sep) *sep = '\0';
    trimright(data->pointgroup);
  
@@ -2705,7 +2720,18 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
    printf("gamessplugin) Point group = %s, naxis = %d, order = %d\n",
           data->pointgroup, data->naxis, data->order);
-@@ -2405,6 +2475,7 @@
+@@ -2114,6 +2194,10 @@
+    * the array size wavef_size already from the basis set
+    * statistics */
+   data->angular_momentum = (int*)calloc(3*data->wavef_size, sizeof(int));
++  if (data->wavef_size > 0 && data->angular_momentum == NULL) {
++    PRINTERR;
++    return FALSE;
++  }
+ 
+   /* Try reading the first frame. 
+    * If there is only one frame then also read the
+@@ -2405,6 +2489,7 @@
  
    /* the first character is '=', we skip it */
    strncpy(data->guess,&word[1], sizeof(data->guess));
@@ -2713,7 +2739,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
    printf("gamessplugin) Run was performed with GUESS = %s \n",
  	  data->guess);
-@@ -2487,7 +2558,12 @@
+@@ -2487,7 +2572,12 @@
      switch (numread) {
        case 1:
          /* Next atom */
@@ -2727,7 +2753,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
          /* skip initial blank line */
          eatline(data->file, 1);
-@@ -2539,6 +2615,7 @@
+@@ -2539,6 +2629,7 @@
          /* Update total number of basis functions */
          data->num_shells += numshells;
          i++;
@@ -2735,7 +2761,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
          /* go back one line so that we can read the name of the
           * next atom */
-@@ -2725,7 +2802,7 @@
+@@ -2725,7 +2816,7 @@
  
        /* for FMO calculations we have to strip the "-n" tail
         * of the basis atom name. */
@@ -2744,7 +2770,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
          *strchr(basisname, '-') = '\0';
        }
  
-@@ -2778,7 +2855,11 @@
+@@ -2778,7 +2869,11 @@
    (*prim) = (prim_t*)calloc(1, sizeof(prim_t));
  
    do {
@@ -2757,7 +2783,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        if (pcgamess)
          success = sscanf(buffer,"%d %c %*s %f %f %*s %*s %f", &shell,
                         shelltype,
-@@ -2854,6 +2935,9 @@
+@@ -2854,6 +2949,9 @@
    buffer[0] = '\0';
    word[0]   = '\0';
  
@@ -2767,7 +2793,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    printf("gamessplugin) Timestep %d:\n", data->num_frames_read);
    printf("gamessplugin) ============\n");
  
-@@ -3014,46 +3098,56 @@
+@@ -3014,46 +3112,56 @@
         * (specified by IROOT in $CIS group) will be printed.
         * Here we read in the energies for all states, and store 
         * the energy for the selected state in its wavefunction */
@@ -2860,7 +2886,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
      }
    }
  
-@@ -3191,12 +3285,12 @@
+@@ -3191,12 +3299,12 @@
        sscanf(buffer, " COORD 1 LYING ALONG ATOM PAIR %d %d",
               coord1, coord1+1);
        GET_LINE(buffer, data->file);
@@ -2879,7 +2905,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        printf("gamessplugin) origin=%f, displacement=%f nstep=%d\n", origin1, disp1, nstep1);
      }
    }
-@@ -3210,8 +3304,11 @@
+@@ -3210,8 +3318,11 @@
      }
      eatline(data->file, 2);
      GET_LINE(buffer, data->file);
@@ -2893,7 +2919,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
      printf("gamessplugin) MEX SCF1=%s SCF2=%s\n", scftype1, scftype2);
  
    }
-@@ -3423,7 +3520,8 @@
+@@ -3423,7 +3534,8 @@
      GET_LINE(buffer, data->file);
      line = trimleft(buffer);
      numread = sscanf(line,"%d %f %*i %*f", &dum, &dumf);
@@ -2903,7 +2929,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        switch (epos) {
        case 1:
          sscanf(buffer,"%*d %lf", ts->scfenergies+i);
-@@ -3562,7 +3660,7 @@
+@@ -3562,7 +3674,7 @@
  static int get_wavefunction(qmdata_t *data, qm_timestep_t *ts,
                              qm_wavefunction_t *wf)
  {
@@ -2912,7 +2938,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    float *wave_coeff;
    char buffer[BUFSIZ];
    char word[6][BUFSIZ];
-@@ -3711,6 +3809,10 @@
+@@ -3711,6 +3823,10 @@
    /* Reserve space for arrays storing wavefunction and orbital
     * energies. we reserve the max. space (num_orbitals==wavef_size)
     * for now and realloc later if, we have less orbitals. */
@@ -2923,7 +2949,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    wave_coeff = (float *)calloc(data->wavef_size*data->wavef_size,
                                    sizeof(float)); 
    //printf("gamessplugin) wave_coeff() allocated\n");
-@@ -3722,10 +3824,11 @@
+@@ -3722,10 +3838,11 @@
  
    /* orbital energies/occupancies */  
    orb_enocc = (float *)calloc(data->wavef_size, sizeof(float));
@@ -2936,7 +2962,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
      PRINTERR; 
      return FALSE;
    }
-@@ -3768,7 +3871,17 @@
+@@ -3768,7 +3885,17 @@
  
      /* If there are no orbital indexes then this must be the
       * end of the wavefunction coefficient table. */
@@ -2955,7 +2981,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        fseek(data->file, filepos, SEEK_SET);
        break;
      }
-@@ -3837,7 +3950,7 @@
+@@ -3837,7 +3964,7 @@
  
      /* Read the wave function coefficient block for up to 5
       * orbitals per line. */
@@ -2964,7 +2990,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
                            wave_coeff, data->angular_momentum)) {
        printf("gamessplugin) Wavefunction coefficient block truncated or ill formatted!\n");
        data->status = MOLFILE_QMSTATUS_FILE_TRUNCATED;
-@@ -3910,7 +4023,7 @@
+@@ -3910,7 +4037,7 @@
   *  2  C  1  S    0.046228  -0.548915   0.000000   0.645267   0.000000
   *  3  C  1  X    0.000000   0.000000   1.030974   0.000000   0.000000
   */
@@ -2973,7 +2999,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
                              float *wave_coeff, int *angular_momentum) {
    int i, j;
    int truncated = 0;
-@@ -3942,7 +4055,7 @@
+@@ -3942,7 +4069,7 @@
      /* Each orbital has data->wavef_size entries, 
       * hence we have to use this number as offset when storing 
       * them in groups of five. */
@@ -2982,7 +3008,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        wave_coeff[j*wavef_size+i] = coeff[j];
      }
    }
-@@ -4096,6 +4209,7 @@
+@@ -4096,6 +4223,7 @@
  
    eatline(data->file, 4);
  
@@ -2990,7 +3016,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    ts->gradient = (float *)calloc(3*data->numatoms, sizeof(float));
  
    if (ts->gradient == NULL) {
-@@ -4111,6 +4225,8 @@
+@@ -4111,6 +4239,8 @@
      GET_LINE(buffer, data->file);
      numread = sscanf(buffer, "%d %*s %*f %f %f %f", &i, &dx, &dy, &dz);
      if (numread==4) {
@@ -2999,7 +3025,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        ts->gradient[3*(i-1)  ] = dx;
        ts->gradient[3*(i-1)+1] = dy;
        ts->gradient[3*(i-1)+2] = dz;
-@@ -4121,6 +4237,8 @@
+@@ -4121,6 +4251,8 @@
    if (numgrad!=data->numatoms) {
      printf("gamessplugin) Found %d gradients for %d atoms!\n",
             numgrad, data->numatoms);
@@ -3008,7 +3034,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
      fseek(data->file, filepos, SEEK_SET);
      return FALSE;
    }
-@@ -4146,6 +4264,7 @@
+@@ -4146,6 +4278,7 @@
      return FALSE;
    }
  
@@ -3016,7 +3042,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
    ts->gradient = (float *)calloc(3*data->numatoms, sizeof(float));
  
    if (ts->gradient == NULL) {
-@@ -4161,6 +4280,8 @@
+@@ -4161,6 +4294,8 @@
      GET_LINE(buffer, data->file);
      numread = sscanf(buffer, "%d %*s %f %f %f", &i, &dx, &dy, &dz);
      if (numread==4) {
@@ -3025,7 +3051,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
        ts->gradient[3*(i-1)  ] = dx;
        ts->gradient[3*(i-1)+1] = dy;
        ts->gradient[3*(i-1)+2] = dz;
-@@ -4173,6 +4294,8 @@
+@@ -4173,6 +4308,8 @@
  
    if (numgrad!=data->numatoms) {
      printf("gamessplugin) Number of gradients != number of atoms!\n");
