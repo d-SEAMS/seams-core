@@ -30,7 +30,7 @@ Its frame-mutation and order-parameter entries are
 
 ```{literalinclude} ../../../bindings/cxx/seams_lang.h
 :language: cpp
-:lines: 45-90,121-248
+:lines: 46-89,121-250
 ```
 
 `docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
@@ -157,7 +157,7 @@ from `seams.hpp`.
 
 ```{literalinclude} ../../../bindings/cxx/test_lang.cpp
 :language: cpp
-:lines: 33-40,53-75,108-120,141-159,184-208,301-371,449-453,495-502,514,1058-1080,1119-1206
+:lines: 31-42,58-78,103-122,141-160,182-208,320-479,644-650,691-698,708-710,1285-1288,1320-1467
 ```
 
 <!-- API_SYMBOLS_BEGIN -->
