@@ -12,8 +12,11 @@
 #include <seams_input.hpp>
 
 #include <cstddef>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <functional>
+#include <iterator>
 #include <string>
 
 namespace {
@@ -174,13 +177,18 @@ TEST_CASE("fuzzed native and molfile inputs are errors", "[chemfiles][hostile]")
            Refused{"fuzz_xtc_xdrfile_320.xtc", "XTC", "invalid small index 0"},
            Refused{"fuzz_xtc_xtc_108.xtc", "XTC", "buffer overrun during decompression"},
            Refused{"fuzz_xtc_xtc_123.xtc", "XTC", "buffer overrun during decompression"},
-           Refused{"fuzz_dtr_dtrplugin_670.dtr", "DESRES Trajectory", "found no atoms"},
-           Refused{"fuzz_dtr_dtrplugin_766.dtr", "DESRES Trajectory", "could not open"},
-           Refused{"fuzz_dtr_dtrplugin_818_heap.dtr", "DESRES Trajectory", "found no atoms"},
+           Refused{"fuzz_dtr_dtrplugin_670.dtr", "DESRES Trajectory",
+                   "key records of 268435456 bytes instead of 24"},
+           Refused{"fuzz_dtr_dtrplugin_766.dtr", "DESRES Trajectory",
+                   "declares zero frames per file"},
+           Refused{"fuzz_dtr_dtrplugin_818_heap.dtr", "DESRES Trajectory",
+                   "key records of 268435456 bytes instead of 24"},
            Refused{"fuzz_dtr_dtrplugin_818_misaligned.dtr", "DESRES Trajectory",
-                   "found no atoms"},
-           Refused{"fuzz_dtr_dtrplugin_818_segv.dtr", "DESRES Trajectory", "found no atoms"},
-           Refused{"fuzz_dtr_stlvector_1144.dtr", "DESRES Trajectory", "found no atoms"},
+                   "key records of 268435456 bytes instead of 24"},
+           Refused{"fuzz_dtr_dtrplugin_818_segv.dtr", "DESRES Trajectory",
+                   "key records of 268435456 bytes instead of 24"},
+           Refused{"fuzz_dtr_stlvector_1144.dtr", "DESRES Trajectory",
+                   "key records of 0 bytes instead of 24"},
            Refused{"fuzz_tng_tngio_2896.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_tngio_2923.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_tngio_2989.tng", "TNG", kTngErr},
@@ -500,18 +508,231 @@ TEST_CASE("TNG files written by the fixed encoder keep their coordinates",
   REQUIRE(moving.read().size() == 200);
 }
 
-TEST_CASE("an empty clickme.dtr is a DESRES trajectory, not an empty file",
-          "[chemfiles][hostile]") {
-  chemfiles::Trajectory trajectory("hostile/dtr_clickme/clickme.dtr", 'r', "DESRES Trajectory");
+namespace {
+
+constexpr const char *kDtr = "DESRES Trajectory";
+
+void writeBytes(const fs::path &path, const std::string &bytes) {
+  std::ofstream out(path, std::ios::binary | std::ios::trunc);
+  out << bytes;
+}
+
+std::string readBytes(const fs::path &path) {
+  std::ifstream in(path, std::ios::binary);
+  return {std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+}
+
+std::string be32(std::uint32_t value) {
+  return {static_cast<char>(value >> 24), static_cast<char>(value >> 16),
+          static_cast<char>(value >> 8), static_cast<char>(value)};
+}
+
+// One timekey: the time, offset and size fields are each a low then a
+// high big-endian word.
+std::string timekey(std::uint32_t timeHi, std::uint32_t offset, std::uint32_t size) {
+  return be32(0) + be32(timeHi) + be32(offset) + be32(0) + be32(size) + be32(0);
+}
+
+// hostile/dtr_clickme is a two-frame, eight-atom DESRES trajectory: 256
+// frames per file, both 4096-byte frames in frame000000000, a metadata
+// frame, not_hashed/.ddparams "0 0" and the empty clickme.dtr.
+fs::path copyDtr(const fs::path &into, const std::string &name = "copy.dtr") {
+  const auto dtr = into / name;
+  fs::create_directories(dtr.parent_path());
+  fs::copy("hostile/dtr_clickme", dtr, fs::copy_options::recursive);
+  return dtr;
+}
+
+void requireTwoFrames(const fs::path &path) {
+  INFO(path.string());
+  chemfiles::Trajectory trajectory(path.string(), 'r', kDtr);
   REQUIRE(trajectory.nsteps() == 2);
   const auto frame = trajectory.read();
   REQUIRE(frame.size() == 8);
   REQUIRE_THAT(frame.positions()[0][0], Catch::Matchers::WithinAbs(0.0, 1e-4));
+  REQUIRE(trajectory.read().size() == 8);
+}
+
+void requireDtrError(const fs::path &path, const std::string &expected) {
+  INFO(path.string() << " expecting: " << expected);
+  const auto out = readAll(path.string(), kDtr);
+  REQUIRE(out.error.find(expected) != std::string::npos);
+}
+
+} // namespace
+
+TEST_CASE("a DESRES trajectory is a valid directory or the clickme.dtr inside it",
+          "[chemfiles][hostile]") {
+  requireTwoFrames("hostile/dtr_clickme");
+  requireTwoFrames("hostile/dtr_clickme/clickme.dtr");
+
   const auto dir = dseams_test::freshDir();
-  const auto empty = dir / "clickme.dtr";
-  std::ofstream(empty, std::ios::binary).close();
-  const auto missing = readAll(empty.string(), "DESRES Trajectory");
-  REQUIRE(missing.error.find("could not open") != std::string::npos);
+  SECTION("the old top-level .ddparams, or none, is a flat directory") {
+    const auto dtr = copyDtr(dir);
+    fs::remove(dtr / "not_hashed" / ".ddparams");
+    writeBytes(dtr / ".ddparams", "0 0\n");
+    requireTwoFrames(dtr / "clickme.dtr");
+    fs::remove(dtr / ".ddparams");
+    fs::remove(dtr / "metadata");
+    requireTwoFrames(dtr);
+  }
+  SECTION("frames in the subdirectory .ddparams hashes them to") {
+    // printf frame000000000 | cksum gives 3066110831; with 4 and 3
+    // directories dtrplugin looks in 3066110831 % 4 = 3 and
+    // (3066110831 / 4) % 3 = 2.
+    const auto dtr = copyDtr(dir);
+    writeBytes(dtr / "not_hashed" / ".ddparams", "4 3\n");
+    fs::create_directories(dtr / "003" / "002");
+    fs::rename(dtr / "frame000000000", dtr / "003" / "002" / "frame000000000");
+    requireTwoFrames(dtr / "clickme.dtr");
+    fs::rename(dtr / "003" / "002" / "frame000000000", dtr / "003" / "frame000000000");
+    requireDtrError(dtr, "its first frame file 003/002/frame000000000 is missing");
+  }
+  SECTION("one frame per file") {
+    const auto dtr = copyDtr(dir);
+    const auto frames = readBytes(dtr / "frame000000000");
+    writeBytes(dtr / "frame000000000", frames.substr(0, 4096));
+    writeBytes(dtr / "frame000000001", frames.substr(4096));
+    writeBytes(dtr / "timekeys", be32(0x4445534b) + be32(1) + be32(24) +
+                                     timekey(0, 0, 4096) + timekey(0x3ff00000, 0, 4096));
+    requireTwoFrames(dtr);
+  }
+  SECTION("an outer directory named like the marker") {
+    requireTwoFrames(copyDtr(dir / "clickme.dtr.d", "run.dtr") / "clickme.dtr");
+  }
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a clickme.dtr outside a valid DESRES directory is refused",
+          "[chemfiles][hostile]") {
+  const auto dir = dseams_test::freshDir();
+  const auto lone = dir / "clickme.dtr";
+  writeBytes(lone, "");
+  requireDtrError(lone, "is a clickme.dtr outside a DESRES trajectory");
+  requireDtrError(lone, "it has no timekeys file");
+
+  // the marker next to a broken timekeys file is not a trajectory either
+  writeBytes(dir / "timekeys", be32(0x4445534b) + be32(0) + be32(24));
+  requireDtrError(lone, "is a clickme.dtr outside a DESRES trajectory");
+  requireDtrError(lone, "declares zero frames per file");
+
+  // the marker is empty; a clickme.dtr with content is not the marker
+  const auto dtr = copyDtr(dir);
+  writeBytes(dtr / "clickme.dtr", "x");
+  requireDtrError(dtr / "clickme.dtr", "a DESRES trajectory is a directory");
+  fs::remove_all(dir);
+}
+
+TEST_CASE("an empty .dtr file that is not the marker is empty",
+          "[chemfiles][hostile]") {
+  const auto dir = dseams_test::freshDir();
+  for (const char *name : {"empty.dtr", "run.dtr", "notclickme.dtr", "clickme.dtr.dtr"}) {
+    writeBytes(dir / name, "");
+    requireDtrError(dir / name, "is empty");
+  }
+  // an empty .dtr is empty even inside a valid trajectory directory
+  const auto dtr = copyDtr(dir);
+  writeBytes(dtr / "other.dtr", "");
+  requireDtrError(dtr / "other.dtr", "is empty");
+  writeBytes(dir / "data.dtr", "not a directory");
+  requireDtrError(dir / "data.dtr", "a DESRES trajectory is a directory");
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a DESRES directory is checked the way dtrplugin reads it",
+          "[chemfiles][hostile]") {
+  const auto dir = dseams_test::freshDir();
+  const std::string prologue = be32(0x4445534b) + be32(256) + be32(24);
+  const auto keys = timekey(0, 0, 4096) + timekey(0x3ff00000, 4096, 4096);
+  const auto broken = [&](const char *what, const std::function<void(const fs::path &)> &edit,
+                          const std::string &expected) {
+    INFO(what);
+    const auto dtr = copyDtr(dir, std::string(what) + ".dtr");
+    edit(dtr);
+    requireDtrError(dtr, "is not a DESRES trajectory: ");
+    requireDtrError(dtr, expected);
+    requireDtrError(dtr / "clickme.dtr", "is a clickme.dtr outside a DESRES trajectory");
+    requireDtrError(dtr / "clickme.dtr", expected);
+  };
+  broken("no-timekeys", [](const fs::path &d) { fs::remove(d / "timekeys"); },
+         "it has no timekeys file");
+  broken("timekeys-dir",
+         [](const fs::path &d) {
+           fs::remove(d / "timekeys");
+           fs::create_directory(d / "timekeys");
+         },
+         "it has no timekeys file");
+  broken("short-prologue", [&](const fs::path &d) { writeBytes(d / "timekeys", "DESK"); },
+         "shorter than the 12-byte prologue");
+  broken("magic", [&](const fs::path &d) { writeBytes(d / "timekeys", "XESK" + prologue.substr(4) + keys); },
+         "does not start with the DESRES timekeys magic number");
+  broken("zero-fpf",
+         [&](const fs::path &d) {
+           writeBytes(d / "timekeys", be32(0x4445534b) + be32(0) + be32(24) + keys);
+         },
+         "declares zero frames per file");
+  broken("key-size",
+         [&](const fs::path &d) {
+           writeBytes(d / "timekeys", be32(0x4445534b) + be32(256) + be32(23) + keys);
+         },
+         "declares key records of 23 bytes instead of 24");
+  broken("partial-key",
+         [&](const fs::path &d) { writeBytes(d / "timekeys", prologue + keys.substr(0, 47)); },
+         "ends inside a key record");
+  broken("no-frames", [&](const fs::path &d) { writeBytes(d / "timekeys", prologue); },
+         "its timekeys file has no frames");
+  broken("zero-size-key",
+         [&](const fs::path &d) { writeBytes(d / "timekeys", prologue + timekey(0, 0, 0)); },
+         "its first timekey does not describe a frame");
+  broken("ddparams-text",
+         [](const fs::path &d) { writeBytes(d / "not_hashed" / ".ddparams", "x\n"); },
+         "its not_hashed/.ddparams is not two directory counts from 0 to 4096");
+  broken("ddparams-range",
+         [](const fs::path &d) { writeBytes(d / "not_hashed" / ".ddparams", "5000 0\n"); },
+         "its not_hashed/.ddparams is not two directory counts from 0 to 4096");
+  broken("ddparams-top",
+         [](const fs::path &d) {
+           fs::remove(d / "not_hashed" / ".ddparams");
+           writeBytes(d / ".ddparams", "-1 0\n");
+         },
+         "its .ddparams is not two directory counts from 0 to 4096");
+  broken("metadata", [](const fs::path &d) { writeBytes(d / "metadata", "x"); },
+         "its metadata is not a DESRES frame");
+  broken("no-frame", [](const fs::path &d) { fs::remove(d / "frame000000000"); },
+         "its first frame file frame000000000 is missing");
+  broken("short-frame",
+         [](const fs::path &d) {
+           writeBytes(d / "frame000000000", readBytes(d / "frame000000000").substr(0, 100));
+         },
+         "its first frame file is shorter than its timekey says");
+  broken("frame-magic",
+         [](const fs::path &d) {
+           auto bytes = readBytes(d / "frame000000000");
+           bytes[3] = 'X';
+           writeBytes(d / "frame000000000", bytes);
+         },
+         "its first frame is not a DESRES frame");
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a hostile DESRES frame in a valid directory still fails in the plugin",
+          "[chemfiles][hostile]") {
+  // The fuzzed 818 frames carry the frame magic and a corrupt header. In a
+  // directory that passes the structural checks they reach dtrplugin,
+  // whose frame reader refuses them, leaving no atoms.
+  const auto dir = dseams_test::freshDir();
+  for (const char *name : {"fuzz_dtr_dtrplugin_818_heap.dtr", "fuzz_dtr_dtrplugin_818_misaligned.dtr",
+                           "fuzz_dtr_dtrplugin_818_segv.dtr"}) {
+    INFO(name);
+    const auto dtr = copyDtr(dir, name);
+    const auto frame = readBytes(fs::path("hostile") / name / "frame000000000");
+    REQUIRE(frame.size() == 96);
+    writeBytes(dtr / "frame000000000", frame);
+    writeBytes(dtr / "timekeys", be32(0x4445534b) + be32(1) + be32(24) + timekey(0, 0, 96));
+    const auto out = readAll((dtr / "clickme.dtr").string(), kDtr);
+    REQUIRE(out.error.find("found no atoms") != std::string::npos);
+  }
+  fs::remove_all(dir);
 }
 
 TEST_CASE("extended XYZ loads every column of a wide property",

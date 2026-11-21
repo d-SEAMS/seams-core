@@ -176,7 +176,17 @@ diff -ruN cf-diff-a/include/chemfiles/formats/Molfile.hpp cf-diff-b/include/chem
  };
  
  /// A thin wrapper around the vmd plugin functions
-@@ -90,6 +124,40 @@
+@@ -72,6 +106,9 @@
+ 
+     /// Path of the underlying file
+     std::string path_;
++    /// Path handed to the plugin. For a DESRES trajectory this is the
++    /// validated directory's clickme.dtr, otherwise it is `path_`.
++    std::string plugin_path_;
+     /// VMD plugin data
+     MolfilePluginData<F> plugin_data_;
+     /// VMD molfile plugin
+@@ -90,6 +127,40 @@
  template<> const FormatMetadata& format_metadata<Molfile<TRJ>>();
  template<> const FormatMetadata& format_metadata<Molfile<PSF>>();
  template<> const FormatMetadata& format_metadata<Molfile<MOLDEN>>();
@@ -316,7 +326,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  #include <array>
  #include <string>
  #include <vector>
-@@ -29,6 +32,11 @@
+@@ -29,9 +32,226 @@
  
  #include "chemfiles/formats/Molfile.hpp"
  
@@ -324,11 +334,226 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
 +#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 +#define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
 +#endif
++#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
++#define S_ISDIR(mode) (((mode) & S_IFMT) == S_IFDIR)
++#endif
 +
  using namespace chemfiles;
  
  /******************************************************************************/
-@@ -52,6 +60,40 @@
++// A DESRES trajectory (dtrplugin) is a directory. It holds `timekeys`, a
++// 12-byte prologue (magic 0x4445534b, frames per file, key record size)
++// followed by one 24-byte key per frame; the frame files, `frame%09d`,
++// each starting with the frame magic 0x4445534d; an optional `metadata`
++// frame; and an optional `.ddparams` (in `not_hashed/`, or at the top) that
++// spreads the frame files over hashed subdirectories. DESRES writers also
++// leave an empty `clickme.dtr` inside the directory for file pickers. Every
++// header word is big-endian.
++namespace {
++const uint32_t DESRES_TIMEKEY_MAGIC = 0x4445534b;
++const uint32_t DESRES_FRAME_MAGIC = 0x4445534d;
++const size_t DESRES_PROLOGUE_SIZE = 12;
++const size_t DESRES_KEY_SIZE = 24;
++const size_t DESRES_FRAME_HEADER_SIZE = 16;
++
++uint32_t desres_word(const unsigned char* bytes) {
++    return (static_cast<uint32_t>(bytes[0]) << 24) | (static_cast<uint32_t>(bytes[1]) << 16) |
++           (static_cast<uint32_t>(bytes[2]) << 8) | static_cast<uint32_t>(bytes[3]);
++}
++
++uint64_t desres_dword(const unsigned char* bytes) {
++    // a 64-bit key field is stored as its low word, then its high word
++    return (static_cast<uint64_t>(desres_word(bytes + 4)) << 32) | desres_word(bytes);
++}
++
++// The POSIX cksum of `name`. dtrplugin hashes a frame file name with it to
++// pick the subdirectory the file lives in.
++uint32_t desres_cksum(const std::string& name) {
++    auto add_byte = [](uint32_t crc, unsigned char byte) {
++        crc ^= static_cast<uint32_t>(byte) << 24;
++        for (int bit = 0; bit < 8; bit++) {
++            crc = (crc & 0x80000000u) ? (crc << 1) ^ 0x04C11DB7u : (crc << 1);
++        }
++        return crc;
++    };
++    uint32_t crc = 0;
++    for (char c : name) {
++        crc = add_byte(crc, static_cast<unsigned char>(c));
++    }
++    for (size_t length = name.size(); length != 0; length >>= 8) {
++        crc = add_byte(crc, static_cast<unsigned char>(length & 0xff));
++    }
++    return ~crc;
++}
++
++bool desres_stat(const std::string& path, struct stat& st) {
++    return stat(path.c_str(), &st) == 0;
++}
++
++// Reads `count` bytes at `offset`; false when the file is shorter.
++bool desres_read(const std::string& path, uint64_t offset, unsigned char* bytes, size_t count) {
++    std::FILE* file = std::fopen(path.c_str(), "rb");
++    if (file == nullptr) {
++        return false;
++    }
++    bool ok = true;
++    for (uint64_t skipped = 0; ok && skipped < offset; skipped++) {
++        ok = std::fgetc(file) != EOF;
++    }
++    ok = ok && std::fread(bytes, 1, count, file) == count;
++    std::fclose(file);
++    return ok;
++}
++
++bool desres_is_frame(const std::string& path, uint64_t offset) {
++    unsigned char header[DESRES_FRAME_HEADER_SIZE];
++    return desres_read(path, offset, header, sizeof(header)) &&
++           desres_word(header) == DESRES_FRAME_MAGIC;
++}
++
++// Checks `dir` the way dtrplugin reads it, and returns why it is not a
++// DESRES trajectory, or an empty string when it is one.
++std::string desres_problem(const std::string& dir) {
++    struct stat st;
++    const auto timekeys = dir + "/timekeys";
++    if (!desres_stat(timekeys, st) || !S_ISREG(st.st_mode)) {
++        return "it has no timekeys file";
++    }
++    const auto timekeys_size = static_cast<uint64_t>(st.st_size);
++    unsigned char prologue[DESRES_PROLOGUE_SIZE + DESRES_KEY_SIZE];
++    if (timekeys_size < DESRES_PROLOGUE_SIZE ||
++        !desres_read(timekeys, 0, prologue, DESRES_PROLOGUE_SIZE)) {
++        return "its timekeys file is shorter than the 12-byte prologue";
++    }
++    if (desres_word(prologue) != DESRES_TIMEKEY_MAGIC) {
++        return "its timekeys file does not start with the DESRES timekeys magic number";
++    }
++    const uint32_t frames_per_file = desres_word(prologue + 4);
++    if (frames_per_file == 0) {
++        return "its timekeys file declares zero frames per file";
++    }
++    if (desres_word(prologue + 8) != DESRES_KEY_SIZE) {
++        return "its timekeys file declares key records of " +
++               std::to_string(desres_word(prologue + 8)) + " bytes instead of 24";
++    }
++    if ((timekeys_size - DESRES_PROLOGUE_SIZE) % DESRES_KEY_SIZE != 0) {
++        return "its timekeys file ends inside a key record";
++    }
++    if (timekeys_size == DESRES_PROLOGUE_SIZE) {
++        return "its timekeys file has no frames";
++    }
++    if (!desres_read(timekeys, 0, prologue, sizeof(prologue))) {
++        return "its first timekey cannot be read";
++    }
++    const uint64_t offset = desres_dword(prologue + DESRES_PROLOGUE_SIZE + 8);
++    const uint64_t framesize = desres_dword(prologue + DESRES_PROLOGUE_SIZE + 16);
++    if (framesize < DESRES_FRAME_HEADER_SIZE || offset > UINT64_MAX - framesize) {
++        return "its first timekey does not describe a frame";
++    }
++
++    // dtrplugin reads .ddparams from not_hashed/ and falls back to the top
++    // of the directory only when that file does not exist.
++    int ndir1 = 0;
++    int ndir2 = 0;
++    for (const char* name : {"/not_hashed/.ddparams", "/.ddparams"}) {
++        const auto ddparams = dir + name;
++        if (!desres_stat(ddparams, st)) {
++            continue;
++        }
++        char text[64] = {0};
++        std::FILE* file = std::fopen(ddparams.c_str(), "rb");
++        size_t length = file == nullptr ? 0 : std::fread(text, 1, sizeof(text) - 1, file);
++        if (file != nullptr) {
++            std::fclose(file);
++        }
++        text[length] = '\0';
++        if (!S_ISREG(st.st_mode) || std::sscanf(text, "%d%d", &ndir1, &ndir2) != 2 ||
++            ndir1 < 0 || ndir1 > 4096 || ndir2 < 0 || ndir2 > 4096) {
++            return std::string("its ") + (name + 1) + " is not two directory counts from 0 to 4096";
++        }
++        break;
++    }
++
++    const auto metadata = dir + "/metadata";
++    if (desres_stat(metadata, st) && !(S_ISREG(st.st_mode) && desres_is_frame(metadata, 0))) {
++        return "its metadata is not a DESRES frame";
++    }
++
++    const std::string frame_name = "frame000000000";
++    std::string subdir;
++    if (ndir1 > 0) {
++        const uint32_t hash = desres_cksum(frame_name);
++        char buffer[32];
++        if (ndir2 > 0) {
++            std::snprintf(buffer, sizeof(buffer), "%03x/%03x/",
++                          static_cast<unsigned>(hash % static_cast<uint32_t>(ndir1)),
++                          static_cast<unsigned>((hash / static_cast<uint32_t>(ndir1)) %
++                                                static_cast<uint32_t>(ndir2)));
++        } else {
++            std::snprintf(buffer, sizeof(buffer), "%03x/",
++                          static_cast<unsigned>(hash % static_cast<uint32_t>(ndir1)));
++        }
++        subdir = buffer;
++    }
++    const auto first = dir + "/" + subdir + frame_name;
++    if (!desres_stat(first, st) || !S_ISREG(st.st_mode)) {
++        return "its first frame file " + subdir + frame_name + " is missing";
++    }
++    if (static_cast<uint64_t>(st.st_size) < offset + framesize) {
++        return "its first frame file is shorter than its timekey says";
++    }
++    if (!desres_is_frame(first, offset)) {
++        return "its first frame is not a DESRES frame";
++    }
++    return "";
++}
++
++// The directory of the DESRES trajectory at `path`: `path` itself, or the
++// directory holding `path` when it is an empty clickme.dtr.
++std::string desres_directory(const std::string& path) {
++    struct stat st;
++    if (!desres_stat(path, st)) {
++        throw format_error("could not open the DESRES trajectory at '{}'", path);
++    }
++    std::string dir;
++    if (S_ISDIR(st.st_mode)) {
++        dir = path;
++    } else {
++        const auto slash = path.find_last_of("/\\");
++        const auto base = slash == std::string::npos ? path : path.substr(slash + 1);
++        if (S_ISREG(st.st_mode) && st.st_size == 0 && base != "clickme.dtr") {
++            throw format_error("the file at '{}' is empty", path);
++        }
++        if (!S_ISREG(st.st_mode) || st.st_size != 0) {
++            throw format_error(
++                "'{}' is not a DESRES trajectory: a DESRES trajectory is a directory, "
++                "or the empty clickme.dtr inside one", path
++            );
++        }
++        dir = slash == std::string::npos ? std::string(".") : path.substr(0, slash);
++        if (dir.empty()) {
++            dir = "/";
++        }
++    }
++    const auto problem = desres_problem(dir);
++    if (!problem.empty()) {
++        if (dir == path) {
++            throw format_error("'{}' is not a DESRES trajectory: {}", path, problem);
++        }
++        throw format_error(
++            "'{}' is a clickme.dtr outside a DESRES trajectory: '{}' is not one, {}",
++            path, dir, problem
++        );
++    }
++    return dir;
++}
++} // namespace
++
++/******************************************************************************/
+ #define PLUGINS_DATA(FORMAT, PLUGIN, READER, VELOCITIES)                       \
+     extern "C" int PLUGIN##_register(void*, vmdplugin_register_cb); /*NOLINT*/ \
+     extern "C" int PLUGIN##_fini(void); /*NOLINT*/                             \
+@@ -52,6 +272,40 @@
      PLUGINS_DATA(TRJ,     gromacsplugin, trj,    false);
      PLUGINS_DATA(PSF,     psfplugin,     psf,    false);
      PLUGINS_DATA(MOLDEN,  moldenplugin,  molden, false);
@@ -369,7 +594,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  }
  
  #undef PLUGINS_FUNCTIONS
-@@ -93,6 +135,14 @@
+@@ -93,6 +347,14 @@
      };
  }
  
@@ -384,24 +609,33 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  template <MolfileFormat F> static int register_plugin(void* user_data, vmdplugin_t* vmd_plugin) {
      auto user_plugin = static_cast<molfile_plugin_t**>(user_data);
      assert(std::string(MOLFILE_PLUGIN_TYPE) == std::string(vmd_plugin->type));
-@@ -131,12 +181,66 @@
+@@ -118,7 +380,7 @@
+ 
+ template <MolfileFormat F>
+ Molfile<F>::Molfile(std::string path, File::Mode mode, File::Compression compression)
+-    : path_(std::move(path)), plugin_handle_(nullptr), data_(nullptr), natoms_(0) {
++    : path_(std::move(path)), plugin_path_(path_), plugin_handle_(nullptr), data_(nullptr), natoms_(0) {
+     if (mode != File::READ) {
+         throw format_error(
+             "molfiles based format {} is only available in read mode", plugin_data_.format()
+@@ -131,12 +393,66 @@
          );
      }
  
-+    // Several plugins read their first lines without checking for end of
-+    // file, then crash or loop. A DESRES trajectory is a directory, which
-+    // reads as an error rather than as end of file, and goes to its plugin.
-+    // clickme.dtr is an empty file the plugin accepts as that directory.
-+    const auto slash = path_.find_last_of("/\\");
-+    const auto base = slash == std::string::npos ? path_ : path_.substr(slash + 1);
-+    const bool clickme = F == VMDFMT_DTR && base == "clickme.dtr";
-+    {
++    if (F == VMDFMT_DTR) {
++        // dtrplugin cuts its path at the last "clickme.dtr" it contains, so
++        // naming the marker after the directory makes that cut land on the
++        // directory even when an outer path component contains the string.
++        plugin_path_ = desres_directory(path_) + "/clickme.dtr";
++    } else {
++        // Several plugins read their first lines without checking for end
++        // of file, then crash or loop.
 +        std::FILE* probe = std::fopen(path_.c_str(), "rb");
 +        if (probe != nullptr) {
 +            int first = std::fgetc(probe);
 +            bool empty = first == EOF && std::ferror(probe) == 0;
 +            std::fclose(probe);
-+            if (empty && !clickme) {
++            if (empty) {
 +                throw format_error("the file at '{}' is empty", path_);
 +            }
 +        }
@@ -451,7 +685,16 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
      if (plugin_data_.registration(&plugin_handle_, register_plugin<F>)) {
          throw format_error(
              "could not register the {} plugin", plugin_data_.format()
-@@ -170,7 +274,30 @@
+@@ -161,7 +477,7 @@
+     }
+ 
+     data_ = plugin_handle_->open_file_read(
+-        path_.c_str(), plugin_handle_->name, &natoms_
++        plugin_path_.c_str(), plugin_handle_->name, &natoms_
+     );
+ 
+     if (data_ == nullptr) {
+@@ -170,7 +486,31 @@
          );
      }
  
@@ -465,8 +708,9 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
 +
 +    // A dense reader cannot store more atoms than the file has bytes.
 +    // VTF atom ids are sparse, so a short file may name a high id; those
-+    // two plugins cap the id themselves.
-+    if (F != VMDFMT_VSF && F != VMDFMT_VTF && !clickme) {
++    // two plugins cap the id themselves. A DESRES trajectory keeps its atoms
++    // in the frame files, and its path names the directory or the marker.
++    if (F != VMDFMT_VSF && F != VMDFMT_VTF && F != VMDFMT_DTR) {
 +        struct stat st;
 +        if (stat(path_.c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
 +            static_cast<uint64_t>(natoms_) > static_cast<uint64_t>(st.st_size)) {
@@ -482,7 +726,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  }
  
  template <MolfileFormat F> Molfile<F>::~Molfile() {
-@@ -186,6 +313,22 @@
+@@ -186,6 +526,22 @@
          return plugin_handle_->read_next_timestep(data_, natoms_, timestep);
      } else if (plugin_handle_->read_timestep != nullptr) {
          // This function is provided by quantum molecular simulation format.
@@ -505,7 +749,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          return plugin_handle_->read_timestep(
              data_, natoms_, timestep, nullptr, nullptr
          );
-@@ -245,8 +388,15 @@
+@@ -245,8 +601,15 @@
      }
      size_t n = 0;
      int status = MOLFILE_SUCCESS;
@@ -522,14 +766,14 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          if (status == MOLFILE_SUCCESS) {
              n++;
          } else {
-@@ -255,8 +405,20 @@
+@@ -255,8 +618,20 @@
      }
      // We need to close and re-open the file
      plugin_handle_->close_file_read(data_);
 -    int unused = 0;
 -    data_ = plugin_handle_->open_file_read(path_.c_str(), plugin_handle_->name, &unused);
 +    int natoms = 0;
-+    data_ = plugin_handle_->open_file_read(path_.c_str(), plugin_handle_->name, &natoms);
++    data_ = plugin_handle_->open_file_read(plugin_path_.c_str(), plugin_handle_->name, &natoms);
 +    if (data_ == nullptr) {
 +        throw format_error(
 +            "could not re-open the file at '{}' with {} plugin", path_, plugin_data_.format()
@@ -545,7 +789,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
      read_topology();
  
      return n;
-@@ -315,7 +477,15 @@
+@@ -315,7 +690,15 @@
      auto residues = std::unordered_map<residue_info_t, Residue>();
      size_t atom_id = 0;
      for (auto& molfile_atom : atoms) {
@@ -562,7 +806,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          if ((optflags & MOLFILE_MASS) != 0) {
              atom.set_mass(static_cast<double>(molfile_atom.mass));
          }
-@@ -325,17 +495,17 @@
+@@ -325,17 +708,17 @@
  
          topology_->add_atom(std::move(atom));
  
@@ -588,7 +832,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
              };
              auto inserted = residues.insert({std::move(info), std::move(residue)});
              inserted.first->second.add_atom(atom_id);
-@@ -369,9 +539,21 @@
+@@ -369,9 +752,21 @@
          );
      }
  
@@ -611,7 +855,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
                              static_cast<size_t>(to[i]) - 1);
      }
  }
-@@ -380,6 +562,40 @@
+@@ -380,6 +775,40 @@
  template class chemfiles::Molfile<TRJ>;
  template class chemfiles::Molfile<PSF>;
  template class chemfiles::Molfile<MOLDEN>;
@@ -652,7 +896,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  
  template<> const FormatMetadata& chemfiles::format_metadata<Molfile<TRJ>>() {
      static FormatMetadata metadata;
-@@ -432,6 +648,686 @@
+@@ -432,6 +861,686 @@
  
      metadata.read = true;
      metadata.write = false;

@@ -390,6 +390,16 @@ VASP atom counts and the js byte swap are bounded too, and the VTF
 reader parses a line the same way however many files it read before;
 it also joins a line that ends in a backslash with the next one, which
 it did not.
+A DESRES trajectory opens from its directory or from the empty
+~clickme.dtr~ inside it. Before ~dtrplugin~ runs, the directory must
+hold a ~timekeys~ file with the DESRES magic number, a nonzero frame
+count per file, 24-byte key records and at least one whole record; a
+~.ddparams~, when there is one, must name 0 to 4096 directories at
+each level; a ~metadata~ file, when there is one, must be a DESRES
+frame; and the first frame file, in the subdirectory ~.ddparams~
+hashes it to, must hold the bytes its key names and start with the
+frame magic number. A ~clickme.dtr~ outside such a directory is
+refused, and any other empty ~.dtr~ file is reported as empty.
 ~chemfiles-0.10.4-tng-sources.patch~ checks the block, molecule,
 mapping and data sizes of TNG, and a TNG frame whose blocks leave a
 particle without positions is an error before chemfiles allocates its

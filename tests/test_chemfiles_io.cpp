@@ -506,12 +506,13 @@ TEST_CASE("a molfile plugin that finds no atoms is an error",
     REQUIRE(sinp::chemfilesSteps(uncounted.string()) == -1);
     REQUIRE(sinp::openFrame(uncounted.string(), 1, -1).nop == 0);
   }
-  // A DESRES trajectory is a directory. It is not "empty"; its plugin
-  // reports the missing frames.
+  // A DESRES trajectory is a directory. An empty one is not "empty"; it
+  // has no timekeys.
   const auto dtr = dir / "none.dtr";
   fs::create_directories(dtr);
   const auto dtrError = chemfilesOpenError(dtr);
-  REQUIRE_FALSE(dtrError.empty());
+  REQUIRE(dtrError.find("is not a DESRES trajectory: it has no timekeys file") !=
+          std::string::npos);
   REQUIRE(dtrError.find("is empty") == std::string::npos);
   fs::remove_all(dir);
 }
