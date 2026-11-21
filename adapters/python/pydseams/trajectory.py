@@ -25,6 +25,18 @@ _CHEMFILES_EXTS = {
     ".mmtf",
 }
 _LAMMPS_EXTS = {".lammpstrj", ".dump", ".lammps", ".trj"}
+_SIZE_MAX = (1 << (8 * ctypes.sizeof(ctypes.c_size_t))) - 1
+
+
+def _size_arg(name: str, value, minimum: int = 0) -> int:
+    """value as an int in [minimum, SIZE_MAX]; ctypes wraps anything else into size_t."""
+    n = int(value)
+    if n < minimum:
+        raise ValueError(f"{name} must be at least {minimum}, got {n}")
+    if n > _SIZE_MAX:
+        raise ValueError(f"{name} must be at most {_SIZE_MAX}, got {n}")
+    return n
+
 
 @dataclass(frozen=True)
 class MoleculeCentresResult:
@@ -1027,13 +1039,16 @@ class MsdAccumulator:
         dt: float = 1.0,
         axis=(0.0, 0.0, 1.0),
     ):
+        n_particles = _size_arg("n_particles", n_particles, 1)
+        max_lag = _size_arg("max_lag", max_lag)
+        origin_stride = _size_arg("origin_stride", origin_stride, 1)
         ax = np.ascontiguousarray(axis, dtype=np.float64).reshape(3)
         lib = _capi.get_lib()
         raw = ctypes.c_void_p()
         st = lib.seams_msd_create(
-            int(n_particles),
-            int(max_lag),
-            int(origin_stride),
+            n_particles,
+            max_lag,
+            origin_stride,
             float(dt),
             _capi.double_ptr(ax),
             ctypes.byref(raw),
@@ -1041,7 +1056,7 @@ class MsdAccumulator:
         self._handle: ctypes.c_void_p | None = None
         _capi.check_status(st)
         self._handle = raw
-        self.n_particles = int(n_particles)
+        self.n_particles = n_particles
 
     def close(self) -> None:
         if self._handle is not None and self._handle.value:
@@ -1155,11 +1170,13 @@ class HbondLifetimeAccumulator:
         dt: float = 1.0,
         directed: bool = True,
     ):
+        max_lag = _size_arg("max_lag", max_lag)
+        origin_stride = _size_arg("origin_stride", origin_stride, 1)
         lib = _capi.get_lib()
         raw = ctypes.c_void_p()
         st = lib.seams_hbond_tcf_create(
-            int(max_lag),
-            int(origin_stride),
+            max_lag,
+            origin_stride,
             float(dt),
             1 if directed else 0,
             ctypes.byref(raw),
@@ -1293,19 +1310,22 @@ class ReorientationAccumulator:
         origin_stride: int = 1,
         dt: float = 1.0,
     ):
+        n_vectors = _size_arg("n_vectors", n_vectors, 1)
+        max_lag = _size_arg("max_lag", max_lag)
+        origin_stride = _size_arg("origin_stride", origin_stride, 1)
         lib = _capi.get_lib()
         raw = ctypes.c_void_p()
         st = lib.seams_reorient_create(
-            int(n_vectors),
-            int(max_lag),
-            int(origin_stride),
+            n_vectors,
+            max_lag,
+            origin_stride,
             float(dt),
             ctypes.byref(raw),
         )
         self._handle: ctypes.c_void_p | None = None
         _capi.check_status(st)
         self._handle = raw
-        self.n_vectors = int(n_vectors)
+        self.n_vectors = n_vectors
 
     def close(self) -> None:
         if self._handle is not None and self._handle.value:
@@ -1407,8 +1427,12 @@ def hbond_lifetime(
     with HbondLifetimeAccumulator(
         max_lag=max_lag, origin_stride=origin_stride, dt=dt, directed=directed
     ) as acc:
+        pushed = 0
         for edges in edge_sets:
             acc.push(edges)
+            pushed += 1
+        if pushed == 0:
+            raise ValueError("edge_sets is empty")
         res = acc.curve()
         fit_res = (
             acc.fit(fit_window[0], fit_window[1]) if res.lag_time.size >= 2 else None

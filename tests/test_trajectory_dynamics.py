@@ -491,3 +491,72 @@ def test_hbond_lifetime_and_reorientation_oracles():
     assert reor.relaxation.tau1_exp == pytest.approx(tau1_true, rel=0.06)
     assert reor.relaxation.tau2_exp == pytest.approx(tau2_true, rel=0.06)
     assert (reor.relaxation.tau1_exp / reor.relaxation.tau2_exp) == pytest.approx(3.0, rel=0.08)
+
+
+def test_size_arguments_out_of_size_t_range_are_refused():
+    size_max = 2**64 - 1
+    for bad in (-1, -(2**63), 2**64):
+        with pytest.raises(ValueError, match="n_particles"):
+            ds.MsdAccumulator(bad)
+        with pytest.raises(ValueError, match="max_lag"):
+            ds.MsdAccumulator(1, max_lag=bad)
+        with pytest.raises(ValueError, match="origin_stride"):
+            ds.MsdAccumulator(1, origin_stride=bad)
+        with pytest.raises(ValueError, match="max_lag"):
+            ds.HbondLifetimeAccumulator(max_lag=bad)
+        with pytest.raises(ValueError, match="n_vectors"):
+            ds.ReorientationAccumulator(bad)
+        with pytest.raises(ValueError, match="max_lag"):
+            ds.ReorientationAccumulator(1, max_lag=bad)
+    # In size_t range but too large to allocate: libseams refuses at create.
+    for make in (
+        lambda: ds.MsdAccumulator(size_max),
+        lambda: ds.MsdAccumulator(size_max // 3 + 1),
+        lambda: ds.MsdAccumulator(1, max_lag=size_max),
+        lambda: ds.HbondLifetimeAccumulator(max_lag=size_max),
+        lambda: ds.ReorientationAccumulator(size_max // 3 + 1),
+        lambda: ds.ReorientationAccumulator(1, max_lag=size_max),
+    ):
+        with pytest.raises(ValueError, match="too large"):
+            make()
+
+
+def test_empty_and_one_frame_trajectories():
+    empty = ds.TrajectorySequence.from_frames([])
+    assert len(empty) == 0
+    with pytest.raises(IndexError):
+        _ = empty[0]
+    for call in (
+        empty.unwrap_positions,
+        empty.unwrap_centres,
+        empty.msd,
+        lambda: empty.msd(by_molecule=True),
+        empty.orientation_order,
+        empty.reorientation,
+        empty.hbond_lifetime,
+    ):
+        with pytest.raises(ValueError):
+            call()
+    with pytest.raises(ValueError, match="empty"):
+        ds.hbond_lifetime([])
+    with pytest.raises(ValueError, match="empty"):
+        ds.reorientation_tcf([])
+
+    pos = np.array([[[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]])
+    one = ds.TrajectorySequence.from_arrays(pos, [10.0, 10.0, 10.0], dt=0.25)
+    assert len(one) == 1
+    assert np.allclose(one.unwrap_positions(), pos)
+    centres = one.unwrap_centres(mol_ids=[7, 7])
+    assert centres.mol_ids.tolist() == [7]
+    assert np.allclose(centres.centres, [[[2.5, 3.5, 4.5]]])
+    msd = one.msd()
+    assert msd.lag_time.tolist() == [0.0]
+    assert msd.total.tolist() == [0.0]
+    assert msd.n_origins.tolist() == [1]
+    assert msd.diffusion is None
+    reo = one.reorientation(vectors=[np.array([[0.0, 0.0, 1.0], [1.0, 0.0, 0.0]])])
+    assert reo.c1.tolist() == [1.0] and reo.c2.tolist() == [1.0]
+    assert reo.relaxation is None
+    hb = one.hbond_lifetime(edge_sets=[{(1, 2)}])
+    assert hb.c_hb.tolist() == [1.0] and hb.s_hb.tolist() == [1.0]
+    assert hb.lifetimes is None
