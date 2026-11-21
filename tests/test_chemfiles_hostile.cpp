@@ -266,6 +266,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_particles_unset.tng", "TNG", kTngErr},
            // an empty square brace was indexed at its first char
            Refused{"fuzz_smi_empty_brace.smi", "SMI", "empty square brace"},
+           // renumbering function type 2147483647 overflowed an int
+           Refused{"fuzz_tpr_tpr_776.tpr", "TPR", "invalid function type 2147483647"},
        }) {
     requireRefused(item);
   }

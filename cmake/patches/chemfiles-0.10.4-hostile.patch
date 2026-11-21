@@ -7,7 +7,8 @@
 #   byte as "buffer empty"; SMI stops at EOF.
 #   BinaryFile checks reads and skips against the bytes left in the file;
 #   XDR, XTC, TRR, TPR, DCD and Amber NetCDF check their counts, sizes,
-#   indices and compressed-coordinate bit widths against it.
+#   indices and compressed-coordinate bit widths against it, and TPR
+#   checks each function type before renumbering it.
 #   CSSR checks atom and bond ids, GRO rejects a box GROMACS cannot hold
 #   instead of asserting, LAMMPS Data checks its atom count and sections,
 #   LAMMPS trajectories check the box bounds, the atom count and each
@@ -19,7 +20,7 @@
 #   S_ISREG is defined where the C library lacks it (MSVC).
 diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
 --- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 03:02:37.000000000 +0000
++++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 03:51:05.000000000 +0000
 @@ -1,5 +1,10 @@
  @PACKAGE_INIT@
  
@@ -33,7 +34,7 @@ diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.c
  
 diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
 --- host-a/include/chemfiles/File.hpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/include/chemfiles/File.hpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/include/chemfiles/File.hpp	2026-11-21 03:51:05.000000000 +0000
 @@ -216,6 +216,9 @@
      bool got_impl_eof_ = false;
      /// Did we actually reached the end of file while reading a line?
@@ -46,7 +47,7 @@ diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
  } // namespace chemfiles
 diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles/files/BinaryFile.hpp
 --- host-a/include/chemfiles/files/BinaryFile.hpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 03:51:05.000000000 +0000
 @@ -63,6 +63,11 @@
      /// Get the size of the file
      uint64_t file_size();
@@ -61,7 +62,7 @@ diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles
      /// Read exactly as many char as fit in the pre-allocated vector
 diff -ruN host-a/include/chemfiles/formats/TNG.hpp host-b/include/chemfiles/formats/TNG.hpp
 --- host-a/include/chemfiles/formats/TNG.hpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/include/chemfiles/formats/TNG.hpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/include/chemfiles/formats/TNG.hpp	2026-11-21 03:51:05.000000000 +0000
 @@ -26,7 +26,7 @@
      void read(Frame& frame) override;
      size_t nsteps() override;
@@ -73,7 +74,7 @@ diff -ruN host-a/include/chemfiles/formats/TNG.hpp host-b/include/chemfiles/form
      void read_topology(Frame& frame);
 diff -ruN host-a/src/File.cpp host-b/src/File.cpp
 --- host-a/src/File.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/File.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/File.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -100,7 +100,7 @@
      file_->seek(position);
      position_ = position;
@@ -131,7 +132,7 @@ diff -ruN host-a/src/File.cpp host-b/src/File.cpp
      }
 diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
 --- host-a/src/files/BinaryFile.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/files/BinaryFile.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/files/BinaryFile.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -244,8 +244,11 @@
  }
  
@@ -179,7 +180,7 @@ diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
  
 diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
 --- host-a/src/files/Netcdf3File.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/files/Netcdf3File.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/files/Netcdf3File.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -160,7 +160,7 @@
      } else if (nc_type == constants::NC_DOUBLE) {
          return sizeof(double);
@@ -288,7 +289,7 @@ diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
      // now that we know all the variables, compute the size of a single record
 diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
 --- host-a/src/files/XDRFile.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/files/XDRFile.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/files/XDRFile.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -28,8 +28,12 @@
  void XDRFile::read_opaque(std::vector<char>& data) {
      const uint32_t count = read_single_u32();
@@ -412,7 +413,7 @@ diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
              smallnum = smaller;
 diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
 --- host-a/src/formats/CSSR.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/CSSR.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/CSSR.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -5,6 +5,7 @@
  #include <array>
  #include <memory>
@@ -466,7 +467,7 @@ diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
  
 diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
 --- host-a/src/formats/DCD.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/DCD.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/DCD.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -190,7 +190,9 @@
  
  void DCDFormat::read_header() {
@@ -572,7 +573,7 @@ diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
              "DCD reader",
 diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
 --- host-a/src/formats/GRO.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/GRO.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/GRO.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -138,13 +138,17 @@
          auto v2_y = parse<double>(box_values[1]) * 10;
          auto v3_z = parse<double>(box_values[2]) * 10;
@@ -597,7 +598,7 @@ diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
  
 diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
 --- host-a/src/formats/LAMMPSData.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -4,6 +4,7 @@
  #include <cstdint>
  #include <cassert>
@@ -655,7 +656,7 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
      auto residues = std::unordered_map<size_t, Residue>();
 diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTrajectory.cpp
 --- host-a/src/formats/LAMMPSTrajectory.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -64,7 +64,7 @@
              throw format_error("expected an ITEM entry in LAMMPS format, got '{}'", line);
          }
@@ -697,7 +698,7 @@ diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTraje
              if (duplicate_check[atomid]) {
 diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
 --- host-a/src/formats/SMI.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/SMI.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/SMI.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -137,10 +137,16 @@
  void SMIFormat::process_property_list(Topology& topology, string_view smiles) {
      size_t i = 0;
@@ -727,7 +728,7 @@ diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
      }
 diff -ruN host-a/src/formats/TNG.cpp host-b/src/formats/TNG.cpp
 --- host-a/src/formats/TNG.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/TNG.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/TNG.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -130,7 +130,17 @@
      frame.set_step(static_cast<size_t>(tng_steps_[step_]));
      natoms_ = 0;
@@ -774,7 +775,7 @@ diff -ruN host-a/src/formats/TNG.cpp host-b/src/formats/TNG.cpp
          positions[i][0] = static_cast<double>(buffer[3 * i + 0]) * distance_scale_factor_;
 diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
 --- host-a/src/formats/TPR.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/TPR.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/TPR.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -207,7 +207,11 @@
      FunctionType() = default;
      constexpr FunctionType(FT v) : value(v) {}
@@ -888,7 +889,27 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
      ffparams.function_types.resize(num_function_types);
  
      // Read all function types
-@@ -859,6 +880,8 @@
+@@ -748,6 +769,9 @@
+     // In practice the code is backwards compatible, which means that the
+     // numbering may have to be altered from old numbering to new numbering.
+     for (auto& function_type : ffparams.function_types) {
++        if (function_type < 0 || function_type >= NRE) {
++            throw format_error("invalid function type {} in TPR file", function_type);
++        }
+         for (const auto& function_type_update : FUNCTION_TYPE_UPDATES) {
+             // Compare the read file version to the update table
+             if ((file_version < function_type_update.file_version) &&
+@@ -755,6 +779,9 @@
+                 ++function_type;
+             }
+         }
++        if (function_type >= NRE) {
++            throw format_error("invalid function type {} in TPR file", function_type);
++        }
+         // Skip the force field parameters of the function
+         size_t params_size = interaction_params_size(static_cast<FunctionType>(function_type),
+                                                      sizeof_real, file_version);
+@@ -859,6 +886,8 @@
  
      header_.natoms = file_.read_single_size_as_i32();
      header_.ngroups_temperature_coupling = file_.read_single_size_as_i32();
@@ -897,7 +918,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
  
      if (header_.file_version < 62) {
          // Skip some legacy entries
-@@ -896,6 +919,14 @@
+@@ -896,6 +925,14 @@
      } else {
          header_.body_convention = FileIOXdr;
      }
@@ -912,7 +933,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
  }
  
  void TPRFormat::read_box(Frame& frame) {
-@@ -934,6 +965,7 @@
+@@ -934,6 +971,7 @@
      // see `do_moltype`
      auto read_molecule_types = [this, symbol_table]() -> std::vector<MoleculeType> {
          const size_t nmoltypes = file_.read_single_size_as_i32();
@@ -920,7 +941,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          std::vector<MoleculeType> molecule_types;
          molecule_types.reserve(nmoltypes);
  
-@@ -980,6 +1012,8 @@
+@@ -980,6 +1018,8 @@
              Atoms atoms;
              const size_t natoms = file_.read_single_size_as_i32();
              const size_t nresidue_info = file_.read_single_size_as_i32();
@@ -929,7 +950,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
              atoms.atom_properties.reserve(natoms);
              atoms.atom_names.reserve(natoms);
              atoms.atom_types.reserve(natoms);
-@@ -1030,12 +1064,12 @@
+@@ -1030,12 +1070,12 @@
  
              // GROMACS: Skip the obsolete charge group index
              // see `do_block`
@@ -945,7 +966,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
              file_.skip((nlists + 1 + nelements) * sizeof(int32_t));
          }
          return molecule_types;
-@@ -1051,9 +1085,25 @@
+@@ -1051,9 +1091,25 @@
      for (size_t i = 0; i < nmolblocks; ++i) {
          // Index of the molecule type read previously
          size_t moltype_idx = file_.read_single_size_as_i32();
@@ -972,7 +993,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          for (size_t j = 0; j < nmolecules; ++j) {
              std::vector<chemfiles::Residue> residues_of_mol;
              residues_of_mol.reserve(atoms.residue_infos.size());
-@@ -1081,9 +1131,8 @@
+@@ -1081,9 +1137,8 @@
                          "residue index out of bounds, there are {} residues, got index {}",
                          moltype.atoms.residue_infos.size(), props.residue_idx);
                  }
@@ -983,7 +1004,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
              global_atom_idx += atoms.size();
              for (const auto& residue : residues_of_mol) {
                  frame.add_residue(residue);
-@@ -1093,27 +1142,32 @@
+@@ -1093,27 +1148,32 @@
          // Skip number of atoms per molecule as this is already stored in the type
          file_.skip(sizeof(int32_t));
          for (size_t j = 0; j < 2; ++j) {
@@ -1020,7 +1041,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          if (header_.file_version < TPRVersion::RemoveImplicitSolvation) {
              file_.skip(3 * ntypes * header_.sizeof_real());
          }
-@@ -1127,8 +1181,11 @@
+@@ -1127,8 +1187,11 @@
      // Skip dihedral correction maps (CMAP)
      // see `do_cmap`
      if (header_.file_version >= 65) {
@@ -1034,7 +1055,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          file_.skip(ngrids * grid_spacing * grid_spacing * 4 * header_.sizeof_real());
      }
  
-@@ -1138,15 +1195,15 @@
+@@ -1138,15 +1201,15 @@
          // Skip sizes of groups
          for (size_t i = 0; i < NR_GROUP_TYPES; ++i) {
              // see `do_grps`
@@ -1053,7 +1074,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
              if (header_.body_convention == FileIOXdr) {
                  file_.skip(ngroup_numbers * sizeof(uint32_t));
              } else {
-@@ -1163,9 +1220,9 @@
+@@ -1163,9 +1226,9 @@
                                 "a positive value, got {}",
                                 intermolecularExclusionGroupSize);
          }
@@ -1066,7 +1087,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
      }
  }
  
-@@ -1230,6 +1287,7 @@
+@@ -1230,6 +1293,7 @@
  
  std::vector<std::string> TPRFormat::read_symbol_table() {
      size_t nsymbols = file_.read_single_size_as_i32();
@@ -1074,7 +1095,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
      std::vector<std::string> symbol_table;
      symbol_table.reserve(nsymbols);
      for (size_t i = 0; i < nsymbols; ++i) {
-@@ -1240,7 +1298,12 @@
+@@ -1240,7 +1304,12 @@
  
  const std::string& TPRFormat::read_symbol_table_entry(const std::vector<std::string>& table) {
      size_t idx = file_.read_single_size_as_i32();
@@ -1088,7 +1109,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
  }
  
  std::string TPRFormat::read_gmx_string() {
-@@ -1255,6 +1318,7 @@
+@@ -1255,6 +1324,7 @@
  
          // lenght without null terminator
          const uint64_t len = file_.read_single_u64();
@@ -1098,7 +1119,7 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          buf.resize(static_cast<size_t>(len));
 diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
 --- host-a/src/formats/TRR.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/TRR.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/TRR.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -236,6 +236,29 @@
          }
          header.use_double = (nflsize == sizeof(double));
@@ -1144,7 +1165,7 @@ diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
              break;
 diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
 --- host-a/src/formats/XTC.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/XTC.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/XTC.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -102,6 +102,12 @@
  
  void XTCFormat::read(Frame& frame) {
@@ -1194,7 +1215,7 @@ diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
              }
 diff -ruN host-a/src/formats/XYZ.cpp host-b/src/formats/XYZ.cpp
 --- host-a/src/formats/XYZ.cpp	2026-11-21 02:17:51.000000000 +0000
-+++ host-b/src/formats/XYZ.cpp	2026-11-21 03:02:37.000000000 +0000
++++ host-b/src/formats/XYZ.cpp	2026-11-21 03:51:05.000000000 +0000
 @@ -443,6 +443,11 @@
          while (!done()) {
              skip_whitespace();
