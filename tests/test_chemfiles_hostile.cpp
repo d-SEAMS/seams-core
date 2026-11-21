@@ -333,6 +333,9 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_gamess_prim_leak.gms", "GAMESS", "could not open"},
            // MMTF chainsPerModel/groupsPerChain sum exceeded numChains/numGroups
            Refused{"fuzz_mmtf_chain_oob.mmtf", "MMTF", "issue with data"},
+           // DMS illegal bond returned without finalizing sqlite3_stmt, leaking db
+           Refused{"fuzz_dms_illegal_bond_leak.dms", "DESRES Molecular Structure",
+                   "could not read bonds"},
        }) {
     requireRefused(item);
   }

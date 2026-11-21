@@ -1590,7 +1590,7 @@ diff -ruN molfiles-a/molfiles/src/dlpolyplugin.c molfiles-b/molfiles/src/dlpolyp
        printf("dlpoly timestep) failed parsing atom coordinates\n");
 diff -ruN molfiles-a/molfiles/src/dmsplugin.cxx molfiles-b/molfiles/src/dmsplugin.cxx
 --- molfiles-a/molfiles/src/dmsplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/dmsplugin.cxx	2026-11-21 06:59:20.627291779 +0000
++++ molfiles-b/molfiles/src/dmsplugin.cxx	2026-11-21 09:08:13.445678083 +0000
 @@ -232,6 +232,7 @@
      }
      if (count) *count = sqlite3_column_int64(stmt, 0);
@@ -1622,6 +1622,62 @@ diff -ruN molfiles-a/molfiles/src/dmsplugin.cxx molfiles-b/molfiles/src/dmsplugi
        h = new Handle(db, count);
        *natoms = count;
        return h;
+@@ -342,6 +347,7 @@
+       atom = atoms;
+       while (SQLITE_ROW==sqlite3_step(stmt)) {
+           const char * name = (const char *)sqlite3_column_text(stmt,1);
++          if (!name) { ++ncols; continue; }
+ 
+           if      (!strcmp(name, "anum")) anum_col = ncols;
+           else if (!strcmp(name, "id")) gid_col = ncols;
+@@ -447,7 +453,7 @@
+         std::map<int,int> gidmap;
+         for (unsigned i=0; i<h->gids.size(); i++) gidmap[h->gids[i]]=i+1;
+ 
+-        for (int i=0; sqlite3_step(stmt)==SQLITE_ROW; i++) {
++        for (int i=0; sqlite3_step(stmt)==SQLITE_ROW && i < count; i++) {
+             std::map<int,int>::const_iterator iter;
+ 
+             int from = sqlite3_column_int(stmt,0);
+@@ -456,12 +462,14 @@
+             if ((iter=gidmap.find(from))==gidmap.end()) {
+                 fprintf(stderr, "Illegal bond in row %d: %d-%d\n", 
+                         i+1, from, to);
++                sqlite3_finalize(stmt);
+                 return MOLFILE_ERROR;
+             }
+             h->from[i] = iter->second;
+             if ((iter=gidmap.find(to))==gidmap.end()) {
+                 fprintf(stderr, "Illegal bond in row %d: %d-%d\n", 
+                         i+1, from, to);
++                sqlite3_finalize(stmt);
+                 return MOLFILE_ERROR;
+             }
+             h->to[i] = iter->second;
+@@ -493,7 +501,7 @@
+         std::map<int,int> gidmap;
+         for (unsigned i=0; i<h->gids.size(); i++) gidmap[h->gids[i]]=i+1;
+ 
+-        for (int i=0; sqlite3_step(stmt)==SQLITE_ROW; i++) {
++        for (int i=0; sqlite3_step(stmt)==SQLITE_ROW && i < count; i++) {
+             std::map<int,int>::const_iterator iter;
+ 
+             int from = sqlite3_column_int(stmt,0);
+@@ -501,12 +509,14 @@
+             if ((iter=gidmap.find(from))==gidmap.end()) {
+                 fprintf(stderr, "Illegal glue in row %d: %d-%d\n", 
+                         i+1, from, to);
++                sqlite3_finalize(stmt);
+                 return MOLFILE_ERROR;
+             }
+             h->glue_from[i] = iter->second;
+             if ((iter=gidmap.find(to))==gidmap.end()) {
+                 fprintf(stderr, "Illegal glue in row %d: %d-%d\n", 
+                         i+1, from, to);
++                sqlite3_finalize(stmt);
+                 return MOLFILE_ERROR;
+             }
+             h->glue_to[i] = iter->second;
 diff -ruN molfiles-a/molfiles/src/dtrplugin.cxx molfiles-b/molfiles/src/dtrplugin.cxx
 --- molfiles-a/molfiles/src/dtrplugin.cxx	2021-09-10 14:18:46.000000000 +0000
 +++ molfiles-b/molfiles/src/dtrplugin.cxx	2026-11-21 06:22:01.951844109 +0000
