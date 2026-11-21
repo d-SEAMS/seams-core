@@ -455,21 +455,22 @@ TEST_CASE("a VTF range past 200000 atoms is the structure it declares",
           "[chemfiles][molfile][hostile]") {
   const auto dir = dseams_test::freshDir();
   const auto path = (dir / "wide.vtf").string();
-  constexpr int kAtoms = 201000;
-  {
-    std::ofstream out(path, std::ios::binary);
-    out << "atom 0:" << (kAtoms - 1) << " name O type O\n\ntimestep\n";
-    for (int i = 0; i < kAtoms; ++i) {
-      out << "1 2 3\n";
+  for (int kAtoms : {201000, 330000, 1000002}) {
+    {
+      std::ofstream out(path, std::ios::binary);
+      out << "atom 0:" << (kAtoms - 1) << " name O type O\n\ntimestep\n";
+      for (int i = 0; i < kAtoms; ++i) {
+        out << "1 2 3\n";
+      }
     }
+    chemfiles::Trajectory trajectory(path, 'r', "VTF trajectory format");
+    REQUIRE(trajectory.nsteps() == 1);
+    const auto frame = trajectory.read();
+    REQUIRE(frame.size() == static_cast<std::size_t>(kAtoms));
+    REQUIRE(frame[0].name() == "O");
+    REQUIRE_THAT(frame.positions()[kAtoms - 1][0], Catch::Matchers::WithinAbs(1.0, 1e-6));
+    REQUIRE_THAT(frame.positions()[kAtoms - 1][2], Catch::Matchers::WithinAbs(3.0, 1e-6));
   }
-  chemfiles::Trajectory trajectory(path, 'r', "VTF trajectory format");
-  REQUIRE(trajectory.nsteps() == 1);
-  const auto frame = trajectory.read();
-  REQUIRE(frame.size() == static_cast<std::size_t>(kAtoms));
-  REQUIRE(frame[0].name() == "O");
-  REQUIRE_THAT(frame.positions()[kAtoms - 1][0], Catch::Matchers::WithinAbs(1.0, 1e-6));
-  REQUIRE_THAT(frame.positions()[kAtoms - 1][2], Catch::Matchers::WithinAbs(3.0, 1e-6));
   fs::remove_all(dir);
 }
 
@@ -501,16 +502,17 @@ TEST_CASE("extended XYZ loads every column of a wide property",
   const auto soapFrame = soapTraj.read();
   REQUIRE(soapFrame.size() == 4);
   const auto &soapProps = soapFrame[3].properties();
-  REQUIRE(soapProps.count("soap_0") == 1);
-  REQUIRE(soapProps.count("soap_4999") == 1);
-  REQUIRE(soapProps.count("soap_5000") == 0);
-  REQUIRE(soapProps.at("soap_4999").as_double() == 3 * 5000 + 4999);
+  REQUIRE(soapProps.size() == 5000);
+  REQUIRE(soapProps.get("soap_0"));
+  REQUIRE_FALSE(soapProps.get("soap_5000"));
+  REQUIRE(soapProps.get("soap_4999").value().as_double() == 3.0 * 5000 + 4999);
   chemfiles::Trajectory pairTraj(pair, 'r', "XYZ");
   const auto pairFrame = pairTraj.read();
-  REQUIRE(pairFrame[0].properties().count("a_0") == 1);
-  REQUIRE(pairFrame[0].properties().count("a_2999") == 1);
-  REQUIRE(pairFrame[0].properties().count("b_0") == 1);
-  REQUIRE(pairFrame[0].properties().count("b_2999") == 1);
-  REQUIRE(pairFrame[0].properties().at("b_2999").as_double() == 5999);
+  const auto &pairProps = pairFrame[0].properties();
+  REQUIRE(pairProps.size() == 6000);
+  REQUIRE(pairProps.get("a_0"));
+  REQUIRE(pairProps.get("a_2999"));
+  REQUIRE(pairProps.get("b_0"));
+  REQUIRE(pairProps.get("b_2999").value().as_double() == 5999.0);
   fs::remove_all(dir);
 }
