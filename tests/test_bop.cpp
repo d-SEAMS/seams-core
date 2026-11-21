@@ -1940,3 +1940,94 @@ TEST_CASE("cutoff q_l skips the Lechner-Dellago average", "[bop]") {
     REQUIRE_THAT(q3.qlBar[i], Catch::Matchers::WithinAbs(q3rows.qlBar[i], 1e-8));
   }
 }
+
+TEST_CASE("triclinic shifted periodic images preserve cutoff Steinhardt and q4q6ChillPlus",
+          "[bop][triclinic]") {
+  // Build a 2x2x2 diamond-cubic lattice inside a tilted triclinic supercell.
+  const double lx = 12.7;
+  const double ly = 12.7;
+  const double lz = 12.7;
+  const double xy = 1.5;
+  const double xz = 0.8;
+  const double yz = 0.7;
+  const double xlo = 0.0;
+  const double ylo = 0.0;
+  const double zlo = 0.0;
+  const double xloBound = xlo + std::min({0.0, xy, xz, xy + xz});
+  const double xhiBound = xlo + lx + std::max({0.0, xy, xz, xy + xz});
+  const double yloBound = ylo + std::min(0.0, yz);
+  const double yhiBound = ylo + ly + std::max(0.0, yz);
+
+  const double basis[8][3] = {
+      {0.0, 0.0, 0.0},    {0.0, 0.5, 0.5},    {0.5, 0.0, 0.5},    {0.5, 0.5, 0.0},
+      {0.25, 0.25, 0.25}, {0.25, 0.75, 0.75}, {0.75, 0.25, 0.75}, {0.75, 0.75, 0.25},
+  };
+
+  auto makeCloud = [&](bool shiftImages) {
+    molSys::PointCloud<molSys::Point<double>, double> c;
+    c.box = {xhiBound - xloBound, yhiBound - yloBound, lz, xy, xz, yz};
+    c.boxLow = {xloBound, yloBound, zlo};
+    c.currentFrame = 1;
+    int id = 1;
+    for (int ix = 0; ix < 2; ++ix) {
+      for (int iy = 0; iy < 2; ++iy) {
+        for (int iz = 0; iz < 2; ++iz) {
+          for (int b = 0; b < 8; ++b) {
+            double sx = 0.5 * (ix + basis[b][0]);
+            double sy = 0.5 * (iy + basis[b][1]);
+            double sz = 0.5 * (iz + basis[b][2]);
+            if (shiftImages) {
+              const int idx = id - 1;
+              sx += static_cast<double>((idx % 3) - 1);
+              sy += static_cast<double>(((idx / 3) % 3) - 1);
+              sz += static_cast<double>(((idx / 9) % 3) - 1);
+            }
+            molSys::Point<double> p;
+            p.type = 1;
+            p.atomID = id;
+            p.molID = id;
+            p.x = xlo + lx * sx + xy * sy + xz * sz;
+            p.y = ylo + ly * sy + yz * sz;
+            p.z = zlo + lz * sz;
+            c.idIndexMap[id] = static_cast<int>(c.pts.size());
+            c.pts.push_back(p);
+            ++id;
+          }
+        }
+      }
+    }
+    c.nop = static_cast<int>(c.pts.size());
+    return c;
+  };
+
+  auto refCloud = makeCloud(false);
+  auto shiftedCloud = makeCloud(true);
+  const double cutoff = 3.5;
+
+  for (int l : {3, 4, 6}) {
+    const auto refQl = chill::steinhardtQlCutoff(refCloud, cutoff, l, 1, true, true);
+    const auto shQl = chill::steinhardtQlCutoff(shiftedCloud, cutoff, l, 1, true, true);
+    const auto shLocal = chill::steinhardtQlCutoff(shiftedCloud, cutoff, l, 1, false, false);
+    REQUIRE(shQl.ql.size() == refQl.ql.size());
+    for (std::size_t i = 0; i < refQl.ql.size(); ++i) {
+      REQUIRE_THAT(shQl.ql[i], Catch::Matchers::WithinAbs(refQl.ql[i], 1e-10));
+      REQUIRE_THAT(shLocal.ql[i], Catch::Matchers::WithinAbs(refQl.ql[i], 1e-10));
+      REQUIRE_THAT(shQl.qlBar[i], Catch::Matchers::WithinAbs(refQl.qlBar[i], 1e-10));
+      if (l == 4 || l == 6) {
+        REQUIRE_THAT(shQl.wl[i], Catch::Matchers::WithinAbs(refQl.wl[i], 1e-10));
+      }
+    }
+  }
+
+  std::vector<double> r4, r6, r4b, r6b, s4, s6, s4b, s6b;
+  REQUIRE(chill::q4q6ChillPlus(refCloud, cutoff, 1, r4, r6, r4b, r6b));
+  REQUIRE(chill::q4q6ChillPlus(shiftedCloud, cutoff, 1, s4, s6, s4b, s6b));
+  for (int i = 0; i < refCloud.nop; ++i) {
+    const auto u = static_cast<std::size_t>(i);
+    REQUIRE_THAT(s4[u], Catch::Matchers::WithinAbs(r4[u], 1e-10));
+    REQUIRE_THAT(s6[u], Catch::Matchers::WithinAbs(r6[u], 1e-10));
+    REQUIRE_THAT(s4b[u], Catch::Matchers::WithinAbs(r4b[u], 1e-10));
+    REQUIRE_THAT(s6b[u], Catch::Matchers::WithinAbs(r6b[u], 1e-10));
+    REQUIRE(shiftedCloud.pts[u].iceType == refCloud.pts[u].iceType);
+  }
+}

@@ -1184,15 +1184,15 @@ SteinhardtQl cutoffSolid(
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     if (tilt) {
-      // Reduced coordinates. The bond loop then wraps those lengths
-      // instead of repeating the fractional conversion on every neighbour.
+      // Reduced coordinates. Solve the upper-triangular system before wrapping
+      // so integer image shifts in y and z cancel the tilt coupling terms.
       double sz = (p.z - frac.oz) / frac.lz;
+      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
+      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
       sz -= std::floor(sz);
       if (!(sz < 1.0)) sz = 0.0;
-      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
       sy -= std::floor(sy);
       if (!(sy < 1.0)) sy = 0.0;
-      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
       sx -= std::floor(sx);
       if (!(sx < 1.0)) sx = 0.0;
       scratch.xyz[static_cast<std::size_t>(3 * i)] = sx * frac.lx;

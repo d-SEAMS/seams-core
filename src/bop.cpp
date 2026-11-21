@@ -1819,12 +1819,12 @@ bool chill::q4q6ChillPlus(
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     if (tilt) {
       double sz = (p.z - frac.oz) / frac.lz;
+      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
+      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
       sz -= std::floor(sz);
       if (!(sz < 1.0)) sz = 0.0;
-      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
       sy -= std::floor(sy);
       if (!(sy < 1.0)) sy = 0.0;
-      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
       sx -= std::floor(sx);
       if (!(sx < 1.0)) sx = 0.0;
       xyz[static_cast<std::size_t>(3 * i)] = sx * frac.lx;
