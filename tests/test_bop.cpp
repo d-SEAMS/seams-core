@@ -2138,3 +2138,61 @@ TEST_CASE("reduced triclinic cell outside Smith ball uses Euclidean MIC across C
                  Catch::Matchers::WithinAbs(cDot2.pts[0].c_ij[k].c_value, 1e-10));
   }
 }
+
+TEST_CASE("getq6 and reclassifyWater handle coincident pairs and empty bond lists safely",
+          "[bop]") {
+  // Coincident-only pair: r == 0 must not trigger out-of-bounds ylm access or NaN.
+  molSys::PointCloud<molSys::Point<double>, double> coinc;
+  coinc.box = {20.0, 20.0, 20.0};
+  coinc.boxLow = {0.0, 0.0, 0.0};
+  coinc.currentFrame = 1;
+  for (int i = 0; i < 2; ++i) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.x = 1.0;
+    p.y = 1.0;
+    p.z = 1.0;
+    p.iceType = molSys::atom_state_type::water;
+    coinc.idIndexMap[p.atomID] = i;
+    coinc.pts.push_back(p);
+  }
+  coinc.nop = 2;
+  const std::vector<std::vector<int>> coincRows = {{1, 2}, {2, 1}};
+  const auto q6Coinc = chill::getq6(coinc, coincRows, false);
+  REQUIRE(q6Coinc.size() == 2);
+  REQUIRE(std::isfinite(q6Coinc[0]));
+  REQUIRE(std::isfinite(q6Coinc[1]));
+  REQUIRE_THAT(q6Coinc[0], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(q6Coinc[1], Catch::Matchers::WithinAbs(0.0, 1e-12));
+
+  // Mixed real + coincident neighbour: valid bond must still yield c_6(i,j) = 1.0
+  // for a single antiparallel pair (even l=6 satisfies Y_6m(-r) = +Y_6m(r)).
+  molSys::PointCloud<molSys::Point<double>, double> mixed = coinc;
+  molSys::Point<double> p3;
+  p3.type = 1;
+  p3.atomID = 3;
+  p3.molID = 3;
+  p3.x = 3.75;
+  p3.y = 1.0;
+  p3.z = 1.0;
+  mixed.idIndexMap[3] = 2;
+  mixed.pts.push_back(p3);
+  mixed.nop = 3;
+  const std::vector<std::vector<int>> mixedRows = {{1, 2, 3}, {2, 1, 3}, {3, 1, 2}};
+  const auto q6Mixed = chill::getq6(mixed, mixedRows, false);
+  REQUIRE(q6Mixed.size() == 3);
+  for (double v : q6Mixed) {
+    REQUIRE(std::isfinite(v));
+  }
+  // Atom 3 has two identical non-zero bonds (to coincident atoms 1 and 2), each
+  // antiparallel to their bond to atom 3, so all three have unit correlation 1.0.
+  REQUIRE_THAT(q6Mixed[2], Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  // reclassifyWater with empty c_ij and q6 > 0.5 must stay water without 0/0.
+  std::vector<double> highQ6 = {0.9, 0.9};
+  chill::reclassifyWater(coinc, highQ6);
+  REQUIRE(coinc.pts[0].iceType == molSys::atom_state_type::water);
+  REQUIRE(coinc.pts[1].iceType == molSys::atom_state_type::water);
+}

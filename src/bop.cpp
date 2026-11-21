@@ -3355,32 +3355,30 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // if(yCloud.pts[iatom].type!=typeO){continue;}
 
+    auto &dstYlm = QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm;
+    dstYlm.assign(static_cast<std::size_t>(2 * l + 1), {0.0, 0.0});
     const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom, 4);
-    bool first = true;
+    int nUsed = 0;
     for (int jatomIndex : nearest) {
       delta = gen::relDist(yCloud, iatom, jatomIndex);
-      double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
-                           std::pow(delta[2], 2.0));
-      if (r == 0.0) {
+      const double r = std::sqrt(delta[0] * delta[0] + delta[1] * delta[1] +
+                                 delta[2] * delta[2]);
+      if (!(r > 0.0)) {
         continue;
       }
-      angles[1] = acos(delta[2] / r);
-      angles[0] = atan2(delta[0], delta[1]);
+      const double cosTheta = std::max(-1.0, std::min(1.0, delta[2] / r));
+      angles[1] = std::acos(cosTheta);
+      angles[0] = std::atan2(delta[0], delta[1]);
 
-      if (first) {
-        sph::spheriHarmoInto(l, angles, QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm);
-        first = false;
-        continue;
-      }
       sph::spheriHarmoInto(l, angles, yl);
       for (int m = 0; m < 2 * l + 1; m++) {
-        QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm[static_cast<std::size_t>(m)] += yl[static_cast<std::size_t>(m)];
+        dstYlm[static_cast<std::size_t>(m)] += yl[static_cast<std::size_t>(m)];
       }
+      ++nUsed;
     }
 
-    if (!nearest.empty()) {
-      QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm = gen::avgVector(
-          QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm, l, static_cast<int>(nearest.size()));
+    if (nUsed > 0) {
+      dstYlm = gen::avgVector(dstYlm, l, nUsed);
     }
   } // End of looping over all iatom
 
@@ -3409,9 +3407,8 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));
       }
-      complexDenominator = std::sqrt(Inorm * Jnorm);
-      complexCij = dot_product / complexDenominator;
-      cij_real = complexCij.real();
+      const double denom = std::sqrt(Inorm.real() * Jnorm.real());
+      cij_real = (denom > 0.0) ? (dot_product.real() / denom) : 0.0;
 
       q_value += cij_real;
     }
@@ -3454,6 +3451,9 @@ void chill::reclassifyWater(
         avgQ3 = 0.0; // init to zero
         // Loop through all c_ij
         nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
+        if (nnumNeighbours == 0) {
+          continue;
+        }
         for (int j = 0; j < nnumNeighbours; j++) {
           avgQ3 += yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].c_value;
         }
