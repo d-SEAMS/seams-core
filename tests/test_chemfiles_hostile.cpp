@@ -331,6 +331,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_alloc_bound.tng", "TNG", kTngErr},
            // GAMESS read_shell_primitives hit EOF before freeing *prim
            Refused{"fuzz_gamess_prim_leak.gms", "GAMESS", "could not open"},
+           // MMTF chainsPerModel/groupsPerChain sum exceeded numChains/numGroups
+           Refused{"fuzz_mmtf_chain_oob.mmtf", "MMTF", "issue with data"},
        }) {
     requireRefused(item);
   }
@@ -394,6 +396,11 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   REQUIRE(cifExp.error.empty());
   REQUIRE(cifExp.steps == 1);
   REQUIRE(cifExp.natoms == 1);
+
+  // A TRJ frame with no positions (mdts.pos == NULL) must not pass NULL to memcpy.
+  const auto trjNullPos = readAll("hostile/fuzz_trj_null_pos.trj", "TRJ");
+  REQUIRE(trjNullPos.error.empty());
+  REQUIRE(trjNullPos.steps == 0);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",

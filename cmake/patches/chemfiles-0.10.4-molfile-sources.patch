@@ -3930,7 +3930,7 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
  	return mdio_seterror(MDIO_SUCCESS);
 diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/gromacsplugin.cxx
 --- molfiles-a/molfiles/src/gromacsplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/gromacsplugin.cxx	2026-11-21 06:23:34.715571264 +0000
++++ molfiles-b/molfiles/src/gromacsplugin.cxx	2026-11-21 08:40:11.646811830 +0000
 @@ -85,7 +85,7 @@
      &mdh.timeval, &mdh.natoms, 0) < 0) {
          fprintf(stderr, "gromacsplugin) Cannot read header fromm '%s', %s\n",
@@ -3940,7 +3940,22 @@ diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/grom
          return NULL;
      }
      *natoms = mdh.natoms;
-@@ -281,6 +281,7 @@
+@@ -148,8 +148,13 @@
+ 
+   if (mdio_timestep(gmx->mf, &mdts) < 0)
+     return MOLFILE_ERROR;
++  if (gmx->natoms > 0 && !mdts.pos) {
++    mdio_tsfree(&mdts);
++    return MOLFILE_ERROR;
++  }
+   if (ts) {
+-    memcpy(ts->coords, mdts.pos, 3 * sizeof(float) * gmx->natoms);
++    if (gmx->natoms > 0)
++      memcpy(ts->coords, mdts.pos, 3 * sizeof(float) * gmx->natoms);
+     if (mdts.box) {
+       ts->A = mdts.box->A;
+       ts->B = mdts.box->B;
+@@ -281,6 +286,7 @@
          if (g96_header(mf, mdh.title, MAX_MDIO_TITLE, &mdh.timeval) < 0) {
              fprintf(stderr, "gromacsplugin) Cannot read header from '%s', %s\n",
                      filename, mdio_errmsg(mdio_errno()));
@@ -3948,7 +3963,7 @@ diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/grom
              return NULL;
          }
  
-@@ -288,6 +289,7 @@
+@@ -288,6 +294,7 @@
          if (mdio_readline(mf, gbuf, MAX_G96_LINE + 1) < 0) {
              fprintf(stderr, "gromacsplugin) Cannot read header from '%s', %s\n",
                      filename, mdio_errmsg(mdio_errno()));
@@ -3956,7 +3971,7 @@ diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/grom
              return NULL;
          }
          if (!strcasecmp(gbuf, "TIMESTEP")) {
-@@ -297,11 +299,13 @@
+@@ -297,11 +304,13 @@
                  mdio_readline(mf, gbuf, MAX_G96_LINE + 1) < 0) {
                fprintf(stderr, "gromacsplugin) Cannot read header from '%s', %s\n",
                        filename, mdio_errmsg(mdio_errno()));
@@ -3970,6 +3985,37 @@ diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/grom
            return NULL;
          }
          *natoms = g96_countatoms(mf);
+@@ -407,8 +416,13 @@
+ 
+   if (mdio_timestep(gmx->mf, &mdts) < 0)
+     return MOLFILE_ERROR;
++  if (gmx->natoms > 0 && !mdts.pos) {
++    mdio_tsfree(&mdts);
++    return MOLFILE_ERROR;
++  }
+   if (ts) {
+-    memcpy(ts->coords, mdts.pos, 3 * sizeof(float) * gmx->natoms);
++    if (gmx->natoms > 0)
++      memcpy(ts->coords, mdts.pos, 3 * sizeof(float) * gmx->natoms);
+     if (mdts.box) {
+       ts->A = mdts.box->A;
+       ts->B = mdts.box->B;
+@@ -492,8 +506,14 @@
+     return MOLFILE_ERROR;
+   }
+ 
++  if (gmx->natoms > 0 && !mdts.pos) {
++    mdio_tsfree(&mdts);
++    return MOLFILE_ERROR;
++  }
++
+   if (ts) {
+-    memcpy(ts->coords, mdts.pos, 3 * sizeof(float) * gmx->natoms);
++    if (gmx->natoms > 0)
++      memcpy(ts->coords, mdts.pos, 3 * sizeof(float) * gmx->natoms);
+     if (mdts.box) {
+       ts->A = mdts.box->A;
+       ts->B = mdts.box->B;
 diff -ruN molfiles-a/molfiles/src/hash.c molfiles-b/molfiles/src/hash.c
 --- molfiles-a/molfiles/src/hash.c	2021-09-10 14:18:46.000000000 +0000
 +++ molfiles-b/molfiles/src/hash.c	2026-11-21 06:22:01.955844104 +0000

@@ -205,6 +205,75 @@ diff -ruN mmtf-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp mmtf-b/mmtf-cpp/incl
          md.checkExtraKeys();
          return obj;
      }
+diff -ruN mmtf-a/mmtf-cpp/include/mmtf/structure_data.hpp mmtf-b/mmtf-cpp/include/mmtf/structure_data.hpp
+--- mmtf-a/mmtf-cpp/include/mmtf/structure_data.hpp	2020-10-25 17:06:08.000000000 +0000
++++ mmtf-b/mmtf-cpp/include/mmtf/structure_data.hpp	2026-11-21 08:40:23.738792446 +0000
+@@ -570,6 +570,12 @@
+ 
+ 
+ inline bool StructureData::hasConsistentData(bool verbose, uint32_t chain_name_max_length) const {
++  if (numAtoms < 0 || numGroups < 0 || numChains < 0 || numModels < 0 || numBonds < 0) {
++    if (verbose) {
++      std::cout << "inconsistent negative count in StructureData" << std::endl;
++    }
++    return false;
++  }
+   std::vector<int8_t> allowed_bond_orders;
+   allowed_bond_orders.push_back(-1);
+   allowed_bond_orders.push_back(1);
+@@ -901,9 +907,9 @@
+       }
+   }
+   // traverse structure for more checks
+-  int bond_count_from_atom = 0;
+-  int bond_count_from_order = 0;
+-  int bond_count_from_resonance = 0;
++  int64_t bond_count_from_atom = 0;
++  int64_t bond_count_from_order = 0;
++  int64_t bond_count_from_resonance = 0;
+   bool all_bond_orderLists_are_default = true;
+   bool all_bond_resonanceLists_are_default = true;
+   bool all_bond_atomLists_are_default = true;
+@@ -921,11 +927,20 @@
+   }
+   int chain_idx = 0; // will be count at end of loop
+   int group_idx = 0; // will be count at end of loop
+-  int atom_idx = 0;  // will be count at end of loop
++  int64_t atom_idx = 0;  // will be count at end of loop
+   // traverse models
+   for (int model_idx = 0; model_idx < numModels; ++model_idx) {
++    if (chainsPerModel[model_idx] < 0) {
++      return false;
++    }
+     // traverse chains
+     for (int j = 0; j < chainsPerModel[model_idx]; ++j, ++chain_idx) {
++      if (chain_idx >= numChains) {
++        if (verbose) {
++          std::cout << "inconsistent chainsPerModel sum > numChains" << std::endl;
++        }
++        return false;
++      }
+       // check chain names (fixed length)
+       if (chainIdList[chain_idx].size() > chain_name_max_length) {
+         if (verbose) {
+@@ -944,8 +959,17 @@
+         }
+         return false;
+       }
++      if (groupsPerChain[chain_idx] < 0) {
++        return false;
++      }
+       // traverse groups
+       for (int k = 0; k < groupsPerChain[chain_idx]; ++k, ++group_idx) {
++        if (group_idx >= numGroups) {
++          if (verbose) {
++            std::cout << "inconsistent groupsPerChain sum > numGroups" << std::endl;
++          }
++          return false;
++        }
+         // check seq. idx
+         if (!isDefaultValue(sequenceIndexList)) {
+           const int32_t idx = sequenceIndexList[group_idx];
 diff -ruN mmtf-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp mmtf-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp
 --- mmtf-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2020-10-25 17:09:39.000000000 +0000
 +++ mmtf-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2026-11-21 06:22:02.031844018 +0000
