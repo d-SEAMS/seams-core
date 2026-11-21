@@ -27,10 +27,25 @@ def _wrap_triclinic(xyz: np.ndarray, box9: np.ndarray) -> np.ndarray:
     return out
 
 
-def _write_multiframe_lammps_dump(path: Path, frames_xyz: np.ndarray, box_len: float, types: np.ndarray, mols: np.ndarray) -> None:
+def _write_multiframe_lammps_dump(
+    path: Path,
+    frames_xyz: np.ndarray,
+    box_len: float,
+    types: np.ndarray,
+    mols: np.ndarray,
+    orders: list[np.ndarray] | None = None,
+    ids: np.ndarray | None = None,
+) -> None:
+    """Atom i has ID ids[i] (default i + 1); frame f lists atoms in orders[f].
+
+    mols and ids may also be (n_frames, n_atoms), one row per frame.
+    """
     lines: list[str] = []
     n_frames, n_atoms, _ = frames_xyz.shape
+    atom_ids = np.arange(1, n_atoms + 1) if ids is None else np.asarray(ids)
     for f in range(n_frames):
+        frame_mols = mols[f] if np.ndim(mols) == 2 else mols
+        frame_ids = atom_ids[f] if atom_ids.ndim == 2 else atom_ids
         lines.extend(
             [
                 "ITEM: TIMESTEP",
@@ -44,10 +59,10 @@ def _write_multiframe_lammps_dump(path: Path, frames_xyz: np.ndarray, box_len: f
                 "ITEM: ATOMS id mol type x y z",
             ]
         )
-        for i in range(n_atoms):
+        for i in (range(n_atoms) if orders is None else orders[f]):
             x, y, z = frames_xyz[f, i]
             lines.append(
-                f"{i + 1} {int(mols[i])} {int(types[i])} {x:.8f} {y:.8f} {z:.8f}"
+                f"{int(frame_ids[i])} {int(frame_mols[i])} {int(types[i])} {x:.8f} {y:.8f} {z:.8f}"
             )
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -491,6 +506,99 @@ def test_hbond_lifetime_and_reorientation_oracles():
     assert reor.relaxation.tau1_exp == pytest.approx(tau1_true, rel=0.06)
     assert reor.relaxation.tau2_exp == pytest.approx(tau2_true, rel=0.06)
     assert (reor.relaxation.tau1_exp / reor.relaxation.tau2_exp) == pytest.approx(3.0, rel=0.08)
+
+
+def _moving_waters(n_frames: int, box_len: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Unwrapped (T, 12, 3) positions of 4 waters that drift and turn, plus types and mols."""
+    n_waters = 4
+    types = np.tile([2, 1, 1], n_waters)
+    mols = np.repeat(np.arange(1, n_waters + 1), 3)
+    oh1 = np.array([0.757, 0.0, 0.586])
+    oh2 = np.array([-0.757, 0.0, 0.586])
+    velocity = np.array([[0.9, 0.1, -0.3], [-0.7, 0.5, 0.2], [0.2, -0.8, 0.6], [0.4, 0.4, -0.9]])
+    spin = np.array([0.35, -0.2, 0.5, 0.1])
+    xyz = np.zeros((n_frames, 3 * n_waters, 3), dtype=np.float64)
+    for f in range(n_frames):
+        for w in range(n_waters):
+            centre = np.array([2.0 + 5.0 * (w % 2), 2.0 + 5.0 * (w // 2), 6.0]) + f * velocity[w]
+            a = spin[w] * f
+            rot = np.array([[np.cos(a), -np.sin(a), 0.0], [np.sin(a), np.cos(a), 0.0], [0.0, 0.0, 1.0]])
+            xyz[f, 3 * w] = centre
+            xyz[f, 3 * w + 1] = centre + rot @ oh1
+            xyz[f, 3 * w + 2] = centre + rot @ oh2
+    return xyz, types, mols
+
+
+@pytest.mark.parametrize("atom_ids", [None, 1000 + 7 * np.arange(12)], ids=["ids-1-to-n", "ids-with-gaps"])
+def test_reordered_dump_lines_keep_atom_and_molecule_identity(tmp_path: Path, atom_ids):
+    # A dump may list atoms in any order each frame. Every trajectory result
+    # must match the same dump written in one fixed order. IDs other than
+    # 1..N take the native reader, which keeps the dump's line order.
+    box_len = 12.0
+    n_frames = 8
+    truth, types, mols = _moving_waters(n_frames, box_len)
+    wrapped = truth - box_len * np.floor(truth / box_len)
+    rng = np.random.default_rng(2026)
+    orders = [np.arange(12)] + [rng.permutation(12) for _ in range(n_frames - 1)]
+    assert any(not np.array_equal(o, np.arange(12)) for o in orders)
+    fixed_path = tmp_path / "fixed.lammpstrj"
+    shuffled_path = tmp_path / "shuffled.lammpstrj"
+    _write_multiframe_lammps_dump(fixed_path, wrapped, box_len, types, mols, ids=atom_ids)
+    _write_multiframe_lammps_dump(shuffled_path, wrapped, box_len, types, mols, orders=orders, ids=atom_ids)
+    fixed = ds.open_trajectory(fixed_path, all_atoms=True, dt=0.5)
+    shuffled = ds.open_trajectory(shuffled_path, all_atoms=True, dt=0.5)
+
+    up_fixed = fixed.unwrap_positions()
+    up_shuffled = shuffled.unwrap_positions()
+    assert np.allclose(up_fixed - up_fixed[0], truth - truth[0], atol=1e-6)
+    assert np.allclose(up_shuffled, up_fixed, atol=1e-6)
+
+    uc_fixed = fixed.unwrap_centres()
+    uc_shuffled = shuffled.unwrap_centres()
+    assert np.array_equal(uc_shuffled.mol_ids, uc_fixed.mol_ids)
+    assert np.allclose(uc_shuffled.centres, uc_fixed.centres, atol=1e-6)
+
+    for by_molecule in (False, True):
+        m_fixed = fixed.msd(by_molecule=by_molecule)
+        m_shuffled = shuffled.msd(by_molecule=by_molecule)
+        assert m_fixed.total[1] > 0.1
+        assert np.allclose(m_shuffled.total, m_fixed.total, atol=1e-8)
+        assert np.allclose(m_shuffled.axial, m_fixed.axial, atol=1e-8)
+        assert np.allclose(m_shuffled.lateral, m_fixed.lateral, atol=1e-8)
+
+    for kind in ("bisector", "hh", "dipole"):
+        r_fixed = fixed.reorientation(kind=kind, oxygen_type=2, hydrogen_type=1)
+        r_shuffled = shuffled.reorientation(kind=kind, oxygen_type=2, hydrogen_type=1)
+        assert np.allclose(r_shuffled.c1, r_fixed.c1, atol=1e-10), kind
+        assert np.allclose(r_shuffled.c2, r_fixed.c2, atol=1e-10), kind
+    # The turning waters decorrelate, so a row mix-up would show.
+    assert fixed.reorientation(kind="hh", oxygen_type=2, hydrogen_type=1).c1[4] < 0.9
+
+
+def test_trajectory_identity_mismatches_are_refused(tmp_path: Path):
+    box_len = 12.0
+    truth, types, mols = _moving_waters(3, box_len)
+    wrapped = truth - box_len * np.floor(truth / box_len)
+
+    # An atom that changes molecule between frames.
+    moved = np.stack([mols, mols, mols])
+    moved[1, 3], moved[1, 0] = 1, 2
+    moved_path = tmp_path / "moved.lammpstrj"
+    _write_multiframe_lammps_dump(moved_path, wrapped, box_len, types, moved)
+    traj = ds.open_trajectory(moved_path, all_atoms=True)
+    with pytest.raises(ValueError, match="molecule"):
+        traj.unwrap_centres()
+    with pytest.raises(ValueError, match="molecule"):
+        traj.msd(by_molecule=True)
+    # Atom-level results do not depend on molecule membership.
+    assert traj.unwrap_positions().shape == (3, 12, 3)
+
+    # The same atom count, but different atom IDs in a later frame.
+    ids_path = tmp_path / "ids.lammpstrj"
+    frame_ids = np.stack([np.arange(1, 13), np.arange(1, 13), np.arange(101, 113)])
+    _write_multiframe_lammps_dump(ids_path, wrapped, box_len, types, mols, ids=frame_ids)
+    with pytest.raises(ValueError, match="atom IDs differ"):
+        ds.open_trajectory(ids_path, all_atoms=True).unwrap_positions()
 
 
 def test_size_arguments_out_of_size_t_range_are_refused():
