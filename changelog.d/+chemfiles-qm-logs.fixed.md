@@ -1,0 +1,1 @@
+A GAMESS log and a valid CPMD output read through chemfiles. The molfile reader passed a null QM timestep to plugins that parse each frame in `read_qm_timestep_metadata`, which it never called, so both crashed; the Gaussian and Molden readers take the same guard. A CPMD output with an over-long version line is an error instead of a stack overflow.

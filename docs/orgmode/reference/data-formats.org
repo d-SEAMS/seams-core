@@ -246,8 +246,9 @@ formats. chemfiles itself enables three (TRJ, PSF, Molden).
 ~cmake/patches/chemfiles-0.10.4-molfiles.patch~ adds the rest, including
 the g96 reader already inside ~gromacsplugin~, the DESRES ~.dms~ reader
 (linked to the system SQLite3) and the CPMD and Gaussian log readers.
-~cmake/patches/chemfiles-0.10.4-external-sources.sh~ adds the three QM
-fields those log plugins write and the hostile-file fixes, then repacks
+~cmake/patches/chemfiles-0.10.4-external-sources.sh~ applies
+~chemfiles-0.10.4-molfile-sources.patch~, which adds the three QM fields
+those log plugins write and the hostile-file fixes, then repacks
 ~molfiles.tar.gz~. Configure keeps an installed chemfiles only when
 ~cmake/chemfiles_mmcif_probe.cpp~ finds all 37 names and counts the
 frame of ~cmake/molfile_water.rst7~. An unpatched 0.10.x has three, so
@@ -359,6 +360,29 @@ and a file without atoms is ~the FORMAT plugin found no atoms in
 example ~VMDFMT_RST7~). ~sinp::openFrame~ returns an empty cloud for
 each. A file the plugin itself refuses is ~could not open the file at
 'PATH' with FORMAT plugin~.
+
+Every format the build enables was also fuzzed under AddressSanitizer
+and UndefinedBehaviorSanitizer with truncated files, huge counts, NUL
+bytes and over-long lines, and each crash, hang or sanitizer report it
+found is fixed in the reader rather than by dropping the format. Each
+fix has a fixture under ~input/hostile/~ that ~chemfiles_hostile~ reads.
+A frame read now fetches the timestep and QM metadata first, so the
+GAMESS log and a valid CPMD output read instead of writing through a
+null QM timestep, and the Gaussian and Molden readers take the same
+guard. The CPMD version check, the AMBER7 parm readers (EOF and every
+~%s~ scan), the Gaussian cube atom loop, the Maestro, PQR, BINPOS,
+DESRES, js, XSF, XBGF, CAR, DL_POLY, g96 and TRJ readers bound what they
+read by the buffer and the bytes left in the file. The mmCIF reader
+checks its model column and the writer prints ~?~ for an empty name or
+type, which it reads back as empty. In chemfiles' own readers, the text
+file keeps the right offset after a line longer than its buffer (later
+steps of an XYZ or SMI file read from the wrong place), and XTC, TRR,
+TPR, DCD, Amber NetCDF, CSSR and GRO check their counts and indices.
+~chemfiles-0.10.4-tng-sources.patch~ checks the block, molecule and data
+sizes of TNG, and ~chemfiles-0.10.4-mmtf-sources.patch~ checks the
+lengths and integer arithmetic of the MMTF binary decoder; both go
+through ~chemfiles-0.10.4-external-sources.sh~ like the molfiles
+patch.
 
 * eOn ~.con~
 

@@ -64,6 +64,8 @@ lzma (liblzma)
 mmtf-cpp (headers)
   License: MIT
   Text: mmtf-cpp/LICENSE
+  cmake/patches/chemfiles-0.10.4-mmtf-sources.patch checks the binary
+    decoder's lengths and integer arithmetic.
   mmtf-cpp/msgpack-c: BSL-1.0, with its copies of Boost.Preprocessor and
     Boost.Predef, also BSL-1.0 (text at the end of this file)
 molfiles (VMD molfile plugins)
@@ -89,7 +91,8 @@ molfiles (VMD molfile plugins)
       be distributed if the notice is kept unmodified and changes to the
       rest of the file are noted in comments.
       cmake/patches/chemfiles-0.10.4-molfile-sources.patch bounds the
-      %s scans in ReadPARM7.h and notes that change in the file.
+      %s scans in ReadPARM7.h, checks the reads, counts and indices of
+      both readers, and notes those changes in each file.
   Compiled plugins (external/CMakeLists.txt after
   cmake/patches/chemfiles-0.10.4-molfiles.patch): abinitplugin,
   bgfplugin, binposplugin, carplugin, corplugin, cpmdlogplugin,
@@ -108,6 +111,8 @@ pugixml
 tng (TNG trajectory library)
   License: BSD-3-Clause, except the files below
   Text: tng/COPYING
+  cmake/patches/chemfiles-0.10.4-tng-sources.patch checks the block,
+    molecule and data sizes read from the file in tng/src/lib/tng_io.c.
   tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
     Aladdin Enterprises, text in each file header
 toml11 (headers)
