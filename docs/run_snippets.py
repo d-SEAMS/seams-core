@@ -728,7 +728,9 @@ C_BUFFERS = [
     ("n", "  size_t n = 8;"),
     ("xyz", "  double *xyz = doc_cell;"),
     ("labels", "  int labels_buf[8192] = {0};\n  int *labels = labels_buf;"),
-    ("counts", "  int counts[9] = {0};"),
+    # Ring size is the histogram index. seams_rings_histogram(..., 13)
+    # writes counts[0] through counts[12]. CHILL+ uses the first 9.
+    ("counts", "  int counts[13] = {0};"),
     ("box9", "  const double box9[9] = {0, 0, 0, a, a, a, 0, 0, 0};"),
     ("frame0", "  const double *frame0 = doc_cell;"),
     ("frames", "  const double *frames[2] = {doc_cell, doc_cell};"),
