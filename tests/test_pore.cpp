@@ -2122,6 +2122,40 @@ TEST_CASE("minimum image error holds on skewed cells with a long b edge", "[pore
   REQUIRE(pairs == 21 * 64);
 }
 
+TEST_CASE("minimum image error holds when a wrap cancels on a compact cell", "[pore]") {
+  // w = L + d for a short lattice vector L and an offset d far shorter than
+  // w, on cells whose wrap images rarely cancel, so the descent from w runs
+  // again to evaluate the image exactly.
+  long pairs = 0;
+  const auto judge = [&](const double c[6], const std::array<double, 3> &w) {
+    const ImageError e = imageError(c, w);
+    ++pairs;
+    REQUIRE(e.ulps <= 4.0);
+    REQUIRE(e.relative <= 1e-14);
+  };
+  const double cells[2][6] = {{30.0, 28.0, 26.0, 7.0, -5.0, 3.0},
+                              {20.0, 17.0, 16.0, 9.5, 9.0, 5.5}};
+  std::mt19937_64 gen(20261122);
+  std::uniform_real_distribution<double> unit(-1.0, 1.0);
+  for (const auto &c : cells) {
+    for (int code = 0; code < 27; ++code) {
+      const int n[3] = {code % 3 - 1, (code / 3) % 3 - 1, code / 9 - 1};
+      if (n[0] == 0 && n[1] == 0 && n[2] == 0) {
+        continue;
+      }
+      const double lattice[3] = {c[0] * n[0] + c[3] * n[1] + c[4] * n[2],
+                                 c[1] * n[1] + c[5] * n[2], c[2] * n[2]};
+      for (const double size : {0.3, 1e-3, 1e-7, 1e-12, 0.0}) {
+        const std::array<double, 3> w = {lattice[0] + size * unit(gen),
+                                         lattice[1] + size * unit(gen),
+                                         lattice[2] + size * unit(gen)};
+        judge(c, w);
+      }
+    }
+  }
+  REQUIRE(pairs == 2 * 26 * 5);
+}
+
 TEST_CASE("elongated minimum images below 2^52 are returned", "[pore]") {
   // The Babai coordinate on the short reduced vector and the large
   // coefficient on a different vector used to be multiplied together and
