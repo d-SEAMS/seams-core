@@ -284,6 +284,28 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_xtc_int_overflow.xtc", "XTC", "integer overflow during decompression"},
            // truncated TNG header failed tng_util_trajectory_open after allocating handle
            Refused{"fuzz_tng_open_leak.tng", "TNG", kTngErr},
+           // non-MOLDEN header leaked qmdata_t and FILE in open_molden_read
+           Refused{"fuzz_molden_open_leak.molden", "Molden", "could not open"},
+           // truncated InsightII car header leaked cardata and FILE
+           Refused{"fuzz_car_open_leak.car", "InsightII car", "could not open"},
+           // invalid CPMD first column leaked cpmddata and FILE
+           Refused{"fuzz_cpmd_open_leak.traj", "CPMD", "could not open"},
+           // ABINIT binary header with huge nsym hung reading past EOF
+           Refused{"fuzz_abinit_bad_counts.bin", "ABINIT", "could not open"},
+           // ABINIT binary header with out-of-range typat[i] indexed znucltypat OOB
+           Refused{"fuzz_abinit_bad_typat.bin", "ABINIT", "could not open"},
+           // AMBER Parm ReadPARM leaked parmstruct and its arrays
+           Refused{"fuzz_parm_read_leak.parm", "AMBER Parm", "could not open"},
+           // VASP POSCAR leaked strdup(lineptr) and overwritten titleline
+           Refused{"fuzz_poscar_strdup_leak.poscar", "VASP_POSCAR", "could not open"},
+           // non-SQLite DMS file leaked sqlite3 handle on open failure
+           Refused{"fuzz_dms_open_leak.dms", "DESRES Molecular Structure", "could not open"},
+           // VTF atom record missing name leaked aid_list
+           Refused{"fuzz_vtf_aid_leak.vsf", "VTF structure format", "could not open"},
+           // MDF bond parse error leaked hasharray and atomnames
+           Refused{"fuzz_mdf_bonds_leak.mdf", "InsightII MDF", "could not read bonds"},
+           // repeated CPMD ATOMS block overwrote initatoms without freeing it
+           Refused{"fuzz_cpmdlog_double_atoms.out", "CPMD 3.x output", "could not open"},
        }) {
     requireRefused(item);
   }
@@ -321,6 +343,12 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   REQUIRE(pdbNucleic.error.empty());
   REQUIRE(pdbNucleic.steps == 1);
   REQUIRE(pdbNucleic.natoms == 2);
+
+  // A Gromacs g96 file whose first timestep fails must free ts->pos in
+  // mdio_timestep().
+  const auto g96 = readAll("hostile/fuzz_g96_timestep_leak.g96", "Gromacs g96");
+  REQUIRE(g96.error.empty());
+  REQUIRE(g96.steps == 0);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",

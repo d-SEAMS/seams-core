@@ -60,6 +60,13 @@
 #   their close routines on open failures instead of leaking file handles,
 #   file_name or qmdata_t. gromacsplugin calls mdio_close on gro and g96
 #   open header failures.
+#   Fuzz hardening (r4): abinitplugin bounds binary header counts against
+#   file size, frees pawrhoij on error and validates typat[i] against
+#   ntypat; ReadPARM frees prm and its arrays in ~ReadPARM() and frees
+#   temporary buffers on error; moldenplugin, carplugin, cpmdplugin,
+#   vaspposcarplugin, dmsplugin, Gromacs.h (mdio_timestep), vtfplugin,
+#   mdfplugin and cpmdlogplugin (repeated ATOMS blocks) free allocations
+#   and handles on error and close paths.
 diff -ruN molfiles-a/molfiles/CMakeLists.txt molfiles-b/molfiles/CMakeLists.txt
 --- molfiles-a/molfiles/CMakeLists.txt	2021-09-10 14:18:46.000000000 +0000
 +++ molfiles-b/molfiles/CMakeLists.txt	2026-11-21 06:22:01.947844114 +0000
@@ -101,7 +108,7 @@ diff -ruN molfiles-a/molfiles/include/molfile_plugin.h molfiles-b/molfiles/inclu
  
 diff -ruN molfiles-a/molfiles/src/abinitplugin.c molfiles-b/molfiles/src/abinitplugin.c
 --- molfiles-a/molfiles/src/abinitplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/abinitplugin.c	2026-11-21 06:22:01.947844114 +0000
++++ molfiles-b/molfiles/src/abinitplugin.c	2026-11-21 07:09:45.305078966 +0000
 @@ -60,6 +60,7 @@
  #endif
  #include <math.h>
@@ -167,6 +174,203 @@ diff -ruN molfiles-a/molfiles/src/abinitplugin.c molfiles-b/molfiles/src/abinitp
        fprintf(stderr, "\n\nABINIT read) ERROR: file '%s' does not have the atom list.\n", data->filename);
        return MOLFILE_ERROR;
      }
+@@ -641,9 +653,14 @@
+ 
+   data->natom = data->hdr->natom;
+ 
+-  if (data->natom <= 0 || data->natom > NATOM_MAX) return NULL;
++  if (data->natom <= 0 || data->natom > NATOM_MAX || data->hdr->ntypat <= 0) return NULL;
+ 
+-  for (i = 0; i < data->natom; ++i) data->typat[i] = data->hdr->typat[i];
++  for (i = 0; i < data->natom; ++i) {
++    if (data->hdr->typat[i] < 1 || data->hdr->typat[i] > data->hdr->ntypat) {
++      return NULL;
++    }
++    data->typat[i] = data->hdr->typat[i];
++  }
+ 
+   for (i = 0; i < data->natom; ++i) DBGPRINT(stderr, "   \"%s\": data->typat[%d] = %d\n", data->filetype, i, data->typat[i]);
+ 
+@@ -1514,6 +1531,11 @@
+ 	                       (hdr->bintype.endian == big_endian ? "Big Endian" : "Little Endian"), hdr->bintype.recordmarker);
+ 
+   /* start reading again from the beginning of the file */
++  long file_len = 0;
++  if (fseek(fp, 0, SEEK_END) != 0 || (file_len = ftell(fp)) <= 0) {
++    abinit_header_free(hdr);
++    return NULL;
++  }
+   rewind(fp);
+ 
+   /*The header
+@@ -1701,13 +1723,51 @@
+ 
+   /* skip the recordmarker bytes two times */
+   bc += fread(skip, 1, 2 * hdr->bintype.recordmarker, fp);
++  if (feof(fp) || ferror(fp)) {
++    abinit_header_free(hdr);
++    return NULL;
++  }
++
++  /* Validate all counts against negative values, overflow and file size */
++  if (hdr->nkpt < 0 || hdr->nsppol < 0 || hdr->npsp < 0 || hdr->nsym < 0 ||
++      hdr->natom <= 0 || hdr->bantot < 0 || hdr->ntypat < 0) {
++    abinit_header_free(hdr);
++    return NULL;
++  }
++  {
++    unsigned long long fbytes = (unsigned long long)file_len;
++    unsigned long long nkpt = (unsigned long long)hdr->nkpt;
++    unsigned long long nsppol = (unsigned long long)hdr->nsppol;
++    unsigned long long npsp = (unsigned long long)hdr->npsp;
++    unsigned long long nsym = (unsigned long long)hdr->nsym;
++    unsigned long long natom = (unsigned long long)hdr->natom;
++    unsigned long long bantot = (unsigned long long)hdr->bantot;
++    unsigned long long ntypat = (unsigned long long)hdr->ntypat;
++    if (nkpt > fbytes / 40ULL ||
++        (nsppol > 0 && nkpt > fbytes / (4ULL * nsppol)) ||
++        npsp > fbytes / 172ULL ||
++        nsym > fbytes / 64ULL ||
++        natom > fbytes / 28ULL ||
++        bantot > fbytes / 8ULL ||
++        ntypat > fbytes / 8ULL) {
++      abinit_header_free(hdr);
++      return NULL;
++    }
++    unsigned long long need = nkpt * 40ULL + nkpt * nsppol * 4ULL +
++                              npsp * 172ULL + nsym * 64ULL +
++                              natom * 28ULL + bantot * 8ULL + ntypat * 8ULL;
++    if (need > fbytes) {
++      abinit_header_free(hdr);
++      return NULL;
++    }
++  }
+ 
+-  hdr->istwfk = (int *)malloc(sizeof(int) * hdr->nkpt);
+-  hdr->nband  = (int *)malloc(sizeof(int) * hdr->nkpt * hdr->nsppol);
+-  hdr->npwarr = (int *)malloc(sizeof(int) * hdr->nkpt);
+-  hdr->so_psp = (int *)malloc(sizeof(int) * hdr->npsp);
+-  hdr->symafm = (int *)malloc(sizeof(int) * hdr->nsym);
+-  hdr->typat  = (int *)malloc(sizeof(int) * hdr->natom);
++  hdr->istwfk = (int *)malloc(sizeof(int) * (size_t)(hdr->nkpt > 0 ? hdr->nkpt : 1));
++  hdr->nband  = (int *)malloc(sizeof(int) * (size_t)((hdr->nkpt > 0 && hdr->nsppol > 0) ? hdr->nkpt * hdr->nsppol : 1));
++  hdr->npwarr = (int *)malloc(sizeof(int) * (size_t)(hdr->nkpt > 0 ? hdr->nkpt : 1));
++  hdr->so_psp = (int *)malloc(sizeof(int) * (size_t)(hdr->npsp > 0 ? hdr->npsp : 1));
++  hdr->symafm = (int *)malloc(sizeof(int) * (size_t)(hdr->nsym > 0 ? hdr->nsym : 1));
++  hdr->typat  = (int *)malloc(sizeof(int) * (size_t)hdr->natom);
+ 
+   if (!hdr->istwfk || !hdr->nband || !hdr->npwarr || !hdr->so_psp || !hdr->symafm || !hdr->typat) {
+     abinit_header_free(hdr);
+@@ -1716,7 +1776,7 @@
+   for (i = 0; i < 3; ++i) {
+     int j;
+     for (j = 0; j < 3; ++j) {
+-      hdr->symrel[i][j] = (int *)malloc(sizeof(int) * hdr->nsym);
++      hdr->symrel[i][j] = (int *)malloc(sizeof(int) * (size_t)(hdr->nsym > 0 ? hdr->nsym : 1));
+       if (!hdr->symrel[i][j]) {abinit_header_free(hdr); return NULL;}
+     }
+   }
+@@ -1874,31 +1934,86 @@
+       int **rhoijselect;
+       double **rhoij;
+     };
+-    struct pawrhoij_t *pawrhoij = malloc(hdr->natom * sizeof(struct pawrhoij_t));
++    struct pawrhoij_t *pawrhoij = (struct pawrhoij_t *)calloc((size_t)hdr->natom, sizeof(struct pawrhoij_t));
++    if (!pawrhoij) { abinit_header_free(hdr); return NULL; }
+ 
+     for (i = 0; i < hdr->natom; ++i) {
+       int j;
+-      pawrhoij[i].nrhoijsel = (int *)malloc(sizeof(int) * hdr->nspden);
+-      if (!pawrhoij[i].nrhoijsel) {abinit_header_free(hdr); return NULL;}
++      pawrhoij[i].nrhoijsel = (int *)calloc((size_t)hdr->nspden, sizeof(int));
++      if (!pawrhoij[i].nrhoijsel) { free(pawrhoij); abinit_header_free(hdr); return NULL; }
+       for (j = 0; j < hdr->nspden; ++j){
+-        bc += binread(&pawrhoij[i].nrhoijsel[j], 4, fp, hdr->bintype);
++        if (binread(&pawrhoij[i].nrhoijsel[j], 4, fp, hdr->bintype) != 4 ||
++            pawrhoij[i].nrhoijsel[j] < 0 ||
++            (unsigned long long)pawrhoij[i].nrhoijsel[j] > (unsigned long long)file_len / 12ULL) {
++          free(pawrhoij[i].nrhoijsel);
++          free(pawrhoij);
++          abinit_header_free(hdr);
++          return NULL;
++        }
++        bc += 4;
+         if (debug) fprintf(stderr, "pawrhoij[%d].nrhoijsel[%d] = '%d'\n", i, j, pawrhoij[i].nrhoijsel[j]);
+       }
+-      pawrhoij[i].rhoijselect = (int **)malloc(sizeof(int) * hdr->nspden);
+-      pawrhoij[i].rhoij = (double **)malloc(sizeof(double) * hdr->nspden);
+-      if (!pawrhoij[i].rhoijselect || !pawrhoij[i].rhoij) {abinit_header_free(hdr); return NULL;}
++      pawrhoij[i].rhoijselect = (int **)calloc((size_t)hdr->nspden, sizeof(int *));
++      pawrhoij[i].rhoij = (double **)calloc((size_t)hdr->nspden, sizeof(double *));
++      if (!pawrhoij[i].rhoijselect || !pawrhoij[i].rhoij) {
++        free(pawrhoij[i].rhoijselect);
++        free(pawrhoij[i].rhoij);
++        free(pawrhoij[i].nrhoijsel);
++        free(pawrhoij);
++        abinit_header_free(hdr);
++        return NULL;
++      }
+       for (j = 0; j < hdr->nspden; ++j) {
+         int k;
+-        pawrhoij[i].rhoijselect[j] = (int *)malloc(sizeof(int) * pawrhoij[i].nrhoijsel[j]);
+-        pawrhoij[i].rhoij[j] = (double *)malloc(sizeof(double) * pawrhoij[i].nrhoijsel[j]);
+-        if (!pawrhoij[i].rhoijselect[j]) {abinit_header_free(hdr); return NULL;}
++        size_t nsel = (size_t)pawrhoij[i].nrhoijsel[j];
++        pawrhoij[i].rhoijselect[j] = (int *)malloc(sizeof(int) * (nsel > 0 ? nsel : 1));
++        pawrhoij[i].rhoij[j] = (double *)malloc(sizeof(double) * (nsel > 0 ? nsel : 1));
++        if (!pawrhoij[i].rhoijselect[j] || !pawrhoij[i].rhoij[j]) {
++          int jj;
++          for (jj = 0; jj <= j; ++jj) {
++            free(pawrhoij[i].rhoijselect[jj]);
++            free(pawrhoij[i].rhoij[jj]);
++          }
++          free(pawrhoij[i].rhoijselect);
++          free(pawrhoij[i].rhoij);
++          free(pawrhoij[i].nrhoijsel);
++          free(pawrhoij);
++          abinit_header_free(hdr);
++          return NULL;
++        }
+         for (k = 0; k < pawrhoij[i].nrhoijsel[j]; ++k) {
+-          bc += binread(&pawrhoij[i].rhoijselect[j][k], 4, fp, hdr->bintype);
+-	 if (debug) fprintf(stderr, "pawrhoij[%d].rhoijselect[%d][%d] = '%d'\n", i, j, k, pawrhoij[i].rhoijselect[j][k]);
++          if (binread(&pawrhoij[i].rhoijselect[j][k], 4, fp, hdr->bintype) != 4) {
++            int jj;
++            for (jj = 0; jj <= j; ++jj) {
++              free(pawrhoij[i].rhoijselect[jj]);
++              free(pawrhoij[i].rhoij[jj]);
++            }
++            free(pawrhoij[i].rhoijselect);
++            free(pawrhoij[i].rhoij);
++            free(pawrhoij[i].nrhoijsel);
++            free(pawrhoij);
++            abinit_header_free(hdr);
++            return NULL;
++          }
++          bc += 4;
++          if (debug) fprintf(stderr, "pawrhoij[%d].rhoijselect[%d][%d] = '%d'\n", i, j, k, pawrhoij[i].rhoijselect[j][k]);
+         }
+         for (k = 0; k < pawrhoij[i].nrhoijsel[j]; ++k) {
+-          bc += binread(&pawrhoij[i].rhoij[j][k], 8, fp, hdr->bintype);
+-	 if (debug) fprintf(stderr, "pawrhoij[%d].rhoij[%d][%d] = '%g'\n", i, j, k, pawrhoij[i].rhoij[j][k]);
++          if (binread(&pawrhoij[i].rhoij[j][k], 8, fp, hdr->bintype) != 8) {
++            int jj;
++            for (jj = 0; jj <= j; ++jj) {
++              free(pawrhoij[i].rhoijselect[jj]);
++              free(pawrhoij[i].rhoij[jj]);
++            }
++            free(pawrhoij[i].rhoijselect);
++            free(pawrhoij[i].rhoij);
++            free(pawrhoij[i].nrhoijsel);
++            free(pawrhoij);
++            abinit_header_free(hdr);
++            return NULL;
++          }
++          bc += 8;
++          if (debug) fprintf(stderr, "pawrhoij[%d].rhoij[%d][%d] = '%g'\n", i, j, k, pawrhoij[i].rhoij[j][k]);
+         }
+       }
+       for (j = 0; j < hdr->nspden; ++j) {
 diff -ruN molfiles-a/molfiles/src/bgfplugin.cxx molfiles-b/molfiles/src/bgfplugin.cxx
 --- molfiles-a/molfiles/src/bgfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
 +++ molfiles-b/molfiles/src/bgfplugin.cxx	2026-11-21 06:22:01.947844114 +0000
@@ -334,7 +538,7 @@ diff -ruN molfiles-a/molfiles/src/binposplugin.c molfiles-b/molfiles/src/binposp
      fprintf(stderr, "Unable to allocate space for %d atoms.\n", binpos->numatoms);
 diff -ruN molfiles-a/molfiles/src/carplugin.c molfiles-b/molfiles/src/carplugin.c
 --- molfiles-a/molfiles/src/carplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/carplugin.c	2026-11-21 06:22:01.951844109 +0000
++++ molfiles-b/molfiles/src/carplugin.c	2026-11-21 06:59:08.011326866 +0000
 @@ -116,7 +116,7 @@
    /* Check that the resid won't overflow the resname string, then copy it
     * over
@@ -344,9 +548,149 @@ diff -ruN molfiles-a/molfiles/src/carplugin.c molfiles-b/molfiles/src/carplugin.
      atom->resname[0] = '\0';
    else
      sprintf(atom->resname, "%d", resid);
+@@ -157,13 +157,18 @@
+   fd = fopen(filename, "rb"); if (!fd) return NULL;
+   
+   data = (cardata *)malloc(sizeof(cardata));
++  if (!data) {
++    fclose(fd);
++    return NULL;
++  }
+   data->eof = 0;
+   data->file = fd;
+ 
+   /* First line: "!BIOSYM archive n", where n indicates the file format */
+-  fgets(line, LINESIZE, fd);
+-  if (strncmp(line, "!BIOSYM archive", 15)) {
++  if (!fgets(line, LINESIZE, fd) || strncmp(line, "!BIOSYM archive", 15)) {
+     fprintf(stderr, "ERROR) badly formatted/missing header.\n");
++    fclose(fd);
++    free(data);
+     return NULL;
+   }
+ 
+@@ -171,10 +176,20 @@
+    * info on the next line: "PBC=ON|OFF|2D". 
+    * If HELIX is present, PBC cannot be "ON": return an error if this happens. 
+    */
+-  fgets(line, LINESIZE, fd);
++  if (!fgets(line, LINESIZE, fd)) {
++    fprintf(stderr, "ERROR) badly formatted/missing PBC info.\n");
++    fclose(fd);
++    free(data);
++    return NULL;
++  }
+   if (!strncmp(line, "HELIX", 5)) {
+     data->helix = 1;
+-    fgets(line, LINESIZE, fd);
++    if (!fgets(line, LINESIZE, fd)) {
++      fprintf(stderr, "ERROR) badly formatted/missing PBC info.\n");
++      fclose(fd);
++      free(data);
++      return NULL;
++    }
+     fprintf(stdout, "WARNING) ignoring helix information.\n");
+   }
+   else {
+@@ -193,21 +208,31 @@
+   }
+   else {
+     fprintf(stderr, "ERROR) badly formatted/missing PBC info.\n");
++    fclose(fd);
++    free(data);
+     return NULL;
+   }
+ 
+   if (data->helix && (data->pbc == PBC_ON)) {
+     fprintf(stderr, "ERROR) car file contains helix and 3D PBC information.");
++    fclose(fd);
++    free(data);
+     return NULL;
+   }
+ 
+   /* Next line: title/energy for the system. Skipped. */
+-  fgets(line, LINESIZE, fd);
++  if (!fgets(line, LINESIZE, fd)) {
++    fprintf(stderr, "ERROR) unexpected end-of-file.\n");
++    fclose(fd);
++    free(data);
++    return NULL;
++  }
+ 
+   /* Next line: "!DATE [day month date time year]". */
+-  fgets(line, LINESIZE, fd);
+-  if (strncmp(line, "!DATE", 5)) {
++  if (!fgets(line, LINESIZE, fd) || strncmp(line, "!DATE", 5)) {
+     fprintf(stderr, "ERROR) badly formatted/missing date.\n");
++    fclose(fd);
++    free(data);
+     return NULL;
+   }
+     
+@@ -215,29 +240,46 @@
+   data->coord_location = ftell(fd);
+ 
+   /* Skip the PBC and HELIX entries, if present */
+-  if (data->pbc != PBC_OFF) 
+-    fgets(line, LINESIZE, fd);
+-  if (data->helix)
+-    fgets(line, LINESIZE, fd);
++  if (data->pbc != PBC_OFF && !fgets(line, LINESIZE, fd)) {
++    fprintf(stderr, "ERROR) unexpected end-of-file.\n");
++    fclose(fd);
++    free(data);
++    return NULL;
++  }
++  if (data->helix && !fgets(line, LINESIZE, fd)) {
++    fprintf(stderr, "ERROR) unexpected end-of-file.\n");
++    fclose(fd);
++    free(data);
++    return NULL;
++  }
+ 
+   /* Count the atoms in all molecules*/
+   data->numatoms = 0;
+-  fgets(line, LINESIZE, fd);
++  if (!fgets(line, LINESIZE, fd)) {
++    fprintf(stderr, "ERROR) unexpected end-of-file.\n");
++    fclose(fd);
++    free(data);
++    return NULL;
++  }
+   while(strncmp(line, "end", 3)) {
+     while(strncmp(line, "end", 3)) {
+       data->numatoms++;
+-      fgets(line, LINESIZE, fd);
+-
+-      if (feof(fd)) {
+-        fprintf(stderr, "ERROR) unexpected end-of-file.\n");
+-        return NULL;
+-      }
+-      if (ferror(fd)) {
+-        fprintf(stderr, "ERROR) error reading car file.\n");
++      if (!fgets(line, LINESIZE, fd)) {
++        if (ferror(fd))
++          fprintf(stderr, "ERROR) error reading car file.\n");
++        else
++          fprintf(stderr, "ERROR) unexpected end-of-file.\n");
++        fclose(fd);
++        free(data);
+         return NULL;
+       }
+     }
+-    fgets(line, LINESIZE, fd);
++    if (!fgets(line, LINESIZE, fd)) {
++      fprintf(stderr, "ERROR) unexpected end-of-file.\n");
++      fclose(fd);
++      free(data);
++      return NULL;
++    }
+   }
+   *natoms = data->numatoms;
+ 
 diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlogplugin.c
 --- molfiles-a/molfiles/src/cpmdlogplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/cpmdlogplugin.c	2026-11-21 06:23:13.143659467 +0000
++++ molfiles-b/molfiles/src/cpmdlogplugin.c	2026-11-21 07:09:47.997068096 +0000
 @@ -1,4 +1,4 @@
 -#if false
 +#if 1 /* molfile_qm_* now has the fields this plugin writes */
@@ -512,7 +856,15 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  
      /* empty line */
      if (n < 0) continue;
-@@ -708,10 +727,17 @@
+@@ -699,6 +718,7 @@
+       GET_LINE(buffer, data->file);
+ 
+       numatoms=0;
++      free(data->initatoms);
+       data->initatoms=NULL;
+       while (1) {
+         qm_atom_t *atm;
+@@ -708,10 +728,17 @@
          if (strstr(buffer, "*************************") != NULL)
            break;
  
@@ -532,7 +884,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
          if (n != 4) {
            free(data->initatoms);
            data->initatoms=NULL;
-@@ -831,7 +857,8 @@
+@@ -831,7 +858,8 @@
    i=0; /* check only the first 100 lines */
    do {
      GET_LINE(buffer, data->file);
@@ -542,7 +894,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
      ++i;
    } while( (strcmp(word[0],"PROGRAM") ||
              strcmp(word[1],"CPMD") ||
-@@ -844,19 +871,27 @@
+@@ -844,19 +872,27 @@
    i=0; /* check only the next 100 lines */
    do {
      GET_LINE(buffer, data->file);
@@ -578,7 +930,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  
    vmdcon_printf(VMDCON_INFO,
                  "cpmdlogplugin) CPMD version = %s  (Version code: %d)\n",
-@@ -902,17 +937,17 @@
+@@ -902,17 +938,17 @@
      vmdcon_printf(VMDCON_WARN,
                    "cpmdlogplugin) ##################################"
                    "####################################\n");
@@ -601,7 +953,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
    } else {
      /* don't copy coordinates yet. we have the newer version of CPMD
       * that prints them right before each projection. */
-@@ -937,22 +972,27 @@
+@@ -937,22 +973,27 @@
    char buffer[BUFSIZ];
    char word[3][MOLFILE_BUFSIZ];
    char filepath[256];
@@ -634,7 +986,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
    }
  
    if (fp == NULL) {
-@@ -970,60 +1010,59 @@
+@@ -970,60 +1011,59 @@
    /* Allocate space for the basis for all atoms */
    /* When the molecule is symmetric the actual number atoms with
     * a basis set could be smaller */
@@ -722,7 +1074,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  #if CPMDLOG_DEBUG && CPMDLOG_BASIS_DEBUG
          vmdcon_printf(VMDCON_INFO, "cpmdlogplugin) atom: %d, element: %s, shell: %d "
                        "%s-type shell, %d primitives, scalefactor %f\n", i,
-@@ -1034,17 +1073,12 @@
+@@ -1034,17 +1074,12 @@
        } else {
          vmdcon_printf(VMDCON_ERROR,
                        "cpmdlogplugin) basis set parse error: %s",buffer);
@@ -742,7 +1094,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
        data->num_basis_funcs += numprim;
  
        switch(shell[ishell].symmetry) {
-@@ -1071,25 +1105,20 @@
+@@ -1071,25 +1106,20 @@
        }
  
        if (shell[ishell].symmetry == SP_S_SHELL) {
@@ -773,7 +1125,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
          fix_fortran_exp(word[0]);
          shell[ishell].prim[n].exponent=atof(word[0])*scalef*scalef;
          fix_fortran_exp(word[1]);
-@@ -1110,6 +1139,7 @@
+@@ -1110,6 +1140,7 @@
      /* store the total number of basis functions */
      data->num_shells += numshells;
    }
@@ -781,7 +1133,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  
    vmdcon_printf(VMDCON_INFO,
                  "cpmdlogplugin) Parsed %d uncontracted basis functions. \n",
-@@ -1118,6 +1148,37 @@
+@@ -1118,6 +1149,37 @@
    /* allocate and populate flat arrays needed for molfileplugin */
    data->have_basis = TRUE;
    return fill_basis_arrays(data);
@@ -819,7 +1171,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  }
  
  
-@@ -1252,7 +1313,7 @@
+@@ -1252,7 +1314,7 @@
    while (1) {
  
      GET_LINE(buffer,data->file);
@@ -828,7 +1180,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  
      /* empty or uninteresting line */
      if (n < 3) continue;
-@@ -1422,11 +1483,11 @@
+@@ -1422,11 +1484,11 @@
      /* read up to line of orbital indices */
      do {
        GET_LINE(buffer, data->file);
@@ -842,7 +1194,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
                        word[2],word[3],word[4],word[5],word[6],word[7]);
  
      /* we don't have orbital energies here, but we
-@@ -1447,7 +1508,7 @@
+@@ -1447,7 +1509,7 @@
        /* read in the wavefunction coefficients for up
         * to 8 orbitals at a time line by line */
        GET_LINE(buffer, data->file);
@@ -851,6 +1203,52 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
                            word[1], word[2],word[3], word[4],
                            word[5], word[6], word[7], word[8]);
  
+diff -ruN molfiles-a/molfiles/src/cpmdplugin.c molfiles-b/molfiles/src/cpmdplugin.c
+--- molfiles-a/molfiles/src/cpmdplugin.c	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/cpmdplugin.c	2026-11-21 06:59:14.415309124 +0000
+@@ -42,6 +42,10 @@
+   if (!fd) return NULL;
+   
+   data = (cpmddata *)malloc(sizeof(cpmddata));
++  if (!data) {
++    fclose(fd);
++    return NULL;
++  }
+   data->file = fd;
+   data->file_name = filename;
+ 
+@@ -49,11 +53,11 @@
+   nfi_current = 0;
+ 
+   /* first column is the current timestep number  */
+-  fgets(linebuf, 255, fd);
+-  i = sscanf(linebuf, "%d", &nfi_first);
+-  if (i < 1) {
++  if (!fgets(linebuf, 255, fd) || sscanf(linebuf, "%d", &nfi_first) < 1) {
+     fprintf(stderr, "read) cpmd trajectory file '%s' should have the timestep number "
+             "in the first column\n", filename);
++    fclose(fd);
++    free(data);
+     return NULL;
+   }
+   atomcount   = 0;
+@@ -63,11 +67,15 @@
+      changes, indicating the end of a configuration */
+   while ((nfi_first == nfi_current) && !ferror(fd) && !feof(fd)) {
+     ++atomcount;
+-    fgets(linebuf, 255, fd);
++    if (!fgets(linebuf, 255, fd)) {
++      break;
++    }
+     i = sscanf(linebuf, "%d", &nfi_current);
+     if (i < 1) {
+       fprintf(stderr, "read) cpmd trajectory file '%s' should have the "
+               "timestep number in the first column\n", filename);
++      fclose(fd);
++      free(data);
+       return NULL;
+     }
+   }
 diff -ruN molfiles-a/molfiles/src/cubeplugin.cxx molfiles-b/molfiles/src/cubeplugin.cxx
 --- molfiles-a/molfiles/src/cubeplugin.cxx	2021-09-10 14:18:46.000000000 +0000
 +++ molfiles-b/molfiles/src/cubeplugin.cxx	2026-11-21 06:22:01.951844109 +0000
@@ -1190,6 +1588,40 @@ diff -ruN molfiles-a/molfiles/src/dlpolyplugin.c molfiles-b/molfiles/src/dlpolyp
      /* read the coordinates */
      if (3 != fscanf(data->file, "%f %f %f", &x, &y, &z)) {
        printf("dlpoly timestep) failed parsing atom coordinates\n");
+diff -ruN molfiles-a/molfiles/src/dmsplugin.cxx molfiles-b/molfiles/src/dmsplugin.cxx
+--- molfiles-a/molfiles/src/dmsplugin.cxx	2021-09-10 14:18:46.000000000 +0000
++++ molfiles-b/molfiles/src/dmsplugin.cxx	2026-11-21 06:59:20.627291779 +0000
+@@ -232,6 +232,7 @@
+     }
+     if (count) *count = sqlite3_column_int64(stmt, 0);
+     sqlite3_finalize(stmt);
++    free(buf);
+     return 1; /* success */
+ }
+ 
+@@ -260,15 +261,19 @@
+   static void *open_file_read( const char *filename, const char *filetype,
+                         int *natoms ) {
+ 
+-      sqlite3 * db;
++      sqlite3 * db = NULL;
+       sqlite_int64 count;
+       Handle * h;
+       if (sqlite3_open_v2( filename, &db, SQLITE_OPEN_READONLY, NULL)) {
+           fprintf(stderr, "Error opening dms at %s: %s", 
+-                  filename, sqlite3_errmsg(db));
++                  filename, db ? sqlite3_errmsg(db) : "out of memory");
++          if (db) sqlite3_close(db);
++          return NULL;
++      }
++      if (!table_size( db, "particle", &count )) {
++          sqlite3_close(db);
+           return NULL;
+       }
+-      if (!table_size( db, "particle", &count )) return NULL;
+       h = new Handle(db, count);
+       *natoms = count;
+       return h;
 diff -ruN molfiles-a/molfiles/src/dtrplugin.cxx molfiles-b/molfiles/src/dtrplugin.cxx
 --- molfiles-a/molfiles/src/dtrplugin.cxx	2021-09-10 14:18:46.000000000 +0000
 +++ molfiles-b/molfiles/src/dtrplugin.cxx	2026-11-21 06:22:01.951844109 +0000
@@ -3242,7 +3674,7 @@ diff -ruN molfiles-a/molfiles/src/gaussianplugin.c molfiles-b/molfiles/src/gauss
         * labels are: S, PX, PY, PZ, DXX, DXY, DXZ, DYY, DYZ, DZZ, ...*/
 diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
 --- molfiles-a/molfiles/src/Gromacs.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/Gromacs.h	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/Gromacs.h	2026-11-21 06:59:29.187267662 +0000
 @@ -39,6 +39,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -3276,7 +3708,63 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
  	     i--)
  		buf[i] = 0;
  
-@@ -1248,7 +1254,8 @@
+@@ -483,9 +489,15 @@
+ 		else return mdio_seterror(MDIO_BADPARAMS);
+ 	}
+ 
+-	if (ts->pos && ts->natoms > 0) free(ts->pos);
++	if (ts->pos && ts->natoms > 0) {
++		free(ts->pos);
++		ts->pos = NULL;
++	}
+ 
+-  if (ts->box) free(ts->box);
++  if (ts->box) {
++		free(ts->box);
++		ts->box = NULL;
++	}
+ 
+ 	if (holderror) return -1;
+ 	else return mdio_seterror(MDIO_SUCCESS);
+@@ -572,26 +584,33 @@
+ 
+ // Reads in a timestep from a file (format independent)
+ static int mdio_timestep(md_file *mf, md_ts *ts) {
++	int rc;
+ 	if (!mf || !ts) return mdio_seterror(MDIO_BADPARAMS);
+ 	if (!mf->f) return mdio_seterror(MDIO_BADPARAMS);
+ 
+ 	switch (mf->fmt) {
+ 	case MDFMT_GRO:
+-		return gro_timestep(mf, ts);
++		rc = gro_timestep(mf, ts);
++		break;
+ 
+ 	case MDFMT_TRR:
+ 	case MDFMT_TRJ: /* fallthrough */
+-		return trx_timestep(mf, ts);
++		rc = trx_timestep(mf, ts);
++		break;
+ 
+ 	case MDFMT_G96:
+-		return g96_timestep(mf, ts);
++		rc = g96_timestep(mf, ts);
++		break;
+ 
+ 	case MDFMT_XTC:
+-		return xtc_timestep(mf, ts);
++		rc = xtc_timestep(mf, ts);
++		break;
+ 
+ 	default:
+ 		return mdio_seterror(MDIO_UNKNOWNFMT);
+ 	}
++	if (rc < 0) mdio_tsfree(ts, 1);
++	return rc;
+ }
+ 
+ 
+@@ -1248,7 +1267,8 @@
  	if (trx_int(mf, &hdr->nre) < 0) return -1;
  
  	// Make sure there are atoms...
@@ -3286,7 +3774,7 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
  
  	// Try to determine precision (float? double?)
  	if (hdr->x_size) mf->prec = hdr->x_size / (hdr->natoms * 3);
-@@ -1365,6 +1372,7 @@
+@@ -1365,6 +1385,7 @@
  	if (!mf) return mdio_seterror(MDIO_BADPARAMS);
  
  	if (trx_int(mf, &size) < 0) return -1;
@@ -3294,7 +3782,7 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
    ssize = (size_t)size;
  
  	if (str && size <= max) {
-@@ -1373,7 +1381,7 @@
+@@ -1373,7 +1394,7 @@
  		str[size] = 0;
  		return size;
  	} else if (str) {
@@ -3303,7 +3791,7 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
  			return mdio_seterror(MDIO_IOERROR);
  		if (fseek(mf->f, size - max, SEEK_CUR) != 0)
  			return mdio_seterror(MDIO_IOERROR);
-@@ -1527,7 +1535,7 @@
+@@ -1527,7 +1548,7 @@
  		else return mdio_seterror(MDIO_UNKNOWNERROR);
  	}
  
@@ -3312,7 +3800,7 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
  	return mdio_seterror(MDIO_SUCCESS);
  }
  
-@@ -1549,7 +1557,7 @@
+@@ -1549,7 +1570,7 @@
  		// By reading the number in as an integer and then
  		// copying it to a floating point number we can
  		// ensure proper endianness
@@ -4292,7 +4780,7 @@ diff -ruN molfiles-a/molfiles/src/maeffplugin.cxx molfiles-b/molfiles/src/maeffp
      *nbondtypes = 0;
 diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugin.cxx
 --- molfiles-a/molfiles/src/mdfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/mdfplugin.cxx	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/mdfplugin.cxx	2026-11-21 07:09:50.201059191 +0000
 @@ -50,6 +50,9 @@
  
  #define LINESIZE 256
@@ -4435,7 +4923,27 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
    char (*atomnames)[NAMESIZE]; // Dynamic array of cstrings
    hash_t *hasharray;           // Array of hash tables
  
-@@ -271,13 +290,17 @@
+@@ -263,6 +282,19 @@
+   }
+   atomnames = new char[mdf->natoms][NAMESIZE];
+ 
++  struct MdfBondScratchGuard {
++    hash_t *hashes;
++    int nmols;
++    char (*names)[NAMESIZE];
++    ~MdfBondScratchGuard() {
++      for (int m = 0; m < nmols; m++) {
++        hash_destroy(&hashes[m]);
++      }
++      delete [] hashes;
++      delete [] names;
++    }
++  } scratch_guard = { hasharray, mdf->nmols, atomnames };
++
+   // Populate the hash table; key: atom name; value: one-based atom index.
+   // Count the bonds, each bond is counted twice.
+   fseek(mdf->file, mdf->mol_data_location, SEEK_SET);
+@@ -271,13 +303,17 @@
    mol = 0;
    bond_count = 0;
    while ( line[0] != '#' ) {
@@ -4455,7 +4963,7 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
            vmdcon_printf(VMDCON_ERROR, "mdfplugin) Improperly formatted atom record encountered while reading bonds.\n");
            return MOLFILE_ERROR;
          }
-@@ -290,8 +313,7 @@
+@@ -290,8 +326,7 @@
          atom++;
        }
  
@@ -4465,7 +4973,7 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
          vmdcon_printf(VMDCON_ERROR, "mdfplugin) File error while reading bonds.\n");
          return MOLFILE_ERROR;
        }
-@@ -300,9 +322,10 @@
+@@ -300,9 +335,10 @@
      mol++;
    }
  
@@ -4479,7 +4987,7 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
    fromptr = mdf->from;
    toptr = mdf->to;
  
-@@ -312,7 +335,10 @@
+@@ -312,7 +348,10 @@
    atom = 1;
    mol = 0;
    while ( line[0] != '#' ) {
@@ -4491,7 +4999,7 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
  
      // Read the bonds
      while ( (line[0] != '@') && (line[0] != '#') ) {
-@@ -336,9 +362,10 @@
+@@ -336,9 +375,10 @@
                vmdcon_printf(VMDCON_ERROR, "mdfplugin) Could not find atom '%s' in hash table.\n", curr);
                return MOLFILE_ERROR;
              }
@@ -4503,7 +5011,7 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
                *fromptr = atom;
                *toptr = tmp_to;
                fromptr++;
-@@ -350,8 +377,7 @@
+@@ -350,8 +390,7 @@
          atom++;
        }
  
@@ -4513,10 +5021,16 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
          vmdcon_printf(VMDCON_ERROR, "mdfplugin) File error while reading bonds.\n");
          return MOLFILE_ERROR;
        }
-@@ -366,7 +392,7 @@
-   delete [] hasharray;
-   delete [] atomnames;
+@@ -360,13 +399,7 @@
+     mol++;
+   }
  
+-  for (mol = 0; mol < mdf->nmols; mol++) {
+-    hash_destroy(&hasharray[mol]);
+-  }
+-  delete [] hasharray;
+-  delete [] atomnames;
+-
 -  *nbonds = bond_count;
 +  *nbonds = stored;
    *from_data = mdf->from;
@@ -4524,8 +5038,56 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
    *bondorderptr = NULL; // not implemented yet
 diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenplugin.c
 --- molfiles-a/molfiles/src/moldenplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/moldenplugin.c	2026-11-21 06:22:01.955844104 +0000
-@@ -144,7 +144,7 @@
++++ molfiles-b/molfiles/src/moldenplugin.c	2026-11-21 06:59:39.635237890 +0000
+@@ -101,6 +101,8 @@
+  * section in moldendata_t.
+  *
+  *********************************************************/
++static void close_molden_read(void *mydata);
++
+ static void *open_molden_read(const char *filename,
+                               const char *filetype,
+                               int *natoms) {
+@@ -115,25 +117,35 @@
+ 
+   /* allocate memory for main QM data structure */
+   data = init_qmdata();
+-  if (!data) return NULL;
++  if (!data) {
++    fclose(fd);
++    return NULL;
++  }
+ 
+   data->file = fd;
+ 
+   /* allocate GAMESS specific data */
+   moldendata = (moldendata_t *)calloc(1, sizeof(moldendata_t));
+-  if (!moldendata) return NULL;
++  if (!moldendata) {
++    close_molden_read(data);
++    return NULL;
++  }
+ 
+   data->format_specific_data = moldendata;
+ 
+ 
+   /* Read first line */
+-  if (!fgets(buffer,1024,data->file)) return NULL;
++  if (!fgets(buffer,1024,data->file)) {
++    close_molden_read(data);
++    return NULL;
++  }
+ 
+   /* Check if the file is MOLDEN format */
+   if (!strcmp(strtoupper(trimleft(trimright(buffer))), "[MOLDEN FORMAT]")) {
+     printf("moldenplugin) Detected MOLDEN file format!\n");
+   } else {
+     printf("moldenplugin) The file is not in MOLDEN format!\n");
++    close_molden_read(data);
+     return NULL;
+   }
+ 
+@@ -144,7 +156,7 @@
    while (fgets(buffer,1024,data->file)) {
  
      /* Get key string (ignoring empty lines) */
@@ -4534,16 +5096,26 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
  
      /* Quick test avoiding the uppercase transformation */
      if (keystring[0]!='[') continue;
-@@ -168,7 +168,7 @@
+@@ -168,8 +180,9 @@
        printf("moldenplugin) Found [ATOMS] section ...\n");
        moldendata->filepos_atoms = ftell(data->file);
  
 -      if (!sscanf(buffer, "%*s %s", moldendata->units)) {
 +      if (!sscanf(buffer, "%*s %15s", moldendata->units)) {
          printf("moldenplugin) Missing units in [ATOMS] section!\n");
++        close_molden_read(data);
          return NULL;
        }
-@@ -495,8 +495,9 @@
+ 
+@@ -205,6 +218,7 @@
+          * contains the number of atoms. */
+         if (fscanf(data->file, "%d", natoms) != 1) {
+           printf("moldenplugin) No # atoms found in [GEOMETRIES] section!\n");
++          close_molden_read(data);
+           return NULL;
+         }
+         data->numatoms = *natoms;
+@@ -495,8 +509,9 @@
  
      read_molecular_orbitals(data);
  
@@ -4555,7 +5127,16 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
        for (i=0; i<cur_ts->numwave; i++) {
          qm_wavefunction_t *wave = &cur_ts->wave[i];
          qm_ts->wave[i].type         = wave->type;
-@@ -1119,7 +1120,7 @@
+@@ -650,7 +665,7 @@
+   int i, j;
+   qmdata_t *data = (qmdata_t *)mydata;
+ 
+-  fclose(data->file);
++  if (data->file) fclose(data->file);
+ 
+   free(data->atoms);
+   free(data->basis);
+@@ -1119,7 +1134,7 @@
      return FALSE;
    }
  
@@ -4564,7 +5145,7 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
    eatline(data->file, 1);
  
    /* The first wavefunction should have spin alpha */
-@@ -1158,7 +1159,7 @@
+@@ -1158,7 +1173,7 @@
  
    /* Count MOs */
    fscanf(data->file, " Ene= %f\n", &orbenergy);
@@ -4573,7 +5154,7 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
    fscanf(data->file, " Occup= %f\n", &occu);
  
    while (1) {
-@@ -1172,7 +1173,7 @@
+@@ -1172,7 +1187,7 @@
      }
  
      nr  = fscanf(data->file, " Ene= %f\n", &orbenergy);
@@ -4582,7 +5163,7 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
      nr += fscanf(data->file, " Occup= %f\n", &occu);
  
      if (nr!=3 || toupper(spin[0])!='A')
-@@ -1202,7 +1203,7 @@
+@@ -1202,7 +1217,7 @@
        }
  
        nr  = fscanf(data->file, " Ene= %f\n", &orbenergy);
@@ -4591,7 +5172,7 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
        nr += fscanf(data->file, " Occup= %f\n", &occu);
  
        if (nr!=3 || toupper(spin[0])!='B' ||
-@@ -1271,11 +1272,14 @@
+@@ -1271,11 +1286,14 @@
        int nr2;
        if (!fgets(buffer,1024,file)) return FALSE;
        nr = sscanf(buffer,"%d %f", &AOid, &wf_coeff);
@@ -5062,7 +5643,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM7.h molfiles-b/molfiles/src/ReadPARM7.
  }
 diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
 --- molfiles-a/molfiles/src/ReadPARM.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/ReadPARM.h	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/ReadPARM.h	2026-11-21 07:18:01.738982862 +0000
 @@ -17,6 +17,12 @@
   *     get_parm_natoms, get_parm_nbonds, get_parm_boxInfo were added in 
   *     order to convert from prm.c parlance to VMD conventions.
@@ -5091,7 +5672,71 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  #if 0 
  #define _REAL		double
  #define DBLFMT          "%lf"
-@@ -87,7 +99,7 @@
+@@ -80,14 +92,69 @@
+ namespace {
+   class ReadPARM {
+   public:
+-    ReadPARM() {popn = 0;}
+-    ~ReadPARM(void) {}
++    ReadPARM() {popn = 0; prm = NULL;}
++    ~ReadPARM(void) {
++      if (prm) {
++        free(prm->AtomNames);
++        free(prm->ResNames);
++        free(prm->AtomSym);
++        free(prm->AtomTree);
++        free(prm->Charges);
++        free(prm->Masses);
++        free(prm->Rk);
++        free(prm->Req);
++        free(prm->Tk);
++        free(prm->Teq);
++        free(prm->Pk);
++        free(prm->Pn);
++        free(prm->Phase);
++        free(prm->Solty);
++        free(prm->Cn1);
++        free(prm->Cn2);
++        free(prm->HB12);
++        free(prm->HB6);
++        free(prm->Iac);
++        free(prm->Iblo);
++        free(prm->Cno);
++        free(prm->Ipres);
++        free(prm->ExclAt);
++        free(prm->TreeJoin);
++        free(prm->AtomRes);
++        free(prm->BondHAt1);
++        free(prm->BondHAt2);
++        free(prm->BondHNum);
++        free(prm->BondAt1);
++        free(prm->BondAt2);
++        free(prm->BondNum);
++        free(prm->AngleHAt1);
++        free(prm->AngleHAt2);
++        free(prm->AngleHAt3);
++        free(prm->AngleHNum);
++        free(prm->AngleAt1);
++        free(prm->AngleAt2);
++        free(prm->AngleAt3);
++        free(prm->AngleNum);
++        free(prm->DihHAt1);
++        free(prm->DihHAt2);
++        free(prm->DihHAt3);
++        free(prm->DihHAt4);
++        free(prm->DihHNum);
++        free(prm->DihAt1);
++        free(prm->DihAt2);
++        free(prm->DihAt3);
++        free(prm->DihAt4);
++        free(prm->DihNum);
++        free(prm->Boundary);
++        free(prm);
++        prm = NULL;
++      }
++    }
+  
+     int popn;
      parmstruct *prm;
      FILE *open_parm_file(const char *name);
      void close_parm_file(FILE *fileptr);
@@ -5100,7 +5745,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
      int preadln(FILE *file, char *string);
      int readparm(FILE *file);
      void get_parm_atom(int, char *, char *, char *, char *, int *, float *,
-@@ -138,6 +150,10 @@
+@@ -138,6 +205,10 @@
  	length = strlen(name);
  	compressed = 0;  // Just to start
  //	compressed = iscompressed(name);
@@ -5111,7 +5756,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  	strcpy(cbuf, name);
  
  	/*
-@@ -233,18 +249,18 @@
+@@ -233,18 +304,18 @@
  /***********************************************************************
                                        GET()
  ************************************************************************/
@@ -5134,7 +5779,15 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  		fflush(stdout);
  		perror("malloc err:");
          fprintf(stderr, "Exiting due to ReadPARM memory allocation error.\n");
-@@ -360,6 +376,34 @@
+@@ -322,6 +393,7 @@
+ #else
+         buffer = new int[30];
+         if (!read_fortran_12I6(file,buffer,30)) { 
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         prm->Natom = buffer[0];
+@@ -360,6 +432,36 @@
           return MOLFILE_ERROR;
         }
  
@@ -5156,12 +5809,14 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
 +           if (counts[i] < 0 || counts[i] > limit) {
 +             printf("parm read error: invalid count %d in the header\n", counts[i]);
 +             free(prm);
++             prm = NULL;
 +             return MOLFILE_ERROR;
 +           }
 +         }
 +         if ((long) prm->Ntypes * prm->Ntypes > limit) {
 +           printf("parm read error: invalid atom type count %d\n", prm->Ntypes);
 +           free(prm);
++           prm = NULL;
 +           return MOLFILE_ERROR;
 +         }
 +       }
@@ -5169,7 +5824,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  
  	/* ALLOCATE MEMORY */
  	prm->Nat3 = 3 * prm->Natom;
-@@ -423,7 +467,8 @@
+@@ -423,7 +525,8 @@
  	 * READ ATOM NAMES -IH(M04)
  	 */
  	for (i=0; i<(prm->Natom/20 + (prm->Natom%20 ? 1 : 0)); i++) {
@@ -5179,7 +5834,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
          }
  
  	/* 
-@@ -487,7 +532,8 @@
+@@ -487,7 +590,8 @@
  	 * READ RES NAMES (4 chars each, 4th blank) -IH(M02)
  	 */
  	for (i=0; i<(prm->Nres/20 + (prm->Nres%20 ? 1 : 0)); i++)
@@ -5189,7 +5844,55 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  
  	/* 
  	 * READ RES POINTERS TO 1st ATOM 		-IX(I02)
-@@ -776,13 +822,15 @@
+@@ -588,6 +692,7 @@
+ #else
+         buffer = new int[3*prm->Nbonh];
+         if (!read_fortran_12I6(file, buffer, 3*prm->Nbonh)) { 
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         for (i=0; i<prm->Nbonh; i++) { 
+@@ -612,6 +717,7 @@
+ #else
+         buffer = new int[3*prm->Nbona];
+         if (!read_fortran_12I6(file, buffer, 3*prm->Nbona)) { 
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         for (i=0; i<prm->Nbona; i++) { 
+@@ -638,6 +744,7 @@
+ #else
+         buffer = new int[4*prm->Ntheth];
+         if (!read_fortran_12I6(file, buffer, 4*prm->Ntheth)) { 
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         for (i=0; i<prm->Ntheth; i++) { 
+@@ -665,6 +772,7 @@
+ #else
+         buffer = new int[4*prm->Ntheta];
+         if (!read_fortran_12I6(file, buffer, 4*prm->Ntheta)) {
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         for (i=0; i<prm->Ntheta; i++) { 
+@@ -693,6 +801,7 @@
+ #else
+         buffer = new int[5*prm->Nphih];
+         if (!read_fortran_12I6(file, buffer, 5*prm->Nphih)) {
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         for (i=0; i<prm->Nphih; i++) { 
+@@ -723,6 +832,7 @@
+ #else
+         buffer = new int[5*prm->Nphia];
+         if (!read_fortran_12I6(file, buffer, 5*prm->Nphia)) {
++          delete [] buffer;
+           return MOLFILE_ERROR;
+         }
+         for (i=0; i<prm->Nphia; i++) {
+@@ -776,13 +886,15 @@
  	 * READ ATOM SYMBOLS (FOR ANALYSIS PROGS)	-IH(M06)
  	 */
  	for (i=0; i<(prm->Natom/20 + (prm->Natom%20 ? 1 : 0)); i++)
@@ -5207,7 +5910,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
        
  	/*
  	 * READ TREE JOIN INFO (FOR ANALYSIS PROGS)	-IX(I64)
-@@ -812,7 +860,7 @@
+@@ -812,7 +924,7 @@
  #endif
          res = 0;
  	for (i=0; i<prm->Natom; i++) {
@@ -5216,7 +5919,15 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
              res++;
            prm->AtomRes[i] = res;
  	}
-@@ -840,6 +888,10 @@
+@@ -832,6 +944,7 @@
+ #else
+                 buffer = new int[3];
+                 if (!read_fortran_12I6(file, buffer, 3)) { 
++                  delete [] buffer;
+                   return MOLFILE_ERROR;
+                 }
+                 prm->Iptres = buffer[0];
+@@ -840,6 +953,10 @@
                  delete [] buffer;
  #endif
                  readtoeoln(file);
@@ -5227,7 +5938,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  		prm->Boundary = (int *) get(sizeof(int)*prm->Nspm);
  #if !defined(USENEWCODE)
  		for (i=0; i<prm->Nspm; i++)
-@@ -853,7 +905,7 @@
+@@ -853,7 +970,7 @@
  		fscanf(file, " " DBLFMT " " DBLFMT " " DBLFMT, 
  				&prm->Box[0], &prm->Box[1], &prm->Box[2]);
                  readtoeoln(file);
@@ -5236,7 +5947,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  			prm->Ipatm = prm->Ipres[prm->Iptres] - 1; 
        		/* IF(IPTRES.GT.0) IPTATM = IX(I02+IPTRES-1+1)-1 */
  	}
-@@ -950,14 +1002,15 @@
+@@ -950,14 +1067,15 @@
  // data - buffer to hold the whole block. Should be allocated before the call
  // count - number of ints in the block.
  int ReadPARM::read_fortran_12I6(FILE *fp, int *data, int count) {
@@ -5584,7 +6295,7 @@ diff -ruN molfiles-a/molfiles/src/vaspplugin.h molfiles-b/molfiles/src/vaspplugi
    if (!data) return;
 diff -ruN molfiles-a/molfiles/src/vaspposcarplugin.c molfiles-b/molfiles/src/vaspposcarplugin.c
 --- molfiles-a/molfiles/src/vaspposcarplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vaspposcarplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vaspposcarplugin.c	2026-11-21 06:59:15.919304937 +0000
 @@ -29,6 +29,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -5593,9 +6304,53 @@ diff -ruN molfiles-a/molfiles/src/vaspposcarplugin.c molfiles-b/molfiles/src/vas
  
  #include "molfile_plugin.h"
  #include "vaspplugin.h"
-@@ -82,6 +83,11 @@
+@@ -61,27 +62,49 @@
+   data->filename = strdup(filename);
+ 
+   /* Read title line */
+-  fgets(lineptr, LINESIZE, data->file);
++  lineptr[0] = '\0';
++  if (!fgets(lineptr, LINESIZE, data->file)) {
++    vasp_plugindata_free(data);
++    return NULL;
++  }
+   data->titleline = strdup(lineptr);
+ 
+   /* Ignore rest of header up to the line with atom numbers */
+-  for (i = 0; i < 5; ++i) fgets(lineptr, LINESIZE, data->file);
++  for (i = 0; i < 5; ++i) {
++    if (!fgets(lineptr, LINESIZE, data->file)) {
++      vasp_plugindata_free(data);
++      return NULL;
++    }
++  }
+ 
+   /* Read the number of atoms per atom type */
+   data->numatoms = 0;
+   for (i = 0; i < MAXATOMTYPES; ++i) {
+-    char const *tmplineptr = strdup(lineptr);
++    char *tmplineptr = (i == 0) ? strdup(lineptr) : NULL;
+     char const *token = (i == 0 ? strtok(lineptr, " ") : strtok(NULL, " "));
+     int const n = (token ? atoi(token) : -1);
+ 
+     /* if fails to read number of atoms, then assume VASP5 */
+     if (i == 0 && n <= 0) {
+       data->version = 5;
+-      data->titleline =  strdup(tmplineptr);
+-      fgets(lineptr, LINESIZE, data->file);
++      free(data->titleline);
++      data->titleline = tmplineptr;
++      tmplineptr = NULL;
++      if (!fgets(lineptr, LINESIZE, data->file)) {
++        lineptr[0] = '\0';
++      }
++      break;
++    } else if (n <= 0) {
++      free(tmplineptr);
        break;
-     }else if (n <= 0) break;
+-    }else if (n <= 0) break;
++    }
++    free(tmplineptr);
  
 +    if (n > INT_MAX - data->numatoms) {
 +      fprintf(stderr, "\n\nVASP POSCAR read) ERROR: file '%s' has more atoms than an int holds.\n", filename);
@@ -5605,7 +6360,7 @@ diff -ruN molfiles-a/molfiles/src/vaspposcarplugin.c molfiles-b/molfiles/src/vas
      data->eachatom[i] = n;
      data->numatoms += n;
    }
-@@ -94,6 +100,11 @@
+@@ -94,6 +117,11 @@
        
        if (n <= 0) break;
        
@@ -5617,7 +6372,7 @@ diff -ruN molfiles-a/molfiles/src/vaspposcarplugin.c molfiles-b/molfiles/src/vas
        data->eachatom[i] = n;
        data->numatoms += n;
      }
-@@ -125,9 +136,11 @@
+@@ -125,9 +153,11 @@
    *optflags |= MOLFILE_ATOMICNUMBER | MOLFILE_RADIUS; 
  
    /* This plugin can read both POSCAR and CONTCAR files */
@@ -5831,7 +6586,7 @@ diff -ruN molfiles-a/molfiles/src/vaspxmlplugin.c molfiles-b/molfiles/src/vaspxm
         /* Extract number of atoms */
 diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.c
 --- molfiles-a/molfiles/src/vtfplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-21 06:59:29.423266993 +0000
 @@ -25,6 +25,7 @@
  #include <errno.h>
  #include <ctype.h>
@@ -6198,7 +6953,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
      s += n;
  #ifdef DEBUG
      printf("keyword: \"%s\" rest: \"%s\"\n", keyword, s);
-@@ -414,7 +518,12 @@
+@@ -414,10 +518,16 @@
      switch (tolower(keyword[0])) {
      case 'n': {
        /* name */
@@ -6212,7 +6967,11 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          AIDLOOP(strcpy(cur_atom->name, atom.name));
        } else {
          vtf_error("could not get name in atom record", line);
-@@ -425,7 +534,12 @@
++        sfree(aid_list);
+         return MOLFILE_ERROR;
+       }
+       s += n;
+@@ -425,10 +535,16 @@
      }
      case 't': {
        /* type */
@@ -6226,7 +6985,11 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          AIDLOOP(strcpy(cur_atom->type, atom.type));
        } else {
          vtf_error("could not get type in atom record", line);
-@@ -459,7 +573,12 @@
++        sfree(aid_list);
+         return MOLFILE_ERROR;
+       }
+       s += n;
+@@ -459,7 +575,12 @@
        } else if (strcmp(keyword, "res") == 0 || 
                   strcmp(keyword, "resname") == 0) {
          /* resname */
@@ -6240,7 +7003,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
            AIDLOOP(strcpy(cur_atom->resname, atom.resname));
          } else {
            vtf_error("could not get resname in atom record", line);
-@@ -478,7 +597,12 @@
+@@ -478,7 +599,12 @@
      }
      case 's': {
        /* segid */
@@ -6254,7 +7017,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          AIDLOOP(strcpy(cur_atom->segid, atom.segid));
        } else {
          vtf_error("could not get segid in atom record", line);
-@@ -662,17 +786,37 @@
+@@ -662,17 +788,37 @@
    s = line;
  
    while (1) {
@@ -6296,7 +7059,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        for (aid = from; aid < to; aid++) {
          /*printf("creating bond from %d to %d\n", aid, aid+1);*/
          d->from[bid] = aid+1;
-@@ -681,12 +825,23 @@
+@@ -681,12 +827,23 @@
        }
      } else if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
        /* single bond specifier */
@@ -6325,7 +7088,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
      } else {
        vtf_error("bad bond specifier", s);
        return MOLFILE_ERROR;
-@@ -789,7 +944,7 @@
+@@ -789,7 +946,7 @@
        /* ATOM RECORD */
      case 'a': {
        /* Remove the "atom" keyword" */
@@ -6334,7 +7097,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
      }
      case '0':
-@@ -811,7 +966,7 @@
+@@ -811,7 +968,7 @@
        /* BOND RECORD */
      case 'b': {
        /* Remove the "bond" keyword" */
@@ -6343,7 +7106,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
        d->return_code = vtf_parse_bond(line, d);
        break;
-@@ -821,7 +976,7 @@
+@@ -821,7 +978,7 @@
      case 'u':
      case 'p': {
        /* Remove the "pbc"/"unitcell" keyword */
@@ -6352,7 +7115,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
        d->return_code = vtf_parse_pbc(line, d);
        break;
-@@ -831,7 +986,7 @@
+@@ -831,7 +988,7 @@
      case 'c': 
      case 't': {
        /* Remove the "timestep" or "coordinates" keyword */
@@ -6361,7 +7124,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
      }
      case 'i': 
-@@ -894,8 +1049,10 @@
+@@ -894,8 +1051,10 @@
  
    /* initialize the data structure */
    d = malloc(sizeof(vtf_data));
@@ -6372,7 +7135,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  
    d->return_code = MOLFILE_SUCCESS;
    d->read_mode = read_mode;
-@@ -1040,7 +1197,7 @@
+@@ -1040,7 +1199,7 @@
        case 'c': 
        case 't':
          /* Remove the "timestep" or "coordinates" keyword */
@@ -6381,7 +7144,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          line += n;
        case 'i': 
        case 'o': 
-@@ -1096,7 +1253,7 @@
+@@ -1096,7 +1255,7 @@
        case 'u':
        case 'p': {
          /* Remove the "pbc"/"unitcell" keyword */
@@ -6390,7 +7153,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          line += n;
          if (vtf_parse_pbc(line, d) != MOLFILE_SUCCESS) 
            return MOLFILE_ERROR;
-@@ -1106,7 +1263,7 @@
+@@ -1106,7 +1265,7 @@
          /* USER DATA RECORD */
        case 'd': {
          /* Remove the "data" keyword */
@@ -6399,7 +7162,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  #ifdef _USE_TCL
          if (d->read_mode == VTF_USERDATA) {
            line += n;
-@@ -1120,7 +1277,7 @@
+@@ -1120,7 +1279,7 @@
        case 'c': 
        case 't': {
          /* Remove the "timestep" or "coordinates" keyword */
