@@ -84,7 +84,7 @@ environment. `seams --print-config` prints the resolved table.
 A commented template is `seams.env.example`. Analysis choice (which
 command, which Lua script, which Python call) is not this table.
 
-\note The <a href="docs/orgmode/user/tutorials/index.org">related pages</a> describe the examples and how to obtain
+\note The <a href="https://docs.dseams.info/user/tutorials/index.html">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
