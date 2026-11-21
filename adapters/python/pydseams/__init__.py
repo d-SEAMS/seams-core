@@ -119,7 +119,5 @@ _EXTRA_EXPORTS = [
     "water_vectors",
 ]
 
-if "__all__" in globals():
-    __all__ = sorted(set(globals()["__all__"]).union(_EXTRA_EXPORTS))
-else:
-    __all__ = sorted(set(_EXTRA_EXPORTS) | {"Frame", "read", "from_arrays", "__version__"})
+_FRAME_EXPORTS = ("Frame", "read", "from_arrays", "__version__")
+__all__ = sorted(set(getattr(_downstream, "__all__", _FRAME_EXPORTS)).union(_EXTRA_EXPORTS))
