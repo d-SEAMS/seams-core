@@ -356,15 +356,20 @@ TrajectoryUnwrapper::TrajectoryUnwrapper(std::size_t nParticles) {
 }
 
 void TrajectoryUnwrapper::reset(std::size_t nParticles) {
-  nParticles_ = nParticles;
   framesSeen_ = 0;
-  prevWrapped_.assign(3 * nParticles, 0.0);
+  if (nParticles > kMaxTriples) {
+    nParticles_ = 0;
+    currentUnwrapped_.clear();
+    return;
+  }
+  nParticles_ = nParticles;
   currentUnwrapped_.assign(3 * nParticles, 0.0);
 }
 
 bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
                                     const BoxCell &cell, double *unwrappedOut) {
-  if (!cell.ok || nParticles == 0 || xyz == nullptr) {
+  if (!cell.ok || nParticles == 0 || nParticles > kMaxTriples ||
+      xyz == nullptr) {
     return false;
   }
   if (!finiteArray(xyz, 3 * nParticles)) {
@@ -377,7 +382,6 @@ bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
     return false;
   }
   if (framesSeen_ == 0) {
-    std::copy_n(xyz, 3 * nParticles_, prevWrapped_.data());
     std::copy_n(xyz, 3 * nParticles_, currentUnwrapped_.data());
   } else {
     for (std::size_t i = 0; i < nParticles_; ++i) {
@@ -389,9 +393,6 @@ bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
       currentUnwrapped_[base] += step[0];
       currentUnwrapped_[base + 1] += step[1];
       currentUnwrapped_[base + 2] += step[2];
-      prevWrapped_[base] = xyz[base];
-      prevWrapped_[base + 1] = xyz[base + 1];
-      prevWrapped_[base + 2] = xyz[base + 2];
     }
   }
   if (unwrappedOut != nullptr) {
@@ -407,7 +408,10 @@ bool unwrapPositions(const double *xyzFrames, std::size_t nFrames,
   if (xyzFrames == nullptr || boxes == nullptr || unwrappedOut == nullptr) {
     return false;
   }
-  if (nFrames == 0 || nAtoms == 0 || (nBoxes != 1 && nBoxes != nFrames)) {
+  std::size_t total = 0;
+  if (nFrames == 0 || nAtoms == 0 || nAtoms > kMaxTriples ||
+      !checkedMul(nFrames, 3 * nAtoms, total) ||
+      (nBoxes != 1 && nBoxes != nFrames)) {
     return false;
   }
   TrajectoryUnwrapper unwrapper(nAtoms);
@@ -517,7 +521,10 @@ bool unwrapMoleculeCentres(const double *xyzFrames, std::size_t nFrames,
   if (xyzFrames == nullptr || boxes == nullptr || molIds == nullptr) {
     return false;
   }
-  if (nFrames == 0 || nAtoms == 0 || (nBoxes != 1 && nBoxes != nFrames)) {
+  std::size_t total = 0;
+  if (nFrames == 0 || nAtoms == 0 || nAtoms > kMaxTriples ||
+      !checkedMul(nFrames, 3 * nAtoms, total) ||
+      (nBoxes != 1 && nBoxes != nFrames)) {
     return false;
   }
 
@@ -1031,11 +1038,13 @@ MsdAccumulator::MsdAccumulator(std::size_t nParticles, std::size_t maxLag,
                                std::size_t originStride, double dt,
                                const double axis[3])
     : nParticles_(nParticles), maxLag_(maxLag), originStride_(originStride),
-      dt_(dt), unwrapper_(nParticles) {
-  if (nParticles == 0 || originStride == 0 || !(dt > 0.0) ||
-      !std::isfinite(dt) || axis == nullptr || !finiteArray(axis, 3)) {
+      dt_(dt) {
+  if (nParticles == 0 || nParticles > kMaxTriples || maxLag > kMaxLag ||
+      originStride == 0 || !(dt > 0.0) || !std::isfinite(dt) ||
+      axis == nullptr || !finiteArray(axis, 3)) {
     return;
   }
+  unwrapper_.reset(nParticles);
   const double aNorm =
       std::sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
   if (!(aNorm > 0.0) || !std::isfinite(aNorm)) {
@@ -1194,7 +1203,8 @@ HbondLifetimeAccumulator::HbondLifetimeAccumulator(std::size_t maxLag,
                                                    double dt, bool directed)
     : maxLag_(maxLag), originStride_(originStride), dt_(dt),
       directed_(directed) {
-  if (originStride == 0 || !(dt > 0.0) || !std::isfinite(dt)) {
+  if (maxLag > kMaxLag || originStride == 0 || !(dt > 0.0) ||
+      !std::isfinite(dt)) {
     return;
   }
   if (maxLag_ > 0) {
@@ -1322,7 +1332,8 @@ ReorientationAccumulator::ReorientationAccumulator(std::size_t nVectors,
                                                    double dt)
     : nVectors_(nVectors), maxLag_(maxLag), originStride_(originStride),
       dt_(dt) {
-  if (nVectors == 0 || originStride == 0 || !(dt > 0.0) || !std::isfinite(dt)) {
+  if (nVectors == 0 || nVectors > kMaxTriples || maxLag > kMaxLag ||
+      originStride == 0 || !(dt > 0.0) || !std::isfinite(dt)) {
     return;
   }
   if (maxLag_ > 0) {

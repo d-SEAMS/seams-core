@@ -25,6 +25,81 @@ _CHEMFILES_EXTS = {
     ".mmtf",
 }
 _LAMMPS_EXTS = {".lammpstrj", ".dump", ".lammps", ".trj"}
+_SIZE_MAX = (1 << (8 * ctypes.sizeof(ctypes.c_size_t))) - 1
+
+
+def _size_arg(name: str, value, minimum: int = 0) -> int:
+    """value as an int in [minimum, SIZE_MAX]; ctypes wraps anything else into size_t."""
+    n = int(value)
+    if n < minimum:
+        raise ValueError(f"{name} must be at least {minimum}, got {n}")
+    if n > _SIZE_MAX:
+        raise ValueError(f"{name} must be at most {_SIZE_MAX}, got {n}")
+    return n
+
+
+def _match_rows(label: str, ref_sorted: np.ndarray, ref_sorter: np.ndarray, ids: np.ndarray) -> np.ndarray:
+    """Permutation p with ids[p] in the reference row order, or ValueError."""
+    sorter = np.argsort(ids, kind="stable")
+    if ids.shape != ref_sorted.shape or not np.array_equal(ids[sorter], ref_sorted):
+        raise ValueError(f"{label} differ from the first frame's")
+    perm = np.empty_like(sorter)
+    perm[ref_sorter] = sorter
+    return perm
+
+
+class _AtomOrder:
+    """Put each frame's atom rows in the first frame's order, by atom ID.
+
+    A dump need not list atoms in the same order every frame, so row i of
+    two frames may be different atoms. ``fixed_mols`` also requires every
+    atom to stay in the molecule it had in the first frame.
+    """
+
+    def __init__(self, fixed_mols: bool = False):
+        self._fixed_mols = fixed_mols
+        self._ids: np.ndarray | None = None
+
+    def __call__(self, xyz, types, ids, mols):
+        ids = np.asarray(ids)
+        if self._ids is None:
+            self._sorter = np.argsort(ids, kind="stable")
+            self._sorted = ids[self._sorter]
+            if np.any(self._sorted[1:] == self._sorted[:-1]):
+                raise ValueError("atom IDs repeat within the first frame")
+            self._ids = ids.copy()
+            self._mols = np.asarray(mols).copy()
+            return xyz, types, ids, mols
+        if not np.array_equal(ids, self._ids):
+            perm = _match_rows("atom IDs", self._sorted, self._sorter, ids)
+            xyz, types, ids, mols = xyz[perm], types[perm], ids[perm], np.asarray(mols)[perm]
+        if self._fixed_mols and not np.array_equal(mols, self._mols):
+            moved = int(np.flatnonzero(np.asarray(mols) != self._mols)[0])
+            raise ValueError(
+                f"atom {int(ids[moved])} is in molecule {int(mols[moved])}, "
+                f"but in molecule {int(self._mols[moved])} in the first frame"
+            )
+        return xyz, types, ids, mols
+
+
+class _MoleculeOrder:
+    """Put each frame's per-molecule rows in the first frame's order, by molecule ID."""
+
+    def __init__(self):
+        self._ids: np.ndarray | None = None
+
+    def __call__(self, mol_ids, rows):
+        mol_ids = np.asarray(mol_ids)
+        if self._ids is None:
+            self._sorter = np.argsort(mol_ids, kind="stable")
+            self._sorted = mol_ids[self._sorter]
+            if np.any(self._sorted[1:] == self._sorted[:-1]):
+                raise ValueError("molecule IDs repeat within the first frame")
+            self._ids = mol_ids.copy()
+            return rows
+        if np.array_equal(mol_ids, self._ids):
+            return rows
+        return np.asarray(rows)[_match_rows("molecule IDs", self._sorted, self._sorter, mol_ids)]
 
 @dataclass(frozen=True)
 class MoleculeCentresResult:
@@ -1027,13 +1102,16 @@ class MsdAccumulator:
         dt: float = 1.0,
         axis=(0.0, 0.0, 1.0),
     ):
+        n_particles = _size_arg("n_particles", n_particles, 1)
+        max_lag = _size_arg("max_lag", max_lag)
+        origin_stride = _size_arg("origin_stride", origin_stride, 1)
         ax = np.ascontiguousarray(axis, dtype=np.float64).reshape(3)
         lib = _capi.get_lib()
         raw = ctypes.c_void_p()
         st = lib.seams_msd_create(
-            int(n_particles),
-            int(max_lag),
-            int(origin_stride),
+            n_particles,
+            max_lag,
+            origin_stride,
             float(dt),
             _capi.double_ptr(ax),
             ctypes.byref(raw),
@@ -1041,7 +1119,7 @@ class MsdAccumulator:
         self._handle: ctypes.c_void_p | None = None
         _capi.check_status(st)
         self._handle = raw
-        self.n_particles = int(n_particles)
+        self.n_particles = n_particles
 
     def close(self) -> None:
         if self._handle is not None and self._handle.value:
@@ -1155,11 +1233,13 @@ class HbondLifetimeAccumulator:
         dt: float = 1.0,
         directed: bool = True,
     ):
+        max_lag = _size_arg("max_lag", max_lag)
+        origin_stride = _size_arg("origin_stride", origin_stride, 1)
         lib = _capi.get_lib()
         raw = ctypes.c_void_p()
         st = lib.seams_hbond_tcf_create(
-            int(max_lag),
-            int(origin_stride),
+            max_lag,
+            origin_stride,
             float(dt),
             1 if directed else 0,
             ctypes.byref(raw),
@@ -1293,19 +1373,22 @@ class ReorientationAccumulator:
         origin_stride: int = 1,
         dt: float = 1.0,
     ):
+        n_vectors = _size_arg("n_vectors", n_vectors, 1)
+        max_lag = _size_arg("max_lag", max_lag)
+        origin_stride = _size_arg("origin_stride", origin_stride, 1)
         lib = _capi.get_lib()
         raw = ctypes.c_void_p()
         st = lib.seams_reorient_create(
-            int(n_vectors),
-            int(max_lag),
-            int(origin_stride),
+            n_vectors,
+            max_lag,
+            origin_stride,
             float(dt),
             ctypes.byref(raw),
         )
         self._handle: ctypes.c_void_p | None = None
         _capi.check_status(st)
         self._handle = raw
-        self.n_vectors = int(n_vectors)
+        self.n_vectors = n_vectors
 
     def close(self) -> None:
         if self._handle is not None and self._handle.value:
@@ -1407,8 +1490,12 @@ def hbond_lifetime(
     with HbondLifetimeAccumulator(
         max_lag=max_lag, origin_stride=origin_stride, dt=dt, directed=directed
     ) as acc:
+        pushed = 0
         for edges in edge_sets:
             acc.push(edges)
+            pushed += 1
+        if pushed == 0:
+            raise ValueError("edge_sets is empty")
         res = acc.curve()
         fit_res = (
             acc.fit(fit_window[0], fit_window[1]) if res.lag_time.size >= 2 else None
@@ -1770,6 +1857,18 @@ class TrajectorySequence(Sequence):
         finally:
             lib.seams_system_destroy(sys_h)
 
+    def _ordered_stream(self, fixed_mols: bool = False):
+        """_raw_stream with every frame's atoms in the first frame's row order."""
+        order = _AtomOrder(fixed_mols=fixed_mols)
+        for xyz, box9, types, ids, mols in self._raw_stream():
+            xyz, types, ids, mols = order(xyz, types, ids, mols)
+            yield xyz, box9, types, ids, mols
+
+    def _frames_in_first_order(self, *, fixed_mols: bool = False):
+        """Frames whose atom rows follow the first frame, matched by atom ID."""
+        for xyz, box9, types, ids, mols in self._ordered_stream(fixed_mols=fixed_mols):
+            yield CtypesFrame(xyz, box9, types=types, atom_ids=ids, mol_ids=mols)
+
     def __iter__(self) -> Iterator:
         for pos in range(len(self._indices)):
             yield self._frame_at_pos(pos)
@@ -1821,10 +1920,14 @@ class TrajectorySequence(Sequence):
         return f"TrajectorySequence(source={src!r}, n_frames={len(self)}, dt={self.dt})"
 
     def unwrap_positions(self) -> np.ndarray:
-        """Stream frames and return PBC-unwrapped coordinates of shape (T, N, 3)."""
+        """Stream frames and return PBC-unwrapped coordinates of shape (T, N, 3).
+
+        Atoms are matched across frames by atom ID; rows follow the first
+        frame's order.
+        """
         frames_xyz: list[np.ndarray] = []
         boxes: list[np.ndarray] = []
-        for xyz, box9, _t, _i, _m in self._raw_stream():
+        for xyz, box9, _t, _i, _m in self._ordered_stream():
             frames_xyz.append(xyz)
             boxes.append(box9)
         if not frames_xyz:
@@ -1834,11 +1937,16 @@ class TrajectorySequence(Sequence):
         return unwrap_positions(stacked, box_arr)
 
     def unwrap_centres(self, *, mol_ids=None, masses=None) -> UnwrappedCentresResult:
-        """Stream frames, assemble intact molecules under PBC, and unwrap centres."""
+        """Stream frames, assemble intact molecules under PBC, and unwrap centres.
+
+        Atoms are matched across frames by atom ID. ``mol_ids`` follows the
+        first frame's atom order; without it every atom must keep the
+        molecule ID it has in the first frame.
+        """
         frames_xyz: list[np.ndarray] = []
         boxes: list[np.ndarray] = []
         first_mols: np.ndarray | None = None
-        for xyz, box9, _t, _i, m_arr in self._raw_stream():
+        for xyz, box9, _t, _i, m_arr in self._ordered_stream(fixed_mols=mol_ids is None):
             frames_xyz.append(xyz)
             boxes.append(box9)
             if first_mols is None:
@@ -1856,18 +1964,53 @@ class TrajectorySequence(Sequence):
         oxygen_type: int | None = None,
         hydrogen_type: int | None = None,
     ) -> list[WaterVectors]:
-        """Extract WaterVectors for each frame in the trajectory."""
-        return [
-            water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type)
-            for fr in self
-        ]
+        """Extract WaterVectors for each frame in the trajectory.
+
+        Atoms are matched across frames by atom ID, so the H-H vector keeps
+        the first frame's hydrogen order. Rows follow the first frame's
+        molecules. Every atom must keep the molecule ID it has in the first
+        frame.
+        """
+        molecules = _MoleculeOrder()
+        out: list[WaterVectors] = []
+        for fr in self._frames_in_first_order(fixed_mols=True):
+            wv = water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type)
+            mids = wv.mol_ids
+            out.append(
+                WaterVectors(
+                    mol_ids=molecules(mids, mids),
+                    oh_mid=molecules(mids, wv.oh_mid),
+                    bisector=molecules(mids, wv.bisector),
+                    hh=molecules(mids, wv.hh),
+                    hh_unit=molecules(mids, wv.hh_unit),
+                )
+            )
+        return out
 
     def molecule_dipoles(self, *, mol_ids=None, charges=None) -> list[MoleculeDipoles]:
-        """Extract MoleculeDipoles for each frame in the trajectory."""
-        return [
-            molecule_dipoles(fr, mol_ids=mol_ids, charges=charges)
-            for fr in self
-        ]
+        """Extract MoleculeDipoles for each frame in the trajectory.
+
+        Atoms are matched across frames by atom ID, in the first frame's row
+        order, so a charge-free dipole keeps the same anchor atom and
+        ``charges`` stay on the atoms they were given for. ``mol_ids`` and
+        ``charges`` follow that order. Without ``mol_ids``, every atom must
+        keep its first-frame molecule. Rows follow the first frame's molecule
+        order.
+        """
+        molecules = _MoleculeOrder()
+        out: list[MoleculeDipoles] = []
+        for fr in self._frames_in_first_order(fixed_mols=mol_ids is None):
+            md = molecule_dipoles(fr, mol_ids=mol_ids, charges=charges)
+            mids = md.mol_ids
+            out.append(
+                MoleculeDipoles(
+                    mol_ids=molecules(mids, mids),
+                    dipoles=molecules(mids, md.dipoles),
+                    unit_vectors=molecules(mids, md.unit_vectors),
+                    magnitudes=molecules(mids, md.magnitudes),
+                )
+            )
+        return out
 
     def orientation_order(
         self,
@@ -1879,23 +2022,30 @@ class TrajectorySequence(Sequence):
         mol_ids=None,
         charges=None,
     ) -> OrientationOrder:
-        """Aggregate axis-projected P1 and P2 order parameters across all frames."""
+        """Aggregate axis-projected P1 and P2 order parameters across all frames.
+
+        Atoms are matched across frames by atom ID, in the first frame's row
+        order, and the vectors are matched by molecule ID. For
+        ``kind="dipole"``, ``mol_ids`` and ``charges`` follow that atom order;
+        without ``mol_ids`` every atom must keep the molecule ID it has in the
+        first frame. Bisector and H-H results use the file's molecule IDs and
+        require the same.
+        """
+        if kind not in ("bisector", "hh", "dipole"):
+            raise ValueError("kind must be 'bisector', 'hh', or 'dipole'")
         per_frame_vecs: list[np.ndarray] = []
-        for fr in self:
+        molecules = _MoleculeOrder()
+        fixed_mols = (mol_ids is None) if kind == "dipole" else True
+        for fr in self._frames_in_first_order(fixed_mols=fixed_mols):
             if kind == "bisector":
-                per_frame_vecs.append(
-                    water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type).bisector
-                )
+                wv = water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type)
+                per_frame_vecs.append(molecules(wv.mol_ids, wv.bisector))
             elif kind == "hh":
-                per_frame_vecs.append(
-                    water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type).hh_unit
-                )
-            elif kind == "dipole":
-                per_frame_vecs.append(
-                    molecule_dipoles(fr, mol_ids=mol_ids, charges=charges).unit_vectors
-                )
+                wv = water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type)
+                per_frame_vecs.append(molecules(wv.mol_ids, wv.hh_unit))
             else:
-                raise ValueError("kind must be 'bisector', 'hh', or 'dipole'")
+                md = molecule_dipoles(fr, mol_ids=mol_ids, charges=charges)
+                per_frame_vecs.append(molecules(md.mol_ids, md.unit_vectors))
         if not per_frame_vecs:
             raise ValueError("TrajectorySequence has no frames")
         all_vecs = np.concatenate(per_frame_vecs, axis=0)
@@ -1913,17 +2063,24 @@ class TrajectorySequence(Sequence):
         masses=None,
         fit_window: tuple[float, float] = (0.0, 0.0),
     ) -> MsdResult:
-        """Stream frames through MsdAccumulator with axial/lateral split and fit."""
+        """Stream frames through MsdAccumulator with axial/lateral split and fit.
+
+        Atoms are matched across frames by atom ID. With ``by_molecule``,
+        ``mol_ids`` follows the first frame's atom order; without it every
+        atom must keep the molecule ID it has in the first frame.
+        """
         step_dt = self.dt if dt is None else float(dt)
         acc: MsdAccumulator | None = None
+        molecules = _MoleculeOrder()
         try:
-            for xyz, box9, types, ids, stored_mols in self._raw_stream():
+            stream = self._ordered_stream(fixed_mols=by_molecule and mol_ids is None)
+            for xyz, box9, types, ids, stored_mols in stream:
                 if by_molecule:
                     use_mols = stored_mols if mol_ids is None else mol_ids
                     mc = molecule_centres(
                         xyz, box9, mol_ids=use_mols, masses=masses
                     )
-                    pts = mc.centres
+                    pts = molecules(mc.mol_ids, mc.centres)
                 else:
                     pts = xyz
                 if acc is None:
@@ -1970,20 +2127,27 @@ class TrajectorySequence(Sequence):
         angle_cutoff: float = 30.0,
         fit_window: tuple[float, float] = (0.0, 0.0),
     ) -> HbondLifetimeResult:
-        """Compute continuous S_HB(t) and intermittent C_HB(t) lifetime curves."""
+        """Compute continuous S_HB(t) and intermittent C_HB(t) lifetime curves.
+
+        Edges read from the trajectory are matched by molecule ID. Every atom
+        must keep the molecule ID it has in the first frame. Caller-supplied
+        ``edge_sets`` are used as given.
+        """
         step_dt = self.dt if dt is None else float(dt)
         if edge_sets is None:
-            edge_iter = (
-                water_hbond_edges(
-                    fr,
-                    oxygen_type=oxygen_type,
-                    hydrogen_type=hydrogen_type,
-                    oo_cutoff=oo_cutoff,
-                    oh_cutoff=oh_cutoff,
-                    angle_cutoff=angle_cutoff,
-                )
-                for fr in self
-            )
+
+            def _edge_gen():
+                for fr in self._frames_in_first_order(fixed_mols=True):
+                    yield water_hbond_edges(
+                        fr,
+                        oxygen_type=oxygen_type,
+                        hydrogen_type=hydrogen_type,
+                        oo_cutoff=oo_cutoff,
+                        oh_cutoff=oh_cutoff,
+                        angle_cutoff=angle_cutoff,
+                    )
+
+            edge_iter = _edge_gen()
         else:
             edge_iter = edge_sets
         return hbond_lifetime(
@@ -2009,25 +2173,36 @@ class TrajectorySequence(Sequence):
         charges=None,
         fit_window: tuple[float, float] = (0.0, 0.0),
     ) -> ReorientationResult:
-        """Compute dipole/orientation C1(t) and C2(t) correlations and tau fits."""
+        """Compute dipole/orientation C1(t) and C2(t) correlations and tau fits.
+
+        Molecular vectors computed here are matched across frames by
+        molecule ID, from atoms in the first frame's row order. Without
+        ``mol_ids``, every atom must keep the molecule ID it has in the first
+        frame. Rows of caller-supplied ``vectors`` are taken as the same
+        molecules in every frame.
+        """
         step_dt = self.dt if dt is None else float(dt)
         if vectors is None:
+            if kind not in ("bisector", "hh", "dipole"):
+                raise ValueError("kind must be 'bisector', 'hh', or 'dipole'")
+
             def _vec_gen():
-                for fr in self:
+                # Without charges a dipole runs from a molecule's first-listed
+                # atom, so each frame is taken in the first frame's atom order.
+                molecules = _MoleculeOrder()
+                for xyz, box9, types, ids, mols in self._ordered_stream(
+                    fixed_mols=(mol_ids is None)
+                ):
+                    fr = CtypesFrame(xyz, box9, types=types, atom_ids=ids, mol_ids=mols)
                     if kind == "bisector":
-                        yield water_vectors(
-                            fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type
-                        ).bisector
+                        wv = water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type)
+                        yield molecules(wv.mol_ids, wv.bisector)
                     elif kind == "hh":
-                        yield water_vectors(
-                            fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type
-                        ).hh_unit
-                    elif kind == "dipole":
-                        yield molecule_dipoles(
-                            fr, mol_ids=mol_ids, charges=charges
-                        ).unit_vectors
+                        wv = water_vectors(fr, oxygen_type=oxygen_type, hydrogen_type=hydrogen_type)
+                        yield molecules(wv.mol_ids, wv.hh_unit)
                     else:
-                        raise ValueError("kind must be 'bisector', 'hh', or 'dipole'")
+                        md = molecule_dipoles(fr, mol_ids=mol_ids, charges=charges)
+                        yield molecules(md.mol_ids, md.unit_vectors)
 
             vec_iter = _vec_gen()
         else:

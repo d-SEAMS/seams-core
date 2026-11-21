@@ -76,7 +76,7 @@ def main(argv):
     work = base / "work"
     work.mkdir()
     subprocess.check_call(
-        ["meson", "install", "-C", str(build), "--no-rebuild", "--quiet", "--destdir", str(stage)]
+        ["meson", "install", "-C", str(help_mod.meson_root(build)), "--no-rebuild", "--quiet", "--destdir", str(stage)]
     )
 
     pc_files = list(stage.rglob("seams.pc"))

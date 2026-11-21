@@ -1,5 +1,6 @@
 """CLI flags and Meson project options do not share or shadow a name."""
 
+import json
 import re
 import subprocess
 import sys
@@ -24,7 +25,22 @@ def declared_options(path: Path):
     return set(re.findall(r"option\(\s*'([^']+)'", path.read_text(encoding="utf-8")))
 
 
-def configured_project_options(build_dir: str):
+def meson_root(build: Path) -> Path:
+    """BUILD, or the parent build directory when seams-core is a subproject."""
+    for path in (build, *build.parents):
+        if (path / "meson-info" / "meson-info.json").is_file():
+            return path
+    raise SystemExit(f"{build} is not inside a meson build directory")
+
+
+def subproject_root(root: Path) -> Path:
+    """The top project's subproject directory, where every wrap is unpacked."""
+    info = json.loads((root / "meson-info" / "meson-info.json").read_text(encoding="utf-8"))
+    project = json.loads((root / "meson-info" / "intro-projectinfo.json").read_text(encoding="utf-8"))
+    return Path(info["directories"]["source"]) / project["subproject_dir"]
+
+
+def configured_project_options(build_dir: Path):
     proc = subprocess.run(
         ["meson", "configure", build_dir],
         check=False,
@@ -108,8 +124,9 @@ def main() -> int:
         if not patch.is_file():
             sys.stderr.write(f"missing {patch}\n")
             return 1
-    listed = configured_project_options(build_dir)
-    root = Path("subprojects")
+    build_root = meson_root(Path(build_dir).resolve())
+    listed = configured_project_options(build_root)
+    root = subproject_root(build_root)
     # Upstream wraps. They are not seams projects and do not carry this
     # tree's option file.
     third_party = {

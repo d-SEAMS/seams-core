@@ -3064,8 +3064,12 @@ SEAMS_API seams_status seams_orientation_order(const double *vectors,
 /**
  * @brief Create a streaming multi-origin MSD accumulator with axial/lateral split.
  *
- * @param natoms Particle or molecule count per frame, at least 1.
- * @param max_lag Maximum lag in frames, or 0 to retain all lags.
+ * @param natoms Particle or molecule count per frame, at least 1. Above
+ *        PTRDIFF_MAX / (3 * sizeof(double)) the coordinates cannot be
+ *        allocated, which is ::SEAMS_ERR_RANGE.
+ * @param max_lag Maximum lag in frames, or 0 to retain all lags. Above
+ *        PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated,
+ *        which is ::SEAMS_ERR_RANGE.
  * @param origin_stride Frame stride between time origins, at least 1.
  * @param dt Positive finite frame spacing in physical time units.
  * @param axis Non-zero 3-vector defining the axial direction.
@@ -3217,7 +3221,9 @@ SEAMS_API seams_status seams_msd_fit(const seams_msd *msd, double t_start,
 /**
  * @brief Create a streaming H-bond lifetime accumulator from per-frame edges.
  *
- * @param max_lag Maximum lag in frames, or 0 to retain all lags.
+ * @param max_lag Maximum lag in frames, or 0 to retain all lags. Above
+ *        PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated,
+ *        which is ::SEAMS_ERR_RANGE.
  * @param origin_stride Frame stride between time origins, at least 1.
  * @param dt Positive finite frame spacing.
  * @param directed Non-zero treats (donor, acceptor) as directed; zero canonicalizes pairs.
@@ -3357,8 +3363,12 @@ SEAMS_API seams_status seams_hbond_tcf_fit(const seams_hbond_tcf *tcf,
 /**
  * @brief Create a streaming orientational correlation accumulator for C1 and C2.
  *
- * @param n_vectors Number of molecular vectors per frame, at least 1.
- * @param max_lag Maximum lag in frames, or 0 to retain all lags.
+ * @param n_vectors Number of molecular vectors per frame, at least 1. Above
+ *        PTRDIFF_MAX / (3 * sizeof(double)) the vectors cannot be allocated,
+ *        which is ::SEAMS_ERR_RANGE.
+ * @param max_lag Maximum lag in frames, or 0 to retain all lags. Above
+ *        PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated,
+ *        which is ::SEAMS_ERR_RANGE.
  * @param origin_stride Frame stride between time origins, at least 1.
  * @param dt Positive finite frame spacing.
  * @param out Receives the new handle; set to NULL on failure.

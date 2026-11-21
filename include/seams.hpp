@@ -735,6 +735,20 @@ class Handle {
   T *ptr_ = nullptr;
 };
 
+// The C trajectory calls take no xyz length and read nframes * 3 * natoms.
+inline std::size_t trajectory_coordinates(std::span<const double> xyz, std::size_t nframes,
+                                          std::size_t natoms) {
+  constexpr std::size_t most = std::numeric_limits<std::size_t>::max();
+  if (natoms > most / 3 || (natoms != 0 && nframes > most / (3 * natoms))) {
+    throw Error(SEAMS_ERR_RANGE, "nframes * 3 * natoms overflows size_t");
+  }
+  const std::size_t want = nframes * 3 * natoms;
+  if (xyz.size() != want) {
+    throw Error(SEAMS_ERR_RANGE, "xyz length is not nframes * 3 * natoms");
+  }
+  return want;
+}
+
 template <class Call>
 inline std::string copy_text(Call call, const void *handle) {
   std::size_t n_out = 0;
@@ -1897,14 +1911,17 @@ inline void set_num_threads(int n) { detail::check(seams_set_num_threads(n), nul
 /**
  * @brief Unwrap periodic coordinates across frames.
  * @ingroup seams_cpp
+ * @throws Error `SEAMS_ERR_RANGE` when `xyz.size()` is not `nframes * 3 * natoms`,
+ *         that product overflows `size_t`, or `boxes.size()` is not a multiple of 9.
  */
 [[nodiscard]] inline std::vector<double> unwrap_positions(std::span<const double> xyz,
                                                           std::size_t nframes, std::size_t natoms,
                                                           std::span<const double> boxes) {
+  const std::size_t total = detail::trajectory_coordinates(xyz, nframes, natoms);
   if (boxes.size() % 9 != 0) {
     throw Error(SEAMS_ERR_RANGE, "boxes length is not a multiple of 9");
   }
-  std::vector<double> out(nframes * 3 * natoms);
+  std::vector<double> out(total);
   detail::check(seams_traj_unwrap_positions(xyz.data(), nframes, natoms, boxes.data(),
                                             boxes.size() / 9, out.data(), out.size()),
                 nullptr);
@@ -1914,12 +1931,15 @@ inline void set_num_threads(int n) { detail::check(seams_set_num_threads(n), nul
 /**
  * @brief Assemble and unwrap periodic molecule centres across frames.
  * @ingroup seams_cpp
+ * @throws Error `SEAMS_ERR_RANGE` when `xyz.size()` is not `nframes * 3 * natoms`,
+ *         that product overflows `size_t`, or `boxes.size()` is not a multiple of 9.
  */
 [[nodiscard]] inline MoleculeCentres unwrap_centres(std::span<const double> xyz,
                                                     std::size_t nframes, std::size_t natoms,
                                                     std::span<const double> boxes,
                                                     std::span<const int> mols,
                                                     std::span<const double> masses = {}) {
+  static_cast<void>(detail::trajectory_coordinates(xyz, nframes, natoms));
   if (boxes.size() % 9 != 0) {
     throw Error(SEAMS_ERR_RANGE, "boxes length is not a multiple of 9");
   }

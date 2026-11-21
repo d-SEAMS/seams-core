@@ -3,8 +3,10 @@
 
 ``snapshot`` records the untracked, non-ignored files of the checkout before
 the other tests start; ``check`` runs after them and fails on any file that
-was not in the snapshot. Both exit 77 outside a git checkout of the source
-root.
+was not in the snapshot. A source root that is not the top of a git checkout,
+such as an unpacked subproject, is listed through an empty repository whose
+work tree is the source root, so every file there counts as untracked unless
+a .gitignore in the tree excludes it.
 
 Several ``meson test`` processes may share one build directory, so each
 snapshot belongs to one run: its generation is the process id and start time
@@ -21,22 +23,32 @@ Usage: source_tree_untracked.py {snapshot,check} GIT SOURCE_ROOT STATE_DIR
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
-def untracked(git: str, root: Path) -> set[str] | None:
+def untracked(git: str, root: Path) -> set[str]:
     top = subprocess.run(
         [git, "-C", str(root), "rev-parse", "--show-toplevel"],
         capture_output=True,
         text=True,
     )
-    if top.returncode != 0 or Path(top.stdout.strip()).resolve() != root.resolve():
-        return None
-    listed = subprocess.run(
-        [git, "-C", str(root), "ls-files", "--others", "--exclude-standard", "-z"],
-        capture_output=True,
-        check=True,
-    )
+    if top.returncode == 0 and Path(top.stdout.strip()).resolve() == root.resolve():
+        listed = subprocess.run(
+            [git, "-C", str(root), "ls-files", "--others", "--exclude-standard", "-z"],
+            capture_output=True,
+            check=True,
+        )
+    else:
+        with tempfile.TemporaryDirectory(prefix="seams-untracked-git-") as tmp:
+            gitdir, tree = str(Path(tmp).resolve()), str(root.resolve())
+            subprocess.run([git, "init", "-q", "--bare", gitdir], capture_output=True, check=True)
+            listed = subprocess.run(
+                [git, "--git-dir", gitdir, "--work-tree", tree, "-C", tree,
+                 "ls-files", "--others", "--exclude-standard", "-z"],
+                capture_output=True,
+                check=True,
+            )
     return {p.decode("utf-8", "surrogateescape") for p in listed.stdout.split(b"\0") if p}
 
 
@@ -47,10 +59,12 @@ class NoProcessTable(Exception):
     """Neither /proc nor ps can describe a process."""
 
 
-def process_info(pid: int) -> tuple[int, str, list[str]] | None:
+def process_info(pid: int, ancestor: bool = False) -> tuple[int, str, list[str]] | None:
     """Parent pid, start time and argv of pid, or None if it is gone.
 
     /proc is read when it is mounted; a pid it cannot read is asked of ps.
+    An ancestor of this process is alive, so when /proc has no entry for it
+    (hidepid, say) and ps is missing, that is NoProcessTable, not None.
     """
     proc = PROC / str(pid)
     gone = False
@@ -67,16 +81,23 @@ def process_info(pid: int) -> tuple[int, str, list[str]] | None:
             fields = stat[stat.rindex(")") + 2 :].split()
             return int(fields[1]), fields[19], [a for a in argv if a]
     try:
+        # lstart is five words only in the C locale.
         out = subprocess.run(
             ["ps", "-o", "ppid=", "-o", "lstart=", "-o", "command=", "-p", str(pid)],
             capture_output=True,
             text=True,
+            env={**os.environ, "LC_ALL": "C"},
         )
     except FileNotFoundError:
         # A pid absent from a readable /proc is gone; ps could only agree.
-        if gone:
+        if gone and not ancestor:
             return None
-        where = f"{proc} is unreadable" if (PROC / "self" / "stat").is_file() else f"{PROC} is not mounted"
+        if gone:
+            where = f"{proc} is missing"
+        elif (PROC / "self" / "stat").is_file():
+            where = f"{proc} is unreadable"
+        else:
+            where = f"{PROC} is not mounted"
         raise NoProcessTable(f"{where} and ps is not on PATH, so process {pid} cannot be inspected") from None
     words = out.stdout.split()
     if out.returncode != 0 or len(words) < 7:
@@ -101,7 +122,7 @@ def generation() -> str | None:
     seen = set()
     while pid > 1 and pid not in seen:
         seen.add(pid)
-        info = process_info(pid)
+        info = process_info(pid, ancestor=True)
         if info is None:
             return None
         ppid, start, argv = info
@@ -132,9 +153,6 @@ def run(argv: list[str]) -> int:
         return 2
     mode, git, root, state_dir = argv[1], argv[2], Path(argv[3]), Path(argv[4])
     now = untracked(git, root)
-    if now is None:
-        print(f"{root} is not the top of a git checkout")
-        return 77
     gen = generation()
     if gen is None:
         print("cannot identify the meson test run that launched this test", file=sys.stderr)
@@ -149,14 +167,16 @@ def run(argv: list[str]) -> int:
         if state.exists():
             print(f"run {gen} already took a snapshot", file=sys.stderr)
             return 1
-        state.write_text(header + "".join(f"{p}\0" for p in sorted(now)), encoding="utf-8")
+        # git paths need not be UTF-8; surrogateescape round-trips their bytes.
+        state.write_text(header + "".join(f"{p}\0" for p in sorted(now)), encoding="utf-8",
+                         errors="surrogateescape")
         print(f"run {gen}: {len(now)} untracked files before the tests")
         return 0
     if not state.is_file():
         print(f"run {gen} has no snapshot; source_tree_untracked_snapshot must run first in the same meson test run",
               file=sys.stderr)
         return 1
-    text = state.read_text(encoding="utf-8")
+    text = state.read_text(encoding="utf-8", errors="surrogateescape")
     state.unlink()
     if not text.startswith(header):
         print(f"{state} does not belong to run {gen} at {root.resolve()}", file=sys.stderr)

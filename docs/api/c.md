@@ -3281,7 +3281,7 @@ seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride, double
 
 Parameters: `max_lag`, `origin_stride`, `dt`, `directed`, `out`.
 
-- `max_lag`: Maximum lag in frames, or 0 to retain all lags.
+- `max_lag`: Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is SEAMS_ERR_RANGE.
 - `origin_stride`: Frame stride between time origins, at least 1.
 - `dt`: Positive finite frame spacing.
 - `directed`: Non-zero treats (donor, acceptor) as directed; zero canonicalizes pairs.
@@ -3842,8 +3842,8 @@ seams_status seams_msd_create(size_t natoms, size_t max_lag, size_t origin_strid
 
 Parameters: `natoms`, `max_lag`, `origin_stride`, `dt`, `axis`, `out`.
 
-- `natoms`: Particle or molecule count per frame, at least 1.
-- `max_lag`: Maximum lag in frames, or 0 to retain all lags.
+- `natoms`: Particle or molecule count per frame, at least 1. Above PTRDIFF_MAX / (3 * sizeof(double)) the coordinates cannot be allocated, which is SEAMS_ERR_RANGE.
+- `max_lag`: Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is SEAMS_ERR_RANGE.
 - `origin_stride`: Frame stride between time origins, at least 1.
 - `dt`: Positive finite frame spacing in physical time units.
 - `axis`: Non-zero 3-vector defining the axial direction.
@@ -4759,8 +4759,8 @@ seams_status seams_reorient_create(size_t n_vectors, size_t max_lag, size_t orig
 
 Parameters: `n_vectors`, `max_lag`, `origin_stride`, `dt`, `out`.
 
-- `n_vectors`: Number of molecular vectors per frame, at least 1.
-- `max_lag`: Maximum lag in frames, or 0 to retain all lags.
+- `n_vectors`: Number of molecular vectors per frame, at least 1. Above PTRDIFF_MAX / (3 * sizeof(double)) the vectors cannot be allocated, which is SEAMS_ERR_RANGE.
+- `max_lag`: Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is SEAMS_ERR_RANGE.
 - `origin_stride`: Frame stride between time origins, at least 1.
 - `dt`: Positive finite frame spacing.
 - `out`: Receives the new handle; set to NULL on failure.

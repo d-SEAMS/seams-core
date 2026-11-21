@@ -65,6 +65,15 @@ def selftest():
             raise SystemExit(f"selftest: flagged {text}")
 
 
+def meson_root(build):
+    """BUILD, or the parent build directory when seams-core is a subproject;
+    meson introspect and ninja take only that one."""
+    for path in (build, *build.parents):
+        if (path / "meson-info" / "meson-info.json").is_file():
+            return path
+    raise SystemExit(f"{build} is not inside a meson build directory")
+
+
 def introspect(build):
     meson = shutil.which("meson") or "meson"
     out = subprocess.check_output([meson, "introspect", "--targets", "--tests", str(build)], text=True)
@@ -102,7 +111,7 @@ def ninja_inputs(build, outputs):
     return {str((build / line.strip()).resolve()) for line in done.stdout.splitlines() if line.strip()}
 
 
-def install_problems(build, targets, tests, name):
+def install_problems(build, targets, tests, name, parent_project=False):
     rows = [test for test in tests if test["name"] == name]
     if not rows:
         return []
@@ -120,6 +129,9 @@ def install_problems(build, targets, tests, name):
     missing = []
     for target in targets:
         if not target.get("installed"):
+            continue
+        # The parent's own targets are not seams-core's to depend on.
+        if parent_project and target.get("subproject") is None:
             continue
         for name in target["filename"]:
             if str(Path(name).resolve()) not in built:
@@ -151,7 +163,8 @@ def main():
         raise SystemExit(__doc__)
     selftest()
     source = Path(sys.argv[1]).resolve()
-    build = Path(sys.argv[2])
+    project_build = Path(sys.argv[2]).resolve()
+    build = meson_root(project_build)
     targets, tests = introspect(build)
     failures = []
     for script, names in sorted(test_scripts(tests, source).items()):
@@ -161,7 +174,7 @@ def main():
             rel = script.relative_to(source)
             failures.append(f"{rel}:{number} rebuilds the tree under {', '.join(sorted(set(names)))}: {line}")
     for install_test in INSTALL_TESTS:
-        for name in install_problems(build, targets, tests, install_test):
+        for name in install_problems(build, targets, tests, install_test, build != project_build):
             failures.append(f"{install_test} installs {name} but does not depend on it")
     for name in r_lib_problems(targets, tests, source):
         failures.append(f"{name} reads {R_LIB} but does not depend on it")

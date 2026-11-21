@@ -6,7 +6,11 @@ created in the source tree and run B takes a snapshot that includes it. Run
 A's check must still report the artifact. A check-only run, which never took
 a snapshot, must fail instead of consuming B's.
 
-Usage: source_tree_untracked_parallel.py MESON SOURCE_ROOT BUILD_ROOT
+BUILD_ROOT is the top-level build directory, the one ``meson test -C`` takes,
+also when seams-core is a subproject. PROJECT names this project's tests so a
+parent project's tests are not run.
+
+Usage: source_tree_untracked_parallel.py MESON SOURCE_ROOT BUILD_ROOT PROJECT
    or: source_tree_untracked_parallel.py --hold DIR COMMAND...  (meson --wrapper)
 """
 
@@ -45,11 +49,12 @@ def show(label: str, proc_out: str, code: int) -> None:
 def main(argv: list[str]) -> int:
     if len(argv) >= 3 and argv[1] == "--hold":
         hold(Path(argv[2]), argv[3:])
-    if len(argv) != 4:
+    if len(argv) != 5:
         print(__doc__, file=sys.stderr)
         return 2
-    meson, root, build = argv[1], Path(argv[2]), Path(argv[3])
-    snapshot, check = "source_tree_untracked_snapshot", "source_tree_untracked_check"
+    meson, root, build, project = argv[1], Path(argv[2]), Path(argv[3]), argv[4]
+    snapshot = f"{project}:source_tree_untracked_snapshot"
+    check = f"{project}:source_tree_untracked_check"
     artifact = root / f".source-tree-untracked-parallel-{os.getpid()}"
     failures = []
     with tempfile.TemporaryDirectory(prefix="seams-untracked-") as tmp:

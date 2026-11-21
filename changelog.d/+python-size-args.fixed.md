@@ -1,0 +1,1 @@
+`pydseams.MsdAccumulator`, `HbondLifetimeAccumulator` and `ReorientationAccumulator` raise `ValueError` naming the argument when a count, `max_lag` or `origin_stride` is negative or above `SIZE_MAX`, where ctypes used to wrap it silently into `size_t`, and `pydseams.hbond_lifetime([])` raises `ValueError` instead of returning an empty curve.

@@ -25,6 +25,18 @@ if get_option('with_tests')
     timeout: 180,
   )
 
+  test(
+    'seams_hpp_traj_bounds',
+    executable(
+      'test_seams_hpp_traj_bounds',
+      files('../tests/test_seams_hpp_traj_bounds.cpp'),
+      link_with: seams_api_lib,
+      include_directories: include_directories('../include'),
+      cpp_args: ['-I' + meson.project_build_root() / 'src'],
+    ),
+    timeout: 60,
+  )
+
   # Compile-only guard: scripts/bench_binding_overhead.py builds this driver
   # by hand, so a seams.hpp change would otherwise break it unseen.
   executable(

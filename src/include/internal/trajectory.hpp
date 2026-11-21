@@ -32,6 +32,35 @@
 namespace traj {
 
 /**
+ * @brief Largest particle or vector count n whose 3 * n doubles one
+ * std::vector can hold. Larger counts are refused, so 3 * n never wraps.
+ */
+inline constexpr std::size_t kMaxTriples =
+    static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /
+    (3 * sizeof(double));
+
+/**
+ * @brief Largest max_lag whose max_lag + 1 lag bins one std::vector can
+ * hold. Larger lags are refused, so max_lag + 1 never wraps to zero.
+ */
+inline constexpr std::size_t kMaxLag =
+    static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /
+        sizeof(double) -
+    1;
+
+/**
+ * @brief out = a * b; false, leaving out alone, when that overflows size_t.
+ */
+[[nodiscard]] inline bool checkedMul(std::size_t a, std::size_t b,
+                                     std::size_t &out) noexcept {
+  if (a != 0 && b > std::numeric_limits<std::size_t>::max() / a) {
+    return false;
+  }
+  out = a * b;
+  return true;
+}
+
+/**
  * @brief Restricted-triclinic periodic simulation cell.
  *
  * Edge matrix H has columns a = (lx, 0, 0), b = (xy, ly, 0), c = (xz, yz, lz)
@@ -82,6 +111,8 @@ class TrajectoryUnwrapper {
 public:
   explicit TrajectoryUnwrapper(std::size_t nParticles = 0);
 
+  /// A count above kMaxTriples leaves the unwrapper empty, and pushFrame
+  /// refuses such a count.
   void reset(std::size_t nParticles = 0);
 
   [[nodiscard]] std::size_t numParticles() const noexcept { return nParticles_; }
@@ -93,7 +124,6 @@ public:
 private:
   std::size_t nParticles_ = 0;
   std::size_t framesSeen_ = 0;
-  std::vector<double> prevWrapped_;
   std::vector<double> currentUnwrapped_;
 };
 
