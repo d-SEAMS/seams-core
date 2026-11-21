@@ -948,3 +948,13 @@ if sphericart_found
       build_rpath: meson.project_build_root() / 'src'),
     timeout: 30)
 endif
+
+_wf_python = find_program('python3', required: true)
+test('workflow_triggers', _wf_python,
+  args: [files('check_workflow_triggers.py')],
+  workdir: meson.project_source_root(),
+  timeout: 30)
+test('workflow_triggers_selftest', _wf_python,
+  args: [files('check_workflow_triggers.py'), '--self-test'],
+  workdir: meson.project_source_root(),
+  timeout: 30)
