@@ -2030,33 +2030,33 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_TETRAHEDRAL_NEAREST_FOUR
 
-Purpose: Tetrahedral order from the four nearest selected partners.
+Purpose: Four nearest selected partners; cutoff is ignored. Declared in include/seams.h.
 
 Parameters: none
 
-Returns: The dimensionless code 0.
+Returns: The enumerator value 0.
 
-Ownership: No storage is transferred.
+Ownership: No allocation.
 
-Errors: This constant cannot fail.
+Errors: None.
 
-Units: dimensionless
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_TETRAHEDRAL_WITHIN_CUTOFF
 
-Purpose: Tetrahedral order from every selected partner inside the cutoff.
+Purpose: Every selected partner at or inside cutoff. Declared in include/seams.h.
 
 Parameters: none
 
-Returns: The dimensionless code 1.
+Returns: The enumerator value 1.
 
-Ownership: No storage is transferred.
+Ownership: No allocation.
 
-Errors: This constant cannot fail.
+Errors: None.
 
-Units: dimensionless
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -3820,7 +3820,7 @@ Units: as given for each parameter above.
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
-Errors: A non-success status and seams_last_error_message() give the detail.
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -5400,7 +5400,7 @@ Units: as given for each parameter above.
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
-Errors: A non-success status and seams_last_error_message() give the detail.
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -5653,7 +5653,7 @@ Units: as given for each parameter above.
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
-Errors: A non-success status and seams_last_error_message() give the detail.
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -6641,15 +6641,15 @@ Example: `docs/examples/c_api_tour.c`
 
 ### seams_tetrahedral_neighbours
 
-Purpose: Enumerator of tetrahedral-order neighbour conventions.
+Purpose: Neighbour convention for tetrahedral order. Declared in include/seams.h.
 
 Parameters: none
 
-Returns: A dimensionless convention code.
+Returns: The enumeration type.
 
-Ownership: No storage is transferred.
+Ownership: No allocation.
 
-Errors: This type cannot fail.
+Errors: None. This is a type.
 
 Units: dimensionless
 
@@ -6689,7 +6689,7 @@ Units: as given for each parameter above.
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
-Errors: A non-success status and seams_last_error_message() give the detail.
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 

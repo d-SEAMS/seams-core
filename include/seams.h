@@ -213,10 +213,8 @@ typedef enum seams_graph {
 
 /** @brief Neighbour convention for tetrahedral order. */
 typedef enum seams_tetrahedral_neighbours {
-  /** Four nearest selected partners; cutoff is ignored. */
-  SEAMS_TETRAHEDRAL_NEAREST_FOUR = 0,
-  /** Every selected partner at or inside cutoff. */
-  SEAMS_TETRAHEDRAL_WITHIN_CUTOFF = 1
+  SEAMS_TETRAHEDRAL_NEAREST_FOUR = 0, /**< Four nearest selected partners; cutoff is ignored. */
+  SEAMS_TETRAHEDRAL_WITHIN_CUTOFF = 1 /**< Every selected partner at or inside cutoff. */
 } seams_tetrahedral_neighbours;
 
 /**
