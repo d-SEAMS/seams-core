@@ -270,6 +270,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tpr_tpr_776.tpr", "TPR", "invalid function type 2147483647"},
            // truncated TNG triplet-compressed block read past its buffer
            Refused{"fuzz_tng_coder_oob.tng", "TNG", kTngErr},
+           // MMTF atomIdList had a duplicate atom id before the model's atomSkip_
+           Refused{"fuzz_mmtf_atomskip.mmtf", "MMTF", "before current model offset"},
        }) {
     requireRefused(item);
   }
@@ -293,6 +295,13 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   const auto vtf = readAll("hostile/fuzz_vtf_vtfplugin_1326.vtf", "VTF trajectory format");
   REQUIRE(vtf.error.empty());
   REQUIRE(vtf.steps == 0);
+
+  // A PDB CONECT record appearing before any ATOM/HETATM records must not
+  // dereference an empty atom_offsets_ vector.
+  const auto pdb = readAll("hostile/fuzz_pdb_conect_empty.pdb", "PDB");
+  REQUIRE(pdb.error.empty());
+  REQUIRE(pdb.steps == 1);
+  REQUIRE(pdb.natoms == 0);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",

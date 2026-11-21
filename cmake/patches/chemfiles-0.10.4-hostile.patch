@@ -17,8 +17,11 @@
 #   allocates the frame's atoms, a TRR frame with atoms but no positions,
 #   velocities or forces is an error (nothing ties its atom count to the
 #   file), an SMI square brace must hold an atom, the extended XYZ comment
-#   parser stops at an '=' with no name before it instead of looping, and
-#   S_ISREG is defined where the C library lacks it (MSVC).
+#   parser stops at an '=' with no name before it instead of looping, PDB
+#   CONECT records are ignored with a warning when no atoms have been read
+#   yet, MMTF atom_id checks atom indices and model offsets with
+#   FormatError instead of assert(), and S_ISREG is defined where the C
+#   library lacks it (MSVC).
 diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
 --- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 06:14:16.829019226 +0000
 +++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 06:22:02.139843893 +0000
@@ -697,6 +700,80 @@ diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTraje
              --atomid; // the frame uses zero-based indices
              assert(duplicate_check.size() == natoms);
              if (duplicate_check[atomid]) {
+diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
+--- host-a/src/formats/MMTF.cpp	2026-11-21 06:14:16.849019156 +0000
++++ host-b/src/formats/MMTF.cpp	2026-11-21 06:45:21.131437508 +0000
+@@ -625,26 +625,46 @@
+ // the initial atom index if it exists.
+ size_t MMTFFormat::atom_id(size_t mmtf_id) {
+     if (!mmtf::isDefaultValue(structure_.atomIdList)) {
+-        assert(mmtf_id < structure_.atomIdList.size());
+-        assert(structure_.atomIdList[mmtf_id] > 0);
++        if (mmtf_id >= structure_.atomIdList.size()) {
++            throw format_error(
++                "invalid MMTF atom index {} (only {} atom ids)",
++                mmtf_id, structure_.atomIdList.size()
++            );
++        }
++        if (structure_.atomIdList[mmtf_id] <= 0) {
++            throw format_error(
++                "invalid non-positive MMTF atom id {}", structure_.atomIdList[mmtf_id]
++            );
++        }
+         size_t id;
+         if (new_atom_indexes_.empty()) {
+             // atom ids are well-behaved, no reordering necessary
+             id = static_cast<size_t>(structure_.atomIdList[mmtf_id]) - 1;
+         } else {
+-            assert(structure_.atomIdList.size() == new_atom_indexes_.size());
++            if (structure_.atomIdList.size() != new_atom_indexes_.size()) {
++                throw format_error("inconsistent MMTF atom id list size");
++            }
+             auto listedId = structure_.atomIdList[mmtf_id];
+             // use the fact that indexes are sorted for faster search
+             auto it =
+                 std::lower_bound(new_atom_indexes_.begin(), new_atom_indexes_.end(), listedId);
+-            // it is guaranteed that the lower bound is an exact match
+-            assert(it != new_atom_indexes_.end() && *it == listedId);
++            if (it == new_atom_indexes_.end() || *it != listedId) {
++                throw format_error("MMTF atom id {} not found in index table", listedId);
++            }
+             id = static_cast<size_t>(std::distance(new_atom_indexes_.begin(), it));
+         }
+-        assert(atomSkip_ <= id);
++        if (atomSkip_ > id) {
++            throw format_error(
++                "invalid MMTF atom index {} before current model offset {}", id, atomSkip_
++            );
++        }
+         return id - atomSkip_;
+     } else {
+-        assert(atomSkip_ <= mmtf_id);
++        if (atomSkip_ > mmtf_id) {
++            throw format_error(
++                "invalid MMTF atom index {} before current model offset {}", mmtf_id, atomSkip_
++            );
++        }
+         return mmtf_id - atomSkip_;
+     }
+ }
+diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
+--- host-a/src/formats/PDB.cpp	2026-11-21 06:14:16.849019156 +0000
++++ host-b/src/formats/PDB.cpp	2026-11-21 06:45:21.127437530 +0000
+@@ -467,6 +467,13 @@
+ 
+ void PDBFormat::read_CONECT(Frame& frame, string_view line) {
+     assert(line.substr(0, 6) == "CONECT");
++    if (atom_offsets_.empty()) {
++        warning("PDB reader",
++            "ignoring CONECT ('{}') with atomic indexes bigger than frame size ({})",
++            trim(line), frame.size()
++        );
++        return;
++    }
+     auto line_length = trim(line).length();
+ 
+     // Helper lambdas
 diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
 --- host-a/src/formats/SMI.cpp	2026-11-21 06:14:16.849019156 +0000
 +++ host-b/src/formats/SMI.cpp	2026-11-21 06:22:02.143843888 +0000
