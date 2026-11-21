@@ -481,6 +481,7 @@ else
                       'patches/chemfiles-0.10.4-molfile-sources.patch',
                       'patches/chemfiles-0.10.4-tng-sources.patch',
                       'patches/chemfiles-0.10.4-mmtf-sources.patch',
+                      'patches/chemfiles-0.10.4-gemmi-sources.patch',
                       'patches/chemfiles-0.10.4-external-sources.sh',
                       'patches/chemfiles-0.10.4-hostile.patch',
                       'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',

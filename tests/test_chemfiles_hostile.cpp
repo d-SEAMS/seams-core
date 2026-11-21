@@ -385,6 +385,13 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   REQUIRE(pdbHelix.error.empty());
   REQUIRE(pdbHelix.steps == 1);
   REQUIRE(pdbHelix.natoms == 1);
+
+  // A CIF number with a 10-digit exponent must not overflow int and index
+  // gemmi's power-of-10 LUT with a negative offset.
+  const auto cifExp = readAll("hostile/fuzz_cif_huge_exponent.cif", "CIF");
+  REQUIRE(cifExp.error.empty());
+  REQUIRE(cifExp.steps == 1);
+  REQUIRE(cifExp.natoms == 1);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",
