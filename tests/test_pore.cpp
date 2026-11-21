@@ -2122,3 +2122,49 @@ TEST_CASE("elongated minimum images below 2^52 are returned", "[pore]") {
   const double needleFrac[3] = {0.5, 0, 0};
   expect(needle, needleFrac, 1, -100000000, 0);
 }
+
+TEST_CASE("minimum image is scale-invariant in LAMMPS cgs and si units", "[pore]") {
+  const double base[6] = {30.0, 28.0, 26.0, 14.0, 11.0, 12.0};
+  const std::array<double, 3> baseW = {25.0, 18.0, 12.0};
+  const auto refMic = gen::mic::euclideanIfShorter(
+      base[0], base[1], base[2], base[3], base[4], base[5], baseW, baseW);
+  const double refNorm =
+      std::sqrt(refMic[0] * refMic[0] + refMic[1] * refMic[1] + refMic[2] * refMic[2]);
+
+  // Real/metal (A), nano (nm), micro (um), cgs (cm, 1e-8 A), si (m, 1e-10 A),
+  // plus extreme binary64 scales.
+  for (const double scale : {1.0, 1e-1, 1e-4, 1e-8, 1e-10, 1e-100, 1e+100}) {
+    const double lx = base[0] * scale;
+    const double ly = base[1] * scale;
+    const double lz = base[2] * scale;
+    const double xy = base[3] * scale;
+    const double xz = base[4] * scale;
+    const double yz = base[5] * scale;
+    const std::array<double, 3> w = {baseW[0] * scale, baseW[1] * scale, baseW[2] * scale};
+    const auto gotMic = gen::mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, w, w);
+    for (int k = 0; k < 3; ++k) {
+      REQUIRE_THAT(gotMic[k] / scale, Catch::Matchers::WithinAbs(refMic[k], 1e-12 * refNorm));
+    }
+
+    const auto cloud = triclinic(lx, ly, lz, xy, xz, yz);
+    const auto gotPub = gen::triclinicMinImage(cloud, w[0], w[1], w[2], 0.0, 0.0, 0.0);
+    for (int k = 0; k < 3; ++k) {
+      REQUIRE_THAT(gotPub[k] / scale, Catch::Matchers::WithinAbs(refMic[k], 1e-12 * refNorm));
+    }
+  }
+}
+
+TEST_CASE("minimum image basis build is bounded on high-aspect legal needles", "[pore]") {
+  const double ly = 1.6877791608068398;
+  const double lz = 1.7939748045334107;
+  const double yz = 0.12097869737185198;
+  for (const double L : {1.12982562035e11, 1.0e15}) {
+    for (const double xy : {0.0, 1.0e-12}) {
+      const std::array<double, 3> w = {0.3 * L, 0.2 * ly, 0.4 * lz};
+      const auto got = gen::mic::euclideanIfShorter(L, ly, lz, xy, 0.0, yz, w, w);
+      REQUIRE_THAT(got[0], Catch::Matchers::WithinRel(0.3 * L, 1e-14));
+      REQUIRE_THAT(got[1], Catch::Matchers::WithinAbs(0.2 * ly, 1e-12));
+      REQUIRE_THAT(got[2], Catch::Matchers::WithinAbs(0.4 * lz, 1e-12));
+    }
+  }
+}
