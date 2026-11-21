@@ -6,35 +6,83 @@
 # the Python package against the engine under test, before either is
 # tagged. PYDSEAMSLIB_REF picks the PydSEAMSlib branch or tag (main).
 # Pass --if-missing first to return immediately when pydseamslib is already
-# importable in the active Python environment.
+# installed in the active Python environment for this checkout and HEAD tree.
 # Extra arguments go to pip, e.g. a different interpreter's -m pip.
 set -eu
-root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
 tree=$(git -C "$root" rev-parse HEAD^{tree})
 if [ "${1:-}" = "--if-missing" ]; then
   shift
-  if SEAMS_ROOT="$root" SEAMS_TREE="$tree" python - <<'PY'
+  if SEAMS_ROOT="$root" SEAMS_TREE="$tree" python -I - <<'PY'
 import json
 import os
-import sys
+import sysconfig
 from pathlib import Path
 
-root = Path(os.environ["SEAMS_ROOT"]).resolve()
+root = Path(os.environ["SEAMS_ROOT"]).resolve(strict=True)
 expected_tree = os.environ["SEAMS_TREE"]
-import dseams  # noqa: F401
+targets = tuple(
+    sorted(
+        {
+            Path(p).resolve()
+            for p in (sysconfig.get_path("purelib"), sysconfig.get_path("platlib"))
+            if p
+        }
+    )
+)
+if not targets:
+    raise SystemExit("pydseams probe: could not determine Python site-packages target")
+
+
+def require_in_target(mod, name):
+    mod_file = getattr(mod, "__file__", None)
+    if not mod_file:
+        raise SystemExit(f"pydseams probe: {name} has no __file__")
+    mod_path = Path(mod_file).resolve()
+    if not any(mod_path.is_relative_to(target) for target in targets):
+        raise SystemExit(
+            f"pydseams probe: {name} at {mod_path} is outside install targets {targets}"
+        )
+    return mod_path
+
+
+import dseams
 import pydseams
+
+require_in_target(dseams, "dseams")
+pydseams_path = require_in_target(pydseams, "pydseams")
 if not hasattr(pydseams.Frame, "classify_chill_plus"):
     raise SystemExit("pydseams probe: Frame.classify_chill_plus is missing")
-stamp = Path(pydseams.__file__).resolve().parent / ".seams-core-build.json"
-if not stamp.is_file():
+
+stamp = pydseams_path.parent / ".seams-core-build.json"
+if stamp.is_symlink() or not stamp.is_file():
     raise SystemExit(f"pydseams probe: missing install stamp {stamp}")
-info = json.loads(stamp.read_text(encoding="utf-8"))
-stamp_root = Path(info.get("root", "")).resolve()
-stamp_tree = str(info.get("tree", ""))
+if not any(stamp.resolve().is_relative_to(target) for target in targets):
+    raise SystemExit(f"pydseams probe: install stamp {stamp} is outside install targets {targets}")
+try:
+    info = json.loads(stamp.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    raise SystemExit(f"pydseams probe: unreadable install stamp {stamp}: {exc}")
+if not isinstance(info, dict):
+    raise SystemExit(f"pydseams probe: malformed install stamp {stamp}")
+
+raw_root = info.get("root")
+if not isinstance(raw_root, str) or not raw_root:
+    raise SystemExit(f"pydseams probe: missing or invalid stamp root {raw_root!r}")
+raw_root_path = Path(raw_root)
+if not raw_root_path.is_absolute():
+    raise SystemExit(f"pydseams probe: stamp root must be an absolute path, found {raw_root!r}")
+stamp_root = raw_root_path.resolve()
+if raw_root != str(stamp_root):
+    raise SystemExit(
+        f"pydseams probe: stamp root must be a canonical realpath, found {raw_root!r} (resolves to {stamp_root})"
+    )
 if stamp_root != root:
     raise SystemExit(f"pydseams probe: expected root {root}, found {stamp_root}")
-if stamp_tree != expected_tree:
-    raise SystemExit(f"pydseams probe: expected tree {expected_tree}, found {stamp_tree}")
+
+stamp_tree = info.get("tree")
+if not isinstance(stamp_tree, str) or stamp_tree != expected_tree:
+    raise SystemExit(f"pydseams probe: expected tree {expected_tree}, found {stamp_tree!r}")
 PY
   then
     exit 0
@@ -54,18 +102,52 @@ for wrap in "$root"/subprojects/*.wrap; do
   fi
 done
 cp -R "$root/subprojects/packagefiles/." "$work/PydSEAMSlib/subprojects/packagefiles/"
-python -m pip install "$@" "$work/PydSEAMSlib"
-SEAMS_ROOT="$root" SEAMS_TREE="$tree" python - <<'PY'
+(unset PYTHONPATH; exec python -m pip install "$@" "$work/PydSEAMSlib")
+SEAMS_ROOT="$root" SEAMS_TREE="$tree" python -I - <<'PY'
 import json
 import os
+import sysconfig
 from pathlib import Path
 
+root = Path(os.environ["SEAMS_ROOT"]).resolve(strict=True)
+expected_tree = os.environ["SEAMS_TREE"]
+targets = tuple(
+    sorted(
+        {
+            Path(p).resolve()
+            for p in (sysconfig.get_path("purelib"), sysconfig.get_path("platlib"))
+            if p
+        }
+    )
+)
+if not targets:
+    raise SystemExit("pydseams stamp: could not determine Python site-packages target")
+
+
+def require_in_target(mod, name):
+    mod_file = getattr(mod, "__file__", None)
+    if not mod_file:
+        raise SystemExit(f"pydseams stamp: {name} has no __file__")
+    mod_path = Path(mod_file).resolve()
+    if not any(mod_path.is_relative_to(target) for target in targets):
+        raise SystemExit(
+            f"pydseams stamp: {name} at {mod_path} is outside install targets {targets}"
+        )
+    return mod_path
+
+
+import dseams
 import pydseams
 
-stamp = Path(pydseams.__file__).resolve().parent / ".seams-core-build.json"
+require_in_target(dseams, "dseams")
+pydseams_path = require_in_target(pydseams, "pydseams")
+stamp = pydseams_path.parent / ".seams-core-build.json"
+if not any(stamp.parent.resolve().is_relative_to(target) for target in targets):
+    raise SystemExit(f"pydseams stamp: {stamp} is outside install targets {targets}")
+if stamp.is_symlink():
+    stamp.unlink()
 stamp.write_text(
-    json.dumps({"root": os.environ["SEAMS_ROOT"], "tree": os.environ["SEAMS_TREE"]}, sort_keys=True)
-    + "\n",
+    json.dumps({"root": str(root), "tree": expected_tree}, sort_keys=True) + "\n",
     encoding="utf-8",
 )
 PY
