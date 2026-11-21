@@ -2320,10 +2320,11 @@ endif
 # alone once every earlier test has finished, in descending priority, so the
 # snapshot runs before every other test and the check after them all. Each
 # meson test process keeps its own snapshot in the state directory, because
-# several runs may share this build directory.
-_git = find_program('git', required: false)
-_untracked_py = find_program('python3', required: false)
-if _git.found() and _untracked_py.found()
+# several runs may share this build directory. meson test -C takes the top
+# build directory, which is not this project's when seams-core is a subproject.
+if get_option('with_tests')
+  _git = find_program('git', required: true)
+  _untracked_py = find_program('python3', required: true)
   _untracked_state = meson.project_build_root() / 'source-tree-untracked'
   foreach _mode : [['snapshot', 100000], ['check', -100000]]
     test('source_tree_untracked_' + _mode[0], _untracked_py,
@@ -2338,7 +2339,13 @@ if _git.found() and _untracked_py.found()
     timeout: 60)
   test('source_tree_untracked_parallel', _untracked_py,
     args: [meson.project_source_root() / 'tests' / 'source_tree_untracked_parallel.py',
-      find_program('meson').full_path(), meson.project_source_root(), meson.project_build_root()],
+      find_program('meson').full_path(), meson.project_source_root(), meson.global_build_root(),
+      meson.project_name()],
     is_parallel: false,
     timeout: 300)
+  test('with_tests_false_registers_none', _untracked_py,
+    args: [meson.project_source_root() / 'tests' / 'with_tests_false.py',
+      find_program('meson').full_path(), meson.project_source_root(),
+      meson.current_build_dir() / 'with-tests-false'],
+    timeout: 600)
 endif
