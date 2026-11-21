@@ -457,6 +457,7 @@ bindings/rust/seams-sys/vendor/
 *.rock
 lua_modules/
 
-# Hostile-reader fixtures include QM logs and CPMD output.
+# Hostile-reader fixtures include QM logs, CPMD output and LAMMPS dumps.
 !input/hostile/*.log
 !input/hostile/*.out
+!input/hostile/*.lammpstrj

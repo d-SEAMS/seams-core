@@ -9,9 +9,14 @@
 #   Delta and recursive-index sums that overflow their integer type, a
 #   string length below one and a zero divisor are decode errors. A binary
 #   shorter than its 12-byte header is an error from both constructors.
+# mmtf-cpp/include/mmtf/msgpack_decoders.hpp: a transform matrix must
+#   have its 16 values; a shorter one left the rest of the matrix unset.
+# mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp: converting
+#   an empty msgpack array into a C array no longer dereferences its null
+#   element pointer, as the vector and std::array adaptors already did.
 diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp
 --- mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 00:18:48.000000000 +0000
-+++ mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 00:54:55.000000000 +0000
++++ mmtf-cpp-b/mmtf-cpp/include/mmtf/binary_decoder.hpp	2026-11-21 02:17:56.000000000 +0000
 @@ -122,6 +122,10 @@
      template<typename Int>
      void decodeDivide_(const std::vector<Int>& input, float const divisor,
@@ -140,3 +145,60 @@ diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/binary_decoder.hpp mmtf-cpp-b/mmtf-cp
      output.clear();
      output.reserve(input.size());
      float inv_div = float(1) / divisor;
+diff -ruN mmtf-cpp-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp mmtf-cpp-b/mmtf-cpp/include/mmtf/msgpack_decoders.hpp
+--- mmtf-cpp-a/mmtf-cpp/include/mmtf/msgpack_decoders.hpp	2026-11-21 00:18:48.000000000 +0000
++++ mmtf-cpp-b/mmtf-cpp/include/mmtf/msgpack_decoders.hpp	2026-11-21 02:17:56.000000000 +0000
+@@ -20,6 +20,10 @@
+ 
+ #include <msgpack.hpp>
+ 
++#include <algorithm>
++#include <string>
++#include <vector>
++
+ // custom global function used here and in decoder.hpp
+ namespace mmtf {
+ namespace impl {
+@@ -156,7 +160,15 @@
+ 
+         mmtf::MapDecoder md(obj);
+         md.decode("chainIndexList", true, transform.chainIndexList);
+-        md.decode("matrix", true, transform.matrix);
++        // a shorter array would leave the rest of the 4x4 matrix unset
++        std::vector<float> matrix;
++        md.decode("matrix", true, matrix);
++        if (matrix.size() != 16) {
++            throw mmtf::DecodeError("MMTF transform matrix has "
++                                    + std::to_string(matrix.size())
++                                    + " values instead of 16");
++        }
++        std::copy(matrix.begin(), matrix.end(), transform.matrix);
+         md.checkExtraKeys();
+         return obj;
+     }
+diff -ruN mmtf-cpp-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp mmtf-cpp-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp
+--- mmtf-cpp-a/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2026-11-21 00:18:48.000000000 +0000
++++ mmtf-cpp-b/mmtf-cpp/msgpack-c/include/msgpack/v1/adaptor/carray.hpp	2026-11-21 02:17:56.000000000 +0000
+@@ -28,13 +28,15 @@
+     msgpack::object const& operator()(msgpack::object const& o, T* v) const {
+         if (o.type != msgpack::type::ARRAY) { throw msgpack::type_error(); }
+         if (o.via.array.size > N) { throw msgpack::type_error(); }
+-        msgpack::object* p = o.via.array.ptr;
+-        msgpack::object* const pend = o.via.array.ptr + o.via.array.size;
+-        do {
+-            p->convert(*v);
+-            ++p;
+-            ++v;
+-        } while(p < pend);
++        if (o.via.array.size > 0) {
++            msgpack::object* p = o.via.array.ptr;
++            msgpack::object* const pend = o.via.array.ptr + o.via.array.size;
++            do {
++                p->convert(*v);
++                ++p;
++                ++v;
++            } while(p < pend);
++        }
+         return o;
+     }
+ };

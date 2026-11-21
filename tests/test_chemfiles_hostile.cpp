@@ -2,7 +2,8 @@
 // Every file under input/hostile/ crashed, hung or overflowed a buffer in
 // the r2 chemfiles patches: the f1-f8 files are the gate reproducers, the
 // fuzz_* files are minimised fuzzer findings named after the r2 source
-// line that failed. Each one must now read or fail with a chemfiles error.
+// line or function that failed, or after what the file declares. Each one
+// must now read or fail with a chemfiles error.
 #include "fresh_temp.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -234,5 +235,70 @@ TEST_CASE("a line longer than the text buffer keeps the later step offsets",
   REQUIRE(out.error.empty());
   REQUIRE(out.steps == 4);
   REQUIRE(out.natoms == 2);
+  fs::remove_all(dir);
+}
+
+TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][hostile]") {
+  for (const auto &item : {
+           // gradient rows past the atoms counted wrote outside the gradient
+           Refused{"fuzz_gamess_gamessplugin_3793.gms", "GAMESS", "found no atoms"},
+           // a coordinate row past the atoms counted overflowed the atom array
+           Refused{"fuzz_gamess_strncpy.gms", "GAMESS", "could not open"},
+           // the byte swap shifted a byte into the sign bit of an int
+           Refused{"fuzz_js_endianswap_116.js", "js", "could not open"},
+           // a missing ITEM line where NUMBER OF ATOMS belongs was dereferenced
+           Refused{"fuzz_lammps_optional_556.lammpstrj", "LAMMPS",
+                   "expected an ITEM entry for 'NUMBER OF ATOMS'"},
+           // a CONECT record past the bonds counted wrote outside the bonds
+           Refused{"fuzz_bgf_bgfplugin_400.bgf", "MSI Biograf Format",
+                   "out of bounds atomic index"},
+           // the atom counts of a line added up past INT_MAX
+           Refused{"fuzz_xdatcar5_vasp5xdatcarplugin_80.VASP_XDATCAR5", "VASP_XDATCAR5",
+                   "could not open"},
+           // msgpack converted an empty transform matrix through a null pointer
+           Refused{"fuzz_mmtf_carray_34.mmtf", "MMTF",
+                   "MMTF transform matrix has 0 values instead of 16"},
+           // freeing string data used the counts of a later block
+           Refused{"fuzz_tng_tngio_8675.tng", "TNG", kTngErr},
+           // string data was filled past the strings allocated
+           Refused{"fuzz_tng_tngio_5231.tng", "TNG", kTngErr},
+           // 100663311 particles declared, positions stored for 15
+           Refused{"fuzz_tng_particles_unset.tng", "TNG", kTngErr},
+       }) {
+    requireRefused(item);
+  }
+
+  // A box shape block declaring 2^44 strings is rejected before anything
+  // is allocated, and the positions still read.
+  const auto tng = readAll("hostile/fuzz_tng_huge_strings.tng", "TNG");
+  REQUIRE(tng.error.empty());
+  REQUIRE(tng.steps == 10);
+  REQUIRE(tng.natoms == 15);
+
+  // The second open of the file in nsteps() parsed a NUL-holding line
+  // differently from the first and passed a null handle to the plugin.
+  const auto vtf = readAll("hostile/fuzz_vtf_vtfplugin_1326.vtf", "VTF trajectory format");
+  REQUIRE(vtf.error.empty());
+  REQUIRE(vtf.steps == 0);
+}
+
+TEST_CASE("a VTF line ending in a backslash continues on the next line",
+          "[chemfiles][molfile][hostile]") {
+  const auto dir = dseams_test::freshDir();
+  const auto path = (dir / "continued.vtf").string();
+  {
+    std::ofstream out(path, std::ios::binary);
+    out << "# water\natom 0 name O \\\n  type O\r\natom 1:2 name H type H\n"
+        << "bond 0:1\nbond 0:2\nunitcell 10 10 10\n\ntimestep\n0 0 0\n1 0 0\n0 1 0\n"
+        << "timestep\n0 0 1\n1 0 1\n0 1 1";
+  }
+  chemfiles::Trajectory trajectory(path, 'r', "VTF trajectory format");
+  REQUIRE(trajectory.nsteps() == 2);
+  trajectory.read();
+  const auto frame = trajectory.read();
+  REQUIRE(frame.size() == 3);
+  REQUIRE(frame[0].type() == "O");
+  REQUIRE(frame.topology().bonds().size() == 2);
+  REQUIRE_THAT(frame.positions()[1][2], Catch::Matchers::WithinAbs(1.0, 1e-6));
   fs::remove_all(dir);
 }

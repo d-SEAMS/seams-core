@@ -10,10 +10,13 @@
 #   indices and compressed-coordinate bit widths against it.
 #   CSSR checks atom and bond ids, GRO rejects a box GROMACS cannot hold
 #   instead of asserting, LAMMPS Data checks its atom count and sections,
-#   and S_ISREG is defined where the C library lacks it (MSVC).
+#   LAMMPS trajectories check the box bounds, the atom count and each
+#   atom id instead of asserting, TNG reads a frame's positions before it
+#   allocates the frame's atoms, and S_ISREG is defined where the C
+#   library lacks it (MSVC).
 diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
---- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 00:54:50.000000000 +0000
+--- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 02:17:51.000000000 +0000
++++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 02:17:56.000000000 +0000
 @@ -1,5 +1,10 @@
  @PACKAGE_INIT@
  
@@ -26,8 +29,8 @@ diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.c
  check_required_components("@PROJECT_NAME@")
  
 diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
---- host-a/include/chemfiles/File.hpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/include/chemfiles/File.hpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/include/chemfiles/File.hpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/include/chemfiles/File.hpp	2026-11-21 02:17:56.000000000 +0000
 @@ -216,6 +216,9 @@
      bool got_impl_eof_ = false;
      /// Did we actually reached the end of file while reading a line?
@@ -39,8 +42,8 @@ diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
  
  } // namespace chemfiles
 diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles/files/BinaryFile.hpp
---- host-a/include/chemfiles/files/BinaryFile.hpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/include/chemfiles/files/BinaryFile.hpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 02:17:56.000000000 +0000
 @@ -63,6 +63,11 @@
      /// Get the size of the file
      uint64_t file_size();
@@ -53,9 +56,21 @@ diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles
      /// Read exactly `count` char, and store them in the `data` array
      void read_char(char* data, size_t count);
      /// Read exactly as many char as fit in the pre-allocated vector
+diff -ruN host-a/include/chemfiles/formats/TNG.hpp host-b/include/chemfiles/formats/TNG.hpp
+--- host-a/include/chemfiles/formats/TNG.hpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/include/chemfiles/formats/TNG.hpp	2026-11-21 02:17:56.000000000 +0000
+@@ -26,7 +26,7 @@
+     void read(Frame& frame) override;
+     size_t nsteps() override;
+ private:
+-    void read_positions(Frame& frame);
++    void read_positions(Frame& frame, const float* buffer);
+     void read_velocities(Frame& frame);
+     void read_cell(Frame& frame);
+     void read_topology(Frame& frame);
 diff -ruN host-a/src/File.cpp host-b/src/File.cpp
---- host-a/src/File.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/File.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/File.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/File.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -100,7 +100,7 @@
      file_->seek(position);
      position_ = position;
@@ -112,8 +127,8 @@ diff -ruN host-a/src/File.cpp host-b/src/File.cpp
          fill_buffer(remainder);
      }
 diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
---- host-a/src/files/BinaryFile.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/files/BinaryFile.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/files/BinaryFile.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/files/BinaryFile.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -244,8 +244,11 @@
  }
  
@@ -160,8 +175,8 @@ diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
  /******************************************************************************/
  
 diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
---- host-a/src/files/Netcdf3File.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/files/Netcdf3File.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/files/Netcdf3File.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/files/Netcdf3File.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -160,7 +160,7 @@
      } else if (nc_type == constants::NC_DOUBLE) {
          return sizeof(double);
@@ -269,8 +284,8 @@ diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
  
      // now that we know all the variables, compute the size of a single record
 diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
---- host-a/src/files/XDRFile.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/files/XDRFile.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/files/XDRFile.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/files/XDRFile.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -28,8 +28,12 @@
  void XDRFile::read_opaque(std::vector<char>& data) {
      const uint32_t count = read_single_u32();
@@ -393,8 +408,8 @@ diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
              --smallidx;
              smallnum = smaller;
 diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
---- host-a/src/formats/CSSR.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/CSSR.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/CSSR.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/CSSR.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -5,6 +5,7 @@
  #include <array>
  #include <memory>
@@ -447,8 +462,8 @@ diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
  }
  
 diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
---- host-a/src/formats/DCD.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/DCD.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/DCD.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/DCD.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -190,7 +190,9 @@
  
  void DCDFormat::read_header() {
@@ -553,8 +568,8 @@ diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
          warning(
              "DCD reader",
 diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
---- host-a/src/formats/GRO.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/GRO.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/GRO.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/GRO.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -138,13 +138,17 @@
          auto v2_y = parse<double>(box_values[1]) * 10;
          auto v3_z = parse<double>(box_values[2]) * 10;
@@ -578,8 +593,8 @@ diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
          auto v3_y = parse<double>(box_values[8]) * 10;
  
 diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
---- host-a/src/formats/LAMMPSData.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/LAMMPSData.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -4,6 +4,7 @@
  #include <cstdint>
  #include <cassert>
@@ -616,14 +631,16 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
              break;
          }
      }
-@@ -366,6 +376,16 @@
+@@ -366,6 +376,18 @@
      }
      style_ = atom_style(atom_style_name_);
  
 +    // One atom is at least one byte. A count past the end of the file
-+    // is how "2000000000 atoms" allocates until the process dies.
++    // is how "2000000000 atoms" allocates until the process dies. The
++    // size of a compressed file says nothing about its contents.
 +    struct stat st;
-+    if (stat(file_.path().c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
++    if (file_.compression() == File::DEFAULT &&
++        stat(file_.path().c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
 +        natoms_ > static_cast<size_t>(st.st_size)) {
 +        throw format_error(
 +            "LAMMPS Data atom count {} does not fit in '{}'", natoms_, file_.path()
@@ -633,9 +650,51 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
      frame.resize(natoms_);
      auto positions = frame.positions();
      auto residues = std::unordered_map<size_t, Residue>();
+diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTrajectory.cpp
+--- host-a/src/formats/LAMMPSTrajectory.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 02:17:56.000000000 +0000
+@@ -64,7 +64,7 @@
+             throw format_error("expected an ITEM entry in LAMMPS format, got '{}'", line);
+         }
+         auto splitted = split(*item, ' ');
+-        if (splitted[0] == "BOX" && splitted[1] == "BOUNDS") {
++        if (splitted.size() >= 2 && splitted[0] == "BOX" && splitted[1] == "BOUNDS") {
+             auto matrix = Matrix3D::unit();
+             std::array<double, 3> origin;
+             auto shape = UnitCell::ORTHORHOMBIC;
+@@ -336,8 +336,15 @@
+ 
+     size_t natoms = 0;
+     item = get_item(file_.readline());
+-    if (item && *item == "NUMBER OF ATOMS") {
++    if (!item) {
++        throw format_error("can not read next step as LAMMPS format: expected "
++                           "an ITEM entry for 'NUMBER OF ATOMS'");
++    }
++    if (*item == "NUMBER OF ATOMS") {
+         int64_t lmp_natoms = parse<int64_t>(trim(file_.readline()));
++        if (lmp_natoms < 0) {
++            throw format_error("invalid number of atoms in LAMMPS format: {}", lmp_natoms);
++        }
+         natoms = static_cast<size_t>(lmp_natoms);
+     } else {
+         throw format_error("can not read next step as LAMMPS format: expected "
+@@ -397,7 +404,11 @@
+         if (atomid_column) {
+             // LAMMPS uses atom IDs that start with 1
+             atomid = parse<size_t>(splitted[*atomid_column]);
+-            assert(atomid > 0);
++            if (atomid == 0 || atomid > natoms) {
++                throw format_error(
++                    "invalid atom ID {} in LAMMPS format with {} atoms", atomid, natoms
++                );
++            }
+             --atomid; // the frame uses zero-based indices
+             assert(duplicate_check.size() == natoms);
+             if (duplicate_check[atomid]) {
 diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
---- host-a/src/formats/SMI.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/SMI.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/SMI.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/SMI.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -238,6 +238,9 @@
      auto line = file_.readline();
      auto smiles = trim(line);
@@ -646,9 +705,56 @@ diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
          line = file_.readline();
          smiles = trim(line);
      }
+diff -ruN host-a/src/formats/TNG.cpp host-b/src/formats/TNG.cpp
+--- host-a/src/formats/TNG.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/TNG.cpp	2026-11-21 02:17:56.000000000 +0000
+@@ -130,7 +130,17 @@
+     frame.set_step(static_cast<size_t>(tng_steps_[step_]));
+     natoms_ = 0;
+     CHECK(tng_num_particles_get(tng_, &natoms_));
+-    assert(natoms_ > 0);
++    if (natoms_ <= 0) {
++        throw format_error("invalid number of atoms in TNG file: {}", natoms_);
++    }
++
++    // TNG checks that the file holds positions for every atom, so read
++    // them before allocating natoms_ atoms
++    TngBuffer<float> positions;
++    int64_t unused = 0;
++    CHECK(tng_util_pos_read_range(
++        tng_, tng_steps_[step_], tng_steps_[step_], positions.ptr(), &unused
++    ));
+     frame.resize(static_cast<size_t>(natoms_));
+ 
+     double time = 0;
+@@ -142,7 +152,7 @@
+         frame.set("time", time * 1e12);
+     }
+ 
+-    read_positions(frame);
++    read_positions(frame, *positions.ptr());
+     read_velocities(frame);
+     read_cell(frame);
+     read_topology(frame);
+@@ -150,14 +160,7 @@
+     step_++;
+ }
+ 
+-void TNGFormat::read_positions(Frame& frame) {
+-    TngBuffer<float> buffer;
+-    int64_t unused = 0;
+-
+-    CHECK(tng_util_pos_read_range(
+-        tng_, tng_steps_[step_], tng_steps_[step_], buffer.ptr(), &unused
+-    ));
+-
++void TNGFormat::read_positions(Frame& frame, const float* buffer) {
+     auto positions = frame.positions();
+     for (size_t i=0; i<static_cast<size_t>(natoms_); i++) {
+         positions[i][0] = static_cast<double>(buffer[3 * i + 0]) * distance_scale_factor_;
 diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
---- host-a/src/formats/TPR.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/TPR.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/TPR.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/TPR.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -207,7 +207,11 @@
      FunctionType() = default;
      constexpr FunctionType(FT v) : value(v) {}
@@ -971,8 +1077,8 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          std::vector<char> buf;
          buf.resize(static_cast<size_t>(len));
 diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
---- host-a/src/formats/TRR.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/TRR.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/TRR.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/TRR.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -236,6 +236,21 @@
          }
          header.use_double = (nflsize == sizeof(double));
@@ -1009,8 +1115,8 @@ diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
          } catch (const Error&) {
              break;
 diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
---- host-a/src/formats/XTC.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ host-b/src/formats/XTC.cpp	2026-11-21 00:54:50.000000000 +0000
+--- host-a/src/formats/XTC.cpp	2026-11-21 02:17:51.000000000 +0000
++++ host-b/src/formats/XTC.cpp	2026-11-21 02:17:56.000000000 +0000
 @@ -102,6 +102,12 @@
  
  void XTCFormat::read(Frame& frame) {
