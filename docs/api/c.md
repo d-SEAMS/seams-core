@@ -6672,7 +6672,7 @@ Parameters: `sys`, `centres`, `n_centres`, `partners`, `n_partners`, `convention
 - `n_centres`: Centre count. Zero means every atom.
 - `partners`: Partner indices, or NULL when n_partners is zero.
 - `n_partners`: Partner count. Zero means every atom.
-- `convention`: One ::seams_tetrahedral_neighbours value.
+- `convention`: One ::seams_tetrahedral_neighbours value. Any other value returns SEAMS_ERR_ARG.
 - `cutoff`: Positive finite cutoff in WITHIN_CUTOFF mode; ignored in NEAREST_FOUR mode.
 - `q`: Caller buffer, one value per selected centre.
 - `q_len`: Length of q.

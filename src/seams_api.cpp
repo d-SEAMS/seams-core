@@ -2351,7 +2351,7 @@ seams_status seams_tetrahedral_order(
   }
   if (convention != SEAMS_TETRAHEDRAL_NEAREST_FOUR &&
       convention != SEAMS_TETRAHEDRAL_WITHIN_CUTOFF) {
-    return fail(SEAMS_ERR_RANGE, "unknown tetrahedral neighbour convention");
+    return fail(SEAMS_ERR_ARG, "unknown tetrahedral neighbour convention");
   }
   if (convention == SEAMS_TETRAHEDRAL_WITHIN_CUTOFF &&
       (!(cutoff > 0.0) || !std::isfinite(cutoff))) {

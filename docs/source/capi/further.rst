@@ -34,7 +34,7 @@ Errington-Debenedetti tetrahedral order for arbitrary selections.
     Partner count. Zero means every atom.
 
 ``convention``
-    One ::seams_tetrahedral_neighbours value.
+    One ::seams_tetrahedral_neighbours value. Any other value returns ::SEAMS_ERR_ARG.
 
 ``cutoff``
     Positive finite cutoff in WITHIN_CUTOFF mode; ignored in NEAREST_FOUR mode.

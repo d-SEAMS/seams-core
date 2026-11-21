@@ -1043,7 +1043,8 @@ SEAMS_API seams_status seams_q6bar(seams_system *sys, double cutoff, int type,
  * @param n_centres Centre count. Zero means every atom.
  * @param partners Partner indices, or NULL when n_partners is zero.
  * @param n_partners Partner count. Zero means every atom.
- * @param convention One ::seams_tetrahedral_neighbours value.
+ * @param convention One ::seams_tetrahedral_neighbours value. Any other
+ *        value returns ::SEAMS_ERR_ARG.
  * @param cutoff Positive finite cutoff in WITHIN_CUTOFF mode; ignored in
  *        NEAREST_FOUR mode.
  * @param q Caller buffer, one value per selected centre.
