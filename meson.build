@@ -1580,6 +1580,19 @@ if get_option('with_cli') and get_option('with_tests')
     ],
     timeout: 120)
   test(
+    'subproject_build_dirs',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'subproject_consumer.py',
+      'build-dirs',
+      find_program('meson').full_path(),
+      meson.project_source_root(),
+      meson.global_build_root(),
+      seams_exe.full_path(),
+      meson.current_build_dir() / 'subproject-build-dirs',
+    ],
+    timeout: 600)
+  test(
     'docs_migrate',
     python3,
     args: [
@@ -2344,8 +2357,8 @@ if get_option('with_tests')
     is_parallel: false,
     timeout: 300)
   test('with_tests_false_registers_none', _untracked_py,
-    args: [meson.project_source_root() / 'tests' / 'with_tests_false.py',
-      find_program('meson').full_path(), meson.project_source_root(),
-      meson.current_build_dir() / 'with-tests-false'],
+    args: [meson.project_source_root() / 'tests' / 'subproject_consumer.py', 'with-tests-false',
+      find_program('meson').full_path(), meson.project_source_root(), meson.global_build_root(),
+      '', meson.current_build_dir() / 'with-tests-false'],
     timeout: 600)
 endif
