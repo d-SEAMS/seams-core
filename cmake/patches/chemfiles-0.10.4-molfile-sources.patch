@@ -67,9 +67,14 @@
 #   vaspposcarplugin, dmsplugin, Gromacs.h (mdio_timestep), vtfplugin,
 #   mdfplugin and cpmdlogplugin (repeated ATOMS blocks) free allocations
 #   and handles on error and close paths.
+# VTF no longer refuses an atom id at a fixed 200000. The id has to
+# fit in the signed index this plugin stores, and the allocation has
+# to fit in size_t; a declared range of a million atoms is read.
+# binpos rejects an atom count whose 12 bytes per atom are not left
+# in the file, before it allocates the frame.
 diff -ruN molfiles-a/molfiles/CMakeLists.txt molfiles-b/molfiles/CMakeLists.txt
 --- molfiles-a/molfiles/CMakeLists.txt	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/CMakeLists.txt	2026-11-21 06:22:01.947844114 +0000
++++ molfiles-b/molfiles/CMakeLists.txt	2026-11-21 14:42:51.000000000 +0000
 @@ -24,3 +24,12 @@
  
  include_directories(include)
@@ -85,7 +90,7 @@ diff -ruN molfiles-a/molfiles/CMakeLists.txt molfiles-b/molfiles/CMakeLists.txt
 +endif()
 diff -ruN molfiles-a/molfiles/include/molfile_plugin.h molfiles-b/molfiles/include/molfile_plugin.h
 --- molfiles-a/molfiles/include/molfile_plugin.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/include/molfile_plugin.h	2026-11-21 06:22:01.947844114 +0000
++++ molfiles-b/molfiles/include/molfile_plugin.h	2026-11-21 14:42:51.000000000 +0000
 @@ -343,6 +343,11 @@
    int have_carthessian;         /**< hessian in cartesian coords available  */
    int have_inthessian;          /**< hessian in internal coords available  */
@@ -108,7 +113,7 @@ diff -ruN molfiles-a/molfiles/include/molfile_plugin.h molfiles-b/molfiles/inclu
  
 diff -ruN molfiles-a/molfiles/src/abinitplugin.c molfiles-b/molfiles/src/abinitplugin.c
 --- molfiles-a/molfiles/src/abinitplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/abinitplugin.c	2026-11-21 07:09:45.305078966 +0000
++++ molfiles-b/molfiles/src/abinitplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -60,6 +60,7 @@
  #endif
  #include <math.h>
@@ -373,7 +378,7 @@ diff -ruN molfiles-a/molfiles/src/abinitplugin.c molfiles-b/molfiles/src/abinitp
        for (j = 0; j < hdr->nspden; ++j) {
 diff -ruN molfiles-a/molfiles/src/bgfplugin.cxx molfiles-b/molfiles/src/bgfplugin.cxx
 --- molfiles-a/molfiles/src/bgfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/bgfplugin.cxx	2026-11-21 06:22:01.947844114 +0000
++++ molfiles-b/molfiles/src/bgfplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -54,6 +54,7 @@
      fgets(line, LINESIZE, fd);
      if ( ferror(fd) || feof(fd) ) {
@@ -476,8 +481,17 @@ diff -ruN molfiles-a/molfiles/src/bgfplugin.cxx molfiles-b/molfiles/src/bgfplugi
  
 diff -ruN molfiles-a/molfiles/src/binposplugin.c molfiles-b/molfiles/src/binposplugin.c
 --- molfiles-a/molfiles/src/binposplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/binposplugin.c	2026-11-21 06:22:01.947844114 +0000
-@@ -56,19 +56,29 @@
++++ molfiles-b/molfiles/src/binposplugin.c	2026-11-21 15:04:36.717779299 +0000
+@@ -21,6 +21,8 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <limits.h>
++#include <sys/stat.h>
++#include <unistd.h>
+ 
+ #include "molfile_plugin.h"
+ 
+@@ -56,19 +58,29 @@
     }
    binpos = (binposhandle *)malloc(sizeof(binposhandle));
    memset(binpos, 0, sizeof(binposhandle));
@@ -511,7 +525,7 @@ diff -ruN molfiles-a/molfiles/src/binposplugin.c molfiles-b/molfiles/src/binposp
     {
      fprintf(stderr, "File '%s' appears to be other-endian.\n", path);
      binpos->wrongendian = 1;
-@@ -80,13 +90,23 @@
+@@ -80,13 +92,39 @@
  	if((fseek(fd, point, SEEK_SET))!=0)
        {
  	  fprintf(stderr,"Endian correction failed. er=%d\n",er);
@@ -521,7 +535,8 @@ diff -ruN molfiles-a/molfiles/src/binposplugin.c molfiles-b/molfiles/src/binposp
       }
  	fseek(fd, point, SEEK_SET);
     }
-+  /* a frame is read as 3*numatoms floats, which must fit in an int */
++  /* a frame is read as 3*numatoms floats, which must fit in an int
++     and in the bytes still in this file */
 +  if (igarb <= 0 || igarb > INT_MAX/3)
 +   {
 +    fprintf(stderr, "binpos file '%s' has a bad atom count %d\n", path, igarb);
@@ -529,6 +544,21 @@ diff -ruN molfiles-a/molfiles/src/binposplugin.c molfiles-b/molfiles/src/binposp
 +    free(binpos);
 +    return NULL;
 +   }
++  {
++    struct stat binpos_st;
++    long binpos_at = ftell(fd);
++    if (binpos_at >= 0 && fstat(fileno(fd), &binpos_st) == 0 && S_ISREG(binpos_st.st_mode))
++     {
++      off_t binpos_rest = binpos_st.st_size - (off_t)binpos_at;
++      if (binpos_rest < (off_t)igarb * 12)
++       {
++        fprintf(stderr, "binpos file '%s' is shorter than its atom count\n", path);
++        fclose(fd);
++        free(binpos);
++        return NULL;
++       }
++     }
++  }
    binpos->fd = fd;
    binpos->numatoms = igarb;
 -  binpos->xyz = (float *)malloc(3 * binpos->numatoms * sizeof(float));
@@ -538,7 +568,7 @@ diff -ruN molfiles-a/molfiles/src/binposplugin.c molfiles-b/molfiles/src/binposp
      fprintf(stderr, "Unable to allocate space for %d atoms.\n", binpos->numatoms);
 diff -ruN molfiles-a/molfiles/src/carplugin.c molfiles-b/molfiles/src/carplugin.c
 --- molfiles-a/molfiles/src/carplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/carplugin.c	2026-11-21 06:59:08.011326866 +0000
++++ molfiles-b/molfiles/src/carplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -116,7 +116,7 @@
    /* Check that the resid won't overflow the resname string, then copy it
     * over
@@ -690,7 +720,7 @@ diff -ruN molfiles-a/molfiles/src/carplugin.c molfiles-b/molfiles/src/carplugin.
  
 diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlogplugin.c
 --- molfiles-a/molfiles/src/cpmdlogplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/cpmdlogplugin.c	2026-11-21 07:09:47.997068096 +0000
++++ molfiles-b/molfiles/src/cpmdlogplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -1,4 +1,4 @@
 -#if false
 +#if 1 /* molfile_qm_* now has the fields this plugin writes */
@@ -1205,7 +1235,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdlogplugin.c molfiles-b/molfiles/src/cpmdlo
  
 diff -ruN molfiles-a/molfiles/src/cpmdplugin.c molfiles-b/molfiles/src/cpmdplugin.c
 --- molfiles-a/molfiles/src/cpmdplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/cpmdplugin.c	2026-11-21 06:59:14.415309124 +0000
++++ molfiles-b/molfiles/src/cpmdplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -42,6 +42,10 @@
    if (!fd) return NULL;
    
@@ -1251,7 +1281,7 @@ diff -ruN molfiles-a/molfiles/src/cpmdplugin.c molfiles-b/molfiles/src/cpmdplugi
    }
 diff -ruN molfiles-a/molfiles/src/cubeplugin.cxx molfiles-b/molfiles/src/cubeplugin.cxx
 --- molfiles-a/molfiles/src/cubeplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/cubeplugin.cxx	2026-11-21 06:22:01.951844109 +0000
++++ molfiles-b/molfiles/src/cubeplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -26,6 +26,8 @@
  #include <stdlib.h>
  #include <math.h>
@@ -1379,7 +1409,7 @@ diff -ruN molfiles-a/molfiles/src/cubeplugin.cxx molfiles-b/molfiles/src/cubeplu
        return MOLFILE_ERROR;
 diff -ruN molfiles-a/molfiles/src/dlpolyplugin.c molfiles-b/molfiles/src/dlpolyplugin.c
 --- molfiles-a/molfiles/src/dlpolyplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/dlpolyplugin.c	2026-11-21 06:22:01.951844109 +0000
++++ molfiles-b/molfiles/src/dlpolyplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -27,6 +27,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -1590,7 +1620,7 @@ diff -ruN molfiles-a/molfiles/src/dlpolyplugin.c molfiles-b/molfiles/src/dlpolyp
        printf("dlpoly timestep) failed parsing atom coordinates\n");
 diff -ruN molfiles-a/molfiles/src/dmsplugin.cxx molfiles-b/molfiles/src/dmsplugin.cxx
 --- molfiles-a/molfiles/src/dmsplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/dmsplugin.cxx	2026-11-21 09:08:13.445678083 +0000
++++ molfiles-b/molfiles/src/dmsplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -232,6 +232,7 @@
      }
      if (count) *count = sqlite3_column_int64(stmt, 0);
@@ -1680,7 +1710,7 @@ diff -ruN molfiles-a/molfiles/src/dmsplugin.cxx molfiles-b/molfiles/src/dmsplugi
              h->glue_to[i] = iter->second;
 diff -ruN molfiles-a/molfiles/src/dtrplugin.cxx molfiles-b/molfiles/src/dtrplugin.cxx
 --- molfiles-a/molfiles/src/dtrplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/dtrplugin.cxx	2026-11-21 06:22:01.951844109 +0000
++++ molfiles-b/molfiles/src/dtrplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -433,15 +433,25 @@
      prologue->frames_per_file = ntohl( prologue->frames_per_file );
      prologue->key_record_size = ntohl( prologue->key_record_size );
@@ -2258,7 +2288,7 @@ diff -ruN molfiles-a/molfiles/src/dtrplugin.cxx molfiles-b/molfiles/src/dtrplugi
    for (unsigned i=0; i<natoms; i++) {
 diff -ruN molfiles-a/molfiles/src/endianswap.h molfiles-b/molfiles/src/endianswap.h
 --- molfiles-a/molfiles/src/endianswap.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/endianswap.h	2026-11-21 06:22:01.951844109 +0000
++++ molfiles-b/molfiles/src/endianswap.h	2026-11-21 14:42:51.000000000 +0000
 @@ -94,13 +94,14 @@
  /* Only works with aligned 2-byte quantities, will cause a bus error */
  /* on some platforms if used on unaligned data.                      */
@@ -2326,7 +2356,7 @@ diff -ruN molfiles-a/molfiles/src/endianswap.h molfiles-b/molfiles/src/endianswa
      N[1] = t0; 
 diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessplugin.c
 --- molfiles-a/molfiles/src/gamessplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/gamessplugin.c	2026-11-21 08:28:21.880358516 +0000
++++ molfiles-b/molfiles/src/gamessplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -320,7 +320,7 @@
  static int get_wavefunction(qmdata_t *, qm_timestep_t *, qm_wavefunction_t *);
  
@@ -3006,7 +3036,7 @@ diff -ruN molfiles-a/molfiles/src/gamessplugin.c molfiles-b/molfiles/src/gamessp
  
 diff -ruN molfiles-a/molfiles/src/gaussianplugin.c molfiles-b/molfiles/src/gaussianplugin.c
 --- molfiles-a/molfiles/src/gaussianplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/gaussianplugin.c	2026-11-21 06:22:55.011723610 +0000
++++ molfiles-b/molfiles/src/gaussianplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -1,4 +1,4 @@
 -#if false
 +#if 1 /* molfile_qm_* now has the fields this plugin writes */
@@ -3849,7 +3879,7 @@ diff -ruN molfiles-a/molfiles/src/gaussianplugin.c molfiles-b/molfiles/src/gauss
         * labels are: S, PX, PY, PZ, DXX, DXY, DXZ, DYY, DYZ, DZZ, ...*/
 diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
 --- molfiles-a/molfiles/src/Gromacs.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/Gromacs.h	2026-11-21 06:59:29.187267662 +0000
++++ molfiles-b/molfiles/src/Gromacs.h	2026-11-21 14:42:51.000000000 +0000
 @@ -39,6 +39,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -3986,7 +4016,7 @@ diff -ruN molfiles-a/molfiles/src/Gromacs.h molfiles-b/molfiles/src/Gromacs.h
  	return mdio_seterror(MDIO_SUCCESS);
 diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/gromacsplugin.cxx
 --- molfiles-a/molfiles/src/gromacsplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/gromacsplugin.cxx	2026-11-21 08:40:11.646811830 +0000
++++ molfiles-b/molfiles/src/gromacsplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -85,7 +85,7 @@
      &mdh.timeval, &mdh.natoms, 0) < 0) {
          fprintf(stderr, "gromacsplugin) Cannot read header fromm '%s', %s\n",
@@ -4074,7 +4104,7 @@ diff -ruN molfiles-a/molfiles/src/gromacsplugin.cxx molfiles-b/molfiles/src/grom
        ts->B = mdts.box->B;
 diff -ruN molfiles-a/molfiles/src/hash.c molfiles-b/molfiles/src/hash.c
 --- molfiles-a/molfiles/src/hash.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/hash.c	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/hash.c	2026-11-21 14:42:51.000000000 +0000
 @@ -40,13 +40,13 @@
   *  key: The key to create a hash number for
   */
@@ -4094,7 +4124,7 @@ diff -ruN molfiles-a/molfiles/src/hash.c molfiles-b/molfiles/src/hash.c
    }    
 diff -ruN molfiles-a/molfiles/src/jsplugin.c molfiles-b/molfiles/src/jsplugin.c
 --- molfiles-a/molfiles/src/jsplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/jsplugin.c	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/jsplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -78,6 +78,7 @@
  #include <sys/types.h>
  #include <stdio.h>
@@ -4897,7 +4927,7 @@ diff -ruN molfiles-a/molfiles/src/jsplugin.c molfiles-b/molfiles/src/jsplugin.c
      if (readlen != framelen) {
 diff -ruN molfiles-a/molfiles/src/maeffplugin.cxx molfiles-b/molfiles/src/maeffplugin.cxx
 --- molfiles-a/molfiles/src/maeffplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/maeffplugin.cxx	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/maeffplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -100,8 +100,8 @@
          CONTINUEOTHER  // 9
        } action_t;
@@ -5001,7 +5031,7 @@ diff -ruN molfiles-a/molfiles/src/maeffplugin.cxx molfiles-b/molfiles/src/maeffp
      *nbondtypes = 0;
 diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugin.cxx
 --- molfiles-a/molfiles/src/mdfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/mdfplugin.cxx	2026-11-21 07:09:50.201059191 +0000
++++ molfiles-b/molfiles/src/mdfplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -50,6 +50,9 @@
  
  #define LINESIZE 256
@@ -5259,7 +5289,7 @@ diff -ruN molfiles-a/molfiles/src/mdfplugin.cxx molfiles-b/molfiles/src/mdfplugi
    *bondorderptr = NULL; // not implemented yet
 diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenplugin.c
 --- molfiles-a/molfiles/src/moldenplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/moldenplugin.c	2026-11-21 06:59:39.635237890 +0000
++++ molfiles-b/molfiles/src/moldenplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -101,6 +101,8 @@
   * section in moldendata_t.
   *
@@ -5412,7 +5442,7 @@ diff -ruN molfiles-a/molfiles/src/moldenplugin.c molfiles-b/molfiles/src/moldenp
  
 diff -ruN molfiles-a/molfiles/src/parm7plugin.cxx molfiles-b/molfiles/src/parm7plugin.cxx
 --- molfiles-a/molfiles/src/parm7plugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/parm7plugin.cxx	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/parm7plugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -16,6 +16,7 @@
   ***************************************************************************/
  
@@ -5538,7 +5568,7 @@ diff -ruN molfiles-a/molfiles/src/parm7plugin.cxx molfiles-b/molfiles/src/parm7p
    for (int i=0; i<prm->Natom; i++) {
 diff -ruN molfiles-a/molfiles/src/parmplugin.cxx molfiles-b/molfiles/src/parmplugin.cxx
 --- molfiles-a/molfiles/src/parmplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/parmplugin.cxx	2026-11-21 06:22:01.955844104 +0000
++++ molfiles-b/molfiles/src/parmplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -38,8 +38,8 @@
    }
    
@@ -5581,7 +5611,7 @@ diff -ruN molfiles-a/molfiles/src/parmplugin.cxx molfiles-b/molfiles/src/parmplu
  /*
 diff -ruN molfiles-a/molfiles/src/pqrplugin.c molfiles-b/molfiles/src/pqrplugin.c
 --- molfiles-a/molfiles/src/pqrplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/pqrplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/pqrplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -61,8 +61,10 @@
    } 
    else {
@@ -5597,7 +5627,7 @@ diff -ruN molfiles-a/molfiles/src/pqrplugin.c molfiles-b/molfiles/src/pqrplugin.
        /* Note that by only comparing 5 chars for "ATOM " rather than 6,     */
 diff -ruN molfiles-a/molfiles/src/ReadPARM7.h molfiles-b/molfiles/src/ReadPARM7.h
 --- molfiles-a/molfiles/src/ReadPARM7.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/ReadPARM7.h	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/ReadPARM7.h	2026-11-21 14:42:51.000000000 +0000
 @@ -18,6 +18,14 @@
   *     Methods get_parm7_atom, get_parm7_bond, get_hydrogen_bond,
   *     get_parm7_natoms, get_parm7_nbonds, get_parm7_boxInfo were added in 
@@ -5864,7 +5894,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM7.h molfiles-b/molfiles/src/ReadPARM7.
  }
 diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
 --- molfiles-a/molfiles/src/ReadPARM.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/ReadPARM.h	2026-11-21 07:23:36.493259533 +0000
++++ molfiles-b/molfiles/src/ReadPARM.h	2026-11-21 14:42:51.000000000 +0000
 @@ -17,6 +17,14 @@
   *     get_parm_natoms, get_parm_nbonds, get_parm_boxInfo were added in 
   *     order to convert from prm.c parlance to VMD conventions.
@@ -6195,7 +6225,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  
 diff -ruN molfiles-a/molfiles/src/rst7plugin.c molfiles-b/molfiles/src/rst7plugin.c
 --- molfiles-a/molfiles/src/rst7plugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/rst7plugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/rst7plugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -36,11 +36,11 @@
  static void *open_rst_read(const char *filename, const char *filetype,int *natoms) {
    FILE *fd;
@@ -6374,7 +6404,7 @@ diff -ruN molfiles-a/molfiles/src/rst7plugin.c molfiles-b/molfiles/src/rst7plugi
      }
 diff -ruN molfiles-a/molfiles/src/tinkerplugin.c molfiles-b/molfiles/src/tinkerplugin.c
 --- molfiles-a/molfiles/src/tinkerplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/tinkerplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/tinkerplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -61,11 +61,43 @@
    i = fscanf(data->file, "%d", natoms);
    if (i < 1) {
@@ -6422,7 +6452,7 @@ diff -ruN molfiles-a/molfiles/src/tinkerplugin.c molfiles-b/molfiles/src/tinkerp
  }
 diff -ruN molfiles-a/molfiles/src/vasp5xdatcarplugin.c molfiles-b/molfiles/src/vasp5xdatcarplugin.c
 --- molfiles-a/molfiles/src/vasp5xdatcarplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vasp5xdatcarplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vasp5xdatcarplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -29,6 +29,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -6458,7 +6488,7 @@ diff -ruN molfiles-a/molfiles/src/vasp5xdatcarplugin.c molfiles-b/molfiles/src/v
      strcpy(cp, "POTCAR");
 diff -ruN molfiles-a/molfiles/src/vaspoutcarplugin.c molfiles-b/molfiles/src/vaspoutcarplugin.c
 --- molfiles-a/molfiles/src/vaspoutcarplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vaspoutcarplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vaspoutcarplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -112,15 +112,24 @@
  
    typecount = 0;
@@ -6502,7 +6532,7 @@ diff -ruN molfiles-a/molfiles/src/vaspoutcarplugin.c molfiles-b/molfiles/src/vas
      potcar = NULL;
 diff -ruN molfiles-a/molfiles/src/vaspplugin.h molfiles-b/molfiles/src/vaspplugin.h
 --- molfiles-a/molfiles/src/vaspplugin.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vaspplugin.h	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vaspplugin.h	2026-11-21 14:42:51.000000000 +0000
 @@ -61,6 +61,16 @@
  
  
@@ -6522,7 +6552,7 @@ diff -ruN molfiles-a/molfiles/src/vaspplugin.h molfiles-b/molfiles/src/vaspplugi
    if (!data) return;
 diff -ruN molfiles-a/molfiles/src/vaspposcarplugin.c molfiles-b/molfiles/src/vaspposcarplugin.c
 --- molfiles-a/molfiles/src/vaspposcarplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vaspposcarplugin.c	2026-11-21 06:59:15.919304937 +0000
++++ molfiles-b/molfiles/src/vaspposcarplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -29,6 +29,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -6616,7 +6646,7 @@ diff -ruN molfiles-a/molfiles/src/vaspposcarplugin.c molfiles-b/molfiles/src/vas
      strcpy(cp, "POTCAR");
 diff -ruN molfiles-a/molfiles/src/vaspxdatcarplugin.c molfiles-b/molfiles/src/vaspxdatcarplugin.c
 --- molfiles-a/molfiles/src/vaspxdatcarplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vaspxdatcarplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vaspxdatcarplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -29,6 +29,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -6797,7 +6827,7 @@ diff -ruN molfiles-a/molfiles/src/vaspxdatcarplugin.c molfiles-b/molfiles/src/va
    for (atomcount = i = 0; atomcount < data->numatoms; ++i) {
 diff -ruN molfiles-a/molfiles/src/vaspxmlplugin.c molfiles-b/molfiles/src/vaspxmlplugin.c
 --- molfiles-a/molfiles/src/vaspxmlplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vaspxmlplugin.c	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/vaspxmlplugin.c	2026-11-21 14:42:51.000000000 +0000
 @@ -71,10 +71,10 @@
  
      if (strstr(lineptr, "SYSTEM") != NULL && data->titleline == NULL) {
@@ -6813,7 +6843,7 @@ diff -ruN molfiles-a/molfiles/src/vaspxmlplugin.c molfiles-b/molfiles/src/vaspxm
         /* Extract number of atoms */
 diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.c
 --- molfiles-a/molfiles/src/vtfplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-21 09:32:21.526415483 +0000
++++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-21 15:04:31.009791013 +0000
 @@ -25,6 +25,7 @@
  #include <errno.h>
  #include <ctype.h>
@@ -6979,20 +7009,22 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
    }
  
    return s;
-@@ -263,15 +275,29 @@
+@@ -262,16 +274,30 @@
+ /***************************************************
   * Parse ATOM
   ***************************************************/
- /* Create new atoms so that after the call max_aid atoms are there */
+-/* Create new atoms so that after the call max_aid atoms are there */
 -static void vtf_create_atoms_as_needed(int max_aid, vtf_data *d) {
-+/* Past this, a hostile id would allocate until the process dies.
-+   A real VTF structure is far smaller. */
-+#define VTF_MAX_ATOMS 200000u
-+
++/* Create new atoms so that after the call max_aid atoms are there.
++   The id is the one the file declared. It has to fit in the signed index
++   the rest of this plugin stores, and the allocation has to fit in size_t.
++   There is no separate ceiling: a million-atom structure is one range. */
 +static int vtf_create_atoms_as_needed(unsigned int max_aid, vtf_data *d) {
    /* create new atoms as needed */
 -  if (d->natoms < max_aid+1) {
-+  if (max_aid >= VTF_MAX_ATOMS) {
-+    vtf_error("atom id is larger than this reader accepts", "");
++  if (max_aid >= (unsigned int)INT_MAX
++      || (size_t)max_aid + 1u > (size_t)-1 / sizeof(molfile_atom_t)) {
++    vtf_error("atom id does not fit", "");
 +    return -1;
 +  }
 +  if (d->natoms < (int)max_aid+1) {
@@ -7065,13 +7097,13 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
          /* RANGE */
          if (from > to) { 
-@@ -312,23 +362,62 @@
+@@ -312,23 +362,64 @@
            sfree(aid_list);
            return NULL;
          }
 -        vtf_create_atoms_as_needed(to, d);
-+        if (to >= VTF_MAX_ATOMS || (to - from) >= VTF_MAX_ATOMS) {
-+          vtf_error("atom id is larger than this reader accepts", s);
++        if (to >= (unsigned int)INT_MAX) {
++          vtf_error("atom id does not fit", s);
 +          sfree(aid_list);
 +          return NULL;
 +        }
@@ -7084,7 +7116,8 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
 -        size += to-from+1;
 -        aid_list = realloc(aid_list, size*sizeof(int));
 +        count = to - from + 1;
-+        if (size > VTF_MAX_ATOMS - count) {
++        if (count == 0 || size > (unsigned int)-1 - count
++            || (size_t)size + (size_t)count > (size_t)-1 / sizeof(int)) {
 +          vtf_error("atom id range does not fit", s);
 +          sfree(aid_list);
 +          return NULL;
@@ -7106,8 +7139,8 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        } else if (sscanf(s, " %u%n", &to, &n) == 1) {
          /* SINGLE AID */
 -        vtf_create_atoms_as_needed(to, d);
-+        if (to >= VTF_MAX_ATOMS) {
-+          vtf_error("atom id is larger than this reader accepts", s);
++        if (to >= (unsigned int)INT_MAX) {
++          vtf_error("atom id does not fit", s);
 +          sfree(aid_list);
 +          return NULL;
 +        }
@@ -7116,7 +7149,8 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
 +          return NULL;
 +        }
          /* add the aid to the aid_list */
-+        if (size >= VTF_MAX_ATOMS) {
++        if (size == (unsigned int)-1
++            || (size_t)size + 1u > (size_t)-1 / sizeof(int)) {
 +          vtf_error("atom id list does not fit", s);
 +          sfree(aid_list);
 +          return NULL;
@@ -7135,7 +7169,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  
        } else {
          /* ERROR */
-@@ -355,7 +444,13 @@
+@@ -355,7 +446,13 @@
    }
  
    /* Terminate the list with -1 */
@@ -7150,7 +7184,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
    aid_list[size] = -1;
    return aid_list;
  }
-@@ -384,10 +479,14 @@
+@@ -384,10 +481,14 @@
    /* HANDLE THE AID SPECIFIER */
  
    /* save the aid specifier */
@@ -7166,7 +7200,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
    s += n;
  
    aid_list = vtf_parse_aid_specifier(aid_specifier, d);
-@@ -406,7 +505,12 @@
+@@ -406,7 +507,12 @@
    
    /* handle the keywords */
    rest_is_userdata = 0;
@@ -7180,7 +7214,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
      s += n;
  #ifdef DEBUG
      printf("keyword: \"%s\" rest: \"%s\"\n", keyword, s);
-@@ -414,10 +518,16 @@
+@@ -414,10 +520,16 @@
      switch (tolower(keyword[0])) {
      case 'n': {
        /* name */
@@ -7198,7 +7232,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          return MOLFILE_ERROR;
        }
        s += n;
-@@ -425,10 +535,16 @@
+@@ -425,10 +537,16 @@
      }
      case 't': {
        /* type */
@@ -7216,7 +7250,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          return MOLFILE_ERROR;
        }
        s += n;
-@@ -459,7 +575,12 @@
+@@ -459,7 +577,12 @@
        } else if (strcmp(keyword, "res") == 0 || 
                   strcmp(keyword, "resname") == 0) {
          /* resname */
@@ -7230,7 +7264,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
            AIDLOOP(strcpy(cur_atom->resname, atom.resname));
          } else {
            vtf_error("could not get resname in atom record", line);
-@@ -478,7 +599,12 @@
+@@ -478,7 +601,12 @@
      }
      case 's': {
        /* segid */
@@ -7244,7 +7278,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          AIDLOOP(strcpy(cur_atom->segid, atom.segid));
        } else {
          vtf_error("could not get segid in atom record", line);
-@@ -662,17 +788,37 @@
+@@ -662,17 +790,40 @@
    s = line;
  
    while (1) {
@@ -7260,8 +7294,11 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          vtf_error("bad chain specifier (from > to):", s); 
          return MOLFILE_ERROR;
        }
-+      if ((to - from) >= VTF_MAX_ATOMS || d->nbonds > (int)(VTF_MAX_ATOMS - (to - from))) {
-+        vtf_error("bond id is larger than this reader accepts", s);
++      /* Stored endpoints are aid+1 and aid+2, so `to` has to fit in a signed int. */
++      if (to >= (unsigned int)INT_MAX || d->nbonds < 0
++          || (unsigned int)(to - from) > (unsigned int)INT_MAX - (unsigned int)d->nbonds
++          || (size_t)d->nbonds + (size_t)(to - from) > (size_t)-1 / sizeof(int)) {
++        vtf_error("bond id does not fit", s);
 +        return MOLFILE_ERROR;
 +      }
        bid = d->nbonds;
@@ -7286,14 +7323,15 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        for (aid = from; aid < to; aid++) {
          /*printf("creating bond from %d to %d\n", aid, aid+1);*/
          d->from[bid] = aid+1;
-@@ -681,12 +827,23 @@
+@@ -681,12 +832,24 @@
        }
      } else if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
        /* single bond specifier */
 +      int *from_grown;
 +      int *to_grown;
-+      if (from >= VTF_MAX_ATOMS || to >= VTF_MAX_ATOMS) {
-+        vtf_error("bond id is larger than this reader accepts", s);
++      if (from >= (unsigned int)INT_MAX - 1u || to >= (unsigned int)INT_MAX - 1u
++          || d->nbonds < 0 || d->nbonds == INT_MAX) {
++        vtf_error("bond id does not fit", s);
 +        return MOLFILE_ERROR;
 +      }
 +      from_grown = realloc(d->from, ((size_t)d->nbonds+1)*sizeof(int));
@@ -7315,7 +7353,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
      } else {
        vtf_error("bad bond specifier", s);
        return MOLFILE_ERROR;
-@@ -789,7 +946,7 @@
+@@ -789,7 +952,7 @@
        /* ATOM RECORD */
      case 'a': {
        /* Remove the "atom" keyword" */
@@ -7324,7 +7362,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
      }
      case '0':
-@@ -811,7 +968,7 @@
+@@ -811,7 +974,7 @@
        /* BOND RECORD */
      case 'b': {
        /* Remove the "bond" keyword" */
@@ -7333,7 +7371,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
        d->return_code = vtf_parse_bond(line, d);
        break;
-@@ -821,7 +978,7 @@
+@@ -821,7 +984,7 @@
      case 'u':
      case 'p': {
        /* Remove the "pbc"/"unitcell" keyword */
@@ -7342,7 +7380,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
        d->return_code = vtf_parse_pbc(line, d);
        break;
-@@ -831,7 +988,7 @@
+@@ -831,7 +994,7 @@
      case 'c': 
      case 't': {
        /* Remove the "timestep" or "coordinates" keyword */
@@ -7351,7 +7389,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
      }
      case 'i': 
-@@ -894,8 +1051,10 @@
+@@ -894,8 +1057,10 @@
  
    /* initialize the data structure */
    d = malloc(sizeof(vtf_data));
@@ -7362,7 +7400,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  
    d->return_code = MOLFILE_SUCCESS;
    d->read_mode = read_mode;
-@@ -1040,7 +1199,7 @@
+@@ -1040,7 +1205,7 @@
        case 'c': 
        case 't':
          /* Remove the "timestep" or "coordinates" keyword */
@@ -7371,7 +7409,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          line += n;
        case 'i': 
        case 'o': 
-@@ -1096,7 +1255,7 @@
+@@ -1096,7 +1261,7 @@
        case 'u':
        case 'p': {
          /* Remove the "pbc"/"unitcell" keyword */
@@ -7380,7 +7418,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          line += n;
          if (vtf_parse_pbc(line, d) != MOLFILE_SUCCESS) 
            return MOLFILE_ERROR;
-@@ -1106,7 +1265,7 @@
+@@ -1106,7 +1271,7 @@
          /* USER DATA RECORD */
        case 'd': {
          /* Remove the "data" keyword */
@@ -7389,7 +7427,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  #ifdef _USE_TCL
          if (d->read_mode == VTF_USERDATA) {
            line += n;
-@@ -1120,7 +1279,7 @@
+@@ -1120,7 +1285,7 @@
        case 'c': 
        case 't': {
          /* Remove the "timestep" or "coordinates" keyword */
@@ -7400,7 +7438,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        case 'i': 
 diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplugin.cxx
 --- molfiles-a/molfiles/src/xbgfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/xbgfplugin.cxx	2026-11-21 10:47:55.318519772 +0000
++++ molfiles-b/molfiles/src/xbgfplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -60,13 +60,20 @@
    bgf->meta->remarklen = 0;
    bgf->meta->remarks = NULL;
@@ -7524,7 +7562,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
            if (conline) {
 diff -ruN molfiles-a/molfiles/src/xsfplugin.cxx molfiles-b/molfiles/src/xsfplugin.cxx
 --- molfiles-a/molfiles/src/xsfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/xsfplugin.cxx	2026-11-21 06:22:01.959844100 +0000
++++ molfiles-b/molfiles/src/xsfplugin.cxx	2026-11-21 14:42:51.000000000 +0000
 @@ -22,6 +22,7 @@
  #include <stdlib.h>
  #include <math.h>

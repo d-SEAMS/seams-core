@@ -25,9 +25,14 @@
 #   constructor, MMTF catches msgpack unpack/type errors and atom_id checks
 #   atom indices and model offsets with FormatError instead of assert(),
 #   and S_ISREG is defined where the C library lacks it (MSVC).
+# An extended XYZ property repeat is kept when the first atom line has
+# that many columns, and is an error when it does not. Nothing is
+# dropped, and the names are not built before the line is seen.
+# Amber NetCDF reads a file that has neither coordinates nor
+# velocities when the atom count fits in the file.
 diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
---- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 06:14:16.829019226 +0000
-+++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 06:22:02.139843893 +0000
+--- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 14:42:39.928338999 +0000
++++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 15:05:54.773619458 +0000
 @@ -1,5 +1,10 @@
  @PACKAGE_INIT@
  
@@ -40,8 +45,8 @@ diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.c
  check_required_components("@PROJECT_NAME@")
  
 diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
---- host-a/include/chemfiles/File.hpp	2026-11-21 06:14:16.841019183 +0000
-+++ host-b/include/chemfiles/File.hpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/include/chemfiles/File.hpp	2026-11-21 14:42:39.936338920 +0000
++++ host-b/include/chemfiles/File.hpp	2026-11-21 15:05:54.773619458 +0000
 @@ -216,6 +216,9 @@
      bool got_impl_eof_ = false;
      /// Did we actually reached the end of file while reading a line?
@@ -53,8 +58,8 @@ diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
  
  } // namespace chemfiles
 diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles/files/BinaryFile.hpp
---- host-a/include/chemfiles/files/BinaryFile.hpp	2026-11-21 06:14:16.845019170 +0000
-+++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/include/chemfiles/files/BinaryFile.hpp	2026-11-21 14:42:39.936338920 +0000
++++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 15:05:54.773619458 +0000
 @@ -63,6 +63,11 @@
      /// Get the size of the file
      uint64_t file_size();
@@ -68,8 +73,8 @@ diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles
      void read_char(char* data, size_t count);
      /// Read exactly as many char as fit in the pre-allocated vector
 diff -ruN host-a/include/chemfiles/formats/TNG.hpp host-b/include/chemfiles/formats/TNG.hpp
---- host-a/include/chemfiles/formats/TNG.hpp	2026-11-21 06:14:16.845019170 +0000
-+++ host-b/include/chemfiles/formats/TNG.hpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/include/chemfiles/formats/TNG.hpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/include/chemfiles/formats/TNG.hpp	2026-11-21 15:05:54.777619450 +0000
 @@ -26,7 +26,7 @@
      void read(Frame& frame) override;
      size_t nsteps() override;
@@ -80,8 +85,8 @@ diff -ruN host-a/include/chemfiles/formats/TNG.hpp host-b/include/chemfiles/form
      void read_cell(Frame& frame);
      void read_topology(Frame& frame);
 diff -ruN host-a/src/File.cpp host-b/src/File.cpp
---- host-a/src/File.cpp	2026-11-21 06:14:16.845019170 +0000
-+++ host-b/src/File.cpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/src/File.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/File.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -100,7 +100,7 @@
      file_->seek(position);
      position_ = position;
@@ -138,8 +143,8 @@ diff -ruN host-a/src/File.cpp host-b/src/File.cpp
          fill_buffer(remainder);
      }
 diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
---- host-a/src/files/BinaryFile.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/files/BinaryFile.cpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/src/files/BinaryFile.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/BinaryFile.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -244,8 +244,11 @@
  }
  
@@ -186,8 +191,8 @@ diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
  /******************************************************************************/
  
 diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
---- host-a/src/files/Netcdf3File.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/files/Netcdf3File.cpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/src/files/Netcdf3File.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/Netcdf3File.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -160,7 +160,7 @@
      } else if (nc_type == constants::NC_DOUBLE) {
          return sizeof(double);
@@ -295,8 +300,8 @@ diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
  
      // now that we know all the variables, compute the size of a single record
 diff -ruN host-a/src/files/TNGFile.cpp host-b/src/files/TNGFile.cpp
---- host-a/src/files/TNGFile.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/files/TNGFile.cpp	2026-11-21 06:58:26.715437741 +0000
+--- host-a/src/files/TNGFile.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/TNGFile.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -13,12 +13,20 @@
  #define CHECK(x) check_tng_error((x), (STRING(x)))
  
@@ -329,8 +334,8 @@ diff -ruN host-a/src/files/TNGFile.cpp host-b/src/files/TNGFile.cpp
  
  TNGFile::~TNGFile() {
 diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
---- host-a/src/files/XDRFile.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/files/XDRFile.cpp	2026-11-21 07:41:51.664015194 +0000
+--- host-a/src/files/XDRFile.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/XDRFile.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -28,8 +28,12 @@
  void XDRFile::read_opaque(std::vector<char>& data) {
      const uint32_t count = read_single_u32();
@@ -491,19 +496,12 @@ diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
              --smallidx;
              smallnum = smaller;
 diff -ruN host-a/src/formats/AmberNetCDF.cpp host-b/src/formats/AmberNetCDF.cpp
---- host-a/src/formats/AmberNetCDF.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/AmberNetCDF.cpp	2026-11-21 07:30:43.535460511 +0000
-@@ -206,6 +206,20 @@
+--- host-a/src/formats/AmberNetCDF.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/AmberNetCDF.cpp	2026-11-21 15:05:54.785619434 +0000
+@@ -206,6 +206,13 @@
          frame.set("name", file_title_.value());
      }
  
-+    if (!variables_.coordinates.var && !variables_.velocities.var && n_atoms_ > 0) {
-+        throw format_error(
-+            "Amber NetCDF file '{}' declares {} atoms with neither coordinates nor velocities",
-+            file_.path(), n_atoms_
-+        );
-+    }
-+
 +    if (n_atoms_ > file_.file_size()) {
 +        throw format_error(
 +            "Amber NetCDF atom count {} does not fit in '{}'",
@@ -515,8 +513,8 @@ diff -ruN host-a/src/formats/AmberNetCDF.cpp host-b/src/formats/AmberNetCDF.cpp
  
      if (variables_.coordinates.var) {
 diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
---- host-a/src/formats/CSSR.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/CSSR.cpp	2026-11-21 06:58:11.083478047 +0000
+--- host-a/src/formats/CSSR.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/CSSR.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -5,6 +5,7 @@
  #include <array>
  #include <memory>
@@ -588,8 +586,8 @@ diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
  }
  
 diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
---- host-a/src/formats/DCD.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/DCD.cpp	2026-11-21 06:22:02.139843893 +0000
+--- host-a/src/formats/DCD.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/DCD.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -190,7 +190,9 @@
  
  void DCDFormat::read_header() {
@@ -694,8 +692,8 @@ diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
          warning(
              "DCD reader",
 diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
---- host-a/src/formats/GRO.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/GRO.cpp	2026-11-21 06:22:02.143843888 +0000
+--- host-a/src/formats/GRO.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/GRO.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -138,13 +138,17 @@
          auto v2_y = parse<double>(box_values[1]) * 10;
          auto v3_z = parse<double>(box_values[2]) * 10;
@@ -719,8 +717,8 @@ diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
          auto v3_y = parse<double>(box_values[8]) * 10;
  
 diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
---- host-a/src/formats/LAMMPSData.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 07:41:50.112015824 +0000
+--- host-a/src/formats/LAMMPSData.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -4,6 +4,7 @@
  #include <cstdint>
  #include <cassert>
@@ -823,8 +821,8 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
          auto vy = parse<double>(splitted[2]);
          auto vz = parse<double>(splitted[3]);
 diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTrajectory.cpp
---- host-a/src/formats/LAMMPSTrajectory.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 06:22:02.143843888 +0000
+--- host-a/src/formats/LAMMPSTrajectory.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -64,7 +64,7 @@
              throw format_error("expected an ITEM entry in LAMMPS format, got '{}'", line);
          }
@@ -865,8 +863,8 @@ diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTraje
              assert(duplicate_check.size() == natoms);
              if (duplicate_check[atomid]) {
 diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
---- host-a/src/formats/MMTF.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/MMTF.cpp	2026-11-21 06:58:24.343443917 +0000
+--- host-a/src/formats/MMTF.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/MMTF.cpp	2026-11-21 15:05:54.777619450 +0000
 @@ -104,6 +104,12 @@
          mmtf::decodeFromBuffer(structure_, data, size);
      } catch (const mmtf::DecodeError& e) { // rethrow as a chemfiles error
@@ -935,8 +933,8 @@ diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
      }
  }
 diff -ruN host-a/src/formats/MOL2.cpp host-b/src/formats/MOL2.cpp
---- host-a/src/formats/MOL2.cpp	2026-11-21 06:22:02.071843972 +0000
-+++ host-b/src/formats/MOL2.cpp	2026-11-21 07:30:43.387460106 +0000
+--- host-a/src/formats/MOL2.cpp	2026-11-21 15:05:54.701619606 +0000
++++ host-b/src/formats/MOL2.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -130,8 +130,13 @@
          bool is_sybyl;
  
@@ -954,8 +952,8 @@ diff -ruN host-a/src/formats/MOL2.cpp host-b/src/formats/MOL2.cpp
              is_sybyl = false;
              for (auto c: atom_name) {
 diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
---- host-a/src/formats/PDB.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/PDB.cpp	2026-11-21 07:41:46.504017265 +0000
+--- host-a/src/formats/PDB.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/PDB.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -306,7 +306,7 @@
          return;
      }
@@ -997,8 +995,8 @@ diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
          }
  
 diff -ruN host-a/src/formats/SDF.cpp host-b/src/formats/SDF.cpp
---- host-a/src/formats/SDF.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/SDF.cpp	2026-11-21 06:58:16.823463357 +0000
+--- host-a/src/formats/SDF.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/SDF.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -60,6 +60,11 @@
      file_.readline(); // Comment line - skip it
  
@@ -1032,8 +1030,8 @@ diff -ruN host-a/src/formats/SDF.cpp host-b/src/formats/SDF.cpp
          Bond::BondOrder bond_order;
          switch (order) {
 diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
---- host-a/src/formats/SMI.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/SMI.cpp	2026-11-21 06:22:02.143843888 +0000
+--- host-a/src/formats/SMI.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/SMI.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -137,10 +137,16 @@
  void SMIFormat::process_property_list(Topology& topology, string_view smiles) {
      size_t i = 0;
@@ -1062,8 +1060,8 @@ diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
          smiles = trim(line);
      }
 diff -ruN host-a/src/formats/TNG.cpp host-b/src/formats/TNG.cpp
---- host-a/src/formats/TNG.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/TNG.cpp	2026-11-21 06:24:19.743353658 +0000
+--- host-a/src/formats/TNG.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/TNG.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -92,14 +92,14 @@
      int64_t current_frame = -1;
      int64_t next_frame = 0;
@@ -1135,8 +1133,8 @@ diff -ruN host-a/src/formats/TNG.cpp host-b/src/formats/TNG.cpp
      for (size_t i=0; i<static_cast<size_t>(natoms_); i++) {
          positions[i][0] = static_cast<double>(buffer[3 * i + 0]) * distance_scale_factor_;
 diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
---- host-a/src/formats/TPR.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/TPR.cpp	2026-11-21 06:22:02.143843888 +0000
+--- host-a/src/formats/TPR.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/TPR.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -207,7 +207,11 @@
      FunctionType() = default;
      constexpr FunctionType(FT v) : value(v) {}
@@ -1479,8 +1477,8 @@ diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
          std::vector<char> buf;
          buf.resize(static_cast<size_t>(len));
 diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
---- host-a/src/formats/TRR.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/TRR.cpp	2026-11-21 06:22:02.143843888 +0000
+--- host-a/src/formats/TRR.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/TRR.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -236,6 +236,29 @@
          }
          header.use_double = (nflsize == sizeof(double));
@@ -1525,8 +1523,8 @@ diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
          } catch (const Error&) {
              break;
 diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
---- host-a/src/formats/XTC.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/XTC.cpp	2026-11-21 06:22:02.143843888 +0000
+--- host-a/src/formats/XTC.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/XTC.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -102,6 +102,12 @@
  
  void XTCFormat::read(Frame& frame) {
@@ -1575,9 +1573,110 @@ diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
                  break;
              }
 diff -ruN host-a/src/formats/XYZ.cpp host-b/src/formats/XYZ.cpp
---- host-a/src/formats/XYZ.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/XYZ.cpp	2026-11-21 11:59:22.554310255 +0000
-@@ -443,6 +443,11 @@
+--- host-a/src/formats/XYZ.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/XYZ.cpp	2026-11-21 15:08:09.573344578 +0000
+@@ -46,9 +46,18 @@
+ /// Type for a list of additional atomic properties in extended XYZ
+ using properties_list_t = std::vector<extended_property>;
+ 
++struct property_spec {
++    std::string name;
++    Property::Kind type;
++    size_t columns;
++    bool vector;
++};
++
+ /// Read the extended XYZ properties from the line, set frame properties
+-/// directly and return the list of atomic properties to read
+-static properties_list_t read_extended_comment_line(string_view line, Frame& frame);
++/// directly and return the atomic properties the atom lines must carry.
++/// Names are not expanded here: a repeat is only a column count until an
++/// atom line shows those columns exist.
++static std::vector<property_spec> read_extended_comment_line(string_view line, Frame& frame);
+ 
+ /// Read the properties in the list form the line and set them on the atom
+ static void read_atomic_properties(const properties_list_t& properties, string_view line, Atom& atom);
+@@ -79,14 +88,66 @@
+     return metadata;
+ }
+ 
++static size_t count_xyz_fields(string_view line) {
++    size_t n = 0;
++    bool in_field = false;
++    for (auto c: line) {
++        if (c == ' ' || c == '\t' || c == '\r') {
++            in_field = false;
++        } else if (!in_field) {
++            n++;
++            in_field = true;
++        }
++    }
++    return n;
++}
++
++static properties_list_t expand_property_specs(const std::vector<property_spec>& specs) {
++    properties_list_t properties;
++    for (const auto& spec: specs) {
++        if (spec.vector || spec.columns == 1) {
++            properties.emplace_back(extended_property{spec.name, spec.type});
++        } else {
++            for (size_t j = 0; j < spec.columns; j++) {
++                properties.emplace_back(extended_property{
++                    fmt::format("{}_{}", spec.name, j), spec.type
++                });
++            }
++        }
++    }
++    return properties;
++}
++
+ void XYZFormat::read_next(Frame& frame) {
+     size_t n_atoms = parse<size_t>(file_.readline());
+ 
+-    auto properties = read_extended_comment_line(file_.readline(), frame);
++    auto specs = read_extended_comment_line(file_.readline(), frame);
++    size_t extra = 0;
++    for (const auto& spec: specs) {
++        if (spec.columns > SIZE_MAX - extra) {
++            throw format_error("extended XYZ properties do not fit on an atom line");
++        }
++        extra += spec.columns;
++    }
+ 
+     frame.reserve(n_atoms);
++    properties_list_t properties;
++    bool checked = specs.empty();
+     for (size_t i=0; i<n_atoms; i++) {
+         auto line = file_.readline();
++        if (!checked) {
++            auto fields = count_xyz_fields(line);
++            // A repeat the line does not carry is malformed. Extra fields
++            // past the declared columns are ignored, as they were before.
++            if (fields < extra + 4) {
++                throw format_error(
++                    "extended XYZ property columns ({}) do not match the {} fields on the atom line",
++                    extra, fields
++                );
++            }
++            properties = expand_property_specs(specs);
++            checked = true;
++        }
+         double x = 0, y = 0, z = 0;
+         std::string name;
+         auto count = scan(line, name, x, y, z);
+@@ -94,6 +155,11 @@
+         read_atomic_properties(properties, line.substr(count), atom);
+         frame.add_atom(std::move(atom), Vector3D(x, y, z));
+     }
++    if (n_atoms == 0 && extra > 0) {
++        throw format_error(
++            "extended XYZ declares {} property columns and no atoms", extra
++        );
++    }
+ }
+ 
+ void XYZFormat::write_next(const Frame& frame) {
+@@ -443,6 +509,11 @@
          while (!done()) {
              skip_whitespace();
              auto name = next_substring();
@@ -1589,23 +1688,76 @@ diff -ruN host-a/src/formats/XYZ.cpp host-b/src/formats/XYZ.cpp
              if (!name.empty() && current() == '=') {
                  advance();
              } else {
-@@ -622,9 +627,11 @@
-             continue;
+@@ -571,7 +642,7 @@
+ /// - Properties of type S:1 are maped to string values
+ /// - Properties of type S:N are maped to N separate string properties,
+ ///   named `$name_$i`
+-static properties_list_t parse_property_list(string_view input) {
++static std::vector<property_spec> parse_property_list(string_view input) {
+     if (input.substr(0, 19) != "species:S:1:pos:R:3") {
+         warning("Extended XYZ", "ignoring non-standard Properties='{}', should start with 'species:S:1:pos:R:3'", input);
+         return {};
+@@ -583,12 +654,11 @@
+         return {};
+     }
+     list.remove_prefix(20);
+-    properties_list_t properties;
++    std::vector<property_spec> properties;
+ 
+     auto splitted = split(list, ':');
+     if (splitted.size() % 3 != 0) {
+-        warning("Extended XYZ", "ignoring invalid Properties='{}'", input);
+-        return {};
++        throw format_error("invalid extended XYZ Properties='{}'", input);
+     }
+ 
+     auto count = splitted.size() / 3;
+@@ -612,34 +682,25 @@
+         try {
+             repeat = parse<size_t>(splitted[3 * i + 2]);
+         } catch (const Error&) {
+-            warning("Extended XYZ", "invalid type repeat for {} in Properties='{}'", name, input);
+-            continue;
++            throw format_error("invalid type repeat for {} in Properties='{}'", name, input);
+         }
+ 
+-        if (repeat == 3 && type == Property::DOUBLE) {
+-            type = Property::VECTOR3D;
+-            properties.emplace_back(extended_property{name, type});
+-            continue;
++        if (repeat == 0) {
++            throw format_error("invalid type repeat for {} in Properties='{}'", name, input);
          }
  
 -        if (repeat == 0) {
-+        constexpr size_t MAX_EXTENDED_XYZ_PROPERTIES = 4096;
-+        if (repeat == 0 || repeat > MAX_EXTENDED_XYZ_PROPERTIES
-+            || properties.size() > MAX_EXTENDED_XYZ_PROPERTIES - repeat) {
-             warning("Extended XYZ", "invalid type repeat for {} in Properties='{}'", name, input);
--            continue;
-+            return {};
-         } else if (repeat == 1) {
-             properties.emplace_back(extended_property{name, type});
-         } else {
+-            warning("Extended XYZ", "invalid type repeat for {} in Properties='{}'", name, input);
++        if (repeat == 3 && type == Property::DOUBLE) {
++            properties.push_back(property_spec{name, Property::VECTOR3D, 3, true});
+             continue;
+-        } else if (repeat == 1) {
+-            properties.emplace_back(extended_property{name, type});
+-        } else {
+-            for (size_t j=0; j<repeat; j++) {
+-                properties.emplace_back(extended_property{
+-                    fmt::format("{}_{}", name, j), type
+-                });
+-            }
+         }
++
++        properties.push_back(property_spec{std::move(name), type, repeat, false});
+     }
+ 
+     return properties;
+ }
+ 
+-properties_list_t read_extended_comment_line(string_view line, Frame& frame) {
++std::vector<property_spec> read_extended_comment_line(string_view line, Frame& frame) {
+     // only try to parse as extended XYZ if `Properties` is defined as expected
+     if (line.find("species:S:1:pos:R:3") == std::string::npos) {
+         return {};
 diff -ruN host-a/src/parse.cpp host-b/src/parse.cpp
---- host-a/src/parse.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/parse.cpp	2026-11-21 07:41:48.204016589 +0000
+--- host-a/src/parse.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/parse.cpp	2026-11-21 15:05:54.781619442 +0000
 @@ -307,6 +307,10 @@
          throw error("the length of '{}' is greater than the width '{}', this is a bug in chemfiles", s, width);
      }

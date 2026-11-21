@@ -308,9 +308,9 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_mdf_bonds_leak.mdf", "InsightII MDF", "could not read bonds"},
            // repeated CPMD ATOMS block overwrote initatoms without freeing it
            Refused{"fuzz_cpmdlog_double_atoms.out", "CPMD 3.x output", "could not open"},
-           // Amber NetCDF file declaring 536M atoms with neither coordinates nor velocities
-           Refused{"fuzz_ncrst_huge_atoms.ncrst", "Amber Restart",
-                   "neither coordinates nor velocities"},
+           // Amber NetCDF file declaring 536M atoms. The count does not fit
+           // in the file, which is what stops the allocation.
+           Refused{"fuzz_ncrst_huge_atoms.ncrst", "Amber Restart", "does not fit"},
            // CONECT line with no atom id passed empty string_view to decode_hybrid36
            Refused{"fuzz_pdb_short_conect.pdb", "PDB", "could not read atomic number"},
            // GAMESS basis set hitting EOF before TOTAL NUMBER leaked basis_set shells
@@ -340,8 +340,15 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_frameset_cycle.tng", "TNG", kTngErr},
            // TNG next-frame-set header error leaked tng_gen_block and looped on bad offset
            Refused{"fuzz_tng_block_leak.tng", "TNG", kTngErr},
-           // VTF huge sparse atom id (9999992) allocated gigabytes before timing out
+           // VTF atom id 4294967295 does not fit in the signed index
            Refused{"fuzz_vtf_huge_aid.vtf", "VTF structure format", "could not open"},
+           // binpos atom count would allocate about 8 GB; the file is shorter
+           Refused{"fuzz_binpos_8gb_alloc.binpos", "Scripps Binpos", "could not open"},
+           // XTC2 packed stream writes past the output or indexes magic_bits
+           Refused{"fuzz_tng_xtc2_heap_write.tng", "TNG", kTngErr},
+           Refused{"fuzz_tng_xtc2_index_oob.tng", "TNG", kTngErr},
+           Refused{"fuzz_tng_xtc2_index_neg1123.tng", "TNG", kTngErr},
+           Refused{"fuzz_tng_xtc2_index_m1.tng", "TNG", kTngErr},
        }) {
     requireRefused(item);
   }
@@ -416,12 +423,11 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
                                    "Internal Paratool Format");
   REQUIRE_FALSE(missingXbgf.error.empty());
 
-  // An extended XYZ Properties repeat count of 32147483647 must not spin
-  // allocating billions of property entries.
+  // An extended XYZ Properties repeat the atom line does not carry is an
+  // error. The names are not allocated, and the properties already parsed
+  // are not dropped on a later, valid repeat.
   const auto xyzRepeat = readAll("hostile/fuzz_xyz_huge_repeat.xyz", "XYZ");
-  REQUIRE(xyzRepeat.error.empty());
-  REQUIRE(xyzRepeat.steps == 1);
-  REQUIRE(xyzRepeat.natoms == 1);
+  REQUIRE(xyzRepeat.error.find("do not match") != std::string::npos);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",
@@ -442,5 +448,69 @@ TEST_CASE("a VTF line ending in a backslash continues on the next line",
   REQUIRE(frame[0].type() == "O");
   REQUIRE(frame.topology().bonds().size() == 2);
   REQUIRE_THAT(frame.positions()[1][2], Catch::Matchers::WithinAbs(1.0, 1e-6));
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a VTF range past 200000 atoms is the structure it declares",
+          "[chemfiles][molfile][hostile]") {
+  const auto dir = dseams_test::freshDir();
+  const auto path = (dir / "wide.vtf").string();
+  constexpr int kAtoms = 201000;
+  {
+    std::ofstream out(path, std::ios::binary);
+    out << "atom 0:" << (kAtoms - 1) << " name O type O\n\ntimestep\n";
+    for (int i = 0; i < kAtoms; ++i) {
+      out << "1 2 3\n";
+    }
+  }
+  chemfiles::Trajectory trajectory(path, 'r', "VTF trajectory format");
+  REQUIRE(trajectory.nsteps() == 1);
+  const auto frame = trajectory.read();
+  REQUIRE(frame.size() == static_cast<std::size_t>(kAtoms));
+  REQUIRE(frame[0].name() == "O");
+  REQUIRE_THAT(frame.positions()[kAtoms - 1][0], Catch::Matchers::WithinAbs(1.0, 1e-6));
+  REQUIRE_THAT(frame.positions()[kAtoms - 1][2], Catch::Matchers::WithinAbs(3.0, 1e-6));
+  fs::remove_all(dir);
+}
+
+TEST_CASE("extended XYZ loads every column of a wide property",
+          "[chemfiles][hostile]") {
+  const auto dir = dseams_test::freshDir();
+  const auto soap = (dir / "soap.xyz").string();
+  const auto pair = (dir / "pair.xyz").string();
+  {
+    std::ofstream out(soap, std::ios::binary);
+    out << "4\nProperties=species:S:1:pos:R:3:soap:R:5000\n";
+    for (int atom = 0; atom < 4; ++atom) {
+      out << "O 0 0 0";
+      for (int i = 0; i < 5000; ++i) {
+        out << ' ' << (atom * 5000 + i);
+      }
+      out << '\n';
+    }
+  }
+  {
+    std::ofstream out(pair, std::ios::binary);
+    out << "1\nProperties=species:S:1:pos:R:3:a:R:3000:b:R:3000\nH 1 2 3";
+    for (int i = 0; i < 6000; ++i) {
+      out << ' ' << i;
+    }
+    out << '\n';
+  }
+  chemfiles::Trajectory soapTraj(soap, 'r', "XYZ");
+  const auto soapFrame = soapTraj.read();
+  REQUIRE(soapFrame.size() == 4);
+  const auto &soapProps = soapFrame[3].properties();
+  REQUIRE(soapProps.count("soap_0") == 1);
+  REQUIRE(soapProps.count("soap_4999") == 1);
+  REQUIRE(soapProps.count("soap_5000") == 0);
+  REQUIRE(soapProps.at("soap_4999").as_double() == 3 * 5000 + 4999);
+  chemfiles::Trajectory pairTraj(pair, 'r', "XYZ");
+  const auto pairFrame = pairTraj.read();
+  REQUIRE(pairFrame[0].properties().count("a_0") == 1);
+  REQUIRE(pairFrame[0].properties().count("a_2999") == 1);
+  REQUIRE(pairFrame[0].properties().count("b_0") == 1);
+  REQUIRE(pairFrame[0].properties().count("b_2999") == 1);
+  REQUIRE(pairFrame[0].properties().at("b_2999").as_double() == 5999);
   fs::remove_all(dir);
 }

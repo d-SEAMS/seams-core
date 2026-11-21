@@ -72,8 +72,11 @@ mmtf-cpp (headers)
     matrix, and the chainsPerModel/groupsPerChain totals in structure_data.hpp.
   mmtf-cpp/msgpack-c: BSL-1.0, with its copies of Boost.Preprocessor and
     Boost.Predef, also BSL-1.0 (text at the end of this file). The same
-    patch changes msgpack/v1/adaptor/carray.hpp, which converted an empty
-    array through a null pointer; the file keeps its BSL-1.0 notice.
+    patch changes three msgpack headers, and each keeps its BSL-1.0 notice:
+    msgpack/v1/adaptor/carray.hpp, which converted an empty array through a
+    null pointer; msgpack/v2/create_object_visitor.hpp, which skips memcpy
+    when the size is zero; and the unpack limits applied from
+    mmtf-cpp/include/mmtf/map_decoder.hpp.
 molfiles (VMD molfile plugins)
   License: University of Illinois Open Source License (NCSA), for every
     compiled file not listed below
