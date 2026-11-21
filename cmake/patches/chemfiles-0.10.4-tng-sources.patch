@@ -726,7 +726,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
                                                    unsigned long* prec_hi,
 diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
 --- tng-a/tng/src/lib/tng_io.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/lib/tng_io.c	2026-11-21 07:51:34.215504279 +0000
++++ tng-b/tng/src/lib/tng_io.c	2026-11-21 07:59:41.836510445 +0000
 @@ -33,6 +33,7 @@
  #endif
  
@@ -1264,7 +1264,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  /**
   * @brief Write a molecules block.
   * @param tng_data is a trajectory data container.
-@@ -3418,6 +3481,15 @@
+@@ -3418,13 +3481,22 @@
          return (TNG_CRITICAL);
      }
  
@@ -1280,6 +1280,14 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      if (tng_data->var_num_atoms_flag)
      {
          prev_n_particles       = frame_set->n_particles;
+         frame_set->n_particles = 0;
+         /* If the list of molecule counts has already been created assume that
+          * it is of correct size. */
+-        if (!frame_set->molecule_cnt_list)
++        if (tng_data->n_molecules > 0 && !frame_set->molecule_cnt_list)
+         {
+             frame_set->molecule_cnt_list = (int64_t*)malloc(sizeof(int64_t) * tng_data->n_molecules);
+ 
 @@ -3443,6 +3515,15 @@
                  return (TNG_CRITICAL);
              }
@@ -2236,7 +2244,18 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      *n = first_frame + n_frames;
  
      return (TNG_SUCCESS);
-@@ -11856,6 +12104,12 @@
+@@ -10084,6 +10332,10 @@
+ 
+     *n = tng_data->n_trajectory_frame_sets = cnt;
+ 
++    if (frame_set->molecule_cnt_list != orig_frame_set.molecule_cnt_list)
++    {
++        free(frame_set->molecule_cnt_list);
++    }
+     *frame_set = orig_frame_set;
+     /* The mapping block in the original frame set has been freed when reading
+      * other frame sets. */
+@@ -11856,6 +12108,12 @@
          data->values = 0;
          /* FIXME: Memory leak from strings. */
          data->strings              = 0;
@@ -2249,7 +2268,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          data->last_retrieved_frame = -1;
      }
  
-@@ -13421,6 +13675,16 @@
+@@ -13421,6 +13679,16 @@
          default: size = sizeof(double);
      }
  
@@ -2266,7 +2285,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      *n_frames           = tng_max_i64(1, data->n_frames);
      *n_values_per_frame = data->n_values_per_frame;
      *stride_length      = data->stride_length;
-@@ -13451,7 +13715,7 @@
+@@ -13451,7 +13719,7 @@
      else
      {
          i_step = (*n_particles) * (*n_values_per_frame);
@@ -2275,7 +2294,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          {
              for (j = 0; j < *n_particles; j++)
              {
-@@ -14361,6 +14625,10 @@
+@@ -14361,6 +14629,10 @@
      if (mode == 'w')
      {
          stat = tng_output_file_set(*tng_data_p, filename);
@@ -2286,7 +2305,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          return (stat);
      }
      tng_input_file_set(*tng_data_p, filename);
-@@ -14372,6 +14640,7 @@
+@@ -14372,6 +14644,7 @@
  
      if (stat != TNG_SUCCESS)
      {

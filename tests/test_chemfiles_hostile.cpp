@@ -325,6 +325,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
                    "invalid atom index 2147483647"},
            // TNG compressed block claiming petabyte uncompressed_len before header check
            Refused{"fuzz_tng_uncompress_size.tng", "TNG", kTngErr},
+           // TNG variable-atom frame set leaked molecule_cnt_list in tng_num_frame_sets_get
+           Refused{"fuzz_tng_molcnt_leak.tng", "TNG", kTngErr},
        }) {
     requireRefused(item);
   }
