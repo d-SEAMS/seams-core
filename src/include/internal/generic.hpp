@@ -378,16 +378,16 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 // rdf2d paths) and the fractional wrap are both refined by
 // mic::euclideanIfShorter. It reduces the cell with Lagrange and Selling,
 // re-evaluates the reduced vectors from their integer coordinates with an
-// error-free dot product,
-// and descends from the Babai point over the shortest member of each coset
-// of L / 2L, which contains every Voronoi-relevant vector. That descent stops
-// in the Voronoi cell, so the result is the minimum image on every legal
-// cell. A step that cannot lower the binary64 norm ends the descent instead
-// of throwing. Non-finite values, singular bases, and coefficients at or
-// above 2^52 throw without poisoning the per-thread basis cache. The
-// returned length is within about ten binary64 ulps of the wrapped
-// displacement's length, so the relative error grows only when that wrap is
-// much longer than the image (at cell aspect ratios of about 1e3 and above).
+// error-free dot product, and descends from the fractional wrap or the Babai
+// point over the shortest member of each coset of L / 2L, which contains
+// every Voronoi-relevant vector. That descent stops in the Voronoi cell, so
+// the result is the minimum image on every legal cell. Results that
+// cancelled heavily are re-evaluated from their integer coefficients and
+// refined in extended precision. Non-finite values, singular bases, and
+// coefficients at or above 2^52 throw without poisoning the per-thread basis
+// cache. On the cells tested in tests/test_pore.cpp, up to edge aspect 1e8,
+// the returned length is within 4 ulps of the wrapped length (4 * 2^-52 *
+// |wrap|) and 1e-14 relative of the exact minimum.
 //
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
