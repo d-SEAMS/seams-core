@@ -28,11 +28,13 @@
 # through null). Fixed-width plugin fields are read up to their size, a
 # bond list that is null or names atom 0 is an error, nsteps() is an
 # error when the plugin cannot re-open the file or then reports another
-# atom count (vtfplugin read through a null handle), and S_ISREG is
-# defined where the C library lacks it (MSVC).
+# atom count (vtfplugin read through a null handle), S_ISREG is defined
+# where the C library lacks it (MSVC), and the Molfile constructor uses an
+# RAII guard so the plugin handle is closed and finalized if any step
+# (including read_topology) throws.
 diff -ruN cf-diff-a/CMakeLists.txt cf-diff-b/CMakeLists.txt
---- cf-diff-a/CMakeLists.txt	2026-11-21 00:54:50.000000000 +0000
-+++ cf-diff-b/CMakeLists.txt	2026-11-21 02:17:51.000000000 +0000
+--- cf-diff-a/CMakeLists.txt	2026-11-21 06:14:16.829019226 +0000
++++ cf-diff-b/CMakeLists.txt	2026-11-21 06:22:02.095843944 +0000
 @@ -80,6 +80,20 @@
  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CHEMFILES_SANITIZERS}")
  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CHEMFILES_SANITIZERS}")
@@ -63,8 +65,8 @@ diff -ruN cf-diff-a/CMakeLists.txt cf-diff-b/CMakeLists.txt
  
  if(WIN32)
 diff -ruN cf-diff-a/external/CMakeLists.txt cf-diff-b/external/CMakeLists.txt
---- cf-diff-a/external/CMakeLists.txt	2026-11-21 00:54:50.000000000 +0000
-+++ cf-diff-b/external/CMakeLists.txt	2026-11-21 02:17:51.000000000 +0000
+--- cf-diff-a/external/CMakeLists.txt	2026-11-21 06:14:16.833019212 +0000
++++ cf-diff-b/external/CMakeLists.txt	2026-11-21 06:22:02.095843944 +0000
 @@ -175,9 +175,43 @@
  # VMD molfile: https://github.com/chemfiles/molfiles
  # ==========
@@ -127,8 +129,8 @@ diff -ruN cf-diff-a/external/CMakeLists.txt cf-diff-b/external/CMakeLists.txt
  # The code is not yet written ...
  #       mmcif
 diff -ruN cf-diff-a/include/chemfiles/formats/Molfile.hpp cf-diff-b/include/chemfiles/formats/Molfile.hpp
---- cf-diff-a/include/chemfiles/formats/Molfile.hpp	2026-11-21 00:54:50.000000000 +0000
-+++ cf-diff-b/include/chemfiles/formats/Molfile.hpp	2026-11-21 02:17:51.000000000 +0000
+--- cf-diff-a/include/chemfiles/formats/Molfile.hpp	2026-11-21 06:14:16.845019170 +0000
++++ cf-diff-b/include/chemfiles/formats/Molfile.hpp	2026-11-21 06:22:02.099843939 +0000
 @@ -29,6 +29,40 @@
      TRJ,                ///< Gromacs .trj file format
      PSF,                ///< PSF topology files
@@ -212,8 +214,8 @@ diff -ruN cf-diff-a/include/chemfiles/formats/Molfile.hpp cf-diff-b/include/chem
  } // namespace chemfiles
  
 diff -ruN cf-diff-a/src/FormatFactory.cpp cf-diff-b/src/FormatFactory.cpp
---- cf-diff-a/src/FormatFactory.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ cf-diff-b/src/FormatFactory.cpp	2026-11-21 02:17:51.000000000 +0000
+--- cf-diff-a/src/FormatFactory.cpp	2026-11-21 06:14:16.845019170 +0000
++++ cf-diff-b/src/FormatFactory.cpp	2026-11-21 06:22:02.099843939 +0000
 @@ -53,6 +53,40 @@
      extern template class Molfile<TRJ>;
      extern template class Molfile<PSF>;
@@ -297,8 +299,8 @@ diff -ruN cf-diff-a/src/FormatFactory.cpp cf-diff-b/src/FormatFactory.cpp
  
  FormatFactory& FormatFactory::get() {
 diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
---- cf-diff-a/src/formats/Molfile.cpp	2026-11-21 00:54:50.000000000 +0000
-+++ cf-diff-b/src/formats/Molfile.cpp	2026-11-21 02:17:51.000000000 +0000
+--- cf-diff-a/src/formats/Molfile.cpp	2026-11-21 06:14:16.849019156 +0000
++++ cf-diff-b/src/formats/Molfile.cpp	2026-11-21 06:29:41.978280502 +0000
 @@ -8,7 +8,10 @@
  }
  
@@ -378,7 +380,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  template <MolfileFormat F> static int register_plugin(void* user_data, vmdplugin_t* vmd_plugin) {
      auto user_plugin = static_cast<molfile_plugin_t**>(user_data);
      assert(std::string(MOLFILE_PLUGIN_TYPE) == std::string(vmd_plugin->type));
-@@ -131,6 +181,41 @@
+@@ -131,12 +181,62 @@
          );
      }
  
@@ -420,16 +422,34 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
      if (plugin_data_.init()) {
          throw format_error(
              "could not initialize the {} plugin", plugin_data_.format()
-@@ -170,6 +255,34 @@
+         );
+     }
+ 
++    struct PluginGuard {
++        Molfile<F>& self;
++        bool active;
++        explicit PluginGuard(Molfile<F>& s): self(s), active(true) {}
++        ~PluginGuard() {
++            if (active) {
++                if (self.data_ && self.plugin_handle_ && self.plugin_handle_->close_file_read) {
++                    self.plugin_handle_->close_file_read(self.data_);
++                    self.data_ = nullptr;
++                }
++                self.plugin_data_.fini();
++            }
++        }
++    } guard(*this);
++
+     if (plugin_data_.registration(&plugin_handle_, register_plugin<F>)) {
+         throw format_error(
+             "could not register the {} plugin", plugin_data_.format()
+@@ -170,7 +270,30 @@
          );
      }
  
 +    // A plugin that finds no atoms reports 0 or -1 (unknown). Sizing the
 +    // frame from either throws from std::vector or reads garbage.
 +    if (natoms_ <= 0) {
-+        plugin_handle_->close_file_read(data_);
-+        data_ = nullptr;
-+        plugin_data_.fini();
 +        throw format_error(
 +            "the {} plugin found no atoms in '{}'", plugin_data_.format(), path_
 +        );
@@ -442,9 +462,6 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
 +        struct stat st;
 +        if (stat(path_.c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
 +            static_cast<uint64_t>(natoms_) > static_cast<uint64_t>(st.st_size)) {
-+            plugin_handle_->close_file_read(data_);
-+            data_ = nullptr;
-+            plugin_data_.fini();
 +            throw format_error(
 +                "the {} plugin's atom count ({}) does not fit in '{}'",
 +                plugin_data_.format(), natoms_, path_
@@ -453,9 +470,11 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
 +    }
 +
      read_topology();
++    guard.active = false;
  }
  
-@@ -186,6 +299,22 @@
+ template <MolfileFormat F> Molfile<F>::~Molfile() {
+@@ -186,6 +309,22 @@
          return plugin_handle_->read_next_timestep(data_, natoms_, timestep);
      } else if (plugin_handle_->read_timestep != nullptr) {
          // This function is provided by quantum molecular simulation format.
@@ -478,7 +497,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          return plugin_handle_->read_timestep(
              data_, natoms_, timestep, nullptr, nullptr
          );
-@@ -245,8 +374,15 @@
+@@ -245,8 +384,15 @@
      }
      size_t n = 0;
      int status = MOLFILE_SUCCESS;
@@ -495,7 +514,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          if (status == MOLFILE_SUCCESS) {
              n++;
          } else {
-@@ -255,8 +391,20 @@
+@@ -255,8 +401,20 @@
      }
      // We need to close and re-open the file
      plugin_handle_->close_file_read(data_);
@@ -518,7 +537,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
      read_topology();
  
      return n;
-@@ -315,7 +463,15 @@
+@@ -315,7 +473,15 @@
      auto residues = std::unordered_map<residue_info_t, Residue>();
      size_t atom_id = 0;
      for (auto& molfile_atom : atoms) {
@@ -535,7 +554,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          if ((optflags & MOLFILE_MASS) != 0) {
              atom.set_mass(static_cast<double>(molfile_atom.mass));
          }
-@@ -325,17 +481,17 @@
+@@ -325,17 +491,17 @@
  
          topology_->add_atom(std::move(atom));
  
@@ -561,7 +580,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
              };
              auto inserted = residues.insert({std::move(info), std::move(residue)});
              inserted.first->second.add_atom(atom_id);
-@@ -369,9 +525,21 @@
+@@ -369,9 +535,21 @@
          );
      }
  
@@ -584,7 +603,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
                              static_cast<size_t>(to[i]) - 1);
      }
  }
-@@ -380,6 +548,40 @@
+@@ -380,6 +558,40 @@
  template class chemfiles::Molfile<TRJ>;
  template class chemfiles::Molfile<PSF>;
  template class chemfiles::Molfile<MOLDEN>;
@@ -625,7 +644,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  
  template<> const FormatMetadata& chemfiles::format_metadata<Molfile<TRJ>>() {
      static FormatMetadata metadata;
-@@ -432,6 +634,686 @@
+@@ -432,6 +644,686 @@
  
      metadata.read = true;
      metadata.write = false;
