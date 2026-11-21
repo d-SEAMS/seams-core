@@ -1175,15 +1175,20 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
 #else
   (void)selection;
   const auto ext = extensionOf(filename);
+  std::string lowerExt = ext;
+  for (char &ch : lowerExt) {
+    ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  }
   // These formats are read only through chemfiles. Without it they are a
   // refused read, as a chemfiles build reports them, not a LAMMPS dump
   // with no frames.
   static const char *const chemfilesOnly[] = {
       "mol2", "mmcif", "cif", "pdb", "gro", "dcd", "xtc", "trr", "tng", "nc",
-      "sdf", "cml", "cssr", "arc", "mmtf", "lammpsdata"};
+      "netcdf", "sdf", "cml", "cssr", "arc", "mmtf", "lammpsdata"};
   for (const char *only : chemfilesOnly) {
-    if (ext == only) {
-      throw std::runtime_error("reading ." + ext + " needs chemfiles, which this build lacks");
+    if (lowerExt == only) {
+      throw std::runtime_error("chemfiles is not in this build; " + lowerExt +
+                               " input needs it");
     }
   }
   if (ext == "xyz") {
