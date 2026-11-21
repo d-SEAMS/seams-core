@@ -414,19 +414,23 @@ inline bool cosetMinima(const Vec3 basis[3], const double basisCoef[3][3], long 
     };
     const auto z2Limit = [&]() -> long double {
       const long double rem = remNorm2();
-      return std::sqrt(static_cast<long double>(z2Best * z2Best) +
-                       (rem / q[2]) * (1.0L + 1e-9L));
+      const long double z2b = static_cast<long double>(z2Best);
+      return std::sqrt(z2b * z2b + (rem / q[2]) * (1.0L + 1e-9L));
     };
     long double w2 = z2Limit();
     if (!(std::isfinite(w2) && w2 < kWidth)) {
       return false;
     }
+    // z2 is below 2^52, so its square is formed in long double, not long long.
+    const auto square = [](long long z) {
+      const long double l = static_cast<long double>(z);
+      return l * l;
+    };
     // Sign symmetry (-z0, -z1, -z2) preserves both parity and norm, so z2 >= 0 suffices.
     for (long long z2 = p2; static_cast<long double>(z2) <= w2; z2 += 2) {
-      const long long dz2 = z2 * z2 - z2Best * z2Best;
       const long double rem = remNorm2();
       const long double budget1 =
-          (dz2 == 0 ? 0.0L : -q[2] * static_cast<long double>(dz2)) +
+          (z2 == z2Best ? 0.0L : -q[2] * (square(z2) - square(z2Best))) +
           rem * (1.0L + 64.0L * kEps);
       if (budget1 < 0.0L) {
         continue;
@@ -449,13 +453,11 @@ inline bool cosetMinima(const Vec3 basis[3], const double basisCoef[3][3], long 
           const long long z0 = z0Near + off;
           const long double e0 = static_cast<long double>(z0) - c0;
           const long double diff =
-              (z2 == z2Best ? 0.0L
-                            : q[2] * static_cast<long double>(z2 * z2 - z2Best * z2Best)) +
+              (z2 == z2Best ? 0.0L : q[2] * (square(z2) - square(z2Best))) +
               q[1] * (e1 * e1 - e1Best * e1Best) +
               q[0] * (e0 * e0 - e0Best * e0Best);
           const long double diffScale =
-              (z2 == z2Best ? 0.0L
-                            : q[2] * static_cast<long double>(z2 * z2 + z2Best * z2Best)) +
+              (z2 == z2Best ? 0.0L : q[2] * (square(z2) + square(z2Best))) +
               q[1] * (e1 * e1 + e1Best * e1Best) +
               q[0] * (e0 * e0 + e0Best * e0Best);
           const long double curTol = 64.0L * kEps * diffScale;
@@ -480,11 +482,15 @@ inline bool cosetMinima(const Vec3 basis[3], const double basisCoef[3][3], long 
       }
     }
 
+    // Each product and the sum stay far inside long long before the exact
+    // integer evaluation.
+    constexpr long double kTerm = 0x1p62L;
     for (int m = 0; m < 3; m++) {
-      const long double cm = static_cast<long double>(z0Best) * U[0][m] +
-                             static_cast<long double>(z1Best) * U[1][m] +
-                             static_cast<long double>(z2Best) * U[2][m];
-      if (!(std::abs(cm) < kWidth)) {
+      const long double t0 = static_cast<long double>(z0Best) * U[0][m];
+      const long double t1 = static_cast<long double>(z1Best) * U[1][m];
+      const long double t2 = static_cast<long double>(z2Best) * U[2][m];
+      if (!(std::abs(t0) < kTerm && std::abs(t1) < kTerm && std::abs(t2) < kTerm &&
+            std::abs(t0 + t1 + t2) < kWidth)) {
         return false;
       }
       out[coset - 1][m] = z0Best * U[0][m] + z1Best * U[1][m] + z2Best * U[2][m];
