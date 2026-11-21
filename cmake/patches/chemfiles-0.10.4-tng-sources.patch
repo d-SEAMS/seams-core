@@ -23,9 +23,667 @@
 #   whose blocks left a particle without values is an error instead of
 #   returning uninitialised memory (a 2.5 kB file declared 100663311
 #   particles and stored positions for 15).
+#   tng_uncompress passes compressed and uncompressed byte lengths into
+#   tng_compress_uncompress[_float]_bounded and Ptngc_unpack_array_bounded;
+#   unpack_array_triplet and unpack_array_stop_bits check ptr < end before
+#   every byte read and bound coding parameters and bit counts.
+diff -ruN tng-a/tng/include/compression/coder.h tng-b/tng/include/compression/coder.h
+--- tng-a/tng/include/compression/coder.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/coder.h	2026-11-21 06:24:35.219270434 +0000
+@@ -25,6 +25,8 @@
+ #ifndef CODER_H
+ #define CODER_H
+ 
++#include <stddef.h>
++
+ #ifndef DECLSPECDLLEXPORT
+ #    ifdef USE_WINDOWS
+ #        define DECLSPECDLLEXPORT __declspec(dllexport)
+@@ -57,6 +59,14 @@
+                                          int            coding,
+                                          int            coding_parameter,
+                                          int            natoms);
++int DECLSPECDLLEXPORT Ptngc_unpack_array_bounded(struct coder*  coder,
++                                                 unsigned char* packed,
++                                                 size_t         packed_len,
++                                                 int*           output,
++                                                 int            length,
++                                                 int            coding,
++                                                 int            coding_parameter,
++                                                 int            natoms);
+ unsigned char DECLSPECDLLEXPORT* Ptngc_pack_array_xtc2(struct coder* coder, int* input, int* length);
+ int DECLSPECDLLEXPORT Ptngc_unpack_array_xtc2(struct coder* coder, unsigned char* packed, int* output, int length);
+ unsigned char DECLSPECDLLEXPORT* Ptngc_pack_array_xtc3(int* input, int* length, int natoms, int speed);
+diff -ruN tng-a/tng/include/compression/tng_compress.h tng-b/tng/include/compression/tng_compress.h
+--- tng-a/tng/include/compression/tng_compress.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/tng_compress.h	2026-11-21 06:24:38.739250997 +0000
+@@ -25,6 +25,8 @@
+ #ifndef TNG_COMPRESS_H
+ #define TNG_COMPRESS_H
+ 
++#include <stddef.h>
++
+ #ifndef USE_WINDOWS
+ #    if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+ #        define USE_WINDOWS
+@@ -214,8 +216,18 @@
+      */
+     int DECLSPECDLLEXPORT tng_compress_uncompress(char* data, double* posvel);
+ 
++    int DECLSPECDLLEXPORT tng_compress_uncompress_bounded(char*   data,
++                                                          size_t  data_len,
++                                                          double* posvel,
++                                                          size_t  posvel_bytes);
++
+     int DECLSPECDLLEXPORT tng_compress_uncompress_float(char* data, float* posvel);
+ 
++    int DECLSPECDLLEXPORT tng_compress_uncompress_float_bounded(char*  data,
++                                                                size_t data_len,
++                                                                float* posvel,
++                                                                size_t posvel_bytes);
++
+     int DECLSPECDLLEXPORT tng_compress_uncompress_int(char*          data,
+                                                       int*           posvel,
+                                                       unsigned long* prec_hi,
+diff -ruN tng-a/tng/src/compression/coder.c tng-b/tng/src/compression/coder.c
+--- tng-a/tng/src/compression/coder.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/coder.c	2026-11-21 06:25:18.771018596 +0000
+@@ -24,6 +24,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <stdint.h>
+ #include "../../include/compression/tng_compress.h"
+ #include "../../include/compression/bwlzh.h"
+ #include "../../include/compression/coder.h"
+@@ -414,6 +415,7 @@
+ 
+ static int unpack_array_stop_bits(struct coder*  coder_inst,
+                                   unsigned char* packed,
++                                  const size_t   packed_len,
+                                   int*           output,
+                                   const int      length,
+                                   const int      coding_parameter)
+@@ -421,7 +423,12 @@
+     int            i, j;
+     unsigned int   extract_mask = 0x80;
+     unsigned char* ptr          = packed;
++    unsigned char* end          = packed + packed_len;
+     (void)coder_inst;
++    if (length < 0 || coding_parameter < 1 || coding_parameter > 32)
++    {
++        return 1;
++    }
+     for (i = 0; i < length; i++)
+     {
+         unsigned int pattern = 0;
+@@ -434,6 +441,10 @@
+         {
+             for (j = 0; j < numbits; j++)
+             {
++                if (ptr >= end)
++                {
++                    return 1;
++                }
+                 bit = *ptr & extract_mask;
+                 if (bit)
+                 {
+@@ -448,6 +459,10 @@
+                 }
+             }
+             /* Check stop bit */
++            if (ptr >= end)
++            {
++                return 1;
++            }
+             bit = *ptr & extract_mask;
+             extract_mask >>= 1;
+             if (!extract_mask)
+@@ -463,6 +478,10 @@
+                     numbits = 1;
+                 }
+                 inserted_bits += numbits;
++                if (inserted_bits > 32)
++                {
++                    return 1;
++                }
+                 insert_mask = 1U << (inserted_bits - 1);
+             }
+         } while (bit);
+@@ -478,6 +497,7 @@
+ 
+ static int unpack_array_triplet(struct coder*  coder_inst,
+                                 unsigned char* packed,
++                                const size_t   packed_len,
+                                 int*           output,
+                                 int            length,
+                                 const int      coding_parameter)
+@@ -485,20 +505,32 @@
+     int            i, j;
+     unsigned int   extract_mask = 0x80;
+     unsigned char* ptr          = packed;
++    unsigned char* end          = packed + packed_len;
+     /* Determine max base and maxbits */
+-    unsigned int max_base = 1U << coding_parameter;
+-    unsigned int maxbits  = coding_parameter;
++    uint64_t     max_base;
++    unsigned int maxbits;
+     unsigned int intmax;
+     /* Get intmax */
+     (void)coder_inst;
++    if (length < 0 || (length % 3) != 0 || coding_parameter < 0 || coding_parameter >= 32
++        || packed_len < 4)
++    {
++        return 1;
++    }
++    max_base = ((uint64_t)1U) << coding_parameter;
++    maxbits  = (unsigned int)coding_parameter;
+     intmax = ((unsigned int)ptr[0]) << 24 | ((unsigned int)ptr[1]) << 16
+              | ((unsigned int)ptr[2]) << 8 | ((unsigned int)ptr[3]);
+     ptr += 4;
+-    while (intmax >= max_base)
++    while ((uint64_t)intmax >= max_base && maxbits < 32)
+     {
+-        max_base *= 2;
++        max_base <<= 1;
+         maxbits++;
+     }
++    if ((uint64_t)intmax >= max_base)
++    {
++        return 1;
++    }
+     length /= 3;
+     for (i = 0; i < length; i++)
+     {
+@@ -508,6 +540,10 @@
+         unsigned int bit;
+         for (j = 0; j < 2; j++)
+         {
++            if (ptr >= end)
++            {
++                return 1;
++            }
+             bit = *ptr & extract_mask;
+             jbase <<= 1;
+             if (bit)
+@@ -527,7 +563,11 @@
+         }
+         else
+         {
+-            numbits = coding_parameter + jbase;
++            numbits = (unsigned int)coding_parameter + jbase;
++        }
++        if (numbits > 32)
++        {
++            return 1;
+         }
+         for (j = 0; j < 3; j++)
+         {
+@@ -536,6 +576,10 @@
+             unsigned int pattern = 0;
+             for (jbit = 0; jbit < numbits; jbit++)
+             {
++                if (ptr >= end)
++                {
++                    return 1;
++                }
+                 bit = *ptr & extract_mask;
+                 pattern <<= 1;
+                 if (bit)
+@@ -562,17 +606,29 @@
+ 
+ static int unpack_array_bwlzh(struct coder*  coder_inst,
+                               unsigned char* packed,
++                              const size_t   packed_len,
+                               int*           output,
+                               const int      length,
+                               const int      natoms)
+ {
+     int           i, j, k, n = length;
+-    unsigned int* pval          = warnmalloc(n * sizeof *pval);
+-    int           nframes       = n / natoms / 3;
++    unsigned int* pval;
++    int           nframes;
+     int           cnt           = 0;
+-    int           most_negative = (int)(((unsigned int)packed[0]) | (((unsigned int)packed[1]) << 8)
+-                              | (((unsigned int)packed[2]) << 16) | (((unsigned int)packed[3]) << 24));
++    int           most_negative;
+     (void)coder_inst;
++    if (packed_len < 4 || natoms <= 0 || length < 0 || (length % (natoms * 3)) != 0)
++    {
++        return 1;
++    }
++    pval = warnmalloc(n * sizeof *pval);
++    if (!pval)
++    {
++        return 1;
++    }
++    nframes       = n / natoms / 3;
++    most_negative = (int)(((unsigned int)packed[0]) | (((unsigned int)packed[1]) << 8)
++                          | (((unsigned int)packed[2]) << 16) | (((unsigned int)packed[3]) << 24));
+     bwlzh_decompress(packed + 4, length, pval);
+     for (i = 0; i < natoms; i++)
+     {
+@@ -589,22 +645,23 @@
+     return 0;
+ }
+ 
+-int DECLSPECDLLEXPORT Ptngc_unpack_array(struct coder*  coder_inst,
+-                                         unsigned char* packed,
+-                                         int*           output,
+-                                         const int      length,
+-                                         const int      coding,
+-                                         const int      coding_parameter,
+-                                         const int      natoms)
++int DECLSPECDLLEXPORT Ptngc_unpack_array_bounded(struct coder*  coder_inst,
++                                                 unsigned char* packed,
++                                                 const size_t   packed_len,
++                                                 int*           output,
++                                                 const int      length,
++                                                 const int      coding,
++                                                 const int      coding_parameter,
++                                                 const int      natoms)
+ {
+     if ((coding == TNG_COMPRESS_ALGO_STOPBIT) || (coding == TNG_COMPRESS_ALGO_VEL_STOPBIT_INTER))
+     {
+-        return unpack_array_stop_bits(coder_inst, packed, output, length, coding_parameter);
++        return unpack_array_stop_bits(coder_inst, packed, packed_len, output, length, coding_parameter);
+     }
+     else if ((coding == TNG_COMPRESS_ALGO_TRIPLET) || (coding == TNG_COMPRESS_ALGO_POS_TRIPLET_INTRA)
+              || (coding == TNG_COMPRESS_ALGO_POS_TRIPLET_ONETOONE))
+     {
+-        return unpack_array_triplet(coder_inst, packed, output, length, coding_parameter);
++        return unpack_array_triplet(coder_inst, packed, packed_len, output, length, coding_parameter);
+     }
+     else if (coding == TNG_COMPRESS_ALGO_POS_XTC2)
+     {
+@@ -612,7 +669,7 @@
+     }
+     else if ((coding == TNG_COMPRESS_ALGO_BWLZH1) || (coding == TNG_COMPRESS_ALGO_BWLZH2))
+     {
+-        return unpack_array_bwlzh(coder_inst, packed, output, length, natoms);
++        return unpack_array_bwlzh(coder_inst, packed, packed_len, output, length, natoms);
+     }
+     else if (coding == TNG_COMPRESS_ALGO_POS_XTC3)
+     {
+@@ -620,3 +677,15 @@
+     }
+     return 1;
+ }
++
++int DECLSPECDLLEXPORT Ptngc_unpack_array(struct coder*  coder_inst,
++                                         unsigned char* packed,
++                                         int*           output,
++                                         const int      length,
++                                         const int      coding,
++                                         const int      coding_parameter,
++                                         const int      natoms)
++{
++    return Ptngc_unpack_array_bounded(coder_inst, packed, SIZE_MAX, output, length, coding,
++                                      coding_parameter, natoms);
++}
+diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng_compress.c
+--- tng-a/tng/src/compression/tng_compress.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/tng_compress.c	2026-11-21 06:26:37.966513505 +0000
+@@ -23,6 +23,8 @@
+  */
+ 
+ #include <stdlib.h>
++#include <stdint.h>
++#include <limits.h>
+ #include <string.h>
+ #include <math.h>
+ #include "../../include/compression/tng_compress.h"
+@@ -1762,13 +1764,15 @@
+ }
+ 
+ static int tng_compress_uncompress_pos_gen(char*          data,
++                                           size_t         data_len,
+                                            double*        posd,
+                                            float*         posf,
+                                            int*           posi,
++                                           size_t         pos_bytes,
+                                            unsigned long* prec_hi,
+                                            unsigned long* prec_lo)
+ {
+-    int           bufloc = 0;
++    size_t        bufloc = 0;
+     int           length;
+     int           natoms, nframes;
+     int           initial_coding, initial_coding_parameter;
+@@ -1777,6 +1781,11 @@
+     struct coder* coder = NULL;
+     int           rval  = 0;
+     int           magic_int;
++    if (data_len < 40)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* Magic integer for positions */
+     magic_int = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+@@ -1808,22 +1817,53 @@
+     bufloc += 4;
+     *prec_hi = readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+-    /* Allocate the memory for the quantized positions */
+-    quant = malloc(natoms * nframes * 3 * sizeof *quant);
++    if (natoms <= 0 || nframes <= 0)
++    {
++        rval = 1;
++        goto error;
++    }
++    {
++        size_t   elem_size = posd ? sizeof(double) : (posf ? sizeof(float) : sizeof(int));
++        uint64_t nvals     = (uint64_t)natoms * (uint64_t)nframes;
++        if (nvals > (uint64_t)INT_MAX / 3)
++        {
++            rval = 1;
++            goto error;
++        }
++        nvals *= 3;
++        if (nvals > (uint64_t)SIZE_MAX / sizeof *quant
++            || nvals > (uint64_t)pos_bytes / elem_size)
++        {
++            rval = 1;
++            goto error;
++        }
++        /* Allocate the memory for the quantized positions */
++        quant = malloc((size_t)nvals * sizeof *quant);
++        if (!quant)
++        {
++            rval = 1;
++            goto error;
++        }
++    }
+     /* The data block length. */
+     length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
++    if (length < 0 || (size_t)length > data_len - bufloc)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* The initial frame */
+     coder = Ptngc_coder_init();
+-    rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant, natoms * 3,
+-                              initial_coding, initial_coding_parameter, natoms);
++    rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length, quant,
++                                       natoms * 3, initial_coding, initial_coding_parameter, natoms);
+     Ptngc_coder_deinit(coder);
+     if (rval)
+     {
+         goto error;
+     }
+     /* Skip past the actual data block. */
+-    bufloc += length;
++    bufloc += (size_t)length;
+     /* Obtain the actual positions for the initial block. */
+     if ((initial_coding == TNG_COMPRESS_ALGO_POS_XTC2)
+         || (initial_coding == TNG_COMPRESS_ALGO_POS_TRIPLET_ONETOONE)
+@@ -1862,10 +1902,22 @@
+     /* The remaining frames. */
+     if (nframes > 1)
+     {
++        if (data_len - bufloc < 4)
++        {
++            rval = 1;
++            goto error;
++        }
++        length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+         bufloc += 4;
++        if (length < 0 || (size_t)length > data_len - bufloc)
++        {
++            rval = 1;
++            goto error;
++        }
+         coder = Ptngc_coder_init();
+-        rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant + natoms * 3,
+-                                  (nframes - 1) * natoms * 3, coding, coding_parameter, natoms);
++        rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length,
++                                           quant + natoms * 3, (nframes - 1) * natoms * 3, coding,
++                                           coding_parameter, natoms);
+         Ptngc_coder_deinit(coder);
+         if (rval)
+         {
+@@ -1935,31 +1987,33 @@
+     return rval;
+ }
+ 
+-static int tng_compress_uncompress_pos(char* data, double* pos)
++static int tng_compress_uncompress_pos(char* data, size_t data_len, double* pos, size_t pos_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_pos_gen(data, pos, NULL, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_pos_gen(data, data_len, pos, NULL, NULL, pos_bytes, &prec_hi, &prec_lo);
+ }
+ 
+-static int tng_compress_uncompress_pos_float(char* data, float* pos)
++static int tng_compress_uncompress_pos_float(char* data, size_t data_len, float* pos, size_t pos_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_pos_gen(data, NULL, pos, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_pos_gen(data, data_len, NULL, pos, NULL, pos_bytes, &prec_hi, &prec_lo);
+ }
+ 
+ static int tng_compress_uncompress_pos_int(char* data, int* pos, unsigned long* prec_hi, unsigned long* prec_lo)
+ {
+-    return tng_compress_uncompress_pos_gen(data, NULL, NULL, pos, prec_hi, prec_lo);
++    return tng_compress_uncompress_pos_gen(data, SIZE_MAX, NULL, NULL, pos, SIZE_MAX, prec_hi, prec_lo);
+ }
+ 
+ static int tng_compress_uncompress_vel_gen(char*          data,
++                                           size_t         data_len,
+                                            double*        veld,
+                                            float*         velf,
+                                            int*           veli,
++                                           size_t         vel_bytes,
+                                            unsigned long* prec_hi,
+                                            unsigned long* prec_lo)
+ {
+-    int           bufloc = 0;
++    size_t        bufloc = 0;
+     int           length;
+     int           natoms, nframes;
+     int           initial_coding, initial_coding_parameter;
+@@ -1968,6 +2022,11 @@
+     struct coder* coder = NULL;
+     int           rval  = 0;
+     int           magic_int;
++    if (data_len < 40)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* Magic integer for velocities */
+     magic_int = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+@@ -1999,22 +2058,53 @@
+     bufloc += 4;
+     *prec_hi = readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+-    /* Allocate the memory for the quantized positions */
+-    quant = malloc(natoms * nframes * 3 * sizeof *quant);
++    if (natoms <= 0 || nframes <= 0)
++    {
++        rval = 1;
++        goto error;
++    }
++    {
++        size_t   elem_size = veld ? sizeof(double) : (velf ? sizeof(float) : sizeof(int));
++        uint64_t nvals     = (uint64_t)natoms * (uint64_t)nframes;
++        if (nvals > (uint64_t)INT_MAX / 3)
++        {
++            rval = 1;
++            goto error;
++        }
++        nvals *= 3;
++        if (nvals > (uint64_t)SIZE_MAX / sizeof *quant
++            || nvals > (uint64_t)vel_bytes / elem_size)
++        {
++            rval = 1;
++            goto error;
++        }
++        /* Allocate the memory for the quantized positions */
++        quant = malloc((size_t)nvals * sizeof *quant);
++        if (!quant)
++        {
++            rval = 1;
++            goto error;
++        }
++    }
+     /* The data block length. */
+     length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
++    if (length < 0 || (size_t)length > data_len - bufloc)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* The initial frame */
+     coder = Ptngc_coder_init();
+-    rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant, natoms * 3,
+-                              initial_coding, initial_coding_parameter, natoms);
++    rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length, quant,
++                                       natoms * 3, initial_coding, initial_coding_parameter, natoms);
+     Ptngc_coder_deinit(coder);
+     if (rval)
+     {
+         goto error;
+     }
+     /* Skip past the actual data block. */
+-    bufloc += length;
++    bufloc += (size_t)length;
+     /* Obtain the actual positions for the initial block. */
+     if ((initial_coding == TNG_COMPRESS_ALGO_VEL_STOPBIT_ONETOONE)
+         || (initial_coding == TNG_COMPRESS_ALGO_VEL_TRIPLET_ONETOONE)
+@@ -2036,10 +2126,22 @@
+     /* The remaining frames. */
+     if (nframes > 1)
+     {
++        if (data_len - bufloc < 4)
++        {
++            rval = 1;
++            goto error;
++        }
++        length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+         bufloc += 4;
++        if (length < 0 || (size_t)length > data_len - bufloc)
++        {
++            rval = 1;
++            goto error;
++        }
+         coder = Ptngc_coder_init();
+-        rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant + natoms * 3,
+-                                  (nframes - 1) * natoms * 3, coding, coding_parameter, natoms);
++        rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length,
++                                           quant + natoms * 3, (nframes - 1) * natoms * 3, coding,
++                                           coding_parameter, natoms);
+         Ptngc_coder_deinit(coder);
+         if (rval)
+         {
+@@ -2090,37 +2192,44 @@
+     return rval;
+ }
+ 
+-static int tng_compress_uncompress_vel(char* data, double* vel)
++static int tng_compress_uncompress_vel(char* data, size_t data_len, double* vel, size_t vel_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_vel_gen(data, vel, NULL, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_vel_gen(data, data_len, vel, NULL, NULL, vel_bytes, &prec_hi, &prec_lo);
+ }
+ 
+-static int tng_compress_uncompress_vel_float(char* data, float* vel)
++static int tng_compress_uncompress_vel_float(char* data, size_t data_len, float* vel, size_t vel_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_vel_gen(data, NULL, vel, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_vel_gen(data, data_len, NULL, vel, NULL, vel_bytes, &prec_hi, &prec_lo);
+ }
+ 
+ static int tng_compress_uncompress_vel_int(char* data, int* vel, unsigned long* prec_hi, unsigned long* prec_lo)
+ {
+-    return tng_compress_uncompress_vel_gen(data, NULL, NULL, vel, prec_hi, prec_lo);
++    return tng_compress_uncompress_vel_gen(data, SIZE_MAX, NULL, NULL, vel, SIZE_MAX, prec_hi, prec_lo);
+ }
+ 
+ /* Uncompresses any tng compress block, positions or velocities. It determines whether it is
+  * positions or velocities from the data buffer. The return value is 0 if ok, and 1 if not.
+  */
+-int DECLSPECDLLEXPORT tng_compress_uncompress(char* data, double* posvel)
++int DECLSPECDLLEXPORT tng_compress_uncompress_bounded(char*   data,
++                                                      size_t  data_len,
++                                                      double* posvel,
++                                                      size_t  posvel_bytes)
+ {
+     int magic_int;
++    if (data_len < 4)
++    {
++        return 1;
++    }
+     magic_int = (int)readbufferfix((unsigned char*)data, 4);
+     if (magic_int == MAGIC_INT_POS)
+     {
+-        return tng_compress_uncompress_pos(data, posvel);
++        return tng_compress_uncompress_pos(data, data_len, posvel, posvel_bytes);
+     }
+     else if (magic_int == MAGIC_INT_VEL)
+     {
+-        return tng_compress_uncompress_vel(data, posvel);
++        return tng_compress_uncompress_vel(data, data_len, posvel, posvel_bytes);
+     }
+     else
+     {
+@@ -2128,17 +2237,29 @@
+     }
+ }
+ 
+-int DECLSPECDLLEXPORT tng_compress_uncompress_float(char* data, float* posvel)
++int DECLSPECDLLEXPORT tng_compress_uncompress(char* data, double* posvel)
++{
++    return tng_compress_uncompress_bounded(data, SIZE_MAX, posvel, SIZE_MAX);
++}
++
++int DECLSPECDLLEXPORT tng_compress_uncompress_float_bounded(char*  data,
++                                                            size_t data_len,
++                                                            float* posvel,
++                                                            size_t posvel_bytes)
+ {
+     int magic_int;
++    if (data_len < 4)
++    {
++        return 1;
++    }
+     magic_int = (int)readbufferfix((unsigned char*)data, 4);
+     if (magic_int == MAGIC_INT_POS)
+     {
+-        return tng_compress_uncompress_pos_float(data, posvel);
++        return tng_compress_uncompress_pos_float(data, data_len, posvel, posvel_bytes);
+     }
+     else if (magic_int == MAGIC_INT_VEL)
+     {
+-        return tng_compress_uncompress_vel_float(data, posvel);
++        return tng_compress_uncompress_vel_float(data, data_len, posvel, posvel_bytes);
+     }
+     else
+     {
+@@ -2146,6 +2267,11 @@
+     }
+ }
+ 
++int DECLSPECDLLEXPORT tng_compress_uncompress_float(char* data, float* posvel)
++{
++    return tng_compress_uncompress_float_bounded(data, SIZE_MAX, posvel, SIZE_MAX);
++}
++
+ int DECLSPECDLLEXPORT tng_compress_uncompress_int(char*          data,
+                                                   int*           posvel,
+                                                   unsigned long* prec_hi,
 diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
---- tng-a/tng/src/lib/tng_io.c	2026-11-21 00:05:04.000000000 +0000
-+++ tng-b/tng/src/lib/tng_io.c	2026-11-21 02:26:31.000000000 +0000
+--- tng-a/tng/src/lib/tng_io.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/lib/tng_io.c	2026-11-21 06:26:40.382497412 +0000
 @@ -33,6 +33,7 @@
  #endif
  
@@ -656,7 +1314,48 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          }
      }
  
-@@ -4440,6 +4535,15 @@
+@@ -4327,6 +4422,7 @@
+                                           const struct tng_gen_block*  block,
+                                           const char                   type,
+                                           char**                       data,
++                                          const int64_t                compressed_len,
+                                           const int64_t                uncompressed_len)
+ {
+     double* d_dest = 0;
+@@ -4334,8 +4430,10 @@
+     int     result;
+     (void)tng_data;
+ 
+-    TNG_ASSERT(uncompressed_len,
+-               "TNG library: The full length of the uncompressed data must be > 0.");
++    if (compressed_len < 0 || uncompressed_len <= 0)
++    {
++        return (TNG_FAILURE);
++    }
+ 
+     if (block->id != TNG_TRAJ_POSITIONS && block->id != TNG_TRAJ_VELOCITIES)
+     {
+@@ -4358,7 +4456,8 @@
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+             return (TNG_CRITICAL);
+         }
+-        result = tng_compress_uncompress_float(*data, f_dest);
++        result = tng_compress_uncompress_float_bounded(*data, (size_t)compressed_len, f_dest,
++                                                       (size_t)uncompressed_len);
+ 
+         free(*data);
+ 
+@@ -4372,7 +4471,8 @@
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+             return (TNG_CRITICAL);
+         }
+-        result = tng_compress_uncompress(*data, d_dest);
++        result = tng_compress_uncompress_bounded(*data, (size_t)compressed_len, d_dest,
++                                                 (size_t)uncompressed_len);
+ 
+         free(*data);
+ 
+@@ -4440,6 +4540,15 @@
      (void)tng_data;
      uLongf new_len = uncompressed_len;
  
@@ -672,7 +1371,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      dest = (Bytef*)malloc(uncompressed_len);
      if (!dest)
      {
-@@ -4467,6 +4571,13 @@
+@@ -4467,6 +4576,13 @@
          fprintf(stderr, "TNG library: Error uncompressing gzipped data. %s: %d\n", __FILE__, __LINE__);
          return (TNG_FAILURE);
      }
@@ -686,7 +1385,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
      free(*data);
  
-@@ -4475,6 +4586,165 @@
+@@ -4475,6 +4591,165 @@
      return (TNG_SUCCESS);
  }
  
@@ -852,7 +1551,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  /**
   * @brief Allocate memory for storing particle data.
   * The allocated block will be refered to by data->values.
-@@ -4495,64 +4765,28 @@
+@@ -4495,64 +4770,28 @@
                                                            const int64_t n_particles,
                                                            const int64_t n_values_per_frame)
  {
@@ -925,7 +1624,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          }
      }
      else
-@@ -4565,16 +4799,13 @@
+@@ -4565,16 +4804,13 @@
              default: size = sizeof(double);
          }
  
@@ -945,7 +1644,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      return (TNG_SUCCESS);
  }
  
-@@ -4841,56 +5072,28 @@
+@@ -4841,56 +5077,28 @@
                                                   const int64_t                stride_length,
                                                   const int64_t                n_values_per_frame)
  {
@@ -1010,7 +1709,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          }
      }
      else
-@@ -4903,16 +5106,12 @@
+@@ -4903,16 +5111,12 @@
              default: size = sizeof(double);
          }
  
@@ -1029,7 +1728,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
      return (TNG_SUCCESS);
  }
-@@ -4962,7 +5161,8 @@
+@@ -4962,7 +5166,8 @@
                                           md5_state_t*                md5_state)
  {
      int64_t                    i, j, k, tot_n_particles, n_frames_div, offset;
@@ -1039,7 +1738,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      int                        size, len;
      char ***                   first_dim_values, **second_dim_values;
      tng_data_t                 data;
-@@ -4982,6 +5182,14 @@
+@@ -4982,6 +5187,14 @@
          default: size = sizeof(double);
      }
  
@@ -1054,7 +1753,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      if (n_particles > 0)
      {
          is_particle_data = TNG_TRUE;
-@@ -5004,6 +5212,12 @@
+@@ -5004,6 +5217,12 @@
      {
          stat = tng_data_find(tng_data, block->id, &data);
      }
@@ -1067,7 +1766,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
      if (tng_data->current_trajectory_frame_set_input_file_pos > 0)
      {
-@@ -5069,8 +5283,14 @@
+@@ -5069,8 +5288,14 @@
  
          data->values = 0;
          /* FIXME: Memory leak from strings. */
@@ -1084,7 +1783,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          data->dependency = 0;
          if (is_particle_data == TNG_TRUE)
          {
-@@ -5106,6 +5326,29 @@
+@@ -5106,6 +5331,29 @@
  
      n_frames_div = (n_frames - 1) / stride_length + 1;
  
@@ -1114,7 +1813,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      contents = (char*)malloc(block_data_len);
      if (!contents)
      {
-@@ -5116,6 +5359,7 @@
+@@ -5116,6 +5364,7 @@
      if (fread(contents, block_data_len, 1, tng_data->input_file) == 0)
      {
          fprintf(stderr, "TNG library: Cannot read block. %s: %d\n", __FILE__, __LINE__);
@@ -1122,7 +1821,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          return (TNG_CRITICAL);
      }
  
-@@ -5126,16 +5370,13 @@
+@@ -5126,19 +5375,17 @@
  
      if (codec_id != TNG_UNCOMPRESSED)
      {
@@ -1141,8 +1840,13 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
 +                return (TNG_CRITICAL);
              case TNG_TNG_COMPRESSION:
                  /*            fprintf(stderr, "TNG library: Before TNG uncompression: %" PRId64 "\n", block->block_contents_size);*/
-                 if (tng_uncompress(tng_data, block, datatype, &contents, full_data_len) != TNG_SUCCESS)
-@@ -5159,15 +5400,35 @@
+-                if (tng_uncompress(tng_data, block, datatype, &contents, full_data_len) != TNG_SUCCESS)
++                if (tng_uncompress(tng_data, block, datatype, &contents, block_data_len, full_data_len)
++                    != TNG_SUCCESS)
+                 {
+                     fprintf(stderr,
+                             "TNG library: Could not read tng compressed block data. %s: %d\n",
+@@ -5159,15 +5406,35 @@
                  }
                  /*         fprintf(stderr, "TNG library: After compression: %" PRId64 "\n", block->block_contents_size); */
                  break;
@@ -1179,7 +1883,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      {
          if (is_particle_data == TNG_TRUE)
          {
-@@ -5203,7 +5464,15 @@
+@@ -5203,7 +5470,15 @@
                      second_dim_values = first_dim_values[j];
                      for (k = 0; k < n_values; k++)
                      {
@@ -1196,7 +1900,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                          if (second_dim_values[k])
                          {
                              free(second_dim_values[k]);
-@@ -5216,7 +5485,8 @@
+@@ -5216,7 +5491,8 @@
                              free(contents);
                              return (TNG_CRITICAL);
                          }
@@ -1206,7 +1910,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                          offset += len;
                      }
                  }
-@@ -5228,7 +5498,15 @@
+@@ -5228,7 +5504,15 @@
              {
                  for (j = 0; j < n_values; j++)
                  {
@@ -1223,7 +1927,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                      if (data->strings[0][i][j])
                      {
                          free(data->strings[0][i][j]);
-@@ -5240,7 +5518,8 @@
+@@ -5240,7 +5524,8 @@
                          free(contents);
                          return (TNG_CRITICAL);
                      }
@@ -1233,7 +1937,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                      offset += len;
                  }
              }
-@@ -5248,14 +5527,22 @@
+@@ -5248,14 +5533,22 @@
      }
      else
      {
@@ -1260,7 +1964,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          }
          /* Endianness is handled by the TNG compression library. TNG compressed blocks are always
           * written as little endian by the compression library. */
-@@ -5269,7 +5556,7 @@
+@@ -5269,7 +5562,7 @@
                          for (i = 0; i < full_data_len; i += size)
                          {
                              if (tng_data->input_endianness_swap_func_32(
@@ -1269,7 +1973,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                                  != TNG_SUCCESS)
                              {
                                  fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
-@@ -5285,7 +5572,7 @@
+@@ -5285,7 +5578,7 @@
                          for (i = 0; i < full_data_len; i += size)
                          {
                              if (tng_data->input_endianness_swap_func_64(
@@ -1278,7 +1982,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
                                  != TNG_SUCCESS)
                              {
                                  fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
-@@ -8508,33 +8795,8 @@
+@@ -8508,33 +8801,8 @@
                  tng_data->non_tr_particle_data[i].values = 0;
              }
  
@@ -1314,7 +2018,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (tng_data->non_tr_particle_data[i].block_name)
              {
-@@ -8556,27 +8818,8 @@
+@@ -8556,27 +8824,8 @@
                  tng_data->non_tr_data[i].values = 0;
              }
  
@@ -1344,7 +2048,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (tng_data->non_tr_data[i].block_name)
              {
-@@ -8612,36 +8855,8 @@
+@@ -8612,36 +8861,8 @@
                  frame_set->tr_particle_data[i].values = 0;
              }
  
@@ -1383,7 +2087,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (frame_set->tr_particle_data[i].block_name)
              {
-@@ -8663,28 +8878,8 @@
+@@ -8663,28 +8884,8 @@
                  frame_set->tr_data[i].values = 0;
              }
  
@@ -1414,7 +2118,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
  
              if (frame_set->tr_data[i].block_name)
              {
-@@ -11856,6 +12051,12 @@
+@@ -11856,6 +12057,12 @@
          data->values = 0;
          /* FIXME: Memory leak from strings. */
          data->strings              = 0;
@@ -1427,7 +2131,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
          data->last_retrieved_frame = -1;
      }
  
-@@ -13421,6 +13622,16 @@
+@@ -13421,6 +13628,16 @@
          default: size = sizeof(double);
      }
  
@@ -1444,7 +2148,7 @@ diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
      *n_frames           = tng_max_i64(1, data->n_frames);
      *n_values_per_frame = data->n_values_per_frame;
      *stride_length      = data->stride_length;
-@@ -13451,7 +13662,7 @@
+@@ -13451,7 +13668,7 @@
      else
      {
          i_step = (*n_particles) * (*n_values_per_frame);
