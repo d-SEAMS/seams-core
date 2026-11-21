@@ -7400,8 +7400,19 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        case 'i': 
 diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplugin.cxx
 --- molfiles-a/molfiles/src/xbgfplugin.cxx	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/xbgfplugin.cxx	2026-11-21 06:22:01.959844100 +0000
-@@ -67,6 +67,10 @@
++++ molfiles-b/molfiles/src/xbgfplugin.cxx	2026-11-21 10:47:55.318519772 +0000
+@@ -60,13 +60,20 @@
+   bgf->meta->remarklen = 0;
+   bgf->meta->remarks = NULL;
+ 
+-  if ((fd = fopen(path, "r")) == NULL)
++  if ((fd = fopen(path, "r")) == NULL) {
++    free(bgf->meta);
++    free(bgf);
+     return NULL;
++  }
+ 
+   do {
      fgets(line, LINESIZE, fd);
      if ( ferror(fd) || feof(fd) ) {
        printf("xbgfplugin) Improperly terminated bgf file\n");
@@ -7412,7 +7423,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
        return NULL;
      }
  
-@@ -76,7 +80,8 @@
+@@ -76,7 +83,8 @@
      if (strncmp(line,"CONECT",6)==0) {
        nbline=(strlen(line)-1)/6; 
        nbline -= 2;
@@ -7422,7 +7433,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
      }
  
      // Read the remarks
-@@ -130,9 +135,21 @@
+@@ -130,9 +138,21 @@
    }
  }
  
@@ -7444,7 +7455,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
    memset(numstr, 0, sizeof(numstr));
    if (x != NULL) {
      strncpy(numstr, record + 32, 10);
-@@ -161,6 +178,8 @@
+@@ -161,6 +181,8 @@
    char tempbeta[7];
    char tempocc[7];
    char tempelem[4];
@@ -7453,7 +7464,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
    strcpy(insert, " ");
  
    /* get atom name */
-@@ -249,6 +268,11 @@
+@@ -249,6 +271,11 @@
      }
  
      if (strncmp(line, "ATOM", 4) && strncmp(line, "HETATM", 6)) continue;
@@ -7465,7 +7476,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
      atom=atoms+natoms;
      natoms++;
      get_xbgf_fields(line, atom->name, atom->resname, atom->chain, atom->segid, 
-@@ -288,7 +312,7 @@
+@@ -288,7 +315,7 @@
    } while ( strncmp(line, "FORMAT ATOM", 11) );
  
    // Read the atoms
@@ -7474,7 +7485,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
      fgets(line, LINESIZE, bgf->file);
      if ( ferror(bgf->file) || feof(bgf->file) ) {
        printf("xbgfplugin) Error occurred reading atom coordinates.\n");
-@@ -305,6 +329,7 @@
+@@ -305,6 +332,7 @@
        ts->coords[3*i+1] = y;
        ts->coords[3*i+2] = z;
      }
@@ -7482,7 +7493,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
    }
  
    bgf->coords_read = 1;
-@@ -408,7 +433,7 @@
+@@ -408,7 +436,7 @@
        numfields--;
        bondptr += 6;
  
@@ -7491,7 +7502,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
          strncpy(currbond,bondptr,6);
          numfields--;
          bondptr += 6;
-@@ -417,7 +442,7 @@
+@@ -417,7 +445,7 @@
        }
  
        if (conline) {
@@ -7500,7 +7511,7 @@ diff -ruN molfiles-a/molfiles/src/xbgfplugin.cxx molfiles-b/molfiles/src/xbgfplu
          conptr=&nextline[0];
          numfields -= 2;
          conptr += 12;
-@@ -435,6 +460,10 @@
+@@ -435,6 +463,10 @@
        for (int l=0;l<numbonds;l++) {
          k=bonds[l];
          if (j<k) {

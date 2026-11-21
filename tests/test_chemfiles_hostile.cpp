@@ -410,6 +410,11 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   const auto trjNullPos = readAll("hostile/fuzz_trj_null_pos.trj", "TRJ");
   REQUIRE(trjNullPos.error.empty());
   REQUIRE(trjNullPos.steps == 0);
+
+  // Opening a nonexistent XBGF file must free bgf and bgf->meta before returning NULL.
+  const auto missingXbgf = readAll("hostile/does_not_exist_xbgf.xbgf",
+                                   "Internal Paratool Format");
+  REQUIRE_FALSE(missingXbgf.error.empty());
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",
