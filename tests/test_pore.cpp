@@ -1806,3 +1806,283 @@ TEST_CASE("minimum image matches a triangular brute force on random legal cells"
   REQUIRE(pairs == 1200 * 24);
   REQUIRE(threw == 0);
 }
+
+// sum m[i] * x[i] with error-free products and a compensated sum (Dot2).
+long double dot2(const double m[4], const double x[4]) {
+  double s = 0.0;
+  double e = 0.0;
+  for (int i = 0; i < 4; ++i) {
+    const double p = m[i] * x[i];
+    const double pe = std::fma(m[i], x[i], -p);
+    const double t = s + p;
+    const double b = t - s;
+    e += pe + ((s - (t - b)) + (p - b));
+    s = t;
+  }
+  return static_cast<long double>(s) + e;
+}
+
+// w - (n0 a + n1 b + n2 c) on the upper-triangular cell, each component to
+// about one rounding.
+std::array<long double, 3> latticeImage(const double c[6], const double w[3],
+                                        const long long n[3]) {
+  const double m[4] = {1.0, -static_cast<double>(n[0]), -static_cast<double>(n[1]),
+                       -static_cast<double>(n[2])};
+  const double xs[4] = {w[0], c[0], c[3], c[4]};
+  const double ys[4] = {w[1], 0.0, c[1], c[5]};
+  const double zs[4] = {w[2], 0.0, 0.0, c[2]};
+  return {dot2(m, xs), dot2(m, ys), dot2(m, zs)};
+}
+
+template <class T> long double lengthOf(const std::array<T, 3> &v) {
+  return std::sqrt(static_cast<long double>(v[0]) * v[0] +
+                   static_cast<long double>(v[1]) * v[1] +
+                   static_cast<long double>(v[2]) * v[2]);
+}
+
+// Shortest |w - n H| no longer than `radius`, or -1 when there is none or the
+// search is too wide. LLL with an integer transform picks the enumeration
+// basis; every candidate is scored from its integer coefficients in H.
+long double coefficientImage(const double c[6], const double w[3], long double radius) {
+  long long u[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+  long double b[3][3];
+  const auto rebuild = [&](int k) {
+    const double zero[3] = {0.0, 0.0, 0.0};
+    const long long n[3] = {-u[k][0], -u[k][1], -u[k][2]};
+    const auto v = latticeImage(c, zero, n);
+    for (int m = 0; m < 3; ++m) {
+      b[k][m] = v[m];
+    }
+  };
+  const auto dot = [](const long double *p, const long double *q) {
+    return p[0] * q[0] + p[1] * q[1] + p[2] * q[2];
+  };
+  long double gs[3][3];
+  long double mu[3][3] = {};
+  long double norm[3];
+  const auto gram = [&]() {
+    for (int i = 0; i < 3; ++i) {
+      for (int m = 0; m < 3; ++m) {
+        gs[i][m] = b[i][m];
+      }
+      for (int j = 0; j < i; ++j) {
+        mu[i][j] = dot(b[i], gs[j]) / norm[j];
+        for (int m = 0; m < 3; ++m) {
+          gs[i][m] -= mu[i][j] * gs[j][m];
+        }
+      }
+      norm[i] = dot(gs[i], gs[i]);
+    }
+  };
+  for (int k = 0; k < 3; ++k) {
+    rebuild(k);
+  }
+  for (int iter = 0; iter < 100000; ++iter) {
+    gram();
+    bool changed = false;
+    for (int k = 1; k < 3 && !changed; ++k) {
+      for (int j = k - 1; j >= 0; --j) {
+        if (std::abs(mu[k][j]) <= 0.5L + 1e-9L) {
+          continue;
+        }
+        const long long q = std::llround(mu[k][j]);
+        for (int m = 0; m < 3; ++m) {
+          u[k][m] -= q * u[j][m];
+        }
+        rebuild(k);
+        changed = true;
+        break;
+      }
+      if (!changed && norm[k] < (0.99L - mu[k][k - 1] * mu[k][k - 1]) * norm[k - 1]) {
+        std::swap(u[k], u[k - 1]);
+        rebuild(k);
+        rebuild(k - 1);
+        changed = true;
+      }
+    }
+    if (!changed) {
+      break;
+    }
+  }
+  gram();
+  const long double t[3] = {w[0], w[1], w[2]};
+  long double coordinate[3];
+  for (int i = 0; i < 3; ++i) {
+    coordinate[i] = dot(t, gs[i]) / norm[i];
+  }
+  long double best = -1.0L;
+  const long double best2 = radius * radius;
+  long nodes = 0;
+  const long double width2 = std::sqrt(best2 / norm[2]);
+  if (!(width2 < 1e15L)) {
+    return -1.0L;
+  }
+  for (long long x2 = static_cast<long long>(std::ceil(coordinate[2] - width2));
+       x2 <= static_cast<long long>(std::floor(coordinate[2] + width2)); ++x2) {
+    const long double e2 = coordinate[2] - static_cast<long double>(x2);
+    const long double r2 = e2 * e2 * norm[2];
+    if (r2 > best2) {
+      continue;
+    }
+    const long double c1 = coordinate[1] - static_cast<long double>(x2) * mu[2][1];
+    const long double width1 = std::sqrt((best2 - r2) / norm[1]);
+    if (!(width1 < 1e15L)) {
+      return -1.0L;
+    }
+    for (long long x1 = static_cast<long long>(std::ceil(c1 - width1));
+         x1 <= static_cast<long long>(std::floor(c1 + width1)); ++x1) {
+      const long double e1 = c1 - static_cast<long double>(x1);
+      const long double r1 = r2 + e1 * e1 * norm[1];
+      if (r1 > best2) {
+        continue;
+      }
+      const long double c0 = coordinate[0] - static_cast<long double>(x2) * mu[2][0] -
+                             static_cast<long double>(x1) * mu[1][0];
+      const long double width0 = std::sqrt((best2 - r1) / norm[0]);
+      if (!(width0 < 1e15L)) {
+        return -1.0L;
+      }
+      // One extra point either side absorbs rounding in the long double
+      // Gram-Schmidt coordinates.
+      for (long long x0 = static_cast<long long>(std::ceil(c0 - width0)) - 1;
+           x0 <= static_cast<long long>(std::floor(c0 + width0)) + 1; ++x0) {
+        if (++nodes > 50000000) {
+          return -1.0L;
+        }
+        const long long n[3] = {x0 * u[0][0] + x1 * u[1][0] + x2 * u[2][0],
+                                x0 * u[0][1] + x1 * u[1][1] + x2 * u[2][1],
+                                x0 * u[0][2] + x1 * u[1][2] + x2 * u[2][2]};
+        const long double l = lengthOf(latticeImage(c, w, n));
+        if (best < 0.0L || l < best) {
+          best = l;
+        }
+      }
+    }
+  }
+  return best;
+}
+
+struct ImageError {
+  double ulps = 0.0;
+  double relative = 0.0;
+};
+
+// Error of the library image of the wrap `w` against the coefficient
+// reference, in ulps of |w| and relative to the exact minimum.
+ImageError imageError(const double c[6], const std::array<double, 3> &w) {
+  constexpr long double eps = std::numeric_limits<double>::epsilon();
+  const auto got = gen::mic::euclideanIfShorter(c[0], c[1], c[2], c[3], c[4], c[5], w, w);
+  const long double found = lengthOf(got);
+  const long double wrap = lengthOf(w);
+  const double d[3] = {w[0], w[1], w[2]};
+  const long double ref =
+      coefficientImage(c, d, (found + 64.0L * eps * wrap + 1e-300L) * (1.0L + 1e-12L));
+  REQUIRE(ref >= 0.0L);
+  const long double err = std::abs(found - ref);
+  return {static_cast<double>(err / (eps * wrap)),
+          static_cast<double>(ref > 0.0L ? err / ref : err)};
+}
+
+TEST_CASE("minimum image error is within 4 ulps of the wrap and 1e-14 relative",
+          "[pore]") {
+  // The bounds stated in changelog.d/+pore-profiles.added.md, over the sets
+  // they were measured on.
+  long pairs = 0;
+  const auto judge = [&](const double c[6], const std::array<double, 3> &w) {
+    const ImageError e = imageError(c, w);
+    ++pairs;
+    REQUIRE(e.ulps <= 4.0);
+    REQUIRE(e.relative <= 1e-14);
+  };
+  // An aspect-1e8 cell whose wrap is about 4e7 times its minimum image.
+  const double gate[6] = {874115888.13459587, 26.140636200847869, 8.7411588813459584,
+                          -55749478.818535045, 437057944.06729794, 4.6514428281782481};
+  judge(gate, {437057944.06729794, 0.0, 0.0});
+  const double elongated[6] = {1.0e7, 0.1, 0.1, 0.025, 0.025, 0.0};
+  judge(elongated, {-4859743.2640920915, -0.0050198905816330854, -0.031675054668108597});
+  judge(elongated, {2500000.0, 0.02, -0.03});
+
+  const double halves[][3] = {{0.5, 0.0, 0.0}, {0.0, 0.5, 0.0}, {0.0, 0.0, 0.5},
+                              {0.5, 0.5, 0.0}, {0.5, 0.0, 0.5}, {0.0, 0.5, 0.5},
+                              {0.5, 0.5, 0.5}};
+  const auto wrapOf = [](const double c[6], const double f[3]) {
+    return std::array<double, 3>{c[0] * f[0] + c[3] * f[1] + c[4] * f[2],
+                                 c[1] * f[1] + c[5] * f[2], c[2] * f[2]};
+  };
+  {
+    // The aspect-40 generator of the triangular brute-force test above.
+    std::mt19937_64 gen(20261120);
+    std::uniform_real_distribution<double> logScale(-1.0, 3.0);
+    std::uniform_real_distribution<double> logAspect(0.0, std::log10(40.0));
+    std::uniform_real_distribution<double> unit(0.0, 1.0);
+    std::uniform_real_distribution<double> half(-0.5, 0.5);
+    for (int cell = 0; cell < 1200; ++cell) {
+      const double base = std::pow(10.0, logScale(gen));
+      double edge[3] = {base, base * std::pow(10.0, logAspect(gen) * unit(gen)),
+                        base * std::pow(10.0, logAspect(gen))};
+      std::shuffle(edge, edge + 3, gen);
+      double c[6] = {edge[0], edge[1], edge[2], half(gen) * edge[0], half(gen) * edge[0],
+                     half(gen) * edge[1]};
+      if (cell % 4 == 1) {
+        c[3] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[0];
+      }
+      if (cell % 4 == 2) {
+        c[3] = 0.5 * edge[0];
+        c[4] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[0];
+        c[5] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[1];
+      }
+      for (int p = 0; p < 24; ++p) {
+        double f[3];
+        for (int k = 0; k < 3; ++k) {
+          f[k] = p < 7 ? halves[p][k] : half(gen);
+        }
+        judge(c, wrapOf(c, f));
+      }
+    }
+  }
+  // 3000 LAMMPS-legal cells per edge aspect: one edge is the base, one is
+  // aspect times it, the third lies between. By index mod 4 the tilts are
+  // random, one is at +-edge/2, all three are, or xz is half the long lx.
+  unsigned long seed = 20261122;
+  for (const double aspect : {1e3, 1e5, 1e8}) {
+    std::mt19937_64 gen(seed++);
+    std::uniform_real_distribution<double> logScale(-1.0, 2.0);
+    std::uniform_real_distribution<double> unit(0.0, 1.0);
+    std::uniform_real_distribution<double> half(-0.5, 0.5);
+    const double la = std::log10(aspect);
+    for (int cell = 0; cell < 3000; ++cell) {
+      const double base = std::pow(10.0, logScale(gen));
+      double edge[3] = {base, base * aspect, base * std::pow(10.0, la * unit(gen))};
+      if (cell % 4 == 3) {
+        std::swap(edge[0], edge[1]);
+        if (unit(gen) < 0.5) {
+          std::swap(edge[1], edge[2]);
+        }
+      } else {
+        std::shuffle(edge, edge + 3, gen);
+      }
+      double c[6] = {edge[0], edge[1], edge[2], half(gen) * edge[0], half(gen) * edge[0],
+                     half(gen) * edge[1]};
+      if (cell % 4 == 1) {
+        c[3 + (cell / 4) % 3] =
+            (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[(cell / 4) % 3 == 2 ? 1 : 0];
+      }
+      if (cell % 4 == 2) {
+        c[3] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[0];
+        c[4] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[0];
+        c[5] = (unit(gen) < 0.5 ? 0.5 : -0.5) * edge[1];
+      }
+      if (cell % 4 == 3) {
+        c[4] = 0.5 * edge[0];
+      }
+      for (int p = 0; p < 16; ++p) {
+        double f[3];
+        for (int k = 0; k < 3; ++k) {
+          f[k] = p < 7 ? halves[p][k] : half(gen);
+        }
+        judge(c, wrapOf(c, f));
+      }
+    }
+  }
+  REQUIRE(pairs == 3 + 1200 * 24 + 3 * 3000 * 16);
+}
