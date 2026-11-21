@@ -2186,6 +2186,11 @@ if get_option('with_tests')
     find_program('python3', required: true),
     args: [meson.project_source_root() / 'docs' / 'capi_docs_selftest.py'] + _capi_docs_args,
     timeout: 60)
+  test(
+    'emit_api_symbols_selftest',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'docs' / 'emit_api_symbols_selftest.py'],
+    timeout: 60)
   _doxygen = find_program('doxygen', required: false)
   if _doxygen.found()
     _doxy_data = configuration_data()

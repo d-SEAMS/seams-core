@@ -242,31 +242,41 @@ def render(rows, example):
     return "\n".join(lines)
 
 
-def splice(path, block):
-    text = path.read_text()
-    wrapped = BEGIN + "\n" + block + END + "\n"
-    begins = list(re.finditer(re.escape(BEGIN), text))
-    ends = list(re.finditer(re.escape(END), text))
-    if begins or ends:
-        if len(begins) != len(ends):
-            raise ValueError(
-                "{} has {} begin marker(s) and {} end marker(s)".format(
-                    path, len(begins), len(ends)
-                )
-            )
-        if begins[0].start() > ends[-1].start():
-            raise ValueError("{} has API_SYMBOLS_END before API_SYMBOLS_BEGIN".format(path))
-        tail = text[ends[-1].end():]
-        if tail.startswith("\r\n"):
-            tail = tail[2:]
-        elif tail.startswith("\n"):
-            tail = tail[1:]
-        text = text[:begins[0].start()] + wrapped + tail
-    else:
+def marker_lines(text, marker):
+    return [text.count("\n", 0, m.start()) + 1 for m in re.finditer(re.escape(marker), text)]
+
+
+def splice_text(text, wrapped, name):
+    """Return text with its one symbol block replaced, or a block appended.
+
+    Any other marker layout raises ValueError naming the marker lines.
+    """
+    begins = marker_lines(text, BEGIN)
+    ends = marker_lines(text, END)
+    if not begins and not ends:
         if not text.endswith("\n"):
             text += "\n"
-        text += "\n" + wrapped
-    path.write_text(text)
+        return text + "\n" + wrapped
+    if len(begins) != 1 or len(ends) != 1 or text.find(END) < text.find(BEGIN):
+        raise ValueError(
+            "{}: need exactly one API_SYMBOLS_BEGIN followed by one API_SYMBOLS_END, "
+            "found API_SYMBOLS_BEGIN on line(s) {} and API_SYMBOLS_END on line(s) {}".format(
+                name,
+                ", ".join(map(str, begins)) or "none",
+                ", ".join(map(str, ends)) or "none",
+            )
+        )
+    stop = text.find(END) + len(END)
+    if text.startswith("\r\n", stop):
+        stop += 2
+    elif text.startswith("\n", stop):
+        stop += 1
+    return text[: text.find(BEGIN)] + wrapped + text[stop:]
+
+
+def splice(path, block):
+    text = path.read_text()
+    path.write_text(splice_text(text, BEGIN + "\n" + block + END + "\n", path))
 
 
 def main():
