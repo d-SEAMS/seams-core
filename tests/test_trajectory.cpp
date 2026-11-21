@@ -220,10 +220,10 @@ TEST_CASE("Unwrapping takes the Euclidean image on a skewed LAMMPS cell",
 
   std::vector<double> boxes(27);
   std::vector<double> wrapped(9);
-  for (int f = 0; f < 3; ++f) {
-    std::copy_n(frameBoxes[f], 9, boxes.begin() + 9 * f);
+  for (std::size_t f = 0; f < 3; ++f) {
+    std::copy_n(frameBoxes[f], 9, boxes.data() + 9 * f);
     const auto w = wrapTriclinic(truth[f], frameBoxes[f]);
-    std::copy(w.begin(), w.end(), wrapped.begin() + 3 * f);
+    std::copy(w.begin(), w.end(), wrapped.data() + 3 * f);
   }
   const std::array<double, 3> raw2 = {wrapped[6] - u1[0], wrapped[7] - u1[1],
                                       wrapped[8] - u1[2]};
@@ -236,8 +236,8 @@ TEST_CASE("Unwrapping takes the Euclidean image on a skewed LAMMPS cell",
   REQUIRE(traj::unwrapPositions(wrapped.data(), 3, 1, boxes.data(), 3,
                                 out.data()));
   // The first frame is already in the cell, so no lattice offset is needed.
-  for (int f = 0; f < 3; ++f) {
-    for (int k = 0; k < 3; ++k) {
+  for (std::size_t f = 0; f < 3; ++f) {
+    for (std::size_t k = 0; k < 3; ++k) {
       CHECK(out[3 * f + k] == Catch::Approx(truth[f][k]).margin(1e-9));
     }
   }
