@@ -472,6 +472,30 @@ diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
          if (is_smaller < 0) {
              --smallidx;
              smallnum = smaller;
+diff -ruN host-a/src/formats/AmberNetCDF.cpp host-b/src/formats/AmberNetCDF.cpp
+--- host-a/src/formats/AmberNetCDF.cpp	2026-11-21 06:14:16.849019156 +0000
++++ host-b/src/formats/AmberNetCDF.cpp	2026-11-21 07:30:43.535460511 +0000
+@@ -206,6 +206,20 @@
+         frame.set("name", file_title_.value());
+     }
+ 
++    if (!variables_.coordinates.var && !variables_.velocities.var && n_atoms_ > 0) {
++        throw format_error(
++            "Amber NetCDF file '{}' declares {} atoms with neither coordinates nor velocities",
++            file_.path(), n_atoms_
++        );
++    }
++
++    if (n_atoms_ > file_.file_size()) {
++        throw format_error(
++            "Amber NetCDF atom count {} does not fit in '{}'",
++            n_atoms_, file_.path()
++        );
++    }
++
+     frame.resize(n_atoms_);
+ 
+     if (variables_.coordinates.var) {
 diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
 --- host-a/src/formats/CSSR.cpp	2026-11-21 06:14:16.849019156 +0000
 +++ host-b/src/formats/CSSR.cpp	2026-11-21 06:58:11.083478047 +0000
@@ -678,7 +702,7 @@ diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
  
 diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
 --- host-a/src/formats/LAMMPSData.cpp	2026-11-21 06:14:16.849019156 +0000
-+++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 06:22:02.143843888 +0000
++++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 07:30:41.791455736 +0000
 @@ -4,6 +4,7 @@
  #include <cstdint>
  #include <cassert>
@@ -699,7 +723,19 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
  
  using namespace chemfiles;
  
-@@ -291,9 +297,13 @@
+@@ -223,7 +229,10 @@
+     auto it = comment.find("atom_style");
+     if (it != std::string::npos) {
+         auto style = comment.substr(it + 10);
+-        atom_style_name_ = trim(split(style, ' ')[0]).to_string();
++        auto parts = split(style, ' ');
++        if (!parts.empty()) {
++            atom_style_name_ = trim(parts[0]).to_string();
++        }
+     }
+ 
+     while(!file_.eof()) {
+@@ -291,9 +300,13 @@
              // Even if all parameters are 0, set shape to TRICLINIC
              shape = UnitCell::TRICLINIC;
          } else {
@@ -715,7 +751,7 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
              break;
          }
      }
-@@ -366,6 +376,18 @@
+@@ -366,6 +379,18 @@
      }
      style_ = atom_style(atom_style_name_);
  
@@ -734,6 +770,24 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
      frame.resize(natoms_);
      auto positions = frame.positions();
      auto residues = std::unordered_map<size_t, Residue>();
+@@ -386,11 +411,13 @@
+ 
+         if (!comment.empty()) {
+             // Read the first string after the comment, and use it as atom name
+-            auto name = split(comment, ' ')[0];
+-            if (names_.empty()) {
+-                names_.resize(natoms_);
++            auto parts = split(comment, ' ');
++            if (!parts.empty()) {
++                if (names_.empty()) {
++                    names_.resize(natoms_);
++                }
++                names_[data.index] = parts[0].to_string();
+             }
+-            names_[data.index] = name.to_string();
+         }
+ 
+         auto atom = Atom(std::to_string(data.type));
 diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTrajectory.cpp
 --- host-a/src/formats/LAMMPSTrajectory.cpp	2026-11-21 06:14:16.849019156 +0000
 +++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 06:22:02.143843888 +0000
@@ -846,6 +900,25 @@ diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
          return mmtf_id - atomSkip_;
      }
  }
+diff -ruN host-a/src/formats/MOL2.cpp host-b/src/formats/MOL2.cpp
+--- host-a/src/formats/MOL2.cpp	2026-11-21 06:22:02.071843972 +0000
++++ host-b/src/formats/MOL2.cpp	2026-11-21 07:30:43.387460106 +0000
+@@ -130,8 +130,13 @@
+         bool is_sybyl;
+ 
+         if (sybyl_type.find('.') != std::string::npos || find_in_periodic_table(sybyl_type)) {
+-            atom_type = split(sybyl_type, '.')[0].to_string();
+-            is_sybyl = true;
++            auto parts = split(sybyl_type, '.');
++            if (!parts.empty()) {
++                atom_type = parts[0].to_string();
++                is_sybyl = true;
++            } else {
++                is_sybyl = false;
++            }
+         } else {
+             is_sybyl = false;
+             for (auto c: atom_name) {
 diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
 --- host-a/src/formats/PDB.cpp	2026-11-21 06:14:16.849019156 +0000
 +++ host-b/src/formats/PDB.cpp	2026-11-21 07:09:34.157123904 +0000

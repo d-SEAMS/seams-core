@@ -308,6 +308,9 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_mdf_bonds_leak.mdf", "InsightII MDF", "could not read bonds"},
            // repeated CPMD ATOMS block overwrote initatoms without freeing it
            Refused{"fuzz_cpmdlog_double_atoms.out", "CPMD 3.x output", "could not open"},
+           // Amber NetCDF file declaring 536M atoms with neither coordinates nor velocities
+           Refused{"fuzz_ncrst_huge_atoms.ncrst", "Amber Restart",
+                   "neither coordinates nor velocities"},
        }) {
     requireRefused(item);
   }
@@ -351,6 +354,13 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
   const auto g96 = readAll("hostile/fuzz_g96_timestep_leak.g96", "Gromacs g96");
   REQUIRE(g96.error.empty());
   REQUIRE(g96.steps == 0);
+
+  // A LAMMPS Data file with whitespace-only trailing comments must not
+  // index an empty split() result.
+  const auto lmp = readAll("hostile/fuzz_lammpsdata_blank_comment.lmp", "LAMMPS Data");
+  REQUIRE(lmp.error.empty());
+  REQUIRE(lmp.steps == 1);
+  REQUIRE(lmp.natoms == 1);
 }
 
 TEST_CASE("a VTF line ending in a backslash continues on the next line",
