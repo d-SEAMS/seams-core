@@ -47,7 +47,7 @@ Errington-Debenedetti tetrahedral order for arbitrary selections.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-centres and partners contain zero-based frame indices. A NULL pointer with zero length selects every atom. A centre is excluded from its own partner shell. NEAREST_FOUR uses the four nearest selected partners and ignores cutoff. WITHIN_CUTOFF uses every selected partner at or inside cutoff and generalizes the standard 3/8 normalization to 9/(4 N (N-1)). In both modes a centre with fewer than four neighbours receives quiet NaN.
+centres and partners contain zero-based frame indices. A NULL pointer with zero length selects every atom. A centre is excluded from its own partner shell. q = 1 - 9/(2 N (N-1)) sum_{j<k} (cos psi_jk + 1/3)^2 over the N shell neighbours: a perfect tetrahedron is 1 and an ideal gas averages 0. NEAREST_FOUR uses the four nearest selected partners, N = 4 and the Errington-Debenedetti factor 3/8, and ignores cutoff. WITHIN_CUTOFF uses every selected partner at or inside cutoff. In both modes a centre with fewer than four neighbours receives quiet NaN.
 
 @par Handle access Non-const only because the call clears the handle error slot. @par Ownership The caller owns every selection and output buffer. @par Thread safety Exclusive use of sys.
 

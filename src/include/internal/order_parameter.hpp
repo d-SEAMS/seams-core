@@ -39,7 +39,8 @@ enum class TetrahedralNeighbours {
   //! The four nearest selected partners, with no radial cutoff.
   NearestFour = 0,
   //! Every selected partner at or inside the supplied cutoff. For N
-  //! neighbours the standard 3/8 factor is generalized to 9/(4 N (N-1)).
+  //! neighbours the standard 3/8 factor is generalized to 9/(2 N (N-1)),
+  //! which keeps the ideal-gas mean at zero.
   WithinCutoff = 1
 };
 

@@ -127,8 +127,10 @@ std::vector<double> topoparam::tetrahedralOrder(
         angular += shifted * shifted;
       }
     }
+    // An isotropic pair has <(cos psi + 1/3)^2> = 4/9, so this factor puts
+    // the ideal-gas mean at zero for every N; it is 3/8 at N = 4.
     const double norm =
-        9.0 / (4.0 * static_cast<double>(neighbours) *
+        9.0 / (2.0 * static_cast<double>(neighbours) *
                static_cast<double>(neighbours - 1));
     result[row] = 1.0 - norm * angular;
   }

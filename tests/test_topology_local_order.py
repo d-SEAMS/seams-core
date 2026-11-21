@@ -5,6 +5,8 @@ from __future__ import annotations
 import ctypes
 import math
 import os
+import random
+import statistics
 
 
 lib = ctypes.CDLL(os.environ["SEAMS_LANG_LIB"])
@@ -214,6 +216,21 @@ def test_tetrahedral_order_and_lsi_oracles() -> None:
     finally:
         lib.seams_frame_free(tetra)
 
+    square = make_frame(
+        [50, 50, 50, 51, 50, 50, 49, 50, 50, 50, 51, 50, 50, 49, 50], box
+    )
+    try:
+        for convention, cutoff in ((0, 0.0), (1, 1.5)):
+            assert (
+                lib.seams_frame_tetrahedral(
+                    square, centre, 1, None, 0, convention, cutoff, q
+                )
+                == 0
+            )
+            assert math.isclose(q[0], 0.5, abs_tol=1e-12)
+    finally:
+        lib.seams_frame_free(square)
+
     radial = make_frame(
         [50, 50, 50, 51, 50, 50, 50, 51.5, 50, 50, 50, 52.5, 47, 50, 50],
         box,
@@ -224,3 +241,27 @@ def test_tetrahedral_order_and_lsi_oracles() -> None:
         assert math.isclose(lsi[0], 1.0 / 18.0, abs_tol=1e-12)
     finally:
         lib.seams_frame_free(radial)
+
+
+def test_ideal_gas_tetrahedral_order_averages_zero() -> None:
+    box_length = 20.0
+    rng = random.Random(20261120)
+    values = []
+    configuration_means = []
+    for _ in range(20):
+        xyz = [box_length * rng.random() for _ in range(3 * 64)]
+        frame = make_frame(xyz, [0, 0, 0, box_length, box_length, box_length, 0, 0, 0])
+        q = (ctypes.c_double * 64)()
+        try:
+            assert lib.seams_frame_tetrahedral(frame, None, 0, None, 0, 0, 0.0, q) == 0
+        finally:
+            lib.seams_frame_free(frame)
+        values.extend(q)
+        configuration_means.append(statistics.fmean(q))
+    assert len(values) == 1280
+    assert all(math.isfinite(value) for value in values)
+    # Centres in one configuration share neighbours; the error is taken over
+    # the independent configurations.
+    mean = statistics.fmean(configuration_means)
+    standard_error = statistics.stdev(configuration_means) / math.sqrt(len(configuration_means))
+    assert abs(mean) < 3.0 * standard_error

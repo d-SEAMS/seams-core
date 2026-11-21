@@ -11,6 +11,7 @@
 #include <array>
 #include <cmath>
 #include <functional>
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
@@ -69,6 +70,101 @@ TEST_CASE("tetrahedral order has analytic neighbour conventions",
       cloud, centre, threePartners,
       topoparam::TetrahedralNeighbours::NearestFour, 0.0);
   REQUIRE(std::isnan(sparse[0]));
+}
+
+TEST_CASE("tetrahedral order of a square-planar shell is one half",
+          "[order_parameter][tetrahedral]") {
+  // Four right angles and two straight angles: the sum is 4/3 and
+  // 1 - (3/8)(4/3) = 1/2.
+  auto cloud = makeCloud({
+      {50.0, 50.0, 50.0},
+      {51.0, 50.0, 50.0},
+      {49.0, 50.0, 50.0},
+      {50.0, 51.0, 50.0},
+      {50.0, 49.0, 50.0},
+  });
+  const auto nearest = topoparam::tetrahedralOrder(
+      cloud, {0}, {}, topoparam::TetrahedralNeighbours::NearestFour, 0.0);
+  const auto cutoff = topoparam::tetrahedralOrder(
+      cloud, {0}, {}, topoparam::TetrahedralNeighbours::WithinCutoff, 1.5);
+  REQUIRE_THAT(nearest[0], Catch::Matchers::WithinAbs(0.5, 1e-12));
+  REQUIRE_THAT(cutoff[0], Catch::Matchers::WithinAbs(0.5, 1e-12));
+}
+
+namespace {
+
+// Uniform [0, 1) from the top 53 bits of mt19937_64, whose output sequence
+// is fixed by the standard; std::uniform_real_distribution is not.
+double unitDraw(std::mt19937_64 &engine) {
+  return static_cast<double>(engine() >> 11) * 0x1.0p-53;
+}
+
+struct SampleMean {
+  double mean;
+  double standardError;
+  std::size_t count;
+};
+
+// Centres in one configuration share neighbours, so their q values are
+// correlated; the error is taken over the independent configurations.
+SampleMean idealGasTetrahedral(topoparam::TetrahedralNeighbours convention,
+                               int particles, double cutoff) {
+  constexpr int kConfigurations = 20;
+  constexpr double kBox = 20.0;
+  std::mt19937_64 engine(20261120);
+  std::vector<double> configurationMeans;
+  std::size_t count = 0;
+  for (int config = 0; config < kConfigurations; ++config) {
+    std::vector<std::array<double, 3>> coords(
+        static_cast<std::size_t>(particles));
+    for (auto &point : coords) {
+      for (auto &x : point) {
+        x = kBox * unitDraw(engine);
+      }
+    }
+    const auto q = topoparam::tetrahedralOrder(makeCloud(coords, kBox), {},
+                                               {}, convention, cutoff);
+    double sum = 0.0;
+    std::size_t finite = 0;
+    for (const double value : q) {
+      if (std::isfinite(value)) {
+        sum += value;
+        ++finite;
+      }
+    }
+    configurationMeans.push_back(sum / static_cast<double>(finite));
+    count += finite;
+  }
+  const auto n = static_cast<double>(configurationMeans.size());
+  double mean = 0.0;
+  for (const double value : configurationMeans) {
+    mean += value;
+  }
+  mean /= n;
+  double squares = 0.0;
+  for (const double value : configurationMeans) {
+    squares += (value - mean) * (value - mean);
+  }
+  const double sampleVariance = squares / (n - 1.0);
+  return {mean, std::sqrt(sampleVariance / n), count};
+}
+
+} // namespace
+
+TEST_CASE("tetrahedral order of an ideal gas averages zero",
+          "[order_parameter][tetrahedral]") {
+  SECTION("four nearest neighbours") {
+    const auto sample = idealGasTetrahedral(
+        topoparam::TetrahedralNeighbours::NearestFour, 64, 0.0);
+    REQUIRE(sample.count == 1280);
+    REQUIRE(std::abs(sample.mean) < 3.0 * sample.standardError);
+  }
+  SECTION("every neighbour inside the cutoff") {
+    const auto sample = idealGasTetrahedral(
+        topoparam::TetrahedralNeighbours::WithinCutoff, 256, 4.0);
+    REQUIRE(sample.count >= 1000);
+    REQUIRE(std::abs(sample.mean) < 3.0 * sample.standardError);
+  }
 }
 
 TEST_CASE("local structure index matches radial-gap algebra",

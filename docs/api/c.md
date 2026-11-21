@@ -600,7 +600,7 @@ The call uses the `seams_tetrahedral_neighbours` convention type. The run
 prints:
 
 ```
-capi seams_tetrahedral_order 0.998972
+capi seams_tetrahedral_order 0.997943
 ```
 
 ### seams_lsi
@@ -6659,7 +6659,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Errington-Debenedetti tetrahedral order for arbitrary selections.
 
-centres and partners contain zero-based frame indices. A NULL pointer with zero length selects every atom. A centre is excluded from its own partner shell. NEAREST_FOUR uses the four nearest selected partners and ignores cutoff. WITHIN_CUTOFF uses every selected partner at or inside cutoff and generalizes the standard 3/8 normalization to 9/(4 N (N-1)). In both modes a centre with fewer than four neighbours receives quiet NaN.
+centres and partners contain zero-based frame indices. A NULL pointer with zero length selects every atom. A centre is excluded from its own partner shell. q = 1 - 9/(2 N (N-1)) sum_{j<k} (cos psi_jk + 1/3)^2 over the N shell neighbours: a perfect tetrahedron is 1 and an ideal gas averages 0. NEAREST_FOUR uses the four nearest selected partners, N = 4 and the Errington-Debenedetti factor 3/8, and ignores cutoff. WITHIN_CUTOFF uses every selected partner at or inside cutoff. In both modes a centre with fewer than four neighbours receives quiet NaN.
 
 ```c
 seams_status seams_tetrahedral_order( seams_system *sys, const int *centres, size_t n_centres, const int *partners, size_t n_partners, int convention, double cutoff, double *q, size_t q_len);

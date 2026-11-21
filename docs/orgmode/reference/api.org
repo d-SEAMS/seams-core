@@ -164,11 +164,14 @@ radial cutoff.  The ~WithinCutoff~ convention uses all \(N\) selected
 partners at or inside the cutoff and evaluates
 
 \[
-q = 1 - \frac{9}{4N(N-1)}
+q = 1 - \frac{9}{2N(N-1)}
     \sum_{j<k}\left(\cos\psi_{jk}+\frac{1}{3}\right)^2 .
 \]
 
-For \(N=4\) this is the Errington--Debenedetti factor \(3/8\).
+For \(N=4\) this is the Errington--Debenedetti factor \(3/8\), and
+~NearestFour~ always uses it.  A perfect tetrahedron gives \(q=1\).  For
+uncorrelated directions each term averages \(4/9\), so an ideal gas
+averages \(q=0\) for every \(N\).
 Both conventions return quiet NaN when fewer than four neighbours are
 available; they never substitute zero.
 
