@@ -245,14 +245,23 @@ def render(rows, example):
 def splice(path, block):
     text = path.read_text()
     wrapped = BEGIN + "\n" + block + END + "\n"
-    if BEGIN in text and END in text:
-        text = re.sub(
-            re.escape(BEGIN) + r".*?" + re.escape(END) + r"\n?",
-            wrapped,
-            text,
-            count=1,
-            flags=re.S,
-        )
+    begins = list(re.finditer(re.escape(BEGIN), text))
+    ends = list(re.finditer(re.escape(END), text))
+    if begins or ends:
+        if len(begins) != len(ends):
+            raise ValueError(
+                "{} has {} begin marker(s) and {} end marker(s)".format(
+                    path, len(begins), len(ends)
+                )
+            )
+        if begins[0].start() > ends[-1].start():
+            raise ValueError("{} has API_SYMBOLS_END before API_SYMBOLS_BEGIN".format(path))
+        tail = text[ends[-1].end():]
+        if tail.startswith("\r\n"):
+            tail = tail[2:]
+        elif tail.startswith("\n"):
+            tail = tail[1:]
+        text = text[:begins[0].start()] + wrapped + tail
     else:
         if not text.endswith("\n"):
             text += "\n"

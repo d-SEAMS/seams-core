@@ -2190,8 +2190,9 @@ class TrajectorySequence(Sequence):
                 # Without charges a dipole runs from a molecule's first-listed
                 # atom, so each frame is taken in the first frame's atom order.
                 molecules = _MoleculeOrder()
+                fixed_mols = (mol_ids is None) if kind == "dipole" else True
                 for xyz, box9, types, ids, mols in self._ordered_stream(
-                    fixed_mols=(mol_ids is None)
+                    fixed_mols=fixed_mols
                 ):
                     fr = CtypesFrame(xyz, box9, types=types, atom_ids=ids, mol_ids=mols)
                     if kind == "bisector":

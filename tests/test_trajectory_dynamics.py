@@ -711,6 +711,10 @@ def test_gapped_permuted_two_water_order_and_molecule_swap(tmp_path: Path):
         lambda: bad.reorientation(kind="dipole"),
         lambda: bad.reorientation(kind="bisector", oxygen_type=2, hydrogen_type=1),
         lambda: bad.reorientation(kind="hh", oxygen_type=2, hydrogen_type=1),
+        # bisector/hh use file molecule IDs; passing mol_ids must not bypass
+        # molecule-consistency checks for a swapped trajectory.
+        lambda: bad.reorientation(kind="bisector", oxygen_type=2, hydrogen_type=1, mol_ids=mols),
+        lambda: bad.reorientation(kind="hh", oxygen_type=2, hydrogen_type=1, mol_ids=mols),
         lambda: bad.orientation_order(kind="dipole"),
         lambda: bad.orientation_order(kind="dipole", charges=charges),
         lambda: bad.orientation_order(kind="bisector", oxygen_type=2, hydrogen_type=1),
