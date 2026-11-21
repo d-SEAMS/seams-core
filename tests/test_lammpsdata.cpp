@@ -10,10 +10,13 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <future>
 #include <string>
+#include <system_error>
 
 namespace {
 
@@ -73,6 +76,60 @@ const char *kFile =
     "5 1 7 8\n"
     "6 1 7 9\n";
 
+// Removes the directory when the test case ends, including when a REQUIRE
+// throws.
+struct TempDir {
+  fs::path path = dseams_test::freshDir();
+  TempDir() = default;
+  TempDir(const TempDir &) = delete;
+  TempDir &operator=(const TempDir &) = delete;
+  ~TempDir() {
+    std::error_code ec;
+    fs::remove_all(path, ec);
+  }
+};
+
+// Frees the system handle on every exit from the scope.
+struct SystemGuard {
+  seams_system *sys = seams_system_create();
+  SystemGuard() = default;
+  SystemGuard(const SystemGuard &) = delete;
+  SystemGuard &operator=(const SystemGuard &) = delete;
+  ~SystemGuard() {
+    if (sys != nullptr) {
+      seams_system_destroy(sys);
+    }
+  }
+};
+
+// fs::path::c_str() is wchar_t on Windows; the C API takes narrow strings.
+std::string narrow(const fs::path &path) { return path.string(); }
+
+void setEnv(const char *name, const char *value) {
+#if defined(_WIN32)
+  _putenv_s(name, value);
+#else
+  setenv(name, value, 1);
+#endif
+}
+
+void unsetEnv(const char *name) {
+#if defined(_WIN32)
+  _putenv_s(name, "");
+#else
+  unsetenv(name);
+#endif
+}
+
+// The CLI colours its output when FORCE_COLOR or CLICOLOR_FORCE is set, and
+// the escapes break the text comparison. NO_COLOR outranks both. The child
+// inherits this process's environment.
+void forceColourOff() {
+  setEnv("NO_COLOR", "1");
+  unsetEnv("FORCE_COLOR");
+  unsetEnv("CLICOLOR_FORCE");
+}
+
 struct CliResult {
   int status = -1;
   std::string out;
@@ -85,10 +142,12 @@ CliResult cliRead(const fs::path &path) {
     cli.out = "SEAMS_BIN is unset";
     return cli;
   }
-  const std::string command = "\"" + std::string(bin) +
-                              "\" --type -1 read \"" + path.string() +
-                              "\" 2>&1";
+  forceColourOff();
+  std::string command = "\"" + std::string(bin) + "\" --type -1 read \"" +
+                        narrow(path) + "\" 2>&1";
 #if defined(_WIN32)
+  // cmd.exe /c drops the outer quotes of a string that starts with one.
+  command = "\"" + command + "\"";
   FILE *pipe = _popen(command.c_str(), "r");
 #else
   FILE *pipe = popen(command.c_str(), "r");
@@ -110,8 +169,9 @@ CliResult cliRead(const fs::path &path) {
 }
 
 void expectWater(const fs::path &path) {
+  const std::string text = narrow(path);
   size_t nframes = 99;
-  const seams_status counted = seams_path_nframes(path.c_str(), &nframes);
+  const seams_status counted = seams_path_nframes(text.c_str(), &nframes);
   const char *countError = seams_last_error();
   const std::string countText =
       countError == nullptr ? std::string() : std::string(countError);
@@ -119,10 +179,10 @@ void expectWater(const fs::path &path) {
   REQUIRE(counted == SEAMS_OK);
   REQUIRE(nframes == 1);
 
-  seams_system *sys = seams_system_create();
+  SystemGuard guard;
+  seams_system *sys = guard.sys;
   REQUIRE(sys != nullptr);
-  const seams_status read =
-      seams_system_read(sys, path.c_str(), 1, -1);
+  const seams_status read = seams_system_read(sys, text.c_str(), 1, -1);
   const char *readError = seams_last_error();
   const std::string readText =
       readError == nullptr ? std::string() : std::string(readError);
@@ -163,7 +223,6 @@ void expectWater(const fs::path &path) {
     REQUIRE_THAT(box[3 + i], Catch::Matchers::WithinAbs(kBox, 1e-6));
     REQUIRE_THAT(box[6 + i], Catch::Matchers::WithinAbs(0.0, 1e-6));
   }
-  seams_system_destroy(sys);
 
   const CliResult cli = cliRead(path);
   INFO(cli.out);
@@ -177,9 +236,9 @@ void expectWater(const fs::path &path) {
 
 TEST_CASE("three water molecules in a lammps data file are one frame",
           "[lammpsdata]") {
-  const fs::path dir = dseams_test::freshDir();
-  const fs::path lower = dir / "water.lammpsdata";
-  const fs::path upper = dir / "water.LAMMPSDATA";
+  TempDir tmp;
+  const fs::path lower = tmp.path / "water.lammpsdata";
+  const fs::path upper = tmp.path / "water.LAMMPSDATA";
   {
     std::ofstream out(lower);
     REQUIRE(out.good());
@@ -192,6 +251,76 @@ TEST_CASE("three water molecules in a lammps data file are one frame",
   }
   expectWater(lower);
   expectWater(upper);
-  std::error_code ec;
-  fs::remove_all(dir, ec);
+}
+
+namespace {
+
+// Vendored chemfiles 0.10.4 spins forever on a header line it cannot place
+// in release builds. Each read runs on its own thread so that a regression
+// ends the process with a message instead of hanging until the runner's
+// timeout.
+template <typename Work> void completesInTime(Work work) {
+  auto done = std::async(std::launch::async, work);
+  if (done.wait_for(std::chrono::seconds(20)) != std::future_status::ready) {
+    std::fputs("lammpsdata read did not return within 20 s\n", stderr);
+    std::fflush(stderr);
+    std::_Exit(3);
+  }
+  done.get();
+}
+
+void expectReadError(const fs::path &path) {
+  const std::string text = narrow(path);
+  completesInTime([&] {
+    size_t nframes = 99;
+    (void)seams_path_nframes(text.c_str(), &nframes);
+  });
+  seams_status read = SEAMS_OK;
+  std::string error;
+  completesInTime([&] {
+    SystemGuard guard;
+    read = seams_system_read(guard.sys, text.c_str(), 1, -1);
+    const char *message = seams_last_error();
+    error = message == nullptr ? std::string() : std::string(message);
+  });
+  INFO(error);
+  REQUIRE(read != SEAMS_OK);
+  REQUIRE_FALSE(error.empty());
+}
+
+void writeFile(const fs::path &path, const char *body) {
+  std::ofstream out(path);
+  REQUIRE(out.good());
+  out << body;
+}
+
+} // namespace
+
+TEST_CASE("a lammps data header line that is no keyword is an error",
+          "[lammpsdata][malformed]") {
+  TempDir tmp;
+  const fs::path unknown = tmp.path / "unknown.lammpsdata";
+  writeFile(unknown, "origin line\n"
+                     "\n"
+                     "1 atoms\n"
+                     "1 atom types\n"
+                     "0.0 0.0 0.0 abc origin\n"
+                     "0.0 16.0 xlo xhi\n"
+                     "0.0 16.0 ylo yhi\n"
+                     "0.0 16.0 zlo zhi\n"
+                     "\n"
+                     "Atoms # full\n"
+                     "\n"
+                     "1 1 1 0.0 1.0 1.0 1.0\n");
+  expectReadError(unknown);
+}
+
+TEST_CASE("a file that is not lammps data is an error", "[lammpsdata][malformed]") {
+  TempDir tmp;
+  const fs::path garbage = tmp.path / "garbage.lammpsdata";
+  writeFile(garbage, "this is not a data file\n"
+                     "\n"
+                     "hello world\n"
+                     "more words here\n");
+  expectReadError(garbage);
 }
