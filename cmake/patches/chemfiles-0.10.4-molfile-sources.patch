@@ -5643,8 +5643,8 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM7.h molfiles-b/molfiles/src/ReadPARM7.
  }
 diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
 --- molfiles-a/molfiles/src/ReadPARM.h	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/ReadPARM.h	2026-11-21 07:18:01.738982862 +0000
-@@ -17,6 +17,12 @@
++++ molfiles-b/molfiles/src/ReadPARM.h	2026-11-21 07:23:36.493259533 +0000
+@@ -17,6 +17,14 @@
   *     get_parm_natoms, get_parm_nbonds, get_parm_boxInfo were added in 
   *     order to convert from prm.c parlance to VMD conventions.
   *     RCS Information headers and footers were added.
@@ -5652,12 +5652,14 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
 + *     readparm checks every read, checks the counts of the header against
 + *     the size of a regular file before it sizes arrays from them, and
 + *     checks the residue, molecule and bond indices it uses; get()
-+ *     returns zeroed memory. S_ISREG is defined where <sys/stat.h> lacks
-+ *     it.
++ *     returns zeroed memory. ~ReadPARM() frees prm and its allocated
++ *     arrays, readparm clears prm after freeing it on error and deletes
++ *     temporary Fortran integer buffers on error. S_ISREG is defined
++ *     where <sys/stat.h> lacks it.
   ***************************************************************************/
  
  /*
-@@ -46,8 +52,14 @@
+@@ -46,8 +54,14 @@
  #include <sys/stat.h>
  #include <errno.h>
  #include <string.h>
@@ -5672,7 +5674,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  #if 0 
  #define _REAL		double
  #define DBLFMT          "%lf"
-@@ -80,14 +92,69 @@
+@@ -80,14 +94,69 @@
  namespace {
    class ReadPARM {
    public:
@@ -5745,7 +5747,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
      int preadln(FILE *file, char *string);
      int readparm(FILE *file);
      void get_parm_atom(int, char *, char *, char *, char *, int *, float *,
-@@ -138,6 +205,10 @@
+@@ -138,6 +207,10 @@
  	length = strlen(name);
  	compressed = 0;  // Just to start
  //	compressed = iscompressed(name);
@@ -5756,7 +5758,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  	strcpy(cbuf, name);
  
  	/*
-@@ -233,18 +304,18 @@
+@@ -233,18 +306,18 @@
  /***********************************************************************
                                        GET()
  ************************************************************************/
@@ -5779,7 +5781,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  		fflush(stdout);
  		perror("malloc err:");
          fprintf(stderr, "Exiting due to ReadPARM memory allocation error.\n");
-@@ -322,6 +393,7 @@
+@@ -322,6 +395,7 @@
  #else
          buffer = new int[30];
          if (!read_fortran_12I6(file,buffer,30)) { 
@@ -5787,7 +5789,11 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          prm->Natom = buffer[0];
-@@ -360,6 +432,36 @@
+@@ -357,9 +431,40 @@
+        if (ifpert) {
+          printf("not equipped to read perturbation prmtop\n");
+          free(prm);
++         prm = NULL;
           return MOLFILE_ERROR;
         }
  
@@ -5824,7 +5830,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  
  	/* ALLOCATE MEMORY */
  	prm->Nat3 = 3 * prm->Natom;
-@@ -423,7 +525,8 @@
+@@ -423,7 +528,8 @@
  	 * READ ATOM NAMES -IH(M04)
  	 */
  	for (i=0; i<(prm->Natom/20 + (prm->Natom%20 ? 1 : 0)); i++) {
@@ -5834,7 +5840,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
          }
  
  	/* 
-@@ -487,7 +590,8 @@
+@@ -487,7 +593,8 @@
  	 * READ RES NAMES (4 chars each, 4th blank) -IH(M02)
  	 */
  	for (i=0; i<(prm->Nres/20 + (prm->Nres%20 ? 1 : 0)); i++)
@@ -5844,7 +5850,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  
  	/* 
  	 * READ RES POINTERS TO 1st ATOM 		-IX(I02)
-@@ -588,6 +692,7 @@
+@@ -588,6 +695,7 @@
  #else
          buffer = new int[3*prm->Nbonh];
          if (!read_fortran_12I6(file, buffer, 3*prm->Nbonh)) { 
@@ -5852,7 +5858,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          for (i=0; i<prm->Nbonh; i++) { 
-@@ -612,6 +717,7 @@
+@@ -612,6 +720,7 @@
  #else
          buffer = new int[3*prm->Nbona];
          if (!read_fortran_12I6(file, buffer, 3*prm->Nbona)) { 
@@ -5860,7 +5866,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          for (i=0; i<prm->Nbona; i++) { 
-@@ -638,6 +744,7 @@
+@@ -638,6 +747,7 @@
  #else
          buffer = new int[4*prm->Ntheth];
          if (!read_fortran_12I6(file, buffer, 4*prm->Ntheth)) { 
@@ -5868,7 +5874,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          for (i=0; i<prm->Ntheth; i++) { 
-@@ -665,6 +772,7 @@
+@@ -665,6 +775,7 @@
  #else
          buffer = new int[4*prm->Ntheta];
          if (!read_fortran_12I6(file, buffer, 4*prm->Ntheta)) {
@@ -5876,7 +5882,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          for (i=0; i<prm->Ntheta; i++) { 
-@@ -693,6 +801,7 @@
+@@ -693,6 +804,7 @@
  #else
          buffer = new int[5*prm->Nphih];
          if (!read_fortran_12I6(file, buffer, 5*prm->Nphih)) {
@@ -5884,7 +5890,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          for (i=0; i<prm->Nphih; i++) { 
-@@ -723,6 +832,7 @@
+@@ -723,6 +835,7 @@
  #else
          buffer = new int[5*prm->Nphia];
          if (!read_fortran_12I6(file, buffer, 5*prm->Nphia)) {
@@ -5892,7 +5898,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
            return MOLFILE_ERROR;
          }
          for (i=0; i<prm->Nphia; i++) {
-@@ -776,13 +886,15 @@
+@@ -776,13 +889,15 @@
  	 * READ ATOM SYMBOLS (FOR ANALYSIS PROGS)	-IH(M06)
  	 */
  	for (i=0; i<(prm->Natom/20 + (prm->Natom%20 ? 1 : 0)); i++)
@@ -5910,7 +5916,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
        
  	/*
  	 * READ TREE JOIN INFO (FOR ANALYSIS PROGS)	-IX(I64)
-@@ -812,7 +924,7 @@
+@@ -812,7 +927,7 @@
  #endif
          res = 0;
  	for (i=0; i<prm->Natom; i++) {
@@ -5919,7 +5925,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
              res++;
            prm->AtomRes[i] = res;
  	}
-@@ -832,6 +944,7 @@
+@@ -832,6 +947,7 @@
  #else
                  buffer = new int[3];
                  if (!read_fortran_12I6(file, buffer, 3)) { 
@@ -5927,7 +5933,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
                    return MOLFILE_ERROR;
                  }
                  prm->Iptres = buffer[0];
-@@ -840,6 +953,10 @@
+@@ -840,6 +956,10 @@
                  delete [] buffer;
  #endif
                  readtoeoln(file);
@@ -5938,7 +5944,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  		prm->Boundary = (int *) get(sizeof(int)*prm->Nspm);
  #if !defined(USENEWCODE)
  		for (i=0; i<prm->Nspm; i++)
-@@ -853,7 +970,7 @@
+@@ -853,7 +973,7 @@
  		fscanf(file, " " DBLFMT " " DBLFMT " " DBLFMT, 
  				&prm->Box[0], &prm->Box[1], &prm->Box[2]);
                  readtoeoln(file);
@@ -5947,7 +5953,7 @@ diff -ruN molfiles-a/molfiles/src/ReadPARM.h molfiles-b/molfiles/src/ReadPARM.h
  			prm->Ipatm = prm->Ipres[prm->Iptres] - 1; 
        		/* IF(IPTRES.GT.0) IPTATM = IX(I02+IPTRES-1+1)-1 */
  	}
-@@ -950,14 +1067,15 @@
+@@ -950,14 +1070,15 @@
  // data - buffer to hold the whole block. Should be allocated before the call
  // count - number of ints in the block.
  int ReadPARM::read_fortran_12I6(FILE *fp, int *data, int count) {

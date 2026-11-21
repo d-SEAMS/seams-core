@@ -296,6 +296,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_abinit_bad_typat.bin", "ABINIT", "could not open"},
            // AMBER Parm ReadPARM leaked parmstruct and its arrays
            Refused{"fuzz_parm_read_leak.parm", "AMBER Parm", "could not open"},
+           // AMBER Parm perturbation file freed prm without clearing it before ~ReadPARM
+           Refused{"fuzz_parm_ifpert.parm", "AMBER Parm", "could not open"},
            // VASP POSCAR leaked strdup(lineptr) and overwritten titleline
            Refused{"fuzz_poscar_strdup_leak.poscar", "VASP_POSCAR", "could not open"},
            // non-SQLite DMS file leaked sqlite3 handle on open failure
