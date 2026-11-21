@@ -1,0 +1,1 @@
+`seams::unwrap_positions` and `seams::unwrap_centres` in `include/seams.hpp` throw `seams::Error` with `SEAMS_ERR_RANGE` when the `xyz` span is not exactly `nframes * 3 * natoms` long or that product overflows `size_t`, instead of reading past the span.
