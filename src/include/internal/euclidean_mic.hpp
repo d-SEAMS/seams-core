@@ -121,6 +121,24 @@ inline Split split(double a) {
   return {hi, a - hi};
 }
 
+// v as rounded on its own. With FMA hardware the compiler may fuse the
+// product that produced v into the sum that consumes it, and the error
+// terms computed for the separately rounded product and sum would then no
+// longer add up to the exact result.
+inline double rounded(double v) {
+#if (defined(__GNUC__) || defined(__clang__)) && defined(__SSE2__)
+  __asm__("" : "+x"(v));
+#elif (defined(__GNUC__) || defined(__clang__)) && defined(__aarch64__)
+  __asm__("" : "+w"(v));
+#elif defined(__GNUC__) || defined(__clang__)
+  __asm__("" : "+m"(v));
+#else
+  volatile double kept = v;
+  v = kept;
+#endif
+  return v;
+}
+
 // The rounding error of product = a * b, exactly. Without a hardware FMA,
 // std::fma is a library call, so the product is split instead (Dekker); a
 // target without FMA cannot contract that split into one.
@@ -148,7 +166,7 @@ inline double integerDot(const double (&n)[N], const double (&x)[N]) {
   double sum = 0.0;
   double error = 0.0;
   for (std::size_t i = 0; i < N; i++) {
-    const double product = n[i] * x[i];
+    const double product = rounded(n[i] * x[i]);
     const double next = sum + product;
     const double back = next - sum;
     error += productError(n[i], x[i], product) + ((sum - (next - back)) + (product - back));
@@ -209,12 +227,12 @@ inline Vec3 latticeTranslate(const Obtuse &s, Vec3 w, const double n[3], Vec3 &l
   const Split s0 = split(m0);
   const Split s1 = split(m1);
   const Split s2 = split(m2);
-  const double px0 = m0 * s.cellX[0];
-  const double px1 = m1 * s.cellX[1];
-  const double px2 = m2 * s.cellX[2];
-  const double py1 = m1 * s.cellY[1];
-  const double py2 = m2 * s.cellY[2];
-  const double pz2 = m2 * s.cellZ[2];
+  const double px0 = rounded(m0 * s.cellX[0]);
+  const double px1 = rounded(m1 * s.cellX[1]);
+  const double px2 = rounded(m2 * s.cellX[2]);
+  const double py1 = rounded(m1 * s.cellY[1]);
+  const double py2 = rounded(m2 * s.cellY[2]);
+  const double pz2 = rounded(m2 * s.cellZ[2]);
   const double ex = productError(m0, s0, s.cellX[0], s.splitX[0], px0) +
                     productError(m1, s1, s.cellX[1], s.splitX[1], px1) +
                     productError(m2, s2, s.cellX[2], s.splitX[2], px2);
