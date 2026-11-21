@@ -29,12 +29,41 @@ export MOLECULES_BPY="$cycles_python"
 # The docs snippet and doc-block tests import dseams and pydseams from pydseamslib.
 sh scripts/install_pydseamslib.sh --if-missing
 
+# abi is solved apart from default and carries libabigail's abidiff for
+# capi_abi_2_13. Supply it via a Meson native file when the caller did not
+# already pass one and abidiff is not on PATH, matching CI.
+abidiff_ini=""
+case " ${SEAMS_MESON_ARGS:-} " in
+  *" --native-file "*|*" --native-file="*) ;;
+  *)
+    if ! command -v abidiff >/dev/null 2>&1; then
+      abidiff_bin=""
+      if [ -x "$prefix/../abi/bin/abidiff" ]; then
+        abidiff_bin=$(CDPATH= cd -- "$prefix/../abi/bin" && pwd -P)/abidiff
+      elif command -v pixi >/dev/null 2>&1; then
+        abidiff_bin=$(pixi run --frozen -e abi sh -c 'command -v abidiff' 2>/dev/null || true)
+      fi
+      if [ -n "$abidiff_bin" ] && [ -x "$abidiff_bin" ]; then
+        abidiff_ini="$scratch/abidiff.ini"
+        printf "[binaries]\nabidiff = '%s'\n" "$abidiff_bin" > "$abidiff_ini"
+      fi
+    fi
+    ;;
+esac
+
+if [ -n "$abidiff_ini" ]; then
+  set -- --native-file "$abidiff_ini"
+else
+  set --
+fi
+
 meson setup build --buildtype=release \
   -Dwith_tests=true -Dwith_cli=true \
   -Dwith_gromacs=enabled -Dwith_lammps=enabled \
   -Dwith_openmm=enabled -Dwith_plumed=enabled \
   -Dpaper_full=true \
   -Dlammps_src_include="$lammps_src" \
+  "$@" \
   ${SEAMS_MESON_ARGS:-}
 ninja -C build -j2
 
