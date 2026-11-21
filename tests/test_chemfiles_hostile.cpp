@@ -496,6 +496,20 @@ TEST_CASE("TNG files written by the fixed encoder keep their coordinates",
   REQUIRE(moving.read().size() == 200);
 }
 
+TEST_CASE("an empty clickme.dtr is a DESRES trajectory, not an empty file",
+          "[chemfiles][hostile]") {
+  chemfiles::Trajectory trajectory("hostile/dtr_clickme/clickme.dtr", 'r', "DESRES Trajectory");
+  REQUIRE(trajectory.nsteps() == 2);
+  const auto frame = trajectory.read();
+  REQUIRE(frame.size() == 8);
+  REQUIRE_THAT(frame.positions()[0][0], Catch::Matchers::WithinAbs(0.0, 1e-4));
+  const auto dir = dseams_test::freshDir();
+  const auto empty = dir / "clickme.dtr";
+  std::ofstream(empty, std::ios::binary).close();
+  const auto missing = readAll(empty.string(), "DESRES Trajectory");
+  REQUIRE(missing.error.find("could not open") != std::string::npos);
+}
+
 TEST_CASE("extended XYZ loads every column of a wide property",
           "[chemfiles][hostile]") {
   const auto dir = dseams_test::freshDir();
