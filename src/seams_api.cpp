@@ -4256,6 +4256,12 @@ seams_status seams_msd_create(size_t natoms, size_t max_lag,
   if (natoms == 0 || origin_stride == 0) {
     return fail(SEAMS_ERR_RANGE, "natoms and origin_stride must be positive");
   }
+  if (natoms > traj::kMaxTriples) {
+    return fail(SEAMS_ERR_RANGE, "natoms is too large: 3 * natoms doubles do not fit in memory");
+  }
+  if (max_lag > traj::kMaxLag) {
+    return fail(SEAMS_ERR_RANGE, "max_lag is too large: max_lag + 1 lag bins do not fit in memory");
+  }
   if (!std::isfinite(dt) || !(dt > 0.0)) {
     return fail(SEAMS_ERR_ARG, "dt must be finite and positive");
   }
@@ -4440,6 +4446,9 @@ seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride,
   if (origin_stride == 0) {
     return fail(SEAMS_ERR_RANGE, "origin_stride must be positive");
   }
+  if (max_lag > traj::kMaxLag) {
+    return fail(SEAMS_ERR_RANGE, "max_lag is too large: max_lag + 1 lag bins do not fit in memory");
+  }
   if (!std::isfinite(dt) || !(dt > 0.0)) {
     return fail(SEAMS_ERR_ARG, "dt must be finite and positive");
   }
@@ -4600,6 +4609,12 @@ seams_status seams_reorient_create(size_t n_vectors, size_t max_lag,
   if (n_vectors == 0 || origin_stride == 0) {
     return fail(SEAMS_ERR_RANGE,
                 "n_vectors and origin_stride must be positive");
+  }
+  if (n_vectors > traj::kMaxTriples) {
+    return fail(SEAMS_ERR_RANGE, "n_vectors is too large: 3 * n_vectors doubles do not fit in memory");
+  }
+  if (max_lag > traj::kMaxLag) {
+    return fail(SEAMS_ERR_RANGE, "max_lag is too large: max_lag + 1 lag bins do not fit in memory");
   }
   if (!std::isfinite(dt) || !(dt > 0.0)) {
     return fail(SEAMS_ERR_ARG, "dt must be finite and positive");

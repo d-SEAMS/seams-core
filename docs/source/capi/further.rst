@@ -1122,10 +1122,10 @@ seams_msd_create
 Create a streaming multi-origin MSD accumulator with axial/lateral split.
 
 ``natoms``
-    Particle or molecule count per frame, at least 1.
+    Particle or molecule count per frame, at least 1. Above PTRDIFF_MAX / (3 \* sizeof(double)) the coordinates cannot be allocated, which is ::SEAMS_ERR_RANGE.
 
 ``max_lag``
-    Maximum lag in frames, or 0 to retain all lags.
+    Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is ::SEAMS_ERR_RANGE.
 
 ``origin_stride``
     Frame stride between time origins, at least 1.
@@ -1287,7 +1287,7 @@ seams_hbond_tcf_create
 Create a streaming H-bond lifetime accumulator from per-frame edges.
 
 ``max_lag``
-    Maximum lag in frames, or 0 to retain all lags.
+    Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is ::SEAMS_ERR_RANGE.
 
 ``origin_stride``
     Frame stride between time origins, at least 1.
@@ -1441,10 +1441,10 @@ seams_reorient_create
 Create a streaming orientational correlation accumulator for C1 and C2.
 
 ``n_vectors``
-    Number of molecular vectors per frame, at least 1.
+    Number of molecular vectors per frame, at least 1. Above PTRDIFF_MAX / (3 \* sizeof(double)) the vectors cannot be allocated, which is ::SEAMS_ERR_RANGE.
 
 ``max_lag``
-    Maximum lag in frames, or 0 to retain all lags.
+    Maximum lag in frames, or 0 to retain all lags. Above PTRDIFF_MAX / sizeof(double) - 1 the lag bins cannot be allocated, which is ::SEAMS_ERR_RANGE.
 
 ``origin_stride``
     Frame stride between time origins, at least 1.
