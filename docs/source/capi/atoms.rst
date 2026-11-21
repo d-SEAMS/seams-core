@@ -4,7 +4,7 @@ Atoms in
 
 Read a frame into an opaque handle.
 
-The stable C interface provides 110 exported functions through ``include/seams.h``.
+The stable C interface provides 112 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_atoms.c
    :language: c
@@ -238,6 +238,61 @@ Returns: The atom count, or 0 when sys is NULL or holds no frame.
 ABI 1 query. It cannot report an error; seams_system_natoms() can.
 
 @par Ownership The caller owns sys; the call borrows it. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys. @par Example @code int n = seams_system_count(sys); @endcode
+
+.. _capi-seams_system_set_hydrogen_frame:
+
+seams_system_set_hydrogen_frame
+-------------------------------
+
+
+.. code-block:: c
+
+   seams_status seams_system_set_hydrogen_frame( seams_system *sys, const double *heavy_xyz, size_t n_heavy, const int *heavy_types, const int *heavy_ids, const int *heavy_mols, const double *hydrogen_xyz, size_t n_hydrogen, const int *hydrogen_types, const int *hydrogen_ids, const int *hydrogen_mols, const double *box9, size_t box_len)
+
+Store a heavy-atom cloud and a separate hydrogen cloud.
+
+``sys``
+    Frame handle.
+
+``heavy_xyz``
+    Interleaved heavy coordinates, Angstrom.
+
+``n_heavy``
+    Heavy-atom count. Must be positive.
+
+``heavy_types``
+    One species per heavy atom.
+
+``heavy_ids``
+    One id per heavy atom, or NULL for 1..n_heavy.
+
+``heavy_mols``
+    One molID per heavy atom, or NULL to copy the atom id.
+
+``hydrogen_xyz``
+    Interleaved hydrogen coordinates, Angstrom.
+
+``n_hydrogen``
+    Hydrogen count. Zero allows the hydrogen pointers to be NULL.
+
+``hydrogen_types``
+    One species per hydrogen, required when n_hydrogen is positive.
+
+``hydrogen_ids``
+    One id per hydrogen, or NULL to continue after the heavies.
+
+``hydrogen_mols``
+    One molID per hydrogen, or NULL to copy the atom id.
+
+``box9``
+    ox, oy, oz, lx, ly, lz, xy, xz, yz.
+
+``box_len``
+    Length of box9. Must be 9.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+Heavies occupy frame indices [0, n_heavy). Hydrogens follow, in the order given, so a hydrogen cloud index h is frame index n_heavy + h. A null id pointer numbers that cloud from 1 across the whole frame. A null mol pointer sets each molID to that atom's id, which pairs no hydrogen with a heavy atom. Pass molecule ids to attach each hydrogen to a heavy atom. A failed call leaves the previous frame in place. @par Handle access The call replaces the frame on success and clears the handle error on entry. @par Ownership The caller owns sys and every buffer. The call copies the values and keeps no pointer. @par Thread safety Exclusive use of sys. @par Example @code const double heavy[] = {0, 0, 0, 2.8, 0, 0}; const double hydrogen[] = {1, 0, 0}; const int heavy_types[] = {8, 8}; const int heavy_mols[] = {1, 2}; const int hydrogen_types[] = {2}; const int hydrogen_mols[] = {1}; const double box9[] = {0, 0, 0, 20, 20, 20, 0, 0, 0}; seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols, hydrogen, 1, hydrogen_types, NULL, hydrogen_mols, box9, 9); @endcode
 
 .. _capi-seams_system_natoms:
 

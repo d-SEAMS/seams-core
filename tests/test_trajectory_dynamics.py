@@ -137,6 +137,25 @@ def test_trajectory_sequence_container(tmp_path: Path):
 _EXAMPLE_TRAJ = Path(__file__).resolve().parents[1] / "input" / "traj" / "exampleTraj.lammpstrj"
 
 
+def test_overlay_preserves_downstream_public_names(tmp_path):
+    import os
+    import subprocess
+    import sys
+
+    package = tmp_path / "pydseams"
+    package.mkdir()
+    (package / "__init__.py").write_text(
+        "class Frame: pass\ndef from_ase(): pass\n__all__ = ['Frame', 'from_ase']\n"
+    )
+    adapter = Path(__file__).resolve().parents[1] / "adapters" / "python"
+    env = {**os.environ, "PYTHONPATH": os.pathsep.join([str(adapter), str(tmp_path)])}
+    subprocess.run(
+        [sys.executable, "-c",
+         "from pydseams import *; assert callable(from_ase); assert Trajectory is Frame"],
+        cwd=adapter, env=env, check=True,
+    )
+
+
 def test_trajectory_stays_the_frame_alias():
     assert ds.Trajectory is ds.Frame
     assert {"Frame", "Trajectory", "TrajectorySequence", "open_trajectory"} <= set(ds.__all__)

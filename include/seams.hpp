@@ -491,6 +491,35 @@ struct BondOptions {
 };
 
 /**
+ * @brief One directed hydrogen bond.
+ * @ingroup seams_cpp
+ *
+ * Indices are frame indices. Heavies from set_hydrogen_frame occupy
+ * `[0, n_heavy)` and hydrogens follow. `angle` is acceptor-first degrees:
+ * 0 is a linear donor-hydrogen-acceptor geometry.
+ */
+struct DirectedBond {
+  int donor = -1;       /**< Donor heavy-atom index. */
+  int hydrogen = -1;    /**< Hydrogen index. */
+  int acceptor = -1;    /**< Acceptor heavy-atom index. */
+  double d_AH = 0;      /**< Acceptor-hydrogen distance, Angstrom. */
+  double d_DA = 0;      /**< Donor-acceptor distance, Angstrom. */
+  double angle = 0;     /**< Acceptor-first angle, degrees. */
+};
+
+/**
+ * @brief Knobs for directed hydrogen bonds.
+ * @ingroup seams_cpp
+ */
+struct DirectedBondOptions {
+  double cutoff = 3.5;     /**< Donor-acceptor cutoff, Angstrom. Strictly inside. */
+  double distance = 2.42;  /**< Acceptor-hydrogen cutoff, Angstrom. Strictly inside. */
+  double angle = 30;       /**< Acceptor-first angle, degrees. Kept at or below this value. */
+  int hydrogen = 2;        /**< Hydrogen species. Must be positive and distinct from the type sets. */
+  bool exclude_same_mol = true; /**< Drop a donor and acceptor that share a molID. */
+};
+
+/**
  * @brief Knobs for the axial number density.
  * @ingroup seams_cpp
  */
@@ -1537,6 +1566,81 @@ class System : public detail::Handle<seams_system, seams_system_destroy> {
                                options.distance, options.angle, &n_bonds),
                   get());
     return n_bonds;
+  }
+
+  /**
+   * @brief Store heavies and a separate hydrogen cloud.
+   *
+   * An empty id or mol span uses the C API default for that cloud.
+   */
+  void set_hydrogen_frame(std::span<const double> heavy_xyz, std::span<const int> heavy_types,
+                          std::span<const int> heavy_mols, std::span<const double> hydrogen_xyz,
+                          std::span<const int> hydrogen_types, std::span<const int> hydrogen_mols,
+                          std::span<const double, 9> box9, std::span<const int> heavy_ids,
+                          std::span<const int> hydrogen_ids) {
+    if (heavy_xyz.size() % 3 != 0 || hydrogen_xyz.size() % 3 != 0) {
+      throw Error(SEAMS_ERR_ARG, "coordinates are not a multiple of 3");
+    }
+    const auto n_heavy = heavy_xyz.size() / 3;
+    const auto n_hydrogen = hydrogen_xyz.size() / 3;
+    if (heavy_types.size() != n_heavy || hydrogen_types.size() != n_hydrogen) {
+      throw Error(SEAMS_ERR_ARG, "one type per atom");
+    }
+    if ((!heavy_mols.empty() && heavy_mols.size() != n_heavy) ||
+        (!hydrogen_mols.empty() && hydrogen_mols.size() != n_hydrogen) ||
+        (!heavy_ids.empty() && heavy_ids.size() != n_heavy) ||
+        (!hydrogen_ids.empty() && hydrogen_ids.size() != n_hydrogen)) {
+      throw Error(SEAMS_ERR_ARG, "one id and one molID per atom");
+    }
+    detail::check(seams_system_set_hydrogen_frame(
+                      get(), heavy_xyz.data(), n_heavy, heavy_types.data(),
+                      heavy_ids.empty() ? nullptr : heavy_ids.data(),
+                      heavy_mols.empty() ? nullptr : heavy_mols.data(),
+                      n_hydrogen == 0 ? nullptr : hydrogen_xyz.data(), n_hydrogen,
+                      n_hydrogen == 0 ? nullptr : hydrogen_types.data(),
+                      hydrogen_ids.empty() ? nullptr : hydrogen_ids.data(),
+                      hydrogen_mols.empty() ? nullptr : hydrogen_mols.data(), box9.data(), 9),
+                  get());
+  }
+
+  /**
+   * @brief Directed hydrogen bonds for one donor type set and one acceptor type set.
+   */
+  [[nodiscard]] std::vector<DirectedBond> directed_hbonds(std::span<const int> donor_types,
+                                                         std::span<const int> acceptor_types,
+                                                         const DirectedBondOptions &options) {
+    if (!(options.cutoff > 0.0) || !(options.distance > 0.0) || !(options.angle > 0.0)) {
+      throw Error(SEAMS_ERR_RANGE, "cutoffs must be positive");
+    }
+    std::size_t n_out = 0;
+    detail::check(seams_directed_hbonds(get(), options.cutoff, options.distance, options.angle,
+                                        donor_types.empty() ? nullptr : donor_types.data(),
+                                        donor_types.size(),
+                                        acceptor_types.empty() ? nullptr : acceptor_types.data(),
+                                        acceptor_types.size(), options.hydrogen,
+                                        options.exclude_same_mol ? 1 : 0, nullptr, 0, &n_out),
+                  get());
+    std::vector<seams_directed_hbond> rows(n_out);
+    for (auto &row : rows) {
+      row.size = sizeof(seams_directed_hbond);
+    }
+    if (n_out > 0) {
+      detail::check(seams_directed_hbonds(get(), options.cutoff, options.distance, options.angle,
+                                          donor_types.empty() ? nullptr : donor_types.data(),
+                                          donor_types.size(),
+                                          acceptor_types.empty() ? nullptr : acceptor_types.data(),
+                                          acceptor_types.size(), options.hydrogen,
+                                          options.exclude_same_mol ? 1 : 0, rows.data(), n_out,
+                                          &n_out),
+                    get());
+    }
+    std::vector<DirectedBond> out;
+    out.reserve(n_out);
+    for (const auto &row : rows) {
+      out.push_back(DirectedBond{static_cast<int>(row.donor), static_cast<int>(row.hydrogen),
+                                 static_cast<int>(row.acceptor), row.d_AH, row.d_DA, row.angle});
+    }
+    return out;
   }
 
   /** @brief Number density along one cell axis. */

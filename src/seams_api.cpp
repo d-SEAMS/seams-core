@@ -842,6 +842,88 @@ hbond_edges_detailed(const Cloud &cloud, double cutoff, int oxygen_type, int hyd
 
 } // namespace
 
+/* mols NULL stores molID = atomID, the historical set_atoms behaviour. */
+static seams_status load_frame(seams_system *sys, const double *xyz, size_t n,
+                               const double *box9, size_t box_len, const int *types,
+                               const int *ids, const int *mols) {
+  if (sys == nullptr || xyz == nullptr || box9 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system, coordinates, or box is null");
+  }
+  if (box_len != 9) {
+    return fail(SEAMS_ERR_RANGE, "box length is 9");
+  }
+  if (n == 0) {
+    return fail(SEAMS_ERR_RANGE, "frame has no atoms");
+  }
+  if (n > static_cast<std::size_t>(INT_MAX)) {
+    return fail(SEAMS_ERR_RANGE, "atom count does not fit in the frame");
+  }
+  const int count = static_cast<int>(n);
+  if (!finite_box(box9)) {
+    return fail(SEAMS_ERR_BOX, "box contains a non-finite number");
+  }
+  try {
+    if (!nneigh::setBoxFromLammpsEdges(sys->spare_box, sys->spare_low, box9[0], box9[1],
+                                      box9[2], box9[3], box9[4], box9[5], box9[6],
+                                      box9[7], box9[8])) {
+      return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
+    }
+    if (!finite_coordinates(xyz, n)) {
+      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    }
+    bool sequential = true;
+    if (ids != nullptr) {
+      for (int i = 0; i < count && sequential; ++i) {
+        sequential = ids[i] == i + 1;
+      }
+    }
+    const bool rebuild = !sequential || !sys->ready || sys->identity_ids != n;
+    if (rebuild) {
+      auto &map = sys->spare_ids;
+      map.clear();
+      map.reserve(n);
+      for (int i = 0; i < count; ++i) {
+        if (!map.emplace(ids == nullptr ? i + 1 : ids[i], i).second) {
+          return fail(SEAMS_ERR_ARG, "atom ids are not unique");
+        }
+      }
+    }
+    Cloud &cloud = sys->cloud;
+    sys->staged_current = false;
+    cloud.pts.resize(n);
+    // Nothing below allocates, so the frame is either the old one or the
+    // whole new one.
+    for (int i = 0; i < count; ++i) {
+      const std::size_t base = static_cast<std::size_t>(i) * 3;
+      auto &point = cloud.pts[static_cast<std::size_t>(i)];
+      point.x = xyz[base];
+      point.y = xyz[base + 1];
+      point.z = xyz[base + 2];
+      point.type = types == nullptr ? 1 : types[i];
+      point.atomID = ids == nullptr ? i + 1 : ids[i];
+      point.molID = mols == nullptr ? point.atomID : mols[i];
+      point.iceType = molSys::atom_state_type::unclassified;
+      point.inSlice = true;
+      point.c_ij.clear();
+    }
+    if (rebuild) {
+      cloud.idIndexMap.swap(sys->spare_ids);
+    }
+    cloud.box.swap(sys->spare_box);
+    cloud.boxLow.swap(sys->spare_low);
+    cloud.nop = count;
+    cloud.currentFrame = 1;
+    sys->identity_ids = sequential ? n : 0;
+    sys->ready = true;
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return g_error == "out of memory" ? SEAMS_ERR_NOMEM : SEAMS_ERR_INTERNAL;
+  }
+}
+
 extern "C" {
 
 int seams_abi(void) { return SEAMS_ABI; }
@@ -1016,76 +1098,59 @@ seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t
                                     const int *ids) {
   handle_guard guard(sys);
   clear_error();
-  if (sys == nullptr || xyz == nullptr || box9 == nullptr) {
-    return fail(SEAMS_ERR_NULL, "system, coordinates, or box is null");
+  return load_frame(sys, xyz, n, box9, box_len, types, ids, nullptr);
+}
+
+seams_status seams_system_set_hydrogen_frame(
+    seams_system *sys, const double *heavy_xyz, size_t n_heavy, const int *heavy_types,
+    const int *heavy_ids, const int *heavy_mols, const double *hydrogen_xyz,
+    size_t n_hydrogen, const int *hydrogen_types, const int *hydrogen_ids,
+    const int *hydrogen_mols, const double *box9, size_t box_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || heavy_xyz == nullptr || box9 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system, heavy coordinates, or box is null");
   }
-  if (box_len != 9) {
-    return fail(SEAMS_ERR_RANGE, "box length is 9");
+  if (n_heavy == 0) {
+    return fail(SEAMS_ERR_RANGE, "frame has no heavy atoms");
   }
-  if (n == 0) {
-    return fail(SEAMS_ERR_RANGE, "frame has no atoms");
+  if (heavy_types == nullptr) {
+    return fail(SEAMS_ERR_NULL, "heavy types are null");
   }
-  if (n > static_cast<std::size_t>(INT_MAX)) {
+  if (n_hydrogen > 0 && (hydrogen_xyz == nullptr || hydrogen_types == nullptr)) {
+    return fail(SEAMS_ERR_NULL, "hydrogen coordinates or types are null");
+  }
+  if (n_heavy > static_cast<std::size_t>(INT_MAX) ||
+      n_hydrogen > static_cast<std::size_t>(INT_MAX) - n_heavy) {
     return fail(SEAMS_ERR_RANGE, "atom count does not fit in the frame");
   }
-  const int count = static_cast<int>(n);
-  if (!finite_box(box9)) {
-    return fail(SEAMS_ERR_BOX, "box contains a non-finite number");
-  }
   try {
-    if (!nneigh::setBoxFromLammpsEdges(sys->spare_box, sys->spare_low, box9[0], box9[1],
-                                      box9[2], box9[3], box9[4], box9[5], box9[6],
-                                      box9[7], box9[8])) {
-      return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
+    const std::size_t n = n_heavy + n_hydrogen;
+    std::vector<double> xyz(n * 3);
+    std::vector<int> types(n);
+    std::vector<int> ids(n);
+    std::vector<int> mols(n);
+    for (std::size_t i = 0; i < n_heavy; ++i) {
+      const std::size_t base = i * 3;
+      xyz[base] = heavy_xyz[base];
+      xyz[base + 1] = heavy_xyz[base + 1];
+      xyz[base + 2] = heavy_xyz[base + 2];
+      types[i] = heavy_types[i];
+      ids[i] = heavy_ids == nullptr ? static_cast<int>(i + 1) : heavy_ids[i];
+      mols[i] = heavy_mols == nullptr ? ids[i] : heavy_mols[i];
     }
-    if (!finite_coordinates(xyz, n)) {
-      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    for (std::size_t i = 0; i < n_hydrogen; ++i) {
+      const std::size_t k = n_heavy + i;
+      const std::size_t src = i * 3;
+      const std::size_t base = k * 3;
+      xyz[base] = hydrogen_xyz[src];
+      xyz[base + 1] = hydrogen_xyz[src + 1];
+      xyz[base + 2] = hydrogen_xyz[src + 2];
+      types[k] = hydrogen_types[i];
+      ids[k] = hydrogen_ids == nullptr ? static_cast<int>(k + 1) : hydrogen_ids[i];
+      mols[k] = hydrogen_mols == nullptr ? ids[k] : hydrogen_mols[i];
     }
-    bool sequential = true;
-    if (ids != nullptr) {
-      for (int i = 0; i < count && sequential; ++i) {
-        sequential = ids[i] == i + 1;
-      }
-    }
-    const bool rebuild = !sequential || !sys->ready || sys->identity_ids != n;
-    if (rebuild) {
-      auto &map = sys->spare_ids;
-      map.clear();
-      map.reserve(n);
-      for (int i = 0; i < count; ++i) {
-        if (!map.emplace(ids == nullptr ? i + 1 : ids[i], i).second) {
-          return fail(SEAMS_ERR_ARG, "atom ids are not unique");
-        }
-      }
-    }
-    Cloud &cloud = sys->cloud;
-    sys->staged_current = false;
-    cloud.pts.resize(n);
-    // Nothing below allocates, so the frame is either the old one or the
-    // whole new one.
-    for (int i = 0; i < count; ++i) {
-      const std::size_t base = static_cast<std::size_t>(i) * 3;
-      auto &point = cloud.pts[static_cast<std::size_t>(i)];
-      point.x = xyz[base];
-      point.y = xyz[base + 1];
-      point.z = xyz[base + 2];
-      point.type = types == nullptr ? 1 : types[i];
-      point.atomID = ids == nullptr ? i + 1 : ids[i];
-      point.molID = point.atomID;
-      point.iceType = molSys::atom_state_type::unclassified;
-      point.inSlice = true;
-      point.c_ij.clear();
-    }
-    if (rebuild) {
-      cloud.idIndexMap.swap(sys->spare_ids);
-    }
-    cloud.box.swap(sys->spare_box);
-    cloud.boxLow.swap(sys->spare_low);
-    cloud.nop = count;
-    cloud.currentFrame = 1;
-    sys->identity_ids = sequential ? n : 0;
-    sys->ready = true;
-    return SEAMS_OK;
+    return load_frame(sys, xyz.data(), n, box9, box_len, types.data(), ids.data(), mols.data());
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
@@ -2958,6 +3023,95 @@ seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type
       row.hydrogen = detailed[i].hydrogen >= 0
                          ? static_cast<uint32_t>(detailed[i].hydrogen)
                          : UINT32_MAX;
+      row.d_DA = detailed[i].d_DA;
+      row.angle = detailed[i].angle;
+      std::memcpy(raw_out + i * elem_size, &row, copy_bytes);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_directed_hbonds(
+    seams_system *sys, double pair_cutoff, double dist_cutoff, double angle_cutoff,
+    const int *donor_types, size_t n_donor_types, const int *acceptor_types,
+    size_t n_acceptor_types, int hydrogen_type, int exclude_same_mol,
+    seams_directed_hbond *edges, size_t cap, size_t *n_out) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "directed hbond output is null");
+  }
+  if ((n_donor_types > 0 && donor_types == nullptr) ||
+      (n_acceptor_types > 0 && acceptor_types == nullptr)) {
+    return fail(SEAMS_ERR_NULL, "type set is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!(pair_cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(pair_cutoff) || !std::isfinite(dist_cutoff) ||
+      !std::isfinite(angle_cutoff)) {
+    return fail(SEAMS_ERR_RANGE, "cutoffs must be positive");
+  }
+  if (hydrogen_type <= 0) {
+    return fail(SEAMS_ERR_ARG, "hydrogen type must be positive");
+  }
+  if (exclude_same_mol != 0 && exclude_same_mol != 1) {
+    return fail(SEAMS_ERR_ARG, "exclude_same_mol is 0 or 1");
+  }
+  try {
+    for (size_t i = 0; i < n_donor_types; ++i) {
+      if (donor_types[i] == hydrogen_type) {
+        return fail(SEAMS_ERR_ARG, "hydrogen type is distinct from the donor types");
+      }
+    }
+    for (size_t i = 0; i < n_acceptor_types; ++i) {
+      if (acceptor_types[i] == hydrogen_type) {
+        return fail(SEAMS_ERR_ARG, "hydrogen type is distinct from the acceptor types");
+      }
+    }
+    const std::vector<int> donors(donor_types, donor_types + n_donor_types);
+    const std::vector<int> acceptors(acceptor_types, acceptor_types + n_acceptor_types);
+    const auto detailed = bond::directedHydrogenBonds(
+        sys->cloud, pair_cutoff, dist_cutoff, angle_cutoff, donors, acceptors, hydrogen_type,
+        exclude_same_mol != 0);
+    *n_out = detailed.size();
+    if (edges == nullptr) {
+      return SEAMS_OK;
+    }
+    if (cap > 0 && edges[0].size < sizeof(seams_directed_hbond)) {
+      return fail(SEAMS_ERR_ARG, "directed hbond struct size is short");
+    }
+    if (cap < detailed.size()) {
+      return fail(SEAMS_ERR_RANGE, "buffer is short");
+    }
+    if (detailed.empty()) {
+      return SEAMS_OK;
+    }
+    const std::size_t elem_size = edges[0].size;
+    auto *raw_out = reinterpret_cast<unsigned char *>(edges);
+    for (std::size_t i = 0; i < detailed.size(); ++i) {
+      uint32_t row_size = 0;
+      std::memcpy(&row_size, raw_out + i * elem_size, sizeof(row_size));
+      if (row_size != elem_size) {
+        return fail(SEAMS_ERR_ARG, "directed hbond struct size mismatch");
+      }
+    }
+    const std::size_t copy_bytes = std::min(elem_size, sizeof(seams_directed_hbond));
+    for (std::size_t i = 0; i < detailed.size(); ++i) {
+      seams_directed_hbond row{};
+      row.size = static_cast<uint32_t>(elem_size);
+      row.donor = static_cast<uint32_t>(detailed[i].donor);
+      row.hydrogen = static_cast<uint32_t>(detailed[i].hydrogen);
+      row.acceptor = static_cast<uint32_t>(detailed[i].acceptor);
+      row.d_AH = detailed[i].d_AH;
       row.d_DA = detailed[i].d_DA;
       row.angle = detailed[i].angle;
       std::memcpy(raw_out + i * elem_size, &row, copy_bytes);

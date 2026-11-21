@@ -965,6 +965,39 @@ Errors: None.
 Units: dimensionless counts
 
 Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_frame_directed_hbonds
+
+Purpose: Directed hydrogen-bond edges sorted by donor, hydrogen, and acceptor.
+
+Parameters: frame; pair_cutoff; dist_cutoff; angle_cutoff; donor_types; n_donor_types; acceptor_types; n_acceptor_types; hydrogen_type; exclude_same_mol; donor; hydrogen; acceptor; d_AH; d_DA; angle; cap; n_out
+
+Returns: Zero on success. A non-zero value reports the failure.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
+Units: donor, hydrogen, and acceptor are 0-based indices; distances in angstrom; angle in degrees
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_frame_from_hydrogen_cloud
+
+Purpose: Build a frame from a heavy-atom cloud and a separate hydrogen cloud.
+
+Parameters: heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9
+
+Returns: A new seams_frame, or NULL when the call cannot build one.
+
+Ownership: The caller owns the frame and frees it with seams_frame_free.
+
+Errors: NULL. seams_last_error() names the reason.
+
+Units: coordinates and box lengths in angstrom
+
+Example: `docs/examples/minimal_cpp.cpp`
+
 <!-- API_SYMBOLS_END -->
 
 
