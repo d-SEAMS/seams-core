@@ -2,9 +2,9 @@ name: Offline source tarball
 
 on:
   push:
-    branches: [main, "release/**"]
+    branches: [main, develop, "release/**"]
   pull_request:
-    branches: [main, "release/**"]
+    branches: [main, develop, "release/**"]
 
 jobs:
   dist-offline:

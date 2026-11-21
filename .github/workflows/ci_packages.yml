@@ -4,10 +4,10 @@ name: Packages
 # an installed libseams in their own repositories. Nothing here publishes.
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     tags: ["v*"]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions:

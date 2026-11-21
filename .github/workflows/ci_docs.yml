@@ -1,10 +1,10 @@
 name: Docs
 on:
   push:
-    branches: [main, "release/*"]
+    branches: [main, develop, "release/*"]
     tags: ["v*"]
   pull_request:
-    branches: [main, "release/*"]
+    branches: [main, develop, "release/*"]
 
 # Publish gh-pages only from d-SEAMS/seams-core main. Netlify
 # (dseamsdocs) is Git-linked to that branch and serves
