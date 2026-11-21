@@ -124,7 +124,6 @@ public:
 private:
   std::size_t nParticles_ = 0;
   std::size_t framesSeen_ = 0;
-  std::vector<double> prevWrapped_;
   std::vector<double> currentUnwrapped_;
 };
 

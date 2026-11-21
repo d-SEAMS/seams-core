@@ -359,12 +359,10 @@ void TrajectoryUnwrapper::reset(std::size_t nParticles) {
   framesSeen_ = 0;
   if (nParticles > kMaxTriples) {
     nParticles_ = 0;
-    prevWrapped_.clear();
     currentUnwrapped_.clear();
     return;
   }
   nParticles_ = nParticles;
-  prevWrapped_.assign(3 * nParticles, 0.0);
   currentUnwrapped_.assign(3 * nParticles, 0.0);
 }
 
@@ -384,7 +382,6 @@ bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
     return false;
   }
   if (framesSeen_ == 0) {
-    std::copy_n(xyz, 3 * nParticles_, prevWrapped_.data());
     std::copy_n(xyz, 3 * nParticles_, currentUnwrapped_.data());
   } else {
     for (std::size_t i = 0; i < nParticles_; ++i) {
@@ -396,9 +393,6 @@ bool TrajectoryUnwrapper::pushFrame(const double *xyz, std::size_t nParticles,
       currentUnwrapped_[base] += step[0];
       currentUnwrapped_[base + 1] += step[1];
       currentUnwrapped_[base + 2] += step[2];
-      prevWrapped_[base] = xyz[base];
-      prevWrapped_[base + 1] = xyz[base + 1];
-      prevWrapped_[base + 2] = xyz[base + 2];
     }
   }
   if (unwrappedOut != nullptr) {
