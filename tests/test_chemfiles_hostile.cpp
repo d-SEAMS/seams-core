@@ -329,6 +329,8 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_molcnt_leak.tng", "TNG", kTngErr},
            // TNG particle data allocation exceeded file size bound (24 TB calloc)
            Refused{"fuzz_tng_alloc_bound.tng", "TNG", kTngErr},
+           // GAMESS read_shell_primitives hit EOF before freeing *prim
+           Refused{"fuzz_gamess_prim_leak.gms", "GAMESS", "could not open"},
        }) {
     requireRefused(item);
   }
