@@ -110,7 +110,7 @@ if [[ -f $BASE_TREE/meson.build ]]; then
     run meson compile -C build-base >> "$OUT_DIR/base-setup.log" 2>&1
   )
   EIGEN_INC=$(run bash -c 'echo $CONDA_PREFIX/include/eigen3')
-  BASE_INC="-I$BASE_TREE/src/include/internal -I$BASE_TREE/src/include/external -I$EIGEN_INC"
+  BASE_INC="-I$BASE_TREE/src/include/internal -I$EIGEN_INC"
   BASE_LINK="-L$BASE_TREE/build-base/src -lyodaLib -Wl,-rpath,$BASE_TREE/build-base/src -Wl,--enable-new-dtags -Wl,--allow-shlib-undefined"
   log "compiling baseline drivers"
   run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_scaling" \

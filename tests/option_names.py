@@ -24,6 +24,24 @@ def declared_options(path: Path):
     return set(re.findall(r"option\(\s*'([^']+)'", path.read_text(encoding="utf-8")))
 
 
+def wrap_directory(root: Path, project: str) -> str:
+    """The on-disk subproject directory `meson configure`'s project name
+    actually lands in.
+
+    A `[wrap-file]`/`[wrap-git]` wrap's own `directory =` key can differ
+    from the subproject's `project()` name that `meson configure` reports
+    (e.g. backward-cpp.wrap's directory is backward-cpp-1.6). With no
+    `directory =` key, Meson's own default is the wrap file's base name,
+    which is why every subproject here is named after its wrap file.
+    """
+    wrap = root / f"{project}.wrap"
+    if wrap.is_file():
+        match = re.search(r"^directory\s*=\s*(.+?)\s*$", wrap.read_text(encoding="utf-8"), re.MULTILINE)
+        if match:
+            return match.group(1)
+    return project
+
+
 def configured_project_options(build_dir: str):
     proc = subprocess.run(
         ["meson", "configure", build_dir],
@@ -110,6 +128,7 @@ def main() -> int:
             return 1
     listed = configured_project_options(build_dir)
     root = Path("subprojects")
+    top_level_options = declared_options(Path("meson_options.txt"))
     # Upstream wraps. They are not seams projects and do not carry this
     # tree's option file.
     third_party = {
@@ -123,10 +142,23 @@ def main() -> int:
     for project, options in sorted(listed.items()):
         if project in third_party:
             continue
-        src = root / project / "meson_options.txt"
+        src = root / wrap_directory(root, project) / "meson_options.txt"
         if not src.is_file():
-            sys.stderr.write(f"{project} has no meson_options.txt\n")
-            return 1
+            if options and not options <= top_level_options:
+                # Non-empty, and not this project's own option names, so
+                # this is not the subproject-prints-the-top-level-table
+                # case below: the directory resolved above is wrong.
+                sys.stderr.write(f"{project} has no meson_options.txt\n")
+                return 1
+            # A subproject that declares no options of its own has no
+            # meson_options.txt to check against. (`meson configure`
+            # itself does not keep this clean: for such a subproject it
+            # prints the top-level project's own option table under that
+            # subproject's heading instead of an empty one, reproduced
+            # with cxxopts/rang on this Meson version; the `options <=
+            # top_level_options` test above tells that case apart from a
+            # genuinely wrong directory.)
+            continue
         extra = options - declared_options(src)
         if extra:
             sys.stderr.write(

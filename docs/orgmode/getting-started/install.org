@@ -53,6 +53,41 @@ subproject. Highway (~libhwy~ 1.3 or newer) is optional. A setup that
 does not find it leaves Highway off. The pixi environment below
 provides it.
 
+** Offline builds
+
+~-Dwith_tests=true~ needs Catch2, cxxopts, and rang. ~-Dwith_cli=true~
+needs backward-cpp when ~-Dwith_backward=enabled~ (the default is
+~auto~, which also resolves to on when nothing blocks it). None of the
+three is required by conda-forge/nixpkgs the way Eigen is, so a setup
+with no system package for one of them and no network falls back to
+its Meson wrap, and ~meson setup~ fails outright rather than silently
+dropping the dependency. That failure is intentional: it is
+~--wrap-mode=nodownload~, set on purpose above, doing what it is for.
+
+To build with no network, fetch every wrap once beforehand, while
+network is still available:
+
+#+begin_src bash
+meson subprojects download
+#+end_src
+
+This downloads every ~[wrap-file]~ this repository lists (including
+~backward-cpp.wrap~, ~cxxopts.wrap~, ~rang.wrap~, and ~catch2.wrap~)
+into ~subprojects/packagecache~ and extracts them, after which
+~meson setup~ with ~--wrap-mode=nodownload~ (or no flag at all)
+resolves every one of them from disk, with no further network access.
+The packaged builds that must stay fully offline (~recipe/recipe.yaml~
+for conda-forge, ~packaging/yggdrasil/L/libseams/build_tarballs.jl~ for
+Yggdrasil, and ~nix/package.nix~'s ~fetchurl~) use the same mechanism
+for backward-cpp specifically: each fetches the upstream tarball
+pinned to the wrap's own ~source_hash~, then overlays
+~subprojects/packagefiles/backward-cpp~ on top of it (the same three
+files the wrap's own ~patch_directory~ applies; the wrap carries no
+~patch_hash~, since nothing is fetched for that part), landing
+~subprojects/backward-cpp-1.6~ already on disk before the
+network-free build script runs, so Meson finds that one subproject
+without needing ~meson subprojects download~ to have covered it too.
+
 * pixi
 
 From a checkout of ~v2.14.0~:

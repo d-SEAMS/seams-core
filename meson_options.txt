@@ -24,6 +24,8 @@ option('offload_triple', type: 'string', value: 'nvptx64-nvidia-cuda',
   description: 'OpenMP offload target triple when with_openmp_offload is enabled')
 option('with_ira', type: 'feature', value: 'auto',
   description: 'Link libira (IRA match and SOFI point groups)')
+option('with_backward', type: 'feature', value: 'auto',
+  description: 'Pretty stack traces via backward-cpp (header or wrap) when execinfo.h is available')
 option('with_spglib', type: 'feature', value: 'auto',
   description: 'Link spglib for space groups of crystalline regions')
 option('with_csm', type: 'feature', value: 'disabled',
