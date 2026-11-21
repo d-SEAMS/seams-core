@@ -380,7 +380,10 @@ type, which it reads back as empty. In chemfiles' own readers, the text
 file keeps the right offset after a line longer than its buffer (later
 steps of an XYZ or SMI file read from the wrong place), and XTC, TRR,
 TPR, DCD, Amber NetCDF, CSSR and GRO check their counts and indices.
-A LAMMPS dump checks its box bounds, atom count and atom ids. The
+A LAMMPS dump checks its box bounds, atom count and atom ids. A TRR
+frame with atoms but no positions, velocities or forces ends the
+trajectory, an empty SMI square brace is an error, and the extended XYZ
+comment parser stops at an ~=~ with no name before it. The
 GAMESS gradient and coordinate tables, the BGF and XBGF records, the
 VASP atom counts and the js byte swap are bounded too, and the VTF
 reader parses a line the same way however many files it read before;
