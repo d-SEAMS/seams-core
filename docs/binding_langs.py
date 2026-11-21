@@ -6,7 +6,9 @@ github.com/d-SEAMS when this module loads a language.
 """
 
 import ast
+import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -26,7 +28,19 @@ REPOS = {
 def checkout(name):
     dest = CACHE / name
     dest.parent.mkdir(parents=True, exist_ok=True)
+    # The offline tarball has no network. meson dist vendors these clones
+    # into docs/.cache/bindings and strips .git, so a fetch cannot refresh them.
+    if os.environ.get("SEAMS_NO_NETWORK") == "1":
+        if dest.is_dir() and any(dest.iterdir()):
+            return dest
+        raise RuntimeError(
+            "{} is not in docs/.cache/bindings and SEAMS_NO_NETWORK=1 forbids cloning".format(name)
+        )
     if not (dest / ".git").is_dir():
+        # A dist tree keeps the sources and drops .git. An online run replaces
+        # that snapshot so the check still tracks the binding heads.
+        if dest.exists():
+            shutil.rmtree(dest)
         subprocess.check_call(["git", "clone", "--quiet", "--depth", "1", REPOS[name], str(dest)])
     else:
         subprocess.check_call(["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin", "HEAD"])

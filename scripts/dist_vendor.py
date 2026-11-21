@@ -6,6 +6,7 @@ import hashlib
 import os
 import shutil
 import subprocess
+import sys
 import urllib.request
 from pathlib import Path
 
@@ -103,6 +104,30 @@ def fetch_checked(dist_root, item):
         part.replace(dest)
 
 
+def vendor_bindings(source_root, dist_root):
+    """Shallow-clone the language bindings into the dist cache.
+
+    docs/check_binding_api.py reads those trees. The offline image runs
+    with SEAMS_NO_NETWORK=1, so the clones have to already be in the tarball.
+    """
+    sys.path.insert(0, str(source_root / "docs"))
+    from binding_langs import REPOS
+
+    dest_root = dist_root / "docs" / ".cache" / "bindings"
+    dest_root.mkdir(parents=True, exist_ok=True)
+    for name, url in REPOS.items():
+        dest = dest_root / name
+        if dest.exists():
+            shutil.rmtree(dest)
+        subprocess.run(
+            ["git", "clone", "--quiet", "--depth", "1", url, str(dest)],
+            check=True,
+        )
+        git_dir = dest / ".git"
+        if git_dir.is_dir():
+            shutil.rmtree(git_dir)
+
+
 def main():
     source_root = Path(os.environ["MESON_SOURCE_ROOT"])
     dist_root = Path(os.environ["MESON_DIST_ROOT"])
@@ -114,6 +139,7 @@ def main():
             vendor_cargo(child)
     for item in (CHEMFILES,) + DATA:
         fetch_checked(dist_root, item)
+    vendor_bindings(source_root, dist_root)
 
 
 if __name__ == "__main__":
