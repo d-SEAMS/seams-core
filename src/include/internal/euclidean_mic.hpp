@@ -12,9 +12,10 @@
 // Euclidean minimum image for a triclinic cell. The fractional wrap is the
 // nearest image only inside the Smith ball. Past that ball the closest
 // lattice point is found by the Sommer-Feder-Shalvi slicer over the
-// Voronoi-relevant vectors, started from the wrap itself when no cell edge is
-// longer than the reduced superbasis, and otherwise from Babai rounding in a
-// Selling superbasis.
+// Voronoi-relevant vectors, started from the wrap itself when the longest
+// cell edge is at most 64 times the shortest edge and its square is at most
+// 32 times the square of the longest reduced vector, and otherwise from
+// Babai rounding in a Selling superbasis.
 //
 // The relevant vectors are found once per cell. Every Voronoi-relevant vector
 // is, up to sign, the shortest member of one of the seven nonzero cosets of
@@ -146,6 +147,9 @@ struct Obtuse {
   double rel[3][8]{};
   double relCoef[3][8]{};
   double halfN2[8]{};
+  // dot(rel_i, rel_j), so a binary64 slicer step can update every
+  // projection with one subtraction instead of a fresh dot product.
+  double gram[8][8]{};
   double inv[3][3]{};
   // Rows of the upper-triangular cell, a = (lx, 0, 0), b = (xy, ly, 0),
   // c = (xz, yz, lz), by component.
@@ -156,7 +160,6 @@ struct Obtuse {
   Split splitY[3]{};
   Split splitZ[3]{};
   double maxRelN2 = 0.0;
-  double maxCoef = 0.0;
   // Largest squared row of inv: |Babai coefficient|^2 <= n2(y) * maxInvN2.
   double maxInvN2 = 0.0;
   // max |component| of each vector of the Babai triple.
@@ -399,6 +402,12 @@ inline bool relevantOf(Obtuse &o) {
       o.maxRelN2 = std::max(o.maxRelN2, n2(r));
     }
   }
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      o.gram[i][j] =
+          o.rel[0][i] * o.rel[0][j] + o.rel[1][i] * o.rel[1][j] + o.rel[2][i] * o.rel[2][j];
+    }
+  }
   return true;
 }
 
@@ -542,19 +551,34 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
     o.splitZ[k] = split(cell[k].z);
   }
   double longestEdge = 0.0;
+  double shortestEdge = std::numeric_limits<double>::infinity();
   double longestReduced = 0.0;
   for (int i = 0; i < 4; i++) {
     o.v[i] = v[i];
     longestReduced = std::max(longestReduced, n2(v[i]));
     for (int m = 0; m < 3; m++) {
       o.coef[i][m] = coef[i][m];
-      o.maxCoef = std::max(o.maxCoef, std::abs(coef[i][m]));
     }
     if (i < 3) {
-      longestEdge = std::max(longestEdge, n2(cell[i]));
+      const double edge = n2(cell[i]);
+      longestEdge = std::max(longestEdge, edge);
+      shortestEdge = std::min(shortestEdge, edge);
     }
   }
-  o.fractional = longestEdge <= longestReduced;
+  // Both scales are powers of two, so the products are exact in binary64.
+  // Comparing an edge with a reduced vector for equality flips when the two
+  // meet (FCC, both squared lengths 400) and a 1e-9 Angstrom change makes
+  // the reduced vector the shorter one. A factor of 32 on the squared
+  // lengths keeps those cells, and every compact cell measured out to
+  // orthogonal aspect 10 (squared ratio at most about 14), on the wrap
+  // path. legal-elong sits near 43 and still starts at Babai. The edge
+  // aspect cap (64, squared factor 4096) keeps a long needle whose reduced
+  // vector happens to be almost as long as its long edge on the Babai path,
+  // where the coefficient is re-evaluated.
+  constexpr double kWrapSlack = 32.0;
+  constexpr double kWrapAspect2 = 4096.0;
+  o.fractional = longestEdge <= longestReduced * kWrapSlack &&
+                 longestEdge <= shortestEdge * kWrapAspect2;
   // Every triple of a superbasis spans the same cell volume, so Babai takes
   // the most orthogonal one, |det| / (|b0| |b1| |b2|).
   double bestAbs = 0.0;
@@ -664,6 +688,13 @@ inline int descend(const Obtuse &s, Vec3 &x, double n[3], int cap) {
   if (!(n2(x) < kRange && s.maxRelN2 < kRange)) {
     throw std::runtime_error("minimum-image slicer projection exceeds binary64 range");
   }
+  double proj[8];
+  const auto project = [&]() {
+    for (int k = 0; k < 8; k++) {
+      proj[k] = x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
+    }
+  };
+  project();
   int steps = 0;
   unsigned rejected = 0;
   while (steps < cap) {
@@ -671,13 +702,11 @@ inline int descend(const Obtuse &s, Vec3 &x, double n[3], int cap) {
     int at = -1;
     double sign = 0.0;
     for (int k = 0; k < 8; k++) {
-      const double projection =
-          x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
-      const double gain = std::abs(projection) - s.halfN2[k];
+      const double gain = std::abs(proj[k]) - s.halfN2[k];
       if (gain > bestGain && !(rejected & (1u << k))) {
         bestGain = gain;
         at = k;
-        sign = projection > 0.0 ? 1.0 : -1.0;
+        sign = proj[k] > 0.0 ? 1.0 : -1.0;
       }
     }
     if (at < 0) {
@@ -696,6 +725,16 @@ inline int descend(const Obtuse &s, Vec3 &x, double n[3], int cap) {
     n[1] += sign * s.relCoef[1][at];
     n[2] += sign * s.relCoef[2][at];
     steps++;
+    // A binary64 step moves x by exactly sign * rel[at], so the stored
+    // Gram row updates every projection. The extended-precision norm does
+    // not, and a rejected step leaves x where it was.
+    if constexpr (Precise) {
+      project();
+    } else {
+      for (int k = 0; k < 8; k++) {
+        proj[k] -= sign * s.gram[at][k];
+      }
+    }
   }
   return steps;
 }
@@ -725,15 +764,23 @@ inline Vec3 babai(const Obtuse &s, Vec3 y, double z[3], double &scale) {
 }
 
 // Adds the cell coordinates of the Babai triple combination z to n.
+// Each stored coefficient is an integer, and z[k] multiplies only row
+// coef[idx[k]]. The product that has to be an exact binary64 integer is
+// that term, not max|z| times the largest coefficient of a different
+// vector. A term at or above 2^52 is rejected; requireIntegral then
+// rejects a sum that reaches the same line.
 inline void addBabai(const Obtuse &s, const double z[3], double n[3]) {
-  const double largest = std::max({std::abs(z[0]), std::abs(z[1]), std::abs(z[2])});
-  if (!(largest * s.maxCoef < kIntegral)) {
-    throw std::runtime_error(
-        "minimum-image lattice coefficient exceeds binary64 integer precision");
-  }
   for (int m = 0; m < 3; m++) {
-    n[m] += z[0] * s.coef[s.idx[0]][m] + z[1] * s.coef[s.idx[1]][m] +
-            z[2] * s.coef[s.idx[2]][m];
+    double sum = 0.0;
+    for (int k = 0; k < 3; k++) {
+      const double term = z[k] * s.coef[s.idx[k]][m];
+      if (!(std::abs(term) < kIntegral)) {
+        throw std::runtime_error(
+            "minimum-image lattice coefficient exceeds binary64 integer precision");
+      }
+      sum += term;
+    }
+    n[m] += sum;
   }
 }
 
@@ -770,12 +817,89 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
 
 constexpr int kFractionalSteps = 4;
 
+// Wrap-path slicer. Gain is maintained with the stored Gram matrix, the same
+// recurrence the direct cell descent uses, so a compact cell that finishes
+// in one or two steps does not rebuild eight dot products per step. A step
+// is applied only when its gain is positive; the cap sends anything still
+// moving on to Babai.
+inline int descendFast(const Obtuse &s, Vec3 &x, int cap) {
+  double t0 = x.x * s.rel[0][0] + x.y * s.rel[1][0] + x.z * s.rel[2][0];
+  double t1 = x.x * s.rel[0][1] + x.y * s.rel[1][1] + x.z * s.rel[2][1];
+  double t2 = x.x * s.rel[0][2] + x.y * s.rel[1][2] + x.z * s.rel[2][2];
+  double t3 = x.x * s.rel[0][3] + x.y * s.rel[1][3] + x.z * s.rel[2][3];
+  double t4 = x.x * s.rel[0][4] + x.y * s.rel[1][4] + x.z * s.rel[2][4];
+  double t5 = x.x * s.rel[0][5] + x.y * s.rel[1][5] + x.z * s.rel[2][5];
+  double t6 = x.x * s.rel[0][6] + x.y * s.rel[1][6] + x.z * s.rel[2][6];
+  double t7 = x.x * s.rel[0][7] + x.y * s.rel[1][7] + x.z * s.rel[2][7];
+  const double h0 = s.halfN2[0];
+  const double h1 = s.halfN2[1];
+  const double h2 = s.halfN2[2];
+  const double h3 = s.halfN2[3];
+  const double h4 = s.halfN2[4];
+  const double h5 = s.halfN2[5];
+  const double h6 = s.halfN2[6];
+  const double h7 = s.halfN2[7];
+  int steps = 0;
+  while (steps < cap) {
+    const double g0 = std::abs(t0) - h0;
+    const double g1 = std::abs(t1) - h1;
+    const double g2 = std::abs(t2) - h2;
+    const double g3 = std::abs(t3) - h3;
+    const double g4 = std::abs(t4) - h4;
+    const double g5 = std::abs(t5) - h5;
+    const double g6 = std::abs(t6) - h6;
+    const double g7 = std::abs(t7) - h7;
+    int at = 0;
+    double best = g0;
+    double sign = t0 > 0.0 ? 1.0 : -1.0;
+    if (g1 > best) { best = g1; at = 1; sign = t1 > 0.0 ? 1.0 : -1.0; }
+    if (g2 > best) { best = g2; at = 2; sign = t2 > 0.0 ? 1.0 : -1.0; }
+    if (g3 > best) { best = g3; at = 3; sign = t3 > 0.0 ? 1.0 : -1.0; }
+    if (g4 > best) { best = g4; at = 4; sign = t4 > 0.0 ? 1.0 : -1.0; }
+    if (g5 > best) { best = g5; at = 5; sign = t5 > 0.0 ? 1.0 : -1.0; }
+    if (g6 > best) { best = g6; at = 6; sign = t6 > 0.0 ? 1.0 : -1.0; }
+    if (g7 > best) { best = g7; at = 7; sign = t7 > 0.0 ? 1.0 : -1.0; }
+    if (!(best > 0.0)) {
+      break;
+    }
+    x.x -= sign * s.rel[0][at];
+    x.y -= sign * s.rel[1][at];
+    x.z -= sign * s.rel[2][at];
+    const double *row = s.gram[at];
+    t0 -= sign * row[0];
+    t1 -= sign * row[1];
+    t2 -= sign * row[2];
+    t3 -= sign * row[3];
+    t4 -= sign * row[4];
+    t5 -= sign * row[5];
+    t6 -= sign * row[6];
+    t7 -= sign * row[7];
+    steps++;
+  }
+  return steps;
+}
+
+// The fast path does not carry coefficients. Recover them from the upper
+// triangular cell when a result has to be re-evaluated. The steps are a few
+// lattice vectors, so the long-double quotient rounds to the exact integer.
+inline void recoverCoefficient(const Obtuse &s, Vec3 w, Vec3 y, double n[3]) {
+  const long double dz =
+      (static_cast<long double>(w.z) - y.z) / s.cellZ[2];
+  const long double dy =
+      ((static_cast<long double>(w.y) - y.y) - dz * s.cellY[2]) / s.cellY[1];
+  const long double dx = ((static_cast<long double>(w.x) - y.x) - dy * s.cellX[1] -
+                          dz * s.cellX[2]) /
+                         s.cellX[0];
+  n[0] = std::round(static_cast<double>(dx));
+  n[1] = std::round(static_cast<double>(dy));
+  n[2] = std::round(static_cast<double>(dz));
+}
+
 // Binary64 results are kept only when nothing cancelled far below |w|: the
 // Babai rounding subtracts lattice vectors with sum |z_i| max|b_i| at most
-// 2 max|w|, the slicer takes at most two steps from a start no longer than
-// the wrap (its norms only fall, and each relevant vector it applies is
-// shorter than twice the current point), and the image is at least |w| / 16.
-// Every other image is re-evaluated from its lattice coefficients.
+// 2 max|w|, a Babai descent takes at most two steps, a wrap descent takes
+// at most three steps, and the image is at least |w| / 16. Every other
+// image is re-evaluated from its lattice coefficients.
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w) {
   if (!s.ok) {
     throw std::runtime_error(
@@ -790,11 +914,16 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w) {
   double n[3] = {0.0, 0.0, 0.0};
   Vec3 x = w;
   if (s.fractional) {
-    const int steps = descend<false>(s, x, n, kFractionalSteps);
-    if (steps == 0 || (steps <= 2 && kept(x))) {
-      return x;
+    Vec3 y = x;
+    const int steps = descendFast(s, y, kFractionalSteps);
+    // Stopped inside the cap (at most three steps): the image is kept when
+    // it is still at least |w|/16. Hitting the cap discards the partial
+    // move and starts Babai from the wrap.
+    if (steps < kFractionalSteps && (steps == 0 || kept(y))) {
+      return y;
     }
     if (steps < kFractionalSteps) {
+      recoverCoefficient(s, w, y, n);
       return refine(s, w, n);
     }
   }
@@ -821,7 +950,11 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w) {
   const Vec3 start = latticeTranslate(s, w, n);
   x = start;
   if (descend<false>(s, x, n, std::numeric_limits<int>::max()) == 0) {
-    return start;
+    // Binary64 can miss a step whose squared-norm drop is below an ulp
+    // of |x|^2 (a needle of aspect 5e8 drops n^2 by 1.25 on a value near
+    // 5e16). The extended-precision pass takes that step, and it returns
+    // immediately when every binary64 gain is already non-positive.
+    return refine(s, w, n);
   }
   return refine(s, w, n);
 }

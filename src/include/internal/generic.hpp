@@ -378,9 +378,11 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 // rdf2d paths) and the fractional wrap are both refined by
 // mic::euclideanIfShorter. It reduces the cell with Lagrange and Selling,
 // re-evaluates the reduced vectors from their integer coordinates with an
-// error-free dot product, and descends from the fractional wrap or the Babai
-// point over the shortest member of each coset of L / 2L, which contains
-// every Voronoi-relevant vector. That descent stops in the Voronoi cell, so
+// error-free dot product, and descends from the fractional wrap when the
+// longest edge is at most 64 times the shortest edge and its square is at
+// most 32 times the square of the longest reduced vector, or from the Babai
+// point otherwise, over the shortest member of each coset of L / 2L,
+// which contains every Voronoi-relevant vector. That descent stops in the Voronoi cell, so
 // the result is the minimum image on every legal cell. Results that
 // cancelled heavily are re-evaluated from their integer coefficients and
 // refined in extended precision. Non-finite values, singular bases, and
