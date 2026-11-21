@@ -2086,3 +2086,39 @@ TEST_CASE("minimum image error is within 4 ulps of the wrap and 1e-14 relative",
   }
   REQUIRE(pairs == 3 + 1200 * 24 + 3 * 3000 * 16);
 }
+
+TEST_CASE("elongated minimum images below 2^52 are returned", "[pore]") {
+  // The Babai coordinate on the short reduced vector and the large
+  // coefficient on a different vector used to be multiplied together and
+  // rejected. Each product that is actually formed stays near 1e8.
+  const auto coefficient = [](const double c[6], const std::array<double, 3> &w,
+                              const std::array<double, 3> &got) {
+    const long double cz = (static_cast<long double>(w[2]) - got[2]) / c[2];
+    const long double cy =
+        ((static_cast<long double>(w[1]) - got[1]) - static_cast<long double>(c[5]) * cz) / c[1];
+    const long double cx = ((static_cast<long double>(w[0]) - got[0]) -
+                            static_cast<long double>(c[3]) * cy -
+                            static_cast<long double>(c[4]) * cz) /
+                           c[0];
+    return std::array<long double, 3>{cx, cy, cz};
+  };
+  const auto expect = [&](const double c[6], const double f[3], long long nx, long long ny,
+                          long long nz) {
+    const std::array<double, 3> w = {c[0] * f[0] + c[3] * f[1] + c[4] * f[2],
+                                     c[1] * f[1] + c[5] * f[2], c[2] * f[2]};
+    const auto got = gen::mic::euclideanIfShorter(c[0], c[1], c[2], c[3], c[4], c[5], w, w);
+    const auto n = coefficient(c, w, got);
+    REQUIRE(std::llround(n[0]) == nx);
+    REQUIRE(std::llround(n[1]) == ny);
+    REQUIRE(std::llround(n[2]) == nz);
+    REQUIRE(std::abs(n[0] - static_cast<long double>(nx)) < 1e-4L);
+    REQUIRE(std::abs(n[1] - static_cast<long double>(ny)) < 1e-4L);
+    REQUIRE(std::abs(n[2] - static_cast<long double>(nz)) < 1e-4L);
+  };
+  const double skewed[6] = {120000000, 120000000, 1, 60000000, 1, 1};
+  const double skewedFrac[3] = {0.5, 0.5, -0.5};
+  expect(skewed, skewedFrac, 1, 1, -50000000);
+  const double needle[6] = {500000000, 1, 1, 0.5, 0, 0};
+  const double needleFrac[3] = {0.5, 0, 0};
+  expect(needle, needleFrac, 1, -100000000, 0);
+}
