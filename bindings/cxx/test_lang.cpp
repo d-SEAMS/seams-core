@@ -387,19 +387,23 @@ int main(int argc, char **argv) {
   }
   seams_frame_free(analytic);
 
-  const double radialXyz[15] = {
-      50, 50, 50, 51, 50, 50, 50, 51.5, 50,
-      50, 50, 52.5, 47, 50, 50,
+  const double radialXyz[18] = {
+      50, 50, 50, 52.8, 50, 50, 50, 52.9, 50,
+      50, 50, 53.1, 46.5, 50, 50, 50, 45.8, 50,
   };
   const int radialPartners[4] = {1, 2, 3, 4};
   analytic =
-      seams_frame_from_arrays(radialXyz, 5, analyticBox, nullptr, nullptr);
+      seams_frame_from_arrays(radialXyz, 6, analyticBox, nullptr, nullptr);
   double lsi[1] = {};
   if (analytic == nullptr ||
-      seams_frame_lsi(analytic, centre, 1, radialPartners, 4, 3.1, lsi) !=
-          0 ||
-      std::abs(lsi[0] - 1.0 / 18.0) > 1e-12) {
+      seams_frame_lsi(analytic, centre, 1, nullptr, 0, 3.7, lsi) != 0 ||
+      std::abs(lsi[0] - 0.0525) > 1e-12) {
     return fail("language LSI");
+  }
+  if (seams_frame_lsi(analytic, centre, 1, radialPartners, 4, 3.7, lsi) !=
+          0 ||
+      !std::isnan(lsi[0])) {
+    return fail("language LSI without a partner beyond the cutoff");
   }
   seams_frame_free(analytic);
 

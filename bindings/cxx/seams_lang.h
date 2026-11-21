@@ -239,9 +239,10 @@ int seams_frame_tetrahedral(seams_frame *frame, const int *centres,
                             int n_partners, int convention, double cutoff,
                             double *q);
 
-/** Local Structure Index for the same arbitrary selections. Distances inside
- * cutoff are sorted and adjacent radial-gap variance is returned. Fewer than
- * two neighbours writes NaN. @ingroup lang_order */
+/** Shiratani-Sasai Local Structure Index for the same arbitrary selections:
+ * the variance of the N radial gaps from the nearest partner to the first
+ * partner beyond cutoff. No partner inside cutoff, or none beyond it, writes
+ * NaN. @ingroup lang_order */
 int seams_frame_lsi(seams_frame *frame, const int *centres, int n_centres,
                     const int *partners, int n_partners, double cutoff,
                     double *lsi);

@@ -53,9 +53,10 @@ std::vector<double> tetrahedralOrder(
     const std::vector<int> &centres, const std::vector<int> &partners,
     TetrahedralNeighbours convention, double cutoff);
 
-//! Local Structure Index for selected centres and partners. Distances at or
-//! inside cutoff are sorted; LSI is the variance of adjacent radial gaps.
-//! A shell with fewer than two neighbours is quiet NaN.
+//! Shiratani-Sasai Local Structure Index for selected centres and partners.
+//! With sorted distances r_1 < ... < r_N <= cutoff < r_{N+1}, LSI is the
+//! population variance of the N gaps r_{i+1} - r_i. No partner inside the
+//! cutoff, or none beyond it, is quiet NaN.
 std::vector<double> localStructureIndex(
     const molSys::PointCloud<molSys::Point<double>, double> &cloud,
     const std::vector<int> &centres, const std::vector<int> &partners,

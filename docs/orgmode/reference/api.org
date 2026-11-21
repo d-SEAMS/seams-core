@@ -175,9 +175,18 @@ averages \(q=0\) for every \(N\).
 Both conventions return quiet NaN when fewer than four neighbours are
 available; they never substitute zero.
 
-~topoparam::localStructureIndex~ sorts selected-partner distances at or inside
-the cutoff.  If \(\Delta_j=r_{j+1}-r_j\), it returns the population variance
-of those adjacent gaps.  Fewer than two neighbours returns quiet NaN.
+~topoparam::localStructureIndex~ is the Shiratani--Sasai index.  It sorts
+selected-partner distances so that
+\(r_1<\dots<r_N\le r_c<r_{N+1}\), takes the \(N\) gaps
+\(\Delta_i=r_{i+1}-r_i\) for \(i=1,\dots,N\), and returns their population
+variance
+
+\[
+I = \frac{1}{N}\sum_{i=1}^{N}\left(\Delta_i-\bar\Delta\right)^2 .
+\]
+
+The last gap reaches the first partner beyond the cutoff.  A centre with no
+partner inside the cutoff, or none beyond it, returns quiet NaN.
 
 The stable C entries are ~seams_tetrahedral_order~ and ~seams_lsi~.
 ~seams_frame_tetrahedral~ and ~seams_frame_lsi~ are the language ABI consumed

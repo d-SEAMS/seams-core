@@ -958,19 +958,23 @@ static void analytic_topology_and_order(void) {
   seams_system_destroy(sys);
 
   sys = seams_system_create();
-  const double radial[15] = {
-      50, 50, 50, 51, 50, 50, 50, 51.5, 50,
-      50, 50, 52.5, 47, 50, 50,
+  /* Inside 3.7: 2.8, 2.9, 3.1, 3.5; first beyond: 4.2. Gap variance 0.0525. */
+  const double radial[18] = {
+      50, 50, 50, 52.8, 50, 50, 50, 52.9, 50,
+      50, 50, 53.1, 46.5, 50, 50, 50, 45.8, 50,
   };
   const int radial_partners[4] = {1, 2, 3, 4};
   double lsi[1] = {0};
   if (sys == NULL ||
-      seams_system_set_atoms(sys, radial, 5, box, 9, NULL, NULL) !=
+      seams_system_set_atoms(sys, radial, 6, box, 9, NULL, NULL) !=
           SEAMS_OK ||
-      seams_lsi(sys, centre, 1, radial_partners, 4, 3.1, lsi, 1) !=
-          SEAMS_OK ||
-      fabs(lsi[0] - 1.0 / 18.0) > 1e-12) {
+      seams_lsi(sys, centre, 1, NULL, 0, 3.7, lsi, 1) != SEAMS_OK ||
+      fabs(lsi[0] - 0.0525) > 1e-12) {
     fault("analytic LSI");
+  } else if (seams_lsi(sys, centre, 1, radial_partners, 4, 3.7, lsi, 1) !=
+                 SEAMS_OK ||
+             !isnan(lsi[0])) {
+    fault("LSI without a partner beyond the cutoff");
   }
   seams_system_destroy(sys);
 

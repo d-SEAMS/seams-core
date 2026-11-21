@@ -1068,9 +1068,11 @@ SEAMS_API seams_status seams_tetrahedral_order(
 /**
  * @brief Local Structure Index for arbitrary selections.
  *
- * For each centre, selected-partner distances at or inside cutoff are sorted.
- * The result is the population variance of the adjacent radial gaps. A shell
- * with fewer than two neighbours receives quiet NaN.
+ * Shiratani-Sasai index. For each centre, selected-partner distances are
+ * sorted, r_1 < ... < r_N <= cutoff < r_{N+1}. The result is the population
+ * variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the
+ * first partner beyond cutoff. A centre with no partner inside cutoff, or
+ * none beyond it, receives quiet NaN.
  *
  * @param sys Frame handle.
  * @param centres Centre indices, or NULL when n_centres is zero.

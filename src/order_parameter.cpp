@@ -154,17 +154,19 @@ std::vector<double> topoparam::localStructureIndex(
   const double nan = std::numeric_limits<double>::quiet_NaN();
   std::vector<double> result(centreAtoms.size(), nan);
   for (std::size_t row = 0; row < centreAtoms.size(); ++row) {
-    auto shell = partnerShell(cloud, box, centreAtoms[row], partnerAtoms);
+    const auto shell =
+        partnerShell(cloud, box, centreAtoms[row], partnerAtoms);
     const auto outside =
         std::upper_bound(shell.begin(), shell.end(), cutoff,
                          [](double r, const RadialPartner &entry) {
                            return r < entry.distance;
                          });
-    shell.erase(outside, shell.end());
-    if (shell.size() < 2) {
+    // Shiratani-Sasai: N neighbours inside the cutoff give N gaps, the last
+    // one reaching the first neighbour beyond it.
+    const auto gaps = static_cast<std::size_t>(outside - shell.begin());
+    if (gaps == 0 || outside == shell.end()) {
       continue;
     }
-    const std::size_t gaps = shell.size() - 1;
     double mean = 0.0;
     for (std::size_t i = 0; i < gaps; ++i) {
       mean += shell[i + 1].distance - shell[i].distance;

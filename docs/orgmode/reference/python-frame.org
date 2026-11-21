@@ -132,7 +132,8 @@ Centre and neighbour selections are independent zero-based arrays.  The
 nearest-four convention has no distance cutoff.  The cutoff convention uses
 every selected partner at or inside the cutoff and the generalized
 Errington--Debenedetti normalization.  Tetrahedral order is NaN with fewer
-than four neighbours; LSI is NaN with fewer than two.  These cases are not
+than four neighbours; LSI is NaN without a neighbour inside the cutoff and
+one beyond it.  These cases are not
 reported as liquid-like zeroes.
 
 #+begin_src python

@@ -89,7 +89,7 @@ Local Structure Index for arbitrary selections.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-For each centre, selected-partner distances at or inside cutoff are sorted. The result is the population variance of the adjacent radial gaps. A shell with fewer than two neighbours receives quiet NaN.
+Shiratani-Sasai index. For each centre, selected-partner distances are sorted, r_1 < ... < r_N <= cutoff < r_{N+1}. The result is the population variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the first partner beyond cutoff. A centre with no partner inside cutoff, or none beyond it, receives quiet NaN.
 
 @par Handle access Non-const only because the call clears the handle error slot. @par Ownership The caller owns every selection and output buffer. @par Thread safety Exclusive use of sys.
 

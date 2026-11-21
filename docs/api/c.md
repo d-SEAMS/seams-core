@@ -608,7 +608,7 @@ capi seams_tetrahedral_order 0.997943
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_lsi 0.000105
+capi seams_lsi 0.502195
 ```
 
 ### seams_rings_find
@@ -3791,7 +3791,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Local Structure Index for arbitrary selections.
 
-For each centre, selected-partner distances at or inside cutoff are sorted. The result is the population variance of the adjacent radial gaps. A shell with fewer than two neighbours receives quiet NaN.
+Shiratani-Sasai index. For each centre, selected-partner distances are sorted, r_1 < ... < r_N <= cutoff < r_{N+1}. The result is the population variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the first partner beyond cutoff. A centre with no partner inside cutoff, or none beyond it, receives quiet NaN.
 
 ```c
 seams_status seams_lsi(seams_system *sys, const int *centres, size_t n_centres, const int *partners, size_t n_partners, double cutoff, double *lsi, size_t lsi_len);

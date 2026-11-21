@@ -167,22 +167,28 @@ TEST_CASE("tetrahedral order of an ideal gas averages zero",
   }
 }
 
-TEST_CASE("local structure index matches radial-gap algebra",
+TEST_CASE("local structure index includes the gap beyond the cutoff",
           "[order_parameter][lsi]") {
+  // Inside 3.7: 2.8, 2.9, 3.1, 3.5; first beyond: 4.2. The gaps 0.1, 0.2,
+  // 0.4, 0.7 have mean 0.35 and population variance 0.21 / 4 = 0.0525.
   auto cloud = makeCloud({
       {50.0, 50.0, 50.0},
-      {51.0, 50.0, 50.0},
-      {50.0, 51.5, 50.0},
-      {50.0, 50.0, 52.5},
-      {47.0, 50.0, 50.0},
+      {52.8, 50.0, 50.0},
+      {50.0, 52.9, 50.0},
+      {50.0, 50.0, 53.1},
+      {46.5, 50.0, 50.0},
+      {50.0, 45.8, 50.0},
   });
-  const auto lsi =
-      topoparam::localStructureIndex(cloud, {0}, {1, 2, 3, 4}, 3.1);
-  REQUIRE_THAT(lsi[0], Catch::Matchers::WithinAbs(1.0 / 18.0, 1e-12));
+  const auto lsi = topoparam::localStructureIndex(cloud, {0}, {}, 3.7);
+  REQUIRE_THAT(lsi[0], Catch::Matchers::WithinAbs(0.0525, 1e-12));
 
-  const auto sparse =
-      topoparam::localStructureIndex(cloud, {0}, {1}, 3.1);
-  REQUIRE(std::isnan(sparse[0]));
+  const auto noneBeyond =
+      topoparam::localStructureIndex(cloud, {0}, {1, 2, 3, 4}, 3.7);
+  REQUIRE(std::isnan(noneBeyond[0]));
+  const auto noneInside = topoparam::localStructureIndex(cloud, {0}, {}, 2.0);
+  REQUIRE(std::isnan(noneInside[0]));
+  const auto single = topoparam::localStructureIndex(cloud, {0}, {1, 5}, 3.7);
+  REQUIRE_THAT(single[0], Catch::Matchers::WithinAbs(0.0, 1e-12));
 }
 
 // Regression test for projAreaSingleRing return order.

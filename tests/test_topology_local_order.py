@@ -231,14 +231,17 @@ def test_tetrahedral_order_and_lsi_oracles() -> None:
     finally:
         lib.seams_frame_free(square)
 
+    # Inside 3.7: 2.8, 2.9, 3.1, 3.5; first beyond: 4.2. Gap variance 0.0525.
     radial = make_frame(
-        [50, 50, 50, 51, 50, 50, 50, 51.5, 50, 50, 50, 52.5, 47, 50, 50],
+        [50, 50, 50, 52.8, 50, 50, 50, 52.9, 50, 50, 50, 53.1, 46.5, 50, 50, 50, 45.8, 50],
         box,
     )
     lsi = (ctypes.c_double * 1)()
     try:
-        assert lib.seams_frame_lsi(radial, centre, 1, partners, 4, 3.1, lsi) == 0
-        assert math.isclose(lsi[0], 1.0 / 18.0, abs_tol=1e-12)
+        assert lib.seams_frame_lsi(radial, centre, 1, None, 0, 3.7, lsi) == 0
+        assert math.isclose(lsi[0], 0.0525, abs_tol=1e-12)
+        assert lib.seams_frame_lsi(radial, centre, 1, partners, 4, 3.7, lsi) == 0
+        assert math.isnan(lsi[0])
     finally:
         lib.seams_frame_free(radial)
 
