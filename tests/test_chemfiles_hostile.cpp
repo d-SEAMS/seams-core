@@ -349,6 +349,9 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_xtc2_index_oob.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_xtc2_index_neg1123.tng", "TNG", kTngErr},
            Refused{"fuzz_tng_xtc2_index_m1.tng", "TNG", kTngErr},
+           // Streams written by the broken Huffman length sort are not decodable
+           Refused{"fuzz_tng_bwlzh_roundtrip.tng", "TNG", kTngErr},
+           Refused{"fuzz_tng_xtc3_roundtrip.tng", "TNG", kTngErr},
        }) {
     requireRefused(item);
   }
@@ -472,6 +475,25 @@ TEST_CASE("a VTF range past 200000 atoms is the structure it declares",
     REQUIRE_THAT(frame.positions()[kAtoms - 1][2], Catch::Matchers::WithinAbs(3.0, 1e-6));
   }
   fs::remove_all(dir);
+}
+
+TEST_CASE("TNG files written by the fixed encoder keep their coordinates",
+          "[chemfiles][hostile]") {
+  for (const char *name : {"fuzz_tng_codec_bwlzh.tng", "fuzz_tng_codec_xtc2.tng",
+                           "fuzz_tng_codec_xtc3.tng", "fuzz_tng_codec_gzip.tng",
+                           "fuzz_tng_codec_none.tng", "fuzz_tng_codec_triplet.tng"}) {
+    chemfiles::Trajectory trajectory(std::string("hostile/") + name, 'r', "TNG");
+    REQUIRE(trajectory.nsteps() == 3);
+    const auto frame = trajectory.read();
+    REQUIRE(frame.size() == 40);
+    // Atom 0 is on the origin in y and z. x is the only jitter, and the
+    // precision is 0.001 nm.
+    REQUIRE_THAT(frame.positions()[0][1], Catch::Matchers::WithinAbs(0.0, 0.02));
+    REQUIRE_THAT(frame.positions()[0][2], Catch::Matchers::WithinAbs(0.0, 0.02));
+  }
+  chemfiles::Trajectory moving("hostile/fuzz_tng_codec_bwlzh_move.tng", 'r', "TNG");
+  REQUIRE(moving.nsteps() == 4);
+  REQUIRE(moving.read().size() == 200);
 }
 
 TEST_CASE("extended XYZ loads every column of a wide property",

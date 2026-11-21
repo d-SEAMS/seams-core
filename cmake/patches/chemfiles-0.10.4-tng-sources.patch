@@ -40,6 +40,12 @@
 # header's decompressed size is the block size, not when the ratio to
 # the file is below 4096, and a particle array wider than the
 # decompressed block is rejected before it is allocated.
+# Run-length, LZ77, move-to-front and Burrows-Wheeler decoders return an
+# error when a count, a back-reference or a table index would leave the
+# buffer they were given. They no longer call exit.
+# The position and velocity compressors measure the packed block and
+# allocate that many bytes. The old 14 bytes per value was smaller than
+# a Huffman or XTC3 dictionary on a short block.
 diff -ruN tng-a/tng/include/compression/bwlzh.h tng-b/tng/include/compression/bwlzh.h
 --- tng-a/tng/include/compression/bwlzh.h	2021-11-30 12:10:11.000000000 +0000
 +++ tng-b/tng/include/compression/bwlzh.h	2026-11-21 15:00:31.050288354 +0000
@@ -73,6 +79,18 @@ diff -ruN tng-a/tng/include/compression/bwlzh.h tng-b/tng/include/compression/bw
  
  
  /* the value pointed to by chosen_algo should be
+diff -ruN tng-a/tng/include/compression/bwt.h tng-b/tng/include/compression/bwt.h
+--- tng-a/tng/include/compression/bwt.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/bwt.h	2026-11-21 15:17:34.972899451 +0000
+@@ -27,7 +27,7 @@
+ 
+ void Ptngc_comp_to_bwt(unsigned int* vals, int nvals, unsigned int* output, int* index);
+ 
+-void Ptngc_comp_from_bwt(const unsigned int* input, int nvals, int index, unsigned int* vals);
++int Ptngc_comp_from_bwt(const unsigned int* input, int nvals, int index, unsigned int* vals);
+ 
+ void Ptngc_bwt_merge_sort_inner(int*          indices,
+                                 int           nvals,
 diff -ruN tng-a/tng/include/compression/coder.h tng-b/tng/include/compression/coder.h
 --- tng-a/tng/include/compression/coder.h	2021-11-30 12:10:11.000000000 +0000
 +++ tng-b/tng/include/compression/coder.h	2026-11-21 15:01:48.190127185 +0000
@@ -135,6 +153,41 @@ diff -ruN tng-a/tng/include/compression/huffman.h tng-b/tng/include/compression/
 +                                 int                  huffman_dict_unpackedlen);
  
  #endif
+diff -ruN tng-a/tng/include/compression/lz77.h tng-b/tng/include/compression/lz77.h
+--- tng-a/tng/include/compression/lz77.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/lz77.h	2026-11-21 15:17:31.244898500 +0000
+@@ -34,7 +34,7 @@
+                         unsigned int* offsets,
+                         int*          noffsets);
+ 
+-void Ptngc_comp_from_lz77(const unsigned int* data,
++int Ptngc_comp_from_lz77(const unsigned int* data,
+                           int                 ndata,
+                           const unsigned int* len,
+                           int                 nlens,
+diff -ruN tng-a/tng/include/compression/mtf.h tng-b/tng/include/compression/mtf.h
+--- tng-a/tng/include/compression/mtf.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/mtf.h	2026-11-21 15:17:34.800899407 +0000
+@@ -31,7 +31,7 @@
+                             int                 ndict,
+                             unsigned int*       valsmtf);
+ 
+-void Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
++int Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
+                               int                 nvals,
+                               const unsigned int* dict,
+                               int                 ndict,
+diff -ruN tng-a/tng/include/compression/rle.h tng-b/tng/include/compression/rle.h
+--- tng-a/tng/include/compression/rle.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/rle.h	2026-11-21 15:17:28.028897639 +0000
+@@ -27,6 +27,6 @@
+ 
+ void Ptngc_comp_conv_to_rle(const unsigned int* vals, int nvals, unsigned int* rle, int* nrle, int min_rle);
+ 
+-void Ptngc_comp_conv_from_rle(const unsigned int* rle, unsigned int* vals, int nvals);
++int Ptngc_comp_conv_from_rle(const unsigned int* rle, int nrle, unsigned int* vals, int nvals);
+ 
+ #endif
 diff -ruN tng-a/tng/include/compression/tng_compress.h tng-b/tng/include/compression/tng_compress.h
 --- tng-a/tng/include/compression/tng_compress.h	2021-11-30 12:10:11.000000000 +0000
 +++ tng-b/tng/include/compression/tng_compress.h	2026-11-21 14:42:51.000000000 +0000
@@ -174,7 +227,7 @@ diff -ruN tng-a/tng/include/compression/tng_compress.h tng-b/tng/include/compres
                                                        unsigned long* prec_hi,
 diff -ruN tng-a/tng/src/compression/bwlzh.c tng-b/tng/src/compression/bwlzh.c
 --- tng-a/tng/src/compression/bwlzh.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/compression/bwlzh.c	2026-11-21 15:01:39.122146052 +0000
++++ tng-b/tng/src/compression/bwlzh.c	2026-11-21 15:17:47.860902343 +0000
 @@ -547,7 +547,34 @@
  }
  
@@ -434,7 +487,59 @@ diff -ruN tng-a/tng/src/compression/bwlzh.c tng-b/tng/src/compression/bwlzh.c
                  inpdata += bwlzhhufflen;
  
                  if (verbose)
-@@ -851,10 +894,12 @@
+@@ -778,7 +821,11 @@
+                     fprintf(stderr, "Decompressing LZ77.\n");
+                 }
+ 
+-                Ptngc_comp_from_lz77(rle, nrle, lens, nlens, offsets, noffsets, mtf, nvals16);
++                if (Ptngc_comp_from_lz77(rle, nrle, lens, nlens, offsets, noffsets, mtf, nvals16))
++                {
++                    failed = 1;
++                    goto bwlzh_done;
++                }
+             }
+             else if (reducealgo == 0) /* RLE */
+             {
+@@ -790,7 +837,11 @@
+                 {
+                     fprintf(stderr, "Decompressing rle block.\n");
+                 }
+-                Ptngc_comp_conv_from_rle(rle, mtf, nvals16);
++                if (Ptngc_comp_conv_from_rle(rle, nrle, mtf, nvals16))
++                {
++                    failed = 1;
++                    goto bwlzh_done;
++                }
+             }
+ 
+ #ifdef PARTIAL_MTF3
+@@ -819,7 +870,11 @@
+ #    else
+         int ndict;
+         Ptngc_comp_canonical_dict(dict, &ndict);
+-        Ptngc_comp_conv_from_mtf(mtf, nvals16, dict, ndict, bwt);
++        if (Ptngc_comp_conv_from_mtf(mtf, nvals16, dict, ndict, bwt))
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ #    endif
+ #endif
+ 
+@@ -832,7 +887,11 @@
+         {
+             fprintf(stderr, "Inverse BWT.\n");
+         }
+-        Ptngc_comp_from_bwt(bwt, nvals16, bwt_index, vals16);
++        if (Ptngc_comp_from_bwt(bwt, nvals16, bwt_index, vals16))
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ 
+ #ifdef SHOWIT
+         printvals("vals16", vals16, nvals16);
+@@ -851,10 +910,12 @@
          if (valsnew != thisvals)
          {
              fprintf(stderr, "BWLZH: Block contained different number of values than expected.\n");
@@ -448,7 +553,7 @@ diff -ruN tng-a/tng/src/compression/bwlzh.c tng-b/tng/src/compression/bwlzh.c
      free(hist);
      free(dict);
      free(bwlzhhuff);
-@@ -862,15 +907,18 @@
+@@ -862,15 +923,18 @@
      free(mtf3);
  #endif
      free(tmpmem);
@@ -473,16 +578,42 @@ diff -ruN tng-a/tng/src/compression/bwlzh.c tng-b/tng/src/compression/bwlzh.c
  }
 diff -ruN tng-a/tng/src/compression/bwt.c tng-b/tng/src/compression/bwt.c
 --- tng-a/tng/src/compression/bwt.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/compression/bwt.c	2026-11-21 15:01:46.658130369 +0000
-@@ -362,8 +362,20 @@
++++ tng-b/tng/src/compression/bwt.c	2026-11-21 15:17:43.404901411 +0000
+@@ -352,18 +352,43 @@
+ }
  
+ /* Burrows-Wheeler inverse transform. */
+-void Ptngc_comp_from_bwt(const unsigned int* input, const int nvals, int index, unsigned int* vals)
++int Ptngc_comp_from_bwt(const unsigned int* input, const int nvals, int index, unsigned int* vals)
+ {
+     /* Straightforward from the Burrows-Wheeler paper (page 13). */
+     int           i;
+-    unsigned int* c   = warnmalloc(0x10000 * sizeof *c);
+-    unsigned int* p   = warnmalloc(nvals * sizeof *p);
++    unsigned int* c;
++    unsigned int* p;
+     unsigned int  sum = 0;
+ 
++    if (nvals < 0 || nvals > 0x10000000)
++    {
++        return 1;
++    }
++    c = warnmalloc(0x10000 * sizeof *c);
++    p = warnmalloc((size_t)nvals * sizeof *p);
++    if (c == NULL || p == NULL)
++    {
++        free(p);
++        free(c);
++        return 1;
++    }
++
      memset(c, 0, sizeof(unsigned int) * 0x10000);
  
 +    if (index < 0 || (nvals > 0 && index >= nvals))
 +    {
 +        free(p);
 +        free(c);
-+        return;
++        return 1;
 +    }
      for (i = 0; i < nvals; i++)
      {
@@ -490,11 +621,29 @@ diff -ruN tng-a/tng/src/compression/bwt.c tng-b/tng/src/compression/bwt.c
 +        {
 +            free(p);
 +            free(c);
-+            return;
++            return 1;
 +        }
          p[i] = c[input[i]];
          c[input[i]]++;
      }
+@@ -374,9 +399,16 @@
+     }
+     for (i = nvals - 1; i >= 0; i--)
+     {
++        if (index < 0 || index >= nvals)
++        {
++            free(p);
++            free(c);
++            return 1;
++        }
+         vals[i] = input[index];
+-        index   = p[index] + c[input[index]];
++        index   = (int)(p[index] + c[input[index]]);
+     }
+     free(p);
+     free(c);
++    return 0;
+ }
 diff -ruN tng-a/tng/src/compression/coder.c tng-b/tng/src/compression/coder.c
 --- tng-a/tng/src/compression/coder.c	2021-11-30 12:10:11.000000000 +0000
 +++ tng-b/tng/src/compression/coder.c	2026-11-21 15:01:49.146125196 +0000
@@ -1113,7 +1262,7 @@ diff -ruN tng-a/tng/src/compression/huffman.c tng-b/tng/src/compression/huffman.
  }
 diff -ruN tng-a/tng/src/compression/huffmem.c tng-b/tng/src/compression/huffmem.c
 --- tng-a/tng/src/compression/huffmem.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/compression/huffmem.c	2026-11-21 15:00:51.806244830 +0000
++++ tng-b/tng/src/compression/huffmem.c	2026-11-21 15:17:54.020903514 +0000
 @@ -256,23 +256,66 @@
                                       huffman_lengths, &algo, 0);
  }
@@ -1329,9 +1478,9 @@ diff -ruN tng-a/tng/src/compression/huffmem.c tng-b/tng/src/compression/huffmem.
 +            }
 +            else
 +            {
-+                Ptngc_comp_conv_from_rle(huffdictrle, huffdictunpack, nhuffdictunpack);
-+                if (Ptngc_comp_conv_from_huffman(huffman + 14, huffman + 14 + nhuff, vals16, nvals16, ndict,
-+                                                 NULL, NULL, 0, huffdictunpack, 3 + 0x20000))
++                if (Ptngc_comp_conv_from_rle(huffdictrle, nhuffrle, huffdictunpack, nhuffdictunpack)
++                    || Ptngc_comp_conv_from_huffman(huffman + 14, huffman + 14 + nhuff, vals16, nvals16, ndict,
++                                                    NULL, NULL, 0, huffdictunpack, 3 + 0x20000))
 +                {
 +                    failed = 1;
 +                }
@@ -1367,9 +1516,248 @@ diff -ruN tng-a/tng/src/compression/huffmem.c tng-b/tng/src/compression/huffmem.
  
  static char* huff_algo_names[N_HUFFMAN_ALGO] = { "Huffman (dict=raw)", "Huffman (dict=Huffman)",
 Binary files tng-a/tng/src/compression/huffrt and tng-b/tng/src/compression/huffrt differ
+diff -ruN tng-a/tng/src/compression/lz77.c tng-b/tng/src/compression/lz77.c
+--- tng-a/tng/src/compression/lz77.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/lz77.c	2026-11-21 15:17:34.272899276 +0000
+@@ -342,45 +342,58 @@
+     free(previous);
+ }
+ 
+-void Ptngc_comp_from_lz77(const unsigned int* data,
+-                          const int           ndata,
+-                          const unsigned int* len,
+-                          const int           nlens,
+-                          const unsigned int* offsets,
+-                          const int           noffsets,
+-                          unsigned int*       vals,
+-                          const int           nvals)
++int Ptngc_comp_from_lz77(const unsigned int* data,
++                         const int           ndata,
++                         const unsigned int* len,
++                         const int           nlens,
++                         const unsigned int* offsets,
++                         const int           noffsets,
++                         unsigned int*       vals,
++                         const int           nvals)
+ {
+     int i    = 0;
+     int joff = 0;
+     int jdat = 0;
+     int jlen = 0;
+-    (void)ndata;
+-    (void)nlens;
+-    (void)noffsets;
++    if (nvals < 0 || ndata < 0 || nlens < 0 || noffsets < 0)
++    {
++        return 1;
++    }
+     while (i < nvals)
+     {
+-        unsigned int v = data[jdat++];
++        unsigned int v;
++        if (jdat >= ndata)
++        {
++            return 1;
++        }
++        v = data[jdat++];
+         if (v < 2)
+         {
+-            int offset = 1;
+-            int k;
+-            int length = (int)len[jlen++];
+-#if 0
+-          fprintf(stderr,"len=%d off=%d i=%d\n",length,offset,i);
+-#endif
++            int          offset = 1;
++            unsigned int length;
++            unsigned int k;
++            if (jlen >= nlens)
++            {
++                return 1;
++            }
++            length = len[jlen++];
+             if (v == 1)
+             {
+-                offset = offsets[joff++];
++                if (joff >= noffsets)
++                {
++                    return 1;
++                }
++                offset = (int)offsets[joff++];
++            }
++            /* A back-reference has to land inside the values already
++               written. offset 0 would copy the slot being written. */
++            if (offset < 1 || offset > i || length > (unsigned int)(nvals - i))
++            {
++                return 1;
+             }
+             for (k = 0; k < length; k++)
+             {
+                 vals[i] = vals[i - offset];
+-                if (i >= nvals)
+-                {
+-                    fprintf(stderr, "too many vals.\n");
+-                    exit(EXIT_FAILURE);
+-                }
+                 i++;
+             }
+         }
+@@ -389,4 +402,5 @@
+             vals[i++] = v - 2;
+         }
+     }
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/mtf.c tng-b/tng/src/compression/mtf.c
+--- tng-a/tng/src/compression/mtf.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/mtf.c	2026-11-21 15:17:40.004900652 +0000
+@@ -246,17 +246,27 @@
+ }
+ 
+ /* Move to front decoding */
+-void Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
+-                              const int           nvals,
+-                              const unsigned int* dict,
+-                              const int           ndict,
+-                              unsigned int*       vals)
++int Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
++                             const int           nvals,
++                             const unsigned int* dict,
++                             const int           ndict,
++                             unsigned int*       vals)
+ {
+     int i;
+     /* Indices into a linked list */
+-    int* list = warnmalloc(ndict * sizeof *list);
++    int* list;
+     /* Head of the linked list */
+     int head;
++    /* Symbols are 16-bit, so the move-to-front list is at most that long. */
++    if (nvals < 0 || ndict < 1 || ndict > 0x10000)
++    {
++        return 1;
++    }
++    list = warnmalloc(ndict * sizeof *list);
++    if (list == NULL)
++    {
++        return 1;
++    }
+     for (i = 0; i < ndict - 1; i++)
+     {
+         list[i] = i + 1;
+@@ -265,17 +275,32 @@
+     head            = 0;
+     for (i = 0; i < nvals; i++)
+     {
+-        int r = valsmtf[i];
++        unsigned int r = valsmtf[i];
+         /* Find value at position r in the list */
+-        int ptr    = head;
+-        int oldptr = -1;
+-        int cnt    = 0;
++        int          ptr    = head;
++        int          oldptr = -1;
++        unsigned int cnt    = 0;
++        if (r >= (unsigned int)ndict)
++        {
++            free(list);
++            return 1;
++        }
+         while (cnt < r)
+         {
+             oldptr = ptr;
+-            ptr    = list[ptr];
++            if (ptr < 0 || ptr >= ndict)
++            {
++                free(list);
++                return 1;
++            }
++            ptr = list[ptr];
+             cnt++;
+         }
++        if (ptr < 0 || ptr >= ndict)
++        {
++            free(list);
++            return 1;
++        }
+         vals[i] = dict[ptr];
+         /* Move it to front in list */
+         /* Is it the head? Then it is already at the front. */
+@@ -289,4 +314,5 @@
+         }
+     }
+     free(list);
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/rle.c tng-b/tng/src/compression/rle.c
+--- tng-a/tng/src/compression/rle.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/rle.c	2026-11-21 15:17:30.720898363 +0000
+@@ -87,26 +87,42 @@
+     *nrle = j;
+ }
+ 
+-void Ptngc_comp_conv_from_rle(const unsigned int* rle, unsigned int* vals, const int nvals)
++int Ptngc_comp_conv_from_rle(const unsigned int* rle, const int nrle, unsigned int* vals, const int nvals)
+ {
+     int i = 0;
+     int j = 0;
++    if (nvals < 0 || nrle < 0)
++    {
++        return 1;
++    }
+     while (i < nvals)
+     {
+-        int          k;
+         unsigned int len    = 0;
+         unsigned int mask   = 0x1;
+-        unsigned int v      = rle[j++];
++        unsigned int v;
+         unsigned int hasrle = 0;
++        int          shifts = 0;
++        if (j >= nrle)
++        {
++            return 1;
++        }
++        v = rle[j++];
+         while (v < 2)
+         {
++            /* A run length is stored in the low bits. 31 bits is the most
++               that fits in len before the terminating symbol. */
++            if (shifts >= 31 || j >= nrle)
++            {
++                return 1;
++            }
+             if (v)
+             {
+                 len |= mask;
+             }
+             mask <<= 1;
+             hasrle = 1;
+-            v      = rle[j++];
++            shifts++;
++            v = rle[j++];
+         }
+         if (!hasrle)
+         {
+@@ -116,9 +132,14 @@
+         {
+             len |= mask;
+         }
+-        for (k = 0; k < (int)len; k++)
++        if (len > (unsigned int)(nvals - i))
++        {
++            return 1;
++        }
++        while (len--)
+         {
+             vals[i++] = v - 2;
+         }
+     }
++    return 0;
+ }
 diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng_compress.c
 --- tng-a/tng/src/compression/tng_compress.c	2021-11-30 12:10:11.000000000 +0000
-+++ tng-b/tng/src/compression/tng_compress.c	2026-11-21 14:42:51.000000000 +0000
++++ tng-b/tng/src/compression/tng_compress.c	2026-11-21 15:21:26.476871388 +0000
 @@ -23,6 +23,8 @@
   */
  
@@ -1379,7 +1767,86 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
  #include <string.h>
  #include <math.h>
  #include "../../include/compression/tng_compress.h"
-@@ -1762,13 +1764,15 @@
+@@ -1324,10 +1326,8 @@
+                                              int*                algo,
+                                              int*                nitems)
+ {
+-    char* data = malloc(natoms * nframes * 14
+-                        + 11 * 4); /* 12 bytes are required to store 4 32 bit integers
+-                                     This is 17% extra. The final 11*4 is to store information
+-                                     needed for decompression. */
++    char* data       = NULL;
++    int   measured   = 0;
+     int* quant       = pos;        /* Already quantized positions. */
+     int* quant_intra = malloc(natoms * nframes * 3 * sizeof *quant_intra);
+     int* quant_inter = malloc(natoms * nframes * 3 * sizeof *quant_inter);
+@@ -1389,11 +1389,27 @@
+         }
+     }
+ 
++    /* A Huffman or XTC3 dictionary can be larger than the 14 bytes per
++       value the old buffer allowed, so measure the block before allocating. */
+     compress_quantized_pos(quant, quant_inter, quant_intra, natoms, nframes, speed, initial_coding,
+                            initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
+-                           nitems, data);
++                           &measured, NULL);
++    if (measured > 0)
++    {
++        data = malloc((size_t)measured);
++    }
++    if (data != NULL)
++    {
++        compress_quantized_pos(quant, quant_inter, quant_intra, natoms, nframes, speed, initial_coding,
++                               initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
++                               nitems, data);
++    }
+     free(quant_inter);
+     free(quant_intra);
++    if (data == NULL)
++    {
++        return NULL;
++    }
+     if (algo[0] == -1)
+     {
+         algo[0] = initial_coding;
+@@ -1529,10 +1545,8 @@
+                                              int*                algo,
+                                              int*                nitems)
+ {
+-    char* data = malloc(natoms * nframes * 14
+-                        + 11 * 4); /* 12 bytes are required to store 4 32 bit integers
+-                                     This is 17% extra. The final 11*4 is to store information
+-                                     needed for decompression. */
++    char* data     = NULL;
++    int   measured = 0;
+     int* quant       = vel;
+     int* quant_inter = malloc(natoms * nframes * 3 * sizeof *quant_inter);
+ 
+@@ -1594,8 +1608,22 @@
+ 
+     compress_quantized_vel(quant, quant_inter, natoms, nframes, speed, initial_coding,
+                            initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
+-                           nitems, data);
++                           &measured, NULL);
++    if (measured > 0)
++    {
++        data = malloc((size_t)measured);
++    }
++    if (data != NULL)
++    {
++        compress_quantized_vel(quant, quant_inter, natoms, nframes, speed, initial_coding,
++                               initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
++                               nitems, data);
++    }
+     free(quant_inter);
++    if (data == NULL)
++    {
++        return NULL;
++    }
+     if (algo[0] == -1)
+     {
+         algo[0] = initial_coding;
+@@ -1762,13 +1790,15 @@
  }
  
  static int tng_compress_uncompress_pos_gen(char*          data,
@@ -1396,7 +1863,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      int           length;
      int           natoms, nframes;
      int           initial_coding, initial_coding_parameter;
-@@ -1777,6 +1781,11 @@
+@@ -1777,6 +1807,11 @@
      struct coder* coder = NULL;
      int           rval  = 0;
      int           magic_int;
@@ -1408,7 +1875,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      /* Magic integer for positions */
      magic_int = (int)readbufferfix((unsigned char*)data + bufloc, 4);
      bufloc += 4;
-@@ -1808,22 +1817,53 @@
+@@ -1808,22 +1843,53 @@
      bufloc += 4;
      *prec_hi = readbufferfix((unsigned char*)data + bufloc, 4);
      bufloc += 4;
@@ -1467,7 +1934,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      /* Obtain the actual positions for the initial block. */
      if ((initial_coding == TNG_COMPRESS_ALGO_POS_XTC2)
          || (initial_coding == TNG_COMPRESS_ALGO_POS_TRIPLET_ONETOONE)
-@@ -1862,10 +1902,22 @@
+@@ -1862,10 +1928,22 @@
      /* The remaining frames. */
      if (nframes > 1)
      {
@@ -1492,7 +1959,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
          Ptngc_coder_deinit(coder);
          if (rval)
          {
-@@ -1935,31 +1987,33 @@
+@@ -1935,31 +2013,33 @@
      return rval;
  }
  
@@ -1532,7 +1999,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      int           length;
      int           natoms, nframes;
      int           initial_coding, initial_coding_parameter;
-@@ -1968,6 +2022,11 @@
+@@ -1968,6 +2048,11 @@
      struct coder* coder = NULL;
      int           rval  = 0;
      int           magic_int;
@@ -1544,7 +2011,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      /* Magic integer for velocities */
      magic_int = (int)readbufferfix((unsigned char*)data + bufloc, 4);
      bufloc += 4;
-@@ -1999,22 +2058,53 @@
+@@ -1999,22 +2084,53 @@
      bufloc += 4;
      *prec_hi = readbufferfix((unsigned char*)data + bufloc, 4);
      bufloc += 4;
@@ -1603,7 +2070,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      /* Obtain the actual positions for the initial block. */
      if ((initial_coding == TNG_COMPRESS_ALGO_VEL_STOPBIT_ONETOONE)
          || (initial_coding == TNG_COMPRESS_ALGO_VEL_TRIPLET_ONETOONE)
-@@ -2036,10 +2126,22 @@
+@@ -2036,10 +2152,22 @@
      /* The remaining frames. */
      if (nframes > 1)
      {
@@ -1628,7 +2095,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
          Ptngc_coder_deinit(coder);
          if (rval)
          {
-@@ -2090,37 +2192,79 @@
+@@ -2090,37 +2218,79 @@
      return rval;
  }
  
@@ -1716,7 +2183,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      }
      else
      {
-@@ -2128,17 +2272,29 @@
+@@ -2128,17 +2298,29 @@
      }
  }
  
@@ -1749,7 +2216,7 @@ diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng
      }
      else
      {
-@@ -2146,6 +2302,11 @@
+@@ -2146,6 +2328,11 @@
      }
  }
  
