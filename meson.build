@@ -486,7 +486,12 @@ else
                       'patches/chemfiles-0.10.4-hostile.patch',
                       'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                       'CMakeLists.txt', 'ChemfilesDep.cmake']
-      _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]
+      _chem_patch_path = meson.project_source_root() / 'cmake' / _patch
+      # fs.hash() leaves build.ninja without a dependency on the file, so
+      # ninja would keep the prefix built from an older patch until the
+      # next setup. fs.read() makes a changed file rerun configure.
+      fs.read(_chem_patch_path)
+      _chem_patch_ids += [_patch + ' ' + fs.hash(_chem_patch_path, 'sha256')]
     endforeach
     _chem_patch_text = '\n'.join(_chem_patch_ids)
     _chem_stamp = chem_prefix / 'seams-patches.txt'
