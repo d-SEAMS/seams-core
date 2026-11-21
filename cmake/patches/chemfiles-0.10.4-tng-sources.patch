@@ -1515,7 +1515,6 @@ diff -ruN tng-a/tng/src/compression/huffmem.c tng-b/tng/src/compression/huffmem.
  }
  
  static char* huff_algo_names[N_HUFFMAN_ALGO] = { "Huffman (dict=raw)", "Huffman (dict=Huffman)",
-Binary files tng-a/tng/src/compression/huffrt and tng-b/tng/src/compression/huffrt differ
 diff -ruN tng-a/tng/src/compression/lz77.c tng-b/tng/src/compression/lz77.c
 --- tng-a/tng/src/compression/lz77.c	2021-11-30 12:10:11.000000000 +0000
 +++ tng-b/tng/src/compression/lz77.c	2026-11-21 15:17:34.272899276 +0000
@@ -2596,7 +2595,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
                  output[outvals + i * 3] =
                          Ptngc_largeint_div(base, largeint, largeint_tmp, maxbasevals + 1);
                  for (j = 0; j < maxbasevals + 1; j++)
-@@ -1861,24 +1904,55 @@
+@@ -1861,24 +1904,63 @@
      return output;
  }
  
@@ -2667,7 +2666,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
  }
  
  static void unpack_one_large(struct xtc3_context* xtc3_context,
-@@ -1894,8 +1968,18 @@
+@@ -1894,8 +1976,18 @@
                               const int            current_large_type)
  {
      int large_ints[3] = { 0, 0, 0 };
@@ -2686,7 +2685,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
          large_ints[0] = (int)xtc3_context->large_direct[(*ilargedir)] + minint[0];
          large_ints[1] = (int)xtc3_context->large_direct[(*ilargedir) + 1] + minint[1];
          large_ints[2] = (int)xtc3_context->large_direct[(*ilargedir) + 2] + minint[2];
-@@ -1903,6 +1987,11 @@
+@@ -1903,6 +1995,11 @@
      }
      else if (current_large_type == 1 && xtc3_context->large_intra_delta)
      {
@@ -2698,7 +2697,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
          large_ints[0] = unpositive_int(xtc3_context->large_intra_delta[(*ilargeintra)]) + prevcoord[0];
          large_ints[1] =
                  unpositive_int(xtc3_context->large_intra_delta[(*ilargeintra) + 1]) + prevcoord[1];
-@@ -1912,6 +2001,12 @@
+@@ -1912,6 +2009,12 @@
      }
      else if (xtc3_context->large_inter_delta)
      {
@@ -2711,7 +2710,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
          large_ints[0] = unpositive_int(xtc3_context->large_inter_delta[(*ilargeinter)])
                          + output[outdata - natoms * 3 + didswap * 3];
          large_ints[1] = unpositive_int(xtc3_context->large_inter_delta[(*ilargeinter) + 1])
-@@ -1930,7 +2025,7 @@
+@@ -1930,7 +2033,7 @@
  }
  
  
@@ -2720,7 +2719,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
  {
      int            i;
      int            minint[3];
-@@ -1950,95 +2045,122 @@
+@@ -1950,95 +2053,122 @@
  
      struct xtc3_context xtc3_context;
      init_xtc3_context(&xtc3_context);
@@ -2854,7 +2853,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
      {
          int instr = xtc3_context.instructions[iinstr++];
  #ifdef SHOWIT
-@@ -2060,17 +2182,43 @@
+@@ -2060,17 +2190,43 @@
                  }
                  unpack_one_large(&xtc3_context, &ilargedir, &ilargeintra, &ilargeinter, prevcoord,
                                   minint, output, outdata, didswap, natoms, current_large_type);
@@ -2898,7 +2897,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
                      output[outdata + i * 3]     = prevcoord[0];
                      output[outdata + i * 3 + 1] = prevcoord[1];
                      output[outdata + i * 3 + 2] = prevcoord[2];
-@@ -2100,6 +2248,12 @@
+@@ -2100,6 +2256,12 @@
          else if (instr == INSTR_LARGE_RLE && irle < xtc3_context.nrle)
          {
              int large_rle = xtc3_context.rle[irle++];
@@ -2911,7 +2910,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
  #ifdef SHOWIT
              fprintf(stderr, "large_rle=%d @ %d\n", large_rle, irle - 1);
  #endif
-@@ -2107,6 +2261,12 @@
+@@ -2107,6 +2269,12 @@
              {
                  unpack_one_large(&xtc3_context, &ilargedir, &ilargeintra, &ilargeinter, prevcoord,
                                   minint, output, outdata, 0, natoms, current_large_type);
@@ -2924,7 +2923,7 @@ diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
                  ntriplets_left--;
                  outdata += 3;
              }
-@@ -2147,11 +2307,13 @@
+@@ -2147,11 +2315,13 @@
  #endif
          }
      }

@@ -7009,7 +7009,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
    }
  
    return s;
-@@ -262,16 +274,30 @@
+@@ -262,16 +274,36 @@
  /***************************************************
   * Parse ATOM
   ***************************************************/
@@ -7052,7 +7052,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  #ifdef _USE_TCL
      if (d->read_mode != VTF_MOLFILE) {
        /* fill up with default userdata */
-@@ -280,6 +306,7 @@
+@@ -280,6 +312,7 @@
      }
  #endif
    }
@@ -7060,7 +7060,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  }
  
  /* Parse the aid specifier.
-@@ -288,11 +315,26 @@
+@@ -288,11 +321,26 @@
     the list is empty (i.e. it only contains -1), the default atom is
     to be modified.
   */
@@ -7088,7 +7088,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  
    if (s[0] == 'd') {
      /* DEFAULT */
-@@ -305,6 +347,14 @@
+@@ -305,6 +353,14 @@
      while (1) {
        from = d->natoms;
  
@@ -7103,7 +7103,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
          /* RANGE */
          if (from > to) { 
-@@ -312,23 +362,64 @@
+@@ -312,23 +368,64 @@
            sfree(aid_list);
            return NULL;
          }
@@ -7175,7 +7175,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  
        } else {
          /* ERROR */
-@@ -355,7 +446,13 @@
+@@ -355,7 +452,13 @@
    }
  
    /* Terminate the list with -1 */
@@ -7190,7 +7190,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
    aid_list[size] = -1;
    return aid_list;
  }
-@@ -384,10 +481,14 @@
+@@ -384,10 +487,14 @@
    /* HANDLE THE AID SPECIFIER */
  
    /* save the aid specifier */
@@ -7206,7 +7206,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
    s += n;
  
    aid_list = vtf_parse_aid_specifier(aid_specifier, d);
-@@ -406,7 +507,12 @@
+@@ -406,7 +513,12 @@
    
    /* handle the keywords */
    rest_is_userdata = 0;
@@ -7220,7 +7220,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
      s += n;
  #ifdef DEBUG
      printf("keyword: \"%s\" rest: \"%s\"\n", keyword, s);
-@@ -414,10 +520,16 @@
+@@ -414,10 +526,16 @@
      switch (tolower(keyword[0])) {
      case 'n': {
        /* name */
@@ -7238,7 +7238,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          return MOLFILE_ERROR;
        }
        s += n;
-@@ -425,10 +537,16 @@
+@@ -425,10 +543,16 @@
      }
      case 't': {
        /* type */
@@ -7256,7 +7256,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          return MOLFILE_ERROR;
        }
        s += n;
-@@ -459,7 +577,12 @@
+@@ -459,7 +583,12 @@
        } else if (strcmp(keyword, "res") == 0 || 
                   strcmp(keyword, "resname") == 0) {
          /* resname */
@@ -7270,7 +7270,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
            AIDLOOP(strcpy(cur_atom->resname, atom.resname));
          } else {
            vtf_error("could not get resname in atom record", line);
-@@ -478,7 +601,12 @@
+@@ -478,7 +607,12 @@
      }
      case 's': {
        /* segid */
@@ -7284,7 +7284,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          AIDLOOP(strcpy(cur_atom->segid, atom.segid));
        } else {
          vtf_error("could not get segid in atom record", line);
-@@ -662,17 +790,40 @@
+@@ -662,17 +796,40 @@
    s = line;
  
    while (1) {
@@ -7329,7 +7329,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        for (aid = from; aid < to; aid++) {
          /*printf("creating bond from %d to %d\n", aid, aid+1);*/
          d->from[bid] = aid+1;
-@@ -681,12 +832,24 @@
+@@ -681,12 +838,24 @@
        }
      } else if (sscanf(s, " %u:%u%n", &from, &to, &n) == 2) {
        /* single bond specifier */
@@ -7359,7 +7359,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
      } else {
        vtf_error("bad bond specifier", s);
        return MOLFILE_ERROR;
-@@ -789,7 +952,7 @@
+@@ -789,7 +958,7 @@
        /* ATOM RECORD */
      case 'a': {
        /* Remove the "atom" keyword" */
@@ -7368,7 +7368,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
      }
      case '0':
-@@ -811,7 +974,7 @@
+@@ -811,7 +980,7 @@
        /* BOND RECORD */
      case 'b': {
        /* Remove the "bond" keyword" */
@@ -7377,7 +7377,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
        d->return_code = vtf_parse_bond(line, d);
        break;
-@@ -821,7 +984,7 @@
+@@ -821,7 +990,7 @@
      case 'u':
      case 'p': {
        /* Remove the "pbc"/"unitcell" keyword */
@@ -7386,7 +7386,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
        d->return_code = vtf_parse_pbc(line, d);
        break;
-@@ -831,7 +994,7 @@
+@@ -831,7 +1000,7 @@
      case 'c': 
      case 't': {
        /* Remove the "timestep" or "coordinates" keyword */
@@ -7395,7 +7395,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
        line += n;
      }
      case 'i': 
-@@ -894,8 +1057,10 @@
+@@ -894,8 +1063,10 @@
  
    /* initialize the data structure */
    d = malloc(sizeof(vtf_data));
@@ -7406,7 +7406,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  
    d->return_code = MOLFILE_SUCCESS;
    d->read_mode = read_mode;
-@@ -1040,7 +1205,7 @@
+@@ -1040,7 +1211,7 @@
        case 'c': 
        case 't':
          /* Remove the "timestep" or "coordinates" keyword */
@@ -7415,7 +7415,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          line += n;
        case 'i': 
        case 'o': 
-@@ -1096,7 +1261,7 @@
+@@ -1096,7 +1267,7 @@
        case 'u':
        case 'p': {
          /* Remove the "pbc"/"unitcell" keyword */
@@ -7424,7 +7424,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
          line += n;
          if (vtf_parse_pbc(line, d) != MOLFILE_SUCCESS) 
            return MOLFILE_ERROR;
-@@ -1106,7 +1271,7 @@
+@@ -1106,7 +1277,7 @@
          /* USER DATA RECORD */
        case 'd': {
          /* Remove the "data" keyword */
@@ -7433,7 +7433,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
  #ifdef _USE_TCL
          if (d->read_mode == VTF_USERDATA) {
            line += n;
-@@ -1120,7 +1285,7 @@
+@@ -1120,7 +1291,7 @@
        case 'c': 
        case 't': {
          /* Remove the "timestep" or "coordinates" keyword */

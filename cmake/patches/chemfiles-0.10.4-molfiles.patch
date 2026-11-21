@@ -384,7 +384,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  template <MolfileFormat F> static int register_plugin(void* user_data, vmdplugin_t* vmd_plugin) {
      auto user_plugin = static_cast<molfile_plugin_t**>(user_data);
      assert(std::string(MOLFILE_PLUGIN_TYPE) == std::string(vmd_plugin->type));
-@@ -131,12 +181,64 @@
+@@ -131,12 +181,66 @@
          );
      }
  
@@ -451,7 +451,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
      if (plugin_data_.registration(&plugin_handle_, register_plugin<F>)) {
          throw format_error(
              "could not register the {} plugin", plugin_data_.format()
-@@ -170,7 +272,30 @@
+@@ -170,7 +274,30 @@
          );
      }
  
@@ -482,7 +482,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  }
  
  template <MolfileFormat F> Molfile<F>::~Molfile() {
-@@ -186,6 +311,22 @@
+@@ -186,6 +313,22 @@
          return plugin_handle_->read_next_timestep(data_, natoms_, timestep);
      } else if (plugin_handle_->read_timestep != nullptr) {
          // This function is provided by quantum molecular simulation format.
@@ -505,7 +505,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          return plugin_handle_->read_timestep(
              data_, natoms_, timestep, nullptr, nullptr
          );
-@@ -245,8 +386,15 @@
+@@ -245,8 +388,15 @@
      }
      size_t n = 0;
      int status = MOLFILE_SUCCESS;
@@ -522,7 +522,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          if (status == MOLFILE_SUCCESS) {
              n++;
          } else {
-@@ -255,8 +403,20 @@
+@@ -255,8 +405,20 @@
      }
      // We need to close and re-open the file
      plugin_handle_->close_file_read(data_);
@@ -545,7 +545,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
      read_topology();
  
      return n;
-@@ -315,7 +475,15 @@
+@@ -315,7 +477,15 @@
      auto residues = std::unordered_map<residue_info_t, Residue>();
      size_t atom_id = 0;
      for (auto& molfile_atom : atoms) {
@@ -562,7 +562,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
          if ((optflags & MOLFILE_MASS) != 0) {
              atom.set_mass(static_cast<double>(molfile_atom.mass));
          }
-@@ -325,17 +493,17 @@
+@@ -325,17 +495,17 @@
  
          topology_->add_atom(std::move(atom));
  
@@ -588,7 +588,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
              };
              auto inserted = residues.insert({std::move(info), std::move(residue)});
              inserted.first->second.add_atom(atom_id);
-@@ -369,9 +537,21 @@
+@@ -369,9 +539,21 @@
          );
      }
  
@@ -611,7 +611,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
                              static_cast<size_t>(to[i]) - 1);
      }
  }
-@@ -380,6 +560,40 @@
+@@ -380,6 +562,40 @@
  template class chemfiles::Molfile<TRJ>;
  template class chemfiles::Molfile<PSF>;
  template class chemfiles::Molfile<MOLDEN>;
@@ -652,7 +652,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
  
  template<> const FormatMetadata& chemfiles::format_metadata<Molfile<TRJ>>() {
      static FormatMetadata metadata;
-@@ -432,6 +646,686 @@
+@@ -432,6 +648,686 @@
  
      metadata.read = true;
      metadata.write = false;
