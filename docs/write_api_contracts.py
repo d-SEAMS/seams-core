@@ -14,6 +14,7 @@ import re
 from pathlib import Path
 
 import check_c_symbols
+import emit_api_symbols
 
 ROOT = Path(__file__).resolve().parents[1]
 API = ROOT / "docs" / "api"
@@ -448,9 +449,8 @@ def public_names(lang):
 def rewrite(lang):
     path = API / PAGES[lang]
     text = path.read_text()
-    start = text.find(BEGIN)
-    stop = text.find(END)
-    body = text[start:stop] if start >= 0 and stop > start else ""
+    span = emit_api_symbols.block_span(text, path)
+    body = text[span[0]:span[1]] if span else ""
     have = {name: rest for name, rest in sections_of(body)}
     records = records_for(lang)
     names = list(public_names(lang))
@@ -459,21 +459,7 @@ def rewrite(lang):
         record = records.get(name)
         blocks.append(render_section(name, have.get(name, ""), lang, record))
     wrapped = BEGIN + "\n" + "\n".join(blocks).rstrip() + "\n" + END + "\n"
-    if start >= 0 and stop > start:
-        text = text[:start] + wrapped + text[stop + len(END) :]
-        if not text[stop + len(END) :].startswith("\n"):
-            # END was consumed with the following newline in the slice above when we cut at stop.
-            pass
-        # The slice text[stop + len(END):] drops a single newline that followed END if we want to keep it.
-        # wrapped already ends with newline. If the old END was followed by newline, we now have a double
-        # newline only when the original had END\\n and we didn't include it. That's fine.
-    else:
-        if not text.endswith("\n"):
-            text += "\n"
-        text += "\n" + wrapped
-    # Collapse the accidental gap from an END that already included a trailing newline in the source.
-    text = text.replace(END + "\n\n\n", END + "\n\n")
-    path.write_text(text)
+    path.write_text(emit_api_symbols.splice_text(text, wrapped, path))
     missing = [name for name in names if name not in have and name not in records and lang == "c"]
     return len(names), missing
 
