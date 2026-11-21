@@ -246,7 +246,7 @@ formats. chemfiles itself enables three (TRJ, PSF, Molden).
 ~cmake/patches/chemfiles-0.10.4-molfiles.patch~ adds the rest, including
 the g96 reader already inside ~gromacsplugin~, the DESRES ~.dms~ reader
 (linked to the system SQLite3) and the CPMD and Gaussian log readers.
-~cmake/patches/chemfiles-0.10.4-molfile-sources.sh~ adds the three QM
+~cmake/patches/chemfiles-0.10.4-external-sources.sh~ adds the three QM
 fields those log plugins write and the hostile-file fixes, then repacks
 ~molfiles.tar.gz~. Configure keeps an installed chemfiles only when
 ~cmake/chemfiles_mmcif_probe.cpp~ finds all 37 names and counts the
@@ -340,7 +340,7 @@ In chemfiles' ~Molfile<F>~: counting frames passed a null timestep
 crashed), a plugin that found no atoms sized the frame from 0 or -1,
 and rst7 looped forever when its second line was missing or held only
 spaces and tabs. Inside the plugins, after
-~chemfiles-0.10.4-molfile-sources.sh~: an InsightII MDF truncated on
+~chemfiles-0.10.4-molfile-sources.patch~: an InsightII MDF truncated on
 ~@molecule~ looped, an AMBER7 parm token longer than the scan buffer
 smashed the stack, a long VTF line or a negative or huge atom id
 overflowed the heap, a VTF token one byte longer than its field did the

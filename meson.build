@@ -479,7 +479,7 @@ else
                       'patches/chemfiles-0.10.4-frame-visit.patch',
                       'patches/chemfiles-0.10.4-molfiles.patch',
                       'patches/chemfiles-0.10.4-molfile-sources.patch',
-                      'patches/chemfiles-0.10.4-molfile-sources.sh',
+                      'patches/chemfiles-0.10.4-external-sources.sh',
                       'patches/chemfiles-0.10.4-hostile.patch',
                       'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                       'CMakeLists.txt', 'ChemfilesDep.cmake']

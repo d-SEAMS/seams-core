@@ -1,6 +1,6 @@
 # Copyright (c) d-SEAMS developers
 # Edits inside chemfiles' molfiles.tar.gz, applied by
-# chemfiles-0.10.4-molfile-sources.sh before chemfiles unpacks the archive.
+# chemfiles-0.10.4-external-sources.sh before chemfiles unpacks the archive.
 #
 # molfile_plugin.h gains the three QM fields cpmdlogplugin and
 # gaussianplugin write (have_esp, have_internals, shell_symmetry), and

@@ -6,7 +6,7 @@
 # G96 reader of its own. dmsplugin links the system SQLite3. cpmdlogplugin
 # and gaussianplugin compile once molfile_plugin.h has the QM fields they
 # write. That header edit, and the fixes for hostile files, are applied to
-# molfiles.tar.gz by chemfiles-0.10.4-molfile-sources.sh.
+# molfiles.tar.gz by chemfiles-0.10.4-external-sources.sh.
 #
 # Left unbuilt, each for a reason recorded in
 # docs/orgmode/reference/data-formats.org: cifplugin (no source), crdplugin
