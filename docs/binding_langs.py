@@ -23,6 +23,17 @@ REPOS = {
     "dseams-fortran": "https://github.com/d-SEAMS/dseams-fortran.git",
     "yodaStruct": "https://github.com/d-SEAMS/yodaStruct.git",
 }
+# Default-branch HEAD from `git ls-remote <url> HEAD`. meson dist fetches
+# these commits, so a later upstream push does not change the tarball.
+PINS = {
+    "PydSEAMSlib": "115f0ca9df37107c8ca824088b5d813fe41b2c3e",
+    "Dseams.jl": "24bd4e4d28956fc69a0bf69a86e36145505e7ffe",
+    "dseams-r": "25dfa13e1b1542d88ac768ecd053ebcfe10c72da",
+    "dseams-rs": "c462541512940a3101485a0f731cd1b3e6883fcd",
+    "dseams-fortran": "aafd4b85440c616338e2831ba3bdcdf64e16b2d2",
+    "yodaStruct": "79b6daa1ec74f37451765f537a0d0c37407380fe",
+}
+VENDORED_REV = ".seams-vendored-rev"
 
 
 def checkout(name):
@@ -46,6 +57,42 @@ def checkout(name):
         subprocess.check_call(["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin", "HEAD"])
         subprocess.check_call(["git", "-C", str(dest), "reset", "--quiet", "--hard", "FETCH_HEAD"])
     return dest
+
+
+def vendored_rev_errors(root=None, pins=None):
+    """A dist tree records the pinned commit of every binding.
+
+    Online checkouts have no vendored-rev file. The offline tarball does,
+    and ``SEAMS_NO_NETWORK=1`` requires each file to match ``PINS``.
+
+    >>> import tempfile
+    >>> from pathlib import Path
+    >>> root = Path(tempfile.mkdtemp())
+    >>> pin = "a" * 40
+    >>> (root / "demo").mkdir()
+    >>> vendored_rev_errors(root, {"demo": pin})
+    ['demo is missing .seams-vendored-rev']
+    >>> _ = (root / "demo" / ".seams-vendored-rev").write_text(pin + "\\n", encoding="utf-8")
+    >>> vendored_rev_errors(root, {"demo": pin})
+    []
+    >>> _ = (root / "demo" / ".seams-vendored-rev").write_text("b" * 40, encoding="utf-8")
+    >>> vendored_rev_errors(root, {"demo": pin})[0]
+    'demo vendored bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb but the pin is aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    """
+    if root is None and pins is None and os.environ.get("SEAMS_NO_NETWORK") != "1":
+        return []
+    root = CACHE if root is None else Path(root)
+    pins = PINS if pins is None else pins
+    errors = []
+    for name in sorted(pins):
+        rev = root / name / VENDORED_REV
+        if not rev.is_file():
+            errors.append("{} is missing {}".format(name, VENDORED_REV))
+            continue
+        got = rev.read_text(encoding="utf-8").strip()
+        if got != pins[name]:
+            errors.append("{} vendored {} but the pin is {}".format(name, got, pins[name]))
+    return errors
 
 
 def _calls(text):

@@ -104,28 +104,69 @@ def fetch_checked(dist_root, item):
         part.replace(dest)
 
 
+def fetch_pin(url, pin, dest):
+    """Fetch ``pin`` and leave ``dest`` checked out at that commit.
+
+    ``git rev-parse HEAD`` must equal ``pin``. Anything else is a failed dist.
+    """
+    dest.mkdir(parents=True)
+    subprocess.run(["git", "init", "--quiet", str(dest)], check=True)
+    subprocess.run(["git", "-C", str(dest), "remote", "add", "origin", url], check=True)
+    subprocess.run(
+        ["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin", pin],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(dest), "checkout", "--quiet", "--detach", "FETCH_HEAD"],
+        check=True,
+    )
+    got = subprocess.run(
+        ["git", "-C", str(dest), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    if got != pin:
+        raise SystemExit("{} checked out {} but the pin is {}".format(url, got, pin))
+
+
 def vendor_bindings(source_root, dist_root):
-    """Shallow-clone the language bindings into the dist cache.
+    """Put the pinned language-binding commits into the dist cache.
 
     docs/check_binding_api.py reads those trees. The offline image runs
     with SEAMS_NO_NETWORK=1, so the clones have to already be in the tarball.
+    Each tree records the pin in ``.seams-vendored-rev`` before ``.git`` goes,
+    and the checkout is the pinned commit rather than whatever HEAD is today.
     """
     sys.path.insert(0, str(source_root / "docs"))
-    from binding_langs import REPOS
+    from binding_langs import PINS, REPOS, VENDORED_REV
 
+    if set(PINS) != set(REPOS):
+        raise SystemExit("binding pins and repositories do not name the same set")
     dest_root = dist_root / "docs" / ".cache" / "bindings"
     dest_root.mkdir(parents=True, exist_ok=True)
     for name, url in REPOS.items():
+        pin = PINS[name]
+        if len(pin) != 40 or any(ch not in "0123456789abcdef" for ch in pin):
+            raise SystemExit("{} pin is not a 40-digit SHA".format(name))
+        staging = dest_root / (".{}.partial".format(name))
+        if staging.exists():
+            shutil.rmtree(staging)
+        try:
+            fetch_pin(url, pin, staging)
+            (staging / VENDORED_REV).write_text(pin + "\n", encoding="utf-8")
+            git_dir = staging / ".git"
+            if git_dir.is_dir():
+                shutil.rmtree(git_dir)
+            elif git_dir.exists():
+                git_dir.unlink()
+        except BaseException:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
         dest = dest_root / name
         if dest.exists():
             shutil.rmtree(dest)
-        subprocess.run(
-            ["git", "clone", "--quiet", "--depth", "1", url, str(dest)],
-            check=True,
-        )
-        git_dir = dest / ".git"
-        if git_dir.is_dir():
-            shutil.rmtree(git_dir)
+        staging.rename(dest)
 
 
 def main():
