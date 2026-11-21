@@ -336,6 +336,12 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            // DMS illegal bond returned without finalizing sqlite3_stmt, leaking db
            Refused{"fuzz_dms_illegal_bond_leak.dms", "DESRES Molecular Structure",
                    "could not read bonds"},
+           // TNG cyclic/non-monotonic frame set navigation offsets caused infinite loop
+           Refused{"fuzz_tng_frameset_cycle.tng", "TNG", kTngErr},
+           // TNG next-frame-set header error leaked tng_gen_block and looped on bad offset
+           Refused{"fuzz_tng_block_leak.tng", "TNG", kTngErr},
+           // VTF huge sparse atom id (9999992) allocated gigabytes before timing out
+           Refused{"fuzz_vtf_huge_aid.vtf", "VTF structure format", "could not open"},
        }) {
     requireRefused(item);
   }

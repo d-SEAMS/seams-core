@@ -6813,7 +6813,7 @@ diff -ruN molfiles-a/molfiles/src/vaspxmlplugin.c molfiles-b/molfiles/src/vaspxm
         /* Extract number of atoms */
 diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.c
 --- molfiles-a/molfiles/src/vtfplugin.c	2021-09-10 14:18:46.000000000 +0000
-+++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-21 06:59:29.423266993 +0000
++++ molfiles-b/molfiles/src/vtfplugin.c	2026-11-21 09:32:21.526415483 +0000
 @@ -25,6 +25,7 @@
  #include <errno.h>
  #include <ctype.h>
@@ -6986,7 +6986,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
 -static void vtf_create_atoms_as_needed(int max_aid, vtf_data *d) {
 +/* Past this, a hostile id would allocate until the process dies.
 +   A real VTF structure is far smaller. */
-+#define VTF_MAX_ATOMS 10000000u
++#define VTF_MAX_ATOMS 200000u
 +
 +static int vtf_create_atoms_as_needed(unsigned int max_aid, vtf_data *d) {
    /* create new atoms as needed */
@@ -7084,7 +7084,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
 -        size += to-from+1;
 -        aid_list = realloc(aid_list, size*sizeof(int));
 +        count = to - from + 1;
-+        if (size > ~0u - count) {
++        if (size > VTF_MAX_ATOMS - count) {
 +          vtf_error("atom id range does not fit", s);
 +          sfree(aid_list);
 +          return NULL;
@@ -7116,7 +7116,7 @@ diff -ruN molfiles-a/molfiles/src/vtfplugin.c molfiles-b/molfiles/src/vtfplugin.
 +          return NULL;
 +        }
          /* add the aid to the aid_list */
-+        if (size == ~0u) {
++        if (size >= VTF_MAX_ATOMS) {
 +          vtf_error("atom id list does not fit", s);
 +          sfree(aid_list);
 +          return NULL;
