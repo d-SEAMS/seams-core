@@ -49,8 +49,8 @@ gemmi (headers)
 lzma (liblzma from XZ Utils)
   Authors: Lasse Collin, Igor Pavlov, Kevin Springle, Wei Dai and the
     XZ Utils contributors. Kevin Springle and Wei Dai wrote the SHA-256
-    implementation (lzma/src/liblzma/check/sha256.c and the credit in
-    lzma/src/liblzma/api/lzma.h).
+    implementation (lzma/liblzma/check/sha256.c and the credit in
+    lzma/liblzma/api/lzma.h).
   License: public domain
 mmtf-cpp (headers)
   Authors: Gabriel Studer, Gerardo Tauriello, Daniel Farrell
