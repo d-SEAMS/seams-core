@@ -13,7 +13,7 @@ writes the sheet. Both headers are on the
 ring size 3 to 6 on the mutual four-nearest graph (~ring::findPrisms~).
 Nanotube blocks and monolayer sheets come from the two writers above.
 
-The writers are on the Python Frame in pydseamslib 2.14.0.
+The writers are on the Python Frame in pydseamslib.
 With an output directory, ~Frame.find_prisms~ writes the nanotube
 blocks through ~prismAnalysis~. ~Frame.monolayer_rings~ writes the
 sheet through ~polygonRingAnalysis~. The calls, and a run on

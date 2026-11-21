@@ -10,7 +10,7 @@ command.
 #+end_export
 
 Every other language is its own repository, with its own documentation,
-tests, and releases. The Python package for this engine is ~pydseamslib~ 2.14.0.
+tests, and releases. The Python package for this engine is ~pydseamslib~.
 Each repository's README has the install command.
 
 * Languages

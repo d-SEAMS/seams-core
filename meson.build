@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.14.0',
+version: '2.14.0',
   default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
@@ -1042,13 +1042,13 @@ if get_option('with_cli') and get_option('with_tests')
     'release_versions',
     python3,
     args: [meson.project_source_root() / 'scripts' / 'check_release_version.py'],
-    suite: 'release',
+    suite: ['docs', 'release'],
     timeout: 60)
   test(
     'release_versions_selftest',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'check_release_version.py'],
-    suite: 'release',
+    suite: ['docs', 'release'],
     timeout: 60)
   test(
     'docs_llms_txt',

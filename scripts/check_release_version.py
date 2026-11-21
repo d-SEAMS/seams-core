@@ -36,9 +36,9 @@ def read(name):
 
 def versions():
     found = {
-        "meson.build": first(r"^project\([^)]*?version:\s*'([^']+)'", read("meson.build"), "meson.build"),
-        "pixi.toml": first(r'^\[workspace\][^\[]*?^version\s*=\s*"([^"]+)"', read("pixi.toml"), "pixi.toml"),
-        "recipe/recipe.yaml": first(r'^context:\s*\n\s+version:\s*"([^"]+)"', read("recipe/recipe.yaml"), "recipe/recipe.yaml"),
+        "meson.build": first(r"^project\([^)]*?version\s*:\s*'([^']+)'", read("meson.build"), "meson.build"),
+        "pixi.toml": first(r'^\[workspace\](?:\n(?!\[)[^\n]*)*?\nversion\s*=\s*"([^"]+)"', read("pixi.toml"), "pixi.toml"),
+        "recipe/recipe.yaml": first(r'^context:(?:\n(?!\S)[^\n]*)*?\n\s+version:\s*"([^"]+)"', read("recipe/recipe.yaml"), "recipe/recipe.yaml"),
         "CITATION.cff": first(r'^version:\s*"?([^"\s]+)"?', read("CITATION.cff"), "CITATION.cff"),
     }
     return found
@@ -46,7 +46,7 @@ def versions():
 
 def main(argv):
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--tag", help="release tag, such as v2.14.0")
+    parser.add_argument("--tag", help="release tag, such as vX.Y.Z")
     parser.add_argument("--print", action="store_true", help="print the version")
     args = parser.parse_args(argv)
 

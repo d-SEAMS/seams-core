@@ -12,7 +12,7 @@ The result is 4096 cubic sites.
 | R | =sum(chill_plus(read_frame(path, type=1L))$name == "cubic")= | 4096 |
 | Julia | =chill_plus(read_frame(path; type=1)).counts["cubic"]= | 4096 |
 
-The distribution is ~pip install 'pydseamslib==2.14.0'~.
+The distribution is ~pip install pydseamslib~.
 The imports are ~pydseams~ and ~dseams~.
 ~from dseams import userframe~ is the language frame.
 R is the ~dseams~ package from [[https://github.com/d-SEAMS/dseams-r][dseams-r]].

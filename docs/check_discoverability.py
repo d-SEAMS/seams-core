@@ -59,8 +59,6 @@ H2 = re.compile(r"^## .+")
 def _version_problems():
     version = pub.project_version()
     problems = []
-    if version != "2.14.0":
-        problems.append("meson project version is {}, expected 2.14.0".format(version))
     conf = (DOCS / "source" / "conf.py").read_text(encoding="utf-8")
     if 'version = "{}"'.format(version) not in conf:
         problems.append("conf.py version does not match meson")

@@ -1,1 +1,0 @@
-Python, Julia, Rust and Fortran call the C API. Python reads NumPy arrays in place and accepts ASE and MDAnalysis frames. Julia uses ccall. Rust splits the raw FFI from the safe crate. Fortran binds the same symbols with iso_c_binding.

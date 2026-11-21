@@ -1,0 +1,16 @@
+# Copies of the release version. Cocogitto updates meson.build with Meson's
+# rewriter, then ci/version/seams_version.py supplies these cogapp markers.
+# Regenerate: pixi run --frozen -e version release-cog
+# Check:      pixi run --frozen -e version version-drift
+pixi.toml
+towncrier.toml
+CITATION.cff
+codemeta.json
+nix/package.nix
+recipe/recipe.yaml
+docs/source/conf.py
+docs/source/Doxyfile_seams.cfg
+docs/source/Doxyfile_doxyyoda.cfg
+Doxyfile-prj.cfg
+packaging/yggdrasil/L/libseams/build_tarballs.jl
+skills/d-seams/SKILL.md

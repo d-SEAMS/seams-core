@@ -1,0 +1,32 @@
+# Cocogitto writes meson.build with Meson's rewriter, cogapp copies the
+# version and ship date, and towncrier owns CHANGELOG.md. Run the bump from
+# an environment that provides Meson, cogapp, and towncrier.
+from_latest_tag = true
+ignore_merge_commits = true
+disable_changelog = true
+disable_bump_commit = false
+tag_prefix = "v"
+skip_untracked = false
+
+pre_bump_hooks = [
+  "meson rewrite kwargs set project / version {{version}}",
+  "SEAMS_RELEASE_DATE=$(date +%F) python3 -m cogapp -I ci/version -r @ci/version/files.txt",
+  "towncrier build --yes --version {{version}}",
+]
+post_bump_hooks = [
+  "pixi run --frozen -e version version-drift",
+]
+
+[commit_types]
+feat = { changelog_title = "Added" }
+fix = { changelog_title = "Fixed" }
+perf = { changelog_title = "Changed" }
+refactor = { changelog_title = "Changed" }
+docs = { changelog_title = "Changed" }
+test = { changelog_title = "Changed" }
+build = { changelog_title = "Changed" }
+ci = { changelog_title = "Changed" }
+chore = { changelog_title = "Changed" }
+style = { changelog_title = "Changed" }
+revert = { changelog_title = "Changed" }
+release = { changelog_title = "Changed" }

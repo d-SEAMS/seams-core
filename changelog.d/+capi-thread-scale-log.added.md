@@ -1,1 +1,0 @@
-`bench/capi_thread_scale.txt` records `capi_thread_scale` on a release build. At 8 threads the cutoff-list build is about 60% of `seams_ql_cutoff` and 74% of `seams_cutoff_csr`, and the serial point-cloud conversion about 15% and 18%.

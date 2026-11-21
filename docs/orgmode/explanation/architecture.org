@@ -1,7 +1,7 @@
 #+TITLE: Architecture
 #+OPTIONS: toc:nil num:nil
 
-d-SEAMS 2.14.0 is one C++ engine, ~libyodaLib~. Callers link
+d-SEAMS is one C++ engine, ~libyodaLib~. Callers link
 ~libseams~, ~libseams_lang~, or both. ~libseams~ (=include/seams.h=) is
 the C API. ~libseams_lang~ (=bindings/cxx/seams_lang.h=) is the C ABI.
 Each library links ~libyodaLib~. ~libseams_lang~ is a separate library
@@ -36,8 +36,8 @@ for that build.
 
 Each language is its own package. The package calls this engine. It
 does not carry a second copy of a classifier. A package release carries
-the engine version it was built against, so ~pydseamslib==2.14.0~
-calls the 2.14.0 engine.
+the engine version it was built against, so the ~pydseamslib~ package
+calls that engine.
 
 | language | repository | package | calls |
 |----------+------------+---------+-------|
@@ -71,7 +71,7 @@ returns a list is the cutoff list. One thread does not run that search.
 the cell list did not supply the pairs, the build includes linkcell,
 and the call succeeds. [[https://github.com/d-SEAMS/linkcell][linkcell]]
 is that library. This repository asks for linkcell 0.4.2 or newer.
-linkcell's release number is its own, and the 2.14.0 tag does not
+linkcell's release number is its own, and a seams-core release tag does not
 name it. ~libyodaLib~ links one copy and exports the ~lc_~ symbols.
 
 Vesin fills the list when it is built and linkcell produced nothing:

@@ -1,1 +1,0 @@
-`dump_index_eintr`, `dump_index_eio` and `dump_fstat_keeps_atoms` each write their dump under a directory of their own. The three run one driver in parallel and shared a fixed temporary directory, so one test's cleanup could remove the other's file and abort it with `filesystem error: cannot remove`.

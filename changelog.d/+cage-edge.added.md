@@ -1,1 +1,0 @@
-`Frame.cages_by_signature` takes `edge`, and Lua `dseams.cages_by_signature` reads `edge` from its options table. Both call the same window as `--cage-edge`: empty keeps `2.65,3.15`, and `none` leaves the cage bound to the face census. The C entry for the libseams path is `seams_signature_cages_edge`. `seams_frame_signature_vertices_edge` returns the vertices of that window.

@@ -5,7 +5,9 @@ license: MIT
 compatibility: "The engine builds with Meson. Python is the package pydseamslib. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
 metadata:
   author: d-SEAMS
+  # [[[cog import seams_version as v; cog.outl(f'  version: "{v.VERSION}"')]]]
   version: "2.14.0"
+  # [[[end]]]
 ---
 
 # Use d-SEAMS
@@ -31,10 +33,10 @@ meson setup build && meson compile -C build
 `pixi run setup && pixi run build` uses the locked toolchain and writes
 `./bbdir/seams`. `nix build` writes `./result/bin/seams`.
 
-Python is a separate package. Building this repository does not install it.
+Install the Python package separately:
 
 ```bash
-pip install 'pydseamslib==2.14.0'
+pip install pydseamslib
 ```
 
 `import dseams` is the analysis API. `import pydseams` is the lower-level

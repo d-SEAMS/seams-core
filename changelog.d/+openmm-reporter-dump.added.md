@@ -1,1 +1,0 @@
-`DseamsReporter` writes its `dump` argument: each report appends a LAMMPS dump frame of the classified sites with their CHILL+ labels. `seconds` and `calls` time the reports. Callers that passed a placeholder name now pass nothing.

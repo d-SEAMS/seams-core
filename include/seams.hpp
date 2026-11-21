@@ -1829,7 +1829,7 @@ class System : public detail::Handle<seams_system, seams_system_destroy> {
 };
 
 /**
- * @brief Library version text, for example `2.14.0`.
+ * @brief Library version text of the built library.
  * @ingroup seams_cpp
  * @return A copy of the static version string.
  */

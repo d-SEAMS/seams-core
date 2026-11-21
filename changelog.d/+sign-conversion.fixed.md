@@ -1,1 +1,0 @@
-The library sources PydSEAMSlib and dseams-r compile build without a warning under `-Wsign-conversion` and `-Wshorten-64-to-32` with GCC and the newest Clang, with or without OpenMP, chemfiles, MPI and sphericart. Indices are `std::size_t` or pass a range check on the way, so PydSEAMSlib's `-Werror` build on macOS no longer stops on them. Every count is unchanged.

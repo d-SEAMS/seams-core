@@ -6575,7 +6575,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_string
 
-Purpose: Version text, for example "2.14.0".
+Purpose: Version text of the built library.
 
 ```c
 const char *seams_version_string(void);

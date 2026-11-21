@@ -3,7 +3,7 @@
 
 The 2020 JCIM figures are drawn from figshare project 73545.
 This page runs the same calls on the supplied example trajectories.
-Python is ~pip install 'pydseamslib==2.14.0'~; the import is ~dseams.userframe~.
+Python is ~pip install pydseamslib~; the import is ~dseams.userframe~.
 Run the block from the repository root.
 
 | figure | trajectory | call | result |

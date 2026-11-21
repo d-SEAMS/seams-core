@@ -5,8 +5,8 @@
 .. include:: ../videos/embeds/python.rst
 #+end_export
 
-~dseams.userframe.read~ in pydseamslib 2.14.0 returns a ~Frame~ over
-~libseams_lang~. Install with ~pip install 'pydseamslib==2.14.0'~.
+~dseams.userframe.read~ in pydseamslib returns a ~Frame~ over
+~libseams_lang~. Install with ~pip install pydseamslib~.
 ~import pydseams~ loads ~pydseams.frame.Frame~.
 That class has no ~graph~ argument on ~chill_plus~ and no ~edge~
 argument on ~cages_by_signature~.

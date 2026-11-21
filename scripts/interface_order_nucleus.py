@@ -49,7 +49,7 @@ def library():
         import seams
     except ImportError as err:
         raise SystemExit(
-            "the seams ctypes package is part of pydseamslib: pip install pydseamslib==2.14.0"
+            "the seams ctypes package is part of pydseamslib: pip install pydseamslib"
         ) from err
 
     return seams
