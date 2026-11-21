@@ -1,0 +1,1 @@
+Refine triclinic displacements with exact Euclidean minimum-image reduction outside the Smith ball in `passTilt` (`src/cutoff_csr.cpp`) and in Steinhardt and CHILL/CHILL+ bond-vector kernels (`src/steinhardt_parallel.cpp`, `src/bop.cpp`), and use `floor` for fallback cell counts in `orthoChill`.

@@ -244,6 +244,68 @@ inline bool smithInside(const FracBox &b, double r2) {
   return b.ok && (!b.triclinic || std::sqrt(r2) + 1e-12 < b.halfMin);
 }
 
+// Exact Euclidean minimum-image refinement of a triclinic displacement vector
+// when it lies outside the Smith ball. Works with either minimage or the
+// built-in Selling superbasis fallback.
+inline std::array<double, 3>
+refineEuclidean(double lx, double ly, double lz, double xy, double xz, double yz,
+                const std::array<double, 3> &raw,
+                const std::array<double, 3> &wrapped) {
+#ifdef SEAMS_HAS_MINIMAGE
+  struct CachedCell {
+    double key[6]{};
+    mi_cell cell{};
+    bool valid = false;
+  };
+  thread_local CachedCell cache;
+  if (!cache.valid || cache.key[0] != lx || cache.key[1] != ly ||
+      cache.key[2] != lz || cache.key[3] != xy || cache.key[4] != xz ||
+      cache.key[5] != yz) {
+    cache.key[0] = lx;
+    cache.key[1] = ly;
+    cache.key[2] = lz;
+    cache.key[3] = xy;
+    cache.key[4] = xz;
+    cache.key[5] = yz;
+    const double a[3] = {lx, 0.0, 0.0};
+    const double b[3] = {xy, ly, 0.0};
+    const double c[3] = {xz, yz, lz};
+    const double origin[3] = {0.0, 0.0, 0.0};
+    cache.valid = (mi_cell_from_vectors(a, b, c, origin, &cache.cell) == 0);
+  }
+  if (cache.valid) {
+    const double zero[3] = {0.0, 0.0, 0.0};
+    double ed[3] = {0.0, 0.0, 0.0};
+    if (mi_displacement_euclidean(&cache.cell, zero, raw.data(), ed) == 0) {
+      return {ed[0], ed[1], ed[2]};
+    }
+  }
+  return wrapped;
+#else
+  return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, wrapped);
+#endif
+}
+
+// Exact Euclidean minimum-image displacement from (xj, yj, zj) to (xi, yi, zi).
+// Inside the Smith ball (and on every orthorhombic cell) this returns fracDelta
+// directly; outside the Smith ball on a triclinic cell it refines via exact
+// Euclidean reduction so pairs with h_min/2 <= |d_MIC| < |d_frac| keep their
+// shortest image.
+inline std::array<double, 3> exactDelta(const FracBox &b, double xi, double yi,
+                                        double zi, double xj, double yj,
+                                        double zj) {
+  const auto dr = fracDelta(b, xi, yi, zi, xj, yj, zj);
+  if (!b.triclinic) {
+    return dr;
+  }
+  const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+  if (smithInside(b, r2)) {
+    return dr;
+  }
+  const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
+  return refineEuclidean(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
+}
+
 #ifdef SEAMS_HAS_MINIMAGE
 inline bool euclideanDelta(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double xi,

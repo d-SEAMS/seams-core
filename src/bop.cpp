@@ -931,7 +931,7 @@ static void classifyBondsLeftFp64(
         return;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
         candidates = heapNear.data();
@@ -1421,9 +1421,9 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     int ncell = -1;
   };
   static Scratch scratch;
-  int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
-  int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
-  int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
+  int nx = std::max(1, static_cast<int>(std::floor(Lx / cutoff)));
+  int ny = std::max(1, static_cast<int>(std::floor(Ly / cutoff)));
+  int nz = std::max(1, static_cast<int>(std::floor(Lz / cutoff)));
   seams::coarsenUntilFits(nx, ny, nz, 1);
   int ncell = 0;
   if (!seams::gridFits(nx, ny, nz, ncell)) {
@@ -1550,7 +1550,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
         }
         double rx, ry, rz;
         if (tiltBox) {
-          const auto image = gen::fracDelta(
+          const auto image = gen::exactDelta(
               fracBox, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
               scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
               scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
@@ -1848,6 +1848,7 @@ bool chill::q4q6ChillPlus(
   const double axy = tilt ? frac.xy / frac.ly : 0.0;
   const double axz = tilt ? frac.xz / frac.lz : 0.0;
   const double ayz = tilt ? frac.yz / frac.lz : 0.0;
+  const bool checkSmith = tilt && !(cutoff + 1e-12 < frac.halfMin);
   constexpr double pi = 3.14159265358979323846;
   const double pre4 = 4.0 * pi / 9.0;
   const double pre6 = 4.0 * pi / 13.0;
@@ -1912,6 +1913,17 @@ bool chill::q4q6ChillPlus(
         dx = dX + axy * dY + axz * dZ;
         dy = dY + ayz * dZ;
         dz = dZ;
+        if (checkSmith) {
+          const double r2 = dx * dx + dy * dy + dz * dz;
+          if (!gen::smithInside(frac, r2)) {
+            const std::array<double, 3> w = {dx, dy, dz};
+            const auto euc = gen::refineEuclidean(
+                frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
+            dx = euc[0];
+            dy = euc[1];
+            dz = euc[2];
+          }
+        }
       } else {
         dx = xi - xyz[static_cast<std::size_t>(3 * j)];
         dy = yi - xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -2418,7 +2430,7 @@ bool chill::chillPlusPublishedCutoff(
       if (seen) {
         continue;
       }
-      const auto dr = gen::fracDelta(frame, xi, yi, zi,
+      const auto dr = gen::exactDelta(frame, xi, yi, zi,
                                      scratch.xyz[static_cast<std::size_t>(3 * j)],
                                      scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
                                      scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
@@ -2636,7 +2648,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (!(d2 > 0.0)) {
         continue;
@@ -2830,7 +2842,7 @@ int chill::chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, doubl
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
@@ -2966,7 +2978,7 @@ int chill::chillFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yClou
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
@@ -3751,7 +3763,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
         continue;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
         candidates = heapNear.data();

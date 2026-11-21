@@ -1234,6 +1234,30 @@ SteinhardtQl cutoffSolid(
   const double axy = tilt ? frac.xy / frac.ly : 0.0;
   const double axz = tilt ? frac.xz / frac.lz : 0.0;
   const double ayz = tilt ? frac.yz / frac.lz : 0.0;
+  const bool checkSmith = tilt && !(cutoff + 1e-12 < frac.halfMin);
+  const auto tiltDelta = [&](double xi, double yi, double zi, int j,
+                             double &dx, double &dy, double &dz) {
+    double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+    double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+    double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+    dX -= frac.lx * std::round(dX / frac.lx);
+    dY -= frac.ly * std::round(dY / frac.ly);
+    dZ -= frac.lz * std::round(dZ / frac.lz);
+    dx = dX + axy * dY + axz * dZ;
+    dy = dY + ayz * dZ;
+    dz = dZ;
+    if (checkSmith) {
+      const double r2 = dx * dx + dy * dy + dz * dz;
+      if (!gen::smithInside(frac, r2)) {
+        const std::array<double, 3> w = {dx, dy, dz};
+        const auto euc = gen::refineEuclidean(
+            frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
+        dx = euc[0];
+        dy = euc[1];
+        dz = euc[2];
+      }
+    }
+  };
   // Local q4 and q6. Eight atoms share one solid-harmonic sum. The
   // neighbour shell is whatever the cutoff list stored, not a fixed
   // four, and the q_lm row is not written.
@@ -1282,15 +1306,7 @@ SteinhardtQl cutoffSolid(
           const int j = scratch.cols[static_cast<std::size_t>(p)];
           double dx, dy, dz;
           if (tilt) {
-            double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-            double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-            double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-            dX -= frac.lx * std::round(dX / frac.lx);
-            dY -= frac.ly * std::round(dY / frac.ly);
-            dZ -= frac.lz * std::round(dZ / frac.lz);
-            dx = dX + axy * dY + axz * dZ;
-            dy = dY + ayz * dZ;
-            dz = dZ;
+            tiltDelta(xi, yi, zi, j, dx, dy, dz);
           } else {
             dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
             dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -1374,15 +1390,7 @@ SteinhardtQl cutoffSolid(
         const int j = scratch.cols[static_cast<std::size_t>(a + p)];
         double dx, dy, dz;
         if (tilt) {
-          double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-          double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-          double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-          dX -= frac.lx * std::round(dX / frac.lx);
-          dY -= frac.ly * std::round(dY / frac.ly);
-          dZ -= frac.lz * std::round(dZ / frac.lz);
-          dx = dX + axy * dY + axz * dZ;
-          dy = dY + ayz * dZ;
-          dz = dZ;
+          tiltDelta(xi, yi, zi, j, dx, dy, dz);
         } else {
           dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
           dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -1437,15 +1445,7 @@ SteinhardtQl cutoffSolid(
             const int j = scratch.cols[static_cast<std::size_t>(a + p)];
             double dx, dy, dz;
             if (tilt) {
-              double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-              double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-              double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-              dX -= frac.lx * std::round(dX / frac.lx);
-              dY -= frac.ly * std::round(dY / frac.ly);
-              dZ -= frac.lz * std::round(dZ / frac.lz);
-              dx = dX + axy * dY + axz * dZ;
-              dy = dY + ayz * dZ;
-              dz = dZ;
+              tiltDelta(xi, yi, zi, j, dx, dy, dz);
             } else {
               dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
               dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -1543,15 +1543,7 @@ SteinhardtQl cutoffSolid(
         const int j = scratch.cols[static_cast<std::size_t>(left + p)];
         double dx, dy, dz;
         if (tilt) {
-          double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-          double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-          double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-          dX -= frac.lx * std::round(dX / frac.lx);
-          dY -= frac.ly * std::round(dY / frac.ly);
-          dZ -= frac.lz * std::round(dZ / frac.lz);
-          dx = dX + axy * dY + axz * dZ;
-          dy = dY + ayz * dZ;
-          dz = dZ;
+          tiltDelta(xi, yi, zi, j, dx, dy, dz);
         } else {
           dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
           dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -1631,15 +1623,7 @@ SteinhardtQl cutoffSolid(
       const int j = scratch.cols[static_cast<std::size_t>(p)];
       double dx, dy, dz;
       if (tilt) {
-        double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-        double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-        double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-        dX -= frac.lx * std::round(dX / frac.lx);
-        dY -= frac.ly * std::round(dY / frac.ly);
-        dZ -= frac.lz * std::round(dZ / frac.lz);
-        dx = dX + axy * dY + axz * dZ;
-        dy = dY + ayz * dZ;
-        dz = dZ;
+        tiltDelta(xi, yi, zi, j, dx, dy, dz);
       } else {
         dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
         dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -1951,7 +1935,7 @@ SteinhardtQl steinhardtQlMutual(
         dy -= frame.ly * std::floor(dy / frame.ly + 0.5);
         dz -= frame.lz * std::floor(dz / frame.lz + 0.5);
       } else {
-        const auto image = gen::fracDelta(frame, xi, yi, zi, xj, yj, zj);
+        const auto image = gen::exactDelta(frame, xi, yi, zi, xj, yj, zj);
         dx = image[0];
         dy = image[1];
         dz = image[2];

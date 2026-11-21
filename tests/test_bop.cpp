@@ -6,6 +6,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <order_parameter.hpp>
+#include <ozaki.hpp>
 #include <seams_input.hpp>
 #include <steinhardt_device.hpp>
 #include <ylm_batch.hpp>
@@ -2029,5 +2030,111 @@ TEST_CASE("triclinic shifted periodic images preserve cutoff Steinhardt and q4q6
     REQUIRE_THAT(s4b[u], Catch::Matchers::WithinAbs(r4b[u], 1e-10));
     REQUIRE_THAT(s6b[u], Catch::Matchers::WithinAbs(r6b[u], 1e-10));
     REQUIRE(shiftedCloud.pts[u].iceType == refCloud.pts[u].iceType);
+  }
+}
+
+TEST_CASE("reduced triclinic cell outside Smith ball uses Euclidean MIC across CSR and BOP",
+          "[bop][triclinic]") {
+  // Valid reduced LAMMPS triclinic box (|xy|,|xz|,|yz| <= L/2, shortest nonzero
+  // lattice vector is 7.0 A so Euclidean MIC is strictly unique for d < 3.5 A),
+  // while face separation h_a < 7.0 A puts cutoff = 3.5 A outside the Smith ball.
+  const double lx = 7.0;
+  const double ly = 7.0;
+  const double lz = 7.0;
+  const double xy = 3.4;
+  const double xz = 3.4;
+  const double yz = 3.4;
+  const double xloBound = std::min({0.0, xy, xz, xy + xz});
+  const double xhiBound = lx + std::max({0.0, xy, xz, xy + xz});
+  const double yloBound = std::min(0.0, yz);
+  const double yhiBound = ly + std::max(0.0, yz);
+
+  molSys::PointCloud<molSys::Point<double>, double> c;
+  c.box = {xhiBound - xloBound, yhiBound - yloBound, lz, xy, xz, yz};
+  c.boxLow = {xloBound, yloBound, 0.0};
+  c.currentFrame = 1;
+  // Pair (0,1) at frac (0.49, 0.25, 0.15) has |relDist| = 3.3308 A < 3.5 A,
+  // whereas |fracDelta| = 5.3995 A > 3.5 A.
+  const double coords[3][3] = {
+      {0.0, 0.0, 0.0},
+      {4.79, 2.26, 1.05},
+      {1.5, 0.2, 0.3},
+  };
+  for (int i = 0; i < 3; ++i) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.x = coords[i][0];
+    p.y = coords[i][1];
+    p.z = coords[i][2];
+    c.idIndexMap[p.atomID] = i;
+    c.pts.push_back(p);
+  }
+  c.nop = 3;
+
+  const auto dr01 = gen::relDist(c, 0, 1);
+  const double d01 = std::sqrt(dr01[0] * dr01[0] + dr01[1] * dr01[1] + dr01[2] * dr01[2]);
+  REQUIRE(d01 < 3.5);
+
+  // Cutoff CSR and neighbour lists must include pair (0, 1).
+  std::vector<int> off, cols;
+  REQUIRE(nneigh::orthoFullCsr(c, nullptr, 3.5, off, cols));
+  REQUIRE(off.size() == 4);
+  const bool csrHas01 = std::find(cols.begin() + off[0], cols.begin() + off[1], 1) !=
+                        cols.begin() + off[1];
+  REQUIRE(csrHas01);
+
+  const auto rows = nneigh::neighListO(3.5, c, 1);
+  REQUIRE(std::find(rows[0].begin() + 1, rows[0].end(), 2) != rows[0].end());
+
+  // Cutoff and mutual Steinhardt must agree with manual relDist-based steinhardtQl.
+  const auto q6Ref = chill::steinhardtQl(c, rows, 6);
+  const auto q6Cut = chill::steinhardtQlCutoff(c, 3.5, 6, 1, true, true);
+  const auto q6CutLocal = chill::steinhardtQlCutoff(c, 3.5, 6, 1, false, false);
+  const auto q6Mut = chill::steinhardtQlMutual(c, 2, 3.5, 1, 6);
+  const auto mutRows = nneigh::kNearestNeighbourList(c, 2, 3.5, 1, true);
+  const auto q6MutRef = chill::steinhardtQl(c, mutRows, 6);
+  for (int i = 0; i < 3; ++i) {
+    const auto u = static_cast<std::size_t>(i);
+    REQUIRE_THAT(q6Cut.ql[u], Catch::Matchers::WithinAbs(q6Ref.ql[u], 1e-10));
+    REQUIRE_THAT(q6CutLocal.ql[u], Catch::Matchers::WithinAbs(q6Ref.ql[u], 1e-10));
+    REQUIRE_THAT(q6Cut.qlBar[u], Catch::Matchers::WithinAbs(q6Ref.qlBar[u], 1e-10));
+    REQUIRE_THAT(q6Mut.ql[u], Catch::Matchers::WithinAbs(q6MutRef.ql[u], 1e-10));
+    REQUIRE_THAT(q6Mut.qlBar[u], Catch::Matchers::WithinAbs(q6MutRef.qlBar[u], 1e-10));
+  }
+
+  // Fused q4q6ChillPlus must agree with manual relDist-based q4/q6.
+  const auto q4Ref = chill::steinhardtQl(c, rows, 4);
+  auto cFused = c;
+  std::vector<double> fq4, fq6, fq4b, fq6b;
+  REQUIRE(chill::q4q6ChillPlus(cFused, 3.5, 1, fq4, fq6, fq4b, fq6b));
+  for (int i = 0; i < 3; ++i) {
+    const auto u = static_cast<std::size_t>(i);
+    REQUIRE_THAT(fq4[u], Catch::Matchers::WithinAbs(q4Ref.ql[u], 1e-10));
+    REQUIRE_THAT(fq6[u], Catch::Matchers::WithinAbs(q6Ref.ql[u], 1e-10));
+    REQUIRE_THAT(fq4b[u], Catch::Matchers::WithinAbs(q4Ref.qlBar[u], 1e-10));
+    REQUIRE_THAT(fq6b[u], Catch::Matchers::WithinAbs(q6Ref.qlBar[u], 1e-10));
+  }
+
+  // getCorrelPlus default Fp64 path must match Dot2 (relDist) path on c_ij.
+  auto cFp64 = c;
+  auto cDot2 = c;
+  const auto savedMode = seams::product::mode();
+  seams::product::setMode(seams::product::Mode::Fp64);
+  chill::getCorrelPlus(cFp64, rows, false);
+  seams::product::setMode(seams::product::Mode::Dot2);
+  chill::getCorrelPlus(cDot2, rows, false);
+  seams::product::setMode(savedMode);
+  REQUIRE(cFp64.pts[0].c_ij.size() == cDot2.pts[0].c_ij.size());
+  for (std::size_t k = 0; k < cDot2.pts[0].c_ij.size(); ++k) {
+    REQUIRE_THAT(cFp64.pts[0].c_ij[k].c_value,
+                 Catch::Matchers::WithinAbs(cDot2.pts[0].c_ij[k].c_value, 1e-10));
+  }
+  // Fused q4q6ChillPlus bonds must match Dot2 bonds too.
+  REQUIRE(cFused.pts[0].c_ij.size() == cDot2.pts[0].c_ij.size());
+  for (std::size_t k = 0; k < cDot2.pts[0].c_ij.size(); ++k) {
+    REQUIRE_THAT(cFused.pts[0].c_ij[k].c_value,
+                 Catch::Matchers::WithinAbs(cDot2.pts[0].c_ij[k].c_value, 1e-10));
   }
 }

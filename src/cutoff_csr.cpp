@@ -1371,10 +1371,12 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
                   continue;
                 }
                 double dsx, dsy, dsz;
+                double d2;
                 if (shifted) {
                   dsx = xs[i] - xs[j] - ssx;
                   dsy = ys[i] - ys[j] - ssy;
                   dsz = zs[i] - zs[j] - ssz;
+                  d2 = tilt2(dsx, dsy, dsz, h);
                 } else {
                   dsx = xs[i] - xs[j];
                   dsy = ys[i] - ys[j];
@@ -1382,8 +1384,21 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
                   dsx -= std::floor(dsx + 0.5);
                   dsy -= std::floor(dsy + 0.5);
                   dsz -= std::floor(dsz + 0.5);
+                  d2 = tilt2(dsx, dsy, dsz, h);
+                  if (!(d2 < rc2)) {
+                    // Outside the Smith ball a non-zero integer shift can yield
+                    // a shorter Euclidean image than fractional rounding.
+                    const std::array<double, 3> w = {
+                        h.lx * dsx + h.xy * dsy + h.xz * dsz,
+                        h.ly * dsy + h.yz * dsz,
+                        h.lz * dsz,
+                    };
+                    const auto euc = gen::refineEuclidean(
+                        h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, w, w);
+                    d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+                  }
                 }
-                if (tilt2(dsx, dsy, dsz, h) < rc2) {
+                if (d2 < rc2) {
                   found.push_back(jj);
                 }
               }
