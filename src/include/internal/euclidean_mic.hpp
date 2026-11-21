@@ -164,6 +164,12 @@ struct Obtuse {
   // dot(rel_i, rel_j), so a binary64 slicer step can update every
   // projection with one subtraction instead of a fresh dot product.
   double gram[8][8]{};
+  // rel[m][k] + relLo[m][k] is the relevant vector to about eps^2.
+  double relLo[3][8]{};
+  // Voronoi test with rounding margins (see voronoiRoom).
+  double cut[8]{};
+  double slope[8]{};
+  double invNorm[8]{};
   // Largest squared row of inv: |Babai coefficient|^2 <= n2(y) * maxInvN2.
   double maxInvN2 = 0.0;
   bool fractional = false;
@@ -193,9 +199,10 @@ inline double sumError(double a, double b, double sum) {
   return (a - (sum - back)) + (b - back);
 }
 
-// w - n . (a, b, c), each component within about one rounding of itself. The
-// cell is upper triangular, so x has three products, y two, and z one.
-inline Vec3 latticeTranslate(const Obtuse &s, Vec3 w, const double n[3]) {
+// w - n . (a, b, c), each component within about one rounding of itself, and
+// in lo the rounding of that component, to about eps^2 of the summed terms.
+// The cell is upper triangular, so x has three products, y two, and z one.
+inline Vec3 latticeTranslate(const Obtuse &s, Vec3 w, const double n[3], Vec3 &lo) {
   const double m0 = -n[0];
   const double m1 = -n[1];
   const double m2 = -n[2];
@@ -220,14 +227,27 @@ inline Vec3 latticeTranslate(const Obtuse &s, Vec3 w, const double n[3]) {
   const double sy = w.y + py1;
   const double ty = sy + py2;
   const double sz = w.z + pz2;
-  return {sx + (ex + sumError(px0, px1, x01) + sumError(w.x, px2, x2w) + sumError(x01, x2w, sx)),
-          ty + (ey + sumError(w.y, py1, sy) + sumError(sy, py2, ty)),
-          sz + (ez + sumError(w.z, pz2, sz))};
+  const double cx = ex + sumError(px0, px1, x01) + sumError(w.x, px2, x2w) + sumError(x01, x2w, sx);
+  const double cy = ey + sumError(w.y, py1, sy) + sumError(sy, py2, ty);
+  const double cz = ez + sumError(w.z, pz2, sz);
+  const Vec3 hi = {sx + cx, ty + cy, sz + cz};
+  lo = {sumError(sx, cx, hi.x), sumError(ty, cy, hi.y), sumError(sz, cz, hi.z)};
+  return hi;
+}
+
+inline Vec3 latticeTranslate(const Obtuse &s, Vec3 w, const double n[3]) {
+  Vec3 lo;
+  return latticeTranslate(s, w, n, lo);
+}
+
+inline Vec3 latticeVector(const Obtuse &s, const double n[3], Vec3 &lo) {
+  const double negated[3] = {-n[0], -n[1], -n[2]};
+  return latticeTranslate(s, Vec3{}, negated, lo);
 }
 
 inline Vec3 latticeVector(const Obtuse &s, const double n[3]) {
-  const double negated[3] = {-n[0], -n[1], -n[2]};
-  return latticeTranslate(s, Vec3{}, negated);
+  Vec3 lo;
+  return latticeVector(s, n, lo);
 }
 
 inline long long firstWithParity(long double low, int parity) {
@@ -540,27 +560,38 @@ inline bool relevantOf(Obtuse &o) {
   o.maxRelN2 = 0.0;
   for (int k = 0; k < 8; k++) {
     Vec3 r{};
+    Vec3 lo{};
     if (k < 7) {
       for (int m = 0; m < 3; m++) {
         if (!(std::abs(coef[k][m]) < kIntegral)) {
           return false;
         }
       }
-      r = latticeVector(o, coef[k]);
+      r = latticeVector(o, coef[k], lo);
     }
     o.rel[0][k] = r.x;
     o.rel[1][k] = r.y;
     o.rel[2][k] = r.z;
+    o.relLo[0][k] = lo.x;
+    o.relLo[1][k] = lo.y;
+    o.relLo[2][k] = lo.z;
     for (int m = 0; m < 3; m++) {
       o.relCoef[m][k] = (k < 7) ? coef[k][m] : 0.0;
     }
     o.halfN2[k] = (k < 7) ? 0.5 * n2(r) : std::numeric_limits<double>::infinity();
+    o.cut[k] = std::numeric_limits<double>::infinity();
+    o.slope[k] = 0.0;
+    o.invNorm[k] = 1.0;
     if (k < 7) {
       if (!(std::isfinite(o.halfN2[k]) &&
             o.halfN2[k] >= std::numeric_limits<double>::min())) {
         return false;
       }
       o.maxRelN2 = std::max(o.maxRelN2, n2(r));
+      constexpr double kMargin = 16.0 * std::numeric_limits<double>::epsilon();
+      o.cut[k] = o.halfN2[k] - kMargin * n2(r) - 0x1p-1000;
+      o.slope[k] = kMargin * std::sqrt(n2(r));
+      o.invNorm[k] = 1.0 / std::sqrt(n2(r));
     }
   }
   if (!(o.maxRelN2 < std::numeric_limits<double>::max() / 64.0)) {
@@ -721,8 +752,13 @@ inline double invertColumns(const Vec3 cols[3], double inv[3][3]) {
 }
 
 constexpr int kFractionalSteps = 4;
+// A wrap descent that has not settled after this many steps starts over
+// from Babai. Its path fits 4 bits per step in 64 bits.
+constexpr int kWrapSteps = 16;
 
-inline int descendFast(const Obtuse &s, Vec3 &x, int cap);
+template <bool Track = false, bool Record = false>
+int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n = nullptr,
+                unsigned long long *path = nullptr);
 
 inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[4][3]) {
   Obtuse o;
@@ -1129,7 +1165,12 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
 // initial projections, gain differences, and Gram updates, selects the best
 // gain with a branchless 7-way reduction tree, and exits immediately when
 // no projection exceeds its half-norm. Hitting `cap` falls back to Babai.
-inline int descendFast(const Obtuse &s, Vec3 &x, int cap) {
+// With Track, the integer cell coordinates of each step are added to n.
+// With Record (cap at most kWrapSteps), path gets 4 bits per step, the
+// first step highest: 2 * k + (sign < 0) for the relevant vector k taken.
+template <bool Track, bool Record>
+int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path) {
+  unsigned long long code = 0;
   double t[8];
   for (int k = 0; k < 8; k++) {
     t[k] = x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
@@ -1149,13 +1190,24 @@ inline int descendFast(const Obtuse &s, Vec3 &x, int cap) {
     const auto p46 = larger(p45.first, p45.second, 6, g[6]);
     const auto best = larger(p03.first, p03.second, p46.first, p46.second);
     if (!(best.second > 0.0)) {
+      if constexpr (Record) {
+        *path = code;
+      }
       return iter;
     }
     const int at = best.first;
     const double f = t[at] > 0.0 ? 1.0 : -1.0;
+    if constexpr (Record) {
+      code = (code << 4) | static_cast<unsigned long long>(2 * at + (t[at] > 0.0 ? 0 : 1));
+    }
     x.x -= f * s.rel[0][at];
     x.y -= f * s.rel[1][at];
     x.z -= f * s.rel[2][at];
+    if constexpr (Track) {
+      for (int m = 0; m < 3; m++) {
+        n[m] += f * s.relCoef[m][at];
+      }
+    }
     for (int k = 0; k < 8; k++) {
       t[k] -= f * s.gram[at][k];
     }
@@ -1164,11 +1216,39 @@ inline int descendFast(const Obtuse &s, Vec3 &x, int cap) {
       any |= static_cast<unsigned>(std::abs(t[k]) > s.halfN2[k]);
     }
     if (!any) {
+      if constexpr (Record) {
+        *path = code;
+      }
       return iter + 1;
     }
   }
+  if constexpr (Record) {
+    *path = code;
+  }
   return cap;
 }
+
+// Distance by which x clears the Voronoi cell of the origin with room for
+// rounding, positive when it lies strictly inside: x is within about one
+// rounding of its lattice image, each stored relevant vector within about
+// one rounding of its lattice vector, and the binary64 dot product within
+// 3 eps |x| |r|. Those move x . r by under 8 eps |x| |r| and |r|^2 / 2 by
+// under 4 eps |r|^2, half the margins in cut and slope, so the exact image
+// is then the unique minimum image, and so is any lattice image within the
+// returned distance of x. |x|_1 bounds |x|. The 2^-1000 in cut covers
+// absolute rounding where products are subnormal.
+inline double voronoiRoom(const Obtuse &s, Vec3 x) {
+  const double xn = std::abs(x.x) + std::abs(x.y) + std::abs(x.z);
+  double room[8];
+  for (int k = 0; k < 8; k++) {
+    const double p = x.x * s.rel[0][k] + x.y * s.rel[1][k] + x.z * s.rel[2][k];
+    room[k] = (s.cut[k] - (std::abs(p) + s.slope[k] * xn)) * s.invNorm[k];
+  }
+  return std::min(std::min(std::min(room[0], room[1]), std::min(room[2], room[3])),
+                  std::min(std::min(room[4], room[5]), room[6]));
+}
+
+inline bool insideVoronoi(const Obtuse &s, Vec3 x) { return voronoiRoom(s, x) > 0.0; }
 
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
@@ -1196,7 +1276,60 @@ inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
   addBabai(s, z, n);
   requireIntegral(n);
   Vec3 x = latticeTranslate(s, w, n);
-  descend<false>(s, x, n, std::numeric_limits<int>::max());
+  Vec3 y = x;
+  const int steps = descendFast<true>(s, y, kWrapSteps, n);
+  if (steps < kWrapSteps) {
+    requireIntegral(n);
+    if (steps > 0) {
+      x = latticeTranslate(s, w, n);
+    }
+    if (insideVoronoi(s, x)) {
+      return n2(x) < w2 ? x : w;
+    }
+  }
+  const Vec3 ref = refine(s, w, n);
+  return n2(ref) < w2 ? ref : w;
+}
+
+// A wrap descent from w that settled in the binary64 Voronoi test at y
+// after `steps` steps recorded in `path`. The steps subtract relevant
+// vectors with sign +-1, so replaying them repeats every rounding exactly;
+// the rounding of each subtraction and the low part of each relevant vector
+// give the image as y + lo to about eps^2 per step, and the steps its
+// integer cell coordinates n. That image is kept when y clears the Voronoi
+// cell by twice |lo|_1, which makes it the minimum image; otherwise (a near
+// tie) the image is re-evaluated from n and the extended-precision slicer
+// continues from it.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline Vec3 certifyWrap(const Obtuse &s, Vec3 w, double w2, Vec3 y, unsigned long long path,
+                        int steps) {
+  const double room = voronoiRoom(s, y);
+  Vec3 x = w;
+  Vec3 lo{};
+  double n[3] = {0.0, 0.0, 0.0};
+  for (int i = steps - 1; i >= 0; i--) {
+    const unsigned code = static_cast<unsigned>(path >> (4 * i)) & 15u;
+    const int at = static_cast<int>(code >> 1);
+    const double f = (code & 1u) != 0 ? -1.0 : 1.0;
+    Vec3 next = x;
+    next.x -= f * s.rel[0][at];
+    next.y -= f * s.rel[1][at];
+    next.z -= f * s.rel[2][at];
+    lo.x += sumError(x.x, -f * s.rel[0][at], next.x) - f * s.relLo[0][at];
+    lo.y += sumError(x.y, -f * s.rel[1][at], next.y) - f * s.relLo[1][at];
+    lo.z += sumError(x.z, -f * s.rel[2][at], next.z) - f * s.relLo[2][at];
+    for (int m = 0; m < 3; m++) {
+      n[m] += f * s.relCoef[m][at];
+    }
+    x = next;
+  }
+  const double moved = std::abs(lo.x) + std::abs(lo.y) + std::abs(lo.z);
+  if (x.x == y.x && x.y == y.y && x.z == y.z && room > 2.0 * moved) {
+    const Vec3 image = add(y, lo);
+    return n2(image) < w2 ? image : w;
+  }
   const Vec3 ref = refine(s, w, n);
   return n2(ref) < w2 ? ref : w;
 }
@@ -1205,7 +1338,12 @@ inline Vec3 closestBabai(const Obtuse &s, Vec3 w, double w2) {
 // Babai rounding subtracts lattice vectors with sum |z_i| max|b_i| at most
 // 2 max|w|, a Babai descent takes at most two steps, a wrap descent takes
 // at most three steps, and the image is at least |w| / 16. Every other
-// image is re-evaluated from its lattice coefficients.
+// image is re-evaluated from its lattice coefficients: a wrap descent that
+// settles within kWrapSteps through certifyWrap, anything else through
+// closestBabai.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (!s.ok) {
@@ -1218,15 +1356,16 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
   }
   if (s.fractional && w2 < kRange) {
     Vec3 y = w;
-    const int steps = descendFast(s, y, kFractionalSteps);
-    // Stopped inside the cap (at most three steps): keep y when it has not
-    // cancelled below |w|/16. Heavy cancellation or hitting the cap discards
-    // the partial move and starts Babai from the wrap.
+    unsigned long long path = 0;
+    const int steps = descendFast<false, true>(s, y, kWrapSteps, nullptr, &path);
     if (steps < kFractionalSteps) {
       const double y2 = n2(y);
       if (y2 >= (1.0 / 256.0) * w2) {
         return y2 < w2 ? y : w;
       }
+    }
+    if (steps < kWrapSteps) {
+      return certifyWrap(s, w, w2, y, path, steps);
     }
   }
   return closestBabai(s, w, w2);

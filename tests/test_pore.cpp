@@ -2087,6 +2087,41 @@ TEST_CASE("minimum image error is within 4 ulps of the wrap and 1e-14 relative",
   REQUIRE(pairs == 3 + 1200 * 24 + 3 * 3000 * 16);
 }
 
+TEST_CASE("minimum image error holds on skewed cells with a long b edge", "[pore]") {
+  // Cells (12, ly, 8, 3.6, -3, tilt * ly): the wrap descent settles on images
+  // far shorter than the wrap, or after more than three steps.
+  long pairs = 0;
+  const auto judge = [&](const double c[6], const std::array<double, 3> &w) {
+    const ImageError e = imageError(c, w);
+    ++pairs;
+    REQUIRE(e.ulps <= 4.0);
+    REQUIRE(e.relative <= 1e-14);
+  };
+  std::vector<std::array<double, 6>> cells;
+  for (const double n : {100.0, 1000.0, 20000.0, 100000.0}) {
+    cells.push_back({12.0, 9.0 * n, 8.0, 3.6, -3.0, 3.6 * n});
+  }
+  cells.push_back({15.0, 8000.0, 12.0, 6.0, -4.0, 3000.0});
+  for (const double aspect : {20.0, 100.0, 1000.0, 20000.0}) {
+    for (const double tilt : {0.2, 0.3, 0.4, 0.49}) {
+      cells.push_back({12.0, 8.0 * aspect, 8.0, 3.6, -3.0, tilt * 8.0 * aspect});
+    }
+  }
+  std::mt19937_64 gen(20261121);
+  std::uniform_real_distribution<double> half(-0.5, 0.5);
+  for (const auto &c : cells) {
+    for (int p = 0; p < 64; ++p) {
+      double f[3];
+      for (int k = 0; k < 3; ++k) {
+        f[k] = p < 8 ? ((p >> k) & 1 ? 0.5 : -0.5) : half(gen);
+      }
+      judge(c.data(), {c[0] * f[0] + c[3] * f[1] + c[4] * f[2], c[1] * f[1] + c[5] * f[2],
+                       c[2] * f[2]});
+    }
+  }
+  REQUIRE(pairs == 21 * 64);
+}
+
 TEST_CASE("elongated minimum images below 2^52 are returned", "[pore]") {
   // The Babai coordinate on the short reduced vector and the large
   // coefficient on a different vector used to be multiplied together and
