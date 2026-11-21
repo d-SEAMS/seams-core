@@ -32,9 +32,10 @@
 # where the C library lacks it (MSVC), and the Molfile constructor uses an
 # RAII guard so the plugin handle is closed and finalized if any step
 # (including read_topology) throws.
-# An empty clickme.dtr is the DESRES trajectory the plugin opens; it
-# is not rejected by the empty-file probe or by the atom-count versus
-# file-size check. Every other empty file still is.
+# A file named clickme.dtr is the DESRES trajectory the plugin opens.
+# It is not rejected by the empty-file probe or by the atom-count
+# versus file-size check. Every other empty file, including an empty
+# .dtr that is not named clickme.dtr, still is.
 diff -ruN cf-diff-a/CMakeLists.txt cf-diff-b/CMakeLists.txt
 --- cf-diff-a/CMakeLists.txt	2026-11-21 14:42:39.928338999 +0000
 +++ cf-diff-b/CMakeLists.txt	2026-11-21 15:05:54.721619565 +0000
@@ -390,15 +391,17 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
 +    // Several plugins read their first lines without checking for end of
 +    // file, then crash or loop. A DESRES trajectory is a directory, which
 +    // reads as an error rather than as end of file, and goes to its plugin.
++    // clickme.dtr is an empty file the plugin accepts as that directory.
++    const auto slash = path_.find_last_of("/\\");
++    const auto base = slash == std::string::npos ? path_ : path_.substr(slash + 1);
++    const bool clickme = F == VMDFMT_DTR && base == "clickme.dtr";
 +    {
 +        std::FILE* probe = std::fopen(path_.c_str(), "rb");
 +        if (probe != nullptr) {
 +            int first = std::fgetc(probe);
 +            bool empty = first == EOF && std::ferror(probe) == 0;
 +            std::fclose(probe);
-+            // clickme.dtr is an empty file the DESRES plugin accepts as the
-+            // trajectory directory. Every other empty file is still refused.
-+            if (empty && F != VMDFMT_DTR) {
++            if (empty && !clickme) {
 +                throw format_error("the file at '{}' is empty", path_);
 +            }
 +        }
@@ -463,7 +466,7 @@ diff -ruN cf-diff-a/src/formats/Molfile.cpp cf-diff-b/src/formats/Molfile.cpp
 +    // A dense reader cannot store more atoms than the file has bytes.
 +    // VTF atom ids are sparse, so a short file may name a high id; those
 +    // two plugins cap the id themselves.
-+    if (F != VMDFMT_VSF && F != VMDFMT_VTF && F != VMDFMT_DTR) {
++    if (F != VMDFMT_VSF && F != VMDFMT_VTF && !clickme) {
 +        struct stat st;
 +        if (stat(path_.c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
 +            static_cast<uint64_t>(natoms_) > static_cast<uint64_t>(st.st_size)) {
