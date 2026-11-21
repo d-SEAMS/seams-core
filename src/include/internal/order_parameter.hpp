@@ -34,6 +34,32 @@
 
 namespace topoparam {
 
+//! Neighbour convention for the Errington-Debenedetti tetrahedral order.
+enum class TetrahedralNeighbours {
+  //! The four nearest selected partners, with no radial cutoff.
+  NearestFour = 0,
+  //! Every selected partner at or inside the supplied cutoff. For N
+  //! neighbours the standard 3/8 factor is generalized to 9/(4 N (N-1)).
+  WithinCutoff = 1
+};
+
+//! Errington-Debenedetti tetrahedral order for selected centres against an
+//! independently selected partner set. Empty selections mean every atom.
+//! A centre is excluded from its own partner shell. Results follow centre
+//! order. A centre with fewer than four available neighbours is quiet NaN.
+std::vector<double> tetrahedralOrder(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<int> &centres, const std::vector<int> &partners,
+    TetrahedralNeighbours convention, double cutoff);
+
+//! Local Structure Index for selected centres and partners. Distances at or
+//! inside cutoff are sorted; LSI is the variance of adjacent radial gaps.
+//! A shell with fewer than two neighbours is quiet NaN.
+std::vector<double> localStructureIndex(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+    const std::vector<int> &centres, const std::vector<int> &partners,
+    double cutoff);
+
 //! Calculates the height%, an average measure of filled volume. The average
 //! height of a prism can be taken to be 2.75-2.85 Angstrom. (Koga et. al.,
 //! 2001)

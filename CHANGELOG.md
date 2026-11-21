@@ -50,6 +50,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   The 2015 CHILL+ thresholds are unchanged.
 - Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk.
 - Each language front reports rings, cages, signature cages and symmetry, and the binding CI runs those calls.
+- Errington--Debenedetti tetrahedral order and the Local Structure Index accept independent centre and partner selections through C++, the stable C API, and the Python language ABI. Four-nearest and cutoff-shell conventions are explicit, and undersized shells return NaN.
 - Every target also builds under GCC 15 in release mode with `-Dwerror=true`, and a `gcc15-all` CI job next to `clang21-all` builds that configuration and runs the suite on it.
 - Every target, tests, benchmarks, bindings, engines and subproject examples included, builds under Clang 21 with `-Dwerror=true`, and a CI job builds that configuration and runs the suite on it.
 - Fortran callers use a `seams` module of derived types with final procedures, allocatable results, and an optional `stat`/`errmsg` pair (d-SEAMS/dseams-fortran), and Lua callers get a Fennel module, a rockspec, and LDoc comments (d-SEAMS/yodaStruct). The numbers match the existing tests.
@@ -68,6 +69,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - OpenMM, rings, and cages each have a recording beside the rings and cages recording.
 - Orthorhombic frames are cut by linkcell's weighted recursive coordinate bisection of the cell grid. The halo is the stencil painted while walking the cells a rank owns, and the same cut is reused on the next frame of that size. Neighbour rows, CHILL+, q6 and primitive rings keep their scratch across that repeat, and the ring search answers a length-2 shortcut that passes below the source.
 - Primitive rings are the Franzblau shortest-path census. OVITO FindRings is a subset: K2,3 has three chordless 4-rings and FindRings reports two, and every ring on the 864-atom interface frame at 3.5 Å is primitive.
+- Primitive rings can be searched from a caller CSR graph through C++, the stable C API, and the Python language ABI. Directed edges are symmetrized, ring-size histograms are retained, and optional periodic geometry reports axis winding and contractibility.
 - Python, Julia, Rust and Fortran call the C API. Python reads NumPy arrays in place and accepts ASE and MDAnalysis frames. Julia uses ccall. Rust splits the raw FFI from the safe crate. Fortran binds the same symbols with iso_c_binding.
 - Saved trajectories other than CON are read with chemfiles, including xyz, a LAMMPS dump, gro, pdb, dcd, xtc and Amber NetCDF. A selection expression names water oxygen and hydrogen. The dependency is optional and on by default.
 - TIP4P/2005 ring updates at 0.01, 0.1 and 1 ps stay inside the hop ball and match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.

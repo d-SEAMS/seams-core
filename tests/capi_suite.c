@@ -921,6 +921,87 @@ static void one(const char *src, const char *cpp, const char *py, const char *wo
   (void)src;
 }
 
+static void analytic_topology_and_order(void) {
+  seams_system *sys = seams_system_create();
+  const double box[9] = {0, 0, 0, 100, 100, 100, 0, 0, 0};
+  const double tetra[18] = {
+      50, 50, 50, 51, 51, 51, 51, 49, 49,
+      49, 51, 49, 49, 49, 51, 50, 50, 52,
+  };
+  const int centre[1] = {0};
+  const int tetra_partners[4] = {1, 2, 3, 4};
+  double q[1] = {0};
+  if (sys == NULL ||
+      seams_system_set_atoms(sys, tetra, 6, box, 9, NULL, NULL) !=
+          SEAMS_OK) {
+    fault("analytic system");
+  } else {
+    if (seams_tetrahedral_order(
+            sys, centre, 1, NULL, 0, SEAMS_TETRAHEDRAL_NEAREST_FOUR,
+            0.0, q, 1) != SEAMS_OK ||
+        fabs(q[0] - 1.0) > 1e-12) {
+      fault("analytic nearest tetrahedral order");
+    }
+    if (seams_tetrahedral_order(
+            sys, centre, 1, tetra_partners, 4,
+            SEAMS_TETRAHEDRAL_WITHIN_CUTOFF, 2.0, q, 1) != SEAMS_OK ||
+        fabs(q[0] - 1.0) > 1e-12) {
+      fault("analytic cutoff tetrahedral order");
+    }
+    if (seams_tetrahedral_order(
+            sys, centre, 1, tetra_partners, 3,
+            SEAMS_TETRAHEDRAL_NEAREST_FOUR, 0.0, q, 1) != SEAMS_OK ||
+        !isnan(q[0])) {
+      fault("sparse tetrahedral order");
+    }
+  }
+  seams_system_destroy(sys);
+
+  sys = seams_system_create();
+  const double radial[15] = {
+      50, 50, 50, 51, 50, 50, 50, 51.5, 50,
+      50, 50, 52.5, 47, 50, 50,
+  };
+  const int radial_partners[4] = {1, 2, 3, 4};
+  double lsi[1] = {0};
+  if (sys == NULL ||
+      seams_system_set_atoms(sys, radial, 5, box, 9, NULL, NULL) !=
+          SEAMS_OK ||
+      seams_lsi(sys, centre, 1, radial_partners, 4, 3.1, lsi, 1) !=
+          SEAMS_OK ||
+      fabs(lsi[0] - 1.0 / 18.0) > 1e-12) {
+    fault("analytic LSI");
+  }
+  seams_system_destroy(sys);
+
+  sys = seams_system_create();
+  const double periodic_box[9] = {0, 0, 0, 9, 9, 9, 0, 0, 0};
+  const double winding_xyz[9] = {1, 4, 4, 4, 4, 4, 7, 4, 4};
+  const int offsets[4] = {0, 1, 2, 3};
+  const int columns[3] = {1, 2, 0};
+  seams_rings *rings = NULL;
+  if (sys == NULL ||
+      seams_system_set_atoms(sys, winding_xyz, 3, periodic_box, 9, NULL,
+                             NULL) != SEAMS_OK ||
+      seams_rings_from_csr(offsets, 4, columns, 3, 3, sys, &rings) !=
+          SEAMS_OK) {
+    fault("explicit graph rings");
+  } else {
+    int histogram[4] = {0};
+    int winding[1] = {0};
+    int contractible[1] = {1};
+    if (seams_rings_histogram_n(rings, histogram, 4) != SEAMS_OK ||
+        histogram[3] != 1 ||
+        seams_rings_winding(rings, 0, winding, 1, contractible, 1) !=
+            SEAMS_OK ||
+        winding[0] == 0 || contractible[0] != 0) {
+      fault("periodic graph winding");
+    }
+  }
+  seams_rings_destroy(rings);
+  seams_system_destroy(sys);
+}
+
 int main(int argc, char **argv) {
   if (argc != 5) {
     fprintf(stderr, "usage: capi_suite SRC CPP OVITO_PY WORK\n");
@@ -932,6 +1013,7 @@ int main(int argc, char **argv) {
   setenv("OMP_NUM_THREADS", "1", 1);
   setenv("RAYON_NUM_THREADS", "1", 1);
   (void)seams_set_num_threads(1);
+  analytic_topology_and_order();
   names_and_versions();
   Frame ic;
   memset(&ic, 0, sizeof ic);

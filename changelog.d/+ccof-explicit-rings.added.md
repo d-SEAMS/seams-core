@@ -1,0 +1,1 @@
+Primitive rings can be searched from a caller CSR graph through C++, the stable C API, and the Python language ABI. Directed edges are symmetrized, ring-size histograms are retained, and optional periodic geometry reports axis winding and contractibility.

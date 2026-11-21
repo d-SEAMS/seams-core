@@ -4,7 +4,7 @@ Rings
 
 Primitive rings and their histogram.
 
-The stable C interface provides 112 exported functions through ``include/seams.h``.
+The stable C interface provides 116 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_rings.c
    :language: c
@@ -61,6 +61,45 @@ Primitive rings (Franzblau) up to a maximum size.
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
 @par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller frees \*out with seams_rings_destroy(). @par Thread safety Exclusive use of sys. @par Example @code seams_rings \*rings = NULL; if (seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK) { seams_rings_destroy(rings); } @endcode
+
+.. _capi-seams_rings_from_csr:
+
+seams_rings_from_csr
+--------------------
+
+
+.. code-block:: c
+
+   seams_status seams_rings_from_csr( const int *offsets, size_t offsets_len, const int *columns, size_t columns_len, int max_depth, const seams_system *geometry, seams_rings **out)
+
+Primitive rings from an explicit caller-supplied CSR graph.
+
+``offsets``
+    CSR offsets.
+
+``offsets_len``
+    Number of offsets; at least one.
+
+``columns``
+    CSR columns, or NULL when columns_len is zero.
+
+``columns_len``
+    Number of columns.
+
+``max_depth``
+    Largest ring size, from 3 through 12.
+
+``geometry``
+    Optional frame supplying coordinates and periodic cell.
+
+``out``
+    Receives a new ring handle.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+offsets has n_vertices + 1 entries and starts at zero. columns contains zero-based vertex indices. Directed input is symmetrized by edge union; self edges and duplicates are ignored. The Franzblau search is the same implementation used by seams_rings_find(). geometry may be NULL. When supplied, its atom count must equal n_vertices and winding queries are enabled.
+
+@par Handle access Read-only access to geometry. @par Ownership The caller owns all arrays and frees \*out with seams_rings_destroy(). @par Thread safety Read-only calls may share geometry. The returned handle is independent.
 
 .. _capi-seams_rings_destroy:
 
@@ -184,6 +223,40 @@ Atom indices of one ring.
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
 
 @par Ownership The caller owns atoms. Indices are positions in the frame. @par Thread safety Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. @par Example @code int atoms[12]; size_t len = 0; seams_rings_vertices(rings, 0, atoms, 12, &len); @endcode
+
+.. _capi-seams_rings_winding:
+
+seams_rings_winding
+-------------------
+
+
+.. code-block:: c
+
+   seams_status seams_rings_winding( const seams_rings *rings, int axis, int *axis_winding, size_t axis_winding_len, int *contractible, size_t contractible_len)
+
+Periodic-axis winding and contractibility of every ring.
+
+``rings``
+    Ring handle.
+
+``axis``
+    Periodic cell axis, 0, 1, or 2.
+
+``axis_winding``
+    Signed winding output, or NULL.
+
+``axis_winding_len``
+    Length of axis_winding.
+
+``contractible``
+    One for a zero three-component winding, or NULL.
+
+``contractible_len``
+    Length of contractible.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE.
+
+axis_winding receives the signed integer lattice winding along axis (0, 1, or 2). contractible receives 1 exactly when all three winding components are zero. Either output may be NULL, but not both. Geometry must have been supplied to seams_rings_from_csr(), or carried by seams_rings_find(). @par Ownership The caller owns both output buffers. @par Thread safety Read-only: may run alongside other const calls on rings.
 
 .. _capi-seams_rings_chordless:
 

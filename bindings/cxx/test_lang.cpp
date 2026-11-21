@@ -348,6 +348,88 @@ int main(int argc, char **argv) {
     return fail("from arrays");
   }
   seams_frame_free(built);
+
+  const int graphOff[7] = {0, 1, 2, 3, 4, 5, 6};
+  const int graphCol[6] = {1, 2, 3, 4, 5, 0};
+  int graphHist[7] = {};
+  int nGraphRings = 0;
+  int nGraphVertices = 0;
+  if (seams_graph_rings(graphOff, 7, graphCol, 6, 6, graphHist, 7,
+                        nullptr, 0, nullptr, 0, &nGraphRings,
+                        &nGraphVertices) != 0 ||
+      graphHist[6] != 1 || nGraphRings != 1 || nGraphVertices != 6) {
+    return fail("explicit graph ring query");
+  }
+  int packedOff[2] = {};
+  int packedVertices[6] = {};
+  if (seams_graph_rings(graphOff, 7, graphCol, 6, 6, graphHist, 7,
+                        packedOff, 2, packedVertices, 6, &nGraphRings,
+                        &nGraphVertices) != 0 ||
+      packedOff[1] != 6) {
+    return fail("explicit graph rings");
+  }
+
+  const double tetraXyz[18] = {
+      50, 50, 50, 51, 51, 51, 51, 49, 49,
+      49, 51, 49, 49, 49, 51, 50, 50, 52,
+  };
+  const double analyticBox[9] = {0, 0, 0, 100, 100, 100, 0, 0, 0};
+  seams_frame *analytic =
+      seams_frame_from_arrays(tetraXyz, 6, analyticBox, nullptr, nullptr);
+  const int centre[1] = {0};
+  const int tetraPartners[4] = {1, 2, 3, 4};
+  double tetraQ[1] = {};
+  if (analytic == nullptr ||
+      seams_frame_tetrahedral(analytic, centre, 1, tetraPartners, 4, 1,
+                              2.0, tetraQ) != 0 ||
+      std::abs(tetraQ[0] - 1.0) > 1e-12) {
+    return fail("language tetrahedral order");
+  }
+  seams_frame_free(analytic);
+
+  const double radialXyz[15] = {
+      50, 50, 50, 51, 50, 50, 50, 51.5, 50,
+      50, 50, 52.5, 47, 50, 50,
+  };
+  const int radialPartners[4] = {1, 2, 3, 4};
+  analytic =
+      seams_frame_from_arrays(radialXyz, 5, analyticBox, nullptr, nullptr);
+  double lsi[1] = {};
+  if (analytic == nullptr ||
+      seams_frame_lsi(analytic, centre, 1, radialPartners, 4, 3.1, lsi) !=
+          0 ||
+      std::abs(lsi[0] - 1.0 / 18.0) > 1e-12) {
+    return fail("language LSI");
+  }
+  seams_frame_free(analytic);
+
+  const double windingXyz[9] = {1, 4, 4, 4, 4, 4, 7, 4, 4};
+  const double windingBox[9] = {0, 0, 0, 9, 9, 9, 0, 0, 0};
+  const int triangleOff[4] = {0, 1, 2, 3};
+  const int triangleCol[3] = {1, 2, 0};
+  int triangleHist[4] = {};
+  int trianglePackedOff[2] = {};
+  int triangleVertices[3] = {};
+  int triangleRings = 0;
+  int triangleVertexCount = 0;
+  analytic =
+      seams_frame_from_arrays(windingXyz, 3, windingBox, nullptr, nullptr);
+  if (analytic == nullptr ||
+      seams_graph_rings(triangleOff, 4, triangleCol, 3, 3, triangleHist,
+                        4, trianglePackedOff, 2, triangleVertices, 3,
+                        &triangleRings, &triangleVertexCount) != 0) {
+    return fail("language winding ring");
+  }
+  int axisWinding[1] = {};
+  int isContractible[1] = {1};
+  if (seams_frame_ring_winding(analytic, trianglePackedOff, triangleRings,
+                               triangleVertices, triangleVertexCount, 0,
+                               axisWinding, isContractible) != 0 ||
+      axisWinding[0] == 0 || isContractible[0] != 0) {
+    return fail("language ring winding");
+  }
+  seams_frame_free(analytic);
+
   if (seams_frame_prisms(nullptr, 3.5, 2, 6, nullptr, nullptr, nullptr) == 0) {
     return fail("null prisms");
   }

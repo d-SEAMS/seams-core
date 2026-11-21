@@ -231,6 +231,16 @@ int main(int argc, char **argv) {
   printf("capi seams_q6bar %.6f %d\n", mean, n_ice);
   need("stein", seams_steinhardt(ih, 3.5, 1, 6, q6, (size_t)n, q6bar, (size_t)n), ih);
   printf("capi seams_steinhardt %.6f\n", mean_of(q6bar, n));
+  seams_tetrahedral_neighbours tetrahedral_neighbours =
+      SEAMS_TETRAHEDRAL_NEAREST_FOUR;
+  need("tetrahedral",
+       seams_tetrahedral_order(ih, NULL, 0, NULL, 0,
+                               tetrahedral_neighbours, 0.0, q4,
+                               (size_t)n),
+       ih);
+  printf("capi seams_tetrahedral_order %.6f\n", mean_of(q4, n));
+  need("lsi", seams_lsi(ih, NULL, 0, NULL, 0, 3.7, q6, (size_t)n), ih);
+  printf("capi seams_lsi %.6f\n", mean_of(q6, n));
 
   seams_rings *rings = NULL;
   need("rings", seams_rings_find(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, 6, &rings), ih);
@@ -262,6 +272,27 @@ int main(int argc, char **argv) {
   double fraction = 0;
   need("frac", seams_rings_fraction(rings, 6, &fraction), rings);
   printf("capi seams_rings_fraction %.6f\n", fraction);
+  seams_rings *graph_rings = NULL;
+  need("graph rings",
+       seams_rings_from_csr(offsets, n_off, cols, nnz, 6, ih, &graph_rings),
+       ih);
+  size_t graph_nrings = 0;
+  need("graph ring count",
+       seams_rings_nrings(graph_rings, &graph_nrings), graph_rings);
+  int *axis_winding =
+      calloc(graph_nrings ? graph_nrings : 1, sizeof(int));
+  int *contractible =
+      calloc(graph_nrings ? graph_nrings : 1, sizeof(int));
+  need("ring winding",
+       seams_rings_winding(graph_rings, 2, axis_winding, graph_nrings,
+                           contractible, graph_nrings),
+       graph_rings);
+  printf("capi seams_rings_from_csr %zu\n", graph_nrings);
+  printf("capi seams_rings_winding %d\n",
+         graph_nrings ? contractible[0] : 0);
+  free(axis_winding);
+  free(contractible);
+  seams_rings_destroy(graph_rings);
 
   seams_cage_set *cages = NULL;
   need("cfind", seams_cages_find(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, 4, 0, &cages), ih);

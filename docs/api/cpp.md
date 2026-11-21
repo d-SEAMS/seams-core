@@ -30,7 +30,7 @@ Its frame-mutation and order-parameter entries are
 
 ```{literalinclude} ../../../bindings/cxx/seams_lang.h
 :language: cpp
-:lines: 45-90,131-216
+:lines: 45-90,121-248
 ```
 
 `docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
@@ -998,6 +998,69 @@ Units: coordinates and box lengths in angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
 
+### seams_frame_lsi
+
+Purpose: Write Local Structure Index for selected centres and partners.
+
+Parameters: frame; centres; n_centres; partners; n_partners; cutoff; lsi
+
+Returns: Zero on success. A non-zero value reports failure.
+
+Ownership: The caller owns every buffer. The frame stays with its owner.
+
+Errors: A non-zero code; seams_last_error() holds the detail.
+
+Units: cutoff in angstrom; LSI in square angstrom
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_frame_ring_winding
+
+Purpose: Write periodic winding and contractibility for packed rings.
+
+Parameters: frame; ring_offsets; n_rings; vertices; n_vertices; axis; axis_winding; contractible
+
+Returns: Zero on success. A non-zero value reports failure.
+
+Ownership: The caller owns every buffer. The frame stays with its owner.
+
+Errors: A non-zero code; seams_last_error() holds the detail.
+
+Units: dimensionless lattice winding and flags
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_frame_tetrahedral
+
+Purpose: Write tetrahedral order for selected centres and partners.
+
+Parameters: frame; centres; n_centres; partners; n_partners; convention; cutoff; q
+
+Returns: Zero on success. A non-zero value reports failure.
+
+Ownership: The caller owns every buffer. The frame stays with its owner.
+
+Errors: A non-zero code; seams_last_error() holds the detail.
+
+Units: cutoff in angstrom; q is dimensionless
+
+Example: `docs/examples/minimal_cpp.cpp`
+
+### seams_graph_rings
+
+Purpose: Find primitive rings in a caller-supplied CSR graph.
+
+Parameters: offsets; n_offsets; columns; n_columns; max_depth; histogram; histogram_len; ring_offsets; ring_offsets_cap; vertices; vertices_cap; n_rings; n_vertices
+
+Returns: Zero on success. A non-zero value reports failure.
+
+Ownership: The caller owns every input and output buffer.
+
+Errors: A non-zero code; seams_last_error() holds the detail.
+
+Units: dimensionless indices and counts
+
+Example: `docs/examples/minimal_cpp.cpp`
 <!-- API_SYMBOLS_END -->
 
 

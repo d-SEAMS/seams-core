@@ -27,6 +27,8 @@ EXAMPLES = {
 RAW = {
     "c": [
         ("SEAMS_ABI", "ABI number compiled into the header.", "none", "dimensionless integer 1"),
+        ("SEAMS_BUILDING", "Mark a build of libseams itself.", "none", "preprocessor switch"),
+        ("SEAMS_STATIC", "Mark a consumer of the static libseams archive.", "none", "preprocessor switch"),
         ("SEAMS_CHILL_OVITO", "CHILL+ rule used by OVITO.", "none", "dimensionless code 1"),
         ("SEAMS_CHILL_PUBLISHED", "CHILL+ rule from Nguyen and Molinero, 2015.", "none", "dimensionless code 0"),
         ("SEAMS_ERR_ARG", "A caller argument is the wrong shape.", "none", "dimensionless status code 4"),
@@ -38,6 +40,8 @@ RAW = {
         ("SEAMS_ERR_STATE", "The handle has no frame yet.", "none", "dimensionless status code 5"),
         ("SEAMS_GRAPH_CUTOFF", "Neighbour graph of every pair inside the cutoff.", "none", "dimensionless code 0"),
         ("SEAMS_GRAPH_MUTUAL", "Mutual four-nearest neighbour graph.", "none", "dimensionless code 1"),
+        ("SEAMS_TETRAHEDRAL_NEAREST_FOUR", "Tetrahedral order from the four nearest selected partners.", "none", "dimensionless code 0"),
+        ("SEAMS_TETRAHEDRAL_WITHIN_CUTOFF", "Tetrahedral order from every selected partner inside the cutoff.", "none", "dimensionless code 1"),
         ("SEAMS_LABEL_CLATHRATE", "CHILL+ clathrate label.", "none", "dimensionless code 4"),
         ("SEAMS_LABEL_CUBIC", "CHILL+ cubic-ice label.", "none", "dimensionless code 0"),
         ("SEAMS_LABEL_HEXAGONAL", "CHILL+ hexagonal-ice label.", "none", "dimensionless code 1"),
@@ -62,18 +66,24 @@ RAW = {
         ("SEAMS_RING_UNCLASSIFIED", "Ring with no symmetry class yet.", "none", "dimensionless code 0"),
         ("seams_abi", "Return the ABI number of this libseams.", "none", "dimensionless integer"),
         ("seams_chill_plus", "Write one CHILL+ label per atom.", "sys; cutoff; type; graph; rule; labels; counts9", "cutoff and coordinates in angstrom; labels and counts are dimensionless"),
+        ("seams_chill_plus_n", "Write CHILL+ labels with an explicit output length.", "sys; cutoff; type; graph; rule; labels; labels_len; counts9", "cutoff in angstrom; labels and counts are dimensionless"),
         ("seams_chill_rule", "Enumerator of the published and OVITO CHILL+ rules.", "none", "dimensionless"),
         ("seams_get_num_threads", "Report the OpenMP width the next call will use.", "none", "dimensionless thread count"),
         ("seams_graph", "Enumerator of the cutoff graph and the mutual graph.", "none", "dimensionless"),
         ("seams_label", "Enumerator of the nine CHILL+ labels.", "none", "dimensionless"),
         ("seams_label_name", "Map a CHILL+ code to its name.", "label", "dimensionless code in, text out"),
         ("seams_last_error", "Return the thread-local error detail.", "none", "text"),
+        ("seams_last_error_message", "Return the thread-local error detail.", "none", "text"),
+        ("seams_lammps_bounds", "Convert a restricted-triclinic cell to LAMMPS bounds.", "box9; bounds9", "lengths in angstrom"),
         ("seams_neighbours", "Opaque handle of one neighbour list.", "none", "handle"),
         ("seams_neighbours_build", "Build a cutoff or mutual neighbour list.", "sys; cutoff; type; graph; out", "cutoff in angstrom; type 0 keeps every atom"),
         ("seams_neighbours_count", "Return the number of neighbour rows.", "nb", "dimensionless count"),
         ("seams_neighbours_csr", "Return the neighbour list as CSR offsets and columns.", "nb; offsets; n_offsets; cols; nnz", "dimensionless indices; the self entry is omitted"),
         ("seams_neighbours_destroy", "Free a neighbour-list handle.", "nb", "handle"),
+        ("seams_neighbours_nrows", "Return the number of neighbour rows with status reporting.", "nb; n", "dimensionless count"),
         ("seams_q4q6", "Write local q4 and q6 on the cutoff shell.", "sys; cutoff; type; q4; q6", "cutoff in angstrom; q4 and q6 are dimensionless"),
+        ("seams_q4q6_n", "Write local q4 and q6 with explicit output lengths.", "sys; cutoff; type; q4; q4_len; q6; q6_len", "cutoff in angstrom; q4 and q6 are dimensionless"),
+        ("seams_tetrahedral_neighbours", "Enumerator of tetrahedral-order neighbour conventions.", "none", "dimensionless"),
         ("seams_ring_symmetry", "Enumerator of primitive-ring symmetry classes.", "none", "dimensionless"),
         ("seams_ring_symmetry_name", "Map a ring-symmetry code to its name.", "symmetry", "dimensionless code in, text out"),
         ("seams_rings", "Opaque handle of one primitive-ring set.", "none", "handle"),
@@ -82,17 +92,27 @@ RAW = {
         ("seams_rings_find", "Find primitive rings up to a maximum size.", "sys; cutoff; type; graph; max_depth; out", "cutoff in angstrom; max_depth is a dimensionless ring size from 3"),
         ("seams_rings_fraction", "Fraction of atoms that sit on a ring of one size.", "rings; size; fraction", "size 0 counts every ring; fraction is dimensionless"),
         ("seams_rings_histogram", "Count primitive rings by size.", "rings; counts; counts_len", "counts[k] is the dimensionless number of rings of size k"),
+        ("seams_rings_histogram_n", "Count primitive rings by size with a size_t length.", "rings; counts; counts_len", "dimensionless ring counts"),
         ("seams_rings_labels", "Write the size and symmetry of each ring.", "rings; sizes; symmetry", "dimensionless size and symmetry code"),
+        ("seams_rings_labels_n", "Write ring sizes and symmetry with explicit lengths.", "rings; sizes; sizes_len; symmetry; symmetry_len", "dimensionless size and symmetry code"),
+        ("seams_rings_nrings", "Return the number of primitive rings with status reporting.", "rings; n", "dimensionless count"),
         ("seams_set_num_threads", "Set the OpenMP width for the next call.", "n", "dimensionless thread count; 0 restores the library default"),
         ("seams_status", "Enumerator of the status codes.", "none", "dimensionless"),
         ("seams_status_string", "Map a status code to its name.", "status", "dimensionless code in, text out"),
         ("seams_system", "Opaque handle of one frame.", "none", "handle"),
         ("seams_system_count", "Return the number of points in the frame.", "sys", "dimensionless count"),
+        ("seams_system_box", "Copy the frame cell.", "sys; box9; box_len", "lengths in angstrom"),
         ("seams_system_create", "Allocate an empty frame handle.", "none", "handle"),
         ("seams_system_destroy", "Free a frame handle.", "sys", "handle"),
+        ("seams_system_ids", "Copy atom ids from the frame.", "sys; ids; len", "dimensionless ids"),
+        ("seams_system_natoms", "Return the frame atom count with status reporting.", "sys; n", "dimensionless count"),
+        ("seams_system_positions", "Copy Cartesian coordinates from the frame.", "sys; xyz; len", "coordinates in angstrom"),
         ("seams_system_set_frame", "Store points and a general LAMMPS cell.", "sys; xyz; n; box9; types; ids", "coordinates and box lengths in angstrom; n is a dimensionless count"),
         ("seams_system_set_hydrogen_frame", "Store a heavy-atom cloud and a separate hydrogen cloud.", "sys; heavy_xyz; n_heavy; heavy_types; heavy_ids; heavy_mols; hydrogen_xyz; n_hydrogen; hydrogen_types; hydrogen_ids; hydrogen_mols; box9; box_len", "coordinates and box lengths in angstrom"),
         ("seams_system_set_ortho", "Store points and an orthorhombic cell.", "sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids", "origin and edge lengths in angstrom"),
+        ("seams_system_set_positions", "Replace frame coordinates and optionally its cell.", "sys; xyz; n; box9; box_len", "coordinates and box lengths in angstrom"),
+        ("seams_system_stage_positions", "Stage coordinates for repeated frame updates.", "sys; xyz; n; box9; box_len", "coordinates and box lengths in angstrom"),
+        ("seams_system_types", "Copy atom types from the frame.", "sys; types; len", "dimensionless types"),
         ("SEAMS_CAGE_BOTH", "Atom that belongs to both cage types.", "none", "dimensionless code 3"),
         ("SEAMS_CAGE_CUBIC", "Atom that belongs only to a double-diamond cage.", "none", "dimensionless code 2"),
         ("SEAMS_CAGE_HEX", "Atom that belongs only to a hexagonal cage.", "none", "dimensionless code 1"),
@@ -143,6 +163,7 @@ RAW = {
         ("seams_rdf", "Partial radial distribution.", "sys; rmax; bins; type_i; type_j; r; g; count; cap; n_out; volume", "r and rmax in angstrom; g is dimensionless; volume in cubic angstrom"),
         ("seams_running_cn", "Running coordination number along the partial RDF.", "sys; rmax; bins; type_i; type_j; r; cn; cap; n_out", "r in angstrom; cn is dimensionless"),
         ("seams_signature_cages", "Count closed cages of one ring census.", "sys; cutoff; type; graph; spec; n_cages; n_atoms", "cutoff in angstrom; counts are dimensionless"),
+        ("seams_signature_cages_edge", "Count closed cages with an explicit face-edge window.", "sys; cutoff; type; graph; spec; edge; n_cages; n_atoms", "cutoff and edge lengths in angstrom; counts are dimensionless"),
         ("seams_site_kind", "Enumerator of site-table kinds.", "none", "dimensionless"),
         ("seams_site_table", "Per-atom site kind from a site-table spec.", "sys; spec; kinds; len", "dimensionless kind codes"),
         ("seams_steinhardt", "Local Steinhardt q_l on the cutoff shell, with the average on request.", "sys; cutoff; type; order_l; ql; ql_len; qlbar; qlbar_len", "cutoff in angstrom; q_l is dimensionless"),
@@ -157,12 +178,16 @@ RAW = {
         ("seams_neighbours_copy", "Copy the neighbour list into caller buffers.", "nb; offsets; offsets_cap; n_offsets; cols; cols_cap; nnz", "dimensionless indices; a null buffer queries the length"),
         ("seams_path_nframes", "Count frames in a trajectory path.", "path; nframes", "dimensionless count"),
         ("seams_q6bar", "Write Lechner-Dellago q6-bar and the ice count above a cut.", "sys; cutoff; type; ice_cut; q6bar; q6bar_len; mean; median; n_ice", "cutoff in angstrom; q6-bar is dimensionless"),
+        ("seams_lsi", "Write Local Structure Index values for selected centres and partners.", "sys; centres; n_centres; partners; n_partners; cutoff; lsi; lsi_len", "cutoff and radial gaps in angstrom; LSI in square angstrom"),
         ("seams_ql", "Write local q_l and, on request, its neighbour average.", "sys; cutoff; type; order_l; graph; ql; ql_len; qlbar; qlbar_len", "cutoff in angstrom; q_l is dimensionless"),
+        ("seams_rings_from_csr", "Find primitive rings in a caller-supplied CSR graph.", "offsets; offsets_len; columns; columns_len; max_depth; geometry; out", "indices, ring sizes, and winding are dimensionless"),
         ("seams_rings_vertices", "Copy the atom indices of one ring.", "rings; index; atoms; cap; n_out", "dimensionless indices"),
+        ("seams_rings_winding", "Write periodic-axis winding and contractibility for each ring.", "rings; axis; axis_winding; axis_winding_len; contractible; contractible_len", "dimensionless integer lattice winding and flags"),
         ("seams_rings_chordless", "List the chordless cycles of one size.", "nb; size; rings; rings_len; n_rings; per_atom; per_atom_len", "dimensionless indices and counts; a null rings buffer skips the list"),
         ("seams_system_read", "Read one frame from a trajectory path.", "sys; path; frame; type_filter", "frame index is 1-based; coordinates in angstrom"),
         ("seams_system_set_atoms", "Store points and a cell, with size_t lengths.", "sys; xyz; n; box9; box_len; types; ids", "coordinates and box lengths in angstrom"),
         ("seams_system_symmetry", "Write one ice-shell label per atom.", "sys; shell_rmsd; labels; labels_len", "shell_rmsd is a dimensionless residual; labels are dimensionless codes"),
+        ("seams_tetrahedral_order", "Write Errington-Debenedetti tetrahedral order for selected centres and partners.", "sys; centres; n_centres; partners; n_partners; convention; cutoff; q; q_len", "cutoff in angstrom; q is dimensionless"),
         ("seams_version", "Return the packed release number.", "none", "dimensionless integer, (major << 16) | (minor << 8) | patch"),
         ("seams_version_major", "Return the major version.", "none", "dimensionless integer"),
         ("seams_version_minor", "Return the minor version.", "none", "dimensionless integer"),
@@ -201,6 +226,9 @@ def cxx_rows():
     add("seams_frame_prisms", "Count perfect and imperfect prism stacks.", "frame; cutoff; type; max_depth; output_dir; rows; n_rows", cut)
     add("seams_frame_q4_q6", "Write local and averaged q4 and q6.", "frame; cutoff; type; q4; q6; q4bar; q6bar", cut + "; order parameters are dimensionless")
     add("seams_frame_q4_q6_chill", "Write q4, q6, and CHILL+ from one cutoff list.", "frame; cutoff; type; q4; q6; q4bar; q6bar; labels; counts9", cut + "; order parameters are dimensionless")
+    add("seams_frame_tetrahedral", "Write tetrahedral order for selected centres and partners.", "frame; centres; n_centres; partners; n_partners; convention; cutoff; q", cut + "; q is dimensionless")
+    add("seams_frame_lsi", "Write Local Structure Index for selected centres and partners.", "frame; centres; n_centres; partners; n_partners; cutoff; lsi", cut + "; LSI is in square angstrom")
+    add("seams_frame_ring_winding", "Write periodic winding and contractibility for packed rings.", "frame; ring_offsets; n_rings; vertices; n_vertices; axis; axis_winding; contractible", "dimensionless lattice winding and flags")
     add("seams_frame_rdf", "Radial distribution of one type pair.", "frame; rmax; nbins; type_i; type_j; r; g; count; volume", "rmax and r in angstrom; g is dimensionless; volume in cubic angstrom")
     add("seams_frame_rdf2d", "Two-dimensional radial distribution in a monolayer.", "frame; cutoff; binwidth; output_dir; r; g", "cutoff, binwidth, and r in angstrom; g is dimensionless")
     add("seams_frame_rdf2d_nbin", "Number of bins in the monolayer RDF.", "cutoff; binwidth", "cutoff and binwidth in angstrom; result is a dimensionless count")
@@ -208,11 +236,13 @@ def cxx_rows():
     add("seams_frame_read", "Read one frame from a trajectory path.", "path; frame; type_filter", "frame index is dimensionless; coordinates in the file are angstrom")
     add("seams_frame_chordless", "Chordless cycles of one size on a frame.", "frame; cutoff; type; graph; size; rings; rings_len; n_rings; per_atom", "cutoff in angstrom; size and indices are dimensionless, indices 0-based")
     add("seams_frame_rings", "Histogram of primitive rings.", "frame; cutoff; type; graph; max_depth; counts; counts_len", cut + "; counts[k] is a dimensionless ring count")
+    add("seams_graph_rings", "Find primitive rings in a caller-supplied CSR graph.", "offsets; n_offsets; columns; n_columns; max_depth; histogram; histogram_len; ring_offsets; ring_offsets_cap; vertices; vertices_cap; n_rings; n_vertices", "dimensionless indices and counts")
     add("seams_frame_select", "Keep selected oxygens for later classifiers.", "frame; type; mols; nmol", "type and molecule ids are dimensionless")
     add("seams_frame_set_positions", "Replace coordinates on an array-built frame.", "frame; xyz; n; box9", "coordinates and box lengths in angstrom")
     add("seams_frame_signature", "Count closed cages whose ring census matches a spec.", "frame; cutoff; type; graph; spec; n_cages; n_atoms", cut + "; n_cages and n_atoms are dimensionless")
     add("seams_frame_signature_edge", "Same cage census with an explicit face-edge window.", "frame; cutoff; type; graph; spec; edge; n_cages; n_atoms", cut + "; edge lengths in angstrom")
     add("seams_frame_signature_vertices", "Atom indices of one matched cage, sorted.", "frame; cutoff; type; graph; spec; cage_index; vertices; cap; n_vertices", cut + "; cage_index, cap, and n_vertices are dimensionless")
+    add("seams_frame_signature_vertices_edge", "Atom indices of one matched cage with an explicit face-edge window.", "frame; cutoff; type; graph; spec; edge; cage_index; vertices; cap; n_vertices", cut + "; edge lengths in angstrom")
     add("seams_frame_steinhardt", "Local Steinhardt q_l on the cutoff shell.", "frame; cutoff; type; order_l; ql; qlbar", cut + "; ql is dimensionless")
     add("seams_frame_steinhardt_graph", "Local Steinhardt q_l on a named graph.", "frame; cutoff; type; order_l; graph; ql; qlbar", cut + "; ql is dimensionless")
     add("seams_frame_symmetry", "Per-atom shell label for Ih, Ic, or stacking disorder.", "frame; shell_rmsd; labels", "shell_rmsd is a dimensionless residual; labels are dimensionless codes")

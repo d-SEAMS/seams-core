@@ -1,0 +1,1 @@
+Errington--Debenedetti tetrahedral order and the Local Structure Index accept independent centre and partner selections through C++, the stable C API, and the Python language ABI. Four-nearest and cutoff-shell conventions are explicit, and undersized shells return NaN.

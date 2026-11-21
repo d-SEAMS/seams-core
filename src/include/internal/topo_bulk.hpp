@@ -112,6 +112,14 @@ buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms,
 [[nodiscard]] std::vector<int>
 positionRank(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
+//! Integer lattice winding of every ring. Component k is the sum of the
+//! minimum-image lattice shifts around the cycle along periodic cell axis k.
+//! A contractible ring has {0, 0, 0}. Throws std::invalid_argument when a
+//! vertex is outside the cloud. A cloud without a valid box returns zeros.
+[[nodiscard]] std::vector<std::array<int, 3>> ringWindings(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
 //! The rings of @a rings whose minimum-image bonds have integer lattice
 //! images summing to zero. Any other ring winds through the periodic cell
 //! and bounds no face. A cell narrower than a ring's span has such rings.

@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <queue>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -240,6 +241,24 @@ TEST_CASE("length-2 shortcut is not a chord and is not a primitive ring", "[ring
   }
   const auto fromCsr = primitive::ringNetwork(offsets, cols, 6);
   REQUIRE(fromCsr == hop);
+}
+
+TEST_CASE("directed CSR is symmetrized before the primitive-ring search",
+          "[ring][csr]") {
+  const std::vector<int> offsets{0, 1, 2, 3, 4, 5, 6};
+  const std::vector<int> directed{1, 2, 3, 4, 5, 0};
+  const auto rings =
+      primitive::ringNetworkSymmetrized(offsets, directed, 6);
+  REQUIRE(rings == std::vector<std::vector<int>>{{0, 1, 2, 3, 4, 5}});
+  const auto histogram = primitive::ringSizeHistogram(rings, 6);
+  REQUIRE(histogram.size() == 7);
+  REQUIRE(histogram[6] == 1);
+
+  auto bad = directed;
+  bad[3] = 7;
+  REQUIRE_THROWS_AS(
+      primitive::ringNetworkSymmetrized(offsets, bad, 6),
+      std::invalid_argument);
 }
 
 TEST_CASE("antipode 0-1/4 hexagon is not primitive", "[ring]") {

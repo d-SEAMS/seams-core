@@ -622,6 +622,15 @@ static seams_status p_q6bar(seams_system *sys, double cutoff, size_t len) {
   }
   return seams_q6bar(sys, cutoff, 0, 0.36, g_dbuf, len, &mean, &median, &n_ice);
 }
+static seams_status p_tetrahedral(seams_system *sys, double cutoff, size_t len) {
+  return seams_tetrahedral_order(
+      sys, NULL, 0, NULL, 0, SEAMS_TETRAHEDRAL_WITHIN_CUTOFF, cutoff,
+      g_null_out ? NULL : g_dbuf, len);
+}
+static seams_status p_lsi(seams_system *sys, double cutoff, size_t len) {
+  return seams_lsi(sys, NULL, 0, NULL, 0, cutoff,
+                   g_null_out ? NULL : g_dbuf, len);
+}
 static seams_status p_steinhardt(seams_system *sys, double cutoff, size_t len) {
   return seams_steinhardt(sys, cutoff, 0, 4, g_null_out ? NULL : g_dbuf, len, NULL, 0);
 }
@@ -885,6 +894,8 @@ static void analysis_contract(void) {
   probe("seams_q4q6", p_q4q6, C | O, 0);
   probe("seams_q4q6_n", p_q4q6_n, C | L | O, 0);
   probe("seams_q6bar", p_q6bar, C | L | O, 0);
+  probe("seams_tetrahedral_order", p_tetrahedral, C | L | O, 0);
+  probe("seams_lsi", p_lsi, C | L | O, 0);
   probe("seams_steinhardt", p_steinhardt, C | L | O, 0);
   probe("seams_system_symmetry", p_symmetry, L | O, 0);
   probe("seams_rings_find", p_rings_find, C | O | G, 0);
@@ -908,6 +919,24 @@ static void analysis_contract(void) {
   probe("seams_prisms", p_prisms, C | L | O, 7);
   probe("seams_monolayer", p_monolayer, C | L | O, 7);
   probe("seams_site_table", p_site_table, L | O, 0);
+
+  for (int i = 0; i <= g_n; ++i) {
+    g_ibuf[i] = 0;
+  }
+  seams_rings *explicit_rings = NULL;
+  expect(seams_rings_from_csr(NULL, (size_t)g_n + 1, NULL, 0, 6, g_good,
+                              &explicit_rings),
+         SEAMS_ERR_NULL, "seams_rings_from_csr", "NULL offsets");
+  expect(seams_rings_from_csr(g_ibuf, (size_t)g_n + 1, NULL, 0, 6,
+                              g_good, &explicit_rings),
+         SEAMS_OK, "seams_rings_from_csr", "empty explicit graph");
+  expect(seams_rings_winding(explicit_rings, 3, g_ibuf, (size_t)g_n,
+                             g_ibuf2, (size_t)g_n),
+         SEAMS_ERR_RANGE, "seams_rings_winding", "bad periodic axis");
+  expect(seams_rings_winding(explicit_rings, 0, g_ibuf, (size_t)g_n,
+                             g_ibuf2, (size_t)g_n),
+         SEAMS_OK, "seams_rings_winding", "empty winding list");
+  seams_rings_destroy(explicit_rings);
 
   /* Arguments the generic probe does not reach. */
   size_t a = 0, b = 0;

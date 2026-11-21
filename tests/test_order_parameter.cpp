@@ -39,6 +39,56 @@ makeCloud(const std::vector<std::array<double, 3>> &coords,
   return cloud;
 }
 
+TEST_CASE("tetrahedral order has analytic neighbour conventions",
+          "[order_parameter][tetrahedral]") {
+  auto cloud = makeCloud({
+      {50.0, 50.0, 50.0},
+      {51.0, 51.0, 51.0},
+      {51.0, 49.0, 49.0},
+      {49.0, 51.0, 49.0},
+      {49.0, 49.0, 51.0},
+      {50.0, 50.0, 52.0},
+  });
+  const std::vector<int> centre{0};
+  const std::vector<int> tetrahedralPartners{1, 2, 3, 4};
+  const auto nearest = topoparam::tetrahedralOrder(
+      cloud, centre, {}, topoparam::TetrahedralNeighbours::NearestFour, 0.0);
+  const auto cutoff = topoparam::tetrahedralOrder(
+      cloud, centre, tetrahedralPartners,
+      topoparam::TetrahedralNeighbours::WithinCutoff, 2.0);
+  REQUIRE_THAT(nearest[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+  REQUIRE_THAT(cutoff[0], Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  const auto crowded = topoparam::tetrahedralOrder(
+      cloud, centre, {}, topoparam::TetrahedralNeighbours::WithinCutoff, 2.1);
+  REQUIRE(std::isfinite(crowded[0]));
+  REQUIRE(std::abs(crowded[0] - 1.0) > 1e-3);
+
+  const std::vector<int> threePartners{1, 2, 3};
+  const auto sparse = topoparam::tetrahedralOrder(
+      cloud, centre, threePartners,
+      topoparam::TetrahedralNeighbours::NearestFour, 0.0);
+  REQUIRE(std::isnan(sparse[0]));
+}
+
+TEST_CASE("local structure index matches radial-gap algebra",
+          "[order_parameter][lsi]") {
+  auto cloud = makeCloud({
+      {50.0, 50.0, 50.0},
+      {51.0, 50.0, 50.0},
+      {50.0, 51.5, 50.0},
+      {50.0, 50.0, 52.5},
+      {47.0, 50.0, 50.0},
+  });
+  const auto lsi =
+      topoparam::localStructureIndex(cloud, {0}, {1, 2, 3, 4}, 3.1);
+  REQUIRE_THAT(lsi[0], Catch::Matchers::WithinAbs(1.0 / 18.0, 1e-12));
+
+  const auto sparse =
+      topoparam::localStructureIndex(cloud, {0}, {1}, 3.1);
+  REQUIRE(std::isnan(sparse[0]));
+}
+
 // Regression test for projAreaSingleRing return order.
 // The function should return {areaXY, areaXZ, areaYZ} (index 0=XY, 1=XZ, 2=YZ).
 // The caller calcCoverageArea reads [0]=XY, [1]=XZ, [2]=YZ.
