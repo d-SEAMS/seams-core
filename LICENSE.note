@@ -65,9 +65,12 @@ mmtf-cpp (headers)
   License: MIT
   Text: mmtf-cpp/LICENSE
   cmake/patches/chemfiles-0.10.4-mmtf-sources.patch checks the binary
-    decoder's lengths and integer arithmetic.
+    decoder's lengths and integer arithmetic, and the length of a
+    transform matrix.
   mmtf-cpp/msgpack-c: BSL-1.0, with its copies of Boost.Preprocessor and
-    Boost.Predef, also BSL-1.0 (text at the end of this file)
+    Boost.Predef, also BSL-1.0 (text at the end of this file). The same
+    patch changes msgpack/v1/adaptor/carray.hpp, which converted an empty
+    array through a null pointer; the file keeps its BSL-1.0 notice.
 molfiles (VMD molfile plugins)
   License: University of Illinois Open Source License (NCSA), for every
     compiled file not listed below
@@ -112,7 +115,8 @@ tng (TNG trajectory library)
   License: BSD-3-Clause, except the files below
   Text: tng/COPYING
   cmake/patches/chemfiles-0.10.4-tng-sources.patch checks the block,
-    molecule and data sizes read from the file in tng/src/lib/tng_io.c.
+    molecule, mapping and data sizes read from the file in
+    tng/src/lib/tng_io.c, and the particles each frame set has values for.
   tng/include/tng/md5.h, tng/src/lib/md5.c: the zlib-style licence of
     Aladdin Enterprises, text in each file header
 toml11 (headers)
