@@ -1921,6 +1921,131 @@ SEAMS_API seams_status seams_hbond_edges(seams_system *sys, double cutoff, int o
                                          double angle_cutoff, int fields,
                                          seams_hbond_edge *edges, size_t cap, size_t *n_out);
 
+/** @brief One directed hydrogen bond: donor, hydrogen, acceptor. */
+typedef struct seams_directed_hbond {
+  uint32_t size;      /**< Caller-set sizeof(seams_directed_hbond) on every element. */
+  uint32_t donor;     /**< Donor heavy-atom index in the frame. */
+  uint32_t hydrogen;  /**< Hydrogen index in the frame. */
+  uint32_t acceptor;  /**< Acceptor heavy-atom index in the frame. */
+  double d_AH;        /**< Acceptor-hydrogen minimum-image distance, Angstrom. */
+  double d_DA;        /**< Donor-acceptor minimum-image distance, Angstrom. */
+  double angle;       /**< Acceptor-first angle, degrees. Linear is 0. */
+} seams_directed_hbond;
+
+/**
+ * @brief Store a heavy-atom cloud and a separate hydrogen cloud.
+ *
+ * Heavies occupy frame indices [0, n_heavy). Hydrogens follow, in the
+ * order given, so a hydrogen cloud index h is frame index n_heavy + h.
+ * A null id pointer numbers that cloud from 1 across the whole frame.
+ * A null mol pointer sets each molID to that atom's id, which pairs no
+ * hydrogen with a heavy atom. Pass molecule ids to attach each hydrogen
+ * to a heavy atom. A failed call leaves the previous frame in place.
+ * @param sys Frame handle.
+ * @param heavy_xyz Interleaved heavy coordinates, Angstrom.
+ * @param n_heavy Heavy-atom count. Must be positive.
+ * @param heavy_types One species per heavy atom.
+ * @param heavy_ids One id per heavy atom, or NULL for 1..n_heavy.
+ * @param heavy_mols One molID per heavy atom, or NULL to copy the atom id.
+ * @param hydrogen_xyz Interleaved hydrogen coordinates, Angstrom.
+ * @param n_hydrogen Hydrogen count. Zero allows the hydrogen pointers to be NULL.
+ * @param hydrogen_types One species per hydrogen, required when n_hydrogen is positive.
+ * @param hydrogen_ids One id per hydrogen, or NULL to continue after the heavies.
+ * @param hydrogen_mols One molID per hydrogen, or NULL to copy the atom id.
+ * @param box9 ox, oy, oz, lx, ly, lz, xy, xz, yz.
+ * @param box_len Length of box9. Must be 9.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE,
+ *         ::SEAMS_ERR_BOX, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * The call replaces the frame on success and clears the handle error on entry.
+ * @par Ownership
+ * The caller owns sys and every buffer. The call copies the values and keeps no pointer.
+ * @par Thread safety
+ * Exclusive use of sys.
+ * @par Example
+ * @code
+ * const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+ * const double hydrogen[] = {1, 0, 0};
+ * const int heavy_types[] = {8, 8};
+ * const int heavy_mols[] = {1, 2};
+ * const int hydrogen_types[] = {2};
+ * const int hydrogen_mols[] = {1};
+ * const double box9[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+ * seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols,
+ *                                 hydrogen, 1, hydrogen_types, NULL, hydrogen_mols,
+ *                                 box9, 9);
+ * @endcode
+ */
+SEAMS_API seams_status seams_system_set_hydrogen_frame(
+    seams_system *sys, const double *heavy_xyz, size_t n_heavy, const int *heavy_types,
+    const int *heavy_ids, const int *heavy_mols, const double *hydrogen_xyz,
+    size_t n_hydrogen, const int *hydrogen_types, const int *hydrogen_ids,
+    const int *hydrogen_mols, const double *box9, size_t box_len);
+
+/**
+ * @brief Directed hydrogen-bond edges for selected donor and acceptor types.
+ *
+ * Each edge is one accepting hydrogen. Rows are sorted by donor, then
+ * hydrogen, then acceptor, as frame indices. The angle is acceptor-first.
+ * The donor-acceptor vector is the minimum image of acceptor minus donor.
+ * The acceptor-hydrogen vector is the minimum image of acceptor minus the
+ * hydrogen. A linear donor-hydrogen-acceptor geometry has angle 0 degrees.
+ * The acceptor-hydrogen distance is kept only when it is strictly below
+ * dist_cutoff. The angle is kept when it is less than or equal to
+ * angle_cutoff. The pair list keeps a donor and acceptor only when their
+ * minimum image is strictly below pair_cutoff, on an orthorhombic or
+ * triclinic cell. For a triclinic cell, every face separation must be at
+ * least twice pair_cutoff; a thinner cell can miss valid pairs. Each
+ * hydrogen is assigned to the nearest heavy atom that shares its molID,
+ * then kept only when that atom's type is in donor_types. The lower index
+ * wins a distance tie.
+ * exclude_same_mol of 1 drops a pair that shares a molID. An empty donor
+ * set or acceptor set writes zero edges. Atoms whose type equals
+ * hydrogen_type are hydrogens and are never donors or acceptors.
+ * Water-water and water-framework counts are two calls with different
+ * type sets. When edges is non-NULL, every element must start with size
+ * set to sizeof(seams_directed_hbond).
+ * @param sys Frame handle.
+ * @param pair_cutoff Positive finite donor-acceptor cutoff, Angstrom.
+ * @param dist_cutoff Positive finite acceptor-hydrogen cutoff, Angstrom.
+ * @param angle_cutoff Positive finite acceptor-first angle, degrees.
+ * @param donor_types Species that may donate. NULL only when the count is 0.
+ * @param n_donor_types Length of donor_types. Zero writes no edges.
+ * @param acceptor_types Species that may accept. NULL only when the count is 0.
+ * @param n_acceptor_types Length of acceptor_types. Zero writes no edges.
+ * @param hydrogen_type Positive hydrogen species, distinct from both type sets.
+ * @param exclude_same_mol 1 drops a shared molID, 0 keeps it.
+ * @param edges Caller buffer, or NULL to query the count.
+ * @param cap Capacity of edges. Ignored when edges is NULL.
+ * @param n_out Receives the edge count.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys, the type arrays, edges, and n_out. The call borrows
+ * them and writes caller buffers only.
+ * @par Thread safety
+ * Exclusive use of sys.
+ * @par Example
+ * @code
+ * const int donors[] = {8};
+ * const int acceptors[] = {10};
+ * size_t n_out = 0;
+ * seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1,
+ *                       NULL, 0, &n_out);
+ * @endcode
+ */
+SEAMS_API seams_status seams_directed_hbonds(
+    seams_system *sys, double pair_cutoff, double dist_cutoff, double angle_cutoff,
+    const int *donor_types, size_t n_donor_types, const int *acceptor_types,
+    size_t n_acceptor_types, int hydrogen_type, int exclude_same_mol,
+    seams_directed_hbond *edges, size_t cap, size_t *n_out);
+
 /**
  * @brief Run CHILL+, ring census, and H-bonds on raw and quenched frames.
  *

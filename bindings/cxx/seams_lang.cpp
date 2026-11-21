@@ -29,6 +29,7 @@
 #include <array>
 #include <charconv>
 #include <chrono>
+#include <climits>
 #include <cmath>
 #include <cstring>
 #include <exception>
@@ -657,6 +658,80 @@ seams_frame *seams_frame_from_species(const double *xyz, int n,
   }
   out->sync_arrays();
   return out;
+}
+
+seams_frame *seams_frame_from_hydrogen_cloud(
+    const double *heavy_xyz, int n_heavy, const int *heavy_types, const int *heavy_ids,
+    const int *heavy_mols, const double *hydrogen_xyz, int n_hydrogen,
+    const int *hydrogen_types, const int *hydrogen_ids, const int *hydrogen_mols,
+    const double *box9) {
+  clear_error();
+  if (heavy_xyz == nullptr || box9 == nullptr || heavy_types == nullptr || n_heavy <= 0) {
+    set_error("heavy coordinates, types, a positive heavy count, and a box are required");
+    return nullptr;
+  }
+  if (n_hydrogen < 0) {
+    set_error("hydrogen count must be zero or positive");
+    return nullptr;
+  }
+  if (n_hydrogen > 0 && (hydrogen_xyz == nullptr || hydrogen_types == nullptr)) {
+    set_error("hydrogen coordinates and types are required");
+    return nullptr;
+  }
+  if (n_hydrogen > INT_MAX - n_heavy) {
+    set_error("atom count does not fit in the frame");
+    return nullptr;
+  }
+  for (int i = 0; i < 9; ++i) {
+    if (!std::isfinite(box9[i])) {
+      set_error("box contains a non-finite number");
+      return nullptr;
+    }
+  }
+  const int n = n_heavy + n_hydrogen;
+  try {
+    auto owned = std::make_unique<seams_frame>();
+    seams_frame *out = owned.get();
+    Cloud &cloud = out->cloud;
+    if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1], box9[2],
+                                      box9[3], box9[4], box9[5], box9[6], box9[7], box9[8])) {
+      set_error("box edge lengths must be positive");
+      return nullptr;
+    }
+    cloud.nop = n;
+    cloud.currentFrame = 1;
+    cloud.pts.resize(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; ++i) {
+      const bool hydrogen = i >= n_heavy;
+      const int local = hydrogen ? i - n_heavy : i;
+      const double *xyz = hydrogen ? hydrogen_xyz : heavy_xyz;
+      const int *types = hydrogen ? hydrogen_types : heavy_types;
+      const int *ids = hydrogen ? hydrogen_ids : heavy_ids;
+      const int *mols = hydrogen ? hydrogen_mols : heavy_mols;
+      const std::size_t offset = static_cast<std::size_t>(3) * static_cast<std::size_t>(local);
+      if (!std::isfinite(xyz[offset]) || !std::isfinite(xyz[offset + 1]) ||
+          !std::isfinite(xyz[offset + 2])) {
+        set_error("a coordinate is not finite");
+        return nullptr;
+      }
+      auto &point = cloud.pts[static_cast<std::size_t>(i)];
+      point.x = xyz[offset];
+      point.y = xyz[offset + 1];
+      point.z = xyz[offset + 2];
+      point.type = types[local];
+      point.atomID = ids != nullptr ? ids[local] : i + 1;
+      point.molID = mols != nullptr ? mols[local] : point.atomID;
+      if (!cloud.idIndexMap.emplace(point.atomID, i).second) {
+        set_error("atom ids are not unique");
+        return nullptr;
+      }
+    }
+    out->sync_arrays();
+    return owned.release();
+  } catch (...) {
+    remember_exception();
+    return nullptr;
+  }
 }
 
 int seams_frame_select(seams_frame *frame, int type, const int *mols, int nmol) {
@@ -1480,6 +1555,100 @@ int seams_frame_hbond_edges(seams_frame *frame, double cutoff, int oxygen_type,
       }
       if (angle != nullptr) {
         angle[i] = rows[static_cast<std::size_t>(i)].angle;
+      }
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_directed_hbonds(seams_frame *frame, double pair_cutoff, double dist_cutoff,
+                                double angle_cutoff, const int *donor_types, int n_donor_types,
+                                const int *acceptor_types, int n_acceptor_types, int hydrogen_type,
+                                int exclude_same_mol, uint32_t *donor, uint32_t *hydrogen,
+                                uint32_t *acceptor, double *d_AH, double *d_DA, double *angle,
+                                int cap, int *n_out) {
+  clear_error();
+  if (frame == nullptr || n_out == nullptr) {
+    set_error("directed hbonds need a frame and output length");
+    return 1;
+  }
+  if ((n_donor_types > 0 && donor_types == nullptr) ||
+      (n_acceptor_types > 0 && acceptor_types == nullptr)) {
+    set_error("type set is null");
+    return 1;
+  }
+  if (n_donor_types < 0 || n_acceptor_types < 0) {
+    set_error("type count must be zero or positive");
+    return 1;
+  }
+  if (!(pair_cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(pair_cutoff) || !std::isfinite(dist_cutoff) || !std::isfinite(angle_cutoff)) {
+    set_error("cutoffs must be finite and positive");
+    return 1;
+  }
+  if (hydrogen_type <= 0) {
+    set_error("hydrogen type must be positive");
+    return 1;
+  }
+  if (exclude_same_mol != 0 && exclude_same_mol != 1) {
+    set_error("exclude_same_mol is 0 or 1");
+    return 1;
+  }
+  try {
+    std::vector<int> donors;
+    std::vector<int> acceptors;
+    if (n_donor_types > 0) {
+      donors.assign(donor_types, donor_types + n_donor_types);
+    }
+    if (n_acceptor_types > 0) {
+      acceptors.assign(acceptor_types, acceptor_types + n_acceptor_types);
+    }
+    for (const int typ : donors) {
+      if (typ == hydrogen_type) {
+        set_error("hydrogen type is distinct from the donor types");
+        return 1;
+      }
+    }
+    for (const int typ : acceptors) {
+      if (typ == hydrogen_type) {
+        set_error("hydrogen type is distinct from the acceptor types");
+        return 1;
+      }
+    }
+    const auto rows = bond::directedHydrogenBonds(
+        frame->cloud, pair_cutoff, dist_cutoff, angle_cutoff, donors, acceptors, hydrogen_type,
+        exclude_same_mol != 0);
+    *n_out = static_cast<int>(rows.size());
+    if (donor == nullptr && hydrogen == nullptr && acceptor == nullptr && d_AH == nullptr &&
+        d_DA == nullptr && angle == nullptr) {
+      return 0;
+    }
+    if (cap < *n_out) {
+      set_error("directed hbond buffers are short");
+      return 1;
+    }
+    for (int i = 0; i < *n_out; ++i) {
+      const auto &row = rows[static_cast<std::size_t>(i)];
+      if (donor != nullptr) {
+        donor[i] = static_cast<uint32_t>(row.donor);
+      }
+      if (hydrogen != nullptr) {
+        hydrogen[i] = static_cast<uint32_t>(row.hydrogen);
+      }
+      if (acceptor != nullptr) {
+        acceptor[i] = static_cast<uint32_t>(row.acceptor);
+      }
+      if (d_AH != nullptr) {
+        d_AH[i] = row.d_AH;
+      }
+      if (d_DA != nullptr) {
+        d_DA[i] = row.d_DA;
+      }
+      if (angle != nullptr) {
+        angle[i] = row.angle;
       }
     }
     return 0;

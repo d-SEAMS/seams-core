@@ -297,6 +297,33 @@ seams_frame *seams_frame_from_species(const double *xyz, int n,
                                      const double *box9, const int *types,
                                      const int *ids, const int *mols);
 
+/** Heavy atoms, then a separate hydrogen cloud. Heavies occupy
+ * [0, n_heavy). Hydrogens follow in the given order. A null id pointer
+ * numbers that cloud from 1 across the frame. A null mol pointer copies
+ * the atom id into molID. n_hydrogen may be 0. Returns NULL on failure.
+ * @ingroup lang_frame */
+seams_frame *seams_frame_from_hydrogen_cloud(
+    const double *heavy_xyz, int n_heavy, const int *heavy_types,
+    const int *heavy_ids, const int *heavy_mols, const double *hydrogen_xyz,
+    int n_hydrogen, const int *hydrogen_types, const int *hydrogen_ids,
+    const int *hydrogen_mols, const double *box9);
+
+/** Directed hydrogen bonds. Rows are sorted by donor, hydrogen, acceptor.
+ * The angle is acceptor-first: 0 degrees is linear. The acceptor-hydrogen
+ * distance is strictly below dist_cutoff. The angle is kept at or below
+ * angle_cutoff. The donor-acceptor pair is strictly inside pair_cutoff.
+ * exclude_same_mol is 0 or 1. An empty type set writes zero rows. Any
+ * non-null output column needs cap rows. Returns 0 on success.
+ * @ingroup lang_frame */
+int seams_frame_directed_hbonds(seams_frame *frame, double pair_cutoff,
+                                double dist_cutoff, double angle_cutoff,
+                                const int *donor_types, int n_donor_types,
+                                const int *acceptor_types, int n_acceptor_types,
+                                int hydrogen_type, int exclude_same_mol,
+                                uint32_t *donor, uint32_t *hydrogen,
+                                uint32_t *acceptor, double *d_AH, double *d_DA,
+                                double *angle, int cap, int *n_out);
+
 /** Per-atom ice label from the shell kernel. labels[i] is 0 ice-Ih,
  * 1 ice-Ic, 2 stacking-disordered, or -1. shell_rmsd is the scale-free
  * residual ceiling (0.12 is the production default). @ingroup lang_more */

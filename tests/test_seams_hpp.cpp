@@ -299,6 +299,24 @@ int main(int argc, char **argv) {
         return 1;
       }
     }
+
+    const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+    const double hydrogen[] = {1, 0, 0};
+    const int heavy_types[] = {1, 1};
+    const int heavy_mols[] = {1, 2};
+    const int hydrogen_types[] = {2};
+    const int hydrogen_mols[] = {1};
+    const double box9[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+    seams::System built;
+    built.set_hydrogen_frame(heavy, heavy_types, heavy_mols, hydrogen, hydrogen_types, hydrogen_mols,
+                             std::span<const double, 9>{box9, 9}, {}, {});
+    const int donors[] = {1};
+    const auto edges = built.directed_hbonds(donors, donors, {});
+    if (built.count() != 3 || edges.size() != 1 || edges[0].donor != 0 || edges[0].hydrogen != 2 ||
+        edges[0].acceptor != 1 || std::abs(edges[0].d_DA - 2.8) > 1e-12 ||
+        std::abs(edges[0].d_AH - 1.8) > 1e-12 || std::abs(edges[0].angle) > 1e-8) {
+      return 1;
+    }
   } catch (const std::exception &ex) {
     std::cerr << ex.what() << "\n";
     return 1;

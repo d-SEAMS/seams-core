@@ -822,6 +822,22 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_hbond_edges 460
 ```
 
+### seams_system_set_hydrogen_frame
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_set_hydrogen_frame 3
+```
+
+### seams_directed_hbonds
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_directed_hbonds 1
+```
+
 ### seams_quenched_analysis
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -6589,6 +6605,5643 @@ Example: `docs/examples/c_api_tour.c`
 
 ### seams_water_vectors
 
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_water_vectors 250
+```
+
+### seams_molecule_dipoles
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_molecule_dipoles 250
+```
+
+### seams_orientation_order
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_orientation_order 0.010 0.270
+```
+
+### seams_msd_create
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_msd_create ok
+```
+
+### seams_msd_push
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_msd_push 3
+```
+
+### seams_msd_curve
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_msd_curve 3
+```
+
+### seams_msd_fit
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_msd_fit 2.0
+```
+
+### seams_msd_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_msd_destroy ok
+```
+
+### seams_hbond_tcf_create
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbond_tcf_create ok
+```
+
+### seams_hbond_tcf_push
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbond_tcf_push 2
+```
+
+### seams_hbond_tcf_curve
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbond_tcf_curve 2
+```
+
+### seams_hbond_tcf_fit
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbond_tcf_fit 0.75 0.75
+```
+
+### seams_hbond_tcf_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbond_tcf_destroy ok
+```
+
+### seams_reorient_create
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_reorient_create ok
+```
+
+### seams_reorient_push
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_reorient_push 2
+```
+
+### seams_reorient_curve
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_reorient_curve 2
+```
+
+### seams_reorient_fit
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_reorient_fit 0.90 0.73
+```
+
+### seams_reorient_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_reorient_destroy ok
+```
+
+<!-- API_SYMBOLS_BEGIN -->
+
+## Symbol reference
+
+### SEAMS_ABI
+
+Purpose: ABI number compiled into this header. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The macro value (1).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_BUILDING
+
+Purpose: Defined only while libseams itself is compiled; selects dllexport on Windows.
+
+Parameters: none
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: None.
+
+Units: none
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_BOTH
+
+Purpose: Both cages. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_CUBIC
+
+Purpose: Double-diamond cage only. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_HEX
+
+Purpose: Hexagonal cage only. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_WATER
+
+Purpose: In neither cage. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CHILL_OVITO
+
+Purpose: Published edges are inclusive. OVITO edges are open. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CHILL_PUBLISHED
+
+Purpose: Published edges are inclusive. OVITO edges are open. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_DEPRECATED
+
+Purpose: Mark a shipped declaration and name its replacement. Declared in include/seams.h.
+
+Parameters: message
+
+Returns: The macro value (attribute).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_ARG
+
+Purpose: A caller argument is the wrong shape. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_BOX
+
+Purpose: The cell is missing or has no volume. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_INTERNAL
+
+Purpose: The library hit an internal failure. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_NOMEM
+
+Purpose: An allocation failed. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_NULL
+
+Purpose: A required pointer is null. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_RANGE
+
+Purpose: A number is outside the accepted range. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_ERR_STATE
+
+Purpose: The handle has no frame yet. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_GRAPH_CUTOFF
+
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_GRAPH_MUTUAL
+
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_GRAPH_SEEDED
+
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_HBOND_EDGE_WITH_GEOMETRY
+
+Purpose: Field mask bit that requests `seams_hbond_edge.d_DA` and `seams_hbond_edge.angle`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: None.
+
+Units: dimensionless.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_HBOND_EDGE_WITH_H
+
+Purpose: Field mask bit that requests `seams_hbond_edge.hydrogen`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: None.
+
+Units: dimensionless.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_CLATHRATE
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_CUBIC
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_HEXAGONAL
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_INTERCLATHRATE
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_INTERFACIAL
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_RECUBIC
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_REHEX
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 8.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_UNCLASSIFIED
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_LABEL_WATER
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_OK
+
+Purpose: The call succeeded. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_BOTH_BASAL
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_BOTH_PRISMATIC
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_DDC
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_DEFORMED_PRISM
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_HC_BASAL
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_HC_PRISMATIC
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_HEXAGON
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 10.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_MIXED_PRISM
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 8.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_OTHER
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 11.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_PENTAGON
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 9.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_PRISM
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_RING_UNCLASSIFIED
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_ACCEPTOR
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_ANION
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_APOLAR
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_CATION
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_DONOR_H
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_POLAR
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_SOLVENT
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 10.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_TAIL
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_UNSPECIFIED
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_WATER_H
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 9.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_WATER_O
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 8.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_STATIC
+
+Purpose: Define before including seams.h when linking a static libseams.
+
+Parameters: none
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: None.
+
+Units: none
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_MAJOR
+
+Purpose: Major component of this release. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_MINOR
+
+Purpose: Minor component of this release. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_NUMBER
+
+Purpose: Packed version, (major << 16) | (minor << 8) | patch. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_PATCH
+
+Purpose: Patch component of this release. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_STRING
+
+Purpose: Release text written by the build. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The macro value (text).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: text
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_abi
+
+Purpose: ABI number compiled into this library.
+
+```c
+int seams_abi(void);
+```
+
+Parameters: none.
+
+Returns: SEAMS_ABI, which is 1.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+if (seams_abi() != SEAMS_ABI) { return 1; }
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine
+
+Purpose: One planar ice/brine front measurement. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_analyse
+
+Purpose: Planar ice/brine front from an ice assignment.
+
+ice[i] is non-zero when atom i is ice. water_type 0 keeps every atom whose type is not ion_type. ion_type 0 means the frame has no ions. n_bins 0 selects 20 bins. axis is 0, 1, or 2. The ice fraction cut is 0.5, and the bulk ice and liquid cuts are 0.85 and 0.15.
+
+```c
+seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice, int water_type, int ion_type, int n_bins, int axis, seams_brine **out);
+```
+
+Parameters: `sys`, `ice`, `n_ice`, `water_type`, `ion_type`, `n_bins`, `axis`, `out`.
+
+- `sys`: Frame handle.
+- `ice`: Per-atom ice flags, length n_ice.
+- `n_ice`: Must equal the frame count.
+- `water_type`: Species kept as water, or 0.
+- `ion_type`: Species kept as ions, or 0 for none.
+- `n_bins`: Bin count along axis, or 0 for 20.
+- `axis`: 0, 1, or 2.
+- `out`: Receives a new handle. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_brine_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_brine *front = NULL;
+if (seams_brine_analyse(sys, ice, n, 1, 2, 0, 2, &front) == SEAMS_OK) {
+  seams_brine_destroy(front);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_destroy
+
+Purpose: Free a brine-front handle.
+
+```c
+void seams_brine_destroy(seams_brine *front);
+```
+
+Parameters: `front`.
+
+- `front`: Handle from seams_brine_analyse(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its profile.
+
+Thread safety: The caller must not use front after this returns.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_brine_destroy(front);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_fronts
+
+Purpose: The two planar crossings of the ice slab.
+
+Lengths are Angstrom, in the frame's cell.
+
+```c
+seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, double *z_exit, double *thickness, int *found);
+```
+
+Parameters: `front`, `z_enter`, `z_exit`, `thickness`, `found`.
+
+- `front`: Brine handle.
+- `z_enter`: Where the ice fraction crosses the cut on entering the ice along the positive axis, or NULL.
+- `z_exit`: The crossing on leaving the ice, or NULL.
+- `thickness`: Ice run along the axis, or NULL.
+- `found`: Receives 1 when both crossings exist, otherwise 0, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL or every output pointer is NULL.
+
+Ownership: The caller owns front; the call borrows it. z_enter, z_exit, thickness and found are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on front, and not alongside a non-const call on front.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double thick = 0;
+int found = 0;
+seams_brine_fronts(front, NULL, NULL, &thick, &found);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_pockets
+
+Purpose: Brine pockets trapped in the ice, excluding the liquid reservoir.
+
+```c
+seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets, int *reservoir_waters);
+```
+
+Parameters: `front`, `n_pockets`, `reservoir_waters`.
+
+- `front`: Brine handle.
+- `n_pockets`: Receives the pocket count, or NULL.
+- `reservoir_waters`: Receives the water count of the liquid reservoir, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL or both output pointers are NULL.
+
+Ownership: The caller owns front; the call borrows it. n_pockets and reservoir_waters are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on front, and not alongside a non-const call on front.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int pockets = 0;
+seams_brine_pockets(front, &pockets, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_profile
+
+Purpose: Concentration profile along the front axis.
+
+z_mid is Angstrom. molality is mol/kg. ice_fraction is dimensionless.
+
+```c
+seams_status seams_brine_profile(const seams_brine *front, double *z_mid, double *molality, double *ice_fraction, size_t cap, size_t *n_out);
+```
+
+Parameters: `front`, `z_mid`, `molality`, `ice_fraction`, `cap`, `n_out`.
+
+- `front`: Brine handle.
+- `z_mid`: Bin centers, or NULL to skip the column.
+- `molality`: Bin molalities, or NULL to skip the column.
+- `ice_fraction`: Bin ice fractions, or NULL to skip the column.
+- `cap`: Capacity of each non-NULL column.
+- `n_out`: Receives the bin count.
+
+Returns: SEAMS_OK when every non-NULL column was filled, or when every column pointer was NULL and n_out was written. SEAMS_ERR_RANGE when a non-NULL column is short. SEAMS_ERR_NULL when front or n_out is NULL.
+
+Ownership: The caller owns the columns.
+
+Thread safety: Read-only: may run alongside other const calls on front, and not alongside a non-const call on front.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t bins = 0;
+seams_brine_profile(front, NULL, NULL, NULL, 0, &bins);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_rejection
+
+Purpose: Molal rejection coefficient k = c_ice / c_liquid.
+
+Molality is formula units per kilogram of water.
+
+```c
+seams_status seams_brine_rejection(const seams_brine *front, double *c_ice, double *c_liquid, double *k, int *defined);
+```
+
+Parameters: `front`, `c_ice`, `c_liquid`, `k`, `defined`.
+
+- `front`: Brine handle.
+- `c_ice`: Bulk ice molality, or NULL.
+- `c_liquid`: Bulk liquid molality, or NULL.
+- `k`: The ratio, or NULL. Unchanged when the ratio is undefined.
+- `defined`: Receives 1 when the liquid bulk contains salt or the ice bulk does not, otherwise 0, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL or every output pointer is NULL.
+
+Ownership: The caller owns front; the call borrows it. c_ice, c_liquid, k and defined are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on front, and not alongside a non-const call on front.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double k = 0;
+int defined = 0;
+seams_brine_rejection(front, NULL, NULL, &k, &defined);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cage_label
+
+Purpose: Per-atom cage membership from the hexagonal and double-diamond search. The four codes are disjoint. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cage_set
+
+Purpose: Hexagonal and double-diamond membership for one frame. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages
+
+Purpose: Hexagonal and double-diamond cages. Same search as seams_cages_find().
+
+```c
+seams_status seams_cages(seams_system *sys, double cutoff, int type, int graph, int k, int complete, seams_cage_set **out);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `k`, `complete`, `out`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF, SEAMS_GRAPH_MUTUAL, or SEAMS_GRAPH_SEEDED.
+- `k`: Neighbour count for the seeded graph. Zero selects 4.
+- `complete`: Non-zero runs ring-adjacent completion on seeded labels.
+- `out`: Receives a ::seams_cage_set. On failure *out is NULL.
+
+Returns: Same codes as seams_cages_find().
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_cages_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cage_set *cages = NULL;
+seams_cages(sys, 3.5, 0, SEAMS_GRAPH_SEEDED, 4, 1, &cages);
+seams_cages_destroy(cages);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_counts
+
+Purpose: Disjoint cage population counts.
+
+The four counts sum to the number of atoms the search kept.
+
+```c
+seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_cubic, int *n_water, int *n_both);
+```
+
+Parameters: `cages`, `n_hex`, `n_cubic`, `n_water`, `n_both`.
+
+- `cages`: Cage handle.
+- `n_hex`: Hexagonal only, or NULL.
+- `n_cubic`: Double-diamond only, or NULL.
+- `n_water`: Neither cage, or NULL.
+- `n_both`: Both cages, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when cages is NULL or every count pointer is NULL.
+
+Ownership: The caller owns cages; the call borrows it. n_hex, n_cubic, n_water and n_both are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on cages, and not alongside a non-const call on cages.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int hex = 0, cubic = 0;
+seams_cages_counts(cages, &hex, &cubic, NULL, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_destroy
+
+Purpose: Free a cage-membership handle.
+
+```c
+void seams_cages_destroy(seams_cage_set *cages);
+```
+
+Parameters: `cages`.
+
+- `cages`: Handle from seams_cages_find() or seams_cages(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its per-atom labels.
+
+Thread safety: The caller must not use cages after this returns.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cages_destroy(cages);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_find
+
+Purpose: Hexagonal and double-diamond cage membership.
+
+```c
+seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int graph, int k, int complete, seams_cage_set **out);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `k`, `complete`, `out`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom. The seeded graph uses cutoff + 1.5 as the candidate shell.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF, SEAMS_GRAPH_MUTUAL, or SEAMS_GRAPH_SEEDED.
+- `k`: Neighbour count for the seeded graph. Zero selects 4.
+- `complete`: Non-zero runs ring-adjacent completion on the seeded labels. Ignored for the cutoff and mutual graphs.
+- `out`: Receives a new handle. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_cages_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cage_set *cages = NULL;
+if (seams_cages_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 0, 0, &cages) == SEAMS_OK) {
+  seams_cages_destroy(cages);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_labels
+
+Purpose: Per-atom cage code.
+
+```c
+seams_status seams_cages_labels(const seams_cage_set *cages, int *per_atom, size_t len);
+```
+
+Parameters: `cages`, `per_atom`, `len`.
+
+- `cages`: Cage handle.
+- `per_atom`: Caller buffer of ::seams_cage_label values, one per atom in the frame. Atoms the species filter dropped are SEAMS_CAGE_WATER.
+- `len`: Length of per_atom. Must be at least the frame count stored on the handle.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns per_atom.
+
+Thread safety: Read-only: may run alongside other const calls on cages, and not alongside a non-const call on cages.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cages_labels(cages, per_atom, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_signature
+
+Purpose: Count closed cages whose ring census matches a signature.
+
+spec is a census such as "512", "51262", or "51264", or the names "hc" and "ddc". n_cages is the number of closed cages. n_atoms is the number of distinct vertices in those cages.
+
+```c
+seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, int graph, const char *spec, size_t *n_cages, size_t *n_atoms);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `spec`, `n_cages`, `n_atoms`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `spec`: Signature text. Must be non-NULL.
+- `n_cages`: Receives the cage count.
+- `n_atoms`: Receives the vertex count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. spec is read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_cages = 0, n_atoms = 0;
+seams_cages_signature(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", &n_cages, &n_atoms);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_chill
+
+Purpose: Original CHILL labels, published or OVITO edges.
+
+Published CHILL is Moore's four-neighbour rule with inclusive c_ij edges. OVITO mode uses the same thresholds and the open edges. Labels match ::seams_label.
+
+```c
+seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, int rule, int *labels, size_t labels_len, int counts9[9]);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `rule`, `labels`, `labels_len`, `counts9`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter. Zero and negative keep every atom.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `rule`: SEAMS_CHILL_PUBLISHED or SEAMS_CHILL_OVITO.
+- `labels`: Caller buffer of labels_len ints.
+- `labels_len`: Must be at least the frame count.
+- `counts9`: Nine ints that receive the population of each label, or NULL to skip the histogram.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const: writes each atom's CHILL+ label into the stored frame and clears the handle's error slot on entry. Coordinates, cell, types, and ids are not changed.
+
+Ownership: The caller owns labels and counts9.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int counts[9];
+seams_chill(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, n, counts);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_chill_plus
+
+Purpose: CHILL+ labels, without a buffer length.
+
+ABI 1 entry. labels must hold one int per atom in the frame. New callers use seams_chill_plus_n(), which checks the length.
+
+```c
+seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int graph, int rule, int *labels, int counts9[9]);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `rule`, `labels`, `counts9`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter. Zero and negative keep every atom.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `rule`: SEAMS_CHILL_PUBLISHED or SEAMS_CHILL_OVITO.
+- `labels`: Caller buffer of one label per atom.
+- `counts9`: Nine ints, or NULL.
+
+Returns: Same codes as seams_chill_plus_n().
+
+Handle access: Non-const: writes each atom's CHILL+ label into the stored frame and clears the handle's error slot on entry. Coordinates, cell, types, and ids are not changed.
+
+Ownership: The caller owns labels and counts9.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_chill_plus_n
+
+Purpose: CHILL+ labels into a buffer of known length.
+
+rule selects the q_lm shell. SEAMS_CHILL_PUBLISHED, the default, is Nguyen and Molinero equation 1: the four closest neighbours. SEAMS_CHILL_OVITO is every neighbour inside the cutoff, which is the OVITO Chill+ modifier. Labels match ::seams_label.
+
+```c
+seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int type, int graph, int rule, int *labels, size_t labels_len, int counts9[9]);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `rule`, `labels`, `labels_len`, `counts9`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter. Zero and negative keep every atom.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `rule`: SEAMS_CHILL_PUBLISHED or SEAMS_CHILL_OVITO.
+- `labels`: Caller buffer of labels_len ints.
+- `labels_len`: Must be at least the frame count.
+- `counts9`: Nine ints that receive the population of each label, or NULL.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL for a NULL sys or labels; SEAMS_ERR_STATE when sys holds no frame; SEAMS_ERR_RANGE for a short labels buffer or a non-positive or non-finite cutoff; SEAMS_ERR_ARG for an unknown rule or graph; SEAMS_ERR_NOMEM; SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const: writes each atom's CHILL+ label into the stored frame and clears the handle's error slot on entry. Coordinates, cell, types, and ids are not changed.
+
+Ownership: The caller owns labels and counts9.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int counts[9];
+seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
+                   labels, n, counts);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_chill_rule
+
+Purpose: Published edges are inclusive. OVITO edges are open. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_contact_pairs
+
+Purpose: Mutual nearest unlike contacts of a site table.
+
+Cation and anion counts are molecules in the ion cloud.
+
+```c
+seams_status seams_contact_pairs(seams_system *sys, const char *site_spec, size_t *n_pairs, int *n_cation, int *n_anion);
+```
+
+Parameters: `sys`, `site_spec`, `n_pairs`, `n_cation`, `n_anion`.
+
+- `sys`: Frame handle.
+- `site_spec`: Text such as "1=cationHead,2=anion". Must be non-NULL.
+- `n_pairs`: Receives the contact count, or NULL.
+- `n_cation`: Receives the cation molecule count, or NULL.
+- `n_anion`: Receives the anion molecule count, or NULL. At least one of the three outputs must be non-NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. site_spec is read during the call only. n_pairs, n_cation and n_anion are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t pairs = 0;
+seams_contact_pairs(sys, "1=cationHead,2=anion", &pairs, NULL, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_coordination
+
+Purpose: Coordination number integrated to rmax.
+
+```c
+seams_status seams_coordination(seams_system *sys, double rmax, int bins, int type_i, int type_j, double *cn);
+```
+
+Parameters: `sys`, `rmax`, `bins`, `type_i`, `type_j`, `cn`.
+
+- `sys`: Frame handle.
+- `rmax`: Positive finite outer radius, Angstrom.
+- `bins`: Bin count. Zero selects about rmax / 0.1.
+- `type_i`: Central species, as in seams_rdf().
+- `type_j`: Counted species, as in seams_rdf().
+- `cn`: Receives the coordination number.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. cn is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double cn = 0;
+seams_coordination(sys, 3.5, 0, 1, 1, &cn);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_density_axis
+
+Purpose: Number density along one cell axis.
+
+z is Angstrom. rho is number density, atoms per cubic Angstrom.
+
+```c
+seams_status seams_density_axis(seams_system *sys, int type, int bins, int axis, double *z, double *rho, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `type`, `bins`, `axis`, `z`, `rho`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `type`: Species filter. Zero keeps every atom.
+- `bins`: Bin count. Zero selects about one bin per 0.1 Angstrom.
+- `axis`: 0, 1, or 2.
+- `z`: Bin centers, or NULL to query.
+- `rho`: Density per bin, or NULL to query.
+- `cap`: Capacity of each non-NULL column.
+- `n_out`: Receives the bin count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns the columns.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double z[50], rho[50];
+size_t bins = 0;
+seams_density_axis(sys, 0, 50, 2, z, rho, 50, &bins);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_domains
+
+Purpose: Largest domain of a polar or apolar site subset.
+
+```c
+seams_status seams_domains(seams_system *sys, double cutoff, const char *site_spec, int subset, int *n_subset, int *largest, double *percolation);
+```
+
+Parameters: `sys`, `cutoff`, `site_spec`, `subset`, `n_subset`, `largest`, `percolation`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cluster cutoff, Angstrom.
+- `site_spec`: Site table text. Must be non-NULL.
+- `subset`: 0 is apolar, 1 is polar.
+- `n_subset`: Receives the number of sites in the subset, or NULL.
+- `largest`: Receives the size of the largest domain, or NULL.
+- `percolation`: Receives the largest domain size over the subset size, or NULL. At least one output must be non-NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. site_spec is read during the call only. n_subset, largest and percolation are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int largest = 0;
+seams_domains(sys, 5.0, "1=cationHead,2=anion,3=tail", 0, NULL, &largest, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint
+
+Purpose: Topological fingerprint of the bonded graph.
+
+```c
+seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k, int graph, int hops, int color_types, seams_topo **out);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `k`, `graph`, `hops`, `color_types`, `out`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `k`: Neighbour count for the mutual graph. Zero selects 4.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `hops`: Neighbourhood depth. Zero selects 2.
+- `color_types`: Non-zero colors vertices by LAMMPS type.
+- `out`: Receives a ::seams_topo. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_fingerprint_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_topo *fp = NULL;
+seams_fingerprint(sys, 3.5, 0, 4, SEAMS_GRAPH_CUTOFF, 2, 0, &fp);
+seams_fingerprint_destroy(fp);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_atom
+
+Purpose: Local key of one atom. Same buffer rule as seams_fingerprint_key().
+
+```c
+seams_status seams_fingerprint_atom(const seams_topo *fp, int index, char *buf, size_t cap, size_t *n_out);
+```
+
+Parameters: `fp`, `index`, `buf`, `cap`, `n_out`.
+
+- `fp`: Fingerprint handle.
+- `index`: Atom index in the frame.
+- `buf`: Caller buffer of cap bytes, or NULL to query.
+- `cap`: Capacity of buf, including the terminating NUL.
+- `n_out`: Receives the key length without the terminating NUL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE for a bad index or a short buffer.
+
+Ownership: The caller owns buf.
+
+Thread safety: Read-only: may run alongside other const calls on fp, and not alongside a non-const call on fp.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+char key[256];
+size_t len = 0;
+seams_fingerprint_atom(fp, 0, key, sizeof key, &len);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_destroy
+
+Purpose: Free a fingerprint.
+
+```c
+void seams_fingerprint_destroy(seams_topo *fp);
+```
+
+Parameters: `fp`.
+
+- `fp`: Handle from seams_fingerprint(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its key strings.
+
+Thread safety: The caller must not use fp after this returns.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_fingerprint_destroy(fp);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_key
+
+Purpose: Frame key text.
+
+```c
+seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, size_t *n_out);
+```
+
+Parameters: `fp`, `buf`, `cap`, `n_out`.
+
+- `fp`: Fingerprint handle.
+- `buf`: Caller buffer of cap bytes, or NULL to query.
+- `cap`: Capacity of buf, including the terminating NUL.
+- `n_out`: Receives the key length without the terminating NUL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE when buf is short.
+
+Ownership: The caller owns buf. The copy is NUL-terminated.
+
+Thread safety: Read-only: may run alongside other const calls on fp, and not alongside a non-const call on fp.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t len = 0;
+seams_fingerprint_key(fp, NULL, 0, &len);
+char *key = malloc(len + 1);
+seams_fingerprint_key(fp, key, len + 1, &len);
+free(key);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_rings
+
+Purpose: Primitive-ring census stored on the fingerprint.
+
+```c
+seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts, size_t counts_len);
+```
+
+Parameters: `fp`, `counts`, `counts_len`.
+
+- `fp`: Fingerprint handle.
+- `counts`: Caller buffer. counts[k] receives the number of rings of size k. Sizes past the buffer are dropped.
+- `counts_len`: Length of counts. Must be positive.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE when counts_len is 0.
+
+Ownership: The caller owns counts.
+
+Thread safety: Read-only: may run alongside other const calls on fp, and not alongside a non-const call on fp.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int census[13];
+seams_fingerprint_rings(fp, census, 13);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_get_num_threads
+
+Purpose: Team width the next analysis call will request.
+
+```c
+int seams_get_num_threads(void);
+```
+
+Parameters: none.
+
+Returns: A positive count. After seams_set_num_threads(0) this is the saved default, which is omp_get_max_threads() when OpenMP is linked and 1 otherwise.
+
+Thread safety: Observes the process-global width. Do not call it concurrently with seams_set_num_threads().
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int width = seams_get_num_threads();
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_graph
+
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_handle_error
+
+Purpose: Detail string stored on a handle.
+
+```c
+const char *seams_handle_error(const void *handle);
+```
+
+Parameters: `handle`.
+
+- `handle`: A ::seams_system, ::seams_neighbours, ::seams_rings, ::seams_cage_set, ::seams_topo, or ::seams_brine, or NULL.
+
+Returns: The handle's string, or the thread-local string when handle is NULL. Never NULL. A call taking the handle non-const clears the string on entry. A call taking it const writes the string only when it fails, so after a successful const call the string still holds the last failure.
+
+Ownership: Owned by the handle. Valid until the next failing call on that handle, the next non-const call on it, or destroy.
+
+Thread safety: Reading a handle requires that no other thread is inside a call on that same handle.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+if (seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
+                       labels, n, NULL) != SEAMS_OK) {
+  fprintf(stderr, "%s\n", seams_handle_error(sys));
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_edge
+
+Purpose: C row type for one hydrogen-bond edge record. Callers initialize `size = sizeof(seams_hbond_edge)` on every element passed to `seams_hbond_edges`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: `size` is bytes (`sizeof(seams_hbond_edge)`); donor, acceptor, and hydrogen are 0-based atom indices; `d_DA` is Angstrom; `angle` is degrees.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_edges
+
+Purpose: Hydrogen-bond edges for one frame.
+
+The pair list is stable and deterministic: donor, then acceptor, then hydrogen index. donor and acceptor are frame indices over the stored atoms. When edges is non-NULL, every element must start with size set by the caller to sizeof(seams_hbond_edge); the library validates size and writes only up to that prefix per element.
+
+```c
+seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type, int hydrogen_type, double dist_cutoff, double angle_cutoff, int fields, seams_hbond_edge *edges, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `cutoff`, `oxygen_type`, `hydrogen_type`, `dist_cutoff`, `angle_cutoff`, `fields`, `edges`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `cutoff`: Donor-acceptor cutoff, Angstrom.
+- `oxygen_type`: Heavy-atom species filter as in seams_hbonds().
+- `hydrogen_type`: Hydrogen species (positive).
+- `dist_cutoff`: Acceptor-H distance, Angstrom.
+- `angle_cutoff`: O-O-H angle, degrees.
+- `fields`: Bitmask: SEAMS_HBOND_EDGE_WITH_H and/or SEAMS_HBOND_EDGE_WITH_GEOMETRY.
+- `edges`: Caller buffer with caller-set size on each element, or NULL to query.
+- `cap`: Capacity of `edges`. Ignored when `edges` is NULL.
+- `n_out`: Receives the edge count.
+
+Returns: SEAMS_OK, or the same error classes as seams_hbonds(), plus SEAMS_ERR_ARG when fields is unknown or size is invalid, and SEAMS_ERR_RANGE when cap is smaller than *n_out.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys, edges, and n_out. The call borrows sys and writes caller buffers only.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_tcf
+
+Purpose: @brief Streaming hydrogen-bond lifetime accumulator. Free with seams_hbond_tcf_destroy(). Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_tcf_create
+
+Purpose: Create a streaming H-bond lifetime accumulator from per-frame edges.
+
+```c
+seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride, double dt, int directed, seams_hbond_tcf **out);
+```
+
+Parameters: `max_lag`, `origin_stride`, `dt`, `directed`, `out`.
+
+- `max_lag`: Maximum lag in frames, or 0 to retain all lags.
+- `origin_stride`: Frame stride between time origins, at least 1.
+- `dt`: Positive finite frame spacing.
+- `directed`: Non-zero treats (donor, acceptor) as directed; zero canonicalizes pairs.
+- `out`: Receives the new handle; set to NULL on failure.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The caller frees *out with seams_hbond_tcf_destroy().
+
+Thread safety: Pure aside from handle registration and the thread-local error string.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_hbond_tcf *tcf = NULL;
+seams_hbond_tcf_create(16, 1, 0.1, 1, &tcf);
+seams_hbond_tcf_destroy(tcf);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_tcf_curve
+
+Purpose: Read intermittent C_HB(t) and continuous S_HB(t) lifetime curves.
+
+```c
+seams_status seams_hbond_tcf_curve(const seams_hbond_tcf *tcf, double *lag_time, double *c_intermittent, double *s_continuous, size_t *n_origins, size_t cap, size_t *n_lags);
+```
+
+Parameters: `tcf`, `lag_time`, `c_intermittent`, `s_continuous`, `n_origins`, `cap`, `n_lags`.
+
+- `tcf`: H-bond TCF handle.
+- `lag_time`: Receives lag times k * dt, or NULL.
+- `c_intermittent`: Receives intermittent autocorrelation C_HB, or NULL.
+- `s_continuous`: Receives unbroken survival probability S_HB, or NULL.
+- `n_origins`: Receives origin counts per lag, or NULL.
+- `cap`: Capacity of non-NULL output arrays.
+- `n_lags`: Receives the available lag count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all output buffers.
+
+Thread safety: Read-only on tcf.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int don[1] = {1}, acc[1] = {2};
+seams_hbond_tcf *tcf = NULL;
+size_t nlags = 0;
+seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf);
+seams_hbond_tcf_push(tcf, don, acc, 1);
+seams_hbond_tcf_push(tcf, don, acc, 1);
+seams_hbond_tcf_curve(tcf, NULL, NULL, NULL, NULL, 0, &nlags);
+seams_hbond_tcf_destroy(tcf);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_tcf_destroy
+
+Purpose: Free an H-bond lifetime accumulator.
+
+```c
+void seams_hbond_tcf_destroy(seams_hbond_tcf *tcf);
+```
+
+Parameters: `tcf`.
+
+- `tcf`: Handle from seams_hbond_tcf_create(), or NULL.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its active origin sets.
+
+Thread safety: Exclusive use of tcf.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_hbond_tcf_destroy(NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_tcf_fit
+
+Purpose: Integrated and single-exponential lifetimes for C_HB and S_HB.
+
+Pass t_start = 0 and t_end = 0 to fit across the full positive decay range.
+
+```c
+seams_status seams_hbond_tcf_fit(const seams_hbond_tcf *tcf, double t_start, double t_end, double *tau_c_int, double *tau_c_exp, double *tau_s_int, double *tau_s_exp);
+```
+
+Parameters: `tcf`, `t_start`, `t_end`, `tau_c_int`, `tau_c_exp`, `tau_s_int`, `tau_s_exp`.
+
+- `tcf`: H-bond TCF handle with at least 2 lag points.
+- `t_start`: Fit window start time, >= 0.
+- `t_end`: Fit window end time, > t_start (or both 0 for full range).
+- `tau_c_int`: Receives trapezoidal integral of C_HB, or NULL.
+- `tau_c_exp`: Receives exponential decay time of C_HB, or NULL.
+- `tau_s_int`: Receives trapezoidal integral of S_HB, or NULL.
+- `tau_s_exp`: Receives exponential decay time of S_HB, or NULL.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: Writes scalar outputs owned by the caller.
+
+Thread safety: Read-only on tcf.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int don[2] = {1, 2}, acc[2] = {3, 4};
+seams_hbond_tcf *tcf = NULL;
+double tc = 0, ts = 0;
+seams_hbond_tcf_create(4, 1, 1.0, 1, &tcf);
+seams_hbond_tcf_push(tcf, don, acc, 2);
+seams_hbond_tcf_push(tcf, don, acc, 1);
+seams_hbond_tcf_fit(tcf, 0.0, 0.0, &tc, NULL, &ts, NULL);
+seams_hbond_tcf_destroy(tcf);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbond_tcf_push
+
+Purpose: Push one frame's hydrogen-bond edge set into the lifetime accumulator.
+
+Duplicate edges within the same frame are deduplicated before updating intermittent C_HB(t) and continuous survival S_HB(t).
+
+```c
+seams_status seams_hbond_tcf_push(seams_hbond_tcf *tcf, const int *donors, const int *acceptors, size_t n_edges);
+```
+
+Parameters: `tcf`, `donors`, `acceptors`, `n_edges`.
+
+- `tcf`: H-bond TCF handle.
+- `donors`: Donor ids of length n_edges (may be NULL when n_edges is 0).
+- `acceptors`: Acceptor ids of length n_edges (may be NULL when n_edges is 0).
+- `n_edges`: Number of edges in this frame.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_NOMEM.
+
+Ownership: The library copies edge ids and keeps no caller pointer.
+
+Thread safety: Exclusive use of tcf.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int don[1] = {1}, acc[1] = {2};
+seams_hbond_tcf *tcf = NULL;
+seams_hbond_tcf_create(8, 1, 1.0, 1, &tcf);
+seams_hbond_tcf_push(tcf, don, acc, 1);
+seams_hbond_tcf_destroy(tcf);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbonds
+
+Purpose: Hydrogen-bond count on one frame.
+
+```c
+seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type, int hydrogen_type, double dist_cutoff, double angle_cutoff, int *n_bonds);
+```
+
+Parameters: `sys`, `cutoff`, `oxygen_type`, `hydrogen_type`, `dist_cutoff`, `angle_cutoff`, `n_bonds`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite donor-acceptor cutoff, Angstrom.
+- `oxygen_type`: Heavy-atom species. Zero keeps every atom that is not hydrogen_type.
+- `hydrogen_type`: Positive hydrogen species.
+- `dist_cutoff`: Acceptor-H distance, Angstrom.
+- `angle_cutoff`: O-O-H angle, degrees.
+- `n_bonds`: Receives the number of hydrogen bonds.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. n_bonds is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int n_bonds = 0;
+seams_hbonds(sys, 3.5, 1, 2, 2.4, 30.0, &n_bonds);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_label
+
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_label_name
+
+Purpose: Name of a CHILL label.
+
+```c
+const char *seams_label_name(int label);
+```
+
+Parameters: `label`.
+
+- `label`: A ::seams_label value.
+
+Returns: Static string. Unknown codes return "unknown".
+
+Ownership: The caller does not free it.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+printf("%s\n", seams_label_name(SEAMS_LABEL_HEXAGONAL));
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_lammps_bounds
+
+Purpose: Fill ox, oy, oz, lx, ly, lz, xy, xz, yz from LAMMPS box bounds. Declared in include/seams_lammps_box.h.
+
+Parameters: lo; hi; tilt; box9
+
+Returns: Nothing. The nine cell numbers are written to box9.
+
+Ownership: The caller owns lo, hi, tilt, and box9. The function does not allocate.
+
+Errors: None. The caller supplies three-vectors and a nine-number buffer.
+
+Units: lengths in angstrom
+
+Example: `docs/examples/c_api_tour.c`
+
+- `label`: A ::seams_label value.
+Thread safety: Pure.
+```c
+printf("%s\n", seams_label_name(SEAMS_LABEL_HEXAGONAL));
+```
+The tour call is in `docs/examples/c_api_tour.c`.
+
+### seams_last_error
+
+Purpose: Thread-local detail of the last failing call on this thread.
+
+ABI 1 spelling of seams_last_error_message(). Both return the same string.
+
+```c
+const char *seams_last_error(void);
+```
+
+Parameters: none.
+
+Returns: Pointer to a thread-local string. Never NULL.
+
+Ownership: Owned by the library. Valid until the next call on this thread that sets or clears the error.
+
+Thread safety: The storage is thread-local.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+if (seams_system_set_atoms(sys, xyz, n, box9, 9, NULL, NULL) != SEAMS_OK) {
+  fprintf(stderr, "%s\n", seams_last_error());
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_last_error_message
+
+Purpose: Thread-local detail of the last failing call on this thread.
+
+The string is empty after a successful call on this thread. Prefer seams_handle_error() when the failing call had a handle: that copy survives a later call on another handle. seams_last_error() is the ABI 1 spelling and returns the same string.
+
+```c
+const char *seams_last_error_message(void);
+```
+
+Parameters: none.
+
+Returns: Pointer to a thread-local string. Never NULL.
+
+Ownership: Owned by the library. Valid until the next call on this thread that sets or clears the error.
+
+Thread safety: The storage is thread-local.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_status rc = seams_system_natoms(NULL, NULL);
+fprintf(stderr, "%s: %s\n", seams_status_string(rc), seams_last_error_message());
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_molecule_centres
+
+Purpose: Intact periodic centres of mass or geometry for molecules in a frame.
+
+Atoms sharing a molecule id are assembled onto the first atom of that molecule through the minimum image of the stored orthorhombic or triclinic cell before averaging. Pass NULL for both mol_ids_out and centres_out to query the molecule count in n_mols.
+
+```c
+seams_status seams_molecule_centres(const seams_system *sys, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, double *centres_out, size_t cap, size_t *n_mols);
+```
+
+Parameters: `sys`, `mols`, `mols_len`, `masses`, `masses_len`, `mol_ids_out`, `centres_out`, `cap`, `n_mols`.
+
+- `sys`: Frame handle.
+- `mols`: Optional molecule id per atom, or NULL to use stored molecule ids.
+- `mols_len`: Length of mols when mols is non-NULL; must equal n, or 0 when NULL.
+- `masses`: Optional positive weight per atom, or NULL for equal weights.
+- `masses_len`: Length of masses when masses is non-NULL; must equal n, or 0 when NULL.
+- `mol_ids_out`: Receives one molecule id per molecule, or NULL.
+- `centres_out`: Receives 3 * n_mols coordinates in Angstrom, or NULL.
+- `cap`: Molecule capacity of non-NULL output buffers.
+- `n_mols`: Receives the molecule count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_BOX; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all buffers.
+
+Thread safety: Read-only on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t nm = 0;
+seams_molecule_centres(sys, NULL, 0, NULL, 0, NULL, NULL, 0, &nm);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_molecule_dipoles
+
+Purpose: Generic per-molecule dipole or geometric orientation vectors.
+
+With charges, computes sum_a q_a (r_a - r_centre) in elementary-charge Angstrom on each PBC-assembled molecule. Without charges, computes the mean minimum-image vector from each molecule's first atom to its remaining atoms.
+
+```c
+seams_status seams_molecule_dipoles( const seams_system *sys, const int *mols, size_t mols_len, const double *charges, size_t charges_len, int *mol_ids_out, double *dipoles, double *unit_vectors, size_t cap, size_t *n_mols);
+```
+
+Parameters: `sys`, `mols`, `mols_len`, `charges`, `charges_len`, `mol_ids_out`, `dipoles`, `unit_vectors`, `cap`, `n_mols`.
+
+- `sys`: Frame handle.
+- `mols`: Optional molecule id per atom, or NULL to use stored molecule ids.
+- `mols_len`: Length of mols when non-NULL, or 0 when NULL.
+- `charges`: Optional partial charge per atom, or NULL for geometric mode.
+- `charges_len`: Length of charges when non-NULL, or 0 when NULL.
+- `mol_ids_out`: Receives molecule ids, length cap, or NULL.
+- `dipoles`: Receives 3 * cap raw dipole vectors, or NULL.
+- `unit_vectors`: Receives 3 * cap normalized orientation vectors, or NULL.
+- `cap`: Molecule capacity of non-NULL output arrays.
+- `n_mols`: Receives the molecule count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_BOX; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all buffers.
+
+Thread safety: Read-only on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t nm = 0;
+seams_molecule_dipoles(sys, NULL, 0, NULL, 0, NULL, NULL, NULL, 0, &nm);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_mols
+
+Purpose: Copy the stored molecule ids out.
+
+```c
+seams_status seams_mols(const seams_system *sys, int *mols, size_t len);
+```
+
+Parameters: `sys`, `mols`, `len`.
+
+- `sys`: Frame handle.
+- `mols`: Caller buffer for n ints, in stored order.
+- `len`: Length of mols. Must be at least n.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE when no frame is stored; SEAMS_ERR_RANGE for a short buffer.
+
+Ownership: The caller owns mols.
+
+Thread safety: Read-only: may run alongside other const calls on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int mols[8] = {0};
+seams_mols(sys, mols, 8);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+```c
+seams_status seams_monolayer(seams_system *sys, double cutoff, int type, int max_depth, double sheet_area, int *counts, size_t counts_len);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `max_depth`, `sheet_area`, `counts`, `counts_len`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `max_depth`: Largest ring size, at least 3.
+- `sheet_area`: Sheet area, square Angstrom. Must be positive.
+- `counts`: counts[k] is the number of rings of size k.
+- `counts_len`: Must be at least max_depth + 1.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns counts.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int counts[7];
+seams_monolayer(sys, 3.5, 0, 6, 900.0, counts, 7);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_msd
+
+Purpose: @brief Streaming mean-squared displacement accumulator. Free with seams_msd_destroy(). Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_msd_create
+
+Purpose: Create a streaming multi-origin MSD accumulator with axial/lateral split.
+
+```c
+seams_status seams_msd_create(size_t natoms, size_t max_lag, size_t origin_stride, double dt, const double axis[3], seams_msd **out);
+```
+
+Parameters: `natoms`, `max_lag`, `origin_stride`, `dt`, `axis`, `out`.
+
+- `natoms`: Particle or molecule count per frame, at least 1.
+- `max_lag`: Maximum lag in frames, or 0 to retain all lags.
+- `origin_stride`: Frame stride between time origins, at least 1.
+- `dt`: Positive finite frame spacing in physical time units.
+- `axis`: Non-zero 3-vector defining the axial direction.
+- `out`: Receives the new handle; set to NULL on failure.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The caller frees *out with seams_msd_destroy().
+
+Thread safety: Pure aside from handle registration and the thread-local error string.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double axis[3] = {0, 0, 1};
+seams_msd *msd = NULL;
+seams_msd_create(4, 16, 1, 0.1, axis, &msd);
+seams_msd_destroy(msd);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_msd_curve
+
+Purpose: Read accumulated lag times and total, axial, and lateral MSD curves.
+
+Any of lag_time, total, axial, lateral, and n_origins may be NULL to skip that column; pass all five as NULL to query n_lags.
+
+```c
+seams_status seams_msd_curve(const seams_msd *msd, double *lag_time, double *total, double *axial, double *lateral, size_t *n_origins, size_t cap, size_t *n_lags);
+```
+
+Parameters: `msd`, `lag_time`, `total`, `axial`, `lateral`, `n_origins`, `cap`, `n_lags`.
+
+- `msd`: MSD handle.
+- `lag_time`: Receives lag times k * dt, or NULL.
+- `total`: Receives 3D total MSD, or NULL.
+- `axial`: Receives 1D axial MSD along axis, or NULL.
+- `lateral`: Receives 2D lateral MSD perpendicular to axis, or NULL.
+- `n_origins`: Receives time-origin counts per lag, or NULL.
+- `cap`: Capacity of non-NULL output arrays.
+- `n_lags`: Receives the available lag count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all output buffers.
+
+Thread safety: Read-only on msd.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double axis[3] = {0, 0, 1};
+const double f0[3] = {0, 0, 0}, f1[3] = {0, 0, 1};
+seams_msd *msd = NULL;
+size_t nlags = 0;
+seams_msd_create(1, 4, 1, 1.0, axis, &msd);
+seams_msd_push(msd, f0, 1, NULL, 0);
+seams_msd_push(msd, f1, 1, NULL, 0);
+seams_msd_curve(msd, NULL, NULL, NULL, NULL, NULL, 0, &nlags);
+seams_msd_destroy(msd);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_msd_destroy
+
+Purpose: Free an MSD accumulator.
+
+```c
+void seams_msd_destroy(seams_msd *msd);
+```
+
+Parameters: `msd`.
+
+- `msd`: Handle from seams_msd_create(), or NULL.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its ring buffer.
+
+Thread safety: Exclusive use of msd.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_msd_destroy(NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_msd_fit
+
+Purpose: Linear Einstein diffusion fit on an MSD accumulator.
+
+Fits MSD_total = 6 D_total t + c, MSD_axial = 2 D_axial t + c, and MSD_lateral = 4 D_lateral t + c over [t_start, t_end]. Pass t_start = 0 and t_end = 0 for the default [0.1 t_max, 0.5 t_max] window.
+
+```c
+seams_status seams_msd_fit(const seams_msd *msd, double t_start, double t_end, double *d_total, double *d_axial, double *d_lateral, double *alpha);
+```
+
+Parameters: `msd`, `t_start`, `t_end`, `d_total`, `d_axial`, `d_lateral`, `alpha`.
+
+- `msd`: MSD handle with at least 2 lag points.
+- `t_start`: Window start time, >= 0.
+- `t_end`: Window end time, > t_start (or both 0 for default window).
+- `d_total`: Receives 3D diffusion coefficient, or NULL.
+- `d_axial`: Receives 1D axial diffusion coefficient, or NULL.
+- `d_lateral`: Receives 2D lateral diffusion coefficient, or NULL.
+- `alpha`: Receives the log-log anomalous exponent, or NULL. Receives NaN when the window holds fewer than two lags with t > 0 and MSD_total > 1e-20, so the log-log fit was skipped; test it with isnan(). The diffusion coefficients are still the linear fit.
+
+Returns: SEAMS_OK when the linear fit succeeded, including a skipped log-log fit (alpha NaN); SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: Writes scalar outputs owned by the caller.
+
+Thread safety: Read-only on msd.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double axis[3] = {0, 0, 1};
+const double f0[3] = {0, 0, 0}, f1[3] = {0, 0, 1}, f2[3] = {0, 0, 2};
+seams_msd *msd = NULL;
+double dtot = 0, dax = 0, dlat = 0, alpha = 0;
+seams_msd_create(1, 4, 1, 1.0, axis, &msd);
+seams_msd_push(msd, f0, 1, NULL, 0);
+seams_msd_push(msd, f1, 1, NULL, 0);
+seams_msd_push(msd, f2, 1, NULL, 0);
+seams_msd_fit(msd, 0.0, 0.0, &dtot, &dax, &dlat, &alpha);
+seams_msd_destroy(msd);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_msd_push
+
+Purpose: Push one frame into a streaming MSD accumulator.
+
+Pass box9 as NULL (with box_len 0) when xyz is already unwrapped, or pass a nine-number cell (with box_len 9) to unwrap incrementally across frames.
+
+```c
+seams_status seams_msd_push(seams_msd *msd, const double *xyz, size_t natoms, const double *box9, size_t box_len);
+```
+
+Parameters: `msd`, `xyz`, `natoms`, `box9`, `box_len`.
+
+- `msd`: MSD handle.
+- `xyz`: Coordinates of 3 * natoms doubles in Angstrom.
+- `natoms`: Particle count; must match the count passed to seams_msd_create().
+- `box9`: Optional 9-number periodic cell, or NULL for unwrapped input.
+- `box_len`: Must be 9 when box9 is non-NULL, or 0 when box9 is NULL.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_BOX; SEAMS_ERR_ARG; SEAMS_ERR_STATE; SEAMS_ERR_NOMEM.
+
+Ownership: The library copies coordinates into active origin slots as needed.
+
+Thread safety: Exclusive use of msd.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double axis[3] = {0, 0, 1};
+const double f0[3] = {0, 0, 0};
+seams_msd *msd = NULL;
+seams_msd_create(1, 8, 1, 1.0, axis, &msd);
+seams_msd_push(msd, f0, 1, NULL, 0);
+seams_msd_destroy(msd);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours
+
+Purpose: One neighbour list owned by the caller, built from a frame. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_build
+
+Purpose: Build a cutoff or mutual neighbour list.
+
+```c
+seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type, int graph, seams_neighbours **out);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `out`.
+
+- `sys`: Frame handle that already holds a frame.
+- `cutoff`: Positive finite cutoff, Angstrom. The mutual graph keeps the four nearest neighbours inside cutoff + 1.5.
+- `type`: Species to keep. Zero and negative keep every atom.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL. SEAMS_GRAPH_SEEDED is rejected here.
+- `out`: Receives a new handle. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_neighbours_destroy(). The list is a copy and does not borrow sys.
+
+Thread safety: Exclusive use of sys. The new handle is private to the caller.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_neighbours *nb = NULL;
+if (seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb) == SEAMS_OK) {
+  seams_neighbours_destroy(nb);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_copy
+
+Purpose: Copy the neighbour CSR into caller buffers.
+
+```c
+seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets, size_t offsets_cap, size_t *n_offsets, int *cols, size_t cols_cap, size_t *nnz);
+```
+
+Parameters: `nb`, `offsets`, `offsets_cap`, `n_offsets`, `cols`, `cols_cap`, `nnz`.
+
+- `nb`: Neighbour handle.
+- `offsets`: Caller buffer of offsets_cap ints, or NULL to query.
+- `offsets_cap`: Capacity of offsets. Ignored when offsets is NULL.
+- `n_offsets`: Receives the required offset count (n + 1).
+- `cols`: Caller buffer of cols_cap ints, or NULL to query.
+- `cols_cap`: Capacity of cols. Ignored when cols is NULL.
+- `nnz`: Receives the required column count.
+
+Returns: SEAMS_OK when every non-NULL buffer was filled, or when both buffers were NULL and the lengths were written. SEAMS_ERR_RANGE when a non-NULL buffer is short. SEAMS_ERR_NULL when nb, n_offsets, or nnz is NULL.
+
+Ownership: The caller owns the buffers. The handle is not modified.
+
+Thread safety: Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_off = 0, nnz = 0;
+seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz);
+int *off = malloc(n_off * sizeof *off), *cols = malloc(nnz * sizeof *cols);
+seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz);
+free(off);
+free(cols);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_count
+
+Purpose: Number of neighbour rows, as an int.
+
+ABI 1 query. seams_neighbours_nrows() reports errors.
+
+```c
+int seams_neighbours_count(const seams_neighbours *nb);
+```
+
+Parameters: `nb`.
+
+- `nb`: Neighbour handle, or NULL.
+
+Returns: The row count, or 0 when nb is NULL.
+
+Ownership: The caller owns nb; the call borrows it. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int rows = seams_neighbours_count(nb);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_csr
+
+Purpose: Borrow the neighbour list as CSR.
+
+Offsets has n + 1 entries. Columns omit the self entry.
+
+```c
+seams_status seams_neighbours_csr(const seams_neighbours *nb, const int **offsets, int *n_offsets, const int **cols, int *nnz);
+```
+
+Parameters: `nb`, `offsets`, `n_offsets`, `cols`, `nnz`.
+
+- `nb`: Neighbour handle.
+- `offsets`: Receives the offset pointer.
+- `n_offsets`: Receives the offset count, n + 1.
+- `cols`: Receives the column pointer. May be NULL when the list has no pairs; *nnz is then 0.
+- `nnz`: Receives the column count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL.
+
+Ownership: The pointers are owned by nb and remain valid until seams_neighbours_destroy(nb). Use seams_neighbours_copy() for caller buffers.
+
+Thread safety: Exclusive use of nb. The returned pointers must not be used concurrently with a call that frees nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int *off = NULL, *cols = NULL;
+int n_off = 0, nnz = 0;
+seams_neighbours_csr(nb, &off, &n_off, &cols, &nnz);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_destroy
+
+Purpose: Free a neighbour list.
+
+```c
+void seams_neighbours_destroy(seams_neighbours *nb);
+```
+
+Parameters: `nb`.
+
+- `nb`: Handle from seams_neighbours_build() or seams_neighbours_knn(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its CSR arrays.
+
+Thread safety: The caller must not use nb after this returns.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_neighbours_destroy(nb);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_knn
+
+Purpose: k-nearest neighbour list.
+
+```c
+seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int type, int mutual, seams_neighbours **out);
+```
+
+Parameters: `sys`, `k`, `cutoff`, `type`, `mutual`, `out`.
+
+- `sys`: Frame handle.
+- `k`: Positive neighbour count.
+- `cutoff`: Nominal positive cutoff, Angstrom. Candidates are taken inside cutoff + 1.5.
+- `type`: Species filter. Zero and negative keep every atom.
+- `mutual`: Non-zero keeps the mutual graph. Zero keeps the one-way k-nearest graph.
+- `out`: Receives a neighbour handle. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_neighbours_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_neighbours *nb = NULL;
+seams_neighbours_knn(sys, 4, 3.5, 0, 1, &nb);
+seams_neighbours_destroy(nb);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_nrows
+
+Purpose: Number of neighbour rows.
+
+```c
+seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t *n);
+```
+
+Parameters: `nb`, `n`.
+
+- `nb`: Neighbour handle.
+- `n`: Receives the row count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when nb or n is NULL.
+
+Ownership: The caller owns nb; the call borrows it. n is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on nb, and not alongside a non-const call on nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t rows = 0;
+seams_neighbours_nrows(nb, &rows);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_orientation_order
+
+Purpose: Project molecular vectors onto an axis for P1 and P2 order parameters.
+
+Computes cos_theta = u . e and P2 = 0.5 * (3 cos_theta^2 - 1) for each non-zero vector, where e is the normalized axis. Zero-length vectors receive NaN in per-molecule outputs and are omitted from mean_p1 and mean_p2.
+
+```c
+seams_status seams_orientation_order(const double *vectors, size_t n_vectors, const double axis[3], double *cos_theta, double *p2, size_t cap, double *mean_p1, double *mean_p2);
+```
+
+Parameters: `vectors`, `n_vectors`, `axis`, `cos_theta`, `p2`, `cap`, `mean_p1`, `mean_p2`.
+
+- `vectors`: Input 3-vectors, 3 * n_vectors doubles (or NULL when n_vectors is 0).
+- `n_vectors`: Number of 3-vectors.
+- `axis`: Non-zero reference axis of 3 finite doubles.
+- `cos_theta`: Optional output buffer of cap doubles for cos(theta), or NULL.
+- `p2`: Optional output buffer of cap doubles for P2(cos(theta)), or NULL.
+- `cap`: Capacity of non-NULL per-vector buffers; must be at least n_vectors.
+- `mean_p1`: Receives ensemble mean of cos(theta), or NULL.
+- `mean_p2`: Receives ensemble mean of P2(cos(theta)), or NULL.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all arrays.
+
+Thread safety: Pure aside from the thread-local error string.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double vecs[6] = {0, 0, 1, 0, 0, 2};
+const double axis[3] = {0, 0, 1};
+double p1 = 0, p2 = 0;
+seams_orientation_order(vecs, 2, axis, NULL, NULL, 0, &p1, &p2);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_path_nframes
+
+Purpose: Number of frames in a trajectory path.
+
+```c
+seams_status seams_path_nframes(const char *path, size_t *nframes);
+```
+
+Parameters: `path`, `nframes`.
+
+- `path`: Filesystem path.
+- `nframes`: Receives the count. Must be non-NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_INTERNAL. *nframes is unchanged on failure.
+
+Ownership: path is read during the call only. nframes is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Safe for distinct paths.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t nframes = 0;
+seams_status rc = seams_path_nframes("ice.lammpstrj", &nframes);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_prisms
+
+Purpose: Perfect and imperfect prism counts by ring size.
+
+Rings come from the mutual four-nearest graph inside cutoff + 1.5.
+
+```c
+seams_status seams_prisms(seams_system *sys, double cutoff, int type, int *perfect, int *imperfect, size_t len);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `perfect`, `imperfect`, `len`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `perfect`: Caller buffer. perfect[k] receives the perfect k-prisms.
+- `imperfect`: Caller buffer. imperfect[k] receives the deformed k-prisms.
+- `len`: Length of each buffer. At least 7, so that sizes 3 through 6 are filled.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns both buffers.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int perfect[7], imperfect[7];
+seams_prisms(sys, 3.5, 0, perfect, imperfect, 7);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_q4q6
+
+Purpose: Local q4 and q6 on the cutoff shell, without buffer lengths.
+
+ABI 1 pair. Each non-NULL array has one double per atom. New callers use seams_q4q6_n(), which checks the lengths.
+
+```c
+seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4, double *q6);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `q4`, `q6`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `q4`: Local q4, or NULL.
+- `q6`: Local q6, or NULL. q4 and q6 may not both be NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time.
+
+Ownership: The caller owns q4 and q6.
+
+Thread safety: Exclusive use of sys. Any q call on another handle may run beside it.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_q4q6(sys, 3.5, 0, q4, q6);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_q4q6_n
+
+Purpose: Local q4 and q6 on the cutoff shell into buffers of known length.
+
+```c
+seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, double *q4, size_t q4_len, double *q6, size_t q6_len);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `q4`, `q4_len`, `q6`, `q6_len`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `q4`: Local q4, or NULL.
+- `q4_len`: Length of q4. Ignored when q4 is NULL.
+- `q6`: Local q6, or NULL. q4 and q6 may not both be NULL.
+- `q6_len`: Length of q6. Ignored when q6 is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE for a short buffer or a bad cutoff, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time.
+
+Ownership: The caller owns q4 and q6.
+
+Thread safety: Exclusive use of sys. Any q call on another handle may run beside it.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_q4q6_n(sys, 3.5, 0, q4, n, q6, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_q6bar
+
+Purpose: Lechner-Dellago q6-bar and the ice count above a cut.
+
+The average is the same neighbour mean of q_6m as seams_ql() of order 6 on the cutoff graph. n_ice counts finite values strictly above ice_cut. The nucleation census uses 0.36. mean and median ignore non-finite values. An empty finite set stores 0.
+
+```c
+seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_cut, double *q6bar, size_t q6bar_len, double *mean, double *median, int *n_ice);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `ice_cut`, `q6bar`, `q6bar_len`, `mean`, `median`, `n_ice`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `ice_cut`: Finite threshold on q6-bar.
+- `q6bar`: Per-atom average, or NULL to keep only the summary.
+- `q6bar_len`: Length of q6bar. Ignored when q6bar is NULL.
+- `mean`: Receives the mean, or NULL.
+- `median`: Receives the median, or NULL.
+- `n_ice`: Receives the count above ice_cut, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL. At least one of q6bar, mean, median, and n_ice must be non-NULL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time.
+
+Ownership: The caller owns q6bar.
+
+Thread safety: Exclusive use of sys. Any q call on another handle may run beside it.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double mean = 0, median = 0;
+int n_ice = 0;
+seams_q6bar(sys, 3.5, 0, 0.36, NULL, 0, &mean, &median, &n_ice);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_ql
+
+Purpose: Local Steinhardt q_l, and the Lechner-Dellago average on request.
+
+order_l is 3, 4, 6, 8, or 12. Either array may be NULL. A non-NULL array has one double per atom and its length must be at least the frame count. The average is the neighbour mean of q_lm. The cutoff graph reads the cutoff shell. The mutual graph reads the four nearest neighbours inside cutoff + 1.5.
+
+```c
+seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, int graph, double *ql, size_t ql_len, double *qlbar, size_t qlbar_len);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `order_l`, `graph`, `ql`, `ql_len`, `qlbar`, `qlbar_len`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter. Zero and negative keep every atom.
+- `order_l`: Spherical-harmonic degree.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `ql`: Local q_l, or NULL.
+- `ql_len`: Length of ql. Ignored when ql is NULL.
+- `qlbar`: Averaged q_l, or NULL to skip the average.
+- `qlbar_len`: Length of qlbar. Ignored when qlbar is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time.
+
+Ownership: The caller owns both arrays.
+
+Thread safety: Exclusive use of sys. Any q call on another handle may run beside it.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_ql(sys, 3.5, 0, 6, SEAMS_GRAPH_CUTOFF, q6, n, q6bar, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_quench_callback
+
+Purpose: Callback signature used by `seams_quenched_analysis`.
+
+Parameters: `xyz`, `n`, `box9`, `box_len`, `xyz_out`, `xyz_out_len`, `box9_out`, `box9_out_len`, `user_data`.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: positions are Angstrom, box is `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_quenched_analysis
+
+Purpose: Run CHILL+, ring census, and H-bonds on raw and quenched frames.
+
+The callback receives one frame and returns quenched coordinates. This call then runs CHILL+, primitive rings, and hydrogen-bond analysis on both raw and quenched frames and emits their per-frame differences.
+
+```c
+seams_status seams_quenched_analysis( seams_system *sys, seams_quench_callback callback, void *user_data, double cutoff, int type, int graph, int max_depth, int oxygen_type, int hydrogen_type, double dist_cutoff, double angle_cutoff, int *raw_labels, size_t raw_labels_len, int *quenched_labels, size_t quenched_labels_len, int counts_raw[9], int counts_quenched[9], int *rings_raw, int *rings_quenched, size_t ring_counts_len, int *hbond_raw, int *hbond_quenched, int *hbond_edge_delta, int *ring_count_delta, int *class_change_count);
+```
+
+Parameters: `sys`, `callback`, `user_data`, `cutoff`, `type`, `graph`, `max_depth`, `oxygen_type`, `hydrogen_type`, `dist_cutoff`, `angle_cutoff`, `raw_labels`, `raw_labels_len`, `quenched_labels`, `quenched_labels_len`, `counts_raw`, `counts_quenched`, `rings_raw`, `rings_quenched`, `ring_counts_len`, `hbond_raw`, `hbond_quenched`, `hbond_edge_delta`, `ring_count_delta`, `class_change_count`.
+
+- `sys`: Frame handle.
+- `callback`: Quench callback that writes output coordinates.
+- `user_data`: Opaque callback payload.
+- `cutoff`: Positive finite neighbour cutoff, Angstrom.
+- `type`: Species filter for neighbour, CHILL+, and rings.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `max_depth`: Primitive-ring depth, from 3 through 12.
+- `oxygen_type`: Heavy-atom species filter for H-bonds.
+- `hydrogen_type`: Hydrogen species filter for H-bonds.
+- `dist_cutoff`: Acceptor-H distance, Angstrom.
+- `angle_cutoff`: O-O-H angle, degrees.
+- `raw_labels`: Raw-frame CHILL+ labels, length at least atom count.
+- `raw_labels_len`: Length of `raw_labels`.
+- `quenched_labels`: Quenched-frame CHILL+ labels, length at least atom count.
+- `quenched_labels_len`: Length of `quenched_labels`.
+- `counts_raw`: Raw-frame CHILL+ population counts.
+- `counts_quenched`: Quenched-frame CHILL+ population counts.
+- `rings_raw`: Raw-frame primitive-ring histogram.
+- `rings_quenched`: Quenched-frame primitive-ring histogram.
+- `ring_counts_len`: Length of `rings_raw` and `rings_quenched`.
+- `hbond_raw`: Receives raw-frame H-bond edge count.
+- `hbond_quenched`: Receives quenched-frame H-bond edge count.
+- `hbond_edge_delta`: Receives symmetric-difference edge count between raw and quenched H-bond edge sets.
+- `ring_count_delta`: Receives sum over ring sizes of absolute raw-minus- quenched count differences.
+- `class_change_count`: Receives the atom count whose CHILL+ class changed.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns every output buffer, callback state, and sys. The call borrows callback pointers and writes caller buffers only.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rdf
+
+Purpose: Partial radial distribution.
+
+r is Angstrom. g is dimensionless. volume is cubic Angstrom.
+
+```c
+seams_status seams_rdf(seams_system *sys, double rmax, int bins, int type_i, int type_j, double *r, double *g, int *count, size_t cap, size_t *n_out, double *volume);
+```
+
+Parameters: `sys`, `rmax`, `bins`, `type_i`, `type_j`, `r`, `g`, `count`, `cap`, `n_out`, `volume`.
+
+- `sys`: Frame handle.
+- `rmax`: Positive finite outer radius, Angstrom.
+- `bins`: Bin count. Zero selects about rmax / 0.1.
+- `type_i`: First species. Zero and negative keep every atom of a single-species frame, or every atom as one species otherwise.
+- `type_j`: Second species. Zero and negative reuse the type_i species.
+- `r`: Bin centers, or NULL to query.
+- `g`: g(r) per bin, or NULL to query.
+- `count`: Pair count per bin, or NULL to query.
+- `cap`: Capacity of each non-NULL column.
+- `n_out`: Receives the bin count.
+- `volume`: Receives the cell volume, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns the columns.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t bins = 0;
+seams_rdf(sys, 8.0, 80, 0, 0, NULL, NULL, NULL, 0, &bins, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_reorient
+
+Purpose: @brief Streaming orientational time-correlation accumulator. Free with seams_reorient_destroy(). Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_reorient_create
+
+Purpose: Create a streaming orientational correlation accumulator for C1 and C2.
+
+```c
+seams_status seams_reorient_create(size_t n_vectors, size_t max_lag, size_t origin_stride, double dt, seams_reorient **out);
+```
+
+Parameters: `n_vectors`, `max_lag`, `origin_stride`, `dt`, `out`.
+
+- `n_vectors`: Number of molecular vectors per frame, at least 1.
+- `max_lag`: Maximum lag in frames, or 0 to retain all lags.
+- `origin_stride`: Frame stride between time origins, at least 1.
+- `dt`: Positive finite frame spacing.
+- `out`: Receives the new handle; set to NULL on failure.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The caller frees *out with seams_reorient_destroy().
+
+Thread safety: Pure aside from handle registration and the thread-local error string.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_reorient *rot = NULL;
+seams_reorient_create(4, 16, 1, 0.1, &rot);
+seams_reorient_destroy(rot);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_reorient_curve
+
+Purpose: Read accumulated C1(t) = <P1(u(0).u(t))> and C2(t) = <P2(u(0).u(t))>.
+
+```c
+seams_status seams_reorient_curve(const seams_reorient *reorient, double *lag_time, double *c1, double *c2, size_t *n_origins, size_t cap, size_t *n_lags);
+```
+
+Parameters: `reorient`, `lag_time`, `c1`, `c2`, `n_origins`, `cap`, `n_lags`.
+
+- `reorient`: Reorientation handle.
+- `lag_time`: Receives lag times k * dt, or NULL.
+- `c1`: Receives first Legendre correlation C1, or NULL.
+- `c2`: Receives second Legendre correlation C2, or NULL.
+- `n_origins`: Receives origin counts per lag, or NULL.
+- `cap`: Capacity of non-NULL output arrays.
+- `n_lags`: Receives the available lag count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all output buffers.
+
+Thread safety: Read-only on reorient.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double v0[3] = {0, 0, 1}, v1[3] = {0, 1, 0};
+seams_reorient *rot = NULL;
+size_t nlags = 0;
+seams_reorient_create(1, 4, 1, 1.0, &rot);
+seams_reorient_push(rot, v0, 1);
+seams_reorient_push(rot, v1, 1);
+seams_reorient_curve(rot, NULL, NULL, NULL, NULL, 0, &nlags);
+seams_reorient_destroy(rot);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_reorient_destroy
+
+Purpose: Free a reorientation accumulator.
+
+```c
+void seams_reorient_destroy(seams_reorient *reorient);
+```
+
+Parameters: `reorient`.
+
+- `reorient`: Handle from seams_reorient_create(), or NULL.
+
+Returns: nothing.
+
+Ownership: Releases the handle and its ring buffer.
+
+Thread safety: Exclusive use of reorient.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_reorient_destroy(NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_reorient_fit
+
+Purpose: Integrated and single-exponential reorientation times tau_1 and tau_2.
+
+```c
+seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start, double t_end, double *tau1_int, double *tau1_exp, double *tau2_int, double *tau2_exp);
+```
+
+Parameters: `reorient`, `t_start`, `t_end`, `tau1_int`, `tau1_exp`, `tau2_int`, `tau2_exp`.
+
+- `reorient`: Reorientation handle with at least 2 lag points.
+- `t_start`: Fit window start time, >= 0.
+- `t_end`: Fit window end time, > t_start (or both 0 for full range).
+- `tau1_int`: Receives trapezoidal integral of C1, or NULL.
+- `tau1_exp`: Receives exponential decay time of C1, or NULL.
+- `tau2_int`: Receives trapezoidal integral of C2, or NULL.
+- `tau2_exp`: Receives exponential decay time of C2, or NULL.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: Writes scalar outputs owned by the caller.
+
+Thread safety: Read-only on reorient.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double v0[3] = {0, 0, 1}, v1[3] = {0.6, 0, 0.8};
+seams_reorient *rot = NULL;
+double t1 = 0, t2 = 0;
+seams_reorient_create(1, 4, 1, 1.0, &rot);
+seams_reorient_push(rot, v0, 1);
+seams_reorient_push(rot, v1, 1);
+seams_reorient_fit(rot, 0.0, 0.0, &t1, NULL, &t2, NULL);
+seams_reorient_destroy(rot);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_reorient_push
+
+Purpose: Push one frame of molecular 3-vectors into a reorientation accumulator.
+
+Non-zero vectors are normalized per molecule; zero-norm vectors are skipped in correlation pairs.
+
+```c
+seams_status seams_reorient_push(seams_reorient *reorient, const double *vectors, size_t n_vectors);
+```
+
+Parameters: `reorient`, `vectors`, `n_vectors`.
+
+- `reorient`: Reorientation handle.
+- `vectors`: Array of 3 * n_vectors finite doubles.
+- `n_vectors`: Vector count; must match seams_reorient_create().
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The library copies normalized vectors into active origin slots.
+
+Thread safety: Exclusive use of reorient.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double v0[3] = {0, 0, 1};
+seams_reorient *rot = NULL;
+seams_reorient_create(1, 4, 1, 1.0, &rot);
+seams_reorient_push(rot, v0, 1);
+seams_reorient_destroy(rot);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_ring_symmetry
+
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_ring_symmetry_name
+
+Purpose: Name of a ring-symmetry code.
+
+```c
+const char *seams_ring_symmetry_name(int symmetry);
+```
+
+Parameters: `symmetry`.
+
+- `symmetry`: A ::seams_ring_symmetry value.
+
+Returns: Static string. Unknown codes return "unknown".
+
+Ownership: The caller does not free it.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+printf("%s\n", seams_ring_symmetry_name(SEAMS_RING_DDC));
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings
+
+Purpose: One primitive-ring set owned by the caller. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_chordless
+
+Purpose: Chordless cycles of one size.
+
+A cycle is chordless when no edge of the graph joins two of its vertices that are not next to each other on the cycle. Every primitive ring is chordless; a chordless cycle need not be primitive. Each cycle is written once as size atom indices: it starts at its lowest index and runs towards the smaller of that atom's two cycle neighbours. Cycles are sorted lexicographically, so the list does not depend on the thread count.
+
+```c
+seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *rings, size_t rings_len, size_t *n_rings, int *per_atom, size_t per_atom_len);
+```
+
+Parameters: `nb`, `size`, `rings`, `rings_len`, `n_rings`, `per_atom`, `per_atom_len`.
+
+- `nb`: Graph from seams_neighbours_build().
+- `size`: Cycle length, from 3 through 12.
+- `rings`: Caller buffer of size times the cycle count ints, or NULL to skip the list.
+- `rings_len`: Length of rings in ints. Ignored when rings is NULL.
+- `n_rings`: Receives the cycle count. Required when rings is not NULL.
+- `per_atom`: Caller buffer of one int per atom, or NULL. Receives the number of cycles through each atom.
+- `per_atom_len`: Length of per_atom. Ignored when per_atom is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL. rings, n_rings and per_atom may not all be NULL. A short rings buffer returns SEAMS_ERR_RANGE after n_rings and per_atom are written.
+
+Ownership: The caller owns rings and per_atom. Indices are positions in the frame.
+
+Thread safety: Exclusive use of nb.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_six = 0;
+seams_rings_chordless(nb, 6, NULL, 0, &n_six, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_count
+
+Purpose: Number of primitive rings, as an int.
+
+ABI 1 query. seams_rings_nrings() reports errors.
+
+```c
+int seams_rings_count(const seams_rings *rings);
+```
+
+Parameters: `rings`.
+
+- `rings`: Ring handle, or NULL.
+
+Returns: The ring count, or 0 when rings is NULL.
+
+Ownership: The caller owns rings; the call borrows it. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int nr = seams_rings_count(rings);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_destroy
+
+Purpose: Free a ring set.
+
+```c
+void seams_rings_destroy(seams_rings *rings);
+```
+
+Parameters: `rings`.
+
+- `rings`: Handle from seams_rings_find(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: Releases the handle and every ring it holds.
+
+Thread safety: The caller must not use rings after this returns.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_rings_destroy(rings);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_find
+
+Purpose: Primitive rings (Franzblau) up to a maximum size.
+
+```c
+seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int graph, int max_depth, seams_rings **out);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `max_depth`, `out`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `max_depth`: Largest ring size, from 3 through 12.
+- `out`: Receives a new handle. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller frees *out with seams_rings_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_rings *rings = NULL;
+if (seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK) {
+  seams_rings_destroy(rings);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_fraction
+
+Purpose: Fraction of atoms that sit on a ring.
+
+```c
+seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fraction);
+```
+
+Parameters: `rings`, `size`, `fraction`.
+
+- `rings`: Ring handle.
+- `size`: Ring size to count. Zero counts atoms that sit on any ring.
+- `fraction`: Receives a value in [0, 1].
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns rings; the call borrows it. fraction is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double f6 = 0;
+seams_rings_fraction(rings, 6, &f6);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_histogram
+
+Purpose: Count primitive rings by size, with an int length.
+
+ABI 1 entry. New callers use seams_rings_histogram_n().
+
+```c
+seams_status seams_rings_histogram(const seams_rings *rings, int *counts, int counts_len);
+```
+
+Parameters: `rings`, `counts`, `counts_len`.
+
+- `rings`: Ring handle.
+- `counts`: Caller buffer. counts[k] receives the number of rings of size k. Sizes outside the buffer are ignored.
+- `counts_len`: Length of counts. Must be positive.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns counts.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int hist[13];
+seams_rings_histogram(rings, hist, 13);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_histogram_n
+
+Purpose: Count primitive rings by size into a buffer of known length.
+
+```c
+seams_status seams_rings_histogram_n(const seams_rings *rings, int *counts, size_t counts_len);
+```
+
+Parameters: `rings`, `counts`, `counts_len`.
+
+- `rings`: Ring handle.
+- `counts`: Caller buffer. counts[k] receives the number of rings of size k. Sizes outside the buffer are ignored.
+- `counts_len`: Length of counts. Must be positive.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE when counts_len is 0.
+
+Ownership: The caller owns counts.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int hist[13];
+seams_rings_histogram_n(rings, hist, 13);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_labels
+
+Purpose: Size and symmetry of each ring, without buffer lengths.
+
+ABI 1 entry. Each non-NULL buffer has length seams_rings_count(rings). New callers use seams_rings_labels_n(), which checks the lengths.
+
+```c
+seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symmetry);
+```
+
+Parameters: `rings`, `sizes`, `symmetry`.
+
+- `rings`: Ring handle.
+- `sizes`: One int per ring, or NULL.
+- `symmetry`: One ::seams_ring_symmetry code per ring, or NULL. The two pointers may not both be NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns both arrays.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings. The first symmetry request fills a cache on the handle under a lock; later requests only read it.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_rings_labels(rings, sizes, symmetry);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_labels_n
+
+Purpose: Size and symmetry of each ring into buffers of known length.
+
+```c
+seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes, size_t sizes_len, int *symmetry, size_t symmetry_len);
+```
+
+Parameters: `rings`, `sizes`, `sizes_len`, `symmetry`, `symmetry_len`.
+
+- `rings`: Ring handle.
+- `sizes`: One int per ring, or NULL.
+- `sizes_len`: Length of sizes. Ignored when sizes is NULL.
+- `symmetry`: One ::seams_ring_symmetry code per ring, or NULL. The two pointers may not both be NULL.
+- `symmetry_len`: Length of symmetry. Ignored when symmetry is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE when a buffer is shorter than the ring count, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns both arrays.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t nr = 0;
+seams_rings_nrings(rings, &nr);
+int *sym = malloc(nr * sizeof *sym);
+seams_rings_labels_n(rings, NULL, 0, sym, nr);
+free(sym);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_nrings
+
+Purpose: Number of primitive rings.
+
+```c
+seams_status seams_rings_nrings(const seams_rings *rings, size_t *n);
+```
+
+Parameters: `rings`, `n`.
+
+- `rings`: Ring handle.
+- `n`: Receives the ring count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when rings or n is NULL.
+
+Ownership: The caller owns rings; the call borrows it. n is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t nr = 0;
+seams_rings_nrings(rings, &nr);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_vertices
+
+Purpose: Atom indices of one ring.
+
+```c
+seams_status seams_rings_vertices(const seams_rings *rings, int index, int *atoms, size_t cap, size_t *n_out);
+```
+
+Parameters: `rings`, `index`, `atoms`, `cap`, `n_out`.
+
+- `rings`: Ring handle.
+- `index`: Ring index, from 0 to seams_rings_count(rings) - 1.
+- `atoms`: Caller buffer, or NULL to query.
+- `cap`: Capacity of atoms. Ignored when atoms is NULL.
+- `n_out`: Receives the vertex count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns atoms. Indices are positions in the frame.
+
+Thread safety: Read-only: may run alongside other const calls on rings, and not alongside a non-const call on rings.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int atoms[12];
+size_t len = 0;
+seams_rings_vertices(rings, 0, atoms, 12, &len);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+```c
+seams_status seams_running_cn(seams_system *sys, double rmax, int bins, int type_i, int type_j, double *r, double *cn, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `rmax`, `bins`, `type_i`, `type_j`, `r`, `cn`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `rmax`: Positive finite outer radius, Angstrom.
+- `bins`: Bin count. Zero selects about rmax / 0.1.
+- `type_i`: Central species, as in seams_rdf().
+- `type_j`: Counted species, as in seams_rdf().
+- `r`: Bin centers, Angstrom, or NULL to query.
+- `cn`: Running coordination number, or NULL to query.
+- `cap`: Capacity of each non-NULL column.
+- `n_out`: Receives the bin count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns the columns.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double r[80], cn[80];
+size_t bins = 0;
+seams_running_cn(sys, 8.0, 80, 0, 0, r, cn, 80, &bins);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_set_mols
+
+Purpose: Replace the stored molecule ids on a loaded frame.
+
+```c
+seams_status seams_set_mols(seams_system *sys, const int *mols, size_t len);
+```
+
+Parameters: `sys`, `mols`, `len`.
+
+- `sys`: Frame handle.
+- `mols`: Caller buffer of n molecule ids.
+- `len`: Length of mols. Must equal the stored atom count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE when no frame is stored; SEAMS_ERR_RANGE when len differs from the atom count.
+
+Handle access: Non-const: updates stored molecule ids and clears the handle error slot.
+
+Ownership: The library copies mols and keeps no pointer to caller memory.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int mols[8] = {1, 1, 2, 2, 3, 3, 4, 4};
+seams_set_mols(sys, mols, 8);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_set_num_threads
+
+Purpose: Set the OpenMP team used by later analysis calls.
+
+```c
+seams_status seams_set_num_threads(int n);
+```
+
+Parameters: `n`.
+
+- `n`: Positive width, or 0 to restore the width captured at first use. A negative width is rejected.
+
+Returns: SEAMS_OK, or SEAMS_ERR_RANGE when n is negative, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Thread safety: Process-global. Do not call it concurrently with analysis. The stored width is then read by every handle.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_set_num_threads(1);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_signature_cages
+
+Purpose: Closed cages of one ring census. Same search as seams_cages_signature().
+
+```c
+seams_status seams_signature_cages(seams_system *sys, double cutoff, int type, int graph, const char *spec, size_t *n_cages, size_t *n_atoms);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `spec`, `n_cages`, `n_atoms`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `spec`: Signature text such as "512" or "hc". Must be non-NULL.
+- `n_cages`: Receives the cage count.
+- `n_atoms`: Receives the vertex count.
+
+Returns: Same codes as seams_cages_signature().
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. spec is read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_cages = 0, n_atoms = 0;
+seams_signature_cages(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "hc", &n_cages, &n_atoms);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_signature_cages_edge
+
+Purpose: Closed cages of one ring census with an explicit face-edge window.
+
+Same search as seams_signature_cages(). edge NULL or "" keeps the default window 2.65,3.15 in the coordinate units of the file. "none" leaves the cage bound to the face census.
+
+```c
+seams_status seams_signature_cages_edge(seams_system *sys, double cutoff, int type, int graph, const char *spec, const char *edge, size_t *n_cages, size_t *n_atoms);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `spec`, `edge`, `n_cages`, `n_atoms`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `spec`: Signature text such as "512" or "hc". Must be non-NULL.
+- `edge`: Face-edge window, or NULL. "none" turns the window off.
+- `n_cages`: Receives the cage count.
+- `n_atoms`: Receives the vertex count.
+
+Returns: Same codes as seams_cages_signature().
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. spec and edge are read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_cages = 0, n_atoms = 0;
+seams_signature_cages_edge(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", "none", &n_cages, &n_atoms);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_site_kind
+
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_site_table
+
+Purpose: Per-atom site kind from a site-table spec.
+
+```c
+seams_status seams_site_table(seams_system *sys, const char *spec, int *kinds, size_t len);
+```
+
+Parameters: `sys`, `spec`, `kinds`, `len`.
+
+- `sys`: Frame handle.
+- `spec`: Site table text such as "1=cationHead,2=anion". Must be non-NULL.
+- `kinds`: One ::seams_site_kind per atom.
+- `len`: Length of kinds. Must be at least the frame count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns kinds.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_site_table(sys, "1=cationHead,2=anion", kinds, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_status
+
+Purpose: Status codes. Zero is success. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_status_string
+
+Purpose: Short name of a status code.
+
+```c
+const char *seams_status_string(seams_status status);
+```
+
+Parameters: `status`.
+
+- `status`: A ::seams_status value.
+
+Returns: Pointer to a static string. Unknown codes return "unknown status".
+
+Ownership: The caller does not free it.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+fprintf(stderr, "%s\n", seams_status_string(SEAMS_ERR_BOX));
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_steinhardt
+
+Purpose: Local Steinhardt q_l on the cutoff shell, and the average on request.
+
+This is seams_ql() with the cutoff graph.
+
+```c
+seams_status seams_steinhardt(seams_system *sys, double cutoff, int type, int order_l, double *ql, size_t ql_len, double *qlbar, size_t qlbar_len);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `order_l`, `ql`, `ql_len`, `qlbar`, `qlbar_len`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `order_l`: 3, 4, 6, 8, or 12.
+- `ql`: Local q_l, or NULL.
+- `ql_len`: Length of ql. Ignored when ql is NULL.
+- `qlbar`: Averaged q_l, or NULL to skip the Lechner-Dellago average.
+- `qlbar_len`: Length of qlbar. Ignored when qlbar is NULL.
+
+Returns: Same codes as seams_ql().
+
+Handle access: Non-const only because the call clears the handle's error slot on entry; it reads the frame and nothing else on the handle. The q_lm work arrays belong to the calling thread, so calls on different handles may run at the same time.
+
+Ownership: The caller owns both arrays.
+
+Thread safety: Exclusive use of sys. Any q call on another handle may run beside it.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_steinhardt(sys, 3.5, 0, 6, q6, n, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system
+
+Purpose: One frame. The caller creates and destroys it. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_box
+
+Purpose: Copy the stored cell out as nine LAMMPS numbers.
+
+```c
+seams_status seams_system_box(const seams_system *sys, double *box9, size_t box_len);
+```
+
+Parameters: `sys`, `box9`, `box_len`.
+
+- `sys`: Frame handle.
+- `box9`: Caller buffer: ox, oy, oz, lx, ly, lz, xy, xz, yz. The values match the cell that was stored, to rounding.
+- `box_len`: Must be 9.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE when box_len != 9; SEAMS_ERR_STATE when no frame is stored.
+
+Ownership: The caller owns box9.
+
+Thread safety: Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double cell[9];
+seams_system_box(sys, cell, 9);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_count
+
+Purpose: Number of points in the frame, as an int.
+
+ABI 1 query. It cannot report an error; seams_system_natoms() can.
+
+```c
+int seams_system_count(const seams_system *sys);
+```
+
+Parameters: `sys`.
+
+- `sys`: Frame handle, or NULL.
+
+Returns: The atom count, or 0 when sys is NULL or holds no frame.
+
+Ownership: The caller owns sys; the call borrows it. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int n = seams_system_count(sys);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_create
+
+Purpose: Allocate an empty frame.
+
+```c
+seams_system *seams_system_create(void);
+```
+
+Parameters: none.
+
+Returns: A new handle, or NULL on allocation failure. seams_last_error_message() then explains the failure.
+
+Ownership: The caller owns the handle and passes it to seams_system_destroy().
+
+Thread safety: Safe. The new handle is not shared yet.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system *sys = seams_system_create();
+if (sys == NULL) { return SEAMS_ERR_NOMEM; }
+seams_system_destroy(sys);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: NULL. seams_last_error() then reads 'out of memory'.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_destroy
+
+Purpose: Free a frame.
+
+```c
+void seams_system_destroy(seams_system *sys);
+```
+
+Parameters: `sys`.
+
+- `sys`: Handle from seams_system_create(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: The handle and the frame it stored are released. Neighbour, ring, cage, and brine handles built from it stay valid: they hold their own copies.
+
+Thread safety: The caller must not use sys after this returns, and must not call it concurrently with any use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_destroy(sys);
+sys = NULL;
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_ids
+
+Purpose: Copy the stored atom ids out.
+
+```c
+seams_status seams_system_ids(const seams_system *sys, int *ids, size_t len);
+```
+
+Parameters: `sys`, `ids`, `len`.
+
+- `sys`: Frame handle.
+- `ids`: Caller buffer for n ints, in stored order.
+- `len`: Length of ids. Must be at least n.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE when no frame is stored; SEAMS_ERR_RANGE for a short buffer.
+
+Ownership: The caller owns ids.
+
+Thread safety: Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_ids(sys, ids, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_natoms
+
+Purpose: Number of points in the frame.
+
+```c
+seams_status seams_system_natoms(const seams_system *sys, size_t *n);
+```
+
+Parameters: `sys`, `n`.
+
+- `sys`: Frame handle.
+- `n`: Receives the atom count.
+
+Returns: SEAMS_OK, SEAMS_ERR_NULL when sys or n is NULL, or SEAMS_ERR_STATE when sys holds no frame. *n is unchanged on failure.
+
+Ownership: The caller owns sys; the call borrows it. n is caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n = 0;
+if (seams_system_natoms(sys, &n) == SEAMS_OK) {
+  labels = malloc(n * sizeof *labels);
+  free(labels);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_positions
+
+Purpose: Copy the stored coordinates out.
+
+```c
+seams_status seams_system_positions(const seams_system *sys, double *xyz, size_t len);
+```
+
+Parameters: `sys`, `xyz`, `len`.
+
+- `sys`: Frame handle.
+- `xyz`: Caller buffer for 3 n doubles, Angstrom, in stored order.
+- `len`: Length of xyz in doubles. Must be at least 3 n.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE when no frame is stored; SEAMS_ERR_RANGE for a short buffer.
+
+Ownership: The caller owns xyz.
+
+Thread safety: Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n = 0;
+seams_system_natoms(sys, &n);
+double *xyz = malloc(3 * n * sizeof *xyz);
+seams_system_positions(sys, xyz, 3 * n);
+free(xyz);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_read
+
+Purpose: Read one frame from a trajectory file.
+
+```c
+seams_status seams_system_read(seams_system *sys, const char *path, int frame, int type_filter);
+```
+
+Parameters: `sys`, `path`, `frame`, `type_filter`.
+
+- `sys`: Frame handle. On failure the previously stored frame is kept.
+- `path`: Filesystem path. CON, LAMMPS dump, and the formats the linked readers accept.
+- `frame`: Frame index, 1-based, matching the file order.
+- `type_filter`: Negative keeps every atom. Zero guesses the oxygen species. A positive value keeps that species number.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE (frame index or empty frame), SEAMS_ERR_ARG (unreadable file), SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const: replaces the stored frame. On failure the old frame stays.
+
+Ownership: The library copies the frame out of the file.
+
+Thread safety: Exclusive use of sys. Concurrent reads of distinct paths on distinct handles are safe.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_status rc = seams_system_read(sys, "ice.lammpstrj", 1, -1);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_atoms
+
+Purpose: Store points and a general cell. Lengths are size_t.
+
+On failure the previously stored frame, if any, is kept. A reload on the same handle reuses its per-atom storage. When `ids` is NULL or 1..n and `n` matches the previous load, the id table is kept as well, so reloading a trajectory frame by frame costs one pass over the input after the finiteness check. seams_system_set_positions() also skips the type and id pass.
+
+```c
+seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t n, const double *box9, size_t box_len, const int *types, const int *ids);
+```
+
+Parameters: `sys`, `xyz`, `n`, `box9`, `box_len`, `types`, `ids`.
+
+- `sys`: Frame handle.
+- `xyz`: n times 3 Cartesian coordinates, Angstrom. Every value must be finite.
+- `n`: Atom count. Zero is rejected. A count that does not fit in the frame's integer width is rejected.
+- `box9`: Cell numbers: ox, oy, oz, lx, ly, lz, xy, xz, yz.
+- `box_len`: Must be 9.
+- `types`: Atom types, or NULL to store type 1 for every atom.
+- `ids`: Atom ids, or NULL to store 1..n. Ids must be unique.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL for a NULL sys, xyz, or box9; SEAMS_ERR_RANGE for n == 0 or box_len != 9; SEAMS_ERR_BOX for a non-finite cell or a non-positive edge; SEAMS_ERR_ARG for a non-finite coordinate or repeated ids; SEAMS_ERR_NOMEM; SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const: replaces the stored frame. On failure the old frame stays.
+
+Ownership: The library copies the arrays. The caller keeps them.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double xyz[6] = {0, 0, 0, 1.5, 0, 0};
+const double box9[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+seams_status rc = seams_system_set_atoms(sys, xyz, 2, box9, 9, NULL, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_frame
+
+Purpose: Store points and a general LAMMPS cell, with an int count.
+
+ABI 1 entry. New callers use seams_system_set_atoms().
+
+```c
+seams_status seams_system_set_frame(seams_system *sys, const double *xyz, int n, const double *box9, const int *types, const int *ids);
+```
+
+Parameters: `sys`, `xyz`, `n`, `box9`, `types`, `ids`.
+
+- `sys`: Frame handle.
+- `xyz`: n times 3 coordinates, Angstrom.
+- `n`: Atom count. A non-positive count is rejected.
+- `box9`: Nine cell numbers: ox, oy, oz, lx, ly, lz, xy, xz, yz.
+- `types`: Types, or NULL for type 1.
+- `ids`: Ids, or NULL for 1..n.
+
+Returns: Same codes as seams_system_set_atoms().
+
+Handle access: Non-const: replaces the stored frame. On failure the old frame stays.
+
+Ownership: The library copies the arrays.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_status rc = seams_system_set_frame(sys, xyz, 2, box9, NULL, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_ortho
+
+Purpose: Store points and an orthorhombic cell.
+
+```c
+seams_status seams_system_set_ortho(seams_system *sys, const double *xyz, int n, double ox, double oy, double oz, double lx, double ly, double lz, const int *types, const int *ids);
+```
+
+Parameters: `sys`, `xyz`, `n`, `ox`, `oy`, `oz`, `lx`, `ly`, `lz`, `types`, `ids`.
+
+- `sys`: Frame handle.
+- `xyz`: n times 3 coordinates, Angstrom.
+- `n`: Atom count.
+- `ox`: Origin x, Angstrom.
+- `oy`: Origin y, Angstrom.
+- `oz`: Origin z, Angstrom.
+- `lx`: Edge length x, Angstrom.
+- `ly`: Edge length y, Angstrom.
+- `lz`: Edge length z, Angstrom.
+- `types`: Types, or NULL.
+- `ids`: Ids, or NULL.
+
+Returns: Same codes as seams_system_set_frame(). The tilt is zero.
+
+Handle access: Non-const: replaces the stored frame. On failure the old frame stays.
+
+Ownership: The library copies the arrays.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_status rc = seams_system_set_ortho(sys, xyz, 2, 0, 0, 0, 10, 10, 10, NULL, NULL);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_positions
+
+Purpose: Overwrite the coordinates, and optionally the cell, of the stored frame.
+
+Types and ids stay as stored. Per-atom labels written by an earlier seams_chill() or seams_chill_plus() are reset. On failure the frame is unchanged. By default the call checks every coordinate first and then writes them in place, which reads xyz twice and needs no extra memory. After seams_system_stage_positions(sys, 1) it reads xyz once instead (see there).
+
+```c
+seams_status seams_system_set_positions(seams_system *sys, const double *xyz, size_t n, const double *box9, size_t box_len);
+```
+
+Parameters: `sys`, `xyz`, `n`, `box9`, `box_len`.
+
+- `sys`: Frame handle with a stored frame.
+- `xyz`: n times 3 Cartesian coordinates, Angstrom. Every value must be finite.
+- `n`: Atom count. Must equal the stored count.
+- `box9`: New cell (ox, oy, oz, lx, ly, lz, xy, xz, yz), or NULL to keep the stored cell.
+- `box_len`: 9 when box9 is not NULL; ignored otherwise.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL for a NULL sys or xyz; SEAMS_ERR_STATE when no frame is stored; SEAMS_ERR_RANGE when n differs from the stored count or box_len != 9; SEAMS_ERR_BOX for a non-finite cell or a non-positive edge; SEAMS_ERR_ARG for a non-finite coordinate; SEAMS_ERR_NOMEM; SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const: replaces the stored coordinates and cell.
+
+Ownership: The library copies xyz and box9. The caller keeps them and may reuse the buffers as soon as the call returns.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_set_atoms(sys, frame0, n, box9, 9, types, NULL);
+for (size_t f = 1; f < nframes; ++f) {
+  seams_system_set_positions(sys, frames[f], n, NULL, 0);
+  seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
+                     labels, n, NULL);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_stage_positions
+
+Purpose: Trade memory for a single pass in seams_system_set_positions().
+
+With enable nonzero the handle keeps a second set of per-atom records, about 72 bytes per atom. seams_system_set_positions() then checks and writes the coordinates into that set in one pass and swaps it with the stored frame when every value was finite, so a failed call still leaves the frame unchanged. The first reload after each load fills the second set from the frame. With enable 0, the default, the second set is freed. The setting survives loads.
+
+```c
+seams_status seams_system_stage_positions(seams_system *sys, int enable);
+```
+
+Parameters: `sys`, `enable`.
+
+- `sys`: Frame handle, with or without a stored frame.
+- `enable`: Nonzero to keep the second set, 0 to free it.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL for a NULL sys.
+
+Handle access: Non-const: changes how later reloads use memory. The stored frame is not touched.
+
+Ownership: The library owns the second set and frees it with enable 0 or seams_system_destroy().
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_stage_positions(sys, 1);
+for (size_t f = 1; f < nframes; ++f) {
+  seams_system_set_positions(sys, frames[f], n, NULL, 0);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_symmetry
+
+Purpose: Per-atom ice shell label.
+
+labels[i] is 0 for ice Ih, 1 for ice Ic, 2 for stacking disorder, or -1 when the shell does not match. A non-positive shell_rmsd selects the library ceiling (the scale-free second-shell residual, 0.15).
+
+```c
+seams_status seams_system_symmetry(seams_system *sys, double shell_rmsd, int *labels, size_t labels_len);
+```
+
+Parameters: `sys`, `shell_rmsd`, `labels`, `labels_len`.
+
+- `sys`: Frame handle.
+- `shell_rmsd`: Positive scale-free residual ceiling, or a non-positive value for the library ceiling.
+- `labels`: Caller buffer.
+- `labels_len`: Must be at least the frame count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_INTERNAL, SEAMS_ERR_NOMEM.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns labels.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_symmetry(sys, 0.0, labels, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_types
+
+Purpose: Copy the stored atom types out.
+
+```c
+seams_status seams_system_types(const seams_system *sys, int *types, size_t len);
+```
+
+Parameters: `sys`, `types`, `len`.
+
+- `sys`: Frame handle.
+- `types`: Caller buffer for n ints, in stored order.
+- `len`: Length of types. Must be at least n.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_STATE when no frame is stored; SEAMS_ERR_RANGE for a short buffer.
+
+Ownership: The caller owns types.
+
+Thread safety: Read-only: may run alongside other const calls on sys, and not alongside a non-const call on sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_system_types(sys, types, n);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_topo
+
+Purpose: Topological fingerprint of one bonded frame. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_traj_unwrap_centres
+
+Purpose: Assemble per-molecule centres and unwrap them across frames.
+
+Pass NULL for both mol_ids_out and centres_out to query n_mols first.
+
+```c
+seams_status seams_traj_unwrap_centres( const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, const int *mols, size_t mols_len, const double *masses, size_t masses_len, int *mol_ids_out, size_t mol_ids_cap, double *centres_out, size_t centres_len, size_t *n_mols);
+```
+
+Parameters: `xyz`, `nframes`, `natoms`, `boxes`, `nboxes`, `mols`, `mols_len`, `masses`, `masses_len`, `mol_ids_out`, `mol_ids_cap`, `centres_out`, `centres_len`, `n_mols`.
+
+- `xyz`: Wrapped atom coordinates, nframes * 3 * natoms doubles.
+- `nframes`: Number of frames, at least 1.
+- `natoms`: Number of atoms per frame, at least 1.
+- `boxes`: Cell array of 9 * nboxes doubles.
+- `nboxes`: Cell count, either 1 or nframes.
+- `mols`: Molecule id per atom, length mols_len.
+- `mols_len`: Must equal natoms.
+- `masses`: Optional positive mass per atom, or NULL for equal weights.
+- `masses_len`: Must equal natoms when masses is non-NULL, or 0 when NULL.
+- `mol_ids_out`: Receives unique molecule ids, or NULL.
+- `mol_ids_cap`: Capacity of mol_ids_out in ints when non-NULL.
+- `centres_out`: Receives nframes * 3 * n_mols unwrapped coordinates, or NULL.
+- `centres_len`: Capacity of centres_out in doubles when non-NULL.
+- `n_mols`: Receives the molecule count.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_BOX; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns all buffers.
+
+Thread safety: Pure aside from the thread-local error string.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double box[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+const double xyz[12] = {9.8, 0, 0, 0.2, 0, 0, 0.4, 0, 0, 0.8, 0, 0};
+const int mols[2] = {1, 1};
+size_t nm = 0;
+double out[6] = {0};
+seams_traj_unwrap_centres(xyz, 2, 2, box, 1, mols, 2, NULL, 0, NULL, 0, out, 6, &nm);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_traj_unwrap_positions
+
+Purpose: Unwrap periodic coordinates across consecutive frames.
+
+Each step adds the minimum-image displacement under an orthorhombic or triclinic nine-number cell (ox, oy, oz, lx, ly, lz, xy, xz, yz). Pass nboxes equal to 1 for a constant cell or nframes for a deforming cell.
+
+```c
+seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes, size_t natoms, const double *boxes, size_t nboxes, double *unwrapped, size_t unwrapped_len);
+```
+
+Parameters: `xyz`, `nframes`, `natoms`, `boxes`, `nboxes`, `unwrapped`, `unwrapped_len`.
+
+- `xyz`: Wrapped coordinates, nframes * 3 * natoms doubles in Angstrom.
+- `nframes`: Number of frames, at least 1.
+- `natoms`: Number of atoms per frame, at least 1.
+- `boxes`: Cell array of 9 * nboxes doubles.
+- `nboxes`: Cell count, either 1 or nframes.
+- `unwrapped`: Output buffer of unwrapped_len doubles.
+- `unwrapped_len`: Capacity in doubles, at least nframes * 3 * natoms.
+
+Returns: SEAMS_OK; SEAMS_ERR_NULL; SEAMS_ERR_RANGE; SEAMS_ERR_BOX; SEAMS_ERR_ARG; SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns xyz, boxes, and unwrapped.
+
+Thread safety: Pure aside from the thread-local error string.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double box[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+const double wrapped[6] = {9.5, 1.0, 1.0, 0.5, 1.0, 1.0};
+double unwrapped[6] = {0};
+seams_traj_unwrap_positions(wrapped, 2, 1, box, 1, unwrapped, 6);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_version
+
+Purpose: Packed release number.
+
+```c
+int seams_version(void);
+```
+
+Parameters: none.
+
+Returns: SEAMS_VERSION_NUMBER, (major << 16) | (minor << 8) | patch.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+if (seams_version() < ((2 << 16) | (14 << 8))) { return 1; }
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_version_major
+
+Purpose: Major version of the library at run time.
+
+```c
+int seams_version_major(void);
+```
+
+Parameters: none.
+
+Returns: SEAMS_VERSION_MAJOR of the build.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int major = seams_version_major();
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_version_minor
+
+Purpose: Minor version of the library at run time.
+
+```c
+int seams_version_minor(void);
+```
+
+Parameters: none.
+
+Returns: SEAMS_VERSION_MINOR of the build.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int minor = seams_version_minor();
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_version_patch
+
+Purpose: Patch version of the library at run time.
+
+```c
+int seams_version_patch(void);
+```
+
+Parameters: none.
+
+Returns: SEAMS_VERSION_PATCH of the build.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int patch = seams_version_patch();
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_version_string
+
+Purpose: Version text, for example "2.14.0".
+
+```c
+const char *seams_version_string(void);
+```
+
+Parameters: none.
+
+Returns: Pointer to a static string. Never NULL.
+
+Ownership: The caller does not free it.
+
+Thread safety: Pure.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+printf("d-SEAMS %s\n", seams_version_string());
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_water_vectors
+
 Purpose: Water orientation vectors: O to H-midpoint and H-to-H under PBC.
 
 Each water pairs one oxygen_type atom with two hydrogen_type atoms via shared molecule ids when available, or via minimum-image covalent distance otherwise. Pass NULL for all five output arrays to query n_waters.
@@ -6623,6 +12276,131 @@ Example:
 ```c
 size_t nw = 0;
 seams_water_vectors(sys, 1, 2, NULL, NULL, NULL, NULL, NULL, 0, &nw);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_directed_hbond
+
+Purpose: C row type for one directed hydrogen bond. Callers initialize `size = sizeof(seams_directed_hbond)` on every element passed to `seams_directed_hbonds`.
+
+Parameters: none.
+
+Returns: The result declared for this name in include/seams.h.
+
+Ownership: The caller owns any buffer it allocated. Library text is not freed by the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: `size` is bytes; donor, hydrogen, and acceptor are 0-based frame indices; `d_AH` and `d_DA` are Angstrom; `angle` is degrees and is 0 for a linear donor-hydrogen-acceptor geometry.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_hydrogen_frame
+
+Purpose: Store a heavy-atom cloud and a separate hydrogen cloud.
+
+Heavies occupy frame indices [0, n_heavy). Hydrogens follow, in the order given, so a hydrogen cloud index h is frame index n_heavy + h. A null id pointer numbers that cloud from 1 across the whole frame. A null mol pointer sets each molID to that atom's id, which pairs no hydrogen with a heavy atom. Pass molecule ids to attach each hydrogen to a heavy atom. A failed call leaves the previous frame in place.
+
+```c
+seams_status seams_system_set_hydrogen_frame( seams_system *sys, const double *heavy_xyz, size_t n_heavy, const int *heavy_types, const int *heavy_ids, const int *heavy_mols, const double *hydrogen_xyz, size_t n_hydrogen, const int *hydrogen_types, const int *hydrogen_ids, const int *hydrogen_mols, const double *box9, size_t box_len);
+```
+
+Parameters: `sys`, `heavy_xyz`, `n_heavy`, `heavy_types`, `heavy_ids`, `heavy_mols`, `hydrogen_xyz`, `n_hydrogen`, `hydrogen_types`, `hydrogen_ids`, `hydrogen_mols`, `box9`, `box_len`.
+
+- `sys`: Frame handle.
+- `heavy_xyz`: Interleaved heavy coordinates, Angstrom.
+- `n_heavy`: Heavy-atom count. Must be positive.
+- `heavy_types`: One species per heavy atom.
+- `heavy_ids`: One id per heavy atom, or NULL for 1..n_heavy.
+- `heavy_mols`: One molID per heavy atom, or NULL to copy the atom id.
+- `hydrogen_xyz`: Interleaved hydrogen coordinates, Angstrom.
+- `n_hydrogen`: Hydrogen count. Zero allows the hydrogen pointers to be NULL.
+- `hydrogen_types`: One species per hydrogen, required when n_hydrogen is positive.
+- `hydrogen_ids`: One id per hydrogen, or NULL to continue after the heavies.
+- `hydrogen_mols`: One molID per hydrogen, or NULL to copy the atom id.
+- `box9`: ox, oy, oz, lx, ly, lz, xy, xz, yz.
+- `box_len`: Length of box9. Must be 9.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: The call replaces the frame on success and clears the handle error on entry.
+
+Ownership: The caller owns sys and every buffer. The call copies the values and keeps no pointer.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+const double hydrogen[] = {1, 0, 0};
+const int heavy_types[] = {8, 8};
+const int heavy_mols[] = {1, 2};
+const int hydrogen_types[] = {2};
+const int hydrogen_mols[] = {1};
+const double box9[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+seams_system_set_hydrogen_frame(sys, heavy, 2, heavy_types, NULL, heavy_mols,
+                                hydrogen, 1, hydrogen_types, NULL, hydrogen_mols,
+                                box9, 9);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_directed_hbonds
+
+Purpose: Directed hydrogen-bond edges for selected donor and acceptor types.
+
+Each edge is one accepting hydrogen. Rows are sorted by donor, then hydrogen, then acceptor, as frame indices. The angle is acceptor-first. The donor-acceptor vector is the minimum image of acceptor minus donor. The acceptor-hydrogen vector is the minimum image of acceptor minus the hydrogen. A linear donor-hydrogen-acceptor geometry has angle 0 degrees. The acceptor-hydrogen distance is kept only when it is strictly below dist_cutoff. The angle is kept when it is less than or equal to angle_cutoff. The pair list keeps a donor and acceptor only when their minimum image is strictly below pair_cutoff, on an orthorhombic or triclinic cell. For a triclinic cell, every face separation must be at least twice pair_cutoff; a thinner cell can miss valid pairs. Each hydrogen is assigned to the nearest heavy atom that shares its molID, then kept only when that atom's type is in donor_types. The lower index wins a distance tie. exclude_same_mol of 1 drops a pair that shares a molID. An empty donor set or acceptor set writes zero edges. Atoms whose type equals hydrogen_type are hydrogens and are never donors or acceptors. Water-water and water-framework counts are two calls with different type sets. When edges is non-NULL, every element must start with size set to sizeof(seams_directed_hbond).
+
+```c
+seams_status seams_directed_hbonds( seams_system *sys, double pair_cutoff, double dist_cutoff, double angle_cutoff, const int *donor_types, size_t n_donor_types, const int *acceptor_types, size_t n_acceptor_types, int hydrogen_type, int exclude_same_mol, seams_directed_hbond *edges, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `pair_cutoff`, `dist_cutoff`, `angle_cutoff`, `donor_types`, `n_donor_types`, `acceptor_types`, `n_acceptor_types`, `hydrogen_type`, `exclude_same_mol`, `edges`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `pair_cutoff`: Positive finite donor-acceptor cutoff, Angstrom.
+- `dist_cutoff`: Positive finite acceptor-hydrogen cutoff, Angstrom.
+- `angle_cutoff`: Positive finite acceptor-first angle, degrees.
+- `donor_types`: Species that may donate. NULL only when the count is 0.
+- `n_donor_types`: Length of donor_types. Zero writes no edges.
+- `acceptor_types`: Species that may accept. NULL only when the count is 0.
+- `n_acceptor_types`: Length of acceptor_types. Zero writes no edges.
+- `hydrogen_type`: Positive hydrogen species, distinct from both type sets.
+- `exclude_same_mol`: 1 drops a shared molID, 0 keeps it.
+- `edges`: Caller buffer, or NULL to query the count.
+- `cap`: Capacity of edges. Ignored when edges is NULL.
+- `n_out`: Receives the edge count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys, the type arrays, edges, and n_out. The call borrows them and writes caller buffers only.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+const int donors[] = {8};
+const int acceptors[] = {10};
+size_t n_out = 0;
+seams_directed_hbonds(sys, 3.5, 2.42, 30.0, donors, 1, acceptors, 1, 2, 1,
+                      NULL, 0, &n_out);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.

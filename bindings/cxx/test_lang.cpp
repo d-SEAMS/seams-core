@@ -1378,5 +1378,46 @@ int main(int argc, char **argv) {
     std::cerr << "\n";
     return fail("sH cell");
   }
+  const double heavy[] = {0, 0, 0, 2.8, 0, 0};
+  const double hxyz[] = {1, 0, 0};
+  const int heavyTypes[] = {8, 8};
+  const int heavyMols[] = {1, 2};
+  const int hydrogenTypes[] = {2};
+  const int hydrogenMols[] = {1};
+  const double linBox[] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  seams_frame *hframe = seams_frame_from_hydrogen_cloud(
+      heavy, 2, heavyTypes, nullptr, heavyMols, hxyz, 1, hydrogenTypes, nullptr, hydrogenMols,
+      linBox);
+  if (hframe == nullptr || seams_frame_nop(hframe) != 3) {
+    return fail("hydrogen cloud");
+  }
+  const int donors[] = {8};
+  const int acceptors[] = {10};
+  int n_dir = -1;
+  if (seams_frame_directed_hbonds(hframe, 3.5, 2.42, 30.0, donors, 1, acceptors, 0, 2, 1, nullptr,
+                                  nullptr, nullptr, nullptr, nullptr, nullptr, 0, &n_dir) != 0 ||
+      n_dir != 0) {
+    seams_frame_free(hframe);
+    return fail("empty acceptor set");
+  }
+  uint32_t donorIdx = 0;
+  uint32_t hyd = 0;
+  uint32_t acc = 0;
+  double dah = 0;
+  double dda = 0;
+  double ang = 0;
+  n_dir = -1;
+  if (seams_frame_directed_hbonds(hframe, 3.5, 2.42, 30.0, donors, 1, donors, 1, 2, 1, &donorIdx,
+                                  &hyd, &acc, &dah, &dda, &ang, 1, &n_dir) != 0 ||
+      n_dir != 1 || donorIdx != 0 || hyd != 2 || acc != 1 || std::abs(dda - 2.8) > 1e-12 ||
+      std::abs(dah - 1.8) > 1e-12 || std::abs(ang) > 1e-8) {
+    seams_frame_free(hframe);
+    return fail("directed linear bond");
+  }
+  seams_frame_free(hframe);
+  if (seams_frame_from_hydrogen_cloud(nullptr, 2, heavyTypes, nullptr, heavyMols, hxyz, 1,
+                                      hydrogenTypes, nullptr, hydrogenMols, linBox) != nullptr) {
+    return fail("null heavy cloud");
+  }
   return 0;
 }
