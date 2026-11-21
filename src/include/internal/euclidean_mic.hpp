@@ -33,7 +33,14 @@
 // precision norms. Rounding in Babai or in a long descent, which scales with
 // the superbasis and not with the wrap, therefore does not reach the result.
 //
-// A slicer started from the wrap falls back to Babai after four steps. No
+// A slicer started from the wrap falls back to Babai after four steps. A
+// cell-coordinate residual already inside the certified Smith ball (open
+// ball of radius half the shortest relevant vector, shrunk by a rounding
+// margin) is that ball's unique closest image and is accepted from an
+// error-bounded evaluation, with no second descent and no certificate
+// replay. The non-cancelling wrap descent does not reference that test or
+// the Babai and recertify fallbacks; both sit in a separate call reached
+// after the keep check. No
 // other loop has an iteration cap. Every accepted Lagrange, Selling, or
 // slicer step strictly lowers a non-negative, finite squared norm, which
 // bounds the step count. A slicer step whose rounded norm does not fall is
@@ -194,6 +201,9 @@ struct Obtuse {
   // Wrap images often cancel below |w| / 16, so the wrap descent records
   // its steps on the way down.
   bool recordWrap = false;
+  // Compact fractional cells try the Smith-ball accept before descending.
+  // Needle cells leave it on the cold side so the hot descent stays a leaf.
+  bool smithHot = false;
   bool ok = false;
   Vec3 v[4]{};
   // Integer coordinates of v[k] and of each relevant vector in (a, b, c).
@@ -212,6 +222,13 @@ struct Obtuse {
   // max |component| of each vector of the Babai triple.
   double babaiMax[3]{};
   int idx[3] = {0, 1, 2};
+  // Certified Smith ball. smithLim2 is a strict upper bound on the squared
+  // length of a lattice image that is still inside the open ball of radius
+  // λ1/2. inv* = 1/edge, for the fractional residual.
+  double smithLim2 = 0.0;
+  double invX = 0.0;
+  double invY = 0.0;
+  double invZ = 0.0;
 };
 
 // a + b as sum + error, exactly (Knuth TwoSum).
@@ -630,6 +647,40 @@ inline bool relevantOf(Obtuse &o) {
           o.rel[0][i] * o.rel[0][j] + o.rel[1][i] * o.rel[1][j] + o.rel[2][i] * o.rel[2][j];
     }
   }
+  o.invX = 1.0 / o.cellX[0];
+  o.invY = 1.0 / o.cellY[1];
+  o.invZ = 1.0 / o.cellZ[2];
+  if (!(std::isfinite(o.invX) && std::isfinite(o.invY) && std::isfinite(o.invZ))) {
+    return true;
+  }
+  // λ1 is the shortest relevant vector: every nearest lattice vector is
+  // Voronoi-relevant, and those are the seven coset minima stored in rel.
+  // rel + relLo is that vector within about eps^2; the factors below sit
+  // far above that error and far below a geometric margin.
+  double minLower = std::numeric_limits<double>::infinity();
+  for (int k = 0; k < 7; k++) {
+    const double x = o.rel[0][k];
+    const double y = o.rel[1][k];
+    const double z = o.rel[2][k];
+    const double v2 = x * x + y * y + z * z;
+    if (!(v2 > 0.0) || !std::isfinite(v2)) {
+      minLower = 0.0;
+      break;
+    }
+    const double lo1 =
+        std::abs(o.relLo[0][k]) + std::abs(o.relLo[1][k]) + std::abs(o.relLo[2][k]);
+    const double scale = std::abs(x) + std::abs(y) + std::abs(z) + lo1;
+    const double lower = std::sqrt(v2) * (1.0 - 0x1p-40) - lo1 - scale * 0x1p-80 - 0x1p-900;
+    if (!(lower > 0.0)) {
+      minLower = 0.0;
+      break;
+    }
+    minLower = std::min(minLower, lower);
+  }
+  if (minLower > 0.0 && std::isfinite(minLower)) {
+    const double radius = 0.5 * minLower;
+    o.smithLim2 = radius * radius * (1.0 - 0x1p-40);
+  }
   return true;
 }
 
@@ -887,8 +938,22 @@ inline Obtuse finish(Vec3 a, Vec3 b, Vec3 c, const Vec3 v[4], const double coef[
     for (int i = 1; i < 4; i++) {
       shortest = std::min(shortest, n2(v[i]));
     }
-    const double edges = std::sqrt(n2(a)) + std::sqrt(n2(b)) + std::sqrt(n2(c));
-    o.recordWrap = 1024.0 * shortest < edges * edges;
+    const double la = std::sqrt(n2(a));
+    const double lb = std::sqrt(n2(b));
+    const double lc = std::sqrt(n2(c));
+    const double edges = la + lb + lc;
+    // Only a fractional cell records. A cell that already failed the wrap
+    // probes (skew-both) stays on Babai; recordWrap must not steal that path.
+    o.recordWrap = o.fractional && 1024.0 * shortest < edges * edges;
+    const double mx = std::max(la, std::max(lb, lc));
+    const double mn = std::min(la, std::min(lb, lc));
+    // Aspect under 10: the inline residual test is paid back by the compact
+    // near-lattice pool. Needle cells (aspect-5 tilt, long skew) skip it.
+    // Aspect under 40. The residual test rejects a random wrap on the first
+    // axis, so the Smith call is not on that path, and the wider band covers
+    // the moderate skew cells whose near-lattice images otherwise descend first.
+    o.smithHot = o.fractional && !o.recordWrap && o.smithLim2 > 0.0 && mn > 0.0 &&
+                 mx < 40.0 * mn;
   }
   return o;
 }
@@ -1206,6 +1271,9 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
 // With Record (cap at most 16), path gets 4 bits per step, the first step
 // highest: 2 * k + (sign < 0) for the relevant vector k taken.
 template <bool Track, bool Record>
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((optimize("O3,tree-vectorize")))
+#endif
 inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path) {
   unsigned long long code = 0;
   double t[8];
@@ -1386,16 +1454,271 @@ inline Vec3 recertifyWrap(const Obtuse &s, Vec3 w, double w2) {
   return closestBabai(s, w, w2);
 }
 
+// Nearest integer, half away from zero, or false when x is not a safe
+// binary64 integer coefficient.
+inline bool nearestInt(double x, double &n) {
+  if (!std::isfinite(x) || !(std::abs(x) < kIntegral)) {
+    return false;
+  }
+  const double t = x + std::copysign(0.49999999999999994, x);
+  n = static_cast<double>(static_cast<long long>(t));
+  return true;
+}
+
+// Fractional residuals this close to an integer are the near-lattice case
+// (a lattice vector plus a small Cartesian offset). Random fractional wraps
+// fail the first axis. The length check, not this tolerance, is the certificate.
+constexpr double kSmithTol = 0.05;
+
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
+inline bool smithCandidate(const Obtuse &s, Vec3 w, double &nx, double &ny, double &nz) {
+  const double z = w.z * s.invZ;
+  if (!nearestInt(z, nz) || !(std::abs(z - nz) < kSmithTol)) {
+    return false;
+  }
+  const double y = (w.y - z * s.cellY[2]) * s.invY;
+  if (!nearestInt(y, ny) || !(std::abs(y - ny) < kSmithTol)) {
+    return false;
+  }
+  const double x = (w.x - y * s.cellX[1] - z * s.cellX[2]) * s.invX;
+  return nearestInt(x, nx) && std::abs(x - nx) < kSmithTol;
+}
+
+// Image of w - n.(a,b,c) for coefficients in {-1,0,1}. Those products are
+// exact. TwoSum on each sum leaves a residual of order eps^2 |w|, returned
+// in radBound as a strict upper bound on the absolute error of every
+// component (far above the residual, far below a geometric margin).
+inline bool unitCoeffImage(const Obtuse &s, Vec3 w, double nx, double ny, double nz, Vec3 &out,
+                           double &radBound) {
+  const double p0 = rounded(nx * s.cellX[0]);
+  const double p1 = rounded(ny * s.cellX[1]);
+  const double p2 = rounded(nz * s.cellX[2]);
+  const double q1 = rounded(ny * s.cellY[1]);
+  const double q2 = rounded(nz * s.cellY[2]);
+  const double r2 = rounded(nz * s.cellZ[2]);
+  const double s01 = p0 + p1;
+  const double e01 = sumError(p0, p1, s01);
+  const double px = s01 + p2;
+  const double epx = sumError(s01, p2, px);
+  const double ix = w.x - px;
+  const double eix = sumError(w.x, -px, ix);
+  const double xx = rounded(ix + ((eix - epx) - e01));
+  const double py = q1 + q2;
+  const double epy = sumError(q1, q2, py);
+  const double iy = w.y - py;
+  const double eiy = sumError(w.y, -py, iy);
+  const double yy = rounded(iy + (eiy - epy));
+  const double iz = w.z - r2;
+  const double eiz = sumError(w.z, -r2, iz);
+  const double zz = rounded(iz + eiz);
+  if (!(std::isfinite(xx) && std::isfinite(yy) && std::isfinite(zz))) {
+    return false;
+  }
+  out = {xx, yy, zz};
+  const double scale = std::abs(w.x) + std::abs(w.y) + std::abs(w.z) + std::abs(p0) +
+                       std::abs(p1) + std::abs(p2) + std::abs(q1) + std::abs(q2) + std::abs(r2);
+  radBound = scale * 0x1p-90 + 0x1p-900;
+  return true;
+}
+
+// Accept the image of the coefficients from smithCandidate when a rigorous
+// upper bound on its length sits under smithLim2. The ball of radius λ1/2
+// is inside the Voronoi cell, so that image is the unique minimum image.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
+inline bool smithFromN(const Obtuse &s, Vec3 w, double w2, double nx, double ny, double nz,
+                       Vec3 &out) {
+  if (!(s.smithLim2 > 0.0)) {
+    return false;
+  }
+  Vec3 image;
+  double radBound = 0.0;
+  if (std::abs(nx) <= 1.0 && std::abs(ny) <= 1.0 && std::abs(nz) <= 1.0) {
+    if (!unitCoeffImage(s, w, nx, ny, nz, image, radBound)) {
+      return false;
+    }
+  } else {
+    const double n[3] = {nx, ny, nz};
+    Vec3 lo;
+    const Vec3 hi = latticeTranslate(s, w, n, lo);
+    image = {hi.x + lo.x, hi.y + lo.y, hi.z + lo.z};
+    if (!(std::isfinite(image.x) && std::isfinite(image.y) && std::isfinite(image.z))) {
+      return false;
+    }
+    const double scale = std::abs(w.x) + std::abs(w.y) + std::abs(w.z) +
+                         std::abs(nx) * (std::abs(s.cellX[0]) + std::abs(s.cellX[1]) +
+                                         std::abs(s.cellX[2])) +
+                         std::abs(ny) * (std::abs(s.cellY[1]) + std::abs(s.cellY[2])) +
+                         std::abs(nz) * std::abs(s.cellZ[2]);
+    radBound = scale * 0x1p-80 + 0x1p-900;
+  }
+  const double bx = std::abs(image.x) + radBound;
+  const double by = std::abs(image.y) + radBound;
+  const double bz = std::abs(image.z) + radBound;
+  const double upper = (bx * bx + by * by) + bz * bz;
+  if (!(upper < s.smithLim2 && upper * (1.0 + 0x1p-40) < s.smithLim2)) {
+    return false;
+  }
+  if (!(n2(image) < w2)) {
+    return false;
+  }
+  out = image;
+  return true;
+}
+
+// Non-cancelling plain wrap. No recertify or Babai symbol.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
+inline bool hotPlain(const Obtuse &s, Vec3 w, double w2, Vec3 &out, int &steps) {
+  Vec3 y = w;
+  steps = descendFast(s, y, kFractionalSteps);
+  out = y;
+  if (steps < kFractionalSteps) {
+    const double y2 = n2(y);
+    if (y2 >= (1.0 / 256.0) * w2) {
+      if (!(y2 < w2)) {
+        out = w;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+// Speed-optimized, not cold: long-skew cells take the failure edge on a
+// sizable fraction of wraps, and a size-optimized clone shows up in the median.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline Vec3 coldResolve(const Obtuse &s, Vec3 w, double w2, Vec3 partial, int steps,
+                        unsigned long long path) {
+  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
+  if (s.smithLim2 > 0.0 && w2 > s.smithLim2 && w2 < kRange) {
+    double nx = 0.0;
+    double ny = 0.0;
+    double nz = 0.0;
+    Vec3 image;
+    if (smithCandidate(s, w, nx, ny, nz) && smithFromN(s, w, w2, nx, ny, nz, image)) {
+      return image;
+    }
+  }
+  if (s.fractional && w2 < kRange && steps >= 0 && steps < kFractionalSteps && s.recordWrap) {
+    return certifyWrap(s, w, w2, partial, path, steps);
+  }
+  // The hot budget is four steps. Every measured wrap that hits it is the
+  // minimum one or two slicer steps later, so continue from that image
+  // instead of starting Babai. A cancelled image is not kept.
+  if (s.fractional && w2 < kRange && steps >= kFractionalSteps) {
+    Vec3 y = partial;
+    const int st = descendFast(s, y, 2);
+    if (st < 2) {
+      const double y2 = n2(y);
+      if (y2 >= (1.0 / 256.0) * w2) {
+        return y2 < w2 ? y : w;
+      }
+    }
+    return closestBabai(s, w, w2);
+  }
+  if (s.fractional && w2 < kRange) {
+    return recertifyWrap(s, w, w2);
+  }
+  return closestBabai(s, w, w2);
+}
+
+// Smith accept as its own speed-optimized leaf, so the residual test and the
+// compensated image are not in the straight-line wrap descent.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline bool trySmith(const Obtuse &s, Vec3 w, double w2, Vec3 &out) {
+  double nx = 0.0;
+  double ny = 0.0;
+  double nz = 0.0;
+  if (!smithCandidate(s, w, nx, ny, nz)) {
+    return false;
+  }
+  return smithFromN(s, w, w2, nx, ny, nz, out);
+}
+
+// Missed keep-test. A residual inside the Smith ball is accepted here; a
+// recorded cancellation is certified; the step cap goes to Babai.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline, optimize("O3")))
+#endif
+inline Vec3 recordMiss(const Obtuse &s, Vec3 w, double w2, Vec3 y, unsigned long long path,
+                       int steps) {
+  double nx = 0.0;
+  double ny = 0.0;
+  double nz = 0.0;
+  Vec3 image;
+  if (smithCandidate(s, w, nx, ny, nz) && smithFromN(s, w, w2, nx, ny, nz, image)) {
+    return image;
+  }
+  if (steps < kFractionalSteps) {
+    return certifyWrap(s, w, w2, y, path, steps);
+  }
+  return closestBabai(s, w, w2);
+}
+
+// Recording slicer. The miss edge is a separate call, so the kept image does
+// not share registers with Smith or Babai.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((noinline))
+#endif
+inline Vec3 recordDisplacement(const Obtuse &s, Vec3 w, double w2) {
+  Vec3 y = w;
+  unsigned long long path = 0;
+  const int steps = descendFast<false, true>(s, y, kFractionalSteps, nullptr, &path);
+  if (steps < kFractionalSteps) {
+    const double y2 = n2(y);
+#if defined(__GNUC__) || defined(__clang__)
+    if (__builtin_expect(y2 >= (1.0 / 256.0) * w2, 1)) {
+#else
+    if (y2 >= (1.0 / 256.0) * w2) {
+#endif
+      return y2 < w2 ? y : w;
+    }
+  }
+  return recordMiss(s, w, w2, y, path, steps);
+}
+
+// Non-cancelling wrap. Names neither recertify nor Babai; the failure
+// edge is one separate call.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
+inline Vec3 plainDisplacement(const Obtuse &s, Vec3 w, double w2) {
+  Vec3 out;
+  int steps = -1;
+#if defined(__GNUC__) || defined(__clang__)
+  if (__builtin_expect(hotPlain(s, w, w2, out, steps), 1)) {
+#else
+  if (hotPlain(s, w, w2, out, steps)) {
+#endif
+    return out;
+  }
+  return coldResolve(s, w, w2, out, steps, 0);
+}
+
 // Binary64 results are kept only when nothing cancelled far below |w|: the
 // Babai rounding subtracts lattice vectors with sum |z_i| max|b_i| at most
 // 2 max|w|, a Babai descent takes at most two steps, a wrap descent takes
-// at most three steps, and the image is at least |w| / 16. Every other
-// image is re-evaluated from its lattice coefficients: a short wrap descent
-// that cancelled through certifyWrap, anything else through closestBabai.
-// Recording the wrap steps costs every descent a little, so only cells that
-// expect cancellation do it; elsewhere a cancelled descent runs again.
+// at most three steps, and the image is at least |w| / 16. A short wrap
+// that cancelled is certified from its recorded steps, or recorded on a
+// second descent when the cell does not record. A wrap that uses the whole
+// four-step budget is continued for two slicer steps and kept when that
+// image has not cancelled; otherwise it goes to Babai. Those fallbacks are
+// one separate call. On a compact cell a residual inside the Smith ball is
+// accepted before the descent, and only when the first fractional coordinate
+// is already within 0.05 of an integer, so a random wrap does not call it.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
-  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (!s.ok) {
     throw std::runtime_error(
         "minimum-image cell is numerically singular in binary64");
@@ -1404,30 +1727,35 @@ inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w, double w2) {
     throw std::runtime_error(
         "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
-  if (s.fractional && w2 < kRange) {
-    Vec3 y = w;
-    if (s.recordWrap) {
-      unsigned long long path = 0;
-      const int steps = descendFast<false, true>(s, y, kFractionalSteps, nullptr, &path);
-      if (steps < kFractionalSteps) {
-        const double y2 = n2(y);
-        if (y2 >= (1.0 / 256.0) * w2) {
-          return y2 < w2 ? y : w;
-        }
-        return certifyWrap(s, w, w2, y, path, steps);
+  constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
+#if defined(__GNUC__) || defined(__clang__)
+  if (__builtin_expect(s.recordWrap, 0)) {
+#else
+  if (s.recordWrap) {
+#endif
+    return recordDisplacement(s, w, w2);
+  }
+#if defined(__GNUC__) || defined(__clang__)
+  if (__builtin_expect(!(s.fractional && w2 < kRange), 0)) {
+#else
+  if (!(s.fractional && w2 < kRange)) {
+#endif
+    return closestBabai(s, w, w2);
+  }
+  // Compact cells only. The residual test is the common case and rejects
+  // a random wrap on the first axis, so the Smith call is not on that path.
+  // A near-lattice residual falls through into trySmith.
+  if (s.smithHot && w2 > s.smithLim2) {
+    double nz = 0.0;
+    const double z = w.z * s.invZ;
+    if (nearestInt(z, nz) && std::abs(z - nz) < kSmithTol) {
+      Vec3 image;
+      if (trySmith(s, w, w2, image)) {
+        return image;
       }
-      return closestBabai(s, w, w2);
-    }
-    const int steps = descendFast(s, y, kFractionalSteps);
-    if (steps < kFractionalSteps) {
-      const double y2 = n2(y);
-      if (y2 >= (1.0 / 256.0) * w2) {
-        return y2 < w2 ? y : w;
-      }
-      return recertifyWrap(s, w, w2);
     }
   }
-  return closestBabai(s, w, w2);
+  return plainDisplacement(s, w, w2);
 }
 
 inline Vec3 closestDisplacement(const Obtuse &s, Vec3 w) {
@@ -1481,6 +1809,9 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
 // recovered dump cell. `wrapped` is the fractional image of that
 // difference. The fractional vector is kept when it is not strictly
 // longer than the Selling image.
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__((always_inline))
+#endif
 inline std::array<double, 3>
 euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double yz,
                    const std::array<double, 3> &raw, const std::array<double, 3> &wrapped) {
