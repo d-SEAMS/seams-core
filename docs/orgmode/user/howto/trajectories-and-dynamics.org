@@ -114,12 +114,16 @@ to \(\text{cm}^2/\text{s}\). Lifetimes and relaxation times are in the unit of
 
 ~TrajectorySequence~ matches atoms across frames by atom ID, because a LAMMPS
 dump may list atoms in a different order each frame. ~unwrap_positions~,
-~unwrap_centres~, and ~msd~ return rows in the first frame's atom order, and
-when molecule IDs come from the file the molecule-level paths require each atom
-to keep its first-frame molecule. ~reorientation~ computes each frame's vectors
-in the first frame's atom order and matches them by molecule ID. Arrays passed in
-directly, such as ~reorientation(vectors=...)~ or ~reorientation_tcf~, are
-taken row for row as the same particles in every frame.
+~unwrap_centres~, ~msd~, ~molecule_dipoles~, ~orientation_order~,
+~water_vectors~, and ~reorientation~ read each frame in the first frame's atom
+order. When molecule IDs come from the file, ~unwrap_centres~, ~msd~ with
+~by_molecule=True~, ~molecule_dipoles~, dipole ~orientation_order~ and
+~reorientation~, ~water_vectors~, and ~hbond_lifetime~ (when it reads the
+trajectory) require each atom to keep its first-frame molecule.
+~reorientation~ and ~orientation_order~ match their vectors by molecule ID.
+Arrays passed in directly, such as ~reorientation(vectors=...)~ or
+~reorientation_tcf~, are taken row for row as the same particles in every
+frame.
 
 #+begin_src python
 >>> import pydseams

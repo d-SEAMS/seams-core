@@ -574,6 +574,43 @@ def test_reordered_dump_lines_keep_atom_and_molecule_identity(tmp_path: Path, at
     # The turning waters decorrelate, so a row mix-up would show.
     assert fixed.reorientation(kind="hh", oxygen_type=2, hydrogen_type=1).c1[4] < 0.9
 
+    charges = np.tile([-0.8476, 0.4238, 0.4238], 4)
+    for kind, kwargs in (
+        ("bisector", {"oxygen_type": 2, "hydrogen_type": 1}),
+        ("hh", {"oxygen_type": 2, "hydrogen_type": 1}),
+        ("dipole", {}),
+        ("dipole", {"charges": charges}),
+    ):
+        o_fixed = fixed.orientation_order(kind=kind, **kwargs)
+        o_shuffled = shuffled.orientation_order(kind=kind, **kwargs)
+        assert o_shuffled.mean_p1 == pytest.approx(o_fixed.mean_p1, abs=1e-12), kind
+        assert o_shuffled.mean_p2 == pytest.approx(o_fixed.mean_p2, abs=1e-12), kind
+        assert np.allclose(o_shuffled.cos_theta, o_fixed.cos_theta, atol=1e-12), kind
+
+    for getter in (
+        lambda traj: traj.molecule_dipoles(),
+        lambda traj: traj.molecule_dipoles(charges=charges),
+    ):
+        for a, b in zip(getter(fixed), getter(shuffled)):
+            assert np.array_equal(a.mol_ids, b.mol_ids)
+            assert np.allclose(a.dipoles, b.dipoles, atol=1e-10)
+            assert np.allclose(a.unit_vectors, b.unit_vectors, atol=1e-10)
+
+    for a, b in zip(
+        fixed.water_vectors(oxygen_type=2, hydrogen_type=1),
+        shuffled.water_vectors(oxygen_type=2, hydrogen_type=1),
+    ):
+        assert np.array_equal(a.mol_ids, b.mol_ids)
+        assert np.allclose(a.bisector, b.bisector, atol=1e-10)
+        assert np.allclose(a.hh, b.hh, atol=1e-10)
+        assert np.allclose(a.hh_unit, b.hh_unit, atol=1e-10)
+
+    h_fixed = fixed.hbond_lifetime(oxygen_type=2, hydrogen_type=1)
+    h_shuffled = shuffled.hbond_lifetime(oxygen_type=2, hydrogen_type=1)
+    # Long lags are NaN when no origin still has a bond. NaN matches NaN.
+    assert np.allclose(h_shuffled.c_hb, h_fixed.c_hb, atol=1e-12, equal_nan=True)
+    assert np.allclose(h_shuffled.s_hb, h_fixed.s_hb, atol=1e-12, equal_nan=True)
+
 
 def test_trajectory_identity_mismatches_are_refused(tmp_path: Path):
     box_len = 12.0
@@ -586,10 +623,21 @@ def test_trajectory_identity_mismatches_are_refused(tmp_path: Path):
     moved_path = tmp_path / "moved.lammpstrj"
     _write_multiframe_lammps_dump(moved_path, wrapped, box_len, types, moved)
     traj = ds.open_trajectory(moved_path, all_atoms=True)
-    with pytest.raises(ValueError, match="molecule"):
-        traj.unwrap_centres()
-    with pytest.raises(ValueError, match="molecule"):
-        traj.msd(by_molecule=True)
+    for call in (
+        traj.unwrap_centres,
+        lambda: traj.msd(by_molecule=True),
+        lambda: traj.reorientation(kind="dipole"),
+        lambda: traj.reorientation(kind="bisector", oxygen_type=2, hydrogen_type=1),
+        lambda: traj.reorientation(kind="hh", oxygen_type=2, hydrogen_type=1),
+        lambda: traj.orientation_order(kind="dipole"),
+        lambda: traj.orientation_order(kind="bisector", oxygen_type=2, hydrogen_type=1),
+        lambda: traj.orientation_order(kind="hh", oxygen_type=2, hydrogen_type=1),
+        traj.molecule_dipoles,
+        lambda: traj.water_vectors(oxygen_type=2, hydrogen_type=1),
+        lambda: traj.hbond_lifetime(oxygen_type=2, hydrogen_type=1),
+    ):
+        with pytest.raises(ValueError, match="molecule"):
+            call()
     # Atom-level results do not depend on molecule membership.
     assert traj.unwrap_positions().shape == (3, 12, 3)
 
@@ -599,6 +647,81 @@ def test_trajectory_identity_mismatches_are_refused(tmp_path: Path):
     _write_multiframe_lammps_dump(ids_path, wrapped, box_len, types, mols, ids=frame_ids)
     with pytest.raises(ValueError, match="atom IDs differ"):
         ds.open_trajectory(ids_path, all_atoms=True).unwrap_positions()
+
+
+def test_gapped_permuted_two_water_order_and_molecule_swap(tmp_path: Path):
+    """Two waters, three frames, gapped atom IDs, O/H1 line swaps, then a mol swap.
+
+    Frames 1 and 2 list each water's oxygen and first hydrogen in the other
+    order. Both orders must keep a +z dipole (mean P1 of 1). Swapping two
+    atoms' molecule IDs in frame 1, while leaving the set {1, 2} unchanged,
+    must be refused.
+    """
+    box_len = 20.0
+    n_frames = 3
+    n_atoms = 6
+    types = np.tile([2, 1, 1], 2)
+    mols = np.repeat([1, 2], 3)
+    ids = np.array([100, 105, 110, 200, 205, 210])
+    oh1 = np.array([0.757, 0.0, 0.586])
+    oh2 = np.array([-0.757, 0.0, 0.586])
+    xyz = np.zeros((n_frames, n_atoms, 3), dtype=np.float64)
+    for f in range(n_frames):
+        for w, base in enumerate((np.array([2.0, 2.0, 2.0]), np.array([8.0, 3.0, 2.0]))):
+            centre = base + np.array([0.0, 0.0, 0.1 * f])
+            xyz[f, 3 * w] = centre
+            xyz[f, 3 * w + 1] = centre + oh1
+            xyz[f, 3 * w + 2] = centre + oh2
+    swap_lines = np.array([1, 0, 2, 4, 3, 5])
+    orders = [np.arange(n_atoms), swap_lines, swap_lines]
+    charges = np.tile([-0.8476, 0.4238, 0.4238], 2)
+    fixed_path = tmp_path / "fixed.lammpstrj"
+    shuffled_path = tmp_path / "shuffled.lammpstrj"
+    _write_multiframe_lammps_dump(fixed_path, xyz, box_len, types, mols, ids=ids)
+    _write_multiframe_lammps_dump(shuffled_path, xyz, box_len, types, mols, orders=orders, ids=ids)
+    fixed = ds.open_trajectory(fixed_path, all_atoms=True, dt=1.0)
+    shuffled = ds.open_trajectory(shuffled_path, all_atoms=True, dt=1.0)
+    z_up = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]])
+
+    for kwargs in ({}, {"charges": charges}):
+        for traj in (fixed, shuffled):
+            order = traj.orientation_order(kind="dipole", **kwargs)
+            assert order.mean_p1 == pytest.approx(1.0, abs=1e-12)
+            assert order.mean_p2 == pytest.approx(1.0, abs=1e-12)
+        assert np.allclose(
+            shuffled.orientation_order(kind="dipole", **kwargs).cos_theta,
+            fixed.orientation_order(kind="dipole", **kwargs).cos_theta,
+            atol=1e-12,
+        )
+        for a, b in zip(fixed.molecule_dipoles(**kwargs), shuffled.molecule_dipoles(**kwargs)):
+            assert np.array_equal(a.mol_ids, b.mol_ids)
+            assert np.allclose(a.unit_vectors, z_up, atol=1e-12)
+            assert np.allclose(a.dipoles, b.dipoles, atol=1e-12)
+
+    swapped = np.stack([mols, mols, mols])
+    swapped[1, 0], swapped[1, 3] = int(swapped[1, 3]), int(swapped[1, 0])
+    assert set(int(v) for v in swapped[1]) == {1, 2}
+    assert not np.array_equal(swapped[1], mols)
+    swap_path = tmp_path / "swap.lammpstrj"
+    _write_multiframe_lammps_dump(swap_path, xyz, box_len, types, swapped, ids=ids)
+    bad = ds.open_trajectory(swap_path, all_atoms=True, dt=1.0)
+    for call in (
+        bad.unwrap_centres,
+        lambda: bad.msd(by_molecule=True),
+        lambda: bad.reorientation(kind="dipole"),
+        lambda: bad.reorientation(kind="bisector", oxygen_type=2, hydrogen_type=1),
+        lambda: bad.reorientation(kind="hh", oxygen_type=2, hydrogen_type=1),
+        lambda: bad.orientation_order(kind="dipole"),
+        lambda: bad.orientation_order(kind="dipole", charges=charges),
+        lambda: bad.orientation_order(kind="bisector", oxygen_type=2, hydrogen_type=1),
+        lambda: bad.orientation_order(kind="hh", oxygen_type=2, hydrogen_type=1),
+        bad.molecule_dipoles,
+        lambda: bad.molecule_dipoles(charges=charges),
+        lambda: bad.water_vectors(oxygen_type=2, hydrogen_type=1),
+        lambda: bad.hbond_lifetime(oxygen_type=2, hydrogen_type=1),
+    ):
+        with pytest.raises(ValueError, match="molecule"):
+            call()
 
 
 def test_size_arguments_out_of_size_t_range_are_refused():
