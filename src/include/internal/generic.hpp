@@ -382,13 +382,16 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 // along the cell edges and corners settle within the wrap step cap, or from
 // the Babai point otherwise, over the shortest member of each coset of L / 2L,
 // which contains every Voronoi-relevant vector. That descent stops in the Voronoi cell, so
-// the result is the minimum image on every legal cell. Results that
-// cancelled heavily are re-evaluated from their integer coefficients and
-// refined in extended precision. Non-finite values, singular bases, and
+// the result is the minimum image on every legal cell. A result that
+// cancelled heavily or took more than three steps is evaluated without
+// cancellation error from the recorded steps or its integer coefficients and
+// kept when it clears the Voronoi cell by more than its rounding. Near ties
+// are refined in extended precision. Non-finite values, singular bases, and
 // coefficients at or above 2^52 throw without poisoning the per-thread basis
-// cache. On the cells tested in tests/test_pore.cpp, up to edge aspect 1e8,
-// the returned length is within 4 ulps of the wrapped length (4 * 2^-52 *
-// |wrap|) and 1e-14 relative of the exact minimum.
+// cache. On the cells tested in tests/test_pore.cpp, which reach edge aspect
+// 1e8 (the implementation has no aspect cap), the returned length is within
+// 4 ulps of the wrapped length (4 * 2^-52 * |wrap|) and 1e-14 relative of the
+// exact minimum.
 //
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
