@@ -239,6 +239,20 @@ thread_local bool chemfilesUnreadable = false;
 thread_local bool framePastEnd = false;
 thread_local std::string chemfilesError;
 
+bool extensionFold(const std::string &ext, const char *want) {
+  const auto n = std::char_traits<char>::length(want);
+  if (ext.size() != n) {
+    return false;
+  }
+  for (std::size_t i = 0; i < n; ++i) {
+    if (std::tolower(static_cast<unsigned char>(ext[i])) !=
+        std::tolower(static_cast<unsigned char>(want[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string forcedFormat(const std::string &filename) {
   const auto ext = extensionOf(filename);
   // .cif is small-molecule CIF. .mmcif is mmCIF. Guessing the other
@@ -248,6 +262,11 @@ std::string forcedFormat(const std::string &filename) {
   }
   if (ext == "cif") {
     return "CIF";
+  }
+  // LAMMPS Data registers no extension (chemfiles FormatMetadata::extension
+  // is empty). The frame count and the frame read both pass this name.
+  if (extensionFold(ext, "lammpsdata")) {
+    return "LAMMPS Data";
   }
   return "";
 }

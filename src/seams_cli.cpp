@@ -29,6 +29,7 @@
 #include <tum_offload.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -89,9 +90,22 @@ const char *iceName(molSys::atom_state_type s) {
   return "unclassified";
 }
 
+bool equalFold(std::string_view left, std::string_view right) {
+  if (left.size() != right.size()) {
+    return false;
+  }
+  for (std::size_t i = 0; i < left.size(); ++i) {
+    if (std::tolower(static_cast<unsigned char>(left[i])) !=
+        std::tolower(static_cast<unsigned char>(right[i]))) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool chemfilesSuffix(std::string_view ext) {
   return ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
-         ext == "trr" || ext == "nc";
+         ext == "trr" || ext == "nc" || equalFold(ext, "lammpsdata");
 }
 
 Cloud load(const std::string &path, int frame, int typeI,

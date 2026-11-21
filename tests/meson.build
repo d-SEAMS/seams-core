@@ -216,6 +216,28 @@ foreach name, src : test_sources
   endif
 endforeach
 
+# .lammpsdata has no chemfiles extension. The CLI, the C API read, and
+# seams_path_nframes have to name the LAMMPS Data format. A malformed file
+# has to be an error, not a spin in the vendored reader.
+if chemfiles_dep.found() and get_option('with_cli')
+  _lammpsdata_env = environment()
+  _lammpsdata_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  if chemfiles_libdir != ''
+    _lammpsdata_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+  endif
+  _lammpsdata_env.set('SEAMS_BIN', meson.project_build_root() / 'seams')
+  test('lammpsdata',
+    executable('test_lammpsdata', 'test_lammpsdata.cpp',
+      dependencies: [catch2_dep, dependency('threads')],
+      link_with: seams_api_lib,
+      cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+      link_args: _test_link_args,
+      include_directories: [include_directories('.'), include_directories('../include')],
+      build_rpath: _test_rpath),
+    env: _lammpsdata_env,
+    timeout: 60)
+endif
+
 executable('interface_order', 'interface_order_main.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

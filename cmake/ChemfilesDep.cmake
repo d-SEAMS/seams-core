@@ -8,6 +8,9 @@
 # numeric seq id and treats a missing entity id as residue 0.
 # cmake/patches/chemfiles-0.10.4-mol2.patch rejects a MOL2 molecule with an
 # empty counts line, which 0.10.4 indexed as counts[0].
+# cmake/patches/chemfiles-0.10.4-lammpsdata-section.patch makes a LAMMPS
+# Data header line that is no keyword or section name a format error. A
+# release build of 0.10.4 spins on that line.
 # SEAMS_CHEMFILES_FORCE_VENDORED skips the installed copy. The Meson
 # fallback sets it after its own probe has already rejected the system
 # library, so this file does not probe twice and does not import the
@@ -51,7 +54,7 @@ if(SEAMS_WITH_CHEMFILES)
           set(_seams_chemfiles_system_ok TRUE)
         else()
           message(STATUS
-            "system chemfiles fails the mmCIF or MOL2 probe (exit ${_seams_probe_run}); building patched 0.10.4")
+            "system chemfiles fails the mmCIF, MOL2 or LAMMPS Data probe (exit ${_seams_probe_run}); building patched 0.10.4")
         endif()
       endif()
     endif()
@@ -67,7 +70,7 @@ if(SEAMS_WITH_CHEMFILES)
       GIT_REPOSITORY https://github.com/chemfiles/chemfiles.git
       GIT_TAG 0.10.4
       GIT_SHALLOW TRUE
-      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+      PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-lammpsdata-section.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(CHFL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(CHFL_BUILD_DOCUMENTATION OFF CACHE BOOL "" FORCE)

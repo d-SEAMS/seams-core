@@ -9,11 +9,12 @@ not the frame index).
 |--------+--------+------------------|
 | ~.lammpstrj~, ~.dump~, ~.lammps~, anything else | LAMMPS dump text | yes |
 | ~.xyz~ | ~sinp::readXYZ~ | yes |
-| ~.pdb~, ~.gro~, ~.dcd~ | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
+| ~.pdb~, ~.gro~, ~.dcd~, ~.lammpsdata~ | ~sinp::readChemfiles~ | only with ~SEAMS_HAS_CHEMFILES~ |
 | ~.con~ | ~sinp::readCon~ | only with ~SEAMS_HAS_READCON~ |
 
 The CLI takes the substring after the last ~.~ and compares it to
-~xyz~, ~con~, ~pdb~, ~gro~, and ~dcd~. The comparison is exact, so
+~xyz~, ~con~, ~pdb~, ~gro~, ~dcd~, and ~lammpsdata~. The
+~lammpsdata~ comparison is case-insensitive; the others are exact, so
 ~foo.xyz/dump~ is a LAMMPS dump. A path with no dot is a LAMMPS dump.
 ~seams --features~ reports chemfiles and readcon-core. The 2.14
 Python frame is documented on [[file:python-frame.org][Python Frame]].
@@ -61,8 +62,8 @@ seeded hexagonal 0 cubic 0 both 0 water 0~. ~--graph~ replaces
 seeded signature SPEC cages 0 atoms 0~.
 ~seams read~ on a missing dump prints ~nop 0~ and returns 0.
 A missing ~.con~ path makes the CLI throw ~cannot read PATH~.
-A ~.pdb~, ~.gro~, or ~.dcd~ path on a build without chemfiles throws
-~chemfiles is not in this build~.
+A ~.pdb~, ~.gro~, ~.dcd~, or ~.lammpsdata~ path on a build without
+chemfiles throws ~chemfiles is not in this build~.
 
 ~sinp::nLammpsFrames~ is ~0~ when the file cannot be read.
 ~sinp::forEachLammpsFrame~ is a no-op when that count is ~0~, or
@@ -208,10 +209,12 @@ The CLI routes ~.xyz~ here and does not apply ~--type~ on the read.
 Classification still receives ~--type~ and sees the types assigned
 above.
 
-* chemfiles (PDB, GRO, DCD)
+* chemfiles (PDB, GRO, DCD, LAMMPS Data)
 
 Compiled when Meson finds chemfiles (~SEAMS_HAS_CHEMFILES~). The CLI
-opens ~.pdb~, ~.gro~, and ~.dcd~ only. The C++ entry
+opens ~.pdb~, ~.gro~, ~.dcd~, and ~.lammpsdata~. LAMMPS Data has no
+registered chemfiles extension, so ~.lammpsdata~ is forced to the
+~LAMMPS Data~ format; that suffix is case-insensitive. The C++ entry
 ~sinp::readChemfiles~ accepts any path chemfiles can open. A ~.dcd~
 beside a ~.pdb~ of the same stem uses that PDB as topology.
 
