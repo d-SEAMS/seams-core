@@ -84,7 +84,7 @@ environment. `seams --print-config` prints the resolved table.
 A commented template is `seams.env.example`. Analysis choice (which
 command, which Lua script, which Python call) is not this table.
 
-\note The <a href="pages.html">related pages</a> describe the examples and how to obtain
+\note The <a href="docs/orgmode/user/tutorials/index.org">related pages</a> describe the examples and how to obtain
 the data-sets (trajectories) <a
 href="https://figshare.com/projects/d-SEAMS_Datasets/73545">from figshare</a>.
 
@@ -277,7 +277,7 @@ As of Mon Jan 20 15:57:18 2020, the lines of code calculated by
 # Contributing
 
 Please ensure that all contributions are formatted according to the
-[clang-format](./clang-format) configuration file.
+[clang-format](./.clang-format) configuration file.
 
 Specifically, consider using the following:
 
