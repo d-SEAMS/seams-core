@@ -264,9 +264,18 @@ TEST_CASE("inputs from fuzzing the fixed r3 readers are errors", "[chemfiles][ho
            Refused{"fuzz_tng_tngio_5231.tng", "TNG", kTngErr},
            // 100663311 particles declared, positions stored for 15
            Refused{"fuzz_tng_particles_unset.tng", "TNG", kTngErr},
+           // an empty square brace was indexed at its first char
+           Refused{"fuzz_smi_empty_brace.smi", "SMI", "empty square brace"},
        }) {
     requireRefused(item);
   }
+
+  // The second TRR frame declares atoms but no positions, velocities or
+  // forces, which allocated its atom count without reading anything; like
+  // any invalid trailing frame it now ends the trajectory.
+  requireRead({"fuzz_trr_no_vectors.trr", "TRR", 10});
+  // An '=' with no name before it looped forever in the comment parser.
+  requireRead({"fuzz_xyz_extended_equals.xyz", "XYZ", 1});
 
   // A box shape block declaring 2^44 strings is rejected before anything
   // is allocated, and the positions still read.
