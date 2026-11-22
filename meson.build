@@ -211,6 +211,20 @@ if openmp_dep_ok
           endif
         endif
       endforeach
+      # Ubuntu's clang answers -print-file-name=libomp.so with the bare
+      # name. The library is next to the resource directory's grandparent:
+      # lib/clang/<ver> -> lib/libomp.so. Without that runpath a consumer
+      # built from pkg-config cannot load libomp.so.5.
+      if _omp_libdir == '' and host_machine.system() == 'linux'
+        _omp_res = run_command(cppc.cmd_array() + ['-print-resource-dir'],
+                               check: false).stdout().strip()
+        if _omp_res.startswith('/')
+          _omp_sib = import('fs').parent(import('fs').parent(_omp_res)) / 'libomp.so'
+          if import('fs').exists(_omp_sib)
+            _omp_libdir = import('fs').parent(_omp_sib)
+          endif
+        endif
+      endif
       # conda's clang resource directory does not hold libomp.dylib. The
       # pixi prefix lib directory does, and that is what -fopenmp loads.
       if _omp_libdir == '' and host_machine.system() == 'darwin'
