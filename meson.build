@@ -2658,7 +2658,8 @@ if get_option('with_tests')
     foreach _mode : [['snapshot', 100000], ['check', -100000]]
       test('source_tree_untracked_' + _mode[0], _untracked_py,
         args: [meson.project_source_root() / 'tests' / 'source_tree_untracked.py',
-          _mode[0], _git.full_path(), meson.project_source_root(), _untracked_state],
+          _mode[0], _git.full_path(), meson.project_source_root(), _untracked_state,
+          meson.project_build_root()],
         priority: _mode[1],
         is_parallel: false,
         timeout: 60)
