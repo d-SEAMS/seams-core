@@ -497,6 +497,87 @@ def _git_config_reaches_subprocess_and_index_file_is_scrubbed() -> None:
         )
 
 
+def _git_repo_env_scrubs_every_repo_selecting_var() -> None:
+    repo_vars = (
+        ("GIT_DIR", "/tmp/outer/.git"),
+        ("GIT_WORK_TREE", "/tmp/outer"),
+        ("GIT_INDEX_FILE", "/tmp/outer/index"),
+        ("GIT_COMMON_DIR", "/tmp/outer/.git"),
+        ("GIT_OBJECT_DIRECTORY", "/tmp/outer/.git/objects"),
+        ("GIT_ALTERNATE_OBJECT_DIRECTORIES", "/tmp/outer/.git/objects"),
+        ("GIT_NAMESPACE", "outer-ns"),
+        ("GIT_PREFIX", "subdir/"),
+        ("GIT_IMPLICIT_WORK_TREE", "1"),
+    )
+    config_vars = (
+        ("GIT_CONFIG_COUNT", "1"),
+        ("GIT_CONFIG_KEY_0", "safe.directory"),
+        ("GIT_CONFIG_VALUE_0", "*"),
+        ("GIT_CONFIG_PARAMETERS", "'safe.directory=*'"),
+        ("GIT_CONFIG_GLOBAL", "/tmp/outer/gitconfig"),
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".git").mkdir()
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+        for var_name, var_value in repo_vars:
+            touched = [var_name] + [name for name, _ in config_vars]
+            saved = {name: os.environ.get(name) for name in touched}
+            os.environ[var_name] = var_value
+            for cfg_name, cfg_value in config_vars:
+                os.environ[cfg_name] = cfg_value
+            seen_subcommands: list[str] = []
+
+            def fake_run(
+                args,
+                check=False,
+                capture_output=False,
+                text=False,
+                env=None,
+                var_name=var_name,
+                seen_subcommands=seen_subcommands,
+                **_kwargs,
+            ):
+                _assert(env is not None, "git subprocess env was not set for {}".format(var_name))
+                _assert(
+                    var_name not in env,
+                    "{} leaked into git subprocess env".format(var_name),
+                )
+                for cfg_name, cfg_value in config_vars:
+                    _assert(
+                        env.get(cfg_name) == cfg_value,
+                        "{} was not preserved for git when scrubbing {}".format(cfg_name, var_name),
+                    )
+                if args[3:] == ["rev-parse", "--show-toplevel"]:
+                    seen_subcommands.append("rev-parse")
+                    out = str(root) + ("\n" if text else "")
+                    return _cp(args, stdout=out)
+                if args[3] == "ls-files":
+                    seen_subcommands.append("ls-files")
+                    return _cp(args, stdout=b"docs/source/from-git.rst\0")
+                raise RuntimeError("unexpected call {}".format(args))
+
+            try:
+                with _PatchRun(fake_run):
+                    rows = tracked_files.list_tracked(root, "docs/source")
+            finally:
+                for name, old in saved.items():
+                    if old is None:
+                        os.environ.pop(name, None)
+                    else:
+                        os.environ[name] = old
+            _assert(
+                seen_subcommands == ["rev-parse", "ls-files"],
+                "expected rev-parse and ls-files calls for {}, saw {}".format(
+                    var_name, seen_subcommands
+                ),
+            )
+            _assert(
+                rows == ["docs/source/from-git.rst"],
+                "git rows were not returned when scrubbing {}".format(var_name),
+            )
+
+
 def _rev_parse_exit_128_with_dangling_git_symlink_raises() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -842,6 +923,7 @@ def main() -> int:
     _git_marker_missing_git_raises()
     _git_subprocess_env_scrubs_git_vars()
     _git_config_reaches_subprocess_and_index_file_is_scrubbed()
+    _git_repo_env_scrubs_every_repo_selecting_var()
     _rev_parse_exit_128_with_dangling_git_symlink_raises()
     _nonrepo_marker_inside_outer_repo_raises()
     _special_file_git_marker_raises()
