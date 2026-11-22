@@ -54,7 +54,7 @@ seams_lang = shared_library(
   dependencies: [yds_dep],
   include_directories: include_directories('cxx'),
   cpp_args: ['-DSEAMS_LANG_VERSION="' + meson.project_version() + '"'],
-  install_rpath: '$ORIGIN',
+  install_rpath: host_machine.system() == 'darwin' ? '@loader_path' : '$ORIGIN',
   install: true,
 )
 
@@ -146,8 +146,14 @@ if get_option('with_tests')
     _tip4p_env = environment()
     _tip4p_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
     _tip4p_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+    if host_machine.system() == 'darwin'
+      _tip4p_env.prepend('DYLD_LIBRARY_PATH', meson.project_build_root() / 'src')
+    endif
     if chemfiles_libdir != ''
       _tip4p_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+      if host_machine.system() == 'darwin'
+        _tip4p_env.prepend('DYLD_LIBRARY_PATH', chemfiles_libdir)
+      endif
     endif
     test(
       'tip4p_overhead',

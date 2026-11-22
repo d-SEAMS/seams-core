@@ -115,8 +115,14 @@ endif
 #   3. Setting build_rpath so the binary also works when run outside meson test.
 _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+if host_machine.system() == 'darwin'
+  _test_env.prepend('DYLD_LIBRARY_PATH', meson.project_build_root() / 'src')
+endif
 if chemfiles_libdir != ''
   _test_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+  if host_machine.system() == 'darwin'
+    _test_env.prepend('DYLD_LIBRARY_PATH', chemfiles_libdir)
+  endif
 endif
 # Coverage arc counters share a cache line. Several cores bounce that
 # line and the timed tests exceed their limit. One thread keeps the
@@ -129,7 +135,7 @@ if csm_shape_bin != ''
 endif
 
 # --enable-new-dtags is Linux-only (macOS ld does not support it)
-_test_rpath = '$ORIGIN/../src'
+_test_rpath = (host_machine.system() == 'darwin' ? '@loader_path' : '$ORIGIN') + '/../src'
 if _readcondb_rpath != ''
   _test_rpath = _test_rpath + ':' + _readcondb_rpath
 endif
@@ -891,8 +897,14 @@ _traj_py_env = environment()
 _traj_py_env.prepend('PYTHONPATH', meson.project_source_root() / 'adapters' / 'python')
 _traj_py_env.set('SEAMS_LIB', seams_api_lib.full_path())
 _traj_py_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+if host_machine.system() == 'darwin'
+  _traj_py_env.prepend('DYLD_LIBRARY_PATH', meson.project_build_root() / 'src')
+endif
 if chemfiles_libdir != ''
   _traj_py_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+  if host_machine.system() == 'darwin'
+    _traj_py_env.prepend('DYLD_LIBRARY_PATH', chemfiles_libdir)
+  endif
 endif
 test('trajectory_python', find_program('python3'),
   args: ['-m', 'pytest', '-v', files('test_trajectory_dynamics.py')],

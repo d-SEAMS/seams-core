@@ -137,6 +137,12 @@ if get_option('with_tests')
   )
 endif
 
+_lib_origin = host_machine.system() == 'darwin' ? '@loader_path' : '$ORIGIN'
+_yds_build_rpath = _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir()
+if chemfiles_libdir != ''
+  _yds_build_rpath = _yds_build_rpath + ':' + chemfiles_libdir
+endif
+
 ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps + (linkcell_dep.found() ? [linkcell_dep] : []),
@@ -144,8 +150,8 @@ ydslib = library('yodaLib',
   link_with: _shell_link + _ylm_link,
   link_args: _lib_link_args,
   include_directories: _incdirs,
-  build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
-  install_rpath: '$ORIGIN',
+  build_rpath: _yds_build_rpath,
+  install_rpath: _lib_origin,
   install: true)
 
 _linkto += ydslib
@@ -251,7 +257,7 @@ seams_api_lib = shared_library(
   cpp_args: _seams_api_args,
   link_args: _seams_api_link,
   link_depends: _seams_api_link_depends,
-  install_rpath: '$ORIGIN',
+  install_rpath: _lib_origin,
   install: true)
 
 _abidiff = find_program('abidiff', required: false)

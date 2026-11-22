@@ -666,7 +666,10 @@ else
       endforeach
       _chem_patch_text = '\n'.join(_chem_patch_ids)
       _chem_stamp = chem_prefix / 'seams-patches.txt'
-      _chem_current = fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so') and fs.exists(_chem_stamp)
+      _chem_link = host_system == 'darwin' ? 'libseams-chemfiles.dylib' : 'libseams-chemfiles.so'
+      _chem_soname = host_system == 'darwin' ? 'libseams-chemfiles.0.10.dylib' : 'libseams-chemfiles.so.0.10'
+      _chem_real_name = host_system == 'darwin' ? 'libseams-chemfiles.0.10.4.dylib' : 'libseams-chemfiles.so.0.10.4'
+      _chem_current = fs.exists(chem_prefix / 'lib' / _chem_link) and fs.exists(_chem_stamp)
       if _chem_current
         # fs.read() refuses a path in the build tree.
         _chem_current = run_command('cat', _chem_stamp, check: false).stdout().strip() == _chem_patch_text
@@ -698,10 +701,11 @@ else
                     check: true)
       endif
       # cmake/ChemfilesDep.cmake names the patched library seams-chemfiles,
-      # so its soname cannot be satisfied by the unpatched libchemfiles.so.0.10
-      # in the conda lib directory the conda driver puts first on the RPATH.
-      _chem_real = chem_prefix / 'lib' / 'libseams-chemfiles.so.0.10.4'
-      if fs.exists(chem_prefix / 'lib' / 'libseams-chemfiles.so')
+      # so its soname/install_name cannot be satisfied by the unpatched
+      # libchemfiles in the conda lib directory the conda driver puts first
+      # on the RPATH.
+      _chem_real = chem_prefix / 'lib' / _chem_real_name
+      if fs.exists(chem_prefix / 'lib' / _chem_link)
         chemfiles_dep = cppc.find_library('seams-chemfiles',
                                           dirs: chem_prefix / 'lib',
                                           required: chemfiles_opt)
@@ -713,10 +717,10 @@ else
           _chem_vendored = true
           _chem_version = '0.10.4'
           _chem_origin = 'vendored, patched'
-          # The installed libyodaLib finds this copy through its $ORIGIN
-          # rpath, under the soname it was linked against.
+          # The installed libyodaLib finds this copy through its $ORIGIN /
+          # @loader_path rpath, under the soname/install_name it was linked against.
           if fs.exists(_chem_real)
-            install_data(_chem_real, rename: 'libseams-chemfiles.so.0.10',
+            install_data(_chem_real, rename: _chem_soname,
                          install_dir: get_option('libdir'),
                          install_mode: 'rwxr-xr-x')
           endif
