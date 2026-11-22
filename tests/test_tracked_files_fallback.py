@@ -566,8 +566,8 @@ def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
         shutil.copy2(_tracked_files_path(), root / "scripts" / "tracked_files.py")
         shutil.copy2(ROOT / "scripts" / "run_doc_check.py", root / "scripts" / "run_doc_check.py")
         shutil.copy2(ROOT / "docs" / "check_prose.py", root / "docs" / "check_prose.py")
-        (root / "docs" / "clean.md").write_text("The clean page is seamless.\n", encoding="utf-8")
-        (root / "docs" / "new-page.md").write_text("Supplementary documentation page.\n", encoding="utf-8")
+        (root / "docs" / "clean.md").write_text("Clean documentation page.\n", encoding="utf-8")
+        (root / "docs" / "new-page.md").write_text("The new page is seamless.\n", encoding="utf-8")
         _write_manifest(root, ["docs/clean.md"])
 
         goodbin = base / "goodbin"
@@ -637,12 +637,12 @@ def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
 
 
 def _docs_prose_inherited_git_dir_outer_repo_fails() -> None:
+    # Same fake-git pattern as the broken-git check. There is no real git
+    # process, so nothing can stage into an inherited GIT_DIR or rewrite an
+    # inherited GIT_INDEX_FILE, and the check still runs when git is not on PATH.
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp).resolve()
         outer = base / "outer"
-        outer.mkdir()
-        subprocess.run(["git", "init", str(outer)], check=True, capture_output=True)
-
         root = outer / "sdist"
         (root / "scripts").mkdir(parents=True)
         (root / "docs").mkdir(parents=True)
@@ -653,14 +653,72 @@ def _docs_prose_inherited_git_dir_outer_repo_fails() -> None:
         (root / "docs" / "new-page.md").write_text("Supplementary documentation page.\n", encoding="utf-8")
         _write_manifest(root, ["docs/clean.md"])
 
-        subprocess.run(["git", "-C", str(outer), "add", "-A"], check=True, capture_output=True)
+        index_file = base / "inherited-index"
+        index_bytes = b"sentinel-index-do-not-touch\n"
+        index_file.write_bytes(index_bytes)
+
+        shimbin = base / "shimbin"
+        shimbin.mkdir()
+        helper = base / "fake_git.py"
+        repo_vars = (
+            "GIT_DIR",
+            "GIT_WORK_TREE",
+            "GIT_INDEX_FILE",
+            "GIT_COMMON_DIR",
+            "GIT_OBJECT_DIRECTORY",
+            "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+            "GIT_NAMESPACE",
+            "GIT_PREFIX",
+            "GIT_IMPLICIT_WORK_TREE",
+        )
+        helper.write_text(
+            "import os\n"
+            "import sys\n"
+            "repo_vars = {repo_vars!r}\n"
+            "leaked = [name for name in repo_vars if name in os.environ]\n"
+            "args = sys.argv[1:]\n"
+            "sub = args[2:] if len(args) >= 2 and args[0] == '-C' else args\n"
+            "if leaked:\n"
+            "    if sub == ['rev-parse', '--show-toplevel']:\n"
+            "        sys.stdout.write({root!r} + '\\n')\n"
+            "        raise SystemExit(0)\n"
+            "    if sub and sub[0] == 'ls-files':\n"
+            "        raise SystemExit(0)\n"
+            "    sys.stderr.write('repo git var leaked: ' + ','.join(leaked) + '\\n')\n"
+            "    raise SystemExit(2)\n"
+            "if sub == ['rev-parse', '--show-toplevel']:\n"
+            "    sys.stdout.write({outer!r} + '\\n')\n"
+            "    raise SystemExit(0)\n"
+            "if sub and sub[0] == 'ls-files':\n"
+            "    sys.stdout.buffer.write(b'docs/clean.md\\0docs/new-page.md\\0')\n"
+            "    raise SystemExit(0)\n"
+            "sys.stderr.write('unexpected git call: ' + repr(args) + '\\n')\n"
+            "raise SystemExit(2)\n".format(repo_vars=repo_vars, root=str(root), outer=str(outer)),
+            encoding="utf-8",
+        )
+        shim_git = shimbin / "git"
+        shim_git.write_text(
+            "#!/bin/sh\nexec {} {} \"$@\"\n".format(
+                shlex.quote(sys.executable), shlex.quote(str(helper))
+            ),
+            encoding="utf-8",
+        )
+        shim_git.chmod(0o755)
+
         cmd = [
             sys.executable,
             str(root / "scripts" / "run_doc_check.py"),
             str(root / "docs" / "check_prose.py"),
         ]
-        env = dict(os.environ, GIT_DIR=str(outer / ".git"), LC_ALL="C.UTF-8", LANG="C.UTF-8")
+        env = dict(os.environ)
+        env["PATH"] = str(shimbin)
+        env["GIT_DIR"] = str(outer / ".git")
+        env["GIT_WORK_TREE"] = str(outer)
+        env["GIT_INDEX_FILE"] = str(index_file)
+        env["LC_ALL"] = "C.UTF-8"
+        env["LANG"] = "C.UTF-8"
         done = subprocess.run(cmd, cwd=root, env=env, capture_output=True, text=True)
+        _assert(index_file.read_bytes() == index_bytes, "inherited GIT_INDEX_FILE was modified")
         _assert(
             done.returncode == 1 and "1 prose hits" in done.stderr,
             "docs_prose with inherited outer GIT_DIR did not fail on staged prose violation: rc={} stdout={!r} stderr={!r}".format(
