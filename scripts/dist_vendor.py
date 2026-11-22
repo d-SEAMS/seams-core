@@ -177,9 +177,22 @@ def vendor_bindings(source_root, dist_root):
         place_binding(dest, staging)
 
 
+def write_tracked_manifest(source_root, dist_root):
+    """Record tracked files for checks that run from an unpacked source tarball."""
+    listed = subprocess.run(
+        ["git", "-C", str(source_root), "ls-files", "-z"],
+        check=True,
+        capture_output=True,
+    )
+    out = dist_root / "docs" / ".cache" / "tracked-files.zlist"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(listed.stdout)
+
+
 def main():
     source_root = Path(os.environ["MESON_SOURCE_ROOT"])
     dist_root = Path(os.environ["MESON_DIST_ROOT"])
+    write_tracked_manifest(source_root, dist_root)
     copy_subprojects(source_root, dist_root)
     subprojects = dist_root / "subprojects"
     drop_build_trees(subprojects)
