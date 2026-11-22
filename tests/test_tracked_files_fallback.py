@@ -206,6 +206,48 @@ def _rev_parse_exit_128_raises() -> None:
                 raise RuntimeError("expected RuntimeError on rev-parse exit-128")
 
 
+def _rev_parse_exit_128_with_git_file_raises() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".git").write_text("gitdir: /nonexistent/worktree\n", encoding="utf-8")
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+        def fake_run(args, check=False, capture_output=False, text=False):
+            err = "fatal: not a git repository: /nonexistent/worktree"
+            return _cp(args, code=128, stderr=err)
+
+        with _PatchRun(fake_run):
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except RuntimeError as exc:
+                _assert("rev-parse failed" in str(exc), "rev-parse exit-128 with .git file was not raised")
+            else:
+                raise RuntimeError("expected RuntimeError on rev-parse exit-128 with .git file")
+
+
+def _rev_parse_non_128_without_marker_raises() -> None:
+    for code in (1, 129):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+            def fake_run(args, check=False, capture_output=False, text=False, code=code):
+                return _cp(args, code=code, stderr="git failed with code {}".format(code))
+
+            with _PatchRun(fake_run):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except RuntimeError as exc:
+                    _assert(
+                        "rev-parse failed" in str(exc),
+                        "rev-parse exit-{} was not raised".format(code),
+                    )
+                else:
+                    raise RuntimeError(
+                        "expected RuntimeError on rev-parse exit-{} without .git marker".format(code)
+                    )
+
+
 def _not_git_repo_uses_manifest() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -447,6 +489,8 @@ def main() -> int:
     _git_toplevel_uses_git_not_manifest()
     _git_ls_files_failure_raises()
     _rev_parse_exit_128_raises()
+    _rev_parse_exit_128_with_git_file_raises()
+    _rev_parse_non_128_without_marker_raises()
     _not_git_repo_uses_manifest()
     _localized_not_a_repo_uses_manifest()
     _ls_files_oserror_raises()
