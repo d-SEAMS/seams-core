@@ -40,6 +40,14 @@ inline constexpr std::size_t kMaxTriples =
     (3 * sizeof(double));
 
 /**
+ * @brief Largest box count n whose 9 * n doubles fit in a single array.
+ * Larger counts are refused, so 9 * n and pointer offsets never overflow.
+ */
+inline constexpr std::size_t kMaxBoxes =
+    static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max()) /
+    (9 * sizeof(double));
+
+/**
  * @brief Largest max_lag whose max_lag + 1 lag bins one std::vector can
  * hold. Larger lags are refused, so max_lag + 1 never wraps to zero.
  */

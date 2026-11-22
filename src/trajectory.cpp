@@ -411,7 +411,7 @@ bool unwrapPositions(const double *xyzFrames, std::size_t nFrames,
   std::size_t total = 0;
   if (nFrames == 0 || nAtoms == 0 || nAtoms > kMaxTriples ||
       !checkedMul(nFrames, 3 * nAtoms, total) ||
-      (nBoxes != 1 && nBoxes != nFrames)) {
+      (nBoxes != 1 && nBoxes != nFrames) || nBoxes > kMaxBoxes) {
     return false;
   }
   TrajectoryUnwrapper unwrapper(nAtoms);
@@ -524,7 +524,7 @@ bool unwrapMoleculeCentres(const double *xyzFrames, std::size_t nFrames,
   std::size_t total = 0;
   if (nFrames == 0 || nAtoms == 0 || nAtoms > kMaxTriples ||
       !checkedMul(nFrames, 3 * nAtoms, total) ||
-      (nBoxes != 1 && nBoxes != nFrames)) {
+      (nBoxes != 1 && nBoxes != nFrames) || nBoxes > kMaxBoxes) {
     return false;
   }
 

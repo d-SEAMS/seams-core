@@ -4128,6 +4128,9 @@ seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes,
   if (natoms > SIZE_MAX / 3 || nframes > SIZE_MAX / (3 * natoms)) {
     return fail(SEAMS_ERR_RANGE, "coordinate count overflows size_t");
   }
+  if (nboxes > traj::kMaxBoxes) {
+    return fail(SEAMS_ERR_RANGE, "nboxes is too large: 9 * nboxes doubles do not fit in memory");
+  }
   const std::size_t total = nframes * 3 * natoms;
   if (unwrapped_len < total) {
     return fail(SEAMS_ERR_RANGE, "unwrapped buffer is short");
@@ -4180,6 +4183,9 @@ seams_status seams_traj_unwrap_centres(
   }
   if (natoms > SIZE_MAX / 3 || nframes > SIZE_MAX / (3 * natoms)) {
     return fail(SEAMS_ERR_RANGE, "coordinate count overflows size_t");
+  }
+  if (nboxes > traj::kMaxBoxes) {
+    return fail(SEAMS_ERR_RANGE, "nboxes is too large: 9 * nboxes doubles do not fit in memory");
   }
   for (std::size_t b = 0; b < nboxes; ++b) {
     const traj::BoxCell cell = traj::BoxCell::fromBox9(boxes + 9 * b);

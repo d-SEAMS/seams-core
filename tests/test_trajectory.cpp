@@ -522,11 +522,20 @@ TEST_CASE("Accumulators and unwrappers refuse counts whose storage size wraps",
   std::vector<double> unwrapped(6, 0.0);
   CHECK_FALSE(traj::unwrapPositions(xyz.data(), most / 3 + 2, 1, box9, 1, unwrapped.data()));
   CHECK_FALSE(traj::unwrapPositions(xyz.data(), 1, wraps3, box9, 1, unwrapped.data()));
+  const std::size_t tooManyBoxes = traj::kMaxBoxes + 1;
+  const std::size_t wraps9 = most / 9 + 1;
+  CHECK_FALSE(traj::unwrapPositions(xyz.data(), tooManyBoxes, 1, box9, tooManyBoxes,
+                                    unwrapped.data()));
+  CHECK_FALSE(traj::unwrapPositions(xyz.data(), wraps9, 1, box9, wraps9, unwrapped.data()));
   const int mols[2] = {1, 1};
   std::vector<int> ids;
   std::vector<double> centres;
   CHECK_FALSE(traj::unwrapMoleculeCentres(xyz.data(), most / 3 + 2, 1, box9, 1, mols, nullptr,
                                           ids, centres));
+  CHECK_FALSE(traj::unwrapMoleculeCentres(xyz.data(), tooManyBoxes, 1, box9, tooManyBoxes, mols,
+                                          nullptr, ids, centres));
+  CHECK_FALSE(traj::unwrapMoleculeCentres(xyz.data(), wraps9, 1, box9, wraps9, mols, nullptr, ids,
+                                          centres));
 
   // max_lag 0 keeps every lag and needs no lag bins up front.
   CHECK(traj::MsdAccumulator(1, 0, 1, 1.0, axis).valid());

@@ -239,6 +239,33 @@ int main(void) {
     } else {
       printf("ok hbond max_lag SIZE_MAX: %s\n", seams_last_error_message());
     }
+
+    const size_t too_many_boxes = (size_t)PTRDIFF_MAX / (9 * sizeof(double)) + 1;
+    const size_t wraps9 = SIZE_MAX / 9 + 1;
+    const double dummy_xyz[3] = {1.0, 2.0, 3.0};
+    double dummy_out[3] = {0.0, 0.0, 0.0};
+    const int dummy_mols[1] = {1};
+    const size_t bad_boxes[] = {too_many_boxes, wraps9};
+    for (size_t c = 0; c < sizeof bad_boxes / sizeof bad_boxes[0]; ++c) {
+      const size_t nb = bad_boxes[c];
+      const seams_status st_pos = seams_traj_unwrap_positions(
+          dummy_xyz, nb, 1, box9, nb, dummy_out, nb * 3);
+      if (st_pos != SEAMS_ERR_RANGE) {
+        fprintf(stderr, "FAIL unwrap_positions nboxes=%zu: status %d\n", nb, (int)st_pos);
+        ++fails;
+      } else {
+        printf("ok unwrap_positions nboxes=%zu: %s\n", nb, seams_last_error_message());
+      }
+      size_t nm = 99;
+      const seams_status st_com = seams_traj_unwrap_centres(
+          dummy_xyz, nb, 1, box9, nb, dummy_mols, 1, NULL, 0, NULL, 0, NULL, 0, &nm);
+      if (st_com != SEAMS_ERR_RANGE) {
+        fprintf(stderr, "FAIL unwrap_centres nboxes=%zu: status %d\n", nb, (int)st_com);
+        ++fails;
+      } else {
+        printf("ok unwrap_centres nboxes=%zu: %s\n", nb, seams_last_error_message());
+      }
+    }
   }
 
   return fails == 0 ? 0 : 1;
