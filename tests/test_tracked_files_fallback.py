@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -14,9 +16,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _load_tracked_files():
+def _tracked_files_path() -> Path:
     impl = os.environ.get("TRACKED_FILES_IMPL")
-    path = Path(impl) if impl else (ROOT / "scripts" / "tracked_files.py")
+    return Path(impl) if impl else (ROOT / "scripts" / "tracked_files.py")
+
+
+def _load_tracked_files():
+    path = _tracked_files_path()
     spec = importlib.util.spec_from_file_location("tracked_files", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -296,6 +302,112 @@ def _permission_error_launching_git_raises() -> None:
                 raise RuntimeError("PermissionError launching git fell back to the manifest")
 
 
+def _git_marker_missing_git_raises() -> None:
+    for marker_kind in ("dir", "file"):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            if marker_kind == "dir":
+                (root / ".git").mkdir()
+            else:
+                (root / ".git").write_text("gitdir: /nonexistent/worktree\n", encoding="utf-8")
+            _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+            def fake_run(*_args, **_kwargs):
+                raise FileNotFoundError(2, "No such file or directory", "git")
+
+            with _PatchRun(fake_run):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except FileNotFoundError:
+                    pass
+                else:
+                    raise RuntimeError(
+                        "FileNotFoundError with .git {} marker fell back to the manifest".format(
+                            marker_kind
+                        )
+                    )
+
+
+def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp).resolve()
+        root = base / "repo"
+        (root / ".git").mkdir(parents=True)
+        (root / "scripts").mkdir(parents=True)
+        (root / "docs").mkdir(parents=True)
+        shutil.copy2(_tracked_files_path(), root / "scripts" / "tracked_files.py")
+        shutil.copy2(ROOT / "scripts" / "run_doc_check.py", root / "scripts" / "run_doc_check.py")
+        shutil.copy2(ROOT / "docs" / "check_prose.py", root / "docs" / "check_prose.py")
+        (root / "docs" / "clean.md").write_text("Clean documentation page.\n", encoding="utf-8")
+        (root / "docs" / "new-page.md").write_text("The new page is seamless.\n", encoding="utf-8")
+        _write_manifest(root, ["docs/clean.md"])
+
+        goodbin = base / "goodbin"
+        goodbin.mkdir()
+        helper = base / "fake_git.py"
+        helper.write_text(
+            "import sys\n"
+            "args = sys.argv[1:]\n"
+            "sub = args[2:] if len(args) >= 2 and args[0] == '-C' else args\n"
+            "if sub == ['rev-parse', '--show-toplevel']:\n"
+            "    sys.stdout.write({root!r} + '\\n')\n"
+            "    raise SystemExit(0)\n"
+            "if sub and sub[0] == 'ls-files':\n"
+            "    sys.stdout.buffer.write(b'docs/clean.md\\0docs/new-page.md\\0')\n"
+            "    raise SystemExit(0)\n"
+            "sys.stderr.write('unexpected git call: ' + repr(args) + '\\n')\n"
+            "raise SystemExit(2)\n".format(root=str(root)),
+            encoding="utf-8",
+        )
+        good_git = goodbin / "git"
+        good_git.write_text(
+            "#!/bin/sh\nexec {} {} \"$@\"\n".format(
+                shlex.quote(sys.executable), shlex.quote(str(helper))
+            ),
+            encoding="utf-8",
+        )
+        good_git.chmod(0o755)
+
+        badbin = base / "badbin"
+        badbin.mkdir()
+        bad_git = badbin / "git"
+        bad_git.write_text("#!/nonexistent/interpreter\n", encoding="utf-8")
+        bad_git.chmod(0o755)
+
+        nobin = base / "nobin"
+        nobin.mkdir()
+
+        cmd = [
+            sys.executable,
+            str(root / "scripts" / "run_doc_check.py"),
+            str(root / "docs" / "check_prose.py"),
+        ]
+        good_env = dict(os.environ, PATH=str(goodbin))
+        good_done = subprocess.run(cmd, cwd=root, env=good_env, capture_output=True, text=True)
+        _assert(
+            good_done.returncode == 1 and "1 prose hits" in good_done.stderr,
+            "docs_prose with working git should catch the new rule-breaking page: rc={} stderr={!r}".format(
+                good_done.returncode, good_done.stderr
+            ),
+        )
+
+        for label, bindir in (("broken-shebang", badbin), ("missing-git", nobin)):
+            env = dict(os.environ, PATH=str(bindir))
+            done = subprocess.run(cmd, cwd=root, env=env, capture_output=True, text=True)
+            _assert(
+                done.returncode != 0 and "prose check ok" not in done.stdout,
+                "docs_prose with {} silently passed on a stale manifest: rc={} stdout={!r} stderr={!r}".format(
+                    label, done.returncode, done.stdout, done.stderr
+                ),
+            )
+            _assert(
+                "FileNotFoundError" in done.stderr,
+                "docs_prose with {} did not fail with FileNotFoundError: stderr={!r}".format(
+                    label, done.stderr
+                ),
+            )
+
+
 def _sibling_prefix_rejected() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -322,6 +434,8 @@ def main() -> int:
     _rev_parse_probe_does_not_catch_exception()
     _unreadable_manifest_raises()
     _permission_error_launching_git_raises()
+    _git_marker_missing_git_raises()
+    _docs_prose_broken_git_does_not_pass_stale_manifest()
     _sibling_prefix_rejected()
     print("tracked_files fallback checks ok")
     return 0

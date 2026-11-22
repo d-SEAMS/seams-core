@@ -33,6 +33,8 @@ def _git_toplevel(root: Path) -> Path | None:
     try:
         done = subprocess.run(cmd, check=False, capture_output=True, text=True)
     except FileNotFoundError:
+        if _git_worktree(root):
+            raise
         return None
     if done.returncode == 0:
         return Path(done.stdout.strip()).resolve()
