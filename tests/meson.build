@@ -443,7 +443,7 @@ executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
-executable('bench_h2h_cpc', 'bench_h2h_cpc.cpp',
+bench_h2h_cpc = executable('bench_h2h_cpc', 'bench_h2h_cpc.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
@@ -719,11 +719,15 @@ test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),
   timeout: 30)
+# The harness used to be a guessed build path with no dependency, so a
+# flat layout or a test run that had not linked bench_h2h_cpc reported
+# "missing harness or frame". The target supplies the real output path
+# and is built before the test.
 test('h2h_harness', find_program('python3'),
-  args: [files('test_h2h_harness.py'),
-         meson.project_build_root() / 'tests' / 'bench_h2h_cpc'],
+  args: [files('test_h2h_harness.py'), bench_h2h_cpc],
   workdir: meson.project_source_root(),
   env: _test_env,
+  depends: [bench_h2h_cpc],
   timeout: 120)
 test('snapshot_swap', find_program('python3'),
   args: [files('test_snapshot_swap.py')],
