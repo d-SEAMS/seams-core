@@ -9,11 +9,22 @@ import subprocess
 from pathlib import Path
 
 MANIFEST = Path("docs/.cache/tracked-files.zlist")
-_GIT_ENV_PREFIX = "GIT_"
+# Variables that point git at another repository; config and exec settings stay.
+_GIT_REPO_ENV = frozenset((
+    "GIT_DIR",
+    "GIT_WORK_TREE",
+    "GIT_INDEX_FILE",
+    "GIT_COMMON_DIR",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_NAMESPACE",
+    "GIT_PREFIX",
+    "GIT_IMPLICIT_WORK_TREE",
+))
 
 
 def _git_env() -> dict[str, str]:
-    return {key: value for key, value in os.environ.items() if not key.startswith(_GIT_ENV_PREFIX)}
+    return {key: value for key, value in os.environ.items() if key not in _GIT_REPO_ENV}
 
 
 def _matches(path: str, specs: tuple[str, ...]) -> bool:

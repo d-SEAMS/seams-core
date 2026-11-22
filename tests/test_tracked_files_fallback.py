@@ -396,13 +396,16 @@ def _git_subprocess_env_scrubs_git_vars() -> None:
         _write_manifest(root, ["docs/source/from-manifest.rst"])
         old_git_dir = os.environ.get("GIT_DIR")
         old_git_work_tree = os.environ.get("GIT_WORK_TREE")
+        old_git_index_file = os.environ.get("GIT_INDEX_FILE")
         os.environ["GIT_DIR"] = "/tmp/outer/.git"
         os.environ["GIT_WORK_TREE"] = "/tmp/outer"
+        os.environ["GIT_INDEX_FILE"] = "/tmp/outer/index"
 
         def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             _assert(env is not None, "git subprocess env was not set")
             _assert("GIT_DIR" not in env, "GIT_DIR leaked into git subprocess env")
             _assert("GIT_WORK_TREE" not in env, "GIT_WORK_TREE leaked into git subprocess env")
+            _assert("GIT_INDEX_FILE" not in env, "GIT_INDEX_FILE leaked into git subprocess env")
             if args[3:] == ["rev-parse", "--show-toplevel"]:
                 out = str(root) + ("\n" if text else "")
                 return _cp(args, stdout=out)
@@ -422,7 +425,75 @@ def _git_subprocess_env_scrubs_git_vars() -> None:
                 del os.environ["GIT_WORK_TREE"]
             else:
                 os.environ["GIT_WORK_TREE"] = old_git_work_tree
+            if old_git_index_file is None:
+                del os.environ["GIT_INDEX_FILE"]
+            else:
+                os.environ["GIT_INDEX_FILE"] = old_git_index_file
         _assert(rows == ["docs/source/from-git.rst"], "git rows were not returned with scrubbed env")
+
+
+def _git_config_reaches_subprocess_and_index_file_is_scrubbed() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".git").mkdir()
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+        saved = {
+            key: os.environ.get(key)
+            for key in (
+                "GIT_DIR",
+                "GIT_WORK_TREE",
+                "GIT_INDEX_FILE",
+                "GIT_CONFIG_COUNT",
+                "GIT_CONFIG_KEY_0",
+                "GIT_CONFIG_VALUE_0",
+                "GIT_CONFIG_PARAMETERS",
+                "GIT_CONFIG_GLOBAL",
+            )
+        }
+        os.environ["GIT_DIR"] = "/tmp/outer/.git"
+        os.environ["GIT_WORK_TREE"] = "/tmp/outer"
+        os.environ["GIT_INDEX_FILE"] = "/tmp/outer/index"
+        os.environ["GIT_CONFIG_COUNT"] = "1"
+        os.environ["GIT_CONFIG_KEY_0"] = "safe.directory"
+        os.environ["GIT_CONFIG_VALUE_0"] = "*"
+        os.environ["GIT_CONFIG_PARAMETERS"] = "'safe.directory=*'"
+        os.environ["GIT_CONFIG_GLOBAL"] = "/tmp/outer/gitconfig"
+
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+            _assert(env is not None, "git subprocess env was not set")
+            for leaked in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"):
+                _assert(leaked not in env, "{} leaked into git subprocess env".format(leaked))
+            _assert(env.get("GIT_CONFIG_COUNT") == "1", "GIT_CONFIG_COUNT was not preserved for git")
+            _assert(
+                env.get("GIT_CONFIG_PARAMETERS") == "'safe.directory=*'",
+                "GIT_CONFIG_PARAMETERS was not preserved for git",
+            )
+            _assert(env.get("GIT_CONFIG_KEY_0") == "safe.directory", "GIT_CONFIG_KEY_0 was not preserved for git")
+            _assert(env.get("GIT_CONFIG_VALUE_0") == "*", "GIT_CONFIG_VALUE_0 was not preserved for git")
+            _assert(
+                env.get("GIT_CONFIG_GLOBAL") == "/tmp/outer/gitconfig",
+                "GIT_CONFIG_GLOBAL was not preserved for git",
+            )
+            if args[3:] == ["rev-parse", "--show-toplevel"]:
+                out = str(root) + ("\n" if text else "")
+                return _cp(args, stdout=out)
+            if args[3] == "ls-files":
+                return _cp(args, stdout=b"docs/source/from-git.rst\0")
+            raise RuntimeError("unexpected call {}".format(args))
+
+        try:
+            with _PatchRun(fake_run):
+                rows = tracked_files.list_tracked(root, "docs/source")
+        finally:
+            for key, old in saved.items():
+                if old is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = old
+        _assert(
+            rows == ["docs/source/from-git.rst"],
+            "git rows were not returned when config env was preserved",
+        )
 
 
 def _rev_parse_exit_128_with_dangling_git_symlink_raises() -> None:
@@ -628,6 +699,7 @@ def main() -> int:
     _permission_error_launching_git_raises()
     _git_marker_missing_git_raises()
     _git_subprocess_env_scrubs_git_vars()
+    _git_config_reaches_subprocess_and_index_file_is_scrubbed()
     _rev_parse_exit_128_with_dangling_git_symlink_raises()
     _nonrepo_marker_inside_outer_repo_raises()
     _docs_prose_broken_git_does_not_pass_stale_manifest()
