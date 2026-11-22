@@ -75,8 +75,13 @@ def _from_manifest(root: Path, specs: tuple[str, ...]) -> list[str]:
 def list_tracked(root: Path, *specs: str) -> list[str]:
     """git-tracked files under ``specs``; falls back to the dist manifest."""
     root = root.resolve()
-    if _git_toplevel(root) == root:
+    top = _git_toplevel(root)
+    if top == root:
         return _from_git(root, specs)
+    # Git ignores a marker that is not a repository and keeps walking. An
+    # enclosing repository would then supply the file list.
+    if _git_worktree(root):
+        raise RuntimeError("{} has a .git marker but git resolved {}".format(root, top))
     path = root / MANIFEST
     if not path.is_file():
         raise RuntimeError(

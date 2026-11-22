@@ -443,6 +443,48 @@ def _rev_parse_exit_128_with_dangling_git_symlink_raises() -> None:
                 raise RuntimeError("expected RuntimeError on rev-parse exit-128 with dangling .git symlink")
 
 
+def _nonrepo_marker_inside_outer_repo_raises() -> None:
+    for variant in ("dangling", "emptydir", "symlink-nonrepo"):
+        with tempfile.TemporaryDirectory() as tmp:
+            outer = Path(tmp) / "outer"
+            root = outer / "sdist"
+            root.mkdir(parents=True)
+            if variant == "dangling":
+                (root / ".git").symlink_to(root / "missing-git-dir", target_is_directory=True)
+            elif variant == "emptydir":
+                (root / ".git").mkdir()
+            else:
+                plain = root / "plain-dir"
+                plain.mkdir()
+                (root / ".git").symlink_to(plain, target_is_directory=True)
+            _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+            def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+                if args[3:] == ["rev-parse", "--show-toplevel"]:
+                    out = str(outer.resolve()) + ("\n" if text else "")
+                    return _cp(args, stdout=out)
+                raise RuntimeError("unexpected call {}".format(args))
+
+            with _PatchRun(fake_run):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except RuntimeError as exc:
+                    _assert(
+                        "has a .git marker" in str(exc),
+                        "{} marker inside an outer repo did not name the marker: {}".format(variant, exc),
+                    )
+                    _assert(
+                        str(outer.resolve()) in str(exc),
+                        "{} marker inside an outer repo did not name the resolved toplevel: {}".format(
+                            variant, exc
+                        ),
+                    )
+                else:
+                    raise RuntimeError(
+                        "{} .git marker inside an outer repo silently used the manifest".format(variant)
+                    )
+
+
 def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp).resolve()
@@ -587,6 +629,7 @@ def main() -> int:
     _git_marker_missing_git_raises()
     _git_subprocess_env_scrubs_git_vars()
     _rev_parse_exit_128_with_dangling_git_symlink_raises()
+    _nonrepo_marker_inside_outer_repo_raises()
     _docs_prose_broken_git_does_not_pass_stale_manifest()
     _docs_prose_inherited_git_dir_outer_repo_fails()
     _sibling_prefix_rejected()
