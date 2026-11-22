@@ -751,6 +751,10 @@ test('docs_sources', find_program('python3'),
   args: [files('docs_sources.py')],
   workdir: meson.project_source_root(),
   timeout: 30)
+test('tracked_files_fallback', find_program('python3'),
+  args: [files('test_tracked_files_fallback.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
 test('option_names', find_program('python3'),
   args: [files('option_names.py'), meson.project_build_root() / 'seams',
          meson.project_build_root()],
