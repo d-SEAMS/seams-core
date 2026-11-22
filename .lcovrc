@@ -3,3 +3,7 @@ geninfo_gcov_tool = /usr/bin/gcov
 # GCC marks a line executed when one of its basic blocks ran. Keep that line
 # count and clear the stale "unexecuted" marker on the other block.
 geninfo_unexecuted_blocks = 1
+# GCC 15 records the declaration line of an uncalled lambda as executed by
+# its enclosing function. lcov's consistency check already exempts the first
+# line of a C++ lambda, but isLambda() only matches demangled names.
+demangle_cpp = c++filt
