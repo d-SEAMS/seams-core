@@ -27,7 +27,10 @@ def _git_toplevel(root: Path) -> Path | None:
     except OSError:
         return None
     if done.returncode != 0:
-        return None
+        err = (done.stderr or "").strip()
+        if "not a git repository" in err.lower():
+            return None
+        raise RuntimeError("git rev-parse failed: {}".format(err or "unknown error"))
     return Path(done.stdout.strip()).resolve()
 
 
