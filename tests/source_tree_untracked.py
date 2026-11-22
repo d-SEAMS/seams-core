@@ -26,28 +26,43 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+_HERE = str(Path(__file__).resolve().parent)
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+from host_tool_env import without_asan_preload  # noqa: E402
+
 
 def untracked(git: str, root: Path) -> set[str]:
+    env = without_asan_preload()
     top = subprocess.run(
         [git, "-C", str(root), "rev-parse", "--show-toplevel"],
         capture_output=True,
         text=True,
+        env=env,
     )
     if top.returncode == 0 and Path(top.stdout.strip()).resolve() == root.resolve():
         listed = subprocess.run(
             [git, "-C", str(root), "ls-files", "--others", "--exclude-standard", "-z"],
             capture_output=True,
             check=True,
+            env=env,
         )
     else:
         with tempfile.TemporaryDirectory(prefix="seams-untracked-git-") as tmp:
             gitdir, tree = str(Path(tmp).resolve()), str(root.resolve())
-            subprocess.run([git, "init", "-q", "--bare", gitdir], capture_output=True, check=True)
+            subprocess.run(
+                [git, "init", "-q", "--bare", gitdir],
+                capture_output=True,
+                check=True,
+                env=env,
+            )
             listed = subprocess.run(
                 [git, "--git-dir", gitdir, "--work-tree", tree, "-C", tree,
                  "ls-files", "--others", "--exclude-standard", "-z"],
                 capture_output=True,
                 check=True,
+                env=env,
             )
     return {p.decode("utf-8", "surrogateescape") for p in listed.stdout.split(b"\0") if p}
 
@@ -86,7 +101,7 @@ def process_info(pid: int, ancestor: bool = False) -> tuple[int, str, list[str]]
             ["ps", "-o", "ppid=", "-o", "lstart=", "-o", "command=", "-p", str(pid)],
             capture_output=True,
             text=True,
-            env={**os.environ, "LC_ALL": "C"},
+            env=without_asan_preload(extra={"LC_ALL": "C"}),
         )
     except FileNotFoundError:
         # A pid absent from a readable /proc is gone; ps could only agree.

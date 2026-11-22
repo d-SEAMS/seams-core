@@ -26,6 +26,7 @@ from unittest import mock
 sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import source_tree_untracked as stu  # noqa: E402
+from host_tool_env import without_asan_preload  # noqa: E402
 
 LSTART = "Fri Nov 20 16:33:00 2026"
 FAKE_PS = """#!/bin/sh
@@ -55,7 +56,28 @@ def main(argv: list[str]) -> int:
         tmp = Path(tmp)
         repo = tmp / "repo"
         repo.mkdir()
-        subprocess.run([git, "init", "-q", str(repo)], check=True)
+        subprocess.run([git, "init", "-q", str(repo)], check=True, env=without_asan_preload())
+        cleaned = without_asan_preload(
+            base={
+                "LD_PRELOAD": "/tmp/libasan.so",
+                "DYLD_INSERT_LIBRARIES": "/tmp/libasan.dylib",
+                "ASAN_TEST_PRELOAD": "/tmp/libasan.so",
+                "ASAN_OPTIONS": "halt_on_error=1",
+                "LSAN_OPTIONS": "suppressions=/tmp/lsan.supp",
+                "UBSAN_OPTIONS": "print_stacktrace=1",
+                "PATH": "/usr/bin",
+            },
+            extra={"LC_ALL": "C"},
+        )
+        if any(k in cleaned for k in ("LD_PRELOAD", "DYLD_INSERT_LIBRARIES", "ASAN_TEST_PRELOAD")):
+            failures.append(f"without_asan_preload kept preload vars: {sorted(cleaned)}")
+        if (
+            cleaned.get("ASAN_OPTIONS") != "halt_on_error=1"
+            or cleaned.get("LSAN_OPTIONS") != "suppressions=/tmp/lsan.supp"
+            or cleaned.get("UBSAN_OPTIONS") != "print_stacktrace=1"
+            or cleaned.get("LC_ALL") != "C"
+        ):
+            failures.append(f"without_asan_preload dropped non-preload vars: {cleaned}")
         proc = tmp / "proc"
         (proc / "self").mkdir(parents=True)
         (proc / "self" / "stat").write_text("1 (self) S 0\n")

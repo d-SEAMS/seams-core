@@ -29,6 +29,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+_HERE = str(Path(__file__).resolve().parent)
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+from host_tool_env import without_asan_preload  # noqa: E402
+
 PROJECT = "seams-core"
 MESON_BUILD = """project('seams-core-consumer', 'c', 'cpp')
 subproject('seams-core')
@@ -58,7 +64,13 @@ def scratch_project(work: Path, source: Path, top_build: Path) -> Path:
 
 
 def run(cmd, cwd=None) -> subprocess.CompletedProcess:
-    return subprocess.run([str(c) for c in cmd], cwd=cwd, capture_output=True, text=True)
+    return subprocess.run(
+        [str(c) for c in cmd],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        env=without_asan_preload(),
+    )
 
 
 def helpers(source: Path):
