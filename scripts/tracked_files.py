@@ -41,8 +41,7 @@ def _git_worktree(root: Path) -> bool:
     # A work tree has a .git directory; a linked work tree has a .git file.
     # rev-parse exits 128 for "not a repository" and for real failures, and
     # git translates that text, so the split is the marker on disk.
-    marker = root / ".git"
-    return marker.is_dir() or marker.is_file() or marker.is_symlink()
+    return os.path.lexists(root / ".git")
 
 
 def _git_toplevel(root: Path) -> Path | None:

@@ -8,6 +8,7 @@ import importlib.util
 import os
 import shlex
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -556,6 +557,89 @@ def _nonrepo_marker_inside_outer_repo_raises() -> None:
                     )
 
 
+def _make_special_git_marker(root: Path, kind: str) -> None:
+    marker = root / ".git"
+    if kind == "fifo":
+        os.mkfifo(marker)
+    elif kind == "socket":
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.bind(str(marker))
+    else:
+        raise RuntimeError("unknown special marker kind {}".format(kind))
+
+
+def _special_file_git_marker_raises() -> None:
+    for kind in ("fifo", "socket"):
+        with tempfile.TemporaryDirectory() as tmp:
+            outer = Path(tmp) / "outer"
+            root = outer / "sdist"
+            root.mkdir(parents=True)
+            _make_special_git_marker(root, kind)
+            _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+            def fake_outer(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+                if args[3:] == ["rev-parse", "--show-toplevel"]:
+                    out = str(outer.resolve()) + ("\n" if text else "")
+                    return _cp(args, stdout=out)
+                raise RuntimeError("unexpected call {}".format(args))
+
+            with _PatchRun(fake_outer):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except RuntimeError as exc:
+                    _assert(
+                        "has a .git marker" in str(exc),
+                        "{} marker inside an outer repo did not name the marker: {}".format(kind, exc),
+                    )
+                    _assert(
+                        str(outer.resolve()) in str(exc),
+                        "{} marker inside an outer repo did not name the resolved toplevel: {}".format(
+                            kind, exc
+                        ),
+                    )
+                else:
+                    raise RuntimeError(
+                        "{} .git marker inside an outer repo silently used the manifest".format(kind)
+                    )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "standalone"
+            root.mkdir()
+            _make_special_git_marker(root, kind)
+            _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+            def fake_128(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+                return _cp(args, code=128, stderr="fatal: not a git repository")
+
+            with _PatchRun(fake_128):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except RuntimeError as exc:
+                    _assert(
+                        "rev-parse failed" in str(exc),
+                        "{} marker with rev-parse exit 128 did not raise rev-parse failure: {}".format(
+                            kind, exc
+                        ),
+                    )
+                else:
+                    raise RuntimeError(
+                        "{} .git marker with rev-parse exit 128 silently used the manifest".format(kind)
+                    )
+
+            def fake_missing(*_args, **_kwargs):
+                raise FileNotFoundError(2, "No such file or directory", "git")
+
+            with _PatchRun(fake_missing):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except FileNotFoundError:
+                    pass
+                else:
+                    raise RuntimeError(
+                        "{} .git marker with missing git silently used the manifest".format(kind)
+                    )
+
+
 def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp).resolve()
@@ -760,6 +844,7 @@ def main() -> int:
     _git_config_reaches_subprocess_and_index_file_is_scrubbed()
     _rev_parse_exit_128_with_dangling_git_symlink_raises()
     _nonrepo_marker_inside_outer_repo_raises()
+    _special_file_git_marker_raises()
     _docs_prose_broken_git_does_not_pass_stale_manifest()
     _docs_prose_inherited_git_dir_outer_repo_fails()
     _sibling_prefix_rejected()
