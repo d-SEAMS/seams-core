@@ -4,10 +4,16 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
 MANIFEST = Path("docs/.cache/tracked-files.zlist")
+_GIT_ENV_PREFIX = "GIT_"
+
+
+def _git_env() -> dict[str, str]:
+    return {key: value for key, value in os.environ.items() if not key.startswith(_GIT_ENV_PREFIX)}
 
 
 def _matches(path: str, specs: tuple[str, ...]) -> bool:
@@ -25,13 +31,13 @@ def _git_worktree(root: Path) -> bool:
     # rev-parse exits 128 for "not a repository" and for real failures, and
     # git translates that text, so the split is the marker on disk.
     marker = root / ".git"
-    return marker.is_dir() or marker.is_file()
+    return marker.is_dir() or marker.is_file() or marker.is_symlink()
 
 
 def _git_toplevel(root: Path) -> Path | None:
     cmd = ["git", "-C", str(root), "rev-parse", "--show-toplevel"]
     try:
-        done = subprocess.run(cmd, check=False, capture_output=True, text=True)
+        done = subprocess.run(cmd, check=False, capture_output=True, text=True, env=_git_env())
     except FileNotFoundError:
         if _git_worktree(root):
             raise
@@ -51,7 +57,7 @@ def _from_git(root: Path, specs: tuple[str, ...]) -> list[str]:
     if specs:
         cmd += ["--", *specs]
     try:
-        done = subprocess.run(cmd, check=False, capture_output=True)
+        done = subprocess.run(cmd, check=False, capture_output=True, env=_git_env())
     except OSError as exc:
         raise RuntimeError("git is unavailable: {}".format(exc)) from exc
     if done.returncode != 0:

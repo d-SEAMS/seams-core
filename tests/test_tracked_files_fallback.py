@@ -115,7 +115,7 @@ def _inside_unrelated_git_tree() -> None:
         inner.mkdir()
         _write_manifest(inner, ["docs/source/from-manifest.rst"])
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             if args[3:] == ["rev-parse", "--show-toplevel"]:
                 out = str(outer) + ("\n" if text else "")
                 return _cp(args, stdout=out)
@@ -151,7 +151,7 @@ def _git_toplevel_uses_git_not_manifest() -> None:
         _write_manifest(root, ["docs/source/from-manifest.rst"])
         tracked = b"docs/source/from-git.rst\0"
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             if args[3:] == ["rev-parse", "--show-toplevel"]:
                 out = str(root) + ("\n" if text else "")
                 return _cp(args, stdout=out)
@@ -169,7 +169,7 @@ def _git_ls_files_failure_raises() -> None:
         root = Path(tmp)
         _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             if args[3:] == ["rev-parse", "--show-toplevel"]:
                 out = str(root) + ("\n" if text else "")
                 return _cp(args, stdout=out)
@@ -193,7 +193,7 @@ def _rev_parse_exit_128_raises() -> None:
         (root / ".git").mkdir()
         _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             err = "fatal: detected dubious ownership in repository"
             return _cp(args, code=128, stderr=err)
 
@@ -212,7 +212,7 @@ def _rev_parse_exit_128_with_git_file_raises() -> None:
         (root / ".git").write_text("gitdir: /nonexistent/worktree\n", encoding="utf-8")
         _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             err = "fatal: not a git repository: /nonexistent/worktree"
             return _cp(args, code=128, stderr=err)
 
@@ -231,7 +231,7 @@ def _rev_parse_non_128_without_marker_raises() -> None:
             root = Path(tmp)
             _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-            def fake_run(args, check=False, capture_output=False, text=False, code=code):
+            def fake_run(args, check=False, capture_output=False, text=False, env=None, code=code, **_kwargs):
                 return _cp(args, code=code, stderr="git failed with code {}".format(code))
 
             with _PatchRun(fake_run):
@@ -253,7 +253,7 @@ def _not_git_repo_uses_manifest() -> None:
         root = Path(tmp)
         _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             err = "fatal: not a git repository (or any of the parent directories): .git"
             return _cp(args, code=128, stderr=err)
 
@@ -276,7 +276,7 @@ def _localized_not_a_repo_uses_manifest() -> None:
             root = Path(tmp)
             _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-            def fake_run(args, check=False, capture_output=False, text=False, err=err):
+            def fake_run(args, check=False, capture_output=False, text=False, env=None, err=err, **_kwargs):
                 return _cp(args, code=128, stderr=err)
 
             with _PatchRun(fake_run):
@@ -292,7 +292,7 @@ def _ls_files_oserror_raises() -> None:
         root = Path(tmp)
         _write_manifest(root, ["docs/source/from-manifest.rst"])
 
-        def fake_run(args, check=False, capture_output=False, text=False):
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
             if args[3:] == ["rev-parse", "--show-toplevel"]:
                 out = str(root) + ("\n" if text else "")
                 return _cp(args, stdout=out)
@@ -389,6 +389,60 @@ def _git_marker_missing_git_raises() -> None:
                     )
 
 
+def _git_subprocess_env_scrubs_git_vars() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".git").mkdir()
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+        old_git_dir = os.environ.get("GIT_DIR")
+        old_git_work_tree = os.environ.get("GIT_WORK_TREE")
+        os.environ["GIT_DIR"] = "/tmp/outer/.git"
+        os.environ["GIT_WORK_TREE"] = "/tmp/outer"
+
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+            _assert(env is not None, "git subprocess env was not set")
+            _assert("GIT_DIR" not in env, "GIT_DIR leaked into git subprocess env")
+            _assert("GIT_WORK_TREE" not in env, "GIT_WORK_TREE leaked into git subprocess env")
+            if args[3:] == ["rev-parse", "--show-toplevel"]:
+                out = str(root) + ("\n" if text else "")
+                return _cp(args, stdout=out)
+            if args[3] == "ls-files":
+                return _cp(args, stdout=b"docs/source/from-git.rst\0")
+            raise RuntimeError("unexpected call {}".format(args))
+
+        try:
+            with _PatchRun(fake_run):
+                rows = tracked_files.list_tracked(root, "docs/source")
+        finally:
+            if old_git_dir is None:
+                del os.environ["GIT_DIR"]
+            else:
+                os.environ["GIT_DIR"] = old_git_dir
+            if old_git_work_tree is None:
+                del os.environ["GIT_WORK_TREE"]
+            else:
+                os.environ["GIT_WORK_TREE"] = old_git_work_tree
+        _assert(rows == ["docs/source/from-git.rst"], "git rows were not returned with scrubbed env")
+
+
+def _rev_parse_exit_128_with_dangling_git_symlink_raises() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".git").symlink_to(root / "missing-git-dir", target_is_directory=True)
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+            return _cp(args, code=128, stderr="fatal: not a git repository")
+
+        with _PatchRun(fake_run):
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except RuntimeError as exc:
+                _assert("rev-parse failed" in str(exc), "dangling .git symlink did not raise rev-parse failure")
+            else:
+                raise RuntimeError("expected RuntimeError on rev-parse exit-128 with dangling .git symlink")
+
+
 def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp).resolve()
@@ -399,8 +453,8 @@ def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
         shutil.copy2(_tracked_files_path(), root / "scripts" / "tracked_files.py")
         shutil.copy2(ROOT / "scripts" / "run_doc_check.py", root / "scripts" / "run_doc_check.py")
         shutil.copy2(ROOT / "docs" / "check_prose.py", root / "docs" / "check_prose.py")
-        (root / "docs" / "clean.md").write_text("Clean documentation page.\n", encoding="utf-8")
-        (root / "docs" / "new-page.md").write_text("The new page is seamless.\n", encoding="utf-8")
+        (root / "docs" / "clean.md").write_text("The clean page is seamless.\n", encoding="utf-8")
+        (root / "docs" / "new-page.md").write_text("Supplementary documentation page.\n", encoding="utf-8")
         _write_manifest(root, ["docs/clean.md"])
 
         goodbin = base / "goodbin"
@@ -469,6 +523,39 @@ def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
             )
 
 
+def _docs_prose_inherited_git_dir_outer_repo_fails() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp).resolve()
+        outer = base / "outer"
+        outer.mkdir()
+        subprocess.run(["git", "init", str(outer)], check=True, capture_output=True)
+
+        root = outer / "sdist"
+        (root / "scripts").mkdir(parents=True)
+        (root / "docs").mkdir(parents=True)
+        shutil.copy2(_tracked_files_path(), root / "scripts" / "tracked_files.py")
+        shutil.copy2(ROOT / "scripts" / "run_doc_check.py", root / "scripts" / "run_doc_check.py")
+        shutil.copy2(ROOT / "docs" / "check_prose.py", root / "docs" / "check_prose.py")
+        (root / "docs" / "clean.md").write_text("The clean page is seamless.\n", encoding="utf-8")
+        (root / "docs" / "new-page.md").write_text("Supplementary documentation page.\n", encoding="utf-8")
+        _write_manifest(root, ["docs/clean.md"])
+
+        subprocess.run(["git", "-C", str(outer), "add", "-A"], check=True, capture_output=True)
+        cmd = [
+            sys.executable,
+            str(root / "scripts" / "run_doc_check.py"),
+            str(root / "docs" / "check_prose.py"),
+        ]
+        env = dict(os.environ, GIT_DIR=str(outer / ".git"), LC_ALL="C.UTF-8", LANG="C.UTF-8")
+        done = subprocess.run(cmd, cwd=root, env=env, capture_output=True, text=True)
+        _assert(
+            done.returncode == 1 and "1 prose hits" in done.stderr,
+            "docs_prose with inherited outer GIT_DIR did not fail on staged prose violation: rc={} stdout={!r} stderr={!r}".format(
+                done.returncode, done.stdout, done.stderr
+            ),
+        )
+
+
 def _sibling_prefix_rejected() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -498,7 +585,10 @@ def main() -> int:
     _unreadable_manifest_raises()
     _permission_error_launching_git_raises()
     _git_marker_missing_git_raises()
+    _git_subprocess_env_scrubs_git_vars()
+    _rev_parse_exit_128_with_dangling_git_symlink_raises()
     _docs_prose_broken_git_does_not_pass_stale_manifest()
+    _docs_prose_inherited_git_dir_outer_repo_fails()
     _sibling_prefix_rejected()
     print("tracked_files fallback checks ok")
     return 0
