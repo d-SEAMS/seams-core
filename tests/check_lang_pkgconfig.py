@@ -6,8 +6,9 @@ Usage: check_lang_pkgconfig.py BUILD SOURCE
 
 Builds tests/lang_pkgconfig_consumer.c twice with the flags
 `pkg-config --cflags --libs seams-lang` reports: once with PKG_CONFIG_PATH
-at BUILD/meson-uninstalled, the build-tree flow a binding uses against a
-seams-core checkout, and once against a fresh install under
+at meson-uninstalled in the top build directory (BUILD, or the parent
+project's when seams-core is a subproject), the build-tree flow a binding
+uses against a seams-core checkout, and once against a fresh install under
 BUILD/install-stages. Each binary records the -L directories as its
 runpath and runs with LD_LIBRARY_PATH unset and LD_BIND_NOW=1, so a
 symbol the loaded libraries do not define stops it at startup. ldd must
@@ -113,12 +114,12 @@ def main(argv):
     env = os.environ.copy()
     env.pop("PKG_CONFIG_SYSROOT_DIR", None)
     tree_env = dict(env)
-    tree_env["PKG_CONFIG_PATH"] = str(build / "meson-uninstalled")
+    tree_env["PKG_CONFIG_PATH"] = str(help_mod.meson_root(build) / "meson-uninstalled")
     check("uninstalled", tree_env, None, build, source, work, version, vendored, help_mod)
 
     stage = base / "destdir"
     subprocess.check_call(
-        ["meson", "install", "-C", str(build), "--no-rebuild", "--quiet", "--destdir", str(stage)]
+        ["meson", "install", "-C", str(help_mod.meson_root(build)), "--no-rebuild", "--quiet", "--destdir", str(stage)]
     )
     pc_files = list(stage.rglob("seams-lang.pc"))
     if len(pc_files) != 1:

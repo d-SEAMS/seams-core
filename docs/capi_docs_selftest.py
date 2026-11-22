@@ -76,6 +76,9 @@ def main(argv):
         ("an undocumented export",
          header + "\nSEAMS_API int seams_unannounced(void);\n", page, sorted(names + ["seams_unannounced"]),
          "seams_unannounced: no doc comment above the declaration"),
+        ("a duplicated symbol block",
+         header, page + "\n" + page[page.find(capi_docs.BEGIN): page.find(capi_docs.END) + len(capi_docs.END)] + "\n", names,
+         "the C API page must contain exactly one symbol reference block (found 2 begin marker(s) and 2 end marker(s))"),
     ]
     for label, case_header, case_page, case_names, message in cases:
         if case_header == header and case_page == page:

@@ -34,12 +34,22 @@ def run(cmd, env=None, cwd=None):
     subprocess.check_call(cmd, env=env, cwd=cwd)
 
 
+def meson_root(build):
+    """The meson build directory that holds BUILD: BUILD itself, or the
+    parent project's when seams-core is a subproject. Only that directory
+    can be installed or introspected, and meson-uninstalled is there."""
+    for path in (build, *build.parents):
+        if (path / "meson-info" / "meson-info.json").is_file():
+            return path
+    raise SystemExit(f"{build} is not inside a meson build directory")
+
+
 def prefix_of(build):
     import json
 
     options = json.loads(
         subprocess.check_output(
-            ["meson", "introspect", "--buildoptions", str(build)], text=True
+            ["meson", "introspect", "--buildoptions", str(meson_root(build))], text=True
         )
     )
     for option in options:
@@ -51,10 +61,17 @@ def prefix_of(build):
 def project_version(build):
     import json
 
+    root = meson_root(build)
     info = json.loads(
-        subprocess.check_output(["meson", "introspect", "--projectinfo", str(build)], text=True)
+        subprocess.check_output(["meson", "introspect", "--projectinfo", str(root)], text=True)
     )
-    return info["version"]
+    if root == build:
+        return info["version"]
+    name = build.relative_to(root).parts[-1]
+    for sub in info["subprojects"]:
+        if sub["name"] == name:
+            return sub["version"]
+    raise SystemExit(f"{root} has no subproject {name}")
 
 
 def scratch(build, prefix):
@@ -128,7 +145,7 @@ def main():
     stage = base / "destdir"
     work = base / "work"
     work.mkdir()
-    run(["meson", "install", "-C", str(build), "--no-rebuild", "--destdir", str(stage)])
+    run(["meson", "install", "-C", str(meson_root(build)), "--no-rebuild", "--destdir", str(stage)])
 
     pc_files = list(stage.rglob("seams.pc"))
     configs = list(stage.rglob("seams-config.cmake"))

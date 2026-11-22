@@ -1,0 +1,1 @@
+`source_tree_untracked_snapshot`, `source_tree_untracked_check`, `source_tree_untracked_selftest` and `source_tree_untracked_parallel` stay out of a consumer's test list when seams-core is a Meson subproject, including with `-Dseams-core:with_tests=true`. `source_tree_untracked_not_in_subproject` configures a scratch consumer and fails if any of those four is registered.

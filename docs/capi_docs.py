@@ -184,9 +184,16 @@ def header_problems(funcs, names):
 
 
 def page_sections(page_text):
-    if BEGIN not in page_text or END not in page_text:
+    # Keep one canonical symbol reference region. Multiple copies mask stale docs.
+    n_begin = page_text.count(BEGIN)
+    n_end = page_text.count(END)
+    if n_begin != 1 or n_end != 1:
         return None
-    body = page_text.split(BEGIN, 1)[1].split(END, 1)[0]
+    start = page_text.find(BEGIN)
+    stop = page_text.find(END)
+    if stop < start:
+        return None
+    body = page_text[start + len(BEGIN):stop]
     found = {}
     for chunk in re.split(r"^### ", body, flags=re.M)[1:]:
         title, _, rest = chunk.partition("\n")
@@ -194,7 +201,23 @@ def page_sections(page_text):
     return found
 
 
+def page_block_problems(page_text):
+    n_begin = page_text.count(BEGIN)
+    n_end = page_text.count(END)
+    if n_begin != 1 or n_end != 1:
+        return [
+            "the C API page must contain exactly one symbol reference block "
+            "(found {} begin marker(s) and {} end marker(s))".format(n_begin, n_end)
+        ]
+    if page_text.find(END) < page_text.find(BEGIN):
+        return ["the C API page has API_SYMBOLS_END before API_SYMBOLS_BEGIN"]
+    return []
+
+
 def page_problems(funcs, names, page_text):
+    block_errors = page_block_problems(page_text)
+    if block_errors:
+        return block_errors
     sections = page_sections(page_text)
     if sections is None:
         return ["the C API page has no symbol reference block"]
@@ -265,6 +288,9 @@ def carried_lines(old_part, rendered):
 
 def rewrite_page(page_text, funcs, names):
     """Replace the sections of the listed functions inside the symbol block."""
+    block_errors = page_block_problems(page_text)
+    if block_errors:
+        raise ValueError(block_errors[0])
     head, rest = page_text.split(BEGIN, 1)
     body, tail = rest.split(END, 1)
     parts = re.split(r"^(?=### )", body, flags=re.M)

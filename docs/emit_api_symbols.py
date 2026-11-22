@@ -247,22 +247,50 @@ def render(rows, example):
     return "\n".join(lines)
 
 
-def splice(path, block):
-    text = path.read_text()
-    wrapped = BEGIN + "\n" + block + END + "\n"
-    if BEGIN in text and END in text:
-        text = re.sub(
-            re.escape(BEGIN) + r".*?" + re.escape(END) + r"\n?",
-            wrapped,
-            text,
-            count=1,
-            flags=re.S,
+def marker_lines(text, marker):
+    return [text.count("\n", 0, m.start()) + 1 for m in re.finditer(re.escape(marker), text)]
+
+
+def block_span(text, name):
+    """Offsets of the one BEGIN and END marker, or None when the page has neither.
+
+    Any other marker layout raises ValueError naming the marker lines.
+    """
+    begins = marker_lines(text, BEGIN)
+    ends = marker_lines(text, END)
+    if not begins and not ends:
+        return None
+    if len(begins) != 1 or len(ends) != 1 or text.find(END) < text.find(BEGIN):
+        raise ValueError(
+            "{}: need exactly one API_SYMBOLS_BEGIN followed by one API_SYMBOLS_END, "
+            "found API_SYMBOLS_BEGIN on line(s) {} and API_SYMBOLS_END on line(s) {}".format(
+                name,
+                ", ".join(map(str, begins)) or "none",
+                ", ".join(map(str, ends)) or "none",
+            )
         )
-    else:
+    return text.find(BEGIN), text.find(END)
+
+
+def splice_text(text, wrapped, name):
+    """Return text with its one symbol block replaced, or a block appended."""
+    span = block_span(text, name)
+    if span is None:
         if not text.endswith("\n"):
             text += "\n"
-        text += "\n" + wrapped
-    path.write_text(text)
+        return text + "\n" + wrapped
+    start, stop = span
+    stop += len(END)
+    if text.startswith("\r\n", stop):
+        stop += 2
+    elif text.startswith("\n", stop):
+        stop += 1
+    return text[:start] + wrapped + text[stop:]
+
+
+def splice(path, block):
+    text = path.read_text()
+    path.write_text(splice_text(text, BEGIN + "\n" + block + END + "\n", path))
 
 
 def main():

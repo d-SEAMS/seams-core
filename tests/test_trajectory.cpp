@@ -14,6 +14,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstddef>
+#include <limits>
 #include <numbers>
 #include <random>
 #include <vector>
@@ -478,4 +480,64 @@ TEST_CASE("Continuous vs intermittent H-bond lifetime and rigid-rotor reorientat
       CHECK(rc.c2[k] == Catch::Approx(wantC2).margin(1e-12));
     }
   }
+}
+
+TEST_CASE("Accumulators and unwrappers refuse counts whose storage size wraps",
+          "[traj][bounds]") {
+  constexpr std::size_t most = std::numeric_limits<std::size_t>::max();
+  // 3 * (most / 3 + 1) is 2 modulo 2^64, and most + 1 is 0.
+  const std::size_t wraps3 = most / 3 + 1;
+  const double axis[3] = {0.0, 0.0, 1.0};
+  const double box9[9] = {0.0, 0.0, 0.0, 10.0, 10.0, 10.0, 0.0, 0.0, 0.0};
+
+  CHECK_FALSE(traj::MsdAccumulator(wraps3, 4, 1, 1.0, axis).valid());
+  CHECK_FALSE(traj::MsdAccumulator(traj::kMaxTriples + 1, 4, 1, 1.0, axis).valid());
+  CHECK_FALSE(traj::MsdAccumulator(1, most, 1, 1.0, axis).valid());
+  CHECK_FALSE(traj::MsdAccumulator(1, most - 1, 1, 1.0, axis).valid());
+  CHECK_FALSE(traj::MsdAccumulator(1, traj::kMaxLag + 1, 1, 1.0, axis).valid());
+  CHECK_FALSE(traj::ReorientationAccumulator(wraps3, 4, 1, 1.0).valid());
+  CHECK_FALSE(traj::ReorientationAccumulator(1, most, 1, 1.0).valid());
+  CHECK_FALSE(traj::HbondLifetimeAccumulator(most, 1, 1.0, true).valid());
+  CHECK_FALSE(traj::HbondLifetimeAccumulator(traj::kMaxLag + 1, 1, 1.0, true).valid());
+
+  // A refused accumulator stays refused: push neither reads nor writes.
+  traj::MsdAccumulator msd(1, most, 1, 1.0, axis);
+  const double one[3] = {1.0, 2.0, 3.0};
+  CHECK_FALSE(msd.push(one, 1, nullptr));
+  CHECK(msd.numLags() == 0);
+  traj::HbondLifetimeAccumulator hb(most, 1, 1.0, true);
+  const int d[1] = {0};
+  const int a[1] = {1};
+  CHECK_FALSE(hb.push(d, a, 1));
+  traj::ReorientationAccumulator reo(1, most, 1, 1.0);
+  CHECK_FALSE(reo.push(one, 1));
+
+  traj::TrajectoryUnwrapper unwrapper(wraps3);
+  CHECK(unwrapper.numParticles() == 0);
+  const traj::BoxCell cell = traj::BoxCell::fromBox9(box9);
+  double out[3] = {0.0, 0.0, 0.0};
+  CHECK_FALSE(unwrapper.pushFrame(one, wraps3, cell, out));
+
+  std::vector<double> xyz(6, 1.0);
+  std::vector<double> unwrapped(6, 0.0);
+  CHECK_FALSE(traj::unwrapPositions(xyz.data(), most / 3 + 2, 1, box9, 1, unwrapped.data()));
+  CHECK_FALSE(traj::unwrapPositions(xyz.data(), 1, wraps3, box9, 1, unwrapped.data()));
+  const std::size_t tooManyBoxes = traj::kMaxBoxes + 1;
+  const std::size_t wraps9 = most / 9 + 1;
+  CHECK_FALSE(traj::unwrapPositions(xyz.data(), tooManyBoxes, 1, box9, tooManyBoxes,
+                                    unwrapped.data()));
+  CHECK_FALSE(traj::unwrapPositions(xyz.data(), wraps9, 1, box9, wraps9, unwrapped.data()));
+  const int mols[2] = {1, 1};
+  std::vector<int> ids;
+  std::vector<double> centres;
+  CHECK_FALSE(traj::unwrapMoleculeCentres(xyz.data(), most / 3 + 2, 1, box9, 1, mols, nullptr,
+                                          ids, centres));
+  CHECK_FALSE(traj::unwrapMoleculeCentres(xyz.data(), tooManyBoxes, 1, box9, tooManyBoxes, mols,
+                                          nullptr, ids, centres));
+  CHECK_FALSE(traj::unwrapMoleculeCentres(xyz.data(), wraps9, 1, box9, wraps9, mols, nullptr, ids,
+                                          centres));
+
+  // max_lag 0 keeps every lag and needs no lag bins up front.
+  CHECK(traj::MsdAccumulator(1, 0, 1, 1.0, axis).valid());
+  CHECK(traj::HbondLifetimeAccumulator(0, 1, 1.0, true).valid());
 }

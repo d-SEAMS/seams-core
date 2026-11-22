@@ -4,6 +4,7 @@
 #include "seams.h"
 
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -169,6 +170,102 @@ int main(void) {
     }
     fails += check_close(dtot, 1.0 / 6.0, 1e-12, "two_point_d_total");
     seams_msd_destroy(two);
+  }
+
+  /* Counts whose 3 * n or max_lag + 1 wraps size_t are refused at create.
+   * Accepted, 3 * (SIZE_MAX / 3 + 1) sizes the coordinate store at 2 and
+   * max_lag = SIZE_MAX sizes the lag bins at 0, and push writes past both. */
+  {
+    const double z_axis[3] = {0.0, 0.0, 1.0};
+    const size_t wraps3 = SIZE_MAX / 3 + 1;
+    struct {
+      const char *label;
+      size_t n;
+      size_t max_lag;
+    } msd_cases[] = {
+        {"msd natoms 3n wraps", wraps3, 4},
+        {"msd natoms SIZE_MAX", SIZE_MAX, 4},
+        {"msd max_lag SIZE_MAX", 1, SIZE_MAX},
+        {"msd max_lag SIZE_MAX - 1", 1, SIZE_MAX - 1},
+    };
+    for (size_t c = 0; c < sizeof msd_cases / sizeof msd_cases[0]; ++c) {
+      seams_msd *m = (seams_msd *)&fails;
+      const seams_status st =
+          seams_msd_create(msd_cases[c].n, msd_cases[c].max_lag, 1, 1.0, z_axis, &m);
+      if (st != SEAMS_ERR_RANGE || m != NULL) {
+        fprintf(stderr, "FAIL %s: status %d, handle %s\n", msd_cases[c].label, (int)st,
+                m == NULL ? "NULL" : "set");
+        ++fails;
+        if (st == SEAMS_OK) {
+          seams_msd_destroy(m);
+        }
+      } else {
+        printf("ok %s: %s\n", msd_cases[c].label, seams_last_error_message());
+      }
+    }
+    struct {
+      const char *label;
+      size_t n;
+      size_t max_lag;
+    } reo_cases[] = {
+        {"reorient n_vectors 3n wraps", wraps3, 4},
+        {"reorient n_vectors SIZE_MAX", SIZE_MAX, 4},
+        {"reorient max_lag SIZE_MAX", 1, SIZE_MAX},
+    };
+    for (size_t c = 0; c < sizeof reo_cases / sizeof reo_cases[0]; ++c) {
+      seams_reorient *r = (seams_reorient *)&fails;
+      const seams_status st =
+          seams_reorient_create(reo_cases[c].n, reo_cases[c].max_lag, 1, 1.0, &r);
+      if (st != SEAMS_ERR_RANGE || r != NULL) {
+        fprintf(stderr, "FAIL %s: status %d, handle %s\n", reo_cases[c].label, (int)st,
+                r == NULL ? "NULL" : "set");
+        ++fails;
+        if (st == SEAMS_OK) {
+          seams_reorient_destroy(r);
+        }
+      } else {
+        printf("ok %s: %s\n", reo_cases[c].label, seams_last_error_message());
+      }
+    }
+    seams_hbond_tcf *h = (seams_hbond_tcf *)&fails;
+    const seams_status st = seams_hbond_tcf_create(SIZE_MAX, 1, 1.0, 1, &h);
+    if (st != SEAMS_ERR_RANGE || h != NULL) {
+      fprintf(stderr, "FAIL hbond max_lag SIZE_MAX: status %d, handle %s\n", (int)st,
+              h == NULL ? "NULL" : "set");
+      ++fails;
+      if (st == SEAMS_OK) {
+        seams_hbond_tcf_destroy(h);
+      }
+    } else {
+      printf("ok hbond max_lag SIZE_MAX: %s\n", seams_last_error_message());
+    }
+
+    const size_t too_many_boxes = (size_t)PTRDIFF_MAX / (9 * sizeof(double)) + 1;
+    const size_t wraps9 = SIZE_MAX / 9 + 1;
+    const double dummy_xyz[3] = {1.0, 2.0, 3.0};
+    double dummy_out[3] = {0.0, 0.0, 0.0};
+    const int dummy_mols[1] = {1};
+    const size_t bad_boxes[] = {too_many_boxes, wraps9};
+    for (size_t c = 0; c < sizeof bad_boxes / sizeof bad_boxes[0]; ++c) {
+      const size_t nb = bad_boxes[c];
+      const seams_status st_pos = seams_traj_unwrap_positions(
+          dummy_xyz, nb, 1, box9, nb, dummy_out, nb * 3);
+      if (st_pos != SEAMS_ERR_RANGE) {
+        fprintf(stderr, "FAIL unwrap_positions nboxes=%zu: status %d\n", nb, (int)st_pos);
+        ++fails;
+      } else {
+        printf("ok unwrap_positions nboxes=%zu: %s\n", nb, seams_last_error_message());
+      }
+      size_t nm = 99;
+      const seams_status st_com = seams_traj_unwrap_centres(
+          dummy_xyz, nb, 1, box9, nb, dummy_mols, 1, NULL, 0, NULL, 0, NULL, 0, &nm);
+      if (st_com != SEAMS_ERR_RANGE) {
+        fprintf(stderr, "FAIL unwrap_centres nboxes=%zu: status %d\n", nb, (int)st_com);
+        ++fails;
+      } else {
+        printf("ok unwrap_centres nboxes=%zu: %s\n", nb, seams_last_error_message());
+      }
+    }
   }
 
   return fails == 0 ? 0 : 1;
