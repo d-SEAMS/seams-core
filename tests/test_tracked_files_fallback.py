@@ -157,6 +157,7 @@ def _git_ls_files_failure_raises() -> None:
 def _rev_parse_exit_128_raises() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
+        (root / ".git").mkdir()
         _write_manifest(root, ["docs/source/from-manifest.rst"])
 
         def fake_run(args, check=False, capture_output=False, text=False):
@@ -186,6 +187,115 @@ def _not_git_repo_uses_manifest() -> None:
         _assert(rows == ["docs/source/from-manifest.rst"], "not-a-repository should use manifest")
 
 
+def _localized_not_a_repo_uses_manifest() -> None:
+    messages = (
+        "Schwerwiegend: Kein Git-Repository (oder irgendeines der Elternverzeichnisse): .git",
+        "fatal\u00a0: ni ceci ni aucun de ses répertoires parents n'est un dépôt git\u00a0: .git",
+    )
+    for err in messages:
+        _assert(
+            "not a git repository" not in err.lower(),
+            "localized stderr accidentally contains the English phrase",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+            def fake_run(args, check=False, capture_output=False, text=False, err=err):
+                return _cp(args, code=128, stderr=err)
+
+            with _PatchRun(fake_run):
+                rows = tracked_files.list_tracked(root, "docs/source")
+            _assert(
+                rows == ["docs/source/from-manifest.rst"],
+                "localized not-a-repository error should use the manifest: {}".format(err),
+            )
+
+
+def _ls_files_oserror_raises() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+        def fake_run(args, check=False, capture_output=False, text=False):
+            if args[3:] == ["rev-parse", "--show-toplevel"]:
+                out = str(root) + ("\n" if text else "")
+                return _cp(args, stdout=out)
+            if args[3] == "ls-files":
+                raise OSError("ls-files")
+            raise RuntimeError("unexpected call {}".format(args))
+
+        with _PatchRun(fake_run):
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except (OSError, RuntimeError) as exc:
+                _assert("ls-files" in str(exc), "ls-files OSError was not raised")
+            else:
+                raise RuntimeError("ls-files OSError returned rows")
+
+
+def _rev_parse_probe_does_not_catch_exception() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+        def fake_run(*_args, **_kwargs):
+            raise RuntimeError("rev-parse probe")
+
+        with _PatchRun(fake_run):
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except RuntimeError as exc:
+                _assert(str(exc) == "rev-parse probe", "rev-parse probe swallowed Exception")
+            else:
+                raise RuntimeError("rev-parse probe caught Exception and fell back")
+
+
+def _unreadable_manifest_raises() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+        path = root / tracked_files.MANIFEST
+        path.chmod(0)
+        try:
+            path.read_bytes()
+        except PermissionError:
+            pass
+        else:
+            raise RuntimeError("manifest stayed readable; unreadable-manifest check did not run")
+
+        def fake_run(*_args, **_kwargs):
+            raise FileNotFoundError("git")
+
+        try:
+            with _PatchRun(fake_run):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except PermissionError:
+                    pass
+                else:
+                    raise RuntimeError("unreadable manifest returned rows")
+        finally:
+            path.chmod(0o644)
+
+
+def _permission_error_launching_git_raises() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_manifest(root, ["docs/source/from-manifest.rst"])
+
+        def fake_run(*_args, **_kwargs):
+            raise PermissionError("git")
+
+        with _PatchRun(fake_run):
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except PermissionError:
+                pass
+            else:
+                raise RuntimeError("PermissionError launching git fell back to the manifest")
+
+
 def _sibling_prefix_rejected() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -207,6 +317,11 @@ def main() -> int:
     _git_ls_files_failure_raises()
     _rev_parse_exit_128_raises()
     _not_git_repo_uses_manifest()
+    _localized_not_a_repo_uses_manifest()
+    _ls_files_oserror_raises()
+    _rev_parse_probe_does_not_catch_exception()
+    _unreadable_manifest_raises()
+    _permission_error_launching_git_raises()
     _sibling_prefix_rejected()
     print("tracked_files fallback checks ok")
     return 0

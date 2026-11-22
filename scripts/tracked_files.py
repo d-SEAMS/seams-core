@@ -20,18 +20,28 @@ def _matches(path: str, specs: tuple[str, ...]) -> bool:
     return False
 
 
+def _git_worktree(root: Path) -> bool:
+    # A work tree has a .git directory; a linked work tree has a .git file.
+    # rev-parse exits 128 for "not a repository" and for real failures, and
+    # git translates that text, so the split is the marker on disk.
+    marker = root / ".git"
+    return marker.is_dir() or marker.is_file()
+
+
 def _git_toplevel(root: Path) -> Path | None:
     cmd = ["git", "-C", str(root), "rev-parse", "--show-toplevel"]
     try:
         done = subprocess.run(cmd, check=False, capture_output=True, text=True)
-    except OSError:
+    except FileNotFoundError:
         return None
-    if done.returncode != 0:
-        err = (done.stderr or "").strip()
-        if "not a git repository" in err.lower():
-            return None
-        raise RuntimeError("git rev-parse failed: {}".format(err or "unknown error"))
-    return Path(done.stdout.strip()).resolve()
+    if done.returncode == 0:
+        return Path(done.stdout.strip()).resolve()
+    # Exit 128 with no marker is "not a repository", in any locale.
+    # A marker means this is a work tree and the failure is real.
+    if done.returncode == 128 and not _git_worktree(root):
+        return None
+    err = (done.stderr or "").strip()
+    raise RuntimeError("git rev-parse failed: {}".format(err or "unknown error"))
 
 
 def _from_git(root: Path, specs: tuple[str, ...]) -> list[str]:
