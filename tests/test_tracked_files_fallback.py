@@ -58,6 +58,33 @@ class _PatchRun:
         tracked_files.subprocess.run = self._old
 
 
+class _PatchReadBytes:
+    def __init__(self, target: Path, exc: BaseException):
+        self._target = target.resolve()
+        self._exc = exc
+        self._old = None
+        self.calls = 0
+
+    def __enter__(self):
+        old = tracked_files.Path.read_bytes
+        self._old = old
+        target = self._target
+        exc = self._exc
+        patch = self
+
+        def wrapped(path_self: Path):
+            if path_self.resolve() == target:
+                patch.calls += 1
+                raise exc
+            return old(path_self)
+
+        tracked_files.Path.read_bytes = wrapped
+        return self
+
+    def __exit__(self, _exc_type, _exc, _tb):
+        tracked_files.Path.read_bytes = self._old
+
+
 def _cp(args, code=0, stdout="", stderr=""):
     return subprocess.CompletedProcess(args=args, returncode=code, stdout=stdout, stderr=stderr)
 
@@ -262,27 +289,19 @@ def _unreadable_manifest_raises() -> None:
         root = Path(tmp)
         _write_manifest(root, ["docs/source/from-manifest.rst"])
         path = root / tracked_files.MANIFEST
-        path.chmod(0)
-        try:
-            path.read_bytes()
-        except PermissionError:
-            pass
-        else:
-            raise RuntimeError("manifest stayed readable; unreadable-manifest check did not run")
 
         def fake_run(*_args, **_kwargs):
             raise FileNotFoundError("git")
 
-        try:
-            with _PatchRun(fake_run):
-                try:
-                    tracked_files.list_tracked(root, "docs/source")
-                except PermissionError:
-                    pass
-                else:
-                    raise RuntimeError("unreadable manifest returned rows")
-        finally:
-            path.chmod(0o644)
+        err = PermissionError(13, "Permission denied", str(path))
+        with _PatchRun(fake_run), _PatchReadBytes(path, err) as patch_read:
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except PermissionError:
+                pass
+            else:
+                raise RuntimeError("unreadable manifest returned rows")
+            _assert(patch_read.calls == 1, "unreadable-manifest check did not invoke read_bytes")
 
 
 def _permission_error_launching_git_raises() -> None:
