@@ -6,6 +6,8 @@ github.com/d-SEAMS when this module loads a language.
 """
 
 import ast
+import ctypes
+import errno
 import os
 import re
 import shutil
@@ -61,23 +63,73 @@ def checkout(name):
         except BaseException:
             shutil.rmtree(staging, ignore_errors=True)
             raise
-        if not dest.exists():
-            os.rename(staging, dest)
-        else:
-            previous = dest.with_name(".{}.previous".format(dest.name))
-            if previous.exists():
-                shutil.rmtree(previous)
-            os.rename(dest, previous)
-            try:
-                os.rename(staging, dest)
-            except BaseException:
-                os.rename(previous, dest)
-                raise
-            shutil.rmtree(previous)
+        # A crash between two renames used to leave dest missing. The
+        # install puts the new tree in place without that window, and the
+        # next call restores .previous if a fallback swap was killed.
+        install_snapshot(dest, staging)
     else:
         subprocess.check_call(["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin", "HEAD"])
         subprocess.check_call(["git", "-C", str(dest), "reset", "--quiet", "--hard", "FETCH_HEAD"])
     return dest
+
+
+def _exchange_dirs(left, right):
+    """Atomically swap two directories with renameat2(RENAME_EXCHANGE).
+
+    Returns False when this kernel has no such call. Any other error is raised.
+    """
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+    except OSError:
+        return False
+    if not hasattr(libc, "renameat2"):
+        return False
+    call = libc.renameat2
+    call.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+    call.restype = ctypes.c_int
+    # linux/fs.h: RENAME_EXCHANGE. AT_FDCWD is -100.
+    rc = call(-100, os.fsencode(left), -100, os.fsencode(right), 2)
+    if rc == 0:
+        return True
+    err = ctypes.get_errno()
+    if err in (errno.ENOSYS, errno.EINVAL, errno.ENOTSUP, errno.EOPNOTSUPP, errno.EPERM):
+        return False
+    raise OSError(err, os.strerror(err), str(left), None, str(right))
+
+
+def install_snapshot(dest, staging, rename=None):
+    """Replace ``dest`` with ``staging``.
+
+    ``renameat2(RENAME_EXCHANGE)`` swaps the two names in one syscall, so
+    ``dest`` is never absent. Without that call, a crash between the two
+    renames leaves the old tree at ``.name.previous``. The next call moves
+    it back before installing anything else. ``rename`` replaces both steps
+    of that fallback; the recovery move stays ``os.rename``.
+    """
+    rename = os.rename if rename is None else rename
+    dest = Path(dest)
+    staging = Path(staging)
+    previous = dest.with_name(".{}.previous".format(dest.name))
+    if not dest.exists() and previous.is_dir():
+        os.rename(previous, dest)
+    if not dest.exists():
+        rename(staging, dest)
+        return
+    if previous.exists():
+        shutil.rmtree(previous)
+    if rename is os.rename and _exchange_dirs(dest, staging):
+        if staging.exists():
+            shutil.rmtree(staging)
+        return
+    rename(dest, previous)
+    try:
+        rename(staging, dest)
+    except Exception:
+        if not dest.exists() and previous.is_dir():
+            os.rename(previous, dest)
+        raise
+    if previous.exists():
+        shutil.rmtree(previous)
 
 
 def vendored_rev_errors(root=None, pins=None):

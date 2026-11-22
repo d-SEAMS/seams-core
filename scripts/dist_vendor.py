@@ -130,6 +130,14 @@ def fetch_pin(url, pin, dest):
         raise SystemExit("{} checked out {} but the pin is {}".format(url, got, pin))
 
 
+def place_binding(dest, staging, rename=None):
+    """Move a fetched binding onto ``dest`` without a missing-dest window."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "docs"))
+    from binding_langs import install_snapshot
+
+    install_snapshot(dest, staging, rename=rename)
+
+
 def vendor_bindings(source_root, dist_root):
     """Put the pinned language-binding commits into the dist cache.
 
@@ -164,9 +172,9 @@ def vendor_bindings(source_root, dist_root):
             shutil.rmtree(staging, ignore_errors=True)
             raise
         dest = dest_root / name
-        if dest.exists():
-            shutil.rmtree(dest)
-        staging.rename(dest)
+        # Same crash-safe replace as the online checkout. Deleting dest
+        # before the rename left a killed dist with no binding tree.
+        place_binding(dest, staging)
 
 
 def main():
