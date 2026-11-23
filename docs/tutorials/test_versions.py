@@ -99,4 +99,4 @@ def test_derived_files_read_meson(root: Path):
     ):
         text = (root / rel).read_text(encoding="utf-8")
         assert "@INCLUDE" in text and "Doxyfile_version" in text, rel
-        assert not re.search(r"^PROJECT_NUMBER\s*=", text, re.M), rel
+        assert not re.search(r"^[ \t]*PROJECT_NUMBER\s*=", text, re.M), rel

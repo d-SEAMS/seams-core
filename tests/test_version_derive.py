@@ -73,6 +73,17 @@ def _load_module(name: str, path: Path):
     return module
 
 
+def _meson_project_version(root: Path) -> str:
+    text = (root / "meson.build").read_text(encoding="utf-8")
+    match = re.search(
+        r"^project\([^)]*?version:\s*'([0-9]+\.[0-9]+\.[0-9]+)'",
+        text,
+        re.M,
+    )
+    assert match, "meson.build has no project version"
+    return match.group(1)
+
+
 def _bump_meson(root: Path, version: str) -> None:
     meson_path = root / "meson.build"
     text = meson_path.read_text(encoding="utf-8")
@@ -162,7 +173,7 @@ def _test_release_sync(tmp: Path) -> None:
     assert printed.stdout.strip() == BUMPED_VERSION
 
 
-def _test_doxygen_generation(tmp: Path) -> None:
+def _test_doxygen_generation(tmp: Path, released: str) -> None:
     subprocess.run(
         [sys.executable, str(tmp / "scripts" / "doxygen_version_header.py")],
         check=True,
@@ -190,7 +201,7 @@ def _test_doxygen_generation(tmp: Path) -> None:
     ):
         text = (tmp / rel).read_text(encoding="utf-8")
         assert "@INCLUDE" in text and "Doxyfile_version" in text, rel
-        assert "2.14.0" not in text, rel
+        assert released not in text, rel
 
     doxygen_bin = os.environ.get("DOXYGEN") or shutil.which("doxygen")
     if doxygen_bin:
@@ -199,7 +210,9 @@ def _test_doxygen_generation(tmp: Path) -> None:
         assert "v" + BUMPED_VERSION in index_html
 
 
-def _test_discoverability_and_conf(tmp: Path) -> None:
+def _test_discoverability_and_conf(tmp: Path, released: str) -> None:
+    conf_text = (tmp / "docs" / "source" / "conf.py").read_text(encoding="utf-8")
+    assert released not in conf_text
     code = """
 import ast
 import json
@@ -236,7 +249,7 @@ assert ns["release"] == {ver!r}
     assert res.returncode == 0, res.stderr
 
 
-def _test_c_api_tour_and_video_tapes(tmp: Path) -> None:
+def _test_c_api_tour_and_video_tapes(tmp: Path, released: str) -> None:
     tour = _load_module("check_c_api_tour_tmp", tmp / "docs" / "check_c_api_tour.py")
     assert tour.meson_version(tmp) == (BUMPED_MAJOR, BUMPED_MINOR, BUMPED_PATCH)
     page = (tmp / "docs" / "api" / "c.md").read_text(encoding="utf-8")
@@ -252,14 +265,16 @@ def _test_c_api_tour_and_video_tapes(tmp: Path) -> None:
         assert row in resolved, "missing {}".format(row)
     for ph in ("<number>", "<major>", "<minor>", "<patch>", "<version>"):
         assert ph not in resolved, "unresolved placeholder {}".format(ph)
-    assert "capi seams_version_string 2.14.0" not in resolved
+    stale_line = "capi seams_version_string {}".format(released)
+    assert stale_line not in resolved
+    assert released not in page
     conf_text = (tmp / "docs" / "source" / "conf.py").read_text(encoding="utf-8")
     assert "check_c_api_tour.resolve_page(" in conf_text
 
     all_doc = re.findall(r"(?m)^capi \S.*$", resolved)
     tour.check_page(all_doc, page, tmp, [], "\n".join(all_doc))
     stale_doc = [
-        "capi seams_version_string 2.14.0" if r.startswith("capi seams_version_string ") else r
+        stale_line if r.startswith("capi seams_version_string ") else r
         for r in all_doc
     ]
     failed = False
@@ -267,26 +282,28 @@ def _test_c_api_tour_and_video_tapes(tmp: Path) -> None:
         tour.check_page(stale_doc, page, tmp, [], "\n".join(stale_doc))
     except SystemExit:
         failed = True
-    assert failed, "check_page must reject stale 2.14.0 output when meson is bumped"
+    assert failed, "check_page must reject stale {} output when meson is bumped".format(released)
 
     tapes = _load_module("video_tapes_tmp", tmp / "docs" / "video_tapes.py")
     assert tapes.project_version(tmp) == BUMPED_VERSION
     lua_dir = tmp / "docs" / "videos" / "lua"
     tapes.check_static_folder(lua_dir, BUMPED_VERSION)
-    expanded_rec = tapes.expand_version((lua_dir / "recorded.txt").read_text(encoding="utf-8"), BUMPED_VERSION)
+    recorded = (lua_dir / "recorded.txt").read_text(encoding="utf-8")
+    assert released not in recorded
+    expanded_rec = tapes.expand_version(recorded, BUMPED_VERSION)
     assert "{} cubic 8".format(BUMPED_VERSION) in expanded_rec
-    assert "2.14.0" not in expanded_rec
+    assert released not in expanded_rec
 
     tv = _load_module("test_versions_tmp", tmp / "docs" / "tutorials" / "test_versions.py")
     tv.test_version_files_agree(tmp)
     tv.test_derived_files_read_meson(tmp)
 
 
-def _test_nix_extraction(tmp: Path) -> None:
+def _test_nix_extraction(tmp: Path, released: str) -> None:
     nix_text = (tmp / "nix" / "package.nix").read_text(encoding="utf-8")
     assert "builtins.readFile ../meson.build" in nix_text
     assert "\\nproject(" in nix_text
-    assert "2.14.0" not in nix_text
+    assert released not in nix_text
     # Mirror nix/package.nix project()-anchored extraction on the bumped meson.build,
     # including ensuring a stray version: outside project() is ignored.
     meson_text = (tmp / "meson.build").read_text(encoding="utf-8") + "\n# version: '0.0.1'\n"
@@ -301,17 +318,50 @@ def _test_nix_extraction(tmp: Path) -> None:
     assert matches == [BUMPED_VERSION], matches
 
 
+def _test_finalize_seo(tmp: Path, released: str) -> None:
+    path = tmp / "docs" / "finalize_seo.py"
+    text = path.read_text(encoding="utf-8")
+    assert released not in text, "finalize_seo.py still contains {}".format(released)
+    values = []
+    for node in ast.walk(ast.parse(text)):
+        if not isinstance(node, ast.Dict):
+            continue
+        for key, value in zip(node.keys, node.values):
+            if isinstance(key, ast.Constant) and key.value == "softwareVersion":
+                values.append(value)
+    assert len(values) == 1, values
+    call = values[0]
+    assert isinstance(call, ast.Call), ast.dump(call)
+    func = call.func
+    name = func.id if isinstance(func, ast.Name) else getattr(func, "attr", None)
+    assert name == "project_version", ast.dump(call)
+    sys.path.insert(0, str(tmp / "docs"))
+    try:
+        seo = _load_module("finalize_seo_tmp", path)
+        payload = json.loads(seo._json_ld())
+    finally:
+        sys.path.remove(str(tmp / "docs"))
+    versions = [
+        node.get("softwareVersion")
+        for node in payload["@graph"]
+        if "softwareVersion" in node
+    ]
+    assert versions == [BUMPED_VERSION], versions
+
+
 def main() -> int:
     src_root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
+    released = _meson_project_version(src_root)
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td) / "seams-core"
         _copy_tree(src_root, tmp)
         _bump_meson(tmp, BUMPED_VERSION)
         _test_release_sync(tmp)
-        _test_doxygen_generation(tmp)
-        _test_discoverability_and_conf(tmp)
-        _test_c_api_tour_and_video_tapes(tmp)
-        _test_nix_extraction(tmp)
+        _test_doxygen_generation(tmp, released)
+        _test_discoverability_and_conf(tmp, released)
+        _test_c_api_tour_and_video_tapes(tmp, released)
+        _test_nix_extraction(tmp, released)
+        _test_finalize_seo(tmp, released)
     print("version derive ok (bumped to {})".format(BUMPED_VERSION))
     return 0
 
