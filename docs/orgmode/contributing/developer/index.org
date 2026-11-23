@@ -1,0 +1,86 @@
+#+TITLE: Developing seams-core
+#+OPTIONS: toc:nil num:nil
+
+How to build, test and change the engine. The release cut is
+[[file:release.org][release.org]]. Questions that come up while cutting a
+version are in [[file:faq.org][faq.org]].
+
+The book sources are Org. Edit the files under ~docs/orgmode/~. The
+~docs/source/~ copies are generated.
+
+* Build
+
+From a checkout, with Eigen 3.4 available:
+
+#+begin_example
+meson setup bbdir --prefix=$PWD/bbdir/prefix -Dwith_tests=true
+meson compile -C bbdir
+meson test -C bbdir
+#+end_example
+
+~pixi run setup~ and ~pixi run build~ use the locked toolchain and write
+~bbdir/~. ~pixi run test~ runs the meson suite.
+
+* The version environment
+
+Meson rewrites the source version and cogapp regenerates the copies. These
+tools have their own pixi environment, because the cogapp wheel installs a
+~cog~ script that would shadow cocogitto.
+
+| Task | Environment | What it does |
+| release-cog | version | Rewrite every path in ~ci/version/files.txt~ from ~meson.build~ |
+| version-drift | version | Fail if one of those copies differs |
+| towncrier-check | version | Require a valid fragment for the branch |
+| towncrier-draft | version | Print the unreleased notes without writing them |
+
+#+begin_example
+pixi run --frozen -e version release-cog
+pixi run --frozen -e version version-drift
+pixi run --frozen -e version towncrier-check
+pixi run --frozen -e version towncrier-draft
+#+end_example
+
+* prek
+
+~prek.toml~ runs the ~version-drift~ hook on every commit. Install the
+shims with ~prek install~ after ~pixi install -e version~.
+
+#+begin_example
+prek run version-drift --config prek.toml
+#+end_example
+
+* Changelog fragments
+
+A user-visible change adds ~changelog.d/+slug.<type>.md~ in the same
+commit. The type is ~added~, ~changed~, ~deprecated~, ~removed~, ~fixed~
+or ~security~. The release cut renders the directory with towncrier.
+~changelog.d/README.md~ has the file name.
+
+* Commits
+
+Conventional Commits: ~feat:~ bumps minor, ~fix:~ and ~perf:~ bump patch,
+and a breaking change marked with ~!~ bumps major. ~docs:~, ~test:~,
+~build:~, ~ci:~, ~chore:~, ~style:~ and ~refactor:~ do not bump.
+~cog.toml~ sets ~tag_prefix~ to ~v~ and leaves the changelog to
+towncrier.
+
+* CI, run locally
+
+| Workflow | Local command |
+| ~.github/workflows/ci_test.yml~ | ~meson test -C bbdir~ |
+| ~.github/workflows/ci_docs.yml~ | ~pixi run -e docs docbld~ |
+| ~.github/workflows/release-prepare.yml~ | version-drift, release metadata, towncrier check and draft, then ~cog bump --auto --dry-run~ |
+| ~.github/workflows/release.yml~ | ~scripts/check_release_version.py~ and cogapp ~--check~ |
+| ~.github/workflows/ci_packages.yml~ | the package meson setup in that workflow |
+
+~release.yml~ publishes the GitHub release for a ~v*~ tag and uses
+~GITHUB_TOKEN~ only. ~ci_docs.yml~ publishes ~gh-pages~ from ~main~ and
+uses ~GITHUB_TOKEN~ only. docs.dseams.info reads that branch.
+
+#+begin_export rst
+.. toctree::
+   :hidden:
+
+   release
+   faq
+#+end_export

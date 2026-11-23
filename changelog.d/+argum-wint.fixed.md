@@ -1,1 +1,0 @@
-The vendored argument parser passes a wide character to `iswspace` as `wint_t`. It cast through `unsigned`, which is a sign change where `wint_t` is `int`, so the macOS build stopped under `-Werror=sign-conversion`.

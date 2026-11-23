@@ -17,7 +17,7 @@ import numpy as np
 try:
     import dseams
 except ImportError as err:
-    raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib==2.14.0") from err
+    raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib") from err
 
 
 def read_lammpstrj(path: Path):

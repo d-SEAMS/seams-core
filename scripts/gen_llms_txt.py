@@ -48,7 +48,7 @@ SUMMARY = (
 
 BINDINGS = (
     ("PydSEAMSlib", "https://github.com/d-SEAMS/PydSEAMSlib",
-     "Install the Python binding with pip install pydseamslib==2.14.0."),
+     "Install the Python binding with pip install pydseamslib."),
     ("yodaStruct", "https://github.com/d-SEAMS/yodaStruct",
      "Clone the Lua and Fennel binding, then run luarocks make in the checkout."),
     ("dseams-r", "https://github.com/d-SEAMS/dseams-r",
@@ -56,7 +56,7 @@ BINDINGS = (
     ("Dseams.jl", "https://github.com/d-SEAMS/Dseams.jl",
      "Install the Julia binding with Pkg.add(url=\"https://github.com/d-SEAMS/Dseams.jl\")."),
     ("dseams-rs", "https://github.com/d-SEAMS/dseams-rs",
-     "Install the Rust binding with cargo add dseams@2.14.0."),
+     "Install the Rust binding with cargo add dseams."),
     ("dseams-fortran", "https://github.com/d-SEAMS/dseams-fortran",
      "Add the Fortran binding as an fpm Git dependency."),
 )

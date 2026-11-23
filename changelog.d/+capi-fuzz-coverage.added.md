@@ -1,1 +1,0 @@
-`-Dcapi_fuzz_coverage=true` instruments this project's code for libFuzzer under clang, so the fuzzers see coverage inside `libseams` and not only in the harness. Subprojects stay uninstrumented, so their examples link without a sanitizer runtime; with sanitizers or coverage on, clang links the shared libraries with `-z undefs` and leaves the runtime's symbols to the executable.

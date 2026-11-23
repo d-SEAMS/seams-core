@@ -1,6 +1,8 @@
 [workspace]
 name = "seams-core"
+# [[[cog import seams_version as v; cog.outl(f'version = "{v.VERSION}"')]]]
 version = "2.14.0"
+# [[[end]]]
 channels = ["conda-forge"]
 # linux-64 stays the glibc 2.28 baseline. conda-forge has no
 # sysroot_linux-64 2.38; 2.39 is the sysroot at or above 2.38. It is
@@ -92,6 +94,8 @@ abi = { features = ["abi"] }
 # PLUMED 2.10 with the 2.39 sysroot. The default environment keeps
 # PLUMED 2.9.2 on the glibc 2.28 baseline.
 plumed210 = { features = ["plumed210"], no-default-feature = true }
+# cogapp only. Its wheel installs a `cog` script that would shadow cocogitto.
+version = { features = ["version"], no-default-feature = true }
 
 [feature.plumed210]
 platforms = ["linux-64-glibc239"]
@@ -339,3 +343,24 @@ solvis-tools = ">=0.1.5, <0.2"
 # blank line under the version heading and the towncrier check fails.
 towncrier = "==23.11.0"
 chemparseplot = ">=1.8, <2"
+
+# cogapp regenerates and checks the version copies (ci/version/files.txt).
+# Its own environment, because the cogapp wheel installs a `cog` script that
+# would shadow cocogitto's `cog` in any environment that also runs cog bump.
+# linux-64 matches the release workflows. The other platforms stay on the
+# environments that build the engine.
+[feature.version]
+platforms = ["linux-64"]
+
+[feature.version.dependencies]
+python = ">=3.11,<3.14"
+
+[feature.version.pypi-dependencies]
+cogapp = "==3.6.0"
+towncrier = "==23.11.0"
+
+[feature.version.tasks]
+release-cog = { cmd = "python -m cogapp -I ci/version -r @ci/version/files.txt", description = "Regenerate every version copy from meson.build (ci/version/files.txt)" }
+version-drift = { cmd = "python -m cogapp -I ci/version --check @ci/version/files.txt", description = "Fail if a version copy differs from meson.build (prek version-drift hook)" }
+towncrier-check = { cmd = "python -m towncrier check", description = "Require a valid changelog fragment for the branch" }
+towncrier-draft = { cmd = "python -m towncrier build --draft", description = "Preview release notes" }

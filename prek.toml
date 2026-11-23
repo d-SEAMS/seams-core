@@ -1,0 +1,21 @@
+# prek hook runner. The version-drift hook is the release check:
+# every copy in ci/version/files.txt matches meson.build.
+minimum_prek_version = "0.3.0"
+
+[[repos]]
+repo = "builtin"
+hooks = [
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  { id = "check-added-large-files" },
+  { id = "check-merge-conflict" },
+  { id = "check-toml" },
+  { id = "check-yaml" },
+  { id = "check-json" },
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  { id = "version-drift", name = "version copies match meson.build", entry = "pixi run --frozen -e version version-drift", language = "system", pass_filenames = false, always_run = true },
+]

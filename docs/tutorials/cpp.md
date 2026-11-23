@@ -1,9 +1,8 @@
 # C++ tutorial
 
-Classify the eight-atom cubic cell with `include/seams.hpp`, then the ice Ih dump. The program is `docs/examples/cpp_api.cpp`. Passed the repository root, it prints:
+Classify the eight-atom cubic cell with `include/seams.hpp`, then the ice Ih dump. The program is `docs/examples/cpp_api.cpp`. Passed the repository root, the first line is `cpp api cubic 8 q6 0.629` followed by the project version. The second line is:
 
 ```
-cpp api cubic 8 q6 0.629 2.14.0
 ice Ih atoms 128 hexagonal 128 q6bar 0.562448843702 shell_ih 128 pockets 0
 ```
 

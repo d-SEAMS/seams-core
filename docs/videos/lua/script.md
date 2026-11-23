@@ -20,7 +20,7 @@ LUA_PATH=bindings/lua/?.lua LUA_CPATH="$SEAMS_BUILD/bindings/lua/luajit/?.so" lu
 SEAMS_LIB=seams luajit tests/lua_ffi.lua "$SEAMS_BUILD/bindings/lua/dseams_ffi.lua"
 ```
 
-Expected: `2.14.0 cubic 8` and `ffi ok`.
+Expected: the project version, then `cubic 8`, and `ffi ok`.
 
 ## Scene 2
 

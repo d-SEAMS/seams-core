@@ -1,0 +1,58 @@
+#+TITLE: Release questions
+#+OPTIONS: toc:nil num:nil
+
+What stalled 2.14.1, and the checks that stay out of the meson suite.
+The cut itself is [[file:release.org][release.org]].
+
+* Why the manylinux glibc 2.28 job exited 128
+
+seams-core Release run 44409982519 built the Linux archive inside the
+~manylinux_2_28~ container. ~scripts/build_linux_release.sh~ ran as root
+and extracted the source archive with ~tar -xzf~. Tar retained the uid
+stored in the archive, so the extracted ~subprojects/readcon-core~ was
+not owned by the user running Git. Git 2.35 and later reject such a work
+tree as dubious and the release stopped with exit 128.
+
+The build must assign extracted files to the container user and replace
+the dist copy before creating the pinned checkout:
+
+#+begin_example
+tar --no-same-owner -C "$work/src" -xzf "$src_tar"
+rm -rf "$dest"
+git init "$dest"
+#+end_example
+
+The release builder now preserves the container user's ownership during
+extraction and recreates each pinned readcon checkout from an empty
+directory.
+
+* Why a starved queue is rebuilt from the tag that already exists
+
+A pull request run left sitting in the Actions queue holds the
+concurrency group, and the release job never starts. Cancel the stale
+pull request runs. Then ~workflow_dispatch~ the workflow on the tag that
+is already cut, so that tag is rebuilt. Do not push another tag, and do
+not open another pull request, to get a runner.
+
+For the seams-core release, dispatch ~release.yml~ with the existing tag:
+
+#+begin_example
+gh run list --workflow release.yml --status queued
+gh run cancel RUN_ID
+gh workflow run release.yml -f tag=v2.14.1
+#+end_example
+
+The dispatch checks out that tag, validates its version, and uses the tag
+name for the concurrency group and GitHub release. A tag push remains the
+normal trigger; dispatch is the rebuild path and does not create a tag.
+
+* Why live registry checks stay out of meson test
+
+A lookup of PyPI, conda-forge, crates.io or CRAN does not belong in
+~meson test~. The suite runs offline. A registry that is slow, or a
+package that is not published yet, fails or hangs the test, and the
+release sits in the queue behind it.
+
+Registry and release-tool checks stay in their own jobs. ~version-drift~
+and the towncrier checks run in release-prepare CI. Meson tests the
+release metadata with Python already required by the test suite.
