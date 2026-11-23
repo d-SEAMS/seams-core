@@ -9,7 +9,6 @@ spaces on both sides, outside those examples, is punctuation.
 """
 
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -29,21 +28,15 @@ EM = "\u2014"
 PUNCT = re.compile(r"\s--\s")
 NIX = re.compile(r"\bnix run\b")
 CARGO_SPLIT = re.compile(r" -- --")
+sys.path.insert(0, str(ROOT / "scripts"))
+import tracked_files  # noqa: E402
 
 
 def pages():
     """Tracked pages only. Generated rst is gitignored and must not fail this check."""
-    listed = subprocess.run(
-        ["git", "ls-files", "-z", "--", "docs", "README.md", "changelog.d"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-    )
     found = []
-    for raw in listed.stdout.split(b"\0"):
-        if not raw:
-            continue
-        path = ROOT / raw.decode()
+    for row in tracked_files.list_tracked(ROOT, "docs", "README.md", "changelog.d"):
+        path = ROOT / row
         if path.suffix not in {".md", ".rst", ".org"}:
             continue
         if SKIP.intersection(path.relative_to(ROOT).parts) or path.is_relative_to(GENERATED):

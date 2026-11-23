@@ -1,0 +1,1 @@
+`pin_host` is registered on Linux only. It reads cpu masks with `sched_getaffinity` and the proc filesystem, and the placement it checks exists only on Linux. On macOS it stopped at the missing `libyodaLib.so`, and it could not have passed with the dylib either.

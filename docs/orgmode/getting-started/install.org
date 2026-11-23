@@ -15,7 +15,7 @@ visible as the ~eigen3~ pkg-config module. conda-forge can supply
 Meson, Ninja, pkg-config, and that Eigen:
 
 #+begin_src bash
-conda install -c conda-forge meson ninja pkg-config 'eigen=3.4.*'
+conda install -c conda-forge meson ninja pkg-config 'eigen=3.4.0'
 #+end_src
 
 An unpinned ~eigen~ package on that channel currently resolves to

@@ -13,11 +13,16 @@ import os
 from pathlib import Path
 
 import numpy as np
+from project_version import project_version
 
 try:
     import dseams
 except ImportError as err:
-    raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib==2.14.0") from err
+    raise SystemExit(
+        "dseams is part of pydseamslib: pip install pydseamslib=={}".format(
+            project_version()
+        )
+    ) from err
 
 
 def read_lammpstrj(path: Path):

@@ -1,1 +1,1 @@
-`recipe/recipe.yaml` builds `libseams` (`libyodaLib`, `libseams`, `libseams_lang`, the `seams` CLI, headers, pkg-config and CMake files) for conda-forge with rattler-build from the release tag archive. The `pydseamslib` wheels and their conda package are built in d-SEAMS/PydSEAMSlib.
+The source build installs `libyodaLib`, `libseams`, `libseams_lang`, the `seams` CLI, headers, pkg-config metadata, and CMake metadata. PyPI provides the `pydseamslib` 2.14.0 wheels from d-SEAMS/PydSEAMSlib.

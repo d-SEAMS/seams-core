@@ -333,8 +333,9 @@ the same cluster series, which sits at a mean size of 62, has mean
 fraction 0.414. The maximum of that series has mean fraction 0.417.
 The per-frame largest-cluster columns, for every seed and every
 picosecond, are kept outside the work tree. Their md5 and size are
-`docs/nucleation/mw4096-clusters.dvc`. The table will be published as
-a dataset of the d-SEAMS organisation on Hugging Face.
+`docs/nucleation/mw4096-clusters.dvc`. The table is written as
+`clusters.tsv` by `scripts/nucleation_ensemble.py`, and the md5 there
+checks a regenerated copy.
 
 ## Files
 
@@ -377,8 +378,8 @@ The summary tables kept in the repository are
 `docs/nucleation/mw4096-bootstrap.tsv` and
 `docs/nucleation/mw4096-stacking.tsv`. The per-frame cluster series
 is written next to the trajectories as `clusters.tsv`. Its checksum
-is `docs/nucleation/mw4096-clusters.dvc`. That table will be published
-as a dataset of the d-SEAMS organisation on Hugging Face.
+is `docs/nucleation/mw4096-clusters.dvc`. Regenerate it with the
+`nucleation_ensemble.py` command above.
 
 ## Committor shards
 

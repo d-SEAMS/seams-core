@@ -78,11 +78,20 @@ int main(void) {
         path = Path(tmp) / "shcell.c"
         path.write_text(source)
         binary = Path(tmp) / "shcell"
-        compiler = os.environ.get("CC", "cc")
+        # CC is the compiler this build was configured with. A bare cc on
+        # PATH is a different driver. The snippet is the header plus libc:
+        # the suite's library path is for libseams and makes the link
+        # editor and the loader disagree about which libc that compiler
+        # selected, so the binary dies on a GLIBC_PRIVATE symbol.
+        compiler = os.environ.get("CC", "").strip() or "cc"
+        env = os.environ.copy()
+        for key in ("LIBRARY_PATH", "LD_LIBRARY_PATH", "LD_PRELOAD"):
+            env.pop(key, None)
         subprocess.check_call(
             [compiler, "-I", str(ROOT / "include"), str(path), "-o", str(binary)],
+            env=env,
         )
-        text = subprocess.check_output([str(binary)], text=True).split()
+        text = subprocess.check_output([str(binary)], env=env, text=True).split()
     origin = (float(text[0]), 0.0, 0.0)
     edges = tuple(float(item) for item in text[1:4])
     tilts = tuple(float(item) for item in text[4:7])

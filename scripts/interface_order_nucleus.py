@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 
 import numpy as np
+from project_version import project_version
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAME = ROOT / "input" / "traj" / "nucleation_f1.lammpstrj"
@@ -49,7 +50,8 @@ def library():
         import seams
     except ImportError as err:
         raise SystemExit(
-            "the seams ctypes package is part of pydseamslib: pip install pydseamslib==2.14.0"
+            "the seams ctypes package is part of pydseamslib: "
+            "pip install pydseamslib=={}".format(project_version())
         ) from err
 
     return seams

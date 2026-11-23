@@ -278,6 +278,81 @@ class LocalQl:
             self._frame = None
 
 
+class UnboundIce:
+    """Neighbours and q6 at 8 threads with placement variables unset.
+
+    OMP_NUM_THREADS is 8. OMP_PROC_BIND, OMP_PLACES, OMP_WAIT_POLICY and
+    GOMP_SPINCOUNT are removed before the library is loaded. The cell is
+    110592 molecules of ideal ice Ic and the cutoff is 3.5 angstrom.
+    """
+
+    def setup(self):
+        import ctypes
+        import math
+        for key in ("OMP_PROC_BIND", "OMP_PLACES", "OMP_WAIT_POLICY", "GOMP_SPINCOUNT"):
+            os.environ.pop(key, None)
+        os.environ["OMP_NUM_THREADS"] = "8"
+        import sys
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import release_build
+        lib_path, self.build = release_build.ensure_release(
+            os.environ.get("SEAMS_LANG_LIB"))
+        # The flat calls live next to the language library.
+        flat = str(Path(lib_path).resolve().parent.parent / "src" / "libyodaLib.so")
+        lib = ctypes.CDLL(flat)
+        dp = ctypes.POINTER(ctypes.c_double)
+        ip = ctypes.POINTER(ctypes.c_int)
+        lib.seams_cutoff_csr.argtypes = [
+            dp, ctypes.c_int, dp, ctypes.c_double, ip, ip, ctypes.c_int, ip]
+        lib.seams_ql_cutoff.argtypes = [
+            dp, ctypes.c_int, dp, ctypes.c_double, ctypes.c_int, dp]
+        bond = 2.75
+        lattice = 4.0 * bond / math.sqrt(3.0)
+        cells = 24
+        side = cells * lattice
+        fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+        xyz = []
+        for i in range(cells):
+            for j in range(cells):
+                for k in range(cells):
+                    for b in range(8):
+                        f = b % 4
+                        shift = 0.0 if b < 4 else 0.25
+                        xyz.append(((i + fcc[f][0] + shift) * lattice) % side)
+                        xyz.append(((j + fcc[f][1] + shift) * lattice) % side)
+                        xyz.append(((k + fcc[f][2] + shift) * lattice) % side)
+        n = len(xyz) // 3
+        arr = (ctypes.c_double * len(xyz))(*xyz)
+        box = (ctypes.c_double * 9)(0, 0, 0, side, side, side, 0, 0, 0)
+        self._lib = lib
+        self._xyz = arr
+        self._box = box
+        self._n = n
+        self._dp = dp
+        self._ip = ip
+        self._offsets = (ctypes.c_int * (n + 1))()
+        self._cols = (ctypes.c_int * (16 * n))()
+        self._count = ctypes.c_int(0)
+        self._ql = (ctypes.c_double * n)()
+        if lib.seams_cutoff_csr(
+                arr, n, box, 3.5, self._offsets, self._cols, 16 * n,
+                ctypes.byref(self._count)) != 0:
+            raise RuntimeError("warmup failed")
+
+    def time_neighbours(self):
+        rc = self._lib.seams_cutoff_csr(
+            self._xyz, self._n, self._box, 3.5, self._offsets, self._cols,
+            16 * self._n, ctypes.byref(self._count))
+        if rc != 0:
+            raise RuntimeError("neighbours failed")
+
+    def time_q6(self):
+        rc = self._lib.seams_ql_cutoff(
+            self._xyz, self._n, self._box, 3.5, 6, self._ql)
+        if rc != 0:
+            raise RuntimeError("q6 failed")
+
+
 def _scale_plan():
     """The twelve-call campaign script is not part of this tree."""
     import importlib.util
@@ -632,18 +707,19 @@ class OmpScaling:
 
     Ideal ice Ic, 110592 molecules, with the neighbour list built inside
     every call: neighbours, q4, q6 and rings through the flat C API, CHILL,
-    CHILL+, the shell match, rings with symmetry codes, cages, prisms and
-    the monolayer census through the libseams frame handle, and the 2D RDF
+    CHILL+, the shell match, the four-nearest graph, rings with symmetry
+    codes, cages, prisms and the monolayer census through the libseams frame
+    handle, and the 2D RDF
     through libseams_lang. setup narrows the process to cpus 0 .. threads-1
     and sets the OpenMP width; a width above the allowed cpus is skipped.
-    The one-process-per-row sitting with the 884736-molecule cell, mdapy,
-    pyscal3 and the contended rows is scripts/omp_scaling.py (Snakemake rule
-    omp_scaling).
+    The one-process-per-row sitting with the 884736-molecule cell, the
+    unbound rows, mdapy, pyscal3, freud, OVITO and the contended rows is
+    scripts/omp_scaling.py (Snakemake rule omp_scaling).
     """
 
     params = (["neighbours", "q4", "q6", "rings", "chill", "chill_ovito", "chill_plus",
-               "chill_plus_ovito", "symmetry", "rings_find", "cages", "prisms", "monolayer",
-               "rdf2d"], [1, 2, 4, 8])
+               "chill_plus_ovito", "symmetry", "knn", "rings_find", "cages", "prisms",
+               "monolayer", "rdf2d"], [1, 2, 4, 8])
     param_names = ["operation", "threads"]
 
     def setup(self, operation, threads):

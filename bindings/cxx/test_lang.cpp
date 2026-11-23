@@ -60,6 +60,10 @@ int main(int argc, char **argv) {
   const std::string tip4p = root + "/input/traj/exampleTraj.lammpstrj";
   const std::string cubic = root + "/input/traj/mW_cubic.lammpstrj";
   const std::string si = root + "/input/traj/genice_sI.lammpstrj";
+  const std::string malformedMol2 =
+      root + "/tests/fixtures/malformed/mol2_empty_counts.mol2";
+  const std::string malformedMmcif =
+      root + "/tests/fixtures/malformed/mmcif_no_data.mmcif";
 
   if (std::string(seams_lang_version()).empty()) {
     return fail("empty version");
@@ -389,6 +393,14 @@ int main(int argc, char **argv) {
   }
   if (seams_frame_read(nullptr, 1, 1) != nullptr) {
     return fail("null read");
+  }
+  if (seams_frame_read(malformedMol2.c_str(), 1, -1) != nullptr ||
+      seams_last_error()[0] == '\0') {
+    return fail("malformed MOL2 read");
+  }
+  if (seams_frame_read(malformedMmcif.c_str(), 1, -1) != nullptr ||
+      seams_last_error()[0] == '\0') {
+    return fail("malformed mmCIF read");
   }
   seams_frame *missing = seams_frame_read("missing-lang.xyz", 1, 1);
   if (missing != nullptr) {

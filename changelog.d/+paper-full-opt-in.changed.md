@@ -1,1 +1,1 @@
-The full paper Snakemake tutorials stay out of a default test run. `meson setup -Dpaper_full=true` turns them on; otherwise they exit 77 and say they are opt-in.
+The full paper reproductions stay out of the default analysis set. `meson setup -Dpaper_full=true` enables them explicitly.

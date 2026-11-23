@@ -49,7 +49,10 @@ COLUMN_MM = 85.0
 # 8 pt at 85 mm on the 2048-wide still. The scale bar and the legend share it.
 CAPTION_PX = int(round(8.0 / 72.0 * (WIDTH / (COLUMN_MM / 25.4))))
 CAPTION_MARGIN = 128
-RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "2")))
+# The book stores a WIDTH-by-HEIGHT still. A 2x supersample at 256 samples
+# held Publish the book for hours on a 4-core runner. Denoised 64-sample
+# frames at the delivered size stay within a few levels of those stills.
+RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "1")))
 WEB = (960, 720)
 
 # Colors come from scripts/chill_palette.py. Guest colors stay here and
@@ -884,9 +887,130 @@ def orient(positions, view, center):
     return pos
 
 
-CYCLES_SAMPLES = 256
+CYCLES_SAMPLES = 64
 RENDER_ENGINE = "cycles"
 PANEL_NAME = "panel"
+
+
+def cycles_cache_dir():
+    """Where finished Cycles stills are kept, keyed by their inputs."""
+    chosen = os.environ.get("MOLECULES_CACHE")
+    return Path(chosen) if chosen else ROOT / "docs" / ".cache" / "cycles"
+
+
+# One line, "<dataset> <revision>": the Hugging Face dataset that holds
+# rendered stills under <digest>.png and <digest>.world, and its pinned
+# commit. It is a separate file because this script's bytes are part of
+# every digest.
+STILLS_PIN = Path(__file__).resolve().with_name("cycles-stills.pin")
+
+_BPY_VERSION = {}
+
+
+def cycles_bpy_version(program):
+    """Blender version string of the bpy that program imports."""
+    import subprocess
+
+    if program not in _BPY_VERSION:
+        probe = subprocess.run(
+            [program, "-c", "import bpy; print(bpy.app.version_string)"],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=cycles_env(),
+        )
+        lines = (probe.stdout or "").strip().splitlines()
+        _BPY_VERSION[program] = lines[-1] if probe.returncode == 0 and lines else "unknown"
+    return _BPY_VERSION[program]
+
+
+def cycles_digest(payload, version):
+    """sha256 of everything a Cycles render reads.
+
+    The child process runs this file, so its bytes stand for the scene
+    code; version is the Blender release that draws it. Each array
+    contributes its name, dtype, shape and bytes.
+    """
+    import hashlib
+
+    import numpy as np
+
+    digest = hashlib.sha256()
+    digest.update(Path(__file__).resolve().read_bytes())
+    digest.update(str(version).encode())
+    for name in sorted(payload):
+        value = np.ascontiguousarray(payload[name])
+        digest.update(name.encode())
+        digest.update(str(value.dtype).encode())
+        digest.update(repr(value.shape).encode())
+        digest.update(value.tobytes())
+    return digest.hexdigest()
+
+
+def cycles_remote():
+    """(dataset, revision) of the published stills, or None."""
+    if os.environ.get("MOLECULES_REMOTE", "1") == "0" or not STILLS_PIN.is_file():
+        return None
+    fields = STILLS_PIN.read_text().split()
+    return (fields[0], fields[1]) if len(fields) >= 2 else None
+
+
+def cycles_fetch(digest, folder):
+    """Copy a published still into folder. False when it is not published."""
+    import urllib.error
+    import urllib.request
+
+    remote = cycles_remote()
+    if remote is None:
+        return False
+    base = "https://huggingface.co/datasets/{}/resolve/{}/".format(*remote)
+    folder.mkdir(parents=True, exist_ok=True)
+    fetched = []
+    try:
+        for suffix in (".world", ".png"):
+            part = folder / (digest + suffix + ".part")
+            with urllib.request.urlopen(base + digest + suffix, timeout=60) as reply:
+                part.write_bytes(reply.read())
+            fetched.append((part, folder / (digest + suffix)))
+    except (urllib.error.URLError, OSError, ValueError):
+        for part, _ in fetched:
+            part.unlink(missing_ok=True)
+        return False
+    for part, final in fetched:
+        os.replace(part, final)
+    print("engine CYCLES fetched {}".format(digest[:12]), flush=True)
+    return True
+
+
+def cycles_cached(digest):
+    """The stored or published still and world size for digest, or None."""
+    folder = cycles_cache_dir()
+    picture = folder / (digest + ".png")
+    world = folder / (digest + ".world")
+    if not (picture.is_file() and world.is_file()) and not cycles_fetch(digest, folder):
+        return None
+    from PIL import Image
+
+    try:
+        image = Image.open(picture).convert("RGBA")
+        image.load()
+        size = float(world.read_text().strip())
+    except (OSError, ValueError):
+        return None
+    print("engine CYCLES cached {}".format(digest[:12]), flush=True)
+    return image, size
+
+
+def cycles_store(digest, image, size):
+    folder = cycles_cache_dir()
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        part = folder / (digest + ".png.part")
+        image.save(part, format="PNG")
+        os.replace(part, folder / (digest + ".png"))
+        (folder / (digest + ".world")).write_text(repr(size) + "\n")
+    except OSError as exc:
+        print("cycles cache not written: {}".format(exc), file=sys.stderr)
 
 
 def cycles_env(base=None):
@@ -1443,6 +1567,15 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         payload["mesh_faces_{}".format(slot)] = np.asarray(mesh["faces"], dtype=np.int32)
         payload["mesh_color_{}".format(slot)] = np.asarray(mesh["color"], dtype=np.float64)
         payload["mesh_alpha_{}".format(slot)] = np.float64(mesh.get("alpha", 0.42))
+    digest = cycles_digest(payload, cycles_bpy_version(program))
+    cached = cycles_cached(digest)
+    if cached is not None:
+        for path in (handle.name, picture.name):
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+        return cached
     np.savez(handle.name, **payload)
     env = cycles_env()
     env["MOLECULES_CYCLES"] = "1"
@@ -1471,6 +1604,7 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         image = Image.open(picture.name).convert("RGBA")
         image = image.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
         image.load()
+        cycles_store(digest, image, world)
         return image, world
     except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
         print(str(exc), file=sys.stderr)

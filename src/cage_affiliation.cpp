@@ -21,6 +21,7 @@
 #include <omp.h>
 #endif
 
+
 namespace {
 
 //! Fingerprint of a ring's cycle, the same however the ring was rotated or
@@ -66,13 +67,30 @@ bool sameCycle(const int *a, std::size_t ka, const int *b, std::size_t kb) {
 
 //! Shared per-frame machinery: the inverted index, sorted ring copies for
 //! overlap tests, and cached basal/adjacency lists (one sort per ring).
+int largestAtom(const std::vector<std::vector<int>> &rings) {
+  const int nR = static_cast<int>(rings.size());
+  int maxAtom = 0;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) reduction(max : maxAtom) if (nR >= 4096 && \
+                                                                       !omp_in_parallel())
+#endif
+  for (int i = 0; i < nR; i++) {
+    for (const int a : rings[static_cast<std::size_t>(i)]) {
+      maxAtom = std::max(maxAtom, a);
+    }
+  }
+  return maxAtom;
+}
+
 struct FrameContext {
   // Pointers so a caller can keep one context and rebind it each frame.
   const std::vector<std::vector<int>> *rings = nullptr;
   const std::vector<std::vector<int>> *nList = nullptr;
   ring::RingSearchIndex index;
-  std::vector<std::vector<int>> sortedRings;
-  mutable   std::vector<std::vector<int>> basalCand;
+  // Ring atoms in ascending order, ring i at sortedAtoms[sortedOff[i]].
+  std::vector<int> sortedOff;
+  std::vector<int, seams::FilledByTeam<int>> sortedAtoms;
+  mutable std::vector<std::vector<int>> basalCand;
   mutable std::vector<char> basalReady;
   mutable std::vector<std::vector<int>> adjRings;
   mutable std::vector<char> adjReady;
@@ -83,7 +101,7 @@ struct FrameContext {
   std::vector<ring::strucType> scratchType;
   // Ring atoms in one block, six per ring, when every ring has length 6.
   // The basal search reads these atoms for every candidate.
-  std::vector<int> flat6;
+  std::vector<int, seams::FilledByTeam<int>> flat6;
   bool allHex = false;
   // Kept across warm prepares so the inverted index is not allocated again.
   std::vector<int> refillCount;
@@ -101,14 +119,9 @@ struct FrameContext {
                const std::vector<std::vector<int>> &nList_) {
     rings = &rings_;
     nList = &nList_;
-    int maxAtom = 0;
-    for (const auto &r : rings_) {
-      for (const int a : r) {
-        maxAtom = std::max(maxAtom, a);
-      }
-    }
+    const int maxAtom = largestAtom(rings_);
     // A fresh context. The carried updater refills the same index instead.
-    index = ring::buildRingSearchIndex(rings_, maxAtom + 1);
+    index = ring::buildRingSearchIndex(rings_, maxAtom + 1, false);
     reuseScratch = false;
     finishPrepare(rings_, nList_);
   }
@@ -119,12 +132,7 @@ struct FrameContext {
                    const std::vector<std::vector<int>> &nList_) {
     rings = &rings_;
     nList = &nList_;
-    int maxAtom = 0;
-    for (const auto &r : rings_) {
-      for (const int a : r) {
-        maxAtom = std::max(maxAtom, a);
-      }
-    }
+    const int maxAtom = largestAtom(rings_);
     refillIndex(rings_, maxAtom + 1);
     reuseScratch = true;
     finishPrepare(rings_, nList_);
@@ -134,39 +142,38 @@ struct FrameContext {
                      const std::vector<std::vector<int>> &nList_) {
     bonds.build(nList_);
     const int nR = static_cast<int>(rings_.size());
-    sortedRings.resize(static_cast<std::size_t>(nR));
+    sortedOff.resize(static_cast<std::size_t>(nR) + 1);
+    sortedOff[0] = 0;
+    allHex = true;
+    for (int i = 0; i < nR; i++) {
+      const int len = static_cast<int>(rings_[static_cast<std::size_t>(i)].size());
+      allHex = allHex && len == 6;
+      sortedOff[static_cast<std::size_t>(i) + 1] = sortedOff[static_cast<std::size_t>(i)] + len;
+    }
+    sortedAtoms.resize(static_cast<std::size_t>(sortedOff[static_cast<std::size_t>(nR)]));
+    flat6.resize(allHex ? static_cast<std::size_t>(nR) * 6 : 0);
+    // One block for every ring. A vector per ring was an allocation per
+    // ring here and a serial free per ring when the context went away.
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) if (nR >= 1024 && !omp_in_parallel())
 #endif
     for (int i = 0; i < nR; i++) {
-      sortedRings[static_cast<std::size_t>(i)] =
-          rings_[static_cast<std::size_t>(i)];
-      std::sort(sortedRings[static_cast<std::size_t>(i)].begin(),
-                sortedRings[static_cast<std::size_t>(i)].end());
-    }
-    scratchType.assign(static_cast<std::size_t>(nR),
-                       ring::strucType::unclassified);
-    allHex = true;
-    for (int i = 0; i < nR; i++) {
-      if (rings_[static_cast<std::size_t>(i)].size() != 6) {
-        allHex = false;
-        break;
-      }
-    }
-    flat6.clear();
-    if (allHex) {
-      flat6.resize(static_cast<std::size_t>(nR) * 6);
-      for (int i = 0; i < nR; i++) {
-        const auto &ring = rings_[static_cast<std::size_t>(i)];
+      const auto &ring = rings_[static_cast<std::size_t>(i)];
+      int *dst = sortedAtoms.data() + sortedOff[static_cast<std::size_t>(i)];
+      std::copy(ring.begin(), ring.end(), dst);
+      std::sort(dst, dst + ring.size());
+      if (allHex) {
         std::copy(ring.begin(), ring.end(),
                   flat6.begin() + static_cast<std::ptrdiff_t>(i) * 6);
       }
     }
-    basalCand.resize(static_cast<std::size_t>(nR));
-    adjRings.resize(static_cast<std::size_t>(nR));
-    adjReady.assign(static_cast<std::size_t>(nR), 0);
-    // Left clear. basalCandidates fills a ring the first time a sweep asks.
-    basalReady.assign(static_cast<std::size_t>(nR), 0);
+    scratchType.assign(static_cast<std::size_t>(nR),
+                       ring::strucType::unclassified);
+    // Sized by the first call that asks: the threaded sweep never does.
+    basalCand.clear();
+    basalReady.clear();
+    adjRings.clear();
+    adjReady.clear();
   }
 
   // Serial refill. The parallel builder allocates a count vector per thread
@@ -181,7 +188,7 @@ struct FrameContext {
       return;
     }
     const int nRings = static_cast<int>(rings_.size());
-    index.ringsContainingAtom.resize(static_cast<std::size_t>(numAtoms));
+    index.ringsContainingAtom.clear();
     refillCount.assign(static_cast<std::size_t>(numAtoms), 0);
     for (int iring = 0; iring < nRings; ++iring) {
       for (const int atom : rings_[static_cast<std::size_t>(iring)]) {
@@ -209,19 +216,15 @@ struct FrameContext {
         }
       }
     }
-    for (int atom = 0; atom < numAtoms; ++atom) {
-      const int begin = index.ringOff[static_cast<std::size_t>(atom)];
-      const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
-      auto &row = index.ringsContainingAtom[static_cast<std::size_t>(atom)];
-      row.assign(index.ringCol.begin() + begin, index.ringCol.begin() + end);
-    }
   }
 
   [[nodiscard]] bool shareAtoms(int i, int j) const {
-    const auto &a = sortedRings[static_cast<std::size_t>(i)];
-    const auto &b = sortedRings[static_cast<std::size_t>(j)];
-    size_t p = 0, q = 0;
-    while (p < a.size() && q < b.size()) {
+    const int *a = sortedAtoms.data() + sortedOff[static_cast<std::size_t>(i)];
+    const int *b = sortedAtoms.data() + sortedOff[static_cast<std::size_t>(j)];
+    const int na = sortedOff[static_cast<std::size_t>(i) + 1] - sortedOff[static_cast<std::size_t>(i)];
+    const int nb = sortedOff[static_cast<std::size_t>(j) + 1] - sortedOff[static_cast<std::size_t>(j)];
+    int p = 0, q = 0;
+    while (p < na && q < nb) {
       if (a[p] == b[q]) {
         return true;
       }
@@ -245,28 +248,21 @@ struct FrameContext {
     return {index.ringCol.data() + begin, end - begin};
   }
 
-  [[nodiscard]] const std::vector<int> &ringsThroughAtom(int atom) const {
-    static const std::vector<int> empty;
-    if (atom < 0 ||
-        atom >= static_cast<int>(index.ringsContainingAtom.size())) {
-      return empty;
-    }
-    return index.ringsContainingAtom[static_cast<std::size_t>(atom)];
-  }
-
   [[nodiscard]] std::vector<int> collectAdjacentRings(int r) const {
     std::vector<int> out;
     for (const int atom : (*rings)[static_cast<std::size_t>(r)]) {
-      for (const int s : ringsThroughAtom(atom)) {
-        if (s != r) {
-          out.push_back(s);
+      const RingRow own = ringsOf(atom);
+      for (int c = 0; c < own.n; c++) {
+        if (own.p[c] != r) {
+          out.push_back(own.p[c]);
         }
       }
       if (atom >= 0 && atom < static_cast<int>(nList->size())) {
         for (size_t n = 1; n < (*nList)[static_cast<std::size_t>(atom)].size(); n++) {
-          for (const int s : ringsThroughAtom((*nList)[static_cast<std::size_t>(atom)][n])) {
-            if (s != r) {
-              out.push_back(s);
+          const RingRow near = ringsOf((*nList)[static_cast<std::size_t>(atom)][n]);
+          for (int c = 0; c < near.n; c++) {
+            if (near.p[c] != r) {
+              out.push_back(near.p[c]);
             }
           }
         }
@@ -288,8 +284,12 @@ struct FrameContext {
 
   [[nodiscard]] const std::vector<int> &adjacentRings(int r) {
     static const std::vector<int> empty;
-    if (r < 0 || r >= static_cast<int>(adjRings.size())) {
+    if (r < 0 || r >= static_cast<int>(rings->size())) {
       return empty;
+    }
+    if (adjRings.size() != rings->size()) {
+      adjRings.assign(rings->size(), {});
+      adjReady.assign(rings->size(), 0);
     }
     if (!adjReady[static_cast<std::size_t>(r)]) {
       adjRings[static_cast<std::size_t>(r)] = collectAdjacentRings(r);
@@ -494,6 +494,10 @@ struct FrameContext {
   mutable BasalScratch lazyScratch;
 
   [[nodiscard]] const std::vector<int> &basalCandidates(int i) const {
+    if (basalCand.size() != rings->size()) {
+      basalCand.assign(rings->size(), {});
+      basalReady.assign(rings->size(), 0);
+    }
     if (!basalReady[static_cast<std::size_t>(i)]) {
       collectBasalCandidates(i, lazyScratch, basalCand[static_cast<std::size_t>(i)]);
       basalReady[static_cast<std::size_t>(i)] = 1;
@@ -534,23 +538,17 @@ struct FrameContext {
 
 namespace {
 
-void markHcRing(int ring, std::vector<char> &marked, std::vector<bool> &hc,
-                int &left) {
-  char &slot = marked[static_cast<std::size_t>(ring)];
-  if (slot != 0) {
-    return;
-  }
-  slot = 1;
-  hc[static_cast<std::size_t>(ring)] = true;
-  --left;
-}
-
-ring::CageAffiliation batchSweep(const FrameContext &ctx) {
+ring::CageAffiliation batchSweep(const FrameContext &ctx,
+                                 ring::StackingPlanes *planes = nullptr) {
   const std::vector<std::vector<int>> &rings = *ctx.rings;
   ring::CageAffiliation result;
   const size_t nRings = rings.size();
   result.hc.assign(nRings, false);
   result.ddc.assign(nRings, false);
+  if (planes != nullptr) {
+    planes->basal.assign(nRings, false);
+    planes->equatorial.assign(nRings, false);
+  }
   if (nRings == 0) {
     return result;
   }
@@ -565,19 +563,24 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
 #else
   const bool scale = false;
 #endif
+  // Byte flags, so threads write disjoint rings. A bit vector packs 64
+  // rings per word, and two threads setting bits of one word race.
+  std::vector<char> hcAny(static_cast<std::size_t>(nR), 0);
+  std::vector<char> basalAny(planes != nullptr ? static_cast<std::size_t>(nR) : 0, 0);
   if (scale) {
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
     const int team = omp_get_max_threads();
     std::vector<std::vector<char>> marked;
+    std::vector<std::vector<char>> basalMarked(
+        planes != nullptr ? static_cast<std::size_t>(team) : 0);
     if (ctx.reuseScratch) {
       if (static_cast<int>(ctx.lanes.size()) < team) {
         ctx.lanes.resize(static_cast<std::size_t>(team));
       }
     } else {
-      marked.assign(static_cast<std::size_t>(team),
-                    std::vector<char>(static_cast<std::size_t>(nR), 0));
+      marked.resize(static_cast<std::size_t>(team));
     }
-#pragma omp parallel
+#pragma omp parallel num_threads(team)
     {
       const int tid = omp_get_thread_num();
       FrameContext::BasalScratch localScratch;
@@ -585,7 +588,6 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
       std::vector<ring::strucType> localTypes;
       std::vector<int> localCandidates;
       std::vector<int> localPrismatic;
-      std::vector<char> localOn;
       FrameContext::BasalScratch *scratch = &localScratch;
       std::vector<int> *listHC = &localHC;
       std::vector<ring::strucType> *types = &localTypes;
@@ -603,6 +605,10 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
       } else {
         on = &marked[static_cast<std::size_t>(tid)];
       }
+      std::vector<char> *basalOn =
+          planes != nullptr ? &basalMarked[static_cast<std::size_t>(tid)] : nullptr;
+      // Each thread clears its own flags, so the main thread does not
+      // zero team times the ring count before the fork.
       if (static_cast<int>(types->size()) != nR) {
         types->assign(nRings, ring::strucType::unclassified);
       } else {
@@ -613,6 +619,9 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
       } else {
         std::fill(on->begin(), on->end(), 0);
       }
+      if (basalOn != nullptr) {
+        basalOn->assign(static_cast<std::size_t>(nR), 0);
+      }
 #pragma omp for schedule(static)
       for (int i = 0; i < nR; ++i) {
         ctx.collectBasalCandidates(i, *scratch, *candidates);
@@ -621,8 +630,14 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
             continue;
           }
           (*on)[static_cast<std::size_t>(i)] = 1;
+          if (basalOn != nullptr) {
+            (*basalOn)[static_cast<std::size_t>(i)] = 1;
+          }
           if (j >= 0 && j < nR) {
             (*on)[static_cast<std::size_t>(j)] = 1;
+            if (basalOn != nullptr) {
+              (*basalOn)[static_cast<std::size_t>(j)] = 1;
+            }
           }
           ctx.prismaticInto(i, j, *listHC, *types, *prismatic);
           for (const int k : *prismatic) {
@@ -632,36 +647,59 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
           }
         }
       }
-    }
-    for (int i = 0; i < nR; ++i) {
-      for (int t = 0; t < team; ++t) {
-        const std::vector<char> &on =
-            ctx.reuseScratch ? ctx.lanes[static_cast<std::size_t>(t)].on
-                             : marked[static_cast<std::size_t>(t)];
-        if (on[static_cast<std::size_t>(i)] != 0) {
-          result.hc[static_cast<std::size_t>(i)] = true;
-          break;
+      // The OR over the team ran on the main thread after the join, and at
+      // eight threads it cost as much as a quarter of the sweep.
+#pragma omp for schedule(static)
+      for (int i = 0; i < nR; ++i) {
+        char hit = 0;
+        char basal = 0;
+        for (int t = 0; t < team; ++t) {
+          const std::vector<char> &row =
+              ctx.reuseScratch ? ctx.lanes[static_cast<std::size_t>(t)].on
+                               : marked[static_cast<std::size_t>(t)];
+          hit |= row[static_cast<std::size_t>(i)];
+          if (basalOn != nullptr) {
+            basal |= basalMarked[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)];
+          }
+        }
+        hcAny[static_cast<std::size_t>(i)] = hit;
+        if (basalOn != nullptr) {
+          basalAny[static_cast<std::size_t>(i)] = basal;
         }
       }
     }
 #endif
   } else {
-    std::vector<char> on(static_cast<std::size_t>(nR), 0);
     int left = nR;
+    int leftBasal = planes != nullptr ? nR : 0;
+    auto mark = [&](std::vector<char> &flags, int &remaining, int m) {
+      char &slot = flags[static_cast<std::size_t>(m)];
+      if (slot == 0) {
+        slot = 1;
+        --remaining;
+      }
+    };
     std::vector<int> listHC;
     std::vector<ring::strucType> types(nRings, ring::strucType::unclassified);
-    for (int i = 0; i < nR && left > 0; ++i) {
+    for (int i = 0; i < nR && (left > 0 || leftBasal > 0); ++i) {
       for (const int j : ctx.basalCandidates(i)) {
-        if (left == 0) {
+        if (left == 0 && leftBasal == 0) {
           break;
         }
         if (!ctx.basalPair(i, j)) {
           continue;
         }
-        markHcRing(i, on, result.hc, left);
-        markHcRing(j, on, result.hc, left);
+        mark(hcAny, left, i);
+        mark(hcAny, left, j);
+        if (planes != nullptr) {
+          mark(basalAny, leftBasal, i);
+          mark(basalAny, leftBasal, j);
+        }
+        if (left == 0) {
+          continue;
+        }
         for (const int k : ctx.prismaticOf(i, j, listHC, types)) {
-          markHcRing(k, on, result.hc, left);
+          mark(hcAny, left, k);
         }
       }
     }
@@ -669,6 +707,8 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
 
   // DDC affiliation: every ring passing the equatorial conditions marks
   // itself and its six peripherals
+  std::vector<char> ddcAny(static_cast<std::size_t>(nR), 0);
+  std::vector<char> equator(planes != nullptr ? static_cast<std::size_t>(nR) : 0, 0);
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel if (threaded)
 #endif
@@ -676,20 +716,31 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
     std::vector<int> marks;
     std::vector<int> peripherals;
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp for schedule(dynamic, 256) nowait
+#pragma omp for schedule(dynamic, 256)
 #endif
     for (int i = 0; i < nR; i++) {
-      if (ctx.equatorialPass(i, result.hc[static_cast<std::size_t>(i)],
-                             peripherals)) {
+      if (ctx.equatorialPass(i, hcAny[static_cast<std::size_t>(i)] != 0, peripherals)) {
+        if (planes != nullptr) {
+          equator[static_cast<std::size_t>(i)] = 1;
+        }
         marks.push_back(i);
         marks.insert(marks.end(), peripherals.begin(), peripherals.end());
       }
     }
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp critical(seams_cage_affiliation)
-#endif
+    // A peripheral may belong to another thread's share. Every store
+    // writes 1, so relaxed atomic stores give the same flags in any order.
     for (const int m : marks) {
-      result.ddc[static_cast<std::size_t>(m)] = true;
+      __atomic_store_n(&ddcAny[static_cast<std::size_t>(m)], static_cast<char>(1),
+                       __ATOMIC_RELAXED);
+    }
+  }
+  for (int i = 0; i < nR; ++i) {
+    const auto k = static_cast<std::size_t>(i);
+    result.hc[k] = hcAny[k] != 0;
+    result.ddc[k] = ddcAny[k] != 0;
+    if (planes != nullptr) {
+      planes->basal[k] = basalAny[k] != 0;
+      planes->equatorial[k] = equator[k] != 0;
     }
   }
   return result;
@@ -707,111 +758,18 @@ ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
   return batchSweep(ctx);
 }
 
+ring::CagePlanes ring::cagePlanes(const std::vector<std::vector<int>> &rings,
+                                  const std::vector<std::vector<int>> &nList) {
+  CagePlanes out;
+  const FrameContext ctx(rings, nList);
+  out.affiliation = batchSweep(ctx, &out.planes);
+  return out;
+}
+
 ring::StackingPlanes
 ring::stackingPlanes(const std::vector<std::vector<int>> &rings,
                      const std::vector<std::vector<int>> &nList) {
-  StackingPlanes out;
-  const size_t nRings = rings.size();
-  out.basal.assign(nRings, false);
-  out.equatorial.assign(nRings, false);
-  if (nRings == 0) {
-    return out;
-  }
-  FrameContext ctx(rings, nList);
-  const int nR = static_cast<int>(nRings);
-  std::vector<char> hc(nRings, 0);
-  std::vector<char> basal(nRings, 0);
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  const bool scale = nR >= 1024 && !omp_in_parallel() && omp_get_max_threads() > 1;
-#else
-  const bool scale = false;
-#endif
-  if (scale) {
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-    const int team = omp_get_max_threads();
-    std::vector<std::vector<char>> basalT(static_cast<std::size_t>(team),
-                                          std::vector<char>(nRings, 0));
-    std::vector<std::vector<char>> hcT(static_cast<std::size_t>(team),
-                                       std::vector<char>(nRings, 0));
-#pragma omp parallel
-    {
-      const int tid = omp_get_thread_num();
-      FrameContext::BasalScratch scratch;
-      std::vector<int> candidates;
-      std::vector<int> listHC;
-      std::vector<int> prismatic;
-      std::vector<ring::strucType> types(nRings, ring::strucType::unclassified);
-      auto &mineBasal = basalT[static_cast<std::size_t>(tid)];
-      auto &mineHc = hcT[static_cast<std::size_t>(tid)];
-#pragma omp for schedule(static)
-      for (int i = 0; i < nR; ++i) {
-        ctx.collectBasalCandidates(i, scratch, candidates);
-        for (const int j : candidates) {
-          if (!ctx.basalPair(i, j)) {
-            continue;
-          }
-          mineBasal[static_cast<std::size_t>(i)] = 1;
-          mineHc[static_cast<std::size_t>(i)] = 1;
-          if (j >= 0 && j < nR) {
-            mineBasal[static_cast<std::size_t>(j)] = 1;
-            mineHc[static_cast<std::size_t>(j)] = 1;
-          }
-          ctx.prismaticInto(i, j, listHC, types, prismatic);
-          for (const int k : prismatic) {
-            if (k >= 0 && k < nR) {
-              mineHc[static_cast<std::size_t>(k)] = 1;
-            }
-          }
-        }
-      }
-    }
-    for (int i = 0; i < nR; ++i) {
-      for (int t = 0; t < team; ++t) {
-        if (basalT[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)] != 0) {
-          basal[static_cast<std::size_t>(i)] = 1;
-        }
-        if (hcT[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)] != 0) {
-          hc[static_cast<std::size_t>(i)] = 1;
-        }
-      }
-    }
-#endif
-  } else {
-    for (int i = 0; i < nR; ++i) {
-      const std::vector<int> &candidates = ctx.basalCandidates(i);
-      for (const int j : candidates) {
-        if (!ctx.basalPair(i, j)) {
-          continue;
-        }
-        basal[static_cast<std::size_t>(i)] = 1;
-        hc[static_cast<std::size_t>(i)] = 1;
-        if (j >= 0 && j < nR) {
-          basal[static_cast<std::size_t>(j)] = 1;
-          hc[static_cast<std::size_t>(j)] = 1;
-        }
-        for (const int k : ctx.prismaticOf(i, j)) {
-          if (k >= 0 && k < nR) {
-            hc[static_cast<std::size_t>(k)] = 1;
-          }
-        }
-      }
-    }
-  }
-  std::vector<char> equatorial(nRings, 0);
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (scale)
-#endif
-  for (int i = 0; i < nR; ++i) {
-    std::vector<int> peripherals;
-    if (ctx.equatorialPass(i, hc[static_cast<std::size_t>(i)] != 0, peripherals)) {
-      equatorial[static_cast<std::size_t>(i)] = 1;
-    }
-  }
-  for (int i = 0; i < nR; ++i) {
-    out.basal[static_cast<std::size_t>(i)] = basal[static_cast<std::size_t>(i)] != 0;
-    out.equatorial[static_cast<std::size_t>(i)] = equatorial[static_cast<std::size_t>(i)] != 0;
-  }
-  return out;
+  return cagePlanes(rings, nList).planes;
 }
 
 // ---------------------------------------------------------------------------

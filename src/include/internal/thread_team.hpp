@@ -1,9 +1,12 @@
 #pragma once
 
 #include <algorithm>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
+#include <initializer_list>
 #include <mutex>
 #include <vector>
 
@@ -29,9 +32,13 @@
 #ifdef __linux__
 #include <sched.h>
 #endif
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
 
 extern "C" void lc_set_threads(int n);
 extern "C" int lc_num_threads(void);
+extern "C" void lc_set_places(const int *cpus, int n);
 
 namespace seams {
 
@@ -72,6 +79,117 @@ inline void widenAffinity() {
 #endif
 }
 
+// glibc hands the top of the heap back to the kernel past M_TRIM_THRESHOLD
+// and serves blocks above M_MMAP_THRESHOLD with fresh mappings. Both start
+// low and move with the allocation pattern, so the buffers one call freed
+// were faulted in again by the next call, by an amount that changed from
+// run to run. glibc has no per-library heap and these settings hold for
+// the whole process. SEAMS_MALLOC_TUNE=0 leaves them alone, and so does a
+// malloc setting the caller already made through MALLOC_*_ or
+// GLIBC_TUNABLES.
+inline void tuneHeap() {
+#ifdef __GLIBC__
+  static const bool tuned = [] {
+    const char *opt = std::getenv("SEAMS_MALLOC_TUNE");
+    if (opt != nullptr && (std::strcmp(opt, "0") == 0 || std::strcmp(opt, "off") == 0 ||
+                           std::strcmp(opt, "no") == 0)) {
+      return false;
+    }
+    for (const char *key : {"MALLOC_TRIM_THRESHOLD_", "MALLOC_MMAP_THRESHOLD_",
+                            "MALLOC_TOP_PAD_", "MALLOC_MMAP_MAX_"}) {
+      if (std::getenv(key) != nullptr) {
+        return false;
+      }
+    }
+    const char *tunables = std::getenv("GLIBC_TUNABLES");
+    if (tunables != nullptr && std::strstr(tunables, "glibc.malloc.") != nullptr) {
+      return false;
+    }
+    // 32 MiB is the largest mmap threshold glibc accepts on a 64-bit target.
+    const int mmapAt = sizeof(void *) >= 8 ? 32 << 20 : 4 << 20;
+    mallopt(M_MMAP_THRESHOLD, mmapAt);
+    mallopt(M_TRIM_THRESHOLD, 256 << 20);
+    return true;
+  }();
+  (void)tuned;
+#endif
+}
+
+inline int teamWidth() {
+#ifdef SEAMS_HAS_OPENMP
+  return omp_get_max_threads();
+#else
+  return 1;
+#endif
+}
+
+// The OpenMP width the caller asked for, while a busy machine has
+// narrowed the team for this call (FairWidth, or PinSession beside a few
+// busy threads); zero otherwise. Defined in one library: an inline copy
+// would give libseams and libyodaLib a variable each.
+int &askedWidth();
+
+// Rayon width for a team of `team`. Linkcell's pool steals work, so a
+// worker the scheduler parks holds up only the job it is on. Narrowed
+// with the OpenMP team beside an 8-thread spinner, the 110592-molecule
+// k-nearest search ran on two to four workers at half a cpu each and
+// took 16 to 36 ms instead of 8 to 18. The
+// pool keeps the width asked for; a slice PinSession took for another
+// copy of the program is not a narrowing and still applies.
+inline int poolWidth(int team) {
+#ifdef SEAMS_HAS_OPENMP
+  const int asked = askedWidth();
+  if (asked > team && team == omp_get_max_threads()) {
+    return asked;
+  }
+#endif
+  return team;
+}
+
+// Runs `search` on the calling thread while the other OpenMP threads of
+// the team sleep on a condition variable. After a parallel region the
+// workers spin in the default wait policy, for milliseconds on cores
+// with a slow pause instruction, and a Rayon search started then shares
+// every core with a spinning worker. Inside the region they sleep in the
+// kernel and the pool has the cores. The team stays alive, so the next
+// region does not pay the wake-up of a paused team.
+template <class Search> void withTeamAsleep(int width, Search &&search) {
+#ifdef SEAMS_HAS_OPENMP
+  if (width < 2 || omp_in_parallel()) {
+    search();
+    return;
+  }
+  std::mutex lock;
+  std::condition_variable wake;
+  bool done = false;
+  std::exception_ptr failure;
+#pragma omp parallel num_threads(width)
+  {
+    if (omp_get_thread_num() == 0) {
+      try {
+        search();
+      } catch (...) {
+        failure = std::current_exception();
+      }
+      {
+        const std::lock_guard<std::mutex> hold(lock);
+        done = true;
+      }
+      wake.notify_all();
+    } else {
+      std::unique_lock<std::mutex> hold(lock);
+      wake.wait(hold, [&] { return done; });
+    }
+  }
+  if (failure) {
+    std::rethrow_exception(failure);
+  }
+#else
+  (void)width;
+  search();
+#endif
+}
+
 inline void releaseTeam() {
 #ifdef SEAMS_HAS_OPENMP
   omp_pause_resource_all(omp_pause_soft);
@@ -83,12 +201,61 @@ inline void releaseTeam() {
 // that moves by several milliseconds from call to call. Widen the mask
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
+
+// True while this thread's outermost PinSession has pinned its team. A
+// narrowed team must not pin those workers again onto the caller's cpu.
+bool placementHeld();
+
+// Team width for a request of `base` threads from the load other
+// processes put on the caller's cpus, or 0 where that load cannot be
+// read. The first look counts their runnable threads. Later looks
+// average the cpu time they took over at least 0.1 s, from /proc/stat
+// less this process's own cpu time, and reuse the width in between.
+// Half the cpus busy or more gives half of base; fewer busy cpus give
+// the free ones, never below half of base; none gives base. A width
+// probe cannot tell this: workers still spinning from the last region
+// answer at once on a contended machine, and the call then waits.
+int loadWidth(int base);
+
+// Whether other processes keep half of the caller's cpus busy or more,
+// by the same look as loadWidth. False where the load cannot be read.
+bool othersHoldHalf();
+
+// Pins the OpenMP team for the enclosing call, then puts every worker's
+// affinity back. SEAMS_PIN=0 does nothing. A host that already chose
+// places (OMP_PROC_BIND, OMP_PLACES, GOMP_CPU_AFFINITY, KMP_AFFINITY), or
+// a caller whose mask is a single cpu, is left alone. A lone team
+// narrower than the mask is not pinned. When several processes share the
+// mask, each keeps a disjoint slice and the team is narrowed to that
+// slice. Beside a few busy threads the team narrows to
+// the free cpus and is not pinned; when other threads hold half the mask
+// it is left to the scheduler and FairWidth. The outermost session calls
+// widenAffinity before a load-narrowed width can make it skip, so the
+// masks it saves and restores are the widened ones. Placement adds no cpu
+// outside the host mask. One host thread holds the placement at a time;
+// a call from another thread meanwhile runs unplaced. With team false only
+// linkcell's pool is placed: the plan and its width apply, and no OpenMP
+// region runs to pin or restore the workers, for a call that starts no
+// OpenMP team.
+class PinSession {
+public:
+  explicit PinSession(bool team = true);
+  ~PinSession();
+  PinSession(const PinSession &) = delete;
+  PinSession &operator=(const PinSession &) = delete;
+
+private:
+  bool outer_ = false;
+};
+
 inline void prepareCompute() {
-  // Linkcell sleeps between searches. Forcing a passive OpenMP wait
-  // on top of that made the next region late by tens of milliseconds,
-  // which dominated a k-nearest call of about a millisecond. Leave the
-  // wait policy the process was started with.
+  // Linkcell's pool sleeps on a condvar between searches. Forcing OpenMP
+  // passive as well made the next region wake on a spread of tens of
+  // milliseconds, which is the slow 8-thread sample. Do not switch the
+  // wait policy to active: with another runnable thread that spin sits in
+  // the barrier for the whole stall. PinSession places the workers.
   widenAffinity();
+  tuneHeap();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
 #endif
@@ -114,7 +281,7 @@ inline void adoptThreads() {
     n = 1;
   }
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(n);
+  lc_set_threads(poolWidth(n));
 #else
   (void)n;
 #endif
@@ -127,6 +294,17 @@ inline int teamFor(int n) {
 #ifdef SEAMS_HAS_OPENMP
   (void)n;
   return std::max(1, omp_get_max_threads());
+#else
+  (void)n;
+  return 1;
+#endif
+}
+
+// teamFor for linkcell's pool, on the width before any narrowing.
+inline int poolFor(int n) {
+#ifdef SEAMS_HAS_OPENMP
+  (void)n;
+  return std::max(1, poolWidth(omp_get_max_threads()));
 #else
   (void)n;
   return 1;
@@ -165,7 +343,7 @@ struct TeamWidth {
             cpus[ncpu++] = cpu;
           }
         }
-        if (ncpu > 0) {
+        if (ncpu > 0 && !placementHeld()) {
           // Once per process. Repeating the bind on a call of a few
           // hundred microseconds was the whole gap between four threads
           // requested directly and eight narrowed to four. OpenMP's own
@@ -174,7 +352,9 @@ struct TeamWidth {
           // Thread 0 is the caller and stays on its own mask: a pinned
           // caller hands its one cpu to every OpenMP worker and Rayon
           // thread it creates later, and the next eight-thread region
-          // then runs five threads on that cpu.
+          // then runs five threads on that cpu. A live PinSession already
+          // placed the team; binding again would stack that narrower
+          // team on the caller's cpu.
           static int bound = 0;
           static std::mutex boundMu;
           const std::lock_guard<std::mutex> lock(boundMu);
@@ -215,12 +395,14 @@ struct TeamWidth {
 // When their threads hold the cores, a full-width team waits at each fork
 // that follows serial work for workers the scheduler has parked, a slice
 // at a time, and a call of a few milliseconds grows tenfold. A narrower
-// team leaves cores free and does not wait. One small region at entry,
-// after the caller's own gap, takes at most a few hundred microseconds on
-// an idle machine, where sleeping workers wake, and milliseconds on a
-// contended one. Two slow entries in a row halve the team, down to a
-// quarter of the requested width; at most once a second a narrowed team
-// tries twice its width again. Results do not depend on the width.
+// team leaves cores free and does not wait. On Linux the width follows
+// the load other processes put on the caller's cpus (loadWidth). Where
+// that load cannot be read, one small region at entry, after the
+// caller's own gap, takes at most a few hundred microseconds on an idle
+// machine, where sleeping workers wake, and milliseconds on a contended
+// one. Two slow entries in a row halve the team, down to a quarter of
+// the requested width; at most once a second a narrowed team tries
+// twice its width again. Results do not depend on the width.
 // SEAMS_FAIR_WIDTH=0 keeps the requested width.
 struct FairState {
   std::mutex lock;
@@ -230,10 +412,11 @@ struct FairState {
   double tried = 0.0;
 };
 
-inline FairState &fairState() {
-  static FairState state;
-  return state;
-}
+// One state and one nesting depth per process, defined in one library:
+// inline copies gave libseams and libyodaLib one each, and a FairWidth
+// nested across the two narrowed the team twice.
+FairState &fairState();
+int &fairDepth();
 
 inline bool fairEnabled() {
   static const bool on = [] {
@@ -245,7 +428,9 @@ inline bool fairEnabled() {
 
 class FairWidth {
 public:
-  explicit FairWidth(bool adopt = false) {
+  explicit FairWidth(bool adopt = false)
+      : placed_() {
+    tuneHeap();
 #ifdef SEAMS_HAS_OPENMP
     if (depth()++ == 0 && !omp_in_parallel() && fairEnabled()) {
       choose();
@@ -260,6 +445,9 @@ public:
     if (set_) {
       omp_set_num_threads(asked_);
     }
+    if (marked_) {
+      askedWidth() = 0;
+    }
     --depth();
 #endif
   }
@@ -267,16 +455,24 @@ public:
   FairWidth &operator=(const FairWidth &) = delete;
 
 private:
+  // Constructed before the constructor body, so the probe fork is placed.
+  PinSession placed_;
 #ifdef SEAMS_HAS_OPENMP
   static constexpr double kSlowFork = 1.0e-3;
+  // A full-width fork that waits out a time slice is a busy machine, not
+  // jitter, and halves the team at once. Beside an 8-thread spinner the
+  // bound 8-thread probe came back in microseconds one call in two or three
+  // while the call itself took 45 to 85 ms, so waiting for two slow probes
+  // in a row left a CHILL run at full width for its whole life; at four
+  // threads it took 10 ms. Going below half still takes two slow probes:
+  // two threads took 18 ms. An idle fork takes tens of microseconds.
+  static constexpr double kSliceFork = 2.0e-3;
   static constexpr double kRetry = 1.0;
   int asked_ = 1;
   bool set_ = false;
+  bool marked_ = false;
 
-  static int &depth() {
-    thread_local int level = 0;
-    return level;
-  }
+  static int &depth() { return fairDepth(); }
 
   static double forkSeconds(int width) {
     const double start = omp_get_wtime();
@@ -300,6 +496,23 @@ private:
       state.slow = 0;
       state.tried = 0.0;
     }
+    const int loaded = loadWidth(state.base);
+    if (loaded > 0) {
+      state.granted = loaded;
+    } else {
+      probe(state);
+    }
+    if (state.granted != asked_) {
+      omp_set_num_threads(state.granted);
+      set_ = true;
+      if (askedWidth() == 0) {
+        askedWidth() = asked_;
+        marked_ = true;
+      }
+    }
+  }
+
+  static void probe(FairState &state) {
     const int floor = std::max(1, state.base / 4);
     const double now = omp_get_wtime();
     int width = state.granted;
@@ -307,17 +520,15 @@ private:
       width = std::min(state.base, 2 * width);
       state.tried = now;
     }
-    if (forkSeconds(width) <= kSlowFork) {
+    const double took = forkSeconds(width);
+    if (took <= kSlowFork) {
       state.slow = 0;
       state.granted = width;
-    } else if (width == state.granted && ++state.slow >= 2 && width > floor) {
+    } else if (width == state.granted && width > floor &&
+               (++state.slow >= 2 || (took > kSliceFork && width == state.base))) {
       state.granted = std::max(floor, width / 2);
       state.slow = 0;
       state.tried = now;
-    }
-    if (state.granted != asked_) {
-      omp_set_num_threads(state.granted);
-      set_ = true;
     }
   }
 #endif

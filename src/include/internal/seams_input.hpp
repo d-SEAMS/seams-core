@@ -42,8 +42,8 @@
 /** @brief Functions for the d-SEAMS readers.
  *  @details This namespace contains functions that are used for reading in the
  *   formats supported by d-SEAMS. LAMMPS trajectory files and XYZ files are
- *   currently supported, though it is recommended to use LAMMPS trajectory
- * files, since the simulation box size etc. are not normally present in XYZ
+ * supported. Use LAMMPS trajectory files when possible because simulation box
+ * dimensions are not normally present in XYZ
  * files, and many analyses may fail without the correct box dimensions.
  *
  * ### Changelog ###
@@ -67,7 +67,7 @@ int nLammpsFrames(const std::string &filename);
 //! Drop a cached dump session (tests that rewrite a path in place).
 void dropLammpsDumpIndex(const std::string &filename);
 
-//! Text of the exception currently being handled. Call from a catch
+//! Text of the exception being handled. Call from a catch
 //! clause. A std::exception yields what(); anything else is unnamed.
 std::string currentExceptionText();
 

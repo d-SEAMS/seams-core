@@ -30,6 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from shared_library import built_library  # noqa: E402
+from project_version import project_version  # noqa: E402
 DOCS = ROOT / "docs"
 FIXTURE = ROOT / "input" / "traj" / "genice_sI.lammpstrj"
 LANGS = {"python", "py", "c", "cpp", "c++", "cxx", "rust", "julia", "lua", "fortran", "f90", "r"}
@@ -55,17 +56,6 @@ MD_FENCE = re.compile(r"```([A-Za-z0-9_+-]+)\n(.*?)```", re.S)
 EXCERPT = re.compile(r"^(?:#|//|!)\s*excerpt:\s*(\S+)\s*$")
 OPTIONAL = ("ase", "solvis")
 BINDING = ("dseams", "pydseams")
-
-
-def project_version():
-    """The seams-core version, which pydseamslib releases share.
-
-    >>> project_version().count(".")
-    2
-    """
-    text = (ROOT / "meson.build").read_text(encoding="utf-8")
-    match = re.search(r"^\s*version:\s*'([^']+)'", text, re.M)
-    return match.group(1) if match else "unknown"
 
 
 def install_hint():
@@ -218,7 +208,28 @@ def base_env(build):
     return env
 
 
+def tsan_host(env):
+    """Environment for a binary we just compiled against the sanitized libseams.
+
+    That binary is not itself instrumented, so the thread runtime is not
+    in its link. Preloading it resolves __tsan_*. An executable the build
+    already linked with -fsanitize=thread must not use this.
+    """
+    runtime = os.environ.get("TSAN_RUNTIME", "")
+    if not runtime or not os.path.isfile(runtime):
+        return env
+    out = dict(env)
+    prior = out.get("LD_PRELOAD", "")
+    if runtime not in prior.split(":"):
+        out["LD_PRELOAD"] = runtime if not prior else runtime + ":" + prior
+    return out
+
+
 def run(cmd, env, cwd=ROOT):
+    # A nested interpreter does not go through the asan-path wrapper, so
+    # it does not map the thread runtime unless this environment does.
+    if Path(cmd[0]).name.startswith("python"):
+        env = tsan_host(env)
     done = subprocess.run(cmd, env=env, cwd=cwd, text=True, capture_output=True)
     if done.returncode != 0:
         tail = (done.stderr + done.stdout)[-1200:]
@@ -352,7 +363,9 @@ def sdk_flags(text):
     if prefix is not None:
         include = prefix / "include"
         if "library.h" in text and not lammps_pc and (include / "lammps" / "library.h").is_file():
-            flags.extend(["-I", str(include / "lammps"), "-llammps", "-lmpi"])
+            flags.extend(["-I", str(include / "lammps"), "-llammps"])
+            if library_file("libmpi.so"):
+                flags.append("-lmpi")
         if "OpenMM.h" in text and (include / "OpenMM.h").is_file():
             flags.append("-lOpenMM")
         if "plumed/" in text and (prefix / "lib" / "libplumedKernel.so").is_file():
@@ -413,7 +426,7 @@ def python_with(module, env):
     """True when this interpreter imports ``module`` from the snippet path."""
     probe = subprocess.run(
         [sys.executable, "-c", "import " + module],
-        env=env,
+        env=tsan_host(env),
         capture_output=True,
         text=True,
     )
@@ -716,7 +729,9 @@ C_BUFFERS = [
     ("n", "  size_t n = 8;"),
     ("xyz", "  double *xyz = doc_cell;"),
     ("labels", "  int labels_buf[8192] = {0};\n  int *labels = labels_buf;"),
-    ("counts", "  int counts[9] = {0};"),
+    # Ring size is the histogram index. seams_rings_histogram(..., 13)
+    # writes counts[0] through counts[12]. CHILL+ uses the first 9.
+    ("counts", "  int counts[13] = {0};"),
     ("box9", "  const double box9[9] = {0, 0, 0, a, a, a, 0, 0, 0};"),
     ("frame0", "  const double *frame0 = doc_cell;"),
     ("frames", "  const double *frames[2] = {doc_cell, doc_cell};"),

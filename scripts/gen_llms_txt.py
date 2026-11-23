@@ -32,6 +32,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import tracked_files
+
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 ORG = DOCS / "orgmode"
@@ -101,19 +104,9 @@ def toctrees(text):
 
 def _tracked_source_rst():
     """Rst pages that live in git. Sphinx writes the rest at build time."""
-    listed = set()
-    import subprocess
-
-    result = subprocess.run(
-        ["git", "ls-files", "-z", "--", "docs/source"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-    )
-    for raw in result.stdout.split(b"\0"):
-        if raw.endswith(b".rst"):
-            listed.add(raw.decode())
-    return listed
+    return {
+        row for row in tracked_files.list_tracked(ROOT, "docs/source") if row.endswith(".rst")
+    }
 
 
 _TRACKED_RST = None

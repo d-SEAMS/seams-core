@@ -446,7 +446,8 @@ Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms) {
 }
 
 namespace {
-seams::domain::RingPhases gRingPhases;
+// Concurrent shares each keep the phases of the search they just ran.
+thread_local seams::domain::RingPhases gRingPhases;
 
 
 //! Bit mix of the coordinates. A later frame with the same atom ids still

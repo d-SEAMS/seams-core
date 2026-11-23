@@ -92,9 +92,62 @@ def check(module):
         fail("mixed is too close to interfacial")
 
 
+def check_cache(module):
+    """A still is reused only for the same inputs, and round-trips intact."""
+    import tempfile
+
+    import numpy as np
+    from PIL import Image
+
+    payload = {
+        "positions": np.arange(12, dtype=np.float64).reshape(4, 3),
+        "samples": np.int32(64),
+        "panel": np.array("ice-ih"),
+    }
+    version = "5.3.0"
+    first = module.cycles_digest(payload, version)
+    if module.cycles_digest(dict(payload), version) != first:
+        fail("the cache digest is not stable for the same inputs")
+    moved = dict(payload, positions=payload["positions"] + 1e-9)
+    if module.cycles_digest(moved, version) == first:
+        fail("a moved atom kept the cached still")
+    if module.cycles_digest(dict(payload, samples=np.int32(65)), version) == first:
+        fail("a new sample count kept the cached still")
+    if module.cycles_digest(payload, "5.4.0") == first:
+        fail("another Blender release kept the cached still")
+    saved = os.environ.get("MOLECULES_CACHE")
+    remote = os.environ.get("MOLECULES_REMOTE")
+    os.environ["MOLECULES_REMOTE"] = "0"
+    with tempfile.TemporaryDirectory() as folder:
+        os.environ["MOLECULES_CACHE"] = folder
+        try:
+            if module.cycles_cached(first) is not None:
+                fail("an empty cache returned a still")
+            image = Image.new("RGBA", (8, 6), (10, 20, 30, 255))
+            module.cycles_store(first, image, 12.5)
+            hit = module.cycles_cached(first)
+            if hit is None:
+                fail("a stored still was not found")
+            if list(hit[0].getdata()) != list(image.getdata()) or hit[1] != 12.5:
+                fail("the cached still or its world size changed")
+            os.unlink(os.path.join(folder, first + ".world"))
+            if module.cycles_cached(first) is not None:
+                fail("a still without its world size was reused")
+        finally:
+            if saved is None:
+                os.environ.pop("MOLECULES_CACHE", None)
+            else:
+                os.environ["MOLECULES_CACHE"] = saved
+            if remote is None:
+                os.environ.pop("MOLECULES_REMOTE", None)
+            else:
+                os.environ["MOLECULES_REMOTE"] = remote
+
+
 def main():
     module = load()
     check(module)
+    check_cache(module)
     if module.cycles_python() is None:
         print("no Python here imports bpy; pixi install -e cycles provides one")
         return 77

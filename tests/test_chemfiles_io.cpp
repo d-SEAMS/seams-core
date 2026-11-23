@@ -347,7 +347,8 @@ TEST_CASE("a numeric dump guesses type 2 and then type 1", "[chemfiles]") {
   REQUIRE_FALSE(sinp::forEachChemfilesFrame(
       "no/such/trajectory.lammpstrj", 1, 1, -1, "", 0, 1,
       [&](int, Cloud &) {}));
-  REQUIRE(sinp::openFrame("noextension", 1, -1).nop == 0);
+  REQUIRE_THROWS_AS(sinp::openFrame("noextension", 1, -1),
+                    std::runtime_error);
   REQUIRE(sinp::chemfilesSteps(path.string()) == 1);
   fs::remove(path);
 }
@@ -374,18 +375,114 @@ TEST_CASE("an atom count after the ATOMS header stays inside the id scan",
   fs::remove(late);
 }
 
-#ifdef SEAMS_CHEMFILES_PATCHED
 TEST_CASE("a MOL2 molecule with no counts line is an error", "[chemfiles]") {
   // capi_read_fuzzer: chemfiles 0.10.4 read counts[0] of an empty split.
+  // The vendored copy is patched; an installed copy is refused by the
+  // check in src/chemfiles_io.cpp.
   const auto mol2 = dseams_test::freshFile("dseams_chem_no_counts.mol2");
   {
     std::ofstream out(mol2);
     out << "@<TRIPOS>MOLECULE\nwater\n\n@<TRIPOS>ATOM\n";
   }
   REQUIRE(sinp::chemfilesSteps(mol2.string()) == -1);
+  REQUIRE_THROWS_AS(sinp::openFrame(mol2.string(), 1, -1),
+                    std::runtime_error);
   fs::remove(mol2);
 }
+
+namespace {
+
+// What chemfiles 0.10.4 writes for an atom with no residue: label_seq_id
+// "." and no label_entity_id column. Reading it back segfaults in
+// mmCIFFormat::read of the stock library.
+std::string mmcifAtomSite(const std::string &columns, const std::string &row) {
+  return "data_test\n#\n_cell.length_a 10.0\n_cell.length_b 11.0\n"
+         "_cell.length_c 12.0\n_cell.length_alpha 90.0\n"
+         "_cell.length_beta 90.0\n_cell.length_gamma 90.0\n#\nloop_\n" +
+         columns + row + "\n";
+}
+
+const char *const kSiteColumns =
+    "_atom_site.group_PDB\n_atom_site.id\n_atom_site.type_symbol\n"
+    "_atom_site.label_atom_id\n_atom_site.label_comp_id\n"
+    "_atom_site.label_asym_id\n_atom_site.label_seq_id\n"
+    "_atom_site.Cartn_x\n_atom_site.Cartn_y\n_atom_site.Cartn_z\n";
+
+fs::path writeMmcif(const char *name, const std::string &text) {
+  const auto path = dseams_test::freshFile(name);
+  std::ofstream out(path);
+  out << text;
+  return path;
+}
+
+} // namespace
+
+TEST_CASE("an mmCIF atom_site with no label_entity_id and an unset label_seq_id",
+          "[chemfiles]") {
+  // The vendored copy is patched to read these files. An installed copy
+  // is refused by the check in src/chemfiles_io.cpp before chemfiles opens
+  // the file, so the stock library never reaches the missing column.
+  for (const char *unset : {".", "?"}) {
+    const auto path = writeMmcif(
+        "dseams_chem_unset_seq.mmcif",
+        mmcifAtomSite(kSiteColumns, std::string("HETATM 1 O O HOH A ") + unset +
+                                        " 1.000 2.000 3.000"));
+#ifdef SEAMS_CHEMFILES_PATCHED
+    REQUIRE(sinp::chemfilesSteps(path.string()) == 1);
+    Cloud cloud = sinp::openFrame(path.string(), 1, -1);
+    REQUIRE(cloud.nop == 1);
+    REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(1.0, 1e-4));
+#else
+    REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+    REQUIRE(sinp::openFrame(path.string(), 1, -1).nop == 0);
+    std::size_t seen = 0;
+    sinp::forEachChemfilesStep(
+        path.string(), 1, -1, -1,
+        [&](int, molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+          seen += cloud.pts.size();
+        });
+    REQUIRE(seen == 0);
 #endif
+    fs::remove(path);
+  }
+}
+
+TEST_CASE("an unset label_seq_id after a numeric one is also refused",
+          "[chemfiles]") {
+  const auto path = writeMmcif(
+      "dseams_chem_late_unset_seq.mmcif",
+      mmcifAtomSite(kSiteColumns,
+                    "ATOM 1 N N ALA A 1 1.000 2.000 3.000\n"
+                    "HETATM 2 O O 'HO H' A . 4.000 5.000 6.000"));
+#ifdef SEAMS_CHEMFILES_PATCHED
+  REQUIRE(sinp::chemfilesSteps(path.string()) == 1);
+#else
+  REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+#endif
+  fs::remove(path);
+}
+
+TEST_CASE("an mmCIF atom_site with a label_entity_id column is not refused",
+          "[chemfiles]") {
+  const auto path = writeMmcif(
+      "dseams_chem_entity_seq.mmcif",
+      mmcifAtomSite(std::string(kSiteColumns) + "_atom_site.label_entity_id\n",
+                    "HETATM 1 O O HOH A . 1.000 2.000 3.000 1"));
+  REQUIRE(sinp::chemfilesSteps(path.string()) == 1);
+  fs::remove(path);
+}
+
+TEST_CASE("an mmCIF file without a data block is an error", "[chemfiles]") {
+  const auto mmcif = dseams_test::freshFile("dseams_chem_no_data.mmcif");
+  {
+    std::ofstream out(mmcif);
+    out << "loop_\n_atom_site.label_atom_id\nO1\n";
+  }
+  REQUIRE(sinp::chemfilesSteps(mmcif.string()) == -1);
+  REQUIRE_THROWS_AS(sinp::openFrame(mmcif.string(), 1, -1),
+                    std::runtime_error);
+  fs::remove(mmcif);
+}
 
 TEST_CASE("one open chemfiles trajectory gives the clouds of single reads",
           "[chemfiles]") {
@@ -578,6 +675,19 @@ TEST_CASE("cif and mmcif round trip with an explicit format", "[chemfiles]") {
     mmOut.write(frame);
   }
   for (const auto &path : {cif, mmcif}) {
+#ifndef SEAMS_CHEMFILES_PATCHED
+    if (path == mmcif) {
+      // The stock writer leaves label_seq_id unset and omits
+      // label_entity_id, and the stock reader dies on that file. The
+      // check in src/chemfiles_io.cpp refuses it, so the read gives an
+      // empty cloud and no crash. The vendored copy writes a numeric seq
+      // id and reads the file back below.
+      REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+      REQUIRE(sinp::openFrame(path.string(), 1, -1).nop == 0);
+      fs::remove(path);
+      continue;
+    }
+#endif
     Cloud cloud = sinp::openFrame(path.string(), 1, -1);
     REQUIRE(cloud.nop == 1);
     REQUIRE_THAT(cloud.pts[0].x, Catch::Matchers::WithinAbs(1.0, 1e-4));
@@ -715,8 +825,8 @@ TEST_CASE("name checks and the dump fallback take both sides", "[chemfiles]") {
     std::ofstream out(emptyGro);
     out << "";
   }
-  Cloud none = sinp::openFrame(emptyGro.string(), 1, -1);
-  REQUIRE(none.nop == 0);
+  REQUIRE_THROWS_AS(sinp::openFrame(emptyGro.string(), 1, -1),
+                    std::runtime_error);
   int walked = 0;
   sinp::forEachChemfilesFrame(
       emptyGro.string(), 1, 1, -1, "", 0, 1,

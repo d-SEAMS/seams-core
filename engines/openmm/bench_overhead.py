@@ -88,7 +88,7 @@ def run_box(box_nm, lib, steps, intervals, trials):
 def main():
     lib = LIB
     if not lib.is_file() and str(lib) == "libseams_lang":
-        built = ROOT / "build" / "bindings" / "libseams_lang.so"
+        built = ROOT / "build" / "bindings" / ("libseams_lang.dylib" if sys.platform == "darwin" else "libseams_lang.so")
         if built.is_file():
             lib = built
     for box in BOXES_NM:

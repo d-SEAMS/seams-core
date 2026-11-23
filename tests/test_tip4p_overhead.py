@@ -1,6 +1,7 @@
 # Copyright (c) d-SEAMS developers
 """The TIP4P overhead script's hinge, and one reporter step on a small box."""
 
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -25,6 +26,7 @@ def main() -> int:
         print(f"hinges {median} {hinge}", file=sys.stderr)
         return 1
     lib = os_lib()
+    before = set(os.listdir(os.getcwd()))
     simulation, _oxygens = build_simulation(2.0, threads=1)
     if simulation.topology.getNumResidues() < 8:
         print("box has too few waters", file=sys.stderr)
@@ -41,13 +43,15 @@ def main() -> int:
     if frames != reports or Path(tmp).exists():
         print(f"dump frames {frames} reports {reports} left {Path(tmp).exists()}", file=sys.stderr)
         return 1
+    added = sorted(set(os.listdir(os.getcwd())) - before)
+    if added:
+        print(f"run left {added} in {os.getcwd()}", file=sys.stderr)
+        return 1
     print(f"tip4p waters {simulation.topology.getNumResidues()} reports {reports}")
     return 0
 
 
 def os_lib() -> str:
-    import os
-
     sys.path.insert(0, str(ROOT / "scripts"))
     from shared_library import built_library
 

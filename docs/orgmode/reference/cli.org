@@ -371,7 +371,7 @@ The default is ~2.65,3.15~.
 ~hc~ and ~ddc~ keep their geometric finders. The window applies to the ring-census search.
 
 The numbers are in the coordinate units of the file.
-The LAMMPS dumps in this tree are angstroms, and the default covers the oxygen-oxygen contacts of the reference cells (about 2.74 to 2.81).
+The LAMMPS dumps in the supplied examples are angstroms, and the default covers the oxygen-oxygen contacts of the reference cells (about 2.74 to 2.81).
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.
 A file in nanometers uses ~0.265,0.315~, or ~none~ when the contact range is unknown.

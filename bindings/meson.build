@@ -125,7 +125,7 @@ if get_option('with_tests')
   endif
 
   # ctypes checks of libseams_lang and libyodaLib. The language bindings
-  # live in their own repositories; see docs/orgmode/contributing/repositories.org.
+  # live in their own repositories; see MAINTAINERS/repositories.org.
   if get_option('with_cli') and not get_option('b_sanitize').contains('address')
     test(
       'wl_ice',
