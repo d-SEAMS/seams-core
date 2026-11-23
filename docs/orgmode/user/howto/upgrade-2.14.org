@@ -40,7 +40,7 @@ built against the matching seams-core ~vX.Y.Z~ tag and versioned
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
 | Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ |
 
-~pip install -U 'pydseamslib==X.Y.Z'~ installs a pinned release (or
+~pip install -U 'pydseamslib==2.14.0'~ installs the published release (or
 ~pip install -U pydseamslib~ for the latest), with ~import dseams~ and
 ~import pydseams~.
 Julia reads ~libseams_lang~ from ~SEAMS_LANG_LIB~.
