@@ -19,23 +19,35 @@
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 build=$root/build-san
+# Meson writes the build directory's .gitignore only while that directory
+# is empty. The wrappers live in build-san/asan-path, because the cargo
+# wrapper finds this tree two directories above the path it was started as
+# and the python3 wrapper puts that directory on PYTHONPATH. Creating them
+# first leaves build-san non-empty, so Meson never writes the gitignore and
+# the sanitizer outputs stay untracked. A directory left that way does not
+# gain a gitignore on a later setup. Remove it and let Meson create it.
+if [ -d "$build" ] && [ ! -f "$build/.gitignore" ]; then
+  rm -rf "$build"
+fi
 # A wrapper on PATH answers find_program and shutil.which even when the host
 # lacks the program, so a test that skips an absent tool would run the
 # wrapper and fail. Only wrappers whose program exists are linked in.
 wrap=$build/asan-path
-# Python leaves __pycache__ here once sitecustomize is imported.
-rm -rf "$wrap"
-mkdir -p "$wrap"
-for tool in "$root"/scripts/asan-path/*; do
-  if command -v "${tool##*/}" >/dev/null 2>&1; then
-    ln -s "$tool" "$wrap/${tool##*/}"
-  fi
-done
-# The python3 wrapper puts its own directory on PYTHONPATH, which is this
-# one. sitecustomize is not a program, so the loop above skips it.
-ln -s "$root/scripts/asan-path/sitecustomize.py" "$wrap/sitecustomize.py"
-# Resolved before meson setup so find_program('cargo') records the wrapper.
-export PATH="$wrap:$PATH"
+link_wrappers() {
+  # Python leaves __pycache__ here once sitecustomize is imported.
+  rm -rf "$wrap"
+  mkdir -p "$wrap"
+  for tool in "$root"/scripts/asan-path/*; do
+    if command -v "${tool##*/}" >/dev/null 2>&1; then
+      ln -s "$tool" "$wrap/${tool##*/}"
+    fi
+  done
+  # The python3 wrapper puts its own directory on PYTHONPATH, which is this
+  # one. sitecustomize is not a program, so the loop above skips it.
+  ln -s "$root/scripts/asan-path/sitecustomize.py" "$wrap/sitecustomize.py"
+  # Resolved before the setup that records find_program('cargo').
+  export PATH="$wrap:$PATH"
+}
 # run_hook links LAMMPS and is built with the sanitizer. The environment's
 # LAMMPS initializes Open MPI, whose allocations outlive MPI_Finalize, so
 # the hook is linked to a serial LAMMPS that loads no MPI library.
@@ -54,12 +66,42 @@ fi
 if [ -f "$build/meson-private/coredata.dat" ] && [ -z "$reconfigure" ]; then
   reconfigure=--reconfigure
 fi
-meson setup "$build" $reconfigure \
-  --buildtype=debugoptimized \
-  -Db_sanitize=address,undefined \
-  -Dwith_tests=true \
-  -Dwith_cli=true \
-  "$@"
+# --reconfigure needs a configuration. The removal above, or a build
+# directory that was never set up, has none.
+if [ -n "$reconfigure" ] && [ ! -f "$build/meson-private/coredata.dat" ]; then
+  reconfigure=
+fi
+# No saved configuration (a fresh directory, or one removed above). Meson
+# has to create the build directory itself so it writes .gitignore. The
+# wrappers are linked only after that, and setup runs again with them on
+# PATH. find_program is resolved by that second setup. An existing build
+# already has the gitignore, so the wrappers are reset and linked first.
+run_setup() {
+  meson setup "$build" "$@"
+}
+if [ -n "$reconfigure" ]; then
+  link_wrappers
+  run_setup --reconfigure \
+    --buildtype=debugoptimized \
+    -Db_sanitize=address,undefined \
+    -Dwith_tests=true \
+    -Dwith_cli=true \
+    "$@"
+else
+  run_setup \
+    --buildtype=debugoptimized \
+    -Db_sanitize=address,undefined \
+    -Dwith_tests=true \
+    -Dwith_cli=true \
+    "$@"
+  link_wrappers
+  run_setup --reconfigure \
+    --buildtype=debugoptimized \
+    -Db_sanitize=address,undefined \
+    -Dwith_tests=true \
+    -Dwith_cli=true \
+    "$@"
+fi
 ninja -C "$build"
 # Python, Lua, and the engine hosts are not linked with the sanitizer.
 # A sanitized libseams loaded into them aborts with "ASan runtime does
