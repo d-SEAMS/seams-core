@@ -6,7 +6,11 @@ github.com/d-SEAMS when this module loads a language.
 """
 
 import ast
+import ctypes
+import errno
+import os
 import re
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -21,17 +25,147 @@ REPOS = {
     "dseams-fortran": "https://github.com/d-SEAMS/dseams-fortran.git",
     "yodaStruct": "https://github.com/d-SEAMS/yodaStruct.git",
 }
+# Default-branch HEAD from `git ls-remote <url> HEAD`. meson dist fetches
+# these commits, so a later upstream push does not change the tarball.
+PINS = {
+    "PydSEAMSlib": "115f0ca9df37107c8ca824088b5d813fe41b2c3e",
+    "Dseams.jl": "24bd4e4d28956fc69a0bf69a86e36145505e7ffe",
+    "dseams-r": "25dfa13e1b1542d88ac768ecd053ebcfe10c72da",
+    "dseams-rs": "c462541512940a3101485a0f731cd1b3e6883fcd",
+    "dseams-fortran": "aafd4b85440c616338e2831ba3bdcdf64e16b2d2",
+    "yodaStruct": "79b6daa1ec74f37451765f537a0d0c37407380fe",
+}
+VENDORED_REV = ".seams-vendored-rev"
 
 
 def checkout(name):
     dest = CACHE / name
     dest.parent.mkdir(parents=True, exist_ok=True)
+    # The offline tarball has no network. meson dist vendors these clones
+    # into docs/.cache/bindings and strips .git, so a fetch cannot refresh them.
+    if os.environ.get("SEAMS_NO_NETWORK") == "1":
+        if dest.is_dir() and any(dest.iterdir()):
+            return dest
+        raise RuntimeError(
+            "{} is not in docs/.cache/bindings and SEAMS_NO_NETWORK=1 forbids cloning".format(name)
+        )
     if not (dest / ".git").is_dir():
-        subprocess.check_call(["git", "clone", "--quiet", "--depth", "1", REPOS[name], str(dest)])
+        # A dist tree keeps the sources and drops .git. Clone beside it and
+        # swap only after the clone succeeds, so a network failure leaves the
+        # snapshot in place for a later offline run.
+        staging = dest.with_name(".{}.partial".format(dest.name))
+        if staging.exists():
+            shutil.rmtree(staging)
+        try:
+            subprocess.check_call(
+                ["git", "clone", "--quiet", "--depth", "1", REPOS[name], str(staging)]
+            )
+        except BaseException:
+            shutil.rmtree(staging, ignore_errors=True)
+            raise
+        # A crash between two renames used to leave dest missing. The
+        # install puts the new tree in place without that window, and the
+        # next call restores .previous if a fallback swap was killed.
+        install_snapshot(dest, staging)
     else:
         subprocess.check_call(["git", "-C", str(dest), "fetch", "--quiet", "--depth", "1", "origin", "HEAD"])
         subprocess.check_call(["git", "-C", str(dest), "reset", "--quiet", "--hard", "FETCH_HEAD"])
     return dest
+
+
+def _exchange_dirs(left, right):
+    """Atomically swap two directories with renameat2(RENAME_EXCHANGE).
+
+    Returns False when this kernel has no such call. Any other error is raised.
+    """
+    try:
+        libc = ctypes.CDLL(None, use_errno=True)
+    except OSError:
+        return False
+    if not hasattr(libc, "renameat2"):
+        return False
+    call = libc.renameat2
+    call.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
+    call.restype = ctypes.c_int
+    # linux/fs.h: RENAME_EXCHANGE. AT_FDCWD is -100.
+    rc = call(-100, os.fsencode(left), -100, os.fsencode(right), 2)
+    if rc == 0:
+        return True
+    err = ctypes.get_errno()
+    if err in (errno.ENOSYS, errno.EINVAL, errno.ENOTSUP, errno.EOPNOTSUPP, errno.EPERM):
+        return False
+    raise OSError(err, os.strerror(err), str(left), None, str(right))
+
+
+def install_snapshot(dest, staging, rename=None):
+    """Replace ``dest`` with ``staging``.
+
+    ``renameat2(RENAME_EXCHANGE)`` swaps the two names in one syscall, so
+    ``dest`` is never absent. Without that call, a crash between the two
+    renames leaves the old tree at ``.name.previous``. The next call moves
+    it back before installing anything else. ``rename`` replaces both steps
+    of that fallback; the recovery move stays ``os.rename``.
+    """
+    rename = os.rename if rename is None else rename
+    dest = Path(dest)
+    staging = Path(staging)
+    previous = dest.with_name(".{}.previous".format(dest.name))
+    if not dest.exists() and previous.is_dir():
+        os.rename(previous, dest)
+    if not dest.exists():
+        rename(staging, dest)
+        return
+    if previous.exists():
+        shutil.rmtree(previous)
+    if rename is os.rename and _exchange_dirs(dest, staging):
+        if staging.exists():
+            shutil.rmtree(staging)
+        return
+    rename(dest, previous)
+    try:
+        rename(staging, dest)
+    except Exception:
+        if not dest.exists() and previous.is_dir():
+            os.rename(previous, dest)
+        raise
+    if previous.exists():
+        shutil.rmtree(previous)
+
+
+def vendored_rev_errors(root=None, pins=None):
+    """A dist tree records the pinned commit of every binding.
+
+    Online checkouts have no vendored-rev file. The offline tarball does,
+    and ``SEAMS_NO_NETWORK=1`` requires each file to match ``PINS``.
+
+    >>> import tempfile
+    >>> from pathlib import Path
+    >>> root = Path(tempfile.mkdtemp())
+    >>> pin = "a" * 40
+    >>> (root / "demo").mkdir()
+    >>> vendored_rev_errors(root, {"demo": pin})
+    ['demo is missing .seams-vendored-rev']
+    >>> _ = (root / "demo" / ".seams-vendored-rev").write_text(pin + "\\n", encoding="utf-8")
+    >>> vendored_rev_errors(root, {"demo": pin})
+    []
+    >>> _ = (root / "demo" / ".seams-vendored-rev").write_text("b" * 40, encoding="utf-8")
+    >>> vendored_rev_errors(root, {"demo": pin})[0]
+    'demo vendored bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb but the pin is aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    """
+    if root is None and pins is None and os.environ.get("SEAMS_NO_NETWORK") != "1":
+        return []
+    root = CACHE if root is None else Path(root)
+    pins = PINS if pins is None else pins
+    errors = []
+    for name in sorted(pins):
+        rev = root / name / VENDORED_REV
+        if not rev.is_file():
+            errors.append("{} is missing {}".format(name, VENDORED_REV))
+            continue
+        got = rev.read_text(encoding="utf-8").strip()
+        if got != pins[name]:
+            errors.append("{} vendored {} but the pin is {}".format(name, got, pins[name]))
+    return errors
 
 
 def _calls(text):

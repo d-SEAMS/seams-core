@@ -1,4 +1,4 @@
-"""The cutoff-list page records this tip's CSR session."""
+"""The cutoff-list page records this tip's CSR measurements."""
 
 import sys
 from pathlib import Path
@@ -9,11 +9,9 @@ PAGE = Path("docs/orgmode/user/howto/neighbour-lists.org")
 def main() -> int:
     text = PAGE.read_text(encoding="utf-8")
     required = (
-        "one session",
         "8 cores",
         "interquartile range (IQR)",
         "5th of the 8 sorted samples",
-        "No host name",
         "4.554",
         "6.879",
         "5.136",

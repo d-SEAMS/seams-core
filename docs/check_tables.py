@@ -4,7 +4,6 @@
 
 import csv
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -36,21 +35,15 @@ ALIASES = {
     "phase": "phase",
     "tile": "tile",
 }
+sys.path.insert(0, str(ROOT / "scripts"))
+import tracked_files  # noqa: E402
 
 
 def pages():
     """Tracked pages only. Generated rst is gitignored and must not fail this check."""
-    listed = subprocess.run(
-        ["git", "ls-files", "-z", "--", "docs"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-    )
     found = []
-    for raw in listed.stdout.split(b"\0"):
-        if not raw:
-            continue
-        path = ROOT / raw.decode()
+    for row in tracked_files.list_tracked(ROOT, "docs"):
+        path = ROOT / row
         if path.suffix not in {".org", ".md", ".rst"}:
             continue
         if SKIP.intersection(path.relative_to(ROOT).parts):

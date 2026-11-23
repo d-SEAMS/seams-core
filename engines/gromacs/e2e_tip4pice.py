@@ -118,7 +118,7 @@ def main():
     gmx = e2e.which("gmx", "GMX")
     if gmx is None:
         e2e.skip("GROMACS (gmx or $GMX) was not found")
-    hook = e2e.find_build_file(args.build, "gmx-seams")
+    hook = e2e.external_library(args.build, "gmx-seams")
     if hook is None:
         e2e.skip("gmx-seams was not built (set gromacs_legacy_include for GROMACS 2023+)")
     env = dict(os.environ, GMX_MAXBACKUP="-1", GMX_SUPPRESS_DUMP="1",
@@ -139,7 +139,7 @@ def main():
                                     capture_output=True, text=True).stdout
         if "-plumed" not in mdrun_help:
             e2e.skip("this gmx mdrun is not patched with PLUMED")
-        plugin = e2e.find_build_file(args.build, "libSeamsPlumed.so")
+        plugin = e2e.external_library(args.build, "libSeamsPlumed.so")
         if plugin is None:
             e2e.skip("libSeamsPlumed.so was not built")
         # GROMACS 2024 sorts atoms under single-rank domain decomposition and

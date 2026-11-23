@@ -165,10 +165,13 @@ def machine(root) -> dict[str, str]:
     }
 
 
-def machine_lines(root) -> list[str]:
+def machine_lines(root, commit: bool = True) -> list[str]:
+    """commit=False cites the tree of HEAD instead of the commit."""
     info = machine(root)
+    cited = (f"source_commit {info['source_commit']}" if commit
+             else f"source_tree {source_tree(root)}")
     return [
-        f"source_commit {info['source_commit']}",
+        cited,
         f"cpu_model {info['cpu_model']}",
         f"cpu_family {info['cpu_family']}",
         f"cpu_model_id {info['cpu_model_id']}",

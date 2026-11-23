@@ -14,6 +14,25 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 from shared_library import built_library, require_library  # noqa: E402
 
+
+def _load_e2e():
+    """engines/e2e_common.py, without putting engines/ on sys.path.
+
+    engines/openmm, engines/lammps and the other engine folders would then
+    import as namespace packages, and a missing OpenMM would pass for an
+    installed one.
+    """
+    import importlib.util
+
+    path = Path(__file__).resolve().parents[2] / "engines" / "e2e_common.py"
+    spec = importlib.util.spec_from_file_location("e2e_common", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+e2e = _load_e2e()
+
 HEXAGONAL = 128
 SIX_RINGS = 256
 Q6 = 0.625855
@@ -108,7 +127,7 @@ def run_gromacs(root, build, work):
     gro.write_text("\n".join(lines) + "\n")
     text = subprocess.check_output(
         [str(exe), "-f", str(gro), "-cutoff", "3.5"],
-        env=env_libs(build),
+        env=e2e.with_thread_runtime(env_libs(build)),
         text=True,
     )
     require_census(text)
@@ -155,7 +174,7 @@ def run_lammps(root, build, work):
     text = subprocess.check_output(
         [str(exe), str(deck)],
         cwd=work,
-        env=env_libs(build),
+        env=e2e.drop_thread_runtime(env_libs(build)),
         text=True,
     )
     require_census(text)
@@ -258,7 +277,7 @@ def run_openmm(root, build, work):
 def run_plumed(root, build, work):
     if shutil.which("plumed") is None:
         skip("plumed skipped: plumed was not found")
-    plugin = built(build, "libSeamsPlumed.so")
+    plugin = e2e.external_library(build, "libSeamsPlumed.so")
     if plugin is None:
         skip("plumed skipped: libSeamsPlumed.so was not built")
     atoms, bounds = read_dump(root / "input" / "traj" / "ice1h.lammpstrj")
@@ -280,7 +299,8 @@ def run_plumed(root, build, work):
             plugin, len(atoms), colvar
         )
     )
-    env = env_libs(build)
+    env = e2e.drop_thread_runtime(env_libs(build))
+    env.pop("LD_PRELOAD", None)
     env["PLUMED_NUM_THREADS"] = "1"
     done = subprocess.run(
         ["plumed", "driver", "--plumed", str(deck), "--ixyz", str(xyz)],

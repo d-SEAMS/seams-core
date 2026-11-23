@@ -179,9 +179,10 @@ bool mmcifHasData(const std::string &filename) {
          chunk.find("_cell.") != std::string::npos;
 }
 
-// Defined in the vendored chemfiles library. The trajectory, the frame,
-// and a selection list are created and destroyed there, so their free
-// uses the allocator that allocated them.
+#ifdef SEAMS_CHEMFILES_PATCHED
+// The vendored chemfiles that Meson builds exports these. The trajectory,
+// the frame, and a selection list are created and destroyed there, so
+// their free uses the allocator that allocated them.
 namespace chemfiles {
 int seams_with_frame(const std::string &path, const std::string &format,
                      std::size_t step, const std::string &topology,
@@ -194,6 +195,259 @@ int seams_each_frame(const std::string &path, const std::string &format,
                      int (*visit)(const Frame &frame, std::size_t step, void *user),
                      void *user, std::string &error);
 }
+namespace framevisit = chemfiles;
+#else
+// An installed chemfiles has no seams_with_frame, so the same visit is
+// written here against the public API. cmake/patches/
+// chemfiles-0.10.4-frame-visit.patch is the vendored twin; keep the two
+// in step. The return codes are the ones the callers switch on.
+namespace framevisit {
+
+const char *const mmcifSeqIdMessage =
+    "mmCIF atom_site has no label_entity_id column and an unset label_seq_id";
+
+// Splits a CIF data line into tokens. A quote opens a token only at its
+// start and closes at the same quote before white space, so a token with a
+// space in it stays whole. Quotes are kept, which leaves a quoted "." apart
+// from the unset value ".".
+void cifTokens(const std::string &line, std::vector<std::string> &out) {
+  std::size_t at = 0;
+  const std::size_t n = line.size();
+  while (at < n) {
+    while (at < n && std::isspace(static_cast<unsigned char>(line[at]))) {
+      ++at;
+    }
+    if (at >= n) {
+      break;
+    }
+    std::size_t end = at + 1;
+    if (line[at] == '\'' || line[at] == '"') {
+      const char quote = line[at];
+      while (end < n &&
+             !(line[end] == quote && (end + 1 == n || std::isspace(static_cast<unsigned char>(line[end + 1]))))) {
+        ++end;
+      }
+      end = std::min(end + 1, n);
+    } else {
+      while (end < n && !std::isspace(static_cast<unsigned char>(line[end]))) {
+        ++end;
+      }
+    }
+    out.emplace_back(line.substr(at, end - at));
+    at = end;
+  }
+}
+
+// chemfiles 0.10.4 mmCIFFormat::read dereferences the label_entity_id
+// column to classify a residue. When the atom_site loop has no such column
+// and an atom has no label_seq_id, which a CIF writes as "." or "?", the
+// dereference is of a missing column and the process dies. chemfiles 0.10.4
+// writes exactly that for an atom without a residue, so its own output is
+// refused here. The vendored copy reads such a file
+// (cmake/patches/chemfiles-0.10.4-mmcif.patch).
+bool mmcifSeqIdUnset(const std::string &path, const std::string &format) {
+  if (upperToken(format) != "MMCIF" &&
+      !(format.empty() && extensionIs(path, "mmcif"))) {
+    return false;
+  }
+  std::ifstream in(path);
+  std::string line;
+  std::vector<std::string> columns;
+  std::vector<std::string> tokens;
+  bool header = false;
+  bool rows = false;
+  std::size_t seqColumn = 0;
+  while (std::getline(in, line)) {
+    const auto first = line.find_first_not_of(" \t\r");
+    if (first == std::string::npos) {
+      continue;
+    }
+    std::string text = line.substr(first);
+    std::string lowered = text;
+    for (char &ch : lowered) {
+      ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+    }
+    if (rows) {
+      // The loop ends at the next keyword, tag or comment line.
+      if (text[0] == '_' || text[0] == '#' || lowered.rfind("loop_", 0) == 0 ||
+          lowered.rfind("data_", 0) == 0) {
+        return false;
+      }
+      cifTokens(text, tokens);
+      while (tokens.size() >= columns.size()) {
+        const std::string &value = tokens[seqColumn];
+        if (value == "." || value == "?") {
+          return true;
+        }
+        tokens.erase(tokens.begin(),
+                     tokens.begin() + static_cast<std::ptrdiff_t>(columns.size()));
+      }
+      continue;
+    }
+    if (lowered.rfind("loop_", 0) == 0) {
+      header = true;
+      columns.clear();
+      continue;
+    }
+    if (header && text[0] == '_') {
+      const auto stop = lowered.find_first_of(" \t\r");
+      columns.emplace_back(lowered.substr(0, stop));
+      continue;
+    }
+    if (header) {
+      header = false;
+      if (columns.empty() || columns.front().rfind("_atom_site.", 0) != 0) {
+        continue;
+      }
+      std::size_t seq = columns.size();
+      for (std::size_t i = 0; i < columns.size(); ++i) {
+        if (columns[i] == "_atom_site.label_entity_id") {
+          return false;
+        }
+        if (columns[i] == "_atom_site.label_seq_id") {
+          seq = i;
+        }
+      }
+      if (seq == columns.size()) {
+        return false;
+      }
+      seqColumn = seq;
+      rows = true;
+      tokens.clear();
+      cifTokens(text, tokens);
+      while (tokens.size() >= columns.size()) {
+        if (tokens[seqColumn] == "." || tokens[seqColumn] == "?") {
+          return true;
+        }
+        tokens.erase(tokens.begin(),
+                     tokens.begin() + static_cast<std::ptrdiff_t>(columns.size()));
+      }
+    }
+  }
+  return false;
+}
+
+// chemfiles 0.10.4 reads counts[0] of an empty split when a MOL2 molecule
+// has no counts line, and segfaults. The vendored copy throws instead
+// (cmake/patches/chemfiles-0.10.4-mol2.patch). An installed copy is not
+// probed when cross compiling, so the same files are refused here.
+bool mol2CountsMissing(const std::string &path, const std::string &format) {
+  if (upperToken(format) != "MOL2" &&
+      !(format.empty() && extensionIs(path, "mol2"))) {
+    return false;
+  }
+  std::ifstream in(path);
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.rfind("@<TRIPOS>MOLECULE", 0) != 0) {
+      continue;
+    }
+    std::getline(in, line);
+    if (!std::getline(in, line) ||
+        line.find_first_not_of(" \r") == std::string::npos) {
+      return true;
+    }
+  }
+  return false;
+}
+
+int seams_with_frame(const std::string &path, const std::string &format,
+                     std::size_t step, const std::string &topology,
+                     const std::string &selection, bool read, bool empty_xyz,
+                     int (*visit)(const chemfiles::Frame &frame,
+                                  const std::size_t *ids, std::size_t nids,
+                                  void *user),
+                     void *user, std::string &error, std::size_t &nsteps) {
+  try {
+    if (mol2CountsMissing(path, format)) {
+      error = "missing the number of atoms for MOL2";
+      return 4;
+    }
+    if (mmcifSeqIdUnset(path, format)) {
+      error = mmcifSeqIdMessage;
+      return 4;
+    }
+    chemfiles::Trajectory trajectory(path, 'r', format);
+    nsteps = trajectory.nsteps();
+    if (!read) {
+      return 0;
+    }
+    if (empty_xyz && nsteps == 0) {
+      error = "XYZ read failed: the file has no frames";
+      return 6;
+    }
+    if (nsteps > 0 && step >= nsteps) {
+      return 2;
+    }
+    if (!topology.empty()) {
+      trajectory.set_topology(topology);
+    }
+    chemfiles::Frame frame = trajectory.read_step(step);
+    const std::size_t *ids = nullptr;
+    std::size_t nids = static_cast<std::size_t>(-1);
+    std::vector<std::size_t> picked;
+    if (!selection.empty()) {
+      chemfiles::Selection chosen(selection);
+      picked = chosen.list(frame);
+      ids = picked.data();
+      nids = picked.size();
+    }
+    if (visit == nullptr) {
+      return 0;
+    }
+    return visit(frame, ids, nids, user);
+  } catch (const chemfiles::SelectionError &err) {
+    error = err.what();
+    return 3;
+  } catch (const chemfiles::Error &err) {
+    error = err.what();
+    return 4;
+  } catch (const std::exception &err) {
+    error = err.what();
+    return 5;
+  }
+}
+
+int seams_each_frame(const std::string &path, const std::string &format,
+                     std::size_t first, std::size_t last,
+                     const std::string &topology,
+                     int (*visit)(const chemfiles::Frame &frame,
+                                  std::size_t step, void *user),
+                     void *user, std::string &error) {
+  try {
+    if (mol2CountsMissing(path, format)) {
+      error = "missing the number of atoms for MOL2";
+      return 4;
+    }
+    if (mmcifSeqIdUnset(path, format)) {
+      error = mmcifSeqIdMessage;
+      return 4;
+    }
+    chemfiles::Trajectory trajectory(path, 'r', format);
+    if (!topology.empty()) {
+      trajectory.set_topology(topology);
+    }
+    const std::size_t nsteps = trajectory.nsteps();
+    for (std::size_t step = first; step < nsteps && step <= last; ++step) {
+      // read_step for every step: a format's own read position need not follow
+      // a read_step, so read() after it can return another step.
+      chemfiles::Frame frame = trajectory.read_step(step);
+      if (visit != nullptr && visit(frame, step, user) != 0) {
+        break;
+      }
+    }
+    return 0;
+  } catch (const chemfiles::Error &err) {
+    error = err.what();
+    return 4;
+  } catch (const std::exception &err) {
+    error = err.what();
+    return 5;
+  }
+}
+
+} // namespace framevisit
+#endif
 
 int sinp::chemfilesSteps(const std::string &filename) {
   if (!mmcifHasData(filename)) {
@@ -202,7 +456,7 @@ int sinp::chemfilesSteps(const std::string &filename) {
   }
   std::string error;
   std::size_t nsteps = 0;
-  const int rc = chemfiles::seams_with_frame(
+  const int rc = framevisit::seams_with_frame(
       filename, forcedFormat(filename), 0, "", "", false, false, nullptr,
       nullptr, error, nsteps);
   if (rc != 0) {
@@ -349,7 +603,7 @@ sinp::readChemfiles(std::string filename,
   ChemVisit ctx{&request, &yCloud};
   std::string error;
   std::size_t nsteps = 0;
-  const int rc = chemfiles::seams_with_frame(
+  const int rc = framevisit::seams_with_frame(
       filename, forcedFormat(filename),
       static_cast<std::size_t>(request.frame - 1), topology, request.selection,
       true, extensionIs(filename, "xyz"), visitChemFrame, &ctx, error, nsteps);
@@ -414,8 +668,9 @@ void sinp::forEachChemfilesStep(
   std::string error;
   int rc = 0;
   if (mmcifHasData(filename)) {
-    rc = chemfiles::seams_each_frame(filename, forcedFormat(filename), from, to, topology,
-                                     visitChemRange, &range, error);
+    rc = framevisit::seams_each_frame(filename, forcedFormat(filename), from,
+                                      to, topology, visitChemRange, &range,
+                                      error);
   } else {
     rc = 4;
   }
@@ -821,12 +1076,25 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
       }
       return cloud;
     }
-    std::cerr << "chemfiles cannot read " << filename << "\n";
-    return molSys::clearPointCloud(cloud);
+    if (chemfilesError.empty()) {
+      throw std::runtime_error("chemfiles cannot read " + filename);
+    }
+    throw std::runtime_error(chemfilesError);
   }
 #else
   (void)selection;
   const auto ext = extensionOf(filename);
+  // These formats are read only through chemfiles. Without it they are a
+  // refused read, as a chemfiles build reports them, not a LAMMPS dump
+  // with no frames.
+  static const char *const chemfilesOnly[] = {
+      "mol2", "mmcif", "cif", "pdb", "gro", "dcd", "xtc", "trr", "tng", "nc",
+      "sdf", "cml", "cssr", "arc", "mmtf", "lammpsdata"};
+  for (const char *only : chemfilesOnly) {
+    if (ext == only) {
+      throw std::runtime_error("reading ." + ext + " needs chemfiles, which this build lacks");
+    }
+  }
   if (ext == "xyz") {
     if (frame > 1) {
       throw std::runtime_error(

@@ -20,6 +20,7 @@ some changes or improvements or alternatives.
 Some things that will increase the chance that your pull request is accepted:
 
 - Write tests.
+- Add unreleased user-facing notes under `changelog.d/`.
 - Follow the commit-style below.
 
 ## Commit Style

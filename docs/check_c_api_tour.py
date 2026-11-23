@@ -36,20 +36,25 @@ def main():
             break
     if version is None:
         fail("seams_version.h was not found beside the library")
-    compile_cmd = link_command(
-        c_compiler(),
-        [
-            "-I" + str(root / "include"),
-            "-I" + str(version),
-            str(source),
-            "-L" + str(libdir),
-            "-lseams",
-            "-lm",
-            "-Wl,-rpath," + str(libdir),
-            "-o",
-            str(binary),
-        ],
-    )
+    flags = [
+        "-I" + str(root / "include"),
+        "-I" + str(version),
+        str(source),
+        "-L" + str(libdir),
+        "-lseams",
+        "-lm",
+        "-Wl,-rpath," + str(libdir),
+        "-o",
+        str(binary),
+    ]
+    runtime = os.environ.get("TSAN_RUNTIME", "")
+    if runtime and os.path.isfile(runtime):
+        flags[0:0] = [
+            "-fsanitize=thread",
+            "-shared-libsan",
+            "-Wl,-rpath," + os.path.dirname(runtime),
+        ]
+    compile_cmd = link_command(c_compiler(), flags)
     done = subprocess.run(compile_cmd, text=True, capture_output=True)
     if done.returncode != 0:
         fail(done.stderr[-800:])

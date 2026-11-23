@@ -1,18 +1,33 @@
-#!/bin/sh
-# Julia's LLVM JIT deletes a string it allocated with malloc. That is
-# inside jl_init_llvm, before any seams call. Preloading libasan aborts
-# the process there. The runtime is mapped when Julia loads libseams.
-case $0 in
-  */*) _wrap_dir=${0%/*} ;;
-  *) _wrap_dir=. ;;
-esac
-here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
-unset LD_PRELOAD
-case ":${ASAN_OPTIONS:-}:" in
-  *verify_asan_link_order*) ;;
-  *) ASAN_OPTIONS="verify_asan_link_order=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}" ;;
-esac
-export ASAN_OPTIONS
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
+# Julia is built with GCC 15.3. Its libstdc++ operator new calls malloc
+# inside that DSO, so LD_PRELOAD cannot see the allocation. The sized
+# operator delete is then intercepted. GCC 14.3 libasan aborts in
+# jl_init_llvm with alloc-dealloc-mismatch before any seams call.
+# alloc_dealloc_mismatch=0 lets dlopen of libseams succeed, then
+# LeakSanitizer aborts on Julia's own init.c allocations. Those frames
+# are not Python or matplotlib, so they are not suppressed, and
+# detect_leaks stays on. ThreadSanitizer dies in ijl_load_dynamic_library
+# because Julia dlopens libpcre2 with RTLD_DEEPBIND. The reproduction is
+# benchmarks/logs/asan-julia-r-hosts.txt.
+# When SEAMS_UNSANITIZED_PREFIX names a build, this process loads that
+# libseams and does not preload the sanitizer. The unsanitized job runs
+# the same tests against its own libraries.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+prefix=${SEAMS_UNSANITIZED_PREFIX:-}
+if [ -n "$prefix" ] && [ -f "$prefix/src/libseams.so" ]; then
+  unset LD_PRELOAD
+  export SEAMS_LIB=$prefix/src/libseams.so
+  if [ -f "$prefix/bindings/libseams_lang.so" ]; then
+    export SEAMS_LANG_LIB=$prefix/bindings/libseams_lang.so
+  fi
+  export LD_LIBRARY_PATH=$prefix/src:$prefix/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+elif [ -n "${TSAN_RUNTIME:-}" ] && [ -f "$TSAN_RUNTIME" ]; then
+  case ":${LD_PRELOAD:-}:" in
+    *"$TSAN_RUNTIME"*) ;;
+    *) LD_PRELOAD=$TSAN_RUNTIME${LD_PRELOAD:+:$LD_PRELOAD} ;;
+  esac
+  export LD_PRELOAD
+fi
 found=
 old_ifs=$IFS
 IFS=:

@@ -331,7 +331,7 @@ def write_pages(selected):
 def problems(selected, written=None):
     """Missing symbols, names that are not in the source, and stale pages."""
     known = c_names()
-    errors = []
+    errors = binding_langs.vendored_rev_errors()
     if written is None:
         written = {}
         for slug in selected:
