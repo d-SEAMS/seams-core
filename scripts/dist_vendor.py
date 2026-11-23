@@ -179,10 +179,14 @@ def vendor_bindings(source_root, dist_root):
 
 def write_tracked_manifest(source_root, dist_root):
     """Record tracked files for checks that run from an unpacked source tarball."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from tracked_files import git_env
+
     listed = subprocess.run(
         ["git", "-C", str(source_root), "ls-files", "-z"],
         check=True,
         capture_output=True,
+        env=git_env(),
     )
     out = dist_root / "docs" / ".cache" / "tracked-files.zlist"
     out.parent.mkdir(parents=True, exist_ok=True)

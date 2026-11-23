@@ -23,7 +23,7 @@ _GIT_REPO_ENV = frozenset((
 ))
 
 
-def _git_env() -> dict[str, str]:
+def git_env() -> dict[str, str]:
     return {key: value for key, value in os.environ.items() if key not in _GIT_REPO_ENV}
 
 
@@ -47,7 +47,7 @@ def _git_worktree(root: Path) -> bool:
 def _git_toplevel(root: Path) -> Path | None:
     cmd = ["git", "-C", str(root), "rev-parse", "--show-toplevel"]
     try:
-        done = subprocess.run(cmd, check=False, capture_output=True, text=True, env=_git_env())
+        done = subprocess.run(cmd, check=False, capture_output=True, text=True, env=git_env())
     except FileNotFoundError:
         if _git_worktree(root):
             raise
@@ -67,7 +67,7 @@ def _from_git(root: Path, specs: tuple[str, ...]) -> list[str]:
     if specs:
         cmd += ["--", *specs]
     try:
-        done = subprocess.run(cmd, check=False, capture_output=True, env=_git_env())
+        done = subprocess.run(cmd, check=False, capture_output=True, env=git_env())
     except OSError as exc:
         raise RuntimeError("git is unavailable: {}".format(exc)) from exc
     if done.returncode != 0:
