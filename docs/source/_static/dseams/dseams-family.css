@@ -98,7 +98,8 @@
   font-size: 0.78em;
 }
 
-.dseams-family__docs details {
+.dseams-family__docs details,
+.dseams-family__libraries details {
   position: relative;
   margin: 0;
 }
@@ -156,7 +157,8 @@
   .dseams-family__anchor {
     display: none !important;
   }
-  .dseams-family__docs details {
+  .dseams-family__docs details,
+  .dseams-family__libraries details {
     position: static;
   }
   .dseams-family__menu {
