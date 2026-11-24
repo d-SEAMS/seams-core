@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -120,7 +122,7 @@ def _make_fake_pydseamslib(path: Path) -> None:
     (path / "subprojects" / "packagefiles").mkdir(parents=True, exist_ok=True)
 
 
-def _make_fake_git(path: Path) -> None:
+def _make_fake_git(path: Path, real_git: str) -> None:
     _write(
         path / "git",
         "#!/bin/sh\n"
@@ -131,7 +133,7 @@ def _make_fake_git(path: Path) -> None:
         "  : >\"$FAKE_GIT_CLONE_LOG\"\n"
         "  exit 0\n"
         "fi\n"
-        "exec /usr/bin/git \"$@\"\n",
+        f"exec {shlex.quote(real_git)} \"$@\"\n",
     )
     os.chmod(path / "git", 0o755)
 
@@ -385,6 +387,9 @@ def test_pth_outside_target_rejected(
 
 
 def main() -> int:
+    real_git = shutil.which("git")
+    if real_git is None:
+        raise SystemExit("git is not on PATH")
     expected_root = str(ROOT.resolve(strict=True))
     expected_tree = _git_tree("HEAD")
     if not expected_tree:
@@ -395,7 +400,7 @@ def main() -> int:
         fake_src = tdir / "fake-source"
         fake_bin = tdir / "fake-bin"
         _make_fake_pydseamslib(fake_src)
-        _make_fake_git(fake_bin)
+        _make_fake_git(fake_bin, real_git)
 
         venv = test_stub_no_stamp_stamps_target_not_stub(
             tdir, fake_bin, fake_src, expected_root, expected_tree
