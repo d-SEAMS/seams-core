@@ -187,8 +187,8 @@ void checkAllEntries(const Adjacency &adj, int depth, std::mt19937 &rng) {
     const std::size_t count = chordless::cycles(offsets, cols, size, &flat, nullptr);
     Rings got(count);
     for (std::size_t c = 0; c < count; ++c) {
-      got[c].assign(flat.begin() + static_cast<std::ptrdiff_t>(c * size),
-                    flat.begin() + static_cast<std::ptrdiff_t>((c + 1) * size));
+      const std::ptrdiff_t begin = static_cast<std::ptrdiff_t>(c) * size;
+      got[c].assign(flat.begin() + begin, flat.begin() + begin + size);
     }
     REQUIRE_RINGS(got, oracle::chordlessCycles(adj, size), adj, size, "chordless");
   }
@@ -230,7 +230,8 @@ Frame replicate(const double (*xyz)[3], int n, const double *box9, int na, int n
       for (int c = 0; c < nc; ++c) {
         for (int i = 0; i < n; ++i) {
           for (int k = 0; k < 3; ++k) {
-            f.xyz.push_back(xyz[i][k] + a * h[0][k] + b * h[1][k] + c * h[2][k]);
+            const std::size_t kk = static_cast<std::size_t>(k);
+            f.xyz.push_back(xyz[i][kk] + a * h[0][kk] + b * h[1][kk] + c * h[2][kk]);
           }
         }
       }
@@ -386,8 +387,8 @@ void checkFrame(const Frame &f, double cutoff, int depth, const char *what) {
     }
     Rings got(count);
     for (std::size_t c = 0; c < count; ++c) {
-      got[c].assign(flat.begin() + static_cast<std::ptrdiff_t>(c * size),
-                    flat.begin() + static_cast<std::ptrdiff_t>((c + 1) * size));
+      const std::ptrdiff_t begin = static_cast<std::ptrdiff_t>(c) * size;
+      got[c].assign(flat.begin() + begin, flat.begin() + begin + size);
     }
     REQUIRE_RINGS(got, cycles, adj, size, std::string("seams_rings_chordless ") + what);
   }
@@ -794,11 +795,12 @@ TEST_CASE("seams_rings_find keeps frame indices under a species filter and on th
               std::array<double, 3> d{};
               double d2 = 0;
               for (int k = 0; k < 3; ++k) {
-                d[static_cast<std::size_t>(k)] =
+                const std::size_t kk = static_cast<std::size_t>(k);
+                d[kk] =
                     f.xyz[static_cast<std::size_t>(3 * j + k)] -
-                    f.xyz[static_cast<std::size_t>(3 * i + k)] + a * h[0][k] + b * h[1][k] +
-                    c * h[2][k];
-                d2 += d[static_cast<std::size_t>(k)] * d[static_cast<std::size_t>(k)];
+                    f.xyz[static_cast<std::size_t>(3 * i + k)] + a * h[0][kk] + b * h[1][kk] +
+                    c * h[2][kk];
+                d2 += d[kk] * d[kk];
               }
               if (d2 < best) {
                 best = d2;
