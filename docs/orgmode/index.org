@@ -51,6 +51,14 @@
       :class-card: sd-shadow-sm
 
       Cage membership: HC is ice Ih, DDC is ice Ic, else water.
+
+.. note::
+
+   *Incremental ring and cage algorithms for ice structure analysis*,
+   by Rohit Goswami, Amrita Goswami, Ruhila Goswami, and Jayant K. Singh,
+   describes the incremental ring and cage algorithms. Cite this
+   software with the 2020 JCIM paper,
+   https://doi.org/10.1021/acs.jcim.0c00031.
 #+end_export
 
 * Overview
@@ -213,11 +221,14 @@ The numbers for OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED are on
 The sitting medians are on
 [[file:explanation/performance.org][the sitting tables]].
 
+* Libraries
+
+- [[https://linkcell.dseams.info][linkcell]] :: independent periodic linked-cell neighbour-list library
+
 * Related projects
 
 - [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib docs]] :: Python, ~import dseams~ and ~import pydseams~
 - [[https://d-seams.github.io/yodaStruct/][yodaStruct docs]] :: Lua and Fennel, ~require("dseams")~
-- [[https://github.com/d-SEAMS/linkcell][linkcell]] :: periodic linked-cell neighbours
 - [[https://dseams.info][dseams.info]] :: project site
 
 * License

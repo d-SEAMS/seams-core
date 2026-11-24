@@ -1371,7 +1371,10 @@ void chordless_graph(const Cloud &cloud, double cutoff, int type,
   }
   const auto rows =
       graph == "mutual"
-          ? nneigh::kNearestNeighbourList(work, 4, cutoff + 1.5, typ, true)
+          ? pairs_within(
+                work,
+                nneigh::kNearestNeighbourList(work, 4, cutoff + 1.5, typ, true),
+                cutoff + 1.5)
           : nneigh::neighListO(cutoff, work, typ);
   auto idx = nneigh::neighbourListByIndex(work, rows);
   const int n = work.nop;
@@ -1738,14 +1741,8 @@ int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
     if (which == "cutoff") {
       result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, average);
     } else if (which == "mutual" || which == "knn" || which == "knn-mutual") {
-      const double cand = cutoff + 1.5;
-      if (frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6) {
-        result = chill::steinhardtQlMutual(frame->cloud, 4, cand, typ, order_l);
-      } else {
-        auto nList =
-            nneigh::kNearestNeighbourList(frame->cloud, 4, cand, typ, true);
-        result = chill::steinhardtQl(frame->cloud, nList, order_l);
-      }
+      auto nList = bond_list(frame->cloud, cutoff, typ, "mutual", 4);
+      result = chill::steinhardtQl(frame->cloud, nList, order_l);
     } else {
       throw std::invalid_argument("steinhardt graph is cutoff or mutual");
     }
@@ -1861,7 +1858,21 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
     set_error("q4, q6 and a frame are required");
     return 1;
   }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    set_error("q4, q6 and CHILL+ need a finite positive cutoff");
+    return 1;
+  }
   try {
+    const int n = frame->cloud.nop;
+    if (n <= 0) {
+      frame->ql.clear();
+      frame->qlbar.clear();
+      frame->labels.clear();
+      if (counts9 != nullptr) {
+        std::memset(counts9, 0, 9 * sizeof(int));
+      }
+      return 0;
+    }
     const int typ = resolve_type(frame->cloud, type);
     std::vector<double> out4;
     std::vector<double> out6;
@@ -1871,7 +1882,6 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
       set_error("fused q4 q6 CHILL+ is not available for this frame");
       return 1;
     }
-    const int n = frame->cloud.nop;
     if (n > 0) {
       std::memcpy(q4, out4.data(), static_cast<std::size_t>(n) * sizeof(double));
       std::memcpy(q6, out6.data(), static_cast<std::size_t>(n) * sizeof(double));
@@ -2034,7 +2044,11 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
       // tum::cageCounts reads one graph and has no ring completion, so the
       // seeded assignment stays on the host whatever SEAMS_OFFLOAD says.
       // The same rule as the CLI (GEM-6).
-      auto graphs = nneigh::kNearestNeighbourPair(frame->cloud, k, cand, typ);
+      auto raw_graphs =
+          nneigh::kNearestNeighbourPair(frame->cloud, k, cand, typ);
+      std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+          graphs{pairs_within(frame->cloud, raw_graphs.first, cand),
+                 pairs_within(frame->cloud, raw_graphs.second, cand)};
       // The two nominations are often the same undirected graph. One ring
       // search and one cage affiliation then match the pair of searches.
       if (graphs.first == graphs.second) {

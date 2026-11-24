@@ -18,9 +18,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
+- Mutual and seeded graphs in the language bindings keep a pair only when its minimum-image distance is strictly inside the cutoff plus 1.5 Å. `kNearestNeighbourList` and `kNearestNeighbourPair` take that length only as a cell-size hint, and `pairs_within` applies the distance test in `bond_list`, on the mutual chordless graph, and on the seeded cage graphs.
+- On an empty frame `seams_frame_q4_q6_chill` returns zero counts. It now rejects a cutoff that is zero, negative or not finite.
 - The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
-- The science tutorial check keeps a 180 s timeout. An AddressSanitizer build runs that check serially instead of allowing 900 s: under contention the tutorial took 212 s, and alone it took 22.6 s.
+- The science tutorial check has a 600 s timeout and runs serially in AddressSanitizer builds.
 
 ## [2.14.1] - 2026-11-16
 
@@ -158,6 +161,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The Rust, Fortran, and Python ctypes bindings call the analyses `seams.h` now exports, including frame reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer.
 - The binding-overhead session times each language wrapper of read, k-nearest neighbours, q6 with q6bar, CHILL, and primitive rings on ice Ih, and records the median and interquartile range.
 - The docs build writes a description, a social card, and JSON-LD on each page, plus sitemap dates, robots.txt, a 404 page, a Markdown file beside each HTML page, and llms-full.txt.
+- The documentation landing page names the d-SEAMS 2.0 paper, Incremental ring and cage algorithms for ice structure analysis, by Rohit Goswami, Amrita Goswami, Ruhila Goswami, and Jayant K. Singh, and cites the 2020 JCIM paper for the software.
 - The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
 - The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
 - The installed C library reads frames from arrays and files. Callers can build neighbour lists and primitive rings, evaluate q3, q4, q6, and q6-bar, and run CHILL, CHILL+, cages, the shell classifier, and the brine front. `seams.pc` and `seams-config.cmake` ship with the library, and `examples/c` builds against that install.
@@ -271,6 +275,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   A half list keeps each pair on the lower index.
   A skin reuses the wide list while every atom stays inside the Verlet shell.
   CHILL+, the ring census, and the template overlay read that CSR.
+- The documentation navigation, landing page, and `llms.txt` place `linkcell` in a dedicated Libraries section instead of among the language-binding links.
 - The documentation sidebar is eight groups: Getting started, Tutorials, How-to, Reference (every language and the C API), Engines, Comparisons, Explanation (the paper and the architecture), and Project. The suite-stack diagram is a top-down figure with body-sized labels in light and dark theme.
 - The fingerprint options use the American spelling. `seams fingerprint --color-types` is the name help shows, and `--colour-types` remains a hidden deprecated alias of that same option. The Fortran `frame_fingerprint` keyword is `colors`, and `colours` remains an optional deprecated keyword with the same meaning; giving both different values is an error. `seams_fingerprint` takes `color_types`. Python `fingerprint(color_types=...)`, Rust `FingerprintOptions::color_types`, and the Lua `colors` field follow the same rename and do not accept the old names. A key library writes `colors` in its header and still reads `colours` as a deprecated alias, so a 2.13 library file with `colours 1` keeps its type colors.
 - The full paper reproductions stay out of the default analysis set. `meson setup -Dpaper_full=true` enables them explicitly.
@@ -391,6 +396,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The brine, interface, nucleation and rings picture tracks now show the paper-frame transcripts: 873 atoms with hexagonal 352 and water 434, the 864-molecule interface, 148 nucleation frames, and the 11-frame mW cell. Every tape output and spoken number must agree with its transcript.
 - The cutoff cell window is timed with `steady_clock` when OpenMP is off, so the macOS R package and the wheels build that loop without `omp_get_wtime`.
 - The cutoff neighbour search clamps its cell count and stencil reach before converting them to integers. A cell edge many orders of magnitude shorter or longer than the cutoff overflowed both, which is undefined behavior and in practice left the reach at one cell. Found by `capi_reload_fuzzer` under UBSan.
+- The documentation build publishes redirects in `docs/page_redirects.json` for every page removed since the previous `gh-pages` tree.
 - The engine builds with clang, libc++ and musl and on macOS. CPU features are read with cpuid instead of `__builtin_cpu_supports`, which needs compiler-rt's `__cpu_model` on macOS. The AVX-512 row work in `ozaki.cpp` moved into target functions, since clang does not give an OpenMP region the target attribute of the enclosing function. The dump reader replaces `__gnu_cxx::stdio_filebuf`, which libc++ lacks, with its own seekable buffer. `backward.cpp` compiles to nothing where `<execinfo.h>` is missing, the ring profiler ticks use `steady_clock` off x86, and the AMX request in `ozaki.cpp` is Linux only.
 - The engine compiles on aarch64, Apple silicon, and musl. The AVX kernels are built for x86_64 only and other targets take the scalar paths, `backward.cpp` is skipped without `execinfo.h`, and `LinearFit::stderr` is now `slopeStdErr` because musl defines `stderr` as a macro.
 - The four nearest bonds are ordered by an insertion sort of that bounded count. GCC 15 no longer inlines `std::sort` past the end of the stack array once OpenMP outlines the loop, and the order is unchanged. AVX dispatch uses the CPUID helper, which exists on aarch64.
