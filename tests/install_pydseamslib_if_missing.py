@@ -208,7 +208,7 @@ def _inspect_target(venv: Path) -> dict[str, object]:
     return json.loads(res.stdout)
 
 
-def _assert_valid_target_install(venv: Path, expected_root: str, expected_tree: str) -> Path:
+def _assert_valid_target_install(venv: Path, expected_root: str, expected_tree: str | None) -> Path:
     info = _inspect_target(venv)
     if info["classify"] != "installed":
         raise SystemExit(f"expected installed pydseams in venv, got {info['classify']!r}")
@@ -227,16 +227,30 @@ def _assert_valid_target_install(venv: Path, expected_root: str, expected_tree: 
     return Path(info["stamp_path"])
 
 
-def _git_tree(rev: str) -> str | None:
-    res = subprocess.run(
-        ["git", "-C", str(ROOT), "rev-parse", f"{rev}^{{tree}}"],
-        text=True,
-        capture_output=True,
-        env=without_asan_preload(),
-    )
-    if res.returncode != 0:
-        return None
-    return res.stdout.strip()
+def _git_tree(root: Path, rev: str) -> str:
+    return _run(["git", "-C", str(root), "rev-parse", f"{rev}^{{tree}}"]).stdout.strip()
+
+
+def _stage_source_tree(root: Path) -> None:
+    """Copy the script into a fresh git repository with two commits whose trees differ.
+
+    The test then does not depend on the source tree under test being a git
+    checkout, which an unpacked meson dist tarball is not.
+    """
+    _write(root / "scripts" / SCRIPT.name, SCRIPT.read_text(encoding="utf-8"))
+    _write(root / "subprojects" / "packagefiles" / "README", "staged packagefiles\n")
+    env = without_asan_preload(extra={"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"})
+    ident = ["-c", "user.name=seams-test", "-c", "user.email=seams-test@invalid"]
+    _run(["git", "init", "-q", str(root)], env=env)
+    for label in ("parent", "head"):
+        _write(root / "revision.txt", f"{label}\n")
+        _run(["git", "-C", str(root), "add", "-A"], env=env)
+        _run(["git", "-C", str(root), *ident, "commit", "-q", "-m", label], env=env)
+
+
+def _install_if_missing(root: str, env: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    script = Path(root) / "scripts" / SCRIPT.name
+    return _run(["/bin/sh", str(script), "--if-missing"], env=env, cwd=Path(root))
 
 
 def test_stub_no_stamp_stamps_target_not_stub(
@@ -253,7 +267,7 @@ def test_stub_no_stamp_stamps_target_not_stub(
     _run([sys.executable, "-m", "venv", str(venv)])
 
     env = _script_env(fake_bin, venv, fake_src, clone_log, pythonpath=stub_dir)
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if not clone_log.is_file():
         raise SystemExit("stub without stamp: --if-missing exited without installing")
     if (stub_dir / ".seams-core-build.json").exists():
@@ -261,7 +275,7 @@ def test_stub_no_stamp_stamps_target_not_stub(
     _assert_valid_target_install(venv, expected_root, expected_tree)
 
     clone_log.unlink()
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if clone_log.is_file():
         raise SystemExit("valid target install: --if-missing reinstalled unnecessarily")
     if (stub_dir / ".seams-core-build.json").exists():
@@ -287,7 +301,7 @@ def test_forged_stub_rejected(
     _run([sys.executable, "-m", "venv", str(venv)])
 
     env = _script_env(fake_bin, venv, fake_src, clone_log, pythonpath=stub_dir)
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if not clone_log.is_file():
         raise SystemExit("forged PYTHONPATH stub: --if-missing accepted stub without installing")
     _assert_valid_target_install(venv, expected_root, expected_tree)
@@ -308,7 +322,7 @@ def test_relative_dot_root_rejected(
     )
     clone_log = tdir / "clone-dot-root.log"
     env = _script_env(fake_bin, venv, fake_src, clone_log)
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if not clone_log.is_file():
         raise SystemExit("relative root '.': --if-missing accepted relative root against cwd")
     _assert_valid_target_install(venv, expected_root, expected_tree)
@@ -322,9 +336,9 @@ def test_parent_tree_stamp_rejected(
     expected_root: str,
     expected_tree: str,
 ) -> None:
-    parent_tree = _git_tree("HEAD~1")
-    if not parent_tree or parent_tree == expected_tree:
-        parent_tree = "0" * 40 if expected_tree != "0" * 40 else "1" * 40
+    parent_tree = _git_tree(Path(expected_root), "HEAD~1")
+    if parent_tree == expected_tree:
+        raise SystemExit("staged source tree: HEAD~1 has the same tree as HEAD")
     stamp_path = _assert_valid_target_install(venv, expected_root, expected_tree)
     _write(
         stamp_path,
@@ -332,7 +346,7 @@ def test_parent_tree_stamp_rejected(
     )
     clone_log = tdir / "clone-parent-tree.log"
     env = _script_env(fake_bin, venv, fake_src, clone_log)
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if not clone_log.is_file():
         raise SystemExit("parent tree stamp: --if-missing accepted stale tree without reinstalling")
     _assert_valid_target_install(venv, expected_root, expected_tree)
@@ -355,7 +369,7 @@ def test_other_checkout_root_stamp_rejected(
     )
     clone_log = tdir / "clone-other-root.log"
     env = _script_env(fake_bin, venv, fake_src, clone_log)
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if not clone_log.is_file():
         raise SystemExit("other checkout root: --if-missing accepted foreign root without reinstalling")
     _assert_valid_target_install(venv, expected_root, expected_tree)
@@ -380,23 +394,45 @@ def test_pth_outside_target_rejected(
     _write(_venv_purelib(venv) / "shadow_pydseams.pth", f"{outside_dir}\n")
 
     env = _script_env(fake_bin, venv, fake_src, clone_log)
-    _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
+    _install_if_missing(expected_root, env)
     if not clone_log.is_file():
         raise SystemExit("outside .pth module: --if-missing accepted module outside target site-packages")
     _assert_valid_target_install(venv, expected_root, expected_tree)
+
+
+def test_non_git_tree_always_reinstalls(
+    staged: Path,
+    tdir: Path,
+    fake_bin: Path,
+    fake_src: Path,
+) -> None:
+    plain = tdir / "plain-source"
+    shutil.copytree(staged, plain, ignore=shutil.ignore_patterns(".git"))
+    plain_root = str(plain.resolve(strict=True))
+    venv = tdir / "venv-plain"
+    _run([sys.executable, "-m", "venv", str(venv)])
+    for attempt in ("first", "second"):
+        clone_log = tdir / f"clone-plain-{attempt}.log"
+        env = _script_env(fake_bin, venv, fake_src, clone_log)
+        res = _install_if_missing(plain_root, env)
+        if not clone_log.is_file():
+            raise SystemExit(f"non-git tree, {attempt} run: --if-missing exited without installing")
+        if "is not a git checkout" not in res.stderr:
+            raise SystemExit(f"non-git tree, {attempt} run: no notice on stderr: {res.stderr!r}")
+        _assert_valid_target_install(venv, plain_root, None)
 
 
 def main() -> int:
     real_git = shutil.which("git")
     if real_git is None:
         raise SystemExit("git is not on PATH")
-    expected_root = str(ROOT.resolve(strict=True))
-    expected_tree = _git_tree("HEAD")
-    if not expected_tree:
-        raise SystemExit("could not resolve HEAD^{tree}")
 
     with tempfile.TemporaryDirectory(prefix="seams-pydseamslib-") as tmp:
         tdir = Path(tmp)
+        staged = tdir / "source"
+        _stage_source_tree(staged)
+        expected_root = str(staged.resolve(strict=True))
+        expected_tree = _git_tree(staged, "HEAD")
         fake_src = tdir / "fake-source"
         fake_bin = tdir / "fake-bin"
         _make_fake_pydseamslib(fake_src)
@@ -420,6 +456,7 @@ def main() -> int:
         test_pth_outside_target_rejected(
             tdir, fake_bin, fake_src, expected_root, expected_tree
         )
+        test_non_git_tree_always_reinstalls(staged, tdir, fake_bin, fake_src)
     return 0
 
 
