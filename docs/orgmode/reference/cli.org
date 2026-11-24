@@ -273,10 +273,11 @@ when the analysis must distinguish those force-field names.
 For topology-free trajectories, d-SEAMS uses a same-stem topology when
 present: ~run.xtc~, ~run.trr~, and ~run.nc~ use ~run.gro~; ~run.dcd~
 uses ~run.pdb~. The topology supplies residue and atom names for these
-filters and mappings.
+filters and mappings. The committed example is
+~input/traj/confined_water_40.xtc~, with the matching GRO beside it.
 
 #+begin_src bash
-seams chill-plus confined.xtc --frame 1 --last 3 \
+seams chill-plus input/traj/confined_water_40.xtc --frame 1 --last 3 \
   --exclude-resname SOLX --exclude-atomname MW \
   --type-map O_2=21,N_2=22,C_3=23,C_2=24,C_R=25,H_=26 --type 8
 #+end_src

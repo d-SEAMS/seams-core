@@ -1,1 +1,1 @@
-The head-to-head campaign keeps fastatomstruct 2.2.0 selectable and times fastatomstruct 2.3.0 on King's rings and local q6. The 2.3.0 arm is the release build of commit 4a833a871dd26063381b2183a574b5011ba56eed.
+The head-to-head campaign keeps fastatomstruct 2.2.0 selectable and times the release build of fastatomstruct 2.3.0 on King's rings and local q6.

@@ -26,9 +26,8 @@ Frames
     +----------+-----------+------------------------------------------------------------+
 
 The driver invokes the shared ``input/fetch.py`` helper when the cubic
-trajectory is absent.  The helper uses ``d-SEAMS/seams-core-inputs`` revision
-``163ca2d8dfcb7ef21d88aea1c67381d841f63641`` and verifies the pinned
-SHA-256 digest.
+trajectory is absent. The helper downloads the trajectory from
+``d-SEAMS/seams-core-inputs`` and verifies its SHA-256 digest.
 
 The per-size census is the same in both codes.
 

@@ -16,6 +16,37 @@ from registry_claims import ClaimParseError, claims
 
 ROOT = Path(__file__).resolve().parents[1]
 
+FETCH_REVISION_RE = re.compile(
+    r"""^\s*REVISION\s*=\s*["']([0-9a-f]{7,40})["']""",
+    re.M | re.I,
+)
+
+
+def dataset_revision(root: Path | None = None) -> str | None:
+    """Return the pinned dataset revision from input/fetch.py, if present."""
+    root = ROOT if root is None else root
+    fetch_py = root / "input" / "fetch.py"
+    if not fetch_py.is_file():
+        fetch_py = ROOT / "input" / "fetch.py"
+    if not fetch_py.is_file():
+        return None
+    match = FETCH_REVISION_RE.search(
+        fetch_py.read_text(encoding="utf-8", errors="replace")
+    )
+    return match.group(1) if match else None
+
+
+def dataset_revision_patterns(
+    root: Path | None = None,
+) -> tuple[tuple[str, re.Pattern[str]], ...]:
+    revision = dataset_revision(root)
+    if not revision:
+        return ()
+    return (
+        ("dataset revision pin", re.compile(rf"\b{re.escape(revision)}\b", re.I)),
+    )
+
+
 PROCESS_PATTERNS = (
     ("video claim file", re.compile(r"\bembed\.txt\b", re.I)),
     ("caption production note", re.compile(
@@ -39,7 +70,7 @@ PROCESS_PATTERNS = (
     ("workflow process", re.compile(r"\bSnakemake\b|\btowncrier\b|changelog\.d", re.I)),
     ("repository provenance", re.compile(
         r"\bpinned revision\b|\bsource_commit\b|"
-        r"\b(?:commit|revision|recorded at|retimed at)\s+[`~]?[0-9a-f]{7,40}",
+        r"\b(?:commit|revision|recorded at|retimed at)\s+(?:``|[`~=])?[0-9a-f]{7,40}",
         re.I,
     )),
     ("internal source path", re.compile(r"docs/orgmode/contributing/repositories\.org", re.I)),
@@ -88,6 +119,7 @@ PROCESS_PATTERNS = (
         r"\bBuild Status\b|\bbuilt with nix\b|\bCheck our build status\b",
         re.I,
     )),
+    *dataset_revision_patterns(ROOT),
 )
 
 README_PATTERNS = tuple(
@@ -140,6 +172,11 @@ class VisibleHTML(html.parser.HTMLParser):
 
 def source_pages(root: Path | None = None):
     root = ROOT if root is None else root
+    orgmode = root / "docs" / "orgmode"
+    if orgmode.is_dir():
+        for path in sorted(orgmode.rglob("*.org")):
+            rel = path.relative_to(orgmode).as_posix()
+            yield path, "orgmode/" + rel
     source = root / "docs" / "source"
     if source.is_dir():
         for path in sorted(source.rglob("*")):
@@ -168,7 +205,12 @@ def html_pages(build):
         yield path, rel, " ".join(parser.parts)
 
 
-def page_findings(rel: str, text: str, scanned_text: str) -> tuple[list[str], int]:
+def page_findings(
+    rel: str,
+    text: str,
+    scanned_text: str,
+    extra_patterns: tuple[tuple[str, re.Pattern[str]], ...] = (),
+) -> tuple[list[str], int]:
     """Match one page. ``scanned_text`` is what the patterns see.
 
     ``main`` passes ``normalised_text(text)``. The claim parser still sees
@@ -176,7 +218,7 @@ def page_findings(rel: str, text: str, scanned_text: str) -> tuple[list[str], in
     """
     if text == "players.html must not be published":
         return [f"html/{rel}: internal fragment was published"], 0
-    patterns = README_PATTERNS if rel == "README.md" else PROCESS_PATTERNS
+    patterns = (README_PATTERNS if rel == "README.md" else PROCESS_PATTERNS) + extra_patterns
     errors = []
     for label, pattern in patterns:
         for match in pattern.finditer(scanned_text):
@@ -199,6 +241,13 @@ def main(root: Path | None = None) -> int:
     source_count = 0
     html_count = 0
     scanned = []
+    default_revision = dataset_revision(ROOT)
+    root_revision = dataset_revision(root)
+    extra_patterns = (
+        dataset_revision_patterns(root)
+        if root_revision and root_revision != default_revision
+        else ()
+    )
     for path, rel in source_pages(root):
         source_count += 1
         scanned.append((path, rel, path.read_text(encoding="utf-8", errors="replace")))
@@ -209,7 +258,7 @@ def main(root: Path | None = None) -> int:
             scanned.append((path, "html/" + rel, text))
     for path, rel, text in scanned:
         scanned_text = normalised_text(text)
-        found, claims_here = page_findings(rel, text, scanned_text)
+        found, claims_here = page_findings(rel, text, scanned_text, extra_patterns)
         errors.extend(found)
         registry_claims += claims_here
     if errors:

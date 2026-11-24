@@ -11,9 +11,8 @@ CHILL+ labels every site cubic on that lattice.
 The 1.x driver is gone.
 We use the `seams` command.
 
-Fetch the trajectory from public dataset `d-SEAMS/seams-core-inputs` at
-revision `163ca2d8dfcb7ef21d88aea1c67381d841f63641`; the helper verifies
-the pinned SHA-256 digest:
+Fetch the trajectory from the public `d-SEAMS/seams-core-inputs` dataset
+with `input/fetch.py`, which verifies its SHA-256 digest:
 
 ```bash
 python3 input/fetch.py mW_cubic.lammpstrj

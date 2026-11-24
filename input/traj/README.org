@@ -1,18 +1,17 @@
 #+title: Trajectory inputs
 
-The small files in this directory are committed fixtures.  The full
+The small files in this directory are committed fixtures. The full
 =dump-bcc.lammpstrj=, =dump-l.lammpstrj=, and =mW_cubic.lammpstrj=
-trajectories are public data in the Hugging Face dataset
-=d-SEAMS/seams-core-inputs= at revision
-=163ca2d8dfcb7ef21d88aea1c67381d841f63641=.
+trajectories live in the public =d-SEAMS/seams-core-inputs= Hugging Face
+dataset.
 
-Fetch all three files with:
+Fetch all three files with =input/fetch.py=:
 
 #+begin_src bash
 python3 input/fetch.py
 #+end_src
 
-The helper verifies the pinned SHA-256 digest before replacing any output.
+The helper verifies each SHA-256 digest before replacing any output.
 Pass one or more file names to fetch only selected trajectories.
 
 * Offline test fixtures
