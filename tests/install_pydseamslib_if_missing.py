@@ -57,21 +57,58 @@ def _make_stub_module(path: Path) -> None:
     )
 
 
+# pip's build isolation installs nothing for an empty requires list, so the
+# fake package builds with --no-index and without a network.
+FAKE_BACKEND = '''\
+import base64
+import hashlib
+import zipfile
+from pathlib import Path
+
+NAME = "pydseamslib"
+VERSION = "0.0.0"
+MODULES = ("dseams.py", "pydseams.py")
+DIST_INFO = f"{NAME}-{VERSION}.dist-info"
+
+
+def get_requires_for_build_wheel(config_settings=None):
+    return []
+
+
+def _record_line(arcname, data):
+    digest = base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode()
+    return f"{arcname},sha256={digest},{len(data)}\\n"
+
+
+def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
+    wheel_name = f"{NAME}-{VERSION}-py3-none-any.whl"
+    files = {name: Path(name).read_bytes() for name in MODULES}
+    files[f"{DIST_INFO}/METADATA"] = (
+        f"Metadata-Version: 2.1\\nName: {NAME}\\nVersion: {VERSION}\\n"
+    ).encode()
+    files[f"{DIST_INFO}/WHEEL"] = (
+        b"Wheel-Version: 1.0\\nGenerator: fake_backend\\n"
+        b"Root-Is-Purelib: true\\nTag: py3-none-any\\n"
+    )
+    record = "".join(_record_line(arcname, data) for arcname, data in files.items())
+    record += f"{DIST_INFO}/RECORD,,\\n"
+    files[f"{DIST_INFO}/RECORD"] = record.encode()
+    with zipfile.ZipFile(Path(wheel_directory) / wheel_name, "w") as whl:
+        for arcname, data in files.items():
+            whl.writestr(arcname, data)
+    return wheel_name
+'''
+
+
 def _make_fake_pydseamslib(path: Path) -> None:
     _write(
         path / "pyproject.toml",
         "[build-system]\n"
-        'requires = ["setuptools>=68"]\n'
-        'build-backend = "setuptools.build_meta"\n',
+        "requires = []\n"
+        'build-backend = "fake_backend"\n'
+        'backend-path = ["."]\n',
     )
-    _write(
-        path / "setup.cfg",
-        "[metadata]\n"
-        "name = pydseamslib\n"
-        "version = 0.0.0\n\n"
-        "[options]\n"
-        "py_modules = dseams, pydseams\n",
-    )
+    _write(path / "fake_backend.py", FAKE_BACKEND)
     _write(path / "dseams.py", "value = 'installed'\n")
     _write(
         path / "pydseams.py",
