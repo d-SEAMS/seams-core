@@ -447,7 +447,8 @@ linkcell_dep = dependency('linkcell', version: '>=0.6.0', required: true,
                           default_options: _linkcell_opts)
 # Headers only; libyodaLib links the library (src/meson.build).
 _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
-_args += ['-DSEAMS_HAS_LINKCELL=1', '-DSEAMS_HAS_LINKCELL_CSR=1', '-DSEAMS_HAS_LINKCELL_TEAM=1']
+# Always set: installed headers and consumers still test it.
+_args += ['-DSEAMS_HAS_LINKCELL=1']
 
 minimage_dep = dependency('minimage', version: '>=0.1.4', required: get_option('with_minimage'),
                           fallback: ['minimage', 'minimage_dep'],

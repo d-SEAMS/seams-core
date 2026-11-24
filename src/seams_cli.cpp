@@ -726,16 +726,7 @@ void printFeatures(std::ostream &os) {
 #else
   line("Highway SIMD", false);
 #endif
-#ifdef SEAMS_HAS_VESIN
-  line("vesin cutoff fallback", true);
-#else
-  line("vesin cutoff fallback", false);
-#endif
-#ifdef SEAMS_HAS_LINKCELL
   line("linkcell pairs_within", true);
-#else
-  line("linkcell pairs_within", false);
-#endif
 #ifdef SEAMS_HAS_CHEMFILES
   line("chemfiles", true);
 #else

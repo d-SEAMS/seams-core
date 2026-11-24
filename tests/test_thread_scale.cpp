@@ -231,14 +231,9 @@ TEST_CASE("spatial ranks match the serial neighbour list, CHILL+ labels and q6",
         std::vector<std::vector<int>> window;
         const bool blocked =
             nneigh::blockWindowRows(local, cutoff, &share.owned, window);
-#ifdef SEAMS_HAS_LINKCELL
         if (nRanks > 1) {
           REQUIRE(blocked);
         }
-#else
-        // The block window is built by linkcell.
-        REQUIRE_FALSE(blocked);
-#endif
         for (std::size_t k = 0; k < share.local.size(); k++) {
           if (!share.owned[k]) {
             continue;

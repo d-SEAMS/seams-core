@@ -38,9 +38,7 @@
 #include <omp.h>
 #endif
 
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
-#endif
 
 // The linked cell this tree was built against does not always export
 // the thread-width hooks. A strong definition in that library wins.
@@ -1637,7 +1635,6 @@ struct PairDir {
   int b;
 };
 
-#ifdef SEAMS_HAS_LINKCELL
 int ourToLc(int cid, int ncx, int ncy, int ncz) {
   const int nyz = ncy * ncz;
   const int cx = cid / nyz;
@@ -2099,7 +2096,6 @@ bool ownedBlockPairs(const double *x, const double *y, const double *z, const in
   }
   return badTeam == 0;
 }
-#endif
 
 bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -2218,12 +2214,10 @@ bool orthoFullCsr(
 #else
   const bool nested = false;
 #endif
-#ifdef SEAMS_HAS_LINKCELL
   // An unsized Rayon pool keeps a worker on every cpu. Size it to this
   // OpenMP width before the stencil so those workers are not a second team.
   // Inside a live team the pool stays at one: the team already owns the cpus.
   lc_set_threads(nested ? 1 : seams::poolWidth(maxThreads));
-#endif
   Scratch &sc = nested ? local : scratch();
   auto grow = [](auto &v, std::size_t n) {
     if (v.size() < n) {

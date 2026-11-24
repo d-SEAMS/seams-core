@@ -268,9 +268,7 @@ inline void adoptThreads() {
   prepareCompute();
 #ifdef SEAMS_HAS_OPENMP
   if (omp_in_parallel()) {
-#ifdef SEAMS_HAS_LINKCELL
     lc_set_threads(1);
-#endif
     return;
   }
   int n = omp_get_max_threads();
@@ -280,11 +278,7 @@ inline void adoptThreads() {
   if (n < 1) {
     n = 1;
   }
-#ifdef SEAMS_HAS_LINKCELL
   lc_set_threads(poolWidth(n));
-#else
-  (void)n;
-#endif
 }
 
 // Width the caller asked for. The neighbour and q_l walks are one

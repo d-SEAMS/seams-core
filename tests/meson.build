@@ -691,14 +691,12 @@ executable('bench_stages', 'bench_stages.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
-if linkcell_dep.found()
-  executable('profile_knn', 'profile_knn.cpp',
-    dependencies: [yds_dep],
-    cpp_args: _args,
-    link_args: _test_link_args,
-    include_directories: _incdirs,
-    build_rpath: '$ORIGIN/../src')
-endif
+executable('profile_knn', 'profile_knn.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
 
 executable('walk_compare', 'walk_compare.cpp',
   dependencies: [yds_dep],

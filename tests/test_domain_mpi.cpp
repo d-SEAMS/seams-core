@@ -69,12 +69,10 @@ int main(int argc, char **argv) {
   if (nRanks > 1) {
     const auto measured = iceCube(4);
     seams::domain::distributedRings(measured, cutoff, 6, MPI_COMM_WORLD);
-#ifdef SEAMS_HAS_LINKCELL
     if (!seams::domain::measuredCutReady(seams::domain::kWorkRings)) {
       std::fprintf(stderr, "rank %d: measured ring cut is missing\n", rank);
       bad++;
     }
-#endif
   }
   for (const auto &c : {tiltedFrame(16000, 78.4, 0.0, 0.0, 0.0, 4),
                         tiltedFrame(16000, 78.4, 9.0, 5.0, -7.0, 5)}) {

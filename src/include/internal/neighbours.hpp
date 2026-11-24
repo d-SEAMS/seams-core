@@ -26,9 +26,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.hpp>
-#endif
 #ifdef SEAMS_HAS_MINIMAGE
 #include <minimage.h>
 #endif
@@ -250,7 +248,6 @@ inline bool setBoxFromLengthsAngles(std::vector<double> &box,
                               xy, xz, yz);
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 /// Map a LAMMPS dump box onto lc_cell.
 inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
                                  const std::vector<double> &boxLow) {
@@ -343,7 +340,6 @@ inline void residentFrameCell(const double *box, const double *boxLow,
 void linkcellCutoffCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                        double rcutoff, bool half, const std::array<bool, 3> &periodic,
                        const std::vector<int> &mask, int threads, linkcell::PairCsr &out);
-#endif
 
 //! All these functions use atom IDs and not indices
 

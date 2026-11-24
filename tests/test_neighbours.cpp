@@ -649,7 +649,6 @@ TEST_CASE("empty cloud k-nearest does not throw", "[neighbours]") {
   REQUIRE(both.second.empty());
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 TEST_CASE("LAMMPS dump bounds convert to lattice H",
           "[neighbours][linkcell]") {
   // Dump stores bound spans, not edge lengths. These bounds recover
@@ -701,7 +700,6 @@ TEST_CASE("sheared box k-nearest uses the periodic image",
   REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
                Catch::Matchers::WithinAbs(0.25, 1e-9));
 }
-#endif
 
 TEST_CASE("tilt dump cutoff list finds the a-image pair", "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
@@ -975,7 +973,6 @@ TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
   REQUIRE(rows(nneigh::halfNeighList(cutoff, cloud, 1)) == wantHalf);
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 TEST_CASE("residentFrameCell uses dump H when nBox is 6", "[neighbours]") {
   const double box[6] = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
   linkcell::Cell cell = linkcell::Cell::ortho(1.0, 1.0, 1.0);
@@ -996,7 +993,6 @@ TEST_CASE("residentFrameCell stays ortho for three lengths", "[neighbours]") {
   REQUIRE_THAT(cell.b[1], Catch::Matchers::WithinAbs(11.0, 1e-12));
   REQUIRE_THAT(cell.c[2], Catch::Matchers::WithinAbs(12.0, 1e-12));
 }
-#endif
 
 namespace {
 

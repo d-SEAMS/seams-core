@@ -13,11 +13,9 @@
 
 #include "thread_team.hpp"
 
-#if defined(SEAMS_HAS_LINKCELL) && defined(SEAMS_HAS_LINKCELL_TEAM)
 extern "C" int lc_team_run(std::size_t nstages, const std::size_t *chunks,
                            void (*fn)(void *, std::size_t, std::size_t, std::size_t),
                            void *ctx);
-#endif
 
 // Stages of chunks in one parallel region. A run claims each chunk once
 // and every chunk of a stage returns before the next stage starts.
@@ -47,11 +45,7 @@ inline int width() {
     return 1;
   }
 #endif
-#ifdef SEAMS_HAS_LINKCELL
   return std::max(teamWidth(), poolFor(0));
-#else
-  return teamWidth();
-#endif
 }
 
 // Chunks per stage for `width` workers: one per OpenMP thread on a
@@ -142,7 +136,6 @@ template <class F> void run(const std::vector<std::size_t> &sizes, F &&fn) {
   }
   detail::Call<std::remove_reference_t<F>> call;
   call.fn = &fn;
-#if defined(SEAMS_HAS_LINKCELL) && defined(SEAMS_HAS_LINKCELL_TEAM)
   bool nested = false;
 #ifdef SEAMS_HAS_OPENMP
   nested = omp_in_parallel() != 0;
@@ -155,9 +148,6 @@ template <class F> void run(const std::vector<std::size_t> &sizes, F &&fn) {
   } else {
     detail::ompRun(sizes, call);
   }
-#else
-  detail::ompRun(sizes, call);
-#endif
   if (call.failure) {
     std::rethrow_exception(call.failure);
   }
