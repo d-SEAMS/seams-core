@@ -75,7 +75,7 @@ class ContinuationBullet(unittest.TestCase):
             if directory.is_dir()
             for path in directory.glob("*.md")
         ]
-        self.assertEqual(len(versioned), 58)
+        self.assertEqual(len(versioned), 60)
         self.assertEqual(missing_versioned(changelog, fragments), {})
 
 
