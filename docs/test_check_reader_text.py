@@ -3,11 +3,17 @@
 
 import unittest
 
-from check_reader_text import PROCESS_PATTERNS, README_PATTERNS, source_pages
+from check_reader_text import (
+    PROCESS_PATTERNS,
+    README_PATTERNS,
+    normalised_text,
+    source_pages,
+)
 from registry_claims import ClaimParseError, claims
 
 
 def labels(text, patterns):
+    text = normalised_text(text)
     return {label for label, pattern in patterns if pattern.search(text)}
 
 
@@ -16,6 +22,12 @@ class ReaderTextPatterns(unittest.TestCase):
         self.assertIn(
             "documentation test command",
             labels("meson test -C bbdir", PROCESS_PATTERNS),
+        )
+
+    def test_book_rejects_meson_test_split_by_spaces(self):
+        self.assertIn(
+            "documentation test command",
+            labels("meson   test -C bbdir", PROCESS_PATTERNS),
         )
 
     def test_book_rejects_docs_test_name(self):

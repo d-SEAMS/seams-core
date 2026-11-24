@@ -95,6 +95,17 @@ README_PATTERNS = tuple(
     item for item in PROCESS_PATTERNS if item[0] != "documentation test command"
 )
 
+
+def normalised_text(text: str) -> str:
+    """Collapse horizontal whitespace before the reader-text patterns run.
+
+    Sphinx splits a literal into one span per word and the visible-text
+    join puts the span gaps back as several spaces. ``meson   test`` is
+    the same command as ``meson test``. Newlines stay, so a pattern that
+    is written to stop at the end of a line still does.
+    """
+    return re.sub(r"[^\S\n]+", " ", text)
+
 SKIP_PARTS = {
     "science/figures",
     "videos/embeds",
@@ -174,9 +185,10 @@ def main() -> int:
             errors.append(f"html/{rel}: internal fragment was published")
             continue
         patterns = README_PATTERNS if rel == "README.md" else PROCESS_PATTERNS
+        scanned_text = normalised_text(text)
         for label, pattern in patterns:
-            for match in pattern.finditer(text):
-                line = text.count("\n", 0, match.start()) + 1
+            for match in pattern.finditer(scanned_text):
+                line = scanned_text.count("\n", 0, match.start()) + 1
                 errors.append(f"{rel}:{line}: {label}: {match.group(0)}")
         for number, line in enumerate(text.splitlines(), 1):
             try:
