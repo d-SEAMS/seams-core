@@ -6,8 +6,13 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from host_tool_env import without_asan_preload  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "install_pydseamslib.sh"
@@ -19,7 +24,21 @@ def _run(
     env: dict[str, str] | None = None,
     cwd: Path | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, check=True, text=True, capture_output=True, env=env, cwd=cwd)
+    """Run a host tool; ENV defaults to os.environ without the sanitizer preload."""
+    try:
+        return subprocess.run(
+            cmd,
+            check=True,
+            text=True,
+            capture_output=True,
+            env=without_asan_preload() if env is None else env,
+            cwd=cwd,
+        )
+    except subprocess.CalledProcessError as exc:
+        print(f"command failed with exit {exc.returncode}: {cmd}", file=sys.stderr)
+        print(f"--- stdout ---\n{exc.stdout}", file=sys.stderr)
+        print(f"--- stderr ---\n{exc.stderr}", file=sys.stderr)
+        raise
 
 
 def _write(path: Path, text: str) -> None:
@@ -88,7 +107,7 @@ def _script_env(
     *,
     pythonpath: Path | None = None,
 ) -> dict[str, str]:
-    env = dict(os.environ)
+    env = without_asan_preload()
     env.pop("PYTHONPATH", None)
     if pythonpath is not None:
         env["PYTHONPATH"] = str(pythonpath)
@@ -99,7 +118,7 @@ def _script_env(
 
 
 def _clean_inspect_env(venv: Path) -> dict[str, str]:
-    env = dict(os.environ)
+    env = without_asan_preload()
     env.pop("PYTHONPATH", None)
     env["PATH"] = os.pathsep.join([str(venv / "bin"), env.get("PATH", "")])
     return env
@@ -174,6 +193,7 @@ def _git_tree(rev: str) -> str | None:
         ["git", "-C", str(ROOT), "rev-parse", f"{rev}^{{tree}}"],
         text=True,
         capture_output=True,
+        env=without_asan_preload(),
     )
     if res.returncode != 0:
         return None
@@ -191,7 +211,7 @@ def test_stub_no_stamp_stamps_target_not_stub(
     stub_dir = tdir / "stub-no-stamp"
     clone_log = tdir / "clone-stub.log"
     _make_stub_module(stub_dir)
-    _run(["python3", "-m", "venv", str(venv)])
+    _run([sys.executable, "-m", "venv", str(venv)])
 
     env = _script_env(fake_bin, venv, fake_src, clone_log, pythonpath=stub_dir)
     _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
@@ -225,7 +245,7 @@ def test_forged_stub_rejected(
         stub_dir / ".seams-core-build.json",
         json.dumps({"root": expected_root, "tree": expected_tree}, sort_keys=True) + "\n",
     )
-    _run(["python3", "-m", "venv", str(venv)])
+    _run([sys.executable, "-m", "venv", str(venv)])
 
     env = _script_env(fake_bin, venv, fake_src, clone_log, pythonpath=stub_dir)
     _run(["/bin/sh", str(SCRIPT), "--if-missing"], env=env, cwd=ROOT)
@@ -317,7 +337,7 @@ def test_pth_outside_target_rejected(
         outside_dir / ".seams-core-build.json",
         json.dumps({"root": expected_root, "tree": expected_tree}, sort_keys=True) + "\n",
     )
-    _run(["python3", "-m", "venv", str(venv)])
+    _run([sys.executable, "-m", "venv", str(venv)])
     _write(_venv_purelib(venv) / "shadow_pydseams.pth", f"{outside_dir}\n")
 
     env = _script_env(fake_bin, venv, fake_src, clone_log)
