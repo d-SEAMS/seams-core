@@ -282,6 +282,7 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_nauty" true)
     (lib.mesonEnable "with_csm" true)
     (lib.mesonEnable "with_lammps" true)
+    (lib.mesonOption "lammps_src_include" "${lammps.src}/src")
     (lib.mesonEnable "with_gromacs" true)
     (lib.mesonOption "gromacs_legacy_include" "${gromacsLegacyHeaders}/api/legacy/include")
     (lib.mesonEnable "with_openmm" true)
