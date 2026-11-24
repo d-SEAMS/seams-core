@@ -1,1 +1,1 @@
-A `.lammpsdata` file is read as chemfiles LAMMPS Data. That format registers no extension, so frame counting and frame reading name it, including a mixed-case suffix. The CLI uses the same reader.
+Files with `.lammpsdata` and `.data` suffixes use the Chemfiles LAMMPS Data reader. Frame counting validates the coordinate frame and reports failure for a malformed file.

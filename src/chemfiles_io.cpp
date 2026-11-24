@@ -583,8 +583,15 @@ int sinp::chemfilesSteps(const std::string &filename) {
   }
   std::string error;
   std::size_t nsteps = 0;
+  const auto format = forcedFormat(filename);
+  const auto ext = extensionOf(filename);
+  // Single-frame topology formats can report a count from the header
+  // even if the coordinate frame cannot be parsed.
+  const bool validateFrame = format == "LAMMPS Data" ||
+                             extensionFold(ext, "tpr") ||
+                             extensionFold(ext, "psf");
   const int rc = framevisit::seams_with_frame(
-      filename, forcedFormat(filename), 0, "", "", false, false, nullptr,
+      filename, format, 0, "", "", validateFrame, false, nullptr,
       nullptr, error, nsteps);
   if (rc != 0) {
     chemfilesError = error.empty() ? currentExceptionText() : error;
