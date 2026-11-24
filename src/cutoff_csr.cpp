@@ -2580,57 +2580,6 @@ std::vector<std::vector<int>> idRowsFromCsr(
   return rows;
 }
 
-std::vector<std::vector<int>> indexRowsFromCsr(int nop, const std::vector<int> &offsets,
-                                              const std::vector<int> &cols) {
-  std::vector<std::vector<int>> rows(static_cast<std::size_t>(std::max(nop, 0)));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
-#endif
-  for (int i = 0; i < nop; ++i) {
-    const int a = offsets[static_cast<std::size_t>(i)];
-    const int b = offsets[static_cast<std::size_t>(i) + 1];
-    auto &row = rows[static_cast<std::size_t>(i)];
-    row.resize(static_cast<std::size_t>(1 + b - a));
-    row[0] = i;
-    for (int k = a; k < b; ++k) {
-      row[static_cast<std::size_t>(1 + k - a)] = cols[static_cast<std::size_t>(k)];
-    }
-  }
-  return rows;
-}
-
-std::vector<std::vector<int>> halfIdRowsFromCsr(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<int> &indexToID, const std::vector<int> &offsets,
-    const std::vector<int> &cols) {
-  const int nop = yCloud.nop;
-  std::vector<std::vector<int>> rows(static_cast<std::size_t>(std::max(nop, 0)));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
-#endif
-  for (int i = 0; i < nop; ++i) {
-    if (static_cast<int>(indexToID.size()) <= i ||
-        indexToID[static_cast<std::size_t>(i)] == -1) {
-      continue;
-    }
-    const int a = offsets[static_cast<std::size_t>(i)];
-    const int b = offsets[static_cast<std::size_t>(i) + 1];
-    auto &row = rows[static_cast<std::size_t>(i)];
-    row.push_back(indexToID[static_cast<std::size_t>(i)]);
-    for (int k = a; k < b; ++k) {
-      const int j = cols[static_cast<std::size_t>(k)];
-      if (j <= i) {
-        continue;
-      }
-      if (j >= 0 && j < static_cast<int>(indexToID.size()) &&
-          indexToID[static_cast<std::size_t>(j)] != -1) {
-        row.push_back(indexToID[static_cast<std::size_t>(j)]);
-      }
-    }
-  }
-  return rows;
-}
-
 nneigh::CutoffSkin::CutoffSkin(double cutoff, double skin)
     : cutoff_(cutoff), skin_(skin) {}
 

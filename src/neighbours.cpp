@@ -15,7 +15,6 @@
 #include <index_range.hpp>
 
 #include <algorithm>
-#include <atomic>
 #include <array>
 #include <chrono>
 #include <cmath>
@@ -24,16 +23,12 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
-#include <memory>
 #include <numeric>
-#include <queue>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <utility>
 
 #include <neighbours.hpp>
-#include <par_team.hpp>
 #include <simd_distance.hpp>
 #include <thread_team.hpp>
 

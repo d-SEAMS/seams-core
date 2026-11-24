@@ -475,16 +475,6 @@ std::vector<std::vector<int>> idRowsFromCsr(
     const std::vector<int> &indexToID, const std::vector<int> &offsets,
     const std::vector<int> &cols);
 
-/// Index rows, self first, from a CSR of cloud indices.
-std::vector<std::vector<int>> indexRowsFromCsr(
-    int nop, const std::vector<int> &offsets, const std::vector<int> &cols);
-
-/// Half list by atom ID. The lower cloud index owns the pair.
-std::vector<std::vector<int>> halfIdRowsFromCsr(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<int> &indexToID, const std::vector<int> &offsets,
-    const std::vector<int> &cols);
-
 //! Full neighbour list for one type, from linkcell's cutoff rows. An atom
 //! of another type keeps a row of its own ID. Empty when the cloud has no
 //! box. You can only use this for neighbour lists with one type
