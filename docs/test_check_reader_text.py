@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Tests for reader-only text patterns."""
 
+import contextlib
+import io
+import tempfile
 import unittest
+from pathlib import Path
 
 from check_reader_text import (
     PROCESS_PATTERNS,
     README_PATTERNS,
+    main,
     normalised_text,
     source_pages,
 )
@@ -96,6 +101,67 @@ class ReaderTextPatterns(unittest.TestCase):
     def test_claim_parser_rejects_malformed_conda_line(self):
         with self.assertRaises(ClaimParseError):
             list(claims('conda install "seams-core=2.14.1'))
+
+
+SPAN = (
+    '<code class="docutils literal notranslate">'
+    '<span class="pre">{first}</span> <span class="pre">{second}</span>'
+    "</code>"
+)
+
+
+def _probe(root: Path, body: str) -> None:
+    build = root / "docs" / "build"
+    build.mkdir(parents=True)
+    (build / "probe.html").write_text("<p>" + body + "</p>\n", encoding="utf-8")
+
+
+def _main_stderr(root: Path) -> tuple[int, str]:
+    buf = io.StringIO()
+    with contextlib.redirect_stderr(buf):
+        code = main(root)
+    return code, buf.getvalue()
+
+
+class ReaderTextEntry(unittest.TestCase):
+    def test_main_rejects_words_split_across_literal_spans(self):
+        """Sphinx puts one span per word. The scan has to join them.
+
+        Dropping ``normalised_text`` from ``main`` leaves the span gaps
+        as several spaces, and this phrase no longer matches.
+        """
+        spans = " ".join(
+            f'<span class="pre">{word}</span>'
+            for word in ("out", "of", "the", "repository")
+        )
+        html = (
+            '<code class="docutils literal notranslate">' + spans + "</code>"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _probe(root, html)
+            code, err = _main_stderr(root)
+        self.assertEqual(code, 1)
+        self.assertIn("repository policy", err)
+        self.assertIn("out of the repository", err)
+
+    def test_main_rejects_meson_test_wrapped_across_a_line(self):
+        """A literal that breaks between the two words is still the command.
+
+        ``\\bmeson test\\b`` misses it, because the visible text keeps the
+        newline between the spans.
+        """
+        html = SPAN.format(first="meson", second="test").replace(
+            "</span> <span", "</span>\n<span"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _probe(root, html)
+            code, err = _main_stderr(root)
+        self.assertEqual(code, 1)
+        self.assertIn("documentation test command", err)
+        self.assertIn("meson", err)
+        self.assertIn("test", err)
 
 
 if __name__ == "__main__":
