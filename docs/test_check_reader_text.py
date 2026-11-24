@@ -23,6 +23,17 @@ def labels(text, patterns):
 
 
 class ReaderTextPatterns(unittest.TestCase):
+    def test_normalised_text_keeps_newlines(self):
+        """Horizontal whitespace collapses. A newline stays a newline.
+
+        Folding ``\\s+`` would turn the wrapped command into one line.
+        """
+        self.assertEqual(
+            normalised_text("meson \t test\nwrapped"),
+            "meson test\nwrapped",
+        )
+        self.assertEqual(normalised_text("alpha\n\nbeta"), "alpha\n\nbeta")
+
     def test_book_rejects_meson_test(self):
         self.assertIn(
             "documentation test command",

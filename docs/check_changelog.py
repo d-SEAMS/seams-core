@@ -339,10 +339,10 @@ def check(fragments, text, version):
         absent = missing_versioned(
             changelog_path.read_text(encoding="utf-8"), FRAGMENTS
         )
-        for version, names in absent.items():
+        for release, missing_names in absent.items():
             errors.append(
                 "CHANGELOG.md [{}] is missing the towncrier bullet for: {}".format(
-                    version, ", ".join(names)
+                    release, ", ".join(missing_names)
                 )
             )
     page = PAGE.read_text()
