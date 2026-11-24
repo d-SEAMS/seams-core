@@ -280,7 +280,8 @@ void nneigh::linkcellCutoffCsr(
                                   : linkcell::Cell::ortho(1.0, 1.0, 1.0);
   const std::size_t kept =
       mask.empty() ? static_cast<std::size_t>(nop)
-                   : static_cast<std::size_t>(std::count(mask.begin(), mask.end(), 1));
+                   : static_cast<std::size_t>(
+                         std::count_if(mask.begin(), mask.end(), [](int v) { return v != 0; }));
   double hint = rcutoff;
   if (kept > 0) {
     const double volume = anyPeriodic ? nneigh::dumpVolume(yCloud.box, yCloud.boxLow)

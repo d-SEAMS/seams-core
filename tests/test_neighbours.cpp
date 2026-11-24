@@ -2110,6 +2110,50 @@ TEST_CASE("a tiny cutoff in a large box stays under the linkcell mesh limit",
   REQUIRE(rows.size() == static_cast<std::size_t>(cloud.nop));
 }
 
+TEST_CASE("a tiny cutoff under a mask of flags other than one stays under the mesh limit",
+          "[neighbours][linkcell]") {
+  // Any nonzero flag keeps an atom, so the cells are sized by those atoms.
+  auto cloud = randomCloud(64, 20.0, 20.0, 20.0, 37);
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts[2].x = cloud.pts[0].x + 0.005;
+  cloud.pts[2].y = cloud.pts[0].y;
+  cloud.pts[2].z = cloud.pts[0].z;
+  std::vector<int> mask(static_cast<std::size_t>(cloud.nop), 0);
+  for (std::size_t i = 0; i < mask.size(); i += 2) {
+    mask[i] = i % 4 == 0 ? 2 : -1;
+  }
+  auto kept = cloud;
+  kept.pts.clear();
+  kept.idIndexMap.clear();
+  std::vector<int> keptIndex;
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (mask[static_cast<std::size_t>(i)] != 0) {
+      keptIndex.push_back(i);
+      kept.pts.push_back(cloud.pts[static_cast<std::size_t>(i)]);
+    }
+  }
+  kept.nop = static_cast<int>(kept.pts.size());
+  const double cutoff = 0.01;
+  linkcell::PairCsr csr;
+  for (bool half : {false, true}) {
+    nneigh::linkcellCutoffCsr(cloud, cutoff, half, {true, true, true}, mask, 1, csr);
+    const auto got = csrRows(csr);
+    const auto want = bruteImageRows(kept, cutoff, {true, true, true}, half);
+    REQUIRE(got[0] == std::vector<int>{2});
+    for (std::size_t k = 0; k < keptIndex.size(); ++k) {
+      std::vector<int> mapped;
+      for (int j : want[k]) {
+        mapped.push_back(keptIndex[static_cast<std::size_t>(j)]);
+      }
+      REQUIRE(got[static_cast<std::size_t>(keptIndex[k])] == mapped);
+    }
+    for (int i = 1; i < cloud.nop; i += 2) {
+      REQUIRE(got[static_cast<std::size_t>(i)].empty());
+    }
+  }
+}
+
 TEST_CASE("a cutoff past half a small triclinic cell keeps every image pair",
           "[neighbours][linkcell][triclinic]") {
   // 3.5 is more than half of every width of this cell, so one pair can
