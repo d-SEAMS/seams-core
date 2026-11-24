@@ -41,7 +41,7 @@ endif
 host_system = host_machine.system()
 
 _dist_python = find_program('python3', 'python', required: false)
-if _dist_python.found()
+if _dist_python.found() and not meson.is_subproject()
   # The archive carries the downloaded build inputs and test data, then
   # the version-control metadata of every copied tree is removed.
   meson.add_dist_script(_dist_python, files('scripts/dist_vendor.py'))
