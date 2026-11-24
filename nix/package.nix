@@ -142,8 +142,8 @@ let
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
   };
   linkcellSrc = fetchzip {
-    url = "https://github.com/d-SEAMS/linkcell/archive/refs/tags/v0.4.2.tar.gz";
-    hash = "sha256-9OZPiIS4mMSHLB1aTE9WBqnZ8STDbuZMd19E3fro4g4=";
+    url = "https://github.com/d-SEAMS/linkcell/archive/refs/tags/v0.6.0.tar.gz";
+    hash = "sha256-C1RPSOQHsBjfYxsw5Si6Q4+B+YGlQjNHitinndAv8XA=";
   };
   vesinSrc = fetchzip {
     url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
@@ -151,7 +151,7 @@ let
   };
   linkcellCargoVendor = rustPlatform.fetchCargoVendor {
     src = linkcellSrc;
-    hash = "sha256-YSV6Ewb/O6/ekidfJAGJ/q+5kBhiSzRik9eVD25aPqA=";
+    hash = "sha256-2QscNVUPmCrwO1cAHWnDZAtU8Hsr6Bl/WTO65WwDsC8=";
   };
   minimageCargoVendor = rustPlatform.fetchCargoVendor {
     src = minimageSrc;
