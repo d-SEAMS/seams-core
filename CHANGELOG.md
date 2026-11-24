@@ -53,6 +53,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Precompute exact periodic minimum-image bond vectors via `gen::relDistFromPoint` in `chill::specializedChillPlus` so triclinic cells use full tilt-aware MIC instead of orthorhombic `mic1`, and clamp `dz / r` and zero-distance bonds in `y3`.
 - Reading a malformed `.lammpsdata` file, or one with an unrecognized header keyword line, is an error. Release builds of the vendored chemfiles 0.10.4 spun forever on such a file; a patch makes the reader throw a format error, and the system-library probe rejects a copy that still spins.
 - Refine triclinic displacements with exact Euclidean minimum-image reduction outside the Smith ball in `passTilt` (`src/cutoff_csr.cpp`) and in Steinhardt and CHILL/CHILL+ bond-vector kernels (`src/steinhardt_parallel.cpp`, `src/bop.cpp`), and use `floor` for fallback cell counts in `orthoChill`.
+- Release-note verification renders each release draft in-process through the builder command instead of spawning a nested Python subprocess per release, keeping the changelog verification checks within their time limit under AddressSanitizer.
 - Remove the trajectory dataset revision hash from documentation pages so only `input/fetch.py` stores it, and flag dataset revision hashes in source and rendered documentation checks.
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
 - The Meson dist script does not run when seams-core is a subproject.

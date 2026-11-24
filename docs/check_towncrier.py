@@ -12,10 +12,11 @@ fragment directory fails, and so does a fragment directory without a section.
 
 from __future__ import annotations
 
+import contextlib
 import difflib
+import io
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import tomllib
@@ -70,37 +71,60 @@ def sources(fragments):
 
 def draft(version, date, paths, directory, template):
     """Render one release from its own fragments, or return (None, error)."""
+    try:
+        import click
+        from towncrier.build import _main as towncrier_build
+    except ImportError as exc:
+        return None, str(exc)
     with tempfile.TemporaryDirectory(prefix="seams-towncrier-") as scratch:
         tree = Path(scratch)
-        shutil.copy(CONFIG, tree / CONFIG.name)
+        config_copy = tree / CONFIG.name
+        shutil.copy(CONFIG, config_copy)
         (tree / template).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(ROOT / template, tree / template)
         (tree / directory).mkdir(parents=True)
         for path in paths:
             shutil.copy(path, tree / directory / path.name)
-        done = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "towncrier",
-                "build",
-                "--draft",
-                "--version",
-                version,
-                "--date",
-                date,
-            ],
-            cwd=str(tree),
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-    if done.returncode != 0:
-        return None, (done.stdout + done.stderr).strip() or "towncrier draft failed"
-    marker = done.stdout.find("## [{}]".format(version))
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        failed = False
+        error_text = ""
+        try:
+            with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
+                towncrier_build.main(
+                    [
+                        "--draft",
+                        "--config",
+                        str(config_copy),
+                        "--dir",
+                        str(tree),
+                        "--version",
+                        version,
+                        "--date",
+                        date,
+                    ],
+                    standalone_mode=False,
+                )
+        except click.ClickException as exc:
+            failed = True
+            error_text = exc.format_message()
+        except click.Abort:
+            failed = True
+            error_text = "towncrier draft aborted"
+        except SystemExit as exc:
+            if exc.code not in (None, 0):
+                failed = True
+                if isinstance(exc.code, str):
+                    error_text = exc.code
+    out = stdout.getvalue()
+    err = stderr.getvalue()
+    if failed:
+        combined = "\n".join(part.strip() for part in (out, err, error_text) if part.strip())
+        return None, combined or "towncrier draft failed"
+    marker = out.find("## [{}]".format(version))
     if marker < 0:
         return None, "towncrier draft has no {} heading".format(version)
-    return done.stdout[marker:].strip() + "\n", None
+    return out[marker:].strip() + "\n", None
 
 
 def section_spans(text):
