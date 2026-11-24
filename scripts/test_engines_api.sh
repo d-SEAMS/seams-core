@@ -9,7 +9,8 @@ lib=$build/src
 eessi_lib=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/GCCcore/15.2.0/lib64
 
 if [ ! -x "$lib/test_seams_api" ]; then
-  meson setup "$build" --wrap-mode=nofallback -Dwith_tests=false \
+  meson setup "$build" --wrap-mode=nofallback --force-fallback-for=linkcell \
+    -Dwith_tests=false \
     -Dwith_ira=disabled -Dwith_sphericart=disabled -Dwith_nauty=disabled \
     -Dwith_gpulite=disabled -Dwith_openmp_offload=disabled
   meson compile -C "$build" test_seams_api
