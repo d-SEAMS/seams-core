@@ -2057,7 +2057,8 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     # ASan makes the render CPU-bound; keep it from sharing the runner cores.
     is_parallel: not get_option('b_sanitize').contains('address'),
-    timeout: 180)
+    # Full-resolution software rendering can take several minutes.
+    timeout: 600)
   test(
     'docs_engine_walkthrough',
     python3,
