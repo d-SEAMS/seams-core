@@ -1,6 +1,6 @@
 # In-situ
 
-d-SEAMS 2.14.0. `adapters/python/dseams_insitu/engine.py` is `InSitu`.
+The in-situ driver ships with this engine. `adapters/python/dseams_insitu/engine.py` is `InSitu`.
 `InSitu(library=None, cutoff=3.5, graph="cutoff", max_ring=6, skin=0.0)`
 builds one library handle. `graph` is `cutoff` or `mutual`. `skin` above
 zero keeps the neighbour list while every oxygen has moved by at most half

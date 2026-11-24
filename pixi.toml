@@ -244,7 +244,7 @@ cmd = "bash scripts/get_doxyyoda.sh"
 description = "Standalone doxyYoda C++ API HTML"
 cwd = "docs/source"
 depends-on = ["fetch-doxyyoda"]
-cmd = "doxygen Doxyfile_doxyyoda.cfg"
+cmd = "python3 ../../scripts/doxygen_version_header.py && doxygen Doxyfile_doxyyoda.cfg"
 
 [feature.docs.tasks.install-doxyhtml]
 description = "Copy doxyYoda HTML into the Sphinx publish tree"

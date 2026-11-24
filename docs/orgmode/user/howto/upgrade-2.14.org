@@ -27,9 +27,9 @@ the program reads a trajectory path or keeps a frame across calls.
 
 * Language bindings
 
-2.14 moves every language binding out of this repository. Each one is
-its own repository and package, built against the seams-core 2.14.0 tag
-and versioned 2.14.0:
+Every language binding lives in its own repository and package,
+built against the matching seams-core ~vX.Y.Z~ tag and versioned
+~X.Y.Z~:
 
 | Language | 2.13 location | 2.14 repository | Package |
 |----------+---------------+-----------------+---------|
@@ -40,8 +40,9 @@ and versioned 2.14.0:
 | Rust | none | [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]] | crates ~dseams-sys~ and ~dseams~ |
 | Fortran | none | [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]] | fpm Git dependency ~dseams~ |
 
-~pip install -U 'pydseamslib==2.14.0'~ installs that package, with
-~import dseams~ and ~import pydseams~.
+~pip install -U 'pydseamslib==2.14.0'~ installs the published release (or
+~pip install -U pydseamslib~ for the latest), with ~import dseams~ and
+~import pydseams~.
 Julia reads ~libseams_lang~ from ~SEAMS_LANG_LIB~.
 Rust reads the directory that holds ~libseams~ from ~SEAMS_LIB_DIR~.
 R reads ~SEAMS_LIBDIR~ and ~SEAMS_INCLUDE~.

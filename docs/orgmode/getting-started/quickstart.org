@@ -19,7 +19,7 @@ meson compile -C build
 
 ~-Dwith_tests=false~ leaves out the test suite. The compile still writes
 ~./build/seams~, ~libyodaLib~, ~libseams~ (~include/seams.h~), and
-~libseams_lang~. ~./build/seams --version~ prints ~seams 2.14.0~.
+~libseams_lang~. ~./build/seams --version~ prints ~seams~ and the project version.
 
 Source and pixi builds are on
 [[file:install.org][Install the engine]].
@@ -29,7 +29,7 @@ The Python binding is
 is the array API below, and ~import pydseams~ is the Frame API:
 
 #+begin_src bash
-pip install 'pydseamslib==2.14.0'
+pip install pydseamslib
 #+end_src
 
 Every language is listed on

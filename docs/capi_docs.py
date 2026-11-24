@@ -23,6 +23,15 @@ from pathlib import Path
 
 BEGIN = "<!-- API_SYMBOLS_BEGIN -->"
 END = "<!-- API_SYMBOLS_END -->"
+# The page quotes these tour lines with a placeholder in place of the release
+# value; check_c_api_tour.resolve_page fills them in from meson.build.
+VERSION_PLACEHOLDERS = {
+    "seams_version": "<number>",
+    "seams_version_major": "<major>",
+    "seams_version_minor": "<minor>",
+    "seams_version_patch": "<patch>",
+    "seams_version_string": "<version>",
+}
 DECL = re.compile(
     r"(?:(/\*\*(?:(?!\*/).)*?\*/)\s*)?"
     r"(?:SEAMS_DEPRECATED\((?:[^()]|\([^()]*\))*\)\s*)?"
@@ -244,6 +253,14 @@ def render_function(fn):
         out.append("```c\n{}\n```\n".format(fn.sections["Example code"]))
     out.append("The tour call is in `docs/examples/c_api_tour.c`.\n")
     return out
+
+
+def version_placeholder(row):
+    """A tour line as the page quotes it: release values become placeholders."""
+    parts = row.split(maxsplit=2)
+    if len(parts) == 3 and parts[1] in VERSION_PLACEHOLDERS:
+        return "capi {} {}".format(parts[1], VERSION_PLACEHOLDERS[parts[1]])
+    return row
 
 
 CARRIED = ("Ownership: ", "Errors: ", "Example: `")

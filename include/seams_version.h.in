@@ -18,7 +18,7 @@
 #define SEAMS_VERSION_MINOR @MINOR@
 /** @brief Patch version. Raised for fixes that leave the interface alone. */
 #define SEAMS_VERSION_PATCH @PATCH@
-/** @brief Version text, for example "2.14.0". */
+/** @brief Version text, "@STRING@". */
 #define SEAMS_VERSION_STRING "@STRING@"
 
 /**

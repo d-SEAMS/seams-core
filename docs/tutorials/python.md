@@ -9,7 +9,7 @@ Classify ice Ih from Python. The recording uses `input/traj/ice1h.lammpstrj`: `s
 The binding is [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). `import dseams` is the array API over `libseams` (`include/seams.h`). `import pydseams` is the Frame API. The worked example and the symbol list are the [PydSEAMSlib documentation](https://d-seams.github.io/PydSEAMSlib/).
 
 ```bash
-pip install 'pydseamslib==2.14.0'
+pip install pydseamslib
 ```
 
 The same two engine commands, without the binding, print the ice Ih census. The box is orthorhombic and every oxygen is hexagonal:

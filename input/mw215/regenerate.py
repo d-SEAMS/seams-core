@@ -93,7 +93,7 @@ def time_rule(pos, box, rule: str):
     try:
         from dseams import chill_plus
     except ImportError as err:
-        raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib==2.14.0") from err
+        raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib") from err
 
     labels = None
     samples = []

@@ -211,7 +211,7 @@ capi seams_abi 1
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version 134658
+capi seams_version <number>
 ```
 
 ### seams_version_major
@@ -219,7 +219,7 @@ capi seams_version 134658
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_major 2
+capi seams_version_major <major>
 ```
 
 ### seams_version_minor
@@ -227,7 +227,7 @@ capi seams_version_major 2
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_minor 14
+capi seams_version_minor <minor>
 ```
 
 ### seams_version_patch
@@ -235,7 +235,7 @@ capi seams_version_minor 14
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_patch 2
+capi seams_version_patch <patch>
 ```
 
 ### seams_version_string
@@ -243,7 +243,7 @@ capi seams_version_patch 2
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
-capi seams_version_string 2.14.2
+capi seams_version_string <version>
 ```
 
 ### seams_status_string
@@ -5155,7 +5155,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_string
 
-Purpose: Version text, for example "2.14.0".
+Purpose: Version text of the built library.
 
 ```c
 const char *seams_version_string(void);
