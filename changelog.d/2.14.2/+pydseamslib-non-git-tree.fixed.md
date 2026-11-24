@@ -1,0 +1,1 @@
+`scripts/install_pydseamslib.sh` now runs in a source tree without `.git`, such as an unpacked `meson dist` tarball: `--if-missing` reports that an existing install cannot be matched to that tree and reinstalls, and the install stamp records a null tree that no later `--if-missing` accepts.

@@ -199,8 +199,6 @@ stdenv.mkDerivation (finalAttrs: {
     mkdir -p subprojects/backward-cpp-1.6
     tar -xzf ${backwardCppSrc} --strip-components=1 -C subprojects/backward-cpp-1.6
     cp subprojects/packagefiles/backward-cpp/* subprojects/backward-cpp-1.6/
-    substituteInPlace tests/install_pydseamslib_if_missing.py \
-      --replace-fail /usr/bin/git ${git}/bin/git
     patchShebangs --build scripts
     mkdir -p docs/.cache/bindings
     ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: source: ''

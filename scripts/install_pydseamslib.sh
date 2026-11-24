@@ -7,13 +7,23 @@
 # tagged. PYDSEAMSLIB_REF picks the PydSEAMSlib branch or tag (main).
 # Pass --if-missing first to return immediately when pydseamslib is already
 # installed in the active Python environment for this checkout and HEAD tree.
+# A source tree without .git at its root, such as an unpacked meson dist
+# tarball, has no HEAD tree to compare against: --if-missing then says so
+# and always reinstalls, and the stamp records a null tree that no later
+# --if-missing accepts. A .git whose HEAD cannot be resolved is an error.
 # Extra arguments go to pip, e.g. a different interpreter's -m pip.
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd -P)
-tree=$(git -C "$root" rev-parse HEAD^{tree})
+if [ -e "$root/.git" ]; then
+  tree=$(git -C "$root" rev-parse HEAD^{tree})
+else
+  tree=
+fi
 if [ "${1:-}" = "--if-missing" ]; then
   shift
-  if SEAMS_ROOT="$root" SEAMS_TREE="$tree" python -I - <<'PY'
+  if [ -z "$tree" ]; then
+    echo "install_pydseamslib.sh: $root is not a git checkout, so an installed pydseamslib cannot be matched to this source tree; reinstalling" >&2
+  elif SEAMS_ROOT="$root" SEAMS_TREE="$tree" python -I - <<'PY'
 import json
 import os
 import sysconfig
@@ -110,7 +120,7 @@ import sysconfig
 from pathlib import Path
 
 root = Path(os.environ["SEAMS_ROOT"]).resolve(strict=True)
-expected_tree = os.environ["SEAMS_TREE"]
+expected_tree = os.environ["SEAMS_TREE"] or None
 targets = tuple(
     sorted(
         {
