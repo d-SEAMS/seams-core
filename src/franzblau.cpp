@@ -3475,26 +3475,33 @@ primitive::Graph primitive::populateGraphFromNListID(
  *  indices (according to the input PointCloud).
  * @return The Graph object for the current frame.
  */
+// Row i as the backtracking walk reads it: i first, then each partner once.
+// findRings records a ring once per copy of the root in a row, so a
+// repeated partner would list the same ring twice.
+static std::vector<int> graphRow(const std::vector<std::vector<int>> &nList, int i) {
+  const auto &src = nList[static_cast<std::size_t>(i)];
+  const int nVertices = static_cast<int>(nList.size());
+  std::vector<int> row(1, i);
+  for (std::size_t k = 1; k < src.size(); k++) {
+    const int j = src[k];
+    if (j < 0 || j >= nVertices || j == i ||
+        std::find(row.begin() + 1, row.end(), j) != row.end()) {
+      continue;
+    }
+    row.push_back(j);
+  }
+  return row;
+}
+
 primitive::Graph
 primitive::populateGraphFromIndices(const std::vector<std::vector<int>> &nList) {
-  //
-  primitive::Graph fullGraph; // Contains all the information of the pointCloud
-  primitive::Vertex iVertex;  // The vertex corresponding to a particular point
-  int nnumNeighbours;         // Number of nearest neighbours for iatom
-  int iatom, jatom;           // Atom index being saved
-  // ------------------------------
-  // Loop through every point in nList
-  for (int i = 0; i < nList.size(); i++) {
-    iatom = nList[static_cast<std::size_t>(i)][0]; // Atom index of i
-    // neighListIndex is simply the i^th row of nList
-    //
-    // Update iVertex
-    iVertex.atomIndex = iatom;
-    iVertex.neighListIndex = nList[static_cast<std::size_t>(i)];
-    // Add to the Graph object
-    fullGraph.pts.push_back(iVertex);
-  } // end of loop through iatom
-
+  primitive::Graph fullGraph;
+  fullGraph.pts.resize(nList.size());
+  for (int i = 0; i < static_cast<int>(nList.size()); i++) {
+    auto &vertex = fullGraph.pts[static_cast<std::size_t>(i)];
+    vertex.atomIndex = i;
+    vertex.neighListIndex = graphRow(nList, i);
+  }
   return fullGraph;
 }
 
@@ -3516,11 +3523,9 @@ primitive::restoreEdgesFromIndices(Graph &fullGraph,
   //
   // ------------------------------
   // Loop through every point in nList
-  for (int i = 0; i < nList.size(); i++) {
-    // neighListIndex is simply the i^th row of nList
-    // Update the neighListIndex list in the graph object
-    fullGraph.pts[static_cast<std::size_t>(i)].neighListIndex = nList[static_cast<std::size_t>(i)];
-  } // end of loop through iatom
+  for (int i = 0; i < static_cast<int>(nList.size()); i++) {
+    fullGraph.pts[static_cast<std::size_t>(i)].neighListIndex = graphRow(nList, i);
+  }
 }
 
 /**

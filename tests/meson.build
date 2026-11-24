@@ -222,6 +222,18 @@ foreach name, src : test_sources
   endif
 endforeach
 
+test('ring_oracle',
+  executable('test_ring_oracle', 'test_ring_oracle.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: [seams_api_lib],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: _incdirs + _api_incdirs + [include_directories('.')],
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root() / 'input',
+  env: _test_env,
+  timeout: 600)
+
 executable('interface_order', 'interface_order_main.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

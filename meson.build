@@ -2208,6 +2208,16 @@ if get_option('with_cli') and get_option('with_tests')
     endif
   endforeach
   test(
+    'ring_oracle_python',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'test_ring_oracle.py',
+      meson.project_source_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, seams_lang],
+    timeout: 300)
+  test(
     'docs_snippet_harness',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'run_snippets.py'],

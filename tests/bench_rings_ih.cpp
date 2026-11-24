@@ -122,14 +122,10 @@ int timeOne(int molecules, int threads, int reps, int warmup, bool checkOracle) 
   }
   seams_system_destroy(sys);
   if (checkOracle) {
-    const bool ok4096 = molecules == 4096 && last.count == 8192 && last.basal == 2040 &&
-                        last.prismatic == 5484 && last.hexagon == 668 && last.prism == 0;
-    const bool ok32768 = molecules == 32768 && last.count == 65536 && last.basal == 16368 &&
-                         last.prismatic == 46308 && last.hexagon == 2860 && last.prism == 0;
-    const bool okOther = molecules != 4096 && molecules != 32768 && last.count == 2 * molecules &&
-                         last.basal + last.prismatic + last.hexagon == last.count &&
-                         last.prism == 0;
-    if (!ok4096 && !ok32768 && !okOther) {
+    const bool ok = last.count == 2 * molecules && last.basal == molecules / 2 &&
+                    last.prismatic == 3 * molecules / 2 && last.hexagon == 0 &&
+                    last.prism == 0;
+    if (!ok) {
       std::fprintf(stderr, "census mismatch molecules %d count %d basal %d prismatic %d hexagon %d\n",
                    molecules, last.count, last.basal, last.prismatic, last.hexagon);
       return 3;

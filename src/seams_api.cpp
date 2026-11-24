@@ -1793,8 +1793,12 @@ void refine_ring_labels(const seams_rings *rings) {
     for (int i = 0; i < filled; ++i) {
       const int a = rings->offsets[static_cast<std::size_t>(i)];
       const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
-      rings->idx[static_cast<std::size_t>(i)].assign(rings->cols.begin() + a,
-                                                     rings->cols.begin() + b);
+      // cageAffiliation and findPrisms read a row from its second entry,
+      // as neighbourListByIndex writes it.
+      auto &row = rings->idx[static_cast<std::size_t>(i)];
+      row.reserve(static_cast<std::size_t>(b - a) + 1);
+      row.push_back(i);
+      row.insert(row.end(), rings->cols.begin() + a, rings->cols.begin() + b);
     }
   }
   const auto &idx = rings->idx;

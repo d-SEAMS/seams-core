@@ -267,3 +267,23 @@ TEST_CASE("The sII hydrate host keeps its five-membered rings", "[ring]") {
   primitive::RingUpdater updater(6);
   requireSizes("RingUpdater", updater.update(nList));
 }
+
+TEST_CASE("generate-then-filter lists each ring once when a row repeats a partner",
+          "[ring]") {
+  // A triangle and a square. Rows repeat partners and carry a second self
+  // entry; vertex 7 has an empty row.
+  const std::vector<std::vector<int>> nList = {
+      {0, 1, 2, 1}, {1, 0, 2, 2, 0}, {2, 1, 0, 0}, {3, 4, 6, 3},
+      {4, 3, 5, 5}, {5, 4, 6},       {6, 5, 3, 3}, {}};
+  auto graph = primitive::countAllRingsFromIndex(nList, 6);
+  primitive::removeNonSPrings(graph);
+  std::vector<std::vector<int>> rings;
+  for (auto ring : graph.rings) {
+    std::sort(ring.begin(), ring.end());
+    rings.push_back(ring);
+  }
+  std::sort(rings.begin(), rings.end());
+  const std::vector<std::vector<int>> want = {{0, 1, 2}, {3, 4, 5, 6}};
+  REQUIRE(rings == want);
+  REQUIRE(primitive::ringNetwork(nList, 6).size() == 2);
+}

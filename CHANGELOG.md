@@ -14,6 +14,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Added
 
+- The `ring_oracle` and `ring_oracle_python` tests compare primitive and shortest-path ring sets, ring labels and cage counts against a brute-force enumerator. They cover random graphs, edge cases (lone atoms, repeated bonds, hubs, the max-depth boundary, rings across periodic boundaries), ice Ih, Ic, II and III cells, and hand-built prism and clathrate cages, across the C++ engine, the C API and PydSEAMSlib. `scripts/gen_ring_oracle_cells.py` regenerates the ice II and III cells from GenIce2.
 - The stable C API (`seams_rings_from_csr`, `seams_rings_winding`) and the language ABI (`seams_graph_rings`, `seams_frame_ring_winding`) find primitive rings in a caller CSR graph. Directed edges are symmetrized, and with a periodic frame each ring reports its oriented winding along a cell axis and whether it is contractible.
 - The stable C API (`seams_tetrahedral_order`, `seams_lsi`) and the language ABI (`seams_frame_tetrahedral`, `seams_frame_lsi`) compute Errington-Debenedetti tetrahedral order and the Shiratani-Sasai Local Structure Index for independent centre and partner selections. The four-nearest and cutoff-shell conventions are explicit, and a centre whose shell is too small gets NaN.
 
@@ -23,6 +24,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- `primitive::countAllRingsFromIndex` with `removeNonSPrings` lists each ring once when a neighbour row repeats a partner, and no longer reads past an empty row. It now returns the same ring set as `primitive::ringNetwork`, which already dropped repeats.
+- `seams_rings_labels` and `seams_rings_labels_n` now label every six-ring of ideal ice Ih as a hexagonal-cage face (N/2 basal, 3N/2 prismatic) on the cutoff graph of an orthorhombic box. The label pass rebuilt its neighbour rows from the cutoff CSR without the leading self entry that the cage and prism tests skip, so each atom lost one bond: 668 of the 8192 six-rings of a 4096-molecule ice Ih cell came back as plain `SEAMS_RING_HEXAGON`, and prism labels read the same short rows. Triclinic frames and the mutual graph were not affected.
 - The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
 - Mutual and seeded graphs in the language bindings keep a pair only when its minimum-image distance is strictly inside the cutoff plus 1.5 Å. `kNearestNeighbourList` and `kNearestNeighbourPair` take that length only as a cell-size hint, and `pairs_within` applies the distance test in `bond_list`, on the mutual chordless graph, and on the seeded cage graphs.

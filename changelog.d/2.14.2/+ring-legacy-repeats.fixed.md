@@ -1,0 +1,1 @@
+`primitive::countAllRingsFromIndex` with `removeNonSPrings` lists each ring once when a neighbour row repeats a partner, and no longer reads past an empty row. It now returns the same ring set as `primitive::ringNetwork`, which already dropped repeats.
