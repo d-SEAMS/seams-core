@@ -106,16 +106,48 @@ constexpr int kParallelRowsMinAtoms = 4096;
 // linkcell's mesh limit instead of one cell per cutoff width.
 constexpr double kAtomsPerLinkcellCell = 20.0;
 
-double openVolume(const std::vector<double> &xyz, double floor) {
+//! Volume of the Cartesian extent linkcell bins on a cell with an open
+//! axis: the kept atoms, folded into the box along the periodic axes
+//! only, so an open axis spans wherever its atoms are. Each side is at
+//! least @a floor.
+double binnedVolume(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const std::vector<double> &xyz, const std::vector<int> &mask,
+                    const std::array<bool, 3> &periodic, double floor) {
+  const bool anyPeriodic = periodic[0] || periodic[1] || periodic[2];
+  double H[3][3] = {};
+  double origin[3] = {};
+  if (anyPeriodic) {
+    nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, H, origin);
+  }
+  double lo[3];
+  double hi[3];
+  for (std::size_t axis = 0; axis < 3; ++axis) {
+    lo[axis] = std::numeric_limits<double>::infinity();
+    hi[axis] = -lo[axis];
+  }
+  for (std::size_t i = 0; 3 * i < xyz.size(); ++i) {
+    if (!mask.empty() && mask[i] == 0) {
+      continue;
+    }
+    double r[3] = {xyz[3 * i], xyz[3 * i + 1], xyz[3 * i + 2]};
+    if (anyPeriodic) {
+      double s[3];
+      nneigh::dumpToFrac(H, origin, r[0], r[1], r[2], s);
+      for (std::size_t axis = 0; axis < 3; ++axis) {
+        if (periodic[axis]) {
+          s[axis] -= std::floor(s[axis]);
+        }
+      }
+      nneigh::dumpFromFrac(H, origin, s, r);
+    }
+    for (std::size_t axis = 0; axis < 3; ++axis) {
+      lo[axis] = std::min(lo[axis], r[axis]);
+      hi[axis] = std::max(hi[axis], r[axis]);
+    }
+  }
   double volume = 1.0;
   for (std::size_t axis = 0; axis < 3; ++axis) {
-    double lo = std::numeric_limits<double>::infinity();
-    double hi = -lo;
-    for (std::size_t i = axis; i < xyz.size(); i += 3) {
-      lo = std::min(lo, xyz[i]);
-      hi = std::max(hi, xyz[i]);
-    }
-    volume *= std::max(hi - lo, floor);
+    volume *= std::max(hi[axis] - lo[axis], floor);
   }
   return volume;
 }
@@ -284,8 +316,9 @@ void nneigh::linkcellCutoffCsr(
                          std::count_if(mask.begin(), mask.end(), [](int v) { return v != 0; }));
   double hint = rcutoff;
   if (kept > 0) {
-    const double volume = anyPeriodic ? nneigh::dumpVolume(yCloud.box, yCloud.boxLow)
-                                      : openVolume(xyz, rcutoff);
+    const bool allPeriodic = periodic[0] && periodic[1] && periodic[2];
+    const double volume = allPeriodic ? nneigh::dumpVolume(yCloud.box, yCloud.boxLow)
+                                      : binnedVolume(yCloud, xyz, mask, periodic, rcutoff);
     if (std::isfinite(volume) && volume > 0.0) {
       hint = std::max(rcutoff,
                       std::cbrt(kAtomsPerLinkcellCell * volume / static_cast<double>(kept)));

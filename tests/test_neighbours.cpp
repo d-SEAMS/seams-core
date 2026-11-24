@@ -2110,6 +2110,43 @@ TEST_CASE("a tiny cutoff in a large box stays under the linkcell mesh limit",
   REQUIRE(rows.size() == static_cast<std::size_t>(cloud.nop));
 }
 
+TEST_CASE("a tiny cutoff on a mixed boundary sizes cells by the open-axis span",
+          "[neighbours][linkcell]") {
+  // The open axis is binned where the atoms are, not by the box. Cells
+  // sized from the 20 A box would be about 7 A, and 2e7 A of open axis
+  // at that edge is past linkcell's mesh limit.
+  constexpr double kSpan = 2.0e7;
+  for (std::size_t open : {std::size_t{2}, std::size_t{0}}) {
+    INFO("open axis " << open);
+    auto cloud = randomCloud(512, 20.0, 20.0, 20.0, 41);
+    cloud.box = {20.0, 20.0, 20.0};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+    std::mt19937_64 rng(43);
+    std::uniform_real_distribution<double> u(0.0, kSpan);
+    for (auto &p : cloud.pts) {
+      (open == 2 ? p.z : p.x) = u(rng);
+    }
+    for (std::size_t i = 0; i < 8; ++i) {
+      auto &a = cloud.pts[2 * i];
+      auto &b = cloud.pts[2 * i + 1];
+      b.x = a.x;
+      b.y = a.y;
+      b.z = a.z;
+      (open == 2 ? b.z : b.x) += 0.005;
+    }
+    std::array<bool, 3> periodic{true, true, true};
+    periodic[open] = false;
+    const double cutoff = 0.01;
+    linkcell::PairCsr csr;
+    for (bool half : {false, true}) {
+      nneigh::linkcellCutoffCsr(cloud, cutoff, half, periodic, {}, 1, csr);
+      const auto rows = csrRows(csr);
+      REQUIRE(rows == bruteImageRows(cloud, cutoff, periodic, half));
+      REQUIRE(rows[0] == std::vector<int>{1});
+    }
+  }
+}
+
 TEST_CASE("a tiny cutoff under a mask of flags other than one stays under the mesh limit",
           "[neighbours][linkcell]") {
   // Any nonzero flag keeps an atom, so the cells are sized by those atoms.
