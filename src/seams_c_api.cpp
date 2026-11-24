@@ -126,6 +126,7 @@ int writeQ4Q6(molSys::PointCloud<molSys::Point<double>, double> &cloud,
       chill::steinhardtQlCutoff(cloud, cutoff, 6, 1, q6bar != nullptr);
   if (static_cast<int>(a4.ql.size()) != cloud.nop ||
       static_cast<int>(a6.ql.size()) != cloud.nop) {
+    note_c_error("q4 and q6 do not cover every atom");
     return 1;
   }
   if (cloud.nop > 0) {
@@ -177,26 +178,27 @@ int seams_chill_plus_rule(const double *xyz, int n, const double *box,
                           double cutoff, const char *graph, const char *rule,
                           int *labels) {
   const seams::FairWidth fair;
-  if (xyz == nullptr || box == nullptr || labels == nullptr || n <= 0 ||
-      !(cutoff > 0.0)) {
-    return 1;
-  }
-  const std::string name =
-      (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
-  if (name != "cutoff" && name != "mutual") {
-    return 1;
-  }
-  if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
-    return 1;
-  }
-  try {
+  return reportErrors([&] {
+    if (xyz == nullptr || box == nullptr || labels == nullptr || n <= 0 ||
+        !(cutoff > 0.0)) {
+      note_c_error("xyz, box, labels and a positive cutoff are required");
+      return 1;
+    }
+    const std::string name =
+        (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
+    if (name != "cutoff" && name != "mutual") {
+      note_c_error("graph is cutoff or mutual");
+      return 1;
+    }
+    if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
+      note_c_error("box edges are not positive");
+      return 1;
+    }
     auto cloud = cloudFromXyz(xyz, n);
     cloud.box = {box[3], box[4], box[5]};
     cloud.boxLow = {box[0], box[1], box[2]};
     return chillLabels(cloud, cutoff, name, rule, labels);
-  } catch (const std::exception &) {
-    return 1;
-  }
+  });
 }
 
 namespace {
@@ -275,22 +277,25 @@ int seams_chill_plus_graph_lammps(const double *xyz, int n,
                                   const double *box9, double cutoff,
                                   const char *graph, int *labels) {
   const seams::FairWidth fair;
-  if (xyz == nullptr || box9 == nullptr || labels == nullptr || n <= 0 ||
-      !(cutoff > 0.0)) {
-    return 1;
-  }
-  const std::string name =
-      (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
-  if (name != "cutoff" && name != "mutual") {
-    return 1;
-  }
-  auto cloud = cloudFromXyz(xyz, n);
-  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
-                                    box9[2], box9[3], box9[4], box9[5],
-                                    box9[6], box9[7], box9[8])) {
-    return 1;
-  }
-  return chillLabels(cloud, cutoff, name, nullptr, labels);
+  return reportErrors([&] {
+    if (xyz == nullptr || box9 == nullptr || labels == nullptr || n <= 0 ||
+        !(cutoff > 0.0)) {
+      note_c_error("xyz, box, labels and a positive cutoff are required");
+      return 1;
+    }
+    const std::string name =
+        (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
+    if (name != "cutoff" && name != "mutual") {
+      note_c_error("graph is cutoff or mutual");
+      return 1;
+    }
+    auto cloud = cloudFromXyz(xyz, n);
+    if (!applyLammpsBox(cloud, box9)) {
+      note_c_error("box edges do not make a cell");
+      return 1;
+    }
+    return chillLabels(cloud, cutoff, name, nullptr, labels);
+  });
 }
 
 namespace {
@@ -591,34 +596,40 @@ int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
 int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
                 double *q4, double *q6, double *q4bar, double *q6bar) {
   const seams::FairWidth fair;
-  if (xyz == nullptr || box == nullptr || q4 == nullptr || q6 == nullptr ||
-      n <= 0 || !(cutoff > 0.0)) {
-    return 1;
-  }
-  if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
-    return 1;
-  }
-  auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
-  cloud.box = {box[3], box[4], box[5]};
-  cloud.boxLow = {box[0], box[1], box[2]};
-  return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+  return reportErrors([&] {
+    if (xyz == nullptr || box == nullptr || q4 == nullptr || q6 == nullptr ||
+        n <= 0 || !(cutoff > 0.0)) {
+      note_c_error("xyz, box, q4, q6 and a positive cutoff are required");
+      return 1;
+    }
+    if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
+      note_c_error("box edges are not positive");
+      return 1;
+    }
+    auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
+    cloud.box = {box[3], box[4], box[5]};
+    cloud.boxLow = {box[0], box[1], box[2]};
+    return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+  });
 }
 
 int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
                        double cutoff, double *q4, double *q6, double *q4bar,
                        double *q6bar) {
   const seams::FairWidth fair;
-  if (xyz == nullptr || box9 == nullptr || q4 == nullptr || q6 == nullptr ||
-      n <= 0 || !(cutoff > 0.0)) {
-    return 1;
-  }
-  auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
-  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
-                                    box9[2], box9[3], box9[4], box9[5],
-                                    box9[6], box9[7], box9[8])) {
-    return 1;
-  }
-  return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+  return reportErrors([&] {
+    if (xyz == nullptr || box9 == nullptr || q4 == nullptr || q6 == nullptr ||
+        n <= 0 || !(cutoff > 0.0)) {
+      note_c_error("xyz, box, q4, q6 and a positive cutoff are required");
+      return 1;
+    }
+    auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
+    if (!applyLammpsBox(cloud, box9)) {
+      note_c_error("box edges do not make a cell");
+      return 1;
+    }
+    return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+  });
 }
 
 
