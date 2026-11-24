@@ -1,0 +1,10 @@
+diff --git a/meson.build b/meson.build
+--- a/meson.build
++++ b/meson.build
+@@ -228,6 +228,7 @@ if get_option('with_tests')
+     cargo_prog,
+     args: ['test', '--manifest-path', _msproot / 'Cargo.toml'],
+     timeout: 300,
++    env: {'OMP_NUM_THREADS': '2'},
+   )
+ endif

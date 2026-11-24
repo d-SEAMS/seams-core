@@ -414,6 +414,8 @@ _sub_tests = ['with_tests=' + _sub_flag, 'with_examples=' + _sub_flag]
 _linkcell_opts = _sub_tests
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
+else
+  _linkcell_opts += ['with_gpulite=disabled']
 endif
 linkcell_dep = dependency('linkcell', version: '>=0.4.2', required: get_option('with_linkcell'),
                           fallback: ['linkcell', 'linkcell_dep'],

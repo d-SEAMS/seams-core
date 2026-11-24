@@ -1,0 +1,11 @@
+## scene-01.tape
+nop 250 hbonds 460
+
+# site-site
+# types 1 2 cutoff 4.5 cn 9.144 nI 500 nJ 250 volume 288324
+## scene-02.tape
+nop 250 graph cutoff hops 2 method nauty key 0a64fbb82d6cab5c classes 89 rings 3:37 4:273 5:34 6:167 7:0 top ff5e8d2643267332=106 1cdd256fe56f2020=9 3cb991ff74d132da=8 4d10d8be4e16a49c=8 9072ec56e32c859c=8
+
+contact-pair count 0 nCation 0 nAnion 250
+
+subset polar n 750 largest 750 P 1

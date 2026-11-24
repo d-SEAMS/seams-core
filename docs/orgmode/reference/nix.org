@@ -37,39 +37,32 @@ The only flake input is ~nixpkgs~ (~github:NixOS/nixpkgs/nixos-unstable~).
 
 From =nix/package.nix= (~pname = "seams"~, version set to the project version):
 
-| piece | this package |
-|-------+--------------|
-| Eigen | required, version at least 3.4 |
-| Highway | ~libhwy~, probed and linked when found |
-| OpenMP | ~dependency('openmp', required: false)~, then a link of a parallel region. Clang also gets ~llvmPackages.openmp~. NVIDIA uses ~-mp~ and skips that dependency |
-| GMP, MPFR | required by the test suite (~test_ozaki~) |
-| Catch2 3 | tests |
-| BLAS, LAPACK | present in the sandbox. ~with_blas~ is an auto feature, so it stays off and the libraries are not linked. No engine call uses them |
-| Meson flags | ~with_tests=true~, ~with_cli=true~, ~with_mpi=false~, ~with_openmp_offload=false~ |
-| ~mesonAutoFeatures~ | ~disabled~ |
+| on | Eigen, BLAS, LAPACK, Catch2 3, Highway, spglib, nauty, and the OpenBabel CSM program |
+| engines | LAMMPS, GROMACS, OpenMM, and PLUMED from nixpkgs |
+| neighbour geometry | vesin, linkcell, and minimage from fixed source archives |
+| OpenMP | ~dependency('openmp')~ probe; Clang also gets ~llvmPackages.openmp~ |
+| Meson flags | tests, CLI, packaged analysis and engine backends enabled; unavailable backends disabled |
 | wrap mode | ~nodownload~ (Meson setup hook) |
 
-The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
-=input=, =templates=, and the wraps =readcon-core.wrap=,
-=readcon-db.wrap=, =linkcell.wrap=, =minimage.wrap=, =vesin.wrap=,
-=subprojects/packagefiles=, and =bindings= (the C ABI in =bindings/cxx=).
+The fileset is =meson.build=, =meson_options.txt=, =src=, =include=,
+=tests=, =bindings=, =engines=, =bench=, =gpu_host_kernels=, =scripts=
+(including =scripts/dist_strip_vcs.py=), =examples=, =docs=, =input=,
+=templates=, =cmake=, =adapters=, =third_party=, the release files the suite reads, and the wraps
+=readcon-core.wrap=, =readcon-db.wrap=, =linkcell.wrap=,
+=minimage.wrap=, =vesin.wrap=, =subprojects/packagefiles=.
 
 * What stays off
 
-| option | why it stays off |
-|--------+------------------|
-| ~with_mpi~ | set to ~false~ |
-| ~with_openmp_offload~ | set to ~false~ |
-| linkcell, minimage, chemfiles, readcon-core, readcon-db, IRA, sphericart, nauty, spglib, gpulite | ~auto~ features. ~auto_features=disabled~ does not search them, and ~nodownload~ does not fetch the wraps |
-| vesin | probed with ~required: false~, and vesin is not a build input, so the sandbox probe misses |
+| ~with_mpi~ | ~false~ |
+| ~with_openmp_offload~ | ~false~ |
+| readcon-core, readcon-db | no package on this nixpkgs pin |
+| chemfiles, IRA, sphericart | no package on this nixpkgs pin |
 
-~seams --features~ on this package reports Highway SIMD enabled, and
-OpenMP enabled when the link probe succeeds. It reports vesin cutoff
-fallback, linkcell pairs_within, chemfiles, readcon-core, readcon-db,
-IRA/SOFI, spglib, sphericart, nauty, and MPI disabled. A vesin
-pkg-config file in the build sandbox would turn that probe on. The
-~auto~ features above stay off when the package is only present in
-nixpkgs.
+~seams --features~ on a flake build therefore reports Highway (and
+OpenMP when it linked), spglib, nauty, vesin, linkcell, and minimage as
+enabled. Chemfiles, readcon-core, IRA/SOFI, sphericart, and MPI stay
+disabled because this nixpkgs pin has no package for them or the option
+is intentionally off.
 
 * Front-end flakes
 

@@ -2,10 +2,12 @@
 # classifiers stay in libyodaLib.
 
 if get_option('with_tests')
+  _binding_reader_args = readcon_dep.found() ? ['-DSEAMS_BINDING_HAS_READCON=1'] : []
   binding_oracle = executable(
     'binding_oracle',
     files('../tests/binding_oracle.cpp'),
     dependencies: [yds_dep],
+    cpp_args: _binding_reader_args,
     build_rpath: meson.project_build_root() / 'src',
   )
 
@@ -14,7 +16,7 @@ if get_option('with_tests')
     files('../tests/test_seams_hpp.cpp'),
     link_with: seams_api_lib,
     include_directories: include_directories('../include'),
-    cpp_args: ['-I' + meson.project_build_root() / 'src'],
+    cpp_args: ['-I' + meson.project_build_root() / 'src'] + _binding_reader_args,
   )
 
   test(

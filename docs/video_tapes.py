@@ -164,8 +164,13 @@ def prepare(root, seams, libdir, langdir, build):
             wrapper.unlink()
         real = os.environ.get(var, "").strip()
         if real:
-            wrapper.write_text('#!/bin/sh\nexec {} "$@" {}\n'.format(real, link_line))
-            wrapper.chmod(0o755)
+            # A bare `gcc` on PATH would be this shim once it is installed.
+            resolved = real if os.path.isabs(real) else shutil.which(real)
+            if resolved:
+                wrapper.write_text(
+                    '#!/bin/sh\nexec {} "$@" {}\n'.format(shlex.quote(resolved), link_line)
+                )
+                wrapper.chmod(0o755)
     env = os.environ.copy()
     env["PATH"] = str(shim) + os.pathsep + env.get("PATH", "")
     env["NO_COLOR"] = "1"
@@ -346,6 +351,9 @@ def check_folder(folder, env, root, record, absent, version):
         print(folder.name, "scenes", len(recorded), "of", len(parsed), "ran")
         return
     got = "\n".join(recorded).rstrip() + "\n"
+    if folder.name == "migrate" and " method nauty " in got:
+        path = folder / "recorded-nauty.txt"
+        have = path.read_text() if path.is_file() else ""
     if record:
         path.write_text(got)
         have = got

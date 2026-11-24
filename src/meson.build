@@ -315,7 +315,11 @@ if get_option('with_tests')
   _capi_env = environment()
   _capi_env.set('SEAMS_SAMPLE', meson.project_source_root() / 'input' / 'traj' / 'agi_water_tiny.lammpstrj')
   _capi_env.set('SEAMS_XYZ', meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz')
-  _capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con')
+  # CON frames need the readcon reader. Setting the path without it makes
+  # the probe fail on a build that left the reader off.
+  if readcon_dep.found()
+    _capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con')
+  endif
   test('seams_c_api', seams_api_test, timeout: 180, env: _capi_env)
 
   # A small standalone C example: export hbond edges for a real fixture

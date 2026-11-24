@@ -113,8 +113,10 @@ def main(argv):
 
     env = os.environ.copy()
     env.pop("PKG_CONFIG_SYSROOT_DIR", None)
+    previous = env.get("PKG_CONFIG_PATH", "")
+    uninstalled = str(help_mod.meson_root(build) / "meson-uninstalled")
     tree_env = dict(env)
-    tree_env["PKG_CONFIG_PATH"] = str(help_mod.meson_root(build) / "meson-uninstalled")
+    tree_env["PKG_CONFIG_PATH"] = uninstalled + (os.pathsep + previous if previous else "")
     check("uninstalled", tree_env, None, build, source, work, version, vendored, help_mod)
 
     stage = base / "destdir"
@@ -126,7 +128,7 @@ def main(argv):
         raise SystemExit("install did not produce one seams-lang.pc")
     installed = stage / Path(help_mod.prefix_of(build)).relative_to("/")
     stage_env = dict(env)
-    stage_env["PKG_CONFIG_PATH"] = str(pc_files[0].parent)
+    stage_env["PKG_CONFIG_PATH"] = str(pc_files[0].parent) + (os.pathsep + previous if previous else "")
     stage_env["PKG_CONFIG_DISABLE_UNINSTALLED"] = "1"
     # A multiarch libdir makes pkg-config relocate prefix; name the staged one.
     define = "--define-variable=prefix=" + str(installed)

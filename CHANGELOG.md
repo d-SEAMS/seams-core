@@ -31,6 +31,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Precompute exact periodic minimum-image bond vectors via `gen::relDistFromPoint` in `chill::specializedChillPlus` so triclinic cells use full tilt-aware MIC instead of orthorhombic `mic1`, and clamp `dz / r` and zero-distance bonds in `y3`.
 - Refine triclinic displacements with exact Euclidean minimum-image reduction outside the Smith ball in `passTilt` (`src/cutoff_csr.cpp`) and in Steinhardt and CHILL/CHILL+ bond-vector kernels (`src/steinhardt_parallel.cpp`, `src/bop.cpp`), and use `floor` for fallback cell counts in `orthoChill`.
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
+- The Nix package source includes `scripts/dist_strip_vcs.py`, which Meson reads when it finds Python. The development shell does not include Snakemake, which depends on the broken `stopit` package.
 - The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
 - The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
 - The science tutorial check has a 600 s timeout and runs serially in AddressSanitizer builds.
