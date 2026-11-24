@@ -448,8 +448,11 @@ A range (~--last~ > ~--frame~) dispatches by suffix. LAMMPS dumps use
 ~sinp::forEachLammpsFrame~, with one handle per OpenMP worker and
 deterministic output order. XYZ is a single-frame input and emits frame 1
 at most. Chemfiles and readcon inputs are read serially until the requested
-range or the first missing frame. ~--jobs 1~ is serial; non-LAMMPS readers
-do not use OpenMP workers.
+range or the first missing frame. The first requested frame of a
+~.pdb~, ~.gro~, ~.dcd~, or ~.con~ range is an error when it is empty,
+and so is a path that is missing, a directory, or not readable:
+the CLI exits 2 and prints ~cannot read PATH~. ~--jobs 1~ is serial;
+non-LAMMPS readers do not use OpenMP workers.
 
 A serial range carries rings and cage affiliation from one frame to the
 next: ~primitive::RingUpdater~ and ~ring::AffiliationUpdater~ recompute only

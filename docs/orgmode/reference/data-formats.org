@@ -60,8 +60,10 @@ seeded hexagonal 0 cubic 0 both 0 water 0~. ~--graph~ replaces
 ~seeded~. With ~--signature~, each signature prints ~nop 0 graph
 seeded signature SPEC cages 0 atoms 0~.
 ~seams read~ on a missing dump prints ~nop 0~ and returns 0.
-A missing ~.con~ path makes the CLI throw ~cannot read PATH~.
-A ~.pdb~, ~.gro~, or ~.dcd~ path on a build without chemfiles throws
+A missing, empty, or unreadable ~.pdb~, ~.gro~, ~.dcd~, or ~.con~
+path, including a directory, makes the CLI throw ~cannot read PATH~
+and exit 2. A type filter that keeps no atoms does the same. A
+~.pdb~, ~.gro~, or ~.dcd~ path on a build without chemfiles throws
 ~chemfiles is not in this build~.
 
 ~sinp::nLammpsFrames~ is ~0~ when the file cannot be read.
@@ -69,8 +71,8 @@ A ~.pdb~, ~.gro~, or ~.dcd~ path on a build without chemfiles throws
 when ~first > last~. The CLI prints the frames it ran, in the
 requested order. XYZ is one frame: a range that starts after frame 1
 prints nothing. chemfiles and readcon walk in order on one open
-file and stop at the first empty cloud after the first requested
-frame.
+file. An empty first requested frame makes the CLI throw
+~cannot read PATH~. A later empty cloud stops the walk.
 
 * LAMMPS dump
 
@@ -248,8 +250,10 @@ Orthorhombic angles (90 degrees) store three lengths and an origin
 at zero. A shear stores spans plus ~xy xz yz~, and ~boxLow~ shifts
 with a negative tilt. Frame ~N~ is the Nth record. An index below 1,
 a missing record, or a file readcon cannot open returns an empty
-cloud, with ~currentFrame~ left at 0. ~seams read~ on a missing
-record prints ~nop 0 frame 0~ and returns 0. The CLI does not
+cloud, with ~currentFrame~ left at 0. A single-frame ~seams read~
+of a missing record, or of a file that cannot be opened, throws
+~cannot read PATH~ and exits 2. A range that has already read a
+frame stops at the next empty record. The CLI does not
 type-filter ~.con~.
 
 A flake build leaves readcon-core off: auto features are disabled

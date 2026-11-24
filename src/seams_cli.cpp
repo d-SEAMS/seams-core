@@ -32,6 +32,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -42,6 +43,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -94,6 +96,34 @@ bool chemfilesSuffix(std::string_view ext) {
          ext == "trr" || ext == "nc";
 }
 
+// readCon and readChemfiles print an open error and return an empty cloud.
+// A missing or unreadable PDB, GRO, DCD, or CON path has to fail the
+// command, or `seams read` exits 0 with nop 0. file_exists is not enough:
+// a mode-000 file exists and still cannot be opened. ifstream is not
+// enough either: open(2) on a directory returns a descriptor, and the
+// stream then reports success.
+bool opensForRead(const std::string &path) {
+  std::error_code ec;
+  if (!std::filesystem::is_regular_file(path, ec) || ec) {
+    return false;
+  }
+  std::ifstream in(path, std::ios::binary);
+  return static_cast<bool>(in);
+}
+
+void requireReadable(const std::string &path) {
+  if (!opensForRead(path)) {
+    throw std::runtime_error("cannot read " + path);
+  }
+}
+
+Cloud rejectEmpty(const std::string &path, Cloud cloud) {
+  if (cloud.nop <= 0) {
+    throw std::runtime_error("cannot read " + path);
+  }
+  return cloud;
+}
+
 Cloud load(const std::string &path, int frame, int typeI,
            const sinp::ChemfilesLoadOptions &options = {}) {
   Cloud cloud;
@@ -103,24 +133,21 @@ Cloud load(const std::string &path, int frame, int typeI,
   }
   if (ext == "con") {
 #ifdef SEAMS_HAS_READCON
-    // readCon prints an open error and returns an empty cloud. A missing
-    // path has to fail the command, or the CLI reports success.
-    if (!gen::file_exists(path)) {
-      throw std::runtime_error("cannot read " + path);
-    }
-    return sinp::readCon(path, frame, cloud);
+    requireReadable(path);
+    return rejectEmpty(path, sinp::readCon(path, frame, cloud));
 #else
     throw std::runtime_error("readcon-core is not in this build; CON input needs it");
 #endif
   }
   if (chemfilesSuffix(ext)) {
 #ifdef SEAMS_HAS_CHEMFILES
+    requireReadable(path);
     const int filter = typeI < 0 ? -1 : (typeI > 0 ? typeI : -1);
     sinp::ChemfilesRead request;
     request.frame = frame;
     request.typeFilter = filter;
     request.load = options;
-    return sinp::readChemfiles(path, cloud, request);
+    return rejectEmpty(path, sinp::readChemfiles(path, cloud, request));
 #else
     throw std::runtime_error("chemfiles is not in this build; " + ext + " input needs it");
 #endif
@@ -248,18 +275,34 @@ bool forEachInputFrame(const std::string &path, int first, int last,
     const int lastFrame = last;
     if (ext == "con") {
 #ifdef SEAMS_HAS_READCON
-      if (!gen::file_exists(path)) {
+      requireReadable(path);
+      // forEachConFrame catches exceptions thrown from this callback, so
+      // an empty first frame is recorded here and thrown after it returns.
+      bool stopped = false;
+      bool emptyFirst = false;
+      bool sawFrame = false;
+      const int start = std::max(1, first);
+      sinp::forEachConFrame(path, first, lastFrame,
+                            [&](int frame, Cloud &cloud) {
+                              if (stopped) {
+                                return;
+                              }
+                              if (cloud.nop <= 0) {
+                                if (frame == start) {
+                                  emptyFirst = true;
+                                }
+                                stopped = true;
+                                return;
+                              }
+                              sawFrame = true;
+                              fn(frame, cloud);
+                            });
+      // A reader that accepts the file and yields no frame, such as an
+      // empty GRO, never calls this callback. That first requested frame
+      // is empty.
+      if (emptyFirst || !sawFrame) {
         throw std::runtime_error("cannot read " + path);
       }
-      bool stopped = false;
-      sinp::forEachConFrame(path, first, lastFrame, [&](int frame, Cloud &cloud) {
-        if (stopped || (cloud.nop == 0 && frame != std::max(1, first))) {
-          stopped = true;
-          return;
-        }
-        fn(frame, cloud);
-        stopped = cloud.nop == 0;
-      });
       return true;
 #else
       throw std::runtime_error("readcon-core is not in this build; CON input needs it");
@@ -267,19 +310,33 @@ bool forEachInputFrame(const std::string &path, int first, int last,
     }
 #ifdef SEAMS_HAS_CHEMFILES
     {
+      requireReadable(path);
       const int filter = typeFilter > 0 ? typeFilter : -1;
       bool stopped = false;
+      bool emptyFirst = false;
+      bool sawFrame = false;
+      const int start = std::max(1, first);
       sinp::forEachChemfilesStep(path, first, lastFrame, filter, options,
-                                [&](int frame, Cloud &cloud) {
-                                  if (stopped ||
-                                      (cloud.nop == 0 &&
-                                       frame != std::max(1, first))) {
-                                    stopped = true;
-                                    return;
-                                  }
-                                  fn(frame, cloud);
-                                  stopped = cloud.nop == 0;
-                                });
+                                 [&](int frame, Cloud &cloud) {
+                                   if (stopped) {
+                                     return;
+                                   }
+                                   if (cloud.nop <= 0) {
+                                     if (frame == start) {
+                                       emptyFirst = true;
+                                     }
+                                     stopped = true;
+                                     return;
+                                   }
+                                   sawFrame = true;
+                                   fn(frame, cloud);
+                                 });
+      // A reader that accepts the file and yields no frame, such as an
+      // empty GRO, never calls this callback. That first requested frame
+      // is empty.
+      if (emptyFirst || !sawFrame) {
+        throw std::runtime_error("cannot read " + path);
+      }
       return true;
     }
 #endif
@@ -2946,7 +3003,13 @@ int main(int argc, char *argv[]) {
       return cmdDomains(os, cloud, cutoff, siteTable, domainKind);
     }
     if (cmd == "hbonds") {
-      Cloud hCloud = load(file, cloud.currentFrame, htype, loadOptions);
+      Cloud hCloud;
+      try {
+        hCloud = load(file, cloud.currentFrame, htype, loadOptions);
+      } catch (...) {
+        std::cerr << colorizer.error(exceptionText()) << "\n";
+        return 2;
+      }
       return cmdHbonds(os, cloud, hCloud, cutoff, typeI, hdist, hangle,
                        allDonors);
     }
