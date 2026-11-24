@@ -2648,7 +2648,7 @@ if get_option('with_tests')
   _abi_env = environment()
   # nm and abidiff inspect the library without loading its sanitizer runtime.
   _abi_env.set('LD_PRELOAD', '')
-  _abi_depends = [seams_api_lib]
+  _abi_depends = [seams_api_lib, seams_lang, ydslib]
   if _abidiff.found()
     _abi_env.set('SEAMS_ABIDIFF', _abidiff.full_path())
     _abi_env.set('SEAMS_ABI_DEBUG_LIB', seams_abi_lib.full_path())
