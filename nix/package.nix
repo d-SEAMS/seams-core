@@ -48,6 +48,9 @@
 }:
 
 let
+  lammpsWithPlugin = lammps.overrideAttrs (old: {
+    cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DPKG_PLUGIN=ON" ];
+  });
   # freud needs parsnip. The wheel's distribution name is parsnip_cif.
   py = python3.override {
     packageOverrides = self: super: {
@@ -163,50 +166,12 @@ stdenv.mkDerivation (finalAttrs: {
     else
       builtins.head (builtins.head matches);
 
-  src = lib.fileset.toSource {
-    root = ./..;
-    fileset = lib.fileset.unions [
-      ../meson.build
-      ../meson_options.txt
-      ../.gitignore
-      ../src
-      ../include
-      ../tests
-      ../bindings
-      ../engines
-      ../bench
-      ../gpu_host_kernels
-      ../scripts
-      ../examples
-      ../docs
-      ../input
-      ../templates
-      ../changelog.d
-      ../towncrier.toml
-      ../README.md
-      ../CHANGELOG.md
-      ../CITATION.cff
-      ../pixi.toml
-      ../llms.txt
-      ../recipe
-      ../data
-      ../benchmarks
-      ../analysis
-      ../Snakefile
-      ../cmake
-      ../adapters
-      ../extras
-      ../third_party
-      ../subprojects/readcon-core.wrap
-      ../subprojects/readcon-db.wrap
-      ../subprojects/linkcell.wrap
-      ../subprojects/minimage.wrap
-      ../subprojects/vesin.wrap
-      ../subprojects/packagefiles
-    ];
-  };
+  src = lib.cleanSource ../.;
 
   postPatch = ''
+    substituteInPlace tests/install_pydseamslib_if_missing.py \
+      --replace-fail /usr/bin/git ${git}/bin/git
+    patchShebangs --build scripts
     cp -R ${minimageSrc} subprojects/minimage
     cp -R ${linkcellSrc} subprojects/linkcell
     cp -R ${vesinSrc} subprojects/vesin
@@ -245,7 +210,7 @@ stdenv.mkDerivation (finalAttrs: {
       ps.openmm
     ]))
     openmpi
-    lammps
+    lammpsWithPlugin
     gromacs
     plumed
     rustc
@@ -263,7 +228,7 @@ stdenv.mkDerivation (finalAttrs: {
     spglib
     nauty
     openbabel
-    lammps
+    lammpsWithPlugin
     gromacs
     openmm
     plumed
