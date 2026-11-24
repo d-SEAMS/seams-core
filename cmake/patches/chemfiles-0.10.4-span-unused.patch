@@ -1,0 +1,23 @@
+# Copyright (c) d-SEAMS developers
+# Under NDEBUG, assert(size == 0) compiles out and span(std::nullptr_t,
+# size_type size) leaves size unused, failing -Werror -Wunused-parameter
+# under Clang 21 and Apple Clang. Omit the parameter name when NDEBUG is
+# defined while keeping the assertion in debug builds.
+diff --git a/include/chemfiles/external/span.hpp b/include/chemfiles/external/span.hpp
+index aebb6d1..4ea6e00 100644
+--- a/include/chemfiles/external/span.hpp
++++ b/include/chemfiles/external/span.hpp
+@@ -51,9 +51,13 @@ public:
+         assert(size() == 0);
+     }
+ 
++#ifdef NDEBUG
++    span(std::nullptr_t, size_type): begin_(nullptr), end_(nullptr) {}
++#else
+     span(std::nullptr_t, size_type size): begin_(nullptr), end_(nullptr) {
+         assert(size == 0);
+     }
++#endif
+ 
+     span(reference data): span(&data, 1) {}
+ 

@@ -687,6 +687,7 @@ else
                         'patches/chemfiles-0.10.4-gemmi-sources.patch',
                         'patches/chemfiles-0.10.4-external-sources.sh',
                         'patches/chemfiles-0.10.4-hostile.patch',
+                        'patches/chemfiles-0.10.4-span-unused.patch',
                         'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                         'CMakeLists.txt', 'ChemfilesDep.cmake']
         _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]

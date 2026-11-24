@@ -488,8 +488,9 @@ TEST_CASE("a VTF range past 200000 atoms is the structure it declares",
     const auto frame = trajectory.read();
     REQUIRE(frame.size() == static_cast<std::size_t>(kAtoms));
     REQUIRE(frame[0].name() == "O");
-    REQUIRE_THAT(frame.positions()[kAtoms - 1][0], Catch::Matchers::WithinAbs(1.0, 1e-6));
-    REQUIRE_THAT(frame.positions()[kAtoms - 1][2], Catch::Matchers::WithinAbs(3.0, 1e-6));
+    const std::size_t last = static_cast<std::size_t>(kAtoms - 1);
+    REQUIRE_THAT(frame.positions()[last][0], Catch::Matchers::WithinAbs(1.0, 1e-6));
+    REQUIRE_THAT(frame.positions()[last][2], Catch::Matchers::WithinAbs(3.0, 1e-6));
   }
   fs::remove_all(dir);
 }

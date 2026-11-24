@@ -1,0 +1,1 @@
+The vendored chemfiles `span.hpp` constructor omits its unused `size` parameter name under `NDEBUG` via `cmake/patches/chemfiles-0.10.4-span-unused.patch`, and `tests/ring_oracle.hpp`, `tests/test_ring_oracle.cpp` and `tests/test_chemfiles_hostile.cpp` cast signed indices to `std::size_t` or `std::ptrdiff_t`, so Clang 21 and GCC 15 builds pass with `-Dwerror=true`.

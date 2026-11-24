@@ -225,9 +225,10 @@ inline Adjacency cutoffGraph(const std::vector<double> &xyz, const double *box9,
           for (int c = -2; c <= 2; ++c) {
             double d2 = 0;
             for (int k = 0; k < 3; ++k) {
+              const std::size_t kk = static_cast<std::size_t>(k);
               const double dx = xyz[static_cast<std::size_t>(3 * j + k)] -
-                                xyz[static_cast<std::size_t>(3 * i + k)] + a * h[0][k] +
-                                b * h[1][k] + c * h[2][k];
+                                xyz[static_cast<std::size_t>(3 * i + k)] + a * h[0][kk] +
+                                b * h[1][kk] + c * h[2][kk];
               d2 += dx * dx;
             }
             best = std::min(best, d2);
