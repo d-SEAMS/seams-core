@@ -275,9 +275,9 @@ std::string forcedFormat(const std::string &filename) {
   if (ext == "cif") {
     return "CIF";
   }
-  // LAMMPS Data registers no extension (chemfiles FormatMetadata::extension
-  // is empty). The frame count and the frame read both pass this name.
-  if (extensionFold(ext, "lammpsdata")) {
+  // LAMMPS Data registers no extension. The frame count and frame read
+  // use the same explicit format for the two customary suffixes.
+  if (extensionFold(ext, "lammpsdata") || extensionFold(ext, "data")) {
     return "LAMMPS Data";
   }
   return "";
@@ -299,6 +299,11 @@ bool mmcifHasData(const std::string &filename) {
   return chunk.find("data_") != std::string::npos ||
          chunk.find("_atom_site") != std::string::npos ||
          chunk.find("_cell.") != std::string::npos;
+}
+
+bool isBlankTextFile(const std::string &filename) {
+  std::ifstream input(filename);
+  return input && (input >> std::ws).eof();
 }
 
 #ifdef SEAMS_CHEMFILES_PATCHED
@@ -1198,9 +1203,11 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
       }
       return cloud;
     }
-    // The automatic reader reports a rejected molfile frame as empty,
-    // matching the empty-range result from the trajectory reader.
-    if (isMolfileExtension(ext)) {
+    // These formats can describe topology without a readable coordinate
+    // frame. Report a rejected frame as empty, like a blank mmCIF file.
+    if (extensionFold(ext, "data") || extensionFold(ext, "tpr") ||
+        extensionFold(ext, "psf") || isMolfileExtension(ext) ||
+        (ext == "mmcif" && isBlankTextFile(filename))) {
       return cloud;
     }
     if (chemfilesError.empty()) {
