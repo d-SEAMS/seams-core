@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import capi_docs  # noqa: E402
 from toolchain import c_compiler, link_command  # noqa: E402
 
 
@@ -29,12 +30,16 @@ def resolve_page(page, root):
     major, minor, patch = meson_version(root)
     packed = (major << 16) | (minor << 8) | patch
     version = "{}.{}.{}".format(major, minor, patch)
+    values = {
+        "seams_version": packed,
+        "seams_version_major": major,
+        "seams_version_minor": minor,
+        "seams_version_patch": patch,
+        "seams_version_string": version,
+    }
     placeholders = {
-        "capi seams_version <number>": "capi seams_version {}".format(packed),
-        "capi seams_version_major <major>": "capi seams_version_major {}".format(major),
-        "capi seams_version_minor <minor>": "capi seams_version_minor {}".format(minor),
-        "capi seams_version_patch <patch>": "capi seams_version_patch {}".format(patch),
-        "capi seams_version_string <version>": "capi seams_version_string {}".format(version),
+        "capi {} {}".format(name, mark): "capi {} {}".format(name, values[name])
+        for name, mark in capi_docs.VERSION_PLACEHOLDERS.items()
     }
     missing = [key for key in placeholders if key not in page]
     if missing:
