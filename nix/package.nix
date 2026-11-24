@@ -53,10 +53,13 @@ let
   lammpsWithPlugin = lammps.overrideAttrs (old: {
     cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DPKG_PLUGIN=ON" ];
   });
-  bindingSource = name: rev: hash: fetchzip {
-    url = "https://codeload.github.com/d-SEAMS/${name}/tar.gz/${rev}";
-    extension = "tar.gz";
-    inherit hash;
+  bindingSource = name: rev: hash: {
+    inherit rev;
+    src = fetchzip {
+      url = "https://codeload.github.com/d-SEAMS/${name}/tar.gz/${rev}";
+      extension = "tar.gz";
+      inherit hash;
+    };
   };
   bindingSources = {
     PydSEAMSlib = bindingSource "PydSEAMSlib" "115f0ca9df37107c8ca824088b5d813fe41b2c3e"
@@ -200,8 +203,11 @@ stdenv.mkDerivation (finalAttrs: {
       --replace-fail /usr/bin/git ${git}/bin/git
     patchShebangs --build scripts
     mkdir -p docs/.cache/bindings
-    ${lib.concatStringsSep "\n" (lib.mapAttrsToList
-      (name: source: "ln -s ${source} docs/.cache/bindings/${name}") bindingSources)}
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: source: ''
+      mkdir -p docs/.cache/bindings/${name}
+      cp -R ${source.src}/. docs/.cache/bindings/${name}/
+      printf '%s\n' '${source.rev}' > docs/.cache/bindings/${name}/.seams-vendored-rev
+    '') bindingSources)}
     cp -R ${minimageSrc} subprojects/minimage
     cp -R ${linkcellSrc} subprojects/linkcell
     cp -R ${vesinSrc} subprojects/vesin
