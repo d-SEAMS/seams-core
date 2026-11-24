@@ -29,6 +29,7 @@
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -251,6 +252,17 @@ bool extensionFold(const std::string &ext, const char *want) {
     }
   }
   return true;
+}
+
+bool isMolfileExtension(const std::string &ext) {
+  const auto formats = chemfiles::formats_list();
+  return std::any_of(formats.begin(), formats.end(), [&](const auto &item) {
+    const auto &format = item.get();
+    return format.extension && (*format.extension)[0] == '.' &&
+           std::string_view(format.reference).find("/vmd/plugins/molfile/") !=
+               std::string_view::npos &&
+           extensionFold(ext, *format.extension + 1);
+  });
 }
 
 std::string forcedFormat(const std::string &filename) {
@@ -1184,6 +1196,11 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
         molSys::PointCloud<molSys::Point<double>, double> again;
         cloud = readLammpsTrjO(filename, frame, again, 1);
       }
+      return cloud;
+    }
+    // The automatic reader reports a rejected molfile frame as empty,
+    // matching the empty-range result from the trajectory reader.
+    if (isMolfileExtension(ext)) {
       return cloud;
     }
     if (chemfilesError.empty()) {
