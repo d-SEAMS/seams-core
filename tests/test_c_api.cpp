@@ -6,6 +6,8 @@
 #include <seams_input.hpp>
 
 #include <cmath>
+#include <limits>
+#include <string>
 #include <vector>
 
 TEST_CASE("seams_chill_plus labels a four-atom tetrahedron without crashing",
@@ -246,5 +248,34 @@ TEST_CASE("crowded diamond labels match the cutoff list", "[c_api]") {
   REQUIRE(full.size() == fast.size());
   for (int i = 0; i < cloud.nop; i++) {
     REQUIRE(fast[static_cast<std::size_t>(i)] == full[static_cast<std::size_t>(i)]);
+  }
+}
+
+TEST_CASE("C API neighbour calls report invalid coordinates instead of aborting",
+          "[c_api]") {
+  const double box[6] = {0, 0, 0, 20, 20, 20};
+  const double box9[9] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  const int n = 2;
+  int labels[2] = {-1, -1};
+  int species[2] = {-1, -1};
+  int degree[2] = {-1, -1};
+  for (const double x : {std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::infinity()}) {
+    double xyz[6] = {0.0, 0.0, 0.0, x, 0.0, 0.0};
+    INFO("x = " << x);
+    REQUIRE(seams_chill_plus_graph(xyz, n, box, 3.5, "cutoff", labels) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+
+    REQUIRE(seams_chill_plus_flat(xyz, n, box, labels) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+
+    REQUIRE(seams_chill_plus_species(xyz, n, box9, nullptr, nullptr, 0, 0, nullptr, 0,
+                                     3.5, "cutoff", species, nullptr, nullptr,
+                                     nullptr) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+
+    REQUIRE(seams_oxygen_cutoff_degree(xyz, n, box9, nullptr, nullptr, 0, 0, nullptr, 0,
+                                       3.5, degree) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
   }
 }
