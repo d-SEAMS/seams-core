@@ -40,7 +40,6 @@ meson setup _build_lib ${MESON_ARGS} \
   -Dwith_blas=disabled \
   -Dwith_chemfiles=disabled \
   "$readcon_opt" \
-  -Dwith_linkcell=disabled \
   -Dwith_minimage=disabled \
   -Dwith_gpulite=disabled \
   -Dwith_openmp_offload=disabled \

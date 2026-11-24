@@ -26,9 +26,7 @@
 #include <generic.hpp>
 #include <mol_sys.hpp>
 
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.hpp>
-#endif
 #ifdef SEAMS_HAS_MINIMAGE
 #include <minimage.h>
 #endif
@@ -43,8 +41,8 @@
  */
 
 /** @brief Functions for building neighbour lists.
- * This namespace contains functions that build neighbour lists (vesin
- * cell list, with a brute-force fallback), saving either the atom IDs
+ * This namespace contains functions that build neighbour lists (linkcell
+ * cutoff rows or k-nearest searches), saving either the atom IDs
  * or atom indices (according to a PointCloud) in a row-ordered vector
  * of vectors.
  * Whether the atom IDs or atom indices (i.e. the indices of the elements in the
@@ -250,7 +248,6 @@ inline bool setBoxFromLengthsAngles(std::vector<double> &box,
                               xy, xz, yz);
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 /// Map a LAMMPS dump box onto lc_cell.
 inline lc_cell lammpsBoxToLcCell(const std::vector<double> &box,
                                  const std::vector<double> &boxLow) {
@@ -328,36 +325,43 @@ inline void residentFrameCell(const double *box, const double *boxLow,
     frameLens = nullptr;
   }
 }
-#endif
+
+/// Cutoff rows of the cloud from linkcell's threaded CSR search, in
+/// cloud indices. Row `i` lists every `j != i` whose nearest image is
+/// strictly within @a rcutoff, once and ascending; @a half keeps `j > i`.
+/// An open axis of @a periodic takes no image, and a cloud with every
+/// axis open needs no box. A nonzero entry of @a mask keeps that atom;
+/// a masked atom has an empty row and is in no row. An empty mask keeps
+/// every atom. The search runs on @a threads Rayon workers, and the rows
+/// are the same at every width. @a out keeps its capacity between calls.
+/// Throws std::invalid_argument for a cutoff that is not finite and
+/// positive or a periodic axis without a box, and linkcell::Error for
+/// coordinates that are not finite.
+void linkcellCutoffCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                       double rcutoff, bool half, const std::array<bool, 3> &periodic,
+                       const std::vector<int> &mask, int threads, linkcell::PairCsr &out);
 
 //! All these functions use atom IDs and not indices
 
-//! Full neighbour list for pairs of type I and type J (vesin cell list,
-//! brute-force fallback). The neighbour list does not differentiate
-//! between the types of atoms
+//! Full neighbour list for pairs of type I and type J, from linkcell's
+//! cutoff rows. The neighbour list does not differentiate between the
+//! types of atoms
 std::vector<std::vector<int>> neighList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI, int typeJ);
 
 //! I-J neighbour list (I==J is like-type and reuses neighListO).
-//! Unlike-type pairs use the same dump MIC as neighListO.
+//! Unlike-type pairs come from the same linkcell rows as neighListO.
 std::vector<std::vector<int>> neighListPair(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI, int typeJ);
 
-//! Threaded cell-list neighbour rows. `rows[k]` holds the indices within
-//! `rcutoff` of `subset[k]` under the minimum image convention, ascending
-//! and without the atom itself. Atoms are binned in fractional coordinates
-//! of the recovered triclinic cell H; every axis needs at least three cells
-//! of perpendicular width `rcutoff`, so that the nearest image of every
-//! neighbour sits in one of the 27 surrounding cells. Returns false, with
-//! `rows` untouched, when the cell is too small for that, and the caller
-//! takes the vesin or brute-force path. Each row is built by one thread.
 //! Cutoff rows by atom ID, self first, for every atom or only the atoms
-//! marked in @a source. The cell counts and the row storage stay allocated
-//! on the calling thread and are refilled in place, so overlapping calls
-//! do not share them. The returned reference is valid on this thread until
-//! the next call on this thread. Same partners as neighListO for the rows
+//! marked in @a source; an unmarked atom's row is its own ID. Partners
+//! are in ascending atom ID. The row storage stays allocated on the
+//! calling thread and is refilled in place, so overlapping calls do not
+//! share it. The returned reference is valid on this thread until the
+//! next call on this thread. Same partners as neighListO for the rows
 //! that are filled.
 const std::vector<std::vector<int>> &reusedShellList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -379,13 +383,21 @@ bool blockWindowRows(
     const std::vector<char> *source, std::vector<std::vector<int>> &rows,
     bool byId = true, bool everyRow = false);
 
+//! Threaded cell-list neighbour rows. `rows[k]` holds the indices within
+//! `rcutoff` of `subset[k]` under the minimum image convention, ascending
+//! and without the atom itself. Atoms are binned in fractional coordinates
+//! of the recovered triclinic cell H; every axis needs at least three cells
+//! of perpendicular width `rcutoff`, so that the nearest image of every
+//! neighbour sits in one of the 27 surrounding cells. Returns false, with
+//! `rows` untouched, when the cell is too small for that. Each row is
+//! built by one thread.
 bool cellListRowsThreaded(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &subset, double rcutoff,
     std::vector<std::vector<int>> &rows);
 
-/// When set, neighListO stays on the one-thread builder even if the
-/// OpenMP team is wider. The team is left in place for the caller.
+/// When set, the cutoff lists search on one thread even if the OpenMP
+/// team is wider. The team is left in place for the caller.
 void preferSerialCutoff(bool on);
 
 /// Full cutoff list as CSR of cloud indices. Orthorhombic, or a
@@ -463,32 +475,23 @@ std::vector<std::vector<int>> idRowsFromCsr(
     const std::vector<int> &indexToID, const std::vector<int> &offsets,
     const std::vector<int> &cols);
 
-/// Index rows, self first, from a CSR of cloud indices.
-std::vector<std::vector<int>> indexRowsFromCsr(
-    int nop, const std::vector<int> &offsets, const std::vector<int> &cols);
-
-/// Half list by atom ID. The lower cloud index owns the pair.
-std::vector<std::vector<int>> halfIdRowsFromCsr(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<int> &indexToID, const std::vector<int> &offsets,
-    const std::vector<int> &cols);
-
-//! Full neighbour list for one type (threaded cell list from 2048 atoms
-//! when OpenMP is compiled, vesin cell list, brute-force fallback)
-//! You can only use this for neighbour lists with one type
+//! Full neighbour list for one type, from linkcell's cutoff rows. An atom
+//! of another type keeps a row of its own ID. Empty when the cloud has no
+//! box. You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> neighListO(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI);
 
-//! Cutoff rows from the threaded linkcell list. Empty when linkcell is not
-//! built or the call fails; the caller then uses neighListO. The width is
-//! the OpenMP team, and the OpenMP team is left running.
+//! neighListO's rows with the team narrowed to four threads below 4096
+//! atoms. Empty when the cloud has no box or no atom of @a typeI. The
+//! OpenMP team is left running at that width.
 std::vector<std::vector<int>> neighListLinkcell(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI);
 
-//! Half neighbour list for one type (vesin cell list, brute-force fallback)
-//! You can only use this for neighbour lists with one type
+//! Half neighbour list for one type, from linkcell's half rows: the lower
+//! cloud index owns the pair. You can only use this for neighbour lists
+//! with one type
 std::vector<std::vector<int>> halfNeighList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI = 1);
@@ -515,8 +518,8 @@ std::vector<std::vector<int>> getNewNeighbourListByIndex(
  *  graph is sparser, which starves accidental ring structure -- measured on
  *  the dense null, mutual scores zero false crystal where union reaches
  *  2.5%. Nominations are a periodic linked-cell k-nearest search via
- *  linkcell (Allen and Tildesley): vesin is cutoff-only and KD-trees
- *  have no minimum-image convention. candidateCutoff is only a
+ *  linkcell (Allen and Tildesley): KD-trees have no minimum-image
+ *  convention. candidateCutoff is only a
  *  cell-size hint: an empty hinted shell deliberately falls back to the
  *  whole periodic cell so a k-nearest query still returns the nearest
  *  available atoms.
@@ -606,7 +609,7 @@ BondGraph bondGraphFromName(const std::string &name);
 const char *bondGraphName(BondGraph graph);
 
 /** Persistent neighbour list with a LAMMPS skin.
- *  Vesin (or the brute-force fallback) builds candidates at cutoff+skin,
+ *  linkcell's half rows are the candidates at cutoff+skin,
  *  which is the ghost halo: periodic images already sit in that shell.
  *  The cell list is rebuilt only when some atom has moved more than
  *  skin/2 from the last rebuild, the Verlet trigger. The bond graph

@@ -106,13 +106,11 @@ TEST_CASE("readCon stores a sheared CON cell as the minimage dump box",
   REQUIRE_THAT(gen::periodicDist(cloud, 0, 1),
                Catch::Matchers::WithinAbs(0.0, 1e-6));
 
-#ifdef SEAMS_HAS_LINKCELL
   const lc_cell cell = nneigh::lammpsBoxToLcCell(cloud.box, cloud.boxLow);
   REQUIRE_THAT(cell.ax, Catch::Matchers::WithinAbs(15.3456, 1e-6));
   REQUIRE_THAT(cell.bx, Catch::Matchers::WithinAbs(xy, 1e-8));
   REQUIRE_THAT(cell.by, Catch::Matchers::WithinAbs(yy, 1e-6));
   REQUIRE_THAT(cell.cz, Catch::Matchers::WithinAbs(100.0, 1e-6));
-#endif
   std::filesystem::remove(path);
 }
 

@@ -6,6 +6,8 @@
 #include <seams_input.hpp>
 
 #include <cmath>
+#include <limits>
+#include <string>
 #include <vector>
 
 TEST_CASE("seams_chill_plus labels a four-atom tetrahedron without crashing",
@@ -246,5 +248,103 @@ TEST_CASE("crowded diamond labels match the cutoff list", "[c_api]") {
   REQUIRE(full.size() == fast.size());
   for (int i = 0; i < cloud.nop; i++) {
     REQUIRE(fast[static_cast<std::size_t>(i)] == full[static_cast<std::size_t>(i)]);
+  }
+}
+
+TEST_CASE("C API neighbour calls report invalid coordinates instead of aborting",
+          "[c_api]") {
+  const double box[6] = {0, 0, 0, 20, 20, 20};
+  const double box9[9] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  const int n = 2;
+  int labels[2] = {-1, -1};
+  int species[2] = {-1, -1};
+  int degree[2] = {-1, -1};
+  for (const double x : {std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::infinity()}) {
+    double xyz[6] = {0.0, 0.0, 0.0, x, 0.0, 0.0};
+    INFO("x = " << x);
+    REQUIRE(seams_chill_plus_graph(xyz, n, box, 3.5, "cutoff", labels) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+
+    REQUIRE(seams_chill_plus_flat(xyz, n, box, labels) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+
+    REQUIRE(seams_chill_plus_species(xyz, n, box9, nullptr, nullptr, 0, 0, nullptr, 0,
+                                     3.5, "cutoff", species, nullptr, nullptr,
+                                     nullptr) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+
+    REQUIRE(seams_oxygen_cutoff_degree(xyz, n, box9, nullptr, nullptr, 0, 0, nullptr, 0,
+                                       3.5, degree) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+  }
+}
+
+TEST_CASE("C API LAMMPS and rule CHILL+ calls report invalid coordinates",
+          "[c_api]") {
+  const double box[6] = {0, 0, 0, 20, 20, 20};
+  const double ortho9[9] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  const double tilt9[9] = {0, 0, 0, 20, 20, 20, 2, 1, 0.5};
+  const double good[6] = {1.0, 1.0, 1.0, 2.0, 1.0, 1.0};
+  const int n = 2;
+  int labels[2] = {-1, -1};
+  auto clearError = [&] {
+    REQUIRE(seams_chill_plus_graph(good, n, box, 3.5, "cutoff", labels) == 0);
+    REQUIRE(std::string(seams_c_error()).empty());
+  };
+  for (const double x : {std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::infinity()}) {
+    INFO("x = " << x);
+    double xyz[6] = {1.0, 1.0, 1.0, x, 1.0, 1.0};
+    for (const double *box9 : {ortho9, tilt9}) {
+      INFO("tilted " << (box9 == tilt9));
+      clearError();
+      REQUIRE(seams_chill_plus_graph_lammps(xyz, n, box9, 3.5, "cutoff", labels) != 0);
+      REQUIRE_FALSE(std::string(seams_c_error()).empty());
+    }
+    clearError();
+    REQUIRE(seams_chill_plus_rule(xyz, n, box, 3.5, "cutoff", "", labels) != 0);
+    REQUIRE_FALSE(std::string(seams_c_error()).empty());
+  }
+}
+
+TEST_CASE("C API q4/q6 calls report a neighbour search that fails", "[c_api]") {
+  // Past 2^31 full-list pairs the in-tree list declines and the cutoff
+  // rows come from linkcell, which rejects the coordinate that is not
+  // finite.
+  const int n = 46342;
+  const double box[6] = {0, 0, 0, 1, 1, 1};
+  const double box9[9] = {0, 0, 0, 1, 1, 1, 0, 0, 0};
+  const double good[6] = {1.0, 1.0, 1.0, 2.0, 1.0, 1.0};
+  const double wide[6] = {0, 0, 0, 20, 20, 20};
+  int labels[2] = {-1, -1};
+  std::vector<double> xyz(3 * static_cast<std::size_t>(n));
+  for (std::size_t i = 0; i < xyz.size(); ++i) {
+    xyz[i] = std::fmod(0.6180339887 * static_cast<double>(i), 1.0);
+  }
+  std::vector<double> q4(static_cast<std::size_t>(n));
+  std::vector<double> q6(q4.size());
+  std::vector<double> q4bar(q4.size());
+  std::vector<double> q6bar(q4.size());
+  auto clearError = [&] {
+    REQUIRE(seams_chill_plus_graph(good, 2, wide, 3.5, "cutoff", labels) == 0);
+    REQUIRE(std::string(seams_c_error()).empty());
+  };
+  for (const double x : {std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::infinity()}) {
+    INFO("x = " << x);
+    xyz[3] = x;
+    for (const bool bar : {false, true}) {
+      INFO("q-bar " << bar);
+      double *b4 = bar ? q4bar.data() : nullptr;
+      double *b6 = bar ? q6bar.data() : nullptr;
+      clearError();
+      REQUIRE(seams_q4_q6(xyz.data(), n, box, 3.5, q4.data(), q6.data(), b4, b6) != 0);
+      REQUIRE_FALSE(std::string(seams_c_error()).empty());
+      clearError();
+      REQUIRE(seams_q4_q6_lammps(xyz.data(), n, box9, 3.5, q4.data(), q6.data(), b4, b6) !=
+              0);
+      REQUIRE_FALSE(std::string(seams_c_error()).empty());
+    }
   }
 }

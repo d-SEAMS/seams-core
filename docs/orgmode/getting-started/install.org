@@ -22,10 +22,11 @@ An unpinned ~eigen~ package on that channel currently resolves to
 5.0.1. This release builds with Eigen 3.4. If pkg-config does not
 find ~eigen3~, Meson fetches the Eigen 3.4.0 wrap in the repository.
 
-A default setup fetches vesin, gpulite, linkcell, minimage,
-readcon-core, and readcon-db when those libraries are not already
-installed. linkcell, minimage, and the two readcon projects need the
-Rust toolchain above. When chemfiles is not already installed, setup
+A default setup fetches gpulite, linkcell, minimage, readcon-core,
+and readcon-db when those libraries are not already installed, and
+vesin for the neighbour tests. linkcell is the neighbour backend and is
+always built: ~-Dwith_linkcell=disabled~ is a configure error. linkcell,
+minimage, and the two readcon projects need the Rust toolchain above. When chemfiles is not already installed, setup
 builds it with CMake. LAMMPS dump and XYZ files still read through the
 native parsers when chemfiles is left out.
 

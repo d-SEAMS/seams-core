@@ -547,7 +547,6 @@ line is ~NAME: enabled~ or ~NAME: disabled~.
 | ~OpenMP~ | ~SEAMS_HAS_OPENMP~ |
 | ~MPI~ | ~SEAMS_HAS_MPI~ |
 | ~Highway SIMD~ | ~SEAMS_HAS_HWY~ |
-| ~vesin cutoff fallback~ | ~SEAMS_HAS_VESIN~ |
 | ~linkcell pairs_within~ | ~SEAMS_HAS_LINKCELL~ |
 | ~chemfiles~ | ~SEAMS_HAS_CHEMFILES~ |
 | ~readcon-core~ | ~SEAMS_HAS_READCON~ |

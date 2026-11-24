@@ -649,7 +649,6 @@ TEST_CASE("empty cloud k-nearest does not throw", "[neighbours]") {
   REQUIRE(both.second.empty());
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 TEST_CASE("LAMMPS dump bounds convert to lattice H",
           "[neighbours][linkcell]") {
   // Dump stores bound spans, not edge lengths. These bounds recover
@@ -701,7 +700,6 @@ TEST_CASE("sheared box k-nearest uses the periodic image",
   REQUIRE_THAT(gen::periodicDistSq(cloud, 0, 1),
                Catch::Matchers::WithinAbs(0.25, 1e-9));
 }
-#endif
 
 TEST_CASE("tilt dump cutoff list finds the a-image pair", "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
@@ -975,7 +973,6 @@ TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
   REQUIRE(rows(nneigh::halfNeighList(cutoff, cloud, 1)) == wantHalf);
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 TEST_CASE("residentFrameCell uses dump H when nBox is 6", "[neighbours]") {
   const double box[6] = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
   linkcell::Cell cell = linkcell::Cell::ortho(1.0, 1.0, 1.0);
@@ -996,7 +993,6 @@ TEST_CASE("residentFrameCell stays ortho for three lengths", "[neighbours]") {
   REQUIRE_THAT(cell.b[1], Catch::Matchers::WithinAbs(11.0, 1e-12));
   REQUIRE_THAT(cell.c[2], Catch::Matchers::WithinAbs(12.0, 1e-12));
 }
-#endif
 
 namespace {
 
@@ -1885,6 +1881,445 @@ TEST_CASE("a shell longer than the stash matches the brute-force cutoff", "[neig
     }
     REQUIRE(brute > 48);
     REQUIRE(offsets[static_cast<std::size_t>(i + 1)] - offsets[static_cast<std::size_t>(i)] == brute);
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+}
+
+namespace {
+
+std::uint64_t rowsDigest(const std::vector<std::vector<int>> &rows) {
+  std::uint64_t h = 1469598103934665603ull;
+  auto mix = [&](std::uint64_t v) {
+    h ^= v;
+    h *= 1099511628211ull;
+  };
+  mix(rows.size());
+  for (const auto &row : rows) {
+    mix(row.size());
+    for (int v : row) {
+      mix(static_cast<std::uint64_t>(v));
+    }
+  }
+  return h;
+}
+
+//! Squared distance of the nearest image of j to i, over every image
+//! within two cells along the periodic axes. Valid past half the box.
+double nearestImageSq(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                      int i, int j, const std::array<bool, 3> &periodic) {
+  double H[3][3] = {};
+  double origin[3] = {};
+  if (cloud.box.size() >= 3) {
+    nneigh::dumpBoundsToH(cloud.box, cloud.boxLow, H, origin);
+  }
+  const auto &a = cloud.pts[static_cast<std::size_t>(i)];
+  const auto &b = cloud.pts[static_cast<std::size_t>(j)];
+  const int reach[3] = {periodic[0] ? 2 : 0, periodic[1] ? 2 : 0, periodic[2] ? 2 : 0};
+  double best = std::numeric_limits<double>::infinity();
+  for (int na = -reach[0]; na <= reach[0]; ++na) {
+    for (int nb = -reach[1]; nb <= reach[1]; ++nb) {
+      for (int nc = -reach[2]; nc <= reach[2]; ++nc) {
+        const double dx = b.x - a.x + na * H[0][0] + nb * H[1][0] + nc * H[2][0];
+        const double dy = b.y - a.y + nb * H[1][1] + nc * H[2][1];
+        const double dz = b.z - a.z + nc * H[2][2];
+        best = std::min(best, dx * dx + dy * dy + dz * dz);
+      }
+    }
+  }
+  return best;
+}
+
+//! Rows of cloud indices, ascending, without self, from nearestImageSq.
+std::vector<std::vector<int>> bruteImageRows(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud, double cutoff,
+    const std::array<bool, 3> &periodic, bool half) {
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; ++i) {
+    for (int j = half ? i + 1 : 0; j < cloud.nop; ++j) {
+      if (j != i && nearestImageSq(cloud, i, j, periodic) < cutoff * cutoff) {
+        rows[static_cast<std::size_t>(i)].push_back(j);
+      }
+    }
+  }
+  return rows;
+}
+
+std::vector<std::vector<int>> csrRows(const linkcell::PairCsr &csr) {
+  std::vector<std::vector<int>> rows(csr.offsets.size() - 1);
+  for (std::size_t i = 0; i + 1 < csr.offsets.size(); ++i) {
+    rows[i].assign(csr.cols.begin() + csr.offsets[i], csr.cols.begin() + csr.offsets[i + 1]);
+  }
+  return rows;
+}
+
+molSys::PointCloud<molSys::Point<double>, double> randomCloud(int n, double lx, double ly,
+                                                             double lz, unsigned seed) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  std::mt19937_64 rng(seed);
+  std::uniform_real_distribution<double> u(0.0, 1.0);
+  for (int i = 0; i < n; ++i) {
+    molSys::Point<double> p;
+    p.type = 1 + (i % 3 == 0 ? 1 : 0);
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.x = lx * u(rng);
+    p.y = ly * u(rng);
+    p.z = lz * u(rng);
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = i;
+  }
+  cloud.nop = n;
+  cloud.currentFrame = 1;
+  return cloud;
+}
+
+std::vector<int> bruteKnnPacked(const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                                int k) {
+  const int n = cloud.nop;
+  std::vector<int> packed(static_cast<std::size_t>(n) * static_cast<std::size_t>(k), -1);
+  for (int i = 0; i < n; ++i) {
+    std::vector<std::pair<double, int>> dist;
+    for (int j = 0; j < n; ++j) {
+      if (i != j) {
+        dist.emplace_back(nearestImageSq(cloud, i, j, {true, true, true}), j);
+      }
+    }
+    std::sort(dist.begin(), dist.end());
+    const int take = std::min(k, static_cast<int>(dist.size()));
+    for (int t = 0; t < take; ++t) {
+      packed[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+             static_cast<std::size_t>(t)] = dist[static_cast<std::size_t>(t)].second;
+    }
+  }
+  return packed;
+}
+
+std::vector<int> threadWidths() {
+#ifdef SEAMS_HAS_OPENMP
+  return {1, 2, 8};
+#else
+  return {1};
+#endif
+}
+
+void setWidth(int width) {
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(width);
+#else
+  (void)width;
+#endif
+}
+
+} // namespace
+
+TEST_CASE("cutoff entry points keep the rows develop built", "[neighbours][linkcell]") {
+  // Digests of the rows the in-tree builders gave on develop 13e26c97,
+  // the same at one and eight threads. The linkcell rows have to be
+  // those bytes: same partners, same order, same self entry.
+  struct Want {
+    std::uint64_t full;
+    std::uint64_t half;
+    std::uint64_t index;
+  };
+  const struct {
+    const char *name;
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    Want want;
+  } cases[] = {
+      {"sheared 4096", shearedIce(8),
+       {0xad66965d5892eef9ull, 0xa1e773c82de3faf9ull, 0x9b707739aec69379ull}},
+      {"hexagonal 4096", hexIce(8),
+       {0x882e581977793a71ull, 0x017f54531508a399ull, 0x2bb91f7456b13219ull}},
+      {"sheared 110592", shearedIce(24),
+       {0xc1db08d2407deb79ull, 0xffab258f688a4099ull, 0x1697434ab75036f9ull}},
+      {"hexagonal 110592", hexIce(24),
+       {0x3f2057f2b42a5af1ull, 0xc37fc364ab8c2ed9ull, 0x36f4ee9046abde19ull}},
+  };
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+#endif
+  for (const auto &c : cases) {
+    for (int width : {1, 8}) {
+      setWidth(width);
+      INFO(c.name << " threads " << width);
+      REQUIRE(rowsDigest(nneigh::neighListO(3.5, c.cloud, 1)) == c.want.full);
+      REQUIRE(rowsDigest(nneigh::halfNeighList(3.5, c.cloud, 1)) == c.want.half);
+      REQUIRE(rowsDigest(nneigh::getNewNeighbourListByIndex(c.cloud, 3.5)) == c.want.index);
+      std::vector<std::vector<int>> refilled;
+      REQUIRE(nneigh::refillNeighListO(3.5, c.cloud, 1, refilled));
+      REQUIRE(rowsDigest(refilled) == c.want.full);
+      REQUIRE(nneigh::refillIndexRows(c.cloud, 3.5, refilled));
+      REQUIRE(rowsDigest(refilled) == c.want.index);
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+}
+
+TEST_CASE("cutoff builders reject an invalid cutoff and non-finite coordinates",
+          "[neighbours][linkcell]") {
+  auto cloud = makeFourAtomCloud();
+  REQUIRE_THROWS_AS(nneigh::neighListO(0.0, cloud, 1), std::invalid_argument);
+  REQUIRE_THROWS_AS(nneigh::halfNeighList(-1.0, cloud, 1), std::invalid_argument);
+  REQUIRE_THROWS_AS(nneigh::getNewNeighbourListByIndex(
+                        cloud, std::numeric_limits<double>::quiet_NaN()),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(
+      nneigh::neighListO(std::numeric_limits<double>::infinity(), cloud, 1),
+      std::invalid_argument);
+
+  cloud.pts[1].x = std::numeric_limits<double>::infinity();
+  REQUIRE_THROWS_AS(nneigh::neighListO(1.5, cloud, 1), linkcell::Error);
+  REQUIRE_THROWS_AS(nneigh::halfNeighList(1.5, cloud, 1), linkcell::Error);
+  REQUIRE_THROWS_AS(nneigh::getNewNeighbourListByIndex(cloud, 1.5), linkcell::Error);
+  REQUIRE_THROWS_AS(nneigh::neighListPair(1.5, cloud, 1, 2), linkcell::Error);
+}
+
+TEST_CASE("SkinNeighborList rejects a cloud without a box", "[neighbours][linkcell]") {
+  auto cloud = makeFourAtomCloud();
+  cloud.box.clear();
+  cloud.boxLow.clear();
+  nneigh::SkinNeighborList skin(1.5, 0.5, 1, nneigh::BondGraph::Cutoff);
+  REQUIRE_THROWS_AS(skin.update(cloud), std::invalid_argument);
+}
+
+TEST_CASE("a tiny cutoff in a large box stays under the linkcell mesh limit",
+          "[neighbours][linkcell]") {
+  // One cell per 0.01 A of a 20 A box is 8e9 cells, past linkcell's limit.
+  auto cloud = randomCloud(64, 20.0, 20.0, 20.0, 31);
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts[1].x = cloud.pts[0].x + 0.005;
+  cloud.pts[1].y = cloud.pts[0].y;
+  cloud.pts[1].z = cloud.pts[0].z;
+  auto loose = cloud;
+  loose.box.clear();
+  loose.boxLow.clear();
+  const double cutoff = 0.01;
+  linkcell::PairCsr csr;
+  for (bool half : {false, true}) {
+    nneigh::linkcellCutoffCsr(cloud, cutoff, half, {true, true, true}, {}, 1, csr);
+    REQUIRE(csrRows(csr) == bruteImageRows(cloud, cutoff, {true, true, true}, half));
+    nneigh::linkcellCutoffCsr(loose, cutoff, half, {false, false, false}, {}, 1, csr);
+    REQUIRE(csrRows(csr) == bruteImageRows(loose, cutoff, {false, false, false}, half));
+  }
+  const auto rows = nneigh::neighListPair(cutoff, cloud, 1, 2);
+  REQUIRE(rows.size() == static_cast<std::size_t>(cloud.nop));
+}
+
+TEST_CASE("a tiny cutoff on a mixed boundary sizes cells by the open-axis span",
+          "[neighbours][linkcell]") {
+  // The open axis is binned where the atoms are, not by the box. Cells
+  // sized from the 20 A box would be about 7 A, and 2e7 A of open axis
+  // at that edge is past linkcell's mesh limit.
+  constexpr double kSpan = 2.0e7;
+  for (std::size_t open : {std::size_t{2}, std::size_t{0}}) {
+    INFO("open axis " << open);
+    auto cloud = randomCloud(512, 20.0, 20.0, 20.0, 41);
+    cloud.box = {20.0, 20.0, 20.0};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+    std::mt19937_64 rng(43);
+    std::uniform_real_distribution<double> u(0.0, kSpan);
+    for (auto &p : cloud.pts) {
+      (open == 2 ? p.z : p.x) = u(rng);
+    }
+    for (std::size_t i = 0; i < 8; ++i) {
+      auto &a = cloud.pts[2 * i];
+      auto &b = cloud.pts[2 * i + 1];
+      b.x = a.x;
+      b.y = a.y;
+      b.z = a.z;
+      (open == 2 ? b.z : b.x) += 0.005;
+    }
+    std::array<bool, 3> periodic{true, true, true};
+    periodic[open] = false;
+    const double cutoff = 0.01;
+    linkcell::PairCsr csr;
+    for (bool half : {false, true}) {
+      nneigh::linkcellCutoffCsr(cloud, cutoff, half, periodic, {}, 1, csr);
+      const auto rows = csrRows(csr);
+      REQUIRE(rows == bruteImageRows(cloud, cutoff, periodic, half));
+      REQUIRE(rows[0] == std::vector<int>{1});
+    }
+  }
+}
+
+TEST_CASE("a tiny cutoff under a mask of flags other than one stays under the mesh limit",
+          "[neighbours][linkcell]") {
+  // Any nonzero flag keeps an atom, so the cells are sized by those atoms.
+  auto cloud = randomCloud(64, 20.0, 20.0, 20.0, 37);
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts[2].x = cloud.pts[0].x + 0.005;
+  cloud.pts[2].y = cloud.pts[0].y;
+  cloud.pts[2].z = cloud.pts[0].z;
+  std::vector<int> mask(static_cast<std::size_t>(cloud.nop), 0);
+  for (std::size_t i = 0; i < mask.size(); i += 2) {
+    mask[i] = i % 4 == 0 ? 2 : -1;
+  }
+  auto kept = cloud;
+  kept.pts.clear();
+  kept.idIndexMap.clear();
+  std::vector<int> keptIndex;
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (mask[static_cast<std::size_t>(i)] != 0) {
+      keptIndex.push_back(i);
+      kept.pts.push_back(cloud.pts[static_cast<std::size_t>(i)]);
+    }
+  }
+  kept.nop = static_cast<int>(kept.pts.size());
+  const double cutoff = 0.01;
+  linkcell::PairCsr csr;
+  for (bool half : {false, true}) {
+    nneigh::linkcellCutoffCsr(cloud, cutoff, half, {true, true, true}, mask, 1, csr);
+    const auto got = csrRows(csr);
+    const auto want = bruteImageRows(kept, cutoff, {true, true, true}, half);
+    REQUIRE(got[0] == std::vector<int>{2});
+    for (std::size_t k = 0; k < keptIndex.size(); ++k) {
+      std::vector<int> mapped;
+      for (int j : want[k]) {
+        mapped.push_back(keptIndex[static_cast<std::size_t>(j)]);
+      }
+      REQUIRE(got[static_cast<std::size_t>(keptIndex[k])] == mapped);
+    }
+    for (int i = 1; i < cloud.nop; i += 2) {
+      REQUIRE(got[static_cast<std::size_t>(i)].empty());
+    }
+  }
+}
+
+TEST_CASE("a cutoff past half a small triclinic cell keeps every image pair",
+          "[neighbours][linkcell][triclinic]") {
+  // 3.5 is more than half of every width of this cell, so one pair can
+  // meet through several images; the row lists the nearest one once.
+  auto cloud = randomCloud(40, 6.2, 6.4, 6.6, 11);
+  for (auto &p : cloud.pts) {
+    p.type = 1;
+  }
+  REQUIRE(nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.0, 0.0, 0.0, 6.2, 6.4,
+                                        6.6, 1.5, 1.0, -1.1));
+  const double cutoff = 3.5;
+  const auto full = bruteImageRows(cloud, cutoff, {true, true, true}, false);
+  const auto half = bruteImageRows(cloud, cutoff, {true, true, true}, true);
+  std::vector<std::vector<int>> wantIndex(full.size());
+  std::vector<std::vector<int>> wantFull(full.size());
+  std::vector<std::vector<int>> wantHalf(full.size());
+  for (std::size_t i = 0; i < full.size(); ++i) {
+    wantIndex[i] = {static_cast<int>(i)};
+    wantIndex[i].insert(wantIndex[i].end(), full[i].begin(), full[i].end());
+    wantFull[i] = {static_cast<int>(i) + 1};
+    for (int j : full[i]) {
+      wantFull[i].push_back(j + 1);
+    }
+    wantHalf[i] = {static_cast<int>(i) + 1};
+    for (int j : half[i]) {
+      wantHalf[i].push_back(j + 1);
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+#endif
+  for (int width : threadWidths()) {
+    setWidth(width);
+    INFO("threads " << width);
+    REQUIRE(nneigh::getNewNeighbourListByIndex(cloud, cutoff) == wantIndex);
+    REQUIRE(nneigh::neighListO(cutoff, cloud, 1) == wantFull);
+    REQUIRE(nneigh::halfNeighList(cutoff, cloud, 1) == wantHalf);
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+}
+
+TEST_CASE("linkcell CSR rows match brute force on open and mixed boundaries",
+          "[neighbours][linkcell]") {
+  const double cutoff = 2.4;
+  auto boxed = randomCloud(300, 12.0, 11.0, 10.0, 5);
+  boxed.box = {12.0, 11.0, 10.0};
+  boxed.boxLow = {0.0, 0.0, 0.0};
+  auto tilted = randomCloud(300, 12.0, 11.0, 10.0, 6);
+  REQUIRE(nneigh::setBoxFromLammpsEdges(tilted.box, tilted.boxLow, 0.0, 0.0, 0.0, 12.0,
+                                        11.0, 10.0, 2.0, -1.0, 1.5));
+  auto loose = randomCloud(300, 12.0, 11.0, 10.0, 7);
+  const std::array<std::array<bool, 3>, 4> layouts = {{{true, true, true},
+                                                       {false, false, false},
+                                                       {true, false, true},
+                                                       {false, true, false}}};
+  linkcell::PairCsr csr;
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+#endif
+  for (int width : threadWidths()) {
+    setWidth(width);
+    for (const auto *cloud : {&boxed, &tilted}) {
+      for (const auto &periodic : layouts) {
+        INFO("threads " << width << " periodic " << periodic[0] << periodic[1]
+                        << periodic[2] << " tilted " << (cloud == &tilted));
+        for (bool half : {false, true}) {
+          nneigh::linkcellCutoffCsr(*cloud, cutoff, half, periodic, {}, width, csr);
+          REQUIRE(csrRows(csr) == bruteImageRows(*cloud, cutoff, periodic, half));
+        }
+      }
+    }
+    INFO("threads " << width << " no box");
+    nneigh::linkcellCutoffCsr(loose, cutoff, false, {false, false, false}, {}, width, csr);
+    REQUIRE(csrRows(csr) == bruteImageRows(loose, cutoff, {false, false, false}, false));
+    REQUIRE_THROWS_AS(
+        nneigh::linkcellCutoffCsr(loose, cutoff, false, {true, false, false}, {}, width, csr),
+        std::invalid_argument);
+
+    std::vector<int> mask(static_cast<std::size_t>(boxed.nop), 0);
+    for (int i = 0; i < boxed.nop; ++i) {
+      mask[static_cast<std::size_t>(i)] = boxed.pts[static_cast<std::size_t>(i)].type == 1;
+    }
+    nneigh::linkcellCutoffCsr(boxed, cutoff, false, {true, true, true}, mask, width, csr);
+    auto want = bruteImageRows(boxed, cutoff, {true, true, true}, false);
+    for (int i = 0; i < boxed.nop; ++i) {
+      auto &row = want[static_cast<std::size_t>(i)];
+      if (mask[static_cast<std::size_t>(i)] == 0) {
+        row.clear();
+      }
+      row.erase(std::remove_if(row.begin(), row.end(),
+                               [&](int j) { return mask[static_cast<std::size_t>(j)] == 0; }),
+                row.end());
+    }
+    REQUIRE(csrRows(csr) == want);
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+}
+
+TEST_CASE("linkcell k-nearest nominations match the brute-force minimum image",
+          "[neighbours][linkcell][knn]") {
+  auto ortho = randomCloud(200, 12.0, 11.0, 10.0, 21);
+  ortho.box = {12.0, 11.0, 10.0};
+  ortho.boxLow = {0.0, 0.0, 0.0};
+  auto tilted = randomCloud(200, 12.0, 11.0, 10.0, 22);
+  REQUIRE(nneigh::setBoxFromLammpsEdges(tilted.box, tilted.boxLow, -1.0, 0.5, 0.0, 12.0,
+                                        11.0, 10.0, 3.4, -1.2, 2.1));
+  for (auto *cloud : {&ortho, &tilted}) {
+    for (auto &p : cloud->pts) {
+      p.type = 1;
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+#endif
+  for (int width : threadWidths()) {
+    setWidth(width);
+    for (const auto *cloud : {&ortho, &tilted}) {
+      for (int k : {1, 4, 12}) {
+        INFO("threads " << width << " k " << k << " tilted " << (cloud == &tilted));
+        std::vector<double> xyz;
+        std::vector<int> got;
+        nneigh::kNearestPacked(*cloud, k, 3.5, 1, xyz, got);
+        REQUIRE(got == bruteKnnPacked(*cloud, k));
+      }
+    }
   }
 #ifdef SEAMS_HAS_OPENMP
   omp_set_num_threads(saved);

@@ -186,7 +186,7 @@ endif
 
 ydslib = library('yodaLib',
   ydslib_sources,
-  dependencies: _deps + (linkcell_dep.found() ? [linkcell_dep] : []),
+  dependencies: _deps + [linkcell_dep],
   cpp_args: _args,
   link_with: _shell_link + _ylm_link,
   link_args: _lib_link_args,

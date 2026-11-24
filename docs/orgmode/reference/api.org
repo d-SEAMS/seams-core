@@ -126,8 +126,6 @@ A region that is already parallel does not fork again.
 | ~CutoffSkin::moved~ | Private. True when there is no previous list, or the atom count, the box, ~boxLow~, or any minimum-image displacement has changed by more than ~skin/2~. |
 | ~CutoffSkin::filter~ | Private. Copies the wide CSR down to pairs whose current squared minimum image is below ~cutoff~ squared. |
 | ~nneigh::idRowsFromCsr~ | ~vector<vector<int>> (const PointCloud&, const vector<int>& indexToID, const vector<int>& offsets, const vector<int>& cols)~. Atom-ID rows, self first. |
-| ~nneigh::indexRowsFromCsr~ | ~vector<vector<int>> (int nop, const vector<int>& offsets, const vector<int>& cols)~. Index rows, self first. |
-| ~nneigh::halfIdRowsFromCsr~ | ~vector<vector<int>> (const PointCloud&, const vector<int>& indexToID, const vector<int>& offsets, const vector<int>& cols)~. The lower cloud index owns the pair. |
 | ~chill::classifyBondsCsr~ | ~void (PointCloud&, const vector<int>& offsets, const vector<int>& cols, const BondClassifier& rule, bool isSlice = false)~. Bond labels ~c_ij~ from the CSR. |
 | ~chill::chillPlusFromCsr~ | ~int (PointCloud&, const vector<int>& offsets, const vector<int>& cols, bool keepBonds = true)~. Four nearest of each row, real ~l = 3~ harmonics, CHILL+ labels. Returns the cubic count. ~keepBonds~ false still writes ~iceType~ and skips the bond vectors. |
 | ~symm::diamondFromCsr~ | ~void (const PointCloud&, const vector<int>& offsets, const vector<int>& cols, vector<int>& kind)~. Cubic shell is 1, hexagonal is 0, stacking-disordered is 2, and anything else is -1. The CSR arguments stay so older callers keep the signature; the kernel builds the 3.5 Å shell itself. |

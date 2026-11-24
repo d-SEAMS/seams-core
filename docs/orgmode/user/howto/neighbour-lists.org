@@ -56,11 +56,10 @@ The call returns false when the box is not usable.
 Outside a parallel region the scratch stays allocated and is refilled
 on the next call. Inside one, the call uses a local scratch.
 
-~idRowsFromCsr~ and ~indexRowsFromCsr~ put the atom itself first and
-then the CSR partners, as atom ids or as cloud indices.
-~halfIdRowsFromCsr~ keeps the pair on the lower index.
-~neighListO~, ~halfNeighList~, and ~getNewNeighbourListByIndex~ build
-this CSR and then those rows.
+~idRowsFromCsr~ puts the atom itself first and then the CSR partners,
+as atom ids.
+~neighListO~, ~halfNeighList~, and ~getNewNeighbourListByIndex~ take
+their rows from linkcell's CSR instead.
 
 ~CutoffSkin~ builds candidates at ~cutoff + skin~.
 ~update~ calls ~moved~. That is true when the atom count, the box, the

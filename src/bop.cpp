@@ -23,9 +23,7 @@
 #include <neighbours.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
-#endif
 #include <ozaki.hpp>
 #include <ylm_batch.hpp>
 #include <algorithm>
@@ -2106,12 +2104,6 @@ bool chill::chillPlusPublishedCutoff(
       (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
     return orthoChill(yCloud, cutoff, typeI, false);
   }
-#ifndef SEAMS_HAS_LINKCELL
-  (void)yCloud;
-  (void)cutoff;
-  (void)typeI;
-  return false;
-#else
   const int n = yCloud.nop;
   if (n <= 0 || !(cutoff > 0.0) || yCloud.box.size() < 3) {
     return false;
@@ -2119,9 +2111,7 @@ bool chill::chillPlusPublishedCutoff(
   const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(n);
-#ifdef SEAMS_HAS_LINKCELL
   lc_set_threads(seams::poolFor(n));
-#endif
   const bool timing = std::getenv("SEAMS_CHILL_TIME") != nullptr;
   const auto t0 = std::chrono::steady_clock::now();
   struct Scratch {
@@ -2582,7 +2572,6 @@ bool chill::chillPlusPublishedCutoff(
               << " label_ms=" << ms(tY, tEnd) << "\n";
   }
   return true;
-#endif
 }
 
 /**

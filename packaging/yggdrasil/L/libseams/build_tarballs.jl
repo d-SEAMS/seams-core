@@ -33,16 +33,23 @@ const tag_sha = "e5b21f7fc8180a672248f797b0a5783cfb008540"
 # Meson's wrap resolver uses it directly and never needs network.
 const backward_cpp_tag_sha = "3bb9240cb15459768adb3e7d963a20e1523a6294"
 
+# The commit of the v0.6.0 tag subprojects/linkcell.wrap names. linkcell
+# is the neighbour backend and is always built; its meson.build drives cargo.
+const linkcell_sha = "216df974b3da24b1adfbb75971521dfbb52aac82"
+
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", tag_sha),
     GitSource("https://github.com/bombela/backward-cpp.git", backward_cpp_tag_sha;
                tag = "v1.6", unpack_target = "seams-core/subprojects/backward-cpp-1.6"),
     DirectorySource(joinpath(@__DIR__, "../../../../subprojects/packagefiles/backward-cpp");
                      target = "seams-core/subprojects/backward-cpp-1.6"),
+    GitSource("https://github.com/d-SEAMS/linkcell.git", linkcell_sha;
+              unpack_target = "seams-core/subprojects/linkcell"),
 ]
 
 # The engine core, its stable C API (libseams), and the C ABI of the R and
-# Julia packages (libseams_lang). Every optional backend is off: those come
+# Julia packages (libseams_lang). linkcell is always built from the source
+# above. Every optional backend is off: those come
 # from wraps that would be downloaded during the build, or from libraries
 # that have no JLL yet. with_backward stays on: the two extra sources
 # above pre-seed its subproject directory, so Meson finds a buildable
@@ -72,7 +79,6 @@ meson setup build \
     -Dwith_blas=disabled \
     -Dwith_chemfiles=disabled \
     -Dwith_readcon=disabled \
-    -Dwith_linkcell=disabled \
     -Dwith_minimage=disabled \
     -Dwith_spglib=disabled \
     -Dwith_sphericart=disabled \
@@ -121,5 +127,5 @@ dependencies = [
 # C++20 (<numbers>, <span>, std::from_chars on integers) needs GCC 12 and,
 # on macOS, LLVM 17.
 build_tarballs(ARGS, name, version, sources, script, platforms, products, dependencies;
-               julia_compat = "1.6", preferred_gcc_version = v"12",
+               julia_compat = "1.6", compilers = [:c, :rust], preferred_gcc_version = v"12",
                preferred_llvm_version = v"17")

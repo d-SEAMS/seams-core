@@ -9,8 +9,8 @@ package:
 
 source:
   # The build disables every subproject-backed backend except backward
-  # (see the two sources below) and takes Eigen from conda-forge, so the
-  # GitHub tag archive is most of the source.
+  # and linkcell (see the sources below) and takes Eigen from conda-forge,
+  # so the GitHub tag archive is most of the source.
   # sha256 is that of the v${{ version }} archive; fill it in after the tag.
   - url: https://github.com/d-SEAMS/seams-core/archive/refs/tags/v${{ version }}.tar.gz
     sha256: 0000000000000000000000000000000000000000000000000000000000000000
@@ -28,6 +28,12 @@ source:
     target_directory: subprojects/backward-cpp-1.6
   - path: ../subprojects/packagefiles/backward-cpp
     target_directory: subprojects/backward-cpp-1.6
+  # linkcell is the neighbour backend and is always built. This is the
+  # commit of the v0.6.0 tag subprojects/linkcell.wrap names; cargo
+  # fetches its crates.
+  - git: https://github.com/d-SEAMS/linkcell.git
+    rev: 216df974b3da24b1adfbb75971521dfbb52aac82
+    target_directory: subprojects/linkcell
 
 build:
   number: 0
@@ -38,6 +44,7 @@ requirements:
   build:
     - ${{ compiler('c') }}
     - ${{ compiler('cxx') }}
+    - ${{ compiler('rust') }}
     - ${{ stdlib('c') }}
     - meson >=1.3
     - ninja

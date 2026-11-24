@@ -1,10 +1,8 @@
 #include <gpu_batch.hpp>
 #include <seams_config.hpp>
 
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell_gpu.hpp>
 #include <neighbours.hpp>
-#endif
 
 #include <algorithm>
 #include <chrono>
@@ -650,7 +648,7 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
 #if !defined(SEAMS_HAS_GPULITE)
   out.error = "built without gpulite";
   return out;
-#elif !defined(SEAMS_HAS_LINKCELL) || !defined(LINKCELL_HAS_GPULITE)
+#elif !defined(LINKCELL_HAS_GPULITE)
   out.error = "linkcell device k-nearest not built";
   return out;
 #else

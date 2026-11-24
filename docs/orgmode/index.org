@@ -141,7 +141,7 @@ onto ~seams~.
 
    flowchart TD
      DUMP["LAMMPS dump and XYZ"] --> LIB[libyodaLib]
-     NB["linkcell or vesin"] --> LIB
+     NB["linkcell"] --> LIB
      LIB --> CLI[seams]
      LIB --> API[libseams]
      LIB --> ABI["libseams_lang<br/>Python, R, Julia"]
@@ -149,8 +149,8 @@ onto ~seams~.
 
 ~libyodaLib~ reads a LAMMPS dump or an XYZ file. chemfiles
 (~.pdb~, ~.gro~, ~.dcd~) and the ~.con~ reader are compiled in when
-those libraries are found. The cutoff neighbour list is linkcell when
-that library is built, and vesin otherwise. ~seams --features~ prints
+those libraries are found. The cutoff and k-nearest neighbour lists are
+linkcell's. ~seams --features~ prints
 which backends this binary has. The ~seams~ command, ~libseams~, and
 ~libseams_lang~ each link ~libyodaLib~. ~include/seams.hpp~ links
 ~libseams~. Python and Julia link both libraries. R links

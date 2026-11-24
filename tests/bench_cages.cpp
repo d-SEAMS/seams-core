@@ -197,8 +197,7 @@ int main(int argc, char **argv) {
         reps);
   }
 
-  std::cout << "backends   vesin=on"
-            << " sphericart=" << (seams::sphericart_ylm::available() ? "on" : "off")
+  std::cout << "backends   sphericart=" << (seams::sphericart_ylm::available() ? "on" : "off")
             << " nauty=" << (cage::nautyAvailable() ? "on" : "off")
             << " ira=" << (ira::available() ? "on" : "off") << "\n\n";
 

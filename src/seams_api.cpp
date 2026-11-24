@@ -1154,7 +1154,6 @@ seams_status seams_set_num_threads(int n) {
   const int saved = saved_omp_threads();
   omp_set_num_threads(n > 0 ? n : saved);
 #endif
-#ifdef SEAMS_HAS_LINKCELL
   int width = n;
   if (width <= 0) {
 #ifdef SEAMS_HAS_OPENMP
@@ -1164,9 +1163,6 @@ seams_status seams_set_num_threads(int n) {
 #endif
   }
   lc_set_threads(width);
-#else
-  (void)n;
-#endif
   clear_error();
   return SEAMS_OK;
   } catch (const std::bad_alloc &) {

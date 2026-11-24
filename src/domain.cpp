@@ -10,7 +10,6 @@
 #include <numeric>
 #include <unordered_map>
 
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
 // A library from before lc_owned_mask still links. The header's copy wins.
 extern "C" __attribute__((weak)) int lc_owned_mask(const int *nxyz, const int *assign, std::size_t ncell,
@@ -26,7 +25,6 @@ extern "C" __attribute__((weak)) int lc_owned_mask(const int *nxyz, const int *a
   (void)hit;
   return 1;
 }
-#endif
 
 #include <franzblau.hpp>
 #include <generic.hpp>
@@ -51,7 +49,6 @@ int cellAlong(double s, int n) {
   return std::min(n - 1, static_cast<int>(f * n));
 }
 
-#ifdef SEAMS_HAS_LINKCELL
 // Point-count cut of the periodic cell grid. Measured weights replace it
 // on the next call of the same analysis. The grid itself is reused.
 struct CountCut {
@@ -206,7 +203,6 @@ void linkcellSends(const Cloud &cloud, const Share &share, const std::vector<int
   }
 }
 #endif
-#endif
 
 } // namespace
 
@@ -339,14 +335,12 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
     return share;
   }
 
-#ifdef SEAMS_HAS_LINKCELL
   if (!gForceBlock && cloud.box.size() == 3 && buildCountCut(cloud, halo, nRanks)) {
     Share cut;
     if (shareFromAssign(cloud, rank, gCount.assign, cut)) {
       return cut;
     }
   }
-#endif
   const double w[3] = {b.wx, b.wy, b.wz};
   const BlockGrid grid = chooseGrid(nRanks, w, halo);
   int mineBlk[3];
@@ -929,11 +923,7 @@ Work &gatheredWork() {
 }
 
 void setCutMode(int mode) {
-#ifdef SEAMS_HAS_LINKCELL
   gCutMode = mode;
-#else
-  (void)mode;
-#endif
 }
 
 namespace {
@@ -1011,7 +1001,6 @@ void markInterior(const Work &work, double cutoff, std::vector<char> &interior) 
 }
 
 namespace {
-#ifdef SEAMS_HAS_LINKCELL
 // Heaviest block rank divided by the mean. The caller keeps the block
 // cut while this stays under 1.025.
 double blockLoadRatio(const std::vector<std::uint64_t> &weight, int nRanks, double halo) {
@@ -1152,7 +1141,6 @@ double cellGhostFraction(const Cloud &cloud, const std::vector<int> &assign, int
   }
   return worst;
 }
-#endif
 } // namespace
 
 Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
@@ -1193,7 +1181,6 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
     MPI_Comm graph = MPI_COMM_NULL;
   };
   static GraphCache byMode[2];
-#ifdef SEAMS_HAS_LINKCELL
   if (const char *forced = std::getenv("SEAMS_FORCE_CUT")) {
     if (std::strcmp(forced, "cell") == 0) {
       gCutMode = 2;
@@ -1271,17 +1258,11 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
                  useCell ? "cell" : "block", ratio, autoCell ? "cell" : "block", blockCost,
                  cellCost);
   }
-#else
-  const bool weighted = false;
-  const int epoch = 0;
-  const bool useCell = false;
-#endif
   GraphCache &cache = byMode[useCell ? 1 : 0];
   const bool reuse = cache.nop == cloud.nop && cache.nRanks == nRanks && cache.rank == rank &&
                      cache.halo == halo && cache.tag == workTag && cache.epoch == epoch;
   bool usedCut = false;
   if (!reuse) {
-#ifdef SEAMS_HAS_LINKCELL
     if (useCell) {
       const std::vector<int> &assign = weighted ? gMeasured[workTag].assign : gCount.assign;
       usedCut = shareFromAssign(cloud, rank, assign, work.share);
@@ -1291,9 +1272,6 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
       work.share = decompose(cloud, rank, nRanks, halo);
       gForceBlock = false;
     }
-#else
-    work.share = decompose(cloud, rank, nRanks, halo);
-#endif
     int nOwned = 0;
     for (const char flag : work.share.owned) {
       nOwned += flag ? 1 : 0;
@@ -1319,13 +1297,11 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
         MPI_UNWEIGHTED, cachedDegree,
         cache.nbrs.empty() ? nullptr : cache.nbrs.data(), MPI_UNWEIGHTED,
         MPI_INFO_NULL, 0, &cache.graph);
-#ifdef SEAMS_HAS_LINKCELL
     if (usedCut) {
       const std::vector<int> &assign =
           weighted ? gMeasured[workTag].assign : gCount.assign;
       linkcellSends(cloud, work.share, assign, cache.nbrs, cache.sendAt);
     } else
-#endif
     {
     const gen::FracBox box = gen::makeFracBox(cloud);
     const double w[3] = {box.wx, box.wy, box.wz};
@@ -1781,7 +1757,6 @@ int ownerOfFrame(const Cloud &cloud, int frame, const BlockGrid &grid) {
 } // namespace
 
 void captureLocalWork(int workTag, const double *perLocal, int nLocal, MPI_Comm comm) {
-#ifdef SEAMS_HAS_LINKCELL
   if (workTag <= 0 || workTag >= 5 || perLocal == nullptr || comm == MPI_COMM_NULL) {
     return;
   }
@@ -1829,21 +1804,10 @@ void captureLocalWork(int workTag, const double *perLocal, int nLocal, MPI_Comm 
   slot.parts = gCount.parts;
   slot.halo = gCount.halo;
   slot.ready = true;
-#else
-  (void)workTag;
-  (void)perLocal;
-  (void)nLocal;
-  (void)comm;
-#endif
 }
 
 bool measuredCutReady(int workTag) {
-#ifdef SEAMS_HAS_LINKCELL
   return workTag > 0 && workTag < 5 && gMeasured[workTag].ready;
-#else
-  (void)workTag;
-  return false;
-#endif
 }
 
 const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double cutoff,
@@ -1874,11 +1838,7 @@ const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double
   // gMeasured is the per-analysis cell weights from the first call. It is
   // declared with the linkcell cut; without that cut the block partition
   // stays in place and there is no slot to read.
-#ifdef SEAMS_HAS_LINKCELL
   const bool measure = !gMeasured[kWorkRings].ready;
-#else
-  const bool measure = false;
-#endif
   std::vector<double> sourceUs;
   if (measure) {
     sourceUs.assign(static_cast<std::size_t>(std::max(work.cloud.nop, 0)), 0.0);

@@ -29,9 +29,7 @@
 #include <omp.h>
 #endif
 
-#ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
-#endif
 
 extern "C" __attribute__((weak)) void lc_set_places(const int *cpus, int n) {
   (void)cpus;

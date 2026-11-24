@@ -60,31 +60,22 @@ It does not build ~yodaStruct~. The compiled Python module is
 
 * Cutoff list
 
-The cutoff list is every pair inside the distance cutoff. The full
-list, which the ~seams~ command builds, picks a builder from the build
-and from the OpenMP team.
+The cutoff list is every pair inside the distance cutoff.
+[[https://github.com/d-SEAMS/linkcell][linkcell]] builds it, and there
+is no other builder. ~lc_pairs_within_csr~ returns the rows as CSR,
+built on linkcell's threads and the same bytes at every width;
+seams-core maps them to atom IDs or cloud indices. That covers the
+full and half lists, orthorhombic and restricted triclinic boxes, and
+cutoffs past half the box. This repository asks for linkcell 0.6.0 or
+newer, and ~subprojects/linkcell.wrap~ pins the v0.6.0 tag. linkcell's
+release number is its own, and a seams-core release tag does not name
+it. ~libyodaLib~ links one copy and exports the ~lc_~ symbols.
 
-With several OpenMP threads, an orthorhombic box and a box that carries
-tilt terms are searched with the engine's cell list. A search that
-returns a list is the cutoff list. One thread does not run that search.
-~linkcell::pairs_within~ (~lc_pairs_within_rows~) is the builder when
-the cell list did not supply the pairs, the build includes linkcell,
-and the call succeeds. [[https://github.com/d-SEAMS/linkcell][linkcell]]
-is that library. This repository asks for linkcell 0.4.2 or newer.
-linkcell's release number is its own, and a seams-core release tag does not
-name it. ~libyodaLib~ links one copy and exports the ~lc_~ symbols.
-
-Vesin fills the list when it is built and linkcell produced nothing:
-linkcell is absent, or the linkcell call failed. When neither library
-produced a list, the search continues with a cell list and then a
-direct loop over pairs.
-
-~seams --features~ prints the compile-time backends. ~linkcell
-pairs_within~ and ~vesin cutoff fallback~ are two of those lines, each
-~enabled~ or ~disabled~, among OpenMP, MPI, readers, and the other
-optional libraries. The printout is the build. It does not name which
-builder ran for a frame. A linkcell failure prints ~trying the next
-cutoff list~. A vesin failure prints ~falling back to brute force~.
+A cutoff that is not finite and positive throws
+~std::invalid_argument~, and a coordinate that is not finite throws
+~linkcell::Error~. The C API returns nonzero with the message in
+~seams_c_error()~. ~seams --features~ prints the compile-time backends;
+~linkcell pairs_within~ is always ~enabled~.
 
 The bond graph is a separate choice. For ~seams cages~, ~--graph~ is
 ~cutoff~, ~knn~, ~knn-union~, or ~seeded~, and ~seeded~ is the default

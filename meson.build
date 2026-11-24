@@ -423,51 +423,32 @@ if gpulite_dep.found() and not gpulite_opt.disabled()
   _args += ['-DSEAMS_HAS_GPULITE=1']
 endif
 
+# vesin is a second cutoff list the neighbour tests check linkcell
+# against; the library does not link it.
 vesin_dep = dependency('vesin', required: false, fallback: ['vesin', 'vesin_dep'])
-if vesin_dep.found()
-  _deps += [vesin_dep]
-  _args += ['-DSEAMS_HAS_VESIN=1']
-endif
 
 # The wrapped linkcell and minimage register their own tests and example
 # checks; both follow this project's with_tests.
 _sub_flag = get_option('with_tests') ? 'true' : 'false'
 _sub_tests = ['with_tests=' + _sub_flag, 'with_examples=' + _sub_flag]
-_linkcell_opts = _sub_tests
+_linkcell_opts = _sub_tests + ['use_openmp=' + (openmp_found ? 'true' : 'false')]
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 else
   _linkcell_opts += ['with_gpulite=disabled']
 endif
-linkcell_dep = dependency('linkcell', version: '>=0.4.2', required: get_option('with_linkcell'),
+# Every neighbour list is linkcell's. 0.6.0 has the threaded CSR rows
+# (lc_pairs_within_csr) the cutoff lists are built from.
+if get_option('with_linkcell').disabled()
+  error('with_linkcell=disabled is no longer supported: linkcell is the neighbour backend')
+endif
+linkcell_dep = dependency('linkcell', version: '>=0.6.0', required: true,
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
-if linkcell_dep.found()
-  # Headers only; libyodaLib links the library (src/meson.build).
-  _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
-  _args += ['-DSEAMS_HAS_LINKCELL=1']
-  # 0.4.3 adds the fused CSR query and the stage runner. A 0.4.2
-  # library keeps the in-tree graph and the OpenMP stages. A subproject
-  # dependency cannot be passed to has_header_symbol, and its source tree
-  # sits under the top-level project's subprojects directory when
-  # seams-core is itself a subproject, so its version stands in for the
-  # probe.
-  if linkcell_dep.type_name() == 'internal'
-    _lc_csr = linkcell_dep.version().version_compare('>=0.4.3')
-    _lc_team = _lc_csr
-  else
-    _lc_csr = cppc.has_header_symbol('linkcell.h', 'lc_knearest_csr',
-                                     dependencies: linkcell_dep)
-    _lc_team = cppc.has_header_symbol('linkcell.h', 'lc_team_run',
-                                      dependencies: linkcell_dep)
-  endif
-  if _lc_csr
-    _args += ['-DSEAMS_HAS_LINKCELL_CSR=1']
-  endif
-  if _lc_team
-    _args += ['-DSEAMS_HAS_LINKCELL_TEAM=1']
-  endif
-endif
+# Headers only; libyodaLib links the library (src/meson.build).
+_deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
+# Always set: installed headers and consumers still test it.
+_args += ['-DSEAMS_HAS_LINKCELL=1']
 
 minimage_dep = dependency('minimage', version: '>=0.1.4', required: get_option('with_minimage'),
                           fallback: ['minimage', 'minimage_dep'],
@@ -1120,11 +1101,8 @@ if not nauty_opt.disabled()
 endif
 
 # Report which optional backends this build actually got. Each of these
-# degrades silently: without vesin the cutoff neighbour search falls
-# back to the brute-force path, without linkcell the k-nearest walk
-# uses the in-tree cell list, and without a reader the corresponding
-# formats are simply absent from the library, with nothing at run time
-# to say so.
+# degrades silently: without a reader the corresponding formats are
+# simply absent from the library, with nothing at run time to say so.
 summary({
   'BLAS/LAPACK': blas_backend,
   'SIMD distance kernel (hwy)': hwy_dep.found(),
@@ -1132,8 +1110,6 @@ summary({
   'MPI atom split (Steinhardt)': mpi_found,
   'OpenMP target offload': offload_enabled,
   'Device-resident batches (gpulite)': gpulite_dep.found() and not gpulite_opt.disabled(),
-  'Cutoff fallback (vesin)': vesin_dep.found(),
-  'Cutoff list (linkcell pairs_within)': linkcell_dep.found(),
   'Minimum-image wrap (minimage)': minimage_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': _chem_report,
   '.con reader (readcon-core)': readcon_dep.found(),

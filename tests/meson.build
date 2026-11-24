@@ -239,9 +239,10 @@ foreach name, src : test_sources
     _timeout = 300
   endif
   _exe = executable('test_' + name, src,
-    dependencies: [yds_dep, catch2_dep] + (name in _rang_names ? [rang_dep] : []),
+    dependencies: [yds_dep, catch2_dep] + (name in _rang_names ? [rang_dep] : []) +
+      (name == 'neighbours' and vesin_dep.found() ? [vesin_dep] : []),
     link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
-    cpp_args: _args,
+    cpp_args: _args + (name == 'neighbours' and vesin_dep.found() ? ['-DSEAMS_HAS_VESIN=1'] : []),
     link_args: _test_link_args,
     include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
     build_rpath: _test_rpath)
@@ -484,9 +485,6 @@ executable('bench_scaling', 'bench_scaling.cpp',
   build_rpath: '$ORIGIN/../src')
 
 _overhead_deps = [yds_dep]
-if vesin_dep.found()
-  _overhead_deps += [vesin_dep]
-endif
 executable('bench_overhead', 'bench_overhead.cpp',
   dependencies: _overhead_deps,
   cpp_args: _args,
@@ -693,14 +691,12 @@ executable('bench_stages', 'bench_stages.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
-if linkcell_dep.found()
-  executable('profile_knn', 'profile_knn.cpp',
-    dependencies: [yds_dep],
-    cpp_args: _args,
-    link_args: _test_link_args,
-    include_directories: _incdirs,
-    build_rpath: '$ORIGIN/../src')
-endif
+executable('profile_knn', 'profile_knn.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
 
 executable('walk_compare', 'walk_compare.cpp',
   dependencies: [yds_dep],
