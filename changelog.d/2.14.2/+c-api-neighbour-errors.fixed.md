@@ -1,0 +1,1 @@
+`seams_chill_plus_graph_lammps`, `seams_chill_plus_rule`, `seams_q4_q6` and `seams_q4_q6_lammps` return nonzero and set `seams_c_error()` when an argument is invalid or the neighbour search fails, instead of letting the exception leave the C call or returning without a message.
