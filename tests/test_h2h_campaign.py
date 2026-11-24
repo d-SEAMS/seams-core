@@ -165,11 +165,10 @@ def check_record():
     else:
         assert not prov["code_revision"]
         assert not prov["engine_tree"]
-        assert not prov["harness_blob"]
+        assert re.fullmatch(r"[0-9a-f]{40}", prov["harness_blob"]), prov["harness_blob"]
         prov.update({
             "code_revision": "0" * 40,
             "engine_tree": "1" * 40,
-            "harness_blob": "2" * 40,
         })
     assert "base_revision" in prov
     with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:
