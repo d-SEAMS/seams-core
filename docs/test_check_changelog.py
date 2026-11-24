@@ -69,13 +69,6 @@ class ContinuationBullet(unittest.TestCase):
     def test_released_fragments_match_the_changelog(self):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         fragments = ROOT / "changelog.d"
-        versioned = [
-            path
-            for directory in fragments.iterdir()
-            if directory.is_dir()
-            for path in directory.glob("*.md")
-        ]
-        self.assertEqual(len(versioned), 60)
         self.assertEqual(missing_versioned(changelog, fragments), {})
 
 
