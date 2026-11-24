@@ -211,6 +211,12 @@ typedef enum seams_graph {
   SEAMS_GRAPH_SEEDED = 2  /**< Mutual seeds with union completions, for cages only. */
 } seams_graph;
 
+/** @brief Neighbour convention for tetrahedral order. */
+typedef enum seams_tetrahedral_neighbours {
+  SEAMS_TETRAHEDRAL_NEAREST_FOUR = 0, /**< Four nearest selected partners; cutoff is ignored. */
+  SEAMS_TETRAHEDRAL_WITHIN_CUTOFF = 1 /**< Every selected partner at or inside cutoff. */
+} seams_tetrahedral_neighbours;
+
 /**
  * @brief Per-atom cage membership from the hexagonal and double-diamond search.
  *
@@ -1020,6 +1026,76 @@ SEAMS_API seams_status seams_q6bar(seams_system *sys, double cutoff, int type,
                                    double ice_cut, double *q6bar, size_t q6bar_len,
                                    double *mean, double *median, int *n_ice);
 
+/**
+ * @brief Errington-Debenedetti tetrahedral order for arbitrary selections.
+ *
+ * centres and partners contain zero-based frame indices. A NULL pointer with
+ * zero length selects every atom. A centre is excluded from its own partner
+ * shell. q = 1 - 9/(2 N (N-1)) sum_{j<k} (cos psi_jk + 1/3)^2 over the N
+ * shell neighbours: a perfect tetrahedron is 1 and an ideal gas averages 0.
+ * NEAREST_FOUR uses the four nearest selected partners, N = 4 and the
+ * Errington-Debenedetti factor 3/8, and ignores cutoff. WITHIN_CUTOFF uses
+ * every selected partner at or inside cutoff. In both modes a centre with
+ * fewer than four neighbours receives quiet NaN.
+ *
+ * @param sys Frame handle.
+ * @param centres Centre indices, or NULL when n_centres is zero.
+ * @param n_centres Centre count. Zero means every atom.
+ * @param partners Partner indices, or NULL when n_partners is zero.
+ * @param n_partners Partner count. Zero means every atom.
+ * @param convention One ::seams_tetrahedral_neighbours value. Any other
+ *        value returns ::SEAMS_ERR_ARG.
+ * @param cutoff Positive finite cutoff in WITHIN_CUTOFF mode; ignored in
+ *        NEAREST_FOUR mode.
+ * @param q Caller buffer, one value per selected centre.
+ * @param q_len Length of q.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle error slot.
+ * @par Ownership
+ * The caller owns every selection and output buffer.
+ * @par Thread safety
+ * Exclusive use of sys.
+ */
+SEAMS_API seams_status seams_tetrahedral_order(
+    seams_system *sys, const int *centres, size_t n_centres,
+    const int *partners, size_t n_partners, int convention, double cutoff,
+    double *q, size_t q_len);
+
+/**
+ * @brief Local Structure Index for arbitrary selections.
+ *
+ * Shiratani-Sasai index. For each centre, selected-partner distances are
+ * sorted, r_1 < ... < r_N <= cutoff < r_{N+1}. The result is the population
+ * variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the
+ * first partner beyond cutoff. A centre with no partner inside cutoff, or
+ * none beyond it, receives quiet NaN.
+ *
+ * @param sys Frame handle.
+ * @param centres Centre indices, or NULL when n_centres is zero.
+ * @param n_centres Centre count. Zero means every atom.
+ * @param partners Partner indices, or NULL when n_partners is zero.
+ * @param n_partners Partner count. Zero means every atom.
+ * @param cutoff Positive finite shell cutoff.
+ * @param lsi Caller buffer, one value per selected centre.
+ * @param lsi_len Length of lsi.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle error slot.
+ * @par Ownership
+ * The caller owns every selection and output buffer.
+ * @par Thread safety
+ * Exclusive use of sys.
+ */
+SEAMS_API seams_status seams_lsi(seams_system *sys, const int *centres,
+                                 size_t n_centres, const int *partners,
+                                 size_t n_partners, double cutoff, double *lsi,
+                                 size_t lsi_len);
+
 /** @} */
 
 /**
@@ -1057,6 +1133,38 @@ SEAMS_API seams_status seams_q6bar(seams_system *sys, double cutoff, int type,
  */
 SEAMS_API seams_status seams_rings_find(seams_system *sys, double cutoff, int type,
                                         int graph, int max_depth, seams_rings **out);
+
+/**
+ * @brief Primitive rings from an explicit caller-supplied CSR graph.
+ *
+ * offsets has n_vertices + 1 entries and starts at zero. columns contains
+ * zero-based vertex indices. Directed input is symmetrized by edge union;
+ * self edges and duplicates are ignored. The Franzblau search is the same
+ * implementation used by seams_rings_find(). geometry may be NULL. When
+ * supplied, its atom count must equal n_vertices and winding queries are
+ * enabled.
+ *
+ * @param offsets CSR offsets.
+ * @param offsets_len Number of offsets; at least one.
+ * @param columns CSR columns, or NULL when columns_len is zero.
+ * @param columns_len Number of columns.
+ * @param max_depth Largest ring size, from 3 through 12.
+ * @param geometry Optional frame supplying coordinates and periodic cell.
+ * @param out Receives a new ring handle.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Read-only access to geometry.
+ * @par Ownership
+ * The caller owns all arrays and frees *out with seams_rings_destroy().
+ * @par Thread safety
+ * Read-only calls may share geometry. The returned handle is independent.
+ */
+SEAMS_API seams_status seams_rings_from_csr(
+    const int *offsets, size_t offsets_len, const int *columns,
+    size_t columns_len, int max_depth, const seams_system *geometry,
+    seams_rings **out);
 
 /**
  * @brief Free a ring set.
@@ -1164,6 +1272,34 @@ SEAMS_API seams_status seams_rings_labels(const seams_rings *rings, int *sizes,
  */
 SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index,
                                             int *atoms, size_t cap, size_t *n_out);
+
+/**
+ * @brief Periodic-axis winding and contractibility of every ring.
+ *
+ * axis_winding receives the oriented integer winding along axis (0, 1, or
+ * 2): the minimum-image bond steps summed in the order seams_rings_vertices()
+ * lists the ring, in units of that cell vector. A ring that crosses the cell
+ * once along +x is +1 on axis 0; the reverse traversal is -1. contractible
+ * receives 1 exactly when all three winding components are zero. Either
+ * output may be NULL, but not both. Geometry must
+ * have been supplied to seams_rings_from_csr(), or carried by
+ * seams_rings_find().
+ * @param rings Ring handle.
+ * @param axis Periodic cell axis, 0, 1, or 2.
+ * @param axis_winding Signed winding output, or NULL.
+ * @param axis_winding_len Length of axis_winding.
+ * @param contractible One for a zero three-component winding, or NULL.
+ * @param contractible_len Length of contractible.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
+ *         ::SEAMS_ERR_RANGE.
+ * @par Ownership
+ * The caller owns both output buffers.
+ * @par Thread safety
+ * Read-only: may run alongside other const calls on rings.
+ */
+SEAMS_API seams_status seams_rings_winding(
+    const seams_rings *rings, int axis, int *axis_winding,
+    size_t axis_winding_len, int *contractible, size_t contractible_len);
 
 /**
  * @brief Chordless cycles of one size.

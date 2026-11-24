@@ -1,0 +1,1 @@
+The stable C API (`seams_rings_from_csr`, `seams_rings_winding`) and the language ABI (`seams_graph_rings`, `seams_frame_ring_winding`) find primitive rings in a caller CSR graph. Directed edges are symmetrized, and with a periodic frame each ring reports its oriented winding along a cell axis and whether it is contractible.

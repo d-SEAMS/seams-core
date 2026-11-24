@@ -9,13 +9,16 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <topo_bulk.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <queue>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 namespace {
@@ -240,6 +243,61 @@ TEST_CASE("length-2 shortcut is not a chord and is not a primitive ring", "[ring
   }
   const auto fromCsr = primitive::ringNetwork(offsets, cols, 6);
   REQUIRE(fromCsr == hop);
+}
+
+TEST_CASE("directed CSR is symmetrized before the primitive-ring search",
+          "[ring][csr]") {
+  const std::vector<int> offsets{0, 1, 2, 3, 4, 5, 6};
+  const std::vector<int> directed{1, 2, 3, 4, 5, 0};
+  const auto rings =
+      primitive::ringNetworkSymmetrized(offsets, directed, 6);
+  REQUIRE(rings == std::vector<std::vector<int>>{{0, 1, 2, 3, 4, 5}});
+  const auto histogram = primitive::ringSizeHistogram(rings, 6);
+  REQUIRE(histogram.size() == 7);
+  REQUIRE(histogram[6] == 1);
+
+  auto bad = directed;
+  bad[3] = 7;
+  REQUIRE_THROWS_AS(
+      primitive::ringNetworkSymmetrized(offsets, bad, 6),
+      std::invalid_argument);
+}
+
+TEST_CASE("ring winding is oriented along the traversal", "[ring][winding]") {
+  // A triangle at 1, 4, 7 in a cell of 9 steps +3 three times: one +L.
+  auto triangle = [](const std::array<double, 9> &xyz) {
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    cloud.box = {9.0, 9.0, 9.0};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+    for (int i = 0; i < 3; ++i) {
+      molSys::Point<double> p;
+      p.atomID = i;
+      p.x = xyz[static_cast<std::size_t>(3 * i)];
+      p.y = xyz[static_cast<std::size_t>(3 * i + 1)];
+      p.z = xyz[static_cast<std::size_t>(3 * i + 2)];
+      cloud.pts.push_back(p);
+      cloud.idIndexMap[i] = i;
+    }
+    cloud.nop = 3;
+    return cloud;
+  };
+  const std::vector<std::vector<int>> ring{{0, 1, 2}};
+  using Winding = std::array<int, 3>;
+  REQUIRE(ring::ringWindings(ring, triangle({1, 4, 4, 4, 4, 4, 7, 4, 4})) ==
+          std::vector<Winding>{{1, 0, 0}});
+  REQUIRE(ring::ringWindings(ring, triangle({7, 4, 4, 4, 4, 4, 1, 4, 4})) ==
+          std::vector<Winding>{{-1, 0, 0}});
+  REQUIRE(ring::ringWindings(ring, triangle({4, 1, 4, 4, 4, 4, 4, 7, 4})) ==
+          std::vector<Winding>{{0, 1, 0}});
+  const auto plain = triangle({2, 4, 4, 4, 4, 4, 3, 4, 4});
+  REQUIRE(ring::ringWindings(ring, plain) == std::vector<Winding>{{0, 0, 0}});
+  REQUIRE(ring::contractibleRings(ring, plain) == ring);
+  REQUIRE(ring::contractibleRings(
+              ring, triangle({1, 4, 4, 4, 4, 4, 7, 4, 4})).empty());
+
+  const auto index =
+      ring::buildRingSearchIndex(ring, triangle({1, 4, 4, 4, 4, 4, 7, 4, 4}));
+  REQUIRE(index.ringShift == std::vector<Winding>{{-1, 0, 0}});
 }
 
 TEST_CASE("antipode 0-1/4 hexagon is not primitive", "[ring]") {

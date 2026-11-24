@@ -31,11 +31,13 @@ seams_chill_plus_n
 seams_q4q6_n
 seams_ring_symmetry_name
 seams_rings_find
+seams_rings_from_csr
 seams_rings_destroy
 seams_rings_count
 seams_rings_histogram
 seams_rings_labels
 seams_rings_vertices
+seams_rings_winding
 seams_rings_chordless
 seams_rings_fraction
 seams_rings_nrings
@@ -65,6 +67,8 @@ seams_label_name
 seams_set_num_threads
 seams_get_num_threads
 seams_last_error_message
+seams_tetrahedral_order
+seams_lsi
 seams_brine_analyse
 seams_brine_destroy
 seams_brine_fronts

@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Fill return, ownership, and error lines on the API reference pages.
+"""Fill missing contract lines on the C and C++ API reference pages.
 
-Existing purpose, parameter, unit, and example lines stay. A placeholder
-purpose is replaced with the header's brief. New public symbols gain a
-section. Nothing outside the symbol block is removed.
+Existing purpose, parameter, unit, and example lines stay. On the C page,
+sections rendered from include/seams.h by docs/capi_docs.py keep their
+header fields and gain any missing Ownership, Errors, or Example lines,
+while non-function C symbols follow include/seams.h. On the C++ language
+ABI page, existing curated section order and Return, Ownership, and Error
+lines stay, and any missing or placeholder fields and new symbols are
+filled from bindings/cxx/seams_lang.h. Nothing outside the symbol block
+is removed.
 
 Only the C and C++ pages are written here. The binding repositories keep
 their own language references.
 """
 
+import argparse
+import difflib
 import re
+import sys
 from pathlib import Path
 
 import check_c_symbols
@@ -296,6 +304,153 @@ LUA_PURPOSE = {
 }
 
 
+def _cxx_comment(raw_blocks, name):
+    parts = []
+    for raw in raw_blocks:
+        if "@file" in raw:
+            continue
+        cleaned = _clean(raw)
+        cleaned = re.sub(r"@ingroup\s+\S+", "", cleaned)
+        cleaned = re.sub(r"@brief\s+", "", cleaned)
+        cleaned = " ".join(cleaned.split())
+        if cleaned and cleaned.rstrip(".") != name:
+            parts.append(cleaned)
+    text = " ".join(parts)
+    return _first_sentence(text) if text else ""
+
+
+def _cxx_contract(name, ret, args, comment):
+    ret = " ".join(ret.split())
+    params = _args(args)
+    param_text = "; ".join(params) if params else "none"
+    if ret == "void" and (name.endswith("_free") or name.endswith("_destroy")):
+        returns = "Nothing."
+        ownership = "Frees the caller-owned frame. A null pointer is a no-op."
+        errors = "None."
+        units = "handle"
+    elif ret == "void":
+        returns = "Nothing."
+        ownership = "The caller owns every buffer it passed. The frame stays with its owner."
+        errors = "None."
+        units = "as named by the parameters"
+    elif ret in ("seams_frame *", "seams_frame*"):
+        returns = "A new seams_frame, or NULL when the call cannot build one."
+        ownership = "The caller owns the frame and frees it with seams_frame_free."
+        errors = "NULL. seams_last_error() names the reason."
+        units = "coordinates and box lengths in angstrom"
+    elif ret.startswith("const char"):
+        returns = "A pointer to library text."
+        ownership = "The library owns the string. The caller does not free it."
+        errors = "None."
+        units = "text"
+    elif ret.startswith("const ") and "*" in ret:
+        returns = "A pointer into the frame."
+        ownership = (
+            "The frame owns the memory. It stays valid until seams_frame_free "
+            "or a call that replaces the coordinates."
+        )
+        errors = "NULL when the frame is null."
+        units = "as named by the parameters"
+    elif ret == "int" and "seams_frame" in args:
+        returns = "Zero on success. A non-zero value is the seams_status code."
+        ownership = "The caller owns every buffer it passed. The frame stays with its owner."
+        errors = "A non-zero code. seams_last_error() holds the detail."
+        units = "cutoff in angstrom" if "cutoff" in args else "as named by the parameters"
+    elif ret == "int" and "*" in args:
+        returns = "Zero on success. A non-zero value reports failure."
+        ownership = "The caller owns every input and output buffer."
+        errors = "A non-zero code. seams_last_error() holds the detail."
+        units = "dimensionless indices and counts"
+    else:
+        returns = "The integer result." if ret == "int" else _sentence(ret)
+        ownership = "No allocation."
+        errors = "None."
+        units = "dimensionless"
+    purpose = (
+        _sentence(comment) + " Declared in bindings/cxx/seams_lang.h."
+        if comment
+        else "Declared in bindings/cxx/seams_lang.h."
+    )
+    return {
+        "purpose": purpose,
+        "parameters": param_text,
+        "returns": returns,
+        "ownership": ownership,
+        "errors": errors,
+        "units": units,
+    }
+
+
+def cxx_records():
+    text = (ROOT / "bindings" / "cxx" / "seams_lang.h").read_text()
+    text = re.sub(
+        r"#ifndef\s+DOXYGEN_SHOULD_SKIP_THIS.*?#endif",
+        "",
+        text,
+        flags=re.S,
+    )
+    found = {}
+    token = re.compile(
+        r"(?P<doc>/\*\*(?:(?!\*/).)*?\*/)"
+        r"|(?P<opaque>typedef\s+struct\s+(?P<oname>\w+)\s+(?P<oalias>\w+)\s*;)"
+        r"|(?P<struct>typedef\s+struct\s+(?P<sname>\w+)\s*\{(?P<sbody>[^}]*)\}\s*(?P<salias>\w+)\s*;)"
+        r"|(?P<func>(?P<fret>const\s+\w+\s*\*|seams_frame\s*\*|void|int)\s*(?P<fname>seams_[A-Za-z0-9_]+)\s*\((?P<fargs>[^;]*?)\)\s*;)",
+        re.S,
+    )
+    pending = []
+    last_end = 0
+    for match in token.finditer(text):
+        gap = text[last_end : match.start()]
+        if gap.strip():
+            pending = []
+        last_end = match.end()
+        kind = match.lastgroup
+        if kind == "doc":
+            pending.append(match.group("doc")[3:-2])
+            continue
+        blocks = pending
+        pending = []
+        if kind == "opaque":
+            name = match.group("oalias")
+            note = _cxx_comment(blocks, name)
+            found[name] = {
+                "purpose": (_sentence(note) + " " if note else "") + "Declared in bindings/cxx/seams_lang.h.",
+                "parameters": "none",
+                "returns": "The type itself.",
+                "ownership": "No allocation. This is a type.",
+                "errors": "None.",
+                "units": "handle",
+            }
+        elif kind == "struct":
+            name = match.group("salias")
+            note = _cxx_comment(blocks, name)
+            fields = [
+                fmatch.group(1)
+                for line in match.group("sbody").splitlines()
+                for fmatch in [re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$", line)]
+                if fmatch
+            ]
+            found[name] = {
+                "purpose": (_sentence(note) + " " if note else "") + "Declared in bindings/cxx/seams_lang.h.",
+                "parameters": "; ".join(fields) if fields else "none",
+                "returns": "The type itself.",
+                "ownership": "No allocation. This is a type.",
+                "errors": "None.",
+                "units": "as named by the parameters",
+            }
+        elif kind == "func":
+            name = match.group("fname")
+            if name in found:
+                continue
+            found[name] = _cxx_contract(
+                name,
+                match.group("fret"),
+                match.group("fargs"),
+                _cxx_comment(blocks, name),
+            )
+    return found
+
+
 def semantics(lang, name, purpose, parameters):
     """Return, ownership, and error lines for a symbol that already has a purpose."""
     if lang == "c":
@@ -308,32 +463,11 @@ def semantics(lang, name, purpose, parameters):
             STATUS if name.startswith("seams_") else "None.",
         )
     if lang == "cxx":
-        if name.endswith("_free") or name.endswith("_destroy"):
-            return (
-                "Nothing.",
-                "Frees the caller-owned frame. A null pointer is a no-op.",
-                "None.",
-            )
-        if name in {"seams_frame_read", "seams_frame_from_arrays", "seams_frame_from_species"}:
-            return (
-                "A new seams_frame, or NULL when the call cannot build one.",
-                "The caller owns the frame and frees it with seams_frame_free.",
-                "NULL. seams_last_error() names the reason.",
-            )
-        if name in {"seams_frame_positions", "seams_frame_types", "seams_frame_ids"}:
-            return (
-                "A pointer into the frame.",
-                "The frame owns the memory. It stays valid until seams_frame_free or a call that replaces the coordinates.",
-                "NULL when the frame is null.",
-            )
-        if name in {"seams_last_error", "seams_lang_version"}:
-            return (
-                "A pointer to library text.",
-                "The library owns the string. The caller does not free it.",
-                "None.",
-            )
-        if name in {"seams_frame", "seams_phase_times", "seams_prism_row"}:
-            return ("The type itself.", "No allocation. This is a type.", "None.")
+        record = cxx_records().get(name)
+        if record:
+            return record["returns"], record["ownership"], record["errors"]
+        if name.isupper():
+            return ("The constant value.", "No allocation.", "None.")
         return (
             "Zero on success. A non-zero value is the seams_status code.",
             "The caller owns every buffer it passed. The frame stays with its owner.",
@@ -357,11 +491,14 @@ def _example(block, lang, name):
 HEADER_RENDERED = "The tour call is in `docs/examples/c_api_tour.c`."
 
 
-def _complete_header_section(name, old, lang):
+def _complete_header_section(name, old, lang, record=None):
     """Add the missing contract lines to a section docs/capi_docs.py rendered from seams.h."""
     purpose = _field(old, "Purpose")
     parameters = _field(old, "Parameters")
-    returns, ownership, errors = semantics(lang, name, purpose, parameters)
+    if record:
+        returns, ownership, errors = record["returns"], record["ownership"], record["errors"]
+    else:
+        returns, ownership, errors = semantics(lang, name, purpose, parameters)
     body = old.strip("\n")
     for label, text in (("Ownership", ownership), ("Errors", errors)):
         if not re.search(r"^" + label + r": \S", body, re.M):
@@ -373,7 +510,7 @@ def _complete_header_section(name, old, lang):
 
 def render_section(name, old, lang, record):
     if lang == "c" and HEADER_RENDERED in old:
-        return _complete_header_section(name, old, lang)
+        return _complete_header_section(name, old, lang, record)
     purpose = _field(old, "Purpose")
     parameters = _field(old, "Parameters")
     units = _field(old, "Units")
@@ -383,7 +520,14 @@ def render_section(name, old, lang, record):
         parameters = record["parameters"] if record else parameters or "none"
     if units.startswith("as documented on that declaration") or not units:
         units = record["units"] if record else units or "as named by the parameters"
-    returns, ownership, errors = semantics(lang, name, purpose, parameters)
+    if record:
+        returns, ownership, errors = record["returns"], record["ownership"], record["errors"]
+    else:
+        returns, ownership, errors = semantics(lang, name, purpose, parameters)
+    if lang == "cxx":
+        returns = _field(old, "Returns") or returns
+        ownership = _field(old, "Ownership") or ownership
+        errors = _field(old, "Errors") or errors
     example = _example(old, lang, name)
     if record and record.get("example") and not _field(old, "Example"):
         example = record["example"]
@@ -435,6 +579,8 @@ def sections_of(body):
 def records_for(lang):
     if lang == "c":
         return c_records()
+    if lang == "cxx":
+        return cxx_records()
     return {}
 
 
@@ -446,31 +592,80 @@ def public_names(lang):
     return groups[lang]()
 
 
-def rewrite(lang):
-    path = API / PAGES[lang]
-    text = path.read_text()
+def rewritten_text(lang, text, path):
     span = emit_api_symbols.block_span(text, path)
     body = text[span[0]:span[1]] if span else ""
-    have = {name: rest for name, rest in sections_of(body)}
+    existing = sections_of(body)
+    have = {}
+    for name, rest in existing:
+        have.setdefault(name, rest)
     records = records_for(lang)
     names = list(public_names(lang))
+    if lang == "cxx":
+        name_set = set(names)
+        ordered = []
+        seen = set()
+        for name, _ in existing:
+            if name in name_set and name not in seen:
+                ordered.append(name)
+                seen.add(name)
+        for name in names:
+            if name not in seen:
+                ordered.append(name)
+                seen.add(name)
+    else:
+        ordered = names
     blocks = ["", "## Symbol reference", ""]
-    for name in names:
+    for name in ordered:
         record = records.get(name)
         blocks.append(render_section(name, have.get(name, ""), lang, record))
     wrapped = BEGIN + "\n" + "\n".join(blocks).rstrip() + "\n" + END + "\n"
-    path.write_text(emit_api_symbols.splice_text(text, wrapped, path))
-    missing = [name for name in names if name not in have and name not in records and lang == "c"]
-    return len(names), missing
+    updated = emit_api_symbols.splice_text(text, wrapped, path)
+    missing = [name for name in ordered if name not in have and name not in records and lang == "c"]
+    return updated, len(ordered), missing
 
 
-def main():
+def rewrite(lang, api_dir=None, write=True):
+    path = (Path(api_dir) if api_dir is not None else API) / PAGES[lang]
+    original = path.read_text()
+    updated, count, missing = rewritten_text(lang, original, path)
+    if write:
+        path.write_text(updated)
+    return count, missing, original, updated
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument(
+        "--api-dir",
+        type=Path,
+        default=API,
+        help="Directory holding c.md and cpp.md (default: docs/api).",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail with a unified diff if rewriting would change c.md or cpp.md.",
+    )
+    args = parser.parse_args(argv)
     notes = []
+    changed = False
     for lang in PAGES:
-        count, missing = rewrite(lang)
+        count, missing, original, updated = rewrite(lang, api_dir=args.api_dir, write=not args.check)
+        if args.check and updated != original:
+            changed = True
+            diff = difflib.unified_diff(
+                original.splitlines(keepends=True),
+                updated.splitlines(keepends=True),
+                fromfile=str(args.api_dir / PAGES[lang]),
+                tofile="generated/" + PAGES[lang],
+            )
+            sys.stderr.writelines(diff)
         notes.append("{} {}".format(lang, count))
         for name in missing:
             notes.append("  c fallback " + name)
+    if changed:
+        return 1
     print("\n".join(notes))
     return 0
 

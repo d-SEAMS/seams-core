@@ -154,6 +154,19 @@ std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
                                           const std::vector<int> &cols, int maxDepth,
                                           const std::vector<char> &sources = {});
 
+//! Primitive rings of an explicit caller graph after converting every
+//! directed edge to one undirected edge. Self edges and duplicate columns are
+//! ignored. Throws std::invalid_argument for malformed CSR or an out-of-range
+//! column. The search itself is ringNetwork(offsets, cols, maxDepth).
+std::vector<std::vector<int>>
+ringNetworkSymmetrized(const std::vector<int> &offsets,
+                       const std::vector<int> &cols, int maxDepth);
+
+//! Histogram of a ring list. counts[s] is the number of size-s rings.
+//! The returned vector has maxDepth + 1 entries.
+[[nodiscard]] std::vector<int>
+ringSizeHistogram(const std::vector<std::vector<int>> &rings, int maxDepth);
+
 //! Ring sizes of the same search as ringNetwork(offsets, cols, maxDepth).
 //! counts[s] is the number of primitive rings of size s, for s below
 //! countsLen. The rings themselves are not gathered.

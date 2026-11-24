@@ -33,6 +33,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <nucleation_pathway.hpp>
+#include <order_parameter.hpp>
 #include <rdf.hpp>
 #include <topo_fingerprint.hpp>
 #include <seams_c_api.h>
@@ -437,6 +438,8 @@ struct seams_neighbours : seams_object {
 
 struct seams_rings : seams_object {
   std::vector<std::vector<int>> rings;
+  std::vector<std::array<int, 3>> winding;
+  bool has_geometry = false;
   // Filled lazily by const label reads, under refine_mu.
   mutable std::vector<int> symmetry;
   int n_atoms = 0;
@@ -1680,6 +1683,8 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     rings->cols = std::move(cols);
     rings->idx = std::move(idx);
     rings->rings = std::move(found);
+    rings->winding = ring::ringWindings(rings->rings, rings->cloud);
+    rings->has_geometry = true;
     rings->symmetry.assign(rings->rings.size(), SEAMS_RING_OTHER);
     for (std::size_t i = 0; i < rings->rings.size(); ++i) {
       const int size = static_cast<int>(rings->rings[i].size());
@@ -1690,6 +1695,72 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
       }
     }
     *out = static_cast<seams_rings *>(track(rings.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_rings_from_csr(
+    const int *offsets, size_t offsets_len, const int *columns,
+    size_t columns_len, int max_depth, const seams_system *geometry,
+    seams_rings **out) {
+  read_guard guard(geometry);
+  clear_error();
+  if (out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings output is null");
+  }
+  *out = nullptr;
+  if (offsets == nullptr || (columns == nullptr && columns_len != 0)) {
+    return fail(SEAMS_ERR_NULL, "CSR input is null");
+  }
+  if (offsets_len == 0 ||
+      offsets_len - 1 > static_cast<size_t>(INT_MAX) ||
+      columns_len > static_cast<size_t>(INT_MAX)) {
+    return fail(SEAMS_ERR_RANGE, "CSR size is outside the supported range");
+  }
+  if (max_depth < 3 || max_depth > 12) {
+    return fail(SEAMS_ERR_RANGE, "max_depth must be from 3 to 12");
+  }
+  const int n = static_cast<int>(offsets_len - 1);
+  if (geometry != nullptr &&
+      (!geometry->ready || geometry->cloud.nop != n)) {
+    return fail(geometry->ready ? SEAMS_ERR_RANGE : SEAMS_ERR_STATE,
+                geometry->ready ? "geometry atom count differs from graph"
+                                : "geometry has no frame");
+  }
+  try {
+    const auto fair = use_threads();
+    std::vector<int> off(offsets, offsets + offsets_len);
+    std::vector<int> cols;
+    if (columns_len != 0) {
+      cols.assign(columns, columns + columns_len);
+    }
+    auto result = std::make_unique<seams_rings>();
+    result->n_atoms = n;
+    result->rings =
+        primitive::ringNetworkSymmetrized(off, cols, max_depth);
+    result->symmetry.assign(result->rings.size(), SEAMS_RING_OTHER);
+    for (std::size_t i = 0; i < result->rings.size(); ++i) {
+      if (result->rings[i].size() == 5) {
+        result->symmetry[i] = SEAMS_RING_PENTAGON;
+      } else if (result->rings[i].size() == 6) {
+        result->symmetry[i] = SEAMS_RING_HEXAGON;
+      }
+    }
+    result->refined = true;
+    if (geometry != nullptr) {
+      result->cloud = geometry->cloud;
+      result->winding =
+          ring::ringWindings(result->rings, result->cloud);
+      result->has_geometry = true;
+    }
+    *out = static_cast<seams_rings *>(track(result.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -1970,6 +2041,42 @@ seams_status seams_rings_vertices(const seams_rings *rings, int index, int *atom
   }
   for (std::size_t i = 0; i < ring.size(); ++i) {
     atoms[i] = ring[i];
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_rings_winding(
+    const seams_rings *rings, int axis, int *axis_winding,
+    size_t axis_winding_len, int *contractible, size_t contractible_len) {
+  read_guard guard(rings);
+  clear_error();
+  if (rings == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings handle is null");
+  }
+  if (axis_winding == nullptr && contractible == nullptr) {
+    return fail(SEAMS_ERR_NULL, "winding outputs are null");
+  }
+  if (axis < 0 || axis > 2) {
+    return fail(SEAMS_ERR_RANGE, "periodic axis must be 0, 1, or 2");
+  }
+  if (!rings->has_geometry ||
+      rings->winding.size() != rings->rings.size()) {
+    return fail(SEAMS_ERR_STATE, "ring geometry is unavailable");
+  }
+  const std::size_t need = rings->rings.size();
+  if ((axis_winding != nullptr && axis_winding_len < need) ||
+      (contractible != nullptr && contractible_len < need)) {
+    return fail(SEAMS_ERR_RANGE, "winding buffer is short");
+  }
+  for (std::size_t i = 0; i < need; ++i) {
+    const auto &shift = rings->winding[i];
+    if (axis_winding != nullptr) {
+      axis_winding[i] = shift[static_cast<std::size_t>(axis)];
+    }
+    if (contractible != nullptr) {
+      contractible[i] =
+          shift[0] == 0 && shift[1] == 0 && shift[2] == 0 ? 1 : 0;
+    }
   }
   return SEAMS_OK;
 }
@@ -2321,6 +2428,125 @@ seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_
     }
     if (n_ice != nullptr) {
       *n_ice = ice;
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_tetrahedral_order(
+    seams_system *sys, const int *centres, size_t n_centres,
+    const int *partners, size_t n_partners, int convention, double cutoff,
+    double *q, size_t q_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || q == nullptr ||
+      (centres == nullptr && n_centres != 0) ||
+      (partners == nullptr && n_partners != 0)) {
+    return fail(SEAMS_ERR_NULL, "tetrahedral input or output is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (n_centres > static_cast<size_t>(INT_MAX) ||
+      n_partners > static_cast<size_t>(INT_MAX)) {
+    return fail(SEAMS_ERR_RANGE, "selection is too large");
+  }
+  const size_t need =
+      n_centres == 0 ? static_cast<size_t>(sys->cloud.nop) : n_centres;
+  if (q_len < need) {
+    return fail(SEAMS_ERR_RANGE, "tetrahedral output is short");
+  }
+  if (convention != SEAMS_TETRAHEDRAL_NEAREST_FOUR &&
+      convention != SEAMS_TETRAHEDRAL_WITHIN_CUTOFF) {
+    return fail(SEAMS_ERR_ARG, "unknown tetrahedral neighbour convention");
+  }
+  if (convention == SEAMS_TETRAHEDRAL_WITHIN_CUTOFF &&
+      (!(cutoff > 0.0) || !std::isfinite(cutoff))) {
+    return fail(SEAMS_ERR_RANGE, "tetrahedral cutoff must be positive");
+  }
+  try {
+    const auto fair = use_threads();
+    std::vector<int> centreSelection;
+    std::vector<int> partnerSelection;
+    if (n_centres != 0) {
+      centreSelection.assign(centres, centres + n_centres);
+    }
+    if (n_partners != 0) {
+      partnerSelection.assign(partners, partners + n_partners);
+    }
+    const auto mode =
+        convention == SEAMS_TETRAHEDRAL_NEAREST_FOUR
+            ? topoparam::TetrahedralNeighbours::NearestFour
+            : topoparam::TetrahedralNeighbours::WithinCutoff;
+    const auto values = topoparam::tetrahedralOrder(
+        sys->cloud, centreSelection, partnerSelection, mode, cutoff);
+    if (values.size() != need) {
+      return fail(SEAMS_ERR_INTERNAL, "tetrahedral output length differs");
+    }
+    if (need != 0) {
+      std::memcpy(q, values.data(), need * sizeof(double));
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_lsi(seams_system *sys, const int *centres,
+                       size_t n_centres, const int *partners,
+                       size_t n_partners, double cutoff, double *lsi,
+                       size_t lsi_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || lsi == nullptr ||
+      (centres == nullptr && n_centres != 0) ||
+      (partners == nullptr && n_partners != 0)) {
+    return fail(SEAMS_ERR_NULL, "LSI input or output is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
+    return fail(SEAMS_ERR_RANGE, "LSI cutoff must be positive");
+  }
+  if (n_centres > static_cast<size_t>(INT_MAX) ||
+      n_partners > static_cast<size_t>(INT_MAX)) {
+    return fail(SEAMS_ERR_RANGE, "selection is too large");
+  }
+  const size_t need =
+      n_centres == 0 ? static_cast<size_t>(sys->cloud.nop) : n_centres;
+  if (lsi_len < need) {
+    return fail(SEAMS_ERR_RANGE, "LSI output is short");
+  }
+  try {
+    const auto fair = use_threads();
+    std::vector<int> centreSelection;
+    std::vector<int> partnerSelection;
+    if (n_centres != 0) {
+      centreSelection.assign(centres, centres + n_centres);
+    }
+    if (n_partners != 0) {
+      partnerSelection.assign(partners, partners + n_partners);
+    }
+    const auto values = topoparam::localStructureIndex(
+        sys->cloud, centreSelection, partnerSelection, cutoff);
+    if (values.size() != need) {
+      return fail(SEAMS_ERR_INTERNAL, "LSI output length differs");
+    }
+    if (need != 0) {
+      std::memcpy(lsi, values.data(), need * sizeof(double));
     }
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {

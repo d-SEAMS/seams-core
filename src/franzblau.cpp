@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <limits>
 #include <numeric>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -2728,6 +2729,65 @@ primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &
   PackedRows adjacency = csrRows(offsets, cols);
   gRingSplit.adj_ms = 0;
   return searchPacked(std::move(adjacency), maxDepth, sources, false);
+}
+
+std::vector<std::vector<int>>
+primitive::ringNetworkSymmetrized(const std::vector<int> &offsets,
+                                  const std::vector<int> &cols, int maxDepth) {
+  if (offsets.empty() || offsets.front() != 0) {
+    throw std::invalid_argument("CSR offsets must start at zero");
+  }
+  const int n = static_cast<int>(offsets.size()) - 1;
+  if (offsets.back() < 0 ||
+      static_cast<std::size_t>(offsets.back()) != cols.size()) {
+    throw std::invalid_argument("CSR offsets do not span the columns");
+  }
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; ++i) {
+    const int begin = offsets[static_cast<std::size_t>(i)];
+    const int end = offsets[static_cast<std::size_t>(i) + 1];
+    if (begin < 0 || end < begin ||
+        static_cast<std::size_t>(end) > cols.size()) {
+      throw std::invalid_argument("CSR offsets are not monotone");
+    }
+    for (int k = begin; k < end; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j < 0 || j >= n) {
+        throw std::invalid_argument("CSR column is outside the graph");
+      }
+      if (j == i) {
+        continue;
+      }
+      rows[static_cast<std::size_t>(i)].push_back(j);
+      rows[static_cast<std::size_t>(j)].push_back(i);
+    }
+  }
+  std::vector<int> undirectedOffsets(static_cast<std::size_t>(n) + 1, 0);
+  std::vector<int> undirectedCols;
+  for (int i = 0; i < n; ++i) {
+    auto &row = rows[static_cast<std::size_t>(i)];
+    std::sort(row.begin(), row.end());
+    row.erase(std::unique(row.begin(), row.end()), row.end());
+    undirectedCols.insert(undirectedCols.end(), row.begin(), row.end());
+    undirectedOffsets[static_cast<std::size_t>(i) + 1] =
+        static_cast<int>(undirectedCols.size());
+  }
+  return primitive::ringNetwork(undirectedOffsets, undirectedCols, maxDepth);
+}
+
+std::vector<int>
+primitive::ringSizeHistogram(const std::vector<std::vector<int>> &rings,
+                             int maxDepth) {
+  if (maxDepth < 0) {
+    throw std::invalid_argument("maximum ring size is negative");
+  }
+  std::vector<int> counts(static_cast<std::size_t>(maxDepth) + 1, 0);
+  for (const auto &ring : rings) {
+    if (ring.size() < counts.size()) {
+      counts[ring.size()] += 1;
+    }
+  }
+  return counts;
 }
 
 void primitive::ringSizeCounts(const std::vector<int> &offsets, const std::vector<int> &cols,

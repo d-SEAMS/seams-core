@@ -75,7 +75,7 @@ SIMD distance, device batches, and Cartesian ~Y_lm~.
 | =pntCorrespondence.hpp= | ~pntToPnt~ | reference / target point sets |
 | =shapeMatch.hpp= | ~match~ | prism shape-matching |
 | =cluster.hpp= | ~clump~ | Stillinger ice clusters |
-| =order_parameter.hpp= | ~topoparam~ | height% and coverage area |
+| =order_parameter.hpp= | ~topoparam~ | tetrahedral order, LSI, height% and coverage area |
 | =rdf.hpp= | ~rdf~ | partial 3D ~g_IJ(r)~ and site-site CN |
 | =rdf2d.hpp= | ~rdf2~ | in-plane radial distribution |
 | =density.hpp= | ~site~ | type- or kind-resolved \(\rho\) along one axis |
@@ -135,6 +135,66 @@ A region that is already parallel does not fork again.
 
 The walk and the skin are in
 [[file:../user/howto/neighbour-lists.org][Cutoff neighbour lists]].
+
+* Explicit primitive rings and periodic winding
+
+~primitive::ringNetworkSymmetrized(offsets, columns, maxDepth)~ accepts a
+caller CSR.  It unions directed edges with their reverse, removes self and
+duplicate edges, and then calls the same Franzblau primitive-ring search as
+the cutoff graph.  ~primitive::ringSizeHistogram~ counts the returned rows by
+size.  Malformed offsets and out-of-range columns are errors.
+
+The stable C entry is ~seams_rings_from_csr~.  The existing
+~seams_rings_histogram_n~ and ~seams_rings_vertices~ queries read its handle.
+The language ABI used by Python is ~seams_graph_rings~; its first call with
+null packed-row buffers queries their lengths.
+
+When geometry accompanies the graph, ~ring::ringWindings~ sums the
+minimum-image bond steps around each cycle in its listed vertex order and
+expresses the total in cell vectors.  The result is the oriented integer
+winding: a ring that crosses the cell once along \(+x\) is \(+1\) on axis 0,
+and the reverse traversal is \(-1\).  ~seams_rings_winding~ and
+~seams_frame_ring_winding~ report the signed component along a selected pore
+axis.  A ring is contractible only when all three components are zero.  Thus
+an axis winding of zero does not by itself imply contractibility.
+
+* Tetrahedral order and LSI
+
+~topoparam::tetrahedralOrder~ accepts independent centre and partner index
+selections.  A centre is removed from its own partner set.  The
+~NearestFour~ convention uses the four nearest selected partners without a
+radial cutoff.  The ~WithinCutoff~ convention uses all \(N\) selected
+partners at or inside the cutoff and evaluates
+
+\[
+q = 1 - \frac{9}{2N(N-1)}
+    \sum_{j<k}\left(\cos\psi_{jk}+\frac{1}{3}\right)^2 .
+\]
+
+For \(N=4\) this is the Errington--Debenedetti factor \(3/8\), and
+~NearestFour~ always uses it.  A perfect tetrahedron gives \(q=1\).  For
+uncorrelated directions each term averages \(4/9\), so an ideal gas
+averages \(q=0\) for every \(N\).
+Both conventions return quiet NaN when fewer than four neighbours are
+available; they never substitute zero.
+
+~topoparam::localStructureIndex~ is the Shiratani--Sasai index.  It sorts
+selected-partner distances so that
+\(r_1<\dots<r_N\le r_c<r_{N+1}\), takes the \(N\) gaps
+\(\Delta_i=r_{i+1}-r_i\) for \(i=1,\dots,N\), and returns their population
+variance
+
+\[
+I = \frac{1}{N}\sum_{i=1}^{N}\left(\Delta_i-\bar\Delta\right)^2 .
+\]
+
+The last gap reaches the first partner beyond the cutoff.  A centre with no
+partner inside the cutoff, or none beyond it, returns quiet NaN.
+
+The stable C entries are ~seams_tetrahedral_order~ and ~seams_lsi~.
+~seams_frame_tetrahedral~ and ~seams_frame_lsi~ are the language ABI consumed
+by Python.  A null selection with length zero means every frame atom; output
+order follows centre-selection order.
 
 The face-edge window is the same string on the fronts that take it.
 The default is ~2.65,3.15~ in the coordinate units of the file.

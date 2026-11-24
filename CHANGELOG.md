@@ -12,6 +12,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ## [2.14.2] - 2026-11-19
 
+### Added
+
+- The stable C API (`seams_rings_from_csr`, `seams_rings_winding`) and the language ABI (`seams_graph_rings`, `seams_frame_ring_winding`) find primitive rings in a caller CSR graph. Directed edges are symmetrized, and with a periodic frame each ring reports its oriented winding along a cell axis and whether it is contractible.
+- The stable C API (`seams_tetrahedral_order`, `seams_lsi`) and the language ABI (`seams_frame_tetrahedral`, `seams_frame_lsi`) compute Errington-Debenedetti tetrahedral order and the Shiratani-Sasai Local Structure Index for independent centre and partner selections. The four-nearest and cutoff-shell conventions are explicit, and a centre whose shell is too small gets NaN.
+
 ### Changed
 
 - Public documentation now contains reader instructions and scientific results only. Maintainer workflows, repository policy, provenance pins, and video-production notes have moved out of the published manual.

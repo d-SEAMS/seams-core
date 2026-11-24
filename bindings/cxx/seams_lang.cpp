@@ -1325,6 +1325,111 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
   }
 }
 
+int seams_graph_rings(const int *offsets, int n_offsets, const int *columns,
+                      int n_columns, int max_depth, int *histogram,
+                      int histogram_len, int *ring_offsets,
+                      int ring_offsets_cap, int *vertices, int vertices_cap,
+                      int *n_rings, int *n_vertices) {
+  clear_error();
+  if (offsets == nullptr || n_offsets < 1 || n_columns < 0 ||
+      (columns == nullptr && n_columns != 0) || max_depth < 3 ||
+      max_depth > 12 ||
+      histogram == nullptr || histogram_len < max_depth + 1 ||
+      n_rings == nullptr || n_vertices == nullptr) {
+    set_error("explicit rings need valid CSR, histogram, and size outputs");
+    return 1;
+  }
+  try {
+    const std::vector<int> off(offsets, offsets + n_offsets);
+    std::vector<int> cols;
+    if (n_columns != 0) {
+      cols.assign(columns, columns + n_columns);
+    }
+    const auto rings =
+        primitive::ringNetworkSymmetrized(off, cols, max_depth);
+    const auto counts = primitive::ringSizeHistogram(rings, max_depth);
+    std::copy(counts.begin(), counts.end(), histogram);
+    std::size_t flat = 0;
+    for (const auto &cycle : rings) {
+      flat += cycle.size();
+    }
+    if (rings.size() > static_cast<std::size_t>(INT_MAX) ||
+        flat > static_cast<std::size_t>(INT_MAX)) {
+      set_error("explicit ring output is too large");
+      return 1;
+    }
+    *n_rings = static_cast<int>(rings.size());
+    *n_vertices = static_cast<int>(flat);
+    if (ring_offsets == nullptr && vertices == nullptr) {
+      return 0;
+    }
+    if (ring_offsets == nullptr || vertices == nullptr ||
+        ring_offsets_cap < *n_rings + 1 || vertices_cap < *n_vertices) {
+      set_error("explicit ring output buffer is short");
+      return 1;
+    }
+    int at = 0;
+    ring_offsets[0] = 0;
+    for (int i = 0; i < *n_rings; ++i) {
+      for (const int vertex : rings[static_cast<std::size_t>(i)]) {
+        vertices[at++] = vertex;
+      }
+      ring_offsets[i + 1] = at;
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_ring_winding(const seams_frame *frame,
+                             const int *ring_offsets, int n_rings,
+                             const int *vertices, int n_vertices, int axis,
+                             int *axis_winding, int *contractible) {
+  clear_error();
+  if (frame == nullptr || ring_offsets == nullptr || n_rings < 0 ||
+      n_vertices < 0 || (vertices == nullptr && n_vertices != 0) ||
+      axis < 0 || axis > 2 || axis_winding == nullptr ||
+      contractible == nullptr) {
+    set_error("ring winding input is invalid");
+    return 1;
+  }
+  if (ring_offsets[0] != 0 || ring_offsets[n_rings] != n_vertices) {
+    set_error("packed ring offsets do not span the vertices");
+    return 1;
+  }
+  try {
+    std::vector<std::vector<int>> rings(
+        static_cast<std::size_t>(n_rings));
+    for (int i = 0; i < n_rings; ++i) {
+      const int begin = ring_offsets[i];
+      const int end = ring_offsets[i + 1];
+      if (begin < 0 || end < begin || end > n_vertices) {
+        set_error("packed ring offsets are not monotone");
+        return 1;
+      }
+      if (end - begin < 3) {
+        set_error("a packed ring has fewer than three vertices");
+        return 1;
+      }
+      rings[static_cast<std::size_t>(i)].assign(vertices + begin,
+                                                vertices + end);
+    }
+    const auto winding = ring::ringWindings(rings, frame->cloud);
+    for (int i = 0; i < n_rings; ++i) {
+      const auto &shift = winding[static_cast<std::size_t>(i)];
+      axis_winding[i] = shift[static_cast<std::size_t>(axis)];
+      contractible[i] =
+          shift[0] == 0 && shift[1] == 0 && shift[2] == 0 ? 1 : 0;
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
 namespace {
 
 // The graph seams_neighbours_build makes, so the cycles carry the same
@@ -1842,6 +1947,74 @@ int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
     }
     frame->ql = a6.ql;
     frame->qlbar = q6bar != nullptr ? a6.qlBar : std::vector<double>(static_cast<std::size_t>(std::max(n, 0)), 0.0);
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_tetrahedral(seams_frame *frame, const int *centres,
+                            int n_centres, const int *partners,
+                            int n_partners, int convention, double cutoff,
+                            double *q) {
+  clear_error();
+  if (frame == nullptr || q == nullptr || n_centres < 0 || n_partners < 0 ||
+      (centres == nullptr && n_centres != 0) ||
+      (partners == nullptr && n_partners != 0) ||
+      (convention != 0 && convention != 1)) {
+    set_error("tetrahedral selection or convention is invalid");
+    return 1;
+  }
+  try {
+    std::vector<int> centreSelection;
+    std::vector<int> partnerSelection;
+    if (n_centres != 0) {
+      centreSelection.assign(centres, centres + n_centres);
+    }
+    if (n_partners != 0) {
+      partnerSelection.assign(partners, partners + n_partners);
+    }
+    const auto mode =
+        convention == 0
+            ? topoparam::TetrahedralNeighbours::NearestFour
+            : topoparam::TetrahedralNeighbours::WithinCutoff;
+    const auto values = topoparam::tetrahedralOrder(
+        frame->cloud, centreSelection, partnerSelection, mode, cutoff);
+    if (!values.empty()) {
+      std::memcpy(q, values.data(), values.size() * sizeof(double));
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_lsi(seams_frame *frame, const int *centres, int n_centres,
+                    const int *partners, int n_partners, double cutoff,
+                    double *lsi) {
+  clear_error();
+  if (frame == nullptr || lsi == nullptr || n_centres < 0 ||
+      n_partners < 0 || (centres == nullptr && n_centres != 0) ||
+      (partners == nullptr && n_partners != 0)) {
+    set_error("LSI selection is invalid");
+    return 1;
+  }
+  try {
+    std::vector<int> centreSelection;
+    std::vector<int> partnerSelection;
+    if (n_centres != 0) {
+      centreSelection.assign(centres, centres + n_centres);
+    }
+    if (n_partners != 0) {
+      partnerSelection.assign(partners, partners + n_partners);
+    }
+    const auto values = topoparam::localStructureIndex(
+        frame->cloud, centreSelection, partnerSelection, cutoff);
+    if (!values.empty()) {
+      std::memcpy(lsi, values.data(), values.size() * sizeof(double));
+    }
     return 0;
   } catch (...) {
     remember_exception();

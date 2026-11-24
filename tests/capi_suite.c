@@ -921,6 +921,117 @@ static void one(const char *src, const char *cpp, const char *py, const char *wo
   (void)src;
 }
 
+static void analytic_topology_and_order(void) {
+  seams_system *sys = seams_system_create();
+  const double box[9] = {0, 0, 0, 100, 100, 100, 0, 0, 0};
+  const double tetra[18] = {
+      50, 50, 50, 51, 51, 51, 51, 49, 49,
+      49, 51, 49, 49, 49, 51, 50, 50, 52,
+  };
+  const int centre[1] = {0};
+  const int tetra_partners[4] = {1, 2, 3, 4};
+  double q[1] = {0};
+  if (sys == NULL ||
+      seams_system_set_atoms(sys, tetra, 6, box, 9, NULL, NULL) !=
+          SEAMS_OK) {
+    fault("analytic system");
+  } else {
+    if (seams_tetrahedral_order(
+            sys, centre, 1, NULL, 0, SEAMS_TETRAHEDRAL_NEAREST_FOUR,
+            0.0, q, 1) != SEAMS_OK ||
+        fabs(q[0] - 1.0) > 1e-12) {
+      fault("analytic nearest tetrahedral order");
+    }
+    if (seams_tetrahedral_order(
+            sys, centre, 1, tetra_partners, 4,
+            SEAMS_TETRAHEDRAL_WITHIN_CUTOFF, 2.0, q, 1) != SEAMS_OK ||
+        fabs(q[0] - 1.0) > 1e-12) {
+      fault("analytic cutoff tetrahedral order");
+    }
+    if (seams_tetrahedral_order(
+            sys, centre, 1, tetra_partners, 3,
+            SEAMS_TETRAHEDRAL_NEAREST_FOUR, 0.0, q, 1) != SEAMS_OK ||
+        !isnan(q[0])) {
+      fault("sparse tetrahedral order");
+    }
+  }
+  seams_system_destroy(sys);
+
+  sys = seams_system_create();
+  /* Inside 3.7: 2.8, 2.9, 3.1, 3.5; first beyond: 4.2. Gap variance 0.0525. */
+  const double radial[18] = {
+      50, 50, 50, 52.8, 50, 50, 50, 52.9, 50,
+      50, 50, 53.1, 46.5, 50, 50, 50, 45.8, 50,
+  };
+  const int radial_partners[4] = {1, 2, 3, 4};
+  double lsi[1] = {0};
+  if (sys == NULL ||
+      seams_system_set_atoms(sys, radial, 6, box, 9, NULL, NULL) !=
+          SEAMS_OK ||
+      seams_lsi(sys, centre, 1, NULL, 0, 3.7, lsi, 1) != SEAMS_OK ||
+      fabs(lsi[0] - 0.0525) > 1e-12) {
+    fault("analytic LSI");
+  } else if (seams_lsi(sys, centre, 1, radial_partners, 4, 3.7, lsi, 1) !=
+                 SEAMS_OK ||
+             !isnan(lsi[0])) {
+    fault("LSI without a partner beyond the cutoff");
+  }
+  seams_system_destroy(sys);
+
+  /* A triangle at 1, 4, 7 in a cell of 9 steps +3 three times: one +L. */
+  const double periodic_box[9] = {0, 0, 0, 9, 9, 9, 0, 0, 0};
+  const struct {
+    const char *name;
+    double xyz[9];
+    int winding[3];
+    int contractible;
+  } windings[4] = {
+      {"+x", {1, 4, 4, 4, 4, 4, 7, 4, 4}, {1, 0, 0}, 0},
+      {"-x", {7, 4, 4, 4, 4, 4, 1, 4, 4}, {-1, 0, 0}, 0},
+      {"+y", {4, 1, 4, 4, 4, 4, 4, 7, 4}, {0, 1, 0}, 0},
+      {"contractible", {2, 4, 4, 4, 4, 4, 3, 4, 4}, {0, 0, 0}, 1},
+  };
+  const int offsets[4] = {0, 1, 2, 3};
+  const int columns[3] = {1, 2, 0};
+  for (int c = 0; c < 4; ++c) {
+    sys = seams_system_create();
+    seams_rings *rings = NULL;
+    if (sys == NULL ||
+        seams_system_set_atoms(sys, windings[c].xyz, 3, periodic_box, 9,
+                               NULL, NULL) != SEAMS_OK ||
+        seams_rings_from_csr(offsets, 4, columns, 3, 3, sys, &rings) !=
+            SEAMS_OK) {
+      fault("explicit graph rings");
+    } else {
+      int histogram[4] = {0};
+      int vertices[3] = {0};
+      size_t n_vertices = 0;
+      if (seams_rings_histogram_n(rings, histogram, 4) != SEAMS_OK ||
+          histogram[3] != 1 ||
+          seams_rings_vertices(rings, 0, vertices, 3, &n_vertices) !=
+              SEAMS_OK ||
+          n_vertices != 3 || vertices[0] != 0 || vertices[1] != 1 ||
+          vertices[2] != 2) {
+        fault("explicit graph ring order");
+      }
+      for (int axis = 0; axis < 3; ++axis) {
+        int winding[1] = {99};
+        int contractible[1] = {99};
+        if (seams_rings_winding(rings, axis, winding, 1, contractible, 1) !=
+                SEAMS_OK ||
+            winding[0] != windings[c].winding[axis] ||
+            contractible[0] != windings[c].contractible) {
+          fprintf(stderr, "winding %s axis %d: %d contractible %d\n",
+                  windings[c].name, axis, winding[0], contractible[0]);
+          fault("periodic graph winding");
+        }
+      }
+    }
+    seams_rings_destroy(rings);
+    seams_system_destroy(sys);
+  }
+}
+
 int main(int argc, char **argv) {
   if (argc != 5) {
     fprintf(stderr, "usage: capi_suite SRC CPP OVITO_PY WORK\n");
@@ -932,6 +1043,7 @@ int main(int argc, char **argv) {
   setenv("OMP_NUM_THREADS", "1", 1);
   setenv("RAYON_NUM_THREADS", "1", 1);
   (void)seams_set_num_threads(1);
+  analytic_topology_and_order();
   names_and_versions();
   Frame ic;
   memset(&ic, 0, sizeof ic);
