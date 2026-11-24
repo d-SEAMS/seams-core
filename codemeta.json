@@ -35,7 +35,12 @@
     {
       "@type": "Person",
       "givenName": "Ruhila",
-      "familyName": "S"
+      "familyName": "Goswami",
+      "identifier": "https://orcid.org/0000-0002-5443-9356",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Faculty of Life and Environmental Sciences, University of Iceland"
+      }
     }
   ]
 }

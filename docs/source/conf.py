@@ -626,7 +626,7 @@ import discoverability
 # -- Project information -----------------------------------------------------
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
-author = "Rohit Goswami, Amrita Goswami, Ruhila S"
+author = "Rohit Goswami, Amrita Goswami, Ruhila Goswami"
 version = discoverability.project_version()
 release = version
 language = "en"
