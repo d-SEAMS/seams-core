@@ -4,7 +4,6 @@
   meson,
   ninja,
   pkg-config,
-  fetchurl,
   eigen,
   blas,
   lapack,
