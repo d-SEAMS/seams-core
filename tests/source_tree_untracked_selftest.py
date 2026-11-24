@@ -9,12 +9,14 @@ ps must run in the C locale, whose lstart is five words.
 
 With that stand-in, a source root that is not a git checkout must still be
 checked rather than skipped, and an untracked name that is not UTF-8 must
-survive the snapshot.
+survive the snapshot. A filesystem that refuses such a name (APFS returns
+EILSEQ) gets a non-ASCII UTF-8 name instead.
 
 Usage: source_tree_untracked_selftest.py GIT
 """
 
 import contextlib
+import errno
 import io
 import os
 import subprocess
@@ -42,6 +44,24 @@ def call(argv: list[str]) -> tuple[int, str, str]:
     with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
         code = stu.main(argv)
     return code, out.getvalue(), err.getvalue()
+
+
+def untracked_names(repo: Path) -> tuple[str, str]:
+    """Create an untracked file in REPO; return the kind of its name and a name to leave.
+
+    The UTF-8 fallbacks have no Unicode decomposition, so a filesystem that
+    normalizes names lists them as written.
+    """
+    name = os.fsdecode(b"bad-\xff-name")
+    try:
+        (repo / name).write_text("not UTF-8\n")
+    except OSError as exc:
+        if exc.errno != errno.EILSEQ:
+            raise
+        name = "bad-\u00f0-name"
+        (repo / name).write_text("not ASCII\n")
+        return "non-ASCII", "new-\u00fe"
+    return "non-UTF-8", os.fsdecode(b"new-\xfe")
 
 
 def main(argv: list[str]) -> int:
@@ -145,14 +165,13 @@ def main(argv: list[str]) -> int:
         (plain / "sub").mkdir(parents=True)
         (plain / "sub" / "kept.txt").write_text("present before the snapshot\n")
         (plain / ".gitignore").write_text("*.ignored\n")
-        raw_name = os.fsdecode(b"bad-\xff-name")
-        (repo / raw_name).write_text("not UTF-8\n")
+        kind, left_name = untracked_names(repo)
         roots = [
             ("not a git checkout, nothing left", plain, None, 0),
             ("not a git checkout, ignored file left", plain, "sub/out.ignored", 0),
             ("not a git checkout, file left", plain, "sub/left.txt", 1),
-            ("non-UTF-8 untracked name", repo, None, 0),
-            ("non-UTF-8 untracked name, file left", repo, os.fsdecode(b"new-\xfe"), 1),
+            (f"{kind} untracked name", repo, None, 0),
+            (f"{kind} untracked name, file left", repo, left_name, 1),
         ]
         for i, (label, root, leave, want) in enumerate(roots):
             state = tmp / f"root-state-{i}"
