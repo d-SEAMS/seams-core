@@ -23,7 +23,7 @@ index 7c04421..20e17a5 100644
 -            assert(current_section_ != NOT_A_SECTION);
 +            if (current_section_ == NOT_A_SECTION) {
 +                throw format_error(
-+                    "unknown header value or section name, got '{}'", line
++                    "expected section name or header value, got '{}'", line
 +                );
 +            }
              break;
