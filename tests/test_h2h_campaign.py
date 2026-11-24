@@ -788,15 +788,22 @@ def git_exists(obj: str) -> bool:
     return done.returncode == 0
 
 
-def git_is_shallow() -> bool:
-    value = subprocess.check_output(
+def git_repository_state(root: Path = ROOT) -> str:
+    inside = subprocess.run(
+        ["git", "rev-parse", "--is-inside-work-tree"],
+        cwd=root, capture_output=True, text=True, check=False)
+    if inside.returncode != 0 or inside.stdout.strip() != "true":
+        return "absent"
+    shallow = subprocess.run(
         ["git", "rev-parse", "--is-shallow-repository"],
-        cwd=ROOT, text=True).strip()
-    return value == "true"
+        cwd=root, capture_output=True, text=True, check=False)
+    if shallow.returncode != 0:
+        raise RuntimeError("cannot determine Git repository history")
+    return "shallow" if shallow.stdout.strip() == "true" else "full"
 
 
-def require_full_history(shallow: bool) -> None:
-    if shallow:
+def require_full_history(state: str) -> None:
+    if state == "shallow":
         raise RuntimeError(
             "campaign record validation requires full Git history; "
             "fetch with fetch-depth: 0"
@@ -804,9 +811,12 @@ def require_full_history(shallow: bool) -> None:
 
 
 def check_campaign_full_history_requirement():
-    require_full_history(False)
+    require_full_history("full")
+    with tempfile.TemporaryDirectory() as work:
+        assert git_repository_state(Path(work)) == "absent"
+    require_full_history("absent")
     try:
-        require_full_history(True)
+        require_full_history("shallow")
     except RuntimeError as err:
         assert str(err) == (
             "campaign record validation requires full Git history; "
@@ -848,8 +858,15 @@ def check_campaign_records():
     records = sorted(data_dir.glob("*.jsonl"))
     if not records:
         return
-    require_full_history(git_is_shallow())
-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    repository = git_repository_state()
+    require_full_history(repository)
+    has_history = repository == "full"
+    if not has_history:
+        print("campaign record Git provenance unavailable outside a Git work tree")
+    head = (
+        subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        if has_history else ""
+    )
     tree_cache: dict[str, str] = {}
     for record_path in records:
         rows = hc.read_rows(record_path)
@@ -865,12 +882,17 @@ def check_campaign_records():
             named.update(sup)
         unmarked = set(replaced) - named
         assert not unmarked, f"{record_path.name} replaces {sorted(unmarked)} without supersedes"
-        reachable = git_reachable()
+        reachable = git_reachable() if has_history else set()
         for idx, row in enumerate(rows, 1):
             assert row.get("code_dirty") is False, (record_path.name, idx, row.get("code_dirty"))
             rev = row.get("code_revision", "")
-            assert rev, (record_path.name, idx)
-            if rev not in tree_cache:
+            tree = row.get("engine_tree", "")
+            blob = row.get("harness_blob", "")
+            assert re.fullmatch(r"[0-9a-f]{40}", rev), (record_path.name, idx, rev)
+            assert re.fullmatch(r"[0-9a-f]{40}", tree), (record_path.name, idx, tree)
+            if blob:
+                assert re.fullmatch(r"[0-9a-f]{40}", blob), (record_path.name, idx, blob)
+            if has_history and rev not in tree_cache:
                 anc = subprocess.run(
                     ["git", "merge-base", "--is-ancestor", rev, head],
                     cwd=ROOT, capture_output=True, check=False)
@@ -879,11 +901,10 @@ def check_campaign_records():
                         ["git", "rev-parse", f"{rev}^{{tree}}"], cwd=ROOT, text=True).strip()
                 else:
                     tree_cache[rev] = ""
-            if tree_cache[rev]:
-                assert row.get("engine_tree") == tree_cache[rev], (
+            if has_history and tree_cache[rev]:
+                assert tree == tree_cache[rev], (
                     record_path.name, idx, row.get("engine_tree"), tree_cache[rev])
-            elif row.get("run_id") not in replaced:
-                blob = row.get("harness_blob")
+            elif has_history and row.get("run_id") not in replaced:
                 assert blob and git_exists(blob) and blob in reachable, (
                     f"{record_path.name}:{idx} {rev} is not in this history and "
                     f"harness_blob {blob} does not resolve")
@@ -909,7 +930,7 @@ def check_campaign_records():
         ts = hc.thread_summary(shown)
         for idx, row in enumerate(shown, 1):
             blob = row.get("harness_blob")
-            if blob:
+            if has_history and blob:
                 assert git_exists(blob) and blob in reachable, (
                     f"{record_path.name}:{idx} harness_blob {blob} is not in HEAD")
             version = row.get("tool_version")
@@ -917,6 +938,8 @@ def check_campaign_records():
                 continue
             token = str(version).split()[0]
             if not re.fullmatch(r"[0-9a-f]{7,40}", token):
+                continue
+            if not has_history:
                 continue
             resolved = token if len(token) == 40 else git_commit(token)
             if resolved and resolved in reachable:
