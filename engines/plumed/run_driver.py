@@ -9,14 +9,14 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from e2e_common import find_build_file  # noqa: E402
+from e2e_common import external_library  # noqa: E402
 
 if shutil.which("plumed") is None:
     print("plumed is not installed")
     sys.exit(77)
 
 build = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("build")
-plugin = find_build_file(build, "libSeamsPlumed.so")
+plugin = external_library(build, "libSeamsPlumed.so")
 if plugin is None:
     print("plumed is installed but libSeamsPlumed.so was not built")
     sys.exit(1)
@@ -25,14 +25,16 @@ here = Path(__file__).resolve().parent
 deck = here / "plumed.dat"
 xyz = here / "ice.xyz"
 text = deck.read_text().replace("./libSeamsPlumed.so", str(plugin))
-# PLUMED writes colvar and its bck.* backups beside the deck. Another build
-# tree, or a --repeat copy, runs this test at the same time.
+# FILE=colvar is relative. Two drivers in one meson run used to share
+# engines/plumed/colvar and PLUMED's bck.* rename. The deck and the
+# colvar stay in a private directory, and FILE= is absolute.
 scratch = build.resolve() / "plumed-driver"
 scratch.mkdir(parents=True, exist_ok=True)
 with tempfile.TemporaryDirectory(prefix=f"{os.getpid()}-", dir=scratch) as name:
     work_dir = Path(name)
     work = work_dir / "plumed.driver.dat"
     colvar = work_dir / "colvar"
+    text = text.replace("FILE=colvar", "FILE=" + str(colvar))
     work.write_text(text)
     env = os.environ.copy()
     env["PLUMED_NUM_THREADS"] = env.get("PLUMED_NUM_THREADS", "1")

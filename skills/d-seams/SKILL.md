@@ -2,10 +2,10 @@
 name: d-seams
 description: "Classify ice and hydrate cages in a molecular-dynamics trajectory with d-SEAMS. Use when installing the engine, running the seams CLI, calling libseams (seams.h) or pydseamslib (import dseams), or debugging CHILL+, cages, primitive rings, or Steinhardt q_l. Keywords: molecular dynamics, water, ice Ih, ice Ic, clathrate, cutoff, ABI."
 license: MIT
-compatibility: "The engine builds with Meson. Python needs pydseamslib at the same version. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
+compatibility: "The engine builds with Meson. Python is the package pydseamslib. Lua, R, Julia, Rust, and Fortran bindings live in their own repositories."
 metadata:
   author: d-SEAMS
-  version: "2.14.0"
+  version: "2.14.2"
 ---
 
 # Use d-SEAMS
@@ -20,12 +20,6 @@ https://docs.dseams.info/llms.txt. Each HTML page has a Markdown twin at
 the same path with `.md`.
 
 ## Install
-
-conda-forge ships the engine, the headers, and the command:
-
-```bash
-conda install -c conda-forge 'libseams=2.14.0'
-```
 
 From a source checkout, with Eigen 3.4 available:
 
@@ -126,7 +120,7 @@ is process-global.
 | Language | Repository | Package |
 | --- | --- | --- |
 | Python | d-SEAMS/PydSEAMSlib | `pydseamslib` |
-| Lua, Fennel | d-SEAMS/yodaStruct | LuaRocks `dseams` |
+| Lua, Fennel | d-SEAMS/yodaStruct | Git source, `require("dseams")` |
 | R | d-SEAMS/dseams-r | `dseams` |
 | Julia | d-SEAMS/Dseams.jl | `Dseams` |
 | Rust | d-SEAMS/dseams-rs | `dseams-sys`, `dseams` |
@@ -143,5 +137,5 @@ for editing the tree.
 - conda-forge chemfiles 0.10.4 fails an mmCIF read of an atom with no residue. The Meson build probes `cmake/mmcif_no_entity.mmcif` and vendors a patched chemfiles when the probe fails.
 - `.con` needs readcon-core. The Nix flake does not fetch that wrap.
 - `--jobs` needs an OpenMP build. `seams --features` reports whether OpenMP is on.
-- `require("dseams")` needs the LuaRocks rock from yodaStruct.
+- `require("dseams")` needs the module built from a yodaStruct checkout.
 - A bug report needs `seams --version`, `seams --features`, the command line, and a small dump.

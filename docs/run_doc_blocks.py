@@ -20,6 +20,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "docs"))
 import run_snippets  # noqa: E402
+sys.path.insert(0, str(ROOT / "scripts"))
+import tracked_files  # noqa: E402
 
 PY_BLOCK = re.compile(
     r"```python\n(.*?)```|#\+begin_src python[^\n]*\n(.*?)#\+end_src|\.\.\s+doctest::\n((?:[ \t][^\n]*\n|\n)*)",
@@ -238,9 +240,8 @@ def main():
                 passed += 1
         print(f"{rel:<48} {found:6d} {ran:6d} {passed:6d}")
     created = ROOT / "seams.env"
-    if created.is_file() and "seams.env" not in subprocess.check_output(
-        ["git", "-C", str(ROOT), "ls-files", "seams.env"], text=True
-    ):
+    listed = set(tracked_files.list_tracked(ROOT, "seams.env"))
+    if created.is_file() and "seams.env" not in listed:
         created.unlink()
     output_dir = ROOT / "output"
     if output_dir.is_dir() and not any(output_dir.iterdir()):

@@ -120,7 +120,9 @@ int main(int argc, char **argv) {
   // lammps_close leaves MPI initialized. Open MPI then leaks its
   // singleton state at process exit. Finalize it when this process
   // started it.
-  // A LAMMPS built on the serial MPI stubs has no MPI library to finalize.
+  // A LAMMPS built on the serial MPI stubs has no MPI library to
+  // finalize. lammps_mpi_finalize is the stub inside that liblammps,
+  // and without it the ReadData and Run commands stay allocated.
 #ifdef SEAMS_HOOK_MPI
   int mpi_inited = 0;
   MPI_Initialized(&mpi_inited);
@@ -131,6 +133,8 @@ int main(int argc, char **argv) {
       MPI_Finalize();
     }
   }
+#else
+  lammps_mpi_finalize();
 #endif
   bool spaced = hook.steps.size() == 1;
   if (hook.steps.size() >= 2) {

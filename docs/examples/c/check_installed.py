@@ -118,7 +118,7 @@ def main(argv):
     cmake_build = work / "cmake"
     subprocess.check_call(
         [
-            "cmake", "-S", str(examples), "-B", str(cmake_build),
+            "cmake", "-S", str(examples), "-B", str(cmake_build), "-G", "Ninja",
             "-DCMAKE_C_COMPILER=" + cc[0],
             "-DCMAKE_PREFIX_PATH=" + str(installed),
             "-Dseams_DIR=" + str(configs[0].parent),

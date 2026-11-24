@@ -33,6 +33,78 @@ def find_build_file(build, name):
     return hits[0] if hits else None
 
 
+def _thread_runtime():
+    runtime = os.environ.get("TSAN_RUNTIME", "")
+    return runtime if runtime and Path(runtime).is_file() else ""
+
+
+def needs_thread_runtime(build):
+    """True when this build's libyodaLib references the thread runtime."""
+    lib = Path(build) / "src" / "libyodaLib.so"
+    if not lib.is_file():
+        found = find_build_file(build, "libyodaLib.so")
+        if found is None:
+            return False
+        lib = found
+    try:
+        return b"__tsan_" in lib.read_bytes()
+    except OSError:
+        return False
+
+
+def drop_thread_runtime(env):
+    """Environment for a process that must not map libclang_rt.tsan.
+
+    plumed, gmx and lmp abort if that runtime is loaded at startup, and
+    loading it later leaves OpenMP workers unregistered. An executable
+    already linked with -fsanitize=thread aborts if the shared runtime
+    is preloaded as well.
+    """
+    env = dict(env)
+    runtime = _thread_runtime()
+    preload = env.get("LD_PRELOAD", "")
+    if not runtime or runtime not in preload.split(":"):
+        return env
+    kept = [part for part in preload.split(":") if part and part != runtime]
+    if kept:
+        env["LD_PRELOAD"] = ":".join(kept)
+    else:
+        env.pop("LD_PRELOAD", None)
+    return env
+
+
+def with_thread_runtime(env):
+    """Environment for an unsanitized binary that dlopens the instrumented library.
+
+    gmx-seams is that binary. The runtime has to be mapped before the
+    process starts; linking it into gmx-seams makes gmx_fio_open jump
+    to address 0, while a preload does not.
+    """
+    env = drop_thread_runtime(env)
+    runtime = _thread_runtime()
+    if not runtime:
+        return env
+    env["LD_PRELOAD"] = runtime
+    return env
+
+
+def external_library(build, name):
+    """Shared library an external host can dlopen.
+
+    An AddressSanitizer build returns its own plugin. plumed, gmx and lmp
+    cannot map libclang_rt.tsan (benchmarks/logs/tsan-engine-hosts.txt),
+    so only a ThreadSanitizer build hands them the unsanitized library.
+    """
+    own = find_build_file(build, name)
+    if own is None or not needs_thread_runtime(build):
+        return own
+    unsan = os.environ.get("SEAMS_UNSANITIZED_PREFIX", "")
+    if not unsan:
+        return own
+    alt = find_build_file(unsan, name)
+    return alt if alt is not None else own
+
+
 def seams_cli(build):
     cli = os.environ.get("SEAMS_CLI") or Path(build) / "seams"
     if not Path(cli).is_file():
@@ -47,7 +119,7 @@ def launch_env(argv):
     queue. Open MPI then aborts inside MPI_Bcast. The TCP BTL does not
     touch that device. A one-rank run leaves the caller's transport alone.
     """
-    env = dict(os.environ, OMP_NUM_THREADS="1")
+    env = drop_thread_runtime(dict(os.environ, OMP_NUM_THREADS="1"))
     names = {Path(arg).name for arg in argv[:2]}
     if names & {"mpirun", "mpiexec"}:
         env.setdefault("UCX_TLS", "tcp,self,sm")
@@ -111,7 +183,10 @@ def offline_labels(cli, dump, nframes, cutoff, workdir, extra=()):
     cmd = [cli, "chill-plus", "--frame", "1", "--last", str(nframes),
            "--cutoff", str(cutoff), "--jobs", "1", "--per-atom", str(out),
            *extra, str(dump)]
-    done = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    # The CLI is linked with the thread runtime. A preload of the same
+    # runtime, inherited from a Python host, aborts it.
+    done = subprocess.run(cmd, capture_output=True, text=True, check=False,
+                          env=drop_thread_runtime(os.environ))
     if done.returncode != 0:
         sys.stderr.write(done.stdout + done.stderr)
         sys.exit(f"offline CLI failed: {' '.join(cmd)}")

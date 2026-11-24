@@ -15,6 +15,18 @@ d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Ro
 
 Questions, issues, discussions and pull requests welcome
 """
+STATUS_PROMISE = re.compile(
+    r"\b(?:"
+    r"to be submitted(?:\s+soon)?|"
+    r"submitted soon|"
+    r"will be published|"
+    r"to be published|"
+    r"coming soon|"
+    r"not yet released|"
+    r"not yet published"
+    r")\b",
+    re.I,
+)
 IFRAME = re.compile(r"<iframe\b[^>]*\bsrc=[\"']([^\"']+)[\"']", re.I)
 LINK = re.compile(r"https?://[^\s)\]>\"']+")
 CHANNEL = "https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d"
@@ -46,12 +58,27 @@ def main():
         fail("expected every video script, found {}".format(len(scripts)))
     for path in scripts:
         text = path.read_text(encoding="utf-8")
+        match = STATUS_PROMISE.search(text)
+        if match:
+            fail(
+                "{} contains publication-status wording: {}".format(
+                    path.relative_to(ROOT), match.group(0)
+                )
+            )
         if not text.endswith(END):
             fail("{} end card does not match".format(path.relative_to(ROOT)))
         if text.count("## End card") != 1:
             fail("{} end card is repeated".format(path.relative_to(ROOT)))
     for path in pages():
         text = path.read_text(encoding="utf-8", errors="replace")
+        if path.suffix in {".md", ".org", ".rst"}:
+            match = STATUS_PROMISE.search(text)
+            if match:
+                fail(
+                    "{} contains publication-status wording: {}".format(
+                        path.relative_to(ROOT), match.group(0)
+                    )
+                )
         for src in IFRAME.findall(text):
             if "odysee.com/@" in src or re.search(r"odysee\.com/(?!\$/embed/)", src):
                 fail("{} iframe is a watch URL: {}".format(path.relative_to(ROOT), src))

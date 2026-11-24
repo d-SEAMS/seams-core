@@ -47,6 +47,10 @@ jobs:
       # The docs snippet tests import dseams and pydseams from pydseamslib.
       - name: Install pydseamslib
         run: pixi run sh scripts/install_pydseamslib.sh
+      # The OpenMM engine tests need the full package, so a broken install
+      # stops here with the import error.
+      - name: Check that OpenMM imports
+        run: pixi run python -c "import openmm, openmm.app"
       - run: pixi run setup
       - run: pixi run build
       - run: pixi run test

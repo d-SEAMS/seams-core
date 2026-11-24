@@ -1,0 +1,42 @@
+plumed, gmx and lmp cannot map libclang_rt.tsan. AddressSanitizer
+builds keep their own plugins. external_library substitutes the
+unsanitized copy only when the build's libyodaLib contains __tsan_.
+
+plumed driver, preload unset, plugin = the thread build's
+libSeamsPlumed.so. PLUMED refuses the dlopen:
+
+  (core/PlumedMain.cpp:1079) void PLMD::PlumedMain::load
+  I cannot load library libSeamsPlumed.so
+  libclang_rt.tsan-x86_64.so: cannot allocate memory in static TLS block
+  Signal: Aborted (6)
+
+plumed --help with that runtime preloaded:
+
+  ThreadSanitizer: SEGV on unknown address 0x680 (pc 0x680)
+  The signal is caused by a READ memory access.
+  exit 66
+
+lmp -help with the same preload:
+
+  ThreadSanitizer: SEGV on unknown address 0x680 (pc 0x680)
+  The signal is caused by a READ memory access.
+  exit 66
+
+gmx help with the same preload exits with signal 11 and writes no
+diagnostic.
+
+gmx-seams from the thread build, SEAMS_UNSANITIZED_PREFIX unset, reading
+an xtc through the thread-sanitized libseams. Help text starts, then
+the first frame aborts in the Archer OpenMP tool, which the unsanitized
+gmx binary did not register:
+
+  Reading frame 0 time 0.000
+  ThreadSanitizer: SEGV on unknown address 0x18
+  #0 AnnotateHappensAfter libclang_rt.tsan
+  #1 ompt_tsan_implicit_task ompt-tsan.cpp libarcher.so
+  #2 __kmp_invoke_task_func libomp.so
+  SUMMARY: ThreadSanitizer: SEGV ompt-tsan.cpp in ompt_tsan_implicit_task
+  exit 134
+
+The .gro path of this same binary accepts the runtime. The xtc and trr
+path does not, so the unsanitized gmx-seams reads those files.

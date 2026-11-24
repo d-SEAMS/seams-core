@@ -14,8 +14,11 @@
 #include <index_range.hpp>
 #include <neighbours.hpp>
 #include <omp_tsan.hpp>
+#include <team_run.hpp>
+#include <thread_team.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -379,47 +382,7 @@ void passFast(const double *xs, const double *ys, const double *zs,
 // branch on the distance test.
 constexpr int kSlotRow = 48;
 
-// Exclusive scan of the per-thread cell histograms. Every thread of the
-// team calls it. Afterwards hist[t * nCells + c] is the first slot of
-// thread t's atoms in cell c, so the scatter keeps the atoms of a cell in
-// ascending input order whatever the team width.
-void teamCellPrefix(int *hist, int nCells, int tid, int nt, int *cellStart, TeamSum *part) {
-  const int c0 = static_cast<int>(static_cast<long long>(nCells) * tid / nt);
-  const int c1 = static_cast<int>(static_cast<long long>(nCells) * (tid + 1) / nt);
-  long long sum = 0;
-  for (int c = c0; c < c1; ++c) {
-    for (int t = 0; t < nt; ++t) {
-      sum += hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
-                  static_cast<std::size_t>(c)];
-    }
-  }
-  part[tid].v = sum;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp barrier
-#endif
-  int acc = 0;
-  for (int t = 0; t < tid; ++t) {
-    acc += static_cast<int>(part[t].v);
-  }
-  for (int c = c0; c < c1; ++c) {
-    cellStart[c] = acc;
-    for (int t = 0; t < nt; ++t) {
-      int &h = hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
-                    static_cast<std::size_t>(c)];
-      const int take = h;
-      h = acc;
-      acc += take;
-    }
-  }
-  if (tid == nt - 1) {
-    cellStart[nCells] = acc;
-  }
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp barrier
-#endif
-}
-
-// Column range [k0, k1) of thread tid when the slots are split evenly.
+// Column range [k0, k1) of part tid of nt when the slots are split evenly.
 void slotBalancedColumns(const int *cellStart, int nCols, int ncz, int tid, int nt, int &k0,
                          int &k1) {
   const long long nSlots =
@@ -2244,7 +2207,7 @@ bool orthoFullCsr(
   // An unsized Rayon pool keeps a worker on every cpu. Size it to this
   // OpenMP width before the stencil so those workers are not a second team.
   // Inside a live team the pool stays at one: the team already owns the cpus.
-  lc_set_threads(nested ? 1 : maxThreads);
+  lc_set_threads(nested ? 1 : seams::poolWidth(maxThreads));
 #endif
   Scratch &sc = nested ? local : scratch();
   auto grow = [](auto &v, std::size_t n) {
@@ -2262,203 +2225,197 @@ bool orthoFullCsr(
   grow(sc.cellOf, nPacked);
   grow(sc.ids, nPacked);
   grow(sc.slotOf, static_cast<std::size_t>(nop));
-  grow(sc.part, static_cast<std::size_t>(maxThreads));
-  // Every entry of cellStart and of each thread's histogram row is written
+  // The scatter keeps the atoms of a cell in ascending input order for
+  // any split of the input into contiguous chunks, so the chunk counts
+  // follow the team (seams::team::parts) without changing the list. Each
+  // bin chunk has its own histogram row.
+  auto parts = [](long long items, long long grain, long long most) {
+    return static_cast<int>(std::clamp<long long>(items / grain, 1, most));
+  };
+  const int width = seams::team::width();
+  const int spread = seams::team::parts(width);
+  const int binChunks = parts(nSubset, 4096, spread);
+  const int cellRanges = parts(nCells, 2048, spread);
+  const int rowRanges = parts(nop, 4096, spread);
+  grow(sc.part, static_cast<std::size_t>(std::max(cellRanges, rowRanges)));
+  // Every entry of cellStart and of each chunk's histogram row is written
   // inside the team, so neither is cleared here.
   grow(sc.cellStart, static_cast<std::size_t>(nCells) + 1);
-  grow(sc.hist, static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells));
-  const bool team = !nested && nSubset >= 256;
-
-  const auto tBin = Clock::now();
-  int threads = 1;
-#if defined(SEAMS_TSAN_JOIN)
-  seams::tsan::Slot histJoin;
-#endif
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (team)
-#endif
-  {
-    const int tid = teamRank();
-    const int nt = teamSize();
-    if (tid == 0) {
-      threads = nt;
-    }
-    int *hist = sc.hist.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nCells);
-    std::fill(hist, hist + nCells, 0);
-    const double invLen[3] = {1.0 / len[0], 1.0 / len[1], 1.0 / len[2]};
-    if (subset != nullptr) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static) nowait
-#endif
-      for (int i = 0; i < nop; ++i) {
-        sc.slotOf[static_cast<std::size_t>(i)].v = -1;
-      }
-    }
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int k = 0; k < nSubset; ++k) {
-      const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
-      const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
-      const double coord[3] = {p.x, p.y, p.z};
-      int cxyz[3];
-      double wrapped[3];
-      for (int d = 0; d < 3; ++d) {
-        double f = (coord[d] - origin[d]) * invLen[d];
-        // Coordinates already inside the box skip the floor. A value on the
-        // far boundary is the same cell as the origin under periodic wrap.
-        if (!(f >= 0.0 && f < 1.0)) {
-          f -= std::floor(f);
-          if (!(f < 1.0)) {
-            f = 0.0;
-          }
-        }
-        int c = static_cast<int>(f * static_cast<double>(ncell[d]));
-        if (c >= ncell[d]) {
-          c = ncell[d] - 1;
-        }
-        if (c < 0) {
-          c = 0;
-        }
-        cxyz[d] = c;
-        wrapped[d] = origin[d] + f * len[d];
-      }
-      const int cid = (cxyz[0] * ncell[1] + cxyz[1]) * ncell[2] + cxyz[2];
-      sc.cellOf[static_cast<std::size_t>(k)] = cid;
-      sc.px[static_cast<std::size_t>(k)].v = wrapped[0];
-      sc.py[static_cast<std::size_t>(k)].v = wrapped[1];
-      sc.pz[static_cast<std::size_t>(k)].v = wrapped[2];
-      ++hist[cid];
-    }
-#if defined(SEAMS_TSAN_JOIN)
-    // Each thread has finished its own histogram row. libgomp's barrier
-    // at the end of the for is invisible to ThreadSanitizer.
-    seams::tsan::arrive_and_wait(histJoin, nt);
-#endif
-    teamCellPrefix(sc.hist.data(), nCells, tid, nt, sc.cellStart.data(), sc.part.data());
-    // Same static split as the count loop, so each thread places the atoms
-    // it counted.
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int k = 0; k < nSubset; ++k) {
-      const int cid = sc.cellOf[static_cast<std::size_t>(k)];
-      const int slot = hist[cid]++;
-      const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
-      sc.ids[static_cast<std::size_t>(slot)] = id;
-      sc.slotOf[static_cast<std::size_t>(id)].v = slot;
-      sc.xs[static_cast<std::size_t>(slot)].v = sc.px[static_cast<std::size_t>(k)].v;
-      sc.ys[static_cast<std::size_t>(slot)].v = sc.py[static_cast<std::size_t>(k)].v;
-      sc.zs[static_cast<std::size_t>(slot)].v = sc.pz[static_cast<std::size_t>(k)].v;
-    }
-  }
-  phase().bin = msSince(tBin);
-  phase().threads = threads;
-  phase().n = nSubset;
-
-  const double *x = &sc.xs[0].v;
-  const double *y = &sc.ys[0].v;
-  const double *z = &sc.zs[0].v;
+  grow(sc.hist, static_cast<std::size_t>(binChunks) * static_cast<std::size_t>(nCells));
+  const int nCols = ncell[0] * ncell[1];
+  // A pair across a part edge is tested from both sides.
+  const int pairParts = std::clamp(spread, 1, std::max(1, nCols));
+  auto span = [](int items, int chunk, int count, int &lo, int &hi) {
+    lo = static_cast<int>(static_cast<long long>(items) * chunk / count);
+    hi = static_cast<int>(static_cast<long long>(items) * (chunk + 1) / count);
+  };
+  const double invLen[3] = {1.0 / len[0], 1.0 / len[1], 1.0 / len[2]};
   double shx[27], shy[27], shz[27];
   fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
-
-  if (!fast) {
-    const auto tCount = Clock::now();
-    offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
-    cols.clear();
-    sc.counts.assign(static_cast<std::size_t>(nop), 0);
-    passSafe<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                    ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
-                    sc.counts.data(), nullptr, nullptr, half);
-    phase().count = msSince(tCount);
-    const auto tPrefix = Clock::now();
-    if (!seams::prefixCounts(sc.counts.data(), nop, offsets)) {
-      return false;
-    }
-    const int nnz = offsets[static_cast<std::size_t>(nop)];
-    cols.resize(static_cast<std::size_t>(nnz));
-    phase().prefix = msSince(tPrefix);
-    phase().pairs = nnz;
-    const auto tFill = Clock::now();
-    if (nnz > 0) {
-      passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                     ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
-                     nullptr, offsets.data(), cols.data(), half);
-    }
-    phase().fill = msSince(tFill);
-    publishProfile();
-    return true;
+  if (fast) {
+    grow(sc.stash, nPacked * static_cast<std::size_t>(kSlotRow));
+    grow(sc.slotCount, nPacked);
+    grow(sc.counts, static_cast<std::size_t>(nop));
+    offsets.resize(static_cast<std::size_t>(nop) + 1);
   }
-
-  // One walk records the rows by packed slot. Each thread takes the cell
-  // columns of an even share of the slots and writes only those rows.
-  //
-  // The linkcell block copies each thread's cells and halo before the
-  // stencil. On ice that copy is slower than this walk, so the CSR and the
-  // row-vector callers both take it. The caller builds row vectors from
-  // that CSR.
-  const auto tCount = Clock::now();
-  grow(sc.stash, nPacked * static_cast<std::size_t>(kSlotRow));
-  grow(sc.slotCount, nPacked);
-  int *stash = &sc.stash[0].v;
-  int *slotCount = &sc.slotCount[0].v;
-  int longest = 0;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (team) reduction(max : longest)
-#endif
-  {
-    int k0 = 0;
-    int k1 = ncell[0] * ncell[1];
-    slotBalancedColumns(sc.cellStart.data(), k1, ncell[2], teamRank(), teamSize(), k0, k1);
-    longest = half ? pairedRows<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
-                                      ncell[1], ncell[2], shx, shy, shz, rc2, k0, k1,
-                                      slotCount, stash, branchy)
-                   : pairedRows<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
-                                       ncell[1], ncell[2], shx, shy, shz, rc2, k0, k1,
-                                       slotCount, stash, branchy);
-  }
-  phase().count = msSince(tCount);
-
-  // Degree of each cloud index, the exclusive scan, and the copy of each
-  // stash row into its sorted CSR row, one contiguous range of rows per
-  // thread. A row longer than the stash is filled by a second walk.
-  const bool overflow = longest > kSlotRow - 1;
-  const auto tPrefix = Clock::now();
-  auto tFill = tPrefix;
-  grow(sc.counts, static_cast<std::size_t>(nop));
-  offsets.resize(static_cast<std::size_t>(nop) + 1);
+  int *stash = fast ? &sc.stash[0].v : nullptr;
+  int *slotCount = fast ? &sc.slotCount[0].v : nullptr;
+  std::atomic<int> longest{0};
   int nnz = 0;
   bool tooMany = false;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (!nested && nop >= 256)
-#endif
-  {
-    const int tid = teamRank();
-    const int nt = teamSize();
-    const int i0 = static_cast<int>(static_cast<long long>(nop) * tid / nt);
-    int i1 = static_cast<int>(static_cast<long long>(nop) * (tid + 1) / nt);
-    long long sum = 0;
-    for (int i = i0; i < i1; ++i) {
-      const int s = sc.slotOf[static_cast<std::size_t>(i)].v;
-      const int c = s < 0 ? 0 : slotCount[s];
-      sc.counts[static_cast<std::size_t>(i)] = c;
-      sum += c;
+  const auto tBin = Clock::now();
+  auto tCount = tBin;
+  auto tPrefix = tBin;
+  auto tFill = tBin;
+  enum Stage { Count, Sum, Scan, Scatter, Pairs, Degree, Total, Fill };
+  std::vector<std::size_t> stages = {
+      static_cast<std::size_t>(binChunks), static_cast<std::size_t>(cellRanges),
+      static_cast<std::size_t>(cellRanges), static_cast<std::size_t>(binChunks)};
+  if (fast) {
+    stages.insert(stages.end(), {static_cast<std::size_t>(pairParts),
+                                 static_cast<std::size_t>(rowRanges), 1,
+                                 static_cast<std::size_t>(rowRanges)});
+  }
+  seams::team::run(stages, [&](std::size_t stage, std::size_t chunk, int) {
+    if (stage == Pairs && chunk == 0) {
+      tCount = Clock::now();
     }
-    sc.part[static_cast<std::size_t>(tid)].v = sum;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp barrier
-#endif
-    long long run = 0;
-    for (int t = 0; t < tid; ++t) {
-      run += sc.part[static_cast<std::size_t>(t)].v;
+    const int c = static_cast<int>(chunk);
+    int lo = 0;
+    int hi = 0;
+    switch (static_cast<Stage>(stage)) {
+    case Count: {
+      int *hist = sc.hist.data() + static_cast<std::size_t>(c) * static_cast<std::size_t>(nCells);
+      std::fill(hist, hist + nCells, 0);
+      if (subset != nullptr) {
+        span(nop, c, binChunks, lo, hi);
+        for (int i = lo; i < hi; ++i) {
+          sc.slotOf[static_cast<std::size_t>(i)].v = -1;
+        }
+      }
+      span(nSubset, c, binChunks, lo, hi);
+      for (int k = lo; k < hi; ++k) {
+        const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
+        const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+        const double coord[3] = {p.x, p.y, p.z};
+        int cxyz[3];
+        double wrapped[3];
+        for (int d = 0; d < 3; ++d) {
+          double f = (coord[d] - origin[d]) * invLen[d];
+          // Coordinates already inside the box skip the floor. A value on the
+          // far boundary is the same cell as the origin under periodic wrap.
+          if (!(f >= 0.0 && f < 1.0)) {
+            f -= std::floor(f);
+            if (!(f < 1.0)) {
+              f = 0.0;
+            }
+          }
+          int cell = static_cast<int>(f * static_cast<double>(ncell[d]));
+          if (cell >= ncell[d]) {
+            cell = ncell[d] - 1;
+          }
+          if (cell < 0) {
+            cell = 0;
+          }
+          cxyz[d] = cell;
+          wrapped[d] = origin[d] + f * len[d];
+        }
+        const int cid = (cxyz[0] * ncell[1] + cxyz[1]) * ncell[2] + cxyz[2];
+        sc.cellOf[static_cast<std::size_t>(k)] = cid;
+        sc.px[static_cast<std::size_t>(k)].v = wrapped[0];
+        sc.py[static_cast<std::size_t>(k)].v = wrapped[1];
+        sc.pz[static_cast<std::size_t>(k)].v = wrapped[2];
+        ++hist[cid];
+      }
+      break;
     }
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp single
-#endif
-    {
+    case Sum: {
+      span(nCells, c, cellRanges, lo, hi);
+      long long sum = 0;
+      for (int b = 0; b < binChunks; ++b) {
+        const int *hist = sc.hist.data() + static_cast<std::size_t>(b) * static_cast<std::size_t>(nCells);
+        for (int cell = lo; cell < hi; ++cell) {
+          sum += hist[cell];
+        }
+      }
+      sc.part[chunk].v = sum;
+      break;
+    }
+    case Scan: {
+      // Afterwards hist[b * nCells + cell] is the first slot of chunk b's
+      // atoms in that cell.
+      span(nCells, c, cellRanges, lo, hi);
+      int acc = 0;
+      for (int r = 0; r < c; ++r) {
+        acc += static_cast<int>(sc.part[static_cast<std::size_t>(r)].v);
+      }
+      for (int cell = lo; cell < hi; ++cell) {
+        sc.cellStart[static_cast<std::size_t>(cell)] = acc;
+        for (int b = 0; b < binChunks; ++b) {
+          int &h = sc.hist[static_cast<std::size_t>(b) * static_cast<std::size_t>(nCells) +
+                           static_cast<std::size_t>(cell)];
+          const int take = h;
+          h = acc;
+          acc += take;
+        }
+      }
+      if (c == cellRanges - 1) {
+        sc.cellStart[static_cast<std::size_t>(nCells)] = acc;
+      }
+      break;
+    }
+    case Scatter: {
+      int *hist = sc.hist.data() + static_cast<std::size_t>(c) * static_cast<std::size_t>(nCells);
+      span(nSubset, c, binChunks, lo, hi);
+      for (int k = lo; k < hi; ++k) {
+        const int cid = sc.cellOf[static_cast<std::size_t>(k)];
+        const int slot = hist[cid]++;
+        const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
+        sc.ids[static_cast<std::size_t>(slot)] = id;
+        sc.slotOf[static_cast<std::size_t>(id)].v = slot;
+        sc.xs[static_cast<std::size_t>(slot)].v = sc.px[static_cast<std::size_t>(k)].v;
+        sc.ys[static_cast<std::size_t>(slot)].v = sc.py[static_cast<std::size_t>(k)].v;
+        sc.zs[static_cast<std::size_t>(slot)].v = sc.pz[static_cast<std::size_t>(k)].v;
+      }
+      break;
+    }
+    case Pairs: {
+      // Each part takes the cell columns of an even share of the slots
+      // and writes only those rows.
+      const double *x = &sc.xs[0].v;
+      const double *y = &sc.ys[0].v;
+      const double *z = &sc.zs[0].v;
+      int k0 = 0;
+      int k1 = nCols;
+      slotBalancedColumns(sc.cellStart.data(), nCols, ncell[2], c, pairParts, k0, k1);
+      const int most =
+          half ? pairedRows<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                                  ncell[2], shx, shy, shz, rc2, k0, k1, slotCount, stash, branchy)
+               : pairedRows<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
+                                   ncell[1], ncell[2], shx, shy, shz, rc2, k0, k1, slotCount,
+                                   stash, branchy);
+      int seen = longest.load(std::memory_order_relaxed);
+      while (most > seen && !longest.compare_exchange_weak(seen, most, std::memory_order_relaxed)) {
+      }
+      break;
+    }
+    case Degree: {
+      span(nop, c, rowRanges, lo, hi);
+      long long sum = 0;
+      for (int i = lo; i < hi; ++i) {
+        const int s = sc.slotOf[static_cast<std::size_t>(i)].v;
+        const int deg = s < 0 ? 0 : slotCount[s];
+        sc.counts[static_cast<std::size_t>(i)] = deg;
+        sum += deg;
+      }
+      sc.part[chunk].v = sum;
+      break;
+    }
+    case Total: {
+      tPrefix = Clock::now();
       long long total = 0;
-      for (int t = 0; t < nt; ++t) {
-        total += sc.part[static_cast<std::size_t>(t)].v;
+      for (int r = 0; r < rowRanges; ++r) {
+        total += sc.part[static_cast<std::size_t>(r)].v;
       }
       // Same bound as prefixCounts: the offsets are 32-bit.
       tooMany = total > std::numeric_limits<int>::max();
@@ -2466,32 +2423,84 @@ bool orthoFullCsr(
       offsets[static_cast<std::size_t>(nop)] = nnz;
       cols.resize(static_cast<std::size_t>(nnz));
       tFill = Clock::now();
+      break;
     }
-    if (tooMany) {
-      i1 = i0;
-    }
-    int *out = cols.data();
-    for (int i = i0; i < i1; ++i) {
-      offsets[static_cast<std::size_t>(i)] = static_cast<int>(run);
-      const int c = sc.counts[static_cast<std::size_t>(i)];
-      if (!overflow && c > 0) {
-        const int *src = stash + static_cast<std::size_t>(sc.slotOf[static_cast<std::size_t>(i)].v) *
-                                     static_cast<std::size_t>(kSlotRow);
-        int *dst = out + run;
-        for (int k = 0; k < c; ++k) {
-          dst[k] = src[k];
-        }
-        sortRow(dst, c);
+    case Fill: {
+      if (tooMany) {
+        break;
       }
-      run += c;
+      // A row longer than the stash is filled by a second walk.
+      const bool overflow = longest.load(std::memory_order_relaxed) > kSlotRow - 1;
+      span(nop, c, rowRanges, lo, hi);
+      long long run = 0;
+      for (int r = 0; r < c; ++r) {
+        run += sc.part[static_cast<std::size_t>(r)].v;
+      }
+      int *out = cols.data();
+      for (int i = lo; i < hi; ++i) {
+        offsets[static_cast<std::size_t>(i)] = static_cast<int>(run);
+        const int deg = sc.counts[static_cast<std::size_t>(i)];
+        if (!overflow && deg > 0) {
+          const int *src = stash + static_cast<std::size_t>(sc.slotOf[static_cast<std::size_t>(i)].v) *
+                                       static_cast<std::size_t>(kSlotRow);
+          int *dst = out + run;
+          for (int k = 0; k < deg; ++k) {
+            dst[k] = src[k];
+          }
+          sortRow(dst, deg);
+        }
+        run += deg;
+      }
+      break;
     }
+    }
+  });
+  if (!fast) {
+    phase().bin = msSince(tBin);
+  } else {
+    phase().bin = std::chrono::duration<double, std::milli>(tCount - tBin).count();
+    phase().count = std::chrono::duration<double, std::milli>(tPrefix - tCount).count();
+  }
+  phase().threads = width;
+  phase().n = nSubset;
+
+  const double *x = &sc.xs[0].v;
+  const double *y = &sc.ys[0].v;
+  const double *z = &sc.zs[0].v;
+
+  if (!fast) {
+    const auto tSafe = Clock::now();
+    offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
+    cols.clear();
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+    passSafe<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                    ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
+                    sc.counts.data(), nullptr, nullptr, half);
+    phase().count = msSince(tSafe);
+    const auto tScan = Clock::now();
+    if (!seams::prefixCounts(sc.counts.data(), nop, offsets)) {
+      return false;
+    }
+    const int total = offsets[static_cast<std::size_t>(nop)];
+    cols.resize(static_cast<std::size_t>(total));
+    phase().prefix = msSince(tScan);
+    phase().pairs = total;
+    const auto tWalk = Clock::now();
+    if (total > 0) {
+      passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                     ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
+                     nullptr, offsets.data(), cols.data(), half);
+    }
+    phase().fill = msSince(tWalk);
+    publishProfile();
+    return true;
   }
   if (tooMany) {
     return false;
   }
   phase().prefix = std::chrono::duration<double, std::milli>(tFill - tPrefix).count();
   phase().pairs = nnz;
-  if (overflow && nnz > 0) {
+  if (longest.load(std::memory_order_relaxed) > kSlotRow - 1 && nnz > 0) {
     if (half) {
       passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                            ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),

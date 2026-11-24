@@ -32,7 +32,9 @@ class DseamsReporter:
     def describeNextReport(self, simulation):
         step = int(simulation.currentStep)
         remain = self.interval - (step % self.interval)
-        return {"steps": remain, "periodic": None, "include": ["positions"]}
+        # OpenMM 8.0 indexes the five-item reporter tuple. OpenMM 8.2 and
+        # newer convert this tuple to their dictionary form.
+        return (remain, True, False, False, False)
 
     def report(self, simulation, state):
         del state

@@ -135,7 +135,7 @@ the one-thread result.
 time is not this rings kernel.
 
 #+begin_export rst
-.. include:: pool-audit-tables.rst
+.. include:: thread-scaling-tables.rst
 #+end_export
 
 * The full cutoff ring call

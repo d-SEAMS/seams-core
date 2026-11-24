@@ -48,17 +48,20 @@ def time_plain(simulation, state, steps):
 
 
 def time_insitu(simulation, state, lib, interval, steps):
+    import tempfile
     import time
 
     simulation.reporters.clear()
     restore(simulation, state)
     engine = InSitu(library=str(lib), cutoff=3.5)
-    simulation.reporters.append(DseamsReporter(engine, "unused", interval=interval))
-    start = time.perf_counter()
-    simulation.step(steps)
-    elapsed = time.perf_counter() - start
-    simulation.reporters.clear()
-    return elapsed, len(engine.frames)
+    with tempfile.TemporaryDirectory() as tmp:
+        dump = str(Path(tmp) / "unused")
+        simulation.reporters.append(DseamsReporter(engine, dump, interval=interval))
+        start = time.perf_counter()
+        simulation.step(steps)
+        elapsed = time.perf_counter() - start
+        simulation.reporters.clear()
+        return elapsed, len(engine.frames)
 
 
 def run_box(box_nm, lib, steps, intervals, trials):
@@ -84,7 +87,7 @@ def run_box(box_nm, lib, steps, intervals, trials):
 def main():
     lib = LIB
     if not lib.is_file() and str(lib) == "libseams_lang":
-        built = ROOT / "build" / "bindings" / "libseams_lang.so"
+        built = ROOT / "build" / "bindings" / ("libseams_lang.dylib" if sys.platform == "darwin" else "libseams_lang.so")
         if built.is_file():
             lib = built
     for box in BOXES_NM:

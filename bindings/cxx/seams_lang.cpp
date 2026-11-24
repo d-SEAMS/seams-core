@@ -548,6 +548,7 @@ seams_frame oxygen_subframe(const seams_frame *frame) {
 int classify_chill(seams_frame *frame, double cutoff, int type,
                    const char *graph, bool plus, const char *rule, int *labels,
                    int counts9[9]) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
@@ -831,6 +832,7 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
                            const char *graph, int max_ring, double skin,
                            int *labels, int counts9[9], int *ring_counts,
                            int ring_counts_len, seams_phase_times *times) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || labels == nullptr || counts9 == nullptr ||
       ring_counts == nullptr || max_ring < 3 ||
@@ -965,6 +967,7 @@ int seams_frame_chill(seams_frame *frame, double cutoff, int type,
 int seams_frame_rings(seams_frame *frame, double cutoff, int type,
                       const char *graph, int max_depth, int *counts,
                       int counts_len) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || counts == nullptr || max_depth < 3 ||
       counts_len < max_depth + 1) {
@@ -1190,6 +1193,7 @@ int seams_frame_chordless(seams_frame *frame, double cutoff, int type,
 
 int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                             const char *graph) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || !(cutoff > 0.0) || !std::isfinite(cutoff)) {
     set_error("neighbours need a frame and a finite positive cutoff");
@@ -1242,6 +1246,7 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
 int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
                                  int order_l, const char *graph, double *ql,
                                  double *qlbar) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
@@ -1328,6 +1333,7 @@ int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
 
 int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
                    double *wl) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || wl == nullptr) {
     set_error("wl needs a frame");
@@ -1362,6 +1368,7 @@ int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
 
 int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
                       double *q6, double *q4bar, double *q6bar) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || q4 == nullptr || q6 == nullptr) {
     set_error("q4, q6 and a frame are required");
@@ -1412,6 +1419,7 @@ int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
                             double *q4, double *q6, double *q4bar,
                             double *q6bar, int *labels, int counts9[9]) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || q4 == nullptr || q6 == nullptr) {
     set_error("q4, q6 and a frame are required");
@@ -1466,6 +1474,7 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
 int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,
                       int *n_hex, int *n_cubic, int *n_water, int *n_both) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
@@ -1728,6 +1737,7 @@ int seams_frame_signature(seams_frame *frame, double cutoff, int type,
 int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
                                const char *graph, const char *spec,
                                const char *edge, int *n_cages, int *n_atoms) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || spec == nullptr || n_cages == nullptr ||
       n_atoms == nullptr) {
@@ -1799,6 +1809,7 @@ int seams_frame_rdf_nbins(double rmax, int nbins) {
 int seams_frame_rdf(const seams_frame *frame, double rmax, int nbins,
                     int type_i, int type_j, double *r, double *g, int *count,
                     double *volume) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || r == nullptr || g == nullptr || count == nullptr) {
     set_error("rdf needs a frame and r, g, count buffers");
@@ -1891,6 +1902,7 @@ int seams_frame_rdf2d(seams_frame *frame, double cutoff, double binwidth,
 int seams_frame_prisms(seams_frame *frame, double cutoff, int type,
                        int max_depth, const char *output_dir,
                        seams_prism_row *rows, int *n_rows) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || max_depth < 3) {
     set_error("prisms need a frame and max_depth >= 3");
@@ -1952,6 +1964,7 @@ int seams_frame_prisms(seams_frame *frame, double cutoff, int type,
 int seams_frame_monolayer(seams_frame *frame, double cutoff, int type,
                           int max_depth, double sheet_area,
                           const char *output_dir, int *counts, int counts_len) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || counts == nullptr || max_depth < 3 ||
       counts_len < max_depth + 1) {
@@ -1985,6 +1998,7 @@ int seams_frame_monolayer(seams_frame *frame, double cutoff, int type,
 }
 
 int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || labels == nullptr) {
     set_error("symmetry needs a frame and a label buffer");

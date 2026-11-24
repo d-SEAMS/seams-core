@@ -30,6 +30,7 @@
 #include <cage.hpp>
 #include <mol_sys.hpp>
 #include <order_parameter.hpp>
+#include <par_team.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <seams_output.hpp>
@@ -83,8 +84,8 @@ struct RingSearchIndex {
   std::vector<std::vector<int>> ringsContainingAtom;
   //! Same rows as ringsContainingAtom, packed. ringCol[ringOff[a] .. ringOff[a+1])
   //! is the ascending ring list of atom a. Empty when the index was not built.
-  std::vector<int> ringOff;
-  std::vector<int> ringCol;
+  std::vector<int, seams::FilledByTeam<int>> ringOff;
+  std::vector<int, seams::FilledByTeam<int>> ringCol;
   //! Atoms the packed rows cover.
   [[nodiscard]] int atomCount() const {
     return ringOff.empty() ? 0 : static_cast<int>(ringOff.size()) - 1;

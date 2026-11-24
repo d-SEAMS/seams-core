@@ -1,6 +1,6 @@
 [workspace]
 name = "seams-core"
-version = "2.14.0"
+version = "2.14.2"
 channels = ["conda-forge"]
 # linux-64 stays the glibc 2.28 baseline. conda-forge has no
 # sysroot_linux-64 2.38; 2.39 is the sysroot at or above 2.38. It is
@@ -36,6 +36,8 @@ chemfiles = ">=0.10"
 # Ozaki tests link libgmp and libmpfr.
 gmp = ">=6.3.0,<7"
 mpfr = ">=4.2.2,<5"
+# The OpenMM docs and engine tests import openmm.app on every platform.
+openmm = ">=8.6.1,<9"
 
 [tasks]
 setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true"
@@ -65,9 +67,7 @@ lcov --capture --directory bbdir-cov --branch-coverage \
   --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info && \
 lcov --remove bbdir-cov/meson-logs/coverage.info \
   '*/external/backward.hpp' '*/backward.cpp' \
-  '*/tests/*' '*/bench_*' \
-  --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info \
-  --ignore-errors unused && \
+  --config-file .lcovrc --output-file bbdir-cov/meson-logs/coverage.info && \
 genhtml bbdir-cov/meson-logs/coverage.info --branch-coverage \
   --config-file .lcovrc --output-directory bbdir-cov/meson-logs/coveragereport
 """, depends-on = ["coverage-build"] }
@@ -257,6 +257,7 @@ cmd = "python3 docs/fix_built_links.py && python3 docs/finalize_seo.py docs/buil
 
 [feature.docs.tasks.docbld]
 depends-on = ["fix-built-links"]
+cmd = "python3 docs/fix_built_links.py --sitemap docs/build"
 
 [feature.docs.tasks.docdel]
 cwd = "docs"
@@ -313,9 +314,13 @@ libabigail = "2.9.*"
 [target.linux-64.dependencies]
 # coverage-run passes --branch-coverage, which lcov 1.x does not know.
 lcov = ">=2.0"
-lammps = ">=2024.8.29,<2026"
+# abidiff for capi_abi in the default pixi-suite. The abi feature already has it.
+libabigail = "2.9.*"
+# engine-e2e runs mpirun -np 2. A nompi build has no mpirun on PATH and
+# cannot split the cell. The newest glibc 2.28 build is nompi, so the
+# MPI build string is part of the pin.
+lammps = { version = ">=2024.8.29,<2026", build = "*mpi_openmpi*" }
 gromacs = ">=2026.3,<2027"
-openmm = ">=8.6.1,<9"
 # 2.10 builds of lammps need glibc >= 2.38. The lock is glibc 2.28.
 plumed = ">=2.9.2,<2.10"
 packmol = ">=21.2.1,<22"

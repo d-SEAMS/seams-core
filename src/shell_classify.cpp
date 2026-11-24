@@ -26,6 +26,7 @@
 
 #include <index_range.hpp>
 #include <shell_hot.hpp>
+#include <team_run.hpp>
 #include <thread_team.hpp>
 
 #include <algorithm>
@@ -1438,9 +1439,9 @@ bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon
     }
     if (taken < 3) {
       if (!openFace || na >= 4 || !padOpenFace(mine[k], fx, fy, fz, nf, taken)) {
-        return false;
-      }
+      return false;
     }
+  }
   }
   return nf == 12;
 }
@@ -1713,11 +1714,8 @@ void fillFastBonds(int ncell, int nx, int ny, int nz, double lx, double ly, doub
                    const double *cx, const double *cy, const double *cz, const int *cid, Bond *bonds, int *nbon) {
   const double cut2 = kBond * kBond;
   const double min2 = 2.15 * 2.15;
-  const auto cells = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int cell = 0; cell < ncell; cell++) {
+  seams::team::forRange(static_cast<std::size_t>(ncell), 256, [&](std::size_t from, std::size_t to, int) {
+    for (int cell = static_cast<int>(from); cell < static_cast<int>(to); cell++) {
       const int here0 = cellStart[cell];
       const int here1 = cellStart[cell + 1];
       if (here0 == here1) {
@@ -1859,11 +1857,7 @@ void fillFastBonds(int ncell, int nx, int ny, int nz, double lx, double ly, doub
         }
       }
     }
-  };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (ncell >= 64)
-#endif
-  cells();
+  });
 }
 
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
@@ -1872,8 +1866,10 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   if (n <= 0) {
     return;
   }
-  // The shell walk is OpenMP. A few thousand atoms do not feed eight
-  // threads, and this call does not start a second pool.
+  // The shell walk is seams::team stages: OpenMP on an idle machine,
+  // linkcell's pool on a crowded one. A few thousand atoms do not feed
+  // eight threads.
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(n);
   const bool timed = symTime();
@@ -1936,11 +1932,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   View<double> py{mem.py};
   View<double> pz{mem.pz};
   View<int> bin{mem.bin};
-  const auto wrap = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int i = 0; i < n; i++) {
+  seams::team::forRange(static_cast<std::size_t>(n), 2048, [&](std::size_t from, std::size_t to, int) {
+    for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
       const double c0 = x[i];
       const double c1 = y[i];
       const double c2 = z[i];
@@ -1987,59 +1980,78 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       const int cell = (iz * ny + iy) * nx + ix;
       bin[static_cast<size_t>(i)] = cell;
     }
-  };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (n >= 4096)
-#endif
-  wrap();
+  });
   // Atoms packed by cell, which is the layout of the orthorhombic neighbour list.
   View<int> cellStart{mem.cellStart};
   View<Packed> packed{mem.packed};
-#ifdef SEAMS_HAS_OPENMP
-  const int sortTeam = (n >= 16384 && !omp_in_parallel()) ? omp_get_max_threads() : 1;
-#else
-  const int sortTeam = 1;
-#endif
-  if (sortTeam > 1) {
-#ifdef SEAMS_HAS_OPENMP
-    // A counting sort on the team. Thread t takes the t-th block of atoms,
+  const int width = seams::team::width();
+  const int spread = seams::team::parts(width);
+  const int sortChunks = n >= 16384 ? std::clamp(n / 4096, 1, spread) : 1;
+  if (sortChunks > 1) {
+    // A counting sort on the team. Chunk t takes the t-th block of atoms,
     // and its slots in a cell follow those of the lower blocks, so each
     // cell holds its atoms in ascending order as the serial fill does.
+    const int ranges = std::clamp(ncell / 2048, 1, spread);
     thread_local std::vector<int> slotStore;
-    slotStore.assign(static_cast<size_t>(sortTeam) * static_cast<size_t>(ncell), 0);
+    thread_local std::vector<long long> rangeStore;
+    slotStore.resize(static_cast<size_t>(sortChunks) * static_cast<size_t>(ncell));
+    rangeStore.resize(static_cast<size_t>(ranges));
     int *slots = slotStore.data();
-    const auto sortBlock = [&]() {
-      const int t = omp_get_thread_num();
-      const int nt = omp_get_num_threads();
-      const int lo = static_cast<int>(static_cast<long long>(n) * t / nt);
-      const int hi = static_cast<int>(static_cast<long long>(n) * (t + 1) / nt);
-      int *mine = slots + static_cast<size_t>(t) * static_cast<size_t>(ncell);
-      for (int i = lo; i < hi; i++) {
-        ++mine[bin[static_cast<size_t>(i)]];
-      }
-#pragma omp barrier
-#pragma omp single
-      {
-        for (int c = 0; c < ncell; c++) {
-          int at = cellStart[static_cast<size_t>(c)];
-          for (int u = 0; u < nt; u++) {
-            int &k = slots[static_cast<size_t>(u) * static_cast<size_t>(ncell) + static_cast<size_t>(c)];
-            const int count = k;
-            k = at;
-            at += count;
-          }
-          cellStart[static_cast<size_t>(c) + 1] = at;
-        }
-      }
-      for (int i = lo; i < hi; i++) {
-        const int slot = mine[bin[static_cast<size_t>(i)]]++;
-        packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
-                                                   pz[static_cast<size_t>(i)], i};
-      }
+    long long *rangeSum = rangeStore.data();
+    auto span = [](int items, int part, int parts, int &lo, int &hi) {
+      lo = static_cast<int>(static_cast<long long>(items) * part / parts);
+      hi = static_cast<int>(static_cast<long long>(items) * (part + 1) / parts);
     };
-#pragma omp parallel num_threads(sortTeam)
-    sortBlock();
-#endif
+    seams::team::run({static_cast<std::size_t>(sortChunks), static_cast<std::size_t>(ranges),
+                      static_cast<std::size_t>(ranges), static_cast<std::size_t>(sortChunks)},
+                     [&](std::size_t stage, std::size_t chunk, int) {
+      const int t = static_cast<int>(chunk);
+      int lo = 0;
+      int hi = 0;
+      if (stage == 0 || stage == 3) {
+        int *mine = slots + static_cast<size_t>(t) * static_cast<size_t>(ncell);
+        span(n, t, sortChunks, lo, hi);
+        if (stage == 0) {
+          std::fill(mine, mine + ncell, 0);
+          for (int i = lo; i < hi; i++) {
+            ++mine[bin[static_cast<size_t>(i)]];
+          }
+        } else {
+          for (int i = lo; i < hi; i++) {
+            const int slot = mine[bin[static_cast<size_t>(i)]]++;
+            packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
+                                                       pz[static_cast<size_t>(i)], i};
+          }
+        }
+        return;
+      }
+      span(ncell, t, ranges, lo, hi);
+      if (stage == 1) {
+        long long sum = 0;
+        for (int u = 0; u < sortChunks; u++) {
+          const int *row = slots + static_cast<size_t>(u) * static_cast<size_t>(ncell);
+          for (int c = lo; c < hi; c++) {
+            sum += row[c];
+          }
+        }
+        rangeSum[t] = sum;
+        return;
+      }
+      long long base = 0;
+      for (int r = 0; r < t; r++) {
+        base += rangeSum[r];
+      }
+      int at = static_cast<int>(base);
+      for (int c = lo; c < hi; c++) {
+        for (int u = 0; u < sortChunks; u++) {
+          int &k = slots[static_cast<size_t>(u) * static_cast<size_t>(ncell) + static_cast<size_t>(c)];
+          const int count = k;
+          k = at;
+          at += count;
+        }
+        cellStart[static_cast<size_t>(c) + 1] = at;
+      }
+    });
   } else {
     for (int i = 0; i < n; i++) {
       ++cellStart[static_cast<size_t>(bin[static_cast<size_t>(i)]) + 1];
@@ -2059,34 +2071,22 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   const int nImage = span * span * span;
   View<Bond> bonds{mem.bonds};
   View<int> nbon{mem.nbon};
-#ifdef SEAMS_HAS_OPENMP
-  const int threads = omp_get_max_threads();
-#else
-  const int threads = 1;
-#endif
   const bool halfPairs = false;
   if (fast) {
     double *cx = mem.cx;
     double *cy = mem.cy;
     double *cz = mem.cz;
     int *cid = mem.cid;
-    const auto unpack = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-      for (int s = 0; s < n; s++) {
+    seams::team::forRange(static_cast<std::size_t>(n), 8192, [&](std::size_t from, std::size_t to, int) {
+      for (int s = static_cast<int>(from); s < static_cast<int>(to); s++) {
         const Packed &p = packed[static_cast<size_t>(s)];
         cx[s] = p.x;
         cy[s] = p.y;
         cz[s] = p.z;
         cid[s] = p.id;
       }
-    };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (n >= 16384 && threads > 1)
-#endif
-    unpack();
-    if (threads == 1) {
+    });
+    if (width == 1) {
       fillHalfFast(ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid, mem.js,
                    nbon.data(), mem.bd, mem.vx, mem.vy, mem.vz);
       commitBonds(n, bonds.data(), nbon.data(), mem.js, mem.bd, mem.vx, mem.vy, mem.vz);
@@ -2096,11 +2096,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
   }
   const int cellWalk = fast ? 0 : ncell;
-  const auto walk = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int cell = 0; cell < cellWalk; cell++) {
+  seams::team::forRange(static_cast<std::size_t>(cellWalk), 256, [&](std::size_t from, std::size_t to, int) {
+    for (int cell = static_cast<int>(from); cell < static_cast<int>(to); cell++) {
       const int ix0 = cell % nx;
       const int iy0 = (cell / nx) % ny;
       const int iz0 = cell / (nx * ny);
@@ -2311,17 +2308,10 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       }
       }
     }
-  };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (cellWalk >= 64 && threads > 1)
-#endif
-  walk();
+  });
   const auto tBonds = std::chrono::steady_clock::now();
-  const auto label = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int i = 0; i < n; i++) {
+  seams::team::forRange(static_cast<std::size_t>(n), 2048, [&](std::size_t from, std::size_t to, int) {
+    for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
       const int nb = nbon[static_cast<size_t>(i)];
       const Bond *mine = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
       const double ci0 = px[static_cast<size_t>(i)];
@@ -2451,11 +2441,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         continue;
       }
     }
-  };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (n >= 64 && threads > 1)
-#endif
-  label();
+  });
   const auto tLabel = std::chrono::steady_clock::now();
   // The fit is only for a shell that already touches a labeled crystal.
   // Bulk liquid has a high q and would otherwise all enter Kabsch.
@@ -2516,11 +2502,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   // The test reads the labels from the fit, not the filtered ones.
   int *raw = mem.rawK;
   std::memcpy(raw, kind, static_cast<size_t>(n) * sizeof(int));
-  const auto prune = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int i = 0; i < n; i++) {
+  seams::team::forRange(static_cast<std::size_t>(n), 2048, [&](std::size_t from, std::size_t to, int) {
+    for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
       if (raw[i] < 0) {
         continue;
       }
@@ -2537,11 +2520,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         kind[i] = -1;
       }
     }
-  };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (n >= 64 && threads > 1)
-#endif
-  prune();
+  });
   recoverHex(n, bonds.get(), nbon.data(), packed.get(), cellStart.data(), nx, ny, nz, reach, bin.get(),
              lat, px.get(), py.get(), pz.get(), kind, canon, gate, mem.crystal, mem.tried);
   if (timed) {
@@ -2672,11 +2651,8 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
   for (int i = 0; i < n; i++) {
     crystal[static_cast<size_t>(i)] = kind[i] >= 0 ? 1 : 0;
   }
-  const auto retry = [&]() {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int i = 0; i < n; i++) {
+  seams::team::forRange(static_cast<std::size_t>(n), 2048, [&](std::size_t from, std::size_t to, int) {
+    for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
       if (crystal[static_cast<size_t>(i)] || tried[static_cast<size_t>(i)]) {
         continue;
       }
@@ -2816,12 +2792,7 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
       const double ci[3] = {ci0, ci1, ci2};
       kind[i] = shellFit(ci, nbxyz, 16, canon, gate, true);
     }
-  };
-#ifdef SEAMS_HAS_OPENMP
-  const int threads = omp_get_max_threads();
-#pragma omp parallel if (n >= 64 && threads > 1)
-#endif
-  retry();
+  });
   }
 }
 
