@@ -33,10 +33,22 @@ def main() -> int:
         return 1
     state = save_state(simulation)
     plain = time_plain(simulation, state, 1)
-    with tempfile.TemporaryDirectory(prefix="seams-tip4p-") as tmp:
+    here = Path.cwd()
+    with (
+        tempfile.TemporaryDirectory(prefix="seams-tip4p-") as tmp,
+        tempfile.TemporaryDirectory(prefix="seams-tip4p-cwd-") as scratch,
+    ):
         dump = Path(tmp) / "insitu.lammpstrj"
-        elapsed, reports = time_insitu(simulation, state, lib, 1, 2, dump)
+        os.chdir(scratch)
+        try:
+            elapsed, reports = time_insitu(simulation, state, lib, 1, 2, dump)
+        finally:
+            os.chdir(here)
         frames = dump.read_text().count("ITEM: TIMESTEP")
+        left = sorted(os.listdir(scratch))
+    if left:
+        print(f"time_insitu wrote {left} into its working directory", file=sys.stderr)
+        return 1
     if plain < 0.0 or elapsed < 0.0 or reports < 1:
         print(f"plain {plain} insitu {elapsed} reports {reports}", file=sys.stderr)
         return 1

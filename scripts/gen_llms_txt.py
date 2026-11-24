@@ -30,6 +30,7 @@ import argparse
 import posixpath
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -319,16 +320,42 @@ def render():
     return "\n".join(lines).rstrip() + "\n"
 
 
+def output_matches(path, expected):
+    current = path.read_text(encoding="utf-8") if path.is_file() else None
+    return current == expected, current
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true", help="exit 1 when llms.txt differs from a fresh generation")
+    parser.add_argument(
+        "--selftest",
+        action="store_true",
+        help="prove the clean output passes and a mutated line fails",
+    )
     args = parser.parse_args(argv)
+    if args.check and args.selftest:
+        parser.error("--check and --selftest are mutually exclusive")
     text = render()
-    if args.check:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.is_file() else None
-        if current != text:
+    if args.check or args.selftest:
+        matches, current = output_matches(OUTPUT, text)
+        if not matches:
             print("llms.txt is out of date. Run: python3 scripts/gen_llms_txt.py", file=sys.stderr)
             return 1
+        if args.selftest:
+            marker = "- [API reference]("
+            mutated = current.replace(marker, "- [Mutated API reference](", 1)
+            with tempfile.TemporaryDirectory(prefix="seams-llms-selftest-") as directory:
+                candidate = Path(directory) / OUTPUT.name
+                candidate.write_text(mutated, encoding="utf-8")
+                if mutated == current or output_matches(candidate, text)[0]:
+                    print(
+                        "llms.txt mismatch selftest did not detect a mutation",
+                        file=sys.stderr,
+                    )
+                    return 1
+            print("llms.txt mismatch selftest ok")
+            return 0
         print("llms.txt ok ({} links)".format(text.count("\n- [")))
         return 0
     OUTPUT.write_text(text, encoding="utf-8")
