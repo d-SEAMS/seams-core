@@ -51,6 +51,25 @@ let
   lammpsWithPlugin = lammps.overrideAttrs (old: {
     cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DPKG_PLUGIN=ON" ];
   });
+  bindingSource = name: rev: hash: fetchzip {
+    url = "https://codeload.github.com/d-SEAMS/${name}/tar.gz/${rev}";
+    extension = "tar.gz";
+    inherit hash;
+  };
+  bindingSources = {
+    PydSEAMSlib = bindingSource "PydSEAMSlib" "115f0ca9df37107c8ca824088b5d813fe41b2c3e"
+      "sha256-+flLctn4JkA/qNS999KGCf6SIYJ9vcEPdZcxNnKBJMY=";
+    "Dseams.jl" = bindingSource "Dseams.jl" "24bd4e4d28956fc69a0bf69a86e36145505e7ffe"
+      "sha256-ZbwL/Qd00IZ1PJ9PrC9vkwRzjg2PaSXPamd5TfbqgtY=";
+    dseams-r = bindingSource "dseams-r" "25dfa13e1b1542d88ac768ecd053ebcfe10c72da"
+      "sha256-3KF4IwNGnHCEfGOfCvyMTj2KvdRYk4k4V4ITZ1b7kRk=";
+    dseams-rs = bindingSource "dseams-rs" "c462541512940a3101485a0f731cd1b3e6883fcd"
+      "sha256-Iedu4qlFRDMX0roxTwBxoaX5cLotkIpkaVThLidee+o=";
+    dseams-fortran = bindingSource "dseams-fortran" "aafd4b85440c616338e2831ba3bdcdf64e16b2d2"
+      "sha256-RwV+wyDaKDcQYIXeG1YRUNomcU8LrjBFgvYNvvIm8v0=";
+    yodaStruct = bindingSource "yodaStruct" "79b6daa1ec74f37451765f537a0d0c37407380fe"
+      "sha256-TlC4TAI3LQB95G1+oZRdChp7L+hHWjRWi9mBonnqdg0=";
+  };
   # freud needs parsnip. The wheel's distribution name is parsnip_cif.
   py = python3.override {
     packageOverrides = self: super: {
@@ -172,6 +191,9 @@ stdenv.mkDerivation (finalAttrs: {
     substituteInPlace tests/install_pydseamslib_if_missing.py \
       --replace-fail /usr/bin/git ${git}/bin/git
     patchShebangs --build scripts
+    mkdir -p docs/.cache/bindings
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList
+      (name: source: "ln -s ${source} docs/.cache/bindings/${name}") bindingSources)}
     cp -R ${minimageSrc} subprojects/minimage
     cp -R ${linkcellSrc} subprojects/linkcell
     cp -R ${vesinSrc} subprojects/vesin
@@ -272,6 +294,7 @@ stdenv.mkDerivation (finalAttrs: {
   # git ls-files. The filtered source has no repository of its own.
   doCheck = true;
   preCheck = ''
+    export SEAMS_NO_NETWORK=1
     git -C .. init -q -b main
     git -C .. add -A
     git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
