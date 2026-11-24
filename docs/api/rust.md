@@ -8,7 +8,7 @@
 Both live in [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs).
 
 ```bash
-cargo add dseams@2.14.0
+cargo add dseams
 ```
 
 The safe crate calls the same C API as the CLI. On `input/traj/ice1h.lammpstrj` (128 oxygens, type 1) published CHILL+ at 3.5 angstrom is 128 hexagonal:

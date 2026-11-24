@@ -6,12 +6,12 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 ## Start
 
-- [d-SEAMS](https://docs.dseams.info/index.md): d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
+- [d-SEAMS](https://docs.dseams.info/index.md): d-SEAMS reads a molecular-dynamics trajectory and names the ice in it.
 
 ## Getting started
 
 - [Getting started](https://docs.dseams.info/getting-started/index.md): Install the engine, then classify one frame.
-- [Install the engine](https://docs.dseams.info/getting-started/install.md): Release 2.14.0 provides the seams command, libyodaLib, libseams (include/seams.h), and libseams_lang (bindings/cxx/seams_lang.h).
+- [Install the engine](https://docs.dseams.info/getting-started/install.md): This release provides the seams command, libyodaLib, libseams (include/seams.h), and libseams_lang (bindings/cxx/seams_lang.h).
 - [Quickstart](https://docs.dseams.info/getting-started/quickstart.md): Install the engine, classify one cubic cell, then read one LAMMPS frame.
 - [Videos](https://docs.dseams.info/videos/index.md): Short screencasts of d-SEAMS in each language and tutorial are hosted on d-SEAMS on Odysee.
 
@@ -60,7 +60,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [GROMACS](https://docs.dseams.info/engines/gromacs.md): engines/gromacs/seams_ice.cpp is a TrajectoryAnalysisModule.
 - [OpenMM](https://docs.dseams.info/engines/openmm.md): There is one reporter, DseamsReporter in adapters/python/dseams_insitu/openmm.py.
 - [PLUMED](https://docs.dseams.info/engines/plumed.md): The d-SEAMS PLUMED plugin egg (plumID:26.018) uses v0.4.1 of the dseams-plumed repository.
-- [In-situ](https://docs.dseams.info/engines/insitu.md): adapters/python/dseams_insitu/engine.py is InSitu.
+- [In-situ](https://docs.dseams.info/engines/insitu.md): The in-situ driver ships with this engine.
 - [Engine walkthroughs](https://docs.dseams.info/walkthrough/index.md): Each page analyzes a supplied input with published CHILL+, the primitive six-ring histogram, and local q6.
 - [Language walkthroughs](https://docs.dseams.info/user/languages.md): The same ice cell from C, C++, and each binding, and from each engine driver.
 - [C tutorial](https://docs.dseams.info/fronts/c.md): Label the eight-atom cubic cell with seams.h and print the library version.
@@ -99,12 +99,12 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [sII and sH hydrate cages](https://docs.dseams.info/science/cages.md): input/traj/genice_sII.lammpstrj and input/traj/genice_sH.lammpstrj are guest-free GenIce hosts, 136 waters each.
 - [Science figures](https://docs.dseams.info/science/gallery.md): These four molecular views accompany the science tutorials.
 - [Performance and comparisons](https://docs.dseams.info/user/performance.md): What to time, how the literature codes were run, and where d-SEAMS sits next to them.
-- [Benchmarks](https://docs.dseams.info/user/howto/benchmarks.md): Time a 2.14.0 build and write down the run.
+- [Benchmarks](https://docs.dseams.info/user/howto/benchmarks.md): Time a build of this release and write down the run.
 - [Literature head-to-head](https://docs.dseams.info/user/howto/literature-h2h.md): Two recorded comparisons of d-SEAMS 2.14.0.
 - [Reproduce the literature head-to-head](https://docs.dseams.info/user/howto/literature-reproduce.md): scripts/h2h_rc3_sitting.py writes the six-call sitting.
 - [Head-to-head](https://docs.dseams.info/user/comparisons.md): Measured comparisons of d-SEAMS 2.14.0 with other structure codes.
 - [Concepts](https://docs.dseams.info/explanation/index.md): These pages are for understanding.
-- [Architecture](https://docs.dseams.info/explanation/architecture.md): 0 is one C++ engine, libyodaLib.
+- [Architecture](https://docs.dseams.info/explanation/architecture.md): d-SEAMS is one C++ engine, libyodaLib.
 - [Binding overhead](https://docs.dseams.info/explanation/binding-overhead.md): Ice Ih at 4096, 32768, and 110592 molecules.
 - [The C API](https://docs.dseams.info/explanation/c-api.md): include/seams.h is ABI 1 of libseams.
 - [CHILL+: the published rule and the OVITO rule](https://docs.dseams.info/explanation/chill-plus-rules.md): Nguyen and Molinero, /J. Phys. Chem. B/ 2015, 119, 9369 (10.1021/jp510289t), equation 1 averages q_3 over the four nearest neighbours of a shell that already holds four neighbours inside the cutoff.
@@ -133,7 +133,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 ## API reference
 
 - [API reference](https://docs.dseams.info/reference/index.md): Lookup pages for the engine. Tutorials and how-tos live elsewhere.
-- [Python Frame](https://docs.dseams.info/reference/python-frame.md): dseams.userframe.read in pydseamslib 2.14.0 returns a Frame over libseams_lang.
+- [Python Frame](https://docs.dseams.info/reference/python-frame.md): dseams.userframe.read in pydseamslib returns a Frame over libseams_lang.
 - [seams CLI](https://docs.dseams.info/reference/cli.md): The engine command is seams. The parser is Argum. Help, errors, ice-type counts, and --features are colorized through Argum's environmentColorStatus.
 - [Data Formats](https://docs.dseams.info/reference/data-formats.md): seams and the C++ readers share one suffix table.
 - [walk_compare](https://docs.dseams.info/reference/walk-compare.md): tests/walk_compare walks a LAMMPS dump and prints one row per frame.
@@ -161,11 +161,11 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 
 ## Language bindings
 
-- [PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib): Install the Python binding with pip install pydseamslib==2.14.0.
+- [PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib): Install the Python binding with pip install pydseamslib.
 - [yodaStruct](https://github.com/d-SEAMS/yodaStruct): Clone the Lua and Fennel binding, then run luarocks make in the checkout.
 - [dseams-r](https://github.com/d-SEAMS/dseams-r): Install the R binding with remotes::install_github("d-SEAMS/dseams-r").
 - [Dseams.jl](https://github.com/d-SEAMS/Dseams.jl): Install the Julia binding with Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl").
-- [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Install the Rust binding with cargo add dseams@2.14.0.
+- [dseams-rs](https://github.com/d-SEAMS/dseams-rs): Install the Rust binding with cargo add dseams.
 - [dseams-fortran](https://github.com/d-SEAMS/dseams-fortran): Add the Fortran binding as an fpm Git dependency.
 
 ## PLUMED plugin

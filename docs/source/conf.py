@@ -15,9 +15,6 @@ except RuntimeError:
 # -- Path setup --------------------------------------------------------------
 _source = os.path.dirname(os.path.abspath(__file__))
 _docs = os.path.dirname(_source)
-_root = os.path.dirname(_docs)
-sys.path.insert(0, os.path.join(_root, "scripts"))
-from project_version import project_version
 
 
 def _stage_records():
@@ -222,6 +219,10 @@ def _stage_markdown_book():
     """Copy the language pages into the Sphinx tree so myst renders them."""
     import pathlib
 
+    if _docs not in sys.path:
+        sys.path.insert(0, _docs)
+    import check_c_api_tour
+
     groups = (
         ("api", "stable", "Stable API"),
         ("engines", "engines", "Engine builds"),
@@ -233,7 +234,10 @@ def _stage_markdown_book():
         dest.mkdir(parents=True, exist_ok=True)
         names = []
         for page in sorted(src.glob("*.md")):
-            (dest / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
+            text = page.read_text(encoding="utf-8")
+            if src_name == "api" and page.name == "c.md":
+                text = check_c_api_tour.resolve_page(text, pathlib.Path(_docs).parent)
+            (dest / page.name).write_text(text, encoding="utf-8")
             names.append(page.stem)
         underline = "=" * len(title)
         # The sidebar toctree lives on the landing page. A second toctree
@@ -615,14 +619,18 @@ def _write_binding_api():
 _write_binding_api()
 _include_orphan_pages()
 
+if _docs not in sys.path:
+    sys.path.insert(0, _docs)
+import discoverability
+
 # -- Project information -----------------------------------------------------
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
 author = "Rohit Goswami, Amrita Goswami, Ruhila S"
-version = project_version()
+version = discoverability.project_version()
 release = version
 language = "en"
-# The default HTML title appends "2.14.0 documentation" to every page.
+# The default HTML title appends "<version> documentation" to every page.
 # The short title keeps the tab and the social card on the page name.
 html_title = "d-SEAMS"
 

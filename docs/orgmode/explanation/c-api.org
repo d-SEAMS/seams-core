@@ -90,8 +90,8 @@ hidden. =SEAMS_VERSION_MAJOR=, =SEAMS_VERSION_MINOR=,
 =SEAMS_VERSION_PATCH=, =SEAMS_VERSION_STRING=, and
 =SEAMS_VERSION_NUMBER= are the version of the header.
 =seams_version= returns the =SEAMS_VERSION_NUMBER= the library was
-built with, packed as =(major << 16) | (minor << 8) | patch=. This
-release is 2.14.0. The header and the library disagree when
+built with, packed as =(major << 16) | (minor << 8) | patch=.
+Both sides carry the project version. The header and the library disagree when
 =seams_version= and =SEAMS_VERSION_NUMBER= differ.
 
 * Threads

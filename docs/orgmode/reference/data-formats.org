@@ -15,7 +15,7 @@ not the frame index).
 The CLI takes the substring after the last ~.~ and compares it to
 ~xyz~, ~con~, ~pdb~, ~gro~, and ~dcd~. The comparison is exact, so
 ~foo.xyz/dump~ is a LAMMPS dump. A path with no dot is a LAMMPS dump.
-~seams --features~ reports chemfiles and readcon-core. The 2.14
+~seams --features~ reports chemfiles and readcon-core. The
 Python frame is documented on [[file:python-frame.org][Python Frame]].
 
 * Type columns

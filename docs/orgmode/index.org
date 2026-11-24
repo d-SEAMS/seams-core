@@ -55,9 +55,9 @@
 
 * Overview
 
-d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
+d-SEAMS reads a molecular-dynamics trajectory and names the ice in it.
 The name is Deferred Structural Elucidation Analysis for Molecular
-Simulations. Release 2.14.0 of this repository is the C++ engine
+Simulations. This release of the repository is the C++ engine
 ~libyodaLib~, the C API ~libseams~ (~include/seams.h~), the header-only
 C++ API ~include/seams.hpp~ (it links ~libseams~), the C ABI
 ~libseams_lang~ (~bindings/cxx/seams_lang.h~, used by the Python, R, and
@@ -65,7 +65,7 @@ Julia fronts), the ~seams~ command, and the LAMMPS, GROMACS, OpenMM,
 PLUMED, and in-situ drivers. ~gmx-seams~ reads the trajectory ~gmx mdrun~ wrote.
 The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
 [[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
-~seams --version~ prints ~2.14.0~.
+~seams --version~ prints the project version.
 #+begin_export rst
 See the :doc:`engines/plumed` page for the plugin.
 #+end_export
@@ -104,14 +104,14 @@ Each other language is its own repository.
 and the library each one links.
 
 - Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
-  with ~pip install 'pydseamslib==2.14.0'~ from
+  with ~pip install pydseamslib~ from
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
 - Lua and Fennel: ~require("dseams")~, clone
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] and run ~luarocks make~ in the checkout
 - R: ~remotes::install_github("d-SEAMS/dseams-r")~ from [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
 - Julia: ~Pkg.add(url="https://github.com/d-SEAMS/Dseams.jl")~ from
   [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
-- Rust: ~cargo add dseams@2.14.0~ from [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
+- Rust: ~cargo add dseams~ from [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
 - Fortran: fpm Git dependency ~dseams~ from [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
 
 [[file:reference/release-2.14.org][The 2.14.2 notes]] are the changes

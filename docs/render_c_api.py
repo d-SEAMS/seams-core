@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Write docs/api/c.md from include/seams.h and the tour's printed lines."""
+"""Write docs/api/c.md from include/seams.h and the tour's printed lines.
+
+Usage: c_api_tour <root> | render_c_api.py [OUT]
+
+The release values of the seams_version* lines are written as placeholders,
+so the tracked page does not change when meson.build's version does.
+"""
 
 import re
 import sys
@@ -104,16 +110,11 @@ def lines_for(name, printed):
     return [row for row in printed if row.split()[1] == name]
 
 
-def main():
-    header = HEADER.read_text()
-    printed = [row for row in sys.stdin.read().splitlines() if row.startswith("capi ")]
-    if not printed:
-        print("tour output is empty", file=sys.stderr)
-        return 1
-    names = symbols(header)
+def render(header, printed, names):
     chunks = [INTRO]
     seen = []
     for row in printed:
+        row = capi_docs.version_placeholder(row)
         name = row.split()[1]
         if name in seen:
             chunks.append("```\n{}\n```\n".format(row))
@@ -141,15 +142,26 @@ def main():
     chunks.append("<!-- API_SYMBOLS_END -->\n")
     chunks.append("The program those lines come from:\n")
     chunks.append("```{literalinclude} ../../../docs/examples/c_api_tour.c\n```\n")
-    text = "\n".join(chunks)
+    return "\n".join(chunks)
+
+
+def main(argv):
+    out = Path(argv[1]) if len(argv) > 1 else OUT
+    header = HEADER.read_text()
+    printed = [row for row in sys.stdin.read().splitlines() if row.startswith("capi ")]
+    if not printed:
+        print("tour output is empty", file=sys.stderr)
+        return 1
+    names = symbols(header)
+    text = render(header, printed, names)
     missing = [name for name in names if name not in text]
     if missing:
         print("generator missed " + " ".join(missing), file=sys.stderr)
         return 1
-    OUT.write_text(text)
-    print("wrote {} ({} capi lines)".format(OUT, len(printed)))
+    out.write_text(text)
+    print("wrote {} ({} capi lines)".format(out, len(printed)))
     return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(sys.argv))

@@ -9,12 +9,60 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import capi_docs  # noqa: E402
 from toolchain import c_compiler, link_command  # noqa: E402
 
 
 def fail(message):
     print(message, file=sys.stderr)
     raise SystemExit(1)
+
+
+def meson_version(root):
+    text = (root / "meson.build").read_text(encoding="utf-8")
+    match = re.search(r"^project\([^)]*?version:\s*'([0-9]+)\.([0-9]+)\.([0-9]+)'", text, re.M)
+    if match is None:
+        fail("meson.build has no project version")
+    return tuple(int(part) for part in match.groups())
+
+
+def resolve_page(page, root):
+    major, minor, patch = meson_version(root)
+    packed = (major << 16) | (minor << 8) | patch
+    version = "{}.{}.{}".format(major, minor, patch)
+    values = {
+        "seams_version": packed,
+        "seams_version_major": major,
+        "seams_version_minor": minor,
+        "seams_version_patch": patch,
+        "seams_version_string": version,
+    }
+    placeholders = {
+        "capi {} {}".format(name, mark): "capi {} {}".format(name, values[name])
+        for name, mark in capi_docs.VERSION_PLACEHOLDERS.items()
+    }
+    missing = [key for key in placeholders if key not in page]
+    if missing:
+        fail("docs/api/c.md is missing version placeholder(s):\n" + "\n".join(missing))
+    resolved = page
+    for key, value in placeholders.items():
+        resolved = resolved.replace(key, value)
+    return resolved
+
+
+def check_page(lines, page, root, functions, stdout):
+    resolved = resolve_page(page, root)
+    missing = [row for row in lines if row not in resolved]
+    if missing:
+        fail("docs/api/c.md is missing:\n" + "\n".join(missing))
+    documented = re.findall(r"(?m)^capi \S.*$", resolved)
+    extra = [row for row in documented if row not in lines]
+    if extra:
+        fail("docs/api/c.md quotes lines the tour did not print:\n" + "\n".join(extra[:20]))
+    print("c api documented lines {}".format(len(documented)))
+    quiet = [name for name in functions if "capi " + name not in stdout]
+    if quiet:
+        fail("tour did not print " + " ".join(quiet))
 
 
 def main():
@@ -67,17 +115,7 @@ def main():
     lines = [row for row in run.stdout.splitlines() if row.startswith("capi ")]
     if len(lines) < 60:
         fail("tour printed {} lines".format(len(lines)))
-    missing = [row for row in lines if row not in page]
-    if missing:
-        fail("docs/api/c.md is missing:\n" + "\n".join(missing))
-    documented = re.findall(r"(?m)^capi \S.*$", page)
-    extra = [row for row in documented if row not in lines]
-    if extra:
-        fail("docs/api/c.md quotes lines the tour did not print:\n" + "\n".join(extra[:20]))
-    print("c api documented lines {}".format(len(documented)))
-    quiet = [name for name in functions if "capi " + name not in run.stdout]
-    if quiet:
-        fail("tour did not print " + " ".join(quiet))
+    check_page(lines, page, root, functions, run.stdout)
     print("c api tour {} lines".format(len(lines)))
 
 
