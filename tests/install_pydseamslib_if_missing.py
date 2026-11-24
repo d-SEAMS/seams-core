@@ -422,6 +422,59 @@ def test_non_git_tree_always_reinstalls(
         _assert_valid_target_install(venv, plain_root, None)
 
 
+def test_null_tree_stamp_rejected_in_checkout(
+    venv: Path,
+    tdir: Path,
+    fake_bin: Path,
+    fake_src: Path,
+    expected_root: str,
+    expected_tree: str,
+) -> None:
+    stamp_path = _assert_valid_target_install(venv, expected_root, expected_tree)
+    _write(
+        stamp_path,
+        json.dumps({"root": expected_root, "tree": None}, sort_keys=True) + "\n",
+    )
+    clone_log = tdir / "clone-null-tree.log"
+    env = _script_env(fake_bin, venv, fake_src, clone_log)
+    _install_if_missing(expected_root, env)
+    if not clone_log.is_file():
+        raise SystemExit("null tree stamp: --if-missing in a git checkout accepted it without reinstalling")
+    _assert_valid_target_install(venv, expected_root, expected_tree)
+
+
+def test_unresolvable_git_head_aborts(
+    staged: Path,
+    venv: Path,
+    tdir: Path,
+    fake_bin: Path,
+    fake_src: Path,
+) -> None:
+    git_env = without_asan_preload(extra={"GIT_CONFIG_GLOBAL": os.devnull, "GIT_CONFIG_NOSYSTEM": "1"})
+    unborn = tdir / "unborn-source"
+    shutil.copytree(staged, unborn, ignore=shutil.ignore_patterns(".git"))
+    _run(["git", "init", "-q", str(unborn)], env=git_env)
+    corrupt = tdir / "corrupt-source"
+    shutil.copytree(staged, corrupt, ignore=shutil.ignore_patterns(".git"))
+    _write(corrupt / ".git", f"gitdir: {tdir / 'missing-gitdir'}\n")
+    for label, root in (("unborn .git", unborn), ("corrupt .git", corrupt)):
+        clone_log = tdir / f"clone-{root.name}.log"
+        env = _script_env(fake_bin, venv, fake_src, clone_log)
+        res = subprocess.run(
+            ["/bin/sh", str(root / "scripts" / SCRIPT.name), "--if-missing"],
+            text=True,
+            capture_output=True,
+            env=env,
+            cwd=root,
+        )
+        if res.returncode == 0:
+            raise SystemExit(f"{label}: --if-missing exited 0: {res.stderr!r}")
+        if clone_log.is_file():
+            raise SystemExit(f"{label}: --if-missing installed despite an unresolvable HEAD")
+        if "is not a git checkout" in res.stderr:
+            raise SystemExit(f"{label}: treated as a non-git tree: {res.stderr!r}")
+
+
 def main() -> int:
     real_git = shutil.which("git")
     if real_git is None:
@@ -457,6 +510,10 @@ def main() -> int:
             tdir, fake_bin, fake_src, expected_root, expected_tree
         )
         test_non_git_tree_always_reinstalls(staged, tdir, fake_bin, fake_src)
+        test_null_tree_stamp_rejected_in_checkout(
+            venv, tdir, fake_bin, fake_src, expected_root, expected_tree
+        )
+        test_unresolvable_git_head_aborts(staged, venv, tdir, fake_bin, fake_src)
     return 0
 
 
