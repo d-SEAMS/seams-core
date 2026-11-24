@@ -15,7 +15,6 @@ if str(DOCS_DIR) not in sys.path:
 from registry_claims import ClaimParseError, claims
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "docs" / "source"
 
 PROCESS_PATTERNS = (
     ("video claim file", re.compile(r"\bembed\.txt\b", re.I)),
@@ -32,7 +31,7 @@ PROCESS_PATTERNS = (
     ("base versus tip", re.compile(r"\bBase [0-9a-f]{7,}\s+vs\b", re.I)),
     ("molecule rendering command", re.compile(r"\brender_molecules\.py\b|--out\s+docs/", re.I)),
     ("missing-player process", re.compile(r"\brenders? no player\b", re.I)),
-    ("documentation test command", re.compile(r"\bmeson test\b|\bdocs_[a-z0-9_]+\b", re.I)),
+    ("documentation test command", re.compile(r"\bmeson\s+test\b|\bdocs_[a-z0-9_]+\b", re.I)),
     ("continuous-integration process", re.compile(
         r"\bCI (?:executes|runs|mode)\b|\bin CI\b|\bcontinuous integration\b",
         re.I,
@@ -95,6 +94,17 @@ README_PATTERNS = tuple(
     item for item in PROCESS_PATTERNS if item[0] != "documentation test command"
 )
 
+
+def normalised_text(text: str) -> str:
+    """Collapse horizontal whitespace before the reader-text patterns run.
+
+    Sphinx splits a literal into one span per word and the visible-text
+    join puts the span gaps back as several spaces. ``meson   test`` is
+    the same command as ``meson test``. Newlines stay, so a pattern that
+    is written to stop at the end of a line still does.
+    """
+    return re.sub(r"[^\S\n]+", " ", text)
+
 SKIP_PARTS = {
     "science/figures",
     "videos/embeds",
@@ -128,18 +138,21 @@ class VisibleHTML(html.parser.HTMLParser):
             self.parts.append(data)
 
 
-def source_pages():
-    for path in sorted(SOURCE.rglob("*")):
-        if path.suffix.lower() not in {".rst", ".md"}:
-            continue
-        rel = path.relative_to(SOURCE).as_posix()
-        if rel in SKIP_FILES or any(rel == part or rel.startswith(part + "/") for part in SKIP_PARTS):
-            continue
-        yield path, rel
-    llms = ROOT / "llms.txt"
+def source_pages(root: Path | None = None):
+    root = ROOT if root is None else root
+    source = root / "docs" / "source"
+    if source.is_dir():
+        for path in sorted(source.rglob("*")):
+            if path.suffix.lower() not in {".rst", ".md"}:
+                continue
+            rel = path.relative_to(source).as_posix()
+            if rel in SKIP_FILES or any(rel == part or rel.startswith(part + "/") for part in SKIP_PARTS):
+                continue
+            yield path, rel
+    llms = root / "llms.txt"
     if llms.is_file():
         yield llms, "llms.txt"
-    readme = ROOT / "README.md"
+    readme = root / "README.md"
     if readme.is_file():
         yield readme, "README.md"
 
@@ -155,35 +168,50 @@ def html_pages(build):
         yield path, rel, " ".join(parser.parts)
 
 
-def main() -> int:
+def page_findings(rel: str, text: str, scanned_text: str) -> tuple[list[str], int]:
+    """Match one page. ``scanned_text`` is what the patterns see.
+
+    ``main`` passes ``normalised_text(text)``. The claim parser still sees
+    the original lines.
+    """
+    if text == "players.html must not be published":
+        return [f"html/{rel}: internal fragment was published"], 0
+    patterns = README_PATTERNS if rel == "README.md" else PROCESS_PATTERNS
+    errors = []
+    for label, pattern in patterns:
+        for match in pattern.finditer(scanned_text):
+            line = scanned_text.count("\n", 0, match.start()) + 1
+            errors.append(f"{rel}:{line}: {label}: {match.group(0)}")
+    registry_claims = 0
+    for number, line in enumerate(text.splitlines(), 1):
+        try:
+            for _manager, _package, _version in claims(line):
+                registry_claims += 1
+        except ClaimParseError as error:
+            errors.append(f"{rel}:{number}: malformed install claim: {error}")
+    return errors, registry_claims
+
+
+def main(root: Path | None = None) -> int:
+    root = ROOT if root is None else root
     errors = []
     registry_claims = 0
     source_count = 0
     html_count = 0
     scanned = []
-    for path, rel in source_pages():
+    for path, rel in source_pages(root):
         source_count += 1
         scanned.append((path, rel, path.read_text(encoding="utf-8", errors="replace")))
-    build = ROOT / "docs" / "build"
+    build = root / "docs" / "build"
     if build.is_dir():
         for path, rel, text in html_pages(build):
             html_count += 1
             scanned.append((path, "html/" + rel, text))
     for path, rel, text in scanned:
-        if text == "players.html must not be published":
-            errors.append(f"html/{rel}: internal fragment was published")
-            continue
-        patterns = README_PATTERNS if rel == "README.md" else PROCESS_PATTERNS
-        for label, pattern in patterns:
-            for match in pattern.finditer(text):
-                line = text.count("\n", 0, match.start()) + 1
-                errors.append(f"{rel}:{line}: {label}: {match.group(0)}")
-        for number, line in enumerate(text.splitlines(), 1):
-            try:
-                for _manager, _package, _version in claims(line):
-                    registry_claims += 1
-            except ClaimParseError as error:
-                errors.append(f"{rel}:{number}: malformed install claim: {error}")
+        scanned_text = normalised_text(text)
+        found, claims_here = page_findings(rel, text, scanned_text)
+        errors.extend(found)
+        registry_claims += claims_here
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
