@@ -1,1 +1,1 @@
-The three large example trajectories now live in the public `d-SEAMS/seams-core-inputs` Hugging Face dataset at a pinned revision. Benchmarks and documentation use a shared SHA-256-verifying fetch helper, while the test suite uses small committed fixtures and remains offline.
+The three large example trajectories now live in the public `d-SEAMS/seams-core-inputs` Hugging Face dataset. Benchmarks and documentation fetch them through `input/fetch.py` with SHA-256 verification, while the test suite uses small committed fixtures and remains offline.
