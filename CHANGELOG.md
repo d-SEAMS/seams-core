@@ -11,7 +11,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.2] - 2026-11-19
-
 ### Added
 
 - The `ring_oracle` and `ring_oracle_python` tests compare primitive and shortest-path ring sets, ring labels and cage counts against a brute-force enumerator. They cover random graphs, edge cases (lone atoms, repeated bonds, hubs, the max-depth boundary, rings across periodic boundaries), ice Ih, Ic, II and III cells, and hand-built prism and clathrate cages, across the C++ engine, the C API and PydSEAMSlib. `scripts/gen_ring_oracle_cells.py` regenerates the ice II and III cells from GenIce2.
@@ -57,6 +56,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Release-note verification renders each release draft in-process through the builder command instead of spawning a nested Python subprocess per release, keeping the changelog verification checks within their time limit under AddressSanitizer.
 - Remove the trajectory dataset revision hash from documentation pages so only `input/fetch.py` stores it, and flag dataset revision hashes in source and rendered documentation checks.
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
+- The Linux archive, conda recipe, and Julia build include the Linkcell licence for the neighbour backend compiled into libyodaLib.
 - The Meson dist script does not run when seams-core is a subproject.
 - The Nix package source includes `scripts/dist_strip_vcs.py`, which Meson reads when it finds Python. The development shell omits the workflow runner that depends on the broken `stopit` package.
 - The PLUMED 2.10 engine environment now includes pytest, so bindings configure in that lane instead of failing at configure time.

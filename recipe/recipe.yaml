@@ -100,6 +100,7 @@ about:
   license: MIT AND BSD-3-Clause
   license_file:
     - LICENSE
+    - subprojects/linkcell/LICENSE
     - third_party/argum/LICENSE
   summary: d-SEAMS structural analysis engine for molecular simulations of water and ice
   description: |

@@ -161,6 +161,7 @@ export SEAMS_WITH_READCON=enabled
 (cd "$src" && bash recipe/build-libseams.sh)
 
 EIGEN_SRC=$eigen_src \
+  LINKCELL_SRC=$src/subprojects/linkcell \
   READCON_CORE_SRC=$src/subprojects/readcon-core \
   READCON_DB_SRC=$src/subprojects/readcon-db \
   bash "$root/scripts/finish_libseams_prefix.sh" "$prefix"

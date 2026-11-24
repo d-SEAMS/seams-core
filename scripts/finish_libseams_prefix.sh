@@ -4,8 +4,8 @@
 # licences of the code compiled into it.
 set -euo pipefail
 
-if [[ $# -ne 1 || -z ${EIGEN_SRC:-} ]]; then
-  printf '%s\n' "usage: EIGEN_SRC=... finish_libseams_prefix.sh PREFIX" >&2
+if [[ $# -ne 1 || -z ${EIGEN_SRC:-} || -z ${LINKCELL_SRC:-} ]]; then
+  printf '%s\n' "usage: EIGEN_SRC=... LINKCELL_SRC=... finish_libseams_prefix.sh PREFIX" >&2
   exit 1
 fi
 
@@ -42,9 +42,10 @@ fi
 
 cp "$root/LICENSE" "$prefix/LICENSE"
 lic=$prefix/licenses
-mkdir -p "$lic/argum" "$lic/backward-cpp" "$lic/eigen" "$lic/gcc-runtime"
+mkdir -p "$lic/argum" "$lic/backward-cpp" "$lic/eigen" "$lic/gcc-runtime" "$lic/linkcell"
 cp "$root/scripts/licenses/argum.txt" "$lic/argum/LICENSE"
 cp "$root/scripts/licenses/backward-cpp.txt" "$lic/backward-cpp/LICENSE"
+cp "$LINKCELL_SRC/LICENSE" "$lic/linkcell/LICENSE"
 
 eigen_copied=0
 for file in "$EIGEN_SRC"/COPYING*; do
@@ -131,6 +132,9 @@ argum
 
 backward-cpp
   The crash handler compiled into the seams command. MIT.
+
+linkcell
+  The neighbour backend compiled into libyodaLib. MIT.
 
 gcc-runtime
   GCC runtime objects the manylinux_2_28 compiler links statically
