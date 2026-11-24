@@ -431,7 +431,7 @@ vesin_dep = dependency('vesin', required: false, fallback: ['vesin', 'vesin_dep'
 # checks; both follow this project's with_tests.
 _sub_flag = get_option('with_tests') ? 'true' : 'false'
 _sub_tests = ['with_tests=' + _sub_flag, 'with_examples=' + _sub_flag]
-_linkcell_opts = _sub_tests
+_linkcell_opts = _sub_tests + ['use_openmp=' + (openmp_found ? 'true' : 'false')]
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 else
