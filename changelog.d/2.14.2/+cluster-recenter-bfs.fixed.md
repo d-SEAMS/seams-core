@@ -1,0 +1,1 @@
+Unwrap cluster atoms in `clump::recenterClusterCloud` along a BFS spanning tree of the neighbour list `nList` rather than Stoddard's linked-list cycle, preventing clusters spanning more than half a box edge from being split across periodic boundaries.

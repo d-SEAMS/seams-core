@@ -1,0 +1,1 @@
+Initialize `ylm` rows, divide by the count of non-zero-distance bonds, clamp `cos(theta)`, and guard zero-norm denominators in `chill::getq6`, and guard empty `c_ij` lists in `chill::reclassifyWater`.

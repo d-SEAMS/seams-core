@@ -1,0 +1,1 @@
+Precompute exact periodic minimum-image bond vectors via `gen::relDistFromPoint` in `chill::specializedChillPlus` so triclinic cells use full tilt-aware MIC instead of orthorhombic `mic1`, and clamp `dz / r` and zero-distance bonds in `y3`.

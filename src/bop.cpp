@@ -934,7 +934,7 @@ static void classifyBondsLeftFp64(
         return;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
         candidates = heapNear.data();
@@ -1425,9 +1425,9 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     int ncell = -1;
   };
   static Scratch scratch;
-  int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
-  int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
-  int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
+  int nx = std::max(1, static_cast<int>(std::floor(Lx / cutoff)));
+  int ny = std::max(1, static_cast<int>(std::floor(Ly / cutoff)));
+  int nz = std::max(1, static_cast<int>(std::floor(Lz / cutoff)));
   seams::coarsenUntilFits(nx, ny, nz, 1);
   int ncell = 0;
   if (!seams::gridFits(nx, ny, nz, ncell)) {
@@ -1554,7 +1554,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
         }
         double rx, ry, rz;
         if (tiltBox) {
-          const auto image = gen::fracDelta(
+          const auto image = gen::exactDelta(
               fracBox, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
               scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
               scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
@@ -1824,12 +1824,12 @@ bool chill::q4q6ChillPlus(
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     if (tilt) {
       double sz = (p.z - frac.oz) / frac.lz;
+      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
+      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
       sz -= std::floor(sz);
       if (!(sz < 1.0)) sz = 0.0;
-      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
       sy -= std::floor(sy);
       if (!(sy < 1.0)) sy = 0.0;
-      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
       sx -= std::floor(sx);
       if (!(sx < 1.0)) sx = 0.0;
       xyz[static_cast<std::size_t>(3 * i)] = sx * frac.lx;
@@ -1853,6 +1853,7 @@ bool chill::q4q6ChillPlus(
   const double axy = tilt ? frac.xy / frac.ly : 0.0;
   const double axz = tilt ? frac.xz / frac.lz : 0.0;
   const double ayz = tilt ? frac.yz / frac.lz : 0.0;
+  const bool checkSmith = tilt && !(cutoff + 1e-12 < frac.halfMin);
   constexpr double pi = 3.14159265358979323846;
   const double pre4 = 4.0 * pi / 9.0;
   const double pre6 = 4.0 * pi / 13.0;
@@ -1917,6 +1918,17 @@ bool chill::q4q6ChillPlus(
         dx = dX + axy * dY + axz * dZ;
         dy = dY + ayz * dZ;
         dz = dZ;
+        if (checkSmith) {
+          const double r2 = dx * dx + dy * dy + dz * dz;
+          if (!gen::smithInside(frac, r2)) {
+            const std::array<double, 3> w = {dx, dy, dz};
+            const auto euc = gen::refineEuclidean(
+                frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
+            dx = euc[0];
+            dy = euc[1];
+            dz = euc[2];
+          }
+        }
       } else {
         dx = xi - xyz[static_cast<std::size_t>(3 * j)];
         dy = yi - xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -2428,7 +2440,7 @@ bool chill::chillPlusPublishedCutoff(
       if (seen) {
         continue;
       }
-      const auto dr = gen::fracDelta(frame, xi, yi, zi,
+      const auto dr = gen::exactDelta(frame, xi, yi, zi,
                                      scratch.xyz[static_cast<std::size_t>(3 * j)],
                                      scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
                                      scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
@@ -2652,7 +2664,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
             continue;
           }
           const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-          const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+          const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
           const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
           if (!(d2 > 0.0)) {
             continue;
@@ -2845,7 +2857,7 @@ int chill::chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, doubl
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
@@ -2981,7 +2993,7 @@ int chill::chillFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yClou
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
@@ -3358,32 +3370,30 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // if(yCloud.pts[iatom].type!=typeO){continue;}
 
+    auto &dstYlm = QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm;
+    dstYlm.assign(static_cast<std::size_t>(2 * l + 1), {0.0, 0.0});
     const auto nearest = nearestNeighbourIndices(yCloud, nList, iatom, 4);
-    bool first = true;
+    int nUsed = 0;
     for (int jatomIndex : nearest) {
       delta = gen::relDist(yCloud, iatom, jatomIndex);
-      double r = std::sqrt(std::pow(delta[0], 2.0) + std::pow(delta[1], 2.0) +
-                           std::pow(delta[2], 2.0));
-      if (r == 0.0) {
+      const double r = std::sqrt(delta[0] * delta[0] + delta[1] * delta[1] +
+                                 delta[2] * delta[2]);
+      if (!(r > 0.0)) {
         continue;
       }
-      angles[1] = acos(delta[2] / r);
-      angles[0] = atan2(delta[0], delta[1]);
+      const double cosTheta = std::max(-1.0, std::min(1.0, delta[2] / r));
+      angles[1] = std::acos(cosTheta);
+      angles[0] = std::atan2(delta[0], delta[1]);
 
-      if (first) {
-        sph::spheriHarmoInto(l, angles, QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm);
-        first = false;
-        continue;
-      }
       sph::spheriHarmoInto(l, angles, yl);
       for (int m = 0; m < 2 * l + 1; m++) {
-        QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm[static_cast<std::size_t>(m)] += yl[static_cast<std::size_t>(m)];
+        dstYlm[static_cast<std::size_t>(m)] += yl[static_cast<std::size_t>(m)];
       }
+      ++nUsed;
     }
 
-    if (!nearest.empty()) {
-      QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm = gen::avgVector(
-          QlmTotal.ptq[static_cast<std::size_t>(iatom)].ylm, l, static_cast<int>(nearest.size()));
+    if (nUsed > 0) {
+      dstYlm = gen::avgVector(dstYlm, l, nUsed);
     }
   } // End of looping over all iatom
 
@@ -3412,9 +3422,8 @@ chill::getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         Inorm = Inorm + (qI * std::conj(qI));
         Jnorm = Jnorm + (qJ * std::conj(qJ));
       }
-      complexDenominator = std::sqrt(Inorm * Jnorm);
-      complexCij = dot_product / complexDenominator;
-      cij_real = complexCij.real();
+      const double denom = std::sqrt(Inorm.real() * Jnorm.real());
+      cij_real = (denom > 0.0) ? (dot_product.real() / denom) : 0.0;
 
       q_value += cij_real;
     }
@@ -3457,6 +3466,9 @@ void chill::reclassifyWater(
         avgQ3 = 0.0; // init to zero
         // Loop through all c_ij
         nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
+        if (nnumNeighbours == 0) {
+          continue;
+        }
         for (int j = 0; j < nnumNeighbours; j++) {
           avgQ3 += yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].c_value;
         }
@@ -3767,7 +3779,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
         continue;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
       if (nCand == 32 && candidates == stackNear) {
         heapNear.assign(stackNear, stackNear + 32);
         candidates = heapNear.data();

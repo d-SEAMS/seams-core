@@ -6,6 +6,7 @@
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <order_parameter.hpp>
+#include <ozaki.hpp>
 #include <seams_input.hpp>
 #include <steinhardt_device.hpp>
 #include <ylm_batch.hpp>
@@ -1939,4 +1940,259 @@ TEST_CASE("cutoff q_l skips the Lechner-Dellago average", "[bop]") {
     REQUIRE_THAT(q3.ql[i], Catch::Matchers::WithinAbs(q3rows.ql[i], 1e-8));
     REQUIRE_THAT(q3.qlBar[i], Catch::Matchers::WithinAbs(q3rows.qlBar[i], 1e-8));
   }
+}
+
+TEST_CASE("triclinic shifted periodic images preserve cutoff Steinhardt and q4q6ChillPlus",
+          "[bop][triclinic]") {
+  // Build a 2x2x2 diamond-cubic lattice inside a tilted triclinic supercell.
+  const double lx = 12.7;
+  const double ly = 12.7;
+  const double lz = 12.7;
+  const double xy = 1.5;
+  const double xz = 0.8;
+  const double yz = 0.7;
+  const double xlo = 0.0;
+  const double ylo = 0.0;
+  const double zlo = 0.0;
+  const double xloBound = xlo + std::min({0.0, xy, xz, xy + xz});
+  const double xhiBound = xlo + lx + std::max({0.0, xy, xz, xy + xz});
+  const double yloBound = ylo + std::min(0.0, yz);
+  const double yhiBound = ylo + ly + std::max(0.0, yz);
+
+  const double basis[8][3] = {
+      {0.0, 0.0, 0.0},    {0.0, 0.5, 0.5},    {0.5, 0.0, 0.5},    {0.5, 0.5, 0.0},
+      {0.25, 0.25, 0.25}, {0.25, 0.75, 0.75}, {0.75, 0.25, 0.75}, {0.75, 0.75, 0.25},
+  };
+
+  auto makeCloud = [&](bool shiftImages) {
+    molSys::PointCloud<molSys::Point<double>, double> c;
+    c.box = {xhiBound - xloBound, yhiBound - yloBound, lz, xy, xz, yz};
+    c.boxLow = {xloBound, yloBound, zlo};
+    c.currentFrame = 1;
+    int id = 1;
+    for (int ix = 0; ix < 2; ++ix) {
+      for (int iy = 0; iy < 2; ++iy) {
+        for (int iz = 0; iz < 2; ++iz) {
+          for (int b = 0; b < 8; ++b) {
+            double sx = 0.5 * (ix + basis[b][0]);
+            double sy = 0.5 * (iy + basis[b][1]);
+            double sz = 0.5 * (iz + basis[b][2]);
+            if (shiftImages) {
+              const int idx = id - 1;
+              sx += static_cast<double>((idx % 3) - 1);
+              sy += static_cast<double>(((idx / 3) % 3) - 1);
+              sz += static_cast<double>(((idx / 9) % 3) - 1);
+            }
+            molSys::Point<double> p;
+            p.type = 1;
+            p.atomID = id;
+            p.molID = id;
+            p.x = xlo + lx * sx + xy * sy + xz * sz;
+            p.y = ylo + ly * sy + yz * sz;
+            p.z = zlo + lz * sz;
+            c.idIndexMap[id] = static_cast<int>(c.pts.size());
+            c.pts.push_back(p);
+            ++id;
+          }
+        }
+      }
+    }
+    c.nop = static_cast<int>(c.pts.size());
+    return c;
+  };
+
+  auto refCloud = makeCloud(false);
+  auto shiftedCloud = makeCloud(true);
+  const double cutoff = 3.5;
+
+  for (int l : {3, 4, 6}) {
+    const auto refQl = chill::steinhardtQlCutoff(refCloud, cutoff, l, 1, true, true);
+    const auto shQl = chill::steinhardtQlCutoff(shiftedCloud, cutoff, l, 1, true, true);
+    const auto shLocal = chill::steinhardtQlCutoff(shiftedCloud, cutoff, l, 1, false, false);
+    REQUIRE(shQl.ql.size() == refQl.ql.size());
+    for (std::size_t i = 0; i < refQl.ql.size(); ++i) {
+      REQUIRE_THAT(shQl.ql[i], Catch::Matchers::WithinAbs(refQl.ql[i], 1e-10));
+      REQUIRE_THAT(shLocal.ql[i], Catch::Matchers::WithinAbs(refQl.ql[i], 1e-10));
+      REQUIRE_THAT(shQl.qlBar[i], Catch::Matchers::WithinAbs(refQl.qlBar[i], 1e-10));
+      if (l == 4 || l == 6) {
+        REQUIRE_THAT(shQl.wl[i], Catch::Matchers::WithinAbs(refQl.wl[i], 1e-10));
+      }
+    }
+  }
+
+  std::vector<double> r4, r6, r4b, r6b, s4, s6, s4b, s6b;
+  REQUIRE(chill::q4q6ChillPlus(refCloud, cutoff, 1, r4, r6, r4b, r6b));
+  REQUIRE(chill::q4q6ChillPlus(shiftedCloud, cutoff, 1, s4, s6, s4b, s6b));
+  for (int i = 0; i < refCloud.nop; ++i) {
+    const auto u = static_cast<std::size_t>(i);
+    REQUIRE_THAT(s4[u], Catch::Matchers::WithinAbs(r4[u], 1e-10));
+    REQUIRE_THAT(s6[u], Catch::Matchers::WithinAbs(r6[u], 1e-10));
+    REQUIRE_THAT(s4b[u], Catch::Matchers::WithinAbs(r4b[u], 1e-10));
+    REQUIRE_THAT(s6b[u], Catch::Matchers::WithinAbs(r6b[u], 1e-10));
+    REQUIRE(shiftedCloud.pts[u].iceType == refCloud.pts[u].iceType);
+  }
+}
+
+TEST_CASE("reduced triclinic cell outside Smith ball uses Euclidean MIC across CSR and BOP",
+          "[bop][triclinic]") {
+  // Valid reduced LAMMPS triclinic box (|xy|,|xz|,|yz| <= L/2, shortest nonzero
+  // lattice vector is 7.0 A so Euclidean MIC is strictly unique for d < 3.5 A),
+  // while face separation h_a < 7.0 A puts cutoff = 3.5 A outside the Smith ball.
+  const double lx = 7.0;
+  const double ly = 7.0;
+  const double lz = 7.0;
+  const double xy = 3.4;
+  const double xz = 3.4;
+  const double yz = 3.4;
+  const double xloBound = std::min({0.0, xy, xz, xy + xz});
+  const double xhiBound = lx + std::max({0.0, xy, xz, xy + xz});
+  const double yloBound = std::min(0.0, yz);
+  const double yhiBound = ly + std::max(0.0, yz);
+
+  molSys::PointCloud<molSys::Point<double>, double> c;
+  c.box = {xhiBound - xloBound, yhiBound - yloBound, lz, xy, xz, yz};
+  c.boxLow = {xloBound, yloBound, 0.0};
+  c.currentFrame = 1;
+  // Pair (0,1) at frac (0.49, 0.25, 0.15) has |relDist| = 3.3308 A < 3.5 A,
+  // whereas |fracDelta| = 5.3995 A > 3.5 A.
+  const double coords[3][3] = {
+      {0.0, 0.0, 0.0},
+      {4.79, 2.26, 1.05},
+      {1.5, 0.2, 0.3},
+  };
+  for (int i = 0; i < 3; ++i) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.x = coords[i][0];
+    p.y = coords[i][1];
+    p.z = coords[i][2];
+    c.idIndexMap[p.atomID] = i;
+    c.pts.push_back(p);
+  }
+  c.nop = 3;
+
+  const auto dr01 = gen::relDist(c, 0, 1);
+  const double d01 = std::sqrt(dr01[0] * dr01[0] + dr01[1] * dr01[1] + dr01[2] * dr01[2]);
+  REQUIRE(d01 < 3.5);
+
+  // Cutoff CSR and neighbour lists must include pair (0, 1).
+  std::vector<int> off, cols;
+  REQUIRE(nneigh::orthoFullCsr(c, nullptr, 3.5, off, cols));
+  REQUIRE(off.size() == 4);
+  const bool csrHas01 = std::find(cols.begin() + off[0], cols.begin() + off[1], 1) !=
+                        cols.begin() + off[1];
+  REQUIRE(csrHas01);
+
+  const auto rows = nneigh::neighListO(3.5, c, 1);
+  REQUIRE(std::find(rows[0].begin() + 1, rows[0].end(), 2) != rows[0].end());
+
+  // Cutoff and mutual Steinhardt must agree with manual relDist-based steinhardtQl.
+  const auto q6Ref = chill::steinhardtQl(c, rows, 6);
+  const auto q6Cut = chill::steinhardtQlCutoff(c, 3.5, 6, 1, true, true);
+  const auto q6CutLocal = chill::steinhardtQlCutoff(c, 3.5, 6, 1, false, false);
+  const auto q6Mut = chill::steinhardtQlMutual(c, 2, 3.5, 1, 6);
+  const auto mutRows = nneigh::kNearestNeighbourList(c, 2, 3.5, 1, true);
+  const auto q6MutRef = chill::steinhardtQl(c, mutRows, 6);
+  for (int i = 0; i < 3; ++i) {
+    const auto u = static_cast<std::size_t>(i);
+    REQUIRE_THAT(q6Cut.ql[u], Catch::Matchers::WithinAbs(q6Ref.ql[u], 1e-10));
+    REQUIRE_THAT(q6CutLocal.ql[u], Catch::Matchers::WithinAbs(q6Ref.ql[u], 1e-10));
+    REQUIRE_THAT(q6Cut.qlBar[u], Catch::Matchers::WithinAbs(q6Ref.qlBar[u], 1e-10));
+    REQUIRE_THAT(q6Mut.ql[u], Catch::Matchers::WithinAbs(q6MutRef.ql[u], 1e-10));
+    REQUIRE_THAT(q6Mut.qlBar[u], Catch::Matchers::WithinAbs(q6MutRef.qlBar[u], 1e-10));
+  }
+
+  // Fused q4q6ChillPlus must agree with manual relDist-based q4/q6.
+  const auto q4Ref = chill::steinhardtQl(c, rows, 4);
+  auto cFused = c;
+  std::vector<double> fq4, fq6, fq4b, fq6b;
+  REQUIRE(chill::q4q6ChillPlus(cFused, 3.5, 1, fq4, fq6, fq4b, fq6b));
+  for (int i = 0; i < 3; ++i) {
+    const auto u = static_cast<std::size_t>(i);
+    REQUIRE_THAT(fq4[u], Catch::Matchers::WithinAbs(q4Ref.ql[u], 1e-10));
+    REQUIRE_THAT(fq6[u], Catch::Matchers::WithinAbs(q6Ref.ql[u], 1e-10));
+    REQUIRE_THAT(fq4b[u], Catch::Matchers::WithinAbs(q4Ref.qlBar[u], 1e-10));
+    REQUIRE_THAT(fq6b[u], Catch::Matchers::WithinAbs(q6Ref.qlBar[u], 1e-10));
+  }
+
+  // getCorrelPlus default Fp64 path must match Dot2 (relDist) path on c_ij.
+  auto cFp64 = c;
+  auto cDot2 = c;
+  const auto savedMode = seams::product::mode();
+  seams::product::setMode(seams::product::Mode::Fp64);
+  chill::getCorrelPlus(cFp64, rows, false);
+  seams::product::setMode(seams::product::Mode::Dot2);
+  chill::getCorrelPlus(cDot2, rows, false);
+  seams::product::setMode(savedMode);
+  REQUIRE(cFp64.pts[0].c_ij.size() == cDot2.pts[0].c_ij.size());
+  for (std::size_t k = 0; k < cDot2.pts[0].c_ij.size(); ++k) {
+    REQUIRE_THAT(cFp64.pts[0].c_ij[k].c_value,
+                 Catch::Matchers::WithinAbs(cDot2.pts[0].c_ij[k].c_value, 1e-10));
+  }
+  // Fused q4q6ChillPlus bonds must match Dot2 bonds too.
+  REQUIRE(cFused.pts[0].c_ij.size() == cDot2.pts[0].c_ij.size());
+  for (std::size_t k = 0; k < cDot2.pts[0].c_ij.size(); ++k) {
+    REQUIRE_THAT(cFused.pts[0].c_ij[k].c_value,
+                 Catch::Matchers::WithinAbs(cDot2.pts[0].c_ij[k].c_value, 1e-10));
+  }
+}
+
+TEST_CASE("getq6 and reclassifyWater handle coincident pairs and empty bond lists safely",
+          "[bop]") {
+  // Coincident-only pair: r == 0 must not trigger out-of-bounds ylm access or NaN.
+  molSys::PointCloud<molSys::Point<double>, double> coinc;
+  coinc.box = {20.0, 20.0, 20.0};
+  coinc.boxLow = {0.0, 0.0, 0.0};
+  coinc.currentFrame = 1;
+  for (int i = 0; i < 2; ++i) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.x = 1.0;
+    p.y = 1.0;
+    p.z = 1.0;
+    p.iceType = molSys::atom_state_type::water;
+    coinc.idIndexMap[p.atomID] = i;
+    coinc.pts.push_back(p);
+  }
+  coinc.nop = 2;
+  const std::vector<std::vector<int>> coincRows = {{1, 2}, {2, 1}};
+  const auto q6Coinc = chill::getq6(coinc, coincRows, false);
+  REQUIRE(q6Coinc.size() == 2);
+  REQUIRE(std::isfinite(q6Coinc[0]));
+  REQUIRE(std::isfinite(q6Coinc[1]));
+  REQUIRE_THAT(q6Coinc[0], Catch::Matchers::WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(q6Coinc[1], Catch::Matchers::WithinAbs(0.0, 1e-12));
+
+  // Mixed real + coincident neighbour: valid bond must still yield c_6(i,j) = 1.0
+  // for a single antiparallel pair (even l=6 satisfies Y_6m(-r) = +Y_6m(r)).
+  molSys::PointCloud<molSys::Point<double>, double> mixed = coinc;
+  molSys::Point<double> p3;
+  p3.type = 1;
+  p3.atomID = 3;
+  p3.molID = 3;
+  p3.x = 3.75;
+  p3.y = 1.0;
+  p3.z = 1.0;
+  mixed.idIndexMap[3] = 2;
+  mixed.pts.push_back(p3);
+  mixed.nop = 3;
+  const std::vector<std::vector<int>> mixedRows = {{1, 2, 3}, {2, 1, 3}, {3, 1, 2}};
+  const auto q6Mixed = chill::getq6(mixed, mixedRows, false);
+  REQUIRE(q6Mixed.size() == 3);
+  for (double v : q6Mixed) {
+    REQUIRE(std::isfinite(v));
+  }
+  // Atom 3 has two identical non-zero bonds (to coincident atoms 1 and 2), each
+  // antiparallel to their bond to atom 3, so all three have unit correlation 1.0.
+  REQUIRE_THAT(q6Mixed[2], Catch::Matchers::WithinAbs(1.0, 1e-12));
+
+  // reclassifyWater with empty c_ij and q6 > 0.5 must stay water without 0/0.
+  std::vector<double> highQ6 = {0.9, 0.9};
+  chill::reclassifyWater(coinc, highQ6);
+  REQUIRE(coinc.pts[0].iceType == molSys::atom_state_type::water);
+  REQUIRE(coinc.pts[1].iceType == molSys::atom_state_type::water);
 }

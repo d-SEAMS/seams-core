@@ -1,0 +1,1 @@
+Compute triclinic fractional coordinates `(sx, sy, sz)` before wrapping to `[0, 1)` in `cutoffSolid` and `chill::q4q6ChillPlus`, so atoms shifted into periodic images outside the primary cell keep exact tilt coupling.

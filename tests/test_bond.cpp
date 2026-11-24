@@ -885,3 +885,48 @@ TEST_CASE("symmetrised directed pairs match the two-H water list", "[bond]") {
   REQUIRE(edges.size() == 2);
   REQUIRE(undirectedIds(cloud, edges) == undirectedNet(net));
 }
+
+TEST_CASE("directedHydrogenBonds finds outside-Smith-ball triclinic H-bond", "[bond]") {
+  const double lx = 7.0;
+  const double ly = 7.0;
+  const double lz = 7.0;
+  const double xy = 3.4;
+  const double xz = 3.4;
+  const double yz = 3.4;
+  const double xloBound = std::min({0.0, xy, xz, xy + xz});
+  const double xhiBound = lx + std::max({0.0, xy, xz, xy + xz});
+  const double yloBound = std::min(0.0, yz);
+  const double yhiBound = ly + std::max(0.0, yz);
+
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {xhiBound - xloBound, yhiBound - yloBound, lz, xy, xz, yz};
+  cloud.boxLow = {xloBound, yloBound, 0.0};
+  cloud.currentFrame = 1;
+
+  molSys::Point<double> o0 = makeAtom(1, 1, 0.0, 0.0, 0.0);
+  o0.type = 1;
+  molSys::Point<double> o1 = makeAtom(2, 2, 4.79, 2.26, 1.05);
+  o1.type = 1;
+  cloud.pts.push_back(o0);
+  cloud.pts.push_back(o1);
+  cloud.nop = 2;
+
+  // Place H1 at 1.0 A from O0 along the true Euclidean MIC vector toward O1:
+  // |d(O0, O1)| = 3.3308 A < 3.5 A, |d(O1, H1)| = 2.3308 A < 2.42 A, angle = 0 deg.
+  const auto dir = gen::relDist(cloud, 1, 0);
+  const double r = std::sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+  REQUIRE(r < 3.5);
+  molSys::Point<double> h1 = makeAtom(3, 1, dir[0] / r, dir[1] / r, dir[2] / r);
+  h1.type = 2;
+  cloud.pts.push_back(h1);
+  cloud.nop = 3;
+  for (int i = 0; i < cloud.nop; ++i) {
+    cloud.idIndexMap[cloud.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+
+  const auto edges = bond::directedHydrogenBonds(cloud, 3.5, 2.42, 30.0, {1}, {1}, 2, true);
+  REQUIRE(edges.size() == 1);
+  REQUIRE(edges[0].donor == 0);
+  REQUIRE(edges[0].hydrogen == 2);
+  REQUIRE(edges[0].acceptor == 1);
+}

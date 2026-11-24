@@ -403,3 +403,57 @@ TEST_CASE("largestDomain sheared MIC polar star", "[cluster]") {
   REQUIRE_THAT(polar.percolation,
                Catch::Matchers::WithinAbs(4.0 / 5.0, 1e-12));
 }
+
+TEST_CASE("recenterClusterCloud preserves bonds on clusters spanning more than half the box",
+          "[cluster]") {
+  // 9-atom chain in an L=10 box with bond length 1.0 A (span = 8.0 A > L/2 = 5.0 A)
+  // arranged across the periodic boundary x = 0 / 10 in non-sequential index order
+  // so Stoddard's linked-list cycle links non-adjacent atoms > L/2 apart.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  const double xs[9] = {0.5, 9.5, 1.5, 8.5, 2.5, 7.5, 3.5, 6.5, 4.5};
+  for (int i = 0; i < 9; ++i) {
+    molSys::Point<double> pt;
+    pt.type = 1;
+    pt.atomID = i + 1;
+    pt.molID = i + 1;
+    pt.x = xs[i];
+    pt.y = 5.0;
+    pt.z = 5.0;
+    cloud.pts.push_back(pt);
+    cloud.idIndexMap[pt.atomID] = i;
+  }
+  cloud.nop = 9;
+
+  const auto nList = nneigh::getNewNeighbourListByIndex(cloud, 1.2);
+  REQUIRE(clump::recenterClusterCloud(cloud, nList) == 0);
+
+  // Every bonded pair in nList must remain at its true 1.0 A bond length
+  // in unwrapped coordinates (not torn apart by L = 10.0 A).
+  for (int i = 0; i < cloud.nop; ++i) {
+    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
+      const int j = nList[static_cast<std::size_t>(i)][k];
+      const double dx = cloud.pts[static_cast<std::size_t>(i)].x -
+                        cloud.pts[static_cast<std::size_t>(j)].x;
+      const double dy = cloud.pts[static_cast<std::size_t>(i)].y -
+                        cloud.pts[static_cast<std::size_t>(j)].y;
+      const double dz = cloud.pts[static_cast<std::size_t>(i)].z -
+                        cloud.pts[static_cast<std::size_t>(j)].z;
+      const double dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+      REQUIRE_THAT(dist, Catch::Matchers::WithinAbs(1.0, 1e-10));
+    }
+  }
+
+  // Centroid must be at the box center (5, 5, 5).
+  double cx = 0.0, cy = 0.0, cz = 0.0;
+  for (int i = 0; i < cloud.nop; ++i) {
+    cx += cloud.pts[static_cast<std::size_t>(i)].x;
+    cy += cloud.pts[static_cast<std::size_t>(i)].y;
+    cz += cloud.pts[static_cast<std::size_t>(i)].z;
+  }
+  REQUIRE_THAT(cx / cloud.nop, Catch::Matchers::WithinAbs(5.0, 1e-10));
+  REQUIRE_THAT(cy / cloud.nop, Catch::Matchers::WithinAbs(5.0, 1e-10));
+  REQUIRE_THAT(cz / cloud.nop, Catch::Matchers::WithinAbs(5.0, 1e-10));
+}

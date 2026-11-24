@@ -42,21 +42,18 @@ bool envOffload() {
 #ifdef SEAMS_HAS_OFFLOAD
 #pragma omp declare target
 #endif
-double mic1(double d, double L) {
-  if (L <= 0.0) {
-    return d;
-  }
-  const double q = d / L;
-  // (long long)(q + 0.5) rounds the wrong way for several negative
-  // values and for a half that is not exactly representable.
-  const double n = static_cast<double>(std::llround(q));
-  return d - L * n;
-}
-
 void y3(double dx, double dy, double dz, double *re, double *im) {
   const double r = std::sqrt(dx * dx + dy * dy + dz * dz);
+  if (!(r > 0.0)) {
+    for (int m = 0; m < kM; ++m) {
+      re[m] = 0.0;
+      im[m] = 0.0;
+    }
+    return;
+  }
   const double phi = std::atan2(dx, dy);
-  const double theta = (r > 0.0) ? std::acos(dz / r) : 0.0;
+  const double cosTheta = std::max(-1.0, std::min(1.0, dz / r));
+  const double theta = std::acos(cosTheta);
   const double s = std::sin(theta);
   const double c = std::cos(theta);
   const double s2 = s * s;
@@ -178,35 +175,47 @@ chill::ChillPlusResult chill::specializedChillPlus(
   std::vector<int> neigh(static_cast<std::size_t>(n * kNb), -1);
   std::vector<int> nb(static_cast<std::size_t>(n), 0);
   std::vector<int> shell(static_cast<std::size_t>(n), 0);
-  std::vector<double> xyz(static_cast<std::size_t>(n * 3));
+  std::vector<double> bondDr(static_cast<std::size_t>(n * kNb * 3), 0.0);
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
   for (int i = 0; i < n; i++) {
-    xyz[static_cast<std::size_t>(3 * i)] = yCloud.pts[static_cast<std::size_t>(i)].x;
-    xyz[static_cast<std::size_t>(3 * i + 1)] = yCloud.pts[static_cast<std::size_t>(i)].y;
-    xyz[static_cast<std::size_t>(3 * i + 2)] = yCloud.pts[static_cast<std::size_t>(i)].z;
-    std::vector<std::pair<double, int>> cand;
+    struct Cand {
+      double d2;
+      int j;
+      double dx, dy, dz;
+      bool operator<(const Cand &o) const {
+        return d2 < o.d2 || (d2 == o.d2 && j < o.j);
+      }
+    };
+    std::vector<Cand> cand;
     if (static_cast<std::size_t>(i) < nList.size()) {
       const auto &row = nList[static_cast<std::size_t>(i)];
       for (std::size_t t = 1; t < row.size(); t++) {
         const auto it = yCloud.idIndexMap.find(row[t]);
-        if (it == yCloud.idIndexMap.end()) {
+        if (it == yCloud.idIndexMap.end() || it->second == i) {
           continue;
         }
-        cand.emplace_back(gen::periodicDistSq(yCloud, i, it->second),
-                          it->second);
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(it->second)];
+        const auto d = gen::relDistFromPoint(frame, yCloud, i, pj.x, pj.y, pj.z);
+        const double d2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+        if (!(d2 > 0.0)) {
+          continue;
+        }
+        cand.push_back({d2, it->second, d[0], d[1], d[2]});
       }
     }
     const std::size_t keep = std::min(static_cast<std::size_t>(kNb), cand.size());
     std::partial_sort(cand.begin(), cand.begin() + static_cast<std::ptrdiff_t>(keep),
                       cand.end());
     for (std::size_t t = 0; t < keep; t++) {
-      neigh[static_cast<std::size_t>(static_cast<std::size_t>(i * kNb) + t)] = cand[t].second;
+      const std::size_t slot = static_cast<std::size_t>(i * kNb) + t;
+      neigh[slot] = cand[t].j;
+      bondDr[slot * 3] = cand[t].dx;
+      bondDr[slot * 3 + 1] = cand[t].dy;
+      bondDr[slot * 3 + 2] = cand[t].dz;
     }
     nb[static_cast<std::size_t>(i)] = static_cast<int>(keep);
     shell[static_cast<std::size_t>(i)] = static_cast<int>(cand.size());
   }
-  const double box[3] = {yCloud.box.empty() ? 0.0 : yCloud.box[0],
-                         yCloud.box.size() > 1 ? yCloud.box[1] : 0.0,
-                         yCloud.box.size() > 2 ? yCloud.box[2] : 0.0};
 
   std::vector<double> qre(static_cast<std::size_t>(n * kM), 0.0);
   std::vector<double> qim(static_cast<std::size_t>(n * kM), 0.0);
@@ -221,7 +230,7 @@ chill::ChillPlusResult chill::specializedChillPlus(
 #endif
   out.usedDevice = onDevice;
 
-  double *xyzp = xyz.data();
+  double *bondDrp = bondDr.data();
   int *neighp = neigh.data();
   int *nbp = nb.data();
   double *qrep = qre.data();
@@ -231,7 +240,7 @@ chill::ChillPlusResult chill::specializedChillPlus(
 
 #ifdef SEAMS_HAS_OFFLOAD
 #pragma omp target teams distribute parallel for if (onDevice) \
-    map(to : xyzp[0 : n * 3], neighp[0 : n * kNb], nbp[0 : n], box[0 : 3]) \
+    map(to : bondDrp[0 : n * kNb * 3], neighp[0 : n * kNb], nbp[0 : n]) \
     map(from : qrep[0 : n * kM], qimp[0 : n * kM])
 #endif
 #ifndef SEAMS_HAS_OFFLOAD
@@ -248,9 +257,10 @@ chill::ChillPlusResult chill::specializedChillPlus(
       if (j < 0 || j >= n) {
         continue;
       }
-      const double dx = mic1(xyzp[3 * j] - xyzp[3 * i], box[0]);
-      const double dy = mic1(xyzp[3 * j + 1] - xyzp[3 * i + 1], box[1]);
-      const double dz = mic1(xyzp[3 * j + 2] - xyzp[3 * i + 2], box[2]);
+      const int base = (i * kNb + t) * 3;
+      const double dx = bondDrp[base];
+      const double dy = bondDrp[base + 1];
+      const double dz = bondDrp[base + 2];
       double re[kM], im[kM];
       y3(dx, dy, dz, re, im);
       for (int m = 0; m < kM; m++) {

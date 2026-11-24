@@ -24,6 +24,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- Precompute exact periodic minimum-image bond vectors via `gen::relDistFromPoint` in `chill::specializedChillPlus` so triclinic cells use full tilt-aware MIC instead of orthorhombic `mic1`, and clamp `dz / r` and zero-distance bonds in `y3`.
+- Unwrap cluster atoms in `clump::recenterClusterCloud` along a BFS spanning tree of the neighbour list `nList` rather than Stoddard's linked-list cycle, preventing clusters spanning more than half a box edge from being split across periodic boundaries.
+- Initialize `ylm` rows, divide by the count of non-zero-distance bonds, clamp `cos(theta)`, and guard zero-norm denominators in `chill::getq6`, and guard empty `c_ij` lists in `chill::reclassifyWater`.
+- Refine triclinic displacements with exact Euclidean minimum-image reduction outside the Smith ball in `passTilt` (`src/cutoff_csr.cpp`) and in Steinhardt and CHILL/CHILL+ bond-vector kernels (`src/steinhardt_parallel.cpp`, `src/bop.cpp`), and use `floor` for fallback cell counts in `orthoChill`.
+- Compute triclinic fractional coordinates `(sx, sy, sz)` before wrapping to `[0, 1)` in `cutoffSolid` and `chill::q4q6ChillPlus`, so atoms shifted into periodic images outside the primary cell keep exact tilt coupling.
 - `primitive::countAllRingsFromIndex` with `removeNonSPrings` lists each ring once when a neighbour row repeats a partner, and no longer reads past an empty row. It now returns the same ring set as `primitive::ringNetwork`, which already dropped repeats.
 - `seams_rings_labels` and `seams_rings_labels_n` now label every six-ring of ideal ice Ih as a hexagonal-cage face (N/2 basal, 3N/2 prismatic) on the cutoff graph of an orthorhombic box. The label pass rebuilt its neighbour rows from the cutoff CSR without the leading self entry that the cage and prism tests skip, so each atom lost one bond: 668 of the 8192 six-rings of a 4096-molecule ice Ih cell came back as plain `SEAMS_RING_HEXAGON`, and prism labels read the same short rows. Triclinic frames and the mutual graph were not affected.
 - The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
