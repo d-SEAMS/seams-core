@@ -237,6 +237,7 @@ stdenv.mkDerivation (finalAttrs: {
       matplotlib
       scipy
       ase
+      pytest
       freud
       pyvista
       traits
