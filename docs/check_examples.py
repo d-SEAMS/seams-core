@@ -109,6 +109,40 @@ class Corpus:
         return "\n".join(self.by_doc.get(doc, []))
 
 
+def slice_by_markers(source_lines, start_after, start_at, end_before):
+    start_idx = 0
+    if start_after is not None:
+        found = next(
+            (i + 1 for i, line in enumerate(source_lines) if start_after in line),
+            None,
+        )
+        if found is None:
+            raise ValueError("start-after marker {!r} not found".format(start_after))
+        start_idx = found
+    elif start_at is not None:
+        found = next(
+            (i for i, line in enumerate(source_lines) if start_at in line),
+            None,
+        )
+        if found is None:
+            raise ValueError("start-at marker {!r} not found".format(start_at))
+        start_idx = found
+    end_idx = len(source_lines)
+    if end_before is not None:
+        found = next(
+            (
+                i
+                for i in range(start_idx, len(source_lines))
+                if end_before in source_lines[i]
+            ),
+            None,
+        )
+        if found is None:
+            raise ValueError("end-before marker {!r} not found".format(end_before))
+        end_idx = found
+    return source_lines[start_idx:end_idx]
+
+
 def harvest_markdown(doc, raw, errors, corpus):
     lines = raw.splitlines()
     index = 0
@@ -129,10 +163,19 @@ def harvest_markdown(doc, raw, errors, corpus):
             if index < len(lines) and lines[index].startswith("```"):
                 index += 1
             line_opt = None
+            start_after = None
+            start_at = None
+            end_before = None
             for option in options:
                 stripped = option.strip()
                 if stripped.startswith(":lines:"):
                     line_opt = stripped.split(":", 2)[-1].strip()
+                elif stripped.startswith(":start-after:"):
+                    start_after = stripped.split(":", 2)[-1].strip()
+                elif stripped.startswith(":start-at:"):
+                    start_at = stripped.split(":", 2)[-1].strip()
+                elif stripped.startswith(":end-before:"):
+                    end_before = stripped.split(":", 2)[-1].strip()
             try:
                 target = resolve_include(doc, include)
             except Exception as exc:  # noqa: BLE001
@@ -140,6 +183,15 @@ def harvest_markdown(doc, raw, errors, corpus):
                 continue
             if not target.is_file():
                 errors.append("{}: missing {}".format(doc, target))
+                continue
+            if target.name == "seams_lang.h" and (
+                line_opt is not None or start_after is None or end_before is None
+            ):
+                errors.append(
+                    "{}: seams_lang.h literalinclude must use :start-after: and :end-before: markers".format(
+                        doc
+                    )
+                )
                 continue
             source_lines = load_lines(target)
             if line_opt:
@@ -149,6 +201,15 @@ def harvest_markdown(doc, raw, errors, corpus):
                     errors.append("{}: {}".format(doc, exc))
                     continue
                 snippet = "\n".join(source_lines[i - 1] for i in chosen)
+            elif start_after is not None or start_at is not None or end_before is not None:
+                try:
+                    chosen_lines = slice_by_markers(
+                        source_lines, start_after, start_at, end_before
+                    )
+                except ValueError as exc:
+                    errors.append("{}: {}".format(doc, exc))
+                    continue
+                snippet = "\n".join(chosen_lines)
             else:
                 snippet = "\n".join(source_lines)
             corpus.add(doc, snippet)

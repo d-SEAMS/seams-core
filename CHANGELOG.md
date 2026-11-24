@@ -18,9 +18,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
 - Split docs reader text checks from live package-registry validation. Meson
   `docs_reader_text` now stays offline while still parsing install claims, and CI
   runs live registry claim checks in a dedicated docs workflow job.
+- Mutual and seeded graphs in the language bindings keep a pair only when its minimum-image distance is strictly inside the cutoff plus 1.5 Å. `kNearestNeighbourList` and `kNearestNeighbourPair` take that length only as a cell-size hint, and `pairs_within` applies the distance test in `bond_list`, on the mutual chordless graph, and on the seeded cage graphs.
+- On an empty frame `seams_frame_q4_q6_chill` returns zero counts. It now rejects a cutoff that is zero, negative or not finite.
 - The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
 - `docs_science_tutorials` keeps a 180 s timeout. An AddressSanitizer build runs the test serially instead of allowing 900 s: under contention the tutorial took 212 s, and alone it took 22.6 s.
 
