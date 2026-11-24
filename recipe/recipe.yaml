@@ -8,11 +8,26 @@ package:
   version: ${{ version }}
 
 source:
-  # The build disables every subproject-backed backend and takes Eigen
-  # from conda-forge, so the GitHub tag archive is the whole source.
+  # The build disables every subproject-backed backend except backward
+  # (see the two sources below) and takes Eigen from conda-forge, so the
+  # GitHub tag archive is most of the source.
   # sha256 is that of the v${{ version }} archive; fill it in after the tag.
-  url: https://github.com/d-SEAMS/seams-core/archive/refs/tags/v${{ version }}.tar.gz
-  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  - url: https://github.com/d-SEAMS/seams-core/archive/refs/tags/v${{ version }}.tar.gz
+    sha256: 0000000000000000000000000000000000000000000000000000000000000000
+  # conda-forge's own backward-cpp has no find_package()-able target
+  # (see build-libseams.sh), so these two reproduce what Meson's own
+  # wrap resolver does for subprojects/backward-cpp.wrap: the upstream
+  # v1.6 tarball, then ../subprojects/packagefiles/backward-cpp
+  # (meson.build, meson_options.txt, LICENSE.build, backward.hpp).
+  # meson.build is that wrap's patch_directory overlay, trimmed of
+  # backward-cpp's upstream testexe_* targets. backward.hpp is the
+  # header this repository vendored (upstream 1d43bfea). Both land
+  # before the network-free build script runs.
+  - url: https://github.com/bombela/backward-cpp/archive/refs/tags/v1.6.tar.gz
+    sha256: c654d0923d43f1cea23d086729673498e4741fb2457e806cfaeaea7b20c97c10
+    target_directory: subprojects/backward-cpp-1.6
+  - path: ../subprojects/packagefiles/backward-cpp
+    target_directory: subprojects/backward-cpp-1.6
 
 build:
   number: 0
@@ -73,8 +88,12 @@ about:
   homepage: https://dseams.info
   repository: https://github.com/d-SEAMS/seams-core
   documentation: https://docs.dseams.info
-  license: MIT
-  license_file: LICENSE
+  # The seams CLI always compiles third_party/argum (BSD-3-Clause).
+  # csm stays off in this recipe, so its GPL-2.0 text is not shipped.
+  license: MIT AND BSD-3-Clause
+  license_file:
+    - LICENSE
+    - third_party/argum/LICENSE
   summary: d-SEAMS structural analysis engine for molecular simulations of water and ice
   description: |
     d-SEAMS (Deferred Structural Elucidation Analysis for Molecular

@@ -68,9 +68,50 @@ ydslib_sources = files(
 # It goes into the executables, never libyodaLib: its static
 # SignalHandling replaces the SIGSEGV handler of whatever process loads
 # the library, and Julia's GC safepoints fault on purpose.
-backward_src = []
-if cppc.has_header('execinfo.h')
-  backward_src = files('backward.cpp')
+#
+# backward.hpp comes from the backward-cpp wrap (header-only interface,
+# no DW/BFD/libunwind backend: none of those is enabled below, matching
+# the plain execinfo.h path this project has always used). This stays
+# an auto feature so a build with neither a system package nor network
+# access (--wrap-mode=nodownload with nothing pre-seeded) degrades to
+# "not found" instead of erroring; the packaging recipes that cannot
+# reach the network (conda-forge, Nix, Yggdrasil) pre-seed this wrap's
+# subproject directory from its own pinned source before configuring,
+# so with_backward stays enabled there too (see recipe/build-libseams.sh,
+# nix/package.nix, packaging/yggdrasil/L/libseams/build_tarballs.jl).
+with_backward_opt = get_option('with_backward')
+backward_has_execinfo = cppc.has_header('execinfo.h')
+if with_backward_opt.enabled() and not backward_has_execinfo
+  error('with_backward=enabled but execinfo.h is not available')
+endif
+if with_backward_opt.disabled() or not backward_has_execinfo
+  backward_dep = dependency('backward-cpp-disabled-by-option', required: false)
+else
+  backward_dep = dependency(['backward-cpp-interface', 'Backward'],
+                            required: with_backward_opt.enabled(),
+                            include_type: 'system',
+                            fallback: ['backward-cpp', 'backward_interface_dep'],
+                            default_options: [
+                              'bfd=disabled', 'dw=disabled',
+                              'dwarf=disabled', 'libunwind=disabled',
+                            ])
+endif
+backward_src = backward_dep.found() ? files('backward.cpp') : []
+
+# The wrap's own meson.build unconditionally builds and installs a
+# static libbackward-cpp (its own backward_dep, which this project
+# never links: see backward_interface_dep above), so when the fallback
+# subproject actually ran, that lib is an installed target too. Giving
+# check_no_rebuild.py's install tests a handle to it, without invoking
+# the subproject when a system package satisfied backward_dep instead
+# (type_name() != 'internal') or when with_backward never ran it at
+# all, keeps that check accurate instead of looking the other way.
+backward_cpp_installed = []
+if backward_dep.found() and backward_dep.type_name() == 'internal'
+  backward_cpp_subproject = subproject('backward-cpp', required: false)
+  if backward_cpp_subproject.found()
+    backward_cpp_installed = [backward_cpp_subproject.get_variable('backward')]
+  endif
 endif
 
 # gpu_residency.cpp calls dlopen/dlsym. A shared library that leaves

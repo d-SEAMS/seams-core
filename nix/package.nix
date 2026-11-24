@@ -4,6 +4,7 @@
   meson,
   ninja,
   pkg-config,
+  fetchurl,
   eigen,
   blas,
   lapack,
@@ -11,6 +12,8 @@
   libhwy,
   gmp,
   mpfr,
+  cxxopts,
+  rang,
   llvmPackages,
   git,
   python3,
@@ -166,8 +169,11 @@ replace-with = "vendored-source-registry-0"
 EOF
   '';
   nanobindRoot = "${py.pkgs.nanobind}/lib/python${py.pythonVersion}/site-packages/nanobind";
+  backwardCppSrc = fetchurl {
+    url = "https://github.com/bombela/backward-cpp/archive/refs/tags/v1.6.tar.gz";
+    sha256 = "c654d0923d43f1cea23d086729673498e4741fb2457e806cfaeaea7b20c97c10";
+  };
 in
-
 stdenv.mkDerivation (finalAttrs: {
   pname = "seams";
   version =
@@ -188,6 +194,9 @@ stdenv.mkDerivation (finalAttrs: {
   src = lib.cleanSource ../.;
 
   postPatch = ''
+    mkdir -p subprojects/backward-cpp-1.6
+    tar -xzf ${backwardCppSrc} --strip-components=1 -C subprojects/backward-cpp-1.6
+    cp subprojects/packagefiles/backward-cpp/* subprojects/backward-cpp-1.6/
     substituteInPlace tests/install_pydseamslib_if_missing.py \
       --replace-fail /usr/bin/git ${git}/bin/git
     patchShebangs --build scripts
@@ -239,6 +248,7 @@ stdenv.mkDerivation (finalAttrs: {
     cargo
   ];
 
+
   buildInputs = [
     eigen
     blas
@@ -255,6 +265,8 @@ stdenv.mkDerivation (finalAttrs: {
     openmm
     plumed
     fftwFloat
+    cxxopts
+    rang
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
 
@@ -266,6 +278,7 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonBool "with_cli" true)
     (lib.mesonEnable "with_mpi" false)
     (lib.mesonEnable "with_openmp_offload" false)
+    (lib.mesonEnable "with_backward" true)
     (lib.mesonEnable "with_spglib" true)
     (lib.mesonEnable "with_nauty" true)
     (lib.mesonEnable "with_csm" true)
@@ -341,7 +354,7 @@ stdenv.mkDerivation (finalAttrs: {
       -I${py}/include/python${py.pythonVersion} \
       -I${nanobindRoot}/include \
       -I${robinMap}/include \
-      -I../include -I../src/include/internal -I../src/include/external \
+      -I../include -I../src/include/internal -I../third_party/argum \
       -I${libhwy}/include \
       -isystem ${eigen}/include/eigen3 \
       -Isrc \
@@ -355,7 +368,8 @@ stdenv.mkDerivation (finalAttrs: {
   meta = {
     description = "d-SEAMS C++ engine and seams CLI";
     homepage = "https://dseams.info";
-    license = lib.licenses.mit;
+    # The CLI links third_party/argum (BSD-3-Clause). csm is off here.
+    license = with lib.licenses; [ mit bsd3 ];
     mainProgram = "seams";
     platforms = lib.platforms.linux ++ lib.platforms.darwin;
   };

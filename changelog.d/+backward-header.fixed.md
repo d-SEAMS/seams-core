@@ -1,0 +1,1 @@
+`subprojects/packagefiles/backward-cpp/backward.hpp` is the header this repository used to vendor. It matches upstream commit `1d43bfea` (the v1.6 tag plus the 27 commits after it). The wrap's `patch_directory` copies that file over the v1.6 tarball, and the conda, Yggdrasil and Nix pre-seeds copy the same overlay, so those builds compile that header.

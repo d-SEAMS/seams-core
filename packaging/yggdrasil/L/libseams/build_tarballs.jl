@@ -18,14 +18,35 @@ version = v"2.14.2"
 # commit, so bundled/patches is not applied.
 const tag_sha = "e5b21f7fc8180a672248f797b0a5783cfb008540"
 
+# Pinned to subprojects/backward-cpp.wrap: v1.6's tag commit (the wrap's
+# source_hash is a GitHub tarball hash of this same commit; BinaryBuilder
+# refuses to take GitHub's generated tag archives directly, see
+# check_github_archive in BinaryBuilderBase.jl, so this is a GitSource
+# instead), then the same ../../../../subprojects/packagefiles/backward-cpp
+# the wrap's own patch_directory applies: meson.build/meson_options.txt/
+# LICENSE.build, which upstream backward-cpp does not ship, plus
+# backward.hpp from the header this repository vendored (upstream
+# 1d43bfea, not the v1.6 tag). meson.build is trimmed of backward-cpp's
+# upstream testexe_* targets (see that directory for why).
+# with_backward below is on because of these two, not despite nodownload:
+# the subproject's meson.build already exists before configure runs, so
+# Meson's wrap resolver uses it directly and never needs network.
+const backward_cpp_tag_sha = "3bb9240cb15459768adb3e7d963a20e1523a6294"
+
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", tag_sha),
+    GitSource("https://github.com/bombela/backward-cpp.git", backward_cpp_tag_sha;
+               tag = "v1.6", unpack_target = "seams-core/subprojects/backward-cpp-1.6"),
+    DirectorySource(joinpath(@__DIR__, "../../../../subprojects/packagefiles/backward-cpp");
+                     target = "seams-core/subprojects/backward-cpp-1.6"),
 ]
 
 # The engine core, its stable C API (libseams), and the C ABI of the R and
 # Julia packages (libseams_lang). Every optional backend is off: those come
 # from wraps that would be downloaded during the build, or from libraries
-# that have no JLL yet.
+# that have no JLL yet. with_backward stays on: the two extra sources
+# above pre-seed its subproject directory, so Meson finds a buildable
+# backward-cpp already on disk and the nodownload below never applies to it.
 script = raw"""
 cd ${WORKSPACE}/srcdir/seams-core
 
@@ -56,7 +77,8 @@ meson setup build \
     -Dwith_spglib=disabled \
     -Dwith_sphericart=disabled \
     -Dwith_nauty=disabled \
-    -Dwith_csm=disabled
+    -Dwith_csm=disabled \
+    -Dwith_backward=enabled
 ninja -C build -j${nproc} src/libyodaLib.${dlext} src/libseams.${dlext} bindings/libseams_lang.${dlext} seams${exeext}
 
 install -Dvm 755 build/src/libyodaLib.${dlext} "${libdir}/libyodaLib.${dlext}"
@@ -67,6 +89,8 @@ install -Dvm 644 include/seams.h "${includedir}/seams.h"
 install -Dvm 644 build/src/seams_version.h "${includedir}/seams_version.h"
 install -Dvm 644 bindings/cxx/seams_lang.h "${includedir}/seams/seams_lang.h"
 install_license LICENSE
+cp third_party/argum/LICENSE "${WORKSPACE}/srcdir/LICENSE.argum"
+install_license "${WORKSPACE}/srcdir/LICENSE.argum"
 """
 
 # C++20 headers (<concepts>, <span>, <ranges>) are missing from the default

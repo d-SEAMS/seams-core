@@ -48,6 +48,24 @@ if _dist_python.found() and not meson.is_subproject()
   meson.add_dist_script(_dist_python, files('scripts/dist_strip_vcs.py'))
 endif
 
+# The wrap overlay's backward.hpp must stay the header this tree
+# vendored. Meson skips wrap patches when the subproject directory
+# already has a meson.build, which is how the offline recipes pre-seed
+# it, so this check runs at configure rather than only inside a test.
+_carry_python = find_program('python3', native: true, required: true)
+run_command(
+  _carry_python,
+  files('tests/backward_overlay.py'),
+  check: true,
+)
+# Every third_party tree with source must ship its own licence file.
+# NOTICE.md does not count, and argum's file must be upstream v2.9.
+run_command(
+  _carry_python,
+  files('tests/vendored_licenses.py'),
+  check: true,
+)
+
 # Global accumulator variables (eOn pattern)
 _args = []
 _link_args = []
@@ -845,7 +863,7 @@ if not ira_opt.disabled()
       return 0;
     }
   '''
-  ira_inc = meson.project_source_root() / 'src/include/external'
+  ira_inc = meson.project_source_root() / 'src/include/internal'
   if ira_dep.found() and cppc.links(ira_probe, dependencies: [ira_dep],
                                     args: ['-I' + ira_inc],
                                     name: 'libira C API')
@@ -1122,7 +1140,12 @@ endif
 # Include directories
 _incdirs += include_directories([
   'src/include/internal',
-  'src/include/external',
+  # Locally patched Argum (see third_party/argum/NOTICE.md): a hidden
+  # option alias and the -Wconversion/-Wsign-conversion/-Wshadow fixes
+  # this project needs are not upstream, so this stays out of Meson
+  # WrapDB's dependency() path and out of src/include/internal's
+  # clang-tidy and Doxygen scope, like third_party/csm.
+  'third_party/argum',
 ])
 
 # Library
@@ -1148,7 +1171,7 @@ endif
 science_front_exe = executable(
   'science-front',
   files('scripts/science_front.cpp') + backward_src,
-  dependencies: [yds_dep],
+  dependencies: [yds_dep, backward_dep],
   include_directories: _incdirs,
   cpp_args: _args,
   link_args: nucleation_link,
@@ -1160,7 +1183,7 @@ science_front_exe = executable(
 nucleation_pathway_exe = executable(
   'nucleation-pathway',
   files('scripts/nucleation_pathway.cpp') + backward_src,
-  dependencies: [yds_dep],
+  dependencies: [yds_dep, backward_dep],
   include_directories: _incdirs,
   cpp_args: _args,
   link_args: nucleation_link,
@@ -1203,7 +1226,7 @@ if get_option('with_cli')
   seams_exe = executable(
     'seams',
     files('src/seams_cli.cpp') + backward_src,
-    dependencies: [yds_dep],
+    dependencies: [yds_dep, backward_dep],
     include_directories: _incdirs,
     cpp_args: _args + ['-DSEAMS_VERSION="' + meson.project_version() + '"'],
     link_args: seams_cli_link,
@@ -1213,7 +1236,7 @@ if get_option('with_cli')
   brine_front_exe = executable(
     'brine_front',
     files('src/brine_front_main.cpp') + backward_src,
-    dependencies: [yds_dep],
+    dependencies: [yds_dep, backward_dep],
     include_directories: _incdirs,
     cpp_args: _args,
     link_args: seams_cli_link,
@@ -1903,7 +1926,7 @@ if get_option('with_cli') and get_option('with_tests')
   # would relink libyodaLib and libseams under the tests that load them.
   # Every installed target is therefore built before the test starts.
   _installed_targets = [seams_api_lib, ydslib, seams_lang, seams_exe, brine_front_exe,
-                        science_front_exe, nucleation_pathway_exe]
+                        science_front_exe, nucleation_pathway_exe] + backward_cpp_installed
   foreach _optional : ['run_hook', 'lammps_plugin', 'gmx_seams', 'openmm_plugin', 'seams_plumed']
     if is_variable(_optional)
       _installed_targets += get_variable(_optional)

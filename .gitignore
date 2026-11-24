@@ -44,6 +44,15 @@ subprojects/minimage/
 subprojects/readcon-core/
 subprojects/readcon-db/
 subprojects/vesin/
+subprojects/Catch2-*/
+subprojects/backward-cpp-*/
+subprojects/cxxopts-*/
+subprojects/gpulite/
+subprojects/linkcell/
+subprojects/minimage/
+subprojects/rang-*/
+subprojects/readcon-core/
+subprojects/readcon-db/
 
 # Prerequisites
 *.d

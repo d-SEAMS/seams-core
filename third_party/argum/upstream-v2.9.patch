@@ -1,0 +1,164 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rohit Goswami <rgoswami@ieee.org>
+Date: Mon, 16 Nov 2026 07:50:20 -0600
+Subject: [PATCH] fix: squash the four local argum v2.9 patches
+
+Explicit static_cast fixes for -Wconversion/-Wsign-conversion/-Wshadow
+(49eddbd2, 5dd4e626), a Windows.h casing fix for MinGW (b9926795), and
+alias()/addHidden()/visible() for a hidden --colour-types alias
+(f31a388a). See third_party/argum/NOTICE.md for the full history.
+
+diff --git a/single-file/argum.h b/single-file/argum.h
+index ba4d6dc..19776e3 100644
+--- a/single-file/argum.h
++++ b/single-file/argum.h
+@@ -59,7 +59,7 @@
+     #ifndef WIN32_LEAN_AND_MEAN
+         #define WIN32_LEAN_AND_MEAN
+     #endif
+-    #include <Windows.h>
++    #include <windows.h>
+     #ifdef min
+         #undef min
+     #endif
+@@ -330,7 +330,7 @@ namespace Argum {
+     #undef ARGUM_DEFINE_CHAR_CONSTANTS
+     
+     inline auto CharConstants<char>::isSpace(char c) -> bool { return isspace(c); }
+-    inline auto CharConstants<wchar_t>::isSpace(wchar_t c) -> bool { return iswspace(c); }
++    inline auto CharConstants<wchar_t>::isSpace(wchar_t c) -> bool { return iswspace(static_cast<wint_t>(c)); }
+ 
+     inline auto CharConstants<char>::toLong(const char * str, char ** str_end, int base) -> long {
+         return strtol(str, str_end, base);
+@@ -859,7 +859,7 @@ namespace Argum {
+ 
+         int res = Impl::simpleWidth(str.data(), str.size());
+         if (res >= 0)
+-            return res;
++            return static_cast<unsigned>(res);
+         
+         std::wstring stripped;
+         enum {
+@@ -916,7 +916,7 @@ namespace Argum {
+ 
+         res = Impl::simpleWidth(stripped.data(), stripped.size());
+         if (res >= 0)
+-            return res;
++            return static_cast<unsigned>(res);
+         
+         return unsigned(stripped.size());
+     }
+@@ -1818,7 +1818,8 @@ namespace Argum {
+     public:
+         template<StringConvertibleOf<CharType> First, StringConvertibleOf<CharType>... Rest>
+         BasicOptionNames(First && first, Rest && ...rest):
+-            m_values{makeString(std::forward<First>(first)), makeString(std::forward<Rest>(rest))...} {
++            m_values{makeString(std::forward<First>(first)), makeString(std::forward<Rest>(rest))...},
++            m_shown(m_values.size()) {
+         }
+ 
+         auto main() const -> const StringType & {
+@@ -1829,9 +1830,19 @@ namespace Argum {
+             return this->m_values;
+         }
+ 
++        // Names help prints. Hidden aliases stay in all() so they parse,
++        // and stay out of this span. Usage prints main() only.
++        auto visible() const -> std::span<const StringType> {
++            return std::span<const StringType>(this->m_values.data(), this->m_shown);
++        }
++
++        auto addHidden(StringViewType name) -> void {
++            this->m_values.push_back(makeString(name));
++        }
+ 
+     private:
+         std::vector<StringType> m_values;
++        std::size_t m_shown = 0;
+     };
+ 
+     ARGUM_DECLARE_FRIENDLY_NAMES(OptionNames)
+@@ -2563,7 +2574,7 @@ namespace Argum {
+                     return this->callHandler(std::forward<Func>(handler), OptionToken{argIdx, first->value(), std::move(usedName), std::move(arg)});
+                 } else if (last != first) {
+                     StringType actualPrefix(option.substr(0, nameStart));
+-                    std::vector<StringType> candidates(last - first);
++                    std::vector<StringType> candidates(static_cast<std::size_t>(last - first));
+                     std::transform(first, last, candidates.begin(), [&](const auto & p) {return actualPrefix + p.key(); });
+                     return this->callHandler(std::forward<Func>(handler), AmbiguousOptionToken{argIdx, std::move(usedName), std::move(arg), candidates});
+                 }
+@@ -2713,10 +2724,10 @@ namespace Argum {
+                         StringType actualPrefix(option.substr(0, nameStart));
+                         std::vector<StringType> candidates;
+                         if (mustMatchExact) {
+-                            candidates.reserve(1 + (last - first));
++                            candidates.reserve(static_cast<std::size_t>(1 + (last - first)));
+                             candidates.push_back(StringType(option.substr(0, nameStart + 1)));
+                         } else {
+-                            candidates.reserve(last - first);
++                            candidates.reserve(static_cast<std::size_t>(last - first));
+                         }
+                         std::transform(first, last, std::back_inserter(candidates), [&](const auto & p) { return actualPrefix + p.key(); });
+                         return this->callHandler(std::forward<Func>(handler), AmbiguousOptionToken{argIdx, std::move(usedName), std::move(arg), candidates});
+@@ -3630,28 +3641,28 @@ namespace Argum {
+                 return  this->m_parser.options().begin();
+             auto subCommandMark = this->m_parser.subCommandMark();
+             if (subCommandMark.optionIdx != size_t(-1))
+-                return this->m_parser.options().begin() + subCommandMark.optionIdx;
++                return this->m_parser.options().begin() + static_cast<std::ptrdiff_t>(subCommandMark.optionIdx);
+             return this->m_parser.options().end();
+         }
+         auto optionsEnd(bool forSubCommand) const {
+             auto subCommandMark = this->m_parser.subCommandMark();
+             if (forSubCommand || subCommandMark.optionIdx == size_t(-1))
+                 return this->m_parser.options().end();
+-            return this->m_parser.options().begin() + subCommandMark.optionIdx;
++            return this->m_parser.options().begin() + static_cast<std::ptrdiff_t>(subCommandMark.optionIdx);
+         }
+         auto positionalsBegin(bool forSubCommand) const {
+             if (!forSubCommand)
+                 return this->m_parser.positionals().begin();
+             auto subCommandMark = this->m_parser.subCommandMark();
+             if (subCommandMark.positionalIdx != size_t(-1))
+-                return this->m_parser.positionals().begin() + subCommandMark.positionalIdx + 1;
++                return this->m_parser.positionals().begin() + static_cast<std::ptrdiff_t>(subCommandMark.positionalIdx) + 1;
+             return this->m_parser.positionals().end();
+         }
+         auto positionalsEnd(bool forSubCommand) const {
+             auto subCommandMark = this->m_parser.subCommandMark();
+             if (forSubCommand || subCommandMark.positionalIdx == size_t(-1))
+                 return this->m_parser.positionals().end();
+-            return this->m_parser.positionals().begin() + subCommandMark.positionalIdx;
++            return this->m_parser.positionals().begin() + static_cast<std::ptrdiff_t>(subCommandMark.positionalIdx);
+         }
+ 
+         static auto appendSyntax(StringType base, StringType addend) -> StringType {
+@@ -3799,6 +3810,15 @@ namespace Argum {
+             return std::move(static_cast<BasicOption *>(this)->help(str));
+         }
+ 
++        // Extra name for this same option. It parses and does not appear in help.
++        auto alias(StringViewType name) & -> BasicOption & {
++            this->m_names.addHidden(name);
++            return *this;
++        }
++        auto alias(StringViewType name) && -> BasicOption && {
++            return std::move(static_cast<BasicOption *>(this)->alias(name));
++        }
++
+         auto formatSyntax(const BasicParser<CharType> & parser,
+                           const Colorizer & colorizer = {}) const -> StringType {
+             constexpr auto space = CharConstants::space;
+@@ -3875,9 +3895,9 @@ namespace Argum {
+                 return ret;
+             };
+ 
+-            auto & all = this->m_names.all();
+-            auto first = all.begin();
+-            auto last = all.end();
++            auto shown = this->m_names.visible();
++            auto first = shown.begin();
++            auto last = shown.end();
+         
+             StringType ret = handleName(*first);
+             ++first;

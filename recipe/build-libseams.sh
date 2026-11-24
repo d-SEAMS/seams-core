@@ -22,6 +22,17 @@ if [[ ${SEAMS_WITH_READCON:-} == enabled ]]; then
 else
   readcon_opt=-Dwith_readcon=disabled
 fi
+#
+# with_backward stays enabled: conda-forge's backward-cpp installs only
+# a build-time BackwardConfig.cmake meant for add_subdirectory()/
+# add_backward(), not a find_package()-able target, so Meson's
+# dependency() cannot locate it, and nodownload rules out a wrap fetch
+# during this network-free script. recipe.yaml's source list instead
+# pre-seeds subprojects/backward-cpp-1.6 with exactly what Meson's own
+# wrap resolver would fetch and patch (the upstream v1.6 tarball, then
+# the WrapDB patch that adds its meson.build), so Meson finds a
+# buildable subproject already on disk and never needs the network
+# nodownload forbids. Tests (cxxopts, rang) are already off above.
 meson setup _build_lib ${MESON_ARGS} \
   --wrap-mode=nodownload \
   -Dwith_tests=false \
@@ -42,7 +53,8 @@ meson setup _build_lib ${MESON_ARGS} \
   -Dwith_sphericart=disabled \
   -Dwith_csm=disabled \
   -Dwith_spglib=disabled \
-  -Dwith_nauty=disabled
+  -Dwith_nauty=disabled \
+  -Dwith_backward=enabled
 
 meson compile -C _build_lib -j "${CPU_COUNT:-2}"
 meson install -C _build_lib --no-rebuild

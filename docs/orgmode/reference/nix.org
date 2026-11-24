@@ -47,6 +47,8 @@ From =nix/package.nix= (~pname = "seams"~, version set to the project version):
 The package uses the clean flake source. It stages checksum-pinned
 trajectory data and binding documentation sources for the sandboxed checks.
 
+The backward-cpp wrap uses a pinned source archive with its Meson overlay.
+
 * What stays off
 
 | ~with_mpi~ | ~false~ |
