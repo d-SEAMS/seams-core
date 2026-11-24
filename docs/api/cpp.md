@@ -23,6 +23,13 @@ q6-bar 0.562448843702.
 The wider language ABI remains `libseams_lang` (`seams_frame_*`). A program
 that only needs `seams.hpp` does not link it. `docs/examples/minimal_cpp.cpp`
 is that ABI on the GenIce sI cell.
+
+```{literalinclude} ../../../bindings/cxx/seams_lang.h
+:language: cpp
+:start-after: LANG_READ_BEGIN
+:end-before: LANG_READ_END
+```
+
 Its frame-mutation and order-parameter entries are
 `seams_frame_set_positions`, `seams_frame_steinhardt_graph`,
 `seams_frame_wl`, `seams_frame_q4_q6`, and

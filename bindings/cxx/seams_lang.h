@@ -70,6 +70,7 @@ const char *seams_last_error(void);
 /** @brief seams_path_nframes. @ingroup lang_frame */
 int seams_path_nframes(const char *path);
 
+/* LANG_READ_BEGIN */
 /** Null when path is null or the file cannot be read.
  * seams_last_error() then names the reason. @ingroup lang_frame */
 seams_frame *seams_frame_read(const char *path, int frame, int type_filter);
@@ -78,6 +79,7 @@ seams_frame *seams_frame_read(const char *path, int frame, int type_filter);
 seams_frame *seams_frame_read_options(
     const char *path, int frame, int type_filter,
     const seams_chemfiles_load_options *options);
+/* LANG_READ_END */
 /** @brief seams_frame. @ingroup lang_frame */
 seams_frame *seams_frame_from_arrays(const double *xyz, int n,
                                     const double *box9, const int *types,
