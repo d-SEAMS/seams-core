@@ -11,6 +11,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.2] - 2026-11-19
+
 ### Added
 
 - The Snakemake rules `h2h_release_build`, `h2h_neighbours`, `h2h_rings`, `h2h_lanes`, `h2h_asv`, `h2h_inventory`, `h2h_summary` and `h2h_campaign` run the head-to-head campaign as one chain on one shared `--core` (`h2h_core`, default `0`) with at least 12 interleaved rounds (`h2h_rounds` and `h2h_asv_rounds`, default `12`), and write a done marker under `bbdir-h2h/<stamp>/`. `snakemake --cores 1 h2h_campaign --config h2h_stamp=<stamp>` runs it. An interrupted rule resumes its run and skips the samples already recorded. `--config h2h_attempt=-2` adds a suffix to the run ids, raw logs and done markers of `h2h_lanes`, `h2h_asv` and `h2h_inventory`.
@@ -70,6 +71,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `third_party/argum/LICENSE` is upstream argum v2.9's BSD 3-Clause License, Copyright (c) 2022, Eugene Gershnik, the file `argum.h` names. The conda recipe, the Yggdrasil build and the Nix package record that licence beside the project MIT licence. `tests/vendored_licenses.py` requires the file, that attribution, and those packaging records, and it still requires `third_party/csm/LICENSE.MD`.
 
 ## [2.14.1] - 2026-11-16
+
 ### Added
 
 - The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
@@ -131,6 +133,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - d-SEAMS builds against an installed chemfiles 0.10.4 or a later 0.10 release, including the copy in Chemfiles_jll. The build finds it through `-Dchemfiles_dir`, pkg-config or the CMake package. A cross build with `-Dwith_chemfiles=auto` that finds no chemfiles stops with an error that lists the places it searched, and never builds a copy for the build machine. The option `-Duse_vendored_chemfiles` takes `auto`, `enabled` or `disabled`. CMake builds take `SEAMS_CHEMFILES_DIR` and `SEAMS_USE_VENDORED_CHEMFILES`. With an installed chemfiles 0.10.4, d-SEAMS refuses a MOL2 file with no counts line and an mmCIF file with no `label_entity_id` column and an unset `label_seq_id`. Each gives a message where it used to crash.
 
 ## [2.14.0] - 2026-11-15
+
 ### Added
 
 - A CI job compiles the library sources PydSEAMSlib and dseams-r build under Clang 22 with `-Wsign-conversion -Wunneeded-internal-declaration -Werror`, once without OpenMP or any optional backend and once with them, and builds those libraries with `-Dwerror=true`. The compiler-warnings workflow also runs on `release/**` branches.
