@@ -1,0 +1,1 @@
+Release-note verification renders each release draft in-process through the builder command instead of spawning a nested Python subprocess per release, keeping the changelog verification checks within their time limit under AddressSanitizer.

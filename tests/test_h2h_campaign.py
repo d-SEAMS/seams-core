@@ -9,6 +9,7 @@ consistency, and the ancestry/tree/report integrity of any committed records.
 No tool under test is imported and no sample is timed.
 """
 
+import functools
 import json
 import getpass
 import ipaddress
@@ -778,6 +779,7 @@ def check_campaign_leak_checker_negative_fixtures():
         ), (kind, fixture)
 
 
+@functools.lru_cache(maxsize=None)
 def git_commit(token: str) -> str:
     done = subprocess.run(
         ["git", "rev-parse", "--verify", f"{token}^{{commit}}"],
@@ -791,6 +793,7 @@ def git_reachable() -> set[str]:
     return {line.split()[0] for line in listed.splitlines() if line}
 
 
+@functools.lru_cache(maxsize=None)
 def git_exists(obj: str) -> bool:
     done = subprocess.run(
         ["git", "cat-file", "-e", obj],
@@ -878,6 +881,7 @@ def check_campaign_records():
         if has_history else ""
     )
     tree_cache: dict[str, str] = {}
+    reachable = git_reachable() if has_history else set()
     for record_path in records:
         rows = hc.read_rows(record_path)
         assert rows, f"{record_path} is empty"
@@ -892,7 +896,6 @@ def check_campaign_records():
             named.update(sup)
         unmarked = set(replaced) - named
         assert not unmarked, f"{record_path.name} replaces {sorted(unmarked)} without supersedes"
-        reachable = git_reachable() if has_history else set()
         for idx, row in enumerate(rows, 1):
             assert row.get("code_dirty") is False, (record_path.name, idx, row.get("code_dirty"))
             rev = row.get("code_revision", "")

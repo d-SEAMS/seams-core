@@ -54,6 +54,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Precompute exact periodic minimum-image bond vectors via `gen::relDistFromPoint` in `chill::specializedChillPlus` so triclinic cells use full tilt-aware MIC instead of orthorhombic `mic1`, and clamp `dz / r` and zero-distance bonds in `y3`.
 - Reading a malformed `.lammpsdata` file, or one with an unrecognized header keyword line, is an error. Release builds of the vendored chemfiles 0.10.4 spun forever on such a file; a patch makes the reader throw a format error, and the system-library probe rejects a copy that still spins.
 - Refine triclinic displacements with exact Euclidean minimum-image reduction outside the Smith ball in `passTilt` (`src/cutoff_csr.cpp`) and in Steinhardt and CHILL/CHILL+ bond-vector kernels (`src/steinhardt_parallel.cpp`, `src/bop.cpp`), and use `floor` for fallback cell counts in `orthoChill`.
+- Release-note verification renders each release draft in-process through the builder command instead of spawning a nested Python subprocess per release, keeping the changelog verification checks within their time limit under AddressSanitizer.
 - Remove the trajectory dataset revision hash from documentation pages so only `input/fetch.py` stores it, and flag dataset revision hashes in source and rendered documentation checks.
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
 - The Meson dist script does not run when seams-core is a subproject.
@@ -64,6 +65,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
 - The chemfiles name-filter example in the CLI reference runs on `input/traj/confined_water_40.xtc`, the committed three-frame confined-water trajectory with its same-stem GROMACS `.gro` topology.
 - The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
+- The head-to-head campaign provenance check caches Git object and commit lookups per run, and the AddressSanitizer Python launcher drops the sanitizer preload for Git subprocesses so the check completes within its time limit.
 - The science tutorial check has a 600 s timeout and runs serially in AddressSanitizer builds.
 - The vendored chemfiles `span.hpp` constructor omits its unused `size` parameter name under `NDEBUG` via `cmake/patches/chemfiles-0.10.4-span-unused.patch`, and `tests/ring_oracle.hpp`, `tests/test_ring_oracle.cpp` and `tests/test_chemfiles_hostile.cpp` cast signed indices to `std::size_t` or `std::ptrdiff_t`, so Clang 21 and GCC 15 builds pass with `-Dwerror=true`.
 - Unwrap cluster atoms in `clump::recenterClusterCloud` along a BFS spanning tree of the neighbour list `nList` rather than Stoddard's linked-list cycle, preventing clusters spanning more than half a box edge from being split across periodic boundaries.

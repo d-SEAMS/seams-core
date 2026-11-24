@@ -1,0 +1,1 @@
+The head-to-head campaign provenance check caches Git object and commit lookups per run, and the AddressSanitizer Python launcher drops the sanitizer preload for Git subprocesses so the check completes within its time limit.

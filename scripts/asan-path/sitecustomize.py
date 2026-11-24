@@ -32,7 +32,7 @@ _HOST_TOOLS = {
     "cc", "c++", "gcc", "g++", "clang", "clang++",
     "mpicc", "mpicxx", "mpic++", "mpirun", "mpiexec", "orterun",
     "cmake", "ctest", "ninja", "make", "meson", "pkg-config", "pkgconf",
-    "sh", "bash",
+    "git", "sh", "bash",
 }
 asan = os.environ.get("ASAN_TEST_PRELOAD", "")
 
