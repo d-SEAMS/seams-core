@@ -1,9 +1,9 @@
 name: Compiler warnings
 on:
   push:
-    branches: [main, modernize, 'release/**']
+    branches: [main, develop, modernize, 'release/**']
   pull_request:
-    branches: [main, 'release/**']
+    branches: [main, develop, 'release/**']
 
 concurrency:
   group: ci_clang_warn-${{ github.ref }}

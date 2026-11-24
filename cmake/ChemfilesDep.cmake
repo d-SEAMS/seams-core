@@ -153,6 +153,10 @@ if(SEAMS_WITH_CHEMFILES)
     # and the conda compiler puts that lib directory first on the RPATH.
     # Under the upstream name the loader opens that copy, which lacks
     # seams_with_frame. The patched library needs a soname of its own.
-    set_target_properties(chemfiles PROPERTIES OUTPUT_NAME seams-chemfiles)
+    # chemfiles 0.10.4 declares cmake_minimum_required(VERSION 2.8.12), so
+    # MACOSX_RPATH must be enabled explicitly for @rpath/ install names on macOS.
+    set_target_properties(chemfiles PROPERTIES
+      OUTPUT_NAME seams-chemfiles
+      MACOSX_RPATH ON)
   endif()
 endif()

@@ -58,10 +58,11 @@ molSys::PointCloud<molSys::Point<double>, double> cloudOf(const Frame &frame) {
   cloud.boxLow = {0, 0, 0};
   cloud.pts.resize(static_cast<std::size_t>(frame.n));
   for (int i = 0; i < frame.n; i++) {
-    auto &p = cloud.pts[static_cast<std::size_t>(i)];
-    p.x = frame.xyz[3 * i];
-    p.y = frame.xyz[3 * i + 1];
-    p.z = frame.xyz[3 * i + 2];
+    const auto at = static_cast<std::size_t>(i);
+    auto &p = cloud.pts[at];
+    p.x = frame.xyz[3 * at];
+    p.y = frame.xyz[3 * at + 1];
+    p.z = frame.xyz[3 * at + 2];
     p.type = 1;
     p.atomID = i + 1;
     p.molID = i + 1;

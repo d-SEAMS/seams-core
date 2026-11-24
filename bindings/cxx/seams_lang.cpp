@@ -1129,6 +1129,10 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
     double box9[9];
     fill_box(frame->cloud, box9);
     const auto t0 = clock::now();
+    struct SerialCutoffGuard {
+      SerialCutoffGuard() { nneigh::preferSerialCutoff(true); }
+      ~SerialCutoffGuard() { nneigh::preferSerialCutoff(false); }
+    };
     int reused = 0;
     std::vector<std::vector<int>> bonds;
     if (which == "cutoff" && skin > 0.0 &&
@@ -1139,10 +1143,7 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
       // Leave the OpenMP team as it is. Changing its width sleeps the
       // workers and the ring search pays to create them again. The guard
       // clears the flag if the neighbour build throws.
-      struct Guard {
-        Guard() { nneigh::preferSerialCutoff(true); }
-        ~Guard() { nneigh::preferSerialCutoff(false); }
-      } guard;
+      SerialCutoffGuard guard;
       auto wide = nneigh::neighListO(cutoff + skin, frame->cloud, typ);
       remember_wide(frame, wide, cutoff, skin, typ, which, box9);
       bonds = pairs_within(frame->cloud, frame->wide_list, cutoff);
@@ -1190,10 +1191,7 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
       }
     } else {
       frame->wide_ready = false;
-      struct Guard {
-        Guard() { nneigh::preferSerialCutoff(true); }
-        ~Guard() { nneigh::preferSerialCutoff(false); }
-      } guard;
+      SerialCutoffGuard guard;
       bonds = bond_list(frame->cloud, cutoff, typ, which, 4);
     }
     const auto t1 = clock::now();

@@ -9,12 +9,14 @@ ps must run in the C locale, whose lstart is five words.
 
 With that stand-in, a source root that is not a git checkout must still be
 checked rather than skipped, and an untracked name that is not UTF-8 must
-survive the snapshot.
+survive the snapshot. A filesystem that refuses such a name (APFS returns
+EILSEQ) gets a non-ASCII UTF-8 name instead.
 
 Usage: source_tree_untracked_selftest.py GIT
 """
 
 import contextlib
+import errno
 import io
 import os
 import subprocess
@@ -42,6 +44,24 @@ def call(argv: list[str]) -> tuple[int, str, str]:
     with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
         code = stu.main(argv)
     return code, out.getvalue(), err.getvalue()
+
+
+def untracked_names(repo: Path) -> tuple[str, str]:
+    """Create an untracked file in REPO; return the kind of its name and a name to leave.
+
+    The UTF-8 fallbacks have no Unicode decomposition, so a filesystem that
+    normalizes names lists them as written.
+    """
+    name = os.fsdecode(b"bad-\xff-name")
+    try:
+        (repo / name).write_text("not UTF-8\n")
+    except OSError as exc:
+        if exc.errno != errno.EILSEQ:
+            raise
+        name = "bad-\u00f0-name"
+        (repo / name).write_text("not ASCII\n")
+        return "non-ASCII", "new-\u00fe"
+    return "non-UTF-8", os.fsdecode(b"new-\xfe")
 
 
 def main(argv: list[str]) -> int:
@@ -145,14 +165,13 @@ def main(argv: list[str]) -> int:
         (plain / "sub").mkdir(parents=True)
         (plain / "sub" / "kept.txt").write_text("present before the snapshot\n")
         (plain / ".gitignore").write_text("*.ignored\n")
-        raw_name = os.fsdecode(b"bad-\xff-name")
-        (repo / raw_name).write_text("not UTF-8\n")
+        kind, left_name = untracked_names(repo)
         roots = [
             ("not a git checkout, nothing left", plain, None, 0),
             ("not a git checkout, ignored file left", plain, "sub/out.ignored", 0),
             ("not a git checkout, file left", plain, "sub/left.txt", 1),
-            ("non-UTF-8 untracked name", repo, None, 0),
-            ("non-UTF-8 untracked name, file left", repo, os.fsdecode(b"new-\xfe"), 1),
+            (f"{kind} untracked name", repo, None, 0),
+            (f"{kind} untracked name, file left", repo, left_name, 1),
         ]
         for i, (label, root, leave, want) in enumerate(roots):
             state = tmp / f"root-state-{i}"
@@ -179,6 +198,39 @@ def main(argv: list[str]) -> int:
             if want == 1 and f"left in the source tree: {leave}" not in chk[2]:
                 failures.append(f"{label}: check did not name {leave!r}: {chk[2].strip()}")
             print(f"{label}: snapshot {snap[0]}, check {chk[0]}")
+        # Files written inside an unignored build directory under the source root
+        # are not source-tree leaks, while files beside it still fail check.
+        build_dir = repo / "unignored-build"
+        build_dir.mkdir()
+        build_state = build_dir / "source-tree-untracked"
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(mock.patch.object(stu, "PROC", proc))
+            stack.enter_context(mock.patch.dict(os.environ, {"PATH": str(bin_ps)}))
+            (proc / str(ppid)).rmdir()
+            try:
+                snap_rc, _, snap_err = call([
+                    "source_tree_untracked.py", "snapshot", git, str(repo), str(build_state), str(build_dir)
+                ])
+                (build_dir / "ok-artifact.txt").write_text("in build dir\n")
+                chk_ok_rc, _, chk_ok_err = call([
+                    "source_tree_untracked.py", "check", git, str(repo), str(build_state), str(build_dir)
+                ])
+                snap2_rc, _, snap2_err = call([
+                    "source_tree_untracked.py", "snapshot", git, str(repo), str(build_state), str(build_dir)
+                ])
+                leak = repo / "leaked.txt"
+                leak.write_text("in source tree\n")
+                chk_fail_rc, _, chk_fail_err = call([
+                    "source_tree_untracked.py", "check", git, str(repo), str(build_state), str(build_dir)
+                ])
+                leak.unlink(missing_ok=True)
+            finally:
+                (proc / str(ppid)).mkdir(exist_ok=True)
+        if snap_rc != 0 or chk_ok_rc != 0:
+            failures.append(f"unignored build dir: snapshot={snap_rc} ({snap_err.strip()}), check={chk_ok_rc} ({chk_ok_err.strip()})")
+        if snap2_rc != 0 or chk_fail_rc != 1 or "left in the source tree: leaked.txt" not in chk_fail_err:
+            failures.append(f"source tree leak beside unignored build dir: snapshot={snap2_rc} ({snap2_err.strip()}), check={chk_fail_rc} ({chk_fail_err.strip()})")
+        print(f"unignored build dir: build_ok={chk_ok_rc}, source_leak={chk_fail_rc}")
     for f in failures:
         print(f"FAIL: {f}", file=sys.stderr)
     return 1 if failures else 0

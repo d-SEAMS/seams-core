@@ -2,9 +2,9 @@ name: Sanitizers
 on:
   workflow_dispatch:
   push:
-    branches: [main, modernize]
+    branches: [main, develop, modernize]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 concurrency:
   group: ci_sanitize-${{ github.ref }}

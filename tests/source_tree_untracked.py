@@ -17,7 +17,7 @@ generation, so a check-only run never accepts an older or foreign snapshot.
 Processes are read from /proc, or from ps where /proc is missing or cannot
 read a process. Both modes fail when neither can.
 
-Usage: source_tree_untracked.py {snapshot,check} GIT SOURCE_ROOT STATE_DIR
+Usage: source_tree_untracked.py {snapshot,check} GIT SOURCE_ROOT STATE_DIR [BUILD_ROOT]
 """
 
 import os
@@ -33,7 +33,19 @@ if _HERE not in sys.path:
 from host_tool_env import without_asan_preload  # noqa: E402
 
 
-def untracked(git: str, root: Path) -> set[str]:
+def _relative_prefix(root: Path, child: Path | None) -> str | None:
+    if child is None:
+        return None
+    try:
+        rel = child.resolve().relative_to(root.resolve())
+    except ValueError:
+        return None
+    if not rel.parts:
+        return None
+    return "/".join(rel.parts) + "/"
+
+
+def untracked(git: str, root: Path, build_root: Path | None = None) -> set[str]:
     env = without_asan_preload()
     top = subprocess.run(
         [git, "-C", str(root), "rev-parse", "--show-toplevel"],
@@ -64,7 +76,11 @@ def untracked(git: str, root: Path) -> set[str]:
                 check=True,
                 env=env,
             )
-    return {p.decode("utf-8", "surrogateescape") for p in listed.stdout.split(b"\0") if p}
+    files = {p.decode("utf-8", "surrogateescape") for p in listed.stdout.split(b"\0") if p}
+    prefix = _relative_prefix(root, build_root)
+    if prefix is not None:
+        files = {p for p in files if not p.startswith(prefix)}
+    return files
 
 
 PROC = Path("/proc")
@@ -163,11 +179,12 @@ def main(argv: list[str]) -> int:
 
 
 def run(argv: list[str]) -> int:
-    if len(argv) != 5 or argv[1] not in ("snapshot", "check"):
+    if len(argv) not in (5, 6) or argv[1] not in ("snapshot", "check"):
         print(__doc__, file=sys.stderr)
         return 2
     mode, git, root, state_dir = argv[1], argv[2], Path(argv[3]), Path(argv[4])
-    now = untracked(git, root)
+    build_root = Path(argv[5]) if len(argv) == 6 else None
+    now = untracked(git, root, build_root)
     gen = generation()
     if gen is None:
         print("cannot identify the meson test run that launched this test", file=sys.stderr)

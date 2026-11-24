@@ -773,6 +773,16 @@ def c_context(body, predeclared):
 
 def compile_statements(build, env, lang, body):
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-src-"))
+    # A block with its own main is a whole program. Wrapped in the harness
+    # main it becomes a nested function: Clang rejects it, and GCC accepts it
+    # without ever calling it.
+    if lang == "c" and re.search(r"\bint\s+main\s*\(", body):
+        source = work / "snippet.c"
+        source.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
+        exe = work / "snippet"
+        compile_c_family(build, env, source, exe)
+        run([str(exe)], env)
+        return
     if lang == "c":
         source = work / "snippet.c"
         uses_frame = "seams_frame_" in body
