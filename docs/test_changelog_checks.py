@@ -339,6 +339,22 @@ class ChangelogChecks(unittest.TestCase):
             "check_towncrier.py",
             "entry is in the wrong section (found in {} Fixed, expected in {} Fixed)".format(P2, P1),
         )
+        self.fails(
+            "check_changelog.py",
+            "CHANGELOG.md [{}] is missing the towncrier bullet for: +control-fix.fixed.md".format(P1),
+        )
+
+    def test_patch_entry_with_stale_continuation(self):
+        self.tree.patch_releases()
+        first = "- {}\n".format(FIRST_P1)
+        self.tree.edit_section(
+            P1,
+            lambda text: text.replace(first, first + "  stale continuation\n", 1),
+        )
+        self.fails(
+            "check_changelog.py",
+            "CHANGELOG.md [{}] is missing the towncrier bullet for: +control-fix.fixed.md".format(P1),
+        )
 
     def test_patch_section_without_fragments(self):
         self.tree.patch_releases()

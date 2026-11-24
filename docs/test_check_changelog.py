@@ -66,6 +66,97 @@ class ContinuationBullet(unittest.TestCase):
                 {"2.14.1": ["+spaces.fixed.md"]},
             )
 
+    def test_prefix_of_longer_stale_bullet_is_missing(self):
+        body = "Alpha"
+        cases = {
+            "indented_continuation": (
+                "## [2.14.1] - 2026-11-16\n\n"
+                "- Alpha\n"
+                "  stale continuation\n"
+            ),
+            "blank_line_continuation": (
+                "## [2.14.1] - 2026-11-16\n\n"
+                "- Alpha\n\n"
+                "  stale second paragraph\n"
+            ),
+            "nested_subbullet": (
+                "## [2.14.1] - 2026-11-16\n\n"
+                "- Outer entry:\n"
+                "  - Alpha\n"
+            ),
+            "inline_suffix": (
+                "## [2.14.1] - 2026-11-16\n\n"
+                "- Alpha stale\n"
+            ),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            fragment = Path(tmp) / "2.14.1"
+            fragment.mkdir()
+            (fragment / "+alpha.fixed.md").write_text(body, encoding="utf-8")
+            for name, changelog in cases.items():
+                with self.subTest(case=name):
+                    self.assertEqual(
+                        missing_versioned(changelog, Path(tmp)),
+                        {"2.14.1": ["+alpha.fixed.md"]},
+                    )
+
+    def test_multiline_bullet_exact_match_passes(self):
+        body = (
+            "Alpha starts on line one\n"
+            "and wraps onto line two.\n"
+            "\n"
+            "Second paragraph stays indented.\n"
+        )
+        exact = (
+            "## [2.14.1] - 2026-11-16\n\n"
+            "### Fixed\n\n"
+            "- Earlier entry.\n"
+            "- Alpha starts on line one\n"
+            "  and wraps onto line two.\n"
+            "\n"
+            "  Second paragraph stays indented.\n"
+            "- Later entry.\n\n"
+            "## [2.14.0] - 2026-11-15\n"
+        )
+        with_stale_tail = exact.replace(
+            "  Second paragraph stays indented.\n",
+            "  Second paragraph stays indented.\n  stale third paragraph.\n",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            fragment = Path(tmp) / "2.14.1"
+            fragment.mkdir()
+            (fragment / "+multiline.fixed.md").write_text(body, encoding="utf-8")
+            self.assertEqual(missing_versioned(exact, Path(tmp)), {})
+            self.assertEqual(
+                missing_versioned(with_stale_tail, Path(tmp)),
+                {"2.14.1": ["+multiline.fixed.md"]},
+            )
+
+    def test_bullet_in_wrong_release_section_is_missing(self):
+        body = "Alpha\n"
+        in_older = (
+            "## [2.14.1] - 2026-11-16\n\n"
+            "- Unrelated entry.\n\n"
+            "## [2.14.0] - 2026-11-15\n\n"
+            "- Alpha\n"
+        )
+        in_newer = (
+            "## [2.14.2] - 2026-11-19\n\n"
+            "- Alpha\n\n"
+            "## [2.14.1] - 2026-11-16\n\n"
+            "- Unrelated entry.\n"
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            fragment = Path(tmp) / "2.14.1"
+            fragment.mkdir()
+            (fragment / "+alpha.fixed.md").write_text(body, encoding="utf-8")
+            for name, changelog in (("older", in_older), ("newer", in_newer)):
+                with self.subTest(section=name):
+                    self.assertEqual(
+                        missing_versioned(changelog, Path(tmp)),
+                        {"2.14.1": ["+alpha.fixed.md"]},
+                    )
+
     def test_released_fragments_match_the_changelog(self):
         changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
         fragments = ROOT / "changelog.d"
