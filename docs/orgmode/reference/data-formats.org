@@ -130,18 +130,17 @@ hydrogen. ~input/traj/exampleTraj.lammpstrj~ has 250 atoms of type 2.
 Single-site mW dumps in this tree use type 1.
 ~input/traj/mW_cubic.lammpstrj~ is 11 frames of 4096 atoms, all type 1.
 The three large example trajectories are stored in the public Hugging Face
-dataset ~d-SEAMS/seams-core-inputs~, pinned at revision
-~163ca2d8dfcb7ef21d88aea1c67381d841f63641~.  Fetch them before running
-examples that name them:
+dataset ~d-SEAMS/seams-core-inputs~. Fetch them with ~input/fetch.py~ before
+running examples that name them:
 
 #+begin_src bash
 python3 input/fetch.py
 #+end_src
 
-The shared helper verifies each pinned SHA-256 digest.  A single file can be
-selected, for example ~python3 input/fetch.py mW_cubic.lammpstrj~.  The
-committed ~*.fixture.lammpstrj~ files are deliberately small offline test
-inputs, not substitutes for benchmark or tutorial results.
+The helper downloads the files and verifies each SHA-256 digest. A single
+file can be selected, for example ~python3 input/fetch.py mW_cubic.lammpstrj~.
+The committed ~*.fixture.lammpstrj~ files are small offline test inputs,
+not substitutes for benchmark or tutorial results.
 
 On one frame, omitted ~--type~ (the value 0) keeps type 2 when any
 atom has it, otherwise type 1. ~seams read~ does that in
