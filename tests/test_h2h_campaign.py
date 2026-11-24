@@ -151,15 +151,26 @@ def check_schedule():
 
 def check_record():
     prov = hc.provenance("run-a", "2026-01-02", "0")
-    for key in ("host", "core", "cpu_model", "lscpu", "kernel", "code_revision", "date",
-                "run_id", "schema", "engine_tree"):
+    for key in ("host", "core", "cpu_model", "lscpu", "kernel", "date",
+                "run_id", "schema"):
         assert prov[key], key
     assert re.fullmatch(r"bench-[0-9a-f]{12}", prov["host"]), prov["host"]
-    assert re.fullmatch(r"[0-9a-f]{40}", prov["engine_tree"]), prov["engine_tree"]
-    head_tree = subprocess.check_output(
-        ["git", "rev-parse", f"{prov['code_revision']}^{{tree}}"],
-        cwd=ROOT, text=True).strip()
-    assert prov["engine_tree"] == head_tree, (prov["engine_tree"], head_tree)
+    if git_repository_state() == "full":
+        assert re.fullmatch(r"[0-9a-f]{40}", prov["code_revision"]), prov["code_revision"]
+        assert re.fullmatch(r"[0-9a-f]{40}", prov["engine_tree"]), prov["engine_tree"]
+        head_tree = subprocess.check_output(
+            ["git", "rev-parse", f"{prov['code_revision']}^{{tree}}"],
+            cwd=ROOT, text=True).strip()
+        assert prov["engine_tree"] == head_tree, (prov["engine_tree"], head_tree)
+    else:
+        assert not prov["code_revision"]
+        assert not prov["engine_tree"]
+        assert not prov["harness_blob"]
+        prov.update({
+            "code_revision": "0" * 40,
+            "engine_tree": "1" * 40,
+            "harness_blob": "2" * 40,
+        })
     assert "base_revision" in prov
     with tempfile.TemporaryDirectory(prefix="dseams-h2h-") as work:
         path = Path(work) / "record.jsonl"
