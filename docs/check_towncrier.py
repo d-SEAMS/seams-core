@@ -1,36 +1,27 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Render towncrier output from the configured fragment directory."""
+"""Render the 2.14.0 towncrier draft and require it in CHANGELOG.md.
 
-import datetime as dt
+Fragments under changelog.d stay on disk. The draft is compared to the
+changelog, and every fragment file is required to still be there.
+
+Fragments for follow-up patch releases sit in changelog.d/<X.Y.Z>.
+Towncrier does not read those directories for the 2.14.0 draft, so each
+fragment is required in its matching CHANGELOG.md section.
+"""
+
 import re
 import subprocess
 import sys
-import tomllib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 CHANGELOG = ROOT / "CHANGELOG.md"
-CONFIG = ROOT / "towncrier.toml"
-RELEASE = re.compile(r"^## \[(\d+\.\d+\.\d+)\] - (\d{4}-\d{2}-\d{2})$", re.M)
-
-def read_config():
-    data = tomllib.loads(CONFIG.read_text())
-    tool = data.get("tool", {}).get("towncrier", {})
-    directory = tool.get("directory")
-    if not isinstance(directory, str) or not directory:
-        raise ValueError("tool.towncrier.directory is missing")
-    return ROOT / directory
+FRAGMENTS = ROOT / "changelog.d"
+VERSION_DIR = re.compile(r"^\d+\.\d+\.\d+$")
 
 
-def release_map():
-    releases = {}
-    for version, date in RELEASE.findall(CHANGELOG.read_text()):
-        releases[version] = date
-    return releases
-
-
-def draft(version: str, date: str):
+def draft():
     done = subprocess.run(
         [
             sys.executable,
@@ -39,9 +30,9 @@ def draft(version: str, date: str):
             "build",
             "--draft",
             "--version",
-            version,
+            "2.14.0",
             "--date",
-            date,
+            "2026-11-15",
         ],
         cwd=str(ROOT),
         check=False,
@@ -53,50 +44,64 @@ def draft(version: str, date: str):
         sys.stderr.write(done.stderr)
         return None
     text = done.stdout
-    marker = text.find("## [{}]".format(version))
+    marker = text.find("## [2.14.0]")
     if marker < 0:
         sys.stderr.write(text)
         return None
     return text[marker:].strip() + "\n"
 
 
+def section(text, version):
+    start = text.find("## [{}]".format(version))
+    if start < 0:
+        return ""
+    end = text.find("\n## [", start + 1)
+    return text[start:] if end < 0 else text[start:end]
+
+
+def missing_versioned(changelog):
+    missing = {}
+    for directory in sorted(path for path in FRAGMENTS.iterdir() if path.is_dir()):
+        version = directory.name
+        if not VERSION_DIR.fullmatch(version):
+            continue
+        notes = " ".join(section(changelog, version).split())
+        absent = [
+            path.name
+            for path in sorted(directory.glob("*.md"))
+            if " ".join(path.read_text().split()) not in notes
+        ]
+        if absent:
+            missing[version] = absent
+    return missing
+
+
 def main():
-    try:
-        fragments = read_config()
-    except ValueError as exc:
-        print(str(exc), file=sys.stderr)
-        return 1
-    if not fragments.is_dir():
-        print("missing fragment directory: {}".format(fragments), file=sys.stderr)
-        return 1
-    releases = release_map()
-    name = fragments.name
-    if re.fullmatch(r"\d+\.\d+\.\d+", name):
-        version = name
-        date = releases.get(version, dt.date.today().isoformat())
-    else:
-        if not releases:
-            print("CHANGELOG.md has no release headings", file=sys.stderr)
-            return 1
-        version, date = next(iter(releases.items()))
-    rendered = draft(version, date)
+    rendered = draft()
     if not rendered:
         print("towncrier draft failed", file=sys.stderr)
         return 1
     changelog = CHANGELOG.read_text()
-    present = rendered.strip() in changelog
-    if version in releases and name == "changelog.d":
-        if not present:
-            print("CHANGELOG.md does not contain the towncrier {} draft".format(version),
-                  file=sys.stderr)
-            return 1
-        print("towncrier {} draft matches CHANGELOG.md".format(version))
-        return 0
-    if present:
-        print("CHANGELOG.md already contains the towncrier {} draft".format(version),
-              file=sys.stderr)
+    if rendered.strip() not in changelog:
+        print("CHANGELOG.md does not contain the towncrier 2.14.0 draft", file=sys.stderr)
         return 1
-    print("towncrier {} renders from {}".format(version, fragments.relative_to(ROOT)))
+    absent = missing_versioned(changelog)
+    if absent:
+        for version in sorted(absent):
+            print(
+                "CHANGELOG.md {} lacks {}".format(version, ", ".join(absent[version])),
+                file=sys.stderr,
+            )
+        return 1
+    names = [
+        path.name
+        for path in FRAGMENTS.iterdir()
+        if path.is_file() and path.suffix == ".md" and path.name not in {"README.md"}
+    ]
+    if len(names) < 100:
+        print("changelog.d lost fragments ({})".format(len(names)), file=sys.stderr)
+        return 1
+    print("towncrier 2.14.0 renders, {} fragments kept".format(len(names)))
     return 0
 
 

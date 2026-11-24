@@ -128,6 +128,11 @@ if lammps_opt.allowed()
     lammps_plugin_args = lammps_args
     if get_option('lammps_src_include') != ''
       lammps_plugin_args += ['-I' + get_option('lammps_src_include')]
+      # A serial LAMMPS has no MPI library; its headers take mpi.h from STUBS.
+      _lammps_stubs = get_option('lammps_src_include') / 'STUBS'
+      if not lammps_mpi.found() and fs.is_file(_lammps_stubs / 'mpi.h')
+        lammps_plugin_args += ['-I' + _lammps_stubs]
+      endif
     endif
     # check_header compiles the include, so a src tree without fmt/ fails here.
     # A LAMMPS CMake install carries compute.h but not lammpsplugin.h, and
@@ -154,6 +159,9 @@ if lammps_opt.allowed()
         install_rpath: lammps_rpath,
         install: true)
     else
+      if lammps_opt.enabled()
+        error('with_lammps is enabled but LAMMPS class headers are not installed; set lammps_src_include to the matching LAMMPS src directory')
+      endif
       message('LAMMPS class headers are not installed; set lammps_src_include to build compute dseams')
     endif
   endif
@@ -300,7 +308,7 @@ if openmm_opt.allowed()
           'for var in ("LIBRARY_PATH", "LD_RUN_PATH"):\n' +
           '    dirs.extend(pathlib.Path(p) for p in os.environ.get(var, "").split(os.pathsep) if p)\n' +
           'for root in dirs:\n' +
-          '    if (root / "libOpenMM.so").is_file():\n' +
+          '    if any((root / name).is_file() for name in ("libOpenMM.so", "libOpenMM.dylib")):\n' +
           '        print(root)\n' +
           '        raise SystemExit(0)\n' +
           'raise SystemExit(1)\n',
@@ -429,6 +437,11 @@ endif
 
 python3_engines = find_program('python3', required: false)
 if python3_engines.found() and get_option('with_tests')
+  test(
+    'openmm_reporter_contract',
+    python3_engines,
+    args: [meson.project_source_root() / 'engines/openmm/test_reporter_contract.py'],
+    timeout: 30)
   openmm_env = environment()
   openmm_env.set('DSEAMS_BUILD', meson.project_build_root())
   openmm_env.set('DSEAMS_SRC', meson.project_source_root())

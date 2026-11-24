@@ -44,7 +44,11 @@ if [ -n "${CONDA_PREFIX:-}" ]; then
   conda_inc="$CONDA_PREFIX/include"
 fi
 export LIBRARY_PATH="$prefix/lib${conda_lib:+:$conda_lib}${LIBRARY_PATH:+:$LIBRARY_PATH}"
-export CPATH="$prefix/include${conda_inc:+:$conda_inc}${CPATH:+:$CPATH}"
+# CPATH is a plain -I, so Clang -Werror=sign-conversion fires inside
+# GROMACS and GMP. The C and C++ include paths are system directories.
+export C_INCLUDE_PATH="$prefix/include${conda_inc:+:$conda_inc}${C_INCLUDE_PATH:+:$C_INCLUDE_PATH}"
+export CPLUS_INCLUDE_PATH="$prefix/include${conda_inc:+:$conda_inc}${CPLUS_INCLUDE_PATH:+:$CPLUS_INCLUDE_PATH}"
+unset CPATH
 export LD_LIBRARY_PATH="$prefix/lib${conda_lib:+:$conda_lib}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export OMP_TOOL_LIBRARIES="$prefix/lib/libarcher.so"
 # Only the linkcell cargo invocation may see the nightly sanitizer
@@ -73,6 +77,42 @@ fi
 # Minimage's staticlib contains the ordinary std. Both define
 # rust_eh_personality, and the two copies are not the same COMDAT, so
 # the link needs to keep the first definition.
+# Archer's libomp is not on the default loader path. Record it, and
+# use one shared thread runtime so a later preload is the same file.
+tsan_rt=$(clang -print-file-name=libclang_rt.tsan-x86_64.so)
+tsan_rpath=
+if [ -n "$tsan_rt" ] && [ -f "$tsan_rt" ]; then
+  tsan_rpath="-Wl,-rpath,$(dirname "$tsan_rt")"
+fi
+# The clang driver runs the first ld on PATH, and the pixi environment
+# puts its binutils there. That ld has the conda glibc 2.28 sysroot built
+# in. The thread runtime needs libstdc++.so.6, which LD_LIBRARY_PATH
+# resolves to the conda copy, and that copy needs libdl.so.2. The conda ld
+# then takes libdl from its own sysroot while libc comes from the host, and
+# the sysroot's libdl leaves _dl_sym, _dl_vsym and _dl_addr undefined.
+# Link with the host's ld so every needed library is looked up on the host.
+host_path=$PATH
+if [ -n "${CONDA_PREFIX:-}" ]; then
+  host_path=
+  oldifs=$IFS
+  IFS=:
+  for dir in $PATH; do
+    case $dir in
+      "$CONDA_PREFIX" | "$CONDA_PREFIX"/*) continue ;;
+    esac
+    host_path="${host_path:+$host_path:}$dir"
+  done
+  IFS=$oldifs
+fi
+if ! host_ld=$(PATH=$host_path command -v ld); then
+  echo "no ld outside the pixi environment; install binutils" >&2
+  exit 1
+fi
+link_args="['-shared-libsan','-Wl,--allow-multiple-definition','-Wl,-rpath,$prefix/lib'"
+if [ -n "$tsan_rpath" ]; then
+  link_args="$link_args,'$tsan_rpath'"
+fi
+link_args="$link_args,'--ld-path=$host_ld']"
 meson setup "$build" $reconfigure \
   --buildtype=debugoptimized \
   -Dwith_tests=true \
@@ -80,8 +120,8 @@ meson setup "$build" $reconfigure \
   -Db_sanitize=thread \
   -Db_asneeded=false \
   -Db_lundef=false \
-  -Dc_link_args='-Wl,--allow-multiple-definition' \
-  -Dcpp_link_args='-Wl,--allow-multiple-definition' \
+  -Dc_link_args="$link_args" \
+  -Dcpp_link_args="$link_args" \
   "$@"
 ninja -C "$build" \
   tests/test_neighbours \

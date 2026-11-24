@@ -80,7 +80,7 @@ Tests to know by name:
 
 The Python snippets in the docs import `dseams` and `pydseams` from the
 installed `pydseamslib` of the same version
-(`pip install pydseamslib==2.14.0`, or a build of d-SEAMS/PydSEAMSlib).
+(`pip install pydseamslib`, or a build of d-SEAMS/PydSEAMSlib).
 A `docs_snippet_` test fails, naming that pip line, when the package is
 missing. A test that exits 77 is a skip because an optional toolchain or
 input is absent.

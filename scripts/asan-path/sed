@@ -1,0 +1,21 @@
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
+# sed is used while the suite has preloaded libasan. Its one-byte
+# xmalloc is not a seams allocation. Drop the preload for this process.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+old_ifs=$IFS
+IFS=:
+real=
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/sed" ]; then
+    real=$dir/sed
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$real" ]; then
+  echo "sed is not on PATH" >&2
+  exit 1
+fi
+unset LD_PRELOAD
+exec "$real" "$@"

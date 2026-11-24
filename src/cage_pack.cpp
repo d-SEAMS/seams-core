@@ -954,7 +954,8 @@ bool eulerPerfect(int nL, int nR, const std::vector<int> &off, const std::vector
   return got == nL;
 }
 
-ring::PackParts gPackParts;
+// Concurrent cage searches each keep the split of the call they made.
+thread_local ring::PackParts gPackParts;
 
 void resetPackParts() { gPackParts = {}; }
 

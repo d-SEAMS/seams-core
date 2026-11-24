@@ -1,6 +1,6 @@
 # DVC-style out for the per-frame largest-cluster series.
-# The table is outside the work tree. It will be published as a
-# dataset of the d-SEAMS organisation on Hugging Face.
+# The table is outside the work tree. Regenerate it with
+# scripts/nucleation_ensemble.py and compare the md5 below.
 # One row per saved frame (header plus 10001 frames for each of
 # 20 seeds). Produced by scripts/nucleation_ensemble.py.
 outs:

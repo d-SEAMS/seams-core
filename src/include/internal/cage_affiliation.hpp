@@ -79,6 +79,17 @@ struct StackingPlanes {
     const std::vector<std::vector<int>> &rings,
     const std::vector<std::vector<int>> &nList);
 
+//! Affiliation and stacking planes from one basal sweep. The planes are the
+//! basal rings of the passing pairs and the rings passing the equatorial
+//! test, so both answers read the same pairs.
+struct CagePlanes {
+  CageAffiliation affiliation;
+  StackingPlanes planes;
+};
+
+[[nodiscard]] CagePlanes cagePlanes(const std::vector<std::vector<int>> &rings,
+                                    const std::vector<std::vector<int>> &nList);
+
 //! Batch computation of the affiliation predicates for six-membered rings.
 //! nList is by index with the leading self entry, as neighbourListByIndex
 //! produces.

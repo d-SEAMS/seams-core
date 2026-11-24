@@ -1,7 +1,7 @@
 #+TITLE: Benchmarks
 #+OPTIONS: toc:nil num:nil
 
-Time a 2.14.0 build and write down the run. The guest-code medians are
+Time a build of this release and write down the run. The guest-code medians are
 on [[file:literature-h2h.org][Literature head-to-head]]. The thread
 width each guest receives is on
 [[file:literature-reproduce.org][Reproduce the literature head-to-head]].

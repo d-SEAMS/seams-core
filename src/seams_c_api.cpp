@@ -20,9 +20,11 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <team_run.hpp>
 #include <thread_team.hpp>
 #include <water_select.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -340,8 +342,9 @@ typeOneCopy(const molSys::PointCloud<molSys::Point<double>, double> &cloud) {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
-// Below this many atoms a team costs more than the loop it splits.
-constexpr int kParallelFrame = 2048;
+// Atoms per chunk of a frame copy on the team. A smaller frame is one
+// chunk and stays on the caller.
+constexpr std::size_t kFrameGrain = 8192;
 
 Cloud cloudOf(const double *xyz, int n, const double *box9) {
   Cloud cloud;
@@ -393,32 +396,32 @@ const Cloud &frameCloud(const double *xyz, int n, const double *box9) {
   cloud.idIndexMap.clear();
   cloud.pts.resize(static_cast<std::size_t>(n));
   molSys::Point<double> *pts = cloud.pts.data();
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (n >= kParallelFrame && !omp_in_parallel())
-#endif
-  for (int i = 0; i < n; i++) {
-    auto &p = pts[i];
-    p.x = xyz[3 * i];
-    p.y = xyz[3 * i + 1];
-    p.z = xyz[3 * i + 2];
-    p.type = 1;
-    p.atomID = i + 1;
-    p.molID = i + 1;
-    p.c_ij.clear();
-    p.iceType = molSys::atom_state_type::unclassified;
-    p.inSlice = true;
-  }
+  seams::team::forRange(static_cast<std::size_t>(n), kFrameGrain,
+                        [&](std::size_t begin, std::size_t end, int) {
+                          for (std::size_t i = begin; i < end; i++) {
+                            auto &p = pts[i];
+                            p.x = xyz[3 * i];
+                            p.y = xyz[3 * i + 1];
+                            p.z = xyz[3 * i + 2];
+                            p.type = 1;
+                            p.atomID = static_cast<int>(i) + 1;
+                            p.molID = static_cast<int>(i) + 1;
+                            p.c_ij.clear();
+                            p.iceType = molSys::atom_state_type::unclassified;
+                            p.inSlice = true;
+                          }
+                        });
   return cloud;
 }
 
-void copyInts(const int *src, int *dst, int count) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (count >= kParallelFrame && !omp_in_parallel())
-#endif
-  for (int i = 0; i < count; i++) {
-    dst[i] = src[i];
-  }
+template <class T> void copyOut(const T *src, T *dst, int count) {
+  seams::team::forRange(static_cast<std::size_t>(count), kFrameGrain,
+                        [&](std::size_t begin, std::size_t end, int) {
+                          std::copy(src + begin, src + end, dst + begin);
+                        });
 }
+
+void copyInts(const int *src, int *dst, int count) { copyOut(src, dst, count); }
 
 bool badFrame(const double *xyz, int n, const double *box9, double cutoff) {
   return xyz == nullptr || box9 == nullptr || n <= 0 || !(cutoff > 0.0);
@@ -631,13 +634,7 @@ int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
     if (static_cast<int>(result.ql.size()) != n) {
       return 1;
     }
-    const double *src = result.ql.data();
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (n >= kParallelFrame && !omp_in_parallel())
-#endif
-    for (int i = 0; i < n; i++) {
-      ql[i] = src[i];
-    }
+    copyOut(result.ql.data(), ql, n);
     const auto t3 = StageClock::now();
     const auto &kernel = chill::lastQlCutoffStages();
     const double inside = secondsBetween(t1, t2);

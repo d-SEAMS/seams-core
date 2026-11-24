@@ -1597,8 +1597,7 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
       index.ringOff[static_cast<std::size_t>(atom) + 1] =
           index.ringOff[static_cast<std::size_t>(atom)] + count[static_cast<std::size_t>(atom)];
     }
-    index.ringCol.assign(static_cast<std::size_t>(index.ringOff[static_cast<std::size_t>(numAtoms)]),
-                         0);
+    index.ringCol.resize(static_cast<std::size_t>(index.ringOff[static_cast<std::size_t>(numAtoms)]));
     std::vector<int> cursor(index.ringOff.begin(), index.ringOff.end() - 1);
     for (int iring = 0; iring < nRings; iring++) {
       for (const int atom : rings[static_cast<std::size_t>(iring)]) {
@@ -1617,90 +1616,111 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
     return index;
   }
 
-  // Each thread counts, then writes, its own ring block. Concatenating those
-  // blocks keeps every atom's row in ascending ring order.
-  std::vector<std::vector<int>> counts(static_cast<std::size_t>(nThreads));
+  // Row t of the count table holds thread t's ring block. Thread t zeroes
+  // and fills its own row, and the slots of an atom are handed out to the
+  // rows in thread order, so every atom's list stays in ascending ring
+  // order.
+  const auto width = static_cast<std::size_t>(nThreads);
+  const auto atoms = static_cast<std::size_t>(numAtoms);
+  std::vector<int, seams::FilledByTeam<int>> table(width * atoms);
+  std::vector<int> blockSum(width + 1, 0);
+  index.ringOff.resize(atoms + 1);
+  index.ringOff[0] = 0;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel
+#pragma omp parallel num_threads(nThreads)
 #endif
   {
 #ifdef SEAMS_HAS_OPENMP
     const int tid = omp_get_thread_num();
+    const int team = omp_get_num_threads();
 #else
     const int tid = 0;
+    const int team = 1;
 #endif
-    counts[static_cast<std::size_t>(tid)].assign(static_cast<std::size_t>(numAtoms), 0);
-    auto &count = counts[static_cast<std::size_t>(tid)];
+    int *mine = table.data() + static_cast<std::size_t>(tid) * atoms;
+    if (team != nThreads) {
+      // A smaller team than asked for leaves rows nobody zeroes.
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
+#pragma omp single
 #endif
-    for (int iring = 0; iring < nRings; iring++) {
-      for (const int atom : rings[static_cast<std::size_t>(iring)]) {
-        if (atom >= 0 && atom < numAtoms) {
-          count[static_cast<std::size_t>(atom)]++;
+      std::fill(table.begin(), table.end(), 0);
+    } else {
+      std::fill(mine, mine + atoms, 0);
+    }
+    for (int t = tid; t < nThreads; t += team) {
+      int *row = table.data() + static_cast<std::size_t>(t) * atoms;
+      const int rlo = static_cast<int>(static_cast<std::int64_t>(nRings) * t / nThreads);
+      const int rhi = static_cast<int>(static_cast<std::int64_t>(nRings) * (t + 1) / nThreads);
+      for (int iring = rlo; iring < rhi; iring++) {
+        for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+          if (atom >= 0 && atom < numAtoms) {
+            ++row[atom];
+          }
         }
       }
     }
-  }
-  std::vector<int> base(static_cast<std::size_t>(numAtoms), 0);
-  int total = 0;
-  for (int atom = 0; atom < numAtoms; atom++) {
-    base[static_cast<std::size_t>(atom)] = total;
-    for (int t = 0; t < nThreads; t++) {
-      total += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#endif
+    // Atom block of this thread: totals, a local prefix, then the block
+    // offsets once every block sum is known.
+    const int alo = static_cast<int>(static_cast<std::int64_t>(numAtoms) * tid / team);
+    const int ahi = static_cast<int>(static_cast<std::int64_t>(numAtoms) * (tid + 1) / team);
+    int run = 0;
+    for (int atom = alo; atom < ahi; atom++) {
+      for (std::size_t t = 0; t < width; t++) {
+        int &slot = table[t * atoms + static_cast<std::size_t>(atom)];
+        const int count = slot;
+        slot = run;
+        run += count;
+      }
+      index.ringOff[static_cast<std::size_t>(atom) + 1] = run;
     }
-  }
-  std::vector<int> flat(static_cast<std::size_t>(total));
-  std::vector<std::vector<int>> head(static_cast<std::size_t>(nThreads));
-  for (int t = 0; t < nThreads; t++) {
-    head[static_cast<std::size_t>(t)].resize(static_cast<std::size_t>(numAtoms));
-  }
-  for (int atom = 0; atom < numAtoms; atom++) {
-    int cursor = base[static_cast<std::size_t>(atom)];
-    for (int t = 0; t < nThreads; t++) {
-      head[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)] = cursor;
-      cursor += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
+    blockSum[static_cast<std::size_t>(tid) + 1] = run;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#pragma omp single
+#endif
+    {
+      for (int t = 0; t < team; t++) {
+        blockSum[static_cast<std::size_t>(t) + 1] += blockSum[static_cast<std::size_t>(t)];
+      }
+      index.ringCol.resize(static_cast<std::size_t>(blockSum[static_cast<std::size_t>(team)]));
     }
-  }
+    const int base = blockSum[static_cast<std::size_t>(tid)];
+    for (int atom = alo; atom < ahi; atom++) {
+      index.ringOff[static_cast<std::size_t>(atom) + 1] += base;
+      for (std::size_t t = 0; t < width; t++) {
+        table[t * atoms + static_cast<std::size_t>(atom)] += base;
+      }
+    }
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel
+#pragma omp barrier
 #endif
-  {
-#ifdef SEAMS_HAS_OPENMP
-    const int tid = omp_get_thread_num();
-#else
-    const int tid = 0;
-#endif
-    auto &cursor = head[static_cast<std::size_t>(tid)];
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int iring = 0; iring < nRings; iring++) {
-      for (const int atom : rings[static_cast<std::size_t>(iring)]) {
-        if (atom >= 0 && atom < numAtoms) {
-          flat[static_cast<std::size_t>(cursor[static_cast<std::size_t>(atom)]++)] = iring;
+    int *col = index.ringCol.data();
+    for (int t = tid; t < nThreads; t += team) {
+      int *row = table.data() + static_cast<std::size_t>(t) * atoms;
+      const int rlo = static_cast<int>(static_cast<std::int64_t>(nRings) * t / nThreads);
+      const int rhi = static_cast<int>(static_cast<std::int64_t>(nRings) * (t + 1) / nThreads);
+      for (int iring = rlo; iring < rhi; iring++) {
+        for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+          if (atom >= 0 && atom < numAtoms) {
+            col[row[atom]++] = iring;
+          }
         }
       }
     }
-  }
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (withRows)
+#pragma omp barrier
+#pragma omp for schedule(static)
 #endif
-  for (int atom = 0; atom < (withRows ? numAtoms : 0); atom++) {
-    int n = 0;
-    for (int t = 0; t < nThreads; t++) {
-      n += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
+    for (int atom = 0; atom < (withRows ? numAtoms : 0); atom++) {
+      const int begin = index.ringOff[static_cast<std::size_t>(atom)];
+      const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
+      index.ringsContainingAtom[static_cast<std::size_t>(atom)].assign(
+          index.ringCol.begin() + begin, index.ringCol.begin() + end);
     }
-    auto &row = index.ringsContainingAtom[static_cast<std::size_t>(atom)];
-    const int begin = base[static_cast<std::size_t>(atom)];
-    row.assign(flat.begin() + begin, flat.begin() + begin + n);
   }
-  index.ringOff.assign(static_cast<std::size_t>(numAtoms) + 1, 0);
-  for (int atom = 0; atom < numAtoms; atom++) {
-    index.ringOff[static_cast<std::size_t>(atom)] = base[static_cast<std::size_t>(atom)];
-  }
-  index.ringOff[static_cast<std::size_t>(numAtoms)] = total;
-  index.ringCol = std::move(flat);
   return index;
 }
 
@@ -1989,7 +2009,8 @@ struct DdcSplitTimes {
   double search_ms = 0;
   double write_ms = 0;
 };
-DdcSplitTimes gDdcSplit;
+// findDDC is called from several threads in the cage fuzzer.
+thread_local DdcSplitTimes gDdcSplit;
 // Cycle keys built by the last findDDC order. Ideal ice distinguishes rings
 // by their atoms, so this stays zero when the comparator can stop early.
 std::atomic<std::uint64_t> gDdcCycleEvals{0};
@@ -3145,26 +3166,50 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
 void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
   n_ = static_cast<int>(nList.size());
   off_.assign(static_cast<size_t>(n_) + 1, 0);
-  cols_.clear();
-  std::vector<int> row;
-  for (int i = 0; i < n_; i++) {
+  // Row i is the sorted, unique in-range neighbours of atom i. The sizes
+  // and then the rows are written by the team; a row holds a few atoms.
+  auto sortedRow = [&](int i, std::vector<int> &row) {
     row.clear();
-    if (static_cast<size_t>(i) < nList.size()) {
-      const auto &nbrs = nList[static_cast<size_t>(i)];
-      row.reserve(nbrs.size());
-      for (size_t k = 1; k < nbrs.size(); k++) {
-        const int j = nbrs[k];
-        if (j >= 0 && j < n_) {
-          row.push_back(j);
-        }
+    const auto &nbrs = nList[static_cast<size_t>(i)];
+    for (size_t k = 1; k < nbrs.size(); k++) {
+      const int j = nbrs[k];
+      if (j >= 0 && j < n_) {
+        row.push_back(j);
       }
     }
     std::sort(row.begin(), row.end());
     row.erase(std::unique(row.begin(), row.end()), row.end());
-    off_[static_cast<size_t>(i)] = static_cast<int>(cols_.size());
-    cols_.insert(cols_.end(), row.begin(), row.end());
+  };
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (n_ >= 4096 && !omp_in_parallel())
+#endif
+  {
+    std::vector<int> row;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int i = 0; i < n_; i++) {
+      sortedRow(i, row);
+      off_[static_cast<size_t>(i) + 1] = static_cast<int>(row.size());
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp single
+#endif
+    {
+      for (int i = 0; i < n_; i++) {
+        off_[static_cast<size_t>(i) + 1] += off_[static_cast<size_t>(i)];
+      }
+      cols_.resize(static_cast<size_t>(off_[static_cast<size_t>(n_)]));
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int i = 0; i < n_; i++) {
+      sortedRow(i, row);
+      std::copy(row.begin(), row.end(),
+                cols_.begin() + off_[static_cast<size_t>(i)]);
+    }
   }
-  off_[static_cast<size_t>(n_)] = static_cast<int>(cols_.size());
 }
 
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,

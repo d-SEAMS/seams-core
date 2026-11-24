@@ -35,7 +35,7 @@ def main():
     lmp = e2e.which("lmp", "LMP")
     if lmp is None:
         e2e.skip("LAMMPS (lmp or $LMP) was not found")
-    plugin = e2e.find_build_file(args.build, "dseamsplugin.so")
+    plugin = e2e.external_library(args.build, "dseamsplugin.so")
     if plugin is None:
         e2e.skip("dseamsplugin.so was not built (LAMMPS class headers missing)")
     cli = e2e.seams_cli(args.build)

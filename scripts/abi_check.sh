@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env -S -u LD_PRELOAD /bin/sh
 # Copyright (c) d-SEAMS developers
 # Compare the exported C ABI with the committed baseline.
 # The baseline was taken against main 2dbefa97. A difference is an
@@ -17,7 +17,10 @@
 #     --no-load-undefined-interfaces -o scripts/abi_baseline.abi libseams.so
 # and the abi-instr path cut to src/seams_api.cpp.
 set -eu
-# nm and abidiff read the library. They abort when libasan is preloaded.
+# The shebang drops LD_PRELOAD before this shell is mapped. Unset inside
+# the script is too late: LeakSanitizer already owns the shell and reports
+# its allocations at exit. nm and abidiff abort the same way, so children
+# must not inherit a preload either.
 unset LD_PRELOAD
 build=${1:?build directory}
 baseline=${2:?baseline file}

@@ -23,13 +23,17 @@ build=$root/build-san
 # lacks the program, so a test that skips an absent tool would run the
 # wrapper and fail. Only wrappers whose program exists are linked in.
 wrap=$build/asan-path
+# Python leaves __pycache__ here once sitecustomize is imported.
+rm -rf "$wrap"
 mkdir -p "$wrap"
-rm -f "$wrap"/*
 for tool in "$root"/scripts/asan-path/*; do
   if command -v "${tool##*/}" >/dev/null 2>&1; then
     ln -s "$tool" "$wrap/${tool##*/}"
   fi
 done
+# The python3 wrapper puts its own directory on PYTHONPATH, which is this
+# one. sitecustomize is not a program, so the loop above skips it.
+ln -s "$root/scripts/asan-path/sitecustomize.py" "$wrap/sitecustomize.py"
 # Resolved before meson setup so find_program('cargo') records the wrapper.
 export PATH="$wrap:$PATH"
 # run_hook links LAMMPS and is built with the sanitizer. The environment's
@@ -137,8 +141,9 @@ if [ -n "${FC:-}" ]; then
   export REAL_FC=$FC
   export FC=$root/scripts/asan-path/gfortran
 fi
-if [ -n "$_preload" ]; then
-  LD_PRELOAD=$_preload meson test -C "$build" --print-errorlogs
-else
-  meson test -C "$build" --print-errorlogs
-fi
+# Do not map libasan into the meson test process. That preload is
+# inherited by host shells and compilers (abi_check's bash, mpicc's gcc),
+# and LeakSanitizer then reports their allocations. ASAN_TEST_PRELOAD is
+# already exported: the interpreter wrappers and the cargo test runner
+# map the runtime only for the process that hosts libseams.
+meson test -C "$build" --print-errorlogs

@@ -1,10 +1,10 @@
 name: Docs
 on:
   push:
-    branches: [main]
+    branches: [main, "release/*"]
     tags: ["v*"]
   pull_request:
-    branches: [main]
+    branches: [main, "release/*"]
 
 # Publish gh-pages only from d-SEAMS/seams-core main. Netlify
 # (dseamsdocs) is Git-linked to that branch and serves
@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # A still whose digest is not published is rendered on the CPU. Two
+    # hours covers a full render; a stuck Cycles or Qt process fails.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
@@ -74,6 +77,8 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${PATH}"
           pixi run -e docs docbld
+      - name: Live docs registry claims
+        run: python3 docs/check_registry_claims.py
       - name: SEO metadata
         run: |
           python3 docs/finalize_seo.py --self-test
@@ -92,7 +97,9 @@ jobs:
             --index-files index.html
             --root-dir ${{ github.workspace }}/docs/build
             --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
-            --max-retries 2
+            --remap "https://github.com/d-SEAMS/seams-core/blob/main file://${{ github.workspace }}"
+            --max-retries 5
+            --retry-wait-time 10
             --timeout 30
             --max-concurrency 4
             --extensions html
@@ -115,6 +122,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build
+          keep_files: false
+          force_orphan: true
 
   verify:
     runs-on: ubuntu-latest
@@ -130,6 +139,7 @@ jobs:
       - name: C++ API docs
         run: |
           sudo apt-get update && sudo apt-get install -y doxygen
+          python3 scripts/doxygen_version_header.py
           doxygen docs/Doxyfile.lang
 
       - name: Build the library the examples call
@@ -183,8 +193,25 @@ jobs:
       - name: Export the org book
         run: pixi run -e docs mkrst
 
+      # lychee reads the exported sources and the top-level Markdown, with
+      # the same ignore list and retries as the published-site check. A
+      # slow publisher host is retried instead of failing the job.
       - name: Link check
-        run: pixi run -e docs sphinx-build -W --keep-going -j 2 -b linkcheck -d docs/doctrees docs/source docs/linkcheck
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --no-progress
+            --max-retries 5
+            --retry-wait-time 10
+            --timeout 30
+            --max-concurrency 4
+            --accept 200,202,206,429
+            --remap "https://github.com/d-SEAMS/seams-core/blob/main file://${{ github.workspace }}"
+            --extensions rst,md,org,txt
+            --exclude-path docs/source/api
+            docs/source README.md CHANGELOG.md
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Export the org book for doctest
         run: pixi run -e docs mkrst

@@ -1,0 +1,1 @@
+Public documentation now contains reader instructions and scientific results only. Maintainer workflows, repository policy, provenance pins, and video-production notes have moved out of the published manual.
