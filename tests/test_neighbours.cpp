@@ -2086,6 +2086,30 @@ TEST_CASE("SkinNeighborList rejects a cloud without a box", "[neighbours][linkce
   REQUIRE_THROWS_AS(skin.update(cloud), std::invalid_argument);
 }
 
+TEST_CASE("a tiny cutoff in a large box stays under the linkcell mesh limit",
+          "[neighbours][linkcell]") {
+  // One cell per 0.01 A of a 20 A box is 8e9 cells, past linkcell's limit.
+  auto cloud = randomCloud(64, 20.0, 20.0, 20.0, 31);
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts[1].x = cloud.pts[0].x + 0.005;
+  cloud.pts[1].y = cloud.pts[0].y;
+  cloud.pts[1].z = cloud.pts[0].z;
+  auto loose = cloud;
+  loose.box.clear();
+  loose.boxLow.clear();
+  const double cutoff = 0.01;
+  linkcell::PairCsr csr;
+  for (bool half : {false, true}) {
+    nneigh::linkcellCutoffCsr(cloud, cutoff, half, {true, true, true}, {}, 1, csr);
+    REQUIRE(csrRows(csr) == bruteImageRows(cloud, cutoff, {true, true, true}, half));
+    nneigh::linkcellCutoffCsr(loose, cutoff, half, {false, false, false}, {}, 1, csr);
+    REQUIRE(csrRows(csr) == bruteImageRows(loose, cutoff, {false, false, false}, half));
+  }
+  const auto rows = nneigh::neighListPair(cutoff, cloud, 1, 2);
+  REQUIRE(rows.size() == static_cast<std::size_t>(cloud.nop));
+}
+
 TEST_CASE("a cutoff past half a small triclinic cell keeps every image pair",
           "[neighbours][linkcell][triclinic]") {
   // 3.5 is more than half of every width of this cell, so one pair can

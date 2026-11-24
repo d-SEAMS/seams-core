@@ -102,6 +102,24 @@ std::vector<int> indexToIDTable(
 // Below this many atoms a row-by-row pass is cheaper than waking a team.
 constexpr int kParallelRowsMinAtoms = 4096;
 
+// Cells of about this many atoms keep a tiny cutoff in a large box under
+// linkcell's mesh limit instead of one cell per cutoff width.
+constexpr double kAtomsPerLinkcellCell = 20.0;
+
+double openVolume(const std::vector<double> &xyz, double floor) {
+  double volume = 1.0;
+  for (std::size_t axis = 0; axis < 3; ++axis) {
+    double lo = std::numeric_limits<double>::infinity();
+    double hi = -lo;
+    for (std::size_t i = axis; i < xyz.size(); i += 3) {
+      lo = std::min(lo, xyz[i]);
+      hi = std::max(hi, xyz[i]);
+    }
+    volume *= std::max(hi - lo, floor);
+  }
+  return volume;
+}
+
 constexpr std::array<bool, 3> kPeriodic{true, true, true};
 
 //! Width of the cutoff search and of the row fill for this call: one
@@ -260,12 +278,24 @@ void nneigh::linkcellCutoffCsr(
   const linkcell::Cell cell = anyPeriodic
                                   ? nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow)
                                   : linkcell::Cell::ortho(1.0, 1.0, 1.0);
+  const std::size_t kept =
+      mask.empty() ? static_cast<std::size_t>(nop)
+                   : static_cast<std::size_t>(std::count(mask.begin(), mask.end(), 1));
+  double hint = rcutoff;
+  if (kept > 0) {
+    const double volume = anyPeriodic ? nneigh::dumpVolume(yCloud.box, yCloud.boxLow)
+                                      : openVolume(xyz, rcutoff);
+    if (std::isfinite(volume) && volume > 0.0) {
+      hint = std::max(rcutoff,
+                      std::cbrt(kAtomsPerLinkcellCell * volume / static_cast<double>(kept)));
+    }
+  }
   const double none = 0.0;
   lc_set_threads(width);
   seams::withTeamAsleep(width > 1 ? seams::teamWidth() : 1, [&] {
     linkcell::pairs_within_csr(xyz.empty() ? &none : xyz.data(),
                                static_cast<std::size_t>(nop), cell, rcutoff, out, half,
-                               periodic, mask.empty() ? nullptr : mask.data());
+                               periodic, mask.empty() ? nullptr : mask.data(), hint);
   });
 }
 
