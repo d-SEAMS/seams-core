@@ -48,9 +48,8 @@ independent-axis wrap of the three spans.
 * Neighbour lists
 
 Cutoff lists (~nneigh::neighListO~, ~neighList~, ~halfNeighList~,
-~getNewNeighbourListByIndex~, the vesin cell list, the brute
-fallback, and ~SkinNeighborList~) pass the dump 3x3 into the
-minimum image. k-nearest lists (~kNearestNeighbourList~) build
+~getNewNeighbourListByIndex~, and ~SkinNeighborList~) pass the dump
+3x3 to linkcell as the cell. k-nearest lists (~kNearestNeighbourList~) build
 the same H through ~lammpsBoxToLinkcell~. Device ice-score
 batches use ~residentFrameCell~: ~nBox >= 6~ or a supplied
 ~boxLow~ becomes one dump cell; three lengths stay ortho.

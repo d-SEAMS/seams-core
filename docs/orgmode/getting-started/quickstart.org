@@ -158,10 +158,11 @@ from the ~d-SEAMS/seams-core-inputs~ dataset and verifies its SHA-256 digest.
 #+end_src
 
 The command prints ~Compile-time features:~ and one line per backend.
-The names are OpenMP, MPI, Highway SIMD, vesin cutoff fallback,
-linkcell pairs_within, chemfiles, readcon-core, readcon-db, IRA/SOFI,
+The names are OpenMP, MPI, Highway SIMD, linkcell pairs_within,
+chemfiles, readcon-core, readcon-db, IRA/SOFI,
 spglib, sphericart, and nauty. Each line ends with ~enabled~ or
-~disabled~. Which lines are enabled depends on the build. chemfiles is
+~disabled~. Which lines are enabled depends on the build; linkcell is
+always enabled. chemfiles is
 the PDB, GRO, and DCD reader. readcon-core is the CON reader.
 
 Frame, atom type, cutoff, and graph are flags, or the variables

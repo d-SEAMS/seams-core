@@ -67,6 +67,5 @@ A library caller that sets the variable itself sees the raw text:
   cutoff CHILL+ stays on the host cell list.
 
 ~seams --features~ prints the compile-time backends: OpenMP,
-~linkcell pairs_within~, ~vesin cutoff fallback~, and the rest of that
-list. It does not print the offload define. The Meson summary line is
+~linkcell pairs_within~, and the rest of that list. It does not print the offload define. The Meson summary line is
 the record of the probe.

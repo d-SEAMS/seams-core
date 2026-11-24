@@ -9,14 +9,16 @@ The list itself is
 
 * The cutoff list
 
-~neighListO~ builds one shared CSR with ~nneigh::orthoFullCsr~ when
-the OpenMP team has more than one thread and the caller is outside a
-team. The box is orthorhombic (length 3) or a restricted triclinic
-dump (length at least 6). On one thread, and when that CSR call is
-not taken, a linked linkcell fills the rows with
-~linkcell::pairs_within~. vesin is the fallback when linkcell is
-absent or the call fails.
-~nneigh::preferSerialCutoff(true)~ forces the one-thread builder.
+~neighListO~, ~halfNeighList~, ~getNewNeighbourListByIndex~,
+~neighListPair~ and the skin list take their rows from one linkcell
+call, ~lc_pairs_within_csr~ (~nneigh::linkcellCutoffCsr~). linkcell
+builds the CSR rows on its own threads, sorted and the same at every
+width, for an orthorhombic box (length 3) or a restricted triclinic
+dump (length at least 6); a cutoff past half the box still lists each
+partner once. seams-core maps the rows to atom IDs or indices on the
+OpenMP team. There is no other builder: an invalid cutoff or a
+coordinate that is not finite throws.
+~nneigh::preferSerialCutoff(true)~ runs the search on one thread.
 
 Published CHILL+ calls ~orthoFullCsr~ on those boxes
 (~chill::chillPlusPublishedCutoff~). Cutoff q4 and q6 do the same
