@@ -499,6 +499,12 @@ if chemfiles_opt.disabled()
 else
   _chem_none = dependency('chemfiles-not-searched', required: false)
   chemfiles_dep = _chem_none
+  _chemfiles_system_dep = _chem_none
+  _chemfiles_probe_failure = ''
+  _chemfiles_probe_args = [
+    '-DSEAMS_MMCIF_PROBE="' + (meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif') + '"',
+    '-DSEAMS_RST7_PROBE="' + (meson.project_source_root() / 'cmake' / 'molfile_water.rst7') + '"',
+  ]
   # An installed chemfiles is looked for in this order: the directory named
   # by -Dchemfiles_dir (alone, when it is given), pkg-config, the CMake
   # package, and last a chemfiles-config.cmake under the install prefix.
@@ -612,18 +618,23 @@ else
           # segfaults inside mmCIFFormat::read. The probe also counts the
           # steps of a MOL2 molecule with an empty counts line, where
           # 0.10.4 segfaults. A library that fails either is not used.
-          _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
+          _chemfiles_system_dep = _cand
           _mmcif_run = cppc.run(
             fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
-            args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"',
-                   '-DSEAMS_RST7_PROBE="' + (meson.project_source_root() / 'cmake' / 'molfile_water.rst7') + '"'] +
+            args: _chemfiles_probe_args +
                   (_cand_libdir != '' ? ['-Wl,-rpath,' + _cand_libdir] : []),
             dependencies: _cand,
             name: 'chemfiles reads an mmCIF atom with no residue id, a truncated MOL2 and a bad LAMMPS Data header')
           if _mmcif_run.compiled() and _mmcif_run.returncode() == 0
             _chem_ext = true
+            _chemfiles_probe_failure = ''
           else
-            _chem_rejected += [_method + ' found chemfiles ' + _cand_version + ', which fails the mmCIF, MOL2 or LAMMPS Data probe']
+            _chem_rejected += [_method + ' found chemfiles ' + _cand_version + ', which fails the reader probe']
+            if _mmcif_run.compiled() and _mmcif_run.returncode() == 7
+              _chemfiles_probe_failure = 'system chemfiles has ' + _mmcif_run.stdout().strip() + '; building patched 0.10.4, which has all of them'
+            else
+              _chemfiles_probe_failure = 'system chemfiles fails the reader probe; building patched 0.10.4'
+            endif
           endif
         endif
         if _chem_ext
@@ -637,6 +648,9 @@ else
       endif
     endif
   endforeach
+  if _chemfiles_probe_failure != ''
+    message(_chemfiles_probe_failure)
+  endif
   foreach _why : _chem_rejected
     message('chemfiles: ' + _why)
   endforeach
