@@ -796,6 +796,10 @@ test('h2h_harness', find_program('python3'),
   env: _test_env,
   depends: [bench_h2h_cpc],
   timeout: 120)
+test('h2h_campaign', find_program('python3'),
+  args: [files('test_h2h_campaign.py')],
+  workdir: meson.project_source_root(),
+  timeout: 120)
 test('snapshot_swap', find_program('python3'),
   args: [files('test_snapshot_swap.py')],
   workdir: meson.project_source_root(),
