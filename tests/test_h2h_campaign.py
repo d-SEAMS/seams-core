@@ -788,6 +788,34 @@ def git_exists(obj: str) -> bool:
     return done.returncode == 0
 
 
+def git_is_shallow() -> bool:
+    value = subprocess.check_output(
+        ["git", "rev-parse", "--is-shallow-repository"],
+        cwd=ROOT, text=True).strip()
+    return value == "true"
+
+
+def require_full_history(shallow: bool) -> None:
+    if shallow:
+        raise RuntimeError(
+            "campaign record validation requires full Git history; "
+            "fetch with fetch-depth: 0"
+        )
+
+
+def check_campaign_full_history_requirement():
+    require_full_history(False)
+    try:
+        require_full_history(True)
+    except RuntimeError as err:
+        assert str(err) == (
+            "campaign record validation requires full Git history; "
+            "fetch with fetch-depth: 0"
+        )
+    else:
+        raise AssertionError("shallow history was accepted")
+
+
 def check_speed_verdict_noise():
     arm = [3.5, 2.4, 3.0, 2.5, 7.2, 2.6, 7.0, 2.5]
     ref = [1.3, 0.35, 0.7, 0.34, 2.8, 0.38, 1.6, 0.35]
@@ -820,6 +848,7 @@ def check_campaign_records():
     records = sorted(data_dir.glob("*.jsonl"))
     if not records:
         return
+    require_full_history(git_is_shallow())
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     tree_cache: dict[str, str] = {}
     for record_path in records:
