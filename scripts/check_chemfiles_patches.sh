@@ -20,7 +20,7 @@ url=https://github.com/chemfiles/chemfiles/archive/refs/tags/0.10.4.tar.gz
 
 tree_patches="mmcif mol2 frame-visit lammpsdata-section molfiles"
 archive_patches="molfiles:molfile-sources tng:tng-sources mmtf-cpp:mmtf-sources gemmi:gemmi-sources"
-late_patches="hostile"
+late_patches="hostile span-unused"
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
