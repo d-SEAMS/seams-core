@@ -80,7 +80,7 @@ jobs:
             seams-offline \
             bash -lc '
               set -euxo pipefail
-              cp -a /src /opt/git
+              cp -a --no-preserve=ownership /src /opt/git
               mkdir /opt/tar
               tar -C /opt/tar --strip-components=1 -xzf "$TARBALL"
               rm -rf /opt/git/docs/.cache /opt/git/cmake/vendor
