@@ -2646,6 +2646,8 @@ if get_option('with_tests')
   endif
 
   _abi_env = environment()
+  # nm and abidiff inspect the library without loading its sanitizer runtime.
+  _abi_env.set('LD_PRELOAD', '')
   _abi_depends = [seams_api_lib]
   if _abidiff.found()
     _abi_env.set('SEAMS_ABIDIFF', _abidiff.full_path())
@@ -2654,8 +2656,9 @@ if get_option('with_tests')
   endif
   test(
     'capi_abi',
-    find_program(meson.project_source_root() / 'scripts' / 'abi_check.sh'),
+    find_program('sh'),
     args: [
+      meson.project_source_root() / 'scripts' / 'abi_check.sh',
       meson.current_build_dir(),
       meson.project_source_root() / 'scripts' / 'abi_baseline.txt',
     ],
