@@ -1,1 +1,1 @@
-The default pixi environment installs OpenMM on macOS, so the OpenMM engine page and the engine walkthrough run it there.  The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
+The default pixi environment installs OpenMM on macOS, so the OpenMM engine page and the engine walkthrough run it there. The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.

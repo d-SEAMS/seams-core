@@ -20,7 +20,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 - Split documentation reader-text checks from live package-registry validation. The offline check still parses install claims. Live registry claim checks run in a dedicated docs workflow job.
 - The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
-- The science tutorials keep a 180 s timeout. An AddressSanitizer build runs the test serially instead of allowing 900 s: under contention the tutorial took 212 s, and alone it took 22.6 s.
+- The science tutorial check keeps a 180 s timeout. An AddressSanitizer build runs that check serially instead of allowing 900 s: under contention the tutorial took 212 s, and alone it took 22.6 s.
 
 ## [2.14.1] - 2026-11-16
 
@@ -28,9 +28,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 - The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
 - The release upload now checks the linux-x86_64 tarball in fresh Ubuntu
-  22.04, Rocky Linux 9, and Debian 12 containers. Each check compiles
-  `docs/examples/quickstart.c` with the `pkg-config` flags for `seams` and
-  runs it on an eight-molecule ice frame.
+22.04, Rocky Linux 9, and Debian 12 containers. Each check compiles
+`docs/examples/quickstart.c` with the `pkg-config` flags for `seams` and
+runs it on an eight-molecule ice frame.
 
 ### Changed
 
@@ -41,11 +41,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The linux-x86_64 archive loads the system OpenMP runtime (`libgomp1` on Debian and Ubuntu, `libgomp` on RHEL).
 - The linux-x86_64 release notes record the glibc version, OpenMP runtime, pkg-config prefix, and binding versions measured for that build.
 - The pixi full-suite now fails whenever a test is skipped, so a passing
-  run confirms that the required analyses and documentation checks all ran.
+run confirms that the required analyses and documentation checks all ran.
 
-  `-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
-  `compute dseams`; Meson errors unless `lammps_src_include` points to
-  matching sources.
+`-Dwith_lammps=enabled` now requires the LAMMPS class headers needed for
+`compute dseams`; Meson errors unless `lammps_src_include` points to
+matching sources.
 
 ### Fixed
 
@@ -57,11 +57,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Malformed MOL2 and mmCIF files that chemfiles refuses now report a read error through the C API and every language binding instead of returning a frame with zero atoms.
 - Ring and cage search diagnostics stay on the calling thread. Concurrent searches no longer share the process-global profile, phase and split records, and an OpenMP team copies the calling thread's flags when it starts.
 - Source archives now include every subproject, the patched chemfiles
-  source, and pinned tutorial inputs, so users can build and test in
-  offline environments.
+source, and pinned tutorial inputs, so users can build and test in
+offline environments.
 - The 2.14 release-notes page title names 2.14.1 instead of 2.14.0.
 - The cage invariance fuzzer sizes its trial pool to the CPUs the process may run on.
-- The default pixi environment installs OpenMM on macOS, so the OpenMM engine page and the engine walkthrough run it there.  The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
+- The default pixi environment installs OpenMM on macOS, so the OpenMM engine page and the engine walkthrough run it there. The two scripts load `e2e_common` by file. `engines/openmm` on `sys.path` imported as an empty package and hid the missing module until `import openmm.app` failed.
 - The docs publish job drew every molecule still twice at 4096 px and 256 samples, so Publish the book sat on the runner for hours. The delivered pictures are 2048 px, and a denoised 64-sample frame at that size matches the old stills. The job now stops if it runs for more than two hours.
 - The docs workflow check reads `contents: write` from the build-deploy job and stops at the next job.
 - The documentation build rewrites sitemap entries to lowercase extensionless routes after the link and metadata pass, and video end cards no longer include publication-status text.
@@ -70,14 +70,14 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The in-situ reporter returns the five-item descriptor tuple required by OpenMM 8.0.
 - The k-nearest degree scan starts after the linkcell pool joins, so it no longer reads a row while that row is still being stored.
 - The release recipe enables the .con reader when `SEAMS_WITH_READCON=enabled`. A checkout that already contains the readcon wrap leaves the reader off, as does the conda-forge archive.
-- The sanitizer suite does not preload libasan into the test harness.  Interpreter wrappers and the cargo test runner map it for the process that hosts libseams. Host shells, compilers, and `mpirun` do not inherit it. `pin_host` exports the runtime only to its MPI ranks, turns off Open MPI's memory patcher for that launch, and turns leak detection off for those ranks. Open MPI and PMIx keep allocations until the rank exits, and those frames are not added to the suppression list.
+- The sanitizer suite does not preload libasan into the test harness. Interpreter wrappers and the cargo test runner map it for the process that hosts libseams. Host shells, compilers, and `mpirun` do not inherit it. `pin_host` exports the runtime only to its MPI ranks, turns off Open MPI's memory patcher for that launch, and turns leak detection off for those ranks. Open MPI and PMIx keep allocations until the rank exits, and those frames are not added to the suppression list.
 - The serial LAMMPS hook calls `lammps_mpi_finalize` after `lammps_close`, which frees the ReadData and Run commands the stub would otherwise leave allocated. The MPI build still calls `MPI_Finalize`.
 - Worker placement now stays inside the host mask and is undone when the call returns. `SEAMS_PIN=0` leaves placement to the host. `OMP_PROC_BIND`, `OMP_PLACES`, `GOMP_CPU_AFFINITY`, `KMP_AFFINITY`, and a caller already bound to one cpu are left as the host set them. Several copies of the program share the mask in disjoint slices instead of all pinning worker i to cpu i.
 - `chill::cutoffSolid` calls `seams::ylm::ylmAdd8` only when `SEAMS_YLM_AVX512` is set. That function is built only on x86-64. The call used to stay in the binary at -O0 on every other machine, and a debug macOS arm64 link failed with the symbol undefined. `ylm_add8_o0` compiles that file at -O0 without the flag and rejects an undefined `ylmAdd8`.
-- The science tutorials and the science snippet pages run the Julia and R tutorials from the bindings they moved to.  With `julia` on PATH, the Julia leg runs `examples/science_tutorials.jl` of the developed Dseams.jl against this build's libseams; with `Rscript`, the R leg runs the `examples/science_tutorials.R` that the installed dseams package carries. They ran `docs/examples/science_tutorials.jl`, `science_tutorials.R` and `science_r.c`, which left with the bindings, and failed wherever Julia or R was installed. A missing Dseams.jl or dseams fails the tutorial and names the binding.
-- The science tutorials keep a 180 s timeout, and allows 900 s when `b_sanitize` is set.  Alone under AddressSanitizer the tutorial takes about 24 s; in the full sanitizer suite it shares the cores and takes more than 180 s.
-- The shell-cell header snippet compiles with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
-- The recording check compares the seams census and the rest of the recording, and no longer treats a LAMMPS warning or its docs URL as part of that result.
+- The science tutorials and the science snippet pages run the Julia and R tutorials from the bindings they moved to. With `julia` on PATH, the Julia leg runs `examples/science_tutorials.jl` of the developed Dseams.jl against this build's libseams; with `Rscript`, the R leg runs the `examples/science_tutorials.R` that the installed dseams package carries. They ran `docs/examples/science_tutorials.jl`, `science_tutorials.R` and `science_r.c`, which left with the bindings, and failed wherever Julia or R was installed. A missing Dseams.jl or dseams fails the tutorial and names the binding.
+- The science tutorial check keeps a 180 s timeout, and allows 900 s when `b_sanitize` is set. Alone under AddressSanitizer the tutorial takes about 24 s; in the full sanitizer suite it shares the cores and takes more than 180 s.
+- The sH cell header snippet compiles with the C compiler the build was configured with, and without the suite's library path, so the loader opens the libc that compiler linked.
+- Replaying the video tapes compares the seams census with the rest of the recording, and no longer treats a LAMMPS warning or its docs URL as part of that result.
 - `pin_host` is registered on Linux only. It reads cpu masks with `sched_getaffinity` and the proc filesystem, and the placement it checks exists only on Linux. On macOS it stopped at the missing `libyodaLib.so`, and it could not have passed with the dylib either.
 - `scripts/sanitize_thread.sh` links with the host `ld`. The conda `ld` took `libdl.so.2` from the conda sysroot and libc from the host, so meson rejected `-fsanitize=thread`. `scripts/build_tsan_openmp.sh` builds Archer from the LLVM release that matches clang. A libomp from an older release left `__kmpc_dispatch_deinit` undefined when the tests loaded it.
 - `seams.pc` and the other pkg-config files in the Linux tarball use `prefix=${pcfiledir}/../..`, so the link line follows wherever the tarball is unpacked.
