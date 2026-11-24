@@ -86,6 +86,7 @@ if readcon_dep.found()
 endif
 if chemfiles_dep.found()
   test_sources += {'chemfiles_io': 'test_chemfiles_io.cpp'}
+  test_sources += {'chemfiles_hostile': 'test_chemfiles_hostile.cpp'}
   executable(
     'derive_confined_water_fixture',
     'fixtures/derive_confined_water_fixture.cpp',
@@ -100,6 +101,15 @@ if chemfiles_dep.found()
         files('test_confined_water_cli.py'),
         meson.project_build_root() / 'seams',
         meson.project_source_root() / 'input' / 'traj' / 'confined_water_40',
+      ],
+    )
+    test(
+      'molfile_cli',
+      find_program('python3'),
+      args: [
+        files('test_molfile_cli.py'),
+        meson.project_build_root() / 'seams',
+        meson.project_source_root() / 'input',
       ],
     )
   endif
@@ -151,6 +161,27 @@ endif
 # LDFLAGS so ld rescans both archives.
 if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _test_link_args += ['-Wl,--end-group']
+endif
+
+if chemfiles_dep.found()
+  _probe_src = meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'
+  _configure_args = [
+    files('test_chemfiles_configure.py'),
+    meson.project_build_root() / 'meson-logs' / 'meson-log.txt',
+    executable('chemfiles_probe_linked', _probe_src,
+      cpp_args: _chemfiles_probe_args,
+      dependencies: chemfiles_dep,
+      link_args: _test_link_args,
+      build_rpath: _test_rpath),
+  ]
+  if _chemfiles_system_dep.found()
+    _configure_args += [executable('chemfiles_probe_system', _probe_src,
+      cpp_args: _chemfiles_probe_args,
+      dependencies: _chemfiles_system_dep)]
+  endif
+  test('chemfiles_configure', find_program('python3'),
+    args: _configure_args,
+    env: _test_env)
 endif
 
 # seams.h and the seams_version.h generated beside libseams.

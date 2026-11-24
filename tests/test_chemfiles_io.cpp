@@ -11,10 +11,12 @@
 
 #include <array>
 #include <chrono>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -482,6 +484,239 @@ TEST_CASE("an mmCIF file without a data block is an error", "[chemfiles]") {
   REQUIRE_THROWS_AS(sinp::openFrame(mmcif.string(), 1, -1),
                     std::runtime_error);
   fs::remove(mmcif);
+}
+
+namespace {
+
+// The extensions cmake/patches/chemfiles-0.10.4-molfiles.patch adds.
+// ABINIT, DL_POLY_4 HISTORY, VMD Tinker and Gaussian Logfile have none
+// (.log is GAMESS, .arc is chemfiles' own Tinker).
+const char *const molfileExtensions[] = {
+    "bgf", "binpos", "car", "cor", "cpmd", "cube", "dlpolyconfig",
+    "dlpolyhist", "dms", "dtr", "g96", "js", "log", "mae", "mdf", "coor",
+    "out", "parm", "parm7", "pqr", "rst7", "OUTCAR", "POSCAR", "XDATCAR",
+    "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"};
+
+std::string chemfilesOpenError(const fs::path &path) {
+  try {
+    chemfiles::Trajectory trajectory(path.string());
+  } catch (const chemfiles::Error &err) {
+    return err.what();
+  }
+  return {};
+}
+
+} // namespace
+
+TEST_CASE("every VMD molfile reader is registered", "[chemfiles][molfile]") {
+  std::set<std::string> names;
+  for (const auto &format : chemfiles::formats_list()) {
+    names.insert(format.get().name);
+  }
+  for (const char *name :
+       {"TRJ", "PSF", "Molden", "ABINIT", "MSI Biograf Format",
+        "Scripps Binpos", "InsightII car", "CHARMM Coordinates", "CPMD",
+        "Gaussian Cube", "DL_POLY_C HISTORY", "DL_POLY_4 HISTORY",
+        "DL_POLY CONFIG", "DESRES Trajectory", "GAMESS", "js",
+        "Maestro File", "InsightII MDF", "NAMD Binary Coordinates",
+        "AMBER7 Parm", "AMBER Parm", "PQR", "AMBER7 Restart", "VMD Tinker",
+        "VASP_XDATCAR5", "VASP_OUTCAR", "VASP_POSCAR", "VASP_XDATCAR",
+        "VASP_xml", "VTF structure format", "VTF trajectory format",
+        "Internal Paratool Format", "(Animated) XCrySDen Structure File",
+        "DESRES Molecular Structure", "Gromacs g96", "CPMD 3.x output",
+        "Gaussian Logfile (g94,g98,g03)"}) {
+    INFO(name);
+    REQUIRE(names.count(name) == 1);
+  }
+}
+
+TEST_CASE("PQR, cube and AMBER7 restart frames hold the water molecule",
+          "[chemfiles][molfile]") {
+  const double water[3][3] = {{0, 0, 0}, {0.957, 0, 0}, {-0.24, 0.927, 0}};
+  for (const char *path :
+       {"molfile/water.pqr", "molfile/water.cube", "molfile/water.rst7"}) {
+    INFO(path);
+    REQUIRE(sinp::chemfilesSteps(path) == 1);
+    Cloud cloud = sinp::openFrame(path, 1, -1);
+    REQUIRE(cloud.nop == 3);
+    for (std::size_t i = 0; i < 3; ++i) {
+      REQUIRE_THAT(cloud.pts[i].x, Catch::Matchers::WithinAbs(water[i][0], 1e-5));
+      REQUIRE_THAT(cloud.pts[i].y, Catch::Matchers::WithinAbs(water[i][1], 1e-5));
+      REQUIRE_THAT(cloud.pts[i].z, Catch::Matchers::WithinAbs(water[i][2], 1e-5));
+    }
+  }
+}
+
+TEST_CASE("an XSF frame carries its 10 A cell", "[chemfiles][molfile]") {
+  REQUIRE(sinp::chemfilesSteps("molfile/water.xsf") == 1);
+  Cloud cloud = sinp::openFrame("molfile/water.xsf", 1, -1);
+  REQUIRE(cloud.nop == 3);
+  REQUIRE(cloud.box.size() >= 3);
+  for (std::size_t k = 0; k < 3; ++k) {
+    REQUIRE_THAT(cloud.box[k], Catch::Matchers::WithinAbs(10.0, 1e-5));
+  }
+  REQUIRE_THAT(cloud.pts[1].x, Catch::Matchers::WithinAbs(0.957, 1e-5));
+  // The plugin wraps the third atom, at x = -0.24, into the cell.
+  REQUIRE_THAT(cloud.pts[2].x, Catch::Matchers::WithinAbs(9.76, 1e-5));
+  REQUIRE_THAT(cloud.pts[2].y, Catch::Matchers::WithinAbs(0.927, 1e-5));
+}
+
+TEST_CASE("each molfile extension reaches its reader", "[chemfiles][molfile]") {
+  // Only the molfile wrapper reports an empty file this way, so the
+  // message proves the extension picked a molfile reader, and no plugin
+  // runs on the empty file.
+  const auto dir = dseams_test::freshDir();
+  for (const char *ext : molfileExtensions) {
+    const auto path = dir / (std::string("empty.") + ext);
+    { std::ofstream out(path); }
+    INFO(path.string());
+    REQUIRE(chemfilesOpenError(path).find("is empty") != std::string::npos);
+    REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+    REQUIRE(sinp::openFrame(path.string(), 1, -1).nop == 0);
+  }
+  const auto unknown = dir / "empty.zzz";
+  { std::ofstream out(unknown); }
+  REQUIRE(chemfilesOpenError(unknown).find("can not find a format") !=
+          std::string::npos);
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a molfile plugin that finds no atoms is an error",
+          "[chemfiles][molfile]") {
+  // Unpatched, nsteps() hands rst7 a null timestep and an atom count of
+  // zero sizes the frame from garbage; both crashed the process. With no
+  // field on its second line, rst7 loops forever.
+  const auto dir = dseams_test::freshDir();
+  const auto write = [&](const char *name, const char *text) {
+    const auto path = dir / name;
+    std::ofstream out(path, std::ios::binary);
+    out << text;
+    return path;
+  };
+  const auto words = write("words.rst7", "a title\nno count here\n");
+  REQUIRE(chemfilesOpenError(words).find("found no atoms") != std::string::npos);
+  REQUIRE(sinp::chemfilesSteps(words.string()) == -1);
+  REQUIRE(sinp::openFrame(words.string(), 1, -1).nop == 0);
+  for (const auto &uncounted : {write("title.rst7", "a title and nothing else\n"),
+                                write("spaces.rst7", "a title\n  \t ")}) {
+    REQUIRE(chemfilesOpenError(uncounted).find("no atom count") != std::string::npos);
+    REQUIRE(sinp::chemfilesSteps(uncounted.string()) == -1);
+    REQUIRE(sinp::openFrame(uncounted.string(), 1, -1).nop == 0);
+  }
+  // A DESRES trajectory is a directory. An empty one is not "empty"; it
+  // has no timekeys.
+  const auto dtr = dir / "none.dtr";
+  fs::create_directories(dtr);
+  const auto dtrError = chemfilesOpenError(dtr);
+  REQUIRE(dtrError.find("is not a DESRES trajectory: it has no timekeys file") !=
+          std::string::npos);
+  REQUIRE(dtrError.find("is empty") == std::string::npos);
+  fs::remove_all(dir);
+}
+
+TEST_CASE("hostile molfile inputs fail instead of crashing or hanging",
+          "[chemfiles][molfile]") {
+  // Each input is a file that used to crash or spin inside a plugin:
+  // mdf truncated on @molecule, an AMBER7 parm token longer than the
+  // scan buffer, a VTF line past the old 255-byte buffer, a negative VTF
+  // id, a multi-billion VTF id, a VTF name longer than the 16-byte field,
+  // an AMBER7 restart whose atom count does not fit in the file, and a
+  // VMD Tinker file with the same kind of count. .arc is chemfiles' own
+  // Tinker, so that one is opened by format name.
+  const auto dir = dseams_test::freshDir();
+  const auto write = [&](const char *name, const std::string &text) {
+    const auto path = dir / name;
+    std::ofstream out(path, std::ios::binary);
+    out << text;
+    return path;
+  };
+  const auto refuse = [&](const fs::path &path) {
+    INFO(path.string());
+    const auto error = chemfilesOpenError(path);
+    REQUIRE(error.find("could not open") != std::string::npos);
+    REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+    REQUIRE(sinp::openFrame(path.string(), 1, -1).nop == 0);
+  };
+  refuse(write("trunc.mdf", "@molecule test\n"));
+  refuse(write("huge.parm7", std::string(4096, 'X')));
+  refuse(write("long.vtf", std::string(4000, 'A') + "\n"));
+  refuse(write("neg.vtf", "atom -5:-1 name O\n"));
+  refuse(write("hugeid.vtf", "atom 0:999999999 name O\n"));
+  refuse(write("widename.vtf", "atom 0 name " + std::string(64, 'N') + "\n"));
+  refuse(write("huge.rst7", "title\n2000000000\n"));
+  const auto tinker = write("huge.arc", "  99999999 water\n   1 O 0.0 0.0 0.0\n");
+  std::string tinkerError;
+  try {
+    chemfiles::Trajectory trajectory(tinker.string(), 'r', "VMD Tinker");
+    (void)trajectory.nsteps();
+  } catch (const chemfiles::Error &err) {
+    tinkerError = err.what();
+  }
+  REQUIRE(tinkerError.find("could not open") != std::string::npos);
+  fs::remove_all(dir);
+}
+
+TEST_CASE("a header count or a truncated text file is an error",
+          "[chemfiles][molfile]") {
+  // A second pass over every format. These used to crash, spin, or
+  // allocate until the process died. Each one has to say why it failed.
+  const auto dir = dseams_test::freshDir();
+  const auto write = [&](const char *name, const std::string &text) {
+    const auto path = dir / name;
+    std::ofstream out(path, std::ios::binary);
+    out << text;
+    return path;
+  };
+  const auto refuseAs = [&](const fs::path &path, const char *format, const char *needle) {
+    INFO(path.string() << " as " << format);
+    std::string error;
+    try {
+      chemfiles::Trajectory trajectory(path.string(), 'r', format);
+      // nsteps() only counts. Several of these fail while reading a frame.
+      if (trajectory.nsteps() > 0) {
+        (void)trajectory.read();
+      }
+    } catch (const chemfiles::Error &err) {
+      error = err.what();
+    }
+    REQUIRE(error.find(needle) != std::string::npos);
+    REQUIRE(sinp::chemfilesSteps(path.string()) == -1);
+    REQUIRE(sinp::openFrame(path.string(), 1, -1).nop == 0);
+  };
+  refuseAs(write("spaces.mmcif", " \r\n \t\r\n"), "mmCIF", "_atom_site");
+  refuseAs(write("notdata.data", "3\nwater\nO 0 0 0\n"), "LAMMPS Data",
+           "expected section name");
+  refuseAs(write("huge.data", "title\n\n2000000000 atoms\n1 atom types\n\nAtoms\n\n"),
+           "LAMMPS Data", "does not fit");
+  refuseAs(write("rand.tpr", std::string(512, '\x5a')), "TPR", "does not fit");
+  refuseAs(write("huge.psf", "PSF\n\n       1 !NTITLE\n REMARKS\n\n  2000000000 !NATOM\n"),
+           "PSF", "does not fit");
+  refuseAs(write("trunc.POSCAR", "title\n2000000000\n"), "VASP_POSCAR",
+           "could not open");
+  refuseAs(write("huge.POSCAR", "title\n1.0\n1 0 0\n0 1 0\n0 0 1\n2000000000\n"),
+           "VASP_POSCAR", "does not fit");
+  refuseAs(write("huge.VASP_XDATCAR5", "title\n2000000000\n"), "VASP_XDATCAR5",
+           "does not fit");
+  refuseAs(write("huge.parm7",
+                 "%VERSION  VERSION_STAMP = V0001.000  DATE = 01/01/00  00:00:00\n"
+                 "%FLAG TITLE\n%FORMAT(20a4)\nwater\n"
+                 "%FLAG POINTERS\n%FORMAT(10I8)\n"
+                 "2000000000       1       0       0       0       0       0       0       0       0\n"
+                 "       0       1       0       0       0       0       0       0       0       0\n"
+                 "       0       0       0       0       0       0       0       0       0       0\n"
+                 "       0\n"),
+           "AMBER7 Parm", "could not open");
+  std::string js = "JS Binary Structure and Trajectory File Format";
+  const uint32_t words[] = {0x31337u, 0x12345678u, 2u, 15u, 2000000000u, 0u};
+  for (uint32_t word : words) {
+    for (int byte = 0; byte < 4; ++byte) {
+      js.push_back(static_cast<char>((word >> (8 * byte)) & 0xffu));
+    }
+  }
+  refuseAs(write("huge.js", js), "js", "does not fit");
+  refuseAs(write("huge.cor", "  99999999 water\n   1 O 0.0 0.0 0.0\n"),
+           "CHARMM Coordinates", "does not fit");
+  fs::remove_all(dir);
 }
 
 TEST_CASE("one open chemfiles trajectory gives the clouds of single reads",

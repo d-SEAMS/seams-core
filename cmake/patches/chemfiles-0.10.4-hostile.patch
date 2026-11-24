@@ -1,0 +1,1771 @@
+# Copyright (c) d-SEAMS developers
+# Bounds that stop a hostile file from crashing or hanging a reader
+# chemfiles already ships, and the SQLite3 dependency of the
+# installed package.
+#   TextFile keeps the file position right after its line buffer grows
+#   (every later step offset was wrong) and no longer reads a NUL first
+#   byte as "buffer empty"; SMI stops at EOF.
+#   BinaryFile checks reads and skips against the bytes left in the file;
+#   XDR, XTC, TRR, TPR, DCD and Amber NetCDF check their counts, sizes,
+#   indices and compressed-coordinate bit widths against it, and TPR
+#   checks each function type before renumbering it.
+#   CSSR checks atom and bond ids, GRO rejects a box GROMACS cannot hold
+#   instead of asserting, LAMMPS Data checks its atom count and sections,
+#   LAMMPS trajectories check the box bounds, the atom count and each
+#   atom id instead of asserting, TNG holds its frame-scan block-id buffer
+#   in TngBuffer<int64_t> and reads a frame's positions before it
+#   allocates the frame's atoms, a TRR frame with atoms but no positions,
+#   velocities or forces is an error (nothing ties its atom count to the
+#   file), an SMI square brace must hold an atom, the extended XYZ comment
+#   parser stops at an '=' with no name before it instead of looping, PDB
+#   CONECT records are ignored with a warning when no atoms have been read
+#   yet, PDB nucleic linking checks O3' and O5' before dereferencing, CSSR
+#   and SDF check line lengths before substr, XTC checks compressed
+#   coordinate sums for int32 overflow, TNGFile guards its handle in its
+#   constructor, MMTF catches msgpack unpack/type errors and atom_id checks
+#   atom indices and model offsets with FormatError instead of assert(),
+#   and S_ISREG is defined where the C library lacks it (MSVC).
+# An extended XYZ property repeat is kept when the first atom line has
+# that many columns, and is an error when it does not. Nothing is
+# dropped, and the names are not built before the line is seen.
+# Amber NetCDF reads a file that has neither coordinates nor
+# velocities when the atom count fits in the file.
+diff -ruN host-a/cmake/chemfiles-config.cmake.in host-b/cmake/chemfiles-config.cmake.in
+--- host-a/cmake/chemfiles-config.cmake.in	2026-11-21 14:42:39.928338999 +0000
++++ host-b/cmake/chemfiles-config.cmake.in	2026-11-21 15:05:54.773619458 +0000
+@@ -1,5 +1,10 @@
+ @PACKAGE_INIT@
+ 
++include(CMakeFindDependencyMacro)
++# dmsplugin links the system SQLite3. The imported target has to exist
++# before chemfiles' link interface names it.
++find_dependency(SQLite3)
++
+ include("${CMAKE_CURRENT_LIST_DIR}/chemfiles-targets.cmake")
+ check_required_components("@PROJECT_NAME@")
+ 
+diff -ruN host-a/include/chemfiles/File.hpp host-b/include/chemfiles/File.hpp
+--- host-a/include/chemfiles/File.hpp	2026-11-21 14:42:39.936338920 +0000
++++ host-b/include/chemfiles/File.hpp	2026-11-21 15:05:54.773619458 +0000
+@@ -216,6 +216,9 @@
+     bool got_impl_eof_ = false;
+     /// Did we actually reached the end of file while reading a line?
+     bool eof_ = false;
++    /// Does `buffer_` hold data read from `file_`? The data itself can not
++    /// tell, since files may contain '\0'.
++    bool buffer_filled_ = false;
+ };
+ 
+ } // namespace chemfiles
+diff -ruN host-a/include/chemfiles/files/BinaryFile.hpp host-b/include/chemfiles/files/BinaryFile.hpp
+--- host-a/include/chemfiles/files/BinaryFile.hpp	2026-11-21 14:42:39.936338920 +0000
++++ host-b/include/chemfiles/files/BinaryFile.hpp	2026-11-21 15:05:54.773619458 +0000
+@@ -63,6 +63,11 @@
+     /// Get the size of the file
+     uint64_t file_size();
+ 
++    /// Throw a `FileError` unless `count` items of `item_size` bytes each
++    /// fit between the current position and the end of the file. Use this
++    /// before sizing anything from a count read in the file.
++    void check_remaining(uint64_t count, uint64_t item_size, const char* what);
++
+     /// Read exactly `count` char, and store them in the `data` array
+     void read_char(char* data, size_t count);
+     /// Read exactly as many char as fit in the pre-allocated vector
+diff -ruN host-a/include/chemfiles/formats/TNG.hpp host-b/include/chemfiles/formats/TNG.hpp
+--- host-a/include/chemfiles/formats/TNG.hpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/include/chemfiles/formats/TNG.hpp	2026-11-21 15:05:54.777619450 +0000
+@@ -26,7 +26,7 @@
+     void read(Frame& frame) override;
+     size_t nsteps() override;
+ private:
+-    void read_positions(Frame& frame);
++    void read_positions(Frame& frame, const float* buffer);
+     void read_velocities(Frame& frame);
+     void read_cell(Frame& frame);
+     void read_topology(Frame& frame);
+diff -ruN host-a/src/File.cpp host-b/src/File.cpp
+--- host-a/src/File.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/File.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -100,7 +100,7 @@
+     file_->seek(position);
+     position_ = position;
+     // mark buffer to be refilled
+-    buffer_[0] = '\0';
++    buffer_filled_ = false;
+ }
+ 
+ void TextFile::rewind() {
+@@ -117,15 +117,11 @@
+ }
+ 
+ bool TextFile::buffer_initialized() const {
+-    return buffer_[0] != '\0';
++    return buffer_filled_;
+ }
+ 
+ void TextFile::fill_buffer(size_t start) {
+     auto count = buffer_.size() - start;
+-    if (buffer_initialized()) {
+-        position_ += count;
+-    }
+-
+     auto read_count = file_->read(buffer_.data() + start, count);
+     if (read_count < count) {
+         got_impl_eof_ = true;
+@@ -133,6 +129,7 @@
+         std::memset(buffer_.data() + start + read_count, 0, count - read_count);
+     }
+     line_start_ = buffer_.data();
++    buffer_filled_ = true;
+ }
+ 
+ string_view TextFile::readline() {
+@@ -158,7 +155,7 @@
+             assert(line_start_ <= newline);
+             length += static_cast<size_t>(newline - line_start_ + 1);
+             // Check if we have a windows style line ending (\r\n)
+-            if (newline > buffer_.data() && newline[-1] == '\r') {
++            if (newline > line_start_ && newline[-1] == '\r') {
+                 windows_line = 1;
+             }
+ 
+@@ -189,7 +186,10 @@
+             end_ = buffer_.data() + buffer_.size();
+         }
+ 
+-        // Move remaining data to the start of buffer
++        // Move remaining data to the start of buffer. The buffer may just
++        // have grown, so the data dropped from the file position is what
++        // precedes the line, not the free space refilled below.
++        position_ += static_cast<uint64_t>(line_start_ - buffer_.data());
+         std::memmove(buffer_.data(), line_start_, remainder);
+         fill_buffer(remainder);
+     }
+diff -ruN host-a/src/files/BinaryFile.cpp host-b/src/files/BinaryFile.cpp
+--- host-a/src/files/BinaryFile.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/BinaryFile.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -244,8 +244,11 @@
+ }
+ 
+ void BinaryFile::read_char(char* data, size_t count) {
++    if (count == 0) {
++        return;
++    }
+ #if CHEMFILES_BINARY_FILE_USE_MMAP
+-    if (offset_ + count > file_size_) {
++    if (offset_ > file_size_ || count > file_size_ - offset_) {
+         throw file_error(
+             "failed to read {} bytes from the file at '{}': mmap out of bounds",
+             count, this->path()
+@@ -361,6 +364,9 @@
+ 
+ 
+ void BinaryFile::skip(uint64_t count) {
++    if (this->mode() == Mode::READ) {
++        this->check_remaining(count, 1, "skipped data");
++    }
+ #if CHEMFILES_BINARY_FILE_USE_MMAP
+     offset_ += count;
+ #else
+@@ -389,6 +395,21 @@
+ #endif
+ }
+ 
++void BinaryFile::check_remaining(uint64_t count, uint64_t item_size, const char* what) {
++    auto size = this->file_size();
++    auto position = this->tell();
++    auto remaining = position < size ? size - position : 0;
++    if (item_size == 0) {
++        item_size = 1;
++    }
++    if (count > remaining / item_size) {
++        throw file_error(
++            "{} ({} entries of {} bytes) does not fit in the remaining {} bytes of '{}'",
++            what, count, item_size, remaining, this->path()
++        );
++    }
++}
++
+ 
+ /******************************************************************************/
+ 
+diff -ruN host-a/src/files/Netcdf3File.cpp host-b/src/files/Netcdf3File.cpp
+--- host-a/src/files/Netcdf3File.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/Netcdf3File.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -160,7 +160,7 @@
+     } else if (nc_type == constants::NC_DOUBLE) {
+         return sizeof(double);
+     } else {
+-        unreachable();
++        throw file_error("invalid netcdf3 file: variable data type {} is unknown", nc_type);
+     }
+ }
+ 
+@@ -257,6 +257,12 @@
+         if (dimension->is_record()) {
+             is_record_ = true;
+         } else {
++            if (dimension->size > INT64_MAX / 8 / layout_.size) {
++                throw file_error(
++                    "invalid netcdf3 file: variable with dimension '{}' is too large",
++                    dimension->name
++                );
++            }
+             layout_.size *= dimension->size;
+         }
+     }
+@@ -264,10 +270,10 @@
+     layout_.size_with_padding = layout_.size + padding(layout_.size);
+ 
+     // sanity check w.r.t. the size stored in the file when possible
+-    if (layout_.size < INT32_MAX) {
+-        assert(
+-            layout_.size_with_padding == size_from_file
+-            && "declared size does not match dimension size for this variable"
++    if (layout_.size < INT32_MAX && layout_.size_with_padding != size_from_file) {
++        throw file_error(
++            "invalid netcdf3 file: declared size {} does not match dimension size {} for a variable",
++            size_from_file, layout_.size_with_padding
+         );
+     }
+ }
+@@ -455,6 +461,9 @@
+     for (int i=0; i<count; i++) {
+         auto name = this->read_pascal_string();
+         auto size = this->read_single_i32();
++        if (size < 0) {
++            throw file_error("invalid netcdf3 file: dimension '{}' has negative size {}", name, size);
++        }
+         dimensions_.push_back(std::make_shared<Dimension>(std::move(name), size));
+     }
+ 
+@@ -498,7 +507,12 @@
+ }
+ 
+ std::string Netcdf3File::read_pascal_string() {
+-    auto size = static_cast<size_t>(this->read_single_i32());
++    auto signed_size = this->read_single_i32();
++    if (signed_size < 0) {
++        throw file_error("invalid netcdf3 file: negative string length {}", signed_size);
++    }
++    auto size = static_cast<size_t>(signed_size);
++    this->check_remaining(size, 1, "netcdf3 string");
+     auto value = std::string(size, '\0');
+     this->read_char(&value[0], size);
+     this->skip_padding(static_cast<int64_t>(size));
+@@ -549,6 +563,7 @@
+         value = Value(this->read_single_char());
+     } else if (type == constants::NC_CHAR) {
+         size = sizeof(char);
++        this->check_remaining(count, 1, "netcdf3 text attribute");
+         auto str = std::string(static_cast<size_t>(count), '\0');
+         this->read_char(&str[0], count);
+         // should we remove trailing NULL if there is any?
+@@ -647,6 +662,12 @@
+         auto dimensions = std::vector<std::shared_ptr<Dimension>>();
+         for (int i=0; i<n_dims; i++) {
+             auto id = static_cast<size_t>(this->read_single_i32());
++            if (id >= this->dimensions_.size()) {
++                throw file_error(
++                    "invalid netcdf3 file: variable '{}' uses dimension {}, but there are only {}",
++                    name, id, this->dimensions_.size()
++                );
++            }
+ 
+             auto dimension = this->dimensions_[id];
+             dimensions.emplace_back(dimension);
+@@ -660,12 +681,21 @@
+         // auto offset = this->read_single_i32();
+         auto offset = this->read_single_i64();
+ 
+-        variables_.emplace(std::move(name), Variable(
++        auto variable = Variable(
+             *this,
+             std::move(dimensions),
+             std::move(attributes),
+             VariableLayout { type, /*size*/ 0, size_with_padding, offset }
+-        ));
++        );
++        // the data of a non-record variable, or one record entry, must be
++        // in the file, which bounds the buffers sized from this layout
++        if (this->mode() != File::WRITE && (offset < 0 ||
++            static_cast<uint64_t>(variable.layout_.size) > this->file_size())) {
++            throw file_error(
++                "invalid netcdf3 file: variable '{}' does not fit in the file", name
++            );
++        }
++        variables_.emplace(std::move(name), std::move(variable));
+     }
+ 
+     // now that we know all the variables, compute the size of a single record
+diff -ruN host-a/src/files/TNGFile.cpp host-b/src/files/TNGFile.cpp
+--- host-a/src/files/TNGFile.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/TNGFile.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -13,12 +13,20 @@
+ #define CHECK(x) check_tng_error((x), (STRING(x)))
+ 
+ TNGFile::TNGFile(std::string path, File::Mode mode): File(std::move(path), mode, File::DEFAULT), handle_(nullptr) {
++    struct TngHandleGuard {
++        tng_trajectory_t* ptr;
++        ~TngHandleGuard() {
++            if (ptr != nullptr && *ptr != nullptr) {
++                tng_util_trajectory_close(ptr);
++            }
++        }
++    } guard{&handle_};
++
+     CHECK(tng_util_trajectory_open(this->path().c_str(), mode, &handle_));
+ 
+     if (mode == File::READ) {
+         auto status = tng_file_headers_read(handle_, TNG_USE_HASH);
+         if (status != TNG_SUCCESS) {
+-            tng_util_trajectory_close(&handle_);
+             throw file_error("could not open the file at '{}'", this->path());
+         }
+     }
+@@ -40,6 +48,8 @@
+ 
+         CHECK(tng_file_headers_write(handle_, TNG_USE_HASH));
+     }
++
++    guard.ptr = nullptr;
+ }
+ 
+ TNGFile::~TNGFile() {
+diff -ruN host-a/src/files/XDRFile.cpp host-b/src/files/XDRFile.cpp
+--- host-a/src/files/XDRFile.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/files/XDRFile.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -28,8 +28,12 @@
+ void XDRFile::read_opaque(std::vector<char>& data) {
+     const uint32_t count = read_single_u32();
+     const uint32_t num_filler = (4 - (count % 4)) % 4;
+-    data.resize(static_cast<size_t>(count + num_filler));
+-    read_char(data.data(), count + num_filler);
++    // count + padding can wrap a uint32. A random TPR/TRR/XTC then
++    // resizes a vector to gigabytes and the process dies.
++    const uint64_t need = static_cast<uint64_t>(count) + num_filler;
++    check_remaining(need, 1, "XDR record");
++    data.resize(static_cast<size_t>(need));
++    read_char(data.data(), static_cast<size_t>(need));
+     data.resize(count);
+ }
+ 
+@@ -47,7 +51,12 @@
+     // next comes XDR string without terminator
+     std::vector<char> buf;
+     read_opaque(buf);
+-    assert(len == buf.size() + 1);
++    if (len != buf.size() + 1) {
++        throw file_error(
++            "invalid GROMACS string in '{}': length {} does not match {} bytes of data",
++            this->path(), len, buf.size()
++        );
++    }
+     return std::string(buf.begin(), buf.end());
+ }
+ 
+@@ -255,7 +264,16 @@
+ 
+ template <typename T>
+ static T decodebits(const std::vector<char>& buf, DecodeState& state, uint32_t num_of_bits) {
+-    uint32_t mask = static_cast<uint32_t>(1 << num_of_bits) - 1;
++    if (num_of_bits > 32) {
++        throw file_error("invalid bit count {} in compressed XTC coordinates", num_of_bits);
++    }
++    uint32_t mask = num_of_bits == 32 ? UINT32_MAX : (UINT32_C(1) << num_of_bits) - 1;
++    auto next_byte = [&buf](size_t& cnt) -> uint32_t {
++        if (cnt >= buf.size()) {
++            throw file_error("compressed XTC coordinates end before all atoms are read");
++        }
++        return static_cast<uint32_t>(buf[cnt++] & 0xff);
++    };
+ 
+     size_t cnt = state.count;
+     size_t lastbits = state.lastbits;
+@@ -264,14 +282,14 @@
+ 
+     uint32_t num = 0;
+     while (num_of_bits >= 8) {
+-        lastbyte = (lastbyte << 8) | (buf[cnt++] & 0xff);
++        lastbyte = (lastbyte << 8) | next_byte(cnt);
+         num |= (lastbyte >> lastbits) << (num_of_bits - 8);
+         num_of_bits -= 8;
+     }
+     if (num_of_bits > 0) {
+         if (lastbits < num_of_bits) {
+             lastbits += 8;
+-            lastbyte = (lastbyte << 8) | (buf[cnt++] & 0xff);
++            lastbyte = (lastbyte << 8) | next_byte(cnt);
+         }
+         lastbits -= num_of_bits;
+         num |= (lastbyte >> lastbits) & mask;
+@@ -282,7 +300,6 @@
+     // discard everything but the last byte
+     state.lastbyte = lastbyte & 0xff;
+ 
+-    assert(sizeof(T) * 8 >= num_of_bits);
+     return static_cast<T>(num);
+ }
+ 
+@@ -325,9 +342,14 @@
+ 
+ static uint32_t calc_sizeint(const int minint[3], const int maxint[3], uint32_t sizeint[3],
+                              uint32_t bitsizeint[3]) {
+-    sizeint[0] = static_cast<uint32_t>(maxint[0] - minint[0]) + 1;
+-    sizeint[1] = static_cast<uint32_t>(maxint[1] - minint[1]) + 1;
+-    sizeint[2] = static_cast<uint32_t>(maxint[2] - minint[2]) + 1;
++    for (size_t i = 0; i < 3; i++) {
++        // the writer refuses ranges this large, and they overflow below
++        int64_t range = static_cast<int64_t>(maxint[i]) - static_cast<int64_t>(minint[i]);
++        if (range < 0 || range >= INT_MAX - 2) {
++            throw file_error("invalid coordinate range in compressed XTC data");
++        }
++        sizeint[i] = static_cast<uint32_t>(range) + 1;
++    }
+ 
+     bitsizeint[0] = bitsizeint[1] = bitsizeint[2] = 0;
+     // check if one of the sizes is to big to be multiplied
+@@ -370,8 +392,8 @@
+         read_single_i32(),
+     };
+     uint32_t smallidx = read_single_u32();
+-    if (!(smallidx < LASTIDX)) {
+-        throw file_error("internal overflow compressing XTC coordinates");
++    if (smallidx < FIRSTIDX || smallidx >= LASTIDX) {
++        throw file_error("invalid small index {} in compressed XTC coordinates", smallidx);
+     }
+ 
+     uint32_t sizeint[3], bitsizeint[3];
+@@ -408,9 +430,14 @@
+             decodeints(compressed_data_, state, bitsize, sizeint, thiscoord);
+         }
+ 
+-        thiscoord[0] += minint[0];
+-        thiscoord[1] += minint[1];
+-        thiscoord[2] += minint[2];
++        for (size_t c = 0; c < 3; ++c) {
++            int64_t val = static_cast<int64_t>(thiscoord[c]) + static_cast<int64_t>(minint[c]);
++            if (val < std::numeric_limits<int32_t>::min() ||
++                val > std::numeric_limits<int32_t>::max()) {
++                throw file_error("integer overflow during decompression of XTC coordinates");
++            }
++            thiscoord[c] = static_cast<int32_t>(val);
++        }
+ 
+         prevcoord[0] = thiscoord[0];
+         prevcoord[1] = thiscoord[1];
+@@ -424,7 +451,8 @@
+             run -= is_smaller;
+             is_smaller--;
+         }
+-        if (run > 0 && write_idx * 3 + static_cast<size_t>(run) > data.size()) {
++        // a run writes the current atom and run / 3 more
++        if (run > 0 && write_idx * 3 + static_cast<size_t>(run) + 3 > data.size()) {
+             throw file_error("buffer overrun during decompression of XTC coordinates");
+         }
+         if (run > 0) {
+@@ -434,9 +462,16 @@
+             for (int k = 0; k < run; k += 3) {
+                 decodeints(compressed_data_, state, smallidx, sizesmall, thiscoord);
+                 ++read_idx;
+-                thiscoord[0] += prevcoord[0] - smallnum;
+-                thiscoord[1] += prevcoord[1] - smallnum;
+-                thiscoord[2] += prevcoord[2] - smallnum;
++                for (size_t c = 0; c < 3; ++c) {
++                    int64_t val = static_cast<int64_t>(thiscoord[c]) +
++                                  static_cast<int64_t>(prevcoord[c]) -
++                                  static_cast<int64_t>(smallnum);
++                    if (val < std::numeric_limits<int32_t>::min() ||
++                        val > std::numeric_limits<int32_t>::max()) {
++                        throw file_error("integer overflow during decompression of XTC coordinates");
++                    }
++                    thiscoord[c] = static_cast<int32_t>(val);
++                }
+                 if (k == 0) {
+                     // interchange first with second atom
+                     // for better compression of water molecules
+@@ -466,6 +501,9 @@
+             ++write_idx;
+             thiscoord_fl = span<float>(data.data() + write_idx * 3, 3);
+         }
++        if ((is_smaller < 0 && smallidx <= FIRSTIDX) || (is_smaller > 0 && smallidx + 1 >= LASTIDX)) {
++            throw file_error("invalid small index change in compressed XTC coordinates");
++        }
+         if (is_smaller < 0) {
+             --smallidx;
+             smallnum = smaller;
+diff -ruN host-a/src/formats/AmberNetCDF.cpp host-b/src/formats/AmberNetCDF.cpp
+--- host-a/src/formats/AmberNetCDF.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/AmberNetCDF.cpp	2026-11-21 15:05:54.785619434 +0000
+@@ -206,6 +206,13 @@
+         frame.set("name", file_title_.value());
+     }
+ 
++    if (n_atoms_ > file_.file_size()) {
++        throw format_error(
++            "Amber NetCDF atom count {} does not fit in '{}'",
++            n_atoms_, file_.path()
++        );
++    }
++
+     frame.resize(n_atoms_);
+ 
+     if (variables_.coordinates.var) {
+diff -ruN host-a/src/formats/CSSR.cpp host-b/src/formats/CSSR.cpp
+--- host-a/src/formats/CSSR.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/CSSR.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -5,6 +5,7 @@
+ #include <array>
+ #include <memory>
+ #include <string>
++#include <utility>
+ #include <vector>
+ 
+ #include "chemfiles/types.hpp"
+@@ -76,8 +77,16 @@
+ 
+     // Read unit cell
+     Vector3D lengths, angles;
+-    scan(file_.readline().substr(38), lengths[0], lengths[1], lengths[2]);
+-    scan(file_.readline().substr(21), angles[0], angles[1], angles[2]);
++    auto line = file_.readline();
++    if (line.length() < 38) {
++        throw format_error("CSSR unit cell lengths line is too short: '{}'", line);
++    }
++    scan(line.substr(38), lengths[0], lengths[1], lengths[2]);
++    line = file_.readline();
++    if (line.length() < 21) {
++        throw format_error("CSSR unit cell angles line is too short: '{}'", line);
++    }
++    scan(line.substr(21), angles[0], angles[1], angles[2]);
+     frame.set_cell({lengths, angles});
+ 
+     size_t natoms = 0;
+@@ -88,8 +97,9 @@
+     // Title line
+     file_.readline();
+ 
+-    frame.reserve(natoms);
+-    std::vector<std::vector<size_t>> connectivity(natoms);
++    // natoms comes from the file, a missing atom line ends the loop with an
++    // error, so nothing is sized from it up front
++    std::vector<std::pair<size_t, size_t>> connectivity;
+     for (size_t i=0; i<natoms; i++) {
+         auto line = file_.readline();
+         unsigned atom_id = 0;
+@@ -125,17 +135,25 @@
+         atom.set_charge(charge);
+         frame.add_atom(std::move(atom), position);
+ 
++        if (atom_id < 1 || atom_id > natoms) {
++            throw format_error(
++                "invalid atom id {} in CSSR file with {} atoms", atom_id, natoms
++            );
++        }
+         for (auto bond: bonds) {
+             if (bond != 0) {
+-                connectivity[atom_id - 1].push_back(bond - 1);
++                if (bond > natoms) {
++                    throw format_error(
++                        "invalid bonded atom id {} in CSSR file with {} atoms", bond, natoms
++                    );
++                }
++                connectivity.emplace_back(atom_id - 1, bond - 1);
+             }
+         }
+     }
+ 
+-    for (size_t i=0; i<natoms; i++) {
+-        for (auto j: connectivity[i]) {
+-            frame.add_bond(i, j);
+-        }
++    for (auto& bond: connectivity) {
++        frame.add_bond(bond.first, bond.second);
+     }
+ }
+ 
+diff -ruN host-a/src/formats/DCD.cpp host-b/src/formats/DCD.cpp
+--- host-a/src/formats/DCD.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/DCD.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -190,7 +190,9 @@
+ 
+ void DCDFormat::read_header() {
+     auto header_size = this->read_marker();
+-    assert(header_size == 84);
++    if (header_size != 84) {
++        throw format_error("invalid DCD header: expected a record of 84 bytes, got {}", header_size);
++    }
+ 
+     // first, check the format using the last integer in the header
+     auto header_start = file_->tell();
+@@ -228,6 +230,7 @@
+     this->expect_marker(84);
+ 
+     auto title_size = this->read_marker();
++    file_->check_remaining(title_size, 1, "DCD title record");
+     if (title_size < 4 || (title_size - 4) % 80 != 0) {
+         if (title_size != 0) {
+             warning("DCD reader", "invalid title record size ({}), skipping title section", title_size);
+@@ -242,21 +245,21 @@
+                 title_size, n_lines
+             );
+             file_->seek(file_->tell() + static_cast<uint64_t>(title_size - 4));
+-        }
+-
+-        auto buffer = std::vector<char>(title_size - 4, '\0');
+-        file_->read_char(buffer);
+-
+-        // each line in the title might be padded with NULL or space characters,
+-        // or just NULL-terminated and contain garbage. This code tries to clean
+-        // up the title, removing the risk of reading in garbage.
+-        for (size_t line_i=0; line_i<n_lines; line_i++) {
+-            for (size_t char_i=line_i * 80; char_i<(line_i + 1) * 80; char_i++) {
+-                if (buffer[char_i] == '\0') {
+-                    title_ += '\n';
+-                    break;
+-                } else {
+-                    title_ += buffer[char_i];
++        } else {
++            auto buffer = std::vector<char>(title_size - 4, '\0');
++            file_->read_char(buffer);
++
++            // each line in the title might be padded with NULL or space characters,
++            // or just NULL-terminated and contain garbage. This code tries to clean
++            // up the title, removing the risk of reading in garbage.
++            for (size_t line_i=0; line_i<n_lines; line_i++) {
++                for (size_t char_i=line_i * 80; char_i<(line_i + 1) * 80; char_i++) {
++                    if (buffer[char_i] == '\0') {
++                        title_ += '\n';
++                        break;
++                    } else {
++                        title_ += buffer[char_i];
++                    }
+                 }
+             }
+         }
+@@ -266,12 +269,18 @@
+     // the next record contains the number of atoms
+     this->expect_marker(sizeof(int32_t));
+     n_atoms_ = checked_cast(file_->read_single_i32());
+-    buffer_.resize(n_atoms_);
+     this->expect_marker(sizeof(int32_t));
+ 
+     n_free_atoms_ = n_atoms_;
+     if (n_fixed_atoms != 0) {
++        if (n_fixed_atoms > n_atoms_) {
++            throw format_error(
++                "invalid DCD file: {} fixed atoms, but only {} atoms", n_fixed_atoms, n_atoms_
++            );
++        }
+         n_free_atoms_ = n_atoms_ - n_fixed_atoms;
++        // the fixed coordinates come from a first frame containing all atoms
++        file_->check_remaining(n_atoms_, 3 * sizeof(float), "DCD atoms");
+         this->expect_marker(sizeof(int32_t) * n_free_atoms_);
+ 
+         auto free_atoms = std::vector<int32_t>(n_free_atoms_);
+@@ -282,7 +291,11 @@
+         // translate from fortran 1-based indexes to 0-based indexes for
+         // free atoms
+         std::for_each(std::begin(free_atoms), std::end(free_atoms), [&](int32_t& index) {
+-            assert(index >= 1 && index <= static_cast<int32_t>(n_atoms_));
++            if (index < 1 || static_cast<size_t>(index) > n_atoms_) {
++                throw format_error(
++                    "invalid DCD file: free atom index {} is outside of [1, {}]", index, n_atoms_
++                );
++            }
+             index -= 1;
+         });
+ 
+@@ -338,7 +351,12 @@
+     }
+ 
+     auto file_size = file_->file_size();
+-    auto n_frames_from_size = (file_size - header_size_ - first_frame_size_) / frame_size_ + 1;
++    size_t n_frames_from_size = 0;
++    if (file_size >= header_size_ + first_frame_size_) {
++        n_frames_from_size = (file_size - header_size_ - first_frame_size_) / frame_size_ + 1;
++    } else if (!fixed_atoms_.empty()) {
++        throw format_error("invalid DCD file: the first frame with the fixed atoms is missing");
++    }
+     if (n_frames_from_size != n_frames_) {
+         warning(
+             "DCD reader",
+diff -ruN host-a/src/formats/GRO.cpp host-b/src/formats/GRO.cpp
+--- host-a/src/formats/GRO.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/GRO.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -138,13 +138,17 @@
+         auto v2_y = parse<double>(box_values[1]) * 10;
+         auto v3_z = parse<double>(box_values[2]) * 10;
+ 
+-        assert(parse<double>(box_values[3]) == 0);
+-        assert(parse<double>(box_values[4]) == 0);
++        // GROMACS requires v1(y), v1(z) and v2(z) to be zero
++        if (parse<double>(box_values[3]) != 0 ||
++            parse<double>(box_values[4]) != 0 ||
++            parse<double>(box_values[6]) != 0) {
++            throw format_error(
++                "invalid GRO box '{}': v1(y), v1(z) and v2(z) must be zero", box
++            );
++        }
+ 
+         auto v2_x = parse<double>(box_values[5]) * 10;
+ 
+-        assert(parse<double>(box_values[6]) == 0);
+-
+         auto v3_x = parse<double>(box_values[7]) * 10;
+         auto v3_y = parse<double>(box_values[8]) * 10;
+ 
+diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
+--- host-a/src/formats/LAMMPSData.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/LAMMPSData.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -4,6 +4,7 @@
+ #include <cstdint>
+ #include <cassert>
+ #include <cmath>
++#include <sys/stat.h>
+ 
+ #include <tuple>
+ #include <array>
+@@ -35,6 +36,11 @@
+ 
+ #include "chemfiles/formats/LAMMPSData.hpp"
+ 
++// MSVC's <sys/stat.h> has S_IFMT and S_IFREG, but no S_ISREG
++#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
++#define S_ISREG(mode) (((mode) & S_IFMT) == S_IFREG)
++#endif
++
+ 
+ using namespace chemfiles;
+ 
+@@ -223,7 +229,10 @@
+     auto it = comment.find("atom_style");
+     if (it != std::string::npos) {
+         auto style = comment.substr(it + 10);
+-        atom_style_name_ = trim(split(style, ' ')[0]).to_string();
++        auto parts = split(style, ' ');
++        if (!parts.empty()) {
++            atom_style_name_ = trim(parts[0]).to_string();
++        }
+     }
+ 
+     while(!file_.eof()) {
+@@ -291,9 +300,13 @@
+             // Even if all parameters are 0, set shape to TRICLINIC
+             shape = UnitCell::TRICLINIC;
+         } else {
+-            // End of the header, get the section and break
++            // End of the header. A line that is not a section used to fall
++            // into unreachable() once asserts are compiled out, and the
++            // process spun. It is an error in the file.
+             current_section_ = get_section(line);
+-            assert(current_section_ != NOT_A_SECTION);
++            if (current_section_ == NOT_A_SECTION) {
++                throw format_error("expected section name, got '{}'", line);
++            }
+             break;
+         }
+     }
+@@ -366,6 +379,18 @@
+     }
+     style_ = atom_style(atom_style_name_);
+ 
++    // One atom is at least one byte. A count past the end of the file
++    // is how "2000000000 atoms" allocates until the process dies. The
++    // size of a compressed file says nothing about its contents.
++    struct stat st;
++    if (file_.compression() == File::DEFAULT &&
++        stat(file_.path().c_str(), &st) == 0 && S_ISREG(st.st_mode) &&
++        natoms_ > static_cast<size_t>(st.st_size)) {
++        throw format_error(
++            "LAMMPS Data atom count {} does not fit in '{}'", natoms_, file_.path()
++        );
++    }
++
+     frame.resize(natoms_);
+     auto positions = frame.positions();
+     auto residues = std::unordered_map<size_t, Residue>();
+@@ -386,11 +411,13 @@
+ 
+         if (!comment.empty()) {
+             // Read the first string after the comment, and use it as atom name
+-            auto name = split(comment, ' ')[0];
+-            if (names_.empty()) {
+-                names_.resize(natoms_);
++            auto parts = split(comment, ' ');
++            if (!parts.empty()) {
++                if (names_.empty()) {
++                    names_.resize(natoms_);
++                }
++                names_[data.index] = parts[0].to_string();
+             }
+-            names_[data.index] = name.to_string();
+         }
+ 
+         auto atom = Atom(std::to_string(data.type));
+@@ -498,7 +525,14 @@
+             throw format_error("bad velocity specification '{}'", line);
+         }
+         // LAMMPS use 1-based indexing
+-        auto id = parse<size_t>(splitted[0]) - 1;
++        auto id_raw = parse<size_t>(splitted[0]);
++        if (id_raw == 0 || id_raw > natoms_) {
++            throw format_error(
++                "invalid atom index {} in [Velocities] section (expected 1..{})",
++                id_raw, natoms_
++            );
++        }
++        auto id = id_raw - 1;
+         auto vx = parse<double>(splitted[1]);
+         auto vy = parse<double>(splitted[2]);
+         auto vz = parse<double>(splitted[3]);
+diff -ruN host-a/src/formats/LAMMPSTrajectory.cpp host-b/src/formats/LAMMPSTrajectory.cpp
+--- host-a/src/formats/LAMMPSTrajectory.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/LAMMPSTrajectory.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -64,7 +64,7 @@
+             throw format_error("expected an ITEM entry in LAMMPS format, got '{}'", line);
+         }
+         auto splitted = split(*item, ' ');
+-        if (splitted[0] == "BOX" && splitted[1] == "BOUNDS") {
++        if (splitted.size() >= 2 && splitted[0] == "BOX" && splitted[1] == "BOUNDS") {
+             auto matrix = Matrix3D::unit();
+             std::array<double, 3> origin;
+             auto shape = UnitCell::ORTHORHOMBIC;
+@@ -336,8 +336,15 @@
+ 
+     size_t natoms = 0;
+     item = get_item(file_.readline());
+-    if (item && *item == "NUMBER OF ATOMS") {
++    if (!item) {
++        throw format_error("can not read next step as LAMMPS format: expected "
++                           "an ITEM entry for 'NUMBER OF ATOMS'");
++    }
++    if (*item == "NUMBER OF ATOMS") {
+         int64_t lmp_natoms = parse<int64_t>(trim(file_.readline()));
++        if (lmp_natoms < 0) {
++            throw format_error("invalid number of atoms in LAMMPS format: {}", lmp_natoms);
++        }
+         natoms = static_cast<size_t>(lmp_natoms);
+     } else {
+         throw format_error("can not read next step as LAMMPS format: expected "
+@@ -397,7 +404,11 @@
+         if (atomid_column) {
+             // LAMMPS uses atom IDs that start with 1
+             atomid = parse<size_t>(splitted[*atomid_column]);
+-            assert(atomid > 0);
++            if (atomid == 0 || atomid > natoms) {
++                throw format_error(
++                    "invalid atom ID {} in LAMMPS format with {} atoms", atomid, natoms
++                );
++            }
+             --atomid; // the frame uses zero-based indices
+             assert(duplicate_check.size() == natoms);
+             if (duplicate_check[atomid]) {
+diff -ruN host-a/src/formats/MMTF.cpp host-b/src/formats/MMTF.cpp
+--- host-a/src/formats/MMTF.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/MMTF.cpp	2026-11-21 15:05:54.777619450 +0000
+@@ -104,6 +104,12 @@
+         mmtf::decodeFromBuffer(structure_, data, size);
+     } catch (const mmtf::DecodeError& e) { // rethrow as a chemfiles error
+         throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
++    } catch (const msgpack::unpack_error& e) {
++        throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
++    } catch (const msgpack::type_error& e) {
++        throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
++    } catch (const std::exception& e) {
++        throw format_error("error while decoding MMTF from {}: '{}'", source, e.what());
+     }
+ 
+     if (!structure_.hasConsistentData()) {
+@@ -625,26 +631,46 @@
+ // the initial atom index if it exists.
+ size_t MMTFFormat::atom_id(size_t mmtf_id) {
+     if (!mmtf::isDefaultValue(structure_.atomIdList)) {
+-        assert(mmtf_id < structure_.atomIdList.size());
+-        assert(structure_.atomIdList[mmtf_id] > 0);
++        if (mmtf_id >= structure_.atomIdList.size()) {
++            throw format_error(
++                "invalid MMTF atom index {} (only {} atom ids)",
++                mmtf_id, structure_.atomIdList.size()
++            );
++        }
++        if (structure_.atomIdList[mmtf_id] <= 0) {
++            throw format_error(
++                "invalid non-positive MMTF atom id {}", structure_.atomIdList[mmtf_id]
++            );
++        }
+         size_t id;
+         if (new_atom_indexes_.empty()) {
+             // atom ids are well-behaved, no reordering necessary
+             id = static_cast<size_t>(structure_.atomIdList[mmtf_id]) - 1;
+         } else {
+-            assert(structure_.atomIdList.size() == new_atom_indexes_.size());
++            if (structure_.atomIdList.size() != new_atom_indexes_.size()) {
++                throw format_error("inconsistent MMTF atom id list size");
++            }
+             auto listedId = structure_.atomIdList[mmtf_id];
+             // use the fact that indexes are sorted for faster search
+             auto it =
+                 std::lower_bound(new_atom_indexes_.begin(), new_atom_indexes_.end(), listedId);
+-            // it is guaranteed that the lower bound is an exact match
+-            assert(it != new_atom_indexes_.end() && *it == listedId);
++            if (it == new_atom_indexes_.end() || *it != listedId) {
++                throw format_error("MMTF atom id {} not found in index table", listedId);
++            }
+             id = static_cast<size_t>(std::distance(new_atom_indexes_.begin(), it));
+         }
+-        assert(atomSkip_ <= id);
++        if (atomSkip_ > id) {
++            throw format_error(
++                "invalid MMTF atom index {} before current model offset {}", id, atomSkip_
++            );
++        }
+         return id - atomSkip_;
+     } else {
+-        assert(atomSkip_ <= mmtf_id);
++        if (atomSkip_ > mmtf_id) {
++            throw format_error(
++                "invalid MMTF atom index {} before current model offset {}", mmtf_id, atomSkip_
++            );
++        }
+         return mmtf_id - atomSkip_;
+     }
+ }
+diff -ruN host-a/src/formats/MOL2.cpp host-b/src/formats/MOL2.cpp
+--- host-a/src/formats/MOL2.cpp	2026-11-21 15:05:54.701619606 +0000
++++ host-b/src/formats/MOL2.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -130,8 +130,13 @@
+         bool is_sybyl;
+ 
+         if (sybyl_type.find('.') != std::string::npos || find_in_periodic_table(sybyl_type)) {
+-            atom_type = split(sybyl_type, '.')[0].to_string();
+-            is_sybyl = true;
++            auto parts = split(sybyl_type, '.');
++            if (!parts.empty()) {
++                atom_type = parts[0].to_string();
++                is_sybyl = true;
++            } else {
++                is_sybyl = false;
++            }
+         } else {
+             is_sybyl = false;
+             for (auto c: atom_name) {
+diff -ruN host-a/src/formats/PDB.cpp host-b/src/formats/PDB.cpp
+--- host-a/src/formats/PDB.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/PDB.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -306,7 +306,7 @@
+         return;
+     }
+ 
+-    if (helix_type <= 10) {
++    if (helix_type >= 1 && helix_type <= 10) {
+         secinfo_.emplace(start, std::make_pair(end, HELIX_TYPES[helix_type - 1]));
+     } else {
+         warning("PDB reader", "invalid HELIX type {}", helix_type);
+@@ -467,6 +467,13 @@
+ 
+ void PDBFormat::read_CONECT(Frame& frame, string_view line) {
+     assert(line.substr(0, 6) == "CONECT");
++    if (atom_offsets_.empty()) {
++        warning("PDB reader",
++            "ignoring CONECT ('{}') with atomic indexes bigger than frame size ({})",
++            trim(line), frame.size()
++        );
++        return;
++    }
+     auto line_length = trim(line).length();
+ 
+     // Helper lambdas
+@@ -581,6 +588,7 @@
+ 
+         if (link_previous_nucleic &&
+             five_prime_phosphorus != atom_name_to_index.end() &&
++            three_prime_oxygen != atom_name_to_index.end() &&
+             resid == previous_residue_id + 1 )
+         {
+             link_previous_nucleic = false;
+@@ -594,7 +602,7 @@
+         }
+ 
+         // A special case missed by the standards committee????
+-        if (atom_name_to_index.count("HO5'") != 0) {
++        if (atom_name_to_index.count("HO5'") != 0 && atom_name_to_index.count("O5'") != 0) {
+             frame.add_bond(atom_name_to_index["HO5'"], atom_name_to_index["O5'"]);
+         }
+ 
+diff -ruN host-a/src/formats/SDF.cpp host-b/src/formats/SDF.cpp
+--- host-a/src/formats/SDF.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/SDF.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -60,6 +60,11 @@
+     file_.readline(); // Comment line - skip it
+ 
+     line = file_.readline();
++    if (line.length() < 6) {
++        throw format_error(
++            "counts line is too small for SDF: '{}'", line
++        );
++    }
+     auto natoms = parse<size_t>(line.substr(0, 3));
+     auto nbonds = parse<size_t>(line.substr(3, 3));
+ 
+@@ -117,9 +122,19 @@
+ 
+     for (size_t i=0; i<nbonds; i++) {
+         line = file_.readline();
++        if (line.length() < 9) {
++            throw format_error(
++                "bond line is too small for SDF: '{}'", line
++            );
++        }
+         auto atom_1 = parse<size_t>(line.substr(0, 3));
+         auto atom_2 = parse<size_t>(line.substr(3, 3));
+         auto order = parse<size_t>(line.substr(6, 3));
++        if (atom_1 == 0 || atom_2 == 0) {
++            throw format_error(
++                "invalid 0-based atom index in SDF bond line: '{}'", line
++            );
++        }
+ 
+         Bond::BondOrder bond_order;
+         switch (order) {
+diff -ruN host-a/src/formats/SMI.cpp host-b/src/formats/SMI.cpp
+--- host-a/src/formats/SMI.cpp	2026-11-21 14:42:39.940338880 +0000
++++ host-b/src/formats/SMI.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -137,10 +137,16 @@
+ void SMIFormat::process_property_list(Topology& topology, string_view smiles) {
+     size_t i = 0;
+     double mass = 0.0;
++    if (smiles.empty()) {
++        throw format_error("SMI Reader: empty square brace");
++    }
+     if (is_ascii_digit(smiles[i])) {
+         mass = static_cast<double>(read_number(smiles, i));
+         ++i;
+     }
++    if (i >= smiles.size()) {
++        throw format_error("SMI Reader: no atom in square brace '[{}]'", smiles);
++    }
+ 
+     bool is_aromatic = is_ascii_lowercase(smiles[i]);
+     auto name = read_property_atom(smiles, i);
+@@ -238,6 +244,9 @@
+     auto line = file_.readline();
+     auto smiles = trim(line);
+     while (smiles.empty()) {
++        if (file_.eof()) {
++            throw format_error("SMI Reader: no SMILES string found");
++        }
+         line = file_.readline();
+         smiles = trim(line);
+     }
+diff -ruN host-a/src/formats/TNG.cpp host-b/src/formats/TNG.cpp
+--- host-a/src/formats/TNG.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/TNG.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -92,14 +92,14 @@
+     int64_t current_frame = -1;
+     int64_t next_frame = 0;
+     int64_t unused = 0;
+-    int64_t* buffer = nullptr;
++    TngBuffer<int64_t> buffer;
+ 
+     tng_function_status status = TNG_SUCCESS;
+     while (true) {
+         // Look for all frames with at least position data
+         int64_t block_ids[] = {TNG_TRAJ_POSITIONS};
+         status = tng_util_trajectory_next_frame_present_data_blocks_find(
+-            tng_, current_frame, 1, block_ids, &next_frame, &unused, &buffer
++            tng_, current_frame, 1, block_ids, &next_frame, &unused, buffer.ptr()
+         );
+ 
+         if (status == TNG_SUCCESS) {
+@@ -113,8 +113,6 @@
+             check_tng_error(status, "tng_util_trajectory_next_frame_present_data_blocks_find");
+         }
+     }
+-
+-    free(buffer);
+ }
+ 
+ size_t TNGFormat::nsteps() {
+@@ -130,7 +128,17 @@
+     frame.set_step(static_cast<size_t>(tng_steps_[step_]));
+     natoms_ = 0;
+     CHECK(tng_num_particles_get(tng_, &natoms_));
+-    assert(natoms_ > 0);
++    if (natoms_ <= 0) {
++        throw format_error("invalid number of atoms in TNG file: {}", natoms_);
++    }
++
++    // TNG checks that the file holds positions for every atom, so read
++    // them before allocating natoms_ atoms
++    TngBuffer<float> positions;
++    int64_t unused = 0;
++    CHECK(tng_util_pos_read_range(
++        tng_, tng_steps_[step_], tng_steps_[step_], positions.ptr(), &unused
++    ));
+     frame.resize(static_cast<size_t>(natoms_));
+ 
+     double time = 0;
+@@ -142,7 +150,7 @@
+         frame.set("time", time * 1e12);
+     }
+ 
+-    read_positions(frame);
++    read_positions(frame, *positions.ptr());
+     read_velocities(frame);
+     read_cell(frame);
+     read_topology(frame);
+@@ -150,14 +158,7 @@
+     step_++;
+ }
+ 
+-void TNGFormat::read_positions(Frame& frame) {
+-    TngBuffer<float> buffer;
+-    int64_t unused = 0;
+-
+-    CHECK(tng_util_pos_read_range(
+-        tng_, tng_steps_[step_], tng_steps_[step_], buffer.ptr(), &unused
+-    ));
+-
++void TNGFormat::read_positions(Frame& frame, const float* buffer) {
+     auto positions = frame.positions();
+     for (size_t i=0; i<static_cast<size_t>(natoms_); i++) {
+         positions[i][0] = static_cast<double>(buffer[3 * i + 0]) * distance_scale_factor_;
+diff -ruN host-a/src/formats/TPR.cpp host-b/src/formats/TPR.cpp
+--- host-a/src/formats/TPR.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/TPR.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -207,7 +207,11 @@
+     FunctionType() = default;
+     constexpr FunctionType(FT v) : value(v) {}
+     constexpr FunctionType(size_t v) : value(static_cast<FT>(v)) {}
+-    FunctionType(int v) : value(static_cast<FT>(v)) { assert(v >= 0); }
++    FunctionType(int v) : value(static_cast<FT>(v)) {
++        if (v < 0 || v >= static_cast<int>(FT::Count)) {
++            throw chemfiles::format_error("invalid function type {} in TPR file", v);
++        }
++    }
+     operator int() const { return static_cast<int>(value); }
+ 
+   private:
+@@ -407,10 +411,7 @@
+     std::vector<ResidueInfo> residue_infos;
+ 
+     size_t size() const {
+-        size_t natoms = atom_properties.size();
+-        assert(natoms == atom_names.size());
+-        assert(natoms == atom_types.size());
+-        return natoms;
++        return atom_properties.size();
+     }
+ };
+ 
+@@ -432,9 +433,7 @@
+     size_t size() const {
+         // Number of entries per interaction (type_index + N * atom_index)
+         size_t nentries = FUNCTION_TYPE_INFOS[function_type].natoms + 1;
+-        size_t size = interaction_tuples.size() / nentries;
+-        assert(size * nentries == interaction_tuples.size());
+-        return size;
++        return interaction_tuples.size() / nentries;
+     }
+ 
+     chemfiles::span<const size_t> operator[](size_t i) const {
+@@ -677,6 +676,7 @@
+ 
+             ilist.function_type = function_type;
+             size_t ninteraction_data = file.read_single_size_as_i32();
++            file.check_remaining(ninteraction_data, sizeof(int32_t), "TPR interaction list");
+             ilist.interaction_tuples.reserve(ninteraction_data);
+             for (size_t j = 0; j < ninteraction_data; ++j) {
+                 size_t idx = file.read_single_size_as_i32();
+@@ -685,9 +685,22 @@
+ 
+             if (file_version < 78 && ilist.function_type == FunctionType::SETTLE &&
+                 !ilist.empty()) {
++                // old SETTLE entries are (type, first atom) pairs
++                if (ilist.interaction_tuples.size() % 2 != 0) {
++                    throw format_error("invalid SETTLE interaction list in TPR file");
++                }
+                 ilist.add_settle_atoms();
+             }
+ 
++            size_t nentries = FUNCTION_TYPE_INFOS[function_type].natoms + 1;
++            if (ilist.interaction_tuples.size() % nentries != 0) {
++                throw format_error(
++                    "invalid TPR interaction list for {}: {} entries is not a multiple of {}",
++                    FUNCTION_TYPE_INFOS[function_type].name, ilist.interaction_tuples.size(),
++                    nentries
++                );
++            }
++
+             interaction_lists[i] = ilist;
+         }
+     }
+@@ -696,8 +709,17 @@
+ 
+ // Add connectivity elements i.e. bonds to the frame.
+ // Use the atom index offset to correct for molecule-internal numbering.
++// `natoms` is the number of atoms the interaction indices may refer to.
+ static void add_conectivity(Frame& frame, const InteractionLists& interaction_lists,
+-                            size_t atom_idx_offset = 0) {
++                            size_t natoms, size_t atom_idx_offset = 0) {
++    auto check = [natoms](size_t idx) {
++        if (idx >= natoms) {
++            throw format_error(
++                "out of bounds atom index {} in TPR interaction list with {} atoms", idx, natoms
++            );
++        }
++        return idx;
++    };
+     auto contains = [](const std::vector<FunctionType>& types_set,
+                        FunctionType function_type) -> bool {
+         auto cnt = std::count(types_set.begin(), types_set.end(), function_type);
+@@ -709,15 +731,13 @@
+         else if (contains(BOND_TYPES, ilist.value().function_type)) {
+             for (size_t i = 0; i < ilist.value().size(); ++i) {
+                 auto iatoms = ilist.value()[i];
+-                assert(iatoms.size() == 2);
+-                frame.add_bond(atom_idx_offset + iatoms[0], atom_idx_offset + iatoms[1]);
++                frame.add_bond(atom_idx_offset + check(iatoms[0]), atom_idx_offset + check(iatoms[1]));
+             }
+         } else if (ilist.value().function_type == FunctionType::SETTLE) {
+             for (size_t i = 0; i < ilist.value().size(); ++i) {
+                 auto iatoms = ilist.value()[i];
+-                assert(iatoms.size() == 3);
+-                frame.add_bond(atom_idx_offset + iatoms[0], atom_idx_offset + iatoms[1]);
+-                frame.add_bond(atom_idx_offset + iatoms[0], atom_idx_offset + iatoms[2]);
++                frame.add_bond(atom_idx_offset + check(iatoms[0]), atom_idx_offset + check(iatoms[1]));
++                frame.add_bond(atom_idx_offset + check(iatoms[0]), atom_idx_offset + check(iatoms[2]));
+             }
+         }
+     }
+@@ -730,6 +750,7 @@
+     FFParams ffparams;
+     ffparams.natom_types = file.read_single_i32();
+     const size_t num_function_types = file.read_single_size_as_i32();
++    file.check_remaining(num_function_types, sizeof(int32_t), "TPR function types");
+     ffparams.function_types.resize(num_function_types);
+ 
+     // Read all function types
+@@ -748,6 +769,9 @@
+     // In practice the code is backwards compatible, which means that the
+     // numbering may have to be altered from old numbering to new numbering.
+     for (auto& function_type : ffparams.function_types) {
++        if (function_type < 0 || function_type >= NRE) {
++            throw format_error("invalid function type {} in TPR file", function_type);
++        }
+         for (const auto& function_type_update : FUNCTION_TYPE_UPDATES) {
+             // Compare the read file version to the update table
+             if ((file_version < function_type_update.file_version) &&
+@@ -755,6 +779,9 @@
+                 ++function_type;
+             }
+         }
++        if (function_type >= NRE) {
++            throw format_error("invalid function type {} in TPR file", function_type);
++        }
+         // Skip the force field parameters of the function
+         size_t params_size = interaction_params_size(static_cast<FunctionType>(function_type),
+                                                      sizeof_real, file_version);
+@@ -859,6 +886,8 @@
+ 
+     header_.natoms = file_.read_single_size_as_i32();
+     header_.ngroups_temperature_coupling = file_.read_single_size_as_i32();
++    file_.check_remaining(header_.ngroups_temperature_coupling, header_.sizeof_real(),
++                          "TPR temperature coupling groups");
+ 
+     if (header_.file_version < 62) {
+         // Skip some legacy entries
+@@ -896,6 +925,14 @@
+     } else {
+         header_.body_convention = FileIOXdr;
+     }
++
++    // atoms carry at least one coordinate triplet when the file stores
++    // positions, velocities or forces, and some topology bytes otherwise
++    uint64_t atom_size = 1;
++    if (header_.has_positions || header_.has_velocities || header_.has_forces) {
++        atom_size = 3 * header_.sizeof_real();
++    }
++    file_.check_remaining(header_.natoms, atom_size, "TPR atoms");
+ }
+ 
+ void TPRFormat::read_box(Frame& frame) {
+@@ -934,6 +971,7 @@
+     // see `do_moltype`
+     auto read_molecule_types = [this, symbol_table]() -> std::vector<MoleculeType> {
+         const size_t nmoltypes = file_.read_single_size_as_i32();
++        file_.check_remaining(nmoltypes, sizeof(int32_t), "TPR molecule types");
+         std::vector<MoleculeType> molecule_types;
+         molecule_types.reserve(nmoltypes);
+ 
+@@ -980,6 +1018,8 @@
+             Atoms atoms;
+             const size_t natoms = file_.read_single_size_as_i32();
+             const size_t nresidue_info = file_.read_single_size_as_i32();
++            file_.check_remaining(natoms, sizeof(int32_t), "TPR atoms");
++            file_.check_remaining(nresidue_info, sizeof(int32_t), "TPR residues");
+             atoms.atom_properties.reserve(natoms);
+             atoms.atom_names.reserve(natoms);
+             atoms.atom_types.reserve(natoms);
+@@ -1030,12 +1070,12 @@
+ 
+             // GROMACS: Skip the obsolete charge group index
+             // see `do_block`
+-            const size_t nblocks = file_.read_single_size_as_i32();
++            const uint64_t nblocks = file_.read_single_size_as_i32();
+             file_.skip((nblocks + 1) * sizeof(int32_t));
+ 
+             // Skip the exclusions
+-            size_t nlists = file_.read_single_size_as_i32();
+-            size_t nelements = file_.read_single_size_as_i32();
++            uint64_t nlists = file_.read_single_size_as_i32();
++            uint64_t nelements = file_.read_single_size_as_i32();
+             file_.skip((nlists + 1 + nelements) * sizeof(int32_t));
+         }
+         return molecule_types;
+@@ -1051,9 +1091,25 @@
+     for (size_t i = 0; i < nmolblocks; ++i) {
+         // Index of the molecule type read previously
+         size_t moltype_idx = file_.read_single_size_as_i32();
+-        auto& moltype = molecule_types.at(moltype_idx);
++        if (moltype_idx >= molecule_types.size()) {
++            throw format_error(
++                "molecule type index {} out of bounds in TPR file with {} types",
++                moltype_idx, molecule_types.size()
++            );
++        }
++        auto& moltype = molecule_types[moltype_idx];
+         size_t nmolecules = file_.read_single_size_as_i32();
+         const auto& atoms = moltype.atoms;
++        if (atoms.size() == 0) {
++            if (nmolecules != 0) {
++                throw format_error("molecule block of a molecule type without atoms in TPR file");
++            }
++        } else if (nmolecules > (frame.size() - global_atom_idx) / atoms.size()) {
++            throw format_error(
++                "molecule block of {} molecules with {} atoms does not fit in the {} atoms of the TPR file",
++                nmolecules, atoms.size(), frame.size()
++            );
++        }
+         for (size_t j = 0; j < nmolecules; ++j) {
+             std::vector<chemfiles::Residue> residues_of_mol;
+             residues_of_mol.reserve(atoms.residue_infos.size());
+@@ -1081,9 +1137,8 @@
+                         "residue index out of bounds, there are {} residues, got index {}",
+                         moltype.atoms.residue_infos.size(), props.residue_idx);
+                 }
+-
+-                add_conectivity(frame, moltype.interaction_lists, global_atom_idx);
+             }
++            add_conectivity(frame, moltype.interaction_lists, atoms.size(), global_atom_idx);
+             global_atom_idx += atoms.size();
+             for (const auto& residue : residues_of_mol) {
+                 frame.add_residue(residue);
+@@ -1093,27 +1148,32 @@
+         // Skip number of atoms per molecule as this is already stored in the type
+         file_.skip(sizeof(int32_t));
+         for (size_t j = 0; j < 2; ++j) {
+-            size_t nposition_restraints = file_.read_single_size_as_i32();
++            uint64_t nposition_restraints = file_.read_single_size_as_i32();
+             file_.skip(nposition_restraints * 3 * header_.sizeof_real());
+         }
+     }
+ 
+     const size_t natoms = file_.read_single_size_as_i32();
+-    assert(natoms == header_.natoms);
++    if (natoms != header_.natoms) {
++        throw format_error(
++            "inconsistent number of atoms in TPR file: header has {}, topology has {}",
++            header_.natoms, natoms
++        );
++    }
+ 
+     if (header_.file_version >= TPRVersion::IntermolecularBondeds) {
+         bool has_intermolecular_bonds = read_gmx_bool();
+         if (has_intermolecular_bonds) {
+             InteractionLists interaction_lists =
+                 read_interaction_lists(file_, header_.file_version);
+-            add_conectivity(frame, interaction_lists);
++            add_conectivity(frame, interaction_lists, frame.size());
+         }
+     }
+ 
+     // Skip atom types for old formats
+     // see `do_atomtypes`
+     if (header_.file_version < TPRVersion::RemoveAtomtypes) {
+-        size_t ntypes = file_.read_single_size_as_i32();
++        uint64_t ntypes = file_.read_single_size_as_i32();
+         if (header_.file_version < TPRVersion::RemoveImplicitSolvation) {
+             file_.skip(3 * ntypes * header_.sizeof_real());
+         }
+@@ -1127,8 +1187,11 @@
+     // Skip dihedral correction maps (CMAP)
+     // see `do_cmap`
+     if (header_.file_version >= 65) {
+-        size_t ngrids = file_.read_single_size_as_i32();
+-        size_t grid_spacing = file_.read_single_size_as_i32();
++        uint64_t ngrids = file_.read_single_size_as_i32();
++        uint64_t grid_spacing = file_.read_single_size_as_i32();
++        // each grid holds grid_spacing^2 entries of 4 reals
++        file_.check_remaining(grid_spacing, 1, "TPR CMAP grid spacing");
++        file_.check_remaining(ngrids, grid_spacing * grid_spacing * 4 * header_.sizeof_real(), "TPR CMAP grids");
+         file_.skip(ngrids * grid_spacing * grid_spacing * 4 * header_.sizeof_real());
+     }
+ 
+@@ -1138,15 +1201,15 @@
+         // Skip sizes of groups
+         for (size_t i = 0; i < NR_GROUP_TYPES; ++i) {
+             // see `do_grps`
+-            size_t group_size = file_.read_single_size_as_i32();
++            uint64_t group_size = file_.read_single_size_as_i32();
+             file_.skip(group_size * sizeof(int32_t));
+         }
+-        size_t ngroup_names = file_.read_single_size_as_i32();
++        uint64_t ngroup_names = file_.read_single_size_as_i32();
+         // Skip symbol table indices
+         file_.skip(ngroup_names * sizeof(int32_t));
+         // Skip group numbers
+         for (size_t i = 0; i < NR_GROUP_TYPES; ++i) {
+-            size_t ngroup_numbers = file_.read_single_size_as_i32();
++            uint64_t ngroup_numbers = file_.read_single_size_as_i32();
+             if (header_.body_convention == FileIOXdr) {
+                 file_.skip(ngroup_numbers * sizeof(uint32_t));
+             } else {
+@@ -1163,9 +1226,9 @@
+                                "a positive value, got {}",
+                                intermolecularExclusionGroupSize);
+         }
+-        uint64_t skip_size =
+-            static_cast<uint64_t>(intermolecularExclusionGroupSize) * sizeof(int32_t);
+-        file_.skip(skip_size);
++        file_.check_remaining(static_cast<uint64_t>(intermolecularExclusionGroupSize),
++                              sizeof(int32_t), "TPR intermolecular exclusion group");
++        file_.skip(static_cast<uint64_t>(intermolecularExclusionGroupSize) * sizeof(int32_t));
+     }
+ }
+ 
+@@ -1230,6 +1293,7 @@
+ 
+ std::vector<std::string> TPRFormat::read_symbol_table() {
+     size_t nsymbols = file_.read_single_size_as_i32();
++    file_.check_remaining(nsymbols, sizeof(int32_t), "TPR symbol table");
+     std::vector<std::string> symbol_table;
+     symbol_table.reserve(nsymbols);
+     for (size_t i = 0; i < nsymbols; ++i) {
+@@ -1240,7 +1304,12 @@
+ 
+ const std::string& TPRFormat::read_symbol_table_entry(const std::vector<std::string>& table) {
+     size_t idx = file_.read_single_size_as_i32();
+-    return table.at(idx);
++    if (idx >= table.size()) {
++        throw format_error(
++            "symbol index {} out of bounds in TPR file with {} symbols", idx, table.size()
++        );
++    }
++    return table[idx];
+ }
+ 
+ std::string TPRFormat::read_gmx_string() {
+@@ -1255,6 +1324,7 @@
+ 
+         // lenght without null terminator
+         const uint64_t len = file_.read_single_u64();
++        file_.check_remaining(len, 1, "TPR string");
+         // next comes the contents of the string without padding
+         std::vector<char> buf;
+         buf.resize(static_cast<size_t>(len));
+diff -ruN host-a/src/formats/TRR.cpp host-b/src/formats/TRR.cpp
+--- host-a/src/formats/TRR.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/TRR.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -236,6 +236,29 @@
+         }
+         header.use_double = (nflsize == sizeof(double));
+ 
++        // the reader sizes its buffers from natoms, and skips frames using
++        // the section sizes: both must describe the same data
++        const uint64_t vector_size = static_cast<uint64_t>(header.natoms) * 3 * nflsize;
++        if ((header.box_size != 0 && header.box_size != 9 * nflsize) ||
++            (header.x_size != 0 && header.x_size != vector_size) ||
++            (header.v_size != 0 && header.v_size != vector_size) ||
++            (header.f_size != 0 && header.f_size != vector_size)) {
++            throw format_error("invalid TRR file at '{}': "
++                               "frame with step '{}' has inconsistent sizes",
++                               file_.path(), header.step);
++        }
++        // the atoms of a frame are allocated from natoms, which only the
++        // positions, velocities or forces tie to the size of the file
++        if (header.natoms > 0 && header.x_size == 0 && header.v_size == 0 && header.f_size == 0) {
++            throw format_error("invalid TRR file at '{}': "
++                               "frame with step '{}' has {} atoms but no positions, "
++                               "velocities or forces",
++                               file_.path(), header.step, header.natoms);
++        }
++        uint64_t data_size = static_cast<uint64_t>(header.box_size) + header.vir_size +
++                             header.pres_size + header.x_size + header.v_size + header.f_size;
++        file_.check_remaining(1, 2 * nflsize + data_size, "TRR frame");
++
+         if (header.use_double) {
+             header.time = file_.read_single_f64();
+             header.lambda = file_.read_single_f64();
+@@ -272,10 +295,9 @@
+     frame_offsets_.reserve(est_nframes);
+ 
+     while (true) {
+-        file_.skip(framebytes);
+-
+-        const uint64_t frame_pos = file_.tell();
++        const uint64_t frame_pos = file_.tell() + framebytes;
+         try {
++            file_.skip(framebytes);
+             header = read_frame_header();
+         } catch (const Error&) {
+             break;
+diff -ruN host-a/src/formats/XTC.cpp host-b/src/formats/XTC.cpp
+--- host-a/src/formats/XTC.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/XTC.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -102,6 +102,12 @@
+ 
+ void XTCFormat::read(Frame& frame) {
+     FrameHeader header = read_frame_header();
++    // uncompressed atoms take 12 bytes, compressed ones at least one bit
++    if (header.natoms <= 9) {
++        file_.check_remaining(header.natoms, XTC_SMALL_COORDS_SIZE, "XTC coordinates");
++    } else {
++        file_.check_remaining(header.natoms / 8, 1, "compressed XTC coordinates");
++    }
+ 
+     frame.set_step(header.step);                         // actual step of MD Simulation
+     frame.set("time", static_cast<double>(header.time)); // time in pico seconds
+@@ -156,9 +162,9 @@
+     }
+ }
+ 
+-static int32_t round_to_int_boundary(int32_t x) {
++static uint64_t round_to_int_boundary(uint32_t x) {
+     // Rounding to the next 32-bit boundary
+-    return (x + 3) & ~0x03;
++    return (static_cast<uint64_t>(x) + 3) & ~UINT64_C(0x03);
+ }
+ 
+ void XTCFormat::determine_frame_offsets() {
+@@ -188,17 +194,16 @@
+     } else {
+         file_.seek(XTC_HEADER_SIZE);
+ 
+-        uint64_t framebytes = static_cast<uint64_t>(round_to_int_boundary(file_.read_single_i32()));
++        uint64_t framebytes = round_to_int_boundary(file_.read_single_u32());
+ 
+         const size_t est_nframes = static_cast<size_t>(filesize / (framebytes + XTC_HEADER_SIZE));
+         frame_offsets_.reserve(est_nframes);
+ 
+         while (true) {
+-            file_.skip(framebytes + XTC_HEADER_SIZE);
+-
+-            const uint64_t frame_pos = file_.tell() - XTC_HEADER_SIZE;
++            const uint64_t frame_pos = file_.tell() + framebytes;
+             try {
+-                framebytes = static_cast<uint64_t>(round_to_int_boundary(file_.read_single_i32()));
++                file_.skip(framebytes + XTC_HEADER_SIZE);
++                framebytes = round_to_int_boundary(file_.read_single_u32());
+             } catch (const Error&) {
+                 break;
+             }
+diff -ruN host-a/src/formats/XYZ.cpp host-b/src/formats/XYZ.cpp
+--- host-a/src/formats/XYZ.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/formats/XYZ.cpp	2026-11-21 15:08:09.573344578 +0000
+@@ -46,9 +46,18 @@
+ /// Type for a list of additional atomic properties in extended XYZ
+ using properties_list_t = std::vector<extended_property>;
+ 
++struct property_spec {
++    std::string name;
++    Property::Kind type;
++    size_t columns;
++    bool vector;
++};
++
+ /// Read the extended XYZ properties from the line, set frame properties
+-/// directly and return the list of atomic properties to read
+-static properties_list_t read_extended_comment_line(string_view line, Frame& frame);
++/// directly and return the atomic properties the atom lines must carry.
++/// Names are not expanded here: a repeat is only a column count until an
++/// atom line shows those columns exist.
++static std::vector<property_spec> read_extended_comment_line(string_view line, Frame& frame);
+ 
+ /// Read the properties in the list form the line and set them on the atom
+ static void read_atomic_properties(const properties_list_t& properties, string_view line, Atom& atom);
+@@ -79,14 +88,66 @@
+     return metadata;
+ }
+ 
++static size_t count_xyz_fields(string_view line) {
++    size_t n = 0;
++    bool in_field = false;
++    for (auto c: line) {
++        if (c == ' ' || c == '\t' || c == '\r') {
++            in_field = false;
++        } else if (!in_field) {
++            n++;
++            in_field = true;
++        }
++    }
++    return n;
++}
++
++static properties_list_t expand_property_specs(const std::vector<property_spec>& specs) {
++    properties_list_t properties;
++    for (const auto& spec: specs) {
++        if (spec.vector || spec.columns == 1) {
++            properties.emplace_back(extended_property{spec.name, spec.type});
++        } else {
++            for (size_t j = 0; j < spec.columns; j++) {
++                properties.emplace_back(extended_property{
++                    fmt::format("{}_{}", spec.name, j), spec.type
++                });
++            }
++        }
++    }
++    return properties;
++}
++
+ void XYZFormat::read_next(Frame& frame) {
+     size_t n_atoms = parse<size_t>(file_.readline());
+ 
+-    auto properties = read_extended_comment_line(file_.readline(), frame);
++    auto specs = read_extended_comment_line(file_.readline(), frame);
++    size_t extra = 0;
++    for (const auto& spec: specs) {
++        if (spec.columns > SIZE_MAX - extra) {
++            throw format_error("extended XYZ properties do not fit on an atom line");
++        }
++        extra += spec.columns;
++    }
+ 
+     frame.reserve(n_atoms);
++    properties_list_t properties;
++    bool checked = specs.empty();
+     for (size_t i=0; i<n_atoms; i++) {
+         auto line = file_.readline();
++        if (!checked) {
++            auto fields = count_xyz_fields(line);
++            // A repeat the line does not carry is malformed. Extra fields
++            // past the declared columns are ignored, as they were before.
++            if (fields < extra + 4) {
++                throw format_error(
++                    "extended XYZ property columns ({}) do not match the {} fields on the atom line",
++                    extra, fields
++                );
++            }
++            properties = expand_property_specs(specs);
++            checked = true;
++        }
+         double x = 0, y = 0, z = 0;
+         std::string name;
+         auto count = scan(line, name, x, y, z);
+@@ -94,6 +155,11 @@
+         read_atomic_properties(properties, line.substr(count), atom);
+         frame.add_atom(std::move(atom), Vector3D(x, y, z));
+     }
++    if (n_atoms == 0 && extra > 0) {
++        throw format_error(
++            "extended XYZ declares {} property columns and no atoms", extra
++        );
++    }
+ }
+ 
+ void XYZFormat::write_next(const Frame& frame) {
+@@ -443,6 +509,11 @@
+         while (!done()) {
+             skip_whitespace();
+             auto name = next_substring();
++            if (name.empty() && current() == '=') {
++                // nothing consumed the '=': bail out instead of looping on it
++                warning("Extended XYZ", "expected a property name before '='");
++                break;
++            }
+             if (!name.empty() && current() == '=') {
+                 advance();
+             } else {
+@@ -571,7 +642,7 @@
+ /// - Properties of type S:1 are maped to string values
+ /// - Properties of type S:N are maped to N separate string properties,
+ ///   named `$name_$i`
+-static properties_list_t parse_property_list(string_view input) {
++static std::vector<property_spec> parse_property_list(string_view input) {
+     if (input.substr(0, 19) != "species:S:1:pos:R:3") {
+         warning("Extended XYZ", "ignoring non-standard Properties='{}', should start with 'species:S:1:pos:R:3'", input);
+         return {};
+@@ -583,12 +654,11 @@
+         return {};
+     }
+     list.remove_prefix(20);
+-    properties_list_t properties;
++    std::vector<property_spec> properties;
+ 
+     auto splitted = split(list, ':');
+     if (splitted.size() % 3 != 0) {
+-        warning("Extended XYZ", "ignoring invalid Properties='{}'", input);
+-        return {};
++        throw format_error("invalid extended XYZ Properties='{}'", input);
+     }
+ 
+     auto count = splitted.size() / 3;
+@@ -612,34 +682,25 @@
+         try {
+             repeat = parse<size_t>(splitted[3 * i + 2]);
+         } catch (const Error&) {
+-            warning("Extended XYZ", "invalid type repeat for {} in Properties='{}'", name, input);
+-            continue;
++            throw format_error("invalid type repeat for {} in Properties='{}'", name, input);
+         }
+ 
+-        if (repeat == 3 && type == Property::DOUBLE) {
+-            type = Property::VECTOR3D;
+-            properties.emplace_back(extended_property{name, type});
+-            continue;
++        if (repeat == 0) {
++            throw format_error("invalid type repeat for {} in Properties='{}'", name, input);
+         }
+ 
+-        if (repeat == 0) {
+-            warning("Extended XYZ", "invalid type repeat for {} in Properties='{}'", name, input);
++        if (repeat == 3 && type == Property::DOUBLE) {
++            properties.push_back(property_spec{name, Property::VECTOR3D, 3, true});
+             continue;
+-        } else if (repeat == 1) {
+-            properties.emplace_back(extended_property{name, type});
+-        } else {
+-            for (size_t j=0; j<repeat; j++) {
+-                properties.emplace_back(extended_property{
+-                    fmt::format("{}_{}", name, j), type
+-                });
+-            }
+         }
++
++        properties.push_back(property_spec{std::move(name), type, repeat, false});
+     }
+ 
+     return properties;
+ }
+ 
+-properties_list_t read_extended_comment_line(string_view line, Frame& frame) {
++std::vector<property_spec> read_extended_comment_line(string_view line, Frame& frame) {
+     // only try to parse as extended XYZ if `Properties` is defined as expected
+     if (line.find("species:S:1:pos:R:3") == std::string::npos) {
+         return {};
+diff -ruN host-a/src/parse.cpp host-b/src/parse.cpp
+--- host-a/src/parse.cpp	2026-11-21 14:42:39.944338842 +0000
++++ host-b/src/parse.cpp	2026-11-21 15:05:54.781619442 +0000
+@@ -307,6 +307,10 @@
+         throw error("the length of '{}' is greater than the width '{}', this is a bug in chemfiles", s, width);
+     }
+ 
++    if (s.empty()) {
++        throw error("the value '{}' is not a valid hybrid 36 number", s);
++    }
++
+     auto f = s[0];
+     if (f == '-' || f == ' ' || is_ascii_digit(f)) {
+         // Negative number, these are not encoded

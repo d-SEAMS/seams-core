@@ -1,0 +1,12 @@
+LAMMPS velocity index OOB test
+
+1 atoms
+1 atom types
+
+Atoms # full
+
+1 1 1 0.0 0.0 0.0 0.0
+
+Velocities
+
+2147483647 0.0 0.0 0.0

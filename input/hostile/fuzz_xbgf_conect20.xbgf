@@ -1,0 +1,10 @@
+XTLGRF 200
+DESCRP water
+FORCEFIELD DREIDING
+FORMAT ATOM   (a6,1x,i5,1x,a5,1x,a3,1x,a1,1x,a5,3f10.5,1x,a5,i3,i2,1x,f8.5)
+HETATM     1 O    HOH     1    0.00000   0.00000   0.00000 O_3    2 2 -0.82000 0 0 O 0.0 0.0 0.0 0 0
+HETATM     2 H1   HOH     1    0.75700   0.58600   0.00000 H_     1 0  0.41000 0 0 H 0.0 0.0 0.0 0 0
+HETATM     3 H2   HOH     1   -0.75700   0.58600   0.00000 H_     1 0  0.41000 0 0 H 0.0 0.0 0.0 0 0
+FORMAT CONECT (a6,12i6)
+CONECT     1     2     2     2     2     2     2     2     2     2     2     2     2     2     2     2     2     2     2     2     2
+END

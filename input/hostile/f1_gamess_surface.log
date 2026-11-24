@@ -1,0 +1,22 @@
+ Intel Core2/ Linux  PC GAMESS version running under Linux.
+     BASIS OPTIONS
+     -------------
+     GBASIS=PM3          IGAUSS=       0      POLAR=NONE    
+ THE POINT GROUP OF THE MOLECULE IS C1      
+ ATOM      ATOMIC                      COORDINATES (BOHR)
+ H           1.0    -3.9079005753        0.8531456570       -0.9052343501
+ H           1.0    -1.1090827079        0.7545511549        0.0605105544
+ TOTAL NUMBER OF SHELLS              =    6
+     $CONTRL OPTIONS
+     ---------------
+     SCFTYP=RHF          RUNTYP=SURFACE      EXETYP=RUN     
+     MULT  =       1     ICHARG=       0     MAXIT =      30
+     NPRINT=       7     IREST =       0     COORD =CART    
+     AIMPAC=       F     FRIEND=             CITYP =NONE    
+     THE POINT GROUP IS C1 , NAXIS= 0, ORDER= 1
+ ---- SURFACE MAPPING GEOMETRY ----
+ HAS ENERGY VALUE        -23.8775193054
+ ...... END OF ONE-ELECTRON INTEGRALS ......
+ ITER EX DEM  TOTAL ENERGY      E CHANGE  DENSITY CHANGE    DIIS ERROR
+   8  3  0   -23.878163489     0.000000000   0.000003030   0.000000000
+

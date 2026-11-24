@@ -1,0 +1,4616 @@
+# Copyright (c) d-SEAMS developers
+# Edits inside chemfiles' tng.tar.gz, applied by
+# chemfiles-0.10.4-external-sources.sh before chemfiles unpacks the archive.
+#
+# Hostile files, tng/src/lib/tng_io.c:
+#   Block headers and contents must fit in the file, and the block name
+#   read is checked. tng_freadstr terminates what it reads.
+#   The molecules block bounds every count by the block size, allocates
+#   zeroed arrays before it stores the counts, checks the molecule count
+#   product, requires chains, residues and atoms to add up, and checks
+#   every read. A block that fails leaves no molecules behind, since the
+#   callers go on after a failed block.
+#   Data blocks check their counts, strides, particle range and lengths
+#   against the block, refuse codecs this build cannot decode, and copy
+#   or byte-swap only the values read. gzip data must inflate to the
+#   recorded size, which deflate's 1032:1 limit bounds before anything is
+#   allocated, and a string block must hold a byte for each string.
+#   String data is allocated and freed with the sizes it was allocated
+#   with; the destructors used the counts of the last block read.
+#   Particle mapping blocks check their range against the block and the
+#   frame set, and each real particle number against the particle count.
+#   Values are allocated zeroed, and reading the values of a frame set
+#   whose blocks left a particle without values is an error instead of
+#   returning uninitialised memory (a 2.5 kB file declared 100663311
+#   particles and stored positions for 15).
+#   tng_uncompress passes compressed and uncompressed byte lengths into
+#   tng_compress_uncompress[_float]_bounded and Ptngc_unpack_array_bounded;
+#   unpack_array_triplet and unpack_array_stop_bits check ptr < end before
+#   every byte read and bound coding parameters and bit counts.
+#   tng_util_trajectory_open closes the handle on failure instead of
+#   leaking it.
+# XTC2 and XTC3 take the packed length from Ptngc_unpack_array_bounded
+# and reject a read or a write that would leave that buffer, including
+# an XTC2 magic_bits index. The Huffman length sort is the upstream
+# comparison (length, then symbol): the vendored one had lost its
+# else-if, so a valid code table was ordered by symbol and the decoder
+# walked off the block. A table or a bit read that does not fit in its
+# buffer is an error. BWLZH checks every count against the bytes left
+# before it reads them. TNG compression is accepted when the codec
+# header's decompressed size is the block size, not when the ratio to
+# the file is below 4096, and a particle array wider than the
+# decompressed block is rejected before it is allocated.
+# Run-length, LZ77, move-to-front and Burrows-Wheeler decoders return an
+# error when a count, a back-reference or a table index would leave the
+# buffer they were given. They no longer call exit.
+# The position and velocity compressors measure the packed block and
+# allocate that many bytes. The old 14 bytes per value was smaller than
+# a Huffman or XTC3 dictionary on a short block.
+diff -ruN tng-a/tng/include/compression/bwlzh.h tng-b/tng/include/compression/bwlzh.h
+--- tng-a/tng/include/compression/bwlzh.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/bwlzh.h	2026-11-21 15:00:31.050288354 +0000
+@@ -36,7 +36,8 @@
+ 
+ int DECLSPECDLLEXPORT bwlzh_get_buflen(int nvals);
+ 
+-void DECLSPECDLLEXPORT bwlzh_decompress(unsigned char* input, int nvals, unsigned int* vals);
++/* Returns 0, or 1 if INPUT_LEN does not hold NVALS values. */
++int DECLSPECDLLEXPORT bwlzh_decompress(unsigned char* input, int input_len, int nvals, unsigned int* vals);
+ 
+ 
+ /* The routines below are mostly useful for testing, and for internal
+@@ -49,7 +50,7 @@
+                                                       unsigned char* output,
+                                                       int*           output_len);
+ 
+-void DECLSPECDLLEXPORT bwlzh_decompress_verbose(unsigned char* input, int nvals, unsigned int* vals);
++int DECLSPECDLLEXPORT bwlzh_decompress_verbose(unsigned char* input, int input_len, int nvals, unsigned int* vals);
+ 
+ /* Compress the integers (positive, small integers are preferable)
+    using huffman coding, with automatic selection of how to handle the
+@@ -61,7 +62,9 @@
+ 
+ int Ptngc_comp_huff_buflen(int nvals);
+ 
+-void Ptngc_comp_huff_decompress(unsigned char* huffman, int huffman_len, unsigned int* vals);
++/* Returns 0, or 1 if HUFFMAN_LEN does not hold the table it declares or
++   that table asks for more than NVALS_CAP symbols. */
++int Ptngc_comp_huff_decompress(unsigned char* huffman, int huffman_len, unsigned int* vals, int nvals_cap);
+ 
+ 
+ /* the value pointed to by chosen_algo should be
+diff -ruN tng-a/tng/include/compression/bwt.h tng-b/tng/include/compression/bwt.h
+--- tng-a/tng/include/compression/bwt.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/bwt.h	2026-11-21 15:17:34.972899451 +0000
+@@ -27,7 +27,7 @@
+ 
+ void Ptngc_comp_to_bwt(unsigned int* vals, int nvals, unsigned int* output, int* index);
+ 
+-void Ptngc_comp_from_bwt(const unsigned int* input, int nvals, int index, unsigned int* vals);
++int Ptngc_comp_from_bwt(const unsigned int* input, int nvals, int index, unsigned int* vals);
+ 
+ void Ptngc_bwt_merge_sort_inner(int*          indices,
+                                 int           nvals,
+diff -ruN tng-a/tng/include/compression/coder.h tng-b/tng/include/compression/coder.h
+--- tng-a/tng/include/compression/coder.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/coder.h	2026-11-21 15:01:48.190127185 +0000
+@@ -25,6 +25,8 @@
+ #ifndef CODER_H
+ #define CODER_H
+ 
++#include <stddef.h>
++
+ #ifndef DECLSPECDLLEXPORT
+ #    ifdef USE_WINDOWS
+ #        define DECLSPECDLLEXPORT __declspec(dllexport)
+@@ -57,10 +59,18 @@
+                                          int            coding,
+                                          int            coding_parameter,
+                                          int            natoms);
++int DECLSPECDLLEXPORT Ptngc_unpack_array_bounded(struct coder*  coder,
++                                                 unsigned char* packed,
++                                                 size_t         packed_len,
++                                                 int*           output,
++                                                 int            length,
++                                                 int            coding,
++                                                 int            coding_parameter,
++                                                 int            natoms);
+ unsigned char DECLSPECDLLEXPORT* Ptngc_pack_array_xtc2(struct coder* coder, int* input, int* length);
+-int DECLSPECDLLEXPORT Ptngc_unpack_array_xtc2(struct coder* coder, unsigned char* packed, int* output, int length);
++int DECLSPECDLLEXPORT Ptngc_unpack_array_xtc2(struct coder* coder, unsigned char* packed, size_t packed_len, int* output, int length);
+ unsigned char DECLSPECDLLEXPORT* Ptngc_pack_array_xtc3(int* input, int* length, int natoms, int speed);
+-int DECLSPECDLLEXPORT Ptngc_unpack_array_xtc3(unsigned char* packed, int* output, int length, int natoms);
++int DECLSPECDLLEXPORT Ptngc_unpack_array_xtc3(unsigned char* packed, size_t packed_len, int* output, int length, int natoms);
+ 
+ void DECLSPECDLLEXPORT Ptngc_out8bits(struct coder* coder, unsigned char** output);
+ void DECLSPECDLLEXPORT Ptngc_pack_flush(struct coder* coder, unsigned char** output);
+diff -ruN tng-a/tng/include/compression/huffman.h tng-b/tng/include/compression/huffman.h
+--- tng-a/tng/include/compression/huffman.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/huffman.h	2026-11-21 15:00:22.954305364 +0000
+@@ -37,13 +37,17 @@
+                                 unsigned int*       huffman_dict_unpacked,
+                                 int*                huffman_dict_unpackedlen);
+ 
+-void Ptngc_comp_conv_from_huffman(unsigned char*      huffman,
+-                                  unsigned int*       vals,
+-                                  int                 nvals,
+-                                  int                 ndict,
+-                                  unsigned char*      huffman_dict,
+-                                  int                 huffman_dictlen,
+-                                  const unsigned int* huffman_dict_unpacked,
+-                                  int                 huffman_dict_unpackedlen);
++/* Returns 0, or 1 if the buffer ends before a complete code. HUFFMAN_END
++   and HUFFMAN_DICT_END are one past the last byte of each buffer. */
++int Ptngc_comp_conv_from_huffman(unsigned char*       huffman,
++                                 const unsigned char* huffman_end,
++                                 unsigned int*        vals,
++                                 int                  nvals,
++                                 int                  ndict,
++                                 unsigned char*       huffman_dict,
++                                 const unsigned char* huffman_dict_end,
++                                 int                  huffman_dictlen,
++                                 const unsigned int*  huffman_dict_unpacked,
++                                 int                  huffman_dict_unpackedlen);
+ 
+ #endif
+diff -ruN tng-a/tng/include/compression/lz77.h tng-b/tng/include/compression/lz77.h
+--- tng-a/tng/include/compression/lz77.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/lz77.h	2026-11-21 15:17:31.244898500 +0000
+@@ -34,7 +34,7 @@
+                         unsigned int* offsets,
+                         int*          noffsets);
+ 
+-void Ptngc_comp_from_lz77(const unsigned int* data,
++int Ptngc_comp_from_lz77(const unsigned int* data,
+                           int                 ndata,
+                           const unsigned int* len,
+                           int                 nlens,
+diff -ruN tng-a/tng/include/compression/mtf.h tng-b/tng/include/compression/mtf.h
+--- tng-a/tng/include/compression/mtf.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/mtf.h	2026-11-21 15:17:34.800899407 +0000
+@@ -31,7 +31,7 @@
+                             int                 ndict,
+                             unsigned int*       valsmtf);
+ 
+-void Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
++int Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
+                               int                 nvals,
+                               const unsigned int* dict,
+                               int                 ndict,
+diff -ruN tng-a/tng/include/compression/rle.h tng-b/tng/include/compression/rle.h
+--- tng-a/tng/include/compression/rle.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/rle.h	2026-11-21 15:17:28.028897639 +0000
+@@ -27,6 +27,6 @@
+ 
+ void Ptngc_comp_conv_to_rle(const unsigned int* vals, int nvals, unsigned int* rle, int* nrle, int min_rle);
+ 
+-void Ptngc_comp_conv_from_rle(const unsigned int* rle, unsigned int* vals, int nvals);
++int Ptngc_comp_conv_from_rle(const unsigned int* rle, int nrle, unsigned int* vals, int nvals);
+ 
+ #endif
+diff -ruN tng-a/tng/include/compression/tng_compress.h tng-b/tng/include/compression/tng_compress.h
+--- tng-a/tng/include/compression/tng_compress.h	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/include/compression/tng_compress.h	2026-11-21 14:42:51.000000000 +0000
+@@ -25,6 +25,9 @@
+ #ifndef TNG_COMPRESS_H
+ #define TNG_COMPRESS_H
+ 
++#include <stddef.h>
++#include <stdint.h>
++
+ #ifndef USE_WINDOWS
+ #    if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
+ #        define USE_WINDOWS
+@@ -214,8 +217,23 @@
+      */
+     int DECLSPECDLLEXPORT tng_compress_uncompress(char* data, double* posvel);
+ 
++    int DECLSPECDLLEXPORT tng_compress_inquire_bounded(const char* data,
++                                                       size_t      data_len,
++                                                       size_t      elem_size,
++                                                       uint64_t*   needed_bytes);
++
++    int DECLSPECDLLEXPORT tng_compress_uncompress_bounded(char*   data,
++                                                          size_t  data_len,
++                                                          double* posvel,
++                                                          size_t  posvel_bytes);
++
+     int DECLSPECDLLEXPORT tng_compress_uncompress_float(char* data, float* posvel);
+ 
++    int DECLSPECDLLEXPORT tng_compress_uncompress_float_bounded(char*  data,
++                                                                size_t data_len,
++                                                                float* posvel,
++                                                                size_t posvel_bytes);
++
+     int DECLSPECDLLEXPORT tng_compress_uncompress_int(char*          data,
+                                                       int*           posvel,
+                                                       unsigned long* prec_hi,
+diff -ruN tng-a/tng/src/compression/bwlzh.c tng-b/tng/src/compression/bwlzh.c
+--- tng-a/tng/src/compression/bwlzh.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/bwlzh.c	2026-11-21 15:17:47.860902343 +0000
+@@ -547,7 +547,34 @@
+ }
+ 
+ 
+-static void bwlzh_decompress_gen(unsigned char* input, const int nvals, unsigned int* vals, const int verbose)
++
++static int bwlzh_u32(const unsigned char* input, int input_len, int* inpdata, int* out)
++{
++    int off = *inpdata;
++    if (off < 0 || input_len < 4 || off > input_len - 4)
++    {
++        return 1;
++    }
++    *out = (int)(((unsigned int)input[off]) | (((unsigned int)input[off + 1]) << 8)
++                 | (((unsigned int)input[off + 2]) << 16) | (((unsigned int)input[off + 3]) << 24));
++    *inpdata = off + 4;
++    return 0;
++}
++
++static int bwlzh_u8(const unsigned char* input, int input_len, int* inpdata, int* out)
++{
++    int off = *inpdata;
++    if (off < 0 || off >= input_len)
++    {
++        return 1;
++    }
++    *out = (int)input[off];
++    *inpdata = off + 1;
++    return 0;
++}
++
++static int bwlzh_decompress_gen(unsigned char* input, const int input_len, const int nvals,
++                               unsigned int* vals, const int verbose)
+ {
+     unsigned int* vals16;
+     int           nvals16;
+@@ -572,6 +599,8 @@
+     int            valstart;
+     int            inpdata = 0;
+     int            nvalsfile;
++    int            failed = 0;
++    int            slots;
+ 
+     unsigned int* tmpmem = warnmalloc(max_vals_per_block * 18 * sizeof *tmpmem);
+ 
+@@ -599,17 +628,15 @@
+     }
+ 
+     /* Read the number of real values in the whole block. */
+-    nvalsfile = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                      | (((unsigned int)input[inpdata + 2]) << 16)
+-                      | (((unsigned int)input[inpdata + 3]) << 24));
+-    inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &nvalsfile)) { failed = 1; goto bwlzh_done; }
+ 
+-    if (nvalsfile != nvals)
++    if (input_len < 4 || nvalsfile != nvals)
+     {
+         fprintf(stderr,
+                 "BWLZH: The number of values found in the file is different from the number of "
+                 "values expected.\n");
+-        exit(EXIT_FAILURE);
++        failed = 1;
++        goto bwlzh_done;
+     }
+ 
+     valsleft = nvals;
+@@ -619,28 +646,34 @@
+         int valsnew;
+         int reducealgo;
+         /* Read the number of real values in this block. */
+-        thisvals = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                         | (((unsigned int)input[inpdata + 2]) << 16)
+-                         | (((unsigned int)input[inpdata + 3]) << 24));
+-        inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &thisvals)) { failed = 1; goto bwlzh_done; }
++        if (thisvals <= 0 || thisvals > valsleft)
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ 
+         valsleft -= thisvals;
+ 
+         /* Read the number of nvals16 values in this block. */
+-        nvals16 = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                        | (((unsigned int)input[inpdata + 2]) << 16)
+-                        | (((unsigned int)input[inpdata + 3]) << 24));
+-        inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &nvals16)) { failed = 1; goto bwlzh_done; }
+ 
+         /* Read the BWT index. */
+-        bwt_index = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                          | (((unsigned int)input[inpdata + 2]) << 16)
+-                          | (((unsigned int)input[inpdata + 3]) << 24));
+-        inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &bwt_index)) { failed = 1; goto bwlzh_done; }
++        if (nvals16 > 0 && (bwt_index < 0 || bwt_index >= nvals16))
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ 
+         if (thisvals > max_vals_per_block)
+         {
+             /* More memory must be allocated for decompression. */
++            if (thisvals > 2147483647 / 18)
++            {
++                failed = 1;
++                goto bwlzh_done;
++            }
+             max_vals_per_block = thisvals;
+             if (verbose)
+             {
+@@ -660,6 +693,11 @@
+                                                                  due to up to 3 bytes per 16 value. */
+ #endif
+         }
++        if (nvals16 < 0 || nvals16 > 3 * max_vals_per_block)
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ 
+ #ifdef PARTIAL_MTF3
+         for (imtfinner = 0; imtfinner < 3; imtfinner++)
+@@ -671,50 +709,48 @@
+             }
+ #endif
+ 
+-            reducealgo = (int)input[inpdata];
+-            inpdata++;
++            if (bwlzh_u8(input, input_len, &inpdata, &reducealgo)) { failed = 1; goto bwlzh_done; }
+ 
+             /* Read the number of huffman values in this block. */
+-            nrle = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                         | (((unsigned int)input[inpdata + 2]) << 16)
+-                         | (((unsigned int)input[inpdata + 3]) << 24));
+-            inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &nrle)) { failed = 1; goto bwlzh_done; }
+ 
+             /* Read the size of the huffman block. */
+-            bwlzhhufflen = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                                 | (((unsigned int)input[inpdata + 2]) << 16)
+-                                 | (((unsigned int)input[inpdata + 3]) << 24));
+-            inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &bwlzhhufflen)) { failed = 1; goto bwlzh_done; }
+ 
+             if (verbose)
+             {
+                 fprintf(stderr, "Decompressing huffman block of length %d.\n", bwlzhhufflen);
+             }
+             /* Decompress the huffman block. */
+-            Ptngc_comp_huff_decompress(input + inpdata, bwlzhhufflen, rle);
++            slots = 3 * max_vals_per_block;
++            if (bwlzhhufflen < 0 || nrle < 0 || nrle > slots
++                || inpdata < 0 || bwlzhhufflen > input_len - inpdata
++                || Ptngc_comp_huff_decompress(input + inpdata, bwlzhhufflen, rle, slots))
++            {
++                failed = 1;
++                goto bwlzh_done;
++            }
+             inpdata += bwlzhhufflen;
+ 
+             if (reducealgo == 1) /* LZ77 */
+             {
+                 int offstore;
+                 /* Read the number of huffman values in this block. */
+-                noffsets = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                                 | (((unsigned int)input[inpdata + 2]) << 16)
+-                                 | (((unsigned int)input[inpdata + 3]) << 24));
+-                inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &noffsets)) { failed = 1; goto bwlzh_done; }
++                if (noffsets < 0 || noffsets > 3 * max_vals_per_block)
++                {
++                    failed = 1;
++                    goto bwlzh_done;
++                }
+ 
+                 if (noffsets > 0)
+                 {
+                     /* How are the offsets stored? */
+-                    offstore = (int)input[inpdata++];
++                    if (bwlzh_u8(input, input_len, &inpdata, &offstore)) { failed = 1; goto bwlzh_done; }
+                     if (offstore == 0)
+                     {
+                         /* Read the size of the huffman block. */
+-                        bwlzhhufflen = (int)(((unsigned int)input[inpdata])
+-                                             | (((unsigned int)input[inpdata + 1]) << 8)
+-                                             | (((unsigned int)input[inpdata + 2]) << 16)
+-                                             | (((unsigned int)input[inpdata + 3]) << 24));
+-                        inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &bwlzhhufflen)) { failed = 1; goto bwlzh_done; }
+ 
+                         if (verbose)
+                         {
+@@ -722,7 +758,14 @@
+                         }
+ 
+                         /* Decompress the huffman block. */
+-                        Ptngc_comp_huff_decompress(input + inpdata, bwlzhhufflen, offsets);
++                        slots = 3 * max_vals_per_block;
++                        if (bwlzhhufflen < 0 || noffsets < 0 || noffsets > slots
++                            || inpdata < 0 || bwlzhhufflen > input_len - inpdata
++                            || Ptngc_comp_huff_decompress(input + inpdata, bwlzhhufflen, offsets, slots))
++                        {
++                            failed = 1;
++                            goto bwlzh_done;
++                        }
+                         inpdata += bwlzhhufflen;
+                     }
+                     else
+@@ -734,8 +777,8 @@
+                         }
+                         for (i = 0; i < noffsets; i++)
+                         {
+-                            offsets[i] = (int)(((unsigned int)input[inpdata])
+-                                               | (((unsigned int)input[inpdata + 1]) << 8));
++                            if (inpdata < 0 || input_len - inpdata < 2) { failed = 1; goto bwlzh_done; }
++                            offsets[i] = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8));
+                             inpdata += 2;
+                         }
+                     }
+@@ -752,17 +795,10 @@
+ 
+ 
+                 /* Read the number of huffman values in this block. */
+-                nlens = (int)(((unsigned int)input[inpdata]) | (((unsigned int)input[inpdata + 1]) << 8)
+-                              | (((unsigned int)input[inpdata + 2]) << 16)
+-                              | (((unsigned int)input[inpdata + 3]) << 24));
+-                inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &nlens)) { failed = 1; goto bwlzh_done; }
+ 
+                 /* Read the size of the huffman block. */
+-                bwlzhhufflen = (int)(((unsigned int)input[inpdata])
+-                                     | (((unsigned int)input[inpdata + 1]) << 8)
+-                                     | (((unsigned int)input[inpdata + 2]) << 16)
+-                                     | (((unsigned int)input[inpdata + 3]) << 24));
+-                inpdata += 4;
++if (bwlzh_u32(input, input_len, &inpdata, &bwlzhhufflen)) { failed = 1; goto bwlzh_done; }
+ 
+                 if (verbose)
+                 {
+@@ -770,7 +806,14 @@
+                 }
+ 
+                 /* Decompress the huffman block. */
+-                Ptngc_comp_huff_decompress(input + inpdata, bwlzhhufflen, lens);
++                slots = 3 * max_vals_per_block;
++                if (bwlzhhufflen < 0 || nlens < 0 || nlens > slots
++                    || inpdata < 0 || bwlzhhufflen > input_len - inpdata
++                    || Ptngc_comp_huff_decompress(input + inpdata, bwlzhhufflen, lens, slots))
++                {
++                    failed = 1;
++                    goto bwlzh_done;
++                }
+                 inpdata += bwlzhhufflen;
+ 
+                 if (verbose)
+@@ -778,7 +821,11 @@
+                     fprintf(stderr, "Decompressing LZ77.\n");
+                 }
+ 
+-                Ptngc_comp_from_lz77(rle, nrle, lens, nlens, offsets, noffsets, mtf, nvals16);
++                if (Ptngc_comp_from_lz77(rle, nrle, lens, nlens, offsets, noffsets, mtf, nvals16))
++                {
++                    failed = 1;
++                    goto bwlzh_done;
++                }
+             }
+             else if (reducealgo == 0) /* RLE */
+             {
+@@ -790,7 +837,11 @@
+                 {
+                     fprintf(stderr, "Decompressing rle block.\n");
+                 }
+-                Ptngc_comp_conv_from_rle(rle, mtf, nvals16);
++                if (Ptngc_comp_conv_from_rle(rle, nrle, mtf, nvals16))
++                {
++                    failed = 1;
++                    goto bwlzh_done;
++                }
+             }
+ 
+ #ifdef PARTIAL_MTF3
+@@ -819,7 +870,11 @@
+ #    else
+         int ndict;
+         Ptngc_comp_canonical_dict(dict, &ndict);
+-        Ptngc_comp_conv_from_mtf(mtf, nvals16, dict, ndict, bwt);
++        if (Ptngc_comp_conv_from_mtf(mtf, nvals16, dict, ndict, bwt))
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ #    endif
+ #endif
+ 
+@@ -832,7 +887,11 @@
+         {
+             fprintf(stderr, "Inverse BWT.\n");
+         }
+-        Ptngc_comp_from_bwt(bwt, nvals16, bwt_index, vals16);
++        if (Ptngc_comp_from_bwt(bwt, nvals16, bwt_index, vals16))
++        {
++            failed = 1;
++            goto bwlzh_done;
++        }
+ 
+ #ifdef SHOWIT
+         printvals("vals16", vals16, nvals16);
+@@ -851,10 +910,12 @@
+         if (valsnew != thisvals)
+         {
+             fprintf(stderr, "BWLZH: Block contained different number of values than expected.\n");
+-            exit(EXIT_FAILURE);
++            failed = 1;
++            goto bwlzh_done;
+         }
+         valstart += thisvals;
+     }
++bwlzh_done:
+     free(hist);
+     free(dict);
+     free(bwlzhhuff);
+@@ -862,15 +923,18 @@
+     free(mtf3);
+ #endif
+     free(tmpmem);
++    return failed;
+ }
+ 
+ 
+-void DECLSPECDLLEXPORT bwlzh_decompress(unsigned char* input, const int nvals, unsigned int* vals)
++int DECLSPECDLLEXPORT bwlzh_decompress(unsigned char* input, const int input_len, const int nvals,
++                                      unsigned int* vals)
+ {
+-    bwlzh_decompress_gen(input, nvals, vals, 0);
++    return bwlzh_decompress_gen(input, input_len, nvals, vals, 0);
+ }
+ 
+-void DECLSPECDLLEXPORT bwlzh_decompress_verbose(unsigned char* input, const int nvals, unsigned int* vals)
++int DECLSPECDLLEXPORT bwlzh_decompress_verbose(unsigned char* input, const int input_len, const int nvals,
++                                              unsigned int* vals)
+ {
+-    bwlzh_decompress_gen(input, nvals, vals, 1);
++    return bwlzh_decompress_gen(input, input_len, nvals, vals, 1);
+ }
+diff -ruN tng-a/tng/src/compression/bwt.c tng-b/tng/src/compression/bwt.c
+--- tng-a/tng/src/compression/bwt.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/bwt.c	2026-11-21 15:17:43.404901411 +0000
+@@ -352,18 +352,43 @@
+ }
+ 
+ /* Burrows-Wheeler inverse transform. */
+-void Ptngc_comp_from_bwt(const unsigned int* input, const int nvals, int index, unsigned int* vals)
++int Ptngc_comp_from_bwt(const unsigned int* input, const int nvals, int index, unsigned int* vals)
+ {
+     /* Straightforward from the Burrows-Wheeler paper (page 13). */
+     int           i;
+-    unsigned int* c   = warnmalloc(0x10000 * sizeof *c);
+-    unsigned int* p   = warnmalloc(nvals * sizeof *p);
++    unsigned int* c;
++    unsigned int* p;
+     unsigned int  sum = 0;
+ 
++    if (nvals < 0 || nvals > 0x10000000)
++    {
++        return 1;
++    }
++    c = warnmalloc(0x10000 * sizeof *c);
++    p = warnmalloc((size_t)nvals * sizeof *p);
++    if (c == NULL || p == NULL)
++    {
++        free(p);
++        free(c);
++        return 1;
++    }
++
+     memset(c, 0, sizeof(unsigned int) * 0x10000);
+ 
++    if (index < 0 || (nvals > 0 && index >= nvals))
++    {
++        free(p);
++        free(c);
++        return 1;
++    }
+     for (i = 0; i < nvals; i++)
+     {
++        if (input[i] >= 0x10000U)
++        {
++            free(p);
++            free(c);
++            return 1;
++        }
+         p[i] = c[input[i]];
+         c[input[i]]++;
+     }
+@@ -374,9 +399,16 @@
+     }
+     for (i = nvals - 1; i >= 0; i--)
+     {
++        if (index < 0 || index >= nvals)
++        {
++            free(p);
++            free(c);
++            return 1;
++        }
+         vals[i] = input[index];
+-        index   = p[index] + c[input[index]];
++        index   = (int)(p[index] + c[input[index]]);
+     }
+     free(p);
+     free(c);
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/coder.c tng-b/tng/src/compression/coder.c
+--- tng-a/tng/src/compression/coder.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/coder.c	2026-11-21 15:01:49.146125196 +0000
+@@ -24,6 +24,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <stdint.h>
+ #include "../../include/compression/tng_compress.h"
+ #include "../../include/compression/bwlzh.h"
+ #include "../../include/compression/coder.h"
+@@ -414,6 +415,7 @@
+ 
+ static int unpack_array_stop_bits(struct coder*  coder_inst,
+                                   unsigned char* packed,
++                                  const size_t   packed_len,
+                                   int*           output,
+                                   const int      length,
+                                   const int      coding_parameter)
+@@ -421,7 +423,12 @@
+     int            i, j;
+     unsigned int   extract_mask = 0x80;
+     unsigned char* ptr          = packed;
++    unsigned char* end          = packed + packed_len;
+     (void)coder_inst;
++    if (length < 0 || coding_parameter < 1 || coding_parameter > 32)
++    {
++        return 1;
++    }
+     for (i = 0; i < length; i++)
+     {
+         unsigned int pattern = 0;
+@@ -434,6 +441,10 @@
+         {
+             for (j = 0; j < numbits; j++)
+             {
++                if (ptr >= end)
++                {
++                    return 1;
++                }
+                 bit = *ptr & extract_mask;
+                 if (bit)
+                 {
+@@ -448,6 +459,10 @@
+                 }
+             }
+             /* Check stop bit */
++            if (ptr >= end)
++            {
++                return 1;
++            }
+             bit = *ptr & extract_mask;
+             extract_mask >>= 1;
+             if (!extract_mask)
+@@ -463,6 +478,10 @@
+                     numbits = 1;
+                 }
+                 inserted_bits += numbits;
++                if (inserted_bits > 32)
++                {
++                    return 1;
++                }
+                 insert_mask = 1U << (inserted_bits - 1);
+             }
+         } while (bit);
+@@ -478,6 +497,7 @@
+ 
+ static int unpack_array_triplet(struct coder*  coder_inst,
+                                 unsigned char* packed,
++                                const size_t   packed_len,
+                                 int*           output,
+                                 int            length,
+                                 const int      coding_parameter)
+@@ -485,20 +505,32 @@
+     int            i, j;
+     unsigned int   extract_mask = 0x80;
+     unsigned char* ptr          = packed;
++    unsigned char* end          = packed + packed_len;
+     /* Determine max base and maxbits */
+-    unsigned int max_base = 1U << coding_parameter;
+-    unsigned int maxbits  = coding_parameter;
++    uint64_t     max_base;
++    unsigned int maxbits;
+     unsigned int intmax;
+     /* Get intmax */
+     (void)coder_inst;
++    if (length < 0 || (length % 3) != 0 || coding_parameter < 0 || coding_parameter >= 32
++        || packed_len < 4)
++    {
++        return 1;
++    }
++    max_base = ((uint64_t)1U) << coding_parameter;
++    maxbits  = (unsigned int)coding_parameter;
+     intmax = ((unsigned int)ptr[0]) << 24 | ((unsigned int)ptr[1]) << 16
+              | ((unsigned int)ptr[2]) << 8 | ((unsigned int)ptr[3]);
+     ptr += 4;
+-    while (intmax >= max_base)
++    while ((uint64_t)intmax >= max_base && maxbits < 32)
+     {
+-        max_base *= 2;
++        max_base <<= 1;
+         maxbits++;
+     }
++    if ((uint64_t)intmax >= max_base)
++    {
++        return 1;
++    }
+     length /= 3;
+     for (i = 0; i < length; i++)
+     {
+@@ -508,6 +540,10 @@
+         unsigned int bit;
+         for (j = 0; j < 2; j++)
+         {
++            if (ptr >= end)
++            {
++                return 1;
++            }
+             bit = *ptr & extract_mask;
+             jbase <<= 1;
+             if (bit)
+@@ -527,7 +563,11 @@
+         }
+         else
+         {
+-            numbits = coding_parameter + jbase;
++            numbits = (unsigned int)coding_parameter + jbase;
++        }
++        if (numbits > 32)
++        {
++            return 1;
+         }
+         for (j = 0; j < 3; j++)
+         {
+@@ -536,6 +576,10 @@
+             unsigned int pattern = 0;
+             for (jbit = 0; jbit < numbits; jbit++)
+             {
++                if (ptr >= end)
++                {
++                    return 1;
++                }
+                 bit = *ptr & extract_mask;
+                 pattern <<= 1;
+                 if (bit)
+@@ -562,18 +606,34 @@
+ 
+ static int unpack_array_bwlzh(struct coder*  coder_inst,
+                               unsigned char* packed,
++                              const size_t   packed_len,
+                               int*           output,
+                               const int      length,
+                               const int      natoms)
+ {
+     int           i, j, k, n = length;
+-    unsigned int* pval          = warnmalloc(n * sizeof *pval);
+-    int           nframes       = n / natoms / 3;
++    unsigned int* pval;
++    int           nframes;
+     int           cnt           = 0;
+-    int           most_negative = (int)(((unsigned int)packed[0]) | (((unsigned int)packed[1]) << 8)
+-                              | (((unsigned int)packed[2]) << 16) | (((unsigned int)packed[3]) << 24));
++    int           most_negative;
+     (void)coder_inst;
+-    bwlzh_decompress(packed + 4, length, pval);
++    if (packed_len < 4 || natoms <= 0 || length < 0 || (length % (natoms * 3)) != 0)
++    {
++        return 1;
++    }
++    pval = warnmalloc(n * sizeof *pval);
++    if (!pval)
++    {
++        return 1;
++    }
++    nframes       = n / natoms / 3;
++    most_negative = (int)(((unsigned int)packed[0]) | (((unsigned int)packed[1]) << 8)
++                          | (((unsigned int)packed[2]) << 16) | (((unsigned int)packed[3]) << 24));
++    if (bwlzh_decompress(packed + 4, (int)(packed_len - 4), length, pval))
++    {
++        free(pval);
++        return 1;
++    }
+     for (i = 0; i < natoms; i++)
+     {
+         for (j = 0; j < 3; j++)
+@@ -589,34 +649,47 @@
+     return 0;
+ }
+ 
+-int DECLSPECDLLEXPORT Ptngc_unpack_array(struct coder*  coder_inst,
+-                                         unsigned char* packed,
+-                                         int*           output,
+-                                         const int      length,
+-                                         const int      coding,
+-                                         const int      coding_parameter,
+-                                         const int      natoms)
++int DECLSPECDLLEXPORT Ptngc_unpack_array_bounded(struct coder*  coder_inst,
++                                                 unsigned char* packed,
++                                                 const size_t   packed_len,
++                                                 int*           output,
++                                                 const int      length,
++                                                 const int      coding,
++                                                 const int      coding_parameter,
++                                                 const int      natoms)
+ {
+     if ((coding == TNG_COMPRESS_ALGO_STOPBIT) || (coding == TNG_COMPRESS_ALGO_VEL_STOPBIT_INTER))
+     {
+-        return unpack_array_stop_bits(coder_inst, packed, output, length, coding_parameter);
++        return unpack_array_stop_bits(coder_inst, packed, packed_len, output, length, coding_parameter);
+     }
+     else if ((coding == TNG_COMPRESS_ALGO_TRIPLET) || (coding == TNG_COMPRESS_ALGO_POS_TRIPLET_INTRA)
+              || (coding == TNG_COMPRESS_ALGO_POS_TRIPLET_ONETOONE))
+     {
+-        return unpack_array_triplet(coder_inst, packed, output, length, coding_parameter);
++        return unpack_array_triplet(coder_inst, packed, packed_len, output, length, coding_parameter);
+     }
+     else if (coding == TNG_COMPRESS_ALGO_POS_XTC2)
+     {
+-        return Ptngc_unpack_array_xtc2(coder_inst, packed, output, length);
++        return Ptngc_unpack_array_xtc2(coder_inst, packed, packed_len, output, length);
+     }
+     else if ((coding == TNG_COMPRESS_ALGO_BWLZH1) || (coding == TNG_COMPRESS_ALGO_BWLZH2))
+     {
+-        return unpack_array_bwlzh(coder_inst, packed, output, length, natoms);
++        return unpack_array_bwlzh(coder_inst, packed, packed_len, output, length, natoms);
+     }
+     else if (coding == TNG_COMPRESS_ALGO_POS_XTC3)
+     {
+-        return Ptngc_unpack_array_xtc3(packed, output, length, natoms);
++        return Ptngc_unpack_array_xtc3(packed, packed_len, output, length, natoms);
+     }
+     return 1;
+ }
++
++int DECLSPECDLLEXPORT Ptngc_unpack_array(struct coder*  coder_inst,
++                                         unsigned char* packed,
++                                         int*           output,
++                                         const int      length,
++                                         const int      coding,
++                                         const int      coding_parameter,
++                                         const int      natoms)
++{
++    return Ptngc_unpack_array_bounded(coder_inst, packed, SIZE_MAX, output, length, coding,
++                                      coding_parameter, natoms);
++}
+diff -ruN tng-a/tng/src/compression/huffman.c tng-b/tng/src/compression/huffman.c
+--- tng-a/tng/src/compression/huffman.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/huffman.c	2026-11-21 15:00:23.274304691 +0000
+@@ -188,12 +188,25 @@
+     **output = (unsigned char)combine;
+ }
+ 
+-static unsigned int readbits(int length, unsigned char** input, int* bitptr)
++/* Read LENGTH bits. END is one past the last byte of the buffer.
++   Returns 0 and stores the bits in *OUT, or 1 if the read would leave
++   the buffer or the length is not a bit count this format writes. */
++static int readbits(int length, unsigned char** input, int* bitptr,
++                    const unsigned char* end, unsigned int* out)
+ {
+-    unsigned int  val          = 0U;
+-    unsigned int  extract_mask = 0x80U >> *bitptr;
+-    unsigned char thisval      = **input;
+-    while (length--)
++    unsigned int  val;
++    unsigned int  extract_mask;
++    unsigned char thisval;
++    int           left;
++    if (length < 0 || length > 32 || *bitptr < 0 || *bitptr > 7 || *input >= end)
++    {
++        return 1;
++    }
++    val          = 0U;
++    extract_mask = 0x80U >> *bitptr;
++    thisval      = **input;
++    left         = length;
++    while (left--)
+     {
+         val <<= 1;
+         val |= ((extract_mask & thisval) != 0);
+@@ -204,10 +217,37 @@
+             extract_mask = 0x80U;
+             *input       = (*input) + 1;
+             *bitptr      = 0;
+-            thisval      = **input;
++            if (left)
++            {
++                if (*input >= end)
++                {
++                    return 1;
++                }
++                thisval = **input;
++            }
+         }
+     }
+-    return val;
++    *out = val;
++    return 0;
++}
++
++/* Next canonical code. Lengths are sorted, so the shift is never negative.
++   The shift is unsigned: a code that does not fit in 32 bits is an error
++   instead of a signed overflow. */
++static int huff_advance(unsigned int* code, int this_len, int next_len)
++{
++    int          delta = next_len - this_len;
++    unsigned int c     = *code;
++    if (delta < 0 || delta >= 32)
++    {
++        return 1;
++    }
++    if ((c + 1U) > (~0U >> delta))
++    {
++        return 1;
++    }
++    *code = (c + 1U) << delta;
++    return 0;
+ }
+ 
+ static int comp_codes(const void* codeptr1, const void* codeptr2, const void* private)
+@@ -220,15 +260,15 @@
+     {
+         rval = 1;
+     }
+-    if (code1->length < code2->length)
++    else if (code1->length < code2->length)
+     {
+         rval = -1;
+     }
+-    if (code1->dict > code2->dict)
++    else if (code1->dict > code2->dict)
+     {
+         rval = 1;
+     }
+-    else
++    else if (code1->dict < code2->dict)
+     {
+         rval = -1;
+     }
+@@ -274,7 +314,6 @@
+     struct codelength*    codelength;
+     int                   bitptr;
+     unsigned char*        huffman_ptr;
+-    int                   code;
+     int                   longcodes = 1;
+     while (longcodes)
+     {
+@@ -393,14 +432,26 @@
+         }
+         /* Sort codes wrt length/value */
+         Ptngc_merge_sort(codelength, ndict, sizeof *codelength, comp_codes, NULL);
+-        /* Canonicalize codes. */
+-        code = 0;
+-        for (i = 0; i < ndict; i++)
++        /* Canonicalize codes. Lengths were sorted, so each step is a
++           non-negative shift. A shift that does not fit is the same
++           failure as a code longer than this format allows, and the
++           probabilities are reduced below. */
+         {
+-            codelength[i].code = code;
+-            if (i < ndict - 1)
++            unsigned int ucode = 0U;
++            int          advance_failed = 0;
++            for (i = 0; i < ndict; i++)
+             {
+-                code = (code + 1) << (codelength[i + 1].length - codelength[i].length);
++                codelength[i].code = ucode;
++                if (i < ndict - 1
++                    && huff_advance(&ucode, codelength[i].length, codelength[i + 1].length))
++                {
++                    advance_failed = 1;
++                    break;
++                }
++            }
++            if (advance_failed)
++            {
++                longcodes = 1;
+             }
+         }
+         /* Free all nodes / leaves. */
+@@ -529,125 +580,173 @@
+     free(codelength);
+ }
+ 
+-void Ptngc_comp_conv_from_huffman(unsigned char*      huffman,
+-                                  unsigned int*       vals,
+-                                  const int           nvals,
+-                                  const int           ndict,
+-                                  unsigned char*      huffman_dict,
+-                                  const int           huffman_dictlen,
+-                                  const unsigned int* huffman_dict_unpacked,
+-                                  const int           huffman_dict_unpackedlen)
++int Ptngc_comp_conv_from_huffman(unsigned char*      huffman,
++                                 const unsigned char* huffman_end,
++                                 unsigned int*       vals,
++                                 const int           nvals,
++                                 const int           ndict,
++                                 unsigned char*      huffman_dict,
++                                 const unsigned char* huffman_dict_end,
++                                 const int           huffman_dictlen,
++                                 const unsigned int* huffman_dict_unpacked,
++                                 const int           huffman_dict_unpackedlen)
+ {
+-    struct codelength* codelength = warnmalloc(ndict * sizeof *codelength);
++    struct codelength* codelength;
+     int                i, j;
+     int                maxdict;
+-    int                code;
++    unsigned int       code;
+     unsigned char*     huffman_ptr;
+     int                bitptr;
+     (void)huffman_dictlen;
+-    (void)huffman_dict_unpackedlen;
++    if (ndict < 1 || nvals < 0 || huffman == NULL || huffman_end < huffman)
++    {
++        return 1;
++    }
++    codelength = warnmalloc(ndict * sizeof *codelength);
++    if (codelength == NULL)
++    {
++        return 1;
++    }
+     if (huffman_dict_unpacked)
+     {
+-        maxdict = huffman_dict_unpacked[0] | (huffman_dict_unpacked[1] << 8)
+-                  | (huffman_dict_unpacked[2] << 16);
++        if (huffman_dict_unpackedlen < 3)
++        {
++            free(codelength);
++            return 1;
++        }
++        maxdict = (int)(huffman_dict_unpacked[0] | (huffman_dict_unpacked[1] << 8)
++                        | (huffman_dict_unpacked[2] << 16));
++        if (maxdict < 0)
++        {
++            free(codelength);
++            return 1;
++        }
+         j = 0;
+         for (i = 0; i <= maxdict; i++)
+         {
++            if (3 + i >= huffman_dict_unpackedlen)
++            {
++                free(codelength);
++                return 1;
++            }
+             if (huffman_dict_unpacked[3 + i] != 0)
+             {
+-                codelength[j].length = huffman_dict_unpacked[3 + i];
+-                codelength[j].dict   = i;
+-#if 0
+-              printf("%d %d\n",
+-                     codelength[j].length,
+-                     codelength[j].dict);
+-#endif
++                if (j >= ndict)
++                {
++                    free(codelength);
++                    return 1;
++                }
++                codelength[j].length = (int)huffman_dict_unpacked[3 + i];
++                codelength[j].dict   = (unsigned int)i;
+                 j++;
+             }
+         }
+     }
+     else
+     {
++        unsigned int bit = 0;
++        if (huffman_dict == NULL || huffman_dict_end < huffman_dict + 3)
++        {
++            free(codelength);
++            return 1;
++        }
+         huffman_ptr = huffman_dict;
+-        maxdict     = ((unsigned int)huffman_ptr[0]) | (((unsigned int)huffman_ptr[1]) << 8)
+-                  | (((unsigned int)huffman_ptr[2]) << 16);
++        maxdict     = (int)(((unsigned int)huffman_ptr[0]) | (((unsigned int)huffman_ptr[1]) << 8)
++                            | (((unsigned int)huffman_ptr[2]) << 16));
+         huffman_ptr += 3;
+         bitptr = 0;
+         j      = 0;
++        if (maxdict < 0)
++        {
++            free(codelength);
++            return 1;
++        }
+         for (i = 0; i <= maxdict; i++)
+         {
+-            int bit = readbits(1, &huffman_ptr, &bitptr);
++            if (readbits(1, &huffman_ptr, &bitptr, huffman_dict_end, &bit))
++            {
++                free(codelength);
++                return 1;
++            }
+             if (bit)
+             {
+-                codelength[j].length = readbits(5, &huffman_ptr, &bitptr);
+-                codelength[j].dict   = i;
+-#if 0
+-              printf("%d %d\n",
+-                     codelength[j].length,
+-                     codelength[j].dict);
+-#endif
++                unsigned int lenbits = 0;
++                if (j >= ndict
++                    || readbits(5, &huffman_ptr, &bitptr, huffman_dict_end, &lenbits))
++                {
++                    free(codelength);
++                    return 1;
++                }
++                codelength[j].length = (int)lenbits;
++                codelength[j].dict   = (unsigned int)i;
+                 j++;
+             }
+         }
+     }
++    /* The table must name exactly the symbols the block declared. A short
++       or long table is not a code this encoder writes. */
++    if (j != ndict)
++    {
++        free(codelength);
++        return 1;
++    }
+     /* Sort codes wrt length/value. */
+     Ptngc_merge_sort(codelength, ndict, sizeof *codelength, comp_codes, NULL);
+     /* Canonicalize codes. */
+-    code = 0;
++    code = 0U;
+     for (i = 0; i < ndict; i++)
+     {
+         codelength[i].code = code;
+-        if (i < ndict - 1)
++        if (i < ndict - 1
++            && huff_advance(&code, codelength[i].length, codelength[i + 1].length))
+         {
+-            code = (code + 1) << (codelength[i + 1].length - codelength[i].length);
++            free(codelength);
++            return 1;
+         }
+     }
+-#if 0
+-  {
+-    for (i=0; i<ndict; i++)
+-      {
+-        printf("%d -\t\t %d %d ",codelength[i].dict,codelength[i].length,codelength[i].code);
+-        {
+-          unsigned int c=codelength[i].code;
+-          int j;
+-          unsigned int mask=1<<(codelength[i].length-1);
+-          for (j=codelength[i].length-1; j>=0; j--)
+-            {
+-              int bit=c&mask;
+-              if (bit)
+-                printf("1");
+-              else
+-                printf("0");
+-              mask>>=1;
+-            }
+-          printf("\n");
+-        }
+-      }
+-  }
+-#endif
+     /* Decompress data. */
+     huffman_ptr = huffman;
+     bitptr      = 0;
+     for (i = 0; i < nvals; i++)
+     {
+-        unsigned int symbol;
+-        int          len = codelength[0].length;
+-        symbol           = readbits(len, &huffman_ptr, &bitptr);
+-        j                = 0;
+-        while (symbol != codelength[j].code)
++        unsigned int symbol = 0;
++        int          len    = codelength[0].length;
++        if (len < 1 || readbits(len, &huffman_ptr, &bitptr, huffman_end, &symbol))
++        {
++            free(codelength);
++            return 1;
++        }
++        j = 0;
++        while (j < ndict && symbol != codelength[j].code)
+         {
+             int newlen;
+             j++;
++            if (j >= ndict)
++            {
++                break;
++            }
+             newlen = codelength[j].length;
+             if (newlen != len)
+             {
++                unsigned int more = 0;
++                if (newlen < len
++                    || readbits(newlen - len, &huffman_ptr, &bitptr, huffman_end, &more))
++                {
++                    free(codelength);
++                    return 1;
++                }
+                 symbol <<= (newlen - len);
+-                symbol |= readbits(newlen - len, &huffman_ptr, &bitptr);
++                symbol |= more;
+                 len = newlen;
+             }
+         }
++        if (j >= ndict)
++        {
++            free(codelength);
++            return 1;
++        }
+         vals[i] = codelength[j].dict;
+     }
+-    /* Free info about codes and length. */
+     free(codelength);
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/huffmem.c tng-b/tng/src/compression/huffmem.c
+--- tng-a/tng/src/compression/huffmem.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/huffmem.c	2026-11-21 15:17:54.020903514 +0000
+@@ -256,23 +256,66 @@
+                                      huffman_lengths, &algo, 0);
+ }
+ 
+-void Ptngc_comp_huff_decompress(unsigned char* huffman, const int huffman_len, unsigned int* vals)
++static int huff_span(int len, int off, int n)
+ {
+-    int           isvals16 = (int)huffman[0];
+-    unsigned int* vals16   = NULL;
+-    int           algo     = (int)huffman[1];
+-    int           nvals16  = (int)((unsigned int)huffman[2] | (((unsigned int)huffman[3]) << 8)
+-                        | (((unsigned int)huffman[4]) << 16) | (((unsigned int)huffman[5]) << 24));
+-    int           nvals    = (int)((unsigned int)huffman[6] | (((unsigned int)huffman[7]) << 8)
+-                      | (((unsigned int)huffman[8]) << 16) | (((unsigned int)huffman[9]) << 24));
+-    int           nhuff    = (int)((unsigned int)huffman[10] | (((unsigned int)huffman[11]) << 8)
+-                      | (((unsigned int)huffman[12]) << 16) | (((unsigned int)huffman[13]) << 24));
+-    int ndict = (int)((unsigned int)huffman[17 + nhuff] | (((unsigned int)huffman[18 + nhuff]) << 8)
+-                      | (((unsigned int)huffman[19 + nhuff]) << 16));
+-    (void)huffman_len;
++    if (off < 0 || n < 0 || off > len || n > len - off)
++    {
++        return 1;
++    }
++    return 0;
++}
++
++static int huff_u24(const unsigned char* p)
++{
++    return (int)((unsigned int)p[0] | (((unsigned int)p[1]) << 8) | (((unsigned int)p[2]) << 16));
++}
++
++int Ptngc_comp_huff_decompress(unsigned char* huffman, const int huffman_len, unsigned int* vals,
++                               const int nvals_cap)
++{
++    int           isvals16;
++    unsigned int* vals16 = NULL;
++    int           algo;
++    int           nvals16;
++    int           nvals;
++    int           nhuff;
++    int           ndict;
++    int           failed = 0;
++    const unsigned char* end;
++    if (huffman_len < 20 || nvals_cap < 0)
++    {
++        return 1;
++    }
++    end      = huffman + huffman_len;
++    isvals16 = (int)huffman[0];
++    algo     = (int)huffman[1];
++    nvals16  = (int)((unsigned int)huffman[2] | (((unsigned int)huffman[3]) << 8)
++                    | (((unsigned int)huffman[4]) << 16) | (((unsigned int)huffman[5]) << 24));
++    nvals    = (int)((unsigned int)huffman[6] | (((unsigned int)huffman[7]) << 8)
++                    | (((unsigned int)huffman[8]) << 16) | (((unsigned int)huffman[9]) << 24));
++    nhuff    = (int)((unsigned int)huffman[10] | (((unsigned int)huffman[11]) << 8)
++                    | (((unsigned int)huffman[12]) << 16) | (((unsigned int)huffman[13]) << 24));
++    if (nhuff < 0 || nvals16 < 0 || nvals < 0 || nvals > nvals_cap
++        || huff_span(huffman_len, 17, nhuff + 3))
++    {
++        return 1;
++    }
++    ndict = huff_u24(huffman + 17 + nhuff);
++    if (ndict < 1)
++    {
++        return 1;
++    }
+     if (!isvals16)
+     {
++        if (nvals16 > nvals_cap || (size_t)nvals16 > (size_t)-1 / sizeof *vals16)
++        {
++            return 1;
++        }
+         vals16 = warnmalloc(nvals16 * sizeof *vals16);
++        if (vals16 == NULL)
++        {
++            return 1;
++        }
+     }
+     else
+     {
+@@ -281,68 +324,124 @@
+     }
+     if (algo == 0)
+     {
+-        int nhuffdict =
+-                (int)((unsigned int)huffman[14 + nhuff] | (((unsigned int)huffman[15 + nhuff]) << 8)
+-                      | (((unsigned int)huffman[16 + nhuff]) << 16));
+-        Ptngc_comp_conv_from_huffman(huffman + 14, vals16, nvals16, ndict, huffman + 20 + nhuff,
+-                                     nhuffdict, NULL, 0);
++        int nhuffdict;
++        if (huff_span(huffman_len, 14 + nhuff, 6))
++        {
++            failed = 1;
++        }
++        else
++        {
++            nhuffdict = huff_u24(huffman + 14 + nhuff);
++            if (nhuffdict < 0 || huff_span(huffman_len, 20 + nhuff, nhuffdict)
++                || huff_span(huffman_len, 14, nhuff)
++                || Ptngc_comp_conv_from_huffman(huffman + 14, huffman + 14 + nhuff, vals16, nvals16,
++                                                ndict, huffman + 20 + nhuff, huffman + 20 + nhuff + nhuffdict,
++                                                nhuffdict, NULL, 0))
++            {
++                failed = 1;
++            }
++        }
+     }
+     else if (algo == 1)
+     {
+         unsigned int* huffdictunpack = warnmalloc(0x20005 * sizeof *huffdictunpack);
+-        /* First the dictionary needs to be uncompressed. */
+-        int nhuffdictunpack =
+-                (int)((unsigned int)huffman[14 + nhuff] | (((unsigned int)huffman[15 + nhuff]) << 8)
+-                      | (((unsigned int)huffman[16 + nhuff]) << 16));
+-        int nhuff1 = (int)((unsigned int)huffman[20 + nhuff] | (((unsigned int)huffman[21 + nhuff]) << 8)
+-                           | (((unsigned int)huffman[22 + nhuff]) << 16));
+-        int nhuffdict1 =
+-                (int)((unsigned int)huffman[23 + nhuff] | (((unsigned int)huffman[24 + nhuff]) << 8)
+-                      | (((unsigned int)huffman[25 + nhuff]) << 16));
+-        int ndict1 = (int)((unsigned int)huffman[26 + nhuff] | (((unsigned int)huffman[27 + nhuff]) << 8)
+-                           | (((unsigned int)huffman[28 + nhuff]) << 16));
+-        Ptngc_comp_conv_from_huffman(huffman + 29 + nhuff, huffdictunpack, nhuffdictunpack, ndict1,
+-                                     huffman + 29 + nhuff + nhuff1, nhuffdict1, NULL, 0);
+-        /* Then decompress the "real" data. */
+-        Ptngc_comp_conv_from_huffman(huffman + 14, vals16, nvals16, ndict, NULL, 0, huffdictunpack,
+-                                     nhuffdictunpack);
+-        free(huffdictunpack);
++        int           nhuffdictunpack;
++        int           nhuff1;
++        int           nhuffdict1;
++        int           ndict1;
++        if (huffdictunpack == NULL || huff_span(huffman_len, 14 + nhuff, 18))
++        {
++            free(huffdictunpack);
++            failed = 1;
++        }
++        else
++        {
++            nhuffdictunpack = huff_u24(huffman + 14 + nhuff);
++            nhuff1          = huff_u24(huffman + 20 + nhuff);
++            nhuffdict1      = huff_u24(huffman + 23 + nhuff);
++            ndict1          = huff_u24(huffman + 26 + nhuff);
++            if (nhuffdictunpack < 0 || nhuffdictunpack > 0x20005 || nhuff1 < 0 || nhuffdict1 < 0
++                || ndict1 < 1 || huff_span(huffman_len, 29 + nhuff, nhuff1)
++                || huff_span(huffman_len, 29 + nhuff + nhuff1, nhuffdict1)
++                || huff_span(huffman_len, 14, nhuff)
++                || Ptngc_comp_conv_from_huffman(huffman + 29 + nhuff, huffman + 29 + nhuff + nhuff1,
++                                                huffdictunpack, nhuffdictunpack, ndict1,
++                                                huffman + 29 + nhuff + nhuff1,
++                                                huffman + 29 + nhuff + nhuff1 + nhuffdict1, nhuffdict1, NULL, 0)
++                || Ptngc_comp_conv_from_huffman(huffman + 14, huffman + 14 + nhuff, vals16, nvals16,
++                                                ndict, NULL, NULL, 0, huffdictunpack, 3 + 0x20000))
++            {
++                failed = 1;
++            }
++            free(huffdictunpack);
++        }
+     }
+     else if (algo == 2)
+     {
+         unsigned int* huffdictunpack = warnmalloc(0x20005 * sizeof *huffdictunpack);
+         unsigned int* huffdictrle    = warnmalloc((3 * 0x20005 + 3) * sizeof *huffdictrle);
+-        /* First the dictionary needs to be uncompressed. */
+-        int nhuffdictunpack =
+-                (int)((unsigned int)huffman[14 + nhuff] | (((unsigned int)huffman[15 + nhuff]) << 8)
+-                      | (((unsigned int)huffman[16 + nhuff]) << 16));
+-        int nhuffrle = (int)((unsigned int)huffman[20 + nhuff] | (((unsigned int)huffman[21 + nhuff]) << 8)
+-                             | (((unsigned int)huffman[22 + nhuff]) << 16));
+-        int nhuff2 = (int)((unsigned int)huffman[23 + nhuff] | (((unsigned int)huffman[24 + nhuff]) << 8)
+-                           | (((unsigned int)huffman[25 + nhuff]) << 16));
+-        int nhuffdict2 =
+-                (int)((unsigned int)huffman[26 + nhuff] | (((unsigned int)huffman[27 + nhuff]) << 8)
+-                      | (((unsigned int)huffman[28 + nhuff]) << 16));
+-        int ndict2 = (int)((unsigned int)huffman[29 + nhuff] | (((unsigned int)huffman[30 + nhuff]) << 8)
+-                           | (((unsigned int)huffman[31 + nhuff]) << 16));
+-        Ptngc_comp_conv_from_huffman(huffman + 32 + nhuff, huffdictrle, nhuffrle, ndict2,
+-                                     huffman + 32 + nhuff + nhuff2, nhuffdict2, NULL, 0);
+-        /* Then uncompress the rle data */
+-        Ptngc_comp_conv_from_rle(huffdictrle, huffdictunpack, nhuffdictunpack);
+-        /* Then decompress the "real" data. */
+-        Ptngc_comp_conv_from_huffman(huffman + 14, vals16, nvals16, ndict, NULL, 0, huffdictunpack,
+-                                     nhuffdictunpack);
+-        free(huffdictrle);
+-        free(huffdictunpack);
++        int           nhuffdictunpack;
++        int           nhuffrle;
++        int           nhuff2;
++        int           nhuffdict2;
++        int           ndict2;
++        if (huffdictunpack == NULL || huffdictrle == NULL || huff_span(huffman_len, 14 + nhuff, 21))
++        {
++            free(huffdictrle);
++            free(huffdictunpack);
++            failed = 1;
++        }
++        else
++        {
++            nhuffdictunpack = huff_u24(huffman + 14 + nhuff);
++            nhuffrle        = huff_u24(huffman + 20 + nhuff);
++            nhuff2          = huff_u24(huffman + 23 + nhuff);
++            nhuffdict2      = huff_u24(huffman + 26 + nhuff);
++            ndict2          = huff_u24(huffman + 29 + nhuff);
++            if (nhuffdictunpack < 0 || nhuffdictunpack > 0x20005 || nhuffrle < 0 || nhuffrle > 3 * 0x20005 + 3
++                || nhuff2 < 0 || nhuffdict2 < 0 || ndict2 < 1
++                || huff_span(huffman_len, 32 + nhuff, nhuff2)
++                || huff_span(huffman_len, 32 + nhuff + nhuff2, nhuffdict2)
++                || huff_span(huffman_len, 14, nhuff)
++                || Ptngc_comp_conv_from_huffman(huffman + 32 + nhuff, huffman + 32 + nhuff + nhuff2,
++                                                huffdictrle, nhuffrle, ndict2, huffman + 32 + nhuff + nhuff2,
++                                                huffman + 32 + nhuff + nhuff2 + nhuffdict2, nhuffdict2, NULL, 0))
++            {
++                failed = 1;
++            }
++            else
++            {
++                if (Ptngc_comp_conv_from_rle(huffdictrle, nhuffrle, huffdictunpack, nhuffdictunpack)
++                    || Ptngc_comp_conv_from_huffman(huffman + 14, huffman + 14 + nhuff, vals16, nvals16, ndict,
++                                                    NULL, NULL, 0, huffdictunpack, 3 + 0x20000))
++                {
++                    failed = 1;
++                }
++            }
++            free(huffdictrle);
++            free(huffdictunpack);
++        }
++    }
++    else
++    {
++        failed = 1;
+     }
+ 
+-    /* Do I need to convert from vals16? */
+     if (!isvals16)
+     {
+-        int nvalsx;
+-        Ptngc_comp_conv_from_vals16(vals16, nvals16, vals, &nvalsx);
++        int nvalsx = 0;
++        if (!failed)
++        {
++            Ptngc_comp_conv_from_vals16(vals16, nvals16, vals, &nvalsx);
++            if (nvalsx != nvals)
++            {
++                failed = 1;
++            }
++        }
+         free(vals16);
+     }
++    (void)end;
++    return failed;
+ }
+ 
+ static char* huff_algo_names[N_HUFFMAN_ALGO] = { "Huffman (dict=raw)", "Huffman (dict=Huffman)",
+diff -ruN tng-a/tng/src/compression/lz77.c tng-b/tng/src/compression/lz77.c
+--- tng-a/tng/src/compression/lz77.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/lz77.c	2026-11-21 15:17:34.272899276 +0000
+@@ -342,45 +342,58 @@
+     free(previous);
+ }
+ 
+-void Ptngc_comp_from_lz77(const unsigned int* data,
+-                          const int           ndata,
+-                          const unsigned int* len,
+-                          const int           nlens,
+-                          const unsigned int* offsets,
+-                          const int           noffsets,
+-                          unsigned int*       vals,
+-                          const int           nvals)
++int Ptngc_comp_from_lz77(const unsigned int* data,
++                         const int           ndata,
++                         const unsigned int* len,
++                         const int           nlens,
++                         const unsigned int* offsets,
++                         const int           noffsets,
++                         unsigned int*       vals,
++                         const int           nvals)
+ {
+     int i    = 0;
+     int joff = 0;
+     int jdat = 0;
+     int jlen = 0;
+-    (void)ndata;
+-    (void)nlens;
+-    (void)noffsets;
++    if (nvals < 0 || ndata < 0 || nlens < 0 || noffsets < 0)
++    {
++        return 1;
++    }
+     while (i < nvals)
+     {
+-        unsigned int v = data[jdat++];
++        unsigned int v;
++        if (jdat >= ndata)
++        {
++            return 1;
++        }
++        v = data[jdat++];
+         if (v < 2)
+         {
+-            int offset = 1;
+-            int k;
+-            int length = (int)len[jlen++];
+-#if 0
+-          fprintf(stderr,"len=%d off=%d i=%d\n",length,offset,i);
+-#endif
++            int          offset = 1;
++            unsigned int length;
++            unsigned int k;
++            if (jlen >= nlens)
++            {
++                return 1;
++            }
++            length = len[jlen++];
+             if (v == 1)
+             {
+-                offset = offsets[joff++];
++                if (joff >= noffsets)
++                {
++                    return 1;
++                }
++                offset = (int)offsets[joff++];
++            }
++            /* A back-reference has to land inside the values already
++               written. offset 0 would copy the slot being written. */
++            if (offset < 1 || offset > i || length > (unsigned int)(nvals - i))
++            {
++                return 1;
+             }
+             for (k = 0; k < length; k++)
+             {
+                 vals[i] = vals[i - offset];
+-                if (i >= nvals)
+-                {
+-                    fprintf(stderr, "too many vals.\n");
+-                    exit(EXIT_FAILURE);
+-                }
+                 i++;
+             }
+         }
+@@ -389,4 +402,5 @@
+             vals[i++] = v - 2;
+         }
+     }
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/mtf.c tng-b/tng/src/compression/mtf.c
+--- tng-a/tng/src/compression/mtf.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/mtf.c	2026-11-21 15:17:40.004900652 +0000
+@@ -246,17 +246,27 @@
+ }
+ 
+ /* Move to front decoding */
+-void Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
+-                              const int           nvals,
+-                              const unsigned int* dict,
+-                              const int           ndict,
+-                              unsigned int*       vals)
++int Ptngc_comp_conv_from_mtf(const unsigned int* valsmtf,
++                             const int           nvals,
++                             const unsigned int* dict,
++                             const int           ndict,
++                             unsigned int*       vals)
+ {
+     int i;
+     /* Indices into a linked list */
+-    int* list = warnmalloc(ndict * sizeof *list);
++    int* list;
+     /* Head of the linked list */
+     int head;
++    /* Symbols are 16-bit, so the move-to-front list is at most that long. */
++    if (nvals < 0 || ndict < 1 || ndict > 0x10000)
++    {
++        return 1;
++    }
++    list = warnmalloc(ndict * sizeof *list);
++    if (list == NULL)
++    {
++        return 1;
++    }
+     for (i = 0; i < ndict - 1; i++)
+     {
+         list[i] = i + 1;
+@@ -265,17 +275,32 @@
+     head            = 0;
+     for (i = 0; i < nvals; i++)
+     {
+-        int r = valsmtf[i];
++        unsigned int r = valsmtf[i];
+         /* Find value at position r in the list */
+-        int ptr    = head;
+-        int oldptr = -1;
+-        int cnt    = 0;
++        int          ptr    = head;
++        int          oldptr = -1;
++        unsigned int cnt    = 0;
++        if (r >= (unsigned int)ndict)
++        {
++            free(list);
++            return 1;
++        }
+         while (cnt < r)
+         {
+             oldptr = ptr;
+-            ptr    = list[ptr];
++            if (ptr < 0 || ptr >= ndict)
++            {
++                free(list);
++                return 1;
++            }
++            ptr = list[ptr];
+             cnt++;
+         }
++        if (ptr < 0 || ptr >= ndict)
++        {
++            free(list);
++            return 1;
++        }
+         vals[i] = dict[ptr];
+         /* Move it to front in list */
+         /* Is it the head? Then it is already at the front. */
+@@ -289,4 +314,5 @@
+         }
+     }
+     free(list);
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/rle.c tng-b/tng/src/compression/rle.c
+--- tng-a/tng/src/compression/rle.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/rle.c	2026-11-21 15:17:30.720898363 +0000
+@@ -87,26 +87,42 @@
+     *nrle = j;
+ }
+ 
+-void Ptngc_comp_conv_from_rle(const unsigned int* rle, unsigned int* vals, const int nvals)
++int Ptngc_comp_conv_from_rle(const unsigned int* rle, const int nrle, unsigned int* vals, const int nvals)
+ {
+     int i = 0;
+     int j = 0;
++    if (nvals < 0 || nrle < 0)
++    {
++        return 1;
++    }
+     while (i < nvals)
+     {
+-        int          k;
+         unsigned int len    = 0;
+         unsigned int mask   = 0x1;
+-        unsigned int v      = rle[j++];
++        unsigned int v;
+         unsigned int hasrle = 0;
++        int          shifts = 0;
++        if (j >= nrle)
++        {
++            return 1;
++        }
++        v = rle[j++];
+         while (v < 2)
+         {
++            /* A run length is stored in the low bits. 31 bits is the most
++               that fits in len before the terminating symbol. */
++            if (shifts >= 31 || j >= nrle)
++            {
++                return 1;
++            }
+             if (v)
+             {
+                 len |= mask;
+             }
+             mask <<= 1;
+             hasrle = 1;
+-            v      = rle[j++];
++            shifts++;
++            v = rle[j++];
+         }
+         if (!hasrle)
+         {
+@@ -116,9 +132,14 @@
+         {
+             len |= mask;
+         }
+-        for (k = 0; k < (int)len; k++)
++        if (len > (unsigned int)(nvals - i))
++        {
++            return 1;
++        }
++        while (len--)
+         {
+             vals[i++] = v - 2;
+         }
+     }
++    return 0;
+ }
+diff -ruN tng-a/tng/src/compression/tng_compress.c tng-b/tng/src/compression/tng_compress.c
+--- tng-a/tng/src/compression/tng_compress.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/tng_compress.c	2026-11-21 15:21:26.476871388 +0000
+@@ -23,6 +23,8 @@
+  */
+ 
+ #include <stdlib.h>
++#include <stdint.h>
++#include <limits.h>
+ #include <string.h>
+ #include <math.h>
+ #include "../../include/compression/tng_compress.h"
+@@ -1324,10 +1326,8 @@
+                                              int*                algo,
+                                              int*                nitems)
+ {
+-    char* data = malloc(natoms * nframes * 14
+-                        + 11 * 4); /* 12 bytes are required to store 4 32 bit integers
+-                                     This is 17% extra. The final 11*4 is to store information
+-                                     needed for decompression. */
++    char* data       = NULL;
++    int   measured   = 0;
+     int* quant       = pos;        /* Already quantized positions. */
+     int* quant_intra = malloc(natoms * nframes * 3 * sizeof *quant_intra);
+     int* quant_inter = malloc(natoms * nframes * 3 * sizeof *quant_inter);
+@@ -1389,11 +1389,27 @@
+         }
+     }
+ 
++    /* A Huffman or XTC3 dictionary can be larger than the 14 bytes per
++       value the old buffer allowed, so measure the block before allocating. */
+     compress_quantized_pos(quant, quant_inter, quant_intra, natoms, nframes, speed, initial_coding,
+                            initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
+-                           nitems, data);
++                           &measured, NULL);
++    if (measured > 0)
++    {
++        data = malloc((size_t)measured);
++    }
++    if (data != NULL)
++    {
++        compress_quantized_pos(quant, quant_inter, quant_intra, natoms, nframes, speed, initial_coding,
++                               initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
++                               nitems, data);
++    }
+     free(quant_inter);
+     free(quant_intra);
++    if (data == NULL)
++    {
++        return NULL;
++    }
+     if (algo[0] == -1)
+     {
+         algo[0] = initial_coding;
+@@ -1529,10 +1545,8 @@
+                                              int*                algo,
+                                              int*                nitems)
+ {
+-    char* data = malloc(natoms * nframes * 14
+-                        + 11 * 4); /* 12 bytes are required to store 4 32 bit integers
+-                                     This is 17% extra. The final 11*4 is to store information
+-                                     needed for decompression. */
++    char* data     = NULL;
++    int   measured = 0;
+     int* quant       = vel;
+     int* quant_inter = malloc(natoms * nframes * 3 * sizeof *quant_inter);
+ 
+@@ -1594,8 +1608,22 @@
+ 
+     compress_quantized_vel(quant, quant_inter, natoms, nframes, speed, initial_coding,
+                            initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
+-                           nitems, data);
++                           &measured, NULL);
++    if (measured > 0)
++    {
++        data = malloc((size_t)measured);
++    }
++    if (data != NULL)
++    {
++        compress_quantized_vel(quant, quant_inter, natoms, nframes, speed, initial_coding,
++                               initial_coding_parameter, coding, coding_parameter, prec_hi, prec_lo,
++                               nitems, data);
++    }
+     free(quant_inter);
++    if (data == NULL)
++    {
++        return NULL;
++    }
+     if (algo[0] == -1)
+     {
+         algo[0] = initial_coding;
+@@ -1762,13 +1790,15 @@
+ }
+ 
+ static int tng_compress_uncompress_pos_gen(char*          data,
++                                           size_t         data_len,
+                                            double*        posd,
+                                            float*         posf,
+                                            int*           posi,
++                                           size_t         pos_bytes,
+                                            unsigned long* prec_hi,
+                                            unsigned long* prec_lo)
+ {
+-    int           bufloc = 0;
++    size_t        bufloc = 0;
+     int           length;
+     int           natoms, nframes;
+     int           initial_coding, initial_coding_parameter;
+@@ -1777,6 +1807,11 @@
+     struct coder* coder = NULL;
+     int           rval  = 0;
+     int           magic_int;
++    if (data_len < 40)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* Magic integer for positions */
+     magic_int = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+@@ -1808,22 +1843,53 @@
+     bufloc += 4;
+     *prec_hi = readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+-    /* Allocate the memory for the quantized positions */
+-    quant = malloc(natoms * nframes * 3 * sizeof *quant);
++    if (natoms <= 0 || nframes <= 0)
++    {
++        rval = 1;
++        goto error;
++    }
++    {
++        size_t   elem_size = posd ? sizeof(double) : (posf ? sizeof(float) : sizeof(int));
++        uint64_t nvals     = (uint64_t)natoms * (uint64_t)nframes;
++        if (nvals > (uint64_t)INT_MAX / 3)
++        {
++            rval = 1;
++            goto error;
++        }
++        nvals *= 3;
++        if (nvals > (uint64_t)SIZE_MAX / sizeof *quant
++            || nvals > (uint64_t)pos_bytes / elem_size)
++        {
++            rval = 1;
++            goto error;
++        }
++        /* Allocate the memory for the quantized positions */
++        quant = malloc((size_t)nvals * sizeof *quant);
++        if (!quant)
++        {
++            rval = 1;
++            goto error;
++        }
++    }
+     /* The data block length. */
+     length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
++    if (length < 0 || (size_t)length > data_len - bufloc)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* The initial frame */
+     coder = Ptngc_coder_init();
+-    rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant, natoms * 3,
+-                              initial_coding, initial_coding_parameter, natoms);
++    rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length, quant,
++                                       natoms * 3, initial_coding, initial_coding_parameter, natoms);
+     Ptngc_coder_deinit(coder);
+     if (rval)
+     {
+         goto error;
+     }
+     /* Skip past the actual data block. */
+-    bufloc += length;
++    bufloc += (size_t)length;
+     /* Obtain the actual positions for the initial block. */
+     if ((initial_coding == TNG_COMPRESS_ALGO_POS_XTC2)
+         || (initial_coding == TNG_COMPRESS_ALGO_POS_TRIPLET_ONETOONE)
+@@ -1862,10 +1928,22 @@
+     /* The remaining frames. */
+     if (nframes > 1)
+     {
++        if (data_len - bufloc < 4)
++        {
++            rval = 1;
++            goto error;
++        }
++        length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+         bufloc += 4;
++        if (length < 0 || (size_t)length > data_len - bufloc)
++        {
++            rval = 1;
++            goto error;
++        }
+         coder = Ptngc_coder_init();
+-        rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant + natoms * 3,
+-                                  (nframes - 1) * natoms * 3, coding, coding_parameter, natoms);
++        rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length,
++                                           quant + natoms * 3, (nframes - 1) * natoms * 3, coding,
++                                           coding_parameter, natoms);
+         Ptngc_coder_deinit(coder);
+         if (rval)
+         {
+@@ -1935,31 +2013,33 @@
+     return rval;
+ }
+ 
+-static int tng_compress_uncompress_pos(char* data, double* pos)
++static int tng_compress_uncompress_pos(char* data, size_t data_len, double* pos, size_t pos_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_pos_gen(data, pos, NULL, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_pos_gen(data, data_len, pos, NULL, NULL, pos_bytes, &prec_hi, &prec_lo);
+ }
+ 
+-static int tng_compress_uncompress_pos_float(char* data, float* pos)
++static int tng_compress_uncompress_pos_float(char* data, size_t data_len, float* pos, size_t pos_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_pos_gen(data, NULL, pos, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_pos_gen(data, data_len, NULL, pos, NULL, pos_bytes, &prec_hi, &prec_lo);
+ }
+ 
+ static int tng_compress_uncompress_pos_int(char* data, int* pos, unsigned long* prec_hi, unsigned long* prec_lo)
+ {
+-    return tng_compress_uncompress_pos_gen(data, NULL, NULL, pos, prec_hi, prec_lo);
++    return tng_compress_uncompress_pos_gen(data, SIZE_MAX, NULL, NULL, pos, SIZE_MAX, prec_hi, prec_lo);
+ }
+ 
+ static int tng_compress_uncompress_vel_gen(char*          data,
++                                           size_t         data_len,
+                                            double*        veld,
+                                            float*         velf,
+                                            int*           veli,
++                                           size_t         vel_bytes,
+                                            unsigned long* prec_hi,
+                                            unsigned long* prec_lo)
+ {
+-    int           bufloc = 0;
++    size_t        bufloc = 0;
+     int           length;
+     int           natoms, nframes;
+     int           initial_coding, initial_coding_parameter;
+@@ -1968,6 +2048,11 @@
+     struct coder* coder = NULL;
+     int           rval  = 0;
+     int           magic_int;
++    if (data_len < 40)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* Magic integer for velocities */
+     magic_int = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+@@ -1999,22 +2084,53 @@
+     bufloc += 4;
+     *prec_hi = readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
+-    /* Allocate the memory for the quantized positions */
+-    quant = malloc(natoms * nframes * 3 * sizeof *quant);
++    if (natoms <= 0 || nframes <= 0)
++    {
++        rval = 1;
++        goto error;
++    }
++    {
++        size_t   elem_size = veld ? sizeof(double) : (velf ? sizeof(float) : sizeof(int));
++        uint64_t nvals     = (uint64_t)natoms * (uint64_t)nframes;
++        if (nvals > (uint64_t)INT_MAX / 3)
++        {
++            rval = 1;
++            goto error;
++        }
++        nvals *= 3;
++        if (nvals > (uint64_t)SIZE_MAX / sizeof *quant
++            || nvals > (uint64_t)vel_bytes / elem_size)
++        {
++            rval = 1;
++            goto error;
++        }
++        /* Allocate the memory for the quantized positions */
++        quant = malloc((size_t)nvals * sizeof *quant);
++        if (!quant)
++        {
++            rval = 1;
++            goto error;
++        }
++    }
+     /* The data block length. */
+     length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+     bufloc += 4;
++    if (length < 0 || (size_t)length > data_len - bufloc)
++    {
++        rval = 1;
++        goto error;
++    }
+     /* The initial frame */
+     coder = Ptngc_coder_init();
+-    rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant, natoms * 3,
+-                              initial_coding, initial_coding_parameter, natoms);
++    rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length, quant,
++                                       natoms * 3, initial_coding, initial_coding_parameter, natoms);
+     Ptngc_coder_deinit(coder);
+     if (rval)
+     {
+         goto error;
+     }
+     /* Skip past the actual data block. */
+-    bufloc += length;
++    bufloc += (size_t)length;
+     /* Obtain the actual positions for the initial block. */
+     if ((initial_coding == TNG_COMPRESS_ALGO_VEL_STOPBIT_ONETOONE)
+         || (initial_coding == TNG_COMPRESS_ALGO_VEL_TRIPLET_ONETOONE)
+@@ -2036,10 +2152,22 @@
+     /* The remaining frames. */
+     if (nframes > 1)
+     {
++        if (data_len - bufloc < 4)
++        {
++            rval = 1;
++            goto error;
++        }
++        length = (int)readbufferfix((unsigned char*)data + bufloc, 4);
+         bufloc += 4;
++        if (length < 0 || (size_t)length > data_len - bufloc)
++        {
++            rval = 1;
++            goto error;
++        }
+         coder = Ptngc_coder_init();
+-        rval  = Ptngc_unpack_array(coder, (unsigned char*)data + bufloc, quant + natoms * 3,
+-                                  (nframes - 1) * natoms * 3, coding, coding_parameter, natoms);
++        rval  = Ptngc_unpack_array_bounded(coder, (unsigned char*)data + bufloc, (size_t)length,
++                                           quant + natoms * 3, (nframes - 1) * natoms * 3, coding,
++                                           coding_parameter, natoms);
+         Ptngc_coder_deinit(coder);
+         if (rval)
+         {
+@@ -2090,37 +2218,79 @@
+     return rval;
+ }
+ 
+-static int tng_compress_uncompress_vel(char* data, double* vel)
++static int tng_compress_uncompress_vel(char* data, size_t data_len, double* vel, size_t vel_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_vel_gen(data, vel, NULL, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_vel_gen(data, data_len, vel, NULL, NULL, vel_bytes, &prec_hi, &prec_lo);
+ }
+ 
+-static int tng_compress_uncompress_vel_float(char* data, float* vel)
++static int tng_compress_uncompress_vel_float(char* data, size_t data_len, float* vel, size_t vel_bytes)
+ {
+     unsigned long prec_hi, prec_lo;
+-    return tng_compress_uncompress_vel_gen(data, NULL, vel, NULL, &prec_hi, &prec_lo);
++    return tng_compress_uncompress_vel_gen(data, data_len, NULL, vel, NULL, vel_bytes, &prec_hi, &prec_lo);
+ }
+ 
+ static int tng_compress_uncompress_vel_int(char* data, int* vel, unsigned long* prec_hi, unsigned long* prec_lo)
+ {
+-    return tng_compress_uncompress_vel_gen(data, NULL, NULL, vel, prec_hi, prec_lo);
++    return tng_compress_uncompress_vel_gen(data, SIZE_MAX, NULL, NULL, vel, SIZE_MAX, prec_hi, prec_lo);
+ }
+ 
+ /* Uncompresses any tng compress block, positions or velocities. It determines whether it is
+  * positions or velocities from the data buffer. The return value is 0 if ok, and 1 if not.
+  */
+-int DECLSPECDLLEXPORT tng_compress_uncompress(char* data, double* posvel)
++int DECLSPECDLLEXPORT tng_compress_inquire_bounded(const char* data,
++                                                   size_t      data_len,
++                                                   size_t      elem_size,
++                                                   uint64_t*   needed_bytes)
++{
++    int      magic_int;
++    int      natoms;
++    int      nframes;
++    int      length;
++    uint64_t nvals;
++    if (!data || !needed_bytes || elem_size == 0 || data_len < 40)
++    {
++        return 1;
++    }
++    magic_int = (int)readbufferfix((unsigned char*)data, 4);
++    if (magic_int != MAGIC_INT_POS && magic_int != MAGIC_INT_VEL)
++    {
++        return 1;
++    }
++    natoms  = (int)readbufferfix((unsigned char*)data + 4, 4);
++    nframes = (int)readbufferfix((unsigned char*)data + 8, 4);
++    length  = (int)readbufferfix((unsigned char*)data + 36, 4);
++    if (natoms <= 0 || nframes <= 0 || length < 0 || (size_t)length > data_len - 40)
++    {
++        return 1;
++    }
++    nvals = (uint64_t)natoms * (uint64_t)nframes;
++    if (nvals > (uint64_t)INT_MAX / 3)
++    {
++        return 1;
++    }
++    *needed_bytes = nvals * 3 * (uint64_t)elem_size;
++    return 0;
++}
++
++int DECLSPECDLLEXPORT tng_compress_uncompress_bounded(char*   data,
++                                                      size_t  data_len,
++                                                      double* posvel,
++                                                      size_t  posvel_bytes)
+ {
+     int magic_int;
++    if (data_len < 4)
++    {
++        return 1;
++    }
+     magic_int = (int)readbufferfix((unsigned char*)data, 4);
+     if (magic_int == MAGIC_INT_POS)
+     {
+-        return tng_compress_uncompress_pos(data, posvel);
++        return tng_compress_uncompress_pos(data, data_len, posvel, posvel_bytes);
+     }
+     else if (magic_int == MAGIC_INT_VEL)
+     {
+-        return tng_compress_uncompress_vel(data, posvel);
++        return tng_compress_uncompress_vel(data, data_len, posvel, posvel_bytes);
+     }
+     else
+     {
+@@ -2128,17 +2298,29 @@
+     }
+ }
+ 
+-int DECLSPECDLLEXPORT tng_compress_uncompress_float(char* data, float* posvel)
++int DECLSPECDLLEXPORT tng_compress_uncompress(char* data, double* posvel)
++{
++    return tng_compress_uncompress_bounded(data, SIZE_MAX, posvel, SIZE_MAX);
++}
++
++int DECLSPECDLLEXPORT tng_compress_uncompress_float_bounded(char*  data,
++                                                            size_t data_len,
++                                                            float* posvel,
++                                                            size_t posvel_bytes)
+ {
+     int magic_int;
++    if (data_len < 4)
++    {
++        return 1;
++    }
+     magic_int = (int)readbufferfix((unsigned char*)data, 4);
+     if (magic_int == MAGIC_INT_POS)
+     {
+-        return tng_compress_uncompress_pos_float(data, posvel);
++        return tng_compress_uncompress_pos_float(data, data_len, posvel, posvel_bytes);
+     }
+     else if (magic_int == MAGIC_INT_VEL)
+     {
+-        return tng_compress_uncompress_vel_float(data, posvel);
++        return tng_compress_uncompress_vel_float(data, data_len, posvel, posvel_bytes);
+     }
+     else
+     {
+@@ -2146,6 +2328,11 @@
+     }
+ }
+ 
++int DECLSPECDLLEXPORT tng_compress_uncompress_float(char* data, float* posvel)
++{
++    return tng_compress_uncompress_float_bounded(data, SIZE_MAX, posvel, SIZE_MAX);
++}
++
+ int DECLSPECDLLEXPORT tng_compress_uncompress_int(char*          data,
+                                                   int*           posvel,
+                                                   unsigned long* prec_hi,
+diff -ruN tng-a/tng/src/compression/xtc2.c tng-b/tng/src/compression/xtc2.c
+--- tng-a/tng/src/compression/xtc2.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/xtc2.c	2026-11-21 15:02:31.250037832 +0000
+@@ -1104,14 +1104,54 @@
+ #endif
+ }
+ 
++/* One past the last packed byte. NULL means the caller did not pass a length. */
++static unsigned char* xtc2_lim;
++static int            xtc2_bad;
++static int*           xtc2_out;
++static int*           xtc2_out_end;
++
++static int xtc2_put3(int a, int b, int c)
++{
++    if (xtc2_bad || xtc2_out == NULL || xtc2_out_end - xtc2_out < 3)
++    {
++        xtc2_bad = 1;
++        return 1;
++    }
++    *xtc2_out++ = a;
++    *xtc2_out++ = b;
++    *xtc2_out++ = c;
++    return 0;
++}
++
++static int xtc2_in_range(int index)
++{
++    return index >= 0 && index < MAX_MAGIC;
++}
++
+ static unsigned int readbits(unsigned char** ptr, int* bitptr, int nbits)
+ {
+     unsigned int  val          = 0U;
+-    unsigned int  extract_mask = 0x80U >> *bitptr;
+-    unsigned char thisval      = **ptr;
++    unsigned int  extract_mask;
++    unsigned char thisval;
+ #ifdef SHOWIT
+     fprintf(stderr, "Read nbits=%d val=", nbits);
+ #endif
++    if (xtc2_bad || nbits < 0 || nbits > 32 || *bitptr < 0 || *bitptr > 7)
++    {
++        xtc2_bad = 1;
++        return 0U;
++    }
++    if (nbits == 0)
++    {
++        return 0U;
++    }
++    if (xtc2_lim != NULL && *ptr >= xtc2_lim)
++    {
++        xtc2_bad = 1;
++        return 0U;
++    }
++    extract_mask = 0x80U >> *bitptr;
++    thisval      = **ptr;
+     while (nbits--)
+     {
+         val <<= 1;
+@@ -1125,6 +1165,11 @@
+             *bitptr      = 0;
+             if (nbits)
+             {
++                if (xtc2_lim != NULL && *ptr >= xtc2_lim)
++                {
++                    xtc2_bad = 1;
++                    return 0U;
++                }
+                 thisval = **ptr;
+             }
+         }
+@@ -1137,6 +1182,11 @@
+ 
+ static void readmanybits(unsigned char** ptr, int* bitptr, int nbits, unsigned char* buffer)
+ {
++    if (nbits < 0 || nbits > 32 * 18)
++    {
++        xtc2_bad = 1;
++        return;
++    }
+     while (nbits >= 8)
+     {
+         *buffer++ = readbits(ptr, bitptr, 8);
+@@ -2293,7 +2343,8 @@
+ }
+ 
+ 
+-int Ptngc_unpack_array_xtc2(struct coder* coder, unsigned char* packed, int* output, const int length)
++int Ptngc_unpack_array_xtc2(struct coder* coder, unsigned char* packed, size_t packed_len, int* output,
++                            const int length)
+ {
+     unsigned char* ptr    = packed;
+     int            bitptr = 0;
+@@ -2308,6 +2359,23 @@
+     unsigned char  compress_buffer[18 * 4]; /* Holds compressed result for 3 large ints or up to 18 small ints. */
+     int            encode_ints[21]; /* Up to 3 large + 18 small ints can be encoded at once */
+     (void)coder;
++    xtc2_bad     = 0;
++    xtc2_lim     = NULL;
++    xtc2_out     = output;
++    xtc2_out_end = output;
++    if (length < 0 || output == NULL)
++    {
++        return 1;
++    }
++    if (packed_len != SIZE_MAX)
++    {
++        if (packed == NULL && packed_len != 0)
++        {
++            return 1;
++        }
++        xtc2_lim = packed + packed_len;
++    }
++    xtc2_out_end = output + length;
+ 
+     /* Read min integers. */
+     minint[0] = unpositive_int(readbits(&ptr, &bitptr, 32));
+@@ -2320,6 +2388,11 @@
+     /* Read small index */
+     small_index = readbits(&ptr, &bitptr, 8);
+ 
++    if (xtc2_bad || !xtc2_in_range(large_index[0]) || !xtc2_in_range(large_index[1])
++        || !xtc2_in_range(large_index[2]) || !xtc2_in_range(small_index))
++    {
++        return 1;
++    }
+     large_nbits = compute_magic_bits(large_index);
+ 
+ #ifdef SHOWIT
+@@ -2332,9 +2405,18 @@
+     /* Initial prevcoord is the minimum integers. */
+     memcpy(prevcoord, minint, 3 * sizeof *prevcoord);
+ 
+-    while (ntriplets_left)
++    while (ntriplets_left > 0)
+     {
+-        int instr = read_instruction(&ptr, &bitptr);
++        int instr;
++        if (xtc2_bad)
++        {
++            return 1;
++        }
++        instr = read_instruction(&ptr, &bitptr);
++        if (xtc2_bad)
++        {
++            return 1;
++        }
+ #ifdef SHOWIT
+         if ((instr >= 0) && (instr < MAXINSTR))
+             fprintf(stderr, "Decoded instruction %s\n", instrnames[instr]);
+@@ -2373,7 +2455,12 @@
+                 {
+                     compress_buffer[i] = 0;
+                 }
+-                /* Get the small values. */
++                /* Get the small values. runlength is 1..6 and the index stays inside the table. */
++                if (runlength < 1 || runlength > 6 || !xtc2_in_range(small_index)
++                    || runlength > ntriplets_left)
++                {
++                    return 1;
++                }
+                 readmanybits(&ptr, &bitptr, magic_bits[small_index][runlength - 1], compress_buffer);
+                 trajcoder_base_decompress(compress_buffer, 3 * runlength, small_idx, encode_ints);
+ #ifdef SHOWIT
+@@ -2406,9 +2493,11 @@
+             if (instr != INSTR_ONLY_SMALL)
+             {
+                 /* Output large value */
+-                *output++    = large_ints[0] + minint[0];
+-                *output++    = large_ints[1] + minint[1];
+-                *output++    = large_ints[2] + minint[2];
++                if (xtc2_put3(large_ints[0] + minint[0], large_ints[1] + minint[1],
++                              large_ints[2] + minint[2]))
++                {
++                    return 1;
++                }
+                 prevcoord[0] = large_ints[0];
+                 prevcoord[1] = large_ints[1];
+                 prevcoord[2] = large_ints[2];
+@@ -2446,9 +2535,11 @@
+                             prevcoord[0] + minint[0], prevcoord[1] + minint[1],
+                             prevcoord[2] + minint[2]);
+ #endif
+-                    *output++ = prevcoord[0] + minint[0];
+-                    *output++ = prevcoord[1] + minint[1];
+-                    *output++ = prevcoord[2] + minint[2];
++                    if (xtc2_put3(prevcoord[0] + minint[0], prevcoord[1] + minint[1],
++                                  prevcoord[2] + minint[2]))
++                    {
++                        return 1;
++                    }
+                 }
+                 ntriplets_left -= runlength;
+             }
+@@ -2459,6 +2550,10 @@
+             int large_ints[3];
+             /* How many large atoms in this sequence? */
+             int n = (int)readbits(&ptr, &bitptr, 4) + 3; /* 3-18 large atoms */
++            if (xtc2_bad || n < 3 || n > 18 || n > ntriplets_left)
++            {
++                return 1;
++            }
+             for (i = 0; i < n; i++)
+             {
+                 /* Clear the compress buffer. */
+@@ -2471,9 +2566,11 @@
+                 trajcoder_base_decompress(compress_buffer, 3, large_index, encode_ints);
+                 memcpy(large_ints, encode_ints, 3 * sizeof *large_ints);
+                 /* Output large value */
+-                *output++ = large_ints[0] + minint[0];
+-                *output++ = large_ints[1] + minint[1];
+-                *output++ = large_ints[2] + minint[2];
++                if (xtc2_put3(large_ints[0] + minint[0], large_ints[1] + minint[1],
++                              large_ints[2] + minint[2]))
++                {
++                    return 1;
++                }
+                 memcpy(prevcoord, large_ints, 3 * sizeof *prevcoord);
+             }
+             ntriplets_left -= n;
+@@ -2494,6 +2591,10 @@
+                 change      = ichange - 1;
+             }
+             small_index += change;
++            if (!xtc2_in_range(small_index))
++            {
++                return 1;
++            }
+         }
+         else if (instr == INSTR_FLIP)
+         {
+@@ -2508,15 +2609,22 @@
+                 change = -change;
+             }
+             small_index += change;
++            if (!xtc2_in_range(small_index))
++            {
++                return 1;
++            }
+         }
+         else
+         {
+-            fprintf(stderr, "TRAJNG: BUG! Encoded unknown instruction.\n");
+-            exit(EXIT_FAILURE);
++            return 1;
+         }
+ #ifdef SHOWIT
+         fprintf(stderr, "Number of triplets left is %d\n", ntriplets_left);
+ #endif
++        if (ntriplets_left < 0 || xtc2_bad)
++        {
++            return 1;
++        }
+     }
+-    return 0;
++    return xtc2_bad ? 1 : 0;
+ }
+diff -ruN tng-a/tng/src/compression/xtc3.c tng-b/tng/src/compression/xtc3.c
+--- tng-a/tng/src/compression/xtc3.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/compression/xtc3.c	2026-11-21 15:03:54.449866138 +0000
+@@ -33,6 +33,7 @@
+    with a grain (truckload) of salt. */
+ 
+ #include <limits.h>
++#include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+@@ -766,22 +767,46 @@
+     *outlen = nwrittenout;
+ }
+ 
++/* One past the last byte of the packed XTC3 block. NULL while compressing. */
++static const unsigned char* xtc3_lim;
++static int                  xtc3_bad;
++static int                  xtc3_out_len;
++
++static int xtc3_need(const unsigned char* p, size_t n)
++{
++    if (xtc3_bad)
++    {
++        return 1;
++    }
++    if (xtc3_lim == NULL)
++    {
++        return 0;
++    }
++    if (p == NULL || p > xtc3_lim || n > (size_t)(xtc3_lim - p))
++    {
++        xtc3_bad = 1;
++        return 1;
++    }
++    return 0;
++}
++
+ static void base_decompress(const unsigned char* input, const int len, unsigned int* output)
+ {
+     unsigned int largeint[MAXMAXBASEVALS + 1];
+     unsigned int largeint_tmp[MAXMAXBASEVALS + 1];
+     int          ixyz, i, j;
+-    int          maxbasevals  = (int)((unsigned int)(input[0]) | (((unsigned int)(input[1])) << 8));
+-    int          baseinterval = (int)input[2];
+-    if (maxbasevals > (int)MAXMAXBASEVALS)
+-    {
+-        fprintf(stderr,
+-                "Read a larger maxbasevals value from the file than I can handle. Fix"
+-                " by increasing MAXMAXBASEVALS to at least %d. Although, this is"
+-                " probably a bug in TRAJNG, since MAXMAXBASEVALS should already be insanely large "
+-                "enough.\n",
+-                maxbasevals);
+-        exit(EXIT_FAILURE);
++    int          maxbasevals;
++    int          baseinterval;
++    if (xtc3_need(input, 3))
++    {
++        return;
++    }
++    maxbasevals  = (int)((unsigned int)(input[0]) | (((unsigned int)(input[1])) << 8));
++    baseinterval = (int)input[2];
++    if (maxbasevals < 1 || maxbasevals > (int)MAXMAXBASEVALS || baseinterval < 1 || len < 0)
++    {
++        xtc3_bad = 1;
++        return;
+     }
+     input += 3;
+     for (ixyz = 0; ixyz < 3; ixyz++)
+@@ -800,6 +825,10 @@
+             int n;
+             if (basegiven == 0)
+             {
++                if (xtc3_need(input, 4))
++                {
++                    return;
++                }
+                 base = (unsigned int)(input[0]) | (((unsigned int)(input[1])) << 8)
+                        | (((unsigned int)(input[2])) << 16) | (((unsigned int)(input[3])) << 24);
+                 input += 4;
+@@ -820,6 +849,10 @@
+ #ifdef SHOWIT
+             fprintf(stderr, "Reading largeint: ");
+ #endif
++            if (numbytes < 0 || xtc3_need(input, (size_t)numbytes))
++            {
++                return;
++            }
+             if (numbytes / 4 < maxbasevals + 1)
+             {
+                 for (j = 0; j < numbytes; j++)
+@@ -842,8 +875,18 @@
+             {
+                 n = nvals_left;
+             }
++            if (n < 1)
++            {
++                xtc3_bad = 1;
++                return;
++            }
+             for (i = n - 1; i >= 0; i--)
+             {
++                if (outvals + i * 3 >= len)
++                {
++                    xtc3_bad = 1;
++                    return;
++                }
+                 output[outvals + i * 3] =
+                         Ptngc_largeint_div(base, largeint, largeint_tmp, maxbasevals + 1);
+                 for (j = 0; j < maxbasevals + 1; j++)
+@@ -1861,24 +1904,63 @@
+     return output;
+ }
+ 
+-static void decompress_bwlzh_block(unsigned char** ptr, const int nvals, unsigned int** vals)
++static int decompress_bwlzh_block(unsigned char** ptr, const int nvals, unsigned int** vals)
+ {
+-    int bwlzh_buf_len = (int)(((unsigned int)(*ptr)[0]) | (((unsigned int)(*ptr)[1]) << 8)
+-                              | (((unsigned int)(*ptr)[2]) << 16) | (((unsigned int)(*ptr)[3]) << 24));
++    int bwlzh_buf_len;
++    /* The table cannot be longer than the coordinate block being unpacked,
++       and it has to fit in one 4 GiB allocation. */
++    if (nvals < 0 || nvals > xtc3_out_len
++        || (size_t)nvals > ((size_t)4096 << 20) / sizeof(**vals)
++        || (size_t)nvals > (size_t)-1 / sizeof(**vals) || xtc3_need(*ptr, 4))
++    {
++        return 1;
++    }
++    bwlzh_buf_len = (int)(((unsigned int)(*ptr)[0]) | (((unsigned int)(*ptr)[1]) << 8)
++                          | (((unsigned int)(*ptr)[2]) << 16) | (((unsigned int)(*ptr)[3]) << 24));
+     (*ptr) += 4;
++    if (bwlzh_buf_len < 0 || xtc3_need(*ptr, (size_t)bwlzh_buf_len))
++    {
++        return 1;
++    }
+     *vals = warnmalloc(nvals * sizeof(**vals));
+-    bwlzh_decompress(*ptr, nvals, *vals);
++    if (*vals == NULL || bwlzh_decompress(*ptr, bwlzh_buf_len, nvals, *vals))
++    {
++        return 1;
++    }
+     (*ptr) += bwlzh_buf_len;
++    return 0;
+ }
+ 
+-static void decompress_base_block(unsigned char** ptr, const int nvals, unsigned int** vals)
++static int decompress_base_block(unsigned char** ptr, const int nvals, unsigned int** vals)
+ {
+-    int base_buf_len = (int)(((unsigned int)(*ptr)[0]) | (((unsigned int)(*ptr)[1]) << 8)
+-                             | (((unsigned int)(*ptr)[2]) << 16) | (((unsigned int)(*ptr)[3]) << 24));
++    int base_buf_len;
++    /* The table cannot be longer than the coordinate block being unpacked,
++       and it has to fit in one 4 GiB allocation. */
++    if (nvals < 0 || nvals > xtc3_out_len
++        || (size_t)nvals > ((size_t)4096 << 20) / sizeof(**vals)
++        || (size_t)nvals > (size_t)-1 / sizeof(**vals) || xtc3_need(*ptr, 4))
++    {
++        return 1;
++    }
++    base_buf_len = (int)(((unsigned int)(*ptr)[0]) | (((unsigned int)(*ptr)[1]) << 8)
++                         | (((unsigned int)(*ptr)[2]) << 16) | (((unsigned int)(*ptr)[3]) << 24));
+     (*ptr) += 4;
++    if (base_buf_len < 0 || xtc3_need(*ptr, (size_t)base_buf_len))
++    {
++        return 1;
++    }
+     *vals = warnmalloc(nvals * sizeof(**vals));
++    if (*vals == NULL)
++    {
++        return 1;
++    }
+     base_decompress(*ptr, nvals, *vals);
++    if (xtc3_bad)
++    {
++        return 1;
++    }
+     (*ptr) += base_buf_len;
++    return 0;
+ }
+ 
+ static void unpack_one_large(struct xtc3_context* xtc3_context,
+@@ -1894,8 +1976,18 @@
+                              const int            current_large_type)
+ {
+     int large_ints[3] = { 0, 0, 0 };
++    if (xtc3_bad || outdata < 0 || outdata > xtc3_out_len - 3)
++    {
++        xtc3_bad = 1;
++        return;
++    }
+     if (current_large_type == 0 && xtc3_context->large_direct)
+     {
++        if (*ilargedir < 0 || *ilargedir > xtc3_context->nlargedir - 3)
++        {
++            xtc3_bad = 1;
++            return;
++        }
+         large_ints[0] = (int)xtc3_context->large_direct[(*ilargedir)] + minint[0];
+         large_ints[1] = (int)xtc3_context->large_direct[(*ilargedir) + 1] + minint[1];
+         large_ints[2] = (int)xtc3_context->large_direct[(*ilargedir) + 2] + minint[2];
+@@ -1903,6 +1995,11 @@
+     }
+     else if (current_large_type == 1 && xtc3_context->large_intra_delta)
+     {
++        if (*ilargeintra < 0 || *ilargeintra > xtc3_context->nlargeintra - 3)
++        {
++            xtc3_bad = 1;
++            return;
++        }
+         large_ints[0] = unpositive_int(xtc3_context->large_intra_delta[(*ilargeintra)]) + prevcoord[0];
+         large_ints[1] =
+                 unpositive_int(xtc3_context->large_intra_delta[(*ilargeintra) + 1]) + prevcoord[1];
+@@ -1912,6 +2009,12 @@
+     }
+     else if (xtc3_context->large_inter_delta)
+     {
++        if (*ilargeinter < 0 || *ilargeinter > xtc3_context->nlargeinter - 3 || natoms < 1
++            || outdata < natoms * 3)
++        {
++            xtc3_bad = 1;
++            return;
++        }
+         large_ints[0] = unpositive_int(xtc3_context->large_inter_delta[(*ilargeinter)])
+                         + output[outdata - natoms * 3 + didswap * 3];
+         large_ints[1] = unpositive_int(xtc3_context->large_inter_delta[(*ilargeinter) + 1])
+@@ -1930,7 +2033,7 @@
+ }
+ 
+ 
+-int Ptngc_unpack_array_xtc3(unsigned char* packed, int* output, const int length, const int natoms)
++int Ptngc_unpack_array_xtc3(unsigned char* packed, size_t packed_len, int* output, const int length, const int natoms)
+ {
+     int            i;
+     int            minint[3];
+@@ -1950,95 +2053,122 @@
+ 
+     struct xtc3_context xtc3_context;
+     init_xtc3_context(&xtc3_context);
++    xtc3_bad = 0;
++    xtc3_lim = NULL;
++    if (length < 0 || natoms < 0 || output == NULL)
++    {
++        return 1;
++    }
++    if (packed_len != SIZE_MAX)
++    {
++        if (packed == NULL && packed_len != 0)
++        {
++            free_xtc3_context(&xtc3_context);
++            return 1;
++        }
++        xtc3_lim = packed + packed_len;
++    }
++    xtc3_out_len = length;
+ 
+     for (i = 0; i < 3; i++)
+     {
++        if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         minint[i] = unpositive_int((int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                                          | (((unsigned int)ptr[2]) << 16)
+                                          | (((unsigned int)ptr[3]) << 24)));
+         ptr += 4;
+     }
+ 
++    if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     xtc3_context.ninstr = (int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                                 | (((unsigned int)ptr[2]) << 16) | (((unsigned int)ptr[3]) << 24));
+     ptr += 4;
+     if (xtc3_context.ninstr)
+     {
+-        decompress_bwlzh_block(&ptr, xtc3_context.ninstr, &xtc3_context.instructions);
++        if (decompress_bwlzh_block(&ptr, xtc3_context.ninstr, &xtc3_context.instructions)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     }
+ 
++    if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     xtc3_context.nrle = (int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                               | (((unsigned int)ptr[2]) << 16) | (((unsigned int)ptr[3]) << 24));
+     ptr += 4;
+     if (xtc3_context.nrle)
+     {
+-        decompress_bwlzh_block(&ptr, xtc3_context.nrle, &xtc3_context.rle);
++        if (decompress_bwlzh_block(&ptr, xtc3_context.nrle, &xtc3_context.rle)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     }
+ 
++    if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     xtc3_context.nlargedir = (int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                                    | (((unsigned int)ptr[2]) << 16) | (((unsigned int)ptr[3]) << 24));
+     ptr += 4;
+     if (xtc3_context.nlargedir)
+     {
++        if (xtc3_need(ptr, 1)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         if (*ptr++ == 1)
+         {
+-            decompress_bwlzh_block(&ptr, xtc3_context.nlargedir, &xtc3_context.large_direct);
++            if (decompress_bwlzh_block(&ptr, xtc3_context.nlargedir, &xtc3_context.large_direct)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+         else
+         {
+-            decompress_base_block(&ptr, xtc3_context.nlargedir, &xtc3_context.large_direct);
++            if (decompress_base_block(&ptr, xtc3_context.nlargedir, &xtc3_context.large_direct)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+     }
+ 
++    if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     xtc3_context.nlargeintra = (int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                                      | (((unsigned int)ptr[2]) << 16) | (((unsigned int)ptr[3]) << 24));
+     ptr += 4;
+     if (xtc3_context.nlargeintra)
+     {
++        if (xtc3_need(ptr, 1)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         if (*ptr++ == 1)
+         {
+-            decompress_bwlzh_block(&ptr, xtc3_context.nlargeintra, &xtc3_context.large_intra_delta);
++            if (decompress_bwlzh_block(&ptr, xtc3_context.nlargeintra, &xtc3_context.large_intra_delta)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+         else
+         {
+-            decompress_base_block(&ptr, xtc3_context.nlargeintra, &xtc3_context.large_intra_delta);
++            if (decompress_base_block(&ptr, xtc3_context.nlargeintra, &xtc3_context.large_intra_delta)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+     }
+ 
++    if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     xtc3_context.nlargeinter = (int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                                      | (((unsigned int)ptr[2]) << 16) | (((unsigned int)ptr[3]) << 24));
+     ptr += 4;
+     if (xtc3_context.nlargeinter)
+     {
++        if (xtc3_need(ptr, 1)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         if (*ptr++ == 1)
+         {
+-            decompress_bwlzh_block(&ptr, xtc3_context.nlargeinter, &xtc3_context.large_inter_delta);
++            if (decompress_bwlzh_block(&ptr, xtc3_context.nlargeinter, &xtc3_context.large_inter_delta)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+         else
+         {
+-            decompress_base_block(&ptr, xtc3_context.nlargeinter, &xtc3_context.large_inter_delta);
++            if (decompress_base_block(&ptr, xtc3_context.nlargeinter, &xtc3_context.large_inter_delta)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+     }
+ 
++    if (xtc3_need(ptr, 4)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+     xtc3_context.nsmallintra = (int)(((unsigned int)ptr[0]) | (((unsigned int)ptr[1]) << 8)
+                                      | (((unsigned int)ptr[2]) << 16) | (((unsigned int)ptr[3]) << 24));
+     ptr += 4;
+     if (xtc3_context.nsmallintra)
+     {
++        if (xtc3_need(ptr, 1)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         if (*ptr++ == 1)
+         {
+-            decompress_bwlzh_block(&ptr, xtc3_context.nsmallintra, &xtc3_context.smallintra);
++            if (decompress_bwlzh_block(&ptr, xtc3_context.nsmallintra, &xtc3_context.smallintra)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+         else
+         {
+-            decompress_base_block(&ptr, xtc3_context.nsmallintra, &xtc3_context.smallintra);
++            if (decompress_base_block(&ptr, xtc3_context.nsmallintra, &xtc3_context.smallintra)) { free_xtc3_context(&xtc3_context); xtc3_lim = NULL; return 1; }
+         }
+     }
+ 
+     /* Initial prevcoord is the minimum integers. */
+     memcpy(prevcoord, minint, 3 * sizeof *prevcoord);
+ 
+-    while (ntriplets_left > 0 && iinstr < xtc3_context.ninstr)
++    while (ntriplets_left > 0 && iinstr < xtc3_context.ninstr && !xtc3_bad)
+     {
+         int instr = xtc3_context.instructions[iinstr++];
+ #ifdef SHOWIT
+@@ -2060,17 +2190,43 @@
+                 }
+                 unpack_one_large(&xtc3_context, &ilargedir, &ilargeintra, &ilargeinter, prevcoord,
+                                  minint, output, outdata, didswap, natoms, current_large_type);
++                if (xtc3_bad)
++                {
++                    free_xtc3_context(&xtc3_context);
++                    xtc3_lim = NULL;
++                    return 1;
++                }
+                 ntriplets_left--;
+                 outdata += 3;
+             }
+             if (instr != INSTR_ONLY_LARGE)
+             {
++                if (runlength < 1 || runlength > ntriplets_left)
++                {
++                    free_xtc3_context(&xtc3_context);
++                    xtc3_lim = NULL;
++                    return 1;
++                }
+                 for (i = 0; i < runlength; i++)
+                 {
++                    if (ismallintra < 0 || ismallintra > xtc3_context.nsmallintra - 3
++                        || xtc3_context.smallintra == NULL)
++                    {
++                        free_xtc3_context(&xtc3_context);
++                        xtc3_lim = NULL;
++                        return 1;
++                    }
+                     prevcoord[0] += unpositive_int(xtc3_context.smallintra[ismallintra]);
+                     prevcoord[1] += unpositive_int(xtc3_context.smallintra[ismallintra + 1]);
+                     prevcoord[2] += unpositive_int(xtc3_context.smallintra[ismallintra + 2]);
+                     ismallintra += 3;
++                    if (runlength < 1 || runlength > ntriplets_left || outdata < 0
++                        || i > (length - outdata) / 3 - 1)
++                    {
++                        free_xtc3_context(&xtc3_context);
++                        xtc3_lim = NULL;
++                        return 1;
++                    }
+                     output[outdata + i * 3]     = prevcoord[0];
+                     output[outdata + i * 3 + 1] = prevcoord[1];
+                     output[outdata + i * 3 + 2] = prevcoord[2];
+@@ -2100,6 +2256,12 @@
+         else if (instr == INSTR_LARGE_RLE && irle < xtc3_context.nrle)
+         {
+             int large_rle = xtc3_context.rle[irle++];
++            if (large_rle < 0 || large_rle > ntriplets_left)
++            {
++                free_xtc3_context(&xtc3_context);
++                xtc3_lim = NULL;
++                return 1;
++            }
+ #ifdef SHOWIT
+             fprintf(stderr, "large_rle=%d @ %d\n", large_rle, irle - 1);
+ #endif
+@@ -2107,6 +2269,12 @@
+             {
+                 unpack_one_large(&xtc3_context, &ilargedir, &ilargeintra, &ilargeinter, prevcoord,
+                                  minint, output, outdata, 0, natoms, current_large_type);
++                if (xtc3_bad)
++                {
++                    free_xtc3_context(&xtc3_context);
++                    xtc3_lim = NULL;
++                    return 1;
++                }
+                 ntriplets_left--;
+                 outdata += 3;
+             }
+@@ -2147,11 +2315,13 @@
+ #endif
+         }
+     }
+-    if (ntriplets_left < 0)
++    if (ntriplets_left < 0 || xtc3_bad)
+     {
+-        fprintf(stderr, "TRAJNG XTC3: A bug has been found. At end ntriplets_left<0\n");
+-        exit(EXIT_FAILURE);
++        free_xtc3_context(&xtc3_context);
++        xtc3_lim = NULL;
++        return 1;
+     }
+     free_xtc3_context(&xtc3_context);
++    xtc3_lim = NULL;
+     return 0;
+ }
+diff -ruN tng-a/tng/src/lib/tng_io.c tng-b/tng/src/lib/tng_io.c
+--- tng-a/tng/src/lib/tng_io.c	2021-11-30 12:10:11.000000000 +0000
++++ tng-b/tng/src/lib/tng_io.c	2026-11-21 15:05:44.829639788 +0000
+@@ -33,6 +33,7 @@
+ #endif
+ 
+ #include <limits.h>
++#include <stdint.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <time.h>
+@@ -258,6 +259,19 @@
+     void* values;
+     /** If storing character data store it in a 3-dimensional array */
+     char**** strings;
++    /** The sizes strings was allocated with: [1][frames][values] for
++     *  non-particle data, [frames][particles][values] for particle data.
++     *  n_frames and n_values_per_frame are set apart from the allocation,
++     *  so freeing strings must use these. */
++    int64_t strings_dim[3];
++    /** The particle count values or strings were allocated for */
++    int64_t alloc_particles;
++    /** A bit for each of the alloc_particles particles that a block of the
++     *  frame set starting at particles_set_frame has given values to, and
++     *  the number of these bits that are set */
++    unsigned char* particles_set;
++    int64_t        particles_set_frame;
++    int64_t        n_particles_set;
+ };
+ 
+ 
+@@ -617,7 +631,9 @@
+         }
+     } while ((temp[count - 1] != '\0') && (count < TNG_MAX_STR_LEN));
+ 
+-    temp_alloc = (char*)realloc(*str, count);
++    /* A string of TNG_MAX_STR_LEN bytes is stored without its terminator,
++     * so keep room for one. */
++    temp_alloc = (char*)realloc(*str, count + 1);
+     if (!temp_alloc)
+     {
+         fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, line_nr);
+@@ -627,7 +643,8 @@
+     }
+     *str = temp_alloc;
+ 
+-    strncpy(*str, temp, count);
++    memcpy(*str, temp, count);
++    (*str)[count] = '\0';
+ 
+     if (hash_mode == TNG_USE_HASH)
+     {
+@@ -1095,6 +1112,19 @@
+         return (TNG_CRITICAL);
+     }
+ 
++    /* The readers size their buffers from these, so both parts of the
++     * block must be inside the file. */
++    if (block->header_contents_size < 0
++        || block->header_contents_size > tng_data->input_file_len - start_pos
++        || block->block_contents_size < 0
++        || block->block_contents_size
++                   > tng_data->input_file_len - start_pos - block->header_contents_size)
++    {
++        fprintf(stderr, "TNG library: Block sizes do not fit in the file. %s: %d\n", __FILE__,
++                __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     if (tng_file_input_numerical(tng_data, &block->id, sizeof(block->id), TNG_SKIP_HASH, 0, __LINE__)
+         == TNG_CRITICAL)
+     {
+@@ -1107,7 +1137,11 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &block->name, TNG_SKIP_HASH, 0, __LINE__);
++    if (tng_freadstr(tng_data, &block->name, TNG_SKIP_HASH, 0, __LINE__) != TNG_SUCCESS)
++    {
++        fprintf(stderr, "TNG library: Cannot read block name. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_file_input_numerical(tng_data, &block->block_version, sizeof(block->block_version),
+                                  TNG_SKIP_HASH, 0, __LINE__)
+@@ -2459,7 +2493,10 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &chain->name, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &chain->name, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_file_input_numerical(tng_data, &chain->n_residues, sizeof(chain->n_residues), hash_mode,
+                                  md5_state, __LINE__)
+@@ -2526,7 +2563,10 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &residue->name, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &residue->name, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_file_input_numerical(tng_data, &residue->n_atoms, sizeof(residue->n_atoms), hash_mode,
+                                  md5_state, __LINE__)
+@@ -2593,9 +2633,15 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    tng_freadstr(tng_data, &atom->name, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &atom->name, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+-    tng_freadstr(tng_data, &atom->atom_type, hash_mode, md5_state, __LINE__);
++    if (tng_freadstr(tng_data, &atom->atom_type, hash_mode, md5_state, __LINE__) != TNG_SUCCESS)
++    {
++        return (TNG_CRITICAL);
++    }
+ 
+     return (TNG_SUCCESS);
+ }
+@@ -2763,11 +2809,12 @@
+  * @return TNG_SUCCESS (0) if successful or TNG_CRITICAL (2) if a major
+  * error has occured.
+  */
+-static tng_function_status tng_molecules_block_read(struct tng_trajectory*      tng_data,
+-                                                    const struct tng_gen_block* block,
+-                                                    const char                  hash_mode)
++static tng_function_status tng_molecules_block_contents_read(struct tng_trajectory*      tng_data,
++                                                             const struct tng_gen_block* block,
++                                                             const char                  hash_mode)
+ {
+     int64_t        start_pos, i, j, k, l;
++    int64_t        n_molecules, n_chains, n_residues, n_atoms, n_bonds, max_count;
+     tng_molecule_t molecule;
+     tng_chain_t    chain;
+     tng_residue_t  residue;
+@@ -2783,9 +2830,6 @@
+ 
+     start_pos = ftello(tng_data->input_file);
+ 
+-    /* FIXME: Does not check if the size of the contents matches the expected
+-     * size or if the contents can be read. */
+-
+     if (tng_data->molecules)
+     {
+         for (i = 0; i < tng_data->n_molecules; i++)
+@@ -2802,27 +2846,34 @@
+         md5_init(&md5_state);
+     }
+ 
+-    if (tng_file_input_numerical(tng_data, &tng_data->n_molecules, sizeof(tng_data->n_molecules),
++    if (tng_file_input_numerical(tng_data, &n_molecules, sizeof(n_molecules),
+                                  hash_mode, &md5_state, __LINE__)
+         == TNG_CRITICAL)
+     {
+         return (TNG_CRITICAL);
+     }
+ 
+-    if (tng_data->molecules)
++    /* Every molecule, chain, residue, atom and bond takes at least eight
++     * bytes of the block, which bounds all the counts read below. */
++    max_count = block->block_contents_size / 8;
++    if (n_molecules < 0 || n_molecules > max_count)
+     {
+-        free(tng_data->molecules);
++        fprintf(stderr, "TNG library: Invalid number of molecules %" PRId64 ". %s: %d\n",
++                n_molecules, __FILE__, __LINE__);
++        return (TNG_CRITICAL);
+     }
+ 
+     tng_data->n_particles = 0;
+ 
+-    tng_data->molecules =
+-            (struct tng_molecule*)malloc(tng_data->n_molecules * sizeof(struct tng_molecule));
++    /* zeroed, so that tng_molecule_destroy() can free a partly read molecule */
++    tng_data->molecules = (struct tng_molecule*)calloc(n_molecules ? n_molecules : 1,
++                                                       sizeof(struct tng_molecule));
+     if (!tng_data->molecules)
+     {
+         fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+         return (TNG_CRITICAL);
+     }
++    tng_data->n_molecules = n_molecules;
+ 
+     if (!tng_data->var_num_atoms_flag)
+     {
+@@ -2830,7 +2881,8 @@
+         {
+             free(tng_data->molecule_cnt_list);
+         }
+-        tng_data->molecule_cnt_list = (int64_t*)malloc(sizeof(int64_t) * tng_data->n_molecules);
++        tng_data->molecule_cnt_list =
++                (int64_t*)calloc(n_molecules ? n_molecules : 1, sizeof(int64_t));
+         if (!tng_data->molecule_cnt_list)
+         {
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+@@ -2843,8 +2895,6 @@
+     {
+         molecule = &tng_data->molecules[i];
+ 
+-        molecule->name = 0;
+-
+         if (tng_file_input_numerical(tng_data, &molecule->id, sizeof(molecule->id), hash_mode,
+                                      &md5_state, __LINE__)
+             == TNG_CRITICAL)
+@@ -2852,8 +2902,10 @@
+             return (TNG_CRITICAL);
+         }
+ 
+-        /*         fprintf(stderr, "TNG library: Read id: %" PRId64 " offset: %d\n", molecule->id, offset);*/
+-        tng_freadstr(tng_data, &molecule->name, hash_mode, &md5_state, __LINE__);
++        if (tng_freadstr(tng_data, &molecule->name, hash_mode, &md5_state, __LINE__) != TNG_SUCCESS)
++        {
++            return (TNG_CRITICAL);
++        }
+ 
+         if (tng_file_input_numerical(tng_data, &molecule->quaternary_str,
+                                      sizeof(molecule->quaternary_str), hash_mode, &md5_state, __LINE__)
+@@ -2872,85 +2924,55 @@
+             }
+         }
+ 
+-        if (tng_file_input_numerical(tng_data, &molecule->n_chains, sizeof(molecule->n_chains),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
+-        {
+-            return (TNG_CRITICAL);
+-        }
+-
+-        if (tng_file_input_numerical(tng_data, &molecule->n_residues, sizeof(molecule->n_residues),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
++        /* the counts are stored in the molecule only once its arrays exist */
++        if (tng_file_input_numerical(tng_data, &n_chains, sizeof(n_chains), hash_mode,
++                                     &md5_state, __LINE__)
++                    == TNG_CRITICAL
++            || tng_file_input_numerical(tng_data, &n_residues, sizeof(n_residues), hash_mode,
++                                        &md5_state, __LINE__)
++                       == TNG_CRITICAL
++            || tng_file_input_numerical(tng_data, &n_atoms, sizeof(n_atoms), hash_mode,
++                                        &md5_state, __LINE__)
++                       == TNG_CRITICAL)
+         {
+             return (TNG_CRITICAL);
+         }
+-
+-        if (tng_file_input_numerical(tng_data, &molecule->n_atoms, sizeof(molecule->n_atoms),
+-                                     hash_mode, &md5_state, __LINE__)
+-            == TNG_CRITICAL)
++        if (n_chains < 0 || n_chains > max_count || n_residues < 0 || n_residues > max_count
++            || n_atoms < 0 || n_atoms > max_count)
+         {
++            fprintf(stderr, "TNG library: Invalid molecule sizes. %s: %d\n", __FILE__, __LINE__);
+             return (TNG_CRITICAL);
+         }
+ 
+-        tng_data->n_particles += molecule->n_atoms * tng_data->molecule_cnt_list[i];
+-
+-        if (molecule->n_chains > 0)
+-        {
+-            molecule->chains = (struct tng_chain*)malloc(molecule->n_chains * sizeof(struct tng_chain));
+-            if (!molecule->chains)
+-            {
+-                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                return (TNG_CRITICAL);
+-            }
+-
+-            chain = molecule->chains;
+-        }
+-        else
+-        {
+-            chain = 0;
+-        }
+-
+-        if (molecule->n_residues > 0)
++        if (!tng_data->var_num_atoms_flag)
+         {
+-            molecule->residues =
+-                    (struct tng_residue*)malloc(molecule->n_residues * sizeof(struct tng_residue));
+-            if (!molecule->residues)
++            int64_t cnt = tng_data->molecule_cnt_list[i];
++            if (cnt < 0 || (n_atoms > 0 && cnt > (INT64_MAX - tng_data->n_particles) / n_atoms))
+             {
+-                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                if (molecule->chains)
+-                {
+-                    free(molecule->chains);
+-                    molecule->chains = 0;
+-                }
++                fprintf(stderr, "TNG library: Invalid molecule count %" PRId64 ". %s: %d\n", cnt,
++                        __FILE__, __LINE__);
+                 return (TNG_CRITICAL);
+             }
+-
+-            residue = molecule->residues;
+-        }
+-        else
+-        {
+-            residue = 0;
++            tng_data->n_particles += n_atoms * cnt;
+         }
+ 
+-        molecule->atoms = (struct tng_atom*)malloc(molecule->n_atoms * sizeof(struct tng_atom));
+-        if (!molecule->atoms)
++        molecule->chains =
++                (struct tng_chain*)calloc(n_chains ? n_chains : 1, sizeof(struct tng_chain));
++        molecule->residues =
++                (struct tng_residue*)calloc(n_residues ? n_residues : 1, sizeof(struct tng_residue));
++        molecule->atoms = (struct tng_atom*)calloc(n_atoms ? n_atoms : 1, sizeof(struct tng_atom));
++        if (!molecule->chains || !molecule->residues || !molecule->atoms)
+         {
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-            if (molecule->chains)
+-            {
+-                free(molecule->chains);
+-                molecule->chains = 0;
+-            }
+-            if (molecule->residues)
+-            {
+-                free(molecule->residues);
+-                molecule->residues = 0;
+-            }
+             return (TNG_CRITICAL);
+         }
++        molecule->n_chains   = n_chains;
++        molecule->n_residues = n_residues;
++        molecule->n_atoms    = n_atoms;
+ 
+-        atom = molecule->atoms;
++        chain   = molecule->chains;
++        residue = molecule->residues;
++        atom    = molecule->atoms;
+ 
+         if (molecule->n_chains > 0)
+         {
+@@ -2959,28 +2981,36 @@
+             {
+                 chain->molecule = molecule;
+ 
+-                chain->name = 0;
+-
+-                tng_chain_data_read(tng_data, chain, hash_mode, &md5_state);
+-
+-                if (j == 0)
++                if (tng_chain_data_read(tng_data, chain, hash_mode, &md5_state) != TNG_SUCCESS)
+                 {
+-                    chain->residues = molecule->residues;
+-                    residue         = chain->residues;
++                    return (TNG_CRITICAL);
+                 }
+-                else
++                if (chain->n_residues < 0
++                    || chain->n_residues > molecule->n_residues - (residue - molecule->residues))
+                 {
+-                    chain->residues = residue;
++                    fprintf(stderr, "TNG library: Chain has more residues than its molecule. %s: %d\n",
++                            __FILE__, __LINE__);
++                    return (TNG_CRITICAL);
+                 }
+ 
++                chain->residues = residue;
++
+                 /* Read the residues of the chain */
+                 for (k = 0; k < chain->n_residues; k++)
+                 {
+                     residue->chain = chain;
+ 
+-                    residue->name = 0;
+-
+-                    tng_residue_data_read(tng_data, residue, hash_mode, &md5_state);
++                    if (tng_residue_data_read(tng_data, residue, hash_mode, &md5_state) != TNG_SUCCESS)
++                    {
++                        return (TNG_CRITICAL);
++                    }
++                    if (residue->n_atoms < 0
++                        || residue->n_atoms > molecule->n_atoms - (atom - molecule->atoms))
++                    {
++                        fprintf(stderr, "TNG library: Residue has more atoms than its molecule. %s: %d\n",
++                                __FILE__, __LINE__);
++                        return (TNG_CRITICAL);
++                    }
+ 
+                     residue->atoms_offset = atom - molecule->atoms;
+                     /* Read the atoms of the residue */
+@@ -2988,10 +3018,10 @@
+                     {
+                         atom->residue = residue;
+ 
+-                        atom->name      = 0;
+-                        atom->atom_type = 0;
+-
+-                        tng_atom_data_read(tng_data, atom, hash_mode, &md5_state);
++                        if (tng_atom_data_read(tng_data, atom, hash_mode, &md5_state) != TNG_SUCCESS)
++                        {
++                            return (TNG_CRITICAL);
++                        }
+ 
+                         atom++;
+                     }
+@@ -3008,9 +3038,17 @@
+                 {
+                     residue->chain = 0;
+ 
+-                    residue->name = 0;
+-
+-                    tng_residue_data_read(tng_data, residue, hash_mode, &md5_state);
++                    if (tng_residue_data_read(tng_data, residue, hash_mode, &md5_state) != TNG_SUCCESS)
++                    {
++                        return (TNG_CRITICAL);
++                    }
++                    if (residue->n_atoms < 0
++                        || residue->n_atoms > molecule->n_atoms - (atom - molecule->atoms))
++                    {
++                        fprintf(stderr, "TNG library: Residue has more atoms than its molecule. %s: %d\n",
++                                __FILE__, __LINE__);
++                        return (TNG_CRITICAL);
++                    }
+ 
+                     residue->atoms_offset = atom - molecule->atoms;
+                     /* Read the atoms of the residue */
+@@ -3018,7 +3056,10 @@
+                     {
+                         atom->residue = residue;
+ 
+-                        tng_atom_data_read(tng_data, atom, hash_mode, &md5_state);
++                        if (tng_atom_data_read(tng_data, atom, hash_mode, &md5_state) != TNG_SUCCESS)
++                        {
++                            return (TNG_CRITICAL);
++                        }
+ 
+                         atom++;
+                     }
+@@ -3031,47 +3072,46 @@
+                 {
+                     atom->residue = 0;
+ 
+-                    atom->name      = 0;
+-                    atom->atom_type = 0;
+-
+-                    tng_atom_data_read(tng_data, atom, hash_mode, &md5_state);
++                    if (tng_atom_data_read(tng_data, atom, hash_mode, &md5_state) != TNG_SUCCESS)
++                    {
++                        return (TNG_CRITICAL);
++                    }
+ 
+                     atom++;
+                 }
+             }
+         }
+ 
+-        if (tng_file_input_numerical(tng_data, &molecule->n_bonds, sizeof(molecule->n_bonds),
+-                                     hash_mode, &md5_state, __LINE__)
++        /* Entries not covered by a chain or residue would never be read */
++        if (atom - molecule->atoms != molecule->n_atoms
++            || (molecule->n_chains > 0 && residue - molecule->residues != molecule->n_residues))
++        {
++            fprintf(stderr, "TNG library: Molecule residue or atom counts do not add up. %s: %d\n",
++                    __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++
++        if (tng_file_input_numerical(tng_data, &n_bonds, sizeof(n_bonds), hash_mode, &md5_state,
++                                     __LINE__)
+             == TNG_CRITICAL)
+         {
+             return (TNG_CRITICAL);
+         }
++        if (n_bonds < 0 || n_bonds > max_count)
++        {
++            fprintf(stderr, "TNG library: Invalid number of bonds. %s: %d\n", __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
+ 
+-        if (molecule->n_bonds > 0)
++        if (n_bonds > 0)
+         {
+-            tng_data->molecules[i].bonds =
+-                    (struct tng_bond*)malloc(molecule->n_bonds * sizeof(struct tng_bond));
++            molecule->bonds = (struct tng_bond*)calloc(n_bonds, sizeof(struct tng_bond));
+             if (!molecule->bonds)
+             {
+                 fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                if (molecule->chains)
+-                {
+-                    free(molecule->chains);
+-                    molecule->chains = 0;
+-                }
+-                if (molecule->residues)
+-                {
+-                    free(molecule->residues);
+-                    molecule->residues = 0;
+-                }
+-                if (molecule->atoms)
+-                {
+-                    free(molecule->atoms);
+-                    molecule->atoms = 0;
+-                }
+                 return (TNG_CRITICAL);
+             }
++            molecule->n_bonds = n_bonds;
+ 
+             bond = molecule->bonds;
+ 
+@@ -3128,6 +3168,29 @@
+     return (TNG_SUCCESS);
+ }
+ 
++static tng_function_status tng_molecules_block_read(struct tng_trajectory*      tng_data,
++                                                    const struct tng_gen_block* block,
++                                                    const char                  hash_mode)
++{
++    int64_t             i;
++    tng_function_status stat = tng_molecules_block_contents_read(tng_data, block, hash_mode);
++
++    /* Callers go on after a failed block, they must not see the molecules,
++     * chains, residues and atoms that were never read. */
++    if (stat != TNG_SUCCESS && tng_data->molecules)
++    {
++        for (i = 0; i < tng_data->n_molecules; i++)
++        {
++            tng_molecule_destroy(tng_data, &tng_data->molecules[i]);
++        }
++        free(tng_data->molecules);
++        tng_data->molecules   = 0;
++        tng_data->n_molecules = 0;
++        tng_data->n_particles = 0;
++    }
++    return (stat);
++}
++
+ /**
+  * @brief Write a molecules block.
+  * @param tng_data is a trajectory data container.
+@@ -3418,13 +3481,22 @@
+         return (TNG_CRITICAL);
+     }
+ 
++    if (frame_set->first_frame < 0 || frame_set->n_frames < 0
++        || frame_set->first_frame > INT64_MAX - frame_set->n_frames)
++    {
++        fprintf(stderr, "TNG library: Invalid frame set frame range. %s: %d\n", __FILE__, __LINE__);
++        frame_set->first_frame = -1;
++        frame_set->n_frames = 0;
++        return (TNG_CRITICAL);
++    }
++
+     if (tng_data->var_num_atoms_flag)
+     {
+         prev_n_particles       = frame_set->n_particles;
+         frame_set->n_particles = 0;
+         /* If the list of molecule counts has already been created assume that
+          * it is of correct size. */
+-        if (!frame_set->molecule_cnt_list)
++        if (tng_data->n_molecules > 0 && !frame_set->molecule_cnt_list)
+         {
+             frame_set->molecule_cnt_list = (int64_t*)malloc(sizeof(int64_t) * tng_data->n_molecules);
+ 
+@@ -3443,6 +3515,15 @@
+                 return (TNG_CRITICAL);
+             }
+ 
++            if (frame_set->molecule_cnt_list[i] < 0
++                || tng_data->molecules[i].n_atoms < 0
++                || (tng_data->molecules[i].n_atoms > 0
++                    && frame_set->molecule_cnt_list[i]
++                           > (INT64_MAX - frame_set->n_particles) / tng_data->molecules[i].n_atoms))
++            {
++                fprintf(stderr, "TNG library: Invalid variable particle count. %s: %d\n", __FILE__, __LINE__);
++                return (TNG_CRITICAL);
++            }
+             frame_set->n_particles += tng_data->molecules[i].n_atoms * frame_set->molecule_cnt_list[i];
+         }
+         if (prev_n_particles && frame_set->n_particles != prev_n_particles)
+@@ -3497,6 +3578,28 @@
+         return (TNG_CRITICAL);
+     }
+ 
++    if ((frame_set->next_frame_set_file_pos > 0
++         && (frame_set->next_frame_set_file_pos <= file_pos
++             || (tng_data->input_file_len > 0
++                 && frame_set->next_frame_set_file_pos >= tng_data->input_file_len)))
++        || (frame_set->medium_stride_next_frame_set_file_pos > 0
++            && (frame_set->medium_stride_next_frame_set_file_pos <= file_pos
++                || (tng_data->input_file_len > 0
++                    && frame_set->medium_stride_next_frame_set_file_pos >= tng_data->input_file_len)))
++        || (frame_set->long_stride_next_frame_set_file_pos > 0
++            && (frame_set->long_stride_next_frame_set_file_pos <= file_pos
++                || (tng_data->input_file_len > 0
++                    && frame_set->long_stride_next_frame_set_file_pos >= tng_data->input_file_len)))
++        || (frame_set->prev_frame_set_file_pos > 0 && frame_set->prev_frame_set_file_pos >= file_pos)
++        || (frame_set->medium_stride_prev_frame_set_file_pos > 0
++            && frame_set->medium_stride_prev_frame_set_file_pos >= file_pos)
++        || (frame_set->long_stride_prev_frame_set_file_pos > 0
++            && frame_set->long_stride_prev_frame_set_file_pos >= file_pos))
++    {
++        fprintf(stderr, "TNG library: Invalid frame set navigation offset. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     if (block->block_version >= 3)
+     {
+         if (tng_file_input_numerical(tng_data, &frame_set->first_frame_time,
+@@ -3744,7 +3847,7 @@
+                                                              const struct tng_gen_block* block,
+                                                              const char                  hash_mode)
+ {
+-    int64_t                    start_pos, i;
++    int64_t                    start_pos, i, n_particles, tot_n_particles;
+     tng_trajectory_frame_set_t frame_set = &tng_data->current_trajectory_frame_set;
+     tng_particle_mapping_t     mapping, mappings;
+     char                       hash[TNG_MD5_HASH_LEN];
+@@ -3772,6 +3875,11 @@
+     }
+     frame_set->mappings = mappings;
+     mapping             = &mappings[frame_set->n_mapping_blocks - 1];
++    /* the frame set frees every mapping, even one that failed to read */
++    mapping->num_first_particle    = 0;
++    mapping->n_particles           = 0;
++    mapping->real_particle_numbers = 0;
++    tot_n_particles = tng_data->var_num_atoms_flag ? frame_set->n_particles : tng_data->n_particles;
+ 
+ 
+     if (hash_mode == TNG_USE_HASH)
+@@ -3786,14 +3894,27 @@
+         return (TNG_CRITICAL);
+     }
+ 
+-    if (tng_file_input_numerical(tng_data, &mapping->n_particles, sizeof(mapping->n_particles),
+-                                 hash_mode, &md5_state, __LINE__)
++    if (tng_file_input_numerical(tng_data, &n_particles, sizeof(n_particles), hash_mode,
++                                 &md5_state, __LINE__)
+         == TNG_CRITICAL)
+     {
+         return (TNG_CRITICAL);
+     }
+ 
+-    mapping->real_particle_numbers = (int64_t*)malloc(mapping->n_particles * sizeof(int64_t));
++    /* The block holds the n_particles real particle numbers after its two
++     * counts, and they are indices into the frame set's particles. */
++    if (n_particles <= 0 || mapping->num_first_particle < 0
++        || n_particles > (block->block_contents_size - 2 * (int64_t)sizeof(int64_t))
++                                 / (int64_t)sizeof(int64_t)
++        || n_particles > tot_n_particles
++        || mapping->num_first_particle > tot_n_particles - n_particles)
++    {
++        fprintf(stderr, "TNG library: Particle mapping block particles are out of range. %s: %d\n",
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++
++    mapping->real_particle_numbers = (int64_t*)malloc(n_particles * sizeof(int64_t));
+     if (!mapping->real_particle_numbers)
+     {
+         fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+@@ -3804,7 +3925,7 @@
+      * a time and swapped */
+     if (tng_data->input_endianness_swap_func_64)
+     {
+-        for (i = 0; i < mapping->n_particles; i++)
++        for (i = 0; i < n_particles; i++)
+         {
+             if (tng_file_input_numerical(tng_data, &mapping->real_particle_numbers[i],
+                                          sizeof(int64_t), hash_mode, &md5_state, __LINE__)
+@@ -3817,7 +3938,7 @@
+     /* Otherwise the data can be read all at once */
+     else
+     {
+-        if (fread(mapping->real_particle_numbers, mapping->n_particles * sizeof(int64_t), 1, tng_data->input_file)
++        if (fread(mapping->real_particle_numbers, n_particles * sizeof(int64_t), 1, tng_data->input_file)
+             == 0)
+         {
+             fprintf(stderr, "TNG library: Cannot read block. %s: %d\n", __FILE__, __LINE__);
+@@ -3826,7 +3947,21 @@
+         if (hash_mode == TNG_USE_HASH)
+         {
+             md5_append(&md5_state, (md5_byte_t*)mapping->real_particle_numbers,
+-                       mapping->n_particles * sizeof(int64_t));
++                       n_particles * sizeof(int64_t));
++        }
++    }
++
++    mapping->n_particles = n_particles;
++    for (i = 0; i < n_particles; i++)
++    {
++        if (mapping->real_particle_numbers[i] < 0
++            || mapping->real_particle_numbers[i] >= tot_n_particles)
++        {
++            fprintf(stderr,
++                    "TNG library: Particle mapping block particle %" PRId64
++                    " is out of range. %s: %d\n",
++                    mapping->real_particle_numbers[i], __FILE__, __LINE__);
++            return (TNG_CRITICAL);
+         }
+     }
+ 
+@@ -4327,6 +4462,7 @@
+                                           const struct tng_gen_block*  block,
+                                           const char                   type,
+                                           char**                       data,
++                                          const int64_t                compressed_len,
+                                           const int64_t                uncompressed_len)
+ {
+     double* d_dest = 0;
+@@ -4334,8 +4470,10 @@
+     int     result;
+     (void)tng_data;
+ 
+-    TNG_ASSERT(uncompressed_len,
+-               "TNG library: The full length of the uncompressed data must be > 0.");
++    if (compressed_len < 40 || uncompressed_len <= 0)
++    {
++        return (TNG_FAILURE);
++    }
+ 
+     if (block->id != TNG_TRAJ_POSITIONS && block->id != TNG_TRAJ_VELOCITIES)
+     {
+@@ -4350,6 +4488,20 @@
+         return (TNG_FAILURE);
+     }
+ 
++    {
++        size_t   elem_size    = (type == TNG_FLOAT_DATA) ? sizeof(float) : sizeof(double);
++        uint64_t needed_bytes = 0;
++        if (tng_compress_inquire_bounded(*data, (size_t)compressed_len, elem_size, &needed_bytes) != 0
++            || (uint64_t)uncompressed_len != needed_bytes
++            || (uint64_t)uncompressed_len > (uint64_t)INT_MAX * (uint64_t)elem_size)
++        {
++            fprintf(stderr,
++                    "TNG library: TNG compressed block header does not match block length. %s: %d\n",
++                    __FILE__, __LINE__);
++            return (TNG_FAILURE);
++        }
++    }
++
+     if (type == TNG_FLOAT_DATA)
+     {
+         f_dest = (float*)malloc(uncompressed_len);
+@@ -4358,7 +4510,8 @@
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+             return (TNG_CRITICAL);
+         }
+-        result = tng_compress_uncompress_float(*data, f_dest);
++        result = tng_compress_uncompress_float_bounded(*data, (size_t)compressed_len, f_dest,
++                                                       (size_t)uncompressed_len);
+ 
+         free(*data);
+ 
+@@ -4372,7 +4525,8 @@
+             fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+             return (TNG_CRITICAL);
+         }
+-        result = tng_compress_uncompress(*data, d_dest);
++        result = tng_compress_uncompress_bounded(*data, (size_t)compressed_len, d_dest,
++                                                 (size_t)uncompressed_len);
+ 
+         free(*data);
+ 
+@@ -4440,6 +4594,15 @@
+     (void)tng_data;
+     uLongf new_len = uncompressed_len;
+ 
++    /* deflate cannot expand data more than 1032 times */
++    if (compressed_len <= 0 || uncompressed_len <= 0
++        || uncompressed_len / 1032 > compressed_len + 1)
++    {
++        fprintf(stderr, "TNG library: Gzipped data cannot have the length of its block. %s: %d\n",
++                __FILE__, __LINE__);
++        return (TNG_FAILURE);
++    }
++
+     dest = (Bytef*)malloc(uncompressed_len);
+     if (!dest)
+     {
+@@ -4467,6 +4630,13 @@
+         fprintf(stderr, "TNG library: Error uncompressing gzipped data. %s: %d\n", __FILE__, __LINE__);
+         return (TNG_FAILURE);
+     }
++    if ((int64_t)new_len != uncompressed_len)
++    {
++        free(dest);
++        fprintf(stderr, "TNG library: Gzipped data is shorter than its block. %s: %d\n", __FILE__,
++                __LINE__);
++        return (TNG_FAILURE);
++    }
+ 
+     free(*data);
+ 
+@@ -4475,6 +4645,165 @@
+     return (TNG_SUCCESS);
+ }
+ 
++static void tng_data_particles_set_free(struct tng_data* data)
++{
++    free(data->particles_set);
++    data->particles_set   = 0;
++    data->n_particles_set = 0;
++}
++
++/* Records that a block of the frame set starting at frame has given values
++ * to particles [first, first + n). A block read again sets the same bits,
++ * so n_particles_set never counts a particle twice. */
++static tng_function_status tng_data_particles_set_mark(struct tng_data* data,
++                                                       const int64_t    frame,
++                                                       const int64_t    first,
++                                                       const int64_t    n)
++{
++    int64_t i;
++    size_t  len;
++
++    if ((uint64_t)(data->alloc_particles / 8 + 1) > SIZE_MAX)
++    {
++        return (TNG_CRITICAL);
++    }
++    len = (size_t)(data->alloc_particles / 8 + 1);
++    if (!data->particles_set)
++    {
++        data->particles_set = (unsigned char*)calloc(len, 1);
++        if (!data->particles_set)
++        {
++            fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++        data->particles_set_frame = frame;
++    }
++    if (data->particles_set_frame != frame)
++    {
++        memset(data->particles_set, 0, len);
++        data->n_particles_set     = 0;
++        data->particles_set_frame = frame;
++    }
++    for (i = first; i < first + n; i++)
++    {
++        if (!(data->particles_set[i / 8] & (1u << (i % 8))))
++        {
++            data->particles_set[i / 8] |= (unsigned char)(1u << (i % 8));
++            data->n_particles_set++;
++        }
++    }
++    return (TNG_SUCCESS);
++}
++
++/* Frees data->strings with the sizes it was allocated with. Every level
++ * may be partly allocated after a failed allocation. */
++static void tng_data_strings_free(struct tng_data* data)
++{
++    int64_t i, j, k;
++
++    if (data->strings)
++    {
++        for (i = 0; i < data->strings_dim[0]; i++)
++        {
++            if (!data->strings[i])
++            {
++                continue;
++            }
++            for (j = 0; j < data->strings_dim[1]; j++)
++            {
++                if (!data->strings[i][j])
++                {
++                    continue;
++                }
++                for (k = 0; k < data->strings_dim[2]; k++)
++                {
++                    free(data->strings[i][j][k]);
++                }
++                free(data->strings[i][j]);
++            }
++            free(data->strings[i]);
++        }
++        free(data->strings);
++    }
++    data->strings        = 0;
++    data->strings_dim[0] = 0;
++    data->strings_dim[1] = 0;
++    data->strings_dim[2] = 0;
++}
++
++/* Allocates data->strings as d0 x d1 x d2 null string pointers. */
++static tng_function_status tng_data_strings_alloc(struct tng_data* data,
++                                                  const int64_t    d0,
++                                                  const int64_t    d1,
++                                                  const int64_t    d2)
++{
++    int64_t i, j;
++
++    tng_data_strings_free(data);
++    if (d0 <= 0 || d1 <= 0 || d2 <= 0 || (uint64_t)d0 > SIZE_MAX / sizeof(char***)
++        || (uint64_t)d1 > SIZE_MAX / sizeof(char**) || (uint64_t)d2 > SIZE_MAX / sizeof(char*))
++    {
++        return (TNG_CRITICAL);
++    }
++    data->strings = (char****)calloc((size_t)d0, sizeof(char***));
++    if (!data->strings)
++    {
++        fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    data->strings_dim[0] = d0;
++    data->strings_dim[1] = d1;
++    data->strings_dim[2] = d2;
++    for (i = 0; i < d0; i++)
++    {
++        data->strings[i] = (char***)calloc((size_t)d1, sizeof(char**));
++        if (!data->strings[i])
++        {
++            fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++        for (j = 0; j < d1; j++)
++        {
++            data->strings[i][j] = (char**)calloc((size_t)d2, sizeof(char*));
++            if (!data->strings[i][j])
++            {
++                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
++                return (TNG_CRITICAL);
++            }
++        }
++    }
++    return (TNG_SUCCESS);
++}
++
++/* Replaces data->values with size * a * b * c zeroed bytes. */
++static tng_function_status tng_data_values_realloc(struct tng_data* data,
++                                                   const int64_t    size,
++                                                   const int64_t    a,
++                                                   const int64_t    b,
++                                                   const int64_t    c)
++{
++    void* values;
++
++    if (size <= 0 || a <= 0 || b <= 0 || c <= 0 || a > INT64_MAX / size / b / c
++        || (uint64_t)(size * a * b * c) > SIZE_MAX)
++    {
++        fprintf(stderr, "TNG library: Data block is too large. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    /* The old values have another shape, and a particle no block has given
++     * values to must not read as uninitialised memory. */
++    free(data->values);
++    data->values = 0;
++    values       = calloc((size_t)(size * a * b * c), 1);
++    if (!values)
++    {
++        fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    data->values = values;
++    return (TNG_SUCCESS);
++}
++
+ /**
+  * @brief Allocate memory for storing particle data.
+  * The allocated block will be refered to by data->values.
+@@ -4495,64 +4824,28 @@
+                                                           const int64_t n_particles,
+                                                           const int64_t n_values_per_frame)
+ {
+-    void*** values;
+-    int64_t i, j, k, size, frame_alloc;
++    int64_t size, frame_alloc;
+     (void)tng_data;
+ 
+-    if (n_particles == 0 || n_values_per_frame == 0)
++    if (n_particles <= 0 || n_values_per_frame <= 0)
+     {
+         return (TNG_FAILURE);
+     }
+ 
+-    if (data->strings && data->datatype == TNG_CHAR_DATA)
+-    {
+-        for (i = 0; i < data->n_frames; i++)
+-        {
+-            for (j = 0; j < n_particles; j++)
+-            {
+-                for (k = 0; k < data->n_values_per_frame; k++)
+-                {
+-                    if (data->strings[i][j][k])
+-                    {
+-                        free(data->strings[i][j][k]);
+-                    }
+-                }
+-                free(data->strings[i][j]);
+-            }
+-            free(data->strings[i]);
+-        }
+-        free(data->strings);
+-    }
++    tng_data_strings_free(data);
++    tng_data_particles_set_free(data);
++    data->alloc_particles    = 0;
+     data->n_frames           = n_frames;
+     n_frames                 = tng_max_i64(1, n_frames);
+     data->stride_length      = tng_max_i64(1, stride_length);
+     data->n_values_per_frame = n_values_per_frame;
+-    frame_alloc              = (n_frames - 1) / stride_length + 1;
++    frame_alloc              = (n_frames - 1) / data->stride_length + 1;
+ 
+     if (data->datatype == TNG_CHAR_DATA)
+     {
+-        data->strings = (char****)malloc(sizeof(char***) * frame_alloc);
+-        for (i = 0; i < frame_alloc; i++)
++        if (tng_data_strings_alloc(data, frame_alloc, n_particles, n_values_per_frame) != TNG_SUCCESS)
+         {
+-            data->strings[i] = (char***)malloc(sizeof(char**) * n_particles);
+-            if (!data->strings[i])
+-            {
+-                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                return (TNG_CRITICAL);
+-            }
+-            for (j = 0; j < n_particles; j++)
+-            {
+-                data->strings[i][j] = (char**)malloc(sizeof(char*) * n_values_per_frame);
+-                if (!data->strings[i][j])
+-                {
+-                    fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                    return (TNG_CRITICAL);
+-                }
+-                for (k = 0; k < n_values_per_frame; k++)
+-                {
+-                    data->strings[i][j][k] = 0;
+-                }
+-            }
++            return (TNG_CRITICAL);
+         }
+     }
+     else
+@@ -4565,16 +4858,13 @@
+             default: size = sizeof(double);
+         }
+ 
+-        values = (void***)realloc(data->values, size * frame_alloc * n_particles * n_values_per_frame);
+-        if (!values)
++        if (tng_data_values_realloc(data, size, frame_alloc, n_particles, n_values_per_frame)
++            != TNG_SUCCESS)
+         {
+-            fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-            free(data->values);
+-            data->values = 0;
+             return (TNG_CRITICAL);
+         }
+-        data->values = values;
+     }
++    data->alloc_particles = n_particles;
+     return (TNG_SUCCESS);
+ }
+ 
+@@ -4841,56 +5131,28 @@
+                                                  const int64_t                stride_length,
+                                                  const int64_t                n_values_per_frame)
+ {
+-    void**  values;
+-    int64_t i, j, size, frame_alloc;
++    int64_t size, frame_alloc;
+     (void)tng_data;
+ 
+-    if (n_values_per_frame == 0)
++    if (n_values_per_frame <= 0)
+     {
+         return (TNG_FAILURE);
+     }
+ 
+-    if (data->strings && data->datatype == TNG_CHAR_DATA)
+-    {
+-        for (i = 0; i < data->n_frames; i++)
+-        {
+-            for (j = 0; j < data->n_values_per_frame; j++)
+-            {
+-                if (data->strings[0][i][j])
+-                {
+-                    free(data->strings[0][i][j]);
+-                    data->strings[0][i][j] = 0;
+-                }
+-            }
+-            free(data->strings[0][i]);
+-            data->strings[0][i] = 0;
+-        }
+-        free(data->strings[0]);
+-        data->strings[0] = 0;
+-        free(data->strings);
+-    }
++    tng_data_strings_free(data);
++    tng_data_particles_set_free(data);
++    data->alloc_particles    = 0;
+     data->n_frames           = n_frames;
+     data->stride_length      = tng_max_i64(1, stride_length);
+     n_frames                 = tng_max_i64(1, n_frames);
+     data->n_values_per_frame = n_values_per_frame;
+-    frame_alloc              = (n_frames - 1) / stride_length + 1;
++    frame_alloc              = (n_frames - 1) / data->stride_length + 1;
+ 
+     if (data->datatype == TNG_CHAR_DATA)
+     {
+-        data->strings    = (char****)malloc(sizeof(char***));
+-        data->strings[0] = (char***)malloc(sizeof(char**) * frame_alloc);
+-        for (i = 0; i < frame_alloc; i++)
++        if (tng_data_strings_alloc(data, 1, frame_alloc, n_values_per_frame) != TNG_SUCCESS)
+         {
+-            data->strings[0][i] = (char**)malloc(sizeof(char*) * n_values_per_frame);
+-            if (!data->strings[0][i])
+-            {
+-                fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-                return (TNG_CRITICAL);
+-            }
+-            for (j = 0; j < n_values_per_frame; j++)
+-            {
+-                data->strings[0][i][j] = 0;
+-            }
++            return (TNG_CRITICAL);
+         }
+     }
+     else
+@@ -4903,16 +5165,12 @@
+             default: size = sizeof(double);
+         }
+ 
+-        values = (void**)realloc(data->values, size * frame_alloc * n_values_per_frame);
+-        if (!values)
++        if (tng_data_values_realloc(data, size, frame_alloc, 1, n_values_per_frame) != TNG_SUCCESS)
+         {
+-            fprintf(stderr, "TNG library: Cannot allocate memory. %s: %d\n", __FILE__, __LINE__);
+-            free(data->values);
+-            data->values = 0;
+             return (TNG_CRITICAL);
+         }
+-        data->values = values;
+     }
++    data->alloc_particles = 1;
+ 
+     return (TNG_SUCCESS);
+ }
+@@ -4962,7 +5220,8 @@
+                                          md5_state_t*                md5_state)
+ {
+     int64_t                    i, j, k, tot_n_particles, n_frames_div, offset;
+-    int64_t                    full_data_len;
++    int64_t                    full_data_len, expected_len;
++    char*                      values_start;
+     int                        size, len;
+     char ***                   first_dim_values, **second_dim_values;
+     tng_data_t                 data;
+@@ -4982,6 +5241,14 @@
+         default: size = sizeof(double);
+     }
+ 
++    if (n_values <= 0 || n_frames <= 0 || stride_length <= 0 || n_particles < 0 || block_data_len <= 0
++        || block_data_len > tng_data->input_file_len)
++    {
++        fprintf(stderr, "TNG library: Invalid data block (%s) dimensions. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     if (n_particles > 0)
+     {
+         is_particle_data = TNG_TRUE;
+@@ -5004,6 +5271,12 @@
+     {
+         stat = tng_data_find(tng_data, block->id, &data);
+     }
++    if (stat == TNG_SUCCESS && data->datatype != datatype)
++    {
++        fprintf(stderr, "TNG library: Data block (%s) changes its data type. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
+ 
+     if (tng_data->current_trajectory_frame_set_input_file_pos > 0)
+     {
+@@ -5069,8 +5342,14 @@
+ 
+         data->values = 0;
+         /* FIXME: Memory leak from strings. */
+-        data->strings    = 0;
+-        data->n_frames   = 0;
++        data->strings         = 0;
++        data->strings_dim[0]  = 0;
++        data->strings_dim[1]  = 0;
++        data->strings_dim[2]  = 0;
++        data->alloc_particles = 0;
++        data->particles_set   = 0;
++        data->n_particles_set = 0;
++        data->n_frames        = 0;
+         data->dependency = 0;
+         if (is_particle_data == TNG_TRUE)
+         {
+@@ -5106,6 +5385,38 @@
+ 
+     n_frames_div = (n_frames - 1) / stride_length + 1;
+ 
++    /* The values of the block go to [num_first_particle, num_first_particle
++     * + n_particles) of an array of tot_n_particles: check that range, and
++     * that neither the array nor the block size overflows. */
++    if (is_particle_data == TNG_TRUE
++        && (tot_n_particles <= 0 || num_first_particle < 0 || n_particles > tot_n_particles
++            || num_first_particle > tot_n_particles - n_particles))
++    {
++        fprintf(stderr, "TNG library: Data block (%s) particles are out of range. %s: %d\n",
++                block->name, __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    if (n_frames_div > INT64_MAX / size / n_values / tot_n_particles)
++    {
++        fprintf(stderr, "TNG library: Data block (%s) is too large. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++    {
++        int64_t alloc_elem = (datatype == TNG_CHAR_DATA) ? (int64_t)sizeof(char*) : size;
++        if (n_frames_div > INT64_MAX / alloc_elem / n_values / tot_n_particles)
++        {
++            fprintf(stderr, "TNG library: Data block (%s) is too large. %s: %d\n", block->name,
++                    __FILE__, __LINE__);
++            return (TNG_CRITICAL);
++        }
++    }
++    expected_len = n_frames_div * size * n_values;
++    if (is_particle_data == TNG_TRUE)
++    {
++        expected_len *= n_particles;
++    }
++
+     contents = (char*)malloc(block_data_len);
+     if (!contents)
+     {
+@@ -5116,6 +5427,7 @@
+     if (fread(contents, block_data_len, 1, tng_data->input_file) == 0)
+     {
+         fprintf(stderr, "TNG library: Cannot read block. %s: %d\n", __FILE__, __LINE__);
++        free(contents);
+         return (TNG_CRITICAL);
+     }
+ 
+@@ -5126,19 +5438,17 @@
+ 
+     if (codec_id != TNG_UNCOMPRESSED)
+     {
+-        full_data_len = n_frames_div * size * n_values;
+-        if (is_particle_data == TNG_TRUE)
+-        {
+-            full_data_len *= n_particles;
+-        }
++        full_data_len = expected_len;
+         switch (codec_id)
+         {
+             case TNG_XTC_COMPRESSION:
+                 fprintf(stderr, "TNG library: XTC compression not implemented yet.\n");
+-                break;
++                free(contents);
++                return (TNG_CRITICAL);
+             case TNG_TNG_COMPRESSION:
+                 /*            fprintf(stderr, "TNG library: Before TNG uncompression: %" PRId64 "\n", block->block_contents_size);*/
+-                if (tng_uncompress(tng_data, block, datatype, &contents, full_data_len) != TNG_SUCCESS)
++                if (tng_uncompress(tng_data, block, datatype, &contents, block_data_len, full_data_len)
++                    != TNG_SUCCESS)
+                 {
+                     fprintf(stderr,
+                             "TNG library: Could not read tng compressed block data. %s: %d\n",
+@@ -5159,15 +5469,75 @@
+                 }
+                 /*         fprintf(stderr, "TNG library: After compression: %" PRId64 "\n", block->block_contents_size); */
+                 break;
++            default:
++                fprintf(stderr, "TNG library: Unknown compression codec %" PRId64 ". %s: %d\n",
++                        codec_id, __FILE__, __LINE__);
++                free(contents);
++                return (TNG_CRITICAL);
+         }
+     }
+     else
+     {
+         full_data_len = block_data_len;
+     }
++    /* Strings have a variable length of at least one byte, the other types
++     * exactly fill the block. */
++    if (full_data_len < expected_len)
++    {
++        fprintf(stderr, "TNG library: Data block (%s) is too short. %s: %d\n", block->name,
++                __FILE__, __LINE__);
++        free(contents);
++        return (TNG_CRITICAL);
++    }
++    if (datatype != TNG_CHAR_DATA)
++    {
++        full_data_len = expected_len;
++    }
++
++    if (first_frame_with_data < 0 || n_frames < 0
++        || first_frame_with_data > INT64_MAX - n_frames)
++    {
++        fprintf(stderr, "TNG library: Invalid data block frame range. %s: %d\n", __FILE__, __LINE__);
++        free(contents);
++        return (TNG_CRITICAL);
++    }
++
++    /* The array is tot_n_particles wide and this block holds n_particles of
++       them. When the block covers every particle the two byte counts are
++       equal, which is the decompressed size rather than a ratio of the
++       file length. A wider array is a slice; a width the decompressed
++       block does not divide, or a width larger than the file can hold as
++       copies of that block, is rejected before the allocation. */
++    if (datatype != TNG_CHAR_DATA && is_particle_data == TNG_TRUE)
++    {
++        uint64_t tng_slice = (uint64_t)n_frames_div * (uint64_t)size * (uint64_t)n_values
++                             * (uint64_t)n_particles;
++        uint64_t tng_alloc = (uint64_t)n_frames_div * (uint64_t)size * (uint64_t)n_values
++                             * (uint64_t)tot_n_particles;
++        if (tng_slice == 0 || tng_slice != (uint64_t)full_data_len || n_particles <= 0
++            || (uint64_t)tot_n_particles % (uint64_t)n_particles != 0
++            || tng_alloc / tng_slice != (uint64_t)tot_n_particles / (uint64_t)n_particles)
++        {
++            fprintf(stderr,
++                    "TNG library: Data block (%s) allocation does not match decompressed size. %s: %d\n",
++                    block->name, __FILE__, __LINE__);
++            free(contents);
++            return (TNG_CRITICAL);
++        }
++        if (tng_alloc != tng_slice && tng_data->input_file_len > 0
++            && tng_alloc / tng_slice > (uint64_t)tng_data->input_file_len)
++        {
++            fprintf(stderr, "TNG library: Data block (%s) allocation exceeds file size bound. %s: %d\n",
++                    block->name, __FILE__, __LINE__);
++            free(contents);
++            return (TNG_CRITICAL);
++        }
++    }
+ 
+     /* Allocate memory */
+-    if (!data->values || data->n_frames != n_frames || data->n_values_per_frame != n_values)
++    if ((datatype == TNG_CHAR_DATA ? !data->strings : !data->values) || data->n_frames != n_frames
++        || data->n_values_per_frame != n_values || data->stride_length != stride_length
++        || data->alloc_particles != tot_n_particles)
+     {
+         if (is_particle_data == TNG_TRUE)
+         {
+@@ -5203,7 +5573,15 @@
+                     second_dim_values = first_dim_values[j];
+                     for (k = 0; k < n_values; k++)
+                     {
+-                        len = tng_min_size(strlen(contents + offset) + 1, TNG_MAX_STR_LEN);
++                        if (offset >= full_data_len)
++                        {
++                            fprintf(stderr, "TNG library: Data block (%s) has too few strings. %s: %d\n",
++                                    block->name, __FILE__, __LINE__);
++                            free(contents);
++                            return (TNG_CRITICAL);
++                        }
++                        len = tng_min_size(strnlen(contents + offset, full_data_len - offset) + 1,
++                                           TNG_MAX_STR_LEN);
+                         if (second_dim_values[k])
+                         {
+                             free(second_dim_values[k]);
+@@ -5216,7 +5594,8 @@
+                             free(contents);
+                             return (TNG_CRITICAL);
+                         }
+-                        strncpy(second_dim_values[k], contents + offset, len);
++                        memcpy(second_dim_values[k], contents + offset, len - 1);
++                        second_dim_values[k][len - 1] = '\0';
+                         offset += len;
+                     }
+                 }
+@@ -5228,7 +5607,15 @@
+             {
+                 for (j = 0; j < n_values; j++)
+                 {
+-                    len = tng_min_size(strlen(contents + offset) + 1, TNG_MAX_STR_LEN);
++                    if (offset >= full_data_len)
++                    {
++                        fprintf(stderr, "TNG library: Data block (%s) has too few strings. %s: %d\n",
++                                block->name, __FILE__, __LINE__);
++                        free(contents);
++                        return (TNG_CRITICAL);
++                    }
++                    len = tng_min_size(strnlen(contents + offset, full_data_len - offset) + 1,
++                                       TNG_MAX_STR_LEN);
+                     if (data->strings[0][i][j])
+                     {
+                         free(data->strings[0][i][j]);
+@@ -5240,7 +5627,8 @@
+                         free(contents);
+                         return (TNG_CRITICAL);
+                     }
+-                    strncpy(data->strings[0][i][j], contents + offset, len);
++                    memcpy(data->strings[0][i][j], contents + offset, len - 1);
++                    data->strings[0][i][j][len - 1] = '\0';
+                     offset += len;
+                 }
+             }
+@@ -5248,14 +5636,22 @@
+     }
+     else
+     {
++        values_start = (char*)data->values;
+         if (is_particle_data)
+         {
+-            memcpy((char*)data->values + n_frames_div * size * n_values * num_first_particle,
+-                   contents, full_data_len);
++            values_start += n_frames_div * size * n_values * num_first_particle;
+         }
+-        else
++        memcpy(values_start, contents, full_data_len);
++        if (is_particle_data
++            && tng_data_particles_set_mark(data,
++                                           block_type_flag == TNG_TRAJECTORY_BLOCK
++                                                   ? frame_set->first_frame
++                                                   : -1,
++                                           num_first_particle, n_particles)
++                       != TNG_SUCCESS)
+         {
+-            memcpy(data->values, contents, full_data_len);
++            free(contents);
++            return (TNG_CRITICAL);
+         }
+         /* Endianness is handled by the TNG compression library. TNG compressed blocks are always
+          * written as little endian by the compression library. */
+@@ -5269,7 +5665,7 @@
+                         for (i = 0; i < full_data_len; i += size)
+                         {
+                             if (tng_data->input_endianness_swap_func_32(
+-                                        tng_data, (uint32_t*)((char*)data->values + i))
++                                        tng_data, (uint32_t*)(values_start + i))
+                                 != TNG_SUCCESS)
+                             {
+                                 fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
+@@ -5285,7 +5681,7 @@
+                         for (i = 0; i < full_data_len; i += size)
+                         {
+                             if (tng_data->input_endianness_swap_func_64(
+-                                        tng_data, (uint64_t*)((char*)data->values + i))
++                                        tng_data, (uint64_t*)(values_start + i))
+                                 != TNG_SUCCESS)
+                             {
+                                 fprintf(stderr, "TNG library: Cannot swap byte order. %s: %d\n",
+@@ -8508,33 +8904,8 @@
+                 tng_data->non_tr_particle_data[i].values = 0;
+             }
+ 
+-            if (tng_data->non_tr_particle_data[i].strings)
+-            {
+-                n_values_per_frame = tng_data->non_tr_particle_data[i].n_values_per_frame;
+-                if (tng_data->non_tr_particle_data[i].strings[0])
+-                {
+-                    for (j = 0; j < n_particles; j++)
+-                    {
+-                        if (tng_data->non_tr_particle_data[i].strings[0][j])
+-                        {
+-                            for (k = 0; k < n_values_per_frame; k++)
+-                            {
+-                                if (tng_data->non_tr_particle_data[i].strings[0][j][k])
+-                                {
+-                                    free(tng_data->non_tr_particle_data[i].strings[0][j][k]);
+-                                    tng_data->non_tr_particle_data[i].strings[0][j][k] = 0;
+-                                }
+-                            }
+-                            free(tng_data->non_tr_particle_data[i].strings[0][j]);
+-                            tng_data->non_tr_particle_data[i].strings[0][j] = 0;
+-                        }
+-                    }
+-                    free(tng_data->non_tr_particle_data[i].strings[0]);
+-                    tng_data->non_tr_particle_data[i].strings[0] = 0;
+-                }
+-                free(tng_data->non_tr_particle_data[i].strings);
+-                tng_data->non_tr_particle_data[i].strings = 0;
+-            }
++            tng_data_strings_free(&tng_data->non_tr_particle_data[i]);
++            tng_data_particles_set_free(&tng_data->non_tr_particle_data[i]);
+ 
+             if (tng_data->non_tr_particle_data[i].block_name)
+             {
+@@ -8556,27 +8927,8 @@
+                 tng_data->non_tr_data[i].values = 0;
+             }
+ 
+-            if (tng_data->non_tr_data[i].strings)
+-            {
+-                n_values_per_frame = tng_data->non_tr_data[i].n_values_per_frame;
+-                if (tng_data->non_tr_data[i].strings[0][0])
+-                {
+-                    for (j = 0; j < n_values_per_frame; j++)
+-                    {
+-                        if (tng_data->non_tr_data[i].strings[0][0][j])
+-                        {
+-                            free(tng_data->non_tr_data[i].strings[0][0][j]);
+-                            tng_data->non_tr_data[i].strings[0][0][j] = 0;
+-                        }
+-                    }
+-                    free(tng_data->non_tr_data[i].strings[0][0]);
+-                    tng_data->non_tr_data[i].strings[0][0] = 0;
+-                }
+-                free(tng_data->non_tr_data[i].strings[0]);
+-                tng_data->non_tr_data[i].strings[0] = 0;
+-                free(tng_data->non_tr_data[i].strings);
+-                tng_data->non_tr_data[i].strings = 0;
+-            }
++            tng_data_strings_free(&tng_data->non_tr_data[i]);
++            tng_data_particles_set_free(&tng_data->non_tr_data[i]);
+ 
+             if (tng_data->non_tr_data[i].block_name)
+             {
+@@ -8612,36 +8964,8 @@
+                 frame_set->tr_particle_data[i].values = 0;
+             }
+ 
+-            if (frame_set->tr_particle_data[i].strings)
+-            {
+-                n_values_per_frame = frame_set->tr_particle_data[i].n_values_per_frame;
+-                for (j = 0; j < frame_set->tr_particle_data[i].n_frames; j++)
+-                {
+-                    if (frame_set->tr_particle_data[i].strings[j])
+-                    {
+-                        for (k = 0; k < n_particles; k++)
+-                        {
+-                            if (frame_set->tr_particle_data[i].strings[j][k])
+-                            {
+-                                for (l = 0; l < n_values_per_frame; l++)
+-                                {
+-                                    if (frame_set->tr_particle_data[i].strings[j][k][l])
+-                                    {
+-                                        free(frame_set->tr_particle_data[i].strings[j][k][l]);
+-                                        frame_set->tr_particle_data[i].strings[j][k][l] = 0;
+-                                    }
+-                                }
+-                                free(frame_set->tr_particle_data[i].strings[j][k]);
+-                                frame_set->tr_particle_data[i].strings[j][k] = 0;
+-                            }
+-                        }
+-                        free(frame_set->tr_particle_data[i].strings[j]);
+-                        frame_set->tr_particle_data[i].strings[j] = 0;
+-                    }
+-                }
+-                free(frame_set->tr_particle_data[i].strings);
+-                frame_set->tr_particle_data[i].strings = 0;
+-            }
++            tng_data_strings_free(&frame_set->tr_particle_data[i]);
++            tng_data_particles_set_free(&frame_set->tr_particle_data[i]);
+ 
+             if (frame_set->tr_particle_data[i].block_name)
+             {
+@@ -8663,28 +8987,8 @@
+                 frame_set->tr_data[i].values = 0;
+             }
+ 
+-            if (frame_set->tr_data[i].strings)
+-            {
+-                n_values_per_frame = frame_set->tr_data[i].n_values_per_frame;
+-                for (j = 0; j < frame_set->tr_data[i].n_frames; j++)
+-                {
+-                    if (frame_set->tr_data[i].strings[j])
+-                    {
+-                        for (k = 0; k < n_values_per_frame; k++)
+-                        {
+-                            if (frame_set->tr_data[i].strings[j][k])
+-                            {
+-                                free(frame_set->tr_data[i].strings[j][k]);
+-                                frame_set->tr_data[i].strings[j][k] = 0;
+-                            }
+-                        }
+-                        free(frame_set->tr_data[i].strings[j]);
+-                        frame_set->tr_data[i].strings[j] = 0;
+-                    }
+-                }
+-                free(frame_set->tr_data[i].strings);
+-                frame_set->tr_data[i].strings = 0;
+-            }
++            tng_data_strings_free(&frame_set->tr_data[i]);
++            tng_data_particles_set_free(&frame_set->tr_data[i]);
+ 
+             if (frame_set->tr_data[i].block_name)
+             {
+@@ -9704,6 +10008,12 @@
+ 
+     fseeko(tng_data->input_file, file_pos, SEEK_SET);
+ 
++    if (first_frame < 0 || n_frames < 0 || first_frame > INT64_MAX - n_frames)
++    {
++        fprintf(stderr, "TNG library: Invalid frame count in last frame set. %s: %d\n", __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     *n = first_frame + n_frames;
+ 
+     return (TNG_SUCCESS);
+@@ -10084,6 +10394,10 @@
+ 
+     *n = tng_data->n_trajectory_frame_sets = cnt;
+ 
++    if (frame_set->molecule_cnt_list != orig_frame_set.molecule_cnt_list)
++    {
++        free(frame_set->molecule_cnt_list);
++    }
+     *frame_set = orig_frame_set;
+     /* The mapping block in the original frame set has been freed when reading
+      * other frame sets. */
+@@ -11747,6 +12061,7 @@
+     {
+         fprintf(stderr, "TNG library: Cannot read block header at pos %" PRId64 ". %s: %d\n",
+                 file_pos, __FILE__, __LINE__);
++        tng_block_destroy(&block);
+         return (TNG_CRITICAL);
+     }
+     /*    if(tng_data->current_trajectory_frame_set_input_file_pos <= 0)
+@@ -11856,6 +12171,12 @@
+         data->values = 0;
+         /* FIXME: Memory leak from strings. */
+         data->strings              = 0;
++        data->strings_dim[0]       = 0;
++        data->strings_dim[1]       = 0;
++        data->strings_dim[2]       = 0;
++        data->alloc_particles      = 0;
++        data->particles_set        = 0;
++        data->n_particles_set      = 0;
+         data->last_retrieved_frame = -1;
+     }
+ 
+@@ -13421,6 +13742,16 @@
+         default: size = sizeof(double);
+     }
+ 
++    if (is_particle_data == TNG_TRUE
++        && (data->alloc_particles != *n_particles || data->n_particles_set != *n_particles))
++    {
++        fprintf(stderr,
++                "TNG library: Data block (%s) has values for %" PRId64 " of %" PRId64
++                " particles. %s: %d\n",
++                data->block_name, data->n_particles_set, *n_particles, __FILE__, __LINE__);
++        return (TNG_CRITICAL);
++    }
++
+     *n_frames           = tng_max_i64(1, data->n_frames);
+     *n_values_per_frame = data->n_values_per_frame;
+     *stride_length      = data->stride_length;
+@@ -13451,7 +13782,7 @@
+     else
+     {
+         i_step = (*n_particles) * (*n_values_per_frame);
+-        for (i = 0; i < *n_frames; i++)
++        for (i = 0; i < n_frames_div; i++)
+         {
+             for (j = 0; j < *n_particles; j++)
+             {
+@@ -13884,6 +14215,7 @@
+             if (stat != TNG_SUCCESS)
+             {
+                 fprintf(stderr, "TNG library: Cannot read block header. %s: %d\n", __FILE__, __LINE__);
++                tng_block_destroy(&block);
+                 return (stat);
+             }
+ 
+@@ -14361,6 +14693,10 @@
+     if (mode == 'w')
+     {
+         stat = tng_output_file_set(*tng_data_p, filename);
++        if (stat != TNG_SUCCESS)
++        {
++            tng_util_trajectory_close(tng_data_p);
++        }
+         return (stat);
+     }
+     tng_input_file_set(*tng_data_p, filename);
+@@ -14372,6 +14708,7 @@
+ 
+     if (stat != TNG_SUCCESS)
+     {
++        tng_util_trajectory_close(tng_data_p);
+         return (stat);
+     }
+ 

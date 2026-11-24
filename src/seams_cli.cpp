@@ -105,9 +105,25 @@ bool equalFold(std::string_view left, std::string_view right) {
   return true;
 }
 
+// The VMD molfile extensions: chemfiles' trj, psf and molden, and those
+// cmake/patches/chemfiles-0.10.4-molfiles.patch registers. Every chemfiles
+// this build accepts has them; see cmake/chemfiles_mmcif_probe.cpp.
 bool chemfilesSuffix(std::string_view ext) {
-  return ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
-         ext == "trr" || ext == "nc" || equalFold(ext, "lammpsdata");
+  static constexpr std::string_view molfile[] = {
+      "trj", "psf", "molden", "bgf", "binpos", "car", "cor", "cpmd", "cube",
+      "dlpolyconfig", "dlpolyhist", "dms", "dtr", "g96", "js", "log", "mae",
+      "mdf", "coor", "out", "parm", "parm7", "pqr", "rst7", "OUTCAR", "POSCAR",
+      "XDATCAR", "VASP_XDATCAR5", "xml", "vsf", "vtf", "xbgf", "xsf"};
+  if (ext == "pdb" || ext == "gro" || ext == "dcd" || ext == "xtc" ||
+      ext == "trr" || ext == "nc" || equalFold(ext, "lammpsdata")) {
+    return true;
+  }
+  for (const auto name : molfile) {
+    if (ext == name) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // readCon and readChemfiles print an open error and return an empty cloud.

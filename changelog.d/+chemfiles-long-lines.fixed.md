@@ -1,0 +1,1 @@
+A text file with a line longer than chemfiles' read buffer keeps the right offset for the steps after it. The next frame of such an XYZ file was read from the wrong place, and an SMI file with such a line and a blank tail looped forever. The mmCIF writer prints `?` for an empty atom name or type, which the reader reads back as empty, so the row keeps its columns.

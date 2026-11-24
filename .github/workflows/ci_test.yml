@@ -10,6 +10,16 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
+  # A build dir configured before a patch changed keeps its old chemfiles
+  # prefix, so a malformed hunk can pass every local test. This applies
+  # each patch to a pristine chemfiles 0.10.4 tarball.
+  chemfiles-patches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check every chemfiles patch against the 0.10.4 tarball
+        run: sh scripts/check_chemfiles_patches.sh
+
   build-test:
     strategy:
       fail-fast: false

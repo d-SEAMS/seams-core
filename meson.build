@@ -597,7 +597,8 @@ else
           _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
           _mmcif_run = cppc.run(
             fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
-            args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'] +
+            args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"',
+                   '-DSEAMS_RST7_PROBE="' + (meson.project_source_root() / 'cmake' / 'molfile_water.rst7') + '"'] +
                   (_cand_libdir != '' ? ['-Wl,-rpath,' + _cand_libdir] : []),
             dependencies: _cand,
             name: 'chemfiles reads an mmCIF atom with no residue id, a truncated MOL2 and a bad LAMMPS Data header')
@@ -666,6 +667,13 @@ else
       _chem_patch_ids = ['host ' + _chem_host_id]
       foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
                         'patches/chemfiles-0.10.4-frame-visit.patch', 'patches/chemfiles-0.10.4-lammpsdata-section.patch',
+                        'patches/chemfiles-0.10.4-molfiles.patch',
+                        'patches/chemfiles-0.10.4-molfile-sources.patch',
+                        'patches/chemfiles-0.10.4-tng-sources.patch',
+                        'patches/chemfiles-0.10.4-mmtf-sources.patch',
+                        'patches/chemfiles-0.10.4-gemmi-sources.patch',
+                        'patches/chemfiles-0.10.4-external-sources.sh',
+                        'patches/chemfiles-0.10.4-hostile.patch',
                         'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                         'CMakeLists.txt', 'ChemfilesDep.cmake']
         _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]

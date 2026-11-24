@@ -1,0 +1,135 @@
+Authors and copyright holders of seams-core and of the chemfiles it builds
+
+seams-core is by the d-SEAMS core team; CITATION.cff names its authors.
+License: MIT (LICENSE).
+
+When no installed chemfiles passes cmake/chemfiles_mmcif_probe.cpp, the
+build fetches chemfiles 0.10.4, patches it with cmake/patches/, and
+installs it as libseams-chemfiles. The parts it compiles are listed below
+with their authors; LICENSE.note gives each licence. Paths are inside the
+fetched chemfiles source.
+
+
+1. chemfiles 0.10.4
+
+  Authors: Guillaume Fraux and contributors: Elsa Perrin,
+    François-Xavier Coudert, Guillaume Fraux, Jonathan Fine,
+    Laura Scalfi, Len Kimms, Maximilien Levesque, Patricio Barletta
+    (chemfiles AUTHORS)
+  License: BSD-3-Clause
+  Source: https://github.com/chemfiles/chemfiles
+  Patches in cmake/patches: the d-SEAMS developers
+
+Header-only code in include/chemfiles/external:
+
+optional.hpp
+  Authors: Andrzej Krzemienski
+  License: BSL-1.0
+span.hpp
+  Authors: Guillaume Fraux, Martin Moene, Microsoft Corporation
+  License: MIT
+string_view.hpp
+  Authors: Martin Moene
+  License: BSL-1.0
+
+
+2. Libraries bundled by chemfiles in external/ and compiled
+
+bzip2 (bzip2 and libbzip2)
+  Authors: Julian R Seward
+  License: bzip2-1.0.6 (BSD-style)
+fmt
+  Authors: Victor Zverovich and contributors
+  License: MIT
+gemmi (headers)
+  Authors: Global Phasing Ltd.
+  License: MPL-2.0
+  gemmi/include/gemmi/third_party/tao (PEGTL): Dr. Colin Hirsch and
+    Daniel Frey; MIT
+lzma (liblzma from XZ Utils)
+  Authors: Lasse Collin, Igor Pavlov, Kevin Springle, Wei Dai and the
+    XZ Utils contributors. Kevin Springle and Wei Dai wrote the SHA-256
+    implementation (lzma/liblzma/check/sha256.c and the credit in
+    lzma/liblzma/api/lzma.h).
+  License: public domain
+mmtf-cpp (headers)
+  Authors: Gabriel Studer, Gerardo Tauriello, Daniel Farrell
+    (mmtf-cpp/include/mmtf/structure_data.hpp). Based on mmtf_c by
+    Julien Ferte, with Anthony Bradley and Thomas Holder, and
+    contributions from Yana Valasatava, Gazal Kalyan and Alexander Rose.
+    Copyright holder in mmtf-cpp/LICENSE: University of California
+    San Diego
+  License: MIT
+  Includes msgpack-c (mmtf-cpp/msgpack-c): FURUHASHI Sadayuki, KONDO
+    Takatoshi, Vladimir Volodko, MIZUKI Hirata and the msgpack-c
+    contributors; BSL-1.0
+  Its copy of Boost.Preprocessor (msgpack/preprocessor): Housemarque Oy,
+    Paul Mensonides, Edward Diener; BSL-1.0
+  Its copy of Boost.Predef (msgpack/predef): Rene Rivera, Charly
+    Chevalier, Joel Falcou, Franz Detro, Jessica Hamilton, Microsoft
+    Corporation; BSL-1.0
+molfiles (VMD molfile plugins)
+  Copyright: The Board of Trustees of the University of Illinois, for the
+    Theoretical and Computational Biophysics Group, University of
+    Illinois at Urbana-Champaign
+  License: University of Illinois Open Source License (NCSA), except the
+    files below
+  Authors of the compiled plugins (each plugin's `author` field, and the
+  file header where it names more):
+    abinitplugin: Rob Lahaye
+    bgfplugin, xbgfplugin: Peter Freddolino
+    binposplugin: Brian Bennion
+    carplugin, pqrplugin: Eamon Caddigan
+    corplugin: Eamon Caddigan, John Stone
+    cpmdplugin, cubeplugin, xsfplugin: Axel Kohlmeyer, John Stone
+    cpmdlogplugin: Axel Kohlmeyer
+    dlpolyplugin: John Stone (DL_POLY HISTORY readers), Alin M Elena
+      (DL_POLY CONFIG reader)
+    dmsplugin: D. E. Shaw Research, LLC (Justin Gullingsrud)
+    dtrplugin, maeffplugin: D. E. Shaw Research
+    gamessplugin: Jan Saam, Markus Dittrich, Johan Strumpfer
+    gaussianplugin: Axel Kohlmeyer, Markus Dittrich, Jan Saam
+    gromacsplugin: David Norris, Justin Gullingsrud, Magnus Lundborg,
+      Axel Kohlmeyer (trr_plugin; g96_plugin is David Norris and
+      Justin Gullingsrud, trj_plugin the same, gro_plugin adds
+      Magnus Lundborg)
+    jsplugin, tinkerplugin: John Stone
+    mdfplugin: Eamon Caddigan, Axel Kohlmeyer
+    moldenplugin: Markus Dittrich, Jan Saam, Alexey Titov
+    namdbinplugin: James Phillips, Justin Gullingsrud
+    parm7plugin: Brian Bennion, Justin Gullingsrud, John Stone
+    parmplugin, psfplugin: Justin Gullingsrud, John Stone
+    rst7plugin: Brian Bennion, Axel Kohlmeyer
+    vasp5xdatcarplugin, vaspoutcarplugin, vaspposcarplugin,
+      vaspxdatcarplugin, vaspxmlplugin: Sung Sakong
+    vtfplugin: Olaf Lenz, Henri Menke
+  molfiles/src/Gromacs.h implements the 3dfcoord algorithm by Frans van
+    Hoesel.
+  Files with their own copyright holders and terms:
+    abinitplugin.c: Rob Lahaye, Sungkyunkwan University; may be used only
+      as part of an open-source project
+    dmsplugin.cxx, dtrplugin.cxx, dtrplugin.hxx, maeffplugin.cxx:
+      D. E. Shaw Research, LLC; BSD-3-Clause
+    ReadPARM.h, ReadPARM7.h: Regents of the University of California,
+      code by Bill Ross (UCSF); distributable with the notice kept
+      unmodified and changes noted
+pugixml
+  Authors: Arseny Kapoulkine
+  License: MIT
+  pugixml is based on pugxml by Kristen Wegner, credited in its headers.
+tng (TNG trajectory library)
+  Authors: The GROMACS development team (Magnus Lundborg, Daniel
+    Spångberg, Rossen Apostolov, Anders Gärdenäs, Hugo
+    MacDermott-Opeskin and contributors)
+  License: BSD-3-Clause
+  src/compression/xtc2.c and xtc3.c, by Daniel Spångberg, are based on
+    the coordinate compression of Frans van Hoesel and of GROMACS (Erik
+    Lindahl, David van der Spoel), under tng's BSD-3-Clause licence.
+  include/tng/md5.h, src/lib/md5.c: Aladdin Enterprises (L. Peter
+    Deutsch); zlib-style licence
+toml11 (headers)
+  Authors: Toru Niina
+  License: MIT
+zlib
+  Authors: Jean-loup Gailly and Mark Adler
+  License: Zlib
