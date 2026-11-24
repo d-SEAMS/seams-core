@@ -596,11 +596,11 @@ else
             args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'] +
                   (_cand_libdir != '' ? ['-Wl,-rpath,' + _cand_libdir] : []),
             dependencies: _cand,
-            name: 'chemfiles reads an mmCIF atom with no residue id and a truncated MOL2')
+            name: 'chemfiles reads an mmCIF atom with no residue id, a truncated MOL2 and a bad LAMMPS Data header')
           if _mmcif_run.compiled() and _mmcif_run.returncode() == 0
             _chem_ext = true
           else
-            _chem_rejected += [_method + ' found chemfiles ' + _cand_version + ', which fails the mmCIF or MOL2 probe']
+            _chem_rejected += [_method + ' found chemfiles ' + _cand_version + ', which fails the mmCIF, MOL2 or LAMMPS Data probe']
           endif
         endif
         if _chem_ext
@@ -661,7 +661,7 @@ else
       # the patch step runs only on a fetch.
       _chem_patch_ids = ['host ' + _chem_host_id]
       foreach _patch : ['patches/chemfiles-0.10.4-mmcif.patch', 'patches/chemfiles-0.10.4-mol2.patch',
-                        'patches/chemfiles-0.10.4-frame-visit.patch',
+                        'patches/chemfiles-0.10.4-frame-visit.patch', 'patches/chemfiles-0.10.4-lammpsdata-section.patch',
                         'patches/chemfiles-0.10.4-zlib-apple.sh', 'patches/chemfiles-0.10.4-fmt-libcxx.sh',
                         'CMakeLists.txt', 'ChemfilesDep.cmake']
         _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / _patch, 'sha256')]

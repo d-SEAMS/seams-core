@@ -102,7 +102,7 @@ if(SEAMS_WITH_CHEMFILES)
             set(_seams_chemfiles_system_ok TRUE)
           else()
             message(STATUS
-              "system chemfiles fails the mmCIF or MOL2 probe (exit ${_seams_probe_run})")
+              "system chemfiles fails the mmCIF, MOL2 or LAMMPS Data probe (exit ${_seams_probe_run})")
           endif()
         endif()
       endif()
@@ -136,14 +136,14 @@ if(SEAMS_WITH_CHEMFILES)
         chemfiles
         URL ${_seams_chemfiles_archive}
         URL_HASH SHA256=b8232ddaae2953538274982838aa6c2df87d300f7e2f80e92c171581e06325ba
-        PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+        PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-lammpsdata-section.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
     else()
       FetchContent_Declare(
         chemfiles
         GIT_REPOSITORY https://github.com/chemfiles/chemfiles.git
         GIT_TAG 0.10.4
         GIT_SHALLOW TRUE
-        PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
+        PATCH_COMMAND sh -c "(patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mmcif.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-mol2.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-frame-visit.patch || test $? -eq 1) && (patch -p1 -N -i ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-lammpsdata-section.patch || test $? -eq 1) && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-zlib-apple.sh && sh ${CMAKE_CURRENT_LIST_DIR}/patches/chemfiles-0.10.4-fmt-libcxx.sh")
     endif()
     set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     set(CHFL_BUILD_TESTS OFF CACHE BOOL "" FORCE)

@@ -1,0 +1,31 @@
+# Copyright (c) d-SEAMS developers
+# A LAMMPS Data header line that is not a known keyword or a section name
+# sets the section to NOT_A_SECTION. 0.10.4 guards that with an assert, which
+# a release build compiles out, and the read loop then reaches
+# unreachable(), so the reader spins forever. Throw format_error in both
+# places instead.
+diff --git a/src/formats/LAMMPSData.cpp b/src/formats/LAMMPSData.cpp
+index 7c04421..20e17a5 100644
+--- a/src/formats/LAMMPSData.cpp
++++ b/src/formats/LAMMPSData.cpp
+@@ -247,6 +247,6 @@ void LAMMPSDataFormat::read_next(Frame& frame) {
+             skip_to_next_section();
+             break;
+         case NOT_A_SECTION:
+-            unreachable();
++            throw format_error("LAMMPS Data reader reached an unrecognized section");
+         }
+     }
+@@ -293,7 +293,11 @@ void LAMMPSDataFormat::read_header(Frame& frame) {
+         } else {
+             // End of the header, get the section and break
+             current_section_ = get_section(line);
+-            assert(current_section_ != NOT_A_SECTION);
++            if (current_section_ == NOT_A_SECTION) {
++                throw format_error(
++                    "unknown header value or section name, got '{}'", line
++                );
++            }
+             break;
+         }
+     }

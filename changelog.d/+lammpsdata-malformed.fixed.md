@@ -1,0 +1,1 @@
+Reading a malformed `.lammpsdata` file, or one with an unrecognized header keyword line, is an error. Release builds of the vendored chemfiles 0.10.4 spun forever on such a file; a patch makes the reader throw a format error, and the system-library probe rejects a copy that still spins.
