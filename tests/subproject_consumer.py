@@ -4,7 +4,9 @@
 The scratch project's subprojects/ links to the wraps the build under test
 already unpacked (the top project's subproject directory), and the
 configure does not download, so nothing is written to either source tree.
-WORK_DIR is removed first and afterwards.
+WORK_DIR is removed first and afterwards. chemfiles is off in the scratch
+build: no mode reads it, and a vendored copy is compiled at configure time
+on every core, starving the tests that run beside this one.
 
 MODE with-tests-false: -Dseams-core:with_tests=false must register no test,
 because a consumer runs every test its subprojects register.
@@ -155,7 +157,10 @@ def main(argv: list[str]) -> int:
     try:
         parent = scratch_project(work, source, top_build)
         build = work / "build"
-        setup = run([meson, "setup", build, parent, f"-D{PROJECT}:with_tests={with_tests}", "--wrap-mode=nodownload"])
+        setup = run([
+            meson, "setup", build, parent, f"-D{PROJECT}:with_tests={with_tests}",
+            f"-D{PROJECT}:with_chemfiles=disabled", "--wrap-mode=nodownload",
+        ])
         if setup.returncode != 0:
             print(setup.stdout + setup.stderr, file=sys.stderr)
             print(f"meson setup -D{PROJECT}:with_tests={with_tests} exited {setup.returncode}", file=sys.stderr)
