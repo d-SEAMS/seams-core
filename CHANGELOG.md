@@ -155,7 +155,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The Rust, Fortran, and Python ctypes bindings call the analyses `seams.h` now exports, including frame reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer.
 - The binding-overhead session times each language wrapper of read, k-nearest neighbours, q6 with q6bar, CHILL, and primitive rings on ice Ih, and records the median and interquartile range.
 - The docs build writes a description, a social card, and JSON-LD on each page, plus sitemap dates, robots.txt, a 404 page, a Markdown file beside each HTML page, and llms-full.txt.
-- The documentation landing page adds a coming soon notice for the d-SEAMS 2.0 paper.
+- The documentation landing page names the d-SEAMS 2.0 paper, Incremental ring and cage algorithms for ice structure analysis, by Rohit Goswami, Amrita Goswami, Ruhila Goswami, and Jayant K. Singh, and cites the 2020 JCIM paper for the software.
 - The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
 - The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
 - The installed C library reads frames from arrays and files. Callers can build neighbour lists and primitive rings, evaluate q3, q4, q6, and q6-bar, and run CHILL, CHILL+, cages, the shell classifier, and the brine front. `seams.pc` and `seams-config.cmake` ship with the library, and `examples/c` builds against that install.

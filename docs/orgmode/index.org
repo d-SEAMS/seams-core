@@ -54,9 +54,11 @@
 
 .. note::
 
-   The d-SEAMS 2.0 paper, *Incremental ring and cage algorithms for ice
-   structure analysis*, by Rohit Goswami, Amrita Goswami, Ruhila Goswami
-   and Jayant K. Singh, is coming soon.
+   *Incremental ring and cage algorithms for ice structure analysis*,
+   by Rohit Goswami, Amrita Goswami, Ruhila Goswami, and Jayant K. Singh,
+   describes the incremental ring and cage algorithms. Cite this
+   software with the 2020 JCIM paper,
+   https://doi.org/10.1021/acs.jcim.0c00031.
 #+end_export
 
 * Overview
