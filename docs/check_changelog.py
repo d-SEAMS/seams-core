@@ -146,30 +146,80 @@ def continuation_bullet(body):
 
 
 def changelog_section(changelog, version):
-    start = changelog.find("## [{}]".format(version))
-    if start < 0:
+    text = changelog.replace("\r\n", "\n").replace("\r", "\n")
+    pattern = re.compile(r"^## \[" + re.escape(version) + r"\](?:[ \t].*)?$", re.M)
+    match = pattern.search(text)
+    if match is None:
         return ""
-    end = changelog.find("\n## [", start + 1)
-    return changelog[start:] if end < 0 else changelog[start:end]
+    next_heading = re.search(r"^## ", text[match.end() :], re.M)
+    return (
+        text[match.start() :]
+        if next_heading is None
+        else text[match.start() : match.end() + next_heading.start()]
+    )
+
+
+def section_bullets(section):
+    """Whole top-level bullets in one CHANGELOG.md release section.
+
+    Each bullet starts on a line with a Markdown bullet marker and owns its
+    indented continuation lines, including blank lines that sit between
+    continuation lines. Line endings are normalised to LF and internal
+    spaces are kept verbatim.
+    """
+    text = section.replace("\r\n", "\n").replace("\r", "\n")
+    bullets = []
+    current = None
+    blanks = []
+
+    def close():
+        nonlocal current, blanks
+        if current is not None:
+            bullets.append("\n".join(current))
+        current = None
+        blanks = []
+
+    for line in text.split("\n"):
+        if line.startswith(("- ", "* ", "+ ")):
+            close()
+            current = [line]
+            continue
+        if current is None:
+            continue
+        if not line.strip():
+            blanks.append("")
+            continue
+        if line[0] in (" ", "\t"):
+            current.extend(blanks)
+            blanks = []
+            current.append(line)
+            continue
+        if not blanks and not line.startswith(("#", "<!--")):
+            current.append(line)
+            continue
+        close()
+    close()
+    return bullets
 
 
 def missing_versioned(changelog, fragments):
     """Versioned fragments whose towncrier bullet is absent from CHANGELOG.md.
 
-    A match is exactly :func:`continuation_bullet` plus a newline inside
-    that version's section. Other whitespace is not folded away.
+    A match is an exact whole bullet equal to :func:`continuation_bullet`
+    inside that version's release section. Substring and prefix matches do
+    not count, and internal whitespace is not folded away.
     """
     missing = {}
     for directory in sorted(path for path in fragments.iterdir() if path.is_dir()):
         version = directory.name
         if not VERSION_DIR.fullmatch(version):
             continue
-        notes = changelog_section(changelog, version)
+        bullets = set(section_bullets(changelog_section(changelog, version)))
         absent = [
             path.name
             for path in sorted(directory.glob("*.md"))
             if path.name not in IGNORED
-            and continuation_bullet(path.read_text(encoding="utf-8")) + "\n" not in notes
+            and continuation_bullet(path.read_text(encoding="utf-8")) not in bullets
         ]
         if absent:
             missing[version] = absent
