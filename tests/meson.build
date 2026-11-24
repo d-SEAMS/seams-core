@@ -905,9 +905,15 @@ test('traj_capi',
   env: _test_env,
   timeout: 60)
 
+test('install_pydseamslib_if_missing', find_program('python3'),
+  args: [files('install_pydseamslib_if_missing.py')],
+  workdir: meson.project_source_root(),
+  timeout: 180)
+
 _traj_py_env = environment()
 _traj_py_env.prepend('PYTHONPATH', meson.project_source_root() / 'adapters' / 'python')
 _traj_py_env.set('SEAMS_LIB', seams_api_lib.full_path())
+_traj_py_env.set('SEAMS_HAS_CHEMFILES', chemfiles_dep.found() ? '1' : '0')
 _traj_py_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
 if host_machine.system() == 'darwin'
   _traj_py_env.prepend('DYLD_LIBRARY_PATH', meson.project_build_root() / 'src')

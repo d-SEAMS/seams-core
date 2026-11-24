@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
@@ -125,13 +126,19 @@ def test_trajectory_sequence_container(tmp_path: Path):
     assert len(streamed) == 3
     assert np.allclose(ds.water_vectors(streamed[0]).mol_ids, [1, 2, 3, 4])
 
-    # Chemfiles multi-frame PDB streaming check.
+    # Multi-frame PDB streaming check: native frame counting still works when
+    # chemfiles is disabled, while reading frames requires chemfiles and fails
+    # with an explicit refusal when it is absent.
     pdb_path = tmp_path / "water6.pdb"
     _write_multiframe_pdb(pdb_path, xyz, 12.0)
     pdb_traj = ds.open_trajectory(pdb_path, all_atoms=True, dt=0.5)
     assert len(pdb_traj) == 6
     assert len(pdb_traj[::3]) == 2
-    assert pdb_traj[-1].n_atoms == 12
+    if os.environ.get("SEAMS_HAS_CHEMFILES", "1") == "1":
+        assert pdb_traj[-1].n_atoms == 12
+    else:
+        with pytest.raises(ValueError, match="chemfiles is not in this build"):
+            _ = pdb_traj[-1]
 
 
 _EXAMPLE_TRAJ = Path(__file__).resolve().parents[1] / "input" / "traj" / "exampleTraj.lammpstrj"

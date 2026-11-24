@@ -24,6 +24,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- `sinp::openFrame` and `seams_system_read` now refuse chemfiles-only trajectory formats (`.pdb`, `.gro`, `.dcd`, `.xtc`, `.trr`, `.nc`, `.netcdf`, `.tng`, `.mmtf`) with `chemfiles is not in this build; <ext> input needs it` instead of falling through to the LAMMPS dump reader when built with `-Dwith_chemfiles=disabled`, and `trajectory_python` asserts that refusal in chemfiles-off builds.
+- `pixi run test`, `pixi run coverage-run`, and `scripts/ci_pixi_suite.sh` now ensure `pydseamslib` (`dseams` and `pydseams`) is installed via `scripts/install_pydseamslib.sh --if-missing` before running the Meson test suite, and `scripts/install_pydseamslib.sh` cleans up its temporary build directory on exit.
 - Precompute exact periodic minimum-image bond vectors via `gen::relDistFromPoint` in `chill::specializedChillPlus` so triclinic cells use full tilt-aware MIC instead of orthorhombic `mic1`, and clamp `dz / r` and zero-distance bonds in `y3`.
 - Unwrap cluster atoms in `clump::recenterClusterCloud` along a BFS spanning tree of the neighbour list `nList` rather than Stoddard's linked-list cycle, preventing clusters spanning more than half a box edge from being split across periodic boundaries.
 - Initialize `ylm` rows, divide by the count of non-zero-distance bonds, clamp `cos(theta)`, and guard zero-norm denominators in `chill::getq6`, and guard empty `c_ij` lists in `chill::reclassifyWater`.

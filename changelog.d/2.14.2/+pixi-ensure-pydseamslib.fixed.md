@@ -1,0 +1,1 @@
+`pixi run test`, `pixi run coverage-run`, and `scripts/ci_pixi_suite.sh` now ensure `pydseamslib` (`dseams` and `pydseams`) is installed via `scripts/install_pydseamslib.sh --if-missing` before running the Meson test suite, and `scripts/install_pydseamslib.sh` cleans up its temporary build directory on exit.

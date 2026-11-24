@@ -4,6 +4,10 @@
 # symbols stay undefined. An executable already linked with the runtime
 # must not see that preload, so only this interpreter sets it.
 here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+# Virtual-environment creation and its pip bootstrap are host tools.
+case "${1:-}:${2:-}" in
+  -m:venv|-m:ensurepip) unset ASAN_TEST_PRELOAD TSAN_RUNTIME ;;
+esac
 # Meson builds crates with `python3 -c` and cargo helper scripts. Those
 # shells crash if libclang_rt.tsan is already preloaded. Test programs
 # are real files and do want the runtime.
