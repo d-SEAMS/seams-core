@@ -43,7 +43,7 @@ option('chemfiles_dir', type: 'string', value: '',
   description: 'Install prefix of chemfiles (include/chemfiles.hpp and lib/libchemfiles). Searched alone when set, and an unusable prefix is an error. Otherwise pkg-config, the CMake package and chemfiles-config.cmake under --prefix are tried')
 option('use_vendored_chemfiles', type: 'feature', value: 'auto',
   description: 'Build the patched chemfiles 0.10.4 at configure time. auto: only when no installed copy passes and this is not a cross build. enabled: always, ignoring an installed copy; a cross build needs cmake_toolchain_file in the cross file. disabled: never')
-option('with_linkcell', type: 'feature', value: 'auto', description: 'Deprecated: linkcell is always required; disabled is an error')
+option('with_linkcell', type: 'feature', value: 'enabled', description: 'Deprecated: linkcell is always required; disabled is an error')
 option('with_minimage', type: 'feature', value: 'auto', description: 'Euclidean minimum-image geometry')
 option('paper_full', type: 'boolean', value: false,
   description: 'Run the full paper Snakemake tutorials. Off by default; those tests exit 77 until this is enabled')
