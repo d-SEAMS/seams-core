@@ -127,6 +127,55 @@ def load():
     return errors, found
 
 
+def continuation_bullet(body):
+    """The bullet towncrier writes into CHANGELOG.md.
+
+    The first line gains ``- ``. Each later content line gains two spaces,
+    the continuation indent that keeps a wrapped paragraph inside the
+    list item. A blank line stays blank. Internal spaces are left as
+    written, so a double space is not the same text.
+    """
+    text = body.replace("\r\n", "\n").replace("\r", "\n")
+    if text.endswith("\n"):
+        text = text[:-1]
+    lines = text.split("\n")
+    rendered = ["- " + lines[0]]
+    for extra in lines[1:]:
+        rendered.append("  " + extra if extra else "")
+    return "\n".join(rendered)
+
+
+def changelog_section(changelog, version):
+    start = changelog.find("## [{}]".format(version))
+    if start < 0:
+        return ""
+    end = changelog.find("\n## [", start + 1)
+    return changelog[start:] if end < 0 else changelog[start:end]
+
+
+def missing_versioned(changelog, fragments):
+    """Versioned fragments whose towncrier bullet is absent from CHANGELOG.md.
+
+    A match is exactly :func:`continuation_bullet` plus a newline inside
+    that version's section. Other whitespace is not folded away.
+    """
+    missing = {}
+    for directory in sorted(path for path in fragments.iterdir() if path.is_dir()):
+        version = directory.name
+        if not VERSION_DIR.fullmatch(version):
+            continue
+        notes = changelog_section(changelog, version)
+        absent = [
+            path.name
+            for path in sorted(directory.glob("*.md"))
+            if path.name not in IGNORED
+            and continuation_bullet(path.read_text(encoding="utf-8")) + "\n" not in notes
+        ]
+        if absent:
+            missing[version] = absent
+    return missing
+
+
 def ordered(fragments):
     """Fragments in rendering order: newest release, then towncrier type."""
     releases = sorted({item[0] for item in fragments}, key=version_key, reverse=True)
@@ -285,6 +334,17 @@ def check(fragments, text, version):
             errors.append("duplicate note: {}".format(names[entry]))
         if not missing and not extra and not repeated:
             errors.append("rendered notes are not in release and type order")
+    changelog_path = ROOT / "CHANGELOG.md"
+    if changelog_path.is_file():
+        absent = missing_versioned(
+            changelog_path.read_text(encoding="utf-8"), FRAGMENTS
+        )
+        for version, names in absent.items():
+            errors.append(
+                "CHANGELOG.md [{}] is missing the towncrier bullet for: {}".format(
+                    version, ", ".join(names)
+                )
+            )
     page = PAGE.read_text()
     if ".. include:: {}".format(NOTES.name) not in page:
         errors.append("{} does not include {}".format(PAGE.name, NOTES.name))
