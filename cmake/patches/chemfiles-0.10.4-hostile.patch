@@ -751,22 +751,6 @@ diff -ruN host-a/src/formats/LAMMPSData.cpp host-b/src/formats/LAMMPSData.cpp
      }
  
      while(!file_.eof()) {
-@@ -291,9 +300,13 @@
-             // Even if all parameters are 0, set shape to TRICLINIC
-             shape = UnitCell::TRICLINIC;
-         } else {
--            // End of the header, get the section and break
-+            // End of the header. A line that is not a section used to fall
-+            // into unreachable() once asserts are compiled out, and the
-+            // process spun. It is an error in the file.
-             current_section_ = get_section(line);
--            assert(current_section_ != NOT_A_SECTION);
-+            if (current_section_ == NOT_A_SECTION) {
-+                throw format_error("expected section name, got '{}'", line);
-+            }
-             break;
-         }
-     }
 @@ -366,6 +379,18 @@
      }
      style_ = atom_style(atom_style_name_);
