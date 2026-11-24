@@ -200,7 +200,7 @@ Added
 
 - An ``unsigned-char`` CI job builds every target on x86_64 Linux with ``-funsigned-char`` and runs the suite on it, so code that reads a plain ``char`` as signed fails without an aarch64 runner.
 
-- The videos gallery and the README link the d-SEAMS Odysee channel. Every ``docs/videos/<slug>/script.md`` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.
+- The videos gallery and the README link the d-SEAMS Odysee channel. Every ``docs/videos/<slug>/script.md`` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper.
 
 - All twenty recordings embed their Odysee claims. The cages transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS ``overhead_s`` timer is machine-dependent.
 
