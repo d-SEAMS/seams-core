@@ -19,6 +19,7 @@ The files are build products and are not stored in git.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import os
 import sys
 import warnings
@@ -295,6 +296,20 @@ class Frame:
         index = np.asarray(index, dtype=int)
         symbols = None if self.symbols is None else [self.symbols[int(i)] for i in index]
         return Frame(self.xyz[index], self.types[index], self.box9, symbols)
+
+
+def cubic_trajectory():
+    """The full mW cubic-ice trajectory, fetched through input/fetch.py.
+
+    SEAMS_CUBIC_TRAJ overrides the path, e.g. to the committed 7-frame
+    fixture for offline tests. Otherwise the pinned Hugging Face copy is
+    downloaded (and SHA-256 verified) the first time it is needed.
+    """
+    script = ROOT / "input" / "fetch.py"
+    spec = importlib.util.spec_from_file_location("input_fetch", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.ensure("mW_cubic.lammpstrj", os.environ.get("SEAMS_CUBIC_TRAJ"))
 
 
 def read_dump(path, frame_index=0):
@@ -3394,7 +3409,7 @@ def draw(library, scene):
     if scene == "ice-ih-h":
         return genice_picture("1h", (2, 2, 1), [], False)
     if scene == "ice-ic":
-        frame = read_dump(ROOT / "input/traj/mW_cubic.lammpstrj")
+        frame = read_dump(cubic_trajectory())
         labels = chill_labels(library, frame)
         frame, labels = central_slice(frame, labels, 700)
         return labelled_picture(frame, labels, "basal", False)

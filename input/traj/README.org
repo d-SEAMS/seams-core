@@ -1,0 +1,36 @@
+#+title: Trajectory inputs
+
+The small files in this directory are committed fixtures.  The full
+=dump-bcc.lammpstrj=, =dump-l.lammpstrj=, and =mW_cubic.lammpstrj=
+trajectories are public data in the Hugging Face dataset
+=d-SEAMS/seams-core-inputs= at revision
+=163ca2d8dfcb7ef21d88aea1c67381d841f63641=.
+
+Fetch all three files with:
+
+#+begin_src bash
+python3 input/fetch.py
+#+end_src
+
+The helper verifies the pinned SHA-256 digest before replacing any output.
+Pass one or more file names to fetch only selected trajectories.
+
+* Offline test fixtures
+
+The committed fixtures are byte-for-byte concatenations of complete frames
+from those verified downloads.  Coordinates, atom IDs, atom counts, box
+bounds, and timesteps are not rewritten or rounded.  Rebuild them exactly
+from the repository root with:
+
+#+begin_src bash
+python3 input/fetch.py
+python3 input/traj/derive_fixtures.py
+#+end_src
+
+The derivation script verifies each source digest before reading it.
+
+| fixture | source | zero-based frame indices | original timesteps |
+|---------+--------+--------------------------+--------------------|
+| =bcc-real-30.fixture.lammpstrj= | =dump-bcc.lammpstrj= | =0..29= | =0,5000,...,145000= |
+| =liquid-real-30.fixture.lammpstrj= | =dump-l.lammpstrj= | =0..29= | =0,5000,...,145000= |
+| =cubic-real-7.fixture.lammpstrj= | =mW_cubic.lammpstrj= | =0,2,4,6,8,9,10= | =0,200,400,600,800,900,1000= |

@@ -91,7 +91,12 @@ def logical_lines(body):
     return lines
 
 
-def runnable_seams(body):
+def runnable_seams(body, env):
+    # fixture_inputs rewrites placeholder input paths (e.g. the fetched
+    # mW_cubic.lammpstrj) to a committed offline fixture before the
+    # existence check below runs, so a rewritten path is judged by what it
+    # becomes, not by the placeholder text in the doc source.
+    body = run_snippets.fixture_inputs(body, env)
     kept = []
     dump = None
     for line in logical_lines(body):
@@ -104,13 +109,14 @@ def runnable_seams(body):
             line = line.replace('"$dump"', dump).replace("$dump", dump)
         if SKIP_LINE.search(line) or re.search(r"\bFILE\b|water\.lammpstrj|dump\.lammpstrj", line):
             continue
-        missing = False
         for token in line.split():
             token = token.strip("\"'")
             if "/" in token or token.endswith((".lammpstrj", ".xyz", ".gro", ".xtc", ".env")):
                 if not (ROOT / token).exists():
-                    missing = True
-        if missing or line == "seams":
+                    raise run_snippets.Fail(
+                        "missing input {} in example: {}".format(token, line)
+                    )
+        if line == "seams":
             continue
         kept.append(line)
     return "\n".join(kept) if kept else None
@@ -139,6 +145,7 @@ def expected_phrases(text, start):
 
 
 def run_python_block(build, env, body):
+    body = run_snippets.fixture_inputs(body, env)
     if "```" in body:
         raise run_snippets.Fail("code fence leaked into a Python block")
     if body.lstrip().startswith(">>>") or "\n>>> " in body:
@@ -162,6 +169,7 @@ def run_python_block(build, env, body):
 
 def run_cli_block(build, script):
     env = os.environ.copy()
+    script = run_snippets.fixture_inputs(script, env)
     env["PATH"] = str(build) + os.pathsep + env.get("PATH", "")
     lib = str(build / "src")
     env["LD_LIBRARY_PATH"] = lib + os.pathsep + env.get("LD_LIBRARY_PATH", "")
@@ -222,7 +230,12 @@ def main():
             else:
                 passed += 1
         for body in cli:
-            script = runnable_seams(body)
+            try:
+                script = runnable_seams(body, env)
+            except run_snippets.Fail as exc:
+                ran += 1
+                failures.append(rel + " cli: " + str(exc).splitlines()[-1][:240])
+                continue
             if script is None:
                 continue
             ran += 1
@@ -254,7 +267,13 @@ def main():
         text = path.read_text(encoding="utf-8")
         concrete = []
         for body in bash_blocks(text):
-            script = runnable_seams(body)
+            try:
+                script = runnable_seams(body, env)
+            except run_snippets.Fail as exc:
+                failures.append(
+                    str(path.relative_to(ROOT)) + ": " + str(exc).splitlines()[-1][:240]
+                )
+                continue
             if script:
                 concrete.extend(script.splitlines())
         for body in bash_blocks(text):

@@ -16,6 +16,15 @@ cutoff 3.5 Å. That is the same molecule count as
 Setup (reading the frame, and any analysis a later case consumes) is
 outside the timed region. Each printed line is one full run.
 
+The full trajectory is in the public Hugging Face dataset
+`d-SEAMS/seams-core-inputs`, pinned at revision
+`163ca2d8dfcb7ef21d88aea1c67381d841f63641`. Fetch and SHA-256-verify it
+through the repository's shared helper:
+
+```bash
+python3 input/fetch.py mW_cubic.lammpstrj
+```
+
 Build from a Release tree (the executable lands in `bbdir-rel/bench/`):
 
 ```bash

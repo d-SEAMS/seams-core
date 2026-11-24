@@ -223,7 +223,7 @@ TEST_CASE("diamond common-neighbour test labels ideal ice Ih hexagonal",
 
 TEST_CASE("crowded diamond labels match the cutoff list", "[c_api]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
-  cloud = sinp::readLammpsTrjO("traj/dump-l.lammpstrj", 1, cloud, 1);
+  cloud = sinp::readLammpsTrjO("traj/liquid-real-30.fixture.lammpstrj", 1, cloud, 1);
   REQUIRE(cloud.nop == 512);
   REQUIRE(cloud.box.size() >= 3);
   std::vector<double> xyz(static_cast<std::size_t>(cloud.nop) * 3);

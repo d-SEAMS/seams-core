@@ -207,8 +207,11 @@ class Absent(Exception):
 
 
 def run_command(command, env, cwd):
+    cubic = env.get("SEAMS_CUBIC_TRAJ")
+    public_cubic = "input/traj/mW_cubic.lammpstrj"
+    actual = command.replace(public_cubic, cubic) if cubic else command
     done = subprocess.run(
-        command,
+        actual,
         shell=True,
         cwd=str(cwd),
         env=env,
@@ -224,7 +227,10 @@ def run_command(command, env, cwd):
             print("skipped: {}".format(detail.strip().splitlines()[-1] if detail.strip() else command), file=sys.stderr)
             raise SystemExit(77)
         fail("exit {} for {}\n{}".format(done.returncode, command, detail[-800:]))
-    return done.stdout
+    output = done.stdout
+    if cubic:
+        output = output.replace(cubic, public_cubic)
+    return output
 
 
 def scenes_of(folder):

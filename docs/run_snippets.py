@@ -227,6 +227,14 @@ def tsan_host(env):
     return out
 
 
+def fixture_inputs(text, env):
+    """Use committed offline inputs when the test environment provides them."""
+    cubic = env.get("SEAMS_CUBIC_TRAJ")
+    if cubic:
+        text = text.replace("input/traj/mW_cubic.lammpstrj", cubic)
+    return text
+
+
 def run(cmd, env, cwd=ROOT):
     # A nested interpreter does not go through the asan-path wrapper, so
     # it does not map the thread runtime unless this environment does.
@@ -1035,6 +1043,7 @@ def execute_page(path, build):
                 run_source(build, env, excerpt)
                 ran += 1
                 continue
+            body = fixture_inputs(body, env)
             if lang == "c" and is_prototype(body):
                 prototypes.append(body)
                 continue

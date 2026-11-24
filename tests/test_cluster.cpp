@@ -272,7 +272,7 @@ TEST_CASE("singleClusterLinkedList with single atom", "[cluster]") {
 TEST_CASE("clusterAnalysis with Q6 on mW cubic trajectory", "[cluster]") {
   // Read O atoms from mW cubic ice
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  yCloud = sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
   REQUIRE(yCloud.nop > 0);
 
   // Build neighbour list

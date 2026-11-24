@@ -14,7 +14,7 @@ def main() -> int:
         print("usage: test_h2h_harness.py BENCH", file=sys.stderr)
         return 2
     bench = Path(sys.argv[1])
-    traj = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    traj = ROOT / "input" / "traj" / "cubic-real-7.fixture.lammpstrj"
     if not bench.is_file() or not traj.is_file():
         print("missing harness or frame", file=sys.stderr)
         return 1

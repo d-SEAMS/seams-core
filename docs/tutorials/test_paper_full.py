@@ -2,11 +2,35 @@
 # Copyright (c) d-SEAMS developers
 """Run one full paper tutorial through its Snakemake rule and check the report."""
 
+import importlib.util
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+
+
+def _paper_module():
+    script = HERE / "paper_science.py"
+    spec = importlib.util.spec_from_file_location("paper_science", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _rings_input_line():
+    """The exact 'rings full input ...' line, derived from the file actually read.
+
+    Mirrors paper_science.rings_full: the cubic trajectory is whatever
+    SEAMS_CUBIC_TRAJ names (the 7-frame fixture under meson), or else the
+    fetched 11-frame mW_cubic.lammpstrj.
+    """
+    science = _paper_module()
+    dump = science.cubic_trajectory()
+    return science.input_line("rings", dump, 1)
+
 
 EXPECT = {
     "interface": [
@@ -28,12 +52,9 @@ EXPECT = {
         "cages full paper unit sII molecules 136 cages 16 8",
         "cages full paper unit sH molecules 68 cages 6 4 2",
     ],
-    "rings": [
-        "rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj",
-        "rings full paper molecules 4096 frames 1 rings 8192",
-        "rings full nop 4096 rings 8192",
-        "rings full histogram 6 8192",
-    ],
+    # "rings" is filled in by main(): the file-frames count and the file
+    # name depend on whichever trajectory was actually read (the 7-frame
+    # fixture under meson, or the fetched 11-frame mW_cubic.lammpstrj).
     "brine": [
         "brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj",
         "brine full paper waters 864 ions 9 frames 1",
@@ -93,6 +114,13 @@ def main():
     env["PYTHON"] = sys.executable
     env["NO_COLOR"] = "1"
     env["OPENMM_CPU_THREADS"] = "1"
+    if topic == "rings":
+        EXPECT["rings"] = [
+            _rings_input_line(),
+            "rings full paper molecules 4096 frames 1 rings 8192",
+            "rings full nop 4096 rings 8192",
+            "rings full histogram 6 8192",
+        ]
     done = subprocess.run(
         [
             program,

@@ -30,7 +30,7 @@ namespace fs = std::filesystem;
 static molSys::PointCloud<molSys::Point<double>, double>
 readMwCubicFrame1() {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
-  return sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  return sinp::readLammpsTrjO("traj/cubic-real-7.fixture.lammpstrj", 1, yCloud, 1);
 }
 
 TEST_CASE("buildRefHC reads HC template from XYZ file", "[bulkTUM]") {

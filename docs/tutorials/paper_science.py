@@ -698,6 +698,29 @@ def input_line(topic, path, frames_read):
     )
 
 
+def _input_fetch_module():
+    import importlib.util
+
+    script = ROOT / "input" / "fetch.py"
+    spec = importlib.util.spec_from_file_location("input_fetch", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def cubic_trajectory():
+    """The full mW cubic-ice trajectory, fetched through input/fetch.py.
+
+    SEAMS_CUBIC_TRAJ overrides the path, e.g. to the committed 7-frame
+    fixture for offline tests. Otherwise the pinned Hugging Face copy is
+    downloaded (and SHA-256 verified) the first time it is needed; a
+    failed fetch raises instead of silently falling back.
+    """
+    return _input_fetch_module().ensure(
+        "mW_cubic.lammpstrj", os.environ.get("SEAMS_CUBIC_TRAJ")
+    )
+
+
 def nucleation_dump():
     """The deposited 148-frame mW trajectory. It is not committed."""
     dest = ROOT / "docs" / ".cache" / "figshare-11448702" / "nucleation.lammpstrj"
@@ -821,7 +844,7 @@ def cages_full(seams, libdir, out):
 
 
 def rings_full(seams, libdir, out):
-    dump = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    dump = cubic_trajectory()
     text = run_seams(
         seams,
         libdir,

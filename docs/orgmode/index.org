@@ -74,6 +74,13 @@ PLUMED, and in-situ drivers. ~gmx-seams~ reads the trajectory ~gmx mdrun~ wrote.
 The standalone PLUMED action (~dseams-plumed~ v0.4.1) is indexed in
 [[https://www.plumed-nest.org/eggs/26/018/][PLUMED-NEST egg 26.018]].
 ~seams --version~ prints the project version.
+
+
+Large tutorial and benchmark trajectories are in the public
+~d-SEAMS/seams-core-inputs~ Hugging Face dataset at revision
+~163ca2d8dfcb7ef21d88aea1c67381d841f63641~.  Run ~python3 input/fetch.py~
+from the checkout to download all three files with pinned SHA-256
+verification.  See [[file:reference/data-formats.org][Data formats and trajectory inputs]].
 #+begin_export rst
 See the :doc:`engines/plumed` page for the plugin.
 #+end_export

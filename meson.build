@@ -290,6 +290,10 @@ endif
 _snippet_env = environment()
 _snippet_env.set('CC', _snippet_cc)
 _snippet_env.set('CXX', _snippet_cxx)
+_snippet_env.set(
+  'SEAMS_CUBIC_TRAJ',
+  meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+)
 if _asan_wrap
   _snippet_env.set('REAL_CC', _real_cc)
   _snippet_env.set('REAL_CXX', _real_cxx)
@@ -1422,6 +1426,10 @@ if get_option('with_cli') and get_option('with_tests')
     _lang_file = 'libseams_lang.dll'
   endif
   tutorial_env.set('SEAMS_LANG_LIB', meson.project_build_root() / 'bindings' / _lang_file)
+  tutorial_env.set(
+    'SEAMS_CUBIC_TRAJ',
+    meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+  )
   tutorial_env.set('CC', _snippet_cc)
   tutorial_env.set('CXX', _snippet_cxx)
   if _asan_wrap
@@ -1477,6 +1485,10 @@ if get_option('with_cli') and get_option('with_tests')
   # Off unless -Dpaper_full=true. The script then exits 77 and says so.
   paper_env = environment()
   paper_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  paper_env.set(
+    'SEAMS_CUBIC_TRAJ',
+    meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+  )
   if get_option('paper_full')
     paper_env.set('SEAMS_PAPER_FULL', '1')
   endif
@@ -1604,7 +1616,7 @@ if get_option('with_cli') and get_option('with_tests')
       '-c',
       'import re,subprocess,sys; p=subprocess.run([sys.argv[1],"--frame","1","--last","3","--jobs","4","read",sys.argv[2]],capture_output=True,text=True); frames=[int(m.group(1)) for m in re.finditer(r"frame (\\d+)",p.stdout)]; sys.exit(0 if p.returncode==0 and frames==[1,2,3] else 1)',
       seams_exe.full_path(),
-      meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
+      meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
     ],
     depends: [seams_exe],
     timeout: 60)
@@ -1648,7 +1660,7 @@ if get_option('with_cli') and get_option('with_tests')
       '-c',
       'import json,subprocess,sys; p=subprocess.run([sys.argv[1],"--format","json","--frame","1","--last","3","--jobs","4","read",sys.argv[2]],capture_output=True,text=True); rows=[json.loads(line) for line in p.stdout.splitlines() if line]; sys.exit(0 if p.returncode==0 and [r["frame"] for r in rows]==[1,2,3] and all(r["schema"]=="dseams.cli/v1" for r in rows) else 1)',
       seams_exe.full_path(),
-      meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
+      meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
     ],
     depends: [seams_exe],
     timeout: 60)
@@ -1825,6 +1837,7 @@ if get_option('with_cli') and get_option('with_tests')
       files('tests/cli_carry.py'),
       seams_exe.full_path(),
       meson.project_source_root() / 'input' / 'traj',
+      'fixture',
     ],
     depends: [seams_exe],
     timeout: 600)
@@ -1837,13 +1850,41 @@ if get_option('with_cli') and get_option('with_tests')
         files('tests/mpi_frames.py'),
         _mpiexec.full_path(),
         seams_exe.full_path(),
-        meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
+        meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
         meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con',
       ],
       depends: [seams_exe],
       is_parallel: false,
       timeout: 300)
   endif
+endif
+
+if get_option('with_full_trajectory_tests')
+  if not get_option('with_cli') or not get_option('with_tests')
+    error('with_full_trajectory_tests requires with_cli=true and with_tests=true')
+  endif
+  trajectory_fs = import('fs')
+  foreach trajectory : [
+    'dump-bcc.lammpstrj',
+    'dump-l.lammpstrj',
+    'mW_cubic.lammpstrj',
+  ]
+    trajectory_path = meson.project_source_root() / 'input' / 'traj' / trajectory
+    if not trajectory_fs.is_file(trajectory_path)
+      error('full trajectory is required: ' + trajectory_path)
+    endif
+  endforeach
+  test(
+    'full_trajectory_regressions',
+    python3,
+    args: [
+      files('tests/full_trajectory_regressions.py'),
+      seams_exe.full_path(),
+      meson.project_source_root(),
+    ],
+    depends: [seams_exe],
+    suite: 'full-trajectories',
+    timeout: 1800)
 endif
 
 subdir('bindings')
@@ -1943,12 +1984,17 @@ if get_option('with_cli') and get_option('with_tests')
   # draws that same frame and checks the palette.
   molecule_env.set('MOLECULES_SCALE', '1')
   molecule_env.set('MOLECULES_SAMPLES', '64')
+  # ice-ic reads the full mW cubic trajectory. Offline tests stay on the
+  # committed 7-frame fixture instead of fetching from Hugging Face.
+  molecule_env.set(
+    'SEAMS_CUBIC_TRAJ',
+    meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+  )
   test(
     'docs_render_molecules',
     python3,
     args: [
       meson.project_source_root() / 'docs' / 'test_render_molecules.py',
-      '--slug', 'ice-ih',
       '--out', meson.project_build_root() / 'molecule-stills',
       '--libdir', meson.project_build_root() / 'src',
     ],
@@ -2002,6 +2048,10 @@ if get_option('with_cli') and get_option('with_tests')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
   binding_env.set('SEAMS_LIB', seams_api_lib.full_path())
   binding_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
+  binding_env.set(
+    'SEAMS_CUBIC_TRAJ',
+    meson.project_source_root() / 'input' / 'traj' / 'cubic-real-7.fixture.lammpstrj',
+  )
   binding_env.set('CC', _snippet_cc)
   binding_env.set('CXX', _snippet_cxx)
   if _asan_wrap

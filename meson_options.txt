@@ -1,5 +1,7 @@
 option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
+option('with_full_trajectory_tests', type: 'boolean', value: false,
+  description: 'Require fetched full trajectories and run their regression suite')
 option('with_lammps', type: 'feature', value: 'auto',
   description: 'Build the LAMMPS hook when liblammps is found')
 option('with_gromacs', type: 'feature', value: 'auto',

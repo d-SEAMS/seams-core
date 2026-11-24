@@ -22,6 +22,14 @@ REPS=${SEAMS_REPS:-1}
 FRAME=${SEAMS_FRAME:-1}
 BUILD=$TREE/driver-build
 
+if [[ ! -f $TRAJ && -z ${SEAMS_TRAJ:-} ]]; then
+  python3 "$ROOT/input/fetch.py" mW_cubic.lammpstrj
+fi
+if [[ ! -f $TRAJ ]]; then
+  echo "trajectory $TRAJ does not exist" >&2
+  exit 1
+fi
+
 if [[ ! -d $ROOT/.git && ! -f $ROOT/.git ]]; then
   echo "SEAMS_ROOT=$ROOT is not a git checkout" >&2
   exit 1

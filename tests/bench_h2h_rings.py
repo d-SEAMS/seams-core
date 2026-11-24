@@ -29,6 +29,29 @@ import numpy as np
 MIN_REPEATS = 6
 WARMUP_CALLS = 2
 HEXAGONAL_RING_SIZE = 6
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _input_fetch_module():
+    """Import input/fetch.py as a module, mirroring paper_science.py's helper."""
+    import importlib.util
+
+    script = ROOT / "input" / "fetch.py"
+    spec = importlib.util.spec_from_file_location("input_fetch", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def ensure_cubic_trajectory() -> None:
+    """Fetch and verify input/traj/mW_cubic.lammpstrj via input/fetch.py.
+
+    Always calls the shared fetch() helper instead of short-circuiting on
+    file presence: fetch() re-hashes any existing file and only treats it
+    as a verified no-op when the digest matches the pinned one, so a
+    corrupt pre-existing file is never silently used for the benchmark.
+    """
+    _input_fetch_module().fetch("mW_cubic.lammpstrj", ROOT / "input" / "traj")
 
 
 @dataclass(frozen=True)
@@ -642,6 +665,7 @@ def main() -> None:
         flush=True,
     )
 
+    ensure_cubic_trajectory()
     generated_specs: list[DatasetSpec] = []
     for name, path, rep in [
         ("orth-1e5", "input/traj/mW_cubic.lammpstrj", (3, 3, 3)),

@@ -14,6 +14,8 @@ from __future__ import annotations
 
 import argparse
 import math
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -174,8 +176,13 @@ def liquid_frames(root=None):
     frames = []
     mw = traj / "dump-l.lammpstrj"
     tip = traj / "exampleTraj.lammpstrj"
-    if mw.is_file():
-        frames.append(read_lammps_first(mw, 1, "liquid-mw", "liquid-mw"))
+    if not mw.is_file():
+        subprocess.run(
+            [sys.executable, str(root / "input" / "fetch.py"),
+             "dump-l.lammpstrj", "--output-dir", str(traj)],
+            check=True,
+        )
+    frames.append(read_lammps_first(mw, 1, "liquid-mw", "liquid-mw"))
     if tip.is_file():
         frames.append(read_lammps_first(tip, 2, "tip4p-o", "tip4p-o"))
     return frames
@@ -213,7 +220,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sizes", default="128,4096,110592")
     parser.add_argument("--out", help="write one named frame as an npy archive")
-    parser.add_argument("--name", default="Ic-128")
+    parser.add_argument("--name", default=f"Ic-{SIZES[0]}")
     args = parser.parse_args()
     sizes = tuple(int(part) for part in args.sizes.split(",") if part)
     frames = campaign_frames(sizes)

@@ -58,7 +58,7 @@ int count_of(const int counts[9], int label) { return counts[label]; }
 int main(int argc, char **argv) {
   const std::string root = argc > 1 ? argv[1] : ".";
   const std::string tip4p = root + "/input/traj/exampleTraj.lammpstrj";
-  const std::string cubic = root + "/input/traj/mW_cubic.lammpstrj";
+  const std::string cubic = root + "/input/traj/cubic-real-7.fixture.lammpstrj";
   const std::string si = root + "/input/traj/genice_sI.lammpstrj";
   const std::string malformedMol2 =
       root + "/tests/fixtures/malformed/mol2_empty_counts.mol2";
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
               << "\n";
     return fail("mW cage counts");
   }
-  if (seams_path_nframes(cubic.c_str()) < 2) {
+  if (seams_path_nframes(cubic.c_str()) != 7) {
     return fail("mW nframes");
   }
 
@@ -1133,7 +1133,7 @@ int main(int argc, char **argv) {
   if (seams_frame_cages(oxygen, 3.5, 1, 4, "cutoff", 0, nullptr, &cageHex, &cageHex, &cageHex, &cageHex) != 0) {
     return fail("hex cages");
   }
-  const std::string cubicPath = root + "/input/traj/mW_cubic.lammpstrj";
+  const std::string cubicPath = root + "/input/traj/cubic-real-7.fixture.lammpstrj";
   seams_frame *cubicFrame = seams_frame_read(cubicPath.c_str(), 1, 1);
   if (cubicFrame == nullptr) {
     return fail("cubic read");

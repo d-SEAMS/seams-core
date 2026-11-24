@@ -136,12 +136,15 @@ CHILL+ star. The walk-through is
 * Other counts
 
 #+begin_src bash
+python3 input/fetch.py mW_cubic.lammpstrj
 ./build/seams rings input/traj/exampleTraj.lammpstrj --type 2
 ./build/seams steinhardt input/traj/exampleTraj.lammpstrj --type 2
 ./build/seams symmetry input/traj/mW_cubic.lammpstrj --type 1
 #+end_src
 
-~mW_cubic.lammpstrj~ is 4096 atoms of type 1.
+~mW_cubic.lammpstrj~ is 4096 atoms of type 1.  The fetch helper downloads it
+from ~d-SEAMS/seams-core-inputs~ at revision
+~163ca2d8dfcb7ef21d88aea1c67381d841f63641~ and verifies its SHA-256 digest.
 
 - [[file:../user/howto/rings.org][Primitive rings]]
 - [[file:../user/howto/q4-q6.org][Local q4 and q6]]

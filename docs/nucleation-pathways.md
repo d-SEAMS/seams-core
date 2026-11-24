@@ -26,7 +26,10 @@ symmetry labels come from `symm::diamondFromCsr`: 1 is cubic diamond
 and 0 is hexagonal diamond.
 
 The 0.36 cut sits between two reference frames that are not the
-nucleation window. On `input/traj/mW_cubic.lammpstrj` every one of the
+nucleation window. Fetch the full reference inputs with `python3
+input/fetch.py`; it downloads the pinned `d-SEAMS/seams-core-inputs`
+revision and verifies each SHA-256 digest. On
+`input/traj/mW_cubic.lammpstrj` every one of the
 4096 molecules is published cubic, OVITO cubic and cubic diamond, and
 the q6-bar median is 0.628539. On the 512-atom `input/traj/dump-l.lammpstrj`
 frame the q6-bar median is 0.012006 and no molecule is above 0.36.

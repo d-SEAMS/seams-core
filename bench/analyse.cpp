@@ -8,7 +8,8 @@
 **
 ** Default input is a periodic diamond (ice Ic) lattice, 8x8x8
 ** conventional cells, 4096 molecules, lattice constant 6.37 Angstrom,
-** the same size as input/traj/mW_cubic.lammpstrj. Setup is outside
+** the same size as the SHA-256-verified input/traj/mW_cubic.lammpstrj
+** fetched by input/fetch.py. Setup is outside
 ** the timed region. Each line is one full run of one analysis.
 */
 
