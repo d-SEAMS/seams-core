@@ -68,10 +68,9 @@ Frame jitteredIce(int nx, int ny, int nz, double amp, unsigned seed) {
   return f;
 }
 
-// The ice atoms within radius of the cell centre, in a cubic box of side
-// box, centred on `at` so that the cluster straddles a periodic boundary.
-Frame iceCluster(double radius, double box, std::array<double, 3> at, double amp,
-                 unsigned seed) {
+// The ice atoms within radius of the cell centre, centred on `at`, not
+// wrapped and with no cell.
+Frame iceBall(double radius, std::array<double, 3> at, double amp, unsigned seed) {
   const Frame ice = jitteredIce(3, 3, 3, amp, seed);
   std::array<double, 3> mid{};
   for (int d = 0; d < 3; ++d) {
@@ -91,9 +90,45 @@ Frame iceCluster(double radius, double box, std::array<double, 3> at, double amp
       ++f.n;
     }
   }
+  return f;
+}
+
+// iceBall in a cubic box of side box, so that the cluster straddles a
+// periodic boundary.
+Frame iceCluster(double radius, double box, std::array<double, 3> at, double amp,
+                 unsigned seed) {
+  Frame f = iceBall(radius, at, amp, seed);
   f.box9[3] = f.box9[4] = f.box9[5] = box;
   wrap(f);
   return f;
+}
+
+// The tilted cell of the triclinic BOP test: edges 7 A, every tilt 3.4 A.
+// Its faces are 6.14 A apart, so pairs from 3.07 A to 3.5 A have a shorter
+// Euclidean image than the wrapped fractional difference.
+constexpr double kTilted[9] = {0.0, 0.0, 0.0, 7.0, 7.0, 7.0, 3.4, 3.4, 3.4};
+
+// Wraps the fractional coordinates of every atom of a cell given as
+// ox, oy, oz, lx, ly, lz, xy, xz, yz into [0, 1).
+void wrapTilted(Frame &f) {
+  const double lx = f.box9[3];
+  const double ly = f.box9[4];
+  const double lz = f.box9[5];
+  const double xy = f.box9[6];
+  const double xz = f.box9[7];
+  const double yz = f.box9[8];
+  for (std::size_t i = 0; i < f.n; ++i) {
+    double *p = f.xyz.data() + 3 * i;
+    double sz = (p[2] - f.box9[2]) / lz;
+    double sy = (p[1] - f.box9[1] - yz * sz) / ly;
+    double sx = (p[0] - f.box9[0] - xy * sy - xz * sz) / lx;
+    sx -= std::floor(sx);
+    sy -= std::floor(sy);
+    sz -= std::floor(sz);
+    p[0] = f.box9[0] + lx * sx + xy * sy + xz * sz;
+    p[1] = f.box9[1] + ly * sy + yz * sz;
+    p[2] = f.box9[2] + lz * sz;
+  }
 }
 
 struct Api {
@@ -420,6 +455,133 @@ TEST_CASE("translation through the boundary leaves values and gradients alone",
       REQUIRE(std::abs(ga[c] - gb[c]) <= 1e-9 * (1.0 + std::abs(ga[c])));
     }
   }
+}
+
+TEST_CASE("triclinic gyration places an unbonded part by its Euclidean minimum image",
+          "[smooth_cv][triclinic]") {
+  // The pair of the triclinic BOP test is 3.330796 A apart through its
+  // nearest image, while the wrapped fractional difference is 5.399463 A.
+  // No bond joins them, so the second atom is placed from the first.
+  Frame f;
+  f.xyz = {0.0, 0.0, 0.0, 4.79, 2.26, 1.05};
+  f.n = 2;
+  std::copy(kTilted, kTilted + 9, f.box9);
+  Api api(f, 0.2, 2.5, 6, 0, 2.7, 2.9, 6);
+  api.rebuild(0.16);
+  std::size_t edges = 1;
+  REQUIRE(seams_cv_topology(api.cv, &edges, nullptr, nullptr) == SEAMS_OK);
+  REQUIRE(edges == 0);
+  const std::array<double, 3> d{4.79 - 7.0, 2.26, 1.05};
+  const double d2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+  REQUIRE(std::abs(std::sqrt(d2) - 3.330796) < 1e-6);
+  std::vector<double> grad;
+  const double rg2 = api.value(SEAMS_CV_GYRATION_RG2, -1, &grad);
+  INFO("rg2 " << rg2);
+  REQUIRE(std::abs(rg2 - 2.773550) < 1e-12);
+  // Two atoms of weight one: Rg^2 = |d|^2 / 4 and its gradient is -/+ d / 2.
+  for (std::size_t k = 0; k < 3; ++k) {
+    REQUIRE(std::abs(grad[k] + 0.5 * d[k]) < 1e-12);
+    REQUIRE(std::abs(grad[3 + k] - 0.5 * d[k]) < 1e-12);
+  }
+  checkGradient(api, SEAMS_CV_GYRATION_RG2, -1, "rg2, unbonded pair in the tilted cell");
+}
+
+TEST_CASE("triclinic gyration unwraps a bond stretched past the Smith ball",
+          "[smooth_cv][triclinic]") {
+  // A pair 3.00 A apart along the normal of the narrowest faces is listed
+  // with d_max + skin = 3.06 A. Moving each atom 0.07 A, inside half the
+  // skin, stretches it to 3.14 A, past half the face separation (3.07 A),
+  // where the wrapped fractional difference is 4.50 A.
+  // The first row of the inverse cell matrix, b x c up to scale.
+  std::array<double, 3> normal{kTilted[4] * kTilted[5], -kTilted[6] * kTilted[5],
+                               kTilted[6] * kTilted[8] - kTilted[4] * kTilted[7]};
+  const double norm = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] +
+                                normal[2] * normal[2]);
+  for (double &x : normal) {
+    x /= norm;
+  }
+  const std::array<double, 3> mid{6.9, 5.2, 3.5};
+  auto pair = [&](double dist) {
+    Frame f;
+    f.n = 2;
+    std::copy(kTilted, kTilted + 9, f.box9);
+    for (const double sign : {-0.5, 0.5}) {
+      for (std::size_t k = 0; k < 3; ++k) {
+        f.xyz.push_back(mid[k] + sign * dist * normal[k]);
+      }
+    }
+    wrapTilted(f);
+    return f;
+  };
+  Api api(pair(3.0), 0.2, 2.5, 6, 0, 2.7, 2.9, 6);
+  api.rebuild(0.16);
+  std::size_t edges = 0;
+  REQUIRE(seams_cv_topology(api.cv, &edges, nullptr, nullptr) == SEAMS_OK);
+  REQUIRE(edges == 1);
+  REQUIRE(std::abs(api.value(SEAMS_CV_GYRATION_RG2, -1) - 2.25) < 1e-12);
+  const Frame stretched = pair(3.14);
+  api.place(stretched.xyz);
+  int stale = 1;
+  REQUIRE(seams_cv_needs_rebuild(api.cv, api.sys, &stale) == SEAMS_OK);
+  REQUIRE(stale == 0);
+  api.frame = stretched;
+  const double rg2 = api.value(SEAMS_CV_GYRATION_RG2, -1);
+  INFO("rg2 " << rg2);
+  REQUIRE(std::abs(rg2 - 0.25 * 3.14 * 3.14) < 1e-12);
+  checkGradient(api, SEAMS_CV_GYRATION_RG2, -1, "rg2, stretched bond in the tilted cell");
+}
+
+TEST_CASE("a cluster in a triclinic cell has the values and gradients of the cubic cell",
+          "[smooth_cv][triclinic]") {
+  // The same ice cluster, cut through the faces of a cubic and of a tilted
+  // 30 A cell. Its bonds and atoms are the same minimum-image geometry in
+  // both, so every variable and gradient agrees to rounding, and the tilted
+  // gradients match central differences.
+  // Centred on the face centre at fractional (0, 1/2, 1/2) of the tilted cell.
+  const double cell[9] = {0.0, 0.0, 0.0, 30.0, 30.0, 30.0, 12.0, -9.0, 10.5};
+  const std::array<double, 3> face{0.5 * (cell[6] + cell[7]), 0.5 * (cell[4] + cell[8]),
+                                   0.5 * cell[5]};
+  const Frame ball = iceBall(6.5, face, 0.15, 11);
+  const Frame cubic = iceCluster(6.5, 30.0, face, 0.15, 11);
+  Frame tilted = ball;
+  std::copy(cell, cell + 9, tilted.box9);
+  wrapTilted(tilted);
+  std::size_t moved = 0;
+  for (std::size_t i = 0; i < ball.n; ++i) {
+    moved += static_cast<std::size_t>(tilted.xyz[3 * i] != ball.xyz[3 * i] ||
+                                      tilted.xyz[3 * i + 1] != ball.xyz[3 * i + 1] ||
+                                      tilted.xyz[3 * i + 2] != ball.xyz[3 * i + 2]);
+  }
+  INFO("atoms wrapped through a tilted face: " << moved << " of " << ball.n);
+  REQUIRE(moved > 5);
+  REQUIRE(moved + 5 < ball.n);
+  Api a(cubic, kR0, kD0, kN, kM, kOn, kMax, 6);
+  Api b(tilted, kR0, kD0, kN, kM, kOn, kMax, 6);
+  a.rebuild(0.4);
+  b.rebuild(0.4);
+  const std::array<std::pair<int, int>, 7> cvs{{{SEAMS_CV_RING_COUNT, 6},
+                                                {SEAMS_CV_RING_ATOMS, 0},
+                                                {SEAMS_CV_HEX_BASAL_PAIRS, 0},
+                                                {SEAMS_CV_GYRATION_RG2, -1},
+                                                {SEAMS_CV_GYRATION_RG2, 6},
+                                                {SEAMS_CV_GYRATION_VOLUME, -1},
+                                                {SEAMS_CV_GYRATION_VOLUME, 0}}};
+  for (const auto &[kind, arg] : cvs) {
+    std::vector<double> ga;
+    std::vector<double> gb;
+    const double va = a.value(kind, arg, &ga);
+    const double vb = b.value(kind, arg, &gb);
+    INFO("kind " << kind << " arg " << arg);
+    REQUIRE(std::abs(va - vb) <= 1e-9 * (1.0 + std::abs(va)));
+    for (std::size_t c = 0; c < ga.size(); ++c) {
+      REQUIRE(std::abs(ga[c] - gb[c]) <= 1e-9 * (1.0 + std::abs(ga[c])));
+    }
+  }
+  REQUIRE(b.value(SEAMS_CV_RING_COUNT, 6) > 1.0);
+  checkGradient(b, SEAMS_CV_RING_COUNT, 6, "ring count, tilted cell");
+  checkGradient(b, SEAMS_CV_HEX_BASAL_PAIRS, 0, "hexagon basal pairs, tilted cell");
+  checkGradient(b, SEAMS_CV_GYRATION_RG2, 6, "rg2, six-ring weights, tilted cell");
+  checkGradient(b, SEAMS_CV_GYRATION_VOLUME, -1, "volume, uniform, tilted cell");
 }
 
 TEST_CASE("pairs beyond d_max in the list change nothing", "[smooth_cv]") {

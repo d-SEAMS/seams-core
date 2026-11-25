@@ -690,7 +690,7 @@ bool Workspace::stale(const Cloud &cloud) const {
   for (const int i : selected_) {
     const auto &p = cloud.pts[static_cast<std::size_t>(i)];
     const double *r = reference_.data() + 3 * static_cast<std::size_t>(i);
-    const auto d = gen::fracDelta(box, p.x, p.y, p.z, r[0], r[1], r[2]);
+    const auto d = gen::exactDelta(box, p.x, p.y, p.z, r[0], r[1], r[2]);
     if (d[0] * d[0] + d[1] * d[1] + d[2] * d[2] > limit) {
       return true;
     }
@@ -736,7 +736,7 @@ void Workspace::edgeWeights(const Cloud &cloud) {
   for (std::size_t e = 0; e < ne; ++e) {
     const auto &pi = cloud.pts[static_cast<std::size_t>(topo_.edges[e][0])];
     const auto &pj = cloud.pts[static_cast<std::size_t>(topo_.edges[e][1])];
-    const auto d = gen::fracDelta(box, pj.x, pj.y, pj.z, pi.x, pi.y, pi.z);
+    const auto d = gen::exactDelta(box, pj.x, pj.y, pj.z, pi.x, pi.y, pi.z);
     const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
     double dsdr = 0.0;
     s_[e] = sw_(r, dsdr);
@@ -778,9 +778,10 @@ double Workspace::gyration(const Cloud &cloud, bool volume, int arg, std::vector
   if (selected_.empty()) {
     return 0.0;
   }
-  // Unwrap along graph bonds, which are shorter than half the cell; a
-  // component the graph does not reach is placed by the minimum image of
-  // its first atom from the first selected atom.
+  // Unwrap along graph bonds; a component the graph does not reach is placed
+  // by the minimum image of its first atom from the first selected atom. Both
+  // images are Euclidean: a bond may outgrow the Smith ball by the skin
+  // before the list goes stale, and a placement is any distance.
   const gen::FracBox box = gen::makeFracBox(cloud);
   std::vector<std::array<double, 3>> u(static_cast<std::size_t>(n));
   std::vector<char> seen(static_cast<std::size_t>(n), 0);
@@ -791,7 +792,7 @@ double Workspace::gyration(const Cloud &cloud, bool volume, int arg, std::vector
       continue;
     }
     const auto &ps = cloud.pts[static_cast<std::size_t>(start)];
-    const auto d0 = gen::fracDelta(box, ps.x, ps.y, ps.z, origin.x, origin.y, origin.z);
+    const auto d0 = gen::exactDelta(box, ps.x, ps.y, ps.z, origin.x, origin.y, origin.z);
     u[static_cast<std::size_t>(start)] = {origin.x + d0[0], origin.y + d0[1], origin.z + d0[2]};
     seen[static_cast<std::size_t>(start)] = 1;
     queue.assign(1, start);
@@ -805,7 +806,7 @@ double Workspace::gyration(const Cloud &cloud, bool volume, int arg, std::vector
           continue;
         }
         const auto &pb = cloud.pts[static_cast<std::size_t>(b)];
-        const auto d = gen::fracDelta(box, pb.x, pb.y, pb.z, pa.x, pa.y, pa.z);
+        const auto d = gen::exactDelta(box, pb.x, pb.y, pb.z, pa.x, pa.y, pa.z);
         const auto &ua = u[static_cast<std::size_t>(a)];
         u[static_cast<std::size_t>(b)] = {ua[0] + d[0], ua[1] + d[1], ua[2] + d[2]};
         seen[static_cast<std::size_t>(b)] = 1;
