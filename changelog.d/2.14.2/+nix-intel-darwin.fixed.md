@@ -1,1 +1,1 @@
-The core Nix flake uses the Nixpkgs 26.05 Darwin branch on Intel macOS so that system remains supported.
+The core Nix flake uses Nixpkgs 26.05 on Intel macOS, selects OVITO and Qt test wheels for each platform, and enables optional engines when Nixpkgs provides them for the target.
