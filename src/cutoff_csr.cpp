@@ -14,6 +14,7 @@
 #include <index_range.hpp>
 #include <neighbours.hpp>
 #include <omp_tsan.hpp>
+#include <region_errors.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
 
@@ -1238,6 +1239,7 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
               const Tilt &h, double rc2, bool half, bool shifted, int *counts,
               int *offsets, int *cols, bool branchy = false) {
   const int nCells = ncx * ncy * ncz;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nCells >= 8)
 #endif
@@ -1250,124 +1252,127 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
 #pragma omp for schedule(static)
 #endif
     for (int c = 0; c < nCells; ++c) {
-      const int b = cellStart[c];
-      const int e = cellStart[c + 1];
-      if (b == e) {
-        continue;
-      }
-      const int cz = c % ncz;
-      const int cy = (c / ncz) % ncy;
-      const int cx = c / (ncy * ncz);
-      // A cell whose reach window stays inside the grid has no image shift.
-      // The while-wraps below are then dead branches, same as on an
-      // orthorhombic interior cell.
-      const bool deep = !branchy && cx >= rx && cx + rx < ncx && cy >= ry && cy + ry < ncy &&
-                        cz >= rz && cz + rz < ncz;
-      for (int i = b; i < e; ++i) {
-        const int ii = ids[i];
-        found.clear();
-        ++gen;
-        if (gen == 0) {
-          std::fill(stamp.begin(), stamp.end(), 0);
-          gen = 1;
+      errors.run([&] {
+        const int b = cellStart[c];
+        const int e = cellStart[c + 1];
+        if (b == e) {
+          return;
         }
-        for (int ox = -rx; ox <= rx; ++ox) {
-          int nx = cx + ox;
-          double ssx = 0.0;
-          if (!deep) {
-            while (nx >= ncx) {
-              nx -= ncx;
-              ssx += 1.0;
-            }
-            while (nx < 0) {
-              nx += ncx;
-              ssx -= 1.0;
-            }
+        const int cz = c % ncz;
+        const int cy = (c / ncz) % ncy;
+        const int cx = c / (ncy * ncz);
+        // A cell whose reach window stays inside the grid has no image shift.
+        // The while-wraps below are then dead branches, same as on an
+        // orthorhombic interior cell.
+        const bool deep = !branchy && cx >= rx && cx + rx < ncx && cy >= ry && cy + ry < ncy &&
+                          cz >= rz && cz + rz < ncz;
+        for (int i = b; i < e; ++i) {
+          const int ii = ids[i];
+          found.clear();
+          ++gen;
+          if (gen == 0) {
+            std::fill(stamp.begin(), stamp.end(), 0);
+            gen = 1;
           }
-          for (int oy = -ry; oy <= ry; ++oy) {
-            int ny = cy + oy;
-            double ssy = 0.0;
+          for (int ox = -rx; ox <= rx; ++ox) {
+            int nx = cx + ox;
+            double ssx = 0.0;
             if (!deep) {
-              while (ny >= ncy) {
-                ny -= ncy;
-                ssy += 1.0;
+              while (nx >= ncx) {
+                nx -= ncx;
+                ssx += 1.0;
               }
-              while (ny < 0) {
-                ny += ncy;
-                ssy -= 1.0;
+              while (nx < 0) {
+                nx += ncx;
+                ssx -= 1.0;
               }
             }
-            for (int oz = -rz; oz <= rz; ++oz) {
-              int nz = cz + oz;
-              double ssz = 0.0;
+            for (int oy = -ry; oy <= ry; ++oy) {
+              int ny = cy + oy;
+              double ssy = 0.0;
               if (!deep) {
-                while (nz >= ncz) {
-                  nz -= ncz;
-                  ssz += 1.0;
+                while (ny >= ncy) {
+                  ny -= ncy;
+                  ssy += 1.0;
                 }
-                while (nz < 0) {
-                  nz += ncz;
-                  ssz -= 1.0;
+                while (ny < 0) {
+                  ny += ncy;
+                  ssy -= 1.0;
                 }
               }
-              const int ncid = (nx * ncy + ny) * ncz + nz;
-              if (stamp[static_cast<std::size_t>(ncid)] == gen) {
-                continue;
-              }
-              stamp[static_cast<std::size_t>(ncid)] = gen;
-              for (int j = cellStart[ncid]; j < cellStart[ncid + 1]; ++j) {
-                const int jj = ids[j];
-                if (jj == ii || (half && jj < ii)) {
-                  continue;
-                }
-                double dsx, dsy, dsz;
-                double d2;
-                if (shifted) {
-                  dsx = xs[i] - xs[j] - ssx;
-                  dsy = ys[i] - ys[j] - ssy;
-                  dsz = zs[i] - zs[j] - ssz;
-                  d2 = tilt2(dsx, dsy, dsz, h);
-                } else {
-                  dsx = xs[i] - xs[j];
-                  dsy = ys[i] - ys[j];
-                  dsz = zs[i] - zs[j];
-                  dsx -= std::floor(dsx + 0.5);
-                  dsy -= std::floor(dsy + 0.5);
-                  dsz -= std::floor(dsz + 0.5);
-                  d2 = tilt2(dsx, dsy, dsz, h);
-                  if (!(d2 < rc2)) {
-                    // Outside the Smith ball a non-zero integer shift can yield
-                    // a shorter Euclidean image than fractional rounding.
-                    const std::array<double, 3> w = {
-                        h.lx * dsx + h.xy * dsy + h.xz * dsz,
-                        h.ly * dsy + h.yz * dsz,
-                        h.lz * dsz,
-                    };
-                    const auto euc = gen::refineEuclidean(
-                        h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, w, w);
-                    d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+              for (int oz = -rz; oz <= rz; ++oz) {
+                int nz = cz + oz;
+                double ssz = 0.0;
+                if (!deep) {
+                  while (nz >= ncz) {
+                    nz -= ncz;
+                    ssz += 1.0;
+                  }
+                  while (nz < 0) {
+                    nz += ncz;
+                    ssz -= 1.0;
                   }
                 }
-                if (d2 < rc2) {
-                  found.push_back(jj);
+                const int ncid = (nx * ncy + ny) * ncz + nz;
+                if (stamp[static_cast<std::size_t>(ncid)] == gen) {
+                  continue;
+                }
+                stamp[static_cast<std::size_t>(ncid)] = gen;
+                for (int j = cellStart[ncid]; j < cellStart[ncid + 1]; ++j) {
+                  const int jj = ids[j];
+                  if (jj == ii || (half && jj < ii)) {
+                    continue;
+                  }
+                  double dsx, dsy, dsz;
+                  double d2;
+                  if (shifted) {
+                    dsx = xs[i] - xs[j] - ssx;
+                    dsy = ys[i] - ys[j] - ssy;
+                    dsz = zs[i] - zs[j] - ssz;
+                    d2 = tilt2(dsx, dsy, dsz, h);
+                  } else {
+                    dsx = xs[i] - xs[j];
+                    dsy = ys[i] - ys[j];
+                    dsz = zs[i] - zs[j];
+                    dsx -= std::floor(dsx + 0.5);
+                    dsy -= std::floor(dsy + 0.5);
+                    dsz -= std::floor(dsz + 0.5);
+                    d2 = tilt2(dsx, dsy, dsz, h);
+                    if (!(d2 < rc2)) {
+                      // Outside the Smith ball a non-zero integer shift can yield
+                      // a shorter Euclidean image than fractional rounding.
+                      const std::array<double, 3> w = {
+                          h.lx * dsx + h.xy * dsy + h.xz * dsz,
+                          h.ly * dsy + h.yz * dsz,
+                          h.lz * dsz,
+                      };
+                      const auto euc = gen::refineEuclidean(
+                          h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, w, w);
+                      d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+                    }
+                  }
+                  if (d2 < rc2) {
+                    found.push_back(jj);
+                  }
                 }
               }
             }
           }
-        }
-        std::sort(found.begin(), found.end());
-        found.erase(std::unique(found.begin(), found.end()), found.end());
-        if (Write) {
-          const int base = offsets[ii];
-          for (int k = 0; k < static_cast<int>(found.size()); ++k) {
-            cols[base + k] = found[static_cast<std::size_t>(k)];
+          std::sort(found.begin(), found.end());
+          found.erase(std::unique(found.begin(), found.end()), found.end());
+          if (Write) {
+            const int base = offsets[ii];
+            for (int k = 0; k < static_cast<int>(found.size()); ++k) {
+              cols[base + k] = found[static_cast<std::size_t>(k)];
+            }
+          } else {
+            counts[ii] = static_cast<int>(found.size());
           }
-        } else {
-          counts[ii] = static_cast<int>(found.size());
         }
-      }
+      });
     }
   }
+  errors.rethrow();
 }
 
 bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -2614,27 +2619,31 @@ void nneigh::CutoffSkin::filter(
   const double rc2 = cutoff_ * cutoff_;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   std::vector<int> counts(static_cast<std::size_t>(nop), 0);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nop >= 256)
 #endif
   for (int i = 0; i < nop; ++i) {
-    int n = 0;
-    const int a = wideOff_[static_cast<std::size_t>(i)];
-    const int b = wideOff_[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = wideCols_[static_cast<std::size_t>(k)];
-      if (j < 0 || j >= nop || j == i) {
-        continue;
+    errors.run([&] {
+      int n = 0;
+      const int a = wideOff_[static_cast<std::size_t>(i)];
+      const int b = wideOff_[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = wideCols_[static_cast<std::size_t>(k)];
+        if (j < 0 || j >= nop || j == i) {
+          continue;
+        }
+        if (half_ && j < i) {
+          continue;
+        }
+        if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
+          ++n;
+        }
       }
-      if (half_ && j < i) {
-        continue;
-      }
-      if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
-        ++n;
-      }
-    }
-    counts[static_cast<std::size_t>(i)] = n;
+      counts[static_cast<std::size_t>(i)] = n;
+    });
   }
+  errors.rethrow();
   offsets_.assign(static_cast<std::size_t>(nop) + 1, 0);
   for (int i = 0; i < nop; ++i) {
     offsets_[static_cast<std::size_t>(i) + 1] =
@@ -2645,22 +2654,25 @@ void nneigh::CutoffSkin::filter(
 #pragma omp parallel for schedule(static) if (nop >= 256)
 #endif
   for (int i = 0; i < nop; ++i) {
-    int slot = offsets_[static_cast<std::size_t>(i)];
-    const int a = wideOff_[static_cast<std::size_t>(i)];
-    const int b = wideOff_[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = wideCols_[static_cast<std::size_t>(k)];
-      if (j < 0 || j >= nop || j == i || (half_ && j < i)) {
-        continue;
+    errors.run([&] {
+      int slot = offsets_[static_cast<std::size_t>(i)];
+      const int a = wideOff_[static_cast<std::size_t>(i)];
+      const int b = wideOff_[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = wideCols_[static_cast<std::size_t>(k)];
+        if (j < 0 || j >= nop || j == i || (half_ && j < i)) {
+          continue;
+        }
+        if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
+          cols_[static_cast<std::size_t>(slot++)] = j;
+        }
       }
-      if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
-        cols_[static_cast<std::size_t>(slot++)] = j;
-      }
-    }
-    const int n = slot - offsets_[static_cast<std::size_t>(i)];
-    std::sort(cols_.begin() + offsets_[static_cast<std::size_t>(i)],
-              cols_.begin() + offsets_[static_cast<std::size_t>(i)] + n);
+      const int n = slot - offsets_[static_cast<std::size_t>(i)];
+      std::sort(cols_.begin() + offsets_[static_cast<std::size_t>(i)],
+                cols_.begin() + offsets_[static_cast<std::size_t>(i)] + n);
+    });
   }
+  errors.rethrow();
 }
 
 bool nneigh::CutoffSkin::update(
