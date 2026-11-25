@@ -42,6 +42,7 @@
 #ifdef SEAMS_HAS_READCON
 #include <readcon-core.hpp>
 #endif
+#include <region_errors.hpp>
 #include <site.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
@@ -447,12 +448,14 @@ Cloud &kernel_cloud(seams_system *sys, int type, int &typ) {
     work.box = cloud.box;
     work.boxLow = cloud.boxLow;
     const int n = static_cast<int>(cloud.pts.size());
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 4096 && !omp_in_parallel())
 #endif
     for (int i = 0; i < n; ++i) {
-      work.pts[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)];
+      errors.run([&] { work.pts[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)]; });
     }
+    errors.rethrow();
   }
   sys->scratch_typ = normalize_types(work, type);
   sys->scratch_type = type;
@@ -659,13 +662,17 @@ std::vector<std::vector<int>> gather_rows(const std::vector<std::vector<int>> &s
                                           const std::vector<int> &at) {
   const int m = static_cast<int>(at.size());
   std::vector<std::vector<int>> out(at.size());
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 4096 && !omp_in_parallel())
 #endif
   for (int k = 0; k < m; ++k) {
-    const auto &row = src[static_cast<std::size_t>(at[static_cast<std::size_t>(k)])];
-    out[static_cast<std::size_t>(k)].assign(row.begin(), row.end());
+    errors.run([&] {
+      const auto &row = src[static_cast<std::size_t>(at[static_cast<std::size_t>(k)])];
+      out[static_cast<std::size_t>(k)].assign(row.begin(), row.end());
+    });
   }
+  errors.rethrow();
   return out;
 }
 
@@ -1809,18 +1816,26 @@ void refine_ring_labels(const seams_rings *rings) {
     const int nop = rings->n_atoms;
     rings->idx.assign(static_cast<std::size_t>(std::max(nop, 0)), {});
     const int filled = std::min(nop, static_cast<int>(rings->offsets.size()) - 1);
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (filled >= 4096 && !omp_in_parallel())
 #endif
     for (int i = 0; i < filled; ++i) {
-      const int a = rings->offsets[static_cast<std::size_t>(i)];
-      const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
-      // cageAffiliation and findPrisms read a row from its second entry,
-      // as neighbourListByIndex writes it.
-      auto &row = rings->idx[static_cast<std::size_t>(i)];
-      row.reserve(static_cast<std::size_t>(b - a) + 1);
-      row.push_back(i);
-      row.insert(row.end(), rings->cols.begin() + a, rings->cols.begin() + b);
+      errors.run([&] {
+        const int a = rings->offsets[static_cast<std::size_t>(i)];
+        const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
+        // cageAffiliation and findPrisms read a row from its second entry,
+        // as neighbourListByIndex writes it.
+        auto &row = rings->idx[static_cast<std::size_t>(i)];
+        row.reserve(static_cast<std::size_t>(b - a) + 1);
+        row.push_back(i);
+        row.insert(row.end(), rings->cols.begin() + a, rings->cols.begin() + b);
+      });
+    }
+    // A partial idx would pass the empty() test above on the next call.
+    if (errors.failed()) {
+      rings->idx.clear();
+      errors.rethrow();
     }
   }
   const auto &idx = rings->idx;
