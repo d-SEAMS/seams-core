@@ -14,6 +14,7 @@
 
 #include <generic.hpp>
 #include <par_team.hpp>
+#include <region_errors.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
@@ -1626,6 +1627,7 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
   std::vector<int> blockSum(width + 1, 0);
   index.ringOff.resize(atoms + 1);
   index.ringOff[0] = 0;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(nThreads)
 #endif
@@ -1681,12 +1683,12 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
 #pragma omp barrier
 #pragma omp single
 #endif
-    {
+    errors.run([&] {
       for (int t = 0; t < team; t++) {
         blockSum[static_cast<std::size_t>(t) + 1] += blockSum[static_cast<std::size_t>(t)];
       }
       index.ringCol.resize(static_cast<std::size_t>(blockSum[static_cast<std::size_t>(team)]));
-    }
+    });
     const int base = blockSum[static_cast<std::size_t>(tid)];
     for (int atom = alo; atom < ahi; atom++) {
       index.ringOff[static_cast<std::size_t>(atom) + 1] += base;
@@ -1697,30 +1699,36 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp barrier
 #endif
-    int *col = index.ringCol.data();
-    for (int t = tid; t < nThreads; t += team) {
-      int *row = table.data() + static_cast<std::size_t>(t) * atoms;
-      const int rlo = static_cast<int>(static_cast<std::int64_t>(nRings) * t / nThreads);
-      const int rhi = static_cast<int>(static_cast<std::int64_t>(nRings) * (t + 1) / nThreads);
-      for (int iring = rlo; iring < rhi; iring++) {
-        for (const int atom : rings[static_cast<std::size_t>(iring)]) {
-          if (atom >= 0 && atom < numAtoms) {
-            col[row[atom]++] = iring;
+    // After a failed resize ringCol is short; run() skips these writes.
+    errors.run([&] {
+      int *col = index.ringCol.data();
+      for (int t = tid; t < nThreads; t += team) {
+        int *row = table.data() + static_cast<std::size_t>(t) * atoms;
+        const int rlo = static_cast<int>(static_cast<std::int64_t>(nRings) * t / nThreads);
+        const int rhi = static_cast<int>(static_cast<std::int64_t>(nRings) * (t + 1) / nThreads);
+        for (int iring = rlo; iring < rhi; iring++) {
+          for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+            if (atom >= 0 && atom < numAtoms) {
+              col[row[atom]++] = iring;
+            }
           }
         }
       }
-    }
+    });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp barrier
 #pragma omp for schedule(static)
 #endif
     for (int atom = 0; atom < (withRows ? numAtoms : 0); atom++) {
-      const int begin = index.ringOff[static_cast<std::size_t>(atom)];
-      const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
-      index.ringsContainingAtom[static_cast<std::size_t>(atom)].assign(
-          index.ringCol.begin() + begin, index.ringCol.begin() + end);
+      errors.run([&] {
+        const int begin = index.ringOff[static_cast<std::size_t>(atom)];
+        const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
+        index.ringsContainingAtom[static_cast<std::size_t>(atom)].assign(
+            index.ringCol.begin() + begin, index.ringCol.begin() + end);
+      });
     }
   }
+  errors.rethrow();
   return index;
 }
 
@@ -2162,17 +2170,21 @@ std::vector<int> canonicalRingOrderByAtoms(
     return a < b;
   };
   const int nBuckets = maxAtom + 2;
+  seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int b = 0; b < nBuckets; b++) {
-    const int lo = bucket[static_cast<size_t>(b)];
-    const int hi = b + 1 < static_cast<int>(bucket.size()) ? bucket[static_cast<size_t>(b + 1)]
-                                                           : n;
-    if (hi - lo > 1) {
-      std::sort(order.begin() + lo, order.begin() + hi, before);
-    }
+    errors.run([&] {
+      const int lo = bucket[static_cast<size_t>(b)];
+      const int hi = b + 1 < static_cast<int>(bucket.size()) ? bucket[static_cast<size_t>(b + 1)]
+                                                             : n;
+      if (hi - lo > 1) {
+        std::sort(order.begin() + lo, order.begin() + hi, before);
+      }
+    });
   }
+  errors.rethrow();
   return order;
 }
 
@@ -2204,18 +2216,22 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
     rank[static_cast<size_t>(visitOrder[static_cast<size_t>(r)])] = r;
   }
   std::vector<ring::EquatorChoice> chosenPeriph(static_cast<size_t>(totalRingNum));
+  seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel for schedule(static, 64) if (totalRingNum >= 256 && omp_get_max_threads() > 1)
 #endif
   for (int iring = 0; iring < totalRingNum; iring++) {
-    ring::EquatorChoice &local = chosenPeriph[static_cast<size_t>(iring)];
-    if (notEquatorial[static_cast<size_t>(iring)]) {
-      continue;
-    }
-    if (!ring::equatorialConditions(rings, iring, index, nullptr, nullptr, &rank, &local)) {
-      continue;
-    }
+    errors.run([&] {
+      ring::EquatorChoice &local = chosenPeriph[static_cast<size_t>(iring)];
+      if (notEquatorial[static_cast<size_t>(iring)]) {
+        return;
+      }
+      if (!ring::equatorialConditions(rings, iring, index, nullptr, nullptr, &rank, &local)) {
+        return;
+      }
+    });
   }
+  errors.rethrow();
   const auto td2 = std::chrono::steady_clock::now();
   const std::vector<int> equators =
       ring::maximumEquators(chosenPeriph, visitOrder, certificate);
@@ -3069,6 +3085,7 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
       bool reverse;
     };
     std::vector<std::vector<Hit>> perThread(static_cast<std::size_t>(nThreads));
+    seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel
 #endif
@@ -3085,22 +3102,25 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
 #pragma omp for schedule(guided)
 #endif
       for (int t = 0; t < totalRingNum; t++) {
-        const int iring = visitOrder[static_cast<size_t>(t)];
-        gatherCandidates(iring, candidates, scratch);
-        for (const int jring : candidates) {
-          const std::vector<int> &basal1 = rings[static_cast<size_t>(iring)];
-          const std::vector<int> &basal2 = rings[static_cast<size_t>(jring)];
-          if (ring::hasCommonElements(basal1, basal2)) {
-            continue;
+        errors.run([&] {
+          const int iring = visitOrder[static_cast<size_t>(t)];
+          gatherCandidates(iring, candidates, scratch);
+          for (const int jring : candidates) {
+            const std::vector<int> &basal1 = rings[static_cast<size_t>(iring)];
+            const std::vector<int> &basal2 = rings[static_cast<size_t>(jring)];
+            if (ring::hasCommonElements(basal1, basal2)) {
+              continue;
+            }
+            const bool cond2 = ring::basalConditions(bonds, basal1, basal2);
+            const bool reverse = ring::basalConditions(bonds, basal2, basal1);
+            if (cond2 || reverse) {
+              local.push_back({iring, jring, cond2, reverse});
+            }
           }
-          const bool cond2 = ring::basalConditions(bonds, basal1, basal2);
-          const bool reverse = ring::basalConditions(bonds, basal2, basal1);
-          if (cond2 || reverse) {
-            local.push_back({iring, jring, cond2, reverse});
-          }
-        }
+        });
       }
     }
+    errors.rethrow();
     std::vector<Hit> hits;
     for (auto &local : perThread) {
       hits.insert(hits.end(), local.begin(), local.end());
@@ -3191,6 +3211,7 @@ void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
     std::sort(row.begin(), row.end());
     row.erase(std::unique(row.begin(), row.end()), row.end());
   };
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (n_ >= 4096 && !omp_in_parallel())
 #endif
@@ -3200,27 +3221,31 @@ void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
 #pragma omp for schedule(static)
 #endif
     for (int i = 0; i < n_; i++) {
-      sortedRow(i, row);
-      off_[static_cast<size_t>(i) + 1] = static_cast<int>(row.size());
+      errors.run([&] {
+        sortedRow(i, row);
+        off_[static_cast<size_t>(i) + 1] = static_cast<int>(row.size());
+      });
     }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp single
 #endif
-    {
+    errors.run([&] {
       for (int i = 0; i < n_; i++) {
         off_[static_cast<size_t>(i) + 1] += off_[static_cast<size_t>(i)];
       }
       cols_.resize(static_cast<size_t>(off_[static_cast<size_t>(n_)]));
-    }
+    });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
     for (int i = 0; i < n_; i++) {
-      sortedRow(i, row);
-      std::copy(row.begin(), row.end(),
-                cols_.begin() + off_[static_cast<size_t>(i)]);
+      errors.run([&] {
+        sortedRow(i, row);
+        std::copy(row.begin(), row.end(), cols_.begin() + off_[static_cast<size_t>(i)]);
+      });
     }
   }
+  errors.rethrow();
 }
 
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
