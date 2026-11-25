@@ -2094,28 +2094,114 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
   return fillCachedBasis(slots, hand, lastSlot, lx, ly, lz, xy, xz, yz);
 }
 
+// raw - n . (a, b, c) for the integers n that the fractional wrap of raw
+// picks, evaluated with integerDot rather than through the fractional
+// coordinates.
+inline std::array<double, 3> fractionalWrap(double lx, double ly, double lz, double xy,
+                                            double xz, double yz,
+                                            const std::array<double, 3> &raw) {
+  for (double v : raw) {
+    if (!std::isfinite(v)) {
+      throw RangeError("minimum-image displacement is not finite");
+    }
+  }
+  const double sz = raw[2] / lz;
+  const double sy = (raw[1] - sz * yz) / ly;
+  const double sx = (raw[0] - sy * xy - sz * xz) / lx;
+  const double n[3] = {std::nearbyint(sx), std::nearbyint(sy), std::nearbyint(sz)};
+  for (double v : n) {
+    if (!(std::abs(v) < kIntegral)) {
+      throw RangeError(
+          "minimum-image lattice coefficient exceeds binary64 integer precision");
+    }
+  }
+  const double ax[3] = {lx, xy, xz};
+  const double ay[3] = {0.0, ly, yz};
+  const double az[3] = {0.0, 0.0, lz};
+  return {raw[0] - integerDot(n, ax), raw[1] - integerDot(n, ay),
+          raw[2] - integerDot(n, az)};
+}
+
 } // namespace
 
+// Whether candidate = raw - n . (a, b, c) for integers n below 2^52, to
+// within 32 roundings of the magnitudes a binary64 evaluation of that
+// difference goes through: raw, the candidate, every n_i times its cell
+// row, and every cell row times the candidate's own fractional coordinate.
+// The residual itself is carried error-free, so a candidate off the lattice
+// by more than that, such as minimage 0.1.4's Euclidean image on a needle
+// cell, is rejected.
+inline bool latticeImage(double lx, double ly, double lz, double xy, double xz, double yz,
+                         const std::array<double, 3> &raw,
+                         const std::array<double, 3> &candidate) noexcept {
+  double d[3];
+  double e[3];
+  for (int k = 0; k < 3; k++) {
+    d[k] = raw[static_cast<std::size_t>(k)] - candidate[static_cast<std::size_t>(k)];
+    e[k] = sumError(raw[static_cast<std::size_t>(k)], -candidate[static_cast<std::size_t>(k)],
+                    d[k]);
+    if (!std::isfinite(d[k])) {
+      return false;
+    }
+  }
+  const double nz = std::nearbyint(d[2] / lz);
+  const double ny = std::nearbyint((d[1] - nz * yz) / ly);
+  const double nx = std::nearbyint((d[0] - ny * xy - nz * xz) / lx);
+  const double n[3] = {nx, ny, nz};
+  for (double v : n) {
+    if (!(std::abs(v) < kIntegral)) {
+      return false;
+    }
+  }
+  const double tz = candidate[2] / lz;
+  const double ty = (candidate[1] - tz * yz) / ly;
+  const double tx = (candidate[0] - ty * xy - tz * xz) / lx;
+  const double rows[3][3] = {{lx, xy, xz}, {0.0, ly, yz}, {0.0, 0.0, lz}};
+  const double t[3] = {tx, ty, tz};
+  constexpr double kEps = std::numeric_limits<double>::epsilon();
+  for (int k = 0; k < 3; k++) {
+    const double residual = (d[k] - integerDot(n, rows[k])) + e[k];
+    double scale = std::abs(raw[static_cast<std::size_t>(k)]) +
+                   std::abs(candidate[static_cast<std::size_t>(k)]);
+    for (int i = 0; i < 3; i++) {
+      scale += (std::abs(n[i]) + std::abs(t[i])) * std::abs(rows[k][i]);
+    }
+    const double tolerance = 32.0 * kEps * scale + std::numeric_limits<double>::min();
+    if (!(std::abs(residual) <= tolerance)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // Cartesian displacement from (xj, yj, zj) to (xi, yi, zi) on the
-// recovered dump cell. `wrapped` is the fractional image of that
-// difference. The fractional vector is kept when it is not strictly
-// longer than the Selling image.
+// recovered dump cell: raw is xi - xj and `wrapped` a lattice image of it,
+// such as its fractional wrap or minimage's image. A candidate that is not
+// a lattice image of raw is replaced by the fractional wrap of raw before
+// the search, so the result is always the minimum image of raw.
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((always_inline))
 #endif
 inline std::array<double, 3>
 euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double yz,
                    const std::array<double, 3> &raw, const std::array<double, 3> &wrapped) {
-  (void)raw;
-  const Vec3 w{wrapped[0], wrapped[1], wrapped[2]};
+  for (double value : wrapped) {
+    if (!std::isfinite(value)) {
+      throw RangeError("minimum-image candidate is not finite");
+    }
+  }
+  std::array<double, 3> start = wrapped;
+  if (!latticeImage(lx, ly, lz, xy, xz, yz, raw, wrapped)) {
+    start = fractionalWrap(lx, ly, lz, xy, xz, yz, raw);
+    if (!latticeImage(lx, ly, lz, xy, xz, yz, raw, start)) {
+      throw RangeError(
+          "minimum-image wrap is not a lattice image of the displacement in binary64");
+    }
+  }
+  const Vec3 w{start[0], start[1], start[2]};
   const double f2 = n2(w);
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (!(f2 < kRange)) {
-    for (double value : wrapped) {
-      if (!std::isfinite(value)) {
-        throw RangeError("minimum-image candidate is not finite");
-      }
-    }
     throw RangeError(
         "minimum-image squared norm exceeds binary64 range");
   }
