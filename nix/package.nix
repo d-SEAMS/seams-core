@@ -50,9 +50,21 @@
 }:
 
 let
+  available = lib.meta.availableOn stdenv.hostPlatform;
+  withLammps = available lammps;
+  withGromacs = available gromacs;
+  withOpenmm = available openmm;
+  withPlumed = available plumed;
   lammpsWithPlugin = lammps.overrideAttrs (old: {
     cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DPKG_PLUGIN=ON" ];
   });
+  engineInputs = lib.optional withLammps lammpsWithPlugin
+    ++ lib.optional withGromacs gromacs
+    ++ lib.optional withPlumed plumed;
+  testWheels = import ./test-wheels.nix {
+    inherit fetchurl;
+    system = stdenv.hostPlatform.system;
+  };
   bindingSource = name: rev: hash: {
     inherit rev;
     src = fetchzip {
@@ -93,21 +105,9 @@ let
     rev = "e2bdf66e671b0cc527b5939cf1b3acfd01ebe727";
     hash = "sha256-Too0mXaa+ISNcMA0k/+MdKwHE3i2Lhj5OrMjL4mCoUI=";
   };
-  ovitoWheel = fetchurl {
-    url = "https://files.pythonhosted.org/packages/67/99/09355940b7be501f016e481e69c67aa795aac706dd749b0b34ca6f6be482/ovito-3.17.2-cp314-cp314-manylinux_2_34_x86_64.whl";
-    sha256 = "1j6zplnpzyn7s87h79cgqkilfpp4ganbb5xv86vwcbz4sdwl8sr3";
-  };
   solvisWheel = fetchurl {
     url = "https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl";
     sha256 = "1s80abs8pz9n9zz9yh04clmyfsnmcxva86q59i6zh2f0rji5cwyx";
-  };
-  pysideWheel = fetchurl {
-    url = "https://files.pythonhosted.org/packages/7b/3c/7597d8dcb36aa8315427635ec6ec9d850ffbad4ce78b9118ac854889f2d3/pyside6_essentials-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl";
-    sha256 = "1n9v7n4nkkjllidcrya0h0ymzzlyv91q4ia8w1d26jdg3pjbbx0n";
-  };
-  shibokenWheel = fetchurl {
-    url = "https://files.pythonhosted.org/packages/49/c2/a04fa003b4360e99d8e3fc2829abacf37396ace63ea1cd616402209ec7c6/shiboken6-6.12.0-cp310-abi3-manylinux_2_34_x86_64.whl";
-    sha256 = "0h329n41j6fnzqmmlfg9871aprgdvnnhhf7nqysl8049n1dmdpiv";
   };
   # This pin ships towncrier 25, which joins a Markdown title to the notes
   # with no blank line. The changelog was rendered by towncrier 23.11, the
@@ -241,15 +241,10 @@ stdenv.mkDerivation (finalAttrs: {
       pyvista
       traits
       towncrier
-      ps.openmm
-    ]))
-    openmpi
-    lammpsWithPlugin
-    gromacs
-    plumed
+    ] ++ lib.optional withOpenmm ps.openmm))
     rustc
     cargo
-  ];
+  ] ++ lib.optional (available openmpi) openmpi ++ engineInputs;
 
 
   buildInputs = [
@@ -263,19 +258,17 @@ stdenv.mkDerivation (finalAttrs: {
     spglib
     nauty
     openbabel
-    lammpsWithPlugin
-    gromacs
-    openmm
-    plumed
     fftwFloat
     cxxopts
     rang
   ]
-  ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
+  ++ engineInputs
+  ++ lib.optional withOpenmm openmm
+  ++ lib.optional stdenv.cc.isClang llvmPackages.openmp;
 
   # The meson setup hook already sets -Dwrap_mode=nodownload.
-  # Backends packaged by nixpkgs are required. The others have no package
-  # on this pin and cannot use their networked fallbacks in the sandbox.
+  # Engine integrations use the packages available for the host platform.
+  # The sandbox cannot use networked fallbacks for missing dependencies.
   mesonFlags = [
     (lib.mesonBool "with_tests" true)
     (lib.mesonBool "with_cli" true)
@@ -285,12 +278,10 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_spglib" true)
     (lib.mesonEnable "with_nauty" true)
     (lib.mesonEnable "with_csm" true)
-    (lib.mesonEnable "with_lammps" true)
-    (lib.mesonOption "lammps_src_include" "${lammps.src}/src")
-    (lib.mesonEnable "with_gromacs" true)
-    (lib.mesonOption "gromacs_legacy_include" "${gromacsLegacyHeaders}/api/legacy/include")
-    (lib.mesonEnable "with_openmm" true)
-    (lib.mesonEnable "with_plumed" true)
+    (lib.mesonEnable "with_lammps" withLammps)
+    (lib.mesonEnable "with_gromacs" withGromacs)
+    (lib.mesonEnable "with_openmm" withOpenmm)
+    (lib.mesonEnable "with_plumed" withPlumed)
     (lib.mesonEnable "with_chemfiles" false)
     (lib.mesonEnable "with_readcon" false)
     (lib.mesonEnable "with_ira" false)
@@ -298,7 +289,9 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_gpulite" false)
     (lib.mesonEnable "with_linkcell" true)
     (lib.mesonEnable "with_minimage" true)
-  ];
+  ]
+  ++ lib.optional withLammps (lib.mesonOption "lammps_src_include" "${lammps.src}/src")
+  ++ lib.optional withGromacs (lib.mesonOption "gromacs_legacy_include" "${gromacsLegacyHeaders}/api/legacy/include");
 
   preConfigure = ''
     export CARGO_HOME=${cargoHome}
@@ -314,23 +307,23 @@ stdenv.mkDerivation (finalAttrs: {
     git -C .. init -q -b main
     git -C .. add -A
     git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
-    # Scenes invoke "$CC". A bare gcc name resolves to a shim that calls
-    # itself. The absolute wrapper does not.
-    export CC=$(type -P gcc)
-    export CXX=$(type -P g++)
-    export OPENMM_DIR=${openmm}
+    # Scene tests need the absolute compiler wrappers for this platform.
+    export CC=${stdenv.cc}/bin/cc
+    export CXX=${stdenv.cc}/bin/c++
+    ${lib.optionalString withOpenmm "export OPENMM_DIR=${openmm}"}
     front=$PWD/pyfront
     rm -rf "$front"
     mkdir -p "$front/dseams" "$front/pydseams"
     cp -a ${pydseamslibSrc}/src/dseams/. "$front/dseams/"
     cp -a ${pydseamslibSrc}/src/pydseams/. "$front/pydseams/"
     chmod -R u+w "$front"
-    unzip -q -o ${ovitoWheel} -d "$front"
+    unzip -q -o ${testWheels.ovito} -d "$front"
     unzip -q -o ${solvisWheel} -d "$front"
-    unzip -q -o ${pysideWheel} -d "$front"
-    unzip -q -o ${shibokenWheel} -d "$front"
+    unzip -q -o ${testWheels.pyside} -d "$front"
+    unzip -q -o ${testWheels.shiboken} -d "$front"
     unzip -q -o ${towncrierWheel} -d "$front"
-    export LD_LIBRARY_PATH=${lib.makeLibraryPath [
+    ${lib.optionalString stdenv.hostPlatform.isLinux ''
+      export LD_LIBRARY_PATH=${lib.makeLibraryPath [
       libglvnd
       glib
       brotli
@@ -341,9 +334,10 @@ stdenv.mkDerivation (finalAttrs: {
       fontconfig
       vulkanLoader
       dbus
-    ]}:$LD_LIBRARY_PATH
+      ]}:$LD_LIBRARY_PATH
+    ''}
     export QT_QPA_PLATFORM=offscreen
-    "$CXX" -shared -fPIC -std=c++20 -O2 \
+    "$CXX" -shared -fPIC -std=c++20 -O2 ${lib.optionalString stdenv.hostPlatform.isDarwin "-Wl,-undefined,dynamic_lookup"} \
       -I${py}/include/python${py.pythonVersion} \
       -I${nanobindRoot}/include \
       -I${robinMap}/include \
@@ -352,7 +346,7 @@ stdenv.mkDerivation (finalAttrs: {
       ${nanobindRoot}/src/nb_combined.cpp \
       -Lsrc -lseams -Wl,-rpath,"$PWD/src" \
       -o "$front/dseams/_core.so"
-    "$CXX" -shared -fPIC -std=c++20 -O2 -fopenmp \
+    "$CXX" -shared -fPIC -std=c++20 -O2 -fopenmp ${lib.optionalString stdenv.hostPlatform.isDarwin "-Wl,-undefined,dynamic_lookup"} \
       -DSEAMS_HAS_OPENMP=1 -DSEAMS_HAS_HWY=1 \
       -I${py}/include/python${py.pythonVersion} \
       -I${nanobindRoot}/include \

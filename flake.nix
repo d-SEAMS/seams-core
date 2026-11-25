@@ -28,6 +28,7 @@
         let
           pkgs = pkgsFor system;
           seams = pkgs.callPackage ./nix/package.nix {
+            python3 = if system == "x86_64-darwin" then pkgs.python313 else pkgs.python314;
             robinMap = pkgs.robin-map;
             vulkanLoader = pkgs.vulkan-loader;
           };
