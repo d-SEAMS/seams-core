@@ -66,6 +66,7 @@
 #include <numeric>
 #include <set>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_set>
 #include <utility>
@@ -209,6 +210,22 @@ void remember() noexcept {
   note_error();
 }
 
+/* linkcell's C calls return status 1 for every failure and name the kind in
+ * the message. The frame's cell was checked when it was stored, so a cell
+ * linkcell finds singular, or a mesh or image stencil it cannot represent,
+ * is a cell outside what its binary64 search resolves. */
+seams_status linkcell_status(const linkcell::Error &ex) noexcept {
+  const std::string_view what = ex.what();
+  if (what == "linked-cell mesh is too fine" || what == "periodic image count exceeds 2^24" ||
+      what == "singular or non-positive cell") {
+    return SEAMS_ERR_RANGE;
+  }
+  if (what == "a coordinate is not finite") {
+    return SEAMS_ERR_ARG;
+  }
+  return SEAMS_ERR_INTERNAL;
+}
+
 /* Call only from inside a catch handler. A minimum-image range error comes
  * from the caller's cell or coordinates, so it is not an internal error. */
 seams_status caught() noexcept {
@@ -217,6 +234,8 @@ seams_status caught() noexcept {
     throw;
   } catch (const gen::mic::RangeError &) {
     return SEAMS_ERR_RANGE;
+  } catch (const linkcell::Error &ex) {
+    return linkcell_status(ex);
   } catch (...) {
     return SEAMS_ERR_INTERNAL;
   }
@@ -3700,6 +3719,8 @@ static seams_status pore_status() {
     return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (const gen::mic::RangeError &ex) {
     return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (const linkcell::Error &ex) {
+    return fail(linkcell_status(ex), ex.what());
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (const std::exception &ex) {

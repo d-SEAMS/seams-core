@@ -154,7 +154,7 @@ extern "C" {
 typedef enum seams_status {
   SEAMS_OK = 0,            /**< The call succeeded. */
   SEAMS_ERR_NULL = 1,      /**< A required pointer is null. */
-  SEAMS_ERR_RANGE = 2,     /**< A number or a buffer length is outside the accepted range, or a tilted cell needs a lattice coefficient at or above 2^52 for its minimum image. */
+  SEAMS_ERR_RANGE = 2,     /**< A number or a buffer length is outside the accepted range, a tilted cell needs a lattice coefficient at or above 2^52 for its minimum image, or the cell is outside what the linked-cell search resolves, such as an edge that needs more bins than linkcell allows. */
   SEAMS_ERR_BOX = 3,       /**< The cell is missing, non-finite, or has no volume. */
   SEAMS_ERR_ARG = 4,       /**< A caller argument is the wrong shape, or a coordinate is not finite. */
   SEAMS_ERR_STATE = 5,     /**< The handle has no frame yet. */
