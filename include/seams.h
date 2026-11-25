@@ -1389,9 +1389,11 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * (1 - W_P) for every shortcut path P between two of its members, W_P the
  * product of the path's bond weights. With bond weights 0 and 1 the rings of
  * weight one are the primitive rings of seams_rings_find(). Every value is
- * a fixed polynomial in the pair weights, so it is twice continuously
- * differentiable in the coordinates, also where a bond crosses the list
- * cutoff or a ring gains or loses a shortcut.
+ * a fixed function of the pair weights, so it is as smooth as s(r) also
+ * where a bond crosses the list cutoff or a ring gains or loses a shortcut:
+ * twice continuously differentiable for d0 = 0 or n >= 3. The gyration
+ * volume is a square root and its gradient is unbounded as the cluster
+ * flattens.
  *
  * Gradients are d value / d x, 3 * natoms doubles in frame order,
  * x0 y0 z0 x1 ..., zero for atoms outside the selection. The force of a
