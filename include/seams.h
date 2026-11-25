@@ -1428,15 +1428,16 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At
  * r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise.
  * Above x = 1, s is evaluated in 1 / x, so for every finite argument s is
- * finite, for any n and m. ds/dr can exceed double range when r0 or
+ * finite when n and m are at most 4096. A larger exponent is
+ * ::SEAMS_ERR_RANGE and the message names 4096. ds/dr can exceed double range when r0 or
  * d_max - d_on is near the smallest doubles; when dsdr is not NULL that
  * is ::SEAMS_ERR_RANGE, and neither output is written.
  * @param r Distance, Angstrom. Not negative.
  * @param r0 Positive length scale, Angstrom.
  * @param d0 Plateau radius, Angstrom, at least zero.
- * @param n Numerator exponent, at least one.
- * @param m Denominator exponent, greater than n. Zero selects 2 * n, which
- *        needs n <= INT_MAX / 2.
+ * @param n Numerator exponent, from 1 through 4096.
+ * @param m Denominator exponent, greater than n and at most 4096. Zero
+ *        selects 2 * n, which needs 2 * n <= 4096.
  * @param d_on Taper start, Angstrom, from d0 and below d_max.
  * @param d_max Radius where s reaches zero, Angstrom.
  * @param s Receives s(r).
@@ -1461,9 +1462,9 @@ SEAMS_API seams_status seams_switch_rational(double r, double r0, double d0, int
  * @brief Create a smooth collective-variable workspace.
  * @param r0 Switching length scale, Angstrom. See seams_switch_rational().
  * @param d0 Switching plateau radius, Angstrom.
- * @param n Switching numerator exponent.
- * @param m Switching denominator exponent; zero selects 2 * n, which needs
- *        n <= INT_MAX / 2.
+ * @param n Switching numerator exponent, from 1 through 4096.
+ * @param m Switching denominator exponent, greater than n and at most 4096.
+ *        Zero selects 2 * n, which needs 2 * n <= 4096.
  * @param d_on Taper start, Angstrom.
  * @param d_max Radius where every bond weight reaches zero, Angstrom.
  * @param max_ring Largest candidate ring, from 3 through 10.
@@ -1509,10 +1510,16 @@ SEAMS_API void seams_cv_destroy(seams_cv *cv);
  * candidate rings, their shortcut paths and the hexagon pairs are fixed
  * until the next rebuild. A ring, ring-atom or hexagon-pair value computed
  * from this topology equals the value from a fresh rebuild while no
- * selected atom has moved more than skin / 2 from its position here and
- * the cell is unchanged; so does a gyration value of a compact selection
- * (see seams_cv_value()). seams_cv_needs_rebuild() reports when that no
- * longer holds, and seams_cv_value() then refuses the frame.
+ * selected atom has moved more than skin / 2 from its position here, the
+ * cell is unchanged, and every atom type is unchanged; so does a gyration
+ * value of a compact selection (see seams_cv_value()). A type change marks
+ * the selection stale. The ring and shortcut searches are bounded by the
+ * ring size. A graph that would pass 20000000 ring-search steps, 2000000
+ * candidate rings, 20000000 shortcut-search steps, or 2000000 shortcut
+ * paths is ::SEAMS_ERR_RANGE and the message names that limit; rings and
+ * paths are not dropped. seams_cv_needs_rebuild() reports when the
+ * topology no longer matches the frame, and seams_cv_value() then refuses
+ * the frame.
  * @param cv Workspace handle.
  * @param sys Frame handle that holds a frame.
  * @param type Species to select. Zero and negative select every atom.
@@ -1545,9 +1552,9 @@ SEAMS_API seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, i
  * @brief Whether a frame needs seams_cv_rebuild() before the next value.
  * @param cv Workspace handle.
  * @param sys Frame handle that holds a frame.
- * @param stale Receives 1 when cv was never rebuilt, the atom count or cell
- *        changed, or a selected atom moved more than skin / 2 since the
- *        rebuild, and 0 otherwise.
+ * @param stale Receives 1 when cv was never rebuilt, the atom count, cell,
+ *        or any atom type changed, or a selected atom moved more than
+ *        skin / 2 since the rebuild, and 0 otherwise.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE.
  * @par Ownership
  * The caller owns stale.
@@ -1611,7 +1618,10 @@ SEAMS_API seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges,
  * total weight is positive. With total weight 0 both values and gradients
  * are 0, so with ring weights they jump to 0 as the last ring breaks. The
  * volume is in general not differentiable where the cluster becomes flat,
- * det G = 0; there it and its gradient are 0. ::SEAMS_CV_STATE returns
+ * det G = 0; there it and its gradient are 0. The same 0 value and 0
+ * gradient are returned when the smallest eigenvalue of G is at most
+ * 1e-10 times the largest, so a coplanar cloud whose determinant rounds
+ * positive stays flat. ::SEAMS_CV_STATE returns
  * state arg, as smooth as the variables its clauses read.
  * A value or gradient entry outside double range, from switch parameters
  * near the smallest doubles or coordinates near the largest, is

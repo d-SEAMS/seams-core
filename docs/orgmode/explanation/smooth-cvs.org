@@ -30,8 +30,9 @@ The library evaluates it as the ratio of the geometric sums
 \(x = 1\) needs no special case; there \(R = n/m\) and
 \(R' = -n(m-n) / (2 m r_0)\). Above \(x = 1\) it uses
 \(R = y^{m-n} G_n(y) / G_m(y)\) with \(y = 1/x\) and \(G_k\) the
-geometric sum, which forms no power of \(x\): \(s\) is finite for any
-exponents and any finite distance. Only \(ds/dr\) can leave double
+geometric sum, which forms no power of \(x\): \(s\) is finite for
+exponents through 4096 and any finite distance. A larger exponent is
+rejected and the error names 4096. Only \(ds/dr\) can leave double
 range, when \(r_0\) or \(d_{max} - d_{on}\) is near the smallest
 doubles, and the API then returns ~SEAMS_ERR_RANGE~ rather than a
 non-finite number. ~m = 0~ selects \(m = 2n\), as in PLUMED.
@@ -129,7 +130,9 @@ below half the narrowest cell width, which ~seams_cv_rebuild()~ requires
 (~SEAMS_ERR_BOX~ otherwise).
 
 ~seams_cv_needs_rebuild()~ reports when an atom has moved more than half
-the skin, the atom count changed or the cell changed. ~seams_cv_value()~
+the skin, the atom count changed, the cell changed, or any atom type
+changed. A type change marks the selection stale so the next rebuild
+filters on the new types. ~seams_cv_value()~
 and ~seams_cv_states()~ then return ~SEAMS_ERR_STATE~ until the next
 rebuild, so a stale topology is never evaluated.
 
@@ -325,10 +328,14 @@ one, and the topology holds 64 candidate hexagon pairs.
 * Limitations
 
 - The candidate rings are every simple cycle up to ~max_ring~ on the
-  list at \(d_{max} + \text{skin}\). Their number grows quickly with the
-  coordination of that graph, so a wide skin or a dense liquid with a
-  large ~max_ring~ makes the rebuild slow and the topology large. Keep
-  \(d_{max} + \text{skin}\) inside the first minimum of the oxygen RDF.
+  list at \(d_{max} + \text{skin}\), and the shortcut paths are the
+  simple paths shorter than the ring separation. Both searches stop at
+  that length, so the work is polynomial in the neighbour count. A
+  rebuild that would pass 20000000 ring-search steps, 2000000 candidate
+  rings, 20000000 shortcut-search steps, or 2000000 shortcut paths
+  returns an error that names the limit. It does not drop rings or
+  paths. Keep \(d_{max} + \text{skin}\) inside the first minimum of the
+  oxygen RDF.
 - Only the basal test of the hexagonal cage is smooth. Cage labels,
   double-diamond cages, prism stacks and the per-ring symmetry codes
   stay integer.
@@ -345,7 +352,10 @@ one, and the topology holds 64 candidate hexagon pairs.
 - \(V\) is \(\sqrt{\det G}\): continuous, but in general not
   differentiable where the cluster becomes flat. Lifting one atom a
   height \(h\) off the plane of the others gives \(V \propto |h|\), a
-  kink. A flat or empty cluster returns 0 with a zero gradient.
+  kink. A flat or empty cluster returns 0 with a zero gradient. A
+  cluster whose smallest gyration eigenvalue is at most 1e-10 times the
+  largest is treated as flat in the same way, so a coplanar cloud whose
+  determinant rounds positive still returns 0 with a zero gradient.
 - \(s\) is \(C^{n-1}\) at \(d_0 > 0\). With \(n < 3\) and \(d_0 > 0\) a
   second derivative jumps there. With \(d_0 = 0\) and \(n = 1\) a bond
   weight has a cone where its two atoms coincide, and the gradient

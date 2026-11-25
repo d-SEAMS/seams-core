@@ -3111,8 +3111,8 @@ Parameters: `r0`, `d0`, `n`, `m`, `d_on`, `d_max`, `max_ring`, `out`.
 
 - `r0`: Switching length scale, Angstrom. See seams_switch_rational().
 - `d0`: Switching plateau radius, Angstrom.
-- `n`: Switching numerator exponent.
-- `m`: Switching denominator exponent; zero selects 2 * n, which needs n <= INT_MAX / 2.
+- `n`: Switching numerator exponent, from 1 through 4096.
+- `m`: Switching denominator exponent, greater than n and at most 4096. Zero selects 2 * n, which needs 2 * n <= 4096.
 - `d_on`: Taper start, Angstrom.
 - `d_max`: Radius where every bond weight reaches zero, Angstrom.
 - `max_ring`: Largest candidate ring, from 3 through 10.
@@ -3203,7 +3203,7 @@ Parameters: `cv`, `sys`, `stale`.
 
 - `cv`: Workspace handle.
 - `sys`: Frame handle that holds a frame.
-- `stale`: Receives 1 when cv was never rebuilt, the atom count or cell changed, or a selected atom moved more than skin / 2 since the rebuild, and 0 otherwise.
+- `stale`: Receives 1 when cv was never rebuilt, the atom count, cell, or any atom type changed, or a selected atom moved more than skin / 2 since the rebuild, and 0 otherwise.
 
 Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE.
 
@@ -3234,7 +3234,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: List the graph and fix the candidate rings for the next frames.
 
-Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A ring, ring-atom or hexagon-pair value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here and the cell is unchanged; so does a gyration value of a compact selection (see seams_cv_value()). seams_cv_needs_rebuild() reports when that no longer holds, and seams_cv_value() then refuses the frame.
+Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A ring, ring-atom or hexagon-pair value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here, the cell is unchanged, and every atom type is unchanged; so does a gyration value of a compact selection (see seams_cv_value()). A type change marks the selection stale. The ring and shortcut searches are bounded by the ring size. A graph that would pass 20000000 ring-search steps, 2000000 candidate rings, 20000000 shortcut-search steps, or 2000000 shortcut paths is SEAMS_ERR_RANGE and the message names that limit; rings and paths are not dropped. seams_cv_needs_rebuild() reports when the topology no longer matches the frame, and seams_cv_value() then refuses the frame.
 
 ```c
 seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, const int *atoms, size_t n_atoms, double skin);
@@ -3411,7 +3411,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Value and gradient of one collective variable.
 
-SEAMS_CV_RING_COUNT sums the ring weights of size arg. SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. SEAMS_CV_GYRATION_RG2 and SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read. A value or gradient entry outside double range, from switch parameters near the smallest doubles or coordinates near the largest, is SEAMS_ERR_RANGE, and neither value nor grad is written.
+SEAMS_CV_RING_COUNT sums the ring weights of size arg. SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. SEAMS_CV_GYRATION_RG2 and SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. The same 0 value and 0 gradient are returned when the smallest eigenvalue of G is at most 1e-10 times the largest, so a coplanar cloud whose determinant rounds positive stays flat. SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read. A value or gradient entry outside double range, from switch parameters near the smallest doubles or coordinates near the largest, is SEAMS_ERR_RANGE, and neither value nor grad is written.
 
 ```c
 seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int arg, double *value, double *grad, size_t grad_len);
@@ -6545,7 +6545,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: PLUMED RATIONAL switching function with a C2 taper to zero.
 
-For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. Above x = 1, s is evaluated in 1 / x, so for every finite argument s is finite, for any n and m. ds/dr can exceed double range when r0 or d_max - d_on is near the smallest doubles; when dsdr is not NULL that is SEAMS_ERR_RANGE, and neither output is written.
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. Above x = 1, s is evaluated in 1 / x, so for every finite argument s is finite when n and m are at most 4096. A larger exponent is SEAMS_ERR_RANGE and the message names 4096. ds/dr can exceed double range when r0 or d_max - d_on is near the smallest doubles; when dsdr is not NULL that is SEAMS_ERR_RANGE, and neither output is written.
 
 ```c
 seams_status seams_switch_rational(double r, double r0, double d0, int n, int m, double d_on, double d_max, double *s, double *dsdr);
@@ -6556,8 +6556,8 @@ Parameters: `r`, `r0`, `d0`, `n`, `m`, `d_on`, `d_max`, `s`, `dsdr`.
 - `r`: Distance, Angstrom. Not negative.
 - `r0`: Positive length scale, Angstrom.
 - `d0`: Plateau radius, Angstrom, at least zero.
-- `n`: Numerator exponent, at least one.
-- `m`: Denominator exponent, greater than n. Zero selects 2 * n, which needs n <= INT_MAX / 2.
+- `n`: Numerator exponent, from 1 through 4096.
+- `m`: Denominator exponent, greater than n and at most 4096. Zero selects 2 * n, which needs 2 * n <= 4096.
 - `d_on`: Taper start, Angstrom, from d0 and below d_max.
 - `d_max`: Radius where s reaches zero, Angstrom.
 - `s`: Receives s(r).

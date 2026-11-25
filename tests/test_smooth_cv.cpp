@@ -393,14 +393,17 @@ TEST_CASE("every finite switch argument gives a finite result or SEAMS_ERR_RANGE
   REQUIRE(seams_switch_rational(0.5 * kTiny, kR0, 0.0, kN, kM, 0.0, kTiny, &s, nullptr) ==
           SEAMS_OK);
   REQUIRE(std::isfinite(s));
-  // m = 0 doubles n, which must fit in an int.
+  // m = 0 doubles n, which must fit in an int. Exponents above 4096 are
+  // rejected even when 2n still fits.
   REQUIRE(seams_switch_rational(1.0, kR0, kD0, kIntMax, 0, kOn, kMax, &s, nullptr) ==
           SEAMS_ERR_RANGE);
   REQUIRE(seams_switch_rational(1.0, kR0, kD0, kIntMax / 2 + 1, 0, kOn, kMax, &s, nullptr) ==
           SEAMS_ERR_RANGE);
+  s = -1.0;
   REQUIRE(seams_switch_rational(1.0, kR0, kD0, kIntMax / 2, 0, kOn, kMax, &s, nullptr) ==
-          SEAMS_OK);
-  REQUIRE(s == 1.0);
+          SEAMS_ERR_RANGE);
+  REQUIRE(s == -1.0);
+  REQUIRE(std::string(seams_last_error_message()).find("4096") != std::string::npos);
 
   const double huge = std::numeric_limits<double>::max();
   const std::array<std::pair<int, int>, 6> exponents{
@@ -1057,4 +1060,166 @@ TEST_CASE("collective variables are finite or SEAMS_ERR_RANGE for every finite s
           SEAMS_ERR_RANGE);
   REQUIRE(chi == -1.0);
   REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return g == -1.0; }));
+}
+
+TEST_CASE("switch exponents stop at 4096", "[smooth_cv][limits]") {
+  // At the limit, m = 0 selects 2n = 4096 and the value is the closed form
+  // y^n / (1 + y^n) for y = 0.9. One past the limit is an error that names
+  // 4096 and leaves the outputs untouched.
+  const double r = kD0 + kR0 / 0.9;
+  REQUIRE(r < kOn);
+  const double y = 0.9;
+  const double p = std::pow(y, 2048);
+  const double expect = p / (1.0 + p);
+  double s = 0.0;
+  double ds = 0.0;
+  REQUIRE(seams_switch_rational(r, kR0, kD0, 2048, 0, kOn, kMax, &s, &ds) == SEAMS_OK);
+  INFO("s = " << s << ", expected " << expect << ", ds/dr = " << ds);
+  REQUIRE(expect > 1e-300);
+  REQUIRE(std::abs(s - expect) <= 1e-8 * expect);
+  REQUIRE(std::isfinite(ds));
+  REQUIRE(ds < 0.0);
+  double up = 0.0;
+  double down = 0.0;
+  REQUIRE(seams_switch_rational(r + kStep, kR0, kD0, 2048, 0, kOn, kMax, &up, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(seams_switch_rational(r - kStep, kR0, kD0, 2048, 0, kOn, kMax, &down, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(std::abs((up - down) / (2.0 * kStep) - ds) <= 1e-2 * std::abs(ds));
+
+  s = 1.25;
+  ds = 2.5;
+  REQUIRE(seams_switch_rational(r, kR0, kD0, 2049, 0, kOn, kMax, &s, &ds) == SEAMS_ERR_RANGE);
+  REQUIRE(s == 1.25);
+  REQUIRE(ds == 2.5);
+  REQUIRE(std::string(seams_last_error_message()).find("4096") != std::string::npos);
+  s = 1.25;
+  REQUIRE(seams_switch_rational(r, kR0, kD0, 100, 4097, kOn, kMax, &s, nullptr) ==
+          SEAMS_ERR_RANGE);
+  REQUIRE(s == 1.25);
+  REQUIRE(std::string(seams_last_error_message()).find("4096") != std::string::npos);
+}
+
+TEST_CASE("an atom type change invalidates a type-filtered selection", "[smooth_cv][limits]") {
+  const double pi = std::acos(-1.0);
+  Frame f;
+  f.n = 3;
+  const double side = 2.0;
+  const double radius = side / std::sqrt(3.0);
+  for (int k = 0; k < 3; ++k) {
+    const double t = 2.0 * k * pi / 3.0;
+    f.xyz.insert(f.xyz.end(), {10.0 + radius * std::cos(t), 10.0 + radius * std::sin(t), 10.0});
+  }
+  f.box9[3] = f.box9[4] = f.box9[5] = 30.0;
+  Api api(f, 0.4, 2.5, 6, 12, 3.0, 3.5, 3);
+  int types[3] = {1, 1, 1};
+  REQUIRE(seams_system_set_atoms(api.sys, f.xyz.data(), f.n, f.box9, 9, types, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(seams_cv_rebuild(api.cv, api.sys, 1, nullptr, 0, 0.2) == SEAMS_OK);
+  REQUIRE(std::abs(api.value(SEAMS_CV_RING_COUNT, 3) - 1.0) < 1e-12);
+
+  types[2] = 2;
+  REQUIRE(seams_system_set_atoms(api.sys, f.xyz.data(), f.n, f.box9, 9, types, nullptr) ==
+          SEAMS_OK);
+  int stale = 0;
+  REQUIRE(seams_cv_needs_rebuild(api.cv, api.sys, &stale) == SEAMS_OK);
+  REQUIRE(stale == 1);
+  REQUIRE(seams_cv_rebuild(api.cv, api.sys, 1, nullptr, 0, 0.2) == SEAMS_OK);
+  const double after = api.value(SEAMS_CV_RING_COUNT, 3);
+
+  Api fresh(f, 0.4, 2.5, 6, 12, 3.0, 3.5, 3);
+  REQUIRE(seams_system_set_atoms(fresh.sys, f.xyz.data(), f.n, f.box9, 9, types, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(seams_cv_rebuild(fresh.cv, fresh.sys, 1, nullptr, 0, 0.2) == SEAMS_OK);
+  const double other = fresh.value(SEAMS_CV_RING_COUNT, 3);
+  REQUIRE(after == other);
+  REQUIRE(after == 0.0);
+}
+
+TEST_CASE("exactly and nearly planar clusters have zero volume and a matching gradient",
+          "[smooth_cv][limits]") {
+  // The plane z = 0.3 x + 0.2 y is not a coordinate plane, so the
+  // determinant of G is a cancellation. A lift of 1e-8 along the normal
+  // is coplanar on the scale of the cluster and must stay at volume 0
+  // with a zero gradient. Central differences use a step that remains
+  // inside that flat neighbourhood.
+  const double pi = std::acos(-1.0);
+  const double nx = -0.3;
+  const double ny = -0.2;
+  const double nz = 1.0;
+  const double nn = std::sqrt(nx * nx + ny * ny + nz * nz);
+  auto cloud = [&](double lift) {
+    Frame f;
+    f.n = 6;
+    for (int k = 0; k < 6; ++k) {
+      const double t = k * pi / 3.0;
+      const double x = 10.0 + 2.75 * std::cos(t);
+      const double y = 10.0 + 2.75 * std::sin(t);
+      f.xyz.insert(f.xyz.end(), {x, y, 0.3 * x + 0.2 * y});
+    }
+    f.xyz[0] += lift * nx / nn;
+    f.xyz[1] += lift * ny / nn;
+    f.xyz[2] += lift * nz / nn;
+    f.box9[3] = f.box9[4] = f.box9[5] = 40.0;
+    return f;
+  };
+  for (const double lift : {0.0, 1e-8}) {
+    const Frame f = cloud(lift);
+    Api api(f, kR0, kD0, kN, kM, 6.0, 8.0, 6);
+    api.rebuild(0.4);
+    std::vector<double> grad;
+    const double v = api.value(SEAMS_CV_GYRATION_VOLUME, -1, &grad);
+    INFO("lift " << lift << ", V " << v);
+    REQUIRE(v == 0.0);
+    REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return g == 0.0; }));
+    const auto fd = centralDifference(api, [&] { return api.value(SEAMS_CV_GYRATION_VOLUME, -1); });
+    REQUIRE(fd.size() == grad.size());
+    for (std::size_t c = 0; c < fd.size(); ++c) {
+      INFO("component " << c << " fd " << fd[c]);
+      REQUIRE(std::abs(fd[c]) < 1e-8);
+    }
+  }
+}
+
+TEST_CASE("a dense neighbour graph stops at the ring-search limit", "[smooth_cv][limits]") {
+  // Eight mutually bonded atoms are inside the budget. Every triangle has
+  // weight 1 and every longer cycle has a chord, so the ring count is
+  // C(8, 3) = 56. Thirty-two mutually bonded atoms with max_ring 7 would
+  // visit more than 20000000 ring-search steps; the rebuild names that
+  // limit and does not return a partial count.
+  auto clique = [](int n, double spacing) {
+    Frame f;
+    f.n = static_cast<std::size_t>(n);
+    const int side = 4;
+    for (int i = 0; i < n; ++i) {
+      f.xyz.insert(f.xyz.end(), {10.0 + spacing * static_cast<double>(i % side),
+                                 10.0 + spacing * static_cast<double>((i / side) % side),
+                                 10.0 + spacing * static_cast<double>(i / (side * side))});
+    }
+    f.box9[3] = f.box9[4] = f.box9[5] = 40.0;
+    return f;
+  };
+  {
+    const Frame small = clique(8, 0.4);
+    Api api(small, 0.5, 3.0, 6, 12, 4.0, 5.0, 5);
+    api.rebuild(0.2);
+    REQUIRE(std::abs(api.value(SEAMS_CV_RING_COUNT, 3) - 56.0) < 1e-9);
+    REQUIRE(api.value(SEAMS_CV_RING_COUNT, 4) == 0.0);
+    REQUIRE(api.value(SEAMS_CV_RING_COUNT, 5) == 0.0);
+    REQUIRE(std::abs(api.value(SEAMS_CV_RING_COUNT, 0) - 56.0) < 1e-9);
+  }
+  const Frame dense = clique(32, 0.45);
+  Api api(dense, 0.5, 4.0, 6, 12, 5.0, 6.0, 7);
+  double value = 1.0;
+  const seams_status rc =
+      seams_cv_rebuild(api.cv, api.sys, 0, nullptr, 0, 0.2);
+  INFO(seams_last_error_message());
+  REQUIRE(rc == SEAMS_ERR_RANGE);
+  REQUIRE(value == 1.0);
+  const std::string msg = seams_last_error_message();
+  REQUIRE(msg.find("20000000") != std::string::npos);
+  REQUIRE(msg.find("steps") != std::string::npos);
+  double kept = -1.0;
+  REQUIRE(seams_cv_value(api.cv, api.sys, SEAMS_CV_RING_COUNT, 0, &kept, nullptr, 0) ==
+          SEAMS_ERR_STATE);
 }
