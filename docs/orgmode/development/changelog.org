@@ -4,7 +4,9 @@
 Release notes for the d-SEAMS engine. This repository builds
 ~libyodaLib~, the C library ~libseams~ (=include/seams.h=), the
 language ABI ~libseams_lang~, and the ~seams~ command. Each language
-binding is its own package. The current release is 2.14.0.
+binding is its own package. See the
+[[file:../reference/release-2.14.org][2.14 release notes]] for changes in
+all 2.14 releases. The overview below covers the 2.14.0 ABI and package split.
 
 * 2.14.0
 
