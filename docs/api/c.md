@@ -6803,7 +6803,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: PLUMED RATIONAL switching function with a C2 taper to zero.
 
-For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max.
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise.
 
 ```c
 seams_status seams_switch_rational(double r, double r0, double d0, int n, int m, double d_on, double d_max, double *s, double *dsdr);
@@ -6819,7 +6819,7 @@ Parameters: `r`, `r0`, `d0`, `n`, `m`, `d_on`, `d_max`, `s`, `dsdr`.
 - `d_on`: Taper start, Angstrom, from d0 and below d_max.
 - `d_max`: Radius where s reaches zero, Angstrom.
 - `s`: Receives s(r).
-- `dsdr`: Receives ds/dr in 1/Angstrom, or NULL.
+- `dsdr`: Receives ds/dr in 1/Angstrom, the right derivative at r = d0, or NULL.
 
 Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
 

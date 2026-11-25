@@ -130,11 +130,11 @@ PLUMED RATIONAL switching function with a C2 taper to zero.
     Receives s(r).
 
 ``dsdr``
-    Receives ds/dr in 1/Angstrom, or NULL.
+    Receives ds/dr in 1/Angstrom, the right derivative at r = d0, or NULL.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
 
-For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double sw = 0, dsw = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw); @endcode
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double sw = 0, dsw = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw); @endcode
 
 .. _capi-seams_cv_create:
 

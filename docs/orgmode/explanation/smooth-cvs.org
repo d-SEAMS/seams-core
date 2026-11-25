@@ -40,10 +40,16 @@ T(r) = 1 - u^3 (10 - 15u + 6u^2), \qquad u = \frac{r - d_{on}}{d_{max} - d_{on}}
 with \(T = 1\) below \(d_{on}\) and \(T = 0\) from \(d_{max}\) on. \(T\)
 and its first two derivatives are continuous at both ends, so \(s\) is
 \(C^2\) at \(d_{on}\) and at \(d_{max}\), and exactly zero beyond
-\(d_{max}\). At \(d_0 > 0\), \(R = 1 - x^n + O(x^m)\), so \(s\) is
-\(C^{n-1}\) there; take \(n \ge 3\) or \(d_0 = 0\) for \(C^2\)
-everywhere. The parameters must satisfy \(r_0 > 0\), \(1 \le n < m\)
-and \(0 \le d_0 \le d_{on} < d_{max}\).
+\(d_{max}\). Near \(d_0\), \(R = 1 - x^n + O(x^m)\). At \(d_0 > 0\)
+\(s\) is therefore \(C^{n-1}\) there and not \(C^n\). At \(d_0 = 0\)
+the same expansion in \(r = |v|\), with \(v\) the bond vector, is
+\(C^2\) in \(v\) for \(n \ge 2\), but for \(n = 1\) it is the cone
+\(1 - |v|/r_0\), which has no derivative where the two atoms coincide.
+The bond weights are \(C^2\) in the coordinates for \(n \ge 3\), and
+for \(n = 2\) with \(d_0 = 0\). At \(r = d_0\) the library reports the
+right derivative, \(-1/r_0\) for \(n = 1\) and 0 for \(n \ge 2\). The
+parameters must satisfy \(r_0 > 0\), \(1 \le n < m\) and
+\(0 \le d_0 \le d_{on} < d_{max}\).
 
 ~seams_switch_rational()~ returns \(s\) and \(ds/dr\) for one distance.
 
@@ -317,7 +323,9 @@ one, and the topology holds 64 candidate hexagon pairs.
   \(\det G \to 0\). A flat or empty cluster returns 0 with a zero
   gradient.
 - \(s\) is \(C^{n-1}\) at \(d_0 > 0\). With \(n < 3\) and \(d_0 > 0\) a
-  second derivative jumps there.
+  second derivative jumps there. With \(d_0 = 0\) and \(n = 1\) a bond
+  weight has a cone where its two atoms coincide, and the gradient
+  reported there is zero.
 - The rebuild runs on one thread, and a value costs one pass over the
   rings, their shortcut paths and the hexagon pairs. The values are for
   one frame of one handle at a time; concurrent calls need one handle
