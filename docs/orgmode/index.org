@@ -129,7 +129,7 @@ and the library each one links.
 - Rust: ~cargo add dseams~ from [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
 - Fortran: fpm Git dependency ~dseams~ from [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
 
-[[file:reference/release-2.14.org][The 2.14.2 notes]] are the changes
+[[file:reference/release-2.14.org][The 2.14.3 notes]] are the changes
 since 2.13.0.
 [[file:user/howto/migrate-1x.org][Migrate from 1.x]] maps ~yodaStruct -c~
 onto ~seams~.

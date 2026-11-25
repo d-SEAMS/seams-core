@@ -1,6 +1,6 @@
 [workspace]
 name = "seams-core"
-version = "2.14.2"
+version = "2.14.3"
 channels = ["conda-forge"]
 # linux-64 stays the glibc 2.28 baseline. conda-forge has no
 # sysroot_linux-64 2.38; 2.39 is the sysroot at or above 2.38. It is
