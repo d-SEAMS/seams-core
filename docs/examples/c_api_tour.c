@@ -612,7 +612,7 @@ int main(int argc, char **argv) {
   need("switch", seams_switch_rational(3.1, 0.3, 2.8, 6, 0, 3.2, 3.5, &sw, &dsw), NULL);
   printf("capi seams_switch_rational %.3f %.3f\n", sw, dsw);
   seams_cv *cv = NULL;
-  need("cvc", seams_cv_create(0.3, 2.8, 6, 0, 3.2, 3.5, 6, &cv), NULL);
+  need("cvc", seams_cv_create(0.3, 2.9, 6, 0, 3.2, 3.5, 6, &cv), NULL);
   printf("capi seams_cv_create ok\n");
   need("cvr", seams_cv_rebuild(cv, ih, 0, NULL, 0, 0.5), cv);
   printf("capi seams_cv_rebuild ok\n");
