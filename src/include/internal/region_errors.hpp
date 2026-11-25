@@ -2,7 +2,6 @@
 
 #include <atomic>
 #include <exception>
-#include <mutex>
 
 namespace seams {
 
@@ -11,7 +10,8 @@ namespace seams {
 // iteration's body through run(): the first exception is kept, iterations
 // that start after it return at once, and rethrow() raises it once the
 // region has closed. The skipped iterations leave their outputs unwritten,
-// so a caller that catches the rethrow must not read them.
+// so a caller that catches the rethrow must not read them. The handler
+// itself cannot throw: a lock there would be one more std::terminate.
 class RegionErrors {
 public:
   template <class F> void run(F &&body) noexcept {
@@ -21,11 +21,9 @@ public:
     try {
       body();
     } catch (...) {
-      const std::lock_guard<std::mutex> hold(lock_);
-      if (!first_) {
+      if (!failed_.exchange(true, std::memory_order_acq_rel)) {
         first_ = std::current_exception();
       }
-      failed_.store(true, std::memory_order_relaxed);
     }
   }
 
@@ -40,7 +38,6 @@ public:
 
 private:
   std::atomic<bool> failed_{false};
-  std::mutex lock_;
   std::exception_ptr first_;
 };
 
