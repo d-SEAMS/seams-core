@@ -46,7 +46,7 @@
 // bounds the step count. A slicer step whose rounded norm does not fall is
 // skipped for the next candidate, and the loop stops when no candidate
 // lowers it. Non-finite values, singular bases, and lattice coefficients at
-// or above 2^52 throw explicitly without poisoning the per-thread basis
+// or above 2^52 throw mic::RangeError without poisoning the per-thread basis
 // cache.
 
 #include <algorithm>
@@ -59,6 +59,14 @@
 
 namespace gen {
 namespace mic {
+
+// The cell or the displacement is outside what this header resolves exactly
+// in binary64. It is a property of the input, so the C API reports it as
+// SEAMS_ERR_RANGE rather than as an internal error.
+struct RangeError : std::runtime_error {
+  using std::runtime_error::runtime_error;
+};
+
 namespace {
 
 constexpr double kIntegral = 4503599627370496.0;
@@ -112,7 +120,7 @@ inline double maxAbs(Vec3 v) {
 // Half away from zero, matching a truncation after adding just under 1/2.
 inline double roundAway(double x) {
   if (!std::isfinite(x) || std::abs(x) >= kIntegral) {
-    throw std::runtime_error(
+    throw RangeError(
         "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
   const double t = x + std::copysign(0.49999999999999994, x);
@@ -828,7 +836,7 @@ inline void lagrangeReduce(Vec3 v[3]) {
           const double before = n2(v[i]);
           const double after = n2(reduced);
           if (!std::isfinite(after)) {
-            throw std::runtime_error(
+            throw RangeError(
                 "minimum-image Lagrange reduction reached binary64 limits");
           }
           if (after < before) {
@@ -882,7 +890,7 @@ inline void sellingSteps(Vec3 v[4]) {
       after += n2Long(v[i]);
     }
     if (!std::isfinite(after)) {
-      throw std::runtime_error(
+      throw RangeError(
           "minimum-image Selling reduction reached binary64 limits");
     }
     if (!(after < before)) {
@@ -1078,7 +1086,7 @@ inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) 
   const auto evalFromCoef = [&](const double (&n)[3]) -> Vec3 {
     if (!(std::abs(n[0]) < kIntegral && std::abs(n[1]) < kIntegral &&
           std::abs(n[2]) < kIntegral)) {
-      throw std::runtime_error(
+      throw RangeError(
           "minimum-image lattice coefficient exceeds binary64 integer precision");
     }
     return {integerDot(n, xs), integerDot(n, ys), n[2] * c.z};
@@ -1091,7 +1099,7 @@ inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) 
         std::round((static_cast<long double>(v[k].x) - n1 * b.x - n2c * c.x) / a.x);
     if (!(std::abs(n0) < kIntegral && std::abs(n1) < kIntegral &&
           std::abs(n2c) < kIntegral)) {
-      throw std::runtime_error(
+      throw RangeError(
           "minimum-image lattice coefficient exceeds binary64 integer precision");
     }
     const double n[3] = {static_cast<double>(n0), static_cast<double>(n1),
@@ -1106,7 +1114,7 @@ inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) 
   const long double detV = std::abs(detLong(v[0], v[1], v[2]));
   if (!(volume > 0.0L && std::isfinite(volume) && std::isfinite(detV) &&
         std::abs(detV - volume) <= 1e-6L * volume)) {
-    throw std::runtime_error("minimum-image reduction left the lattice in binary64");
+    throw RangeError("minimum-image reduction left the lattice in binary64");
   }
   // Exact-integer Lagrange size-reduction in extended precision: if binary64
   // rounding in Lagrange/Selling shifted a long reduced vector by many short
@@ -1139,7 +1147,7 @@ inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) 
           const long double nc =
               static_cast<long double>(coef[i][m]) - qd * static_cast<long double>(coef[j][m]);
           if (!(std::abs(nc) < kIntegral)) {
-            throw std::runtime_error(
+            throw RangeError(
                 "minimum-image lattice coefficient exceeds binary64 integer precision");
           }
           nextCoef[m] = static_cast<double>(nc);
@@ -1216,7 +1224,7 @@ inline Obtuse obtuseSuperbasis(Vec3 a, Vec3 b, Vec3 c) {
   const Vec3 original[4] = {a, b, c, scale(-1.0, add(add(a, b), c))};
   for (const Vec3 &v : original) {
     if (!std::isfinite(n2(v))) {
-      throw std::runtime_error("minimum-image cell exceeds binary64 range");
+      throw RangeError("minimum-image cell exceeds binary64 range");
     }
   }
   if (alreadyObtuse(original)) {
@@ -1243,7 +1251,7 @@ inline int descend(const Obtuse &s, Vec3 &x, double n[3], int cap) {
   // Norms only fall from here, so this bounds every projection and step.
   constexpr double kRange = std::numeric_limits<double>::max() / 16.0;
   if (!(n2(x) < kRange && s.maxRelN2 < kRange)) {
-    throw std::runtime_error("minimum-image slicer projection exceeds binary64 range");
+    throw RangeError("minimum-image slicer projection exceeds binary64 range");
   }
   double proj[8];
   const auto project = [&]() {
@@ -1305,7 +1313,7 @@ inline Vec3 babai(const Obtuse &s, Vec3 y, double z[3], double &scale) {
   for (int k = 0; k < 3; k++) {
     c[k] = s.inv[0][k] * yv[0] + s.inv[1][k] * yv[1] + s.inv[2][k] * yv[2];
     if (!std::isfinite(c[k])) {
-      throw std::runtime_error(
+      throw RangeError(
           "minimum-image Babai coefficient exceeds binary64 range");
     }
     z[k] = roundAway(c[k]);
@@ -1332,7 +1340,7 @@ inline void addBabai(const Obtuse &s, const double z[3], double n[3]) {
     for (int k = 0; k < 3; k++) {
       const double term = z[k] * s.coef[s.idx[k]][m];
       if (!(std::abs(term) < kIntegral)) {
-        throw std::runtime_error(
+        throw RangeError(
             "minimum-image lattice coefficient exceeds binary64 integer precision");
       }
       sum += term;
@@ -1344,7 +1352,7 @@ inline void addBabai(const Obtuse &s, const double z[3], double n[3]) {
 inline void requireIntegral(const double n[3]) {
   if (!(std::abs(n[0]) < kIntegral && std::abs(n[1]) < kIntegral &&
         std::abs(n[2]) < kIntegral)) {
-    throw std::runtime_error(
+    throw RangeError(
         "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
 }
@@ -1974,11 +1982,11 @@ __attribute__((always_inline))
 #endif
 inline Vec3 closestDisplacement(const Obtuse &s, const Vec3 &w, double w2) {
   if (!s.ok) {
-    throw std::runtime_error(
+    throw RangeError(
         "minimum-image cell is numerically singular in binary64");
   }
   if (!(w2 * s.maxInvN2 < kIntegral * kIntegral)) {
-    throw std::runtime_error(
+    throw RangeError(
         "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
   if (w2 < s.smithLim2) {
@@ -2105,10 +2113,10 @@ euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double
   if (!(f2 < kRange)) {
     for (double value : wrapped) {
       if (!std::isfinite(value)) {
-        throw std::runtime_error("minimum-image candidate is not finite");
+        throw RangeError("minimum-image candidate is not finite");
       }
     }
-    throw std::runtime_error(
+    throw RangeError(
         "minimum-image squared norm exceeds binary64 range");
   }
   const Cached &slot = cachedBasis(lx, ly, lz, xy, xz, yz);

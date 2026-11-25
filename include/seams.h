@@ -154,7 +154,7 @@ extern "C" {
 typedef enum seams_status {
   SEAMS_OK = 0,            /**< The call succeeded. */
   SEAMS_ERR_NULL = 1,      /**< A required pointer is null. */
-  SEAMS_ERR_RANGE = 2,     /**< A number or a buffer length is outside the accepted range. */
+  SEAMS_ERR_RANGE = 2,     /**< A number or a buffer length is outside the accepted range, or a tilted cell needs a lattice coefficient at or above 2^52 for its minimum image. */
   SEAMS_ERR_BOX = 3,       /**< The cell is missing, non-finite, or has no volume. */
   SEAMS_ERR_ARG = 4,       /**< A caller argument is the wrong shape, or a coordinate is not finite. */
   SEAMS_ERR_STATE = 5,     /**< The handle has no frame yet. */
@@ -2398,7 +2398,8 @@ SEAMS_API seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts
  * @param n_anion Receives the anion molecule count, or NULL. At least
  *        one of the three outputs must be non-NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
- *         ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
+ *         ::SEAMS_ERR_INTERNAL.
  * @par Handle access
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame

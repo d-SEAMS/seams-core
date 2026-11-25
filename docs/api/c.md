@@ -2881,7 +2881,7 @@ Parameters: `sys`, `site_spec`, `n_pairs`, `n_cation`, `n_anion`.
 - `n_cation`: Receives the cation molecule count, or NULL.
 - `n_anion`: Receives the anion molecule count, or NULL. At least one of the three outputs must be non-NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
 
 Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
 

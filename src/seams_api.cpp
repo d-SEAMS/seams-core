@@ -209,6 +209,19 @@ void remember() noexcept {
   note_error();
 }
 
+/* Call only from inside a catch handler. A minimum-image range error comes
+ * from the caller's cell or coordinates, so it is not an internal error. */
+seams_status caught() noexcept {
+  remember();
+  try {
+    throw;
+  } catch (const gen::mic::RangeError &) {
+    return SEAMS_ERR_RANGE;
+  } catch (...) {
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
 void set_threads() {
 #ifdef SEAMS_HAS_OPENMP
   if (g_threads > 0) {
@@ -1169,8 +1182,7 @@ seams_status seams_set_num_threads(int n) {
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1394,8 +1406,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1442,8 +1453,7 @@ seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *ri
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1568,8 +1578,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1614,8 +1623,7 @@ seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1698,8 +1706,7 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1764,8 +1771,7 @@ seams_status seams_rings_from_csr(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1944,8 +1950,7 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
     } catch (const std::bad_alloc &) {
       return fail(SEAMS_ERR_NOMEM, "out of memory");
     } catch (...) {
-      remember();
-      return SEAMS_ERR_INTERNAL;
+      return caught();
     }
   }
   const long count = static_cast<long>(rings->rings.size());
@@ -2137,8 +2142,7 @@ seams_status seams_path_nframes(const char *path, size_t *nframes) {
   } catch (const std::exception &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2177,8 +2181,7 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
     const bool past = !empty && std::strstr(what, "past the last") != nullptr;
     return fail(past ? SEAMS_ERR_RANGE : SEAMS_ERR_ARG, empty ? "cannot read frame" : what);
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2267,8 +2270,7 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2369,8 +2371,7 @@ seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, i
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2436,8 +2437,7 @@ seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2500,8 +2500,7 @@ seams_status seams_tetrahedral_order(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2555,8 +2554,7 @@ seams_status seams_lsi(seams_system *sys, const int *centres,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2709,8 +2707,7 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2827,8 +2824,7 @@ static seams_status signature_with_edge(seams_system *sys, double cutoff, int ty
   } catch (const std::out_of_range &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2878,8 +2874,7 @@ seams_status seams_system_symmetry(seams_system *sys, double shell_rmsd, int *la
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2937,8 +2932,7 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3120,8 +3114,7 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3169,8 +3162,7 @@ seams_status seams_rdf(seams_system *sys, double rmax, int bins, int type_i, int
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3213,8 +3205,7 @@ seams_status seams_running_cn(seams_system *sys, double rmax, int bins, int type
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3242,8 +3233,7 @@ seams_status seams_coordination(seams_system *sys, double rmax, int bins, int ty
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3313,8 +3303,7 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3387,8 +3376,7 @@ seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3476,8 +3464,7 @@ seams_status seams_directed_hbonds(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3647,8 +3634,7 @@ seams_status seams_quenched_analysis(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3695,8 +3681,7 @@ seams_status seams_density_axis(seams_system *sys, int type, int bins, int axis,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3708,6 +3693,8 @@ static seams_status pore_status() {
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (const std::out_of_range &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (const gen::mic::RangeError &ex) {
     return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
@@ -3974,8 +3961,7 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4064,8 +4050,7 @@ seams_status seams_contact_pairs(seams_system *sys, const char *site_spec, size_
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4125,8 +4110,7 @@ seams_status seams_domains(seams_system *sys, double cutoff, const char *site_sp
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4194,8 +4178,7 @@ seams_status seams_prisms(seams_system *sys, double cutoff, int type, int *perfe
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4264,8 +4247,7 @@ seams_status seams_monolayer(seams_system *sys, double cutoff, int type, int max
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4292,8 +4274,7 @@ seams_status seams_site_table(seams_system *sys, const char *spec, int *kinds, s
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4502,8 +4483,7 @@ seams_status seams_system_set_positions(seams_system *sys, const double *xyz, si
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4715,8 +4695,7 @@ seams_status seams_molecule_centres(const seams_system *sys, const int *mols,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4762,8 +4741,7 @@ seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4840,8 +4818,7 @@ seams_status seams_traj_unwrap_centres(
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4895,8 +4872,7 @@ seams_status seams_water_vectors(const seams_system *sys, int oxygen_type,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4951,8 +4927,7 @@ seams_status seams_molecule_dipoles(
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5007,8 +4982,7 @@ seams_status seams_orientation_order(const double *vectors, size_t n_vectors,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5054,8 +5028,7 @@ seams_status seams_msd_create(size_t natoms, size_t max_lag,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5097,8 +5070,7 @@ seams_status seams_msd_push(seams_msd *msd, const double *xyz, size_t natoms,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5148,8 +5120,7 @@ seams_status seams_msd_curve(const seams_msd *msd, double *lag_time,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5197,8 +5168,7 @@ seams_status seams_msd_fit(const seams_msd *msd, double t_start, double t_end,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5232,8 +5202,7 @@ seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5262,8 +5231,7 @@ seams_status seams_hbond_tcf_push(seams_hbond_tcf *tcf, const int *donors,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5310,8 +5278,7 @@ seams_status seams_hbond_tcf_curve(const seams_hbond_tcf *tcf, double *lag_time,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5360,8 +5327,7 @@ seams_status seams_hbond_tcf_fit(const seams_hbond_tcf *tcf, double t_start,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5399,8 +5365,7 @@ seams_status seams_reorient_create(size_t n_vectors, size_t max_lag,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5432,8 +5397,7 @@ seams_status seams_reorient_push(seams_reorient *reorient,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5480,8 +5444,7 @@ seams_status seams_reorient_curve(const seams_reorient *reorient,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5530,8 +5493,7 @@ seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
