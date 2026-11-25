@@ -100,8 +100,9 @@ per-ring symmetry codes have no smooth counterpart here.
 
 * Continuity
 
-Every variable above is a fixed polynomial in the weights \(s_{ij}\) of
-the pairs of the complete graph on the selected atoms, of bounded degree
+Each of the three ring variables above is a fixed polynomial in the
+weights \(s_{ij}\) of the pairs of the complete graph on the selected
+atoms, of bounded degree
 for a given ~max_ring~. The neighbour list only decides which terms are
 written down. A term left out holds an unlisted pair, whose weight is
 zero, as a factor, so it is zero; a shortcut factor left out is
@@ -166,6 +167,18 @@ and \(\partial q_i / \partial x\) runs back through the ring weights to
 the bond weights. The positions \(u_i\) are unwrapped along the listed
 bonds from the first selected atom, so a cluster that straddles the
 cell boundary is measured whole.
+
+These two are not polynomials in the pair weights, and they are smooth
+only where three conditions hold. The selection must be compact: in
+some periodic image its atoms are all closer to each other than half the
+narrowest cell width. Every bond step and every placement then lands on
+that image, whatever the graph, so the \(u_i\) are smooth functions of
+the coordinates and a fresh rebuild gives the same value. The total weight \(W\) must be positive: \(R_g^2\) and \(V\) do
+not depend on the scale of the \(q_i\), so they do not tend to 0 as
+\(W\) does, and at \(W = 0\) they are 0. For \(V\), \(\det G\) must be
+positive: where the cluster becomes flat \(V\) is continuous but in
+general not differentiable. Where these hold, \(R_g^2\) and \(V\) are as
+smooth as the weights \(q_i\), which with ~arg = -1~ is \(C^\infty\).
 
 * Soft states
 
@@ -313,15 +326,20 @@ one, and the topology holds 64 candidate hexagon pairs.
 - Only the basal test of the hexagonal cage is smooth. Cage labels,
   double-diamond cages, prism stacks and the per-ring symmetry codes
   stay integer.
-- The gyration variables assume a cluster that the listed bonds connect
-  and that does not span the cell. A part of the selection with no
-  listed bond to the rest is placed by its minimum image from the first
-  selected atom, which jumps when that part crosses half the cell. On a
-  crystal that percolates through the cell the unwrapped positions
-  depend on the search order and the variables have no meaning.
-- \(V\) is \(\sqrt{\det G}\): continuous, with an unbounded gradient as
-  \(\det G \to 0\). A flat or empty cluster returns 0 with a zero
-  gradient.
+- The gyration variables assume a compact selection. Otherwise a part
+  of the selection with no listed bond to the rest is placed by its
+  minimum image from the first selected atom, which jumps by a cell
+  vector where two images are equally near. On a crystal that
+  percolates through the cell the unwrapped positions depend on the
+  search order and the variables have no meaning.
+- With ring weights, \(R_g^2\) and \(V\) jump to 0 when the total ring
+  participation reaches 0, for example when the last ring of the size
+  breaks. A bias on them should keep a ring present, or use
+  ~arg = -1~.
+- \(V\) is \(\sqrt{\det G}\): continuous, but in general not
+  differentiable where the cluster becomes flat. Lifting one atom a
+  height \(h\) off the plane of the others gives \(V \propto |h|\), a
+  kink. A flat or empty cluster returns 0 with a zero gradient.
 - \(s\) is \(C^{n-1}\) at \(d_0 > 0\). With \(n < 3\) and \(d_0 > 0\) a
   second derivative jumps there. With \(d_0 = 0\) and \(n = 1\) a bond
   weight has a cone where its two atoms coincide, and the gradient

@@ -1353,7 +1353,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CV_GYRATION_RG2
 
-Purpose: Weighted squared radius of gyration, square angstrom. Declared in include/seams.h.
+Purpose: Weighted squared radius of gyration, square angstrom; smooth for a compact selection of positive weight. Declared in include/seams.h.
 
 Parameters: none
 
@@ -1369,7 +1369,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CV_GYRATION_VOLUME
 
-Purpose: Volume of the gyration ellipsoid, cubic angstrom. Declared in include/seams.h.
+Purpose: Volume of the gyration ellipsoid, cubic angstrom; as RG2, and in general not differentiable where the cluster becomes flat. Declared in include/seams.h.
 
 Parameters: none
 
@@ -1385,7 +1385,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CV_HEX_BASAL_PAIRS
 
-Purpose: Soft number of hexagon pairs that pass the HC basal test; arg 0. Declared in include/seams.h.
+Purpose: Soft number of hexagon pairs that pass the HC basal test, arg 0; as smooth as the switch. Declared in include/seams.h.
 
 Parameters: none
 
@@ -1401,7 +1401,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CV_RING_ATOMS
 
-Purpose: Soft number of selected atoms on a ring of size arg. Declared in include/seams.h.
+Purpose: Soft number of selected atoms on a ring of size arg; as smooth as the switch. Declared in include/seams.h.
 
 Parameters: none
 
@@ -1417,7 +1417,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CV_RING_COUNT
 
-Purpose: Sum of soft ring weights of size arg. Declared in include/seams.h.
+Purpose: Sum of soft ring weights of size arg; as smooth as the switch. Declared in include/seams.h.
 
 Parameters: none
 
@@ -1433,7 +1433,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CV_STATE
 
-Purpose: Soft indicator of state arg from seams_cv_state_clause(). Declared in include/seams.h.
+Purpose: Soft indicator of state arg from seams_cv_state_clause(); as smooth as its clauses. Declared in include/seams.h.
 
 Parameters: none
 
@@ -3177,7 +3177,7 @@ Example: `docs/examples/c_api_tour.c`
 
 ### seams_cv_kind
 
-Purpose: @brief Smooth collective variable evaluated by seams_cv_value(). Ring sizes in arg are 0 (every size) or 3 through the workspace's max_ring. Every value is a smooth function of the coordinates. Declared in include/seams.h.
+Purpose: @brief Collective variable evaluated by seams_cv_value(). Ring sizes in arg are 0 (every size) or 3 through the workspace's max_ring. The ring kinds and the hexagon pairs are polynomials in the bond weights, as smooth as the switch of seams_switch_rational(). The gyration kinds are smooth only for a compact selection of positive total weight, and the volume is in general not differentiable where the cluster becomes flat; seams_cv_value() gives the conditions. A state is as smooth as the variables its clauses read. Declared in include/seams.h.
 
 Parameters: none
 
@@ -3234,7 +3234,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: List the graph and fix the candidate rings for the next frames.
 
-Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here and the cell is unchanged; seams_cv_needs_rebuild() reports when that no longer holds, and seams_cv_value() then refuses the frame.
+Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A ring, ring-atom or hexagon-pair value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here and the cell is unchanged; so does a gyration value of a compact selection (see seams_cv_value()). seams_cv_needs_rebuild() reports when that no longer holds, and seams_cv_value() then refuses the frame.
 
 ```c
 seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, const int *atoms, size_t n_atoms, double skin);
@@ -3409,9 +3409,9 @@ Example: `docs/examples/c_api_tour.c`
 
 ### seams_cv_value
 
-Purpose: Value and gradient of one smooth collective variable.
+Purpose: Value and gradient of one collective variable.
 
-SEAMS_CV_RING_COUNT sums the ring weights of size arg. SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. SEAMS_CV_GYRATION_RG2 and SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. SEAMS_CV_STATE returns state arg.
+SEAMS_CV_RING_COUNT sums the ring weights of size arg. SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. SEAMS_CV_GYRATION_RG2 and SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read.
 
 ```c
 seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int arg, double *value, double *grad, size_t grad_len);

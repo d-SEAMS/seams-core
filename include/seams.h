@@ -245,18 +245,23 @@ typedef enum seams_site_kind {
 } seams_site_kind;
 
 /**
- * @brief Smooth collective variable evaluated by seams_cv_value().
+ * @brief Collective variable evaluated by seams_cv_value().
  *
  * Ring sizes in arg are 0 (every size) or 3 through the workspace's
- * max_ring. Every value is a smooth function of the coordinates.
+ * max_ring. The ring kinds and the hexagon pairs are polynomials in the
+ * bond weights, as smooth as the switch of seams_switch_rational(). The
+ * gyration kinds are smooth only for a compact selection of positive
+ * total weight, and the volume is in general not differentiable where the
+ * cluster becomes flat; seams_cv_value() gives the conditions. A state is
+ * as smooth as the variables its clauses read.
  */
 typedef enum seams_cv_kind {
-  SEAMS_CV_RING_COUNT = 0,      /**< Sum of soft ring weights of size arg. */
-  SEAMS_CV_RING_ATOMS = 1,      /**< Soft number of selected atoms on a ring of size arg. */
-  SEAMS_CV_HEX_BASAL_PAIRS = 2, /**< Soft number of hexagon pairs that pass the HC basal test; arg 0. */
-  SEAMS_CV_GYRATION_RG2 = 3,    /**< Weighted squared radius of gyration, square angstrom. */
-  SEAMS_CV_GYRATION_VOLUME = 4, /**< Volume of the gyration ellipsoid, cubic angstrom. */
-  SEAMS_CV_STATE = 5            /**< Soft indicator of state arg from seams_cv_state_clause(). */
+  SEAMS_CV_RING_COUNT = 0,      /**< Sum of soft ring weights of size arg; as smooth as the switch. */
+  SEAMS_CV_RING_ATOMS = 1,      /**< Soft number of selected atoms on a ring of size arg; as smooth as the switch. */
+  SEAMS_CV_HEX_BASAL_PAIRS = 2, /**< Soft number of hexagon pairs that pass the HC basal test, arg 0; as smooth as the switch. */
+  SEAMS_CV_GYRATION_RG2 = 3,    /**< Weighted squared radius of gyration, square angstrom; smooth for a compact selection of positive weight. */
+  SEAMS_CV_GYRATION_VOLUME = 4, /**< Volume of the gyration ellipsoid, cubic angstrom; as RG2, and in general not differentiable where the cluster becomes flat. */
+  SEAMS_CV_STATE = 5            /**< Soft indicator of state arg from seams_cv_state_clause(); as smooth as its clauses. */
 } seams_cv_kind;
 
 /** @brief One frame. Create with seams_system_create(), free with seams_system_destroy(). */
@@ -1381,22 +1386,31 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
 
 /**
  * @defgroup capi_cv Smooth collective variables
- * @brief Differentiable ring counts, hexagon-pair counts, gyration and soft states.
+ * @brief Soft ring counts, hexagon-pair counts, gyration and states, with gradients.
  *
  * Every bond within d_max carries the weight s(r) of seams_switch_rational().
  * A candidate ring is any simple cycle of at most max_ring members in the
  * graph at d_max + skin. Its weight is the product of its bond weights times
  * (1 - W_P) for every shortcut path P between two of its members, W_P the
  * product of the path's bond weights. With bond weights 0 and 1 the rings of
- * weight one are the primitive rings of seams_rings_find(). Every value is
- * a fixed function of the pair weights, so it is as smooth as s(r) also
- * where a bond crosses the list cutoff or a ring gains or loses a shortcut.
+ * weight one are the primitive rings of seams_rings_find(). The ring counts,
+ * ring-atom counts and hexagon pairs are fixed polynomials in the pair
+ * weights, so they are as smooth as s(r) also where a bond crosses the list
+ * cutoff or a ring gains or loses a shortcut.
  * The weights are twice continuously differentiable in the coordinates for
  * n >= 3, and for n = 2 with d0 = 0. At d0 > 0 the weight is only
  * C^(n-1) at r = d0; with d0 = 0 and n = 1 it has a cone, s = 1 - r / r0
- * to first order, where two atoms coincide. The gyration
- * volume is a square root and its gradient is unbounded as the cluster
- * flattens.
+ * to first order, where two atoms coincide.
+ *
+ * The gyration values are not polynomials in the weights. They are as
+ * smooth as the weights for a compact selection, one whose atoms are all
+ * closer to each other than half the narrowest cell width in some periodic
+ * image, while the total weight is positive. Otherwise the unwrapped
+ * positions can jump by a cell vector, and with ring weights the value
+ * drops to 0 where the total weight reaches 0. The volume is a square root
+ * of det G: continuous where G is, but in general not differentiable where
+ * the cluster becomes flat, det G = 0. It has a kink there, like the
+ * distance of one atom from the plane of the others.
  *
  * Gradients are d value / d x, 3 * natoms doubles in frame order,
  * x0 y0 z0 x1 ..., zero for atoms outside the selection. The force of a
@@ -1487,11 +1501,12 @@ SEAMS_API void seams_cv_destroy(seams_cv *cv);
  *
  * Bonds are the selected pairs within d_max + skin, from linkcell. The
  * candidate rings, their shortcut paths and the hexagon pairs are fixed
- * until the next rebuild. A value computed from this topology equals the
- * value from a fresh rebuild while no selected atom has moved more than
- * skin / 2 from its position here and the cell is unchanged;
- * seams_cv_needs_rebuild() reports when that no longer holds, and
- * seams_cv_value() then refuses the frame.
+ * until the next rebuild. A ring, ring-atom or hexagon-pair value computed
+ * from this topology equals the value from a fresh rebuild while no
+ * selected atom has moved more than skin / 2 from its position here and
+ * the cell is unchanged; so does a gyration value of a compact selection
+ * (see seams_cv_value()). seams_cv_needs_rebuild() reports when that no
+ * longer holds, and seams_cv_value() then refuses the frame.
  * @param cv Workspace handle.
  * @param sys Frame handle that holds a frame.
  * @param type Species to select. Zero and negative select every atom.
@@ -1571,18 +1586,27 @@ SEAMS_API seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges,
                                          size_t *n_rings, size_t *n_pairs);
 
 /**
- * @brief Value and gradient of one smooth collective variable.
+ * @brief Value and gradient of one collective variable.
  *
  * ::SEAMS_CV_RING_COUNT sums the ring weights of size arg.
  * ::SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg
  * through each selected atom. ::SEAMS_CV_HEX_BASAL_PAIRS sums
  * w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the
  * hexagonal-cage basal test of either ring against the other; arg is 0.
+ * These three are as smooth as the switch.
  * ::SEAMS_CV_GYRATION_RG2 and ::SEAMS_CV_GYRATION_VOLUME use the gyration
  * tensor G of the selected atoms, unwrapped along bonds, with weight 1
  * when arg is -1 and the ring participation of size arg otherwise; the
  * volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform
- * ellipsoid with that tensor. ::SEAMS_CV_STATE returns state arg.
+ * ellipsoid with that tensor. A part of the selection that no bond reaches
+ * is placed by its minimum image from the first selected atom. Both are
+ * smooth while the selection is compact, its atoms all closer to each
+ * other than half the narrowest cell width in some periodic image, and its
+ * total weight is positive. With total weight 0 both values and gradients
+ * are 0, so with ring weights they jump to 0 as the last ring breaks. The
+ * volume is in general not differentiable where the cluster becomes flat,
+ * det G = 0; there it and its gradient are 0. ::SEAMS_CV_STATE returns
+ * state arg, as smooth as the variables its clauses read.
  * @param cv Workspace handle after seams_cv_rebuild().
  * @param sys Frame with the atom count and cell of the rebuild.
  * @param kind A ::seams_cv_kind code.
