@@ -292,6 +292,26 @@ test('ring_oracle',
   env: _test_env,
   timeout: 600)
 
+# The binary128 minimum-image oracle (mic_oracle/adv.cpp, mic_oracle/oracle.hpp)
+# needs __float128 and libquadmath. Its header says how to run it at full
+# scale and at other flags.
+quadmath_dep = cppc.find_library('quadmath', required: false)
+if quadmath_dep.found() and cppc.links('''
+    #include <quadmath.h>
+    int main() { __float128 x = 2; return (int)sqrtq(x) == 1 ? 0 : 1; }
+  ''', dependencies: quadmath_dep, name: '__float128 and libquadmath link')
+  test('mic_oracle',
+    executable('mic_oracle', 'mic_oracle/adv.cpp',
+      dependencies: [yds_dep, quadmath_dep],
+      cpp_args: _args,
+      link_args: _test_link_args,
+      include_directories: _incdirs,
+      build_rpath: _test_rpath),
+    env: _test_env,
+    suite: 'mic',
+    timeout: 300)
+endif
+
 # .lammpsdata has no chemfiles extension. The CLI, the C API read, and
 # seams_path_nframes have to name the LAMMPS Data format. A malformed file
 # has to be an error, not a spin in the vendored reader.
