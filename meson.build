@@ -748,9 +748,13 @@ else
           # The installed libyodaLib finds this copy through its $ORIGIN /
           # @loader_path rpath, under the soname/install_name it was linked against.
           if fs.exists(_chem_real)
-            install_data(_chem_real, rename: _chem_soname,
-                         install_dir: get_option('libdir'),
-                         install_mode: 'rwxr-xr-x')
+            # Register an output of this Meson subproject for installation.
+            configure_file(output: _chem_soname,
+                           command: [find_program('cp', native: true), _chem_real, '@OUTPUT@'],
+                           install: true,
+                           install_dir: get_option('libdir'),
+                           install_mode: 'rwxr-xr-x',
+                           install_tag: 'runtime')
           endif
         endif
       endif
