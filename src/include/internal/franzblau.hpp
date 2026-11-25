@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -206,16 +207,20 @@ Graph populateGraphFromIndices(const std::vector<std::vector<int>> &nList);
 void restoreEdgesFromIndices(Graph &fullGraph,
                              const std::vector<std::vector<int>> &nList);
 
-//! Creates a vector of vectors of all possible rings
-Graph countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList,
-                             int maxDepth);
+//! Creates a vector of vectors of all possible rings.
+//! maxSteps == 0 and maxRings == 0 do not stop the search. A positive budget
+//! throws std::length_error once that many visits or rings are reached, and
+//! the message names the limit.
+Graph countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList, int maxDepth,
+                             std::int64_t maxSteps = 0, int maxRings = 0);
 
 //! Removes the non-SP rings, using the Franzblau shortest path criterion
 void removeNonSPrings(Graph &fullGraph);
 
 //! Main function that searches for all rings
 [[nodiscard]] int findRings(Graph &fullGraph, int v, std::vector<int> &visited, int maxDepth,
-              int depth, int root = -1);
+                            int depth, int root = -1, std::int64_t *steps = nullptr,
+                            std::int64_t maxSteps = 0, int maxRings = 0);
 
 //! Calculates the shortest path
 [[nodiscard]] int shortestPath(Graph &fullGraph, int v, int goal, std::vector<int> &path,

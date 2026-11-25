@@ -5659,6 +5659,8 @@ seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, c
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::length_error &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {

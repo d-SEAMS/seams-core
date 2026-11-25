@@ -18,6 +18,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include <mol_sys.hpp>
@@ -52,10 +53,46 @@
  *  changes primitivity. The gyration values also depend on the unwrapped
  *  positions: they are as smooth only for a compact selection of positive
  *  total weight, and the volume is not differentiable where det G = 0.
+ *  A tensor whose smallest eigenvalue is at most kFlatEigenRatio times
+ *  its largest is treated as that flat cluster: the volume and its
+ *  gradient are 0, including when rounding makes the determinant positive.
+ *
+ *  Cycles and shortcut paths are simple and no longer than maxRing, so
+ *  the work is polynomial in the neighbour count. The search throws
+ *  std::length_error, and the message names the limit, when a ring search
+ *  would pass kMaxRingSearchSteps visits or kMaxCandidateRings rings, or
+ *  a shortcut search would pass kMaxShortcutSearchSteps visits or
+ *  kMaxShortcutPaths paths. Rings and paths are not dropped.
  */
 namespace smooth {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+//! Largest numerator or denominator exponent. m == 0 means 2n, and 2n
+//! must fit under the same limit. A larger exponent is std::invalid_argument
+//! and the message names this limit.
+inline constexpr int kMaxSwitchExponent = 4096;
+
+//! Smallest gyration eigenvalue, as a fraction of the largest, at and
+//! below which the volume and its gradient are 0.
+inline constexpr double kFlatEigenRatio = 1e-10;
+
+//! Visits of the ring search. A complete graph whose first root would
+//! pass this throws std::length_error before the search. The message
+//! names this limit.
+inline constexpr std::int64_t kMaxRingSearchSteps = 20000000;
+
+//! Candidate rings recorded by one rebuild. Passing this throws
+//! std::length_error naming this limit.
+inline constexpr int kMaxCandidateRings = 2000000;
+
+//! Visits of the shortcut-path search. Passing this throws
+//! std::length_error naming this limit.
+inline constexpr std::int64_t kMaxShortcutSearchSteps = 20000000;
+
+//! Shortcut paths recorded by one rebuild. Passing this throws
+//! std::length_error naming this limit.
+inline constexpr int kMaxShortcutPaths = 2000000;
 
 /** @brief PLUMED RATIONAL switching function times a C2 taper.
  *  @details For x = (r - d0) / r0 the rational part is
@@ -78,8 +115,9 @@ struct RationalSwitch {
   double dMax = 1.0;
 
   //! Throws std::invalid_argument unless r0 > 0, n >= 1, m > n,
-  //! 0 <= d0 <= dOn < dMax and every value is finite. m == 0 is read as 2n
-  //! by makeSwitch before this check.
+  //! n and m are at most kMaxSwitchExponent, 0 <= d0 <= dOn < dMax and
+  //! every value is finite. m == 0 is read as 2n by makeSwitch before
+  //! this check, and 2n must also be at most kMaxSwitchExponent.
   void validate() const;
 
   //! s(r), finite and not negative; dsdr receives ds/dr, the right derivative
@@ -138,6 +176,9 @@ struct Topology {
 //! Topology of a graph given as rows by index, each row starting with the
 //! vertex itself (the layout of primitive::ringNetwork). The rows must be
 //! symmetric. Throws std::invalid_argument for maxRing outside 3 .. 10.
+//! Throws std::length_error, naming the limit, when the ring or shortcut
+//! search exceeds kMaxRingSearchSteps, kMaxCandidateRings,
+//! kMaxShortcutSearchSteps, or kMaxShortcutPaths.
 Topology buildTopology(const std::vector<std::vector<int>> &rows, int maxRing);
 
 //! Ring weights for bond weights s, one per edge
@@ -180,8 +221,9 @@ enum class Kind {
  *  linkcell and fixes the candidate topology. value() equals the value
  *  after a fresh rebuild (for the gyration kinds, of a compact selection)
  *  while no selected atom has moved more than skin / 2 from its position
- *  at the rebuild and the cell is unchanged; stale() reports when that
- *  fails.
+ *  at the rebuild, the cell is unchanged, and every atom type is the type
+ *  recorded at the rebuild. stale() reports when that fails. Any type
+ *  change marks the selection stale so the next rebuild filters again.
  */
 class Workspace {
 public:
@@ -189,7 +231,10 @@ public:
 
   //! Lists the graph and builds the topology. selected holds frame
   //! indices, ascending and unique. Throws std::invalid_argument when the
-  //! cell has no volume or dMax + skin is not below half its narrowest width.
+  //! cell has no volume or dMax + skin is not below half its narrowest
+  //! width. Throws std::length_error, naming the limit, when the ring or
+  //! shortcut search exceeds its documented budget. Records every atom
+  //! type so a later type change makes stale() true.
   void rebuild(const Cloud &cloud, std::vector<int> selected, double skin);
 
   [[nodiscard]] bool built() const { return built_; }
@@ -242,6 +287,7 @@ private:
   Topology topo_;
   std::vector<int> selected_;
   std::vector<double> reference_;
+  std::vector<int> types_;
   std::vector<double> box_;
   std::vector<double> boxLow_;
   double skin_ = 0.0;

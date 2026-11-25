@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <stdexcept>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -145,6 +146,59 @@ void requireFinite(double value, const std::vector<double> *grad) {
   }
 }
 
+// Eigenvalues of a symmetric 3x3 matrix. A vanishing off-diagonal part is
+// already diagonal. Otherwise the trigonometric form of the cubic is used.
+void symmetricEigenvalues(const double m[3][3], double eval[3]) {
+  const double a00 = m[0][0];
+  const double a01 = m[0][1];
+  const double a02 = m[0][2];
+  const double a11 = m[1][1];
+  const double a12 = m[1][2];
+  const double a22 = m[2][2];
+  const double p1 = a01 * a01 + a02 * a02 + a12 * a12;
+  if (!(p1 > 0.0)) {
+    eval[0] = a00;
+    eval[1] = a11;
+    eval[2] = a22;
+    return;
+  }
+  const double q = (a00 + a11 + a22) / 3.0;
+  const double b00 = a00 - q;
+  const double b11 = a11 - q;
+  const double b22 = a22 - q;
+  const double p = std::sqrt((b00 * b00 + b11 * b11 + b22 * b22 + 2.0 * p1) / 6.0);
+  const double c00 = b00 / p;
+  const double c01 = a01 / p;
+  const double c02 = a02 / p;
+  const double c11 = b11 / p;
+  const double c12 = a12 / p;
+  const double c22 = b22 / p;
+  const double detC = c00 * (c11 * c22 - c12 * c12) - c01 * (c01 * c22 - c12 * c02) +
+                      c02 * (c01 * c12 - c11 * c02);
+  double r = 0.5 * detC;
+  if (r < -1.0) {
+    r = -1.0;
+  } else if (r > 1.0) {
+    r = 1.0;
+  }
+  const double pi = std::acos(-1.0);
+  const double phi = std::acos(r) / 3.0;
+  eval[0] = q + 2.0 * p * std::cos(phi);
+  eval[1] = q + 2.0 * p * std::cos(phi + 2.0 * pi / 3.0);
+  eval[2] = 3.0 * q - eval[0] - eval[1];
+}
+
+// Scale-aware coplanar test: the out-of-plane eigenvalue against the
+// largest one. A positive determinant from rounding still counts as flat.
+bool gyrationIsFlat(const double g[3][3]) {
+  double eval[3];
+  symmetricEigenvalues(g, eval);
+  const double largest = std::max(eval[0], std::max(eval[1], eval[2]));
+  const double smallest = std::min(eval[0], std::min(eval[1], eval[2]));
+  const double span = largest > 0.0 ? largest : 0.0;
+  return !(smallest > smooth::kFlatEigenRatio * span);
+}
+
 } // namespace
 
 namespace smooth {
@@ -157,6 +211,10 @@ void RationalSwitch::validate() const {
   }
   if (!(r0 > 0.0)) {
     throw std::invalid_argument("r0 must be positive");
+  }
+  if (n > kMaxSwitchExponent || m > kMaxSwitchExponent) {
+    throw std::invalid_argument("switch exponents must be at most " +
+                                std::to_string(kMaxSwitchExponent));
   }
   if (n < 1 || m <= n) {
     throw std::invalid_argument("the exponents need n >= 1 and m > n");
@@ -321,7 +379,30 @@ Topology buildTopology(const std::vector<std::vector<int>> &rows, int maxRing) {
     row.insert(row.end(), nbrs[static_cast<std::size_t>(i)].begin(),
                nbrs[static_cast<std::size_t>(i)].end());
   }
-  auto graph = primitive::countAllRingsFromIndex(graphRows, maxRing);
+  // A complete graph's first root visits every simple path of length
+  // maxRing. That count is a lower bound, so passing the step budget is
+  // known before the search allocates a ring.
+  bool complete = n >= 2;
+  for (int i = 0; i < n && complete; ++i) {
+    complete = static_cast<int>(nbrs[static_cast<std::size_t>(i)].size()) == n - 1;
+  }
+  if (complete) {
+    double paths = 1.0;
+    for (int len = 0; len < maxRing - 1; ++len) {
+      const int factor = n - 1 - len;
+      if (factor <= 0) {
+        paths = 0.0;
+        break;
+      }
+      paths *= static_cast<double>(factor);
+    }
+    if (paths > static_cast<double>(kMaxRingSearchSteps)) {
+      throw std::length_error("smooth collective-variable ring search exceeded " +
+                              std::to_string(kMaxRingSearchSteps) + " steps");
+    }
+  }
+  auto graph = primitive::countAllRingsFromIndex(graphRows, maxRing, kMaxRingSearchSteps,
+                                                 kMaxCandidateRings);
   std::vector<std::vector<int>> cycles;
   cycles.reserve(graph.rings.size());
   for (auto &ring : graph.rings) {
@@ -336,6 +417,8 @@ Topology buildTopology(const std::vector<std::vector<int>> &rows, int maxRing) {
 
   std::vector<int> path;
   std::vector<char> onPath(static_cast<std::size_t>(n), 0);
+  std::int64_t shortcutSteps = 0;
+  int shortcutPaths = 0;
   for (const auto &ring : cycles) {
     const int k = static_cast<int>(ring.size());
     for (int t = 0; t < k; ++t) {
@@ -364,10 +447,18 @@ Topology buildTopology(const std::vector<std::vector<int>> &rows, int maxRing) {
                a < topo.adjOff[static_cast<std::size_t>(u) + 1]; ++a) {
             const int v = topo.adjAtom[static_cast<std::size_t>(a)];
             const int e = topo.adjEdge[static_cast<std::size_t>(a)];
+            if (++shortcutSteps > kMaxShortcutSearchSteps) {
+              throw std::length_error("smooth collective-variable shortcut search exceeded " +
+                                      std::to_string(kMaxShortcutSearchSteps) + " steps");
+            }
             if (onPath[static_cast<std::size_t>(v)] != 0) {
               continue;
             }
             if (v == goal) {
+              if (++shortcutPaths > kMaxShortcutPaths) {
+                throw std::length_error("smooth collective-variable shortcut search exceeded " +
+                                        std::to_string(kMaxShortcutPaths) + " paths");
+              }
               topo.pathEdges.insert(topo.pathEdges.end(), path.begin(), path.end());
               topo.pathEdges.push_back(e);
               topo.pathEdgeOff.push_back(static_cast<int>(topo.pathEdges.size()));
@@ -708,6 +799,10 @@ void Workspace::rebuild(const Cloud &cloud, std::vector<int> selected, double sk
   }
   topo_ = std::move(topo);
   selected_ = std::move(selected);
+  types_.resize(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; ++i) {
+    types_[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)].type;
+  }
   box_ = cloud.box;
   boxLow_ = cloud.boxLow;
   skin_ = skin;
@@ -715,8 +810,14 @@ void Workspace::rebuild(const Cloud &cloud, std::vector<int> selected, double sk
 }
 
 bool Workspace::stale(const Cloud &cloud) const {
-  if (!built_ || cloud.nop != topo_.nAtoms || cloud.box != box_ || cloud.boxLow != boxLow_) {
+  if (!built_ || cloud.nop != topo_.nAtoms || cloud.box != box_ || cloud.boxLow != boxLow_ ||
+      types_.size() != static_cast<std::size_t>(cloud.nop)) {
     return true;
+  }
+  for (int i = 0; i < cloud.nop; ++i) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type != types_[static_cast<std::size_t>(i)]) {
+      return true;
+    }
   }
   const gen::FracBox box = gen::makeFracBox(cloud);
   const double limit = 0.25 * skin_ * skin_;
@@ -893,9 +994,12 @@ double Workspace::gyration(const Cloud &cloud, bool volume, int arg, std::vector
   // eigenvalues a^2/5, b^2/5, c^2/5, so its volume is this multiple of
   // sqrt(det G).
   const double kEllipsoid = 4.0 * 3.14159265358979323846 / 3.0 * std::pow(5.0, 1.5);
-  const double vol = det > 0.0 ? kEllipsoid * std::sqrt(det) : 0.0;
+  // Coplanar within kFlatEigenRatio, including a determinant that rounds
+  // positive. The volume and its gradient are then the flat-cluster value 0.
+  const bool flat = volume && gyrationIsFlat(g);
+  const double vol = !flat && det > 0.0 ? kEllipsoid * std::sqrt(det) : 0.0;
   const double result = volume ? vol : rg2;
-  if (grad == nullptr || (volume && !(det > 0.0))) {
+  if (grad == nullptr || (volume && (flat || !(det > 0.0)))) {
     return result;
   }
   std::vector<double> wbar(static_cast<std::size_t>(n), 0.0);

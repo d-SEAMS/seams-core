@@ -23,6 +23,7 @@
 #include <limits>
 #include <numeric>
 #include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -3329,7 +3330,7 @@ int primitive::lastRingSearchUsedBalls() { return gUsedBalls; }
  */
 primitive::Graph
 primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList,
-                                  int maxDepth) {
+                                  int maxDepth, std::int64_t maxSteps, int maxRings) {
   //
   primitive::Graph fullGraph; // Graph object
   std::vector<int>
@@ -3343,11 +3344,14 @@ primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbon
   fullGraph = primitive::populateGraphFromIndices(neighHbondList);
   // ------------------------------
   // Loop through every vertex
+  std::int64_t steps = 0;
+  std::int64_t *stepPtr = maxSteps > 0 ? &steps : nullptr;
   for (int iatom = 0; iatom < neighHbondList.size(); iatom++) {
     visited.clear();
     depth = 0;
     // Call the function for getting rings
-    primitive::findRings(fullGraph, iatom, visited, maxDepth, depth);
+    primitive::findRings(fullGraph, iatom, visited, maxDepth, depth, -1, stepPtr, maxSteps,
+                         maxRings);
   } // loop through every vertex
   // ------------------------------
   // Restore back-up of the edges (some may have been removed)
@@ -3380,11 +3384,16 @@ primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbon
  * (candidate ring) is being grown. This is initialized to a dummy value of -1,
  * when it is called from primitive::countAllRingsFromIndex.
  */
-int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
-                         int maxDepth, int depth, int root) {
+int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited, int maxDepth,
+                         int depth, int root, std::int64_t *steps, std::int64_t maxSteps,
+                         int maxRings) {
   //
   int nnumNeighbours; // Number of nearest neighbours for iNode
   int n;              // Node of a neighbour (index)
+  if (steps != nullptr && ++*steps > maxSteps) {
+    throw std::length_error("smooth collective-variable ring search exceeded " +
+                            std::to_string(maxSteps) + " steps");
+  }
   // -------------
   // For the first call:
   if (root == -1) {
@@ -3417,6 +3426,10 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
     n = fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex[static_cast<std::size_t>(j)]; // Neighbour index
     // Has a ring been found?!
     if (depth > 2 && n == root) {
+      if (maxRings > 0 && static_cast<int>(fullGraph.rings.size()) >= maxRings) {
+        throw std::length_error("smooth collective-variable ring search exceeded " +
+                                std::to_string(maxRings) + " rings");
+      }
       // Add the visited vector to the rings vector of vector
       fullGraph.rings.push_back(visited);
     } // A ring has been found!
@@ -3424,7 +3437,8 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
     else if (fullGraph.pts[static_cast<std::size_t>(n)].inGraph) {
       fullGraph.pts[static_cast<std::size_t>(n)].inGraph = false; // Set to false now
       // Recursive call
-      primitive::findRings(fullGraph, n, visited, maxDepth, depth, root);
+      primitive::findRings(fullGraph, n, visited, maxDepth, depth, root, steps, maxSteps,
+                           maxRings);
       fullGraph.pts[static_cast<std::size_t>(n)].inGraph = true; // Put n back in the graph
     } // Search the other unsearched neighbours
   }   // end of search through all neighbours
