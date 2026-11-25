@@ -2,9 +2,10 @@
   description = "d-SEAMS C++ engine (libyodaLib) and the seams CLI";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgsIntelDarwin.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
 
   outputs =
-    { self, nixpkgs }:
+    { self, nixpkgs, nixpkgsIntelDarwin }:
     let
       inherit (nixpkgs) lib;
       systems = [
@@ -14,7 +15,12 @@
         "aarch64-darwin"
       ];
       forAllSystems = lib.genAttrs systems;
-      pkgsFor = system: nixpkgs.legacyPackages.${system};
+      pkgsFor =
+        system:
+        if system == "x86_64-darwin" then
+          nixpkgsIntelDarwin.legacyPackages.${system}
+        else
+          nixpkgs.legacyPackages.${system};
     in
     {
       packages = forAllSystems (
