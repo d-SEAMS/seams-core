@@ -244,8 +244,11 @@ inline bool smithInside(const FracBox &b, double r2) {
 }
 
 // Exact Euclidean minimum-image refinement of a triclinic displacement vector
-// when it lies outside the Smith ball. Works with either minimage or the
-// built-in Selling superbasis fallback.
+// when it lies outside the Smith ball. The linked minimage candidate, or the
+// wrap when minimage is absent or rejects the cell, is refined by
+// mic::euclideanIfShorter. The result is the minimum image, or
+// mic::RangeError when the cell is outside binary64; callers in OpenMP
+// regions must carry that exception out of the region.
 inline std::array<double, 3>
 refineEuclidean(double lx, double ly, double lz, double xy, double xz, double yz,
                 const std::array<double, 3> &raw,
@@ -276,21 +279,11 @@ refineEuclidean(double lx, double ly, double lz, double xy, double xz, double yz
     const double zero[3] = {0.0, 0.0, 0.0};
     double ed[3] = {0.0, 0.0, 0.0};
     if (mi_displacement_euclidean(&cache.cell, zero, raw.data(), ed) == 0) {
-      return {ed[0], ed[1], ed[2]};
+      return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, {ed[0], ed[1], ed[2]});
     }
   }
-  return wrapped;
-#else
-  // euclideanIfShorter throws when the cell is outside binary64. Neighbour
-  // loops call this from an OpenMP region, which cannot propagate that
-  // exception. The linked-minimage branch keeps the fractional wrap when
-  // the cell will not build; do the same here.
-  try {
-    return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, wrapped);
-  } catch (const std::runtime_error &) {
-    return wrapped;
-  }
 #endif
+  return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, wrapped);
 }
 
 // Exact Euclidean minimum-image displacement from (xj, yj, zj) to (xi, yi, zi).
