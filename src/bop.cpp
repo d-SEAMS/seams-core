@@ -1017,31 +1017,34 @@ static void classifyBondsLeftFp64(
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
-      continue;
-    }
-    const int keep = nkeep[static_cast<std::size_t>(iatom)];
-    if (keep <= 0) {
-      continue;
-    }
-    const double *qI = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
-    const double normI = qNorm[static_cast<std::size_t>(iatom)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
-    bonds.reserve(static_cast<std::size_t>(keep));
-    for (int slot = 0; slot < keep; ++slot) {
-      const int jatom = neighbourAt(iatom, slot);
-      if (jatom < 0) {
-        continue;
+    errors.run([&] {
+      if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+        return;
       }
-      const double *qJ = qAtom + static_cast<std::size_t>(jatom) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
-      const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
-      molSys::Result temp_cij;
-      temp_cij.c_value = cij;
-      temp_cij.classifier = chill::classifyBond(cij, rule, closed);
-      bonds.push_back(temp_cij);
-    }
+      const int keep = nkeep[static_cast<std::size_t>(iatom)];
+      if (keep <= 0) {
+        return;
+      }
+      const double *qI = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
+      const double normI = qNorm[static_cast<std::size_t>(iatom)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
+      bonds.reserve(static_cast<std::size_t>(keep));
+      for (int slot = 0; slot < keep; ++slot) {
+        const int jatom = neighbourAt(iatom, slot);
+        if (jatom < 0) {
+          continue;
+        }
+        const double *qJ = qAtom + static_cast<std::size_t>(jatom) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
+        const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
+        molSys::Result temp_cij;
+        temp_cij.c_value = cij;
+        temp_cij.classifier = chill::classifyBond(cij, rule, closed);
+        bonds.push_back(temp_cij);
+      }
+    });
   }
+  errors.rethrow();
 }
 
 void chill::classifyBonds(
@@ -1678,27 +1681,31 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; i++) {
-    const int packed = scratch.nkeep[static_cast<std::size_t>(i)];
-    const int keep = packed & 255;
-    const int shell = packed >> 8;
-    shellCount[static_cast<std::size_t>(i)] = shell;
-    scratch.nkeep[static_cast<std::size_t>(i)] = keep;
-    auto &bonds = certify ? saved[static_cast<std::size_t>(i)]
-                          : yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
-    const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
-    const double ni = scratch.qn[static_cast<std::size_t>(i)];
-    for (int s = 0; s < keep; s++) {
-      const int j = scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
-      const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
-      molSys::Result bond;
-      bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
-    }
+    errors.run([&] {
+      const int packed = scratch.nkeep[static_cast<std::size_t>(i)];
+      const int keep = packed & 255;
+      const int shell = packed >> 8;
+      shellCount[static_cast<std::size_t>(i)] = shell;
+      scratch.nkeep[static_cast<std::size_t>(i)] = keep;
+      auto &bonds = certify ? saved[static_cast<std::size_t>(i)]
+                            : yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+      const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
+      const double ni = scratch.qn[static_cast<std::size_t>(i)];
+      for (int s = 0; s < keep; s++) {
+        const int j =
+            scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+        const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
+        molSys::Result bond;
+        bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
+        bond.classifier = chill::classifyBond(bond.c_value, rule);
+        bonds.push_back(bond);
+      }
+    });
   }
+  errors.rethrow();
   if (certify) {
     for (int i = 0; i < n; i++) {
       const int keep = scratch.nkeep[static_cast<std::size_t>(i)];
@@ -2044,22 +2051,25 @@ bool chill::q4q6ChillPlus(
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
   for (int i = 0; i < n; ++i) {
-    const int keep = nkeep[static_cast<std::size_t>(i)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
-    const double *qi = q3.data() + static_cast<std::size_t>(i) * kRealL3;
-    const double ni = qn[static_cast<std::size_t>(i)];
-    for (int s = 0; s < keep; ++s) {
-      const int j = chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
-      const double *qj = q3.data() + static_cast<std::size_t>(j) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
-      molSys::Result bond;
-      bond.c_value = correlationOf(dot, ni, qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
-    }
+    errors.run([&] {
+      const int keep = nkeep[static_cast<std::size_t>(i)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+      const double *qi = q3.data() + static_cast<std::size_t>(i) * kRealL3;
+      const double ni = qn[static_cast<std::size_t>(i)];
+      for (int s = 0; s < keep; ++s) {
+        const int j = chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+        const double *qj = q3.data() + static_cast<std::size_t>(j) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
+        molSys::Result bond;
+        bond.c_value = correlationOf(dot, ni, qn[static_cast<std::size_t>(j)]);
+        bond.classifier = chill::classifyBond(bond.c_value, rule);
+        bonds.push_back(bond);
+      }
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
@@ -2504,23 +2514,26 @@ bool chill::chillPlusPublishedCutoff(
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; i++) {
-    const int keep = scratch.nkeep[static_cast<std::size_t>(i)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
-    const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
-    const double ni = scratch.qn[static_cast<std::size_t>(i)];
-    for (int s = 0; s < keep; s++) {
-      const int j =
-          scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
-      const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
-      molSys::Result bond;
-      bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
-    }
+    errors.run([&] {
+      const int keep = scratch.nkeep[static_cast<std::size_t>(i)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+      const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
+      const double ni = scratch.qn[static_cast<std::size_t>(i)];
+      for (int s = 0; s < keep; s++) {
+        const int j =
+            scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+        const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
+        molSys::Result bond;
+        bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
+        bond.classifier = chill::classifyBond(bond.c_value, rule);
+        bonds.push_back(bond);
+      }
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
@@ -3877,41 +3890,45 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
     }
     return order.rows[static_cast<std::size_t>(atom)][static_cast<std::size_t>(slot)];
   };
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (which != nullptr &&
-        (static_cast<int>(which->size()) <= iatom || (*which)[static_cast<std::size_t>(iatom)] == 0)) {
-      continue;
-    }
-    if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
-      continue;
-    }
-    const int keep = order.nkeep[static_cast<std::size_t>(iatom)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
-    bonds.clear();
-    if (keep <= 0) {
-      continue;
-    }
-    const double *qI = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
-    const double normI = order.norm[static_cast<std::size_t>(iatom)];
-    bonds.reserve(static_cast<std::size_t>(keep));
-    for (int slot = 0; slot < keep; ++slot) {
-      const int jatom = neighbourAt(iatom, slot);
-      if (jatom < 0) {
-        continue;
+    errors.run([&] {
+      if (which != nullptr && (static_cast<int>(which->size()) <= iatom ||
+                               (*which)[static_cast<std::size_t>(iatom)] == 0)) {
+        return;
       }
-      const double *qJ = order.q.data() + static_cast<std::size_t>(jatom) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
-      const double cij =
-          correlationOf(dot, normI, order.norm[static_cast<std::size_t>(jatom)]);
-      molSys::Result temp;
-      temp.c_value = cij;
-      temp.classifier = chill::classifyBond(cij, rule, closed);
-      bonds.push_back(temp);
-    }
+      if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+        return;
+      }
+      const int keep = order.nkeep[static_cast<std::size_t>(iatom)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
+      bonds.clear();
+      if (keep <= 0) {
+        return;
+      }
+      const double *qI = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
+      const double normI = order.norm[static_cast<std::size_t>(iatom)];
+      bonds.reserve(static_cast<std::size_t>(keep));
+      for (int slot = 0; slot < keep; ++slot) {
+        const int jatom = neighbourAt(iatom, slot);
+        if (jatom < 0) {
+          continue;
+        }
+        const double *qJ = order.q.data() + static_cast<std::size_t>(jatom) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
+        const double cij =
+            correlationOf(dot, normI, order.norm[static_cast<std::size_t>(jatom)]);
+        molSys::Result temp;
+        temp.c_value = cij;
+        temp.classifier = chill::classifyBond(cij, rule, closed);
+        bonds.push_back(temp);
+      }
+    });
   }
+  errors.rethrow();
 }
 
 #ifdef SEAMS_HAS_MPI
