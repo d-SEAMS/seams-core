@@ -67,7 +67,7 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
  *  u = (r - dOn) / (dMax - dOn) in between, so the product and its first
  *  two derivatives vanish at dMax. Near d0 the rational part is
  *  1 - x^n + O(x^m), so s is C^(n-1) and not C^n at d0 > 0; at d0 = 0
- *  and n = 1, s(|v|) has a cone at v = 0.
+ *  and n = 1, s of the length of v has a cone at v = 0.
  */
 struct RationalSwitch {
   double r0 = 1.0;
