@@ -16,6 +16,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 - The linkcell subproject pin moves from the v0.6.0 tag to `d-SEAMS/linkcell` main at `0bc73576ceb4ea79909a3ad7a7931275b59a9fe4`. That commit has the CSR single-pass path, the macOS OpenMP search and runtime-path fixes, the Meson `sanitize` option, which links every consumer with the ThreadSanitizer runtime, and the `cargo_profile` option, which builds the release Cargo profile in a subproject on every Meson version. The wrap applies no patch, so `linkcell-conda-openmp.patch` and `linkcell-macos-rpath.patch` are removed.
 
+### Fixed
+
+- libyodaLib no longer defines weak fallbacks for `lc_set_threads`, `lc_num_threads`, `lc_set_places` and `lc_owned_mask`. Linkcell 0.6.0, the oldest supported release, exports all four, and against a shared liblinkcell the dynamic linker bound libyodaLib's calls to its own fallbacks, so the thread width never reached Linkcell.
+
 ## [2.14.2] - 2026-11-19
 
 ### Added

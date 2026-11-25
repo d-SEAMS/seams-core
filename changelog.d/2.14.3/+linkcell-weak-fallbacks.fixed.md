@@ -1,0 +1,1 @@
+libyodaLib no longer defines weak fallbacks for `lc_set_threads`, `lc_num_threads`, `lc_set_places` and `lc_owned_mask`. Linkcell 0.6.0, the oldest supported release, exports all four, and against a shared liblinkcell the dynamic linker bound libyodaLib's calls to its own fallbacks, so the thread width never reached Linkcell.
