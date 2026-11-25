@@ -59,7 +59,10 @@ let
   withPlumed = available plumed;
   lammpsWithPlugin = lammps.override {
     packages = lammps.packages // { PLUGIN = true; };
-    extraCmakeFlags = lammps.extraCmakeFlags // { BUILD_MPI = "ON"; };
+    extraCmakeFlags = lammps.extraCmakeFlags // {
+      BUILD_MPI = "ON";
+      MPI_CXX_COMPILER = "${lib.getDev openmpi}/bin/mpicxx";
+    };
     extraBuildInputs = lammps.extraBuildInputs ++ [ openmpi ];
   };
   engineInputs = lib.optional withLammps lammpsWithPlugin
