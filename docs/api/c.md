@@ -1144,6 +1144,81 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_reorient_destroy ok
 ```
 
+### seams_switch_rational
+
+The call is in `docs/examples/c_api_tour.c`. At x = (r - d0) / r0 = 1 the
+switch is n / m = 0.5 with slope -n (m - n) / (2 m r0). The run prints:
+
+```
+capi seams_switch_rational 0.500 -5.000
+```
+
+### seams_cv_create
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cv_create ok
+```
+
+### seams_cv_rebuild
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cv_rebuild ok
+```
+
+### seams_cv_topology
+
+The call is in `docs/examples/c_api_tour.c`. Edges, candidate rings and
+hexagon pairs of the ice Ih frame. The run prints:
+
+```
+capi seams_cv_topology 256 256 64
+```
+
+### seams_cv_needs_rebuild
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cv_needs_rebuild 0
+```
+
+### seams_cv_value
+
+The call is in `docs/examples/c_api_tour.c`. Every bond of the frame is
+inside d0, so each of the 256 six-rings has weight one. The run prints:
+
+```
+capi seams_cv_value 256.0
+```
+
+### seams_cv_state_clause
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cv_state_clause ok
+```
+
+### seams_cv_states
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cv_states 1 1.00
+```
+
+### seams_cv_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cv_destroy ok
+```
+
 <!-- API_SYMBOLS_BEGIN -->
 
 ## Symbol reference
@@ -1267,6 +1342,102 @@ Purpose: Published edges are inclusive. OVITO edges are open. Declared in includ
 Parameters: none
 
 Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CV_GYRATION_RG2
+
+Purpose: Weighted squared radius of gyration, square angstrom. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CV_GYRATION_VOLUME
+
+Purpose: Volume of the gyration ellipsoid, cubic angstrom. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CV_HEX_BASAL_PAIRS
+
+Purpose: Soft number of hexagon pairs that pass the HC basal test; arg 0. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CV_RING_ATOMS
+
+Purpose: Soft number of selected atoms on a ring of size arg. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CV_RING_COUNT
+
+Purpose: Sum of soft ring weights of size arg. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CV_STATE
+
+Purpose: Soft indicator of state arg from seams_cv_state_clause(). Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumerator value 5.
 
 Ownership: No allocation.
 
@@ -2904,6 +3075,351 @@ Example:
 ```c
 double cn = 0;
 seams_coordination(sys, 3.5, 0, 1, 1, &cn);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv
+
+Purpose: @brief Smooth collective-variable workspace. Free with seams_cv_destroy(). Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_create
+
+Purpose: Create a smooth collective-variable workspace.
+
+```c
+seams_status seams_cv_create(double r0, double d0, int n, int m, double d_on, double d_max, int max_ring, seams_cv **out);
+```
+
+Parameters: `r0`, `d0`, `n`, `m`, `d_on`, `d_max`, `max_ring`, `out`.
+
+- `r0`: Switching length scale, Angstrom. See seams_switch_rational().
+- `d0`: Switching plateau radius, Angstrom.
+- `n`: Switching numerator exponent.
+- `m`: Switching denominator exponent; zero selects 2 * n.
+- `d_on`: Taper start, Angstrom.
+- `d_max`: Radius where every bond weight reaches zero, Angstrom.
+- `max_ring`: Largest candidate ring, from 3 through 10.
+- `out`: Receives a new handle. On failure *out is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM.
+
+Ownership: The caller frees *out with seams_cv_destroy(). The handle holds no frame until seams_cv_rebuild().
+
+Thread safety: The new handle is private to the caller.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cv *cv = NULL;
+if (seams_cv_create(0.5, 2.5, 6, 0, 3.3, 3.5, 6, &cv) == SEAMS_OK) {
+  seams_cv_destroy(cv);
+}
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_destroy
+
+Purpose: Free a collective-variable workspace.
+
+```c
+void seams_cv_destroy(seams_cv *cv);
+```
+
+Parameters: `cv`.
+
+- `cv`: Handle from seams_cv_create(), or NULL. NULL is ignored.
+
+Returns: nothing.
+
+Ownership: Releases the handle, its topology and its state clauses.
+
+Thread safety: The caller must not use cv after this returns.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cv_destroy(cv);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_kind
+
+Purpose: @brief Smooth collective variable evaluated by seams_cv_value(). Ring sizes in arg are 0 (every size) or 3 through the workspace's max_ring. Every value is a smooth function of the coordinates. Declared in include/seams.h.
+
+Parameters: none
+
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_needs_rebuild
+
+Purpose: Whether a frame needs seams_cv_rebuild() before the next value.
+
+```c
+seams_status seams_cv_needs_rebuild(const seams_cv *cv, const seams_system *sys, int *stale);
+```
+
+Parameters: `cv`, `sys`, `stale`.
+
+- `cv`: Workspace handle.
+- `sys`: Frame handle that holds a frame.
+- `stale`: Receives 1 when cv was never rebuilt, the atom count or cell changed, or a selected atom moved more than skin / 2 since the rebuild, and 0 otherwise.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE.
+
+Ownership: The caller owns stale.
+
+Thread safety: Read-only: may run alongside other const calls on cv and sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+int stale = 0;
+seams_cv_needs_rebuild(cv, sys, &stale);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_rebuild
+
+Purpose: List the graph and fix the candidate rings for the next frames.
+
+Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here and the cell is unchanged; seams_cv_needs_rebuild() reports when that no longer holds, and seams_cv_value() then refuses the frame.
+
+```c
+seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, const int *atoms, size_t n_atoms, double skin);
+```
+
+Parameters: `cv`, `sys`, `type`, `atoms`, `n_atoms`, `skin`.
+
+- `cv`: Workspace handle.
+- `sys`: Frame handle that holds a frame.
+- `type`: Species to select. Zero and negative select every atom.
+- `atoms`: Frame indices to select, or NULL for every atom of type.
+- `n_atoms`: Length of atoms. Ignored when atoms is NULL.
+- `skin`: Verlet skin, Angstrom, at least zero. d_max + skin must be below half the narrowest width of the cell.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_BOX, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Writes the topology into cv. Reads sys.
+
+Ownership: The caller owns atoms. The workspace keeps a copy of the selection and of the coordinates and cell of this frame.
+
+Thread safety: Exclusive use of cv. Read-only use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.5);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_state_clause
+
+Purpose: Add a soft threshold factor to a state.
+
+A state is the product of its factors. A factor on a collective variable v is sigma((v - threshold) / width) when above is nonzero and 1 - sigma((v - threshold) / width) otherwise, sigma(z) = 1 / (1 + e^-z). A factor of kind SEAMS_CV_STATE reads an earlier state chi; with width zero it is chi itself, or 1 - chi when above is zero, so states compose by product (and), complement (not), and 1 - (1 - a)(1 - b) (or).
+
+```c
+seams_status seams_cv_state_clause(seams_cv *cv, int state, int kind, int arg, double threshold, double width, int above);
+```
+
+Parameters: `cv`, `state`, `kind`, `arg`, `threshold`, `width`, `above`.
+
+- `cv`: Workspace handle.
+- `state`: Index of the state to extend, or the current number of states to open a new one.
+- `kind`: A ::seams_cv_kind code.
+- `arg`: Argument of kind, as for seams_cv_value(); for SEAMS_CV_STATE an index below state.
+- `threshold`: Threshold, in the unit of the variable.
+- `width`: Positive logistic width, in the unit of the variable. Zero only for SEAMS_CV_STATE.
+- `above`: Nonzero for a factor that rises through the threshold.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM.
+
+Handle access: Appends to the state list of cv.
+
+Ownership: The workspace keeps the clause until it is destroyed.
+
+Thread safety: Exclusive use of cv.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_states
+
+Purpose: Soft indicator of every state, with gradients on request.
+
+```c
+seams_status seams_cv_states(seams_cv *cv, const seams_system *sys, double *chi, size_t chi_len, size_t *n_states, double *grad, size_t grad_len);
+```
+
+Parameters: `cv`, `sys`, `chi`, `chi_len`, `n_states`, `grad`, `grad_len`.
+
+- `cv`: Workspace handle after seams_cv_rebuild().
+- `sys`: Frame with the atom count and cell of the rebuild.
+- `chi`: Caller buffer of one double per state, each in [0, 1], or NULL to query n_states.
+- `chi_len`: Length of chi. Ignored when chi is NULL.
+- `n_states`: Receives the number of states.
+- `grad`: Caller buffer of n_states rows of 3 * natoms doubles, d chi / d x in 1/Angstrom, or NULL to skip it.
+- `grad_len`: Length of grad. Ignored when grad is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE when cv needs a rebuild for sys, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const because the evaluation keeps bond-weight scratch on cv.
+
+Ownership: The caller owns chi, n_states and grad.
+
+Thread safety: Exclusive use of cv. Read-only use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double chi[2];
+size_t n_states = 0;
+seams_cv_states(cv, sys, chi, 2, &n_states, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_topology
+
+Purpose: Sizes of the fixed topology.
+
+```c
+seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges, size_t *n_rings, size_t *n_pairs);
+```
+
+Parameters: `cv`, `n_edges`, `n_rings`, `n_pairs`.
+
+- `cv`: Workspace handle.
+- `n_edges`: Receives the number of listed bonds, or NULL.
+- `n_rings`: Receives the number of candidate rings, or NULL.
+- `n_pairs`: Receives the number of candidate hexagon pairs, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE before the first rebuild.
+
+Ownership: The caller owns the three outputs.
+
+Thread safety: Read-only: may run alongside other const calls on cv.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t edges = 0, rings = 0, pairs = 0;
+seams_cv_topology(cv, &edges, &rings, &pairs);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cv_value
+
+Purpose: Value and gradient of one smooth collective variable.
+
+SEAMS_CV_RING_COUNT sums the ring weights of size arg. SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. SEAMS_CV_GYRATION_RG2 and SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. SEAMS_CV_STATE returns state arg.
+
+```c
+seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int arg, double *value, double *grad, size_t grad_len);
+```
+
+Parameters: `cv`, `sys`, `kind`, `arg`, `value`, `grad`, `grad_len`.
+
+- `cv`: Workspace handle after seams_cv_rebuild().
+- `sys`: Frame with the atom count and cell of the rebuild.
+- `kind`: A ::seams_cv_kind code.
+- `arg`: Ring size, weight choice, or state index, as above.
+- `value`: Receives the value.
+- `grad`: Caller buffer of 3 * natoms doubles for d value / d x in 1/Angstrom times the unit of value, or NULL to skip it.
+- `grad_len`: Length of grad. Ignored when grad is NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE when cv needs a rebuild for sys, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const because the evaluation keeps bond-weight scratch on cv. The topology is not changed.
+
+Ownership: The caller owns value and grad.
+
+Thread safety: Exclusive use of cv. Read-only use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double n6 = 0;
+seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -5991,6 +6507,49 @@ Example:
 
 ```c
 seams_steinhardt(sys, 3.5, 0, 6, q6, n, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_switch_rational
+
+Purpose: PLUMED RATIONAL switching function with a C2 taper to zero.
+
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max.
+
+```c
+seams_status seams_switch_rational(double r, double r0, double d0, int n, int m, double d_on, double d_max, double *s, double *dsdr);
+```
+
+Parameters: `r`, `r0`, `d0`, `n`, `m`, `d_on`, `d_max`, `s`, `dsdr`.
+
+- `r`: Distance, Angstrom. Not negative.
+- `r0`: Positive length scale, Angstrom.
+- `d0`: Plateau radius, Angstrom, at least zero.
+- `n`: Numerator exponent, at least one.
+- `m`: Denominator exponent, greater than n. Zero selects 2 * n.
+- `d_on`: Taper start, Angstrom, from d0 and below d_max.
+- `d_max`: Radius where s reaches zero, Angstrom.
+- `s`: Receives s(r).
+- `dsdr`: Receives ds/dr in 1/Angstrom, or NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns s and dsdr. The call keeps no state.
+
+Thread safety: Safe from any thread.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double s = 0, ds = 0;
+seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &s, &ds);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.

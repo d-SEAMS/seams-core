@@ -4,7 +4,7 @@ Order parameters
 
 CHILL, CHILL+, and Steinhardt parameters.
 
-The stable C interface provides 116 exported functions through ``include/seams.h``.
+The stable C interface provides 125 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_order.c
    :language: c

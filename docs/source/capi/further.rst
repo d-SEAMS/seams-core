@@ -4,7 +4,7 @@ Further analyses
 
 Brine fronts, topology, and the remaining exports.
 
-The stable C interface provides 116 exported functions through ``include/seams.h``.
+The stable C interface provides 125 exported functions through ``include/seams.h``.
 
 .. _capi-seams_tetrahedral_order:
 
@@ -92,6 +92,304 @@ Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, 
 Shiratani-Sasai index. For each centre, selected-partner distances are sorted, r_1 < ... < r_N <= cutoff < r_{N+1}. The result is the population variance of the N gaps r_{i+1} - r_i, i = 1..N; the last gap reaches the first partner beyond cutoff. A centre with no partner inside cutoff, or none beyond it, receives quiet NaN.
 
 @par Handle access Non-const only because the call clears the handle error slot. @par Ownership The caller owns every selection and output buffer. @par Thread safety Exclusive use of sys.
+
+.. _capi-seams_switch_rational:
+
+seams_switch_rational
+---------------------
+
+
+.. code-block:: c
+
+   seams_status seams_switch_rational(double r, double r0, double d0, int n, int m, double d_on, double d_max, double *s, double *dsdr)
+
+PLUMED RATIONAL switching function with a C2 taper to zero.
+
+``r``
+    Distance, Angstrom. Not negative.
+
+``r0``
+    Positive length scale, Angstrom.
+
+``d0``
+    Plateau radius, Angstrom, at least zero.
+
+``n``
+    Numerator exponent, at least one.
+
+``m``
+    Denominator exponent, greater than n. Zero selects 2 \* n.
+
+``d_on``
+    Taper start, Angstrom, from d0 and below d_max.
+
+``d_max``
+    Radius where s reaches zero, Angstrom.
+
+``s``
+    Receives s(r).
+
+``dsdr``
+    Receives ds/dr in 1/Angstrom, or NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
+
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double s = 0, ds = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &s, &ds); @endcode
+
+.. _capi-seams_cv_create:
+
+seams_cv_create
+---------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_create(double r0, double d0, int n, int m, double d_on, double d_max, int max_ring, seams_cv **out)
+
+Create a smooth collective-variable workspace.
+
+``r0``
+    Switching length scale, Angstrom. See seams_switch_rational().
+
+``d0``
+    Switching plateau radius, Angstrom.
+
+``n``
+    Switching numerator exponent.
+
+``m``
+    Switching denominator exponent; zero selects 2 \* n.
+
+``d_on``
+    Taper start, Angstrom.
+
+``d_max``
+    Radius where every bond weight reaches zero, Angstrom.
+
+``max_ring``
+    Largest candidate ring, from 3 through 10.
+
+``out``
+    Receives a new handle. On failure \*out is NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM.
+
+@par Ownership The caller frees \*out with seams_cv_destroy(). The handle holds no frame until seams_cv_rebuild(). @par Thread safety The new handle is private to the caller. @par Example @code seams_cv \*cv = NULL; if (seams_cv_create(0.5, 2.5, 6, 0, 3.3, 3.5, 6, &cv) == SEAMS_OK) { seams_cv_destroy(cv); } @endcode
+
+.. _capi-seams_cv_destroy:
+
+seams_cv_destroy
+----------------
+
+
+.. code-block:: c
+
+   void seams_cv_destroy(seams_cv *cv)
+
+Free a collective-variable workspace.
+
+``cv``
+    Handle from seams_cv_create(), or NULL. NULL is ignored.
+
+@par Ownership Releases the handle, its topology and its state clauses. @par Thread safety The caller must not use cv after this returns. @par Example @code seams_cv_destroy(cv); @endcode
+
+.. _capi-seams_cv_rebuild:
+
+seams_cv_rebuild
+----------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, const int *atoms, size_t n_atoms, double skin)
+
+List the graph and fix the candidate rings for the next frames.
+
+``cv``
+    Workspace handle.
+
+``sys``
+    Frame handle that holds a frame.
+
+``type``
+    Species to select. Zero and negative select every atom.
+
+``atoms``
+    Frame indices to select, or NULL for every atom of type.
+
+``n_atoms``
+    Length of atoms. Ignored when atoms is NULL.
+
+``skin``
+    Verlet skin, Angstrom, at least zero. d_max + skin must be below half the narrowest width of the cell.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_BOX, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+Bonds are the selected pairs within d_max + skin, from linkcell. The candidate rings, their shortcut paths and the hexagon pairs are fixed until the next rebuild. A value computed from this topology equals the value from a fresh rebuild while no selected atom has moved more than skin / 2 from its position here and the cell is unchanged; seams_cv_needs_rebuild() reports when that no longer holds, and seams_cv_value() then refuses the frame. @par Handle access Writes the topology into cv. Reads sys. @par Ownership The caller owns atoms. The workspace keeps a copy of the selection and of the coordinates and cell of this frame. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.5); @endcode
+
+.. _capi-seams_cv_needs_rebuild:
+
+seams_cv_needs_rebuild
+----------------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_needs_rebuild(const seams_cv *cv, const seams_system *sys, int *stale)
+
+Whether a frame needs seams_cv_rebuild() before the next value.
+
+``cv``
+    Workspace handle.
+
+``sys``
+    Frame handle that holds a frame.
+
+``stale``
+    Receives 1 when cv was never rebuilt, the atom count or cell changed, or a selected atom moved more than skin / 2 since the rebuild, and 0 otherwise.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE.
+
+@par Ownership The caller owns stale. @par Thread safety Read-only: may run alongside other const calls on cv and sys. @par Example @code int stale = 0; seams_cv_needs_rebuild(cv, sys, &stale); @endcode
+
+.. _capi-seams_cv_topology:
+
+seams_cv_topology
+-----------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges, size_t *n_rings, size_t *n_pairs)
+
+Sizes of the fixed topology.
+
+``cv``
+    Workspace handle.
+
+``n_edges``
+    Receives the number of listed bonds, or NULL.
+
+``n_rings``
+    Receives the number of candidate rings, or NULL.
+
+``n_pairs``
+    Receives the number of candidate hexagon pairs, or NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE before the first rebuild.
+
+@par Ownership The caller owns the three outputs. @par Thread safety Read-only: may run alongside other const calls on cv. @par Example @code size_t edges = 0, rings = 0, pairs = 0; seams_cv_topology(cv, &edges, &rings, &pairs); @endcode
+
+.. _capi-seams_cv_value:
+
+seams_cv_value
+--------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int arg, double *value, double *grad, size_t grad_len)
+
+Value and gradient of one smooth collective variable.
+
+``cv``
+    Workspace handle after seams_cv_rebuild().
+
+``sys``
+    Frame with the atom count and cell of the rebuild.
+
+``kind``
+    A ::seams_cv_kind code.
+
+``arg``
+    Ring size, weight choice, or state index, as above.
+
+``value``
+    Receives the value.
+
+``grad``
+    Caller buffer of 3 \* natoms doubles for d value / d x in 1/Angstrom times the unit of value, or NULL to skip it.
+
+``grad_len``
+    Length of grad. Ignored when grad is NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv needs a rebuild for sys, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+::SEAMS_CV_RING_COUNT sums the ring weights of size arg. ::SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. ::SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. ::SEAMS_CV_GYRATION_RG2 and ::SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. ::SEAMS_CV_STATE returns state arg. @par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. The topology is not changed. @par Ownership The caller owns value and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code double n6 = 0; seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0); @endcode
+
+.. _capi-seams_cv_state_clause:
+
+seams_cv_state_clause
+---------------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_state_clause(seams_cv *cv, int state, int kind, int arg, double threshold, double width, int above)
+
+Add a soft threshold factor to a state.
+
+``cv``
+    Workspace handle.
+
+``state``
+    Index of the state to extend, or the current number of states to open a new one.
+
+``kind``
+    A ::seams_cv_kind code.
+
+``arg``
+    Argument of kind, as for seams_cv_value(); for ::SEAMS_CV_STATE an index below state.
+
+``threshold``
+    Threshold, in the unit of the variable.
+
+``width``
+    Positive logistic width, in the unit of the variable. Zero only for ::SEAMS_CV_STATE.
+
+``above``
+    Nonzero for a factor that rises through the threshold.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM.
+
+A state is the product of its factors. A factor on a collective variable v is sigma((v - threshold) / width) when above is nonzero and 1 - sigma((v - threshold) / width) otherwise, sigma(z) = 1 / (1 + e^-z). A factor of kind ::SEAMS_CV_STATE reads an earlier state chi; with width zero it is chi itself, or 1 - chi when above is zero, so states compose by product (and), complement (not), and 1 - (1 - a)(1 - b) (or). @par Handle access Appends to the state list of cv. @par Ownership The workspace keeps the clause until it is destroyed. @par Thread safety Exclusive use of cv. @par Example @code seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1); @endcode
+
+.. _capi-seams_cv_states:
+
+seams_cv_states
+---------------
+
+
+.. code-block:: c
+
+   seams_status seams_cv_states(seams_cv *cv, const seams_system *sys, double *chi, size_t chi_len, size_t *n_states, double *grad, size_t grad_len)
+
+Soft indicator of every state, with gradients on request.
+
+``cv``
+    Workspace handle after seams_cv_rebuild().
+
+``sys``
+    Frame with the atom count and cell of the rebuild.
+
+``chi``
+    Caller buffer of one double per state, each in [0, 1], or NULL to query n_states.
+
+``chi_len``
+    Length of chi. Ignored when chi is NULL.
+
+``n_states``
+    Receives the number of states.
+
+``grad``
+    Caller buffer of n_states rows of 3 \* natoms doubles, d chi / d x in 1/Angstrom, or NULL to skip it.
+
+``grad_len``
+    Length of grad. Ignored when grad is NULL.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv needs a rebuild for sys, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. @par Ownership The caller owns chi, n_states and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code double chi[2]; size_t n_states = 0; seams_cv_states(cv, sys, chi, 2, &n_states, NULL, 0); @endcode
 
 .. _capi-seams_brine_analyse:
 

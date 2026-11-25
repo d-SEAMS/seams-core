@@ -42,6 +42,7 @@
 #include <readcon-core.hpp>
 #endif
 #include <site.hpp>
+#include <smooth_cv.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
 #include <topo_bulk.hpp>
@@ -495,6 +496,11 @@ struct seams_reorient : seams_object {
   seams_reorient(std::size_t n_vectors, std::size_t max_lag,
                  std::size_t origin_stride, double dt)
       : acc(n_vectors, max_lag, origin_stride, dt) {}
+};
+
+struct seams_cv : seams_object {
+  smooth::Workspace ws;
+  seams_cv(const smooth::RationalSwitch &sw, int max_ring) : ws(sw, max_ring) {}
 };
 
 namespace {
@@ -5309,6 +5315,264 @@ seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start,
     if (tau2_exp != nullptr) {
       *tau2_exp = f2.tauExp;
     }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_switch_rational(double r, double r0, double d0, int n, int m, double d_on,
+                                   double d_max, double *s, double *dsdr) {
+  clear_error();
+  if (s == nullptr) {
+    return fail(SEAMS_ERR_NULL, "switch output is null");
+  }
+  if (!std::isfinite(r) || r < 0.0) {
+    return fail(SEAMS_ERR_RANGE, "r must be finite and not negative");
+  }
+  try {
+    const smooth::RationalSwitch sw = smooth::makeSwitch(r0, d0, n, m, d_on, d_max);
+    double slope = 0.0;
+    *s = sw(r, slope);
+    if (dsdr != nullptr) {
+      *dsdr = slope;
+    }
+    return SEAMS_OK;
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_cv_create(double r0, double d0, int n, int m, double d_on, double d_max,
+                             int max_ring, seams_cv **out) {
+  clear_error();
+  if (out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "cv output is null");
+  }
+  *out = nullptr;
+  if (max_ring < 3 || max_ring > 10) {
+    return fail(SEAMS_ERR_RANGE, "max_ring must be from 3 to 10");
+  }
+  try {
+    const smooth::RationalSwitch sw = smooth::makeSwitch(r0, d0, n, m, d_on, d_max);
+    auto cv = std::make_unique<seams_cv>(sw, max_ring);
+    *out = static_cast<seams_cv *>(track(cv.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+void seams_cv_destroy(seams_cv *cv) {
+  if (!claim(cv)) {
+    return;
+  }
+  delete cv;
+}
+
+seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, const int *atoms,
+                              size_t n_atoms, double skin) {
+  handle_guard guard(cv);
+  clear_error();
+  if (cv == nullptr || sys == nullptr) {
+    return fail(SEAMS_ERR_NULL, "cv or system is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!std::isfinite(skin) || skin < 0.0) {
+    return fail(SEAMS_ERR_RANGE, "skin must be finite and not negative");
+  }
+  const Cloud &cloud = sys->cloud;
+  const gen::FracBox box = gen::makeFracBox(cloud);
+  if (!box.ok) {
+    return fail(SEAMS_ERR_BOX, "the cell has no volume");
+  }
+  if (!(cv->ws.switching().dMax + skin < box.halfMin)) {
+    return fail(SEAMS_ERR_BOX, "d_max + skin must be below half the narrowest cell width");
+  }
+  try {
+    const int n = cloud.nop;
+    std::vector<int> selected;
+    auto keep = [&](int i) {
+      return type <= 0 || cloud.pts[static_cast<std::size_t>(i)].type == type;
+    };
+    if (atoms != nullptr) {
+      std::vector<char> seen(static_cast<std::size_t>(n), 0);
+      for (size_t k = 0; k < n_atoms; ++k) {
+        const int i = atoms[k];
+        if (i < 0 || i >= n) {
+          return fail(SEAMS_ERR_RANGE, "an atom index is outside the frame");
+        }
+        if (seen[static_cast<std::size_t>(i)] != 0) {
+          return fail(SEAMS_ERR_ARG, "an atom index is listed twice");
+        }
+        seen[static_cast<std::size_t>(i)] = 1;
+        if (keep(i)) {
+          selected.push_back(i);
+        }
+      }
+      std::sort(selected.begin(), selected.end());
+    } else {
+      for (int i = 0; i < n; ++i) {
+        if (keep(i)) {
+          selected.push_back(i);
+        }
+      }
+    }
+    cv->ws.rebuild(cloud, std::move(selected), skin);
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_cv_needs_rebuild(const seams_cv *cv, const seams_system *sys, int *stale) {
+  read_guard guard(cv);
+  clear_error();
+  if (cv == nullptr || sys == nullptr || stale == nullptr) {
+    return fail(SEAMS_ERR_NULL, "cv, system or output is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  try {
+    *stale = cv->ws.stale(sys->cloud) ? 1 : 0;
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges, size_t *n_rings,
+                               size_t *n_pairs) {
+  read_guard guard(cv);
+  clear_error();
+  if (cv == nullptr || (n_edges == nullptr && n_rings == nullptr && n_pairs == nullptr)) {
+    return fail(SEAMS_ERR_NULL, "cv or every output is null");
+  }
+  if (!cv->ws.built()) {
+    return fail(SEAMS_ERR_STATE, "cv has no topology; call seams_cv_rebuild");
+  }
+  const auto &topo = cv->ws.topology();
+  if (n_edges != nullptr) {
+    *n_edges = topo.edges.size();
+  }
+  if (n_rings != nullptr) {
+    *n_rings = static_cast<size_t>(topo.ringCount());
+  }
+  if (n_pairs != nullptr) {
+    *n_pairs = topo.hexPairs.size();
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int arg,
+                            double *value, double *grad, size_t grad_len) {
+  handle_guard guard(cv);
+  clear_error();
+  if (cv == nullptr || sys == nullptr || value == nullptr) {
+    return fail(SEAMS_ERR_NULL, "cv, system or value is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (kind < SEAMS_CV_RING_COUNT || kind > SEAMS_CV_STATE) {
+    return fail(SEAMS_ERR_RANGE, "unknown collective variable kind");
+  }
+  try {
+    const auto k = static_cast<smooth::Kind>(kind);
+    try {
+      cv->ws.checkKind(k, arg);
+    } catch (const std::invalid_argument &ex) {
+      return fail(SEAMS_ERR_RANGE, ex.what());
+    }
+    if (cv->ws.stale(sys->cloud)) {
+      return fail(SEAMS_ERR_STATE, "the topology is stale for this frame; call seams_cv_rebuild");
+    }
+    const size_t dim = 3 * static_cast<size_t>(sys->cloud.nop);
+    if (grad != nullptr && grad_len < dim) {
+      return fail(SEAMS_ERR_RANGE, "grad needs 3 * natoms doubles");
+    }
+    *value = cv->ws.value(sys->cloud, k, arg, grad);
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_cv_state_clause(seams_cv *cv, int state, int kind, int arg, double threshold,
+                                   double width, int above) {
+  handle_guard guard(cv);
+  clear_error();
+  if (cv == nullptr) {
+    return fail(SEAMS_ERR_NULL, "cv is null");
+  }
+  if (kind < SEAMS_CV_RING_COUNT || kind > SEAMS_CV_STATE) {
+    return fail(SEAMS_ERR_RANGE, "unknown collective variable kind");
+  }
+  try {
+    cv->ws.addClause(state, static_cast<smooth::Kind>(kind), arg, threshold, width, above != 0);
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_cv_states(seams_cv *cv, const seams_system *sys, double *chi, size_t chi_len,
+                             size_t *n_states, double *grad, size_t grad_len) {
+  handle_guard guard(cv);
+  clear_error();
+  if (cv == nullptr || sys == nullptr || n_states == nullptr) {
+    return fail(SEAMS_ERR_NULL, "cv, system or n_states is null");
+  }
+  const size_t count = static_cast<size_t>(cv->ws.stateCount());
+  *n_states = count;
+  if (chi == nullptr) {
+    return SEAMS_OK;
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (chi_len < count) {
+    return fail(SEAMS_ERR_RANGE, "chi needs one double per state");
+  }
+  const size_t dim = 3 * static_cast<size_t>(sys->cloud.nop);
+  if (grad != nullptr && grad_len < count * dim) {
+    return fail(SEAMS_ERR_RANGE, "grad needs n_states * 3 * natoms doubles");
+  }
+  try {
+    if (cv->ws.stale(sys->cloud)) {
+      return fail(SEAMS_ERR_STATE, "the topology is stale for this frame; call seams_cv_rebuild");
+    }
+    cv->ws.states(sys->cloud, chi, grad);
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");

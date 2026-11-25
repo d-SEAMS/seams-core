@@ -575,6 +575,35 @@ int main(int argc, char **argv) {
   seams_reorient_destroy(rot);
   printf("capi seams_reorient_destroy ok\n");
 
+  double sw = 0, dsw = 0;
+  need("switch", seams_switch_rational(3.1, 0.3, 2.8, 6, 0, 3.2, 3.5, &sw, &dsw), NULL);
+  printf("capi seams_switch_rational %.3f %.3f\n", sw, dsw);
+  seams_cv *cv = NULL;
+  need("cvc", seams_cv_create(0.3, 2.8, 6, 0, 3.2, 3.5, 6, &cv), NULL);
+  printf("capi seams_cv_create ok\n");
+  need("cvr", seams_cv_rebuild(cv, ih, 0, NULL, 0, 0.5), cv);
+  printf("capi seams_cv_rebuild ok\n");
+  size_t cv_edges = 0, cv_rings = 0, cv_pairs = 0;
+  need("cvt", seams_cv_topology(cv, &cv_edges, &cv_rings, &cv_pairs), cv);
+  printf("capi seams_cv_topology %zu %zu %zu\n", cv_edges, cv_rings, cv_pairs);
+  int cv_stale = -1;
+  need("cvn", seams_cv_needs_rebuild(cv, ih, &cv_stale), cv);
+  printf("capi seams_cv_needs_rebuild %d\n", cv_stale);
+  const seams_cv_kind cv_kind = SEAMS_CV_RING_COUNT;
+  double *cv_grad = malloc(sizeof(double) * 3 * (size_t)n);
+  double cv_six = 0;
+  need("cvv", seams_cv_value(cv, ih, cv_kind, 6, &cv_six, cv_grad, 3 * (size_t)n), cv);
+  printf("capi seams_cv_value %.1f\n", cv_six);
+  need("cvq", seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 200.0, 10.0, 1), cv);
+  printf("capi seams_cv_state_clause ok\n");
+  double cv_chi[1] = {0};
+  size_t cv_nstates = 0;
+  need("cvx", seams_cv_states(cv, ih, cv_chi, 1, &cv_nstates, NULL, 0), cv);
+  printf("capi seams_cv_states %zu %.2f\n", cv_nstates, cv_chi[0]);
+  seams_cv_destroy(cv);
+  free(cv_grad);
+  printf("capi seams_cv_destroy ok\n");
+
   free(mix_mols);
   free(wbis);
 

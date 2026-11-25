@@ -291,6 +291,17 @@ test('ring_oracle',
   env: _test_env,
   timeout: 600)
 
+test('smooth_cv',
+  executable('test_smooth_cv', 'test_smooth_cv.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: [seams_api_lib],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: _incdirs + _api_incdirs + [include_directories('.')],
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root() / 'input',
+  env: _test_env)
+
 # .lammpsdata has no chemfiles extension. The CLI, the C API read, and
 # seams_path_nframes have to name the LAMMPS Data format. A malformed file
 # has to be an error, not a spin in the vendored reader.

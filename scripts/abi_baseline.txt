@@ -21,6 +21,14 @@ T seams_chill_plus
 T seams_chill_plus_n
 T seams_contact_pairs
 T seams_coordination
+T seams_cv_create
+T seams_cv_destroy
+T seams_cv_needs_rebuild
+T seams_cv_rebuild
+T seams_cv_state_clause
+T seams_cv_states
+T seams_cv_topology
+T seams_cv_value
 T seams_density_axis
 T seams_directed_hbonds
 T seams_domains
@@ -94,6 +102,7 @@ T seams_signature_cages_edge
 T seams_site_table
 T seams_status_string
 T seams_steinhardt
+T seams_switch_rational
 T seams_system_box
 T seams_system_count
 T seams_system_create
