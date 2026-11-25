@@ -109,9 +109,8 @@ let
     url = "https://files.pythonhosted.org/packages/6c/b4/6664afb3c9aa2747fe2c491adc2b9efbe555d0824f86836711f8b3c9752c/solvis_tools-0.1.5-py3-none-any.whl";
     sha256 = "1s80abs8pz9n9zz9yh04clmyfsnmcxva86q59i6zh2f0rji5cwyx";
   };
-  # This pin ships towncrier 25, which joins a Markdown title to the notes
-  # with no blank line. The changelog was rendered by towncrier 23.11, the
-  # release the pixi lock still runs, so the check uses that release.
+  # Use the same Towncrier release as the pixi lock so the draft preserves
+  # the Markdown spacing in the checked-in changelog.
   towncrierWheel = fetchurl {
     url = "https://files.pythonhosted.org/packages/36/5a/6546c8ea2bee64c9e9552e06fdb31118a4f23a12aa161581b5fefd070152/towncrier-23.11.0-py3-none-any.whl";
     hash = "sha256-LlGcphlCbRiePJjJlVj+i+UMnO0T6h/CCko1OpXS3tc=";
