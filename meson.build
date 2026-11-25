@@ -437,6 +437,15 @@ if gpulite_dep.found() and not gpulite_opt.disabled()
 else
   _linkcell_opts += ['with_gpulite=disabled']
 endif
+# The capi ThreadSanitizer build hands work to linkcell's Rayon pool,
+# whose handoffs and joins are std and Rayon atomics. Unless those are
+# rebuilt with the sanitizer, every access on either side of them is
+# reported. scripts/sanitize_thread.sh asks for the same rebuild through
+# LINKCELL_SANITIZE and links the archive.
+_linkcell_tsan = _capi_san.contains('thread')
+if _linkcell_tsan
+  _linkcell_opts += ['sanitize=thread']
+endif
 # Every neighbour list is linkcell's. 0.6.0 has the threaded CSR rows
 # (lc_pairs_within_csr) the cutoff lists are built from.
 if get_option('with_linkcell').disabled()
@@ -445,8 +454,14 @@ endif
 linkcell_dep = dependency('linkcell', version: '>=0.6.0', required: true,
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
-# Headers only; libyodaLib links the library (src/meson.build).
-_deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
+if _linkcell_tsan
+  # The sanitized linkcell is its shared library, one copy however many
+  # targets link it, so every target that calls lc_ links it directly.
+  _deps += [linkcell_dep]
+else
+  # Headers only; libyodaLib links the library (src/meson.build).
+  _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
+endif
 # Always set: installed headers and consumers still test it.
 _args += ['-DSEAMS_HAS_LINKCELL=1']
 

@@ -29,6 +29,9 @@ numpy = ">=1.24"
 pip = "*"
 # linkcell and readcon need cargo on PATH.
 rust = ">=1.80"
+# capi_sanitize=thread rebuilds std for linkcell (-Zbuild-std). rust-src
+# pins itself to the rust version it was cut from.
+rust-src = ">=1.80"
 pytest = ">=8.0"
 # coverage-run passes --branch-coverage, which lcov 1.x does not know.
 lcov = ">=2.0"

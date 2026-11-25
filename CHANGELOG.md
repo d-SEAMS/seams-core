@@ -18,6 +18,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- The `capi_sanitize=thread` build sets Linkcell's `sanitize=thread` option, which rebuilds Linkcell, its Rayon pool and the Rust standard library with `-Zsanitizer=thread` (from the `rust-src` package in the pixi environment) and links the shared liblinkcell, so ThreadSanitizer sees the pool's handoffs and joins. `capi_suite` no longer reports every chunk the pool runs as a data race when other processes keep half the cpus busy and `seams::team::run` hands its stages to Linkcell.
 - libyodaLib no longer defines weak fallbacks for `lc_set_threads`, `lc_num_threads`, `lc_set_places` and `lc_owned_mask`. Linkcell 0.6.0, the oldest supported release, exports all four, and against a shared liblinkcell the dynamic linker bound libyodaLib's calls to its own fallbacks, so the thread width never reached Linkcell.
 
 ## [2.14.2] - 2026-11-19
