@@ -16,7 +16,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:glossary.org][glossary]] | Engine terms |
 | [[file:../explanation/performance.org][Release-candidate sitting]] | Medians and interquartile ranges for the release-candidate comparison |
 | [[file:../explanation/trace-threads.org][Signature-search thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
-| [[file:release-2.14.org][2.14.2 release notes]] | API, engines, threads, and deprecations since v2.13.0 |
+| [[file:release-2.14.org][2.14.3 release notes]] | API, engines, threads, and deprecations since v2.13.0 |
 
 #+begin_export rst
 .. toctree::

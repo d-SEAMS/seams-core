@@ -1,8 +1,7 @@
 [wrap-git]
 url = https://github.com/d-SEAMS/linkcell.git
-revision = v0.6.0
+revision = 0bc73576ceb4ea79909a3ad7a7931275b59a9fe4
 depth = 1
-diff_files = linkcell-conda-openmp.patch, linkcell-macos-rpath.patch
 
 [provide]
 linkcell = linkcell_dep

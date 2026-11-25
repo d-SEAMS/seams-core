@@ -117,7 +117,7 @@ is the pair count. On this ice Ih cell that is 128 waters, 512
 neighbour entries, 256 six-rings, mean q6 0.625855, and 128 hexagonal
 labels.
 
-For 2.14.2 the topology/local-order engine entries used by the Python
+For 2.14.3 the topology/local-order engine entries used by the Python
 binding are:
 
 | Python call | Engine entry |

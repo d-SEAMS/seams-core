@@ -1,7 +1,7 @@
 schema_version: 1
 
 context:
-  version: "2.14.2"
+  version: "2.14.3"
 
 package:
   name: libseams
@@ -29,10 +29,10 @@ source:
   - path: ../subprojects/packagefiles/backward-cpp
     target_directory: subprojects/backward-cpp-1.6
   # linkcell is the neighbour backend and is always built. This is the
-  # commit of the v0.6.0 tag subprojects/linkcell.wrap names; cargo
-  # fetches its crates.
+  # pinned main commit subprojects/linkcell.wrap names; cargo fetches
+  # its crates.
   - git: https://github.com/d-SEAMS/linkcell.git
-    rev: 216df974b3da24b1adfbb75971521dfbb52aac82
+    rev: 0bc73576ceb4ea79909a3ad7a7931275b59a9fe4
     target_directory: subprojects/linkcell
 
 build:

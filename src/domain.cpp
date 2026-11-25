@@ -11,20 +11,6 @@
 #include <unordered_map>
 
 #include <linkcell.h>
-// A library from before lc_owned_mask still links. The header's copy wins.
-extern "C" __attribute__((weak)) int lc_owned_mask(const int *nxyz, const int *assign, std::size_t ncell,
-                             const int *point_cell, std::size_t nop, int rank,
-                             const std::uint32_t *hwidth, int *hit) {
-  (void)nxyz;
-  (void)assign;
-  (void)ncell;
-  (void)point_cell;
-  (void)nop;
-  (void)rank;
-  (void)hwidth;
-  (void)hit;
-  return 1;
-}
 
 #include <franzblau.hpp>
 #include <generic.hpp>

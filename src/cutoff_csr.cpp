@@ -40,17 +40,6 @@
 
 #include <linkcell.h>
 
-// The linked cell this tree was built against does not always export
-// the thread-width hooks. A strong definition in that library wins.
-extern "C" __attribute__((weak)) void lc_set_threads(int n) { (void)n; }
-extern "C" __attribute__((weak)) int lc_num_threads(void) {
-#ifdef SEAMS_HAS_OPENMP
-  return omp_get_max_threads();
-#else
-  return 1;
-#endif
-}
-
 namespace {
 
 constexpr int kMaxCells = 262144;
