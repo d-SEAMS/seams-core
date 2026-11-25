@@ -10,6 +10,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.4] - 2026-11-25
+
+### Added
+
+- Collective variables with analytic gradients for biased sampling and Markov state models. `seams_switch_rational()` is the PLUMED RATIONAL switch times a C2 taper to zero at d_max. A `seams_cv` handle fixes the candidate rings between neighbour-list rebuilds and returns soft primitive-ring counts by size, ring-atom counts, soft HC basal hexagon pairs, the squared radius of gyration and the gyration-ellipsoid volume of a cluster, and products of logistic state clauses, each with its gradient in the coordinates under orthorhombic and triclinic periodic boundaries. The ring counts, ring-atom counts and hexagon pairs are twice continuously differentiable for n >= 3, and for n = 2 with d0 = 0. The squared radius of gyration and the volume are smooth only for a compact selection of positive total weight, and the volume has a kink where the cluster becomes flat. A value or gradient outside double range is `SEAMS_ERR_RANGE`, not a NaN or an infinity.
+
 ## [2.14.3] - 2026-11-25
 
 ### Added
