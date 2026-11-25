@@ -67,6 +67,7 @@
 #include <new>
 #include <numeric>
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -5555,7 +5556,11 @@ seams_status seams_switch_rational(double r, double r0, double d0, int n, int m,
   try {
     const smooth::RationalSwitch sw = smooth::makeSwitch(r0, d0, n, m, d_on, d_max);
     double slope = 0.0;
-    *s = sw(r, slope);
+    const double value = sw(r, slope);
+    if (!std::isfinite(value) || (dsdr != nullptr && !std::isfinite(slope))) {
+      return fail(SEAMS_ERR_RANGE, "s or ds/dr is outside double range");
+    }
+    *s = value;
     if (dsdr != nullptr) {
       *dsdr = slope;
     }
@@ -5736,6 +5741,8 @@ seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::range_error &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (...) {
     remember();
     return SEAMS_ERR_INTERNAL;
@@ -5795,6 +5802,8 @@ seams_status seams_cv_states(seams_cv *cv, const seams_system *sys, double *chi,
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::range_error &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (...) {
     remember();
     return SEAMS_ERR_INTERNAL;

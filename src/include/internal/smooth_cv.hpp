@@ -61,7 +61,8 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
  *  @details For x = (r - d0) / r0 the rational part is
  *  (1 - x^n) / (1 - x^m), evaluated as the ratio of the geometric sums
  *  1 + x + ... + x^(n-1) and 1 + x + ... + x^(m-1), which has no removable
- *  singularity at x = 1. It is 1 for r at or below d0. The taper is 1 below
+ *  singularity at x = 1, and above x = 1 as y^(m-n) times the same ratio
+ *  in y = 1 / x. It is 1 for r at or below d0. The taper is 1 below
  *  dOn, 0 at and beyond dMax, and 1 - u^3 (10 - 15 u + 6 u^2) with
  *  u = (r - dOn) / (dMax - dOn) in between, so the product and its first
  *  two derivatives vanish at dMax. Near d0 the rational part is
@@ -81,11 +82,14 @@ struct RationalSwitch {
   //! by makeSwitch before this check.
   void validate() const;
 
-  //! s(r); dsdr receives ds/dr, the right derivative at r = d0
+  //! s(r), finite and not negative; dsdr receives ds/dr, the right derivative
+  //! at r = d0. No power of x above 1 is formed, so only dsdr can leave
+  //! double range, when r0 or dMax - dOn is near the smallest doubles.
   double operator()(double r, double &dsdr) const;
 };
 
-//! Builds and validates a switch. m == 0 selects m = 2n, as in PLUMED.
+//! Builds and validates a switch. m == 0 selects m = 2n, as in PLUMED,
+//! and throws std::invalid_argument when 2n does not fit in an int.
 RationalSwitch makeSwitch(double r0, double d0, int n, int m, double dOn,
                           double dMax);
 
@@ -200,7 +204,9 @@ public:
   void checkKind(Kind kind, int arg) const;
 
   //! Value of one variable. With grad non-null, 3 * cloud.nop entries of
-  //! d value / d x are written, zero for unselected atoms.
+  //! d value / d x are written, zero for unselected atoms. Throws
+  //! std::range_error, writing nothing, when the value or a gradient entry
+  //! is not finite.
   double value(const Cloud &cloud, Kind kind, int arg, double *grad);
 
   //! Appends a factor to state `state` (state == stateCount() opens a new
@@ -210,7 +216,8 @@ public:
   void addClause(int state, Kind kind, int arg, double threshold, double width, bool above);
 
   //! chi of every state; with grad non-null, stateCount() rows of
-  //! 3 * cloud.nop entries.
+  //! 3 * cloud.nop entries. Throws std::range_error, writing nothing, when
+  //! a chi or a gradient entry is not finite.
   void states(const Cloud &cloud, double *chi, double *grad);
 
 private:

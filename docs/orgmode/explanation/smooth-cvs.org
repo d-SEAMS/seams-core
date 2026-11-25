@@ -28,7 +28,13 @@ with \(R = 1\) for \(r \le d_0\). This is the PLUMED ~RATIONAL~ switch.
 The library evaluates it as the ratio of the geometric sums
 \(1 + x + \dots + x^{n-1}\) and \(1 + x + \dots + x^{m-1}\), so
 \(x = 1\) needs no special case; there \(R = n/m\) and
-\(R' = -n(m-n) / (2 m r_0)\). ~m = 0~ selects \(m = 2n\), as in PLUMED.
+\(R' = -n(m-n) / (2 m r_0)\). Above \(x = 1\) it uses
+\(R = y^{m-n} G_n(y) / G_m(y)\) with \(y = 1/x\) and \(G_k\) the
+geometric sum, which forms no power of \(x\): \(s\) is finite for any
+exponents and any finite distance. Only \(ds/dr\) can leave double
+range, when \(r_0\) or \(d_{max} - d_{on}\) is near the smallest
+doubles, and the API then returns ~SEAMS_ERR_RANGE~ rather than a
+non-finite number. ~m = 0~ selects \(m = 2n\), as in PLUMED.
 
 PLUMED cuts \(R\) at ~D_MAX~ with a step, which leaves a jump of
 \(R(d_{max})\) in the value. Here the cut is a taper,
