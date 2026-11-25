@@ -119,10 +119,12 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
   };
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
   if (useThreads) {
+    seams::RegionErrors errors;
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < nRows; i++) {
-      countRow(i);
+      errors.run([&] { countRow(i); });
     }
+    errors.rethrow();
   } else
 #endif
   for (int i = 0; i < nRows; i++) {
@@ -598,20 +600,24 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
   // square root and a divide, and on a four-neighbour shell that costs
   // more than the seven components it writes.
   const bool batchSolid = (orderL == 4 || orderL == 6) && !pairwise;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    if (pairwise) {
-      qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else if (batchSolid) {
-      qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else {
-      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
-                                      g.cols.data(), qlm.data());
-    }
+    errors.run([&] {
+      if (pairwise) {
+        qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else if (batchSolid) {
+        qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else {
+        seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                        g.cols.data(), qlm.data());
+      }
+    });
   }
+  errors.rethrow();
 }
 
 void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
@@ -620,24 +626,28 @@ void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
       seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
   // Same split as runPass1: degree 3 stays on the one-bond kernel.
   const bool batchSolid = (orderL == 4 || orderL == 6) && !pairwise;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = 0; i < g.nop; i++) {
-    if (which != nullptr &&
-        (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0)) {
-      continue;
-    }
-    if (pairwise) {
-      qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else if (batchSolid) {
-      qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else {
-      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
-                                      g.cols.data(), qlm.data());
-    }
+    errors.run([&] {
+      if (which != nullptr &&
+          (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0)) {
+        return;
+      }
+      if (pairwise) {
+        qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else if (batchSolid) {
+        qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else {
+        seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                        g.cols.data(), qlm.data());
+      }
+    });
   }
+  errors.rethrow();
 }
 
 void runPass2Mask(const NeighbourCSR &g, int orderL, const std::vector<double> &qlm,
@@ -718,47 +728,51 @@ void runPass2(const NeighbourCSR &g, int orderL, int begin, int end,
   const bool stock =
       seams::product::mode() == seams::product::Mode::Fp64 &&
       seams::product::reduction() == seams::product::Reduction::Left;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    if (stock) {
-      seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(),
-                                   g.cols.data(), ql.data(), qlBar.data());
-      continue;
-    }
-    const int nComp = 2 * orderL + 1;
-    constexpr double pi = 3.14159265358979323846;
-    const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
-    const int row = i * nComp;
-    const auto norm = seams::product::realDot(qlm.data() + 2 * row, qlm.data() + 2 * row,
-                                              2 * nComp, seams::product::mode());
-    ql[static_cast<size_t>(i)] = std::sqrt(prefactor * norm.value);
-    const int j0 = g.offsets[static_cast<size_t>(i)];
-    const int j1 = g.offsets[static_cast<size_t>(i) + 1];
-    if (j0 == j1) {
-      qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
-      continue;
-    }
-    const int nContrib = 1 + (j1 - j0);
-    std::vector<double> comp(static_cast<size_t>(nContrib));
-    std::vector<double> bar(static_cast<size_t>(2 * nComp));
-    for (int m = 0; m < 2 * nComp; m++) {
-      comp[0] = qlm[static_cast<size_t>(2 * row + m)];
-      for (int p = j0; p < j1; p++) {
-        const int jatom = g.cols[static_cast<size_t>(p)];
-        comp[static_cast<size_t>(1 + (p - j0))] =
-            qlm[static_cast<size_t>(2 * (jatom * nComp) + m)];
+    errors.run([&] {
+      if (stock) {
+        seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(),
+                                     g.cols.data(), ql.data(), qlBar.data());
+        return;
       }
-      bar[static_cast<size_t>(m)] =
-          seams::product::reduce(comp.data(), nContrib, seams::product::reduction()) /
-          static_cast<double>(nContrib);
-    }
-    const auto barNorm = seams::product::realDot(bar.data(), bar.data(), 2 * nComp,
-                                                 seams::product::mode());
-    qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * barNorm.value);
+      const int nComp = 2 * orderL + 1;
+      constexpr double pi = 3.14159265358979323846;
+      const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+      const int row = i * nComp;
+      const auto norm = seams::product::realDot(qlm.data() + 2 * row, qlm.data() + 2 * row,
+                                                2 * nComp, seams::product::mode());
+      ql[static_cast<size_t>(i)] = std::sqrt(prefactor * norm.value);
+      const int j0 = g.offsets[static_cast<size_t>(i)];
+      const int j1 = g.offsets[static_cast<size_t>(i) + 1];
+      if (j0 == j1) {
+        qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
+        return;
+      }
+      const int nContrib = 1 + (j1 - j0);
+      std::vector<double> comp(static_cast<size_t>(nContrib));
+      std::vector<double> bar(static_cast<size_t>(2 * nComp));
+      for (int m = 0; m < 2 * nComp; m++) {
+        comp[0] = qlm[static_cast<size_t>(2 * row + m)];
+        for (int p = j0; p < j1; p++) {
+          const int jatom = g.cols[static_cast<size_t>(p)];
+          comp[static_cast<size_t>(1 + (p - j0))] =
+              qlm[static_cast<size_t>(2 * (jatom * nComp) + m)];
+        }
+        bar[static_cast<size_t>(m)] =
+            seams::product::reduce(comp.data(), nContrib, seams::product::reduction()) /
+            static_cast<double>(nContrib);
+      }
+      const auto barNorm = seams::product::realDot(bar.data(), bar.data(), 2 * nComp,
+                                                   seams::product::mode());
+      qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * barNorm.value);
+    });
   }
+  errors.rethrow();
 }
 
 #ifdef SEAMS_HAS_OFFLOAD
