@@ -2487,7 +2487,8 @@ if get_option('with_tests')
     'capi_thread_scale',
     files('tests/capi_thread_scale.c'),
     link_with: ydslib,
-    dependencies: [dependency('openmp', language: 'c', required: false)] + _omp_rpath_dep,
+    dependencies: (openmp_dep.found() ? [dependency('openmp', language: 'c', required: false)] : [])
+      + _omp_rpath_dep,
     include_directories: include_directories('src/include/internal'),
     c_args: ['-std=c11'] + _capi_warn,
     link_args: ['-lm'],
