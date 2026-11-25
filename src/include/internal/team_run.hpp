@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <exception>
 #include <initializer_list>
-#include <mutex>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -64,11 +63,12 @@ inline int parts(int width) {
 
 namespace detail {
 
+// The handler runs inside the region or a pool worker and cannot throw:
+// the first failure claims the slot with an atomic exchange, not a lock.
 template <class F> struct Call {
   F *fn;
   std::atomic<bool> failed{false};
   std::exception_ptr failure;
-  std::mutex lock;
 
   void one(std::size_t stage, std::size_t chunk, std::size_t worker) noexcept {
     if (failed.load(std::memory_order_relaxed)) {
@@ -77,11 +77,9 @@ template <class F> struct Call {
     try {
       (*fn)(stage, chunk, static_cast<int>(worker));
     } catch (...) {
-      const std::lock_guard<std::mutex> hold(lock);
-      if (!failure) {
+      if (!failed.exchange(true, std::memory_order_acq_rel)) {
         failure = std::current_exception();
       }
-      failed.store(true, std::memory_order_relaxed);
     }
   }
 
