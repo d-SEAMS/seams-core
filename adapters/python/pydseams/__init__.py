@@ -41,11 +41,11 @@ if _downstream is not None:
     for _k, _v in vars(_downstream).items():
         if not _k.startswith("__"):
             globals()[_k] = _v
-    __version__ = getattr(_downstream, "__version__", "2.14.3")
+    __version__ = getattr(_downstream, "__version__", "2.14.4")
 else:
     from .trajectory import CtypesFrame as Frame, _load_frame_at_step
 
-    __version__ = "2.14.3"
+    __version__ = "2.14.4"
 
     def read(path, frame=1, **kwargs):
         """Load one configuration via libseams."""

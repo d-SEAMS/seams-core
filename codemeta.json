@@ -4,7 +4,7 @@
   "name": "d-SEAMS",
   "identifier": "https://github.com/d-SEAMS/seams-core",
   "description": "d-SEAMS reads molecular-dynamics trajectories and names the ice in them: CHILL+, topological cages, primitive rings, and Steinhardt parameters, on one shared neighbour list.",
-  "version": "2.14.3",
+  "version": "2.14.4",
   "datePublished": "2026-11-25",
   "license": "https://spdx.org/licenses/MIT",
   "codeRepository": "https://github.com/d-SEAMS/seams-core",

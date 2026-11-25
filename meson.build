@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.14.3',
+  version: '2.14.4',
   default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
