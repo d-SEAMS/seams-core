@@ -459,11 +459,6 @@ bool nneigh::cellListRowsThreaded(
   }
   const double rc2 = rcutoff * rcutoff;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-#ifdef SEAMS_HAS_MINIMAGE
-  // Cells span the cutoff across every face separation, so the engine wrap
-  // of a neighbour inside the cutoff is its minimum image.
-  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
-#endif
   // each row belongs to one thread; the 27 cells around an atom hold the
   // nearest image of every neighbour because every axis has at least
   // three cells of width rcutoff
@@ -477,8 +472,6 @@ bool nneigh::cellListRowsThreaded(
 #endif
   {
     std::vector<int> cand;
-    std::vector<double> qs;
-    std::vector<double> d2;
 #ifdef SEAMS_HAS_OPENMP
 #if !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp for schedule(static)
@@ -510,21 +503,9 @@ bool nneigh::cellListRowsThreaded(
             }
           }
         }
-        bool batched = false;
-#ifdef SEAMS_HAS_MINIMAGE
-        if (cells.ok && !cand.empty()) {
-          qs.resize(3 * cand.size());
-          d2.resize(cand.size());
-          for (std::size_t t = 0; t < cand.size(); t++) {
-            std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(cand[t])], 3, &qs[3 * t]);
-          }
-          batched = mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(i)],
-                                  qs.data(), cand.size(), d2.data()) == 0;
-        }
-#endif
         auto &row = rows[k];
         for (std::size_t t = 0; t < cand.size(); t++) {
-          const double r2 = batched ? d2[t] : gen::periodicDistSq(frame, yCloud, i, cand[t]);
+          const double r2 = gen::periodicDistSq(frame, yCloud, i, cand[t]);
           if (r2 <= rc2) {
             row.push_back(cand[t]);
           }
@@ -2037,13 +2018,10 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
   const int nI = static_cast<int>(iIdx.size());
   const std::size_t nJ = jIdx.size();
 #ifdef SEAMS_HAS_MINIMAGE
-  // Every typeJ position once; each typeI then takes one engine-wrap batch.
+  // minimage's Euclidean images start the exact search past the Smith ball,
+  // which replaces any that are not lattice images. Its engine wrap is not
+  // used: minimage 0.1.4 gets it wrong on needle cells even inside the ball.
   const gen::CellFrame cells = gen::makeCellFrame(yCloud);
-  std::vector<double> targets(cells.ok && frame.ok ? 3 * nJ : 0);
-  for (std::size_t k = 0; 3 * k < targets.size(); k++) {
-    std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(jIdx[k])], 3,
-                &targets[3 * k]);
-  }
 #endif
   seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
@@ -2058,13 +2036,7 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
       errors.run([&] {
         const int i = iIdx[static_cast<std::size_t>(t)];
         const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
-        bool batched = false;
-#ifdef SEAMS_HAS_MINIMAGE
-        batched = !targets.empty() &&
-                  mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(i)],
-                                targets.data(), nJ, row.data()) == 0;
-#endif
-        for (std::size_t k = 0; k < nJ && !batched; k++) {
+        for (std::size_t k = 0; k < nJ; k++) {
           const auto &pj = yCloud.pts[static_cast<std::size_t>(jIdx[k])];
           row[k] = frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
                             : gen::periodicDistSq(frame, yCloud, i, jIdx[k]);
@@ -2089,7 +2061,7 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
             if (!gen::smithInside(frame, d2)) {
               d2 = -1.0;
 #ifdef SEAMS_HAS_MINIMAGE
-              if (batched) {
+              if (cells.ok) {
                 d2 = gen::euclideanDistSq(cells, i, j);
               }
 #endif

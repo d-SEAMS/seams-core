@@ -564,50 +564,13 @@ periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   return std::sqrt(periodicDistSq(yCloud, iatom, jatom));
 }
 
-// Tilt batches share one mi_cell. mi_dist2_many is the fractional
-// image for every candidate. A result outside the Smith ball is
-// replaced by the Euclidean image. Orthorhombic batches stay on
-// periodicDistSq; the Highway kernel is the ortho difference path.
+// periodicDistSq for each candidate. minimage's batch engine wrap is not
+// used: minimage 0.1.4 gets it wrong on needle cells even inside the Smith
+// ball.
 inline void batchPeriodicDistSq(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     const int *jatom, std::size_t n, double *distSq) {
   const FracBox b = makeFracBox(yCloud);
-#ifdef SEAMS_HAS_MINIMAGE
-  if (n > 0 && b.ok && b.triclinic) {
-    mi_cell cell;
-    if (pointCloudCell(yCloud, &cell)) {
-      const auto &atom = yCloud.pts[static_cast<std::size_t>(iatom)];
-      const double p[3] = {atom.x, atom.y, atom.z};
-      std::vector<double> qs(n * 3);
-      for (std::size_t k = 0; k < n; ++k) {
-        const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom[k])];
-        qs[3 * k] = pj.x;
-        qs[3 * k + 1] = pj.y;
-        qs[3 * k + 2] = pj.z;
-      }
-      if (mi_dist2_many(&cell, p, qs.data(), n, distSq) == 0) {
-        for (std::size_t k = 0; k < n; ++k) {
-          if (smithInside(b, distSq[k])) {
-            continue;
-          }
-          const double q[3] = {qs[3 * k], qs[3 * k + 1], qs[3 * k + 2]};
-          double ed[3] = {0.0, 0.0, 0.0};
-          if (mi_displacement_euclidean(&cell, q, p, ed) == 0) {
-            const std::array<double, 3> raw = {atom.x - q[0], atom.y - q[1],
-                                               atom.z - q[2]};
-            const auto refined = mic::euclideanIfShorter(
-                b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, {ed[0], ed[1], ed[2]});
-            distSq[k] = refined[0] * refined[0] + refined[1] * refined[1] +
-                        refined[2] * refined[2];
-          } else {
-            distSq[k] = periodicDistSq(b, yCloud, iatom, jatom[k]);
-          }
-        }
-        return;
-      }
-    }
-  }
-#endif
   for (std::size_t k = 0; k < n; k++) {
     distSq[k] = periodicDistSq(b, yCloud, iatom, jatom[k]);
   }
