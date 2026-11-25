@@ -352,6 +352,7 @@ stdenv.mkDerivation (finalAttrs: {
       -I${nanobindRoot}/include \
       -I${robinMap}/include \
       -I../include -I../src/include/internal -I../third_party/argum \
+      -I../subprojects/linkcell/include \
       -I${libhwy}/include \
       -isystem ${eigen}/include/eigen3 \
       -Isrc \

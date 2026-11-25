@@ -65,7 +65,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The brine pocket census reads ice flags only at water indices, and a frame with no ice counts all its liquid water as reservoir instead of returning an empty census.
 - The bundled Linkcell build finds the OpenMP headers and runtime in the active conda environment on macOS.
 - The chemfiles name-filter example in the CLI reference runs on `input/traj/confined_water_40.xtc`, the committed three-frame confined-water trajectory with its same-stem GROMACS `.gro` topology.
-- The core Nix flake uses Nixpkgs 26.05 on Intel macOS, selects OVITO and Qt test wheels for each platform, and enables optional engines when Nixpkgs provides them for the target.
+- The core Nix flake uses Nixpkgs 26.05 on Intel macOS, selects OVITO and Qt test wheels for each platform, and enables optional engines when Nixpkgs provides them for the target. The legacy Python wrapper in the Nix check uses the bundled Linkcell headers.
 - The glibc 2.28 release build gives the extracted source to the container user and replaces the packaged readcon checkout before pinning it.
 - The head-to-head campaign provenance check caches Git object and commit lookups per run, and the AddressSanitizer Python launcher drops the sanitizer preload for Git subprocesses so the check completes within its time limit.
 - The science tutorial check has a 600 s timeout and runs serially in AddressSanitizer builds.
