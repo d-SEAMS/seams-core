@@ -2130,10 +2130,11 @@ inline std::array<double, 3> fractionalWrap(double lx, double ly, double lz, dou
 // row, and every cell row times the candidate's own fractional coordinate.
 // The residual itself is carried error-free, so a candidate off the lattice
 // by more than that, such as minimage 0.1.4's Euclidean image on a needle
-// cell, is rejected.
-inline bool latticeImage(double lx, double ly, double lz, double xy, double xz, double yz,
-                         const std::array<double, 3> &raw,
-                         const std::array<double, 3> &candidate) noexcept {
+// cell, is rejected. On success n holds the integers.
+inline bool latticeCoefficients(double lx, double ly, double lz, double xy, double xz,
+                                double yz, const std::array<double, 3> &raw,
+                                const std::array<double, 3> &candidate,
+                                double (&n)[3]) noexcept {
   double d[3];
   double e[3];
   for (int k = 0; k < 3; k++) {
@@ -2144,10 +2145,9 @@ inline bool latticeImage(double lx, double ly, double lz, double xy, double xz, 
       return false;
     }
   }
-  const double nz = std::nearbyint(d[2] / lz);
-  const double ny = std::nearbyint((d[1] - nz * yz) / ly);
-  const double nx = std::nearbyint((d[0] - ny * xy - nz * xz) / lx);
-  const double n[3] = {nx, ny, nz};
+  n[2] = std::nearbyint(d[2] / lz);
+  n[1] = std::nearbyint((d[1] - n[2] * yz) / ly);
+  n[0] = std::nearbyint((d[0] - n[1] * xy - n[2] * xz) / lx);
   for (double v : n) {
     if (!(std::abs(v) < kIntegral)) {
       return false;
@@ -2172,6 +2172,13 @@ inline bool latticeImage(double lx, double ly, double lz, double xy, double xz, 
     }
   }
   return true;
+}
+
+inline bool latticeImage(double lx, double ly, double lz, double xy, double xz, double yz,
+                         const std::array<double, 3> &raw,
+                         const std::array<double, 3> &candidate) noexcept {
+  double n[3];
+  return latticeCoefficients(lx, ly, lz, xy, xz, yz, raw, candidate, n);
 }
 
 // Cartesian displacement from (xj, yj, zj) to (xi, yi, zi) on the
@@ -2208,6 +2215,32 @@ euclideanIfShorter(double lx, double ly, double lz, double xy, double xz, double
   const Cached &slot = cachedBasis(lx, ly, lz, xy, xz, yz);
   const Vec3 euc = closestDisplacement(slot.s, w, f2);
   return {euc.x, euc.y, euc.z};
+}
+
+// euclideanIfShorter from an image of raw computed outside this header,
+// such as minimage's. An image that latticeImage accepts is re-evaluated
+// as raw - n . (a, b, c) from its own integers n, the way the fractional
+// wrap is, before the search: minimage 0.1.4 can return an image that is a
+// few tens of roundings off the lattice, for example by dropping a tilt
+// near 1e-14 of an edge, and the search would keep that error.
+inline std::array<double, 3> euclideanFromImage(double lx, double ly, double lz, double xy,
+                                                double xz, double yz,
+                                                const std::array<double, 3> &raw,
+                                                const std::array<double, 3> &image) {
+  double n[3];
+  bool finite = true;
+  for (double value : image) {
+    finite = finite && std::isfinite(value);
+  }
+  if (finite && latticeCoefficients(lx, ly, lz, xy, xz, yz, raw, image, n)) {
+    const double ax[3] = {lx, xy, xz};
+    const double ay[3] = {0.0, ly, yz};
+    const double az[3] = {0.0, 0.0, lz};
+    return euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw,
+                              {raw[0] - integerDot(n, ax), raw[1] - integerDot(n, ay),
+                               raw[2] - integerDot(n, az)});
+  }
+  return euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, image);
 }
 
 } // namespace mic

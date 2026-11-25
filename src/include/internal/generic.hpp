@@ -244,9 +244,10 @@ inline bool smithInside(const FracBox &b, double r2) {
 }
 
 // Exact Euclidean minimum-image refinement of a triclinic displacement vector
-// when it lies outside the Smith ball. The linked minimage candidate, or the
-// wrap when minimage is absent or rejects the cell, is refined by
-// mic::euclideanIfShorter. The result is the minimum image, or
+// when it lies outside the Smith ball. The linked minimage candidate, by
+// mic::euclideanFromImage, or the wrap when minimage is absent or rejects
+// the cell, by mic::euclideanIfShorter, is refined. The result is the
+// minimum image, or
 // mic::RangeError when the cell is outside binary64; callers in OpenMP
 // regions must carry that exception out of the region.
 inline std::array<double, 3>
@@ -279,7 +280,7 @@ refineEuclidean(double lx, double ly, double lz, double xy, double xz, double yz
     const double zero[3] = {0.0, 0.0, 0.0};
     double ed[3] = {0.0, 0.0, 0.0};
     if (mi_displacement_euclidean(&cache.cell, zero, raw.data(), ed) == 0) {
-      return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, {ed[0], ed[1], ed[2]});
+      return mic::euclideanFromImage(lx, ly, lz, xy, xz, yz, raw, {ed[0], ed[1], ed[2]});
     }
   }
 #endif
@@ -360,7 +361,7 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
                                      f.xyz[ii + 1] - f.xyz[jj + 1],
                                      f.xyz[ii + 2] - f.xyz[jj + 2]};
   const auto refined =
-      mic::euclideanIfShorter(f.box.lx, f.box.ly, f.box.lz, f.box.xy, f.box.xz,
+      mic::euclideanFromImage(f.box.lx, f.box.ly, f.box.lz, f.box.xy, f.box.xz,
                               f.box.yz, raw, {dr[0], dr[1], dr[2]});
   return refined[0] * refined[0] + refined[1] * refined[1] +
          refined[2] * refined[2];
@@ -376,8 +377,9 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
 // with fewer than six values does not read tilt slots. Inside the Smith
 // ball the fractional wrap is the minimum image. Outside it, the linked
 // minimage result (when available, across scalar, batch, cached-frame, and
-// rdf2d paths) and the fractional wrap are both refined by
-// mic::euclideanIfShorter. It reduces the cell with Lagrange and Selling,
+// rdf2d paths), re-evaluated on the lattice by mic::euclideanFromImage, and
+// the fractional wrap are both refined by mic::euclideanIfShorter. It
+// reduces the cell with Lagrange and Selling,
 // re-evaluates the reduced vectors from their integer coordinates with an
 // error-free dot product, and descends from the fractional wrap when probes
 // along the cell edges and corners settle within the wrap step cap, or from
@@ -422,7 +424,7 @@ inline std::array<double, 3> triclinicMinImage(
     double ed[3] = {0.0, 0.0, 0.0};
     const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
     if (euclideanDelta(yCloud, xi, yi, zi, xj, yj, zj, ed)) {
-      return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw,
+      return mic::euclideanFromImage(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw,
                                      {ed[0], ed[1], ed[2]});
     }
     return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
@@ -509,7 +511,7 @@ periodicDistSq(const FracBox &b,
     const std::array<double, 3> raw = {atom.x - pj.x, atom.y - pj.y,
                                        atom.z - pj.z};
     if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z, ed)) {
-      const auto euc = mic::euclideanIfShorter(
+      const auto euc = mic::euclideanFromImage(
           b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, {ed[0], ed[1], ed[2]});
       return euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
     }
@@ -639,7 +641,7 @@ inline std::array<double, 3> relDistFromPoint(
     double ed[3] = {0.0, 0.0, 0.0};
     const std::array<double, 3> raw = {atom.x - xj, atom.y - yj, atom.z - zj};
     if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, xj, yj, zj, ed)) {
-      return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw,
+      return mic::euclideanFromImage(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw,
                                      {ed[0], ed[1], ed[2]});
     }
     return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
