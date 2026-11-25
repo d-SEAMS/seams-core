@@ -15,7 +15,7 @@ These pages are for understanding. They are not recipes.
 | [[file:ovito-findrings.org][Primitive rings and OVITO FindRings]] | K2,3 has three primitive 4-rings; FindRings reports two |
 | [[file:linkcell-scaling.org][Linkcell strong scaling]] | The rank bisection, its halo, and the column split inside one process |
 | [[file:rings-one-thread.org][Rings on one thread]] | ~ringNetwork~ against OVITO FindRings |
-| [[file:smooth-cvs.org][Smooth collective variables]] | Differentiable ring, cage and cluster counts for biased sampling |
+| [[file:smooth-cvs.org][Smooth collective variables]] | Soft ring, cage and cluster variables with gradients for biased sampling |
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
 | [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
 | [[file:trace-assembly.org][TRACE and signature cages]] | Hydrogen-bond cages and \(V-E+F=2\) |

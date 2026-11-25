@@ -479,6 +479,82 @@ TEST_CASE("translation through the boundary leaves values and gradients alone",
   }
 }
 
+TEST_CASE("the gyration volume has a kink where the cluster becomes flat", "[smooth_cv]") {
+  // A planar hexagon has det G = 0, so V = 0 with a zero gradient. Lifting
+  // one atom by h leaves the in-plane block of G alone and makes det G
+  // proportional to h^2, so V = c |h|, with slopes of opposite sign on the
+  // two sides of the plane.
+  const double pi = std::acos(-1.0);
+  Frame hex;
+  hex.n = 6;
+  for (int k = 0; k < 6; ++k) {
+    const double t = k * pi / 3.0;
+    hex.xyz.insert(hex.xyz.end(),
+                   {10.0 + 2.75 * std::cos(t), 10.0 + 2.75 * std::sin(t), 10.0});
+  }
+  hex.box9[3] = hex.box9[4] = hex.box9[5] = 20.0;
+  Api api(hex, kR0, kD0, kN, kM, kOn, kMax, 6);
+  api.rebuild(0.3);
+  std::vector<double> grad;
+  REQUIRE(api.value(SEAMS_CV_GYRATION_VOLUME, -1, &grad) == 0.0);
+  REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return g == 0.0; }));
+  REQUIRE(api.value(SEAMS_CV_GYRATION_RG2, -1) > 0.0);
+  double slope = 0.0;
+  for (const double h : {1e-2, 1e-3, -1e-3, -1e-2}) {
+    std::vector<double> xyz = hex.xyz;
+    xyz[2] += h;
+    api.place(xyz);
+    const double v = api.value(SEAMS_CV_GYRATION_VOLUME, -1, &grad);
+    if (slope == 0.0) {
+      slope = v / std::abs(h);
+    }
+    INFO("h = " << h << ", V = " << v << ", dV/dz0 = " << grad[2]);
+    REQUIRE(slope > 1.0);
+    REQUIRE(std::abs(v / std::abs(h) - slope) < 1e-9 * slope);
+    REQUIRE(std::abs(grad[2] - std::copysign(slope, h)) < 1e-6 * slope);
+  }
+}
+
+TEST_CASE("ring-weighted gyration drops to 0 when the last ring breaks", "[smooth_cv]") {
+  // The ring-weighted values are ratios over the total participation W, so
+  // an equilateral triangle keeps Rg^2 = side^2 / 3 while W fades and has
+  // Rg^2 = 0 once its bonds pass d_max. With r0 = 1 A the ring weight at a
+  // side of 3.49 A is still about 1e-13. Unit weights stay continuous.
+  const double pi = std::acos(-1.0);
+  auto triangle = [pi](double side) {
+    std::vector<double> xyz;
+    const double radius = side / std::sqrt(3.0);
+    for (int k = 0; k < 3; ++k) {
+      const double t = 2.0 * k * pi / 3.0;
+      xyz.insert(xyz.end(), {10.0 + radius * std::cos(t), 10.0 + radius * std::sin(t), 10.0});
+    }
+    return xyz;
+  };
+  Frame f;
+  f.n = 3;
+  f.xyz = triangle(3.4);
+  f.box9[3] = f.box9[4] = f.box9[5] = 20.0;
+  Api api(f, 1.0, kD0, kN, kM, kOn, kMax, 3);
+  api.rebuild(0.3);
+  for (const double side : {3.4, 3.49, 3.51}) {
+    api.place(triangle(side));
+    std::vector<double> grad;
+    const double ring = api.value(SEAMS_CV_RING_COUNT, 3);
+    const double rg2 = api.value(SEAMS_CV_GYRATION_RG2, 3, &grad);
+    const double plain = api.value(SEAMS_CV_GYRATION_RG2, -1);
+    INFO("side " << side << ": ring weight " << ring << ", ring Rg2 " << rg2);
+    REQUIRE(std::abs(plain - side * side / 3.0) < 1e-12);
+    if (side < kMax) {
+      REQUIRE(ring > 0.0);
+      REQUIRE(std::abs(rg2 - side * side / 3.0) < 1e-9);
+    } else {
+      REQUIRE(ring == 0.0);
+      REQUIRE(rg2 == 0.0);
+      REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return g == 0.0; }));
+    }
+  }
+}
+
 TEST_CASE("triclinic gyration places an unbonded part by its Euclidean minimum image",
           "[smooth_cv][triclinic]") {
   // The pair of the triclinic BOP test is 3.330796 A apart through its

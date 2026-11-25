@@ -42,13 +42,16 @@
  *  weights. With weights 0 and 1 the rings of weight one are exactly the
  *  shortest-path rings of primitive::ringNetwork.
  *
- *  Every quantity is a fixed polynomial in the pair weights of the complete
- *  graph. A pair outside the neighbour list has weight zero, and a term that
- *  contains a zero bond weight, or a factor (1 - 0), contributes what it
- *  would contribute if the pair were listed. The value therefore does not
- *  depend on which pairs beyond d_max the list holds, and it is as smooth
- *  as s(r) at every geometry, including where a bond crosses the list
- *  cutoff or a ring changes primitivity.
+ *  Every ring weight, ring participation and hexagon-pair term is a fixed
+ *  polynomial in the pair weights of the complete graph. A pair outside the
+ *  neighbour list has weight zero, and a term that contains a zero bond
+ *  weight, or a factor (1 - 0), contributes what it would contribute if the
+ *  pair were listed. Those values therefore do not depend on which pairs
+ *  beyond d_max the list holds, and they are as smooth as s(r) at every
+ *  geometry, including where a bond crosses the list cutoff or a ring
+ *  changes primitivity. The gyration values also depend on the unwrapped
+ *  positions: they are as smooth only for a compact selection of positive
+ *  total weight, and the volume is not differentiable where det G = 0.
  */
 namespace smooth {
 
@@ -156,7 +159,9 @@ std::vector<double> ringParticipation(const Topology &topo, const std::vector<do
 void ringParticipationAdjoint(const Topology &topo, const std::vector<double> &w, int size,
                               const std::vector<double> &pbar, std::vector<double> &wbar);
 
-/** @brief The collective variables of one frame, with their gradients. */
+/** @brief The collective variables of one frame, with their gradients.
+ *  @details The first three are as smooth as the switch; see the namespace
+ *  notes for the gyration kinds. A state is as smooth as its clauses. */
 enum class Kind {
   RingCount = 0,
   RingAtoms = 1,
@@ -168,9 +173,11 @@ enum class Kind {
 
 /** @brief Switch, candidate topology, rebuild reference and state clauses.
  *  @details rebuild() lists the selected atoms within dMax + skin with
- *  linkcell and fixes the candidate topology. value() is exact while no
- *  selected atom has moved more than skin / 2 from its position at the
- *  rebuild and the cell is unchanged; stale() reports when that fails.
+ *  linkcell and fixes the candidate topology. value() equals the value
+ *  after a fresh rebuild (for the gyration kinds, of a compact selection)
+ *  while no selected atom has moved more than skin / 2 from its position
+ *  at the rebuild and the cell is unchanged; stale() reports when that
+ *  fails.
  */
 class Workspace {
 public:
