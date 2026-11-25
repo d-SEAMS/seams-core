@@ -16,9 +16,6 @@
 #include <trajectory.hpp>
 
 #include <generic.hpp>
-#ifdef SEAMS_HAS_MINIMAGE
-#include <minimage.h>
-#endif
 
 #include <algorithm>
 #include <cmath>
@@ -276,23 +273,8 @@ std::array<double, 3> BoxCell::micDelta(double dx, double dy,
   if (std::sqrt(rx * rx + ry * ry + rz * rz) + 1e-12 < halfMin) {
     return {rx, ry, rz};
   }
-#ifdef SEAMS_HAS_MINIMAGE
-  // minimage takes LAMMPS dump bounds, which widen lx and ly by the tilts.
-  const double xlo = std::min({0.0, xy, xz, xy + xz});
-  const double xhi = std::max({0.0, xy, xz, xy + xz});
-  const double ylo = std::min(0.0, yz);
-  const double yhi = std::max(0.0, yz);
-  mi_cell cell;
-  if (mi_cell_from_lammps_bounds(lx + xhi - xlo, ly + yhi - ylo, lz, xy, xz,
-                                 yz, ox + xlo, oy + ylo, oz, &cell) == 0) {
-    const double zero[3] = {0.0, 0.0, 0.0};
-    const double target[3] = {dx, dy, dz};
-    double dr[3] = {0.0, 0.0, 0.0};
-    if (mi_displacement_euclidean(&cell, zero, target, dr) == 0) {
-      return {dr[0], dr[1], dr[2]};
-    }
-  }
-#endif
+  // Not minimage's Euclidean image: minimage 0.1.4 returns images off the
+  // lattice on needle cells, and checking one costs this search.
   return micDeltaSearch(dx, dy, dz);
 }
 

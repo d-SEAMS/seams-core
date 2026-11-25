@@ -97,9 +97,9 @@ struct BoxCell {
    * @brief Euclidean minimum-image Cartesian displacement for raw delta
    * (dx, dy, dz).
    *
-   * Uses minimage's reduced-basis search when built with it, otherwise
-   * micDeltaSearch. Independent rounding of fractional coordinates is not
-   * the minimum image on a tilted cell.
+   * The fractional image inside the Smith ball, otherwise micDeltaSearch.
+   * Independent rounding of fractional coordinates is not the minimum image
+   * on a tilted cell.
    */
   [[nodiscard]] std::array<double, 3> micDelta(double dx, double dy,
                                                double dz) const noexcept;

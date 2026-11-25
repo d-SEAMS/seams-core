@@ -1,0 +1,1 @@
+With minimage linked, trajectory unwrapping, molecule centres, water orientation and dipole vectors, and `seams_msd_push` take a displacement past the Smith ball from the library's bounded lattice search, as in the build without minimage, instead of minimage's Euclidean image, which minimage 0.1.4 returns off the lattice on needle cells.
