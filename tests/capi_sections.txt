@@ -130,6 +130,15 @@
 ### seams_reorient_curve
 ### seams_reorient_fit
 ### seams_reorient_destroy
+### seams_switch_rational
+### seams_cv_create
+### seams_cv_rebuild
+### seams_cv_topology
+### seams_cv_needs_rebuild
+### seams_cv_value
+### seams_cv_state_clause
+### seams_cv_states
+### seams_cv_destroy
 ## Symbol reference
 ### SEAMS_ABI
 ### SEAMS_BUILDING
@@ -139,6 +148,12 @@
 ### SEAMS_CAGE_WATER
 ### SEAMS_CHILL_OVITO
 ### SEAMS_CHILL_PUBLISHED
+### SEAMS_CV_GYRATION_RG2
+### SEAMS_CV_GYRATION_VOLUME
+### SEAMS_CV_HEX_BASAL_PAIRS
+### SEAMS_CV_RING_ATOMS
+### SEAMS_CV_RING_COUNT
+### SEAMS_CV_STATE
 ### SEAMS_DEPRECATED
 ### SEAMS_ERR_ARG
 ### SEAMS_ERR_BOX
@@ -215,6 +230,16 @@
 ### seams_chill_rule
 ### seams_contact_pairs
 ### seams_coordination
+### seams_cv
+### seams_cv_create
+### seams_cv_destroy
+### seams_cv_kind
+### seams_cv_needs_rebuild
+### seams_cv_rebuild
+### seams_cv_state_clause
+### seams_cv_states
+### seams_cv_topology
+### seams_cv_value
 ### seams_density_axis
 ### seams_density_fractional
 ### seams_directed_hbond
@@ -306,6 +331,7 @@
 ### seams_status
 ### seams_status_string
 ### seams_steinhardt
+### seams_switch_rational
 ### seams_system
 ### seams_system_box
 ### seams_system_count

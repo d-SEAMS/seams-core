@@ -4,7 +4,7 @@ Atoms in
 
 Read a frame into an opaque handle.
 
-The stable C interface provides 120 exported functions through ``include/seams.h``.
+The stable C interface provides 129 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_atoms.c
    :language: c

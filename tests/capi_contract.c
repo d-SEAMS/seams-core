@@ -1949,6 +1949,157 @@ static void pore_contract(void) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Smooth collective variables                                         */
+
+static void cv_contract(void) {
+  const char *fn = "seams_switch_rational";
+  double s = 0.0;
+  double ds = 0.0;
+  expect(seams_switch_rational(2.8, 0.3, 2.6, 6, 12, 3.0, 3.5, NULL, &ds), SEAMS_ERR_NULL, fn,
+         "null s");
+  expect(seams_switch_rational(NAN, 0.3, 2.6, 6, 12, 3.0, 3.5, &s, &ds), SEAMS_ERR_RANGE, fn,
+         "nan r");
+  expect(seams_switch_rational(2.8, -0.3, 2.6, 6, 12, 3.0, 3.5, &s, &ds), SEAMS_ERR_RANGE, fn,
+         "negative r0");
+  expect(seams_switch_rational(2.8, 0.3, 2.6, 6, 4, 3.0, 3.5, &s, &ds), SEAMS_ERR_RANGE, fn,
+         "m below n");
+  expect(seams_switch_rational(2.8, 0.3, 2.6, 6, 12, 3.5, 3.5, &s, &ds), SEAMS_ERR_RANGE, fn,
+         "empty taper");
+  expect(seams_switch_rational(2.8, 0.3, 2.6, 6, 12, 3.0, INFINITY, &s, &ds), SEAMS_ERR_RANGE,
+         fn, "infinite d_max");
+  expect(seams_switch_rational(2.8, 0.3, 2.6, 6, 12, 3.0, 3.5, &s, NULL), SEAMS_OK, fn,
+         "null dsdr");
+  truth(s > 0.0 && s < 1.0, fn, "s between zero and one");
+
+  fn = "seams_cv_create";
+  seams_cv *cv = NULL;
+  expect(seams_cv_create(0.3, 2.6, 6, 12, 3.0, 3.2, 6, NULL), SEAMS_ERR_NULL, fn, "null out");
+  expect(seams_cv_create(0.3, 2.6, 6, 12, 3.0, 3.2, 2, &cv), SEAMS_ERR_RANGE, fn,
+         "max_ring 2");
+  expect(seams_cv_create(0.3, 2.6, 6, 12, 3.0, 3.2, 11, &cv), SEAMS_ERR_RANGE, fn,
+         "max_ring 11");
+  expect(seams_cv_create(0.3, 3.1, 6, 12, 3.0, 3.2, 6, &cv), SEAMS_ERR_RANGE, fn,
+         "d0 above d_on");
+  truth(cv == NULL, fn, "out cleared on failure");
+  expect(seams_cv_create(0.3, 2.8, 6, 0, 3.0, 3.2, 6, &cv), SEAMS_OK, fn, "valid");
+
+  fn = "seams_cv_topology";
+  size_t ne = 0;
+  size_t nr = 0;
+  size_t np = 0;
+  expect(seams_cv_topology(NULL, &ne, &nr, &np), SEAMS_ERR_NULL, fn, "null cv");
+  expect(seams_cv_topology(cv, NULL, NULL, NULL), SEAMS_ERR_NULL, fn, "every output null");
+  expect(seams_cv_topology(cv, &ne, &nr, &np), SEAMS_ERR_STATE, fn, "before rebuild");
+
+  fn = "seams_cv_value";
+  double v = 0.0;
+  double grad[3 * N_MAX];
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_RING_COUNT, 6, &v, NULL, 0), SEAMS_ERR_STATE, fn,
+         "before rebuild");
+
+  fn = "seams_cv_needs_rebuild";
+  int stale = -1;
+  expect(seams_cv_needs_rebuild(NULL, g_good, &stale), SEAMS_ERR_NULL, fn, "null cv");
+  expect(seams_cv_needs_rebuild(cv, g_good, NULL), SEAMS_ERR_NULL, fn, "null stale");
+  expect(seams_cv_needs_rebuild(cv, g_empty, &stale), SEAMS_ERR_STATE, fn, "no frame");
+  expect(seams_cv_needs_rebuild(cv, g_good, &stale), SEAMS_OK, fn, "before rebuild");
+  truth(stale == 1, fn, "stale before rebuild");
+
+  fn = "seams_cv_rebuild";
+  const int dup[3] = {0, 1, 0};
+  const int out_of_frame[2] = {0, N_MAX + 1};
+  expect(seams_cv_rebuild(NULL, g_good, 0, NULL, 0, 0.3), SEAMS_ERR_NULL, fn, "null cv");
+  expect(seams_cv_rebuild(cv, NULL, 0, NULL, 0, 0.3), SEAMS_ERR_NULL, fn, "null system");
+  expect(seams_cv_rebuild(cv, g_empty, 0, NULL, 0, 0.3), SEAMS_ERR_STATE, fn, "no frame");
+  expect(seams_cv_rebuild(cv, g_good, 0, NULL, 0, -0.1), SEAMS_ERR_RANGE, fn, "negative skin");
+  expect(seams_cv_rebuild(cv, g_good, 0, NULL, 0, NAN), SEAMS_ERR_RANGE, fn, "nan skin");
+  expect(seams_cv_rebuild(cv, g_good, 0, NULL, 0, 4.0), SEAMS_ERR_BOX, fn,
+         "list wider than half the cell");
+  expect(seams_cv_rebuild(cv, g_good, 0, dup, 3, 0.3), SEAMS_ERR_ARG, fn, "repeated atom");
+  expect(seams_cv_rebuild(cv, g_good, 0, out_of_frame, 2, 0.3), SEAMS_ERR_RANGE, fn,
+         "atom outside the frame");
+  expect(seams_cv_rebuild(cv, g_good, 0, NULL, 0, 0.3), SEAMS_OK, fn, "valid");
+
+  fn = "seams_cv_topology";
+  expect(seams_cv_topology(cv, &ne, &nr, NULL), SEAMS_OK, fn, "valid");
+  truth(ne == 2 * (size_t)g_n && nr == 2 * (size_t)g_n, fn,
+        "ice Ic has two bonds and two six-rings per molecule");
+
+  fn = "seams_cv_needs_rebuild";
+  expect(seams_cv_needs_rebuild(cv, g_good, &stale), SEAMS_OK, fn, "after rebuild");
+  truth(stale == 0, fn, "fresh after rebuild");
+
+  fn = "seams_cv_value";
+  const size_t dim = 3 * (size_t)g_n;
+  expect(seams_cv_value(NULL, g_good, SEAMS_CV_RING_COUNT, 6, &v, NULL, 0), SEAMS_ERR_NULL, fn,
+         "null cv");
+  expect(seams_cv_value(cv, NULL, SEAMS_CV_RING_COUNT, 6, &v, NULL, 0), SEAMS_ERR_NULL, fn,
+         "null system");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_RING_COUNT, 6, NULL, NULL, 0), SEAMS_ERR_NULL, fn,
+         "null value");
+  expect(seams_cv_value(cv, g_empty, SEAMS_CV_RING_COUNT, 6, &v, NULL, 0), SEAMS_ERR_STATE, fn,
+         "no frame");
+  expect(seams_cv_value(cv, g_good, 6, 0, &v, NULL, 0), SEAMS_ERR_RANGE, fn, "unknown kind");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_RING_COUNT, 7, &v, NULL, 0), SEAMS_ERR_RANGE, fn,
+         "ring size above max_ring");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_HEX_BASAL_PAIRS, 6, &v, NULL, 0), SEAMS_ERR_RANGE,
+         fn, "hexagon pairs with arg 6");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_GYRATION_RG2, -2, &v, NULL, 0), SEAMS_ERR_RANGE,
+         fn, "gyration weight -2");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_STATE, 0, &v, NULL, 0), SEAMS_ERR_RANGE, fn,
+         "no state yet");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_RING_COUNT, 6, &v, grad, dim - 1),
+         SEAMS_ERR_RANGE, fn, "short gradient");
+  expect(seams_cv_value(cv, g_good, SEAMS_CV_RING_COUNT, 6, &v, grad, dim), SEAMS_OK, fn,
+         "valid");
+  /* Ideal ice Ic bonds sit at 2.75 A, below d0, so every weight is one. */
+  truth(v == 2.0 * g_n, fn, "every ice Ic six-ring has weight one");
+
+  fn = "seams_cv_state_clause";
+  expect(seams_cv_state_clause(NULL, 0, SEAMS_CV_RING_COUNT, 6, 1.0, 1.0, 1), SEAMS_ERR_NULL,
+         fn, "null cv");
+  expect(seams_cv_state_clause(cv, 1, SEAMS_CV_RING_COUNT, 6, 1.0, 1.0, 1), SEAMS_ERR_RANGE,
+         fn, "skips a state");
+  expect(seams_cv_state_clause(cv, 0, 9, 0, 1.0, 1.0, 1), SEAMS_ERR_RANGE, fn, "unknown kind");
+  expect(seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 1.0, 0.0, 1), SEAMS_ERR_RANGE,
+         fn, "zero width");
+  expect(seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, NAN, 1.0, 1), SEAMS_ERR_RANGE,
+         fn, "nan threshold");
+  expect(seams_cv_state_clause(cv, 0, SEAMS_CV_STATE, 0, 0.0, 0.0, 1), SEAMS_ERR_RANGE, fn,
+         "state refers to itself");
+  expect(seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 2.0 * g_n, 1.0, 1), SEAMS_OK,
+         fn, "first state");
+  expect(seams_cv_state_clause(cv, 1, SEAMS_CV_STATE, 0, 0.0, 0.0, 0), SEAMS_OK, fn,
+         "complement");
+
+  fn = "seams_cv_states";
+  double chi[2] = {0.0, 0.0};
+  size_t nstates = 0;
+  expect(seams_cv_states(NULL, g_good, chi, 2, &nstates, NULL, 0), SEAMS_ERR_NULL, fn,
+         "null cv");
+  expect(seams_cv_states(cv, g_good, chi, 2, NULL, NULL, 0), SEAMS_ERR_NULL, fn,
+         "null n_states");
+  expect(seams_cv_states(cv, g_good, NULL, 0, &nstates, NULL, 0), SEAMS_OK, fn, "count query");
+  truth(nstates == 2, fn, "two states");
+  expect(seams_cv_states(cv, g_empty, chi, 2, &nstates, NULL, 0), SEAMS_ERR_STATE, fn,
+         "no frame");
+  expect(seams_cv_states(cv, g_good, chi, 1, &nstates, NULL, 0), SEAMS_ERR_RANGE, fn,
+         "short chi");
+  expect(seams_cv_states(cv, g_good, chi, 2, &nstates, grad, dim), SEAMS_ERR_RANGE, fn,
+         "short gradient");
+  expect(seams_cv_states(cv, g_good, chi, 2, &nstates, NULL, 0), SEAMS_OK, fn, "valid");
+  truth(fabs(chi[0] - 0.5) < 1e-12 && fabs(chi[0] + chi[1] - 1.0) < 1e-12, fn,
+        "logistic at its threshold and its complement");
+
+  fn = "seams_cv_destroy";
+  seams_cv_destroy(NULL);
+  cover(fn);
+  seams_cv_destroy(cv);
+  seams_cv_destroy(cv);
+  truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
+}
+
+/* ------------------------------------------------------------------ */
 
 static int coverage(const char *list) {
   FILE *in = fopen(list, "r");
@@ -2003,6 +2154,7 @@ int main(int argc, char **argv) {
   fingerprint_contract();
   trajectory_contract();
   pore_contract();
+  cv_contract();
   seams_system_destroy(g_good);
   seams_system_destroy(g_empty);
   seams_system_destroy(g_nan);
