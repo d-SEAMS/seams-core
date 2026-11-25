@@ -24,9 +24,11 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <random>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -333,6 +335,116 @@ TEST_CASE("the switch slope at d0 is the right derivative", "[smooth_cv]") {
       REQUIRE(std::abs((up - s) / kStep - right) < 2e-4);
     }
   }
+}
+
+TEST_CASE("large switch exponents stay finite past x = 1", "[smooth_cv]") {
+  // x^(m-1) overflows for these exponents. With m = 2n, R = 1 / (1 + x^n),
+  // within a relative 1e-300 of y^n for y = 1 / x, and ds/dr is
+  // -n R / (r - d0) T + R T'.
+  double s = 0.0;
+  double ds = 0.0;
+  const double r = kD0 + 2.0 * kR0;
+  REQUIRE(seams_switch_rational(r, kR0, kD0, 1000, 0, kOn, kMax, &s, &ds) == SEAMS_OK);
+  const double y = kR0 / (r - kD0);
+  const double u = (r - kOn) / (kMax - kOn);
+  const double taper = 1.0 - u * u * u * (10.0 - 15.0 * u + 6.0 * u * u);
+  const double dTaper = -30.0 * u * u * (1.0 - u) * (1.0 - u) / (kMax - kOn);
+  const double rational = std::pow(y, 1000);
+  INFO("s = " << s << ", ds/dr = " << ds);
+  REQUIRE(rational > 1e-305);
+  REQUIRE(std::abs(s - rational * taper) < 1e-10 * rational * taper);
+  const double slope = -1000.0 * rational / (r - kD0) * taper + rational * dTaper;
+  REQUIRE(std::abs(ds - slope) < 1e-10 * std::abs(slope));
+  double up = 0.0;
+  double down = 0.0;
+  REQUIRE(seams_switch_rational(r + kStep, kR0, kD0, 1000, 0, kOn, kMax, &up, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(seams_switch_rational(r - kStep, kR0, kD0, 1000, 0, kOn, kMax, &down, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(std::abs((up - down) / (2.0 * kStep) - ds) < 1e-4 * std::abs(ds));
+  // x = 40 with n = 200: R is about 1e-320, below the normal doubles.
+  REQUIRE(seams_switch_rational(3.0, 0.01, kD0, 200, 400, kOn, kMax, &s, &ds) == SEAMS_OK);
+  REQUIRE(std::isfinite(s));
+  REQUIRE(std::isfinite(ds));
+  REQUIRE(s >= 0.0);
+  REQUIRE(s < 1e-300);
+}
+
+TEST_CASE("every finite switch argument gives a finite result or SEAMS_ERR_RANGE",
+          "[smooth_cv]") {
+  constexpr double kTiny = 1e-310;
+  constexpr int kIntMax = std::numeric_limits<int>::max();
+  double s = -1.0;
+  double ds = -1.0;
+  // A slope of order 1 / r0 or 1 / (d_max - d_on) beyond the largest double
+  // is an error and leaves both outputs alone; s alone is still available.
+  REQUIRE(seams_switch_rational(0.5 * kTiny, kTiny, 0.0, kN, kM, kOn, kMax, &s, &ds) ==
+          SEAMS_ERR_RANGE);
+  REQUIRE(s == -1.0);
+  REQUIRE(ds == -1.0);
+  REQUIRE(seams_switch_rational(0.5 * kTiny, kTiny, 0.0, kN, kM, kOn, kMax, &s, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(s > 0.9);
+  REQUIRE(s <= 1.0);
+  s = -1.0;
+  REQUIRE(seams_switch_rational(0.5 * kTiny, kR0, 0.0, kN, kM, 0.0, kTiny, &s, &ds) ==
+          SEAMS_ERR_RANGE);
+  REQUIRE(s == -1.0);
+  REQUIRE(seams_switch_rational(0.5 * kTiny, kR0, 0.0, kN, kM, 0.0, kTiny, &s, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(std::isfinite(s));
+  // m = 0 doubles n, which must fit in an int.
+  REQUIRE(seams_switch_rational(1.0, kR0, kD0, kIntMax, 0, kOn, kMax, &s, nullptr) ==
+          SEAMS_ERR_RANGE);
+  REQUIRE(seams_switch_rational(1.0, kR0, kD0, kIntMax / 2 + 1, 0, kOn, kMax, &s, nullptr) ==
+          SEAMS_ERR_RANGE);
+  REQUIRE(seams_switch_rational(1.0, kR0, kD0, kIntMax / 2, 0, kOn, kMax, &s, nullptr) ==
+          SEAMS_OK);
+  REQUIRE(s == 1.0);
+
+  const double huge = std::numeric_limits<double>::max();
+  const std::array<std::pair<int, int>, 6> exponents{
+      {{1, 0}, {2, 0}, {6, 12}, {50, 0}, {1000, 0}, {999, 1000}}};
+  std::size_t checked = 0;
+  std::size_t refused = 0;
+  for (const double r0 : {kTiny, 1e-200, 1e-6, kR0, 1e6, 1e300, huge}) {
+    for (const double d0 : {0.0, kD0}) {
+      const std::array<std::array<double, 2>, 3> tapers{
+          {{d0, d0 + 1e-12}, {kOn, kMax}, {1e300, huge}}};
+      for (const auto &[n, m] : exponents) {
+        for (const auto &[on, max] : tapers) {
+          for (const double r : {0.0, d0, d0 + r0, d0 + 0.5 * r0, 0.5 * (on + max), 2.99, 3.2,
+                                 std::nextafter(max, 0.0), 1e299, 1e301}) {
+            if (!std::isfinite(r)) {
+              continue;
+            }
+            s = -1.0;
+            ds = -1.0;
+            const seams_status status = seams_switch_rational(r, r0, d0, n, m, on, max, &s, &ds);
+            INFO("r = " << r << ", r0 = " << r0 << ", d0 = " << d0 << ", n = " << n
+                        << ", m = " << m << ", d_on = " << on << ", d_max = " << max);
+            REQUIRE((status == SEAMS_OK || status == SEAMS_ERR_RANGE));
+            if (status == SEAMS_OK) {
+              REQUIRE(std::isfinite(s));
+              REQUIRE(std::isfinite(ds));
+            } else {
+              REQUIRE(s == -1.0);
+              REQUIRE(ds == -1.0);
+              ++refused;
+            }
+            REQUIRE(seams_switch_rational(r, r0, d0, n, m, on, max, &s, nullptr) == SEAMS_OK);
+            REQUIRE(std::isfinite(s));
+            REQUIRE(s >= 0.0);
+            REQUIRE(s <= 1.0 + 1e-15);
+            ++checked;
+          }
+        }
+      }
+    }
+  }
+  INFO(checked << " arguments, " << refused << " slopes out of range");
+  REQUIRE(checked > 2000);
+  REQUIRE(refused > 0);
 }
 
 TEST_CASE("weights of one reproduce the primitive rings and the HC basal test",
@@ -899,4 +1011,50 @@ TEST_CASE("the list goes stale after half the skin and selections are honoured",
   REQUIRE(seams_cv_rebuild(api.cv, api.sys, 0, outside.data(), outside.size(), 0.4) ==
           SEAMS_ERR_RANGE);
   REQUIRE(seams_cv_rebuild(api.cv, api.sys, 0, nullptr, 0, 5.0) == SEAMS_ERR_BOX);
+}
+
+TEST_CASE("collective variables are finite or SEAMS_ERR_RANGE for every finite switch",
+          "[smooth_cv]") {
+  Frame square;
+  square.n = 4;
+  square.xyz = {5.0, 5.0, 5.0, 7.0, 5.0, 5.0, 7.0, 7.0, 5.0, 5.0, 7.0, 5.0};
+  square.box9[3] = square.box9[4] = square.box9[5] = 20.0;
+  {
+    // Sides of 2 A at x = 200 with n = 200: R = 200^-200 underflows to 0,
+    // and x^399 overflows. The square is present with weight 0.
+    Api api(square, 0.002, 1.6, 200, 0, 3.0, 3.5, 4);
+    api.rebuild(0.1);
+    std::vector<double> grad;
+    REQUIRE(api.value(SEAMS_CV_RING_COUNT, 4, &grad) == 0.0);
+    REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return std::isfinite(g); }));
+    REQUIRE(api.value(SEAMS_CV_GYRATION_RG2, 4, &grad) == 0.0);
+  }
+  // Sides of exactly d0 = 2 A with n = 1 and r0 = 1e-310 A: the slope there
+  // is -1 / r0, beyond the largest double, and the diagonals sit at
+  // x = 2.8e309. The square has weight one; its gradient is out of range.
+  Api api(square, 1e-310, 2.0, 1, 0, 2.5, 3.0, 4);
+  api.rebuild(0.1);
+  std::size_t edges = 0;
+  REQUIRE(seams_cv_topology(api.cv, &edges, nullptr, nullptr) == SEAMS_OK);
+  REQUIRE(edges == 6);
+  double v = -1.0;
+  REQUIRE(seams_cv_value(api.cv, api.sys, SEAMS_CV_RING_COUNT, 4, &v, nullptr, 0) == SEAMS_OK);
+  REQUIRE(std::abs(v - 1.0) < 1e-12);
+  v = -1.0;
+  std::vector<double> grad(12, -1.0);
+  REQUIRE(seams_cv_value(api.cv, api.sys, SEAMS_CV_RING_COUNT, 4, &v, grad.data(),
+                         grad.size()) == SEAMS_ERR_RANGE);
+  REQUIRE(v == -1.0);
+  REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return g == -1.0; }));
+  REQUIRE(seams_cv_state_clause(api.cv, 0, SEAMS_CV_RING_COUNT, 4, 0.5, 0.1, 1) == SEAMS_OK);
+  double chi = -1.0;
+  std::size_t count = 0;
+  REQUIRE(seams_cv_states(api.cv, api.sys, &chi, 1, &count, nullptr, 0) == SEAMS_OK);
+  REQUIRE(std::isfinite(chi));
+  REQUIRE(chi > 0.99);
+  chi = -1.0;
+  REQUIRE(seams_cv_states(api.cv, api.sys, &chi, 1, &count, grad.data(), grad.size()) ==
+          SEAMS_ERR_RANGE);
+  REQUIRE(chi == -1.0);
+  REQUIRE(std::all_of(grad.begin(), grad.end(), [](double g) { return g == -1.0; }));
 }

@@ -118,7 +118,7 @@ PLUMED RATIONAL switching function with a C2 taper to zero.
     Numerator exponent, at least one.
 
 ``m``
-    Denominator exponent, greater than n. Zero selects 2 \* n.
+    Denominator exponent, greater than n. Zero selects 2 \* n, which needs n <= INT_MAX / 2.
 
 ``d_on``
     Taper start, Angstrom, from d0 and below d_max.
@@ -134,7 +134,7 @@ PLUMED RATIONAL switching function with a C2 taper to zero.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
 
-For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double sw = 0, dsw = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw); @endcode
+For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between them. s and its first two derivatives vanish at d_max. On r >= 0, s is C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise. Above x = 1, s is evaluated in 1 / x, so for every finite argument s is finite, for any n and m. ds/dr can exceed double range when r0 or d_max - d_on is near the smallest doubles; when dsdr is not NULL that is ::SEAMS_ERR_RANGE, and neither output is written. @par Ownership The caller owns s and dsdr. The call keeps no state. @par Thread safety Safe from any thread. @par Example @code double sw = 0, dsw = 0; seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw); @endcode
 
 .. _capi-seams_cv_create:
 
@@ -158,7 +158,7 @@ Create a smooth collective-variable workspace.
     Switching numerator exponent.
 
 ``m``
-    Switching denominator exponent; zero selects 2 \* n.
+    Switching denominator exponent; zero selects 2 \* n, which needs n <= INT_MAX / 2.
 
 ``d_on``
     Taper start, Angstrom.
@@ -315,7 +315,7 @@ Value and gradient of one collective variable.
 
 Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv needs a rebuild for sys, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-::SEAMS_CV_RING_COUNT sums the ring weights of size arg. ::SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. ::SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. ::SEAMS_CV_GYRATION_RG2 and ::SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. ::SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read. @par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. The topology is not changed. @par Ownership The caller owns value and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); double n6 = 0; seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0); seams_cv_destroy(cv); @endcode
+::SEAMS_CV_RING_COUNT sums the ring weights of size arg. ::SEAMS_CV_RING_ATOMS sums 1 - prod (1 - w) over the rings of size arg through each selected atom. ::SEAMS_CV_HEX_BASAL_PAIRS sums w_a w_b B over vertex-disjoint hexagon pairs, B the soft form of the hexagonal-cage basal test of either ring against the other; arg is 0. These three are as smooth as the switch. ::SEAMS_CV_GYRATION_RG2 and ::SEAMS_CV_GYRATION_VOLUME use the gyration tensor G of the selected atoms, unwrapped along bonds, with weight 1 when arg is -1 and the ring participation of size arg otherwise; the volume is (4 pi / 3) 5^(3/2) sqrt(det G), the volume of the uniform ellipsoid with that tensor. A part of the selection that no bond reaches is placed by its minimum image from the first selected atom. Both are smooth while the selection is compact, its atoms all closer to each other than half the narrowest cell width in some periodic image, and its total weight is positive. With total weight 0 both values and gradients are 0, so with ring weights they jump to 0 as the last ring breaks. The volume is in general not differentiable where the cluster becomes flat, det G = 0; there it and its gradient are 0. ::SEAMS_CV_STATE returns state arg, as smooth as the variables its clauses read. A value or gradient entry outside double range, from switch parameters near the smallest doubles or coordinates near the largest, is ::SEAMS_ERR_RANGE, and neither value nor grad is written. @par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. The topology is not changed. @par Ownership The caller owns value and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); double n6 = 0; seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0); seams_cv_destroy(cv); @endcode
 
 .. _capi-seams_cv_state_clause:
 
@@ -387,7 +387,7 @@ Soft indicator of every state, with gradients on request.
 ``grad_len``
     Length of grad. Ignored when grad is NULL.
 
-Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv needs a rebuild for sys, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv needs a rebuild for sys, ::SEAMS_ERR_RANGE, also when a chi or a gradient entry is outside double range and neither chi nor grad is written, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
 @par Handle access Non-const because the evaluation keeps bond-weight scratch on cv. @par Ownership The caller owns chi, n_states and grad. @par Thread safety Exclusive use of cv. Read-only use of sys. @par Example @code seams_cv \*cv = NULL; seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv); seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1); seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1); seams_cv_state_clause(cv, 1, SEAMS_CV_STATE, 0, 0.0, 0.0, 0); double chi[2]; size_t n_states = 0; seams_cv_states(cv, sys, chi, 2, &n_states, NULL, 0); seams_cv_destroy(cv); @endcode
 

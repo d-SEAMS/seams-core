@@ -1427,11 +1427,16 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * them. s and its first two derivatives vanish at d_max. On r >= 0, s is
  * C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At
  * r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise.
+ * Above x = 1, s is evaluated in 1 / x, so for every finite argument s is
+ * finite, for any n and m. ds/dr can exceed double range when r0 or
+ * d_max - d_on is near the smallest doubles; when dsdr is not NULL that
+ * is ::SEAMS_ERR_RANGE, and neither output is written.
  * @param r Distance, Angstrom. Not negative.
  * @param r0 Positive length scale, Angstrom.
  * @param d0 Plateau radius, Angstrom, at least zero.
  * @param n Numerator exponent, at least one.
- * @param m Denominator exponent, greater than n. Zero selects 2 * n.
+ * @param m Denominator exponent, greater than n. Zero selects 2 * n, which
+ *        needs n <= INT_MAX / 2.
  * @param d_on Taper start, Angstrom, from d0 and below d_max.
  * @param d_max Radius where s reaches zero, Angstrom.
  * @param s Receives s(r).
@@ -1457,7 +1462,8 @@ SEAMS_API seams_status seams_switch_rational(double r, double r0, double d0, int
  * @param r0 Switching length scale, Angstrom. See seams_switch_rational().
  * @param d0 Switching plateau radius, Angstrom.
  * @param n Switching numerator exponent.
- * @param m Switching denominator exponent; zero selects 2 * n.
+ * @param m Switching denominator exponent; zero selects 2 * n, which needs
+ *        n <= INT_MAX / 2.
  * @param d_on Taper start, Angstrom.
  * @param d_max Radius where every bond weight reaches zero, Angstrom.
  * @param max_ring Largest candidate ring, from 3 through 10.
@@ -1607,6 +1613,9 @@ SEAMS_API seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges,
  * volume is in general not differentiable where the cluster becomes flat,
  * det G = 0; there it and its gradient are 0. ::SEAMS_CV_STATE returns
  * state arg, as smooth as the variables its clauses read.
+ * A value or gradient entry outside double range, from switch parameters
+ * near the smallest doubles or coordinates near the largest, is
+ * ::SEAMS_ERR_RANGE, and neither value nor grad is written.
  * @param cv Workspace handle after seams_cv_rebuild().
  * @param sys Frame with the atom count and cell of the rebuild.
  * @param kind A ::seams_cv_kind code.
@@ -1689,8 +1698,9 @@ SEAMS_API seams_status seams_cv_state_clause(seams_cv *cv, int state, int kind, 
  *        d chi / d x in 1/Angstrom, or NULL to skip it.
  * @param grad_len Length of grad. Ignored when grad is NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE when cv
- *         needs a rebuild for sys, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM,
- *         ::SEAMS_ERR_INTERNAL.
+ *         needs a rebuild for sys, ::SEAMS_ERR_RANGE, also when a chi or
+ *         a gradient entry is outside double range and neither chi nor
+ *         grad is written, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
  * @par Handle access
  * Non-const because the evaluation keeps bond-weight scratch on cv.
  * @par Ownership

@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -135,6 +136,15 @@ double logistic(double z) {
 
 bool sizeMatches(int ringSize, int size) { return size == 0 || ringSize == size; }
 
+// Must run before any output is written, so that an error leaves the
+// caller's buffers as they were.
+void requireFinite(double value, const std::vector<double> *grad) {
+  const auto finite = [](double x) { return std::isfinite(x); };
+  if (!finite(value) || (grad != nullptr && !std::all_of(grad->begin(), grad->end(), finite))) {
+    throw std::range_error("a value or gradient is outside double range");
+  }
+}
+
 } // namespace
 
 namespace smooth {
@@ -157,6 +167,9 @@ void RationalSwitch::validate() const {
 }
 
 RationalSwitch makeSwitch(double r0, double d0, int n, int m, double dOn, double dMax) {
+  if (m == 0 && n > std::numeric_limits<int>::max() / 2) {
+    throw std::invalid_argument("m = 0 selects 2n, which is out of range for this n");
+  }
   RationalSwitch sw;
   sw.r0 = r0;
   sw.d0 = d0;
@@ -173,38 +186,58 @@ double RationalSwitch::operator()(double r, double &dsdr) const {
   if (r >= dMax) {
     return 0.0;
   }
+  // Horner for 1 + y + ... + y^(k-1) and its derivative. Only 0 <= y <= 1
+  // is evaluated, where they are at most k and k^2.
+  auto geometric = [](double y, int k, double &deriv) {
+    double sum = 0.0;
+    deriv = 0.0;
+    for (int i = 0; i < k; ++i) {
+      deriv = deriv * y + sum;
+      sum = sum * y + 1.0;
+    }
+    return sum;
+  };
   double rational = 1.0;
   double dRational = 0.0;
-  if (r >= d0) {
-    const double x = (r - d0) / r0;
-    // Horner for 1 + x + ... + x^(k-1) and its derivative.
-    auto geometric = [x](int k, double &deriv) {
-      double sum = 0.0;
-      deriv = 0.0;
-      for (int i = 0; i < k; ++i) {
-        deriv = deriv * x + sum;
-        sum = sum * x + 1.0;
-      }
-      return sum;
-    };
+  const double dr = r - d0;
+  if (dr >= 0.0) {
     double dn = 0.0;
     double dm = 0.0;
-    const double sn = geometric(n, dn);
-    const double sm = geometric(m, dm);
-    rational = sn / sm;
-    dRational = (dn * sm - sn * dm) / (sm * sm) / r0;
+    if (dr <= r0) {
+      const double x = dr / r0;
+      const double sn = geometric(x, n, dn);
+      const double sm = geometric(x, m, dm);
+      rational = sn / sm;
+      dRational = (dn * sm - sn * dm) / (sm * sm) / r0;
+    } else {
+      // Past x = 1 a power of x overflows for large exponents, so use
+      // R = y^(m-n) G_n(y) / G_m(y) with y = 1 / x and G_k the geometric sum.
+      const double y = r0 / dr;
+      const double sn = geometric(y, n, dn);
+      const double sm = geometric(y, m, dm);
+      const double q = sn / sm;
+      const double dq = (dn * sm - sn * dm) / (sm * sm);
+      const double gap = static_cast<double>(m - n);
+      const double p = std::pow(y, gap);
+      rational = p * q;
+      dRational = -p * (gap * q + y * dq) / dr;
+    }
   }
-  double taper = 1.0;
-  double dTaper = 0.0;
-  if (r > dOn) {
-    const double width = dMax - dOn;
-    const double u = (r - dOn) / width;
-    const double u2 = u * u;
-    taper = 1.0 - u2 * u * (10.0 - 15.0 * u + 6.0 * u2);
-    const double v = 1.0 - u;
-    dTaper = -30.0 * u2 * v * v / width;
+  if (!(r > dOn)) {
+    dsdr = dRational;
+    return rational;
   }
-  dsdr = dRational * taper + rational * dTaper;
+  // T = 1 - u^3 (10 - 15u + 6u^2) = v^3 (1 + 3u + 6u^2) with v = 1 - u. Each
+  // form is evaluated on the half where it has no cancellation, so T stays
+  // in [0, 1] and is not rounded below zero next to dMax. The rational
+  // factor multiplies T' before the division by the width so that a zero
+  // factor stays zero.
+  const double width = dMax - dOn;
+  const double u = (r - dOn) / width;
+  const double v = (dMax - r) / width;
+  const double taper = u <= 0.5 ? 1.0 - u * u * u * (10.0 - 15.0 * u + 6.0 * u * u)
+                                : v * v * v * (1.0 + 3.0 * u + 6.0 * u * u);
+  dsdr = dRational * taper - rational * (30.0 * u * u * v * v) / width;
   return rational * taper;
 }
 
@@ -1038,14 +1071,16 @@ double Workspace::value(const Cloud &cloud, Kind kind, int arg, double *grad) {
     std::vector<double> chi;
     std::vector<std::vector<double>> grads;
     stateValues(cloud, chi, grad != nullptr ? &grads : nullptr);
+    const auto k = static_cast<std::size_t>(arg);
+    requireFinite(chi[k], grad != nullptr ? &grads[k] : nullptr);
     if (grad != nullptr) {
-      std::copy(grads[static_cast<std::size_t>(arg)].begin(),
-                grads[static_cast<std::size_t>(arg)].end(), grad);
+      std::copy(grads[k].begin(), grads[k].end(), grad);
     }
-    return chi[static_cast<std::size_t>(arg)];
+    return chi[k];
   }
   std::vector<double> g;
   const double v = channel(cloud, kind, arg, grad != nullptr ? &g : nullptr);
+  requireFinite(v, grad != nullptr ? &g : nullptr);
   if (grad != nullptr) {
     std::copy(g.begin(), g.begin() + static_cast<std::ptrdiff_t>(dim), grad);
   }
@@ -1057,6 +1092,9 @@ void Workspace::states(const Cloud &cloud, double *chi, double *grad) {
   std::vector<double> values;
   std::vector<std::vector<double>> grads;
   stateValues(cloud, values, grad != nullptr ? &grads : nullptr);
+  for (std::size_t k = 0; k < values.size(); ++k) {
+    requireFinite(values[k], grad != nullptr ? &grads[k] : nullptr);
+  }
   std::copy(values.begin(), values.end(), chi);
   if (grad != nullptr) {
     const std::size_t dim = 3 * static_cast<std::size_t>(cloud.nop);
