@@ -1390,8 +1390,11 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * product of the path's bond weights. With bond weights 0 and 1 the rings of
  * weight one are the primitive rings of seams_rings_find(). Every value is
  * a fixed function of the pair weights, so it is as smooth as s(r) also
- * where a bond crosses the list cutoff or a ring gains or loses a shortcut:
- * twice continuously differentiable for d0 = 0 or n >= 3. The gyration
+ * where a bond crosses the list cutoff or a ring gains or loses a shortcut.
+ * The weights are twice continuously differentiable in the coordinates for
+ * n >= 3, and for n = 2 with d0 = 0. At d0 > 0 the weight is only
+ * C^(n-1) at r = d0; with d0 = 0 and n = 1 it has a cone, s = 1 - r / r0
+ * to first order, where two atoms coincide. The gyration
  * volume is a square root and its gradient is unbounded as the cluster
  * flattens.
  *
@@ -1407,7 +1410,9 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * For x = (r - d0) / r0, s = (1 - x^n) / (1 - x^m) for r > d0 and 1 for
  * r <= d0, times a taper that is 1 below d_on, 0 at and beyond d_max, and
  * 1 - u^3 (10 - 15u + 6u^2) for u = (r - d_on) / (d_max - d_on) between
- * them. s and its first two derivatives vanish at d_max.
+ * them. s and its first two derivatives vanish at d_max. On r >= 0, s is
+ * C^2 in r except at r = d0 > 0 with n < 3, where it is only C^(n-1). At
+ * r = d0, dsdr is the right derivative: -1 / r0 for n = 1 and 0 otherwise.
  * @param r Distance, Angstrom. Not negative.
  * @param r0 Positive length scale, Angstrom.
  * @param d0 Plateau radius, Angstrom, at least zero.
@@ -1416,7 +1421,8 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * @param d_on Taper start, Angstrom, from d0 and below d_max.
  * @param d_max Radius where s reaches zero, Angstrom.
  * @param s Receives s(r).
- * @param dsdr Receives ds/dr in 1/Angstrom, or NULL.
+ * @param dsdr Receives ds/dr in 1/Angstrom, the right derivative at
+ *        r = d0, or NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
  * @par Ownership
  * The caller owns s and dsdr. The call keeps no state.

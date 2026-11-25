@@ -175,7 +175,7 @@ double RationalSwitch::operator()(double r, double &dsdr) const {
   }
   double rational = 1.0;
   double dRational = 0.0;
-  if (r > d0) {
+  if (r >= d0) {
     const double x = (r - d0) / r0;
     // Horner for 1 + x + ... + x^(k-1) and its derivative.
     auto geometric = [x](int k, double &deriv) {

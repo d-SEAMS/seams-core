@@ -313,6 +313,28 @@ TEST_CASE("rational switch matches its derivative and tapers to zero", "[smooth_
           SEAMS_ERR_RANGE);
 }
 
+TEST_CASE("the switch slope at d0 is the right derivative", "[smooth_cv]") {
+  // Past d0, R = 1 - x^n + O(x^(n+1)) with m = 2n, so the right derivative
+  // at d0 is -1 / r0 for n = 1 and 0 for n >= 2, and the forward difference
+  // is within h / r0^2 = 1.2e-4 / A of it. At d0 = 0 that is the only side.
+  for (const double d0 : {0.0, kD0}) {
+    for (const int n : {1, 2, 3}) {
+      double s = 0.0;
+      double ds = 0.0;
+      double up = 0.0;
+      double unused = 0.0;
+      REQUIRE(seams_switch_rational(d0, kR0, d0, n, 0, kOn, kMax, &s, &ds) == SEAMS_OK);
+      REQUIRE(seams_switch_rational(d0 + kStep, kR0, d0, n, 0, kOn, kMax, &up, &unused) ==
+              SEAMS_OK);
+      const double right = n == 1 ? -1.0 / kR0 : 0.0;
+      INFO("d0 = " << d0 << ", n = " << n << ", ds/dr = " << ds);
+      REQUIRE(s == 1.0);
+      REQUIRE(std::abs(ds - right) <= 1e-12 / kR0);
+      REQUIRE(std::abs((up - s) / kStep - right) < 2e-4);
+    }
+  }
+}
+
 TEST_CASE("weights of one reproduce the primitive rings and the HC basal test",
           "[smooth_cv]") {
   seams_system *sys = seams_system_create();

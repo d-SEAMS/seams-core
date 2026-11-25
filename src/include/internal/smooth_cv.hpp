@@ -61,7 +61,9 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
  *  singularity at x = 1. It is 1 for r at or below d0. The taper is 1 below
  *  dOn, 0 at and beyond dMax, and 1 - u^3 (10 - 15 u + 6 u^2) with
  *  u = (r - dOn) / (dMax - dOn) in between, so the product and its first
- *  two derivatives vanish at dMax.
+ *  two derivatives vanish at dMax. Near d0 the rational part is
+ *  1 - x^n + O(x^m), so s is C^(n-1) and not C^n at d0 > 0; at d0 = 0
+ *  and n = 1, s(|v|) has a cone at v = 0.
  */
 struct RationalSwitch {
   double r0 = 1.0;
@@ -76,7 +78,7 @@ struct RationalSwitch {
   //! by makeSwitch before this check.
   void validate() const;
 
-  //! s(r); dsdr receives ds/dr
+  //! s(r); dsdr receives ds/dr, the right derivative at r = d0
   double operator()(double r, double &dsdr) const;
 };
 
