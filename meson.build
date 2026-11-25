@@ -124,8 +124,14 @@ _deps += m_dep
 # The wheel build falls back to the Eigen subproject. Its headers are
 # not this project's sources, so -Werror=sign-conversion stays on our
 # code and does not fire inside Eigen.
-eigen_dep = dependency('eigen3', version: '>=3.4.0', include_type: 'system',
-                       required: true)
+# With OpenMP, Eigen opens its own region for a wide matrix product, and an
+# allocation failure inside it calls std::terminate, out of reach of any
+# handler here. Every translation unit that sees Eigen gets the same
+# setting.
+eigen_dep = declare_dependency(
+  dependencies: dependency('eigen3', version: '>=3.4.0', include_type: 'system',
+                           required: true),
+  compile_args: ['-DEIGEN_DONT_PARALLELIZE'])
 _deps += [eigen_dep]
 
 # Prefer FlexiBLAS (one wrapper for BLAS and LAPACK). The conda-forge
