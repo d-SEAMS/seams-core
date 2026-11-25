@@ -175,17 +175,20 @@ endif
 # missing libomp, so probe an actual parallel region before committing to it.
 # nvc++ 22.3 trips Meson's OpenMP version sniff (preprocessor
 # delimiters). The flag is -mp; do not call dependency('openmp').
+openmp_opt = get_option('with_openmp')
 openmp_dep_ok = false
 _omp_rpath = ''
 _omp_libdir = ''
-if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
+if openmp_opt.disabled()
+  openmp_dep = dependency('', required: false)
+elif cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   openmp_dep = declare_dependency(compile_args: ['-mp'], link_args: ['-mp'])
   openmp_dep_ok = true
   # Host FMA vs device no-FMA (or the reverse) breaks the offload
   # identity check. IEEE division and no FMA on both sides.
   _args += ['-Kieee', '-Mnofma']
 else
-  openmp_dep = dependency('openmp', required: false)
+  openmp_dep = dependency('openmp', required: openmp_opt)
   openmp_dep_ok = openmp_dep.found()
 endif
 openmp_found = false
@@ -258,6 +261,8 @@ if openmp_dep_ok
         _deps += _omp_rpath_dep
       endif
     endif
+  elif openmp_opt.enabled()
+    error('with_openmp=enabled but an OpenMP parallel region does not link')
   else
     message('OpenMP was found but a parallel region does not link; ' +
             'building the per-particle loops single-threaded')
