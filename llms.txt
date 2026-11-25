@@ -124,6 +124,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Primitive rings and the full graph](https://docs.dseams.info/explanation/primitive-rings.md): A ring is primitive when the graph distance between every pair of its vertices equals the shorter distance along the ring.
 - [Ring-adjacent completion](https://docs.dseams.info/explanation/ring-completion.md): ring::ringAdjacentCompletion fills a single vacancy on a labeled six-ring.
 - [Rings on one thread](https://docs.dseams.info/explanation/rings-one-thread.md): primitive::ringNetwork against OVITO 3.17.2 FindRingsModifier.
+- [Smooth collective variables](https://docs.dseams.info/explanation/smooth-cvs.md): A biased simulation (metadynamics, OPES) needs a collective variable that is a differentiable function of the coordinates, with its gradient.
 - [SQQ](https://docs.dseams.info/explanation/sqq.md): SQQ 0.5.8 counts shortest-path chordless rings of size 4, 5 and 6.
 - [Stacking disorder](https://docs.dseams.info/explanation/stacking-disorder.md): Cubic ice and hexagonal ice are the same puckered hexagons stacked in two orders.
 - [Local symmetry](https://docs.dseams.info/explanation/symmetry.md): The classifier names each oxygen as ice Ih, ice Ic, stacking-disordered ice, or unmatched, and it can name a hydrate cage or a five- or six-ring when one cluster is passed in.
