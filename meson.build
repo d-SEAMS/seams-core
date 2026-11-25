@@ -2545,6 +2545,19 @@ if get_option('with_tests')
       link_args: _libm),
     env: _capi_env,
     timeout: 300)
+  test(
+    'capi_mic_needle',
+    executable(
+      'capi_mic_needle',
+      files('tests/capi_mic_needle.c'),
+      link_with: seams_api_lib,
+      include_directories: include_directories('include'),
+      override_options: ['c_std=c11'],
+      c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+      link_args: _libm),
+    env: _capi_env,
+    suite: 'mic',
+    timeout: 600)
   # GCC marks only ASan and TSan builds; clang reports every sanitizer.
   _signal_mode = (_capi_san.contains('address') or _capi_san.contains('thread') or
                   (cppc.get_id() == 'clang' and _capi_san != 'none')) ? 'sanitized' : 'plain'
