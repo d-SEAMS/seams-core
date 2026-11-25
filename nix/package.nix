@@ -319,6 +319,9 @@ stdenv.mkDerivation (finalAttrs: {
   doCheck = true;
   preCheck = ''
     export SEAMS_NO_NETWORK=1
+    # Open MPI tests run within one sandbox, which has no host network
+    # interfaces for UCX discovery.
+    export OMPI_MCA_pml=ob1
     # Scene tests need the absolute compiler wrappers for this platform.
     export CC=${stdenv.cc}/bin/cc
     export CXX=${stdenv.cc}/bin/c++
