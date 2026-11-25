@@ -15,11 +15,10 @@
 #include <index_range.hpp>
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
+#include <region_errors.hpp>
 
 #include <algorithm>
-#include <atomic>
 #include <cmath>
-#include <exception>
 #include <limits>
 #include <vector>
 
@@ -376,38 +375,26 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
 
   const int nop = yCloud.nop;
-  std::atomic<bool> failed(false);
-  std::exception_ptr err;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nop >= 512)
 #endif
   {
-    std::vector<int> local(histogram.size(), 0);
+    // Empty when its allocation failed, so the sum below adds nothing.
+    std::vector<int> local;
+    errors.run([&] { local.assign(histogram.size(), 0); });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(dynamic, 16)
 #endif
     for (int iatom = 0; iatom < nop - 1; iatom++) {
-      if (failed.load(std::memory_order_relaxed)) {
-        continue;
-      }
-      try {
+      errors.run([&] {
         const auto rest = static_cast<std::size_t>(nop - iatom - 1);
         for (std::size_t k = 0; k < rest; k++) {
           const int jatom = iatom + 1 + static_cast<int>(k);
           const double r2 = gen::periodicDistSq(frame, yCloud, iatom, jatom);
           binPair(std::sqrt(r2), cutoff, binwidth, nbin, local.data());
         }
-      } catch (...) {
-        failed.store(true, std::memory_order_relaxed);
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp critical
-#endif
-        {
-          if (!err) {
-            err = std::current_exception();
-          }
-        }
-      }
+      });
     }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp critical
@@ -416,9 +403,7 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
       histogram[b] += local[b];
     }
   }
-  if (err) {
-    std::rethrow_exception(err);
-  }
+  errors.rethrow();
 
   // Return the histogram
   return histogram;
