@@ -11,7 +11,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.2] - 2026-11-19
-
 ### Added
 
 - The `ring_oracle` and `ring_oracle_python` tests compare primitive and shortest-path ring sets, ring labels and cage counts against a brute-force enumerator. They cover random graphs, edge cases (lone atoms, repeated bonds, hubs, the max-depth boundary, rings across periodic boundaries), ice Ih, Ic, II and III cells, and hand-built prism and clathrate cages, across the C++ engine, the C API and PydSEAMSlib. `scripts/gen_ring_oracle_cells.py` regenerates the ice II and III cells from GenIce2.
@@ -83,7 +82,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `third_party/argum/LICENSE` is upstream argum v2.9's BSD 3-Clause License, Copyright (c) 2022, Eugene Gershnik, the file `argum.h` names. The conda recipe, the Yggdrasil build and the Nix package record that licence beside the project MIT licence. `tests/vendored_licenses.py` requires the file, that attribution, and those packaging records, and it still requires `third_party/csm/LICENSE.MD`.
 
 ## [2.14.1] - 2026-11-16
-
 ### Added
 
 - The linux-x86_64 tarball carries LICENSE and the license texts for Eigen, argum, backward-cpp, readcon-core, readcon-db, and the GCC runtime objects in its binaries.
@@ -145,7 +143,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - d-SEAMS builds against an installed chemfiles 0.10.4 or a later 0.10 release, including the copy in Chemfiles_jll. The build finds it through `-Dchemfiles_dir`, pkg-config or the CMake package. A cross build with `-Dwith_chemfiles=auto` that finds no chemfiles stops with an error that lists the places it searched, and never builds a copy for the build machine. The option `-Duse_vendored_chemfiles` takes `auto`, `enabled` or `disabled`. CMake builds take `SEAMS_CHEMFILES_DIR` and `SEAMS_USE_VENDORED_CHEMFILES`. With an installed chemfiles 0.10.4, d-SEAMS refuses a MOL2 file with no counts line and an mmCIF file with no `label_entity_id` column and an unset `label_seq_id`. Each gives a message where it used to crash.
 
 ## [2.14.0] - 2026-11-15
-
 ### Added
 
 - A CI job compiles the library sources PydSEAMSlib and dseams-r build under Clang 22 with `-Wsign-conversion -Wunneeded-internal-declaration -Werror`, once without OpenMP or any optional backend and once with them, and builds those libraries with `-Dwerror=true`. The compiler-warnings workflow also runs on `release/**` branches.
