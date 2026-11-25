@@ -1123,13 +1123,20 @@ def has_plan(path, run_id: str) -> bool:
 # ----------------------------------------------------------------- driver
 
 
-def validate_core(spec: str) -> str:
+def available_cpus(*, dry_run: bool) -> list[int]:
+    if hasattr(os, "sched_getaffinity"):
+        return sorted(os.sched_getaffinity(0))
+    if dry_run:
+        return list(range(os.cpu_count() or 1))
+    raise SystemExit("recording campaign samples requires Linux CPU affinity; use --dry-run to plan")
+
+
+def validate_core(spec: str, allowed: list[int]) -> str:
     """Validate that --core names a single allowed CPU index."""
     try:
         cpu = int(spec)
     except ValueError as exc:
         raise SystemExit(f"invalid --core {spec!r}: expected an integer CPU id") from exc
-    allowed = sorted(os.sched_getaffinity(0))
     if cpu not in allowed:
         raise SystemExit(f"--core {cpu} is not in allowed cpus {allowed}")
     return str(cpu)
@@ -1543,7 +1550,7 @@ def run_head_to_heads(args) -> int:
     workloads = [w for name in names for w in HEAD_TO_HEADS[name]]
     if args.workloads:
         workloads = [w for w in workloads if w in args.workloads]
-    core = validate_core(args.core)
+    core = validate_core(args.core, available_cpus(dry_run=args.dry_run))
     stamp = args.stamp
     run_id = args.run_id or uuid.uuid4().hex[:12]
     arm_pythons = parse_arm_pythons(getattr(args, "arm_python", None))
@@ -1929,13 +1936,13 @@ def lane_failures(path, run_id: str) -> list[dict]:
 def run_lanes(args) -> int:
     import release_build
 
-    core = validate_core(args.core)
+    allowed = available_cpus(dry_run=args.dry_run)
+    core = validate_core(args.core, allowed)
     stamp = args.stamp
     run_id = args.run_id or uuid.uuid4().hex[:12]
     if args.rounds < args.min_rounds:
         raise SystemExit(f"need at least {args.min_rounds} rounds, got {args.rounds}")
     python = args.python or sys.executable
-    allowed = sorted(os.sched_getaffinity(0))
     work = Path(args.work)
     raw = Path(args.raw)
     scratch = work / "asv"
