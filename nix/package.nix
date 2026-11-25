@@ -18,6 +18,7 @@
   python3,
   cmake,
   util-linux,
+  findutils,
   fetchgit,
   fetchurl,
   fetchzip,
@@ -195,6 +196,8 @@ stdenv.mkDerivation (finalAttrs: {
   src = lib.cleanSource ../.;
 
   postPatch = ''
+    mkdir -p docs/.cache
+    find ${finalAttrs.src} \( -type f -o -type l \) -printf '%P\0' | LC_ALL=C sort -z > docs/.cache/tracked-files.zlist
     mkdir -p subprojects/backward-cpp-1.6
     tar -xzf ${backwardCppSrc} --strip-components=1 -C subprojects/backward-cpp-1.6
     cp subprojects/packagefiles/backward-cpp/* subprojects/backward-cpp-1.6/
@@ -226,6 +229,7 @@ stdenv.mkDerivation (finalAttrs: {
     git
     cmake
     util-linux
+    findutils
     # Meson treats the interpreter it is running as python3. A Python
     # on PATH is the one the test suite actually executes.
     unzip
@@ -298,14 +302,9 @@ stdenv.mkDerivation (finalAttrs: {
   '';
 
   # Catch2, bindings, command-line examples and available engine backends.
-  # docs/check_prose.py and docs/check_tables.py list pages with
-  # git ls-files. The filtered source has no repository of its own.
   doCheck = true;
   preCheck = ''
     export SEAMS_NO_NETWORK=1
-    git -C .. init -q -b main
-    git -C .. add -A
-    git -C .. -c user.name=d-SEAMS -c user.email=dev@dseams.info commit -q -m sources
     # Scene tests need the absolute compiler wrappers for this platform.
     export CC=${stdenv.cc}/bin/cc
     export CXX=${stdenv.cc}/bin/c++
