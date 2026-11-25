@@ -281,7 +281,15 @@ refineEuclidean(double lx, double ly, double lz, double xy, double xz, double yz
   }
   return wrapped;
 #else
-  return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, wrapped);
+  // euclideanIfShorter throws when the cell is outside binary64. Neighbour
+  // loops call this from an OpenMP region, which cannot propagate that
+  // exception. The linked-minimage branch keeps the fractional wrap when
+  // the cell will not build; do the same here.
+  try {
+    return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, wrapped);
+  } catch (const std::runtime_error &) {
+    return wrapped;
+  }
 #endif
 }
 
