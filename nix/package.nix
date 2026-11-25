@@ -152,8 +152,8 @@ let
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
   };
   linkcellSrc = fetchzip {
-    url = "https://github.com/d-SEAMS/linkcell/archive/refs/tags/v0.6.0.tar.gz";
-    hash = "sha256-C1RPSOQHsBjfYxsw5Si6Q4+B+YGlQjNHitinndAv8XA=";
+    url = "https://github.com/d-SEAMS/linkcell/archive/0bc73576ceb4ea79909a3ad7a7931275b59a9fe4.tar.gz";
+    hash = "sha256-hvvSe2mZW4OuCz/HJUMpv8n7rmWZxQ67JaUO1Cy7Rbo=";
   };
   vesinSrc = fetchzip {
     url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
@@ -225,7 +225,6 @@ stdenv.mkDerivation (finalAttrs: {
     cp -R ${vesinSrc} subprojects/vesin
     chmod -R u+w subprojects/minimage subprojects/linkcell subprojects/vesin
     patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch
-    patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-macos-rpath.patch
     cp -R subprojects/packagefiles/vesin/. subprojects/vesin/
     patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
     mkdir -p docs/.cache/figshare-11448702

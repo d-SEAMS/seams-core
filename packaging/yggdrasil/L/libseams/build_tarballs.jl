@@ -33,9 +33,9 @@ const tag_sha = "e5b21f7fc8180a672248f797b0a5783cfb008540"
 # Meson's wrap resolver uses it directly and never needs network.
 const backward_cpp_tag_sha = "3bb9240cb15459768adb3e7d963a20e1523a6294"
 
-# The commit of the v0.6.0 tag subprojects/linkcell.wrap names. linkcell
-# is the neighbour backend and is always built; its meson.build drives cargo.
-const linkcell_sha = "216df974b3da24b1adfbb75971521dfbb52aac82"
+# The pinned main commit subprojects/linkcell.wrap names. linkcell is
+# the neighbour backend and is always built; its meson.build drives cargo.
+const linkcell_sha = "0bc73576ceb4ea79909a3ad7a7931275b59a9fe4"
 
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", tag_sha),

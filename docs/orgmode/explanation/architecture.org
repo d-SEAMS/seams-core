@@ -67,9 +67,9 @@ built on linkcell's threads and the same bytes at every width;
 seams-core maps them to atom IDs or cloud indices. That covers the
 full and half lists, orthorhombic and restricted triclinic boxes, and
 cutoffs past half the box. This repository asks for linkcell 0.6.0 or
-newer, and ~subprojects/linkcell.wrap~ pins the v0.6.0 tag. linkcell's
-release number is its own, and a seams-core release tag does not name
-it. ~libyodaLib~ links one copy and exports the ~lc_~ symbols.
+newer, and ~subprojects/linkcell.wrap~ pins ~d-SEAMS/linkcell~ main.
+linkcell's release number is its own, and a seams-core release tag does
+not name it. ~libyodaLib~ links one copy and exports the ~lc_~ symbols.
 
 A cutoff that is not finite and positive throws
 ~std::invalid_argument~, and a coordinate that is not finite throws

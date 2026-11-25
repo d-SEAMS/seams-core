@@ -10,6 +10,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.3] - 2026-11-25
+
+### Changed
+
+- The linkcell subproject pin moves from the v0.6.0 tag to `d-SEAMS/linkcell` main at `0bc73576ceb4ea79909a3ad7a7931275b59a9fe4`. That commit has the CSR single-pass path, the macOS OpenMP search and runtime-path fixes, the Meson `sanitize` option, which links every consumer with the ThreadSanitizer runtime, and the `cargo_profile` option, which builds the release Cargo profile in a subproject on every Meson version. The wrap applies no patch, so `linkcell-conda-openmp.patch` and `linkcell-macos-rpath.patch` are removed.
+
 ## [2.14.2] - 2026-11-19
 
 ### Added
