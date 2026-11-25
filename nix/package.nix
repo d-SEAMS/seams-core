@@ -44,6 +44,7 @@
   openmm,
   plumed,
   openmpi,
+  sqlite,
   fftwFloat,
   runCommand,
   gnutar,
@@ -56,9 +57,11 @@ let
   withGromacs = available gromacs;
   withOpenmm = available openmm;
   withPlumed = available plumed;
-  lammpsWithPlugin = lammps.overrideAttrs (old: {
-    cmakeFlags = (old.cmakeFlags or [ ]) ++ [ "-DPKG_PLUGIN=ON" ];
-  });
+  lammpsWithPlugin = lammps.override {
+    packages = lammps.packages // { PLUGIN = true; };
+    extraCmakeFlags = lammps.extraCmakeFlags // { BUILD_MPI = "ON"; };
+    extraBuildInputs = lammps.extraBuildInputs ++ [ openmpi ];
+  };
   engineInputs = lib.optional withLammps lammpsWithPlugin
     ++ lib.optional withGromacs gromacs
     ++ lib.optional withPlumed plumed;
@@ -137,6 +140,10 @@ let
     mkdir -p "$out"
     tar -xzf ${gromacs.src} --strip-components=1 -C "$out"
   '';
+  chemfilesArchive = fetchurl {
+    url = "https://github.com/chemfiles/chemfiles/archive/refs/tags/0.10.4.tar.gz";
+    hash = "sha256-uCMt2q4pU1OCdJgoOKpsLfh9MA9+L4DpLBcVgeBjJbo=";
+  };
   minimageSrc = fetchzip {
     url = "https://github.com/lode-org/minimage/archive/refs/tags/v0.1.4.tar.gz";
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
@@ -198,6 +205,8 @@ stdenv.mkDerivation (finalAttrs: {
   postPatch = ''
     mkdir -p docs/.cache
     find ${finalAttrs.src} \( -type f -o -type l \) -printf '%P\0' | LC_ALL=C sort -z > docs/.cache/tracked-files.zlist
+    mkdir -p cmake/vendor
+    cp ${chemfilesArchive} cmake/vendor/chemfiles-0.10.4.tar.gz
     mkdir -p subprojects/backward-cpp-1.6
     tar -xzf ${backwardCppSrc} --strip-components=1 -C subprojects/backward-cpp-1.6
     cp subprojects/packagefiles/backward-cpp/* subprojects/backward-cpp-1.6/
@@ -264,6 +273,7 @@ stdenv.mkDerivation (finalAttrs: {
     fftwFloat
     cxxopts
     rang
+    sqlite
   ]
   ++ engineInputs
   ++ lib.optional withOpenmm openmm
@@ -285,7 +295,8 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_gromacs" withGromacs)
     (lib.mesonEnable "with_openmm" withOpenmm)
     (lib.mesonEnable "with_plumed" withPlumed)
-    (lib.mesonEnable "with_chemfiles" false)
+    (lib.mesonEnable "with_chemfiles" true)
+    (lib.mesonEnable "use_vendored_chemfiles" true)
     (lib.mesonEnable "with_readcon" false)
     (lib.mesonEnable "with_ira" false)
     (lib.mesonEnable "with_sphericart" false)
@@ -293,7 +304,7 @@ stdenv.mkDerivation (finalAttrs: {
     (lib.mesonEnable "with_linkcell" true)
     (lib.mesonEnable "with_minimage" true)
   ]
-  ++ lib.optional withLammps (lib.mesonOption "lammps_src_include" "${lammps.src}/src")
+  ++ lib.optional withLammps (lib.mesonOption "lammps_src_include" "${lammpsWithPlugin.src}/src")
   ++ lib.optional withGromacs (lib.mesonOption "gromacs_legacy_include" "${gromacsLegacyHeaders}/api/legacy/include");
 
   preConfigure = ''
