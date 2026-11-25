@@ -1,0 +1,327 @@
+#+TITLE: Smooth collective variables
+#+OPTIONS: toc:nil num:nil
+
+A biased simulation (metadynamics, OPES) needs a collective variable
+that is a differentiable function of the coordinates, with its gradient.
+A Markov state model built on soft memberships needs the same. The ring
+census of [[file:primitive-rings.org][primitive rings]] and the cage
+search are integer counts: they jump when a bond crosses the cutoff, and
+their gradient is zero almost everywhere.
+
+The ~seams_cv~ handle of =include/seams.h= gives smooth versions of those
+counts, each with its gradient in the Cartesian coordinates of every
+atom, under periodic boundaries. With bond weights of exactly zero and
+one they reduce to the integer counts. This page gives the formulas,
+the argument that they are continuous, the C API, a worked example, and
+what they do not cover.
+
+* The switching function
+
+Every pair \(i, j\) at minimum-image distance \(r\) gets a weight
+
+\[
+s(r) = R(r)\,T(r), \qquad
+R(r) = \frac{1 - x^n}{1 - x^m}, \quad x = \frac{r - d_0}{r_0},
+\]
+
+with \(R = 1\) for \(r \le d_0\). This is the PLUMED ~RATIONAL~ switch.
+The library evaluates it as the ratio of the geometric sums
+\(1 + x + \dots + x^{n-1}\) and \(1 + x + \dots + x^{m-1}\), so
+\(x = 1\) needs no special case; there \(R = n/m\) and
+\(R' = -n(m-n) / (2 m r_0)\). ~m = 0~ selects \(m = 2n\), as in PLUMED.
+
+PLUMED cuts \(R\) at ~D_MAX~ with a step, which leaves a jump of
+\(R(d_{max})\) in the value. Here the cut is a taper,
+
+\[
+T(r) = 1 - u^3 (10 - 15u + 6u^2), \qquad u = \frac{r - d_{on}}{d_{max} - d_{on}},
+\]
+
+with \(T = 1\) below \(d_{on}\) and \(T = 0\) from \(d_{max}\) on. \(T\)
+and its first two derivatives are continuous at both ends, so \(s\) is
+\(C^2\) at \(d_{on}\) and at \(d_{max}\), and exactly zero beyond
+\(d_{max}\). At \(d_0 > 0\), \(R = 1 - x^n + O(x^m)\), so \(s\) is
+\(C^{n-1}\) there; take \(n \ge 3\) or \(d_0 = 0\) for \(C^2\)
+everywhere. The parameters must satisfy \(r_0 > 0\), \(1 \le n < m\)
+and \(0 \le d_0 \le d_{on} < d_{max}\).
+
+~seams_switch_rational()~ returns \(s\) and \(ds/dr\) for one distance.
+
+* Soft primitive rings
+
+A ring is primitive when no two of its members are closer through the
+graph than around the ring (Franzblau). Weighting only the primitive
+rings of the graph inside \(d_{max}\) is discontinuous: when a chord of
+a square leaves the graph at \(d_{max}\), with weight zero, the square
+becomes primitive and its weight \(s_1 s_2 s_3 s_4\) appears at once.
+
+The soft weight therefore carries the primitivity test as well. The
+candidate rings are every simple cycle of at most ~max_ring~ members on
+the listed graph. For a candidate ring \(C\),
+
+\[
+w_C = \prod_{e \in C} s_e \prod_{P \in \mathcal{S}(C)} \Bigl(1 - \prod_{e \in P} s_e\Bigr),
+\]
+
+where \(\mathcal{S}(C)\) is the set of shortcut paths of \(C\): simple
+paths between two members \(a, b\) of \(C\) with fewer edges than the
+separation of \(a\) and \(b\) around \(C\). A path may pass other
+members of \(C\). With weights in \(\{0, 1\}\), \(w_C = 1\) exactly when
+\(C\) is a cycle of the graph with no shortcut, which is Franzblau's
+test, and \(w_C = 0\) otherwise. =test_smooth_cv= checks that the rings of
+weight one on ice1h at 3.5 A are the rings ~seams_rings_find~ returns.
+
+The variables built on the ring weights are
+
+- ~SEAMS_CV_RING_COUNT~, \(\sum_C w_C\) over the rings of size ~arg~
+  (0 for every size);
+- ~SEAMS_CV_RING_ATOMS~, \(\sum_i p_i\) over the selected atoms, with
+  \(p_i = 1 - \prod_{C \ni i} (1 - w_C)\), the soft count of atoms on a
+  ring of size ~arg~;
+- ~SEAMS_CV_HEX_BASAL_PAIRS~, \(\sum_{(A,B)} w_A w_B\,\beta_{AB}\) over
+  vertex-disjoint candidate hexagons, where \(\beta_{AB}\) is
+  ~ring::basalConditions~ in either direction with every "and" a product
+  and every "some" a \(1 - \prod (1 - \cdot)\) over the bond weights
+  between the two rings.
+
+With 0/1 weights the last one is the number of hexagon pairs that pass
+the basal test of the hexagonal-cage search, checked against
+~ring::basalConditions~ on ice1h. It is the smooth form of that test
+alone. ~ring::findHC~ goes on to take prismatic rings and to claim rings
+in visiting order, and the double-diamond search shares rings between
+cages; those steps are choices, so the cage labels, the DDC count and the
+per-ring symmetry codes have no smooth counterpart here.
+
+* Continuity
+
+Every variable above is a fixed polynomial in the weights \(s_{ij}\) of
+the pairs of the complete graph on the selected atoms, of bounded degree
+for a given ~max_ring~. The neighbour list only decides which terms are
+written down. A term left out holds an unlisted pair, whose weight is
+zero, as a factor, so it is zero; a shortcut factor left out is
+\(1 - 0 = 1\). The value computed from a list is therefore the value of
+the full polynomial, for any list that holds every pair inside
+\(d_{max}\).
+
+~seams_cv_rebuild()~ lists the pairs within \(d_{max} + \text{skin}\).
+While no selected atom has moved more than \(\text{skin}/2\) since the
+rebuild, no pair distance has shrunk by more than the skin, so every
+pair now inside \(d_{max}\) is listed. The candidate rings, shortcut
+paths and hexagon pairs are fixed at the rebuild and cover every term
+with a nonzero weight on that list. Between rebuilds the variable is the
+same polynomial, so it is as smooth as \(s\); across a rebuild the value
+does not change, because both lists give the full polynomial. The
+minimum-image distance is smooth while \(d_{max} + \text{skin}\) is
+below half the narrowest cell width, which ~seams_cv_rebuild()~ requires
+(~SEAMS_ERR_BOX~ otherwise).
+
+~seams_cv_needs_rebuild()~ reports when an atom has moved more than half
+the skin, the atom count changed or the cell changed. ~seams_cv_value()~
+and ~seams_cv_states()~ then return ~SEAMS_ERR_STATE~ until the next
+rebuild, so a stale topology is never evaluated.
+
+=test_smooth_cv= checks this on a rhombus whose short diagonal sweeps
+through \(d_{max}\): the count from a fresh rebuild at every step equals
+the count from one topology that holds the diagonal, the value and its
+slope change by no more than the switch bounds allow per step, and at
+\(x = 1\) the square keeps exactly half its weight. A second case
+compares a list at \(d_{max}\) with one that adds the near edge of the
+next shell of ice: the extra rings, paths and pairs change no value or
+gradient beyond rounding.
+
+* Hull surrogate
+
+There is no convex hull in the engine, and the hull volume is only
+piecewise smooth: its gradient jumps when a facet changes. The cluster
+size variables use the weighted gyration tensor instead. With weights
+\(q_i\) on the selected atoms, \(W = \sum q_i\), \(c = \sum q_i u_i / W\),
+
+\[
+G = \frac{1}{W} \sum_i q_i (u_i - c)(u_i - c)^\top, \qquad
+R_g^2 = \operatorname{tr} G, \qquad
+V = \tfrac{4\pi}{3}\, 5^{3/2} \sqrt{\det G}.
+\]
+
+\(V\) is the volume of the uniform solid ellipsoid with gyration tensor
+\(G\). ~arg = -1~ gives every selected atom \(q_i = 1\); ~arg = 0~ or a
+ring size gives \(q_i = p_i\), the soft ring participation above, so the
+size follows the atoms that sit on rings. The gradients are
+
+\[
+\frac{\partial R_g^2}{\partial u_i} = \frac{2 q_i (u_i - c)}{W}, \qquad
+\frac{\partial R_g^2}{\partial q_i} = \frac{|u_i - c|^2 - R_g^2}{W},
+\]
+\[
+\frac{\partial V}{\partial u_i} = \frac{V q_i}{W}\, G^{-1}(u_i - c), \qquad
+\frac{\partial V}{\partial q_i} = \frac{V}{2W}\Bigl((u_i - c)^\top G^{-1} (u_i - c) - 3\Bigr),
+\]
+
+and \(\partial q_i / \partial x\) runs back through the ring weights to
+the bond weights. The positions \(u_i\) are unwrapped along the listed
+bonds from the first selected atom, so a cluster that straddles the
+cell boundary is measured whole.
+
+* Soft states
+
+A state is a product of clauses. A clause on a variable \(v\) is
+\(\sigma((v - t)/w)\) when ~above~ is nonzero and
+\(1 - \sigma((v - t)/w)\) otherwise, with \(\sigma(z) = 1/(1 + e^{-z})\).
+A clause of kind ~SEAMS_CV_STATE~ with width 0 is \(\chi_k\) or
+\(1 - \chi_k\) of an earlier state \(k\). Products are "and", the
+complement is "not", and "or" is \(1 - (1 - \chi_a)(1 - \chi_b)\): a state
+of two complement clauses, then the complement of that state. Each
+\(\chi\) lies in \([0, 1]\), and its gradient is the product rule over
+the clauses with the cached gradient of each variable.
+
+* Gradients
+
+All gradients are reverse mode. The adjoint of the ring weights is
+formed first, then pushed onto the bond weights with leave-one-out
+products, so a bond weight of zero inside a product is handled without
+dividing by it. The soft basal term uses forward-mode dual numbers over
+its 36 bond weights and two ring weights. A bond weight reaches the
+coordinates through \(\partial s / \partial x_j = s'(r)\,\hat{r}_{ij}\)
+and \(\partial s / \partial x_i = -s'(r)\,\hat{r}_{ij}\), with
+\(\hat{r}_{ij}\) the minimum-image unit vector from \(i\) to \(j\).
+
+=test_smooth_cv= compares every gradient with central differences at
+\(h = 10^{-5}\) A on jittered ice and on clusters that straddle the cell
+boundary, to \(10^{-6}(1 + |g|)\).
+
+* C API
+
+| Call | Role |
+|------+------|
+| ~seams_switch_rational(r, r0, d0, n, m, d_on, d_max, &s, &dsdr)~ | \(s(r)\) and \(ds/dr\) |
+| ~seams_cv_create(r0, d0, n, m, d_on, d_max, max_ring, &cv)~ | switch and largest ring, 3 to 10 |
+| ~seams_cv_rebuild(cv, sys, type, atoms, n_atoms, skin)~ | list, candidate rings, paths and pairs |
+| ~seams_cv_needs_rebuild(cv, sys, &stale)~ | 1 after a move beyond skin / 2 or a new cell |
+| ~seams_cv_topology(cv, &n_edges, &n_rings, &n_pairs)~ | sizes of the fixed topology |
+| ~seams_cv_value(cv, sys, kind, arg, &value, grad, grad_len)~ | one variable and \(3N\) gradient entries |
+| ~seams_cv_state_clause(cv, state, kind, arg, threshold, width, above)~ | add a clause; ~state~ equal to the count opens a new state |
+| ~seams_cv_states(cv, sys, chi, chi_len, &n_states, grad, grad_len)~ | every \(\chi\), and \(n_{states} \times 3N\) gradient entries |
+| ~seams_cv_destroy(cv)~ | free the handle |
+
+~kind~ is a ~seams_cv_kind~: ~SEAMS_CV_RING_COUNT~,
+~SEAMS_CV_RING_ATOMS~, ~SEAMS_CV_HEX_BASAL_PAIRS~,
+~SEAMS_CV_GYRATION_RG2~, ~SEAMS_CV_GYRATION_VOLUME~ or ~SEAMS_CV_STATE~.
+The gradient is in units of the variable per angstrom, laid out as
+~grad[3 * i + d]~ for atom ~i~ and axis ~d~, and zero for atoms outside
+the selection. The signatures and status codes are on :doc:`/stable/c`.
+
+* Worked example
+
+One planar hexagon of side 2.75 A sits on the \(x = 0\) face of a
+20 A cell, so two of its bonds are measured through the boundary. With
+\(r_0 = 0.3\), \(d_0 = 2.6\), \(n = 6\), \(m = 12\), \(x = 0.5\) and
+\(s = 64/65\). The ring weight is \(s^6\), and growing the hexagon by
+\(dR\) lengthens every bond by \(dR\), so
+\(dw/dR = 6 s^5\, ds/dr\). The program checks both against the API and
+exits nonzero when they differ.
+
+#+begin_src c
+#include "seams.h"
+
+#include <math.h>
+#include <stdio.h>
+
+int main(void) {
+  const double pi = acos(-1.0);
+  const double side = 2.75;
+  double xyz[18];
+  for (int k = 0; k < 6; ++k) {
+    const double t = k * pi / 3.0;
+    xyz[3 * k] = fmod(20.0 + side * cos(t), 20.0);
+    xyz[3 * k + 1] = 10.0 + side * sin(t);
+    xyz[3 * k + 2] = 10.0;
+  }
+  const double box9[9] = {0, 0, 0, 20, 20, 20, 0, 0, 0};
+  seams_system *sys = seams_system_create();
+  seams_cv *cv = NULL;
+  if (sys == NULL || seams_system_set_atoms(sys, xyz, 6, box9, 9, NULL, NULL) != SEAMS_OK ||
+      seams_cv_create(0.3, 2.6, 6, 0, 3.0, 3.5, 6, &cv) != SEAMS_OK ||
+      seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.5) != SEAMS_OK) {
+    fprintf(stderr, "setup: %s\n", seams_last_error());
+    return 1;
+  }
+
+  double s = 0, dsdr = 0;
+  seams_switch_rational(side, 0.3, 2.6, 6, 0, 3.0, 3.5, &s, &dsdr);
+  double w = 0, grad[18];
+  seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &w, grad, 18);
+  double radial = 0;
+  for (int k = 0; k < 6; ++k) {
+    const double t = k * pi / 3.0;
+    radial += grad[3 * k] * cos(t) + grad[3 * k + 1] * sin(t);
+  }
+  printf("ring weight %.6f, s^6 %.6f\n", w, pow(s, 6));
+  printf("dw/dR %.6f, 6 s^5 ds/dr %.6f\n", radial, 6 * pow(s, 5) * dsdr);
+  int bad = fabs(w - pow(s, 6)) > 1e-12 || fabs(radial - 6 * pow(s, 5) * dsdr) > 1e-9;
+
+  /* State 0: a six-ring is present. State 1: it is not. */
+  seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 0.5, 0.1, 1);
+  seams_cv_state_clause(cv, 1, SEAMS_CV_STATE, 0, 0.0, 0.0, 0);
+  double chi[2], chi_grad[2 * 18];
+  size_t n_states = 0;
+  seams_cv_states(cv, sys, chi, 2, &n_states, chi_grad, 2 * 18);
+  printf("chi %.6f %.6f\n", chi[0], chi[1]);
+  bad |= n_states != 2 || fabs(chi[0] + chi[1] - 1.0) > 1e-12;
+
+  /* A move beyond half the skin needs a rebuild before the next value. */
+  xyz[1] += 0.3;
+  int stale = 0;
+  seams_system_set_positions(sys, xyz, 6, NULL, 0);
+  seams_cv_needs_rebuild(cv, sys, &stale);
+  bad |= stale != 1 || seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &w, NULL, 0) != SEAMS_ERR_STATE;
+  seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.5);
+  seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &w, NULL, 0);
+  printf("stale %d, ring weight after the move %.6f\n", stale, w);
+
+  seams_cv_destroy(cv);
+  seams_system_destroy(sys);
+  return bad;
+}
+#+end_src
+
+It prints
+
+#+begin_example
+ring weight 0.911171, s^6 0.911171
+dw/dR -3.364322, 6 s^5 ds/dr -3.364322
+chi 0.983884 0.016116
+stale 1, ring weight after the move 0.119536
+#+end_example
+
+The tour in =docs/examples/c_api_tour.c= runs the same calls on the
+ice Ih frame =input/traj/ice1h.lammpstrj=, where every bond, at most
+2.82 A, is inside \(d_0 = 2.9\) A: the 256 six-rings each have weight
+one, and the topology holds 64 candidate hexagon pairs.
+
+* Limitations
+
+- The candidate rings are every simple cycle up to ~max_ring~ on the
+  list at \(d_{max} + \text{skin}\). Their number grows quickly with the
+  coordination of that graph, so a wide skin or a dense liquid with a
+  large ~max_ring~ makes the rebuild slow and the topology large. Keep
+  \(d_{max} + \text{skin}\) inside the first minimum of the oxygen RDF.
+- Only the basal test of the hexagonal cage is smooth. Cage labels,
+  double-diamond cages, prism stacks and the per-ring symmetry codes
+  stay integer.
+- The gyration variables assume a cluster that the listed bonds connect
+  and that does not span the cell. A part of the selection with no
+  listed bond to the rest is placed by its minimum image from the first
+  selected atom, which jumps when that part crosses half the cell. On a
+  crystal that percolates through the cell the unwrapped positions
+  depend on the search order and the variables have no meaning.
+- \(V\) is \(\sqrt{\det G}\): continuous, with an unbounded gradient as
+  \(\det G \to 0\). A flat or empty cluster returns 0 with a zero
+  gradient.
+- \(s\) is \(C^{n-1}\) at \(d_0 > 0\). With \(n < 3\) and \(d_0 > 0\) a
+  second derivative jumps there.
+- The rebuild runs on one thread, and a value costs one pass over the
+  rings, their shortcut paths and the hexagon pairs. The values are for
+  one frame of one handle at a time; concurrent calls need one handle
+  each.
+- The PLUMED, LAMMPS and OpenMM drivers in =engines/= do not call these
+  variables. A bias needs a driver that calls ~seams_cv_value()~ each
+  step and adds \(-\partial U / \partial v\) times ~grad~ to the forces.

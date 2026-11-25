@@ -60,6 +60,7 @@ SIMD distance, device batches, and Cartesian ~Y_lm~.
 | =franzblau.hpp= | ~primitive~ | Franzblau primitive rings |
 | =ring.hpp= | ~ring~ | ring helpers and ~strucType~ |
 | =chordless.hpp= | ~chordless~ | chordless cycles on a CSR, size at most 12 |
+| =smooth_cv.hpp= | ~smooth~ | rational switch, soft primitive rings, soft HC basal pairs, gyration and soft states with gradients ([[file:../explanation/smooth-cvs.org][Smooth collective variables]]) |
 | =topo_bulk.hpp= | ~ring~, ~prism3~ | HC / DDC search, bulk polygons; ~contractibleRings~ drops rings that wind the periodic cell |
 | =topo_one_dim.hpp= | ~ring~ | ice-nanotube prisms |
 | =topo_two_dim.hpp= | ~ring~ | monolayer polygons |
