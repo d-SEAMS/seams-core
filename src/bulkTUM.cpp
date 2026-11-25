@@ -181,11 +181,15 @@ int tum3::topoUnitMatchingBulk(
                             quat, rmsd);
       }
       quatList[static_cast<std::size_t>(icage)] = quat;
+      // A critical block is its own must-not-throw region, so its body
+      // needs a handler of its own.
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp critical(seams_tum_rmsd)
 #endif
-      tum3::updateRMSDatom(ringsOneType, cageList[static_cast<std::size_t>(icage)], rmsd, rmsdPerAtom,
-                           noOfCommonElements, atomTypes);
+      errors.run([&] {
+        tum3::updateRMSDatom(ringsOneType, cageList[static_cast<std::size_t>(icage)], rmsd,
+                             rmsdPerAtom, noOfCommonElements, atomTypes);
+      });
     });
   } // end of looping through all cages
   errors.rethrow();

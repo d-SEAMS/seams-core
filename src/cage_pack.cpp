@@ -1,4 +1,5 @@
 #include <par_team.hpp>
+#include <region_errors.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
@@ -2021,36 +2022,40 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
   std::vector<Row> conf(static_cast<size_t>(n));
   int nEdges = 0;
   int nCand = 0;
+  seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel for schedule(static) reduction(+ : nEdges, nCand) if (!omp_in_parallel())
 #endif
   for (int i = 0; i < n; i++) {
-    if (periph[static_cast<size_t>(i)].n == 0) {
-      continue;
-    }
-    nCand++;
-    const ring::EquatorChoice &row = periph[static_cast<size_t>(i)];
-    for (int k = 0; k < row.n; k++) {
-      const int f = row.idAt(k);
-      if (f < 0 || f >= n || f == i || periph[static_cast<size_t>(f)].n == 0) {
-        continue;
+    errors.run([&] {
+      if (periph[static_cast<size_t>(i)].n == 0) {
+        return;
       }
-      bool back = false;
-      const ring::EquatorChoice &other = periph[static_cast<size_t>(f)];
-      for (int t = 0; t < other.n; t++) {
-        if (other.idAt(t) == i) {
-          back = true;
-          break;
+      nCand++;
+      const ring::EquatorChoice &row = periph[static_cast<size_t>(i)];
+      for (int k = 0; k < row.n; k++) {
+        const int f = row.idAt(k);
+        if (f < 0 || f >= n || f == i || periph[static_cast<size_t>(f)].n == 0) {
+          continue;
         }
+        bool back = false;
+        const ring::EquatorChoice &other = periph[static_cast<size_t>(f)];
+        for (int t = 0; t < other.n; t++) {
+          if (other.idAt(t) == i) {
+            back = true;
+            break;
+          }
+        }
+        if (!back) {
+          continue;
+        }
+        conf[static_cast<size_t>(i)].push(f);
       }
-      if (!back) {
-        continue;
-      }
-      conf[static_cast<size_t>(i)].push(f);
-    }
-    conf[static_cast<size_t>(i)].sortUnique();
-    nEdges += conf[static_cast<size_t>(i)].n;
+      conf[static_cast<size_t>(i)].sortUnique();
+      nEdges += conf[static_cast<size_t>(i)].n;
+    });
   }
+  errors.rethrow();
   nEdges /= 2;
   std::vector<int> rankOf(static_cast<size_t>(n));
   for (int r = 0; r < static_cast<int>(order.size()) && r < n; r++) {
