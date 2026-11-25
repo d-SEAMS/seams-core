@@ -167,6 +167,7 @@ int cutoffWidth() {
 //! fill(i) for every row, split over @a width threads once the cloud is
 //! large enough to pay for the team. Each row is written by one thread.
 template <typename Fill> void forEachRow(int nop, int width, Fill &&fill) {
+  seams::RegionErrors errors;
   // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) num_threads(width) if (width > 1 && nop >= kParallelRowsMinAtoms)
@@ -174,8 +175,9 @@ template <typename Fill> void forEachRow(int nop, int width, Fill &&fill) {
   (void)width;
 #endif
   for (int i = 0; i < nop; i++) {
-    fill(i);
+    errors.run([&] { fill(i); });
   }
+  errors.rethrow();
 }
 
 //! One flag per atom, nonzero where keep(type) holds, for the linkcell
@@ -634,6 +636,7 @@ void searchWindow(const double *cx, const double *cy, const double *cz, const in
                   double cut2, double ex, double ey, double ez, int nThreads,
                   std::vector<PairBag> &partial) {
   // Contiguous slabs, one per thread already pinned by OMP_PLACES.
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nThreads > 1)
 #endif
@@ -646,9 +649,12 @@ void searchWindow(const double *cx, const double *cy, const double *cz, const in
 #endif
     const int slot0 = static_cast<int>((static_cast<long long>(tid) * n) / nt);
     const int slot1 = static_cast<int>((static_cast<long long>(tid + 1) * n) / nt);
-    searchSlots<PX, PY, PZ>(cx, cy, cz, slotAtom, cellStart, cellOf, slot0, slot1, nc0, nc1, nc2,
-                            cut2, ex, ey, ez, partial[static_cast<std::size_t>(tid)].pairs);
+    errors.run([&] {
+      searchSlots<PX, PY, PZ>(cx, cy, cz, slotAtom, cellStart, cellOf, slot0, slot1, nc0, nc1,
+                              nc2, cut2, ex, ey, ez, partial[static_cast<std::size_t>(tid)].pairs);
+    });
   }
+  errors.rethrow();
 }
 
 } // namespace
@@ -1118,35 +1124,39 @@ bool nneigh::blockWindowRows(
     }
     return yCloud.pts[static_cast<std::size_t>(i)].atomID;
   };
+  seams::RegionErrors rowErrors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nThreads > 1)
 #endif
   for (int i = 0; i < n; i++) {
-    const int idi = idOf(i);
-    if (idi < 0) {
-      continue;
-    }
-    auto &row = rows[static_cast<std::size_t>(i)];
-    row.push_back(idi);
-    if (!anchor[static_cast<std::size_t>(i)]) {
-      continue;
-    }
-    const int begin = cursor[static_cast<std::size_t>(i)];
-    const int end = cursor[static_cast<std::size_t>(i) + 1];
-    std::sort(partner.begin() + begin, partner.begin() + end);
-    int prev = -1;
-    for (int t = begin; t < end; t++) {
-      const int j = partner[static_cast<std::size_t>(t)];
-      if (j == prev) {
-        continue;
+    rowErrors.run([&] {
+      const int idi = idOf(i);
+      if (idi < 0) {
+        return;
       }
-      prev = j;
-      const int idj = idOf(j);
-      if (idj >= 0) {
-        row.push_back(idj);
+      auto &row = rows[static_cast<std::size_t>(i)];
+      row.push_back(idi);
+      if (!anchor[static_cast<std::size_t>(i)]) {
+        return;
       }
-    }
+      const int begin = cursor[static_cast<std::size_t>(i)];
+      const int end = cursor[static_cast<std::size_t>(i) + 1];
+      std::sort(partner.begin() + begin, partner.begin() + end);
+      int prev = -1;
+      for (int t = begin; t < end; t++) {
+        const int j = partner[static_cast<std::size_t>(t)];
+        if (j == prev) {
+          continue;
+        }
+        prev = j;
+        const int idj = idOf(j);
+        if (idj >= 0) {
+          row.push_back(idj);
+        }
+      }
+    });
   }
+  rowErrors.rethrow();
   if (const char *split = std::getenv("SEAMS_SPLIT")) {
     if (split[0] == '1') {
       const double rowMs =
@@ -1415,31 +1425,35 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
   std::vector<std::vector<int>> indexNlist(nList.size());
 
   // rows are independent and the map is only read, so each row is one task
+  seams::RegionErrors errors;
   // nvc++ -mp=gpu SIGSEGVs this host parallel-for in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) if (nList.size() >= 4096)
 #endif
   for (std::int64_t ii = 0; ii < static_cast<std::int64_t>(nList.size()); ii++) {
-    const std::size_t iatom = static_cast<std::size_t>(ii);
-    if (nList[iatom].empty()) {
-      continue;
-    }
-    const int iatomID = nList[iatom][0];
-    auto gotI = yCloud.idIndexMap.find(iatomID);
-    if (gotI == yCloud.idIndexMap.end()) {
-      continue;
-    }
-    auto &out = indexNlist[iatom];
-    out.reserve(nList[iatom].size());
-    out.push_back(gotI->second);
-    for (size_t j = 1; j < nList[iatom].size(); j++) {
-      auto gotJ = yCloud.idIndexMap.find(nList[iatom][j]);
-      if (gotJ == yCloud.idIndexMap.end()) {
-        continue;
+    errors.run([&] {
+      const std::size_t iatom = static_cast<std::size_t>(ii);
+      if (nList[iatom].empty()) {
+        return;
       }
-      out.push_back(gotJ->second);
-    }
+      const int iatomID = nList[iatom][0];
+      auto gotI = yCloud.idIndexMap.find(iatomID);
+      if (gotI == yCloud.idIndexMap.end()) {
+        return;
+      }
+      auto &out = indexNlist[iatom];
+      out.reserve(nList[iatom].size());
+      out.push_back(gotI->second);
+      for (size_t j = 1; j < nList[iatom].size(); j++) {
+        auto gotJ = yCloud.idIndexMap.find(nList[iatom][j]);
+        if (gotJ == yCloud.idIndexMap.end()) {
+          continue;
+        }
+        out.push_back(gotJ->second);
+      }
+    });
   }
+  errors.rethrow();
 
   // Return the new neighbour list
   return indexNlist;
@@ -1626,36 +1640,41 @@ void fillGraphFromNom(
       }
     }
     out.assign(static_cast<std::size_t>(n), {});
+    seams::RegionErrors errors;
 #pragma omp parallel for schedule(static)
     for (int r = 0; r < n; r++) {
-      const std::size_t own = static_cast<std::size_t>(r) * static_cast<std::size_t>(k);
-      int nOwn = 0;
-      for (int t = 0; t < k; t++) {
-        nOwn += accepted[own + static_cast<std::size_t>(t)] != 0 ? 1 : 0;
-      }
-      const int b = inOff[static_cast<std::size_t>(r)];
-      const int e = inOff[static_cast<std::size_t>(r) + 1];
-      auto &row = out[static_cast<std::size_t>(r)];
-      row.reserve(static_cast<std::size_t>(1 + nOwn + (e - b)));
-      row.push_back(yCloud.pts[static_cast<std::size_t>(r)].atomID);
-      int t = 0;
-      int c = b;
-      while (t < k || c < e) {
-        const std::size_t mine = own + static_cast<std::size_t>(t);
-        if (t < k && accepted[mine] == 0) {
-          ++t;
-          continue;
+      errors.run([&] {
+        const std::size_t own = static_cast<std::size_t>(r) * static_cast<std::size_t>(k);
+        int nOwn = 0;
+        for (int t = 0; t < k; t++) {
+          nOwn += accepted[own + static_cast<std::size_t>(t)] != 0 ? 1 : 0;
         }
-        if (t < k && (c >= e || mine < static_cast<std::size_t>(inSlot[static_cast<std::size_t>(c)]))) {
-          row.push_back(yCloud.pts[static_cast<std::size_t>(nom[mine])].atomID);
-          ++t;
-        } else {
-          const int from = inSlot[static_cast<std::size_t>(c)] / k;
-          row.push_back(yCloud.pts[static_cast<std::size_t>(from)].atomID);
-          ++c;
+        const int b = inOff[static_cast<std::size_t>(r)];
+        const int e = inOff[static_cast<std::size_t>(r) + 1];
+        auto &row = out[static_cast<std::size_t>(r)];
+        row.reserve(static_cast<std::size_t>(1 + nOwn + (e - b)));
+        row.push_back(yCloud.pts[static_cast<std::size_t>(r)].atomID);
+        int t = 0;
+        int c = b;
+        while (t < k || c < e) {
+          const std::size_t mine = own + static_cast<std::size_t>(t);
+          if (t < k && accepted[mine] == 0) {
+            ++t;
+            continue;
+          }
+          if (t < k &&
+              (c >= e || mine < static_cast<std::size_t>(inSlot[static_cast<std::size_t>(c)]))) {
+            row.push_back(yCloud.pts[static_cast<std::size_t>(nom[mine])].atomID);
+            ++t;
+          } else {
+            const int from = inSlot[static_cast<std::size_t>(c)] / k;
+            row.push_back(yCloud.pts[static_cast<std::size_t>(from)].atomID);
+            ++c;
+          }
         }
-      }
+      });
     }
+    errors.rethrow();
     return;
   }
 #endif
@@ -1736,31 +1755,35 @@ void fillBothGraphsFromNom(
   const int team = omp_get_max_threads();
   std::vector<std::vector<Edge>> mutualParts(static_cast<std::size_t>(team));
   std::vector<std::vector<Edge>> uniParts(static_cast<std::size_t>(team));
+  seams::RegionErrors errors;
 #pragma omp parallel
   {
     std::vector<Edge> mutualLocal;
     std::vector<Edge> uniLocal;
 #pragma omp for schedule(static)
     for (int i = 0; i < n; i++) {
-      for (int t = 0; t < k; t++) {
-        const int j =
-            nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
-                static_cast<std::size_t>(t)];
-        if (j < 0 || j >= n || j == i) {
-          continue;
+      errors.run([&] {
+        for (int t = 0; t < k; t++) {
+          const int j =
+              nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                  static_cast<std::size_t>(t)];
+          if (j < 0 || j >= n || j == i) {
+            continue;
+          }
+          const bool listed = listsPacked(nom, n, k, j, i);
+          if (i < j && listed) {
+            mutualLocal.push_back(Edge{i, j});
+          }
+          if (i < j || !listed) {
+            uniLocal.push_back(Edge{i, j});
+          }
         }
-        const bool listed = listsPacked(nom, n, k, j, i);
-        if (i < j && listed) {
-          mutualLocal.push_back(Edge{i, j});
-        }
-        if (i < j || !listed) {
-          uniLocal.push_back(Edge{i, j});
-        }
-      }
+      });
     }
     mutualParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(mutualLocal);
     uniParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(uniLocal);
   }
+  errors.rethrow();
   auto replay = [&](const std::vector<std::vector<Edge>> &parts,
                     std::vector<std::vector<int>> &out) {
     out.assign(static_cast<std::size_t>(n), {});
@@ -2028,7 +2051,8 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
 #pragma omp parallel if (nI >= 256)
 #endif
   {
-    std::vector<double> row(nJ);
+    std::vector<double> row;
+    errors.run([&] { row.resize(nJ); });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
