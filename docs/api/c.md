@@ -3164,6 +3164,8 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
 seams_cv_destroy(cv);
 ```
 
@@ -3214,8 +3216,12 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
 int stale = 0;
 seams_cv_needs_rebuild(cv, sys, &stale);
+seams_cv_destroy(cv);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3256,7 +3262,10 @@ Units: as given for each parameter above.
 Example:
 
 ```c
-seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.5);
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
+seams_cv_destroy(cv);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3298,7 +3307,10 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
 seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1);
+seams_cv_destroy(cv);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3338,9 +3350,15 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
+seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1);
+seams_cv_state_clause(cv, 1, SEAMS_CV_STATE, 0, 0.0, 0.0, 0);
 double chi[2];
 size_t n_states = 0;
 seams_cv_states(cv, sys, chi, 2, &n_states, NULL, 0);
+seams_cv_destroy(cv);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3375,8 +3393,12 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
 size_t edges = 0, rings = 0, pairs = 0;
 seams_cv_topology(cv, &edges, &rings, &pairs);
+seams_cv_destroy(cv);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3418,8 +3440,12 @@ Units: as given for each parameter above.
 Example:
 
 ```c
+seams_cv *cv = NULL;
+seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
 double n6 = 0;
 seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0);
+seams_cv_destroy(cv);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -6548,8 +6574,8 @@ Units: as given for each parameter above.
 Example:
 
 ```c
-double s = 0, ds = 0;
-seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &s, &ds);
+double sw = 0, dsw = 0;
+seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.

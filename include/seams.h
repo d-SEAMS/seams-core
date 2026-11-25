@@ -1422,8 +1422,8 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * Safe from any thread.
  * @par Example
  * @code
- * double s = 0, ds = 0;
- * seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &s, &ds);
+ * double sw = 0, dsw = 0;
+ * seams_switch_rational(3.0, 0.5, 2.5, 6, 0, 3.3, 3.5, &sw, &dsw);
  * @endcode
  */
 SEAMS_API seams_status seams_switch_rational(double r, double r0, double d0, int n, int m,
@@ -1467,6 +1467,8 @@ SEAMS_API seams_status seams_cv_create(double r0, double d0, int n, int m, doubl
  * The caller must not use cv after this returns.
  * @par Example
  * @code
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
  * seams_cv_destroy(cv);
  * @endcode
  */
@@ -1501,7 +1503,10 @@ SEAMS_API void seams_cv_destroy(seams_cv *cv);
  * Exclusive use of cv. Read-only use of sys.
  * @par Example
  * @code
- * seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.5);
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+ * seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
+ * seams_cv_destroy(cv);
  * @endcode
  */
 SEAMS_API seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type,
@@ -1521,8 +1526,12 @@ SEAMS_API seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, i
  * Read-only: may run alongside other const calls on cv and sys.
  * @par Example
  * @code
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+ * seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
  * int stale = 0;
  * seams_cv_needs_rebuild(cv, sys, &stale);
+ * seams_cv_destroy(cv);
  * @endcode
  */
 SEAMS_API seams_status seams_cv_needs_rebuild(const seams_cv *cv, const seams_system *sys,
@@ -1542,8 +1551,12 @@ SEAMS_API seams_status seams_cv_needs_rebuild(const seams_cv *cv, const seams_sy
  * Read-only: may run alongside other const calls on cv.
  * @par Example
  * @code
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+ * seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
  * size_t edges = 0, rings = 0, pairs = 0;
  * seams_cv_topology(cv, &edges, &rings, &pairs);
+ * seams_cv_destroy(cv);
  * @endcode
  */
 SEAMS_API seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges,
@@ -1582,8 +1595,12 @@ SEAMS_API seams_status seams_cv_topology(const seams_cv *cv, size_t *n_edges,
  * Exclusive use of cv. Read-only use of sys.
  * @par Example
  * @code
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+ * seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
  * double n6 = 0;
  * seams_cv_value(cv, sys, SEAMS_CV_RING_COUNT, 6, &n6, NULL, 0);
+ * seams_cv_destroy(cv);
  * @endcode
  */
 SEAMS_API seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind,
@@ -1619,7 +1636,10 @@ SEAMS_API seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int
  * Exclusive use of cv.
  * @par Example
  * @code
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
  * seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1);
+ * seams_cv_destroy(cv);
  * @endcode
  */
 SEAMS_API seams_status seams_cv_state_clause(seams_cv *cv, int state, int kind, int arg,
@@ -1647,9 +1667,15 @@ SEAMS_API seams_status seams_cv_state_clause(seams_cv *cv, int state, int kind, 
  * Exclusive use of cv. Read-only use of sys.
  * @par Example
  * @code
+ * seams_cv *cv = NULL;
+ * seams_cv_create(0.3, 2.8, 6, 0, 2.9, 3.0, 6, &cv);
+ * seams_cv_rebuild(cv, sys, 0, NULL, 0, 0.1);
+ * seams_cv_state_clause(cv, 0, SEAMS_CV_RING_COUNT, 6, 40.0, 4.0, 1);
+ * seams_cv_state_clause(cv, 1, SEAMS_CV_STATE, 0, 0.0, 0.0, 0);
  * double chi[2];
  * size_t n_states = 0;
  * seams_cv_states(cv, sys, chi, 2, &n_states, NULL, 0);
+ * seams_cv_destroy(cv);
  * @endcode
  */
 SEAMS_API seams_status seams_cv_states(seams_cv *cv, const seams_system *sys, double *chi,
