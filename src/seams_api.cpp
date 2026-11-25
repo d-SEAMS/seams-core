@@ -1896,6 +1896,10 @@ void refine_ring_labels(const seams_rings *rings) {
         }
         release_rows(bySize[size]);
       }
+    } catch (const gen::mic::RangeError &) {
+      /* The prism geometry needs the minimum image, so a cell outside its
+         range is the caller's error, not a ring without a prism label. */
+      throw;
     } catch (const std::exception &) {
       /* Prism labels stay at the size or cage code already written. */
     }

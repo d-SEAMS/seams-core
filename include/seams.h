@@ -1234,8 +1234,8 @@ SEAMS_API seams_status seams_rings_histogram(const seams_rings *rings, int *coun
  * @param sizes One int per ring, or NULL.
  * @param symmetry One ::seams_ring_symmetry code per ring, or NULL.
  *        The two pointers may not both be NULL.
- * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_NOMEM,
- *         ::SEAMS_ERR_INTERNAL.
+ * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE,
+ *         ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety

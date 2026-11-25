@@ -187,7 +187,7 @@ Size and symmetry of each ring, without buffer lengths.
 ``symmetry``
     One ::seams_ring_symmetry code per ring, or NULL. The two pointers may not both be NULL.
 
-Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
 ABI 1 entry. Each non-NULL buffer has length seams_rings_count(rings). New callers use seams_rings_labels_n(), which checks the lengths.
 

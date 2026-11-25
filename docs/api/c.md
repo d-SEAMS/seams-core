@@ -5748,7 +5748,7 @@ Parameters: `rings`, `sizes`, `symmetry`.
 - `sizes`: One int per ring, or NULL.
 - `symmetry`: One ::seams_ring_symmetry code per ring, or NULL. The two pointers may not both be NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
 
 Ownership: The caller owns both arrays.
 
