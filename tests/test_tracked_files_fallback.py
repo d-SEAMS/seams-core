@@ -90,304 +90,422 @@ def _cp(args, code=0, stdout="", stderr=""):
     return subprocess.CompletedProcess(args=args, returncode=code, stdout=stdout, stderr=stderr)
 
 
-def _no_git_with_manifest() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/alpha.rst", "docs/guide.md", "README.md"])
 
-        def fake_run(*_args, **_kwargs):
-            raise FileNotFoundError("git")
+def _make_special_git_marker(root: Path, kind: str) -> None:
+    marker = root / ".git"
+    if kind == "fifo":
+        os.mkfifo(marker)
+    elif kind == "socket":
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
+            sock.bind(str(marker))
+    else:
+        raise RuntimeError("unknown special marker kind {}".format(kind))
 
-        with _PatchRun(fake_run):
-            rows = tracked_files.list_tracked(root, "docs/source")
-        _assert(rows == ["docs/source/alpha.rst"], "no-git manifest fallback did not match docs/source")
+
+_MANIFEST_ROW = ["docs/source/from-manifest.rst"]
+_DE_NOT_REPO = (
+    "Schwerwiegend: Kein Git-Repository (oder irgendeines der Elternverzeichnisse): .git"
+)
+_FR_NOT_REPO = (
+    "fatal\u00a0: ni ceci ni aucun de ses répertoires parents n'est un dépôt git\u00a0: .git"
+)
 
 
-def _inside_unrelated_git_tree() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        outer = Path(tmp) / "outer"
+def _git_outcome_cases():
+    """Git result to the rows or the error the caller must see.
+
+    The GIT_DIR scrub cases are a different contract and stay beside this table.
+    """
+    rows = _MANIFEST_ROW
+    plain = "plain"
+    return [
+        {
+            "name": "no-git manifest fallback",
+            "layout": plain,
+            "manifest": ["docs/source/alpha.rst", "docs/guide.md", "README.md"],
+            "git": "missing",
+            "expect": ("rows", ["docs/source/alpha.rst"]),
+        },
+        {
+            "name": "sdist under unrelated git tree",
+            "layout": "unrelated",
+            "manifest": rows,
+            "git": "outer-top",
+            "top": "str",
+            "expect": ("rows", ["docs/source/from-manifest.rst"]),
+        },
+        {
+            "name": "git and manifest missing",
+            "layout": plain,
+            "manifest": None,
+            "git": "missing",
+            "expect": ("error", RuntimeError, "missing"),
+        },
+        {
+            "name": "git toplevel prefers git rows",
+            "layout": plain,
+            "manifest": rows,
+            "git": "toplevel-git",
+            "expect": ("rows", ["docs/source/from-git.rst"]),
+        },
+        {
+            "name": "ls-files failure",
+            "layout": plain,
+            "manifest": rows,
+            "git": "toplevel-ls-fail",
+            "expect": ("error", RuntimeError, "ls-files failed"),
+        },
+        {
+            "name": "rev-parse exit 128 with .git directory",
+            "layout": "gitdir",
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": "fatal: detected dubious ownership in repository",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "rev-parse exit 128 with .git file",
+            "layout": "gitfile",
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": "fatal: not a git repository: /nonexistent/worktree",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "rev-parse exit 1 without marker",
+            "layout": plain,
+            "manifest": rows,
+            "git": "code",
+            "code": 1,
+            "stderr": "git failed with code 1",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "rev-parse exit 129 without marker",
+            "layout": plain,
+            "manifest": rows,
+            "git": "code",
+            "code": 129,
+            "stderr": "git failed with code 129",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "not a repository uses the manifest",
+            "layout": plain,
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": "fatal: not a git repository (or any of the parent directories): .git",
+            "expect": ("rows", ["docs/source/from-manifest.rst"]),
+        },
+        {
+            "name": "German not-a-repository uses the manifest",
+            "layout": plain,
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": _DE_NOT_REPO,
+            "stderr_lacks": "not a git repository",
+            "expect": ("rows", ["docs/source/from-manifest.rst"]),
+        },
+        {
+            "name": "French not-a-repository uses the manifest",
+            "layout": plain,
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": _FR_NOT_REPO,
+            "stderr_lacks": "not a git repository",
+            "expect": ("rows", ["docs/source/from-manifest.rst"]),
+        },
+        {
+            "name": "ls-files OSError",
+            "layout": plain,
+            "manifest": rows,
+            "git": "toplevel-oserror",
+            "expect": ("error", (OSError, RuntimeError), "ls-files"),
+        },
+        {
+            "name": "rev-parse probe is not caught",
+            "layout": plain,
+            "manifest": rows,
+            "git": "probe",
+            "expect": ("exact", RuntimeError, "rev-parse probe"),
+        },
+        {
+            "name": "unreadable manifest",
+            "layout": plain,
+            "manifest": rows,
+            "git": "missing",
+            "expect": ("unreadable",),
+        },
+        {
+            "name": "PermissionError launching git",
+            "layout": plain,
+            "manifest": rows,
+            "git": "permission",
+            "expect": ("error", PermissionError, None),
+        },
+        {
+            "name": "missing git with .git directory",
+            "layout": "gitdir",
+            "manifest": rows,
+            "git": "missing-errno",
+            "expect": ("error", FileNotFoundError, None),
+        },
+        {
+            "name": "missing git with .git file",
+            "layout": "gitfile",
+            "manifest": rows,
+            "git": "missing-errno",
+            "expect": ("error", FileNotFoundError, None),
+        },
+        {
+            "name": "dangling .git symlink",
+            "layout": "dangling",
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": "fatal: not a git repository",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "dangling marker inside an outer repo",
+            "layout": "outer-dangling",
+            "manifest": rows,
+            "git": "outer-top",
+            "expect": ("marker",),
+        },
+        {
+            "name": "empty .git inside an outer repo",
+            "layout": "outer-empty",
+            "manifest": rows,
+            "git": "outer-top",
+            "expect": ("marker",),
+        },
+        {
+            "name": "symlink marker inside an outer repo",
+            "layout": "outer-symlink",
+            "manifest": rows,
+            "git": "outer-top",
+            "expect": ("marker",),
+        },
+        {
+            "name": "fifo marker inside an outer repo",
+            "layout": "outer-fifo",
+            "manifest": rows,
+            "git": "outer-top",
+            "expect": ("marker",),
+        },
+        {
+            "name": "socket marker inside an outer repo",
+            "layout": "outer-socket",
+            "manifest": rows,
+            "git": "outer-top",
+            "expect": ("marker",),
+        },
+        {
+            "name": "fifo marker rev-parse 128",
+            "layout": "standalone",
+            "marker": "fifo",
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": "fatal: not a git repository",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "socket marker rev-parse 128",
+            "layout": "standalone",
+            "marker": "socket",
+            "manifest": rows,
+            "git": "code",
+            "code": 128,
+            "stderr": "fatal: not a git repository",
+            "expect": ("error", RuntimeError, "rev-parse failed"),
+        },
+        {
+            "name": "fifo marker missing git",
+            "layout": "standalone",
+            "marker": "fifo",
+            "manifest": rows,
+            "git": "missing-errno",
+            "expect": ("error", FileNotFoundError, None),
+        },
+        {
+            "name": "socket marker missing git",
+            "layout": "standalone",
+            "marker": "socket",
+            "manifest": rows,
+            "git": "missing-errno",
+            "expect": ("error", FileNotFoundError, None),
+        },
+        {
+            "name": "sibling prefix",
+            "layout": plain,
+            "manifest": ["docs/source/page.rst", "docs/sourcebook/page.rst"],
+            "git": "missing",
+            "expect": ("rows", ["docs/source/page.rst"]),
+        },
+    ]
+
+
+def _prepare_outcome(tmp: str, case: dict):
+    base = Path(tmp)
+    layout = case["layout"]
+    outer = None
+    if layout == "unrelated":
+        outer = base / "outer"
         outer.mkdir()
         (outer / ".git").mkdir()
         (outer / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
         (outer / ".git" / "objects").mkdir()
-        (outer / ".git" / "refs").mkdir()
         (outer / ".git" / "refs" / "heads").mkdir(parents=True)
-        inner = outer / "sdist"
-        inner.mkdir()
-        _write_manifest(inner, ["docs/source/from-manifest.rst"])
+        root = outer / "sdist"
+        root.mkdir()
+    elif layout.startswith("outer-"):
+        outer = base / "outer"
+        root = outer / "sdist"
+        root.mkdir(parents=True)
+        kind = layout.split("-", 1)[1]
+        if kind == "dangling":
+            (root / ".git").symlink_to(root / "missing-git-dir", target_is_directory=True)
+        elif kind == "empty":
+            (root / ".git").mkdir()
+        elif kind == "symlink":
+            plain = root / "plain-dir"
+            plain.mkdir()
+            (root / ".git").symlink_to(plain, target_is_directory=True)
+        elif kind in ("fifo", "socket"):
+            _make_special_git_marker(root, kind)
+        else:
+            raise RuntimeError("unknown layout {}".format(layout))
+    elif layout == "standalone":
+        root = base / "standalone"
+        root.mkdir()
+        _make_special_git_marker(root, case["marker"])
+    else:
+        root = base
+        if layout == "gitdir":
+            (root / ".git").mkdir()
+        elif layout == "gitfile":
+            (root / ".git").write_text("gitdir: /nonexistent/worktree\n", encoding="utf-8")
+        elif layout == "dangling":
+            (root / ".git").symlink_to(root / "missing-git-dir", target_is_directory=True)
+        elif layout != "plain":
+            raise RuntimeError("unknown layout {}".format(layout))
+    if case["manifest"] is not None:
+        _write_manifest(root, case["manifest"])
+    return root, outer
 
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-            if args[3:] == ["rev-parse", "--show-toplevel"]:
-                out = str(outer) + ("\n" if text else "")
-                return _cp(args, stdout=out)
-            raise RuntimeError("unexpected call {}".format(args))
 
-        with _PatchRun(fake_run):
-            rows = tracked_files.list_tracked(inner, "docs/source")
-        _assert(
-            rows == ["docs/source/from-manifest.rst"],
-            "sdist under unrelated git tree did not use manifest",
-        )
-
-
-def _no_git_and_no_manifest() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-
-        def fake_run(*_args, **_kwargs):
+def _fake_git(case: dict, root: Path, outer):
+    def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+        kind = case["git"]
+        if kind == "missing":
             raise FileNotFoundError("git")
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except RuntimeError as exc:
-                _assert("missing" in str(exc), "missing manifest error is not loud enough")
-            else:
-                raise RuntimeError("expected RuntimeError when git and manifest are unavailable")
-
-
-def _git_toplevel_uses_git_not_manifest() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-        tracked = b"docs/source/from-git.rst\0"
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+        if kind == "missing-errno":
+            raise FileNotFoundError(2, "No such file or directory", "git")
+        if kind == "permission":
+            raise PermissionError("git")
+        if kind == "probe":
+            raise RuntimeError("rev-parse probe")
+        if kind == "code":
+            err = case["stderr"]
+            stderr = err if text else err.encode()
+            return _cp(args, code=case["code"], stderr=stderr)
+        if kind == "toplevel-git":
             if args[3:] == ["rev-parse", "--show-toplevel"]:
-                out = str(root) + ("\n" if text else "")
-                return _cp(args, stdout=out)
+                return _cp(args, stdout=str(root) + ("\n" if text else ""))
             if args[3] == "ls-files":
-                return _cp(args, stdout=tracked)
+                return _cp(args, stdout=b"docs/source/from-git.rst\0")
             raise RuntimeError("unexpected call {}".format(args))
-
-        with _PatchRun(fake_run):
-            rows = tracked_files.list_tracked(root, "docs/source")
-        _assert(rows == ["docs/source/from-git.rst"], "git-tracked rows were not preferred at git toplevel")
-
-
-def _git_ls_files_failure_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+        if kind == "toplevel-ls-fail":
             if args[3:] == ["rev-parse", "--show-toplevel"]:
-                out = str(root) + ("\n" if text else "")
-                return _cp(args, stdout=out)
+                return _cp(args, stdout=str(root) + ("\n" if text else ""))
             if args[3] == "ls-files":
-                err = "fatal: index file corrupt"
-                return _cp(args, code=128, stderr=err.encode())
+                return _cp(args, code=128, stderr=b"fatal: index file corrupt")
             raise RuntimeError("unexpected call {}".format(args))
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except RuntimeError as exc:
-                _assert("ls-files failed" in str(exc), "ls-files failure was not raised")
-            else:
-                raise RuntimeError("expected RuntimeError on git ls-files failure")
-
-
-def _rev_parse_exit_128_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        (root / ".git").mkdir()
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-            err = "fatal: detected dubious ownership in repository"
-            return _cp(args, code=128, stderr=err)
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except RuntimeError as exc:
-                _assert("rev-parse failed" in str(exc), "rev-parse exit-128 was not raised")
-            else:
-                raise RuntimeError("expected RuntimeError on rev-parse exit-128")
-
-
-def _rev_parse_exit_128_with_git_file_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        (root / ".git").write_text("gitdir: /nonexistent/worktree\n", encoding="utf-8")
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-            err = "fatal: not a git repository: /nonexistent/worktree"
-            return _cp(args, code=128, stderr=err)
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except RuntimeError as exc:
-                _assert("rev-parse failed" in str(exc), "rev-parse exit-128 with .git file was not raised")
-            else:
-                raise RuntimeError("expected RuntimeError on rev-parse exit-128 with .git file")
-
-
-def _rev_parse_non_128_without_marker_raises() -> None:
-    for code in (1, 129):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-            def fake_run(args, check=False, capture_output=False, text=False, env=None, code=code, **_kwargs):
-                return _cp(args, code=code, stderr="git failed with code {}".format(code))
-
-            with _PatchRun(fake_run):
-                try:
-                    tracked_files.list_tracked(root, "docs/source")
-                except RuntimeError as exc:
-                    _assert(
-                        "rev-parse failed" in str(exc),
-                        "rev-parse exit-{} was not raised".format(code),
-                    )
-                else:
-                    raise RuntimeError(
-                        "expected RuntimeError on rev-parse exit-{} without .git marker".format(code)
-                    )
-
-
-def _not_git_repo_uses_manifest() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-            err = "fatal: not a git repository (or any of the parent directories): .git"
-            return _cp(args, code=128, stderr=err)
-
-        with _PatchRun(fake_run):
-            rows = tracked_files.list_tracked(root, "docs/source")
-        _assert(rows == ["docs/source/from-manifest.rst"], "not-a-repository should use manifest")
-
-
-def _localized_not_a_repo_uses_manifest() -> None:
-    messages = (
-        "Schwerwiegend: Kein Git-Repository (oder irgendeines der Elternverzeichnisse): .git",
-        "fatal\u00a0: ni ceci ni aucun de ses répertoires parents n'est un dépôt git\u00a0: .git",
-    )
-    for err in messages:
-        _assert(
-            "not a git repository" not in err.lower(),
-            "localized stderr accidentally contains the English phrase",
-        )
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-            def fake_run(args, check=False, capture_output=False, text=False, env=None, err=err, **_kwargs):
-                return _cp(args, code=128, stderr=err)
-
-            with _PatchRun(fake_run):
-                rows = tracked_files.list_tracked(root, "docs/source")
-            _assert(
-                rows == ["docs/source/from-manifest.rst"],
-                "localized not-a-repository error should use the manifest: {}".format(err),
-            )
-
-
-def _ls_files_oserror_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
+        if kind == "toplevel-oserror":
             if args[3:] == ["rev-parse", "--show-toplevel"]:
-                out = str(root) + ("\n" if text else "")
-                return _cp(args, stdout=out)
+                return _cp(args, stdout=str(root) + ("\n" if text else ""))
             if args[3] == "ls-files":
                 raise OSError("ls-files")
             raise RuntimeError("unexpected call {}".format(args))
+        if kind == "outer-top":
+            if args[3:] == ["rev-parse", "--show-toplevel"]:
+                shown = outer if case.get("top") == "str" else outer.resolve()
+                return _cp(args, stdout=str(shown) + ("\n" if text else ""))
+            raise RuntimeError("unexpected call {}".format(args))
+        raise RuntimeError("unknown git kind {}".format(kind))
 
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except (OSError, RuntimeError) as exc:
-                _assert("ls-files" in str(exc), "ls-files OSError was not raised")
-            else:
-                raise RuntimeError("ls-files OSError returned rows")
+    return fake_run
 
 
-def _rev_parse_probe_does_not_catch_exception() -> None:
+def _one_git_outcome(case: dict) -> None:
+    lacks = case.get("stderr_lacks")
+    if lacks is not None:
+        _assert(
+            lacks not in case["stderr"].lower(),
+            "localized stderr accidentally contains the English phrase",
+        )
     with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(*_args, **_kwargs):
-            raise RuntimeError("rev-parse probe")
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except RuntimeError as exc:
-                _assert(str(exc) == "rev-parse probe", "rev-parse probe swallowed Exception")
-            else:
-                raise RuntimeError("rev-parse probe caught Exception and fell back")
-
-
-def _unreadable_manifest_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-        path = root / tracked_files.MANIFEST
-
-        def fake_run(*_args, **_kwargs):
-            raise FileNotFoundError("git")
-
-        err = PermissionError(13, "Permission denied", str(path))
-        with _PatchRun(fake_run), _PatchReadBytes(path, err) as patch_read:
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except PermissionError:
-                pass
-            else:
-                raise RuntimeError("unreadable manifest returned rows")
-            _assert(patch_read.calls == 1, "unreadable-manifest check did not invoke read_bytes")
-
-
-def _permission_error_launching_git_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(*_args, **_kwargs):
-            raise PermissionError("git")
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except PermissionError:
-                pass
-            else:
-                raise RuntimeError("PermissionError launching git fell back to the manifest")
-
-
-def _git_marker_missing_git_raises() -> None:
-    for marker_kind in ("dir", "file"):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            if marker_kind == "dir":
-                (root / ".git").mkdir()
-            else:
-                (root / ".git").write_text("gitdir: /nonexistent/worktree\n", encoding="utf-8")
-            _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-            def fake_run(*_args, **_kwargs):
-                raise FileNotFoundError(2, "No such file or directory", "git")
-
-            with _PatchRun(fake_run):
+        root, outer = _prepare_outcome(tmp, case)
+        fake = _fake_git(case, root, outer)
+        expect = case["expect"]
+        kind = expect[0]
+        if kind == "rows":
+            with _PatchRun(fake):
+                got = tracked_files.list_tracked(root, "docs/source")
+            _assert(got == expect[1], "{}: {}".format(case["name"], got))
+            return
+        if kind == "unreadable":
+            path = root / tracked_files.MANIFEST
+            err = PermissionError(13, "Permission denied", str(path))
+            with _PatchRun(fake), _PatchReadBytes(path, err) as patch_read:
                 try:
                     tracked_files.list_tracked(root, "docs/source")
-                except FileNotFoundError:
+                except PermissionError:
                     pass
                 else:
-                    raise RuntimeError(
-                        "FileNotFoundError with .git {} marker fell back to the manifest".format(
-                            marker_kind
-                        )
+                    raise RuntimeError("unreadable manifest returned rows")
+                _assert(patch_read.calls == 1, "unreadable-manifest check did not invoke read_bytes")
+            return
+        if kind == "marker":
+            with _PatchRun(fake):
+                try:
+                    tracked_files.list_tracked(root, "docs/source")
+                except RuntimeError as exc:
+                    text = str(exc)
+                    _assert(
+                        "has a .git marker" in text,
+                        "{} did not name the marker: {}".format(case["name"], text),
                     )
+                    _assert(
+                        str(outer.resolve()) in text,
+                        "{} did not name the resolved toplevel: {}".format(case["name"], text),
+                    )
+                else:
+                    raise RuntimeError("{} silently used the manifest".format(case["name"]))
+            return
+        exc_type, needle = expect[1], expect[2]
+        with _PatchRun(fake):
+            try:
+                tracked_files.list_tracked(root, "docs/source")
+            except exc_type as exc:
+                if kind == "exact":
+                    _assert(str(exc) == needle, "{}: {}".format(case["name"], exc))
+                elif needle is not None:
+                    _assert(needle in str(exc), "{}: {}".format(case["name"], exc))
+            else:
+                raise RuntimeError("{} did not raise".format(case["name"]))
+
+
+def _git_result_outcomes() -> None:
+    for case in _git_outcome_cases():
+        _one_git_outcome(case)
 
 
 def _git_subprocess_env_scrubs_git_vars() -> None:
@@ -578,149 +696,6 @@ def _git_repo_env_scrubs_every_repo_selecting_var() -> None:
             )
 
 
-def _rev_parse_exit_128_with_dangling_git_symlink_raises() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        (root / ".git").symlink_to(root / "missing-git-dir", target_is_directory=True)
-        _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-        def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-            return _cp(args, code=128, stderr="fatal: not a git repository")
-
-        with _PatchRun(fake_run):
-            try:
-                tracked_files.list_tracked(root, "docs/source")
-            except RuntimeError as exc:
-                _assert("rev-parse failed" in str(exc), "dangling .git symlink did not raise rev-parse failure")
-            else:
-                raise RuntimeError("expected RuntimeError on rev-parse exit-128 with dangling .git symlink")
-
-
-def _nonrepo_marker_inside_outer_repo_raises() -> None:
-    for variant in ("dangling", "emptydir", "symlink-nonrepo"):
-        with tempfile.TemporaryDirectory() as tmp:
-            outer = Path(tmp) / "outer"
-            root = outer / "sdist"
-            root.mkdir(parents=True)
-            if variant == "dangling":
-                (root / ".git").symlink_to(root / "missing-git-dir", target_is_directory=True)
-            elif variant == "emptydir":
-                (root / ".git").mkdir()
-            else:
-                plain = root / "plain-dir"
-                plain.mkdir()
-                (root / ".git").symlink_to(plain, target_is_directory=True)
-            _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-            def fake_run(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-                if args[3:] == ["rev-parse", "--show-toplevel"]:
-                    out = str(outer.resolve()) + ("\n" if text else "")
-                    return _cp(args, stdout=out)
-                raise RuntimeError("unexpected call {}".format(args))
-
-            with _PatchRun(fake_run):
-                try:
-                    tracked_files.list_tracked(root, "docs/source")
-                except RuntimeError as exc:
-                    _assert(
-                        "has a .git marker" in str(exc),
-                        "{} marker inside an outer repo did not name the marker: {}".format(variant, exc),
-                    )
-                    _assert(
-                        str(outer.resolve()) in str(exc),
-                        "{} marker inside an outer repo did not name the resolved toplevel: {}".format(
-                            variant, exc
-                        ),
-                    )
-                else:
-                    raise RuntimeError(
-                        "{} .git marker inside an outer repo silently used the manifest".format(variant)
-                    )
-
-
-def _make_special_git_marker(root: Path, kind: str) -> None:
-    marker = root / ".git"
-    if kind == "fifo":
-        os.mkfifo(marker)
-    elif kind == "socket":
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as sock:
-            sock.bind(str(marker))
-    else:
-        raise RuntimeError("unknown special marker kind {}".format(kind))
-
-
-def _special_file_git_marker_raises() -> None:
-    for kind in ("fifo", "socket"):
-        with tempfile.TemporaryDirectory() as tmp:
-            outer = Path(tmp) / "outer"
-            root = outer / "sdist"
-            root.mkdir(parents=True)
-            _make_special_git_marker(root, kind)
-            _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-            def fake_outer(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-                if args[3:] == ["rev-parse", "--show-toplevel"]:
-                    out = str(outer.resolve()) + ("\n" if text else "")
-                    return _cp(args, stdout=out)
-                raise RuntimeError("unexpected call {}".format(args))
-
-            with _PatchRun(fake_outer):
-                try:
-                    tracked_files.list_tracked(root, "docs/source")
-                except RuntimeError as exc:
-                    _assert(
-                        "has a .git marker" in str(exc),
-                        "{} marker inside an outer repo did not name the marker: {}".format(kind, exc),
-                    )
-                    _assert(
-                        str(outer.resolve()) in str(exc),
-                        "{} marker inside an outer repo did not name the resolved toplevel: {}".format(
-                            kind, exc
-                        ),
-                    )
-                else:
-                    raise RuntimeError(
-                        "{} .git marker inside an outer repo silently used the manifest".format(kind)
-                    )
-
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp) / "standalone"
-            root.mkdir()
-            _make_special_git_marker(root, kind)
-            _write_manifest(root, ["docs/source/from-manifest.rst"])
-
-            def fake_128(args, check=False, capture_output=False, text=False, env=None, **_kwargs):
-                return _cp(args, code=128, stderr="fatal: not a git repository")
-
-            with _PatchRun(fake_128):
-                try:
-                    tracked_files.list_tracked(root, "docs/source")
-                except RuntimeError as exc:
-                    _assert(
-                        "rev-parse failed" in str(exc),
-                        "{} marker with rev-parse exit 128 did not raise rev-parse failure: {}".format(
-                            kind, exc
-                        ),
-                    )
-                else:
-                    raise RuntimeError(
-                        "{} .git marker with rev-parse exit 128 silently used the manifest".format(kind)
-                    )
-
-            def fake_missing(*_args, **_kwargs):
-                raise FileNotFoundError(2, "No such file or directory", "git")
-
-            with _PatchRun(fake_missing):
-                try:
-                    tracked_files.list_tracked(root, "docs/source")
-                except FileNotFoundError:
-                    pass
-                else:
-                    raise RuntimeError(
-                        "{} .git marker with missing git silently used the manifest".format(kind)
-                    )
-
-
 def _docs_prose_broken_git_does_not_pass_stale_manifest() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp).resolve()
@@ -892,44 +867,14 @@ def _docs_prose_inherited_git_dir_outer_repo_fails() -> None:
         )
 
 
-def _sibling_prefix_rejected() -> None:
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        _write_manifest(root, ["docs/source/page.rst", "docs/sourcebook/page.rst"])
-
-        def fake_run(*_args, **_kwargs):
-            raise FileNotFoundError("git")
-
-        with _PatchRun(fake_run):
-            rows = tracked_files.list_tracked(root, "docs/source")
-        _assert(rows == ["docs/source/page.rst"], "sibling prefix docs/sourcebook should not match docs/source")
-
 
 def main() -> int:
-    _no_git_with_manifest()
-    _inside_unrelated_git_tree()
-    _no_git_and_no_manifest()
-    _git_toplevel_uses_git_not_manifest()
-    _git_ls_files_failure_raises()
-    _rev_parse_exit_128_raises()
-    _rev_parse_exit_128_with_git_file_raises()
-    _rev_parse_non_128_without_marker_raises()
-    _not_git_repo_uses_manifest()
-    _localized_not_a_repo_uses_manifest()
-    _ls_files_oserror_raises()
-    _rev_parse_probe_does_not_catch_exception()
-    _unreadable_manifest_raises()
-    _permission_error_launching_git_raises()
-    _git_marker_missing_git_raises()
+    _git_result_outcomes()
     _git_subprocess_env_scrubs_git_vars()
     _git_config_reaches_subprocess_and_index_file_is_scrubbed()
     _git_repo_env_scrubs_every_repo_selecting_var()
-    _rev_parse_exit_128_with_dangling_git_symlink_raises()
-    _nonrepo_marker_inside_outer_repo_raises()
-    _special_file_git_marker_raises()
     _docs_prose_broken_git_does_not_pass_stale_manifest()
     _docs_prose_inherited_git_dir_outer_repo_fails()
-    _sibling_prefix_rejected()
     print("tracked_files fallback checks ok")
     return 0
 
