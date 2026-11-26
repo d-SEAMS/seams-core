@@ -35,7 +35,7 @@ const backward_cpp_tag_sha = "3bb9240cb15459768adb3e7d963a20e1523a6294"
 
 # The pinned main commit subprojects/linkcell.wrap names. linkcell is
 # the neighbour backend and is always built; its meson.build drives cargo.
-const linkcell_sha = "0bc73576ceb4ea79909a3ad7a7931275b59a9fe4"
+const linkcell_sha = "f5ea5d6f0cc490686daec5e8352fdee8bc9b2314"
 
 sources = [
     GitSource("https://github.com/d-SEAMS/seams-core.git", tag_sha),
@@ -56,7 +56,9 @@ sources = [
 # backward-cpp already on disk and the nodownload below never applies to it.
 script = raw"""
 cd ${WORKSPACE}/srcdir/seams-core
-patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-exception-typeinfo.patch
+# linkcell's src/error.cpp is already the key function at this pin.
+# Meson builds it as the shared library linkcell_eh. nodownload does
+# not re-apply a wrap diff, and this script does not patch the tree.
 
 meson setup build \
     --cross-file="${MESON_TARGET_TOOLCHAIN}" \
