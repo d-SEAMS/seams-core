@@ -1629,35 +1629,30 @@ TEST_CASE("a directory and a truncated timestep header", "[seams_input]") {
   fs::remove_all(dir);
 }
 
-TEST_CASE("a short xyz names the missing atoms", "[seams_input]") {
-  const auto path = dseams_test::freshFile("dseams_short.xyz");
-  {
-    std::ofstream out(path);
-    out << "3\ncomment\nO 0 0 0\n";
+TEST_CASE("an xyz names a truncated body or a bad header", "[seams_input]") {
+  struct Row {
+    const char *bytes;
+    const char *sentence;
+  };
+  const Row rows[] = {
+      {"3\ncomment\nO 0 0 0\n", "XYZ frame is truncated: expected 3 atoms, read 1."},
+      {"", "XYZ header is not an atom count."},
+      {"this is not an xyz file\n", "XYZ header is not an atom count."},
+  };
+  for (const Row &row : rows) {
+    const auto path = dseams_test::freshFile("dseams_xyz_header.xyz");
+    {
+      std::ofstream out(path);
+      out << row.bytes;
+    }
+    try {
+      sinp::readXYZ(path.string());
+      FAIL(std::string("xyz must not come back as a frame: ") + row.sentence);
+    } catch (const std::runtime_error &err) {
+      REQUIRE(std::string(err.what()) == row.sentence);
+    }
+    fs::remove(path);
   }
-  try {
-    sinp::readXYZ(path.string());
-    FAIL("a short xyz must not come back as a frame");
-  } catch (const std::runtime_error &err) {
-    REQUIRE(std::string(err.what()) ==
-            "XYZ frame is truncated: expected 3 atoms, read 1.");
-  }
-  fs::remove(path);
-}
-
-TEST_CASE("an empty xyz names the header", "[seams_input]") {
-  const auto path = dseams_test::freshFile("dseams_empty.xyz");
-  {
-    std::ofstream out(path);
-    out << "";
-  }
-  try {
-    sinp::readXYZ(path.string());
-    FAIL("an empty xyz must not come back as a frame");
-  } catch (const std::runtime_error &err) {
-    REQUIRE(std::string(err.what()) == "XYZ header is not an atom count.");
-  }
-  fs::remove(path);
 }
 
 TEST_CASE("an xyz header past the reader limit is refused", "[seams_input][reader_limit]") {
@@ -1686,21 +1681,6 @@ TEST_CASE("a dump header past the reader limit is refused", "[seams_input][reade
   }
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   REQUIRE_THROWS_AS(sinp::readLammpsTrj(path.string(), 1, cloud), std::runtime_error);
-  fs::remove(path);
-}
-
-TEST_CASE("a junk xyz header names the failure", "[seams_input]") {
-  const auto path = dseams_test::freshFile("dseams_junk.xyz");
-  {
-    std::ofstream out(path);
-    out << "this is not an xyz file\n";
-  }
-  try {
-    sinp::readXYZ(path.string());
-    FAIL("a junk xyz must not come back as a frame");
-  } catch (const std::runtime_error &err) {
-    REQUIRE(std::string(err.what()) == "XYZ header is not an atom count.");
-  }
   fs::remove(path);
 }
 
