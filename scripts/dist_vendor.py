@@ -95,8 +95,51 @@ def lock_sourced_crates(lock_text):
     return crates
 
 
+def cargo_package_identity(crate_dir):
+    """Name and version from a vendored crate's [package] table.
+
+    An unversioned vendor/<name> directory is one crate. Its Cargo.toml
+    is the version that directory satisfies; a second lock entry needs
+    cargo's vendor/<name>-<version> directory.
+    """
+    path = Path(crate_dir) / "Cargo.toml"
+    if not path.is_file():
+        return None
+    section = None
+    name = version = None
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            section = line[1:-1].strip()
+            continue
+        if section != "package" or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        else:
+            continue
+        if key == "name":
+            name = value
+        elif key == "version":
+            version = value
+    if name and version:
+        return name, version
+    return None
+
+
 def vendored_crate_present(vendor, name, version):
-    return (vendor / name).is_dir() or (vendor / "{}-{}".format(name, version)).is_dir()
+    """True when vendor holds this lock entry's name and version."""
+    versioned = vendor / "{}-{}".format(name, version)
+    plain = vendor / name
+    crate = versioned if versioned.is_dir() else plain
+    if not crate.is_dir():
+        return False
+    return cargo_package_identity(crate) == (name, version)
 
 
 def require_lock_vendored(project):

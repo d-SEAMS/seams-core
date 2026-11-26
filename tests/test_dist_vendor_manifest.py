@@ -127,14 +127,48 @@ def _lock_names_come_from_the_lock() -> None:
     )
 
 
+def _crate(directory: Path, name: str, version: str) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / "Cargo.toml").write_text(
+        '[package]\nname = "{}"\nversion = "{}"\n'.format(name, version),
+        encoding="utf-8",
+    )
+
+
 def _vendor_must_hold_every_lock_crate() -> None:
     with tempfile.TemporaryDirectory() as tmp:
         project = Path(tmp) / "linkcell"
         project.mkdir()
         (project / "Cargo.lock").write_text(LOCK_FIXTURE, encoding="utf-8")
         _assert_raises("cfg-if 1.0.5", lambda: dist_vendor.require_lock_vendored(project))
-        for name in ("cfg-if", "wasip2"):
-            (project / "vendor" / name).mkdir(parents=True)
+        vendor = project / "vendor"
+        _crate(vendor / "cfg-if", "cfg-if", "1.0.5")
+        _crate(vendor / "wasip2", "wasip2", "1.0.4+wasi-0.2.12")
+        dist_vendor.require_lock_vendored(project)
+
+
+DUP_LOCK = LOCK_FIXTURE + """
+[[package]]
+name = "cfg-if"
+version = "1.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+"""
+
+
+def _unversioned_dir_does_not_satisfy_another_version() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        project = Path(tmp) / "linkcell"
+        project.mkdir()
+        (project / "Cargo.lock").write_text(DUP_LOCK, encoding="utf-8")
+        vendor = project / "vendor"
+        _crate(vendor / "cfg-if", "cfg-if", "1.0.5")
+        _crate(vendor / "wasip2", "wasip2", "1.0.4+wasi-0.2.12")
+        _assert_raises("cfg-if 1.0.4", lambda: dist_vendor.require_lock_vendored(project))
+        _crate(vendor / "cfg-if-1.0.4", "cfg-if", "9.9.9")
+        _assert_raises("cfg-if 1.0.4", lambda: dist_vendor.require_lock_vendored(project))
+        _crate(vendor / "cfg-if-1.0.4", "other", "1.0.4")
+        _assert_raises("cfg-if 1.0.4", lambda: dist_vendor.require_lock_vendored(project))
+        _crate(vendor / "cfg-if-1.0.4", "cfg-if", "1.0.4")
         dist_vendor.require_lock_vendored(project)
 
 
@@ -144,8 +178,8 @@ def _install_copies_the_vendored_tree() -> None:
         dist = base / "dist"
         dest = base / "dest"
         src = dist / "subprojects" / "linkcell"
-        (src / "vendor" / "cfg-if").mkdir(parents=True)
-        (src / "vendor" / "wasip2").mkdir()
+        _crate(src / "vendor" / "cfg-if", "cfg-if", "1.0.5")
+        _crate(src / "vendor" / "wasip2", "wasip2", "1.0.4+wasi-0.2.12")
         (src / ".cargo").mkdir()
         (src / ".cargo" / "config.toml").write_text(dist_vendor.VENDOR_CONFIG, encoding="utf-8")
         (src / "Cargo.lock").write_text(LOCK_FIXTURE, encoding="utf-8")
@@ -178,6 +212,7 @@ def main() -> int:
     _foreign_git_dir_and_index_are_ignored()
     _lock_names_come_from_the_lock()
     _vendor_must_hold_every_lock_crate()
+    _unversioned_dir_does_not_satisfy_another_version()
     _install_copies_the_vendored_tree()
     _install_rejects_an_empty_dist()
     print("dist_vendor manifest checks ok")
