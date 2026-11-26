@@ -558,7 +558,8 @@ TEST_CASE("writeHisto writes cij q3 q6 files", "[seams_output]") {
     }
   }
 
-  // writeHisto writes to CWD, so we check it doesn't crash
+  // writeHisto appends cij.txt, q3.txt and q6.txt in the working directory.
+  dseams_test::PrivateCwd privateOutput;
   int ret = sout::writeHisto(cloud, nList, avgQ6);
   REQUIRE(ret == 0);
 

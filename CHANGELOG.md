@@ -44,7 +44,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `seams_rings_labels` and `seams_rings_labels_n` return `SEAMS_ERR_RANGE` when the prism pass meets a minimum-image range error, instead of returning the size and cage labels without the prism codes.
 - libyodaLib no longer defines weak fallbacks for `lc_set_threads`, `lc_num_threads`, `lc_set_places` and `lc_owned_mask`. Linkcell 0.6.0, the oldest supported release, exports all four, and against a shared liblinkcell the dynamic linker bound libyodaLib's calls to its own fallbacks, so the thread width never reached Linkcell.
 
-
 ## [2.14.2] - 2026-11-19
 
 ### Added
