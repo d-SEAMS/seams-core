@@ -24,6 +24,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <random>
 #include <set>
@@ -53,6 +54,17 @@ void wrap(Frame &f) {
   }
 }
 
+// Uniform [-amp, amp) from two words of mt19937. The engine sequence is
+// fixed by the standard; std::uniform_real_distribution is not, so the same
+// seed must not go through it.
+double uniformDisplacement(std::mt19937 &rng, double amp) {
+  const auto lo = static_cast<std::uint64_t>(rng());
+  const auto hi = static_cast<std::uint64_t>(rng());
+  const auto bits = ((hi << 32) | lo) >> 11;
+  const double unit = static_cast<double>(bits) * 0x1.0p-53;
+  return (unit * 2.0 - 1.0) * amp;
+}
+
 // Ideal ice Ih with every coordinate moved by up to amp, so that bond
 // lengths spread over the soft part of the switch.
 Frame jitteredIce(int nx, int ny, int nz, double amp, unsigned seed) {
@@ -62,9 +74,8 @@ Frame jitteredIce(int nx, int ny, int nz, double amp, unsigned seed) {
   std::copy(cell.box9, cell.box9 + 9, f.box9);
   f.n = static_cast<std::size_t>(cell.n);
   std::mt19937 rng(seed);
-  std::uniform_real_distribution<double> u(-amp, amp);
   for (double &x : f.xyz) {
-    x += u(rng);
+    x += uniformDisplacement(rng, amp);
   }
   wrap(f);
   return f;
@@ -131,6 +142,29 @@ void wrapTilted(Frame &f) {
     p[1] = f.box9[1] + ly * sy + yz * sz;
     p[2] = f.box9[2] + lz * sz;
   }
+}
+
+// Atoms whose fractional coordinates lie outside [0, 1), the ones
+// wrapTilted moves through a face. A bitwise compare of the wrapped
+// Cartesian point also counts a round trip that a contracted multiply-add
+// perturbs, which on macOS wrapped 26 of 31 and failed the precondition.
+std::size_t tiltedFacesCrossed(const Frame &f) {
+  const double lx = f.box9[3];
+  const double ly = f.box9[4];
+  const double lz = f.box9[5];
+  const double xy = f.box9[6];
+  const double xz = f.box9[7];
+  const double yz = f.box9[8];
+  std::size_t crossed = 0;
+  for (std::size_t i = 0; i < f.n; ++i) {
+    const double *p = f.xyz.data() + 3 * i;
+    const double sz = (p[2] - f.box9[2]) / lz;
+    const double sy = (p[1] - f.box9[1] - yz * sz) / ly;
+    const double sx = (p[0] - f.box9[0] - xy * sy - xz * sz) / lx;
+    crossed += static_cast<std::size_t>(sx < 0.0 || sx >= 1.0 || sy < 0.0 || sy >= 1.0 ||
+                                        sz < 0.0 || sz >= 1.0);
+  }
+  return crossed;
 }
 
 struct Api {
@@ -758,16 +792,11 @@ TEST_CASE("a cluster in a triclinic cell has the values and gradients of the cub
   const Frame cubic = iceCluster(6.5, 30.0, face, 0.15, 11);
   Frame tilted = ball;
   std::copy(cell, cell + 9, tilted.box9);
-  wrapTilted(tilted);
-  std::size_t moved = 0;
-  for (std::size_t i = 0; i < ball.n; ++i) {
-    moved += static_cast<std::size_t>(tilted.xyz[3 * i] != ball.xyz[3 * i] ||
-                                      tilted.xyz[3 * i + 1] != ball.xyz[3 * i + 1] ||
-                                      tilted.xyz[3 * i + 2] != ball.xyz[3 * i + 2]);
-  }
+  const std::size_t moved = tiltedFacesCrossed(tilted);
   INFO("atoms wrapped through a tilted face: " << moved << " of " << ball.n);
   REQUIRE(moved > 5);
   REQUIRE(moved + 5 < ball.n);
+  wrapTilted(tilted);
   Api a(cubic, kR0, kD0, kN, kM, kOn, kMax, 6);
   Api b(tilted, kR0, kD0, kN, kM, kOn, kMax, 6);
   a.rebuild(0.4);
