@@ -19,6 +19,7 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <filesystem>
 #include <iostream>
 #include <sstream>
@@ -28,9 +29,8 @@
 
 #ifdef SEAMS_HAS_MINIMAGE
 #include <minimage.h>
-#else
-#include <euclidean_mic.hpp>
 #endif
+#include <euclidean_mic.hpp>
 
 // C++20
 #include <numbers>
@@ -201,7 +201,7 @@ makeFracBox(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
 // Displacement from (xj, yj, zj) to (xi, yi, zi). Orthorhombic axes wrap
 // independently. A tilt box wraps the fractional difference and maps it
 // back through H. That vector is the Euclidean minimum image while its
-// length stays below half the shortest edge.
+// length stays inside the Smith ball, half the narrowest face separation.
 inline std::array<double, 3> fracDelta(const FracBox &b, double xi, double yi,
                                        double zi, double xj, double yj,
                                        double zj) {
@@ -241,49 +241,52 @@ inline double fracDistSq(const FracBox &b, double xi, double yi, double zi,
 // ball is a fractional wrap. An orthorhombic wrap is that image on every
 // axis, including past half an edge.
 inline bool smithInside(const FracBox &b, double r2) {
-  return b.ok && (!b.triclinic || std::sqrt(r2) + 1e-12 < b.halfMin);
+  return b.ok && (!b.triclinic || std::sqrt(r2) < b.halfMin * (1.0 - 1e-12));
 }
 
-// Exact Euclidean minimum-image refinement of a triclinic displacement vector
-// when it lies outside the Smith ball. Works with either minimage or the
-// built-in Selling superbasis fallback.
+// The fractional wrap is the minimum image only while one ulp of the
+// coordinates is negligible beside the Smith ball and the cell itself fits
+// the Euclidean reducer. Past either limit the wrap can land inside the
+// ball and still be the wrong image, so callers use the reducer instead.
+inline bool plainWrapCertifies(const FracBox &b, double maxAbs) {
+  if (!b.ok || !std::isfinite(maxAbs)) {
+    return false;
+  }
+  const double edges[3] = {std::fabs(b.lx), std::fabs(b.ly), std::fabs(b.lz)};
+  double peak = std::max(edges[0], std::max(edges[1], edges[2]));
+  peak = std::max(peak, std::max(std::fabs(b.xy), std::max(std::fabs(b.xz), std::fabs(b.yz))));
+  double shortest = std::numeric_limits<double>::infinity();
+  for (double edge : edges) {
+    if (edge > 0.0 && edge < shortest) {
+      shortest = edge;
+    }
+  }
+  static const double limit = std::sqrt(std::numeric_limits<double>::max() / 16.0);
+  if (!(peak < limit) || !std::isfinite(shortest)) {
+    return false;
+  }
+  // The edge is part of the magnitude. A coordinate near the origin on a
+  // long cell has a tiny ulp, while the division by that edge does not.
+  const double mag = std::max(maxAbs, peak);
+  const double ulp = std::numeric_limits<double>::epsilon() * mag;
+  double ball = b.halfMin;
+  if (!(ball > 0.0)) {
+    ball = 0.5 * shortest;
+  }
+  return std::isfinite(ulp) && std::isfinite(ball) && ball > 0.0 && ulp < ball * 1.0e-8;
+}
+
+// Exact Euclidean minimum-image refinement of a displacement that the
+// fractional wrap does not certify. The built-in reduction
+// (mic::euclideanIfShorter) is the answer. An external engine image is not
+// substituted: on a needle it can drop a tilt and still look like a lattice
+// vector. mic::RangeError when the cell is outside binary64; callers in
+// OpenMP regions must carry that exception out of the region.
 inline std::array<double, 3>
 refineEuclidean(double lx, double ly, double lz, double xy, double xz, double yz,
                 const std::array<double, 3> &raw,
                 const std::array<double, 3> &wrapped) {
-#ifdef SEAMS_HAS_MINIMAGE
-  struct CachedCell {
-    double key[6]{};
-    mi_cell cell{};
-    bool valid = false;
-  };
-  thread_local CachedCell cache;
-  if (!cache.valid || cache.key[0] != lx || cache.key[1] != ly ||
-      cache.key[2] != lz || cache.key[3] != xy || cache.key[4] != xz ||
-      cache.key[5] != yz) {
-    cache.key[0] = lx;
-    cache.key[1] = ly;
-    cache.key[2] = lz;
-    cache.key[3] = xy;
-    cache.key[4] = xz;
-    cache.key[5] = yz;
-    const double a[3] = {lx, 0.0, 0.0};
-    const double b[3] = {xy, ly, 0.0};
-    const double c[3] = {xz, yz, lz};
-    const double origin[3] = {0.0, 0.0, 0.0};
-    cache.valid = (mi_cell_from_vectors(a, b, c, origin, &cache.cell) == 0);
-  }
-  if (cache.valid) {
-    const double zero[3] = {0.0, 0.0, 0.0};
-    double ed[3] = {0.0, 0.0, 0.0};
-    if (mi_displacement_euclidean(&cache.cell, zero, raw.data(), ed) == 0) {
-      return {ed[0], ed[1], ed[2]};
-    }
-  }
-  return wrapped;
-#else
   return mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, raw, wrapped);
-#endif
 }
 
 // Exact Euclidean minimum-image displacement from (xj, yj, zj) to (xi, yi, zi).
@@ -295,11 +298,18 @@ inline std::array<double, 3> exactDelta(const FracBox &b, double xi, double yi,
                                         double zi, double xj, double yj,
                                         double zj) {
   const auto dr = fracDelta(b, xi, yi, zi, xj, yj, zj);
+  const double span = std::max({std::fabs(xi), std::fabs(yi), std::fabs(zi), std::fabs(xj),
+                                std::fabs(yj), std::fabs(zj)});
+  const bool certified = plainWrapCertifies(b, span);
   if (!b.triclinic) {
-    return dr;
+    if (!b.ok || certified) {
+      return dr;
+    }
+    const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
+    return refineEuclidean(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
   }
   const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-  if (smithInside(b, r2)) {
+  if (smithInside(b, r2) && certified) {
     return dr;
   }
   const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
@@ -323,6 +333,7 @@ inline bool euclideanDelta(
 // its batch kernels.
 struct CellFrame {
   mi_cell cell{};
+  FracBox box{};
   std::vector<double> xyz;
   bool ok = false;
 };
@@ -333,6 +344,7 @@ makeCellFrame(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   if (!pointCloudCell(yCloud, &f.cell)) {
     return f;
   }
+  f.box = makeFracBox(yCloud);
   const std::size_t n = yCloud.pts.size();
   f.xyz.resize(3 * n);
   for (std::size_t i = 0; i < n; i++) {
@@ -352,10 +364,51 @@ inline double euclideanDistSq(const CellFrame &f, int i, int j) {
                                 dr) != 0) {
     return -1.0;
   }
-  return dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+  const std::size_t ii = 3 * static_cast<std::size_t>(i);
+  const std::size_t jj = 3 * static_cast<std::size_t>(j);
+  const std::array<double, 3> raw = {f.xyz[ii] - f.xyz[jj],
+                                     f.xyz[ii + 1] - f.xyz[jj + 1],
+                                     f.xyz[ii + 2] - f.xyz[jj + 2]};
+  const auto refined =
+      mic::euclideanFromImage(f.box.lx, f.box.ly, f.box.lz, f.box.xy, f.box.xz,
+                              f.box.yz, raw, {dr[0], dr[1], dr[2]});
+  return refined[0] * refined[0] + refined[1] * refined[1] +
+         refined[2] * refined[2];
 }
 #endif
 
+// Shared Euclidean minimum image. Callers are pore host-guest contacts,
+// site distances, water selection, 2D RDF (rdf2::sampleRDF_AA /
+// seams_frame_rdf2d), and, for a box that is not a positive cell,
+// periodicDistSq and relDistFromPoint.
+//
+// A positive three-length box is orthorhombic and wraps each axis. A box
+// with fewer than six values does not read tilt slots. Inside the Smith
+// ball the fractional wrap is the minimum image. Outside it, the linked
+// minimage result (when available, across scalar, batch, cached-frame, and
+// rdf2d paths), re-evaluated on the lattice by mic::euclideanFromImage, and
+// the fractional wrap are both refined by mic::euclideanIfShorter. It
+// reduces the cell with Lagrange and Selling,
+// re-evaluates the reduced vectors from their integer coordinates with an
+// error-free dot product, and descends from the fractional wrap when probes
+// along the cell edges and corners settle within the wrap step cap, or from
+// the Babai point otherwise, over the shortest member of each coset of L / 2L,
+// which contains every Voronoi-relevant vector. That descent stops in the Voronoi cell, so
+// the result is the minimum image on every legal cell. A cell-coordinate
+// residual inside the certified Smith ball is accepted from an error-bounded
+// evaluation without a second descent. A result that
+// cancelled heavily is evaluated without cancellation error from the recorded
+// steps or its integer coefficients and kept when it clears the Voronoi cell
+// by more than its rounding. A descent that uses the four-step budget is
+// continued two slicer steps and kept when that image has not cancelled.
+// Near ties
+// are refined in extended precision. Non-finite values, singular bases, and
+// coefficients at or above 2^52 throw without poisoning the per-thread basis
+// cache. On the cells tested in tests/test_pore.cpp, which reach edge aspect
+// 1e8 (the implementation has no aspect cap), the returned length is within
+// 4 ulps of the wrapped length (4 * 2^-52 * |wrap|) and 1e-14 relative of the
+// exact minimum.
+//
 // Recover H (columns a, b, c) and origin from a LAMMPS dump box with the
 // same mapping as nneigh::lammpsBoxToLcCell: box[0..3] are bound spans,
 // box[3..6] are tilt factors xy, xz, yz, boxLow is the bound lo.
@@ -363,19 +416,42 @@ inline std::array<double, 3> triclinicMinImage(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double xi,
     double yi, double zi, double xj, double yj, double zj) {
   const FracBox b = makeFracBox(yCloud);
+  // A three-length box is orthorhombic. makeFracBox already recovered the
+  // edge lengths, and the fractional wrap is the minimum image on every
+  // axis. The tilt recovery below reads box[3..5], which that box does not
+  // have.
+  const double span = std::max({std::fabs(xi), std::fabs(yi), std::fabs(zi), std::fabs(xj),
+                                std::fabs(yj), std::fabs(zj)});
+  if (b.ok && !b.triclinic) {
+    const auto dr = fracDelta(b, xi, yi, zi, xj, yj, zj);
+    if (plainWrapCertifies(b, span)) {
+      return dr;
+    }
+    const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
+    return refineEuclidean(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
+  }
   if (b.ok && b.triclinic) {
     const auto dr = fracDelta(b, xi, yi, zi, xj, yj, zj);
     const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-    if (smithInside(b, r2)) {
+    if (smithInside(b, r2) && plainWrapCertifies(b, span)) {
       return dr;
     }
-#ifdef SEAMS_HAS_MINIMAGE
-    double ed[3] = {0.0, 0.0, 0.0};
-    if (euclideanDelta(yCloud, xi, yi, zi, xj, yj, zj, ed)) {
-      return {ed[0], ed[1], ed[2]};
+    const std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
+    return refineEuclidean(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
+  }
+  if (yCloud.box.size() < 6) {
+    std::array<double, 3> raw = {xi - xj, yi - yj, zi - zj};
+    const double len[3] = {yCloud.box.size() > 0 ? yCloud.box[0] : 0.0,
+                           yCloud.box.size() > 1 ? yCloud.box[1] : 0.0,
+                           yCloud.box.size() > 2 ? yCloud.box[2] : 0.0};
+    for (int k = 0; k < 3; ++k) {
+      if (!(len[k] > 0.0)) {
+        continue;
+      }
+      raw[static_cast<std::size_t>(k)] -=
+          len[k] * std::floor(raw[static_cast<std::size_t>(k)] / len[k] + 0.5);
     }
-#endif
-    return dr;
+    return raw;
   }
   const auto &box = yCloud.box;
   const auto &boxLow = yCloud.boxLow;
@@ -433,21 +509,14 @@ periodicDistSq(const FracBox &b,
     const auto wrapped = fracDelta(b, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z);
     const double r2 =
         wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2];
-    if (smithInside(b, r2)) {
+    const double span = std::max({std::fabs(atom.x), std::fabs(atom.y), std::fabs(atom.z),
+                                  std::fabs(pj.x), std::fabs(pj.y), std::fabs(pj.z)});
+    if (smithInside(b, r2) && plainWrapCertifies(b, span)) {
       return r2;
     }
-#ifdef SEAMS_HAS_MINIMAGE
-    double ed[3] = {0.0, 0.0, 0.0};
-    if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, pj.x, pj.y, pj.z, ed)) {
-      return ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
-    }
-    return r2;
-#else
     const std::array<double, 3> raw = {atom.x - pj.x, atom.y - pj.y, atom.z - pj.z};
-    const auto euc = mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz,
-                                             raw, wrapped);
+    const auto euc = refineEuclidean(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, wrapped);
     return euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
-#endif
   }
   if (yCloud.box.size() >= 6) {
     const auto dr =
@@ -490,43 +559,13 @@ periodicDist(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   return std::sqrt(periodicDistSq(yCloud, iatom, jatom));
 }
 
-// Tilt batches share one mi_cell. mi_dist2_many is the fractional
-// image for every candidate. A result outside the Smith ball is
-// replaced by the Euclidean image. Orthorhombic batches stay on
-// periodicDistSq; the Highway kernel is the ortho difference path.
+// periodicDistSq for each candidate. minimage's batch engine wrap is not
+// used: minimage 0.1.4 gets it wrong on needle cells even inside the Smith
+// ball.
 inline void batchPeriodicDistSq(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int iatom,
     const int *jatom, std::size_t n, double *distSq) {
   const FracBox b = makeFracBox(yCloud);
-#ifdef SEAMS_HAS_MINIMAGE
-  if (n > 0 && b.ok && b.triclinic) {
-    mi_cell cell;
-    if (pointCloudCell(yCloud, &cell)) {
-      const auto &atom = yCloud.pts[static_cast<std::size_t>(iatom)];
-      const double p[3] = {atom.x, atom.y, atom.z};
-      std::vector<double> qs(n * 3);
-      for (std::size_t k = 0; k < n; ++k) {
-        const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom[k])];
-        qs[3 * k] = pj.x;
-        qs[3 * k + 1] = pj.y;
-        qs[3 * k + 2] = pj.z;
-      }
-      if (mi_dist2_many(&cell, p, qs.data(), n, distSq) == 0) {
-        for (std::size_t k = 0; k < n; ++k) {
-          if (smithInside(b, distSq[k])) {
-            continue;
-          }
-          const double q[3] = {qs[3 * k], qs[3 * k + 1], qs[3 * k + 2]};
-          double ed[3] = {0.0, 0.0, 0.0};
-          if (mi_displacement_euclidean(&cell, q, p, ed) == 0) {
-            distSq[k] = ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
-          }
-        }
-        return;
-      }
-    }
-  }
-#endif
   for (std::size_t k = 0; k < n; k++) {
     distSq[k] = periodicDistSq(b, yCloud, iatom, jatom[k]);
   }
@@ -588,19 +627,13 @@ inline std::array<double, 3> relDistFromPoint(
     const auto &atom = yCloud.pts[static_cast<std::size_t>(iatom)];
     const auto dr = fracDelta(b, atom.x, atom.y, atom.z, xj, yj, zj);
     const double r2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-    if (smithInside(b, r2)) {
+    const double span = std::max({std::fabs(atom.x), std::fabs(atom.y), std::fabs(atom.z),
+                                  std::fabs(xj), std::fabs(yj), std::fabs(zj)});
+    if (smithInside(b, r2) && plainWrapCertifies(b, span)) {
       return dr;
     }
-#ifdef SEAMS_HAS_MINIMAGE
-    double ed[3] = {0.0, 0.0, 0.0};
-    if (euclideanDelta(yCloud, atom.x, atom.y, atom.z, xj, yj, zj, ed)) {
-      return {ed[0], ed[1], ed[2]};
-    }
-    return dr;
-#else
     const std::array<double, 3> raw = {atom.x - xj, atom.y - yj, atom.z - zj};
-    return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
-#endif
+    return refineEuclidean(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
   }
   if (yCloud.box.size() >= 6) {
     return triclinicMinImage(yCloud, yCloud.pts[static_cast<std::size_t>(iatom)].x, yCloud.pts[static_cast<std::size_t>(iatom)].y,

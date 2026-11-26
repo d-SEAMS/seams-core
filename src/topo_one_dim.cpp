@@ -14,6 +14,7 @@
 
 #include <topo_one_dim.hpp>
 #include <neighbours.hpp>
+#include <region_errors.hpp>
 #include <topo_bulk.hpp>
 
 #include <utility>
@@ -273,53 +274,60 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
       omp_get_max_threads() > 1) {
     const int team = omp_get_max_threads();
     std::vector<std::vector<std::pair<int, int>>> bags(static_cast<std::size_t>(team));
+    seams::RegionErrors errors;
 #pragma omp parallel
     {
       const int tid = omp_get_thread_num();
       auto &mine = bags[static_cast<std::size_t>(tid)];
-      std::vector<unsigned> seen(static_cast<std::size_t>(totalRingNum), 0);
+      std::vector<unsigned> seen;
       unsigned generation = 1;
       std::vector<int> candidates;
-      candidates.reserve(64);
+      errors.run([&] {
+        seen.assign(static_cast<std::size_t>(totalRingNum), 0);
+        candidates.reserve(64);
+      });
 #pragma omp for schedule(static)
       for (int iring = 0; iring < totalRingNum - 1; ++iring) {
-        if (generation == 0) {
-          std::fill(seen.begin(), seen.end(), 0);
-          generation = 1;
-        }
-        const unsigned gen = generation++;
-        const auto &basal1 = rings[static_cast<std::size_t>(iring)];
-        if (basal1.empty()) {
-          continue;
-        }
-        candidates.clear();
-        const int atom = basal1[0];
-        if (atom >= 0 && atom < nAtoms) {
-          const auto &row = nList[static_cast<std::size_t>(atom)];
-          for (std::size_t n = 1; n < row.size(); ++n) {
-            const int nb = row[n];
-            if (nb < 0 || nb >= nAtoms) {
-              continue;
-            }
-            const int begin = off[static_cast<std::size_t>(nb)];
-            const int end = off[static_cast<std::size_t>(nb) + 1];
-            for (int k = begin; k < end; ++k) {
-              const int jring = col[static_cast<std::size_t>(k)];
-              if (jring <= iring || seen[static_cast<std::size_t>(jring)] == gen) {
+        errors.run([&] {
+          if (generation == 0) {
+            std::fill(seen.begin(), seen.end(), 0);
+            generation = 1;
+          }
+          const unsigned gen = generation++;
+          const auto &basal1 = rings[static_cast<std::size_t>(iring)];
+          if (basal1.empty()) {
+            return;
+          }
+          candidates.clear();
+          const int atom = basal1[0];
+          if (atom >= 0 && atom < nAtoms) {
+            const auto &row = nList[static_cast<std::size_t>(atom)];
+            for (std::size_t n = 1; n < row.size(); ++n) {
+              const int nb = row[n];
+              if (nb < 0 || nb >= nAtoms) {
                 continue;
               }
-              seen[static_cast<std::size_t>(jring)] = gen;
-              candidates.push_back(jring);
+              const int begin = off[static_cast<std::size_t>(nb)];
+              const int end = off[static_cast<std::size_t>(nb) + 1];
+              for (int k = begin; k < end; ++k) {
+                const int jring = col[static_cast<std::size_t>(k)];
+                if (jring <= iring || seen[static_cast<std::size_t>(jring)] == gen) {
+                  continue;
+                }
+                seen[static_cast<std::size_t>(jring)] = gen;
+                candidates.push_back(jring);
+              }
             }
           }
-        }
-        for (const int jring : candidates) {
-          if (strictPair(iring, jring)) {
-            mine.emplace_back(iring, jring);
+          for (const int jring : candidates) {
+            if (strictPair(iring, jring)) {
+              mine.emplace_back(iring, jring);
+            }
           }
-        }
+        });
       }
     }
+    errors.rethrow();
     std::vector<std::pair<int, int>> pairs;
     for (const auto &bag : bags) {
       pairs.insert(pairs.end(), bag.begin(), bag.end());

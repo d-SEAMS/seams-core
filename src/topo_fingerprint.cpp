@@ -6,6 +6,7 @@
 
 #include <cage_canon.hpp>
 #include <franzblau.hpp>
+#include <region_errors.hpp>
 
 namespace primitive {
 std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, int maxDepth);
@@ -895,14 +896,18 @@ FrameFingerprint fingerprintChoose(const Rows &rows, int hops, int maxRingSize,
     const std::vector<int> &paint = colored ? colors : none;
     out.atomKeys.resize(static_cast<std::size_t>(n));
     out.method = "wl";
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 128 && !omp_in_parallel())
 #endif
     for (int i = 0; i < n; i++) {
-      const std::uint64_t refined = wlHashWide(adj, i, hops + 2, paint);
-      wl[static_cast<std::size_t>(i)] = refined;
-      out.atomKeys[static_cast<std::size_t>(i)] = hex(refined);
+      errors.run([&] {
+        const std::uint64_t refined = wlHashWide(adj, i, hops + 2, paint);
+        wl[static_cast<std::size_t>(i)] = refined;
+        out.atomKeys[static_cast<std::size_t>(i)] = hex(refined);
+      });
     }
+    errors.rethrow();
     for (const auto &key : out.atomKeys) {
       out.classes[key] += 1;
     }
@@ -911,19 +916,23 @@ FrameFingerprint fingerprintChoose(const Rows &rows, int hops, int maxRingSize,
     // Each atom's ball is independent. The class histogram is filled
     // afterwards so the counts stay in atom order, and the recorded
     // method is the last atom's, as a serial walk leaves it.
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256 && !omp_in_parallel() && \
                                               omp_get_max_threads() > 1)
 #endif
     for (int i = 0; i < n; i++) {
-      std::uint64_t refined = 0;
-      LocalKey lk = localKeyRefined(rows, i, hops, colors, &refined);
-      if (i + 1 == n) {
-        out.method = lk.method;
-      }
-      out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
-      wl[static_cast<std::size_t>(i)] = refined;
+      errors.run([&] {
+        std::uint64_t refined = 0;
+        LocalKey lk = localKeyRefined(rows, i, hops, colors, &refined);
+        if (i + 1 == n) {
+          out.method = lk.method;
+        }
+        out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
+        wl[static_cast<std::size_t>(i)] = refined;
+      });
     }
+    errors.rethrow();
     for (const auto &key : out.atomKeys) {
       out.classes[key] += 1;
     }

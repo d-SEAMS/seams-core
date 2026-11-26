@@ -47,8 +47,8 @@ jobs:
       - name: Install the macOS 11.0 SDK for the conda compilers
         if: runner.os == 'macOS'
         run: |
-          curl -sLO https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.0.sdk.tar.xz
-          sudo tar -xf MacOSX11.0.sdk.tar.xz -C /opt
+          curl -fsSL -o "${RUNNER_TEMP}/MacOSX11.0.sdk.tar.xz" https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.0.sdk.tar.xz
+          sudo tar -xf "${RUNNER_TEMP}/MacOSX11.0.sdk.tar.xz" -C /opt
           echo "SDKROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
           echo "CONDA_BUILD_SYSROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
       # OVITO's Python module loads libEGL.so.1. The pixi env ships libegl,

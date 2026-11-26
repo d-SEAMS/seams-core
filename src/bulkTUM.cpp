@@ -14,6 +14,7 @@
 
 #include <bulkTUM.hpp>
 #include <ira_sofi.hpp>
+#include <region_errors.hpp>
 
 #include <algorithm>
 
@@ -166,24 +167,32 @@ int tum3::topoUnitMatchingBulk(
   // Cages are matched independently; the per-atom accumulation is the only
   // shared state and runs under a critical section
   quatList.assign(cageList.size(), {});
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(dynamic, 16) private(quat, rmsd)
 #endif
   for (int icage = 0; icage < static_cast<int>(cageList.size()); icage++) {
-    if (icage < numHC) {
-      tum3::shapeMatchHC(yCloud, refPntsHC, cageList[static_cast<std::size_t>(icage)], ringsOneType,
-                         nList, quat, rmsd);
-    } else {
-      tum3::shapeMatchDDC(yCloud, refPntsDDC, cageList, icage, ringsOneType,
-                          quat, rmsd);
-    }
-    quatList[static_cast<std::size_t>(icage)] = quat;
+    errors.run([&] {
+      if (icage < numHC) {
+        tum3::shapeMatchHC(yCloud, refPntsHC, cageList[static_cast<std::size_t>(icage)], ringsOneType,
+                           nList, quat, rmsd);
+      } else {
+        tum3::shapeMatchDDC(yCloud, refPntsDDC, cageList, icage, ringsOneType,
+                            quat, rmsd);
+      }
+      quatList[static_cast<std::size_t>(icage)] = quat;
+      // A critical block is its own must-not-throw region, so its body
+      // needs a handler of its own.
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp critical(seams_tum_rmsd)
 #endif
-    tum3::updateRMSDatom(ringsOneType, cageList[static_cast<std::size_t>(icage)], rmsd, rmsdPerAtom,
-                         noOfCommonElements, atomTypes);
+      errors.run([&] {
+        tum3::updateRMSDatom(ringsOneType, cageList[static_cast<std::size_t>(icage)], rmsd,
+                             rmsdPerAtom, noOfCommonElements, atomTypes);
+      });
+    });
   } // end of looping through all cages
+  errors.rethrow();
 
   // --------------------------------------------------
   // Getting the RMSD per atom

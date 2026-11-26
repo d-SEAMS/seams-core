@@ -1,5 +1,6 @@
 #include <cpu_features.hpp>
 #include <ozaki.hpp>
+#include <region_errors.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -628,14 +629,18 @@ bool int8GemmVnni(int m, int n, int k, const signed char *A, int lda,
       colSum[static_cast<std::size_t>(j)] += Bp[static_cast<std::size_t>(t) * static_cast<std::size_t>(np) + static_cast<std::size_t>(j)];
     }
   }
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    int8VnniRow(n, kp, np,
-                Au.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(kp),
-                Bp.data(), colSum.data(), C + static_cast<std::ptrdiff_t>(i) * ldc);
+    errors.run([&] {
+      int8VnniRow(n, kp, np,
+                  Au.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(kp),
+                  Bp.data(), colSum.data(), C + static_cast<std::ptrdiff_t>(i) * ldc);
+    });
   }
+  errors.rethrow();
   return true;
 }
 
@@ -1331,26 +1336,31 @@ GemmInfo gemm(int m, int n, int k, const double *A, int lda, const double *B, in
     return info;
   }
   info.backend = modeName(which);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m * n >= 256)
 #endif
   for (int i = 0; i < m; i++) {
-    std::vector<double> row(static_cast<std::size_t>(k));
-    for (int t = 0; t < k; t++) {
-      row[static_cast<std::size_t>(t)] = A[static_cast<std::ptrdiff_t>(i) * lda + t];
-    }
-    for (int j = 0; j < n; j++) {
-      std::vector<double> col(static_cast<std::size_t>(k));
+    errors.run([&] {
+      std::vector<double> row(static_cast<std::size_t>(k));
       for (int t = 0; t < k; t++) {
-        col[static_cast<std::size_t>(t)] = B[static_cast<std::ptrdiff_t>(t) * ldb + j];
+        row[static_cast<std::size_t>(t)] = A[static_cast<std::ptrdiff_t>(i) * lda + t];
       }
-      const RealDot d = realDot(row.data(), col.data(), k, which);
-      C[static_cast<std::ptrdiff_t>(i) * ldc + j] = d.value;
-      if (bounds != nullptr) {
-        bounds[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) + static_cast<std::size_t>(j)] = d.bound;
+      for (int j = 0; j < n; j++) {
+        std::vector<double> col(static_cast<std::size_t>(k));
+        for (int t = 0; t < k; t++) {
+          col[static_cast<std::size_t>(t)] = B[static_cast<std::ptrdiff_t>(t) * ldb + j];
+        }
+        const RealDot d = realDot(row.data(), col.data(), k, which);
+        C[static_cast<std::ptrdiff_t>(i) * ldc + j] = d.value;
+        if (bounds != nullptr) {
+          bounds[static_cast<std::size_t>(i) * static_cast<std::size_t>(n) +
+                 static_cast<std::size_t>(j)] = d.bound;
+        }
       }
-    }
+    });
   }
+  errors.rethrow();
   info.ok = true;
   return info;
 }

@@ -10,6 +10,7 @@
 #include <mol_sys.hpp>
 #include <number_parse.hpp>
 #include <omp_tsan.hpp>
+#include <region_errors.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
@@ -21,6 +22,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -785,6 +787,7 @@ struct ClosedSearch {
       }
       keep[static_cast<size_t>(i)] = 1;
     };
+    seams::RegionErrors errors;
 #if defined(SEAMS_TSAN_JOIN)
     {
       // The OpenMP join is real. ThreadSanitizer does not see libgomp's
@@ -794,7 +797,7 @@ struct ClosedSearch {
       {
 #pragma omp for schedule(static)
         for (int i = 0; i < nRings; ++i) {
-          admitRing(i);
+          errors.run([&] { admitRing(i); });
         }
         seams::tsan::arrive_and_wait(keepSlot, omp_get_num_threads());
       }
@@ -804,9 +807,10 @@ struct ClosedSearch {
 #pragma omp parallel for schedule(static) if (nRings >= 128 && indexTeam > 1)
 #endif
     for (int i = 0; i < nRings; ++i) {
-      admitRing(i);
+      errors.run([&] { admitRing(i); });
     }
 #endif
+    errors.rethrow();
     int slots = 0;
     int maxV = -1;
     cand.reserve(static_cast<size_t>(nRings));
@@ -924,34 +928,37 @@ struct ClosedSearch {
         if (tid == 0) {
           edgeTeam = team;
         }
-        FlatId local;
-        local.reset(std::max(c1 - c0, 1) * 8);
-        std::vector<int> stamp(static_cast<std::size_t>(maxV) + 1, 0);
-        auto &bucket = buckets[static_cast<std::size_t>(tid)];
-        bucket.edges.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)));
-        bucket.verts.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)));
-        for (int ci = c0; ci < c1; ++ci) {
-          const int i = cand[static_cast<std::size_t>(ci)];
-          const auto &ring = rings[static_cast<std::size_t>(i)];
-          const int sz = ringSize[static_cast<std::size_t>(i)];
-          int *eCol = ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
-          for (int k = 0; k < sz; ++k) {
-            const int a = ring[static_cast<std::size_t>(k)];
-            const int b = ring[static_cast<std::size_t>((k + 1) % sz)];
-            const std::uint64_t key = packEdge(a, b);
-            const int before = local.n;
-            const int id = local.intern(key);
-            eCol[k] = id;
-            if (id == before) {
-              bucket.edges.push_back({key, std::min(a, b), std::max(a, b)});
-            }
-            if (a >= 0 && a <= maxV && stamp[static_cast<std::size_t>(a)] == 0) {
-              stamp[static_cast<std::size_t>(a)] = 1;
-              bucket.verts.push_back(a);
+        errors.run([&] {
+          FlatId local;
+          local.reset(std::max(c1 - c0, 1) * 8);
+          std::vector<int> stamp(static_cast<std::size_t>(maxV) + 1, 0);
+          auto &bucket = buckets[static_cast<std::size_t>(tid)];
+          bucket.edges.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)));
+          bucket.verts.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)));
+          for (int ci = c0; ci < c1; ++ci) {
+            const int i = cand[static_cast<std::size_t>(ci)];
+            const auto &ring = rings[static_cast<std::size_t>(i)];
+            const int sz = ringSize[static_cast<std::size_t>(i)];
+            int *eCol = ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
+            for (int k = 0; k < sz; ++k) {
+              const int a = ring[static_cast<std::size_t>(k)];
+              const int b = ring[static_cast<std::size_t>((k + 1) % sz)];
+              const std::uint64_t key = packEdge(a, b);
+              const int before = local.n;
+              const int id = local.intern(key);
+              eCol[k] = id;
+              if (id == before) {
+                bucket.edges.push_back({key, std::min(a, b), std::max(a, b)});
+              }
+              if (a >= 0 && a <= maxV && stamp[static_cast<std::size_t>(a)] == 0) {
+                stamp[static_cast<std::size_t>(a)] = 1;
+                bucket.verts.push_back(a);
+              }
             }
           }
-        }
+        });
       }
+      errors.rethrow();
       vertexOf.assign(static_cast<std::size_t>(maxV) + 1, -1);
       for (int t = 0; t < indexTeam; ++t) {
         const auto &bucket = buckets[static_cast<std::size_t>(t)];
@@ -1006,30 +1013,33 @@ struct ClosedSearch {
         if (tid == 0) {
           wedgeTeam = team;
         }
-        FlatId local;
-        local.reset(std::max(c1 - c0, 1) * 8);
-        auto &bucket = buckets[static_cast<std::size_t>(tid)];
-        bucket.wedges.clear();
-        bucket.wedges.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)) * 6);
-        for (int ci = c0; ci < c1; ++ci) {
-          const int i = cand[static_cast<std::size_t>(ci)];
-          const int sz = ringSize[static_cast<std::size_t>(i)];
-          const int *eCol =
-              ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
-          int *wCol = ringWedges.col.data() + ringWedges.off[static_cast<std::size_t>(i)];
-          for (int k = 0; k < sz; ++k) {
-            const auto e1 = static_cast<std::uint64_t>(eCol[k]);
-            const auto e2 = static_cast<std::uint64_t>(eCol[(k + 1) % sz]);
-            const std::uint64_t key = (std::min(e1, e2) << 32) | std::max(e1, e2);
-            const int before = local.n;
-            const int id = local.intern(key);
-            wCol[k] = id;
-            if (id == before) {
-              bucket.wedges.push_back(key);
+        errors.run([&] {
+          FlatId local;
+          local.reset(std::max(c1 - c0, 1) * 8);
+          auto &bucket = buckets[static_cast<std::size_t>(tid)];
+          bucket.wedges.clear();
+          bucket.wedges.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)) * 6);
+          for (int ci = c0; ci < c1; ++ci) {
+            const int i = cand[static_cast<std::size_t>(ci)];
+            const int sz = ringSize[static_cast<std::size_t>(i)];
+            const int *eCol =
+                ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
+            int *wCol = ringWedges.col.data() + ringWedges.off[static_cast<std::size_t>(i)];
+            for (int k = 0; k < sz; ++k) {
+              const auto e1 = static_cast<std::uint64_t>(eCol[k]);
+              const auto e2 = static_cast<std::uint64_t>(eCol[(k + 1) % sz]);
+              const std::uint64_t key = (std::min(e1, e2) << 32) | std::max(e1, e2);
+              const int before = local.n;
+              const int id = local.intern(key);
+              wCol[k] = id;
+              if (id == before) {
+                bucket.wedges.push_back(key);
+              }
             }
           }
-        }
+        });
       }
+      errors.rethrow();
       for (int t = 0; t < indexTeam; ++t) {
         const auto &bucket = buckets[static_cast<std::size_t>(t)];
         auto &map = wedgeMap[static_cast<std::size_t>(t)];
@@ -1694,6 +1704,7 @@ struct ClosedSearch {
     } else {
       std::vector<std::vector<std::vector<cage::FoundCage>>> partial(
           static_cast<size_t>(nThreads));
+      seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel
 #endif
@@ -1703,10 +1714,15 @@ struct ClosedSearch {
 #else
         const int tid = 0;
 #endif
-        ClosedSearch local(*this);
-        for (auto &list : local.found) {
-          list.clear();
-        }
+        // The copy allocates; a thread whose copy fails still reaches the
+        // worksharing loop, where run() skips its share.
+        std::optional<ClosedSearch> local;
+        errors.run([&] {
+          local.emplace(*this);
+          for (auto &list : local->found) {
+            list.clear();
+          }
+        });
         // Low ring indices own more completions, so a static stride leaves
         // the first threads holding the long seeds. Dynamic chunks hand
         // those seeds out as threads finish.
@@ -1715,12 +1731,13 @@ struct ClosedSearch {
 #pragma omp for schedule(dynamic, 32)
 #endif
         for (int i = 0; i < nCand; ++i) {
-          local.searchOne(cand[static_cast<size_t>(i)]);
+          errors.run([&] { local->searchOne(cand[static_cast<size_t>(i)]); });
         }
-        if (tid < nThreads) {
-          partial[static_cast<size_t>(tid)] = std::move(local.found);
+        if (tid < nThreads && local) {
+          partial[static_cast<size_t>(tid)] = std::move(local->found);
         }
       }
+      errors.rethrow();
       for (int t = 0; t < nThreads; t++) {
         if (partial[static_cast<size_t>(t)].size() != found.size()) {
           continue;

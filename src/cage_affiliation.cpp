@@ -8,6 +8,7 @@
 
 #include <cage_affiliation.hpp>
 
+#include <region_errors.hpp>
 #include <ring.hpp>
 #include <topo_bulk.hpp>
 
@@ -567,6 +568,7 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx,
   // rings per word, and two threads setting bits of one word race.
   std::vector<char> hcAny(static_cast<std::size_t>(nR), 0);
   std::vector<char> basalAny(planes != nullptr ? static_cast<std::size_t>(nR) : 0, 0);
+  seams::RegionErrors errors;
   if (scale) {
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
     const int team = omp_get_max_threads();
@@ -609,65 +611,74 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx,
           planes != nullptr ? &basalMarked[static_cast<std::size_t>(tid)] : nullptr;
       // Each thread clears its own flags, so the main thread does not
       // zero team times the ring count before the fork.
-      if (static_cast<int>(types->size()) != nR) {
-        types->assign(nRings, ring::strucType::unclassified);
-      } else {
-        std::fill(types->begin(), types->end(), ring::strucType::unclassified);
-      }
-      if (static_cast<int>(on->size()) != nR) {
-        on->assign(static_cast<std::size_t>(nR), 0);
-      } else {
-        std::fill(on->begin(), on->end(), 0);
-      }
-      if (basalOn != nullptr) {
-        basalOn->assign(static_cast<std::size_t>(nR), 0);
-      }
+      errors.run([&] {
+        if (static_cast<int>(types->size()) != nR) {
+          types->assign(nRings, ring::strucType::unclassified);
+        } else {
+          std::fill(types->begin(), types->end(), ring::strucType::unclassified);
+        }
+        if (static_cast<int>(on->size()) != nR) {
+          on->assign(static_cast<std::size_t>(nR), 0);
+        } else {
+          std::fill(on->begin(), on->end(), 0);
+        }
+        if (basalOn != nullptr) {
+          basalOn->assign(static_cast<std::size_t>(nR), 0);
+        }
+      });
 #pragma omp for schedule(static)
       for (int i = 0; i < nR; ++i) {
-        ctx.collectBasalCandidates(i, *scratch, *candidates);
-        for (const int j : *candidates) {
-          if (!ctx.basalPair(i, j)) {
-            continue;
-          }
-          (*on)[static_cast<std::size_t>(i)] = 1;
-          if (basalOn != nullptr) {
-            (*basalOn)[static_cast<std::size_t>(i)] = 1;
-          }
-          if (j >= 0 && j < nR) {
-            (*on)[static_cast<std::size_t>(j)] = 1;
+        errors.run([&] {
+          ctx.collectBasalCandidates(i, *scratch, *candidates);
+          for (const int j : *candidates) {
+            if (!ctx.basalPair(i, j)) {
+              continue;
+            }
+            (*on)[static_cast<std::size_t>(i)] = 1;
             if (basalOn != nullptr) {
-              (*basalOn)[static_cast<std::size_t>(j)] = 1;
+              (*basalOn)[static_cast<std::size_t>(i)] = 1;
+            }
+            if (j >= 0 && j < nR) {
+              (*on)[static_cast<std::size_t>(j)] = 1;
+              if (basalOn != nullptr) {
+                (*basalOn)[static_cast<std::size_t>(j)] = 1;
+              }
+            }
+            ctx.prismaticInto(i, j, *listHC, *types, *prismatic);
+            for (const int k : *prismatic) {
+              if (k >= 0 && k < nR) {
+                (*on)[static_cast<std::size_t>(k)] = 1;
+              }
             }
           }
-          ctx.prismaticInto(i, j, *listHC, *types, *prismatic);
-          for (const int k : *prismatic) {
-            if (k >= 0 && k < nR) {
-              (*on)[static_cast<std::size_t>(k)] = 1;
-            }
-          }
-        }
+        });
       }
       // The OR over the team ran on the main thread after the join, and at
-      // eight threads it cost as much as a quarter of the sweep.
+      // eight threads it cost as much as a quarter of the sweep. A thread
+      // whose flags failed to allocate leaves a short row, so the OR runs
+      // only while no thread has failed.
 #pragma omp for schedule(static)
       for (int i = 0; i < nR; ++i) {
-        char hit = 0;
-        char basal = 0;
-        for (int t = 0; t < team; ++t) {
-          const std::vector<char> &row =
-              ctx.reuseScratch ? ctx.lanes[static_cast<std::size_t>(t)].on
-                               : marked[static_cast<std::size_t>(t)];
-          hit |= row[static_cast<std::size_t>(i)];
-          if (basalOn != nullptr) {
-            basal |= basalMarked[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)];
+        errors.run([&] {
+          char hit = 0;
+          char basal = 0;
+          for (int t = 0; t < team; ++t) {
+            const std::vector<char> &row =
+                ctx.reuseScratch ? ctx.lanes[static_cast<std::size_t>(t)].on
+                                 : marked[static_cast<std::size_t>(t)];
+            hit |= row[static_cast<std::size_t>(i)];
+            if (basalOn != nullptr) {
+              basal |= basalMarked[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)];
+            }
           }
-        }
-        hcAny[static_cast<std::size_t>(i)] = hit;
-        if (basalOn != nullptr) {
-          basalAny[static_cast<std::size_t>(i)] = basal;
-        }
+          hcAny[static_cast<std::size_t>(i)] = hit;
+          if (basalOn != nullptr) {
+            basalAny[static_cast<std::size_t>(i)] = basal;
+          }
+        });
       }
     }
+    errors.rethrow();
 #endif
   } else {
     int left = nR;
@@ -719,13 +730,15 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx,
 #pragma omp for schedule(dynamic, 256)
 #endif
     for (int i = 0; i < nR; i++) {
-      if (ctx.equatorialPass(i, hcAny[static_cast<std::size_t>(i)] != 0, peripherals)) {
-        if (planes != nullptr) {
-          equator[static_cast<std::size_t>(i)] = 1;
+      errors.run([&] {
+        if (ctx.equatorialPass(i, hcAny[static_cast<std::size_t>(i)] != 0, peripherals)) {
+          if (planes != nullptr) {
+            equator[static_cast<std::size_t>(i)] = 1;
+          }
+          marks.push_back(i);
+          marks.insert(marks.end(), peripherals.begin(), peripherals.end());
         }
-        marks.push_back(i);
-        marks.insert(marks.end(), peripherals.begin(), peripherals.end());
-      }
+      });
     }
     // A peripheral may belong to another thread's share. Every store
     // writes 1, so relaxed atomic stores give the same flags in any order.
@@ -734,6 +747,7 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx,
                        __ATOMIC_RELAXED);
     }
   }
+  errors.rethrow();
   for (int i = 0; i < nR; ++i) {
     const auto k = static_cast<std::size_t>(i);
     result.hc[k] = hcAny[k] != 0;
@@ -930,22 +944,26 @@ struct ring::AffiliationUpdater::Impl {
   evaluatePairs(const FrameContext &ctx, const std::vector<int> &which) {
     const int n = static_cast<int>(which.size());
     std::vector<std::vector<int>> out(which.size());
+    seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel if (!omp_in_parallel())
 #endif
     {
       std::vector<int> listHC;
-      std::vector<ring::strucType> types(ctx.rings->size(),
-                                         ring::strucType::unclassified);
+      std::vector<ring::strucType> types;
+      errors.run([&] { types.assign(ctx.rings->size(), ring::strucType::unclassified); });
       FrameContext::BasalScratch scratch;
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp for schedule(dynamic, 64)
 #endif
       for (int k = 0; k < n; k++) {
-        pairsOf(ctx, which[static_cast<std::size_t>(k)], listHC, types,
-                out[static_cast<std::size_t>(k)], scratch);
+        errors.run([&] {
+          pairsOf(ctx, which[static_cast<std::size_t>(k)], listHC, types,
+                  out[static_cast<std::size_t>(k)], scratch);
+        });
       }
     }
+    errors.rethrow();
     return out;
   }
 
@@ -979,16 +997,20 @@ struct ring::AffiliationUpdater::Impl {
     const int n = static_cast<int>(pending.size());
     std::vector<std::vector<int>> found(pending.size());
     std::vector<signed char> pass(pending.size(), 0);
+    seams::RegionErrors errors;
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(guided) if (!omp_in_parallel())
 #endif
     for (int k = 0; k < n; k++) {
-      pass[static_cast<std::size_t>(k)] =
-          ctx.equatorialPass(pending[static_cast<std::size_t>(k)], false,
-                             found[static_cast<std::size_t>(k)])
-              ? 1
-              : 0;
+      errors.run([&] {
+        pass[static_cast<std::size_t>(k)] =
+            ctx.equatorialPass(pending[static_cast<std::size_t>(k)], false,
+                               found[static_cast<std::size_t>(k)])
+                ? 1
+                : 0;
+      });
     }
+    errors.rethrow();
     evaluated += n;
     if (n > 0) {
       // Splice the new peripheral lists in ring order

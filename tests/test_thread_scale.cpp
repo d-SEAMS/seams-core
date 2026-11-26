@@ -172,7 +172,12 @@ TEST_CASE("one, two and four threads match the serial CHILL+, q6 and rings",
   REQUIRE(lc_num_threads() == 1);
   for (const int threads : {2, 4}) {
     const Snapshot got = runOnce(base, threads);
+#ifdef SEAMS_HAS_OPENMP
     REQUIRE(lc_num_threads() == threads);
+#else
+    // runOnce cannot widen a build without OpenMP, which runs on one thread.
+    REQUIRE(lc_num_threads() == 1);
+#endif
     REQUIRE(got.neighbours == serial.neighbours);
     REQUIRE(got.published == serial.published);
     REQUIRE(got.ovito == serial.ovito);

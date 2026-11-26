@@ -2,6 +2,7 @@
 url = https://github.com/d-SEAMS/linkcell.git
 revision = 0bc73576ceb4ea79909a3ad7a7931275b59a9fe4
 depth = 1
+diff_files = linkcell-exception-typeinfo.patch
 
 [provide]
 linkcell = linkcell_dep

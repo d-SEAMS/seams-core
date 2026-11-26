@@ -1,0 +1,1 @@
+A minimum-image range error, from a tilted cell whose minimum image needs a lattice coefficient at or above 2^52, a numerically singular cell, or a non-finite intermediate, is `SEAMS_ERR_RANGE` from the C API with the minimum-image message in `seams_last_error()`, instead of `SEAMS_ERR_INTERNAL`. Host-guest queries and the other pore calls report it the same way.

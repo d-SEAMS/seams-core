@@ -4,7 +4,7 @@ Cages
 
 Hexagonal, cubic, and signature cages.
 
-The stable C interface provides 116 exported functions through ``include/seams.h``.
+The stable C interface provides 120 exported functions through ``include/seams.h``.
 
 .. literalinclude:: ../../../docs/examples/capi_cages.c
    :language: c

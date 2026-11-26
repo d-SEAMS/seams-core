@@ -22,6 +22,7 @@
 #include <chordless.hpp>
 #include <cluster.hpp>
 #include <density.hpp>
+#include <pore.hpp>
 #include <cage_affiliation.hpp>
 #include <cage_enum.hpp>
 #include <chill_plus_scheme.hpp>
@@ -41,6 +42,7 @@
 #ifdef SEAMS_HAS_READCON
 #include <readcon-core.hpp>
 #endif
+#include <region_errors.hpp>
 #include <site.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
@@ -65,6 +67,7 @@
 #include <numeric>
 #include <set>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_set>
 #include <utility>
@@ -206,6 +209,37 @@ void remember() noexcept {
     set_error("unknown error");
   }
   note_error();
+}
+
+/* linkcell's C calls return status 1 for every failure and name the kind in
+ * the message. The frame's cell was checked when it was stored, so a cell
+ * linkcell finds singular, or a mesh or image stencil it cannot represent,
+ * is a cell outside what its binary64 search resolves. */
+seams_status linkcell_status(const linkcell::Error &ex) noexcept {
+  const std::string_view what = ex.what();
+  if (what == "linked-cell mesh is too fine" || what == "periodic image count exceeds 2^24" ||
+      what == "singular or non-positive cell") {
+    return SEAMS_ERR_RANGE;
+  }
+  if (what == "a coordinate is not finite") {
+    return SEAMS_ERR_ARG;
+  }
+  return SEAMS_ERR_INTERNAL;
+}
+
+/* Call only from inside a catch handler. A minimum-image range error comes
+ * from the caller's cell or coordinates, so it is not an internal error. */
+seams_status caught() noexcept {
+  remember();
+  try {
+    throw;
+  } catch (const gen::mic::RangeError &) {
+    return SEAMS_ERR_RANGE;
+  } catch (const linkcell::Error &ex) {
+    return linkcell_status(ex);
+  } catch (...) {
+    return SEAMS_ERR_INTERNAL;
+  }
 }
 
 void set_threads() {
@@ -414,12 +448,14 @@ Cloud &kernel_cloud(seams_system *sys, int type, int &typ) {
     work.box = cloud.box;
     work.boxLow = cloud.boxLow;
     const int n = static_cast<int>(cloud.pts.size());
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 4096 && !omp_in_parallel())
 #endif
     for (int i = 0; i < n; ++i) {
-      work.pts[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)];
+      errors.run([&] { work.pts[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)]; });
     }
+    errors.rethrow();
   }
   sys->scratch_typ = normalize_types(work, type);
   sys->scratch_type = type;
@@ -626,13 +662,17 @@ std::vector<std::vector<int>> gather_rows(const std::vector<std::vector<int>> &s
                                           const std::vector<int> &at) {
   const int m = static_cast<int>(at.size());
   std::vector<std::vector<int>> out(at.size());
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 4096 && !omp_in_parallel())
 #endif
   for (int k = 0; k < m; ++k) {
-    const auto &row = src[static_cast<std::size_t>(at[static_cast<std::size_t>(k)])];
-    out[static_cast<std::size_t>(k)].assign(row.begin(), row.end());
+    errors.run([&] {
+      const auto &row = src[static_cast<std::size_t>(at[static_cast<std::size_t>(k)])];
+      out[static_cast<std::size_t>(k)].assign(row.begin(), row.end());
+    });
   }
+  errors.rethrow();
   return out;
 }
 
@@ -1168,8 +1208,7 @@ seams_status seams_set_num_threads(int n) {
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1393,8 +1432,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1441,8 +1479,7 @@ seams_status seams_rings_chordless(const seams_neighbours *nb, int size, int *ri
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1567,8 +1604,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1613,8 +1649,7 @@ seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1697,8 +1732,7 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1763,8 +1797,7 @@ seams_status seams_rings_from_csr(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -1783,18 +1816,26 @@ void refine_ring_labels(const seams_rings *rings) {
     const int nop = rings->n_atoms;
     rings->idx.assign(static_cast<std::size_t>(std::max(nop, 0)), {});
     const int filled = std::min(nop, static_cast<int>(rings->offsets.size()) - 1);
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (filled >= 4096 && !omp_in_parallel())
 #endif
     for (int i = 0; i < filled; ++i) {
-      const int a = rings->offsets[static_cast<std::size_t>(i)];
-      const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
-      // cageAffiliation and findPrisms read a row from its second entry,
-      // as neighbourListByIndex writes it.
-      auto &row = rings->idx[static_cast<std::size_t>(i)];
-      row.reserve(static_cast<std::size_t>(b - a) + 1);
-      row.push_back(i);
-      row.insert(row.end(), rings->cols.begin() + a, rings->cols.begin() + b);
+      errors.run([&] {
+        const int a = rings->offsets[static_cast<std::size_t>(i)];
+        const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
+        // cageAffiliation and findPrisms read a row from its second entry,
+        // as neighbourListByIndex writes it.
+        auto &row = rings->idx[static_cast<std::size_t>(i)];
+        row.reserve(static_cast<std::size_t>(b - a) + 1);
+        row.push_back(i);
+        row.insert(row.end(), rings->cols.begin() + a, rings->cols.begin() + b);
+      });
+    }
+    // A partial idx would pass the empty() test above on the next call.
+    if (errors.failed()) {
+      rings->idx.clear();
+      errors.rethrow();
     }
   }
   const auto &idx = rings->idx;
@@ -1889,6 +1930,10 @@ void refine_ring_labels(const seams_rings *rings) {
         }
         release_rows(bySize[size]);
       }
+    } catch (const gen::mic::RangeError &) {
+      /* The prism geometry needs the minimum image, so a cell outside its
+         range is the caller's error, not a ring without a prism label. */
+      throw;
     } catch (const std::exception &) {
       /* Prism labels stay at the size or cage code already written. */
     }
@@ -1943,8 +1988,7 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
     } catch (const std::bad_alloc &) {
       return fail(SEAMS_ERR_NOMEM, "out of memory");
     } catch (...) {
-      remember();
-      return SEAMS_ERR_INTERNAL;
+      return caught();
     }
   }
   const long count = static_cast<long>(rings->rings.size());
@@ -2136,8 +2180,7 @@ seams_status seams_path_nframes(const char *path, size_t *nframes) {
   } catch (const std::exception &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2176,8 +2219,7 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
     const bool past = !empty && std::strstr(what, "past the last") != nullptr;
     return fail(past ? SEAMS_ERR_RANGE : SEAMS_ERR_ARG, empty ? "cannot read frame" : what);
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2266,8 +2308,7 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2368,8 +2409,7 @@ seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, i
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2435,8 +2475,7 @@ seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2499,8 +2538,7 @@ seams_status seams_tetrahedral_order(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2554,8 +2592,7 @@ seams_status seams_lsi(seams_system *sys, const int *centres,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2708,8 +2745,7 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2826,8 +2862,7 @@ static seams_status signature_with_edge(seams_system *sys, double cutoff, int ty
   } catch (const std::out_of_range &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2877,8 +2912,7 @@ seams_status seams_system_symmetry(seams_system *sys, double shell_rmsd, int *la
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -2936,8 +2970,7 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3119,8 +3152,7 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3168,8 +3200,7 @@ seams_status seams_rdf(seams_system *sys, double rmax, int bins, int type_i, int
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3212,8 +3243,7 @@ seams_status seams_running_cn(seams_system *sys, double rmax, int bins, int type
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3241,8 +3271,7 @@ seams_status seams_coordination(seams_system *sys, double rmax, int bins, int ty
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3312,8 +3341,7 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3386,8 +3414,7 @@ seams_status seams_hbond_edges(seams_system *sys, double cutoff, int oxygen_type
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3475,8 +3502,7 @@ seams_status seams_directed_hbonds(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3646,8 +3672,7 @@ seams_status seams_quenched_analysis(
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3694,8 +3719,227 @@ seams_status seams_density_axis(seams_system *sys, int type, int bins, int axis,
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
+  }
+}
+
+static seams_status pore_status() {
+  try {
+    throw;
+  } catch (const pore::BoxError &ex) {
+    return fail(SEAMS_ERR_BOX, ex.what());
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::out_of_range &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (const gen::mic::RangeError &ex) {
+    return fail(SEAMS_ERR_RANGE, ex.what());
+  } catch (const linkcell::Error &ex) {
+    return fail(linkcell_status(ex), ex.what());
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (const std::exception &ex) {
+    return fail(SEAMS_ERR_INTERNAL, ex.what());
+  } catch (...) {
+    return fail(SEAMS_ERR_INTERNAL, "unknown error");
+  }
+}
+
+static void copy_profile(const pore::Profile &profile, double *coordinate, double *number_density,
+                         double *mass_density, double *volume) {
+  if (coordinate != nullptr) {
+    std::copy(profile.coordinate.begin(), profile.coordinate.end(), coordinate);
+  }
+  if (number_density != nullptr) {
+    std::copy(profile.number_density.begin(), profile.number_density.end(), number_density);
+  }
+  if (mass_density != nullptr) {
+    std::copy(profile.mass_density.begin(), profile.mass_density.end(), mass_density);
+  }
+  if (volume != nullptr) {
+    std::copy(profile.volume.begin(), profile.volume.end(), volume);
+  }
+}
+
+seams_status seams_density_fractional(seams_system *sys, int type, int bins, int axis,
+                                      const double *direction, size_t direction_len, double origin,
+                                      const double *masses, size_t masses_len, double *coordinate,
+                                      double *number_density, double *mass_density,
+                                      double *bin_volume, size_t cap, size_t *n_out) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "density output is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (direction != nullptr && direction_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "direction must hold 3 components");
+  }
+  if (masses != nullptr && masses_len != static_cast<size_t>(sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "masses length must equal the atom count");
+  }
+  try {
+    const pore::Profile profile =
+        direction == nullptr
+            ? pore::fractionalAxis(sys->cloud, type, bins, axis, origin, masses)
+            : pore::alongDirection(sys->cloud, type, bins, direction, origin, masses);
+    *n_out = profile.coordinate.size();
+    const bool any = coordinate != nullptr || number_density != nullptr || mass_density != nullptr ||
+                     bin_volume != nullptr;
+    if (!any) {
+      return SEAMS_OK;
+    }
+    if (cap < profile.coordinate.size()) {
+      return fail(SEAMS_ERR_RANGE, "profile buffer shorter than the bin count");
+    }
+    copy_profile(profile, coordinate, number_density, mass_density, bin_volume);
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
+  }
+}
+
+seams_status seams_pore_frame(seams_system *sys, int framework_type, int axis,
+                              const double *direction, size_t direction_len,
+                              const double *centre_frac, size_t centre_len, double *axis_out,
+                              double *centre_out, double *centre_frac_out, int *axis_index) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || axis_out == nullptr || centre_out == nullptr || centre_frac_out == nullptr ||
+      axis_index == nullptr) {
+    return fail(SEAMS_ERR_NULL, "a pore frame output pointer is NULL");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (direction != nullptr && direction_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "direction must hold 3 components");
+  }
+  if (centre_frac != nullptr && centre_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "centre must hold 3 fractional coordinates");
+  }
+  try {
+    const pore::Frame frame =
+        pore::poreFrame(sys->cloud, framework_type, axis, direction, centre_frac);
+    std::copy(frame.axis_unit, frame.axis_unit + 3, axis_out);
+    std::copy(frame.centre, frame.centre + 3, centre_out);
+    std::copy(frame.centre_frac, frame.centre_frac + 3, centre_frac_out);
+    *axis_index = frame.axis_index;
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
+  }
+}
+
+seams_status seams_pore_profiles(seams_system *sys, int type, int radial_bins, int azimuthal_bins,
+                                 int axial_bins, double r_max, int axis, const double *direction,
+                                 size_t direction_len, const double *centre_frac, size_t centre_len,
+                                 int framework_type, double origin, const double *masses,
+                                 size_t masses_len, double *radius, double *radial_number,
+                                 double *radial_mass, double *radial_volume, size_t radial_cap,
+                                 size_t *n_radial, double *theta, double *azimuthal_number,
+                                 double *azimuthal_mass, double *azimuthal_volume,
+                                 size_t azimuthal_cap, size_t *n_azimuthal, double *axial,
+                                 double *axial_number, double *axial_mass, double *axial_volume,
+                                 size_t axial_cap, size_t *n_axial) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_radial == nullptr || n_azimuthal == nullptr || n_axial == nullptr) {
+    return fail(SEAMS_ERR_NULL, "a profile count pointer is NULL");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (direction != nullptr && direction_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "direction must hold 3 components");
+  }
+  if (centre_frac != nullptr && centre_len != 3) {
+    return fail(SEAMS_ERR_RANGE, "centre must hold 3 fractional coordinates");
+  }
+  if (masses != nullptr && masses_len != static_cast<size_t>(sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "masses length must equal the atom count");
+  }
+  try {
+    const pore::Profiles made = pore::poreProfiles(
+        sys->cloud, type, radial_bins, azimuthal_bins, axial_bins, r_max, axis, direction,
+        centre_frac, framework_type, origin, masses);
+    *n_radial = made.radial.coordinate.size();
+    *n_azimuthal = made.azimuthal.coordinate.size();
+    *n_axial = made.axial.coordinate.size();
+    const bool radial_any = radius != nullptr || radial_number != nullptr || radial_mass != nullptr ||
+                            radial_volume != nullptr;
+    const bool azimuthal_any = theta != nullptr || azimuthal_number != nullptr ||
+                               azimuthal_mass != nullptr || azimuthal_volume != nullptr;
+    const bool axial_any = axial != nullptr || axial_number != nullptr || axial_mass != nullptr ||
+                           axial_volume != nullptr;
+    if ((radial_any && radial_cap < made.radial.coordinate.size()) ||
+        (azimuthal_any && azimuthal_cap < made.azimuthal.coordinate.size()) ||
+        (axial_any && axial_cap < made.axial.coordinate.size())) {
+      return fail(SEAMS_ERR_RANGE, "profile buffer shorter than the bin count");
+    }
+    if (radial_any) {
+      copy_profile(made.radial, radius, radial_number, radial_mass, radial_volume);
+    }
+    if (azimuthal_any) {
+      copy_profile(made.azimuthal, theta, azimuthal_number, azimuthal_mass, azimuthal_volume);
+    }
+    if (axial_any) {
+      copy_profile(made.axial, axial, axial_number, axial_mass, axial_volume);
+    }
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
+  }
+}
+
+seams_status seams_host_guest(seams_system *sys, int guest_type, int framework_type, double cutoff,
+                              int *guest_index, int *nearest_index, int *nearest_type,
+                              double *nearest_distance, size_t guest_cap, size_t *n_guest,
+                              int *framework_types, size_t type_cap, size_t *n_types,
+                              int *contact_counts, size_t contact_cap) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || n_guest == nullptr || n_types == nullptr) {
+    return fail(SEAMS_ERR_NULL, "a count pointer is NULL");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  try {
+    const pore::HostGuest made = pore::hostGuest(sys->cloud, guest_type, framework_type, cutoff);
+    *n_guest = made.guest.size();
+    *n_types = made.framework_types.size();
+    const bool guest_any = guest_index != nullptr || nearest_index != nullptr ||
+                           nearest_type != nullptr || nearest_distance != nullptr;
+    const size_t contacts = made.guest.size() * made.framework_types.size();
+    if ((guest_any && guest_cap < made.guest.size()) ||
+        (framework_types != nullptr && type_cap < made.framework_types.size()) ||
+        (contact_counts != nullptr && contact_cap < contacts)) {
+      return fail(SEAMS_ERR_RANGE, "host-guest buffer shorter than the result");
+    }
+    if (guest_index != nullptr) {
+      std::copy(made.guest.begin(), made.guest.end(), guest_index);
+    }
+    if (nearest_index != nullptr) {
+      std::copy(made.nearest.begin(), made.nearest.end(), nearest_index);
+    }
+    if (nearest_type != nullptr) {
+      std::copy(made.nearest_type.begin(), made.nearest_type.end(), nearest_type);
+    }
+    if (nearest_distance != nullptr) {
+      std::copy(made.distance.begin(), made.distance.end(), nearest_distance);
+    }
+    if (framework_types != nullptr) {
+      std::copy(made.framework_types.begin(), made.framework_types.end(), framework_types);
+    }
+    if (contact_counts != nullptr) {
+      std::copy(made.contacts.begin(), made.contacts.end(), contact_counts);
+    }
+    return SEAMS_OK;
+  } catch (...) {
+    return pore_status();
   }
 }
 
@@ -3757,8 +4001,7 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3847,8 +4090,7 @@ seams_status seams_contact_pairs(seams_system *sys, const char *site_spec, size_
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3908,8 +4150,7 @@ seams_status seams_domains(seams_system *sys, double cutoff, const char *site_sp
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -3977,8 +4218,7 @@ seams_status seams_prisms(seams_system *sys, double cutoff, int type, int *perfe
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4047,8 +4287,7 @@ seams_status seams_monolayer(seams_system *sys, double cutoff, int type, int max
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4075,8 +4314,7 @@ seams_status seams_site_table(seams_system *sys, const char *spec, int *kinds, s
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4285,8 +4523,7 @@ seams_status seams_system_set_positions(seams_system *sys, const double *xyz, si
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4498,8 +4735,7 @@ seams_status seams_molecule_centres(const seams_system *sys, const int *mols,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4545,8 +4781,7 @@ seams_status seams_traj_unwrap_positions(const double *xyz, size_t nframes,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4623,8 +4858,7 @@ seams_status seams_traj_unwrap_centres(
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4678,8 +4912,7 @@ seams_status seams_water_vectors(const seams_system *sys, int oxygen_type,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4734,8 +4967,7 @@ seams_status seams_molecule_dipoles(
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4790,8 +5022,7 @@ seams_status seams_orientation_order(const double *vectors, size_t n_vectors,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4837,8 +5068,7 @@ seams_status seams_msd_create(size_t natoms, size_t max_lag,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4880,8 +5110,7 @@ seams_status seams_msd_push(seams_msd *msd, const double *xyz, size_t natoms,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4931,8 +5160,7 @@ seams_status seams_msd_curve(const seams_msd *msd, double *lag_time,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -4980,8 +5208,7 @@ seams_status seams_msd_fit(const seams_msd *msd, double t_start, double t_end,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5015,8 +5242,7 @@ seams_status seams_hbond_tcf_create(size_t max_lag, size_t origin_stride,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5045,8 +5271,7 @@ seams_status seams_hbond_tcf_push(seams_hbond_tcf *tcf, const int *donors,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5093,8 +5318,7 @@ seams_status seams_hbond_tcf_curve(const seams_hbond_tcf *tcf, double *lag_time,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5143,8 +5367,7 @@ seams_status seams_hbond_tcf_fit(const seams_hbond_tcf *tcf, double t_start,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5182,8 +5405,7 @@ seams_status seams_reorient_create(size_t n_vectors, size_t max_lag,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5215,8 +5437,7 @@ seams_status seams_reorient_push(seams_reorient *reorient,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5263,8 +5484,7 @@ seams_status seams_reorient_curve(const seams_reorient *reorient,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5313,8 +5533,7 @@ seams_status seams_reorient_fit(const seams_reorient *reorient, double t_start,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 

@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <region_errors.hpp>
 #include <ring.hpp>
 
 /**
@@ -192,13 +193,17 @@ ring::getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize
     }
   }
   std::vector<std::vector<int>> ringSingleSize(keep.size());
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (keep.size() >= 2048)
 #endif
   for (int k = 0; k < static_cast<int>(keep.size()); k++) {
-    ringSingleSize[static_cast<std::size_t>(k)] =
-        rings[static_cast<std::size_t>(keep[static_cast<std::size_t>(k)])];
+    errors.run([&] {
+      ringSingleSize[static_cast<std::size_t>(k)] =
+          rings[static_cast<std::size_t>(keep[static_cast<std::size_t>(k)])];
+    });
   }
+  errors.rethrow();
   return ringSingleSize;
 }
 

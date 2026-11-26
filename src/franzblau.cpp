@@ -28,6 +28,7 @@
 
 #include <franzblau.hpp>
 #include <par_team.hpp>
+#include <region_errors.hpp>
 #include <thread_team.hpp>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -276,6 +277,7 @@ struct BoundedBalls {
     }
 #endif
     std::vector<Bag> bags(static_cast<std::size_t>(nThreads));
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (parallel && nThreads > 1) num_threads(nThreads)
 #endif
@@ -285,25 +287,29 @@ struct BoundedBalls {
       tid = omp_get_thread_num();
 #endif
       auto &bag = bags[static_cast<std::size_t>(tid)];
-      std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
+      std::vector<int> dist;
       std::vector<int> touched;
       std::vector<int> frontier;
       std::vector<int> next;
+      errors.run([&] { dist.assign(static_cast<std::size_t>(nVertices), -1); });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
       for (int c = 0; c < nCells; c++) {
-        const int lo = c * cell;
-        const int hi = std::min(nWhich, lo + cell);
-        for (int k = lo; k < hi; k++) {
-          const int v = which[static_cast<std::size_t>(k)];
-          bag.span.push_back(static_cast<int>(bag.items.size()));
-          appendBall(v, adjacency, radius, dist, touched, frontier, next, bag.items);
-          bag.vert.push_back(v);
-        }
+        errors.run([&] {
+          const int lo = c * cell;
+          const int hi = std::min(nWhich, lo + cell);
+          for (int k = lo; k < hi; k++) {
+            const int v = which[static_cast<std::size_t>(k)];
+            bag.span.push_back(static_cast<int>(bag.items.size()));
+            appendBall(v, adjacency, radius, dist, touched, frontier, next, bag.items);
+            bag.vert.push_back(v);
+          }
+        });
       }
-      bag.span.push_back(static_cast<int>(bag.items.size()));
+      errors.run([&] { bag.span.push_back(static_cast<int>(bag.items.size())); });
     }
+    errors.rethrow();
     std::vector<int> width(static_cast<std::size_t>(nVertices), 0);
     int total = 0;
     for (const auto &bag : bags) {
@@ -578,6 +584,7 @@ struct BitBalls {
     const int nthreads = 1;
 #endif
     std::vector<std::vector<Rec>> bags(static_cast<std::size_t>(nthreads));
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (parallel)
 #endif
@@ -588,51 +595,55 @@ struct BitBalls {
       const int tid = 0;
 #endif
       auto &bag = bags[static_cast<std::size_t>(tid)];
-      std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
+      std::vector<int> dist;
       std::vector<int> touched, frontier, next;
+      errors.run([&] { dist.assign(static_cast<std::size_t>(nVertices), -1); });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
       for (int v = 0; v < nVertices; v++) {
-        if (!wanted[static_cast<std::size_t>(v)]) {
-          continue;
-        }
-        for (const int w : touched) {
-          dist[static_cast<std::size_t>(w)] = -1;
-        }
-        touched.clear();
-        dist[static_cast<std::size_t>(v)] = 0;
-        touched.push_back(v);
-        frontier.assign(1, v);
-        for (int depth = 1; depth <= rad && !frontier.empty(); depth++) {
-          next.clear();
-          for (const int u : frontier) {
-            for (const int w : adjacency[u]) {
-              if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
-                dist[static_cast<std::size_t>(w)] = depth;
-                touched.push_back(w);
-                next.push_back(w);
+        errors.run([&] {
+          if (!wanted[static_cast<std::size_t>(v)]) {
+            return;
+          }
+          for (const int w : touched) {
+            dist[static_cast<std::size_t>(w)] = -1;
+          }
+          touched.clear();
+          dist[static_cast<std::size_t>(v)] = 0;
+          touched.push_back(v);
+          frontier.assign(1, v);
+          for (int depth = 1; depth <= rad && !frontier.empty(); depth++) {
+            next.clear();
+            for (const int u : frontier) {
+              for (const int w : adjacency[u]) {
+                if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
+                  dist[static_cast<std::size_t>(w)] = depth;
+                  touched.push_back(w);
+                  next.push_back(w);
+                }
               }
             }
+            frontier.swap(next);
           }
-          frontier.swap(next);
-        }
-        const auto n = static_cast<uint32_t>(touched.size() > 0 ? touched.size() - 1 : 0);
-        uint32_t size = 0;
-        if (n != 0) {
-          size = 64;
-          while (size < n * 2u) {
-            size <<= 1u;
+          const auto n = static_cast<uint32_t>(touched.size() > 0 ? touched.size() - 1 : 0);
+          uint32_t size = 0;
+          if (n != 0) {
+            size = 64;
+            while (size < n * 2u) {
+              size <<= 1u;
+            }
           }
-        }
-        slots[static_cast<std::size_t>(v)] = size;
-        for (const int w : touched) {
-          if (w != v) {
-            bag.push_back(Rec{v, w, static_cast<uint8_t>(dist[static_cast<std::size_t>(w)])});
+          slots[static_cast<std::size_t>(v)] = size;
+          for (const int w : touched) {
+            if (w != v) {
+              bag.push_back(Rec{v, w, static_cast<uint8_t>(dist[static_cast<std::size_t>(w)])});
+            }
           }
-        }
+        });
       }
     }
+    errors.rethrow();
     off[0] = 0;
     for (int v = 0; v < nVertices; v++) {
       mask[static_cast<std::size_t>(v)] =
@@ -2281,6 +2292,7 @@ sparseCensusTeam(const Graph &adjacency, const DistOracle &oracle,
   const int nFrom = static_cast<int>(from.size());
   std::vector<std::vector<int>> threadHists(
       static_cast<std::size_t>(nThreads), std::vector<int>(hist->size(), 0));
+  seams::RegionErrors errors;
 #pragma omp parallel num_threads(nThreads)
   {
     thread_local RingScratch scratch;
@@ -2289,11 +2301,14 @@ sparseCensusTeam(const Graph &adjacency, const DistOracle &oracle,
     local.hist = &threadHists[static_cast<std::size_t>(omp_get_thread_num())];
 #pragma omp for schedule(guided)
     for (int k = 0; k < nFrom; k++) {
-      enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth,
-                          maxLvl, scratch, scratchPool, nullptr, legacy, skipOdd, minSize,
-                          local);
+      errors.run([&] {
+        enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth,
+                            maxLvl, scratch, scratchPool, nullptr, legacy, skipOdd, minSize,
+                            local);
+      });
     }
   }
+  errors.rethrow();
   for (const auto &h : threadHists) {
     for (std::size_t i = 0; i < hist->size(); i++) {
       (*hist)[i] += h[i];
@@ -2359,9 +2374,11 @@ static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
   for (int i = 0; i < sizes.len; i++) {
     sizes.counts[i] = 0;
   }
+  seams::RegionErrors errors;
 #pragma omp parallel num_threads(use) if (use > 1 && !omp_in_parallel())
   {
-    std::vector<long long> local(static_cast<std::size_t>(sizes.len), 0);
+    std::vector<long long> local;
+    errors.run([&] { local.assign(static_cast<std::size_t>(sizes.len), 0); });
 #pragma omp for schedule(static) nowait
     for (int k = 0; k < nPools; k++) {
       for (const auto &ring : pools[k]) {
@@ -2372,10 +2389,13 @@ static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
       }
     }
 #pragma omp critical(seams_ring_sizes)
-    for (int i = 0; i < sizes.len; i++) {
-      sizes.counts[i] += static_cast<int>(local[static_cast<std::size_t>(i)]);
-    }
+    errors.run([&] {
+      for (int i = 0; i < sizes.len; i++) {
+        sizes.counts[i] += static_cast<int>(local[static_cast<std::size_t>(i)]);
+      }
+    });
   }
+  errors.rethrow();
 }
 #endif
 
@@ -2418,28 +2438,32 @@ int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
 [[gnu::noinline]] PackedRows vectorNeighbourRows(
     const std::vector<std::vector<int>> &nList, int nVertices, int use) {
   std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) num_threads(use) if (use > 1 && !omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
-    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
-      continue;
-    }
-    auto &row = uniq[static_cast<std::size_t>(i)];
-    row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
-    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
-      const int j = nList[static_cast<std::size_t>(i)][k];
-      if (j < 0 || j >= nVertices || j == i) {
-        continue;
+    errors.run([&] {
+      if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+        return;
       }
-      if (std::find(row.begin(), row.end(), j) == row.end()) {
-        row.push_back(j);
+      auto &row = uniq[static_cast<std::size_t>(i)];
+      row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
+      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
+        const int j = nList[static_cast<std::size_t>(i)][k];
+        if (j < 0 || j >= nVertices || j == i) {
+          continue;
+        }
+        if (std::find(row.begin(), row.end(), j) == row.end()) {
+          row.push_back(j);
+        }
       }
-    }
-    if (row.size() > 1) {
-      std::sort(row.begin(), row.end());
-    }
+      if (row.size() > 1) {
+        std::sort(row.begin(), row.end());
+      }
+    });
   }
+  errors.rethrow();
   PackedRows adjacency;
   adjacency.first.assign(static_cast<std::size_t>(nVertices) + 1, 0);
   for (int i = 0; i < nVertices; i++) {
@@ -2540,31 +2564,35 @@ int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
     adjacency.cols = std::move(scratch);
     return adjacency;
   }
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) num_threads(use) if (!omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
-    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
-      continue;
-    }
-    int tmp[256];
-    int n = 0;
-    if (!uniqueInto(i, tmp, 256, &n)) {
-      std::vector<int> extra;
-      extra.reserve(nList[static_cast<std::size_t>(i)].size());
-      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
-        const int j = nList[static_cast<std::size_t>(i)][k];
-        if (j < 0 || j >= nVertices || j == i) {
-          continue;
-        }
-        if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
-          extra.push_back(j);
-        }
+    errors.run([&] {
+      if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+        return;
       }
-      n = static_cast<int>(extra.size());
-    }
-    degree[static_cast<std::size_t>(i)] = n;
+      int tmp[256];
+      int n = 0;
+      if (!uniqueInto(i, tmp, 256, &n)) {
+        std::vector<int> extra;
+        extra.reserve(nList[static_cast<std::size_t>(i)].size());
+        for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
+          const int j = nList[static_cast<std::size_t>(i)][k];
+          if (j < 0 || j >= nVertices || j == i) {
+            continue;
+          }
+          if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
+            extra.push_back(j);
+          }
+        }
+        n = static_cast<int>(extra.size());
+      }
+      degree[static_cast<std::size_t>(i)] = n;
+    });
   }
+  errors.rethrow();
   for (int i = 0; i < nVertices; i++) {
     adjacency.first[static_cast<std::size_t>(i + 1)] = adjacency.first[static_cast<std::size_t>(i)] + static_cast<std::size_t>(degree[static_cast<std::size_t>(i)]);
   }
@@ -2573,30 +2601,33 @@ int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
 #pragma omp parallel for schedule(static) num_threads(use) if (!omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
-    const int n = degree[static_cast<std::size_t>(i)];
-    if (n <= 0) {
-      continue;
-    }
-    int *dst = adjacency.cols.data() + adjacency.first[static_cast<std::size_t>(i)];
-    if (n <= 256) {
-      int got = 0;
-      uniqueInto(i, dst, 256, &got);
-    } else {
-      std::vector<int> extra;
-      extra.reserve(static_cast<std::size_t>(n));
-      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
-        const int j = nList[static_cast<std::size_t>(i)][k];
-        if (j < 0 || j >= nVertices || j == i) {
-          continue;
-        }
-        if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
-          extra.push_back(j);
-        }
+    errors.run([&] {
+      const int n = degree[static_cast<std::size_t>(i)];
+      if (n <= 0) {
+        return;
       }
-      std::sort(extra.begin(), extra.end());
-      std::copy(extra.begin(), extra.end(), dst);
-    }
+      int *dst = adjacency.cols.data() + adjacency.first[static_cast<std::size_t>(i)];
+      if (n <= 256) {
+        int got = 0;
+        uniqueInto(i, dst, 256, &got);
+      } else {
+        std::vector<int> extra;
+        extra.reserve(static_cast<std::size_t>(n));
+        for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
+          const int j = nList[static_cast<std::size_t>(i)][k];
+          if (j < 0 || j >= nVertices || j == i) {
+            continue;
+          }
+          if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
+            extra.push_back(j);
+          }
+        }
+        std::sort(extra.begin(), extra.end());
+        std::copy(extra.begin(), extra.end(), dst);
+      }
+    });
   }
+  errors.rethrow();
   return adjacency;
 }
 
@@ -3104,6 +3135,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     const bool profileNow = gProfile;
     const bool timeNow = gTimePrimitive;
     double *const sourceNow = gSourceWorkPtr;
+    seams::RegionErrors errors;
 #pragma omp parallel num_threads(sourceUse)
     {
       adoptSearchFlags(profileNow, timeNow, sourceNow);
@@ -3121,29 +3153,32 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       }
 #pragma omp for schedule(guided)
       for (int k = 0; k < nFrom; k++) {
-        if (gSourceWorkPtr == nullptr && shellWords == 3) {
-          enumerateFromSource<PackedRows, RingPool, 3>(
-              adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl, scratch,
-              (*pools)[static_cast<std::size_t>(k)], nullptr, legacy, skipOdd, minSize, local);
-        } else if (gSourceWorkPtr == nullptr) {
-          enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
-                              scratch, (*pools)[static_cast<std::size_t>(k)],
-                              nullptr, legacy, skipOdd, minSize, local);
-        } else {
-          const auto srcStart = std::chrono::steady_clock::now();
-          enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
-                              scratch, (*pools)[static_cast<std::size_t>(k)],
-                              nullptr, legacy, skipOdd, minSize, local);
-          const int src = from[static_cast<std::size_t>(k)];
-          if (src >= 0 && src < nVertices) {
-            gSourceWorkPtr[src] +=
-                std::chrono::duration<double, std::micro>(
-                    std::chrono::steady_clock::now() - srcStart)
-                    .count();
+        errors.run([&] {
+          if (gSourceWorkPtr == nullptr && shellWords == 3) {
+            enumerateFromSource<PackedRows, RingPool, 3>(
+                adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl, scratch,
+                (*pools)[static_cast<std::size_t>(k)], nullptr, legacy, skipOdd, minSize, local);
+          } else if (gSourceWorkPtr == nullptr) {
+            enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth,
+                                maxLvl, scratch, (*pools)[static_cast<std::size_t>(k)],
+                                nullptr, legacy, skipOdd, minSize, local);
+          } else {
+            const auto srcStart = std::chrono::steady_clock::now();
+            enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth,
+                                maxLvl, scratch, (*pools)[static_cast<std::size_t>(k)],
+                                nullptr, legacy, skipOdd, minSize, local);
+            const int src = from[static_cast<std::size_t>(k)];
+            if (src >= 0 && src < nVertices) {
+              gSourceWorkPtr[src] +=
+                  std::chrono::duration<double, std::micro>(
+                      std::chrono::steady_clock::now() - srcStart)
+                      .count();
+            }
           }
-        }
+        });
       }
     }
+    errors.rethrow();
     if (hist != nullptr) {
       for (const auto &h : threadHists) {
         for (std::size_t i = 0; i < hist->size(); i++) {
@@ -3176,12 +3211,15 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       rings.resize(start[static_cast<std::size_t>(nFrom)]);
 #pragma omp parallel for schedule(static) num_threads(use)
       for (int k = 0; k < nFrom; k++) {
-        auto &pool = (*pools)[static_cast<std::size_t>(k)];
-        std::size_t at = start[static_cast<std::size_t>(k)];
-        for (const auto &ring : pool) {
-          rings[at++].assign(ring.begin(), ring.end());
-        }
+        errors.run([&] {
+          auto &pool = (*pools)[static_cast<std::size_t>(k)];
+          std::size_t at = start[static_cast<std::size_t>(k)];
+          for (const auto &ring : pool) {
+            rings[at++].assign(ring.begin(), ring.end());
+          }
+        });
       }
+      errors.rethrow();
     }
     balls.clear();
     std::vector<int>().swap(adjacency.cols);
@@ -3938,6 +3976,7 @@ struct primitive::RingUpdater::Impl {
     const bool profileNow = gProfile;
     const bool timeNow = gTimePrimitive;
     double *const sourceNow = gSourceWorkPtr;
+    seams::RegionErrors errors;
 #pragma omp parallel num_threads(nThreads)
       {
         adoptSearchFlags(profileNow, timeNow, sourceNow);
@@ -3947,12 +3986,15 @@ struct primitive::RingUpdater::Impl {
         // busy chunk with nothing left to steal.
 #pragma omp for schedule(guided)
         for (int src = 0; src < nVertices; src++) {
-          bySource[static_cast<std::size_t>(src)].reset();
-          enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch,
-                              bySource[static_cast<std::size_t>(src)], nullptr,
-                              false, skipOdd, 3, call);
+          errors.run([&] {
+            bySource[static_cast<std::size_t>(src)].reset();
+            enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch,
+                                bySource[static_cast<std::size_t>(src)], nullptr,
+                                false, skipOdd, 3, call);
+          });
         }
       }
+    errors.rethrow();
     } else
 #endif
     {
@@ -4016,6 +4058,7 @@ struct primitive::RingUpdater::Impl {
     const bool profileNow = gProfile;
     const bool timeNow = gTimePrimitive;
     double *const sourceNow = gSourceWorkPtr;
+    seams::RegionErrors errors;
 #pragma omp parallel num_threads(nThreads)
       {
         adoptSearchFlags(profileNow, timeNow, sourceNow);
@@ -4027,13 +4070,16 @@ struct primitive::RingUpdater::Impl {
         oracle.hop2 = hopOnly;
 #pragma omp for schedule(guided)
         for (int k = 0; k < n; k++) {
-          const int src = T[static_cast<std::size_t>(k)];
-          RingPool &pool = bySource[static_cast<std::size_t>(src)];
-          pool.reset();
-          enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch, pool,
-                              &inT, false, skipOdd, 3, call);
+          errors.run([&] {
+            const int src = T[static_cast<std::size_t>(k)];
+            RingPool &pool = bySource[static_cast<std::size_t>(src)];
+            pool.reset();
+            enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch, pool,
+                                &inT, false, skipOdd, 3, call);
+          });
         }
       }
+    errors.rethrow();
     } else
 #endif
     {
@@ -4079,17 +4125,21 @@ struct primitive::RingUpdater::Impl {
           bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])].n;
     }
     std::vector<std::vector<int>> out(ringAt[static_cast<std::size_t>(n)]);
+    seams::RegionErrors copyErrors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static)
 #endif
     for (int k = 0; k < n; k++) {
-      RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
-      std::size_t at = ringAt[static_cast<std::size_t>(k)];
-      for (std::size_t i = 0; i < pool.n; i++) {
-        out[at++] = pool.storage[i];
-      }
-      pool.reset();
+      copyErrors.run([&] {
+        RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
+        std::size_t at = ringAt[static_cast<std::size_t>(k)];
+        for (std::size_t i = 0; i < pool.n; i++) {
+          out[at++] = pool.storage[i];
+        }
+        pool.reset();
+      });
     }
+    copyErrors.rethrow();
     // Sort indices. Moving the ring buffers at every merge level of a
     // vector sort is most of this step, and the order is the same when
     // every ring is unique.
@@ -4185,6 +4235,7 @@ struct primitive::RingUpdater::Impl {
       aSplit[static_cast<std::size_t>(tid)] = static_cast<int>(at - added.begin());
     }
     std::vector<std::vector<std::vector<int>>> parts(static_cast<std::size_t>(nPart));
+    seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(nPart) if (nPart > 1)
 #endif
@@ -4193,31 +4244,34 @@ struct primitive::RingUpdater::Impl {
 #ifdef SEAMS_HAS_OPENMP
       tid = omp_get_thread_num();
 #endif
-      const int k0 = tid * kept / nPart;
-      const int k1 = (tid + 1) * kept / nPart;
-      const auto a0 = added.begin() + aSplit[static_cast<std::size_t>(tid)];
-      const auto a1 = added.begin() + aSplit[static_cast<std::size_t>(tid + 1)];
-      auto &mine = parts[static_cast<std::size_t>(tid)];
-      mine.reserve(static_cast<std::size_t>(k1 - k0) +
-                   static_cast<std::size_t>(a1 - a0));
-      int k = k0;
-      auto a = a0;
-      while (k < k1 && a != a1) {
-        auto &ring = flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k)])];
-        if (*a < ring) {
-          mine.push_back(std::move(*a++));
-        } else {
-          mine.push_back(std::move(ring));
-          ++k;
+      errors.run([&] {
+        const int k0 = tid * kept / nPart;
+        const int k1 = (tid + 1) * kept / nPart;
+        const auto a0 = added.begin() + aSplit[static_cast<std::size_t>(tid)];
+        const auto a1 = added.begin() + aSplit[static_cast<std::size_t>(tid + 1)];
+        auto &mine = parts[static_cast<std::size_t>(tid)];
+        mine.reserve(static_cast<std::size_t>(k1 - k0) + static_cast<std::size_t>(a1 - a0));
+        int k = k0;
+        auto a = a0;
+        while (k < k1 && a != a1) {
+          auto &ring = flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k)])];
+          if (*a < ring) {
+            mine.push_back(std::move(*a++));
+          } else {
+            mine.push_back(std::move(ring));
+            ++k;
+          }
         }
-      }
-      while (k < k1) {
-        mine.push_back(std::move(flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k++)])]));
-      }
-      while (a != a1) {
-        mine.push_back(std::move(*a++));
-      }
+        while (k < k1) {
+          mine.push_back(std::move(
+              flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k++)])]));
+        }
+        while (a != a1) {
+          mine.push_back(std::move(*a++));
+        }
+      });
     }
+    errors.rethrow();
     std::vector<std::vector<int>> merged;
     merged.reserve(static_cast<std::size_t>(kept) + added.size());
     for (auto &part : parts) {
@@ -4340,14 +4394,16 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
       int directed = 0;
     };
     std::vector<Acc> acc(static_cast<std::size_t>(nThreads));
+    seams::RegionErrors errors;
 #pragma omp parallel num_threads(nThreads)
     {
       Acc &me = acc[static_cast<std::size_t>(omp_get_thread_num())];
 #pragma omp for schedule(static)
       for (int v = 0; v < nVertices; v++) {
-        scanRow(v, me.directed, me.vs);
+        errors.run([&] { scanRow(v, me.directed, me.vs); });
       }
     }
+    errors.rethrow();
     for (const Acc &me : acc) {
       directed += me.directed;
       changed.insert(changed.end(), me.vs.begin(), me.vs.end());

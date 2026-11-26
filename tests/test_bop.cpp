@@ -23,6 +23,7 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -2195,4 +2196,32 @@ TEST_CASE("getq6 and reclassifyWater handle coincident pairs and empty bond list
   chill::reclassifyWater(coinc, highQ6);
   REQUIRE(coinc.pts[0].iceType == molSys::atom_state_type::water);
   REQUIRE(coinc.pts[1].iceType == molSys::atom_state_type::water);
+}
+
+TEST_CASE("a min-image throw inside CHILL leaves the OpenMP region as an exception", "[bop]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  REQUIRE(nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.0, 0.0, 0.0, 1.0e17, 1.0, 0.4,
+                                        0.3, 0.3, 0.3));
+  cloud.nop = 5;
+  cloud.pts.resize(5);
+  for (int i = 0; i < 5; ++i) {
+    cloud.pts[static_cast<std::size_t>(i)].atomID = i + 1;
+    cloud.pts[static_cast<std::size_t>(i)].type = 1;
+    cloud.idIndexMap[i + 1] = i;
+  }
+  cloud.pts[1].y = 0.8;
+  cloud.pts[0].c_ij = {{molSys::bond_type::staggered, 0.0},
+                       {molSys::bond_type::staggered, 0.0},
+                       {molSys::bond_type::out_of_range, 0.0},
+                       {molSys::bond_type::out_of_range, 0.0}};
+  std::vector<std::vector<int>> nList(5);
+  nList[0] = {1, 2, 3, 4, 5};
+  for (int i = 1; i < 5; ++i) {
+    nList[static_cast<std::size_t>(i)] = {i + 1};
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(2);
+#endif
+  REQUIRE_THROWS_AS(chill::getIceTypePlusNoPrint(cloud, nList, false), std::runtime_error);
+  REQUIRE_THROWS_AS(chill::getIceTypeNoPrint(cloud, nList, false), std::runtime_error);
 }

@@ -549,3 +549,90 @@ TEST_CASE("rdf2Danalysis_AA runs without error for single frame", "[rdf2d]") {
   // Cleanup
   std::error_code _ec_; fs::remove_all(tmpPath, _ec_);
 }
+
+TEST_CASE("sampleRDF_AA refines x-elongated tilted pairs against brute force",
+          "[rdf2d]") {
+  struct ElCell {
+    double lx, ly, lz, xy, xz, yz;
+  };
+  auto exactMin = [](const ElCell &c, double dx, double dy, double dz) {
+    const double kw = std::round(-dz / c.lz);
+    const double zw = dz + kw * c.lz;
+    const double y0w = dy + kw * c.yz;
+    const double jw = std::round(-y0w / c.ly);
+    const double yw = y0w + jw * c.ly;
+    const double x0w = dx + jw * c.xy + kw * c.xz;
+    const double xw = x0w + std::round(-x0w / c.lx) * c.lx;
+    double best = xw * xw + yw * yw + zw * zw;
+    const double R = std::sqrt(best);
+    const long k0 = static_cast<long>(std::floor((-dz - R) / c.lz)) - 1;
+    const long k1 = static_cast<long>(std::ceil((-dz + R) / c.lz)) + 1;
+    for (long k = k0; k <= k1; ++k) {
+      const double z = dz + static_cast<double>(k) * c.lz;
+      if (z * z > best) {
+        continue;
+      }
+      const double rem = std::sqrt(best - z * z);
+      const double y0 = dy + static_cast<double>(k) * c.yz;
+      const long j0 = static_cast<long>(std::floor((-y0 - rem) / c.ly)) - 1;
+      const long j1 = static_cast<long>(std::ceil((-y0 + rem) / c.ly)) + 1;
+      for (long j = j0; j <= j1; ++j) {
+        const double y = y0 + static_cast<double>(j) * c.ly;
+        const double x0 = dx + static_cast<double>(j) * c.xy +
+                          static_cast<double>(k) * c.xz;
+        const double ic = std::round(-x0 / c.lx);
+        for (double i = ic - 1.0; i <= ic + 1.0; i += 1.0) {
+          const double x = x0 + i * c.lx;
+          best = std::min(best, x * x + y * y + z * z);
+        }
+      }
+    }
+    return std::sqrt(best);
+  };
+
+  const ElCell cells[] = {
+      {1.0e4, 12.0, 12.0, 3.0, 3.0, 0.0},
+      {1.0e4, 12.0, 12.0, 3.0, 3.0, 6.0},
+  };
+  for (const ElCell &c : cells) {
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    const double xmin = std::min({0.0, c.xy, c.xz, c.xy + c.xz});
+    const double xmax = std::max({0.0, c.xy, c.xz, c.xy + c.xz});
+    cloud.box = {c.lx + xmax - xmin,
+                 c.ly + std::max(0.0, c.yz) - std::min(0.0, c.yz), c.lz, c.xy,
+                 c.xz, c.yz};
+    cloud.boxLow = {xmin, std::min(0.0, c.yz), 0.0};
+    cloud.currentFrame = 1;
+    cloud.nop = 0;
+    unsigned s = 12345;
+    auto u = [&]() {
+      s = s * 1103515245u + 12345u;
+      return static_cast<double>(s >> 8) / static_cast<double>(1 << 24);
+    };
+    const int n = 40;
+    for (int i = 0; i < n; ++i) {
+      const double fa = u();
+      const double fb = u();
+      const double fc = u();
+      addPoint(cloud, fa * c.lx + fb * c.xy + fc * c.xz,
+               fb * c.ly + fc * c.yz, fc * c.lz);
+    }
+    const double cutoff = 0.5 * c.lx;
+    const double bw = 0.5;
+    const int nbin = static_cast<int>(cutoff / bw) + 1;
+    std::vector<int> ref(static_cast<std::size_t>(nbin), 0);
+    for (int i = 0; i < n; ++i) {
+      for (int j = i + 1; j < n; ++j) {
+        const auto &a = cloud.pts[static_cast<std::size_t>(i)];
+        const auto &b = cloud.pts[static_cast<std::size_t>(j)];
+        const double r = exactMin(c, b.x - a.x, b.y - a.y, b.z - a.z);
+        if (r <= cutoff) {
+          ref[static_cast<std::size_t>(
+              std::min(static_cast<int>(r / bw), nbin - 1))] += 2;
+        }
+      }
+    }
+    const std::vector<int> got = rdf2::sampleRDF_AA(cloud, cutoff, bw, nbin);
+    REQUIRE(got == ref);
+  }
+}

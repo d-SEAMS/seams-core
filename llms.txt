@@ -45,6 +45,7 @@ Each link below is the Markdown twin of a page on https://docs.dseams.info, serv
 - [Confined water](https://docs.dseams.info/user/tutorials/confined-water.md): Quasi-one-dimensional ice is a stack of prism blocks.
 - [Quasi-one-dimensional ice](https://docs.dseams.info/user/tutorials/nanotube.md): A nanotube ice is a stack of prism blocks of one ring size.
 - [Confined ice](https://docs.dseams.info/user/howto/confined-ice.md): Classify ice in a nanotube or a monolayer.
+- [Pore profiles](https://docs.dseams.info/user/howto/pore-profiles.md): Water in a hexagonal COF pore sits in a triclinic cell.
 - [Sheared cells](https://docs.dseams.info/user/howto/sheared-cells.md): You have a triclinic LAMMPS dump and want the engine to use the real cell, not a diagonal of bound spans.
 - [Trajectories, dipoles, and time-correlation functions](https://docs.dseams.info/user/howto/trajectories-and-dynamics.md): Confined-water trajectories wrap molecules across periodic boundaries, split transport into axial and in-plane components, and track orientational and hydrogen-bond relaxation over thousands of...
 - [Engines](https://docs.dseams.info/user/engines.md): Read a trajectory from LAMMPS, GROMACS, OpenMM, or PLUMED, or label the frame inside the run.

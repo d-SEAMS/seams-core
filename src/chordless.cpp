@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <chordless.hpp>
+#include <region_errors.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -235,6 +236,7 @@ std::size_t chordless::cycles(const std::vector<int> &offsets, const std::vector
   std::vector<std::vector<int>> buffers(static_cast<std::size_t>(team));
   std::vector<std::vector<int>> blockSource(static_cast<std::size_t>(team));
 
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(team) reduction(+ : total)
 #endif
@@ -244,9 +246,11 @@ std::size_t chordless::cycles(const std::vector<int> &offsets, const std::vector
     tid = omp_get_thread_num();
 #endif
     Scratch scr;
-    scr.near.assign(static_cast<std::size_t>(n), 0);
-    scr.head.assign(static_cast<std::size_t>(n), -1);
-    scr.stamp.assign(static_cast<std::size_t>(n), 0u);
+    errors.run([&] {
+      scr.near.assign(static_cast<std::size_t>(n), 0);
+      scr.head.assign(static_cast<std::size_t>(n), -1);
+      scr.stamp.assign(static_cast<std::size_t>(n), 0u);
+    });
     std::vector<int> tmp;
     auto &buf = buffers[static_cast<std::size_t>(tid)];
     auto &mine = blockSource[static_cast<std::size_t>(tid)];
@@ -254,28 +258,31 @@ std::size_t chordless::cycles(const std::vector<int> &offsets, const std::vector
 #pragma omp for schedule(dynamic, 64)
 #endif
     for (int s = 0; s < n; ++s) {
-      fromSource(g, scr, s);
-      const std::size_t found = scr.local.size() / static_cast<std::size_t>(size);
-      if (found == 0) {
-        continue;
-      }
-      total += found;
-      if (per_atom != nullptr) {
-        for (int v : scr.local) {
+      errors.run([&] {
+        fromSource(g, scr, s);
+        const std::size_t found = scr.local.size() / static_cast<std::size_t>(size);
+        if (found == 0) {
+          return;
+        }
+        total += found;
+        if (per_atom != nullptr) {
+          for (int v : scr.local) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp atomic
 #endif
-          per_atom[v] += 1;
+            per_atom[v] += 1;
+          }
         }
-      }
-      if (keep) {
-        sortLocal(scr.local, size, tmp);
-        perSource[static_cast<std::size_t>(s)] = static_cast<int>(found);
-        mine.push_back(s);
-        buf.insert(buf.end(), scr.local.begin(), scr.local.end());
-      }
+        if (keep) {
+          sortLocal(scr.local, size, tmp);
+          perSource[static_cast<std::size_t>(s)] = static_cast<int>(found);
+          mine.push_back(s);
+          buf.insert(buf.end(), scr.local.begin(), scr.local.end());
+        }
+      });
     }
   }
+  errors.rethrow();
 
   if (keep) {
     std::vector<std::size_t> start(static_cast<std::size_t>(n) + 1, 0);

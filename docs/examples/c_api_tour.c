@@ -444,6 +444,39 @@ int main(int argc, char **argv) {
   need("dens", seams_density_axis(mix, 2, 4, 2, zz, rho, dens_n, &dens_n), mix);
   printf("capi seams_density_axis %zu\n", dens_n);
 
+  seams_system *pore = seams_system_create();
+  const double pore_xyz[] = {1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 3.0, 3.0, 3.0, 4.0, 1.0, 10.0};
+  const int pore_types[] = {1, 1, 1, 2};
+  const double pore_box[9] = {0.0, 0.0, 0.0, 5.0, 6.0, 20.0, 0.0, 0.0, 0.0};
+  need("poreatoms",
+       seams_system_set_atoms(pore, pore_xyz, 4, pore_box, 9, pore_types, NULL), pore);
+  size_t frac_n = 0;
+  need("fracq",
+       seams_density_fractional(pore, 0, 4, 2, NULL, 0, 0.0, NULL, 0, NULL, NULL, NULL, NULL, 0,
+                                &frac_n),
+       pore);
+  printf("capi seams_density_fractional %zu\n", frac_n);
+  double pore_axis[3], pore_centre[3], pore_frac[3];
+  int pore_index = -1;
+  need("pframe",
+       seams_pore_frame(pore, 0, -1, NULL, 0, NULL, 0, pore_axis, pore_centre, pore_frac,
+                        &pore_index),
+       pore);
+  printf("capi seams_pore_frame %d\n", pore_index);
+  size_t n_radial = 0, n_theta = 0, n_axial = 0;
+  need("pprof",
+       seams_pore_profiles(pore, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0, NULL,
+                           NULL, NULL, NULL, 0, &n_radial, NULL, NULL, NULL, NULL, 0, &n_theta,
+                           NULL, NULL, NULL, NULL, 0, &n_axial),
+       pore);
+  printf("capi seams_pore_profiles %zu %zu %zu\n", n_radial, n_theta, n_axial);
+  size_t n_guest = 0, n_types = 0;
+  need("phg",
+       seams_host_guest(pore, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &n_guest, NULL, 0, &n_types,
+                        NULL, 0),
+       pore);
+  printf("capi seams_host_guest %zu %zu\n", n_guest, n_types);
+
   seams_topo *fp = NULL;
   need("fp", seams_fingerprint(ih, 3.5, 1, 4, SEAMS_GRAPH_CUTOFF, 2, 0, &fp), ih);
   printf("capi seams_fingerprint ok\n");
@@ -585,6 +618,7 @@ int main(int argc, char **argv) {
   seams_system_destroy(ih);
   seams_system_destroy(guest);
   seams_system_destroy(mix);
+  seams_system_destroy(pore);
   free(offsets);
   free(cols);
   free(labels);

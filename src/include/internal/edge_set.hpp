@@ -1,6 +1,8 @@
 #ifndef SEAMS_EDGE_SET_H_
 #define SEAMS_EDGE_SET_H_
 
+#include <region_errors.hpp>
+
 #include <algorithm>
 #include <cstdint>
 #include <utility>
@@ -89,22 +91,26 @@ inline EdgeSet edgeSetOf(const std::vector<std::vector<int>> &rows) {
     const int team = omp_get_max_threads();
     std::vector<std::vector<std::pair<int, int>>> parts(
         static_cast<std::size_t>(team));
+    seams::RegionErrors errors;
 #pragma omp parallel
     {
       std::vector<std::pair<int, int>> local;
 #pragma omp for schedule(static)
       for (int i = 0; i < nRows; ++i) {
-        const auto &row = rows[static_cast<std::size_t>(i)];
-        for (std::size_t k = 1; k < row.size(); ++k) {
-          const int j = row[k];
-          if (j < 0 || j == i) {
-            continue;
+        errors.run([&] {
+          const auto &row = rows[static_cast<std::size_t>(i)];
+          for (std::size_t k = 1; k < row.size(); ++k) {
+            const int j = row[k];
+            if (j < 0 || j == i) {
+              continue;
+            }
+            local.emplace_back(std::min(i, j), std::max(i, j));
           }
-          local.emplace_back(std::min(i, j), std::max(i, j));
-        }
+        });
       }
       parts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(local);
     }
+    errors.rethrow();
     std::size_t total = 0;
     for (const auto &part : parts) {
       total += part.size();

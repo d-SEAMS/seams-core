@@ -562,7 +562,8 @@ const std::vector<std::vector<int>> &ringsOf(const Cloud &local, double cutoff,
             row[w++] = row[j];
           }
         }
-        row.resize(w);
+        // Only shrinks, and erase never allocates inside the region.
+        row.erase(row.begin() + static_cast<std::ptrdiff_t>(w), row.end());
       }
     }
     if (!built) {

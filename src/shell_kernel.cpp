@@ -15,6 +15,7 @@
 
 #include <cpu_features.hpp>
 #include <local_symmetry.hpp>
+#include <region_errors.hpp>
 #include <shell_hot.hpp>
 
 #include <Eigen/Dense>
@@ -1455,6 +1456,7 @@ void classifyIceArrays(const double *x, const double *y, const double *z, int n,
 void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out) {
   const int n = static_cast<int>(environments.size());
   out.resize(static_cast<size_t>(std::max(n, 0)));
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   int threads = 1;
   if (!omp_in_parallel()) {
@@ -1463,8 +1465,9 @@ void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Over
 #pragma omp parallel for schedule(static) if (n >= 32 && threads > 1)
 #endif
   for (int i = 0; i < n; i++) {
-    out[static_cast<size_t>(i)] = matchKernel(environments[static_cast<size_t>(i)]);
+    errors.run([&] { out[static_cast<size_t>(i)] = matchKernel(environments[static_cast<size_t>(i)]); });
   }
+  errors.rethrow();
 }
 
 } // namespace symm
