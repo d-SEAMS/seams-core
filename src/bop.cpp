@@ -21,6 +21,7 @@
 #include <chill_plus_scheme.hpp>
 #include <domain.hpp>
 #include <neighbours.hpp>
+#include <region_errors.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
 #include <linkcell.h>
@@ -905,100 +906,104 @@ static void classifyBondsLeftFp64(
   }
 
   const bool useAvx = hostHasAvx2Fma();
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (csrOff == nullptr && static_cast<std::size_t>(iatom) >= nList.size()) {
-      continue;
-    }
-    // The distance and the minimum-image delta are one evaluation. A short
-    // shell stays on the stack; a wider cutoff row spills, in the same order.
-    struct Near {
-      double d2;
-      int jatom;
-      double x, y, z;
-      bool operator<(const Near &o) const {
-        return d2 < o.d2 || (d2 == o.d2 && jatom < o.jatom);
-      }
-    };
-    Near stackNear[32];
-    std::vector<Near> heapNear;
-    Near *candidates = stackNear;
-    int nCand = 0;
-    const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
-    const auto consider = [&](int jatom) {
-      if (jatom < 0 || jatom >= nop || jatom == iatom) {
+    errors.run([&] {
+      if (csrOff == nullptr && static_cast<std::size_t>(iatom) >= nList.size()) {
         return;
       }
-      const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-      if (nCand == 32 && candidates == stackNear) {
-        heapNear.assign(stackNear, stackNear + 32);
-        candidates = heapNear.data();
-      }
-      if (candidates == stackNear) {
-        candidates[nCand] = {dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0],
-                             dr[1], dr[2]};
-      } else {
-        heapNear.push_back(
-            {dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0], dr[1], dr[2]});
-        candidates = heapNear.data();
-      }
-      ++nCand;
-    };
-    if (csrOff != nullptr && csrCols != nullptr &&
-        static_cast<int>(csrOff->size()) > iatom) {
-      const int a = (*csrOff)[static_cast<std::size_t>(iatom)];
-      const int b = (*csrOff)[static_cast<std::size_t>(iatom) + 1];
-      for (int k = a; k < b; ++k) {
-        consider((*csrCols)[static_cast<std::size_t>(k)]);
-      }
-    } else if (static_cast<std::size_t>(iatom) < nList.size()) {
-      const auto &row = nList[static_cast<std::size_t>(iatom)];
-      for (std::size_t j = 1; j < row.size(); ++j) {
-        consider(resolve(static_cast<int>(row[j])));
-      }
-    }
-    const int keep =
-        (keepMax > 0) ? std::min(keepMax, nCand) : nCand;
-    if (keep == 0) {
-      continue;
-    }
-    std::partial_sort(candidates, candidates + keep, candidates + nCand);
-    nkeep[static_cast<std::size_t>(iatom)] = keep;
-    double acc[kRealL3] = {};
-    for (int j = 0; j < keep;) {
-      double xs[4];
-      double ys[4];
-      double zs[4];
-      int batch = 0;
-      for (; batch < 4 && j < keep; ++j, ++batch) {
-        const int jatom = candidates[j].jatom;
-        if (fixedKeep) {
-          chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
-                 static_cast<std::size_t>(j)] = jatom;
+      // The distance and the minimum-image delta are one evaluation. A short
+      // shell stays on the stack; a wider cutoff row spills, in the same order.
+      struct Near {
+        double d2;
+        int jatom;
+        double x, y, z;
+        bool operator<(const Near &o) const {
+          return d2 < o.d2 || (d2 == o.d2 && jatom < o.jatom);
+        }
+      };
+      Near stackNear[32];
+      std::vector<Near> heapNear;
+      Near *candidates = stackNear;
+      int nCand = 0;
+      const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
+      const auto consider = [&](int jatom) {
+        if (jatom < 0 || jatom >= nop || jatom == iatom) {
+          return;
+        }
+        const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
+        const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+        if (nCand == 32 && candidates == stackNear) {
+          heapNear.assign(stackNear, stackNear + 32);
+          candidates = heapNear.data();
+        }
+        if (candidates == stackNear) {
+          candidates[nCand] = {dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0],
+                               dr[1], dr[2]};
         } else {
-          flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(iatom)] + j)] = jatom;
+          heapNear.push_back(
+              {dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0], dr[1], dr[2]});
+          candidates = heapNear.data();
         }
-        xs[batch] = candidates[j].x;
-        ys[batch] = candidates[j].y;
-        zs[batch] = candidates[j].z;
-      }
-      if (useAvx) {
-        realYlm3Accumulate(xs, ys, zs, batch, acc);
-      } else {
-        for (int item = 0; item < batch; ++item) {
-          addRealYlm3Scalar(xs[item], ys[item], zs[item], normQ3(), acc);
+        ++nCand;
+      };
+      if (csrOff != nullptr && csrCols != nullptr &&
+          static_cast<int>(csrOff->size()) > iatom) {
+        const int a = (*csrOff)[static_cast<std::size_t>(iatom)];
+        const int b = (*csrOff)[static_cast<std::size_t>(iatom) + 1];
+        for (int k = a; k < b; ++k) {
+          consider((*csrCols)[static_cast<std::size_t>(k)]);
+        }
+      } else if (static_cast<std::size_t>(iatom) < nList.size()) {
+        const auto &row = nList[static_cast<std::size_t>(iatom)];
+        for (std::size_t j = 1; j < row.size(); ++j) {
+          consider(resolve(static_cast<int>(row[j])));
         }
       }
-    }
-    double *dst = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
-    for (int channel = 0; channel < kRealL3; ++channel) {
-      dst[channel] = acc[channel];
-    }
-    qNorm[static_cast<std::size_t>(iatom)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      const int keep =
+          (keepMax > 0) ? std::min(keepMax, nCand) : nCand;
+      if (keep == 0) {
+        return;
+      }
+      std::partial_sort(candidates, candidates + keep, candidates + nCand);
+      nkeep[static_cast<std::size_t>(iatom)] = keep;
+      double acc[kRealL3] = {};
+      for (int j = 0; j < keep;) {
+        double xs[4];
+        double ys[4];
+        double zs[4];
+        int batch = 0;
+        for (; batch < 4 && j < keep; ++j, ++batch) {
+          const int jatom = candidates[j].jatom;
+          if (fixedKeep) {
+            chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
+                   static_cast<std::size_t>(j)] = jatom;
+          } else {
+            flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(iatom)] + j)] = jatom;
+          }
+          xs[batch] = candidates[j].x;
+          ys[batch] = candidates[j].y;
+          zs[batch] = candidates[j].z;
+        }
+        if (useAvx) {
+          realYlm3Accumulate(xs, ys, zs, batch, acc);
+        } else {
+          for (int item = 0; item < batch; ++item) {
+            addRealYlm3Scalar(xs[item], ys[item], zs[item], normQ3(), acc);
+          }
+        }
+      }
+      double *dst = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
+      for (int channel = 0; channel < kRealL3; ++channel) {
+        dst[channel] = acc[channel];
+      }
+      qNorm[static_cast<std::size_t>(iatom)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+    });
   }
+  errors.rethrow();
   const auto neighbourAt = [&](int atom, int slot) {
     if (fixedKeep) {
       return chosen[static_cast<std::size_t>(atom) * static_cast<std::size_t>(keepMax) +
@@ -1012,31 +1017,34 @@ static void classifyBondsLeftFp64(
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
-      continue;
-    }
-    const int keep = nkeep[static_cast<std::size_t>(iatom)];
-    if (keep <= 0) {
-      continue;
-    }
-    const double *qI = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
-    const double normI = qNorm[static_cast<std::size_t>(iatom)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
-    bonds.reserve(static_cast<std::size_t>(keep));
-    for (int slot = 0; slot < keep; ++slot) {
-      const int jatom = neighbourAt(iatom, slot);
-      if (jatom < 0) {
-        continue;
+    errors.run([&] {
+      if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+        return;
       }
-      const double *qJ = qAtom + static_cast<std::size_t>(jatom) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
-      const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
-      molSys::Result temp_cij;
-      temp_cij.c_value = cij;
-      temp_cij.classifier = chill::classifyBond(cij, rule, closed);
-      bonds.push_back(temp_cij);
-    }
+      const int keep = nkeep[static_cast<std::size_t>(iatom)];
+      if (keep <= 0) {
+        return;
+      }
+      const double *qI = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
+      const double normI = qNorm[static_cast<std::size_t>(iatom)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
+      bonds.reserve(static_cast<std::size_t>(keep));
+      for (int slot = 0; slot < keep; ++slot) {
+        const int jatom = neighbourAt(iatom, slot);
+        if (jatom < 0) {
+          continue;
+        }
+        const double *qJ = qAtom + static_cast<std::size_t>(jatom) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
+        const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
+        molSys::Result temp_cij;
+        temp_cij.c_value = cij;
+        temp_cij.classifier = chill::classifyBond(cij, rule, closed);
+        bonds.push_back(temp_cij);
+      }
+    });
   }
+  errors.rethrow();
 }
 
 void chill::classifyBonds(
@@ -1238,59 +1246,62 @@ void chill::getIceTypeNoPrint(
 
   // An atom's label reads the bonds of its neighbours and writes only its
   // own iceType, so atoms are independent.
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (yCloud.nop >= 16384 && omp_get_max_threads() > 1 && !omp_in_parallel()) reduction(+ : ih, ic, water, interIce, total) private(num_staggrd, num_eclipsd, na, bondType, nnumNeighbours)
 #endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    // if(yCloud.pts[iatom].type!=typeO){continue;}
-    // if this is a slice and the particle is not in the slice
-    // then skip
-    if (isSlice) {
-      if (yCloud.pts[static_cast<std::size_t>(iatom)].inSlice == false) {
-        continue;
+    errors.run([&] {
+      // if(yCloud.pts[iatom].type!=typeO){continue;}
+      // if this is a slice and the particle is not in the slice
+      // then skip
+      if (isSlice) {
+        if (yCloud.pts[static_cast<std::size_t>(iatom)].inSlice == false) {
+          return;
+        }
       }
-    }
-    total++; // Update the total number of atoms considered. Change this to
-    // check for slices
-    num_staggrd = num_eclipsd = na =
-        0; // init to zero before loop through neighbours
+      total++; // Update the total number of atoms considered. Change this to
+      // check for slices
+      num_staggrd = num_eclipsd = na =
+          0; // init to zero before loop through neighbours
 
-    // c_ij is the bond list the correlation pass actually produced; the
-    // neighbour list is not a proxy for its length
-    nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
-    // Loop through the bond cij and get the number of staggered, eclipsed bonds
-    for (int j = 0; j < nnumNeighbours; j++) {
-      bondType = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].classifier;
-      if (bondType == molSys::bond_type::eclipsed) {
-        num_eclipsd++;
-      } else if (bondType == molSys::bond_type::staggered) {
-        num_staggrd++;
-      } else {
-        na++;
-      }
-    } // End of loop through neighbours
+      // c_ij is the bond list the correlation pass actually produced; the
+      // neighbour list is not a proxy for its length
+      nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
+      // Loop through the bond cij and get the number of staggered, eclipsed bonds
+      for (int j = 0; j < nnumNeighbours; j++) {
+        bondType = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].classifier;
+        if (bondType == molSys::bond_type::eclipsed) {
+          num_eclipsd++;
+        } else if (bondType == molSys::bond_type::staggered) {
+          num_staggrd++;
+        } else {
+          na++;
+        }
+      } // End of loop through neighbours
 
-    yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::unclassified; // default
-    if (nnumNeighbours == 4) {
-      if (num_staggrd >= 4) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::cubic;
-        ic++;
-      } else if (num_eclipsd == 1 && num_staggrd == 3) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::hexagonal;
-        ih++;
-      } else if (chill::isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interfacial;
-        interIce++;
+      yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::unclassified; // default
+      if (nnumNeighbours == 4) {
+        if (num_staggrd >= 4) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::cubic;
+          ic++;
+        } else if (num_eclipsd == 1 && num_staggrd == 3) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::hexagonal;
+          ih++;
+        } else if (chill::isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd)) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interfacial;
+          interIce++;
+        } else {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
+          water++;
+        }
       } else {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
         water++;
       }
-    } else {
-      yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
-      water++;
-    }
-
+    });
   } // End of loop through every iatom
+  errors.rethrow();
 
   return;
 }
@@ -1525,137 +1536,141 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   const bool useAvx = hostHasAvx2Fma();
   const chill::BondClassifier rule = chill::chillPlusRule();
   const auto tWalk = std::chrono::steady_clock::now();
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; i++) {
-    struct Near {
-      double d2;
-      int j;
-      double x, y, z;
-      bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
-    };
-    Near best[4];
-    int keep = 0;
-    int shell = 0;
-    const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
-    const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
-    const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
-    const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
-    if (csrOk && live) {
-      const int a = scratch.offsets[static_cast<std::size_t>(i)];
-      const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
-      for (int p = a; p < b; p++) {
-        const int j = scratch.cols[static_cast<std::size_t>(p)];
-        if (j == i) {
-          continue;
-        }
-        double rx, ry, rz;
-        if (tiltBox) {
-          const auto image = gen::exactDelta(
-              fracBox, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
-              scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
-              scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
-          rx = image[0];
-          ry = image[1];
-          rz = image[2];
-        } else {
-          rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-          ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-          rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-          if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
-          if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
-          if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
-        }
-        const double d2 = rx * rx + ry * ry + rz * rz;
-        if (!(d2 > 0.0)) {
-          continue;
-        }
-        Near item{d2, j, rx, ry, rz};
-        ++shell;
-        if (keep < 4) {
-          best[keep++] = item;
-          if (keep == 4) {
+    errors.run([&] {
+      struct Near {
+        double d2;
+        int j;
+        double x, y, z;
+        bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
+      };
+      Near best[4];
+      int keep = 0;
+      int shell = 0;
+      const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
+      const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
+      const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
+      const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
+      if (csrOk && live) {
+        const int a = scratch.offsets[static_cast<std::size_t>(i)];
+        const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
+        for (int p = a; p < b; p++) {
+          const int j = scratch.cols[static_cast<std::size_t>(p)];
+          if (j == i) {
+            continue;
+          }
+          double rx, ry, rz;
+          if (tiltBox) {
+            const auto image = gen::exactDelta(
+                fracBox, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
+                scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
+                scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
+            rx = image[0];
+            ry = image[1];
+            rz = image[2];
+          } else {
+            rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+            ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+            rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+            if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
+            if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
+            if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
+          }
+          const double d2 = rx * rx + ry * ry + rz * rz;
+          if (!(d2 > 0.0)) {
+            continue;
+          }
+          Near item{d2, j, rx, ry, rz};
+          ++shell;
+          if (keep < 4) {
+            best[keep++] = item;
+            if (keep == 4) {
+              sortNearest(best, 4);
+            }
+          } else if (item < best[3]) {
+            best[3] = item;
             sortNearest(best, 4);
           }
-        } else if (item < best[3]) {
-          best[3] = item;
-          sortNearest(best, 4);
         }
-      }
-    } else if (live) {
-      const int ix = std::min(nx - 1, static_cast<int>(xi * invx));
-      const int iy = std::min(ny - 1, static_cast<int>(yi * invy));
-      const int iz = std::min(nz - 1, static_cast<int>(zi * invz));
-      for (int dz = -1; dz <= 1; dz++) {
-        for (int dy = -1; dy <= 1; dy++) {
-          for (int dx = -1; dx <= 1; dx++) {
-            int jx = ix + dx;
-            int jy = iy + dy;
-            int jz = iz + dz;
-            if (jx < 0) jx += nx; else if (jx >= nx) jx -= nx;
-            if (jy < 0) jy += ny; else if (jy >= ny) jy -= ny;
-            if (jz < 0) jz += nz; else if (jz >= nz) jz -= nz;
-            for (int j = scratch.head[static_cast<std::size_t>((jz * ny + jy) * nx + jx)]; j >= 0;
-                 j = scratch.next[static_cast<std::size_t>(j)]) {
-              if (j == i) {
-                continue;
-              }
-              double rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-              double ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-              double rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-              if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
-              if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
-              if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
-              const double d2 = rx * rx + ry * ry + rz * rz;
-              if (!(d2 < cut2 && d2 > 0.0)) {
-                continue;
-              }
-              Near item{d2, j, rx, ry, rz};
-              ++shell;
-              if (keep < 4) {
-                best[keep++] = item;
-                if (keep == 4) {
+      } else if (live) {
+        const int ix = std::min(nx - 1, static_cast<int>(xi * invx));
+        const int iy = std::min(ny - 1, static_cast<int>(yi * invy));
+        const int iz = std::min(nz - 1, static_cast<int>(zi * invz));
+        for (int dz = -1; dz <= 1; dz++) {
+          for (int dy = -1; dy <= 1; dy++) {
+            for (int dx = -1; dx <= 1; dx++) {
+              int jx = ix + dx;
+              int jy = iy + dy;
+              int jz = iz + dz;
+              if (jx < 0) jx += nx; else if (jx >= nx) jx -= nx;
+              if (jy < 0) jy += ny; else if (jy >= ny) jy -= ny;
+              if (jz < 0) jz += nz; else if (jz >= nz) jz -= nz;
+              for (int j = scratch.head[static_cast<std::size_t>((jz * ny + jy) * nx + jx)]; j >= 0;
+                   j = scratch.next[static_cast<std::size_t>(j)]) {
+                if (j == i) {
+                  continue;
+                }
+                double rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+                double ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+                double rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+                if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
+                if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
+                if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
+                const double d2 = rx * rx + ry * ry + rz * rz;
+                if (!(d2 < cut2 && d2 > 0.0)) {
+                  continue;
+                }
+                Near item{d2, j, rx, ry, rz};
+                ++shell;
+                if (keep < 4) {
+                  best[keep++] = item;
+                  if (keep == 4) {
+                    sortNearest(best, 4);
+                  }
+                } else if (item < best[3]) {
+                  best[3] = item;
                   sortNearest(best, 4);
                 }
-              } else if (item < best[3]) {
-                best[3] = item;
-                sortNearest(best, 4);
               }
             }
           }
         }
       }
-    }
-    if (keep > 1 && keep < 4) {
-      sortNearest(best, keep);
-    }
-    scratch.nkeep[static_cast<std::size_t>(i)] = keep + (shell << 8);
-    double xs[4], ys[4], zs[4];
-    for (int s = 0; s < keep; s++) {
-      scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = best[s].j;
-      xs[s] = best[s].x;
-      ys[s] = best[s].y;
-      zs[s] = best[s].z;
-    }
-    double acc[kRealL3] = {};
-    if (keep > 0) {
-      if (useAvx) {
-        realYlm3Accumulate(xs, ys, zs, keep, acc);
-      } else {
-        for (int s = 0; s < keep; s++) {
-          addRealYlm3Scalar(xs[s], ys[s], zs[s], norm, acc);
+      if (keep > 1 && keep < 4) {
+        sortNearest(best, keep);
+      }
+      scratch.nkeep[static_cast<std::size_t>(i)] = keep + (shell << 8);
+      double xs[4], ys[4], zs[4];
+      for (int s = 0; s < keep; s++) {
+        scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = best[s].j;
+        xs[s] = best[s].x;
+        ys[s] = best[s].y;
+        zs[s] = best[s].z;
+      }
+      double acc[kRealL3] = {};
+      if (keep > 0) {
+        if (useAvx) {
+          realYlm3Accumulate(xs, ys, zs, keep, acc);
+        } else {
+          for (int s = 0; s < keep; s++) {
+            addRealYlm3Scalar(xs[s], ys[s], zs[s], norm, acc);
+          }
         }
       }
-    }
-    double *dst = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
-    for (int c = 0; c < kRealL3; c++) {
-      dst[c] = acc[c];
-    }
-    const double hnorm = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
-    scratch.qn[static_cast<std::size_t>(i)] = hnorm;
-    scratch.nkeep[static_cast<std::size_t>(i)] = keep + (shell << 8);
+      double *dst = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
+      for (int c = 0; c < kRealL3; c++) {
+        dst[c] = acc[c];
+      }
+      const double hnorm = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      scratch.qn[static_cast<std::size_t>(i)] = hnorm;
+      scratch.nkeep[static_cast<std::size_t>(i)] = keep + (shell << 8);
+    });
   }
+  errors.rethrow();
   const auto tYlm = std::chrono::steady_clock::now();
   std::vector<std::vector<molSys::Result>> saved;
   if (certify) {
@@ -1666,27 +1681,31 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; i++) {
-    const int packed = scratch.nkeep[static_cast<std::size_t>(i)];
-    const int keep = packed & 255;
-    const int shell = packed >> 8;
-    shellCount[static_cast<std::size_t>(i)] = shell;
-    scratch.nkeep[static_cast<std::size_t>(i)] = keep;
-    auto &bonds = certify ? saved[static_cast<std::size_t>(i)]
-                          : yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
-    const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
-    const double ni = scratch.qn[static_cast<std::size_t>(i)];
-    for (int s = 0; s < keep; s++) {
-      const int j = scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
-      const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
-      molSys::Result bond;
-      bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
-    }
+    errors.run([&] {
+      const int packed = scratch.nkeep[static_cast<std::size_t>(i)];
+      const int keep = packed & 255;
+      const int shell = packed >> 8;
+      shellCount[static_cast<std::size_t>(i)] = shell;
+      scratch.nkeep[static_cast<std::size_t>(i)] = keep;
+      auto &bonds = certify ? saved[static_cast<std::size_t>(i)]
+                            : yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+      const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
+      const double ni = scratch.qn[static_cast<std::size_t>(i)];
+      for (int s = 0; s < keep; s++) {
+        const int j =
+            scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+        const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
+        molSys::Result bond;
+        bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
+        bond.classifier = chill::classifyBond(bond.c_value, rule);
+        bonds.push_back(bond);
+      }
+    });
   }
+  errors.rethrow();
   if (certify) {
     for (int i = 0; i < n; i++) {
       const int keep = scratch.nkeep[static_cast<std::size_t>(i)];
@@ -1786,6 +1805,12 @@ bool chill::q4q6ChillPlus(
   seams::prepareCompute();
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
+  double maxAbs = 0.0;
+  for (int i = 0; i < n; ++i) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    maxAbs = std::max(maxAbs, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  const bool trustFold = gen::plainWrapCertifies(frac, maxAbs);
   const double Lx = tilt ? frac.lx : yCloud.box[0];
   const double Ly = tilt ? frac.ly : yCloud.box[1];
   const double Lz = tilt ? frac.lz : yCloud.box[2];
@@ -1820,7 +1845,11 @@ bool chill::q4q6ChillPlus(
 #endif
   for (int i = 0; i < n; ++i) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    if (tilt) {
+    if (!trustFold) {
+      xyz[static_cast<std::size_t>(3 * i)] = p.x;
+      xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
+      xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+    } else if (tilt) {
       double sz = (p.z - frac.oz) / frac.lz;
       double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
       double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
@@ -1857,145 +1886,171 @@ bool chill::q4q6ChillPlus(
   const double pre6 = 4.0 * pi / 13.0;
   const bool useAvx = hostHasAvx2Fma();
   const auto &norm = normQ3();
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
   for (int i = 0; i < n; ++i) {
-    struct Near {
-      double d2;
-      int j;
-      double x, y, z;
-      bool operator<(const Near &o) const {
-        return d2 < o.d2 || (d2 == o.d2 && j < o.j);
-      }
-    };
-    Near best[4];
-    int keep = 0;
-    int shell = 0;
-    int nUsed = 0;
-    double acc4[18] = {};
-    double acc6[26] = {};
-    double xs[8], ys[8], zs[8];
-    double re4[8 * 9], im4[8 * 9], re6[8 * 13], im6[8 * 13];
-    int filled = 0;
-    const auto flush = [&]() {
-      if (filled == 0) return;
-      seams::ylm::ylmBatch(4, xs, ys, zs, filled, re4, im4);
-      seams::ylm::ylmBatch(6, xs, ys, zs, filled, re6, im6);
-      for (int bond = 0; bond < filled; ++bond) {
-        const double *r4 = re4 + bond * 9;
-        const double *i4 = im4 + bond * 9;
-        const double *r6 = re6 + bond * 13;
-        const double *i6 = im6 + bond * 13;
-        for (int m = 0; m < 9; ++m) {
-          acc4[2 * m] += r4[m];
-          acc4[2 * m + 1] += i4[m];
+    errors.run([&] {
+      struct Near {
+        double d2;
+        int j;
+        double x, y, z;
+        bool operator<(const Near &o) const {
+          return d2 < o.d2 || (d2 == o.d2 && j < o.j);
         }
-        for (int m = 0; m < 13; ++m) {
-          acc6[2 * m] += r6[m];
-          acc6[2 * m + 1] += i6[m];
-        }
-      }
-      filled = 0;
-    };
-    const double xi = xyz[static_cast<std::size_t>(3 * i)];
-    const double yi = xyz[static_cast<std::size_t>(3 * i) + 1];
-    const double zi = xyz[static_cast<std::size_t>(3 * i) + 2];
-    const int a = offsets[static_cast<std::size_t>(i)];
-    const int b = offsets[static_cast<std::size_t>(i) + 1];
-    for (int p = a; p < b; ++p) {
-      const int j = cols[static_cast<std::size_t>(p)];
-      double dx, dy, dz;
-      if (tilt) {
-        double dX = xi - xyz[static_cast<std::size_t>(3 * j)];
-        double dY = yi - xyz[static_cast<std::size_t>(3 * j) + 1];
-        double dZ = zi - xyz[static_cast<std::size_t>(3 * j) + 2];
-        dX -= Lx * std::round(dX / Lx);
-        dY -= Ly * std::round(dY / Ly);
-        dZ -= Lz * std::round(dZ / Lz);
-        dx = dX + axy * dY + axz * dZ;
-        dy = dY + ayz * dZ;
-        dz = dZ;
-        if (checkSmith) {
-          const double r2 = dx * dx + dy * dy + dz * dz;
-          if (!gen::smithInside(frac, r2)) {
-            const std::array<double, 3> w = {dx, dy, dz};
-            const auto euc = gen::refineEuclidean(
-                frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
-            dx = euc[0];
-            dy = euc[1];
-            dz = euc[2];
+      };
+      Near best[4];
+      int keep = 0;
+      int shell = 0;
+      int nUsed = 0;
+      double acc4[18] = {};
+      double acc6[26] = {};
+      double xs[8], ys[8], zs[8];
+      double re4[8 * 9], im4[8 * 9], re6[8 * 13], im6[8 * 13];
+      int filled = 0;
+      const auto flush = [&]() {
+        if (filled == 0) return;
+        seams::ylm::ylmBatch(4, xs, ys, zs, filled, re4, im4);
+        seams::ylm::ylmBatch(6, xs, ys, zs, filled, re6, im6);
+        for (int bond = 0; bond < filled; ++bond) {
+          const double *r4 = re4 + bond * 9;
+          const double *i4 = im4 + bond * 9;
+          const double *r6 = re6 + bond * 13;
+          const double *i6 = im6 + bond * 13;
+          for (int m = 0; m < 9; ++m) {
+            acc4[2 * m] += r4[m];
+            acc4[2 * m + 1] += i4[m];
+          }
+          for (int m = 0; m < 13; ++m) {
+            acc6[2 * m] += r6[m];
+            acc6[2 * m + 1] += i6[m];
           }
         }
-      } else {
-        dx = xi - xyz[static_cast<std::size_t>(3 * j)];
-        dy = yi - xyz[static_cast<std::size_t>(3 * j) + 1];
-        dz = zi - xyz[static_cast<std::size_t>(3 * j) + 2];
-        if (dx > hx) dx -= Lx;
-        else if (dx < -hx) dx += Lx;
-        if (dy > hy) dy -= Ly;
-        else if (dy < -hy) dy += Ly;
-        if (dz > hz) dz -= Lz;
-        else if (dz < -hz) dz += Lz;
+        filled = 0;
+      };
+      const double xi = xyz[static_cast<std::size_t>(3 * i)];
+      const double yi = xyz[static_cast<std::size_t>(3 * i) + 1];
+      const double zi = xyz[static_cast<std::size_t>(3 * i) + 2];
+      const int a = offsets[static_cast<std::size_t>(i)];
+      const int b = offsets[static_cast<std::size_t>(i) + 1];
+      for (int p = a; p < b; ++p) {
+        const int j = cols[static_cast<std::size_t>(p)];
+        double dx, dy, dz;
+        if (tilt) {
+          const std::array<double, 3> raw = {
+              xi - xyz[static_cast<std::size_t>(3 * j)],
+              yi - xyz[static_cast<std::size_t>(3 * j) + 1],
+              zi - xyz[static_cast<std::size_t>(3 * j) + 2]};
+          if (!trustFold) {
+            const auto wrapped = gen::mic::fractionalWrap(
+                frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw);
+            const double r2 = wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] +
+                              wrapped[2] * wrapped[2];
+            if (checkSmith && !gen::smithInside(frac, r2)) {
+              const auto euc = gen::refineEuclidean(
+                  frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw, wrapped);
+              dx = euc[0];
+              dy = euc[1];
+              dz = euc[2];
+            } else {
+              dx = wrapped[0];
+              dy = wrapped[1];
+              dz = wrapped[2];
+            }
+          } else {
+            double dX = raw[0];
+            double dY = raw[1];
+            double dZ = raw[2];
+            dX -= Lx * std::round(dX / Lx);
+            dY -= Ly * std::round(dY / Ly);
+            dZ -= Lz * std::round(dZ / Lz);
+            dx = dX + axy * dY + axz * dZ;
+            dy = dY + ayz * dZ;
+            dz = dZ;
+            if (checkSmith) {
+              const double r2 = dx * dx + dy * dy + dz * dz;
+              if (!gen::smithInside(frac, r2)) {
+                const std::array<double, 3> w = {dx, dy, dz};
+                const auto euc = gen::refineEuclidean(
+                    frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
+                dx = euc[0];
+                dy = euc[1];
+                dz = euc[2];
+              }
+            }
+          }
+        } else {
+          dx = xi - xyz[static_cast<std::size_t>(3 * j)];
+          dy = yi - xyz[static_cast<std::size_t>(3 * j) + 1];
+          dz = zi - xyz[static_cast<std::size_t>(3 * j) + 2];
+          if (dx > hx) dx -= Lx;
+          else if (dx < -hx) dx += Lx;
+          if (dy > hy) dy -= Ly;
+          else if (dy < -hy) dy += Ly;
+          if (dz > hz) dz -= Lz;
+          else if (dz < -hz) dz += Lz;
+        }
+        const double d2 = dx * dx + dy * dy + dz * dz;
+        if (!(d2 > 0.0)) continue;
+        xs[filled] = dx;
+        ys[filled] = dy;
+        zs[filled] = dz;
+        ++nUsed;
+        if (++filled == 8) flush();
+        Near item{d2, j, dx, dy, dz};
+        ++shell;
+        if (keep < 4) {
+          best[keep++] = item;
+          if (keep == 4) sortNearest(best, 4);
+        } else if (item < best[3]) {
+          best[3] = item;
+          sortNearest(best, 4);
+        }
       }
-      const double d2 = dx * dx + dy * dy + dz * dz;
-      if (!(d2 > 0.0)) continue;
-      xs[filled] = dx;
-      ys[filled] = dy;
-      zs[filled] = dz;
-      ++nUsed;
-      if (++filled == 8) flush();
-      Near item{d2, j, dx, dy, dz};
-      ++shell;
-      if (keep < 4) {
-        best[keep++] = item;
-        if (keep == 4) sortNearest(best, 4);
-      } else if (item < best[3]) {
-        best[3] = item;
-        sortNearest(best, 4);
+      flush();
+      if (keep > 1 && keep < 4) sortNearest(best, keep);
+      shellCount[static_cast<std::size_t>(i)] = shell;
+      nkeep[static_cast<std::size_t>(i)] = keep;
+      if (nUsed > 0) {
+        const double inv = 1.0 / static_cast<double>(nUsed);
+        double sum4 = 0.0;
+        double sum6 = 0.0;
+        for (int m = 0; m < 9; ++m) {
+          acc4[2 * m] *= inv;
+          acc4[2 * m + 1] *= inv;
+          sum4 += acc4[2 * m] * acc4[2 * m] + acc4[2 * m + 1] * acc4[2 * m + 1];
+        }
+        for (int m = 0; m < 13; ++m) {
+          acc6[2 * m] *= inv;
+          acc6[2 * m + 1] *= inv;
+          sum6 += acc6[2 * m] * acc6[2 * m] + acc6[2 * m + 1] * acc6[2 * m + 1];
+        }
+        q4[static_cast<std::size_t>(i)] = std::sqrt(pre4 * sum4);
+        q6[static_cast<std::size_t>(i)] = std::sqrt(pre6 * sum6);
+        std::copy_n(acc4, 18, qlm4.data() + static_cast<std::size_t>(i) * 18);
+        std::copy_n(acc6, 26, qlm6.data() + static_cast<std::size_t>(i) * 26);
       }
-    }
-    flush();
-    if (keep > 1 && keep < 4) sortNearest(best, keep);
-    shellCount[static_cast<std::size_t>(i)] = shell;
-    nkeep[static_cast<std::size_t>(i)] = keep;
-    if (nUsed > 0) {
-      const double inv = 1.0 / static_cast<double>(nUsed);
-      double sum4 = 0.0;
-      double sum6 = 0.0;
-      for (int m = 0; m < 9; ++m) {
-        acc4[2 * m] *= inv;
-        acc4[2 * m + 1] *= inv;
-        sum4 += acc4[2 * m] * acc4[2 * m] + acc4[2 * m + 1] * acc4[2 * m + 1];
+      double bx[4], by[4], bz[4];
+      for (int s = 0; s < keep; ++s) {
+        chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = best[s].j;
+        bx[s] = best[s].x;
+        by[s] = best[s].y;
+        bz[s] = best[s].z;
       }
-      for (int m = 0; m < 13; ++m) {
-        acc6[2 * m] *= inv;
-        acc6[2 * m + 1] *= inv;
-        sum6 += acc6[2 * m] * acc6[2 * m] + acc6[2 * m + 1] * acc6[2 * m + 1];
+      double acc[kRealL3] = {};
+      if (keep > 0) {
+        if (useAvx) realYlm3Accumulate(bx, by, bz, keep, acc);
+        else {
+          for (int s = 0; s < keep; ++s) addRealYlm3Scalar(bx[s], by[s], bz[s], norm, acc);
+        }
       }
-      q4[static_cast<std::size_t>(i)] = std::sqrt(pre4 * sum4);
-      q6[static_cast<std::size_t>(i)] = std::sqrt(pre6 * sum6);
-      std::copy_n(acc4, 18, qlm4.data() + static_cast<std::size_t>(i) * 18);
-      std::copy_n(acc6, 26, qlm6.data() + static_cast<std::size_t>(i) * 26);
-    }
-    double bx[4], by[4], bz[4];
-    for (int s = 0; s < keep; ++s) {
-      chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = best[s].j;
-      bx[s] = best[s].x;
-      by[s] = best[s].y;
-      bz[s] = best[s].z;
-    }
-    double acc[kRealL3] = {};
-    if (keep > 0) {
-      if (useAvx) realYlm3Accumulate(bx, by, bz, keep, acc);
-      else {
-        for (int s = 0; s < keep; ++s) addRealYlm3Scalar(bx[s], by[s], bz[s], norm, acc);
-      }
-    }
-    double *dst = q3.data() + static_cast<std::size_t>(i) * kRealL3;
-    for (int c = 0; c < kRealL3; ++c) dst[c] = acc[c];
-    qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      double *dst = q3.data() + static_cast<std::size_t>(i) * kRealL3;
+      for (int c = 0; c < kRealL3; ++c) dst[c] = acc[c];
+      qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
@@ -2028,22 +2083,25 @@ bool chill::q4q6ChillPlus(
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
   for (int i = 0; i < n; ++i) {
-    const int keep = nkeep[static_cast<std::size_t>(i)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
-    const double *qi = q3.data() + static_cast<std::size_t>(i) * kRealL3;
-    const double ni = qn[static_cast<std::size_t>(i)];
-    for (int s = 0; s < keep; ++s) {
-      const int j = chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
-      const double *qj = q3.data() + static_cast<std::size_t>(j) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
-      molSys::Result bond;
-      bond.c_value = correlationOf(dot, ni, qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
-    }
+    errors.run([&] {
+      const int keep = nkeep[static_cast<std::size_t>(i)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+      const double *qi = q3.data() + static_cast<std::size_t>(i) * kRealL3;
+      const double ni = qn[static_cast<std::size_t>(i)];
+      for (int s = 0; s < keep; ++s) {
+        const int j = chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+        const double *qj = q3.data() + static_cast<std::size_t>(j) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
+        molSys::Result bond;
+        bond.c_value = correlationOf(dot, ni, qn[static_cast<std::size_t>(j)]);
+        bond.classifier = chill::classifyBond(bond.c_value, rule);
+        bonds.push_back(bond);
+      }
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
@@ -2397,110 +2455,117 @@ bool chill::chillPlusPublishedCutoff(
   const auto &norm = normQ3();
   const bool useAvx = hostHasAvx2Fma();
   const chill::BondClassifier rule = chill::chillPlusRule();
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; i++) {
-    const int begin = scratch.offsets[static_cast<std::size_t>(i)];
-    const int end = scratch.offsets[static_cast<std::size_t>(i) + 1];
-    struct Near {
-      double d2;
-      int j;
-      double x, y, z;
-      bool operator<(const Near &o) const {
-        return d2 < o.d2 || (d2 == o.d2 && j < o.j);
+    errors.run([&] {
+      const int begin = scratch.offsets[static_cast<std::size_t>(i)];
+      const int end = scratch.offsets[static_cast<std::size_t>(i) + 1];
+      struct Near {
+        double d2;
+        int j;
+        double x, y, z;
+        bool operator<(const Near &o) const {
+          return d2 < o.d2 || (d2 == o.d2 && j < o.j);
+        }
+      };
+      Near stackNear[32];
+      std::vector<Near> heapNear;
+      Near *near = stackNear;
+      int nNear = 0;
+      const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
+      const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
+      const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
+      for (int t = begin; t < end; t++) {
+        const int j = scratch.cols[static_cast<std::size_t>(t)];
+        bool seen = false;
+        for (int s = 0; s < nNear; s++) {
+          if (near[s].j == j) {
+            seen = true;
+            break;
+          }
+        }
+        if (seen) {
+          continue;
+        }
+        const auto dr = gen::exactDelta(frame, xi, yi, zi,
+                                       scratch.xyz[static_cast<std::size_t>(3 * j)],
+                                       scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
+                                       scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
+        if (nNear == 32 && near == stackNear) {
+          heapNear.assign(stackNear, stackNear + 32);
+          near = heapNear.data();
+        }
+        Near item{dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], j, dr[0], dr[1], dr[2]};
+        if (near == stackNear) {
+          near[nNear] = item;
+        } else {
+          heapNear.push_back(item);
+          near = heapNear.data();
+        }
+        ++nNear;
       }
-    };
-    Near stackNear[32];
-    std::vector<Near> heapNear;
-    Near *near = stackNear;
-    int nNear = 0;
-    const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
-    const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
-    const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
-    for (int t = begin; t < end; t++) {
-      const int j = scratch.cols[static_cast<std::size_t>(t)];
-      bool seen = false;
-      for (int s = 0; s < nNear; s++) {
-        if (near[s].j == j) {
-          seen = true;
-          break;
+      const int shell = nNear;
+      scratch.shell[static_cast<std::size_t>(i)] = shell;
+      const int keep = std::min(4, shell);
+      if (keep > 0) {
+        std::partial_sort(near, near + keep, near + shell);
+      }
+      scratch.nkeep[static_cast<std::size_t>(i)] = keep;
+      double xs[4], ys[4], zs[4];
+      for (int s = 0; s < keep; s++) {
+        scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] =
+            near[static_cast<std::size_t>(s)].j;
+        xs[s] = near[static_cast<std::size_t>(s)].x;
+        ys[s] = near[static_cast<std::size_t>(s)].y;
+        zs[s] = near[static_cast<std::size_t>(s)].z;
+      }
+      double acc[kRealL3] = {};
+      if (keep > 0) {
+        if (useAvx) {
+          realYlm3Accumulate(xs, ys, zs, keep, acc);
+        } else {
+          for (int s = 0; s < keep; s++) {
+            addRealYlm3Scalar(xs[s], ys[s], zs[s], norm, acc);
+          }
         }
       }
-      if (seen) {
-        continue;
+      double *dst = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
+      for (int c = 0; c < kRealL3; c++) {
+        dst[c] = acc[c];
       }
-      const auto dr = gen::exactDelta(frame, xi, yi, zi,
-                                     scratch.xyz[static_cast<std::size_t>(3 * j)],
-                                     scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
-                                     scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
-      if (nNear == 32 && near == stackNear) {
-        heapNear.assign(stackNear, stackNear + 32);
-        near = heapNear.data();
-      }
-      Near item{dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], j, dr[0], dr[1], dr[2]};
-      if (near == stackNear) {
-        near[nNear] = item;
-      } else {
-        heapNear.push_back(item);
-        near = heapNear.data();
-      }
-      ++nNear;
-    }
-    const int shell = nNear;
-    scratch.shell[static_cast<std::size_t>(i)] = shell;
-    const int keep = std::min(4, shell);
-    if (keep > 0) {
-      std::partial_sort(near, near + keep, near + shell);
-    }
-    scratch.nkeep[static_cast<std::size_t>(i)] = keep;
-    double xs[4], ys[4], zs[4];
-    for (int s = 0; s < keep; s++) {
-      scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] =
-          near[static_cast<std::size_t>(s)].j;
-      xs[s] = near[static_cast<std::size_t>(s)].x;
-      ys[s] = near[static_cast<std::size_t>(s)].y;
-      zs[s] = near[static_cast<std::size_t>(s)].z;
-    }
-    double acc[kRealL3] = {};
-    if (keep > 0) {
-      if (useAvx) {
-        realYlm3Accumulate(xs, ys, zs, keep, acc);
-      } else {
-        for (int s = 0; s < keep; s++) {
-          addRealYlm3Scalar(xs[s], ys[s], zs[s], norm, acc);
-        }
-      }
-    }
-    double *dst = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
-    for (int c = 0; c < kRealL3; c++) {
-      dst[c] = acc[c];
-    }
-    scratch.qn[static_cast<std::size_t>(i)] =
-        useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      scratch.qn[static_cast<std::size_t>(i)] =
+          useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+    });
   }
+  errors.rethrow();
   const auto tY = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; i++) {
-    const int keep = scratch.nkeep[static_cast<std::size_t>(i)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
-    const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
-    const double ni = scratch.qn[static_cast<std::size_t>(i)];
-    for (int s = 0; s < keep; s++) {
-      const int j =
-          scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
-      const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
-      molSys::Result bond;
-      bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
-    }
+    errors.run([&] {
+      const int keep = scratch.nkeep[static_cast<std::size_t>(i)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+      const double *qi = scratch.q.data() + static_cast<std::size_t>(i) * kRealL3;
+      const double ni = scratch.qn[static_cast<std::size_t>(i)];
+      for (int s = 0; s < keep; s++) {
+        const int j =
+            scratch.chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+        const double *qj = scratch.q.data() + static_cast<std::size_t>(j) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj);
+        molSys::Result bond;
+        bond.c_value = correlationOf(dot, ni, scratch.qn[static_cast<std::size_t>(j)]);
+        bond.classifier = chill::classifyBond(bond.c_value, rule);
+        bonds.push_back(bond);
+      }
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
@@ -2823,76 +2888,80 @@ int chill::chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, doubl
   qn.resize(static_cast<std::size_t>(n));
   chosen.resize(static_cast<std::size_t>(n) * 4);
   nkeep.resize(static_cast<std::size_t>(n));
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; ++i) {
-    struct Near {
-      double d2;
-      int j;
-      double x, y, z;
-      bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
-    };
-    Near stackNear[32];
-    std::vector<Near> heapNear;
-    Near *candidates = stackNear;
-    int nCand = 0;
-    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
-    const int a = offsets[static_cast<std::size_t>(i)];
-    const int b = offsets[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = cols[static_cast<std::size_t>(k)];
-      if (j < 0 || j >= n || j == i) {
-        continue;
-      }
-      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-      if (nCand == 32 && candidates == stackNear) {
-        heapNear.assign(stackNear, stackNear + 32);
-        candidates = heapNear.data();
-      }
-      if (candidates == stackNear) {
-        candidates[nCand] = {d2, j, dr[0], dr[1], dr[2]};
-      } else {
-        heapNear.push_back({d2, j, dr[0], dr[1], dr[2]});
-        candidates = heapNear.data();
-      }
-      ++nCand;
-    }
-    nkeep[static_cast<std::size_t>(i)] = nCand;
-    if (nCand == 0) {
-      continue;
-    }
-    std::sort(candidates, candidates + nCand);
-    double acc[kRealL3] = {};
-    int filled = 0;
-    double xs[4], ys[4], zs[4];
-    for (int s = 0; s < nCand; ++s) {
-      if (nCand == 4) {
-        chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = candidates[s].j;
-      }
-      xs[filled] = candidates[s].x;
-      ys[filled] = candidates[s].y;
-      zs[filled] = candidates[s].z;
-      ++filled;
-      if (filled == 4 || s + 1 == nCand) {
-        if (useAvx) {
-          realYlm3Accumulate(xs, ys, zs, filled, acc);
-        } else {
-          for (int item = 0; item < filled; ++item) {
-            addRealYlm3Scalar(xs[item], ys[item], zs[item], norm, acc);
-          }
+    errors.run([&] {
+      struct Near {
+        double d2;
+        int j;
+        double x, y, z;
+        bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
+      };
+      Near stackNear[32];
+      std::vector<Near> heapNear;
+      Near *candidates = stackNear;
+      int nCand = 0;
+      const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
+      const int a = offsets[static_cast<std::size_t>(i)];
+      const int b = offsets[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = cols[static_cast<std::size_t>(k)];
+        if (j < 0 || j >= n || j == i) {
+          continue;
         }
-        filled = 0;
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+        const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+        const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+        if (nCand == 32 && candidates == stackNear) {
+          heapNear.assign(stackNear, stackNear + 32);
+          candidates = heapNear.data();
+        }
+        if (candidates == stackNear) {
+          candidates[nCand] = {d2, j, dr[0], dr[1], dr[2]};
+        } else {
+          heapNear.push_back({d2, j, dr[0], dr[1], dr[2]});
+          candidates = heapNear.data();
+        }
+        ++nCand;
       }
-    }
-    double *dst = q.data() + static_cast<std::size_t>(i) * kRealL3;
-    for (int c = 0; c < kRealL3; ++c) {
-      dst[c] = acc[c];
-    }
-    qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      nkeep[static_cast<std::size_t>(i)] = nCand;
+      if (nCand == 0) {
+        return;
+      }
+      std::sort(candidates, candidates + nCand);
+      double acc[kRealL3] = {};
+      int filled = 0;
+      double xs[4], ys[4], zs[4];
+      for (int s = 0; s < nCand; ++s) {
+        if (nCand == 4) {
+          chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = candidates[s].j;
+        }
+        xs[filled] = candidates[s].x;
+        ys[filled] = candidates[s].y;
+        zs[filled] = candidates[s].z;
+        ++filled;
+        if (filled == 4 || s + 1 == nCand) {
+          if (useAvx) {
+            realYlm3Accumulate(xs, ys, zs, filled, acc);
+          } else {
+            for (int item = 0; item < filled; ++item) {
+              addRealYlm3Scalar(xs[item], ys[item], zs[item], norm, acc);
+            }
+          }
+          filled = 0;
+        }
+      }
+      double *dst = q.data() + static_cast<std::size_t>(i) * kRealL3;
+      for (int c = 0; c < kRealL3; ++c) {
+        dst[c] = acc[c];
+      }
+      qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+    });
   }
+  errors.rethrow();
   int cubic = 0;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for reduction(+ : cubic) schedule(static) if (n >= 256)
@@ -2959,76 +3028,80 @@ int chill::chillFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yClou
   std::vector<int> nkeep(static_cast<std::size_t>(n), 0);
   std::vector<std::int8_t> kind(
       static_cast<std::size_t>(n) * static_cast<std::size_t>(keepMax), 0);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; ++i) {
-    struct Near {
-      double d2;
-      int j;
-      double x, y, z;
-      bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
-    };
-    Near stackNear[32];
-    std::vector<Near> heapNear;
-    Near *candidates = stackNear;
-    int nCand = 0;
-    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
-    const int a = offsets[static_cast<std::size_t>(i)];
-    const int b = offsets[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = cols[static_cast<std::size_t>(k)];
-      if (j < 0 || j >= n || j == i) {
-        continue;
-      }
-      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-      if (nCand == 32 && candidates == stackNear) {
-        heapNear.assign(stackNear, stackNear + 32);
-        candidates = heapNear.data();
-      }
-      if (candidates == stackNear) {
-        candidates[nCand] = {d2, j, dr[0], dr[1], dr[2]};
-      } else {
-        heapNear.push_back({d2, j, dr[0], dr[1], dr[2]});
-        candidates = heapNear.data();
-      }
-      ++nCand;
-    }
-    const int keep = std::min(keepMax, nCand);
-    if (keep == 0) {
-      continue;
-    }
-    std::partial_sort(candidates, candidates + keep, candidates + nCand);
-    nkeep[static_cast<std::size_t>(i)] = keep;
-    double xs[4], ys[4], zs[4];
-    int filled = 0;
-    double acc[kRealL3] = {};
-    for (int s = 0; s < keep; ++s) {
-      chosen[static_cast<std::size_t>(i) * static_cast<std::size_t>(keepMax) +
-             static_cast<std::size_t>(s)] = candidates[s].j;
-      xs[filled] = candidates[s].x;
-      ys[filled] = candidates[s].y;
-      zs[filled] = candidates[s].z;
-      ++filled;
-      if (filled == 4 || s + 1 == keep) {
-        if (useAvx) {
-          realYlm3Accumulate(xs, ys, zs, filled, acc);
-        } else {
-          for (int item = 0; item < filled; ++item) {
-            addRealYlm3Scalar(xs[item], ys[item], zs[item], norm, acc);
-          }
+    errors.run([&] {
+      struct Near {
+        double d2;
+        int j;
+        double x, y, z;
+        bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
+      };
+      Near stackNear[32];
+      std::vector<Near> heapNear;
+      Near *candidates = stackNear;
+      int nCand = 0;
+      const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
+      const int a = offsets[static_cast<std::size_t>(i)];
+      const int b = offsets[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = cols[static_cast<std::size_t>(k)];
+        if (j < 0 || j >= n || j == i) {
+          continue;
         }
-        filled = 0;
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+        const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+        const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+        if (nCand == 32 && candidates == stackNear) {
+          heapNear.assign(stackNear, stackNear + 32);
+          candidates = heapNear.data();
+        }
+        if (candidates == stackNear) {
+          candidates[nCand] = {d2, j, dr[0], dr[1], dr[2]};
+        } else {
+          heapNear.push_back({d2, j, dr[0], dr[1], dr[2]});
+          candidates = heapNear.data();
+        }
+        ++nCand;
       }
-    }
-    double *dst = q.data() + static_cast<std::size_t>(i) * kRealL3;
-    for (int c = 0; c < kRealL3; ++c) {
-      dst[c] = acc[c];
-    }
-    qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      const int keep = std::min(keepMax, nCand);
+      if (keep == 0) {
+        return;
+      }
+      std::partial_sort(candidates, candidates + keep, candidates + nCand);
+      nkeep[static_cast<std::size_t>(i)] = keep;
+      double xs[4], ys[4], zs[4];
+      int filled = 0;
+      double acc[kRealL3] = {};
+      for (int s = 0; s < keep; ++s) {
+        chosen[static_cast<std::size_t>(i) * static_cast<std::size_t>(keepMax) +
+               static_cast<std::size_t>(s)] = candidates[s].j;
+        xs[filled] = candidates[s].x;
+        ys[filled] = candidates[s].y;
+        zs[filled] = candidates[s].z;
+        ++filled;
+        if (filled == 4 || s + 1 == keep) {
+          if (useAvx) {
+            realYlm3Accumulate(xs, ys, zs, filled, acc);
+          } else {
+            for (int item = 0; item < filled; ++item) {
+              addRealYlm3Scalar(xs[item], ys[item], zs[item], norm, acc);
+            }
+          }
+          filled = 0;
+        }
+      }
+      double *dst = q.data() + static_cast<std::size_t>(i) * kRealL3;
+      for (int c = 0; c < kRealL3; ++c) {
+        dst[c] = acc[c];
+      }
+      qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
@@ -3163,92 +3236,95 @@ void assignIceTypePlus(
   int clathSum = 0;
   int interClathSum = 0;
 
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1) \
     reduction(+ : ihSum, icSum, waterSum, interSum, totalSum, clathSum, interClathSum)
 #endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    int num_staggrd = 0;
-    int num_eclipsd = 0;
-    int na = 0;
-    molSys::bond_type bondType;
-    int nnumNeighbours = 0;
-    // if(yCloud.pts[iatom].type!=typeO){continue;}
-    // if this is a slice and the particle is not in the slice
-    // then skip
-    if (isSlice) {
-      if (yCloud.pts[static_cast<std::size_t>(iatom)].inSlice == false) {
-        continue;
+    errors.run([&] {
+      int num_staggrd = 0;
+      int num_eclipsd = 0;
+      int na = 0;
+      molSys::bond_type bondType;
+      int nnumNeighbours = 0;
+      // if(yCloud.pts[iatom].type!=typeO){continue;}
+      // if this is a slice and the particle is not in the slice
+      // then skip
+      if (isSlice) {
+        if (yCloud.pts[static_cast<std::size_t>(iatom)].inSlice == false) {
+          return;
+        }
       }
-    }
-    totalSum++; // Update the total number of atoms considered. Change this to a
-                // check for slices
-    // c_ij is the bond list after the nearest-neighbour cut. The crystal
-    // test below counts the cutoff row itself, before that cut.
-    nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
-    // Loop through the bond cij and get the number of staggered, eclipsed bonds
-    for (int j = 0; j < nnumNeighbours; j++) {
-      bondType = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].classifier;
-      if (bondType == molSys::bond_type::eclipsed) {
-        num_eclipsd++;
-      } else if (bondType == molSys::bond_type::staggered) {
-        num_staggrd++;
-      } else {
-        na++;
-      }
-    } // End of loop through neighbours
+      totalSum++; // Update the total number of atoms considered. Change this to a
+                  // check for slices
+      // c_ij is the bond list after the nearest-neighbour cut. The crystal
+      // test below counts the cutoff row itself, before that cut.
+      nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
+      // Loop through the bond cij and get the number of staggered, eclipsed bonds
+      for (int j = 0; j < nnumNeighbours; j++) {
+        bondType = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].classifier;
+        if (bondType == molSys::bond_type::eclipsed) {
+          num_eclipsd++;
+        } else if (bondType == molSys::bond_type::staggered) {
+          num_staggrd++;
+        } else {
+          na++;
+        }
+      } // End of loop through neighbours
 
-    // Add more tests later
-    yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::unclassified; // default
-    // Table 1 footnote a: a crystal row needs exactly four neighbours in
-    // the cutoff shell. Four nearest bonds are not enough when a fifth
-    // oxygen also sits inside the shell.
-    const bool fourShell =
-        chill::cutoffShellCount(yCloud, nList, iatom) == 4 &&
-        nnumNeighbours == 4;
-    if (fourShell) {
-      // Cubic ice
-      if (num_eclipsd == 0 && num_staggrd == 4) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::cubic;
-        icSum++;
-      }
-      // Hexagonal
-      else if (num_eclipsd == 1 && num_staggrd == 3) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::hexagonal;
-        ihSum++;
-      }
-      // Interfacial. The published rule applies Table 1's neighbour
-      // test. ovito-chill+ labels two staggered bonds, or three
-      // staggered and no eclipsed bond, with no look at the neighbour.
-      else if (neighbourTest
-                   ? chill::isInterfacial(yCloud, nList, iatom, num_staggrd,
-                                          num_eclipsd, true)
-                   : (num_staggrd == 2 ||
-                      (num_staggrd == 3 && num_eclipsd == 0))) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interfacial;
-        interSum++;
-      }
-      // Clathrate
-      else if (num_eclipsd == 4 && num_staggrd == 0) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::clathrate;
-        clathSum++;
-      }
-      // Interfacial clathrate
-      else if (num_eclipsd == 3) {
-        yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interClathrate;
-        interClathSum++;
-      }
-      // Water
-      else {
+      // Add more tests later
+      yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::unclassified; // default
+      // Table 1 footnote a: a crystal row needs exactly four neighbours in
+      // the cutoff shell. Four nearest bonds are not enough when a fifth
+      // oxygen also sits inside the shell.
+      const bool fourShell =
+          chill::cutoffShellCount(yCloud, nList, iatom) == 4 &&
+          nnumNeighbours == 4;
+      if (fourShell) {
+        // Cubic ice
+        if (num_eclipsd == 0 && num_staggrd == 4) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::cubic;
+          icSum++;
+        }
+        // Hexagonal
+        else if (num_eclipsd == 1 && num_staggrd == 3) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::hexagonal;
+          ihSum++;
+        }
+        // Interfacial. The published rule applies Table 1's neighbour
+        // test. ovito-chill+ labels two staggered bonds, or three
+        // staggered and no eclipsed bond, with no look at the neighbour.
+        else if (neighbourTest
+                     ? chill::isInterfacial(yCloud, nList, iatom, num_staggrd,
+                                            num_eclipsd, true)
+                     : (num_staggrd == 2 ||
+                        (num_staggrd == 3 && num_eclipsd == 0))) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interfacial;
+          interSum++;
+        }
+        // Clathrate
+        else if (num_eclipsd == 4 && num_staggrd == 0) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::clathrate;
+          clathSum++;
+        }
+        // Interfacial clathrate
+        else if (num_eclipsd == 3) {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interClathrate;
+          interClathSum++;
+        }
+        // Water
+        else {
+          yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
+          waterSum++;
+        }
+      } else {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
         waterSum++;
       }
-    } else {
-      yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
-      waterSum++;
-    }
-
+    });
   } // End of loop through every iatom
+  errors.rethrow();
   ih = ihSum;
   ic = icSum;
   water = waterSum;
@@ -3735,90 +3811,94 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   const bool useAvx = hostHasAvx2Fma();
   const bool fixedKeep = keepMax > 0;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const double orderT0 = omp_get_wtime();
   const int orderThreads = omp_get_max_threads();
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (which != nullptr &&
-        (static_cast<int>(which->size()) <= iatom || (*which)[static_cast<std::size_t>(iatom)] == 0)) {
-      continue;
-    }
-    if (static_cast<std::size_t>(iatom) >= nList.size()) {
-      continue;
-    }
-    struct Near {
-      double d2;
-      int jatom;
-      double x, y, z;
-      bool operator<(const Near &o) const {
-        return d2 < o.d2 || (d2 == o.d2 && jatom < o.jatom);
+    errors.run([&] {
+      if (which != nullptr &&
+          (static_cast<int>(which->size()) <= iatom || (*which)[static_cast<std::size_t>(iatom)] == 0)) {
+        return;
       }
-    };
-    Near stackNear[32];
-    std::vector<Near> heapNear;
-    Near *candidates = stackNear;
-    int nCand = 0;
-    const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
-    const auto &row = nList[static_cast<std::size_t>(iatom)];
-    for (std::size_t j = 1; j < row.size(); j++) {
-      const int jatom = resolveId(yCloud, idToIndex, maxId, dense, row[j]);
-      if (jatom < 0) {
-        continue;
+      if (static_cast<std::size_t>(iatom) >= nList.size()) {
+        return;
       }
-      const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-      if (nCand == 32 && candidates == stackNear) {
-        heapNear.assign(stackNear, stackNear + 32);
-        candidates = heapNear.data();
-      }
-      const Near item{dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0], dr[1],
-                      dr[2]};
-      if (candidates == stackNear) {
-        candidates[nCand] = item;
-      } else {
-        heapNear.push_back(item);
-        candidates = heapNear.data();
-      }
-      ++nCand;
-    }
-    const int keep = fixedKeep ? std::min(keepMax, nCand) : nCand;
-    if (keep == 0) {
-      continue;
-    }
-    std::partial_sort(candidates, candidates + keep, candidates + nCand);
-    order.nkeep[static_cast<std::size_t>(iatom)] = keep;
-    double acc[kRealL3] = {};
-    for (int j = 0; j < keep;) {
-      double xs[4], ys[4], zs[4];
-      int batch = 0;
-      for (; batch < 4 && j < keep; ++j, ++batch) {
-        if (fixedKeep) {
-          order.chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
-                       static_cast<std::size_t>(j)] = candidates[j].jatom;
+      struct Near {
+        double d2;
+        int jatom;
+        double x, y, z;
+        bool operator<(const Near &o) const {
+          return d2 < o.d2 || (d2 == o.d2 && jatom < o.jatom);
+        }
+      };
+      Near stackNear[32];
+      std::vector<Near> heapNear;
+      Near *candidates = stackNear;
+      int nCand = 0;
+      const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
+      const auto &row = nList[static_cast<std::size_t>(iatom)];
+      for (std::size_t j = 1; j < row.size(); j++) {
+        const int jatom = resolveId(yCloud, idToIndex, maxId, dense, row[j]);
+        if (jatom < 0) {
+          continue;
+        }
+        const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
+        const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+        if (nCand == 32 && candidates == stackNear) {
+          heapNear.assign(stackNear, stackNear + 32);
+          candidates = heapNear.data();
+        }
+        const Near item{dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0], dr[1],
+                        dr[2]};
+        if (candidates == stackNear) {
+          candidates[nCand] = item;
         } else {
-          order.rows[static_cast<std::size_t>(iatom)].push_back(candidates[j].jatom);
+          heapNear.push_back(item);
+          candidates = heapNear.data();
         }
-        xs[batch] = candidates[j].x;
-        ys[batch] = candidates[j].y;
-        zs[batch] = candidates[j].z;
+        ++nCand;
       }
-      if (useAvx) {
-        realYlm3Accumulate(xs, ys, zs, batch, acc);
-      } else {
-        for (int item = 0; item < batch; ++item) {
-          addRealYlm3Scalar(xs[item], ys[item], zs[item], normQ3(), acc);
+      const int keep = fixedKeep ? std::min(keepMax, nCand) : nCand;
+      if (keep == 0) {
+        return;
+      }
+      std::partial_sort(candidates, candidates + keep, candidates + nCand);
+      order.nkeep[static_cast<std::size_t>(iatom)] = keep;
+      double acc[kRealL3] = {};
+      for (int j = 0; j < keep;) {
+        double xs[4], ys[4], zs[4];
+        int batch = 0;
+        for (; batch < 4 && j < keep; ++j, ++batch) {
+          if (fixedKeep) {
+            order.chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
+                         static_cast<std::size_t>(j)] = candidates[j].jatom;
+          } else {
+            order.rows[static_cast<std::size_t>(iatom)].push_back(candidates[j].jatom);
+          }
+          xs[batch] = candidates[j].x;
+          ys[batch] = candidates[j].y;
+          zs[batch] = candidates[j].z;
+        }
+        if (useAvx) {
+          realYlm3Accumulate(xs, ys, zs, batch, acc);
+        } else {
+          for (int item = 0; item < batch; ++item) {
+            addRealYlm3Scalar(xs[item], ys[item], zs[item], normQ3(), acc);
+          }
         }
       }
-    }
-    double *dst = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
-    for (int channel = 0; channel < kRealL3; ++channel) {
-      dst[channel] = acc[channel];
-    }
-    order.norm[static_cast<std::size_t>(iatom)] =
-        useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+      double *dst = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
+      for (int channel = 0; channel < kRealL3; ++channel) {
+        dst[channel] = acc[channel];
+      }
+      order.norm[static_cast<std::size_t>(iatom)] =
+          useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+    });
   }
+  errors.rethrow();
 #ifdef SEAMS_HAS_OPENMP
   if (const char *split = std::getenv("SEAMS_SPLIT")) {
     if (split[0] == '1') {
@@ -3842,41 +3922,45 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
     }
     return order.rows[static_cast<std::size_t>(atom)][static_cast<std::size_t>(slot)];
   };
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (which != nullptr &&
-        (static_cast<int>(which->size()) <= iatom || (*which)[static_cast<std::size_t>(iatom)] == 0)) {
-      continue;
-    }
-    if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
-      continue;
-    }
-    const int keep = order.nkeep[static_cast<std::size_t>(iatom)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
-    bonds.clear();
-    if (keep <= 0) {
-      continue;
-    }
-    const double *qI = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
-    const double normI = order.norm[static_cast<std::size_t>(iatom)];
-    bonds.reserve(static_cast<std::size_t>(keep));
-    for (int slot = 0; slot < keep; ++slot) {
-      const int jatom = neighbourAt(iatom, slot);
-      if (jatom < 0) {
-        continue;
+    errors.run([&] {
+      if (which != nullptr && (static_cast<int>(which->size()) <= iatom ||
+                               (*which)[static_cast<std::size_t>(iatom)] == 0)) {
+        return;
       }
-      const double *qJ = order.q.data() + static_cast<std::size_t>(jatom) * kRealL3;
-      const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
-      const double cij =
-          correlationOf(dot, normI, order.norm[static_cast<std::size_t>(jatom)]);
-      molSys::Result temp;
-      temp.c_value = cij;
-      temp.classifier = chill::classifyBond(cij, rule, closed);
-      bonds.push_back(temp);
-    }
+      if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+        return;
+      }
+      const int keep = order.nkeep[static_cast<std::size_t>(iatom)];
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
+      bonds.clear();
+      if (keep <= 0) {
+        return;
+      }
+      const double *qI = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
+      const double normI = order.norm[static_cast<std::size_t>(iatom)];
+      bonds.reserve(static_cast<std::size_t>(keep));
+      for (int slot = 0; slot < keep; ++slot) {
+        const int jatom = neighbourAt(iatom, slot);
+        if (jatom < 0) {
+          continue;
+        }
+        const double *qJ = order.q.data() + static_cast<std::size_t>(jatom) * kRealL3;
+        const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
+        const double cij =
+            correlationOf(dot, normI, order.norm[static_cast<std::size_t>(jatom)]);
+        molSys::Result temp;
+        temp.c_value = cij;
+        temp.classifier = chill::classifyBond(cij, rule, closed);
+        bonds.push_back(temp);
+      }
+    });
   }
+  errors.rethrow();
 }
 
 #ifdef SEAMS_HAS_MPI

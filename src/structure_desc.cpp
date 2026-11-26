@@ -9,6 +9,7 @@
 #include <absOrientation.hpp>
 #include <bop.hpp>
 #include <generic.hpp>
+#include <region_errors.hpp>
 #include <ira_sofi.hpp>
 #include <voronoi_qlm.hpp>
 
@@ -315,37 +316,41 @@ std::vector<chill::TemplateHit> chill::classifyTemplates(
                    {CrystalKind::sc, "sc", sc6, 6}};
   const Eigen::MatrixXd refMats[] = {fcc12(), hcp12(), bcc8(), sc6()};
 
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (yCloud.nop >= 64)
 #endif
   for (int i = 0; i < yCloud.nop; i++) {
-    TemplateHit best;
-    for (int t = 0; t < 4; t++) {
-      const auto &tmpl = templates[t];
-      if (kNeigh > 0 && kNeigh < tmpl.k) {
-        continue;
+    errors.run([&] {
+      TemplateHit best;
+      for (int t = 0; t < 4; t++) {
+        const auto &tmpl = templates[t];
+        if (kNeigh > 0 && kNeigh < tmpl.k) {
+          continue;
+        }
+        auto shell = shellOf(yCloud, nList, i, tmpl.k);
+        if (shell.rows() < tmpl.k) {
+          continue;
+        }
+        if (shell.rows() > tmpl.k) {
+          shell.conservativeResize(tmpl.k, 3);
+        }
+        const double rmsd = overlayRmsd(refMats[t], shell);
+        if (rmsd < best.rmsd) {
+          best.kind = tmpl.kind;
+          best.name = tmpl.name;
+          best.rmsd = rmsd;
+        }
       }
-      auto shell = shellOf(yCloud, nList, i, tmpl.k);
-      if (shell.rows() < tmpl.k) {
-        continue;
+      // A first-neighbour-unit RMSD above 0.35 is not a lattice shell
+      if (best.rmsd > 0.35) {
+        best.kind = CrystalKind::other;
+        best.name = "other";
       }
-      if (shell.rows() > tmpl.k) {
-        shell.conservativeResize(tmpl.k, 3);
-      }
-      const double rmsd = overlayRmsd(refMats[t], shell);
-      if (rmsd < best.rmsd) {
-        best.kind = tmpl.kind;
-        best.name = tmpl.name;
-        best.rmsd = rmsd;
-      }
-    }
-    // A first-neighbour-unit RMSD above 0.35 is not a lattice shell
-    if (best.rmsd > 0.35) {
-      best.kind = CrystalKind::other;
-      best.name = "other";
-    }
-    out[static_cast<size_t>(i)] = best;
+      out[static_cast<size_t>(i)] = best;
+    });
   }
+  errors.rethrow();
   return out;
 }
 
@@ -361,13 +366,17 @@ std::vector<std::vector<double>> chill::soapSpectrumAll(
     int lMax, double rcut) {
   std::vector<std::vector<double>> out(static_cast<size_t>(yCloud.nop));
   const gen::FracBox frame = gen::makeFracBox(yCloud);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (yCloud.nop >= 64)
 #endif
   for (int i = 0; i < yCloud.nop; i++) {
-    out[static_cast<size_t>(i)] =
-        soapOne(yCloud, frame, i, nList, nMax, lMax, rcut);
+    errors.run([&] {
+      out[static_cast<size_t>(i)] =
+          soapOne(yCloud, frame, i, nList, nMax, lMax, rcut);
+    });
   }
+  errors.rethrow();
   return out;
 }
 

@@ -16,6 +16,7 @@
 #include <index_cast.hpp>
 #include <neighbours.hpp>
 #include <ozaki.hpp>
+#include <region_errors.hpp>
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
 #include <team_run.hpp>
@@ -118,10 +119,12 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
   };
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
   if (useThreads) {
+    seams::RegionErrors errors;
 #pragma omp parallel for schedule(static)
     for (int i = 0; i < nRows; i++) {
-      countRow(i);
+      errors.run([&] { countRow(i); });
     }
+    errors.rethrow();
   } else
 #endif
   for (int i = 0; i < nRows; i++) {
@@ -158,10 +161,12 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
   if (useThreads) {
     const int rowCount = nRows;
+    seams::RegionErrors errors;
 #pragma omp parallel for schedule(static) firstprivate(rowCount)
     for (int i = 0; i < rowCount; i++) {
-      fillRow(i);
+      errors.run([&] { fillRow(i); });
     }
+    errors.rethrow();
   } else
 #endif
   for (int i = 0; i < nRows; i++) {
@@ -595,20 +600,24 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
   // square root and a divide, and on a four-neighbour shell that costs
   // more than the seven components it writes.
   const bool batchSolid = (orderL == 4 || orderL == 6) && !pairwise;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    if (pairwise) {
-      qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else if (batchSolid) {
-      qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else {
-      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
-                                      g.cols.data(), qlm.data());
-    }
+    errors.run([&] {
+      if (pairwise) {
+        qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else if (batchSolid) {
+        qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else {
+        seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                        g.cols.data(), qlm.data());
+      }
+    });
   }
+  errors.rethrow();
 }
 
 void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
@@ -617,24 +626,28 @@ void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
       seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
   // Same split as runPass1: degree 3 stays on the one-bond kernel.
   const bool batchSolid = (orderL == 4 || orderL == 6) && !pairwise;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = 0; i < g.nop; i++) {
-    if (which != nullptr &&
-        (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0)) {
-      continue;
-    }
-    if (pairwise) {
-      qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else if (batchSolid) {
-      qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else {
-      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
-                                      g.cols.data(), qlm.data());
-    }
+    errors.run([&] {
+      if (which != nullptr &&
+          (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0)) {
+        return;
+      }
+      if (pairwise) {
+        qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else if (batchSolid) {
+        qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+      } else {
+        seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                        g.cols.data(), qlm.data());
+      }
+    });
   }
+  errors.rethrow();
 }
 
 void runPass2Mask(const NeighbourCSR &g, int orderL, const std::vector<double> &qlm,
@@ -715,47 +728,51 @@ void runPass2(const NeighbourCSR &g, int orderL, int begin, int end,
   const bool stock =
       seams::product::mode() == seams::product::Mode::Fp64 &&
       seams::product::reduction() == seams::product::Reduction::Left;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    if (stock) {
-      seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(),
-                                   g.cols.data(), ql.data(), qlBar.data());
-      continue;
-    }
-    const int nComp = 2 * orderL + 1;
-    constexpr double pi = 3.14159265358979323846;
-    const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
-    const int row = i * nComp;
-    const auto norm = seams::product::realDot(qlm.data() + 2 * row, qlm.data() + 2 * row,
-                                              2 * nComp, seams::product::mode());
-    ql[static_cast<size_t>(i)] = std::sqrt(prefactor * norm.value);
-    const int j0 = g.offsets[static_cast<size_t>(i)];
-    const int j1 = g.offsets[static_cast<size_t>(i) + 1];
-    if (j0 == j1) {
-      qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
-      continue;
-    }
-    const int nContrib = 1 + (j1 - j0);
-    std::vector<double> comp(static_cast<size_t>(nContrib));
-    std::vector<double> bar(static_cast<size_t>(2 * nComp));
-    for (int m = 0; m < 2 * nComp; m++) {
-      comp[0] = qlm[static_cast<size_t>(2 * row + m)];
-      for (int p = j0; p < j1; p++) {
-        const int jatom = g.cols[static_cast<size_t>(p)];
-        comp[static_cast<size_t>(1 + (p - j0))] =
-            qlm[static_cast<size_t>(2 * (jatom * nComp) + m)];
+    errors.run([&] {
+      if (stock) {
+        seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(),
+                                     g.cols.data(), ql.data(), qlBar.data());
+        return;
       }
-      bar[static_cast<size_t>(m)] =
-          seams::product::reduce(comp.data(), nContrib, seams::product::reduction()) /
-          static_cast<double>(nContrib);
-    }
-    const auto barNorm = seams::product::realDot(bar.data(), bar.data(), 2 * nComp,
-                                                 seams::product::mode());
-    qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * barNorm.value);
+      const int nComp = 2 * orderL + 1;
+      constexpr double pi = 3.14159265358979323846;
+      const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+      const int row = i * nComp;
+      const auto norm = seams::product::realDot(qlm.data() + 2 * row, qlm.data() + 2 * row,
+                                                2 * nComp, seams::product::mode());
+      ql[static_cast<size_t>(i)] = std::sqrt(prefactor * norm.value);
+      const int j0 = g.offsets[static_cast<size_t>(i)];
+      const int j1 = g.offsets[static_cast<size_t>(i) + 1];
+      if (j0 == j1) {
+        qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
+        return;
+      }
+      const int nContrib = 1 + (j1 - j0);
+      std::vector<double> comp(static_cast<size_t>(nContrib));
+      std::vector<double> bar(static_cast<size_t>(2 * nComp));
+      for (int m = 0; m < 2 * nComp; m++) {
+        comp[0] = qlm[static_cast<size_t>(2 * row + m)];
+        for (int p = j0; p < j1; p++) {
+          const int jatom = g.cols[static_cast<size_t>(p)];
+          comp[static_cast<size_t>(1 + (p - j0))] =
+              qlm[static_cast<size_t>(2 * (jatom * nComp) + m)];
+        }
+        bar[static_cast<size_t>(m)] =
+            seams::product::reduce(comp.data(), nContrib, seams::product::reduction()) /
+            static_cast<double>(nContrib);
+      }
+      const auto barNorm = seams::product::realDot(bar.data(), bar.data(), 2 * nComp,
+                                                   seams::product::mode());
+      qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * barNorm.value);
+    });
   }
+  errors.rethrow();
 }
 
 #ifdef SEAMS_HAS_OFFLOAD
@@ -1142,6 +1159,14 @@ SteinhardtQl cutoffSolid(
   const double hz = 0.5 * Lz;
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
+  double maxAbs = 0.0;
+  for (int i = 0; i < n; ++i) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    maxAbs = std::max(maxAbs, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  // Folding x/L*L in binary64 moves a coordinate by about an ulp of the
+  // edge. Past that, the bond vector is taken from the original points.
+  const bool trustFold = gen::plainWrapCertifies(frac, maxAbs);
   std::atomic<int> mixed{0};
   seams::team::forRange(static_cast<std::size_t>(n), 16384,
                         [&](std::size_t begin, std::size_t end, int) {
@@ -1189,7 +1214,11 @@ SteinhardtQl cutoffSolid(
                         [&](std::size_t from, std::size_t to, int) {
   for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    if (tilt) {
+    if (!trustFold) {
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = p.x;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+    } else if (tilt) {
       // Reduced coordinates. Solve the upper-triangular system before wrapping
       // so integer image shifts in y and z cancel the tilt coupling terms.
       double sz = (p.z - frac.oz) / frac.lz;
@@ -1244,9 +1273,31 @@ SteinhardtQl cutoffSolid(
   const bool checkSmith = tilt && !(cutoff + 1e-12 < frac.halfMin);
   const auto tiltDelta = [&](double xi, double yi, double zi, int j,
                              double &dx, double &dy, double &dz) {
-    double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-    double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-    double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+    const std::array<double, 3> raw = {
+        xi - scratch.xyz[static_cast<std::size_t>(3 * j)],
+        yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
+        zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2]};
+    if (!trustFold) {
+      const auto wrapped = gen::mic::fractionalWrap(
+          frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw);
+      const double r2 =
+          wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2];
+      if (checkSmith && !gen::smithInside(frac, r2)) {
+        const auto euc = gen::refineEuclidean(
+            frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw, wrapped);
+        dx = euc[0];
+        dy = euc[1];
+        dz = euc[2];
+      } else {
+        dx = wrapped[0];
+        dy = wrapped[1];
+        dz = wrapped[2];
+      }
+      return;
+    }
+    double dX = raw[0];
+    double dY = raw[1];
+    double dZ = raw[2];
     dX -= frac.lx * std::round(dX / frac.lx);
     dY -= frac.ly * std::round(dY / frac.ly);
     dZ -= frac.lz * std::round(dZ / frac.lz);
@@ -1256,6 +1307,8 @@ SteinhardtQl cutoffSolid(
     if (checkSmith) {
       const double r2 = dx * dx + dy * dy + dz * dz;
       if (!gen::smithInside(frac, r2)) {
+        // w is the fractional image. Searching from it is the minimum
+        // image of the true displacement, because the fold was certified.
         const std::array<double, 3> w = {dx, dy, dz};
         const auto euc = gen::refineEuclidean(
             frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
@@ -1520,39 +1573,121 @@ SteinhardtQl cutoffSolid(
 #endif
   if (!wroteLocal && !simd8) {
   const int nTiles = (n + 7) / 8;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
   for (int tile = 0; tile < nTiles; ++tile) {
-    const int begin = tile * 8;
-    const int end = std::min(begin + 8, n);
-    // Four bonds on eight atoms: the harmonics stay in SoA and one
-    // blocked transpose writes each atom row. A per-bond lane
-    // transpose was the cost this replaces.
-    bool rows = end - begin == 8 && (orderL == 4 || orderL == 6);
+    errors.run([&] {
+      const int begin = tile * 8;
+      const int end = std::min(begin + 8, n);
+      // Four bonds on eight atoms: the harmonics stay in SoA and one
+      // blocked transpose writes each atom row. A per-bond lane
+      // transpose was the cost this replaces.
+      bool rows = end - begin == 8 && (orderL == 4 || orderL == 6);
 #if !defined(SEAMS_YLM_AVX512)
-    rows = false;
+      rows = false;
 #endif
-    alignas(64) double dxs[32];
-    alignas(64) double dys[32];
-    alignas(64) double dzs[32];
-    for (int a = 0; rows && a < 8; ++a) {
-      const int i = begin + a;
-      if (!uniform && yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
-        rows = false;
-        break;
+      alignas(64) double dxs[32];
+      alignas(64) double dys[32];
+      alignas(64) double dzs[32];
+      for (int a = 0; rows && a < 8; ++a) {
+        const int i = begin + a;
+        if (!uniform && yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
+          rows = false;
+          break;
+        }
+        const int left = scratch.offsets[static_cast<std::size_t>(i)];
+        const int right = scratch.offsets[static_cast<std::size_t>(i) + 1];
+        if (right - left != 4) {
+          rows = false;
+          break;
+        }
+        const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
+        const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
+        const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
+        for (int p = 0; p < 4; ++p) {
+          const int j = scratch.cols[static_cast<std::size_t>(left + p)];
+          double dx, dy, dz;
+          if (tilt) {
+            tiltDelta(xi, yi, zi, j, dx, dy, dz);
+          } else {
+            dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+            dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+            dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+            if (dx > hx) dx -= Lx;
+            else if (dx < -hx) dx += Lx;
+            if (dy > hy) dy -= Ly;
+            else if (dy < -hy) dy += Ly;
+            if (dz > hz) dz -= Lz;
+            else if (dz < -hz) dz += Lz;
+          }
+          if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+            rows = false;
+            break;
+          }
+          dxs[p * 8 + a] = dx;
+          dys[p * 8 + a] = dy;
+          dzs[p * 8 + a] = dz;
+        }
       }
-      const int left = scratch.offsets[static_cast<std::size_t>(i)];
-      const int right = scratch.offsets[static_cast<std::size_t>(i) + 1];
-      if (right - left != 4) {
+#if defined(SEAMS_YLM_AVX512)
+      if (rows && !seams::ylm::avx512Kernels()) {
         rows = false;
-        break;
       }
+      if (rows) {
+        double *row = scratch.qlm.data() +
+                      static_cast<std::size_t>(begin) * static_cast<std::size_t>(width);
+        rows = seams::ylm::ylmSumRows4(orderL, dxs, dys, dzs, row, width, nKeep);
+        if (rows) {
+          constexpr double inv = 0.25;
+          for (int a = 0; a < 8; ++a) {
+            double *dst = row + static_cast<std::size_t>(a) * static_cast<std::size_t>(width);
+            for (int m = 0; m < nKeep; ++m) {
+              dst[2 * m] *= inv;
+              dst[2 * m + 1] *= inv;
+            }
+            result.ql[static_cast<std::size_t>(begin + a)] =
+                std::sqrt(prefactor * rowPower(dst, nKeep, mirror));
+          }
+        }
+      }
+#endif
+      if (rows) {
+        return;
+      }
+      for (int i = begin; i < end; ++i) {
+      double *dst = scratch.qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+      std::fill_n(dst, width, 0.0);
+      const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
+      if (!live) {
+        continue;
+      }
+      const int a = scratch.offsets[static_cast<std::size_t>(i)];
+      const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
       const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
       const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
       const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
-      for (int p = 0; p < 4; ++p) {
-        const int j = scratch.cols[static_cast<std::size_t>(left + p)];
+      double xs[8], ys[8], zs[8], re[8 * 13], im[8 * 13];
+      int filled = 0;
+      int nUsed = 0;
+      const auto flush = [&]() {
+        if (filled == 0) {
+          return;
+        }
+        seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
+        for (int bond = 0; bond < filled; bond++) {
+          const double *yr = re + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
+          const double *yi = im + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
+          for (int m = 0; m < nKeep; m++) {
+            dst[2 * m] += yr[m];
+            dst[2 * m + 1] += yi[m];
+          }
+        }
+        filled = 0;
+      };
+      for (int p = a; p < b; p++) {
+        const int j = scratch.cols[static_cast<std::size_t>(p)];
         double dx, dy, dz;
         if (tilt) {
           tiltDelta(xi, yi, zi, j, dx, dy, dz);
@@ -1568,109 +1703,31 @@ SteinhardtQl cutoffSolid(
           else if (dz < -hz) dz += Lz;
         }
         if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
-          rows = false;
-          break;
+          continue;
         }
-        dxs[p * 8 + a] = dx;
-        dys[p * 8 + a] = dy;
-        dzs[p * 8 + a] = dz;
-      }
-    }
-#if defined(SEAMS_YLM_AVX512)
-    if (rows && !seams::ylm::avx512Kernels()) {
-      rows = false;
-    }
-    if (rows) {
-      double *row = scratch.qlm.data() +
-                    static_cast<std::size_t>(begin) * static_cast<std::size_t>(width);
-      rows = seams::ylm::ylmSumRows4(orderL, dxs, dys, dzs, row, width, nKeep);
-      if (rows) {
-        constexpr double inv = 0.25;
-        for (int a = 0; a < 8; ++a) {
-          double *dst = row + static_cast<std::size_t>(a) * static_cast<std::size_t>(width);
-          for (int m = 0; m < nKeep; ++m) {
-            dst[2 * m] *= inv;
-            dst[2 * m + 1] *= inv;
-          }
-          result.ql[static_cast<std::size_t>(begin + a)] =
-              std::sqrt(prefactor * rowPower(dst, nKeep, mirror));
+        xs[filled] = dx;
+        ys[filled] = dy;
+        zs[filled] = dz;
+        ++nUsed;
+        if (++filled == 8) {
+          flush();
         }
       }
-    }
-#endif
-    if (rows) {
-      continue;
-    }
-    for (int i = begin; i < end; ++i) {
-    double *dst = scratch.qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
-    std::fill_n(dst, width, 0.0);
-    const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
-    if (!live) {
-      continue;
-    }
-    const int a = scratch.offsets[static_cast<std::size_t>(i)];
-    const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
-    const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
-    const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
-    const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
-    double xs[8], ys[8], zs[8], re[8 * 13], im[8 * 13];
-    int filled = 0;
-    int nUsed = 0;
-    const auto flush = [&]() {
-      if (filled == 0) {
-        return;
-      }
-      seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
-      for (int bond = 0; bond < filled; bond++) {
-        const double *yr = re + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
-        const double *yi = im + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
-        for (int m = 0; m < nKeep; m++) {
-          dst[2 * m] += yr[m];
-          dst[2 * m + 1] += yi[m];
-        }
-      }
-      filled = 0;
-    };
-    for (int p = a; p < b; p++) {
-      const int j = scratch.cols[static_cast<std::size_t>(p)];
-      double dx, dy, dz;
-      if (tilt) {
-        tiltDelta(xi, yi, zi, j, dx, dy, dz);
-      } else {
-        dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-        dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-        dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-        if (dx > hx) dx -= Lx;
-        else if (dx < -hx) dx += Lx;
-        if (dy > hy) dy -= Ly;
-        else if (dy < -hy) dy += Ly;
-        if (dz > hz) dz -= Lz;
-        else if (dz < -hz) dz += Lz;
-      }
-      if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+      flush();
+      if (nUsed == 0) {
         continue;
       }
-      xs[filled] = dx;
-      ys[filled] = dy;
-      zs[filled] = dz;
-      ++nUsed;
-      if (++filled == 8) {
-        flush();
+      const double inv = 1.0 / static_cast<double>(nUsed);
+      for (int m = 0; m < nKeep; m++) {
+        dst[2 * m] *= inv;
+        dst[2 * m + 1] *= inv;
       }
-    }
-    flush();
-    if (nUsed == 0) {
-      continue;
-    }
-    const double inv = 1.0 / static_cast<double>(nUsed);
-    for (int m = 0; m < nKeep; m++) {
-      dst[2 * m] *= inv;
-      dst[2 * m + 1] *= inv;
-    }
-    result.ql[static_cast<std::size_t>(i)] =
-        std::sqrt(prefactor * rowPower(dst, nKeep, mirror));
-    }
+      result.ql[static_cast<std::size_t>(i)] =
+          std::sqrt(prefactor * rowPower(dst, nKeep, mirror));
+      }
+    });
   }
+  errors.rethrow();
   }
   if (invariants && (orderL == 4 || orderL == 6)) {
     result.wl.assign(static_cast<std::size_t>(n), 0.0);
@@ -1816,21 +1873,25 @@ SteinhardtQl steinhardtQlCutoff(
   g.cols = std::move(cols);
   g.dr.assign(g.cols.size() * 3, 0.0);
   const gen::FracBox frame = gen::makeFracBox(yCloud);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (g.nop >= kParallelThreshold && !omp_in_parallel())
 #endif
   for (int i = 0; i < g.nop; ++i) {
-    const int a = g.offsets[static_cast<std::size_t>(i)];
-    const int b = g.offsets[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = g.cols[static_cast<std::size_t>(k)];
-      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
-      const auto d = gen::relDistFromPoint(frame, yCloud, i, pj.x, pj.y, pj.z);
-      g.dr[static_cast<std::size_t>(3 * k)] = d[0];
-      g.dr[static_cast<std::size_t>(3 * k + 1)] = d[1];
-      g.dr[static_cast<std::size_t>(3 * k + 2)] = d[2];
-    }
+    errors.run([&] {
+      const int a = g.offsets[static_cast<std::size_t>(i)];
+      const int b = g.offsets[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = g.cols[static_cast<std::size_t>(k)];
+        const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+        const auto d = gen::relDistFromPoint(frame, yCloud, i, pj.x, pj.y, pj.z);
+        g.dr[static_cast<std::size_t>(3 * k)] = d[0];
+        g.dr[static_cast<std::size_t>(3 * k + 1)] = d[1];
+        g.dr[static_cast<std::size_t>(3 * k + 2)] = d[2];
+      }
+    });
   }
+  errors.rethrow();
 
   const int nComp = 2 * orderL + 1;
   std::vector<double> qlm(static_cast<std::size_t>(g.nop) * static_cast<std::size_t>(nComp) * 2,
@@ -1911,92 +1972,96 @@ SteinhardtQl steinhardtQlMutual(
   result.qlBar.assign(static_cast<std::size_t>(n), 0.0);
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   const bool ortho = frame.ok && !frame.triclinic;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= kParallelThreshold)
 #endif
   for (int i = 0; i < n; i++) {
-    int seen[32];
-    int count = 0;
-    const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
-    const double xi = xyz[static_cast<std::size_t>(3 * i)];
-    const double yi = xyz[static_cast<std::size_t>(3 * i) + 1];
-    const double zi = xyz[static_cast<std::size_t>(3 * i) + 2];
-    double dxs[32];
-    double dys[32];
-    double dzs[32];
-    for (int t = 0; t < k; t++) {
-      const int j = row[t];
-      if (j < 0 || j >= n || j == i || !rowLists(nom.data(), k, j, i)) {
-        continue;
+    errors.run([&] {
+      int seen[32];
+      int count = 0;
+      const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+      const double xi = xyz[static_cast<std::size_t>(3 * i)];
+      const double yi = xyz[static_cast<std::size_t>(3 * i) + 1];
+      const double zi = xyz[static_cast<std::size_t>(3 * i) + 2];
+      double dxs[32];
+      double dys[32];
+      double dzs[32];
+      for (int t = 0; t < k; t++) {
+        const int j = row[t];
+        if (j < 0 || j >= n || j == i || !rowLists(nom.data(), k, j, i)) {
+          continue;
+        }
+        bool dup = false;
+        for (int s = 0; s < count; s++) {
+          if (seen[s] == j) {
+            dup = true;
+            break;
+          }
+        }
+        if (dup) {
+          continue;
+        }
+        const double xj = xyz[static_cast<std::size_t>(3 * j)];
+        const double yj = xyz[static_cast<std::size_t>(3 * j) + 1];
+        const double zj = xyz[static_cast<std::size_t>(3 * j) + 2];
+        double dx, dy, dz;
+        if (ortho) {
+          dx = xi - xj;
+          dy = yi - yj;
+          dz = zi - zj;
+          dx -= frame.lx * std::floor(dx / frame.lx + 0.5);
+          dy -= frame.ly * std::floor(dy / frame.ly + 0.5);
+          dz -= frame.lz * std::floor(dz / frame.lz + 0.5);
+        } else {
+          const auto image = gen::exactDelta(frame, xi, yi, zi, xj, yj, zj);
+          dx = image[0];
+          dy = image[1];
+          dz = image[2];
+        }
+        if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+          continue;
+        }
+        seen[count] = j;
+        dxs[count] = dx;
+        dys[count] = dy;
+        dzs[count] = dz;
+        ++count;
       }
-      bool dup = false;
+      nkeep[static_cast<std::size_t>(i)] = count;
+      int *dstN = neigh.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
       for (int s = 0; s < count; s++) {
-        if (seen[s] == j) {
-          dup = true;
-          break;
+        dstN[s] = seen[s];
+      }
+      double *dst = qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+      // The row is reused across calls. A leftover harmonic would be added
+      // to this frame.
+      std::fill_n(dst, width, 0.0);
+      if (count == 0) {
+        return;
+      }
+      double re[32 * 13];
+      double im[32 * 13];
+      seams::ylm::ylmBatch(orderL, dxs, dys, dzs, count, re, im);
+      for (int b = 0; b < count; b++) {
+        const double *yr = re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+        const double *imag = im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+        for (int m = 0; m < nComp; m++) {
+          dst[2 * m] += yr[m];
+          dst[2 * m + 1] += imag[m];
         }
       }
-      if (dup) {
-        continue;
-      }
-      const double xj = xyz[static_cast<std::size_t>(3 * j)];
-      const double yj = xyz[static_cast<std::size_t>(3 * j) + 1];
-      const double zj = xyz[static_cast<std::size_t>(3 * j) + 2];
-      double dx, dy, dz;
-      if (ortho) {
-        dx = xi - xj;
-        dy = yi - yj;
-        dz = zi - zj;
-        dx -= frame.lx * std::floor(dx / frame.lx + 0.5);
-        dy -= frame.ly * std::floor(dy / frame.ly + 0.5);
-        dz -= frame.lz * std::floor(dz / frame.lz + 0.5);
-      } else {
-        const auto image = gen::exactDelta(frame, xi, yi, zi, xj, yj, zj);
-        dx = image[0];
-        dy = image[1];
-        dz = image[2];
-      }
-      if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
-        continue;
-      }
-      seen[count] = j;
-      dxs[count] = dx;
-      dys[count] = dy;
-      dzs[count] = dz;
-      ++count;
-    }
-    nkeep[static_cast<std::size_t>(i)] = count;
-    int *dstN = neigh.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
-    for (int s = 0; s < count; s++) {
-      dstN[s] = seen[s];
-    }
-    double *dst = qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
-    // The row is reused across calls. A leftover harmonic would be added
-    // to this frame.
-    std::fill_n(dst, width, 0.0);
-    if (count == 0) {
-      continue;
-    }
-    double re[32 * 13];
-    double im[32 * 13];
-    seams::ylm::ylmBatch(orderL, dxs, dys, dzs, count, re, im);
-    for (int b = 0; b < count; b++) {
-      const double *yr = re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
-      const double *imag = im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+      const double inv = 1.0 / static_cast<double>(count);
+      double sum = 0.0;
       for (int m = 0; m < nComp; m++) {
-        dst[2 * m] += yr[m];
-        dst[2 * m + 1] += imag[m];
+        dst[2 * m] *= inv;
+        dst[2 * m + 1] *= inv;
+        sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
       }
-    }
-    const double inv = 1.0 / static_cast<double>(count);
-    double sum = 0.0;
-    for (int m = 0; m < nComp; m++) {
-      dst[2 * m] *= inv;
-      dst[2 * m + 1] *= inv;
-      sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
-    }
-    result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+      result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+    });
   }
+  errors.rethrow();
   const auto tY = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= kParallelThreshold)

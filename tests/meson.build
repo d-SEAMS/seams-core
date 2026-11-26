@@ -54,6 +54,7 @@ test_sources = {
   'rdf': 'test_rdf.cpp',
   'rdf2d': 'test_rdf2d.cpp',
   'density': 'test_density.cpp',
+  'pore': 'test_pore.cpp',
   'selection': 'test_selection.cpp',
   'shapeMatch': 'test_shapeMatch.cpp',
   'topo_two_dim': 'test_topo_two_dim.cpp',
@@ -290,6 +291,26 @@ test('ring_oracle',
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   timeout: 600)
+
+# The binary128 minimum-image oracle (mic_oracle/adv.cpp, mic_oracle/oracle.hpp)
+# needs __float128 and libquadmath. Its header says how to run it at full
+# scale and at other flags.
+quadmath_dep = cppc.find_library('quadmath', required: false)
+if quadmath_dep.found() and cppc.links('''
+    #include <quadmath.h>
+    int main() { __float128 x = 2; return (int)sqrtq(x) == 1 ? 0 : 1; }
+  ''', dependencies: quadmath_dep, name: '__float128 and libquadmath link')
+  test('mic_oracle',
+    executable('mic_oracle', 'mic_oracle/adv.cpp',
+      dependencies: [yds_dep, quadmath_dep],
+      cpp_args: _args,
+      link_args: _test_link_args,
+      include_directories: _incdirs,
+      build_rpath: _test_rpath),
+    env: _test_env,
+    suite: 'mic',
+    timeout: 300)
+endif
 
 # .lammpsdata has no chemfiles extension. The CLI, the C API read, and
 # seams_path_nframes have to name the LAMMPS Data format. A malformed file
@@ -866,6 +887,7 @@ test('ion_shell_rings', find_program('python3'),
   env: _test_env,
   timeout: 120)
 # Placement is sched_setaffinity, /proc/self/task and taskset: Linux only.
+# A build without OpenMP still runs. It checks that no team is invented.
 if host_machine.system() == 'linux'
   test('pin_host', find_program('python3'),
     args: [files('pin_host.py')],
@@ -912,6 +934,12 @@ test('cycless_pentagon', find_program('python3'),
          seams_api_lib.full_path()],
   workdir: meson.project_source_root(),
   timeout: 120)
+test('pore_geometry', find_program('python3'),
+  args: [files('test_pore_geometry.py'),
+         seams_api_lib.full_path()],
+  workdir: meson.project_source_root() / 'tests',
+  depends: [seams_api_lib],
+  timeout: 60)
 test('sqq_sh_triclinic', find_program('python3'),
   args: [files('test_sqq_sh.py')],
   workdir: meson.project_source_root(),
@@ -956,6 +984,17 @@ test('mw215_frame', find_program('python3'),
   args: [files('test_mw215_deck.py'), 'frame'],
   workdir: meson.project_source_root(),
   timeout: 600)
+
+test('pore_system',
+  executable('test_pore_system', 'test_pore_system.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  env: _test_env,
+  timeout: 120)
 
 test('omp_threads',
   executable('test_omp_threads', 'test_omp_threads.cpp',

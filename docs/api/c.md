@@ -888,6 +888,38 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_density_axis 4
 ```
 
+### seams_density_fractional
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_density_fractional 4
+```
+
+### seams_pore_frame
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_pore_frame 2
+```
+
+### seams_pore_profiles
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_pore_profiles 4 4 4
+```
+
+### seams_host_guest
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_host_guest 3 1
+```
+
 ### seams_fingerprint
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -2835,7 +2867,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Mutual nearest unlike contacts of a site table.
 
-Cation and anion counts are molecules in the ion cloud.
+Cation and anion counts are molecules in the ion cloud. A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.
 
 ```c
 seams_status seams_contact_pairs(seams_system *sys, const char *site_spec, size_t *n_pairs, int *n_cation, int *n_anion);
@@ -2849,7 +2881,7 @@ Parameters: `sys`, `site_spec`, `n_pairs`, `n_cation`, `n_anion`.
 - `n_cation`: Receives the cation molecule count, or NULL.
 - `n_anion`: Receives the anion molecule count, or NULL. At least one of the three outputs must be non-NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
 
 Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
 
@@ -2949,6 +2981,58 @@ Example:
 double z[50], rho[50];
 size_t bins = 0;
 seams_density_axis(sys, 0, 50, 2, z, rho, 50, &bins);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_density_fractional
+
+Purpose: Number and mass density along a cell axis or a Cartesian direction.
+
+coordinate is the bin centre in the shifted fractional coordinate, on [0, 1). Bin 0 starts at origin. origin is wrapped into [0, 1). A non-NULL direction is three Cartesian components and replaces axis. Pass NULL output columns to query the bin count.
+
+```c
+seams_status seams_density_fractional(seams_system *sys, int type, int bins, int axis, const double *direction, size_t direction_len, double origin, const double *masses, size_t masses_len, double *coordinate, double *number_density, double *mass_density, double *bin_volume, size_t cap, size_t *n_out);
+```
+
+Parameters: `sys`, `type`, `bins`, `axis`, `direction`, `direction_len`, `origin`, `masses`, `masses_len`, `coordinate`, `number_density`, `mass_density`, `bin_volume`, `cap`, `n_out`.
+
+- `sys`: Frame handle.
+- `type`: Species filter. Zero keeps every atom.
+- `bins`: Positive bin count.
+- `axis`: 0, 1, or 2. Ignored when direction is not NULL.
+- `direction`: Three Cartesian components, or NULL for a cell axis.
+- `direction_len`: 3 when direction is not NULL. Ignored otherwise.
+- `origin`: Fractional origin. Any finite value is wrapped into [0, 1).
+- `masses`: One mass per stored atom, or NULL for mass 1.
+- `masses_len`: Length of masses. Must equal the atom count when masses is not NULL.
+- `coordinate`: Bin centres, or NULL to skip.
+- `number_density`: Number density, or NULL to skip.
+- `mass_density`: Mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
+- `bin_volume`: Bin volume in cubic Angstrom, or NULL to skip.
+- `cap`: Capacity of each non-NULL column.
+- `n_out`: Receives the bin count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns every buffer. The library copies nothing and keeps no pointer after the call returns.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n = 0;
+seams_density_fractional(sys, 0, 4, 2, NULL, 0, 0.0, NULL, 0,
+                         NULL, NULL, NULL, NULL, 0, &n);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3649,6 +3733,58 @@ Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_host_guest
+
+Purpose: Nearest framework site and contact counts for each guest.
+
+A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted. guest_type must be positive. framework_type 0 keeps every atom of another type. framework_type equal to guest_type is an error. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.
+
+```c
+seams_status seams_host_guest(seams_system *sys, int guest_type, int framework_type, double cutoff, int *guest_index, int *nearest_index, int *nearest_type, double *nearest_distance, size_t guest_cap, size_t *n_guest, int *framework_types, size_t type_cap, size_t *n_types, int *contact_counts, size_t contact_cap);
+```
+
+Parameters: `sys`, `guest_type`, `framework_type`, `cutoff`, `guest_index`, `nearest_index`, `nearest_type`, `nearest_distance`, `guest_cap`, `n_guest`, `framework_types`, `type_cap`, `n_types`, `contact_counts`, `contact_cap`.
+
+- `sys`: Frame handle.
+- `guest_type`: Positive guest species.
+- `framework_type`: Framework species. Zero keeps every other type. A value equal to guest_type is rejected.
+- `cutoff`: Contact distance in Angstrom. Zero counts only a site at the same point. Negative is rejected.
+- `guest_index`: Guest indices, or NULL to skip.
+- `nearest_index`: Nearest framework index, or -1. NULL skips the column.
+- `nearest_type`: Type of that site, or NULL to skip.
+- `nearest_distance`: Distance in Angstrom, or NULL to skip.
+- `guest_cap`: Capacity of each non-NULL guest column.
+- `n_guest`: Receives the guest count.
+- `framework_types`: Sorted framework types, or NULL to skip.
+- `type_cap`: Capacity of framework_types when that pointer is not NULL.
+- `n_types`: Receives the framework type count.
+- `contact_counts`: Row-major counts, or NULL to skip.
+- `contact_cap`: Capacity of contact_counts. Must hold n_guest * n_types when contact_counts is not NULL.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns every column. The library keeps no pointer.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t ng = 0, nt = 0;
+seams_host_guest(sys, 1, 0, 3.5, NULL, NULL, NULL, NULL, 0, &ng,
+                 NULL, 0, &nt, NULL, 0);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_label
 
 Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
@@ -4236,6 +4372,8 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Build a cutoff or mutual neighbour list.
 
+A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.
+
 ```c
 seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type, int graph, seams_neighbours **out);
 ```
@@ -4567,6 +4705,126 @@ Example:
 ```c
 size_t nframes = 0;
 seams_status rc = seams_path_nframes("ice.lammpstrj", &nframes);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_pore_frame
+
+Purpose: Pore axis and centre, supplied or taken from the framework.
+
+axis 0, 1, or 2 selects that cell edge. axis -1 with direction NULL selects the longest cell edge. Any other negative axis is rejected. A non-NULL direction must be parallel to a cell edge. centre_frac NULL places the centre at the periodic centroid of the framework atoms in the perpendicular plane. framework_type 0 uses every atom for that centroid.
+
+```c
+seams_status seams_pore_frame(seams_system *sys, int framework_type, int axis, const double *direction, size_t direction_len, const double *centre_frac, size_t centre_len, double *axis_out, double *centre_out, double *centre_frac_out, int *axis_index);
+```
+
+Parameters: `sys`, `framework_type`, `axis`, `direction`, `direction_len`, `centre_frac`, `centre_len`, `axis_out`, `centre_out`, `centre_frac_out`, `axis_index`.
+
+- `sys`: Frame handle.
+- `framework_type`: Species used to place an automatic centre. Zero keeps every atom.
+- `axis`: 0, 1, 2, or -1 for the longest edge when direction is NULL. Any other negative value is rejected.
+- `direction`: Three Cartesian components parallel to a cell edge, or NULL.
+- `direction_len`: 3 when direction is not NULL. Ignored otherwise.
+- `centre_frac`: Three fractional coordinates, or NULL to detect the centre.
+- `centre_len`: 3 when centre_frac is not NULL. Ignored otherwise.
+- `axis_out`: Receives the unit Cartesian axis. Three doubles.
+- `centre_out`: Receives the Cartesian centre. Three doubles.
+- `centre_frac_out`: Receives the fractional centre. Three doubles.
+- `axis_index`: Receives 0, 1, or 2.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns the three output arrays. Each holds three doubles. The library keeps no pointer.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+double axis[3], centre[3], frac[3];
+int index = -1;
+seams_pore_frame(sys, 0, -1, NULL, 0, NULL, 0, axis, centre, frac, &index);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_pore_profiles
+
+Purpose: Radial, azimuthal, and axial densities about a pore axis.
+
+The axis is a cell edge, as in seams_pore_frame(). r_max 0 covers the perpendicular face. Radial bins run from 0 to r_max. The radial coordinate is the distance to the nearest periodic image of the pore axis. Within the inscribed radius of the centred face that image is the face origin. Beyond the inscribed radius a corner point can be closer to a neighbouring image, and the coordinate follows that image. The radial shell is the annulus inside the Voronoi cell of the perpendicular lattice. A circle-edge crossing that lands on a vertex stays on that edge. Azimuthal bins cover [-pi, pi) in the centred face, and each sector is clipped to that face. Azimuth zero points along the perpendicular projection of cell edge (axis + 1) mod 3, with the component parallel to the pore axis removed. The angle increases towards the pore axis crossed with that direction. The axial coordinate is the fractional cell coordinate, shifted by origin. A shell volume is that area times the edge length. Mass density is the caller's mass unit per cubic Angstrom. An amu mass gives amu per cubic Angstrom, and times 1.66054 that is grams per cubic centimetre. Pass NULL columns to query the three bin counts.
+
+```c
+seams_status seams_pore_profiles( seams_system *sys, int type, int radial_bins, int azimuthal_bins, int axial_bins, double r_max, int axis, const double *direction, size_t direction_len, const double *centre_frac, size_t centre_len, int framework_type, double origin, const double *masses, size_t masses_len, double *radius, double *radial_number, double *radial_mass, double *radial_volume, size_t radial_cap, size_t *n_radial, double *theta, double *azimuthal_number, double *azimuthal_mass, double *azimuthal_volume, size_t azimuthal_cap, size_t *n_azimuthal, double *axial, double *axial_number, double *axial_mass, double *axial_volume, size_t axial_cap, size_t *n_axial);
+```
+
+Parameters: `sys`, `type`, `radial_bins`, `azimuthal_bins`, `axial_bins`, `r_max`, `axis`, `direction`, `direction_len`, `centre_frac`, `centre_len`, `framework_type`, `origin`, `masses`, `masses_len`, `radius`, `radial_number`, `radial_mass`, `radial_volume`, `radial_cap`, `n_radial`, `theta`, `azimuthal_number`, `azimuthal_mass`, `azimuthal_volume`, `azimuthal_cap`, `n_azimuthal`, `axial`, `axial_number`, `axial_mass`, `axial_volume`, `axial_cap`, `n_axial`.
+
+- `sys`: Frame handle.
+- `type`: Species filter. Zero keeps every atom.
+- `radial_bins`: Positive radial bin count.
+- `azimuthal_bins`: Positive azimuthal bin count.
+- `axial_bins`: Positive axial bin count.
+- `r_max`: Outer radius in Angstrom. Zero covers the face.
+- `axis`: 0, 1, 2, or -1 when direction is NULL. Any other negative value is rejected.
+- `direction`: Three Cartesian components parallel to a cell edge, or NULL.
+- `direction_len`: 3 when direction is not NULL. Ignored otherwise.
+- `centre_frac`: Three fractional coordinates, or NULL to detect the centre.
+- `centre_len`: 3 when centre_frac is not NULL. Ignored otherwise.
+- `framework_type`: Species for an automatic centre. Zero keeps every atom.
+- `origin`: Fractional axial origin, wrapped into [0, 1).
+- `masses`: One mass per stored atom, or NULL for mass 1.
+- `masses_len`: Length of masses. Must equal the atom count when masses is not NULL.
+- `radius`: Radial bin centres, or NULL to skip.
+- `radial_number`: Radial number density, or NULL to skip.
+- `radial_mass`: Radial mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
+- `radial_volume`: Radial shell volume, or NULL to skip.
+- `radial_cap`: Capacity of each non-NULL radial column.
+- `n_radial`: Receives the radial bin count.
+- `theta`: Azimuthal bin centres in radians, or NULL to skip.
+- `azimuthal_number`: Azimuthal number density, or NULL to skip.
+- `azimuthal_mass`: Azimuthal mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
+- `azimuthal_volume`: Azimuthal sector volume, or NULL to skip.
+- `azimuthal_cap`: Capacity of each non-NULL azimuthal column.
+- `n_azimuthal`: Receives the azimuthal bin count.
+- `axial`: Axial bin centres, or NULL to skip.
+- `axial_number`: Axial number density, or NULL to skip.
+- `axial_mass`: Axial mass density in the caller's mass units per cubic Angstrom, or NULL to skip. An amu mass gives amu per cubic Angstrom; times 1.66054 that is grams per cubic centimetre.
+- `axial_volume`: Axial slab volume, or NULL to skip.
+- `axial_cap`: Capacity of each non-NULL axial column.
+- `n_axial`: Receives the axial bin count.
+
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns every column. The library keeps no pointer.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t nr = 0, nt = 0, ns = 0;
+seams_pore_profiles(sys, 0, 4, 4, 4, 0.0, 2, NULL, 0, NULL, 0, 0, 0.0, NULL, 0,
+                    NULL, NULL, NULL, NULL, 0, &nr,
+                    NULL, NULL, NULL, NULL, 0, &nt,
+                    NULL, NULL, NULL, NULL, 0, &ns);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -5492,7 +5750,7 @@ Parameters: `rings`, `sizes`, `symmetry`.
 - `sizes`: One int per ring, or NULL.
 - `symmetry`: One ::seams_ring_symmetry code per ring, or NULL. The two pointers may not both be NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
 
 Ownership: The caller owns both arrays.
 

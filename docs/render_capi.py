@@ -149,7 +149,7 @@ def parse_header(text):
         re.S,
     )
     for match in comments:
-        tail = text[match.end() : match.end() + 800]
+        tail = text[match.end() : match.end() + 4096]
         found_decl = decl.search(tail)
         if found_decl is None or found_decl.start() > 200:
             continue

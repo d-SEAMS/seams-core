@@ -15,6 +15,7 @@
 #include <index_range.hpp>
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
+#include <region_errors.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -374,34 +375,26 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
   }
 
   const int nop = yCloud.nop;
-#ifdef SEAMS_HAS_MINIMAGE
-  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
-#endif
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nop >= 512)
 #endif
   {
-    std::vector<int> local(histogram.size(), 0);
-    std::vector<double> row(static_cast<std::size_t>(std::max(nop, 1)));
+    // Empty when its allocation failed, so the sum below adds nothing.
+    std::vector<int> local;
+    errors.run([&] { local.assign(histogram.size(), 0); });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(dynamic, 16)
 #endif
     for (int iatom = 0; iatom < nop - 1; iatom++) {
-      const auto rest = static_cast<std::size_t>(nop - iatom - 1);
-      bool batched = false;
-#ifdef SEAMS_HAS_MINIMAGE
-      const std::size_t at = 3 * static_cast<std::size_t>(iatom);
-      batched = cells.ok && frame.ok &&
-                mi_dist2_euclidean_many(&cells.cell, &cells.xyz[at],
-                                        &cells.xyz[at + 3], rest,
-                                        row.data()) == 0;
-#endif
-      for (std::size_t k = 0; k < rest; k++) {
-        const int jatom = iatom + 1 + static_cast<int>(k);
-        const double r2 =
-            batched ? row[k] : gen::periodicDistSq(frame, yCloud, iatom, jatom);
-        binPair(std::sqrt(r2), cutoff, binwidth, nbin, local.data());
-      }
+      errors.run([&] {
+        const auto rest = static_cast<std::size_t>(nop - iatom - 1);
+        for (std::size_t k = 0; k < rest; k++) {
+          const int jatom = iatom + 1 + static_cast<int>(k);
+          const double r2 = gen::periodicDistSq(frame, yCloud, iatom, jatom);
+          binPair(std::sqrt(r2), cutoff, binwidth, nbin, local.data());
+        }
+      });
     }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp critical
@@ -410,6 +403,7 @@ rdf2::sampleRDF_AA(const molSys::PointCloud<molSys::Point<double>, double> &yClo
       histogram[b] += local[b];
     }
   }
+  errors.rethrow();
 
   // Return the histogram
   return histogram;

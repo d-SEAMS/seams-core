@@ -1,0 +1,80 @@
+diff --git a/include/linkcell.hpp b/include/linkcell.hpp
+index bedec5f..c427f88 100644
+--- a/include/linkcell.hpp
++++ b/include/linkcell.hpp
+@@ -25,9 +25,17 @@ extern "C" {
+ 
+ namespace linkcell {
+ 
++#if defined(__GNUC__) || defined(__clang__)
++#define LINKCELL_EH_API __attribute__((visibility("default")))
++#else
++#define LINKCELL_EH_API
++#endif
++
+ /// Failure from a neighbour search. `status()` is the C ABI return
+ /// (0 success, nonzero failure).
+-class Error : public std::runtime_error {
++/// The destructor is defined out of line in one library and is the key
++/// function, so every shared library sees a single typeinfo.
++class LINKCELL_EH_API Error : public std::runtime_error {
+ public:
+   Error(int status, std::string message)
+       : std::runtime_error(message.empty() ? "linkcell: knearest failed"
+@@ -36,6 +44,8 @@ public:
+ 
+   explicit Error(std::string message) : Error(1, std::move(message)) {}
+ 
++  ~Error() override;
++
+   [[nodiscard]] int status() const noexcept { return status_; }
+ 
+ private:
+diff --git a/meson.build b/meson.build
+index ae17da9..5bee762 100644
+--- a/meson.build
++++ b/meson.build
+@@ -276,6 +276,15 @@ else
+   _link_idx = 0
+ endif
+ 
++# Key function for linkcell::Error. Linked into every C++ consumer so
++# the typeinfo is one symbol instead of a copy in each shared library.
++linkcell_eh = static_library(
++  'linkcell_eh',
++  'src/error.cpp',
++  include_directories: include_directories('include'),
++  install: false,
++)
++
+ _gpu_opt = get_option('with_gpulite')
+ gpulite_dep = dependency('gpulite', required: false,
+                          fallback: ['gpulite', 'gpulite_dep'])
+@@ -310,7 +319,7 @@ if _gpu_on
+     )
+   endif
+   linkcell_gpu_dep = declare_dependency(
+-    link_with: linkcell_gpu,
++    link_with: [linkcell_gpu, linkcell_eh],
+     link_args: [linkcell_cargo[_link_idx].full_path()] + _sanitize_link,
+     sources: linkcell_built_h,
+     include_directories: include_directories('include'),
+@@ -321,6 +330,7 @@ if _gpu_on
+ endif
+ 
+ linkcell_dep = declare_dependency(
++  link_with: linkcell_eh,
+   link_args: [linkcell_cargo[_link_idx].full_path()] + _sanitize_link,
+   sources: linkcell_built_h,
+   include_directories: include_directories('include'),
+diff --git a/src/error.cpp b/src/error.cpp
+new file mode 100644
+index 0000000..c743085
+--- /dev/null
++++ b/src/error.cpp
+@@ -0,0 +1,5 @@
++#include "linkcell.hpp"
++
++namespace linkcell {
++Error::~Error() = default;
++}

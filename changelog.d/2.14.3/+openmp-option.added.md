@@ -1,0 +1,1 @@
+The `with_openmp` Meson option, a feature that defaults to `auto`, builds every loop single-threaded without OpenMP when disabled, and stops the configure step when enabled and an OpenMP parallel region does not link.

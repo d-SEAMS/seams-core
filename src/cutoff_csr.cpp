@@ -14,6 +14,7 @@
 #include <index_range.hpp>
 #include <neighbours.hpp>
 #include <omp_tsan.hpp>
+#include <region_errors.hpp>
 #include <team_run.hpp>
 #include <thread_team.hpp>
 
@@ -1127,86 +1128,93 @@ void passSafe(const double *xs, const double *ys, const double *zs,
               int rx, int ry, int rz, double lx, double ly, double lz,
               double rc2, int *counts, int *offsets, int *cols, bool half) {
   const int nCells = ncx * ncy * ncz;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nCells >= 8)
 #endif
   {
     std::vector<int> found;
-    std::vector<int> stamp(static_cast<std::size_t>(nCells), 0);
+    std::vector<int> stamp;
     int gen = 0;
-    found.reserve(64);
+    errors.run([&] {
+      stamp.assign(static_cast<std::size_t>(nCells), 0);
+      found.reserve(64);
+    });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
     for (int c = 0; c < nCells; ++c) {
-      const int b = cellStart[c];
-      const int e = cellStart[c + 1];
-      if (b == e) {
-        continue;
-      }
-      const int cz = c % ncz;
-      const int cy = (c / ncz) % ncy;
-      const int cx = c / (ncy * ncz);
-      for (int i = b; i < e; ++i) {
-        const int ii = ids[i];
-        found.clear();
-        ++gen;
-        if (gen == 0) {
-          std::fill(stamp.begin(), stamp.end(), 0);
-          gen = 1;
+      errors.run([&] {
+        const int b = cellStart[c];
+        const int e = cellStart[c + 1];
+        if (b == e) {
+          return;
         }
-        for (int ox = -rx; ox <= rx; ++ox) {
-          int nx = cx + ox;
-          nx %= ncx;
-          if (nx < 0) {
-            nx += ncx;
+        const int cz = c % ncz;
+        const int cy = (c / ncz) % ncy;
+        const int cx = c / (ncy * ncz);
+        for (int i = b; i < e; ++i) {
+          const int ii = ids[i];
+          found.clear();
+          ++gen;
+          if (gen == 0) {
+            std::fill(stamp.begin(), stamp.end(), 0);
+            gen = 1;
           }
-          for (int oy = -ry; oy <= ry; ++oy) {
-            int ny = cy + oy;
-            ny %= ncy;
-            if (ny < 0) {
-              ny += ncy;
+          for (int ox = -rx; ox <= rx; ++ox) {
+            int nx = cx + ox;
+            nx %= ncx;
+            if (nx < 0) {
+              nx += ncx;
             }
-            for (int oz = -rz; oz <= rz; ++oz) {
-              int nz = cz + oz;
-              nz %= ncz;
-              if (nz < 0) {
-                nz += ncz;
+            for (int oy = -ry; oy <= ry; ++oy) {
+              int ny = cy + oy;
+              ny %= ncy;
+              if (ny < 0) {
+                ny += ncy;
               }
-              const int ncid = (nx * ncy + ny) * ncz + nz;
-              if (stamp[static_cast<std::size_t>(ncid)] == gen) {
-                continue;
-              }
-              stamp[static_cast<std::size_t>(ncid)] = gen;
-              const int jb = cellStart[ncid];
-              const int je = cellStart[ncid + 1];
-              for (int j = jb; j < je; ++j) {
-                const int jj = ids[j];
-                if (jj == ii || (half && jj < ii)) {
+              for (int oz = -rz; oz <= rz; ++oz) {
+                int nz = cz + oz;
+                nz %= ncz;
+                if (nz < 0) {
+                  nz += ncz;
+                }
+                const int ncid = (nx * ncy + ny) * ncz + nz;
+                if (stamp[static_cast<std::size_t>(ncid)] == gen) {
                   continue;
                 }
-                const double d2 = minImage2(xs[i] - xs[j], ys[i] - ys[j],
-                                           zs[i] - zs[j], lx, ly, lz);
-                if (d2 < rc2) {
-                  found.push_back(jj);
+                stamp[static_cast<std::size_t>(ncid)] = gen;
+                const int jb = cellStart[ncid];
+                const int je = cellStart[ncid + 1];
+                for (int j = jb; j < je; ++j) {
+                  const int jj = ids[j];
+                  if (jj == ii || (half && jj < ii)) {
+                    continue;
+                  }
+                  const double d2 = minImage2(xs[i] - xs[j], ys[i] - ys[j],
+                                             zs[i] - zs[j], lx, ly, lz);
+                  if (d2 < rc2) {
+                    found.push_back(jj);
+                  }
                 }
               }
             }
           }
-        }
-        std::sort(found.begin(), found.end());
-        found.erase(std::unique(found.begin(), found.end()), found.end());
-        if (Write) {
-          const int base = offsets[ii];
-          for (int k = 0; k < static_cast<int>(found.size()); ++k) {
-            cols[base + k] = found[static_cast<std::size_t>(k)];
+          std::sort(found.begin(), found.end());
+          found.erase(std::unique(found.begin(), found.end()), found.end());
+          if (Write) {
+            const int base = offsets[ii];
+            for (int k = 0; k < static_cast<int>(found.size()); ++k) {
+              cols[base + k] = found[static_cast<std::size_t>(k)];
+            }
+          } else {
+            counts[ii] = static_cast<int>(found.size());
           }
-        } else {
-          counts[ii] = static_cast<int>(found.size());
         }
-      }
+      });
     }
   }
+  errors.rethrow();
 }
 
 struct Tilt {
@@ -1236,138 +1244,169 @@ template <bool Write>
 void passTilt(const double *xs, const double *ys, const double *zs, const int *ids,
               const int *cellStart, int ncx, int ncy, int ncz, int rx, int ry, int rz,
               const Tilt &h, double rc2, bool half, bool shifted, int *counts,
-              int *offsets, int *cols, bool branchy = false) {
+              int *offsets, int *cols, bool branchy = false, bool cartesian = false) {
   const int nCells = ncx * ncy * ncz;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nCells >= 8)
 #endif
   {
     std::vector<int> found;
-    std::vector<int> stamp(static_cast<std::size_t>(nCells), 0);
+    std::vector<int> stamp;
     int gen = 0;
-    found.reserve(32);
+    errors.run([&] {
+      stamp.assign(static_cast<std::size_t>(nCells), 0);
+      found.reserve(32);
+    });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
     for (int c = 0; c < nCells; ++c) {
-      const int b = cellStart[c];
-      const int e = cellStart[c + 1];
-      if (b == e) {
-        continue;
-      }
-      const int cz = c % ncz;
-      const int cy = (c / ncz) % ncy;
-      const int cx = c / (ncy * ncz);
-      // A cell whose reach window stays inside the grid has no image shift.
-      // The while-wraps below are then dead branches, same as on an
-      // orthorhombic interior cell.
-      const bool deep = !branchy && cx >= rx && cx + rx < ncx && cy >= ry && cy + ry < ncy &&
-                        cz >= rz && cz + rz < ncz;
-      for (int i = b; i < e; ++i) {
-        const int ii = ids[i];
-        found.clear();
-        ++gen;
-        if (gen == 0) {
-          std::fill(stamp.begin(), stamp.end(), 0);
-          gen = 1;
+      errors.run([&] {
+        const int b = cellStart[c];
+        const int e = cellStart[c + 1];
+        if (b == e) {
+          return;
         }
-        for (int ox = -rx; ox <= rx; ++ox) {
-          int nx = cx + ox;
-          double ssx = 0.0;
-          if (!deep) {
-            while (nx >= ncx) {
-              nx -= ncx;
-              ssx += 1.0;
-            }
-            while (nx < 0) {
-              nx += ncx;
-              ssx -= 1.0;
-            }
+        const int cz = c % ncz;
+        const int cy = (c / ncz) % ncy;
+        const int cx = c / (ncy * ncz);
+        // A cell whose reach window stays inside the grid has no image shift.
+        // The while-wraps below are then dead branches, same as on an
+        // orthorhombic interior cell.
+        const bool deep = !branchy && cx >= rx && cx + rx < ncx && cy >= ry && cy + ry < ncy &&
+                          cz >= rz && cz + rz < ncz;
+        for (int i = b; i < e; ++i) {
+          const int ii = ids[i];
+          found.clear();
+          ++gen;
+          if (gen == 0) {
+            std::fill(stamp.begin(), stamp.end(), 0);
+            gen = 1;
           }
-          for (int oy = -ry; oy <= ry; ++oy) {
-            int ny = cy + oy;
-            double ssy = 0.0;
+          for (int ox = -rx; ox <= rx; ++ox) {
+            int nx = cx + ox;
+            double ssx = 0.0;
             if (!deep) {
-              while (ny >= ncy) {
-                ny -= ncy;
-                ssy += 1.0;
+              while (nx >= ncx) {
+                nx -= ncx;
+                ssx += 1.0;
               }
-              while (ny < 0) {
-                ny += ncy;
-                ssy -= 1.0;
+              while (nx < 0) {
+                nx += ncx;
+                ssx -= 1.0;
               }
             }
-            for (int oz = -rz; oz <= rz; ++oz) {
-              int nz = cz + oz;
-              double ssz = 0.0;
+            for (int oy = -ry; oy <= ry; ++oy) {
+              int ny = cy + oy;
+              double ssy = 0.0;
               if (!deep) {
-                while (nz >= ncz) {
-                  nz -= ncz;
-                  ssz += 1.0;
+                while (ny >= ncy) {
+                  ny -= ncy;
+                  ssy += 1.0;
                 }
-                while (nz < 0) {
-                  nz += ncz;
-                  ssz -= 1.0;
+                while (ny < 0) {
+                  ny += ncy;
+                  ssy -= 1.0;
                 }
               }
-              const int ncid = (nx * ncy + ny) * ncz + nz;
-              if (stamp[static_cast<std::size_t>(ncid)] == gen) {
-                continue;
-              }
-              stamp[static_cast<std::size_t>(ncid)] = gen;
-              for (int j = cellStart[ncid]; j < cellStart[ncid + 1]; ++j) {
-                const int jj = ids[j];
-                if (jj == ii || (half && jj < ii)) {
-                  continue;
-                }
-                double dsx, dsy, dsz;
-                double d2;
-                if (shifted) {
-                  dsx = xs[i] - xs[j] - ssx;
-                  dsy = ys[i] - ys[j] - ssy;
-                  dsz = zs[i] - zs[j] - ssz;
-                  d2 = tilt2(dsx, dsy, dsz, h);
-                } else {
-                  dsx = xs[i] - xs[j];
-                  dsy = ys[i] - ys[j];
-                  dsz = zs[i] - zs[j];
-                  dsx -= std::floor(dsx + 0.5);
-                  dsy -= std::floor(dsy + 0.5);
-                  dsz -= std::floor(dsz + 0.5);
-                  d2 = tilt2(dsx, dsy, dsz, h);
-                  if (!(d2 < rc2)) {
-                    // Outside the Smith ball a non-zero integer shift can yield
-                    // a shorter Euclidean image than fractional rounding.
-                    const std::array<double, 3> w = {
-                        h.lx * dsx + h.xy * dsy + h.xz * dsz,
-                        h.ly * dsy + h.yz * dsz,
-                        h.lz * dsz,
-                    };
-                    const auto euc = gen::refineEuclidean(
-                        h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, w, w);
-                    d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+              for (int oz = -rz; oz <= rz; ++oz) {
+                int nz = cz + oz;
+                double ssz = 0.0;
+                if (!deep) {
+                  while (nz >= ncz) {
+                    nz -= ncz;
+                    ssz += 1.0;
+                  }
+                  while (nz < 0) {
+                    nz += ncz;
+                    ssz -= 1.0;
                   }
                 }
-                if (d2 < rc2) {
-                  found.push_back(jj);
+                const int ncid = (nx * ncy + ny) * ncz + nz;
+                if (stamp[static_cast<std::size_t>(ncid)] == gen) {
+                  continue;
+                }
+                stamp[static_cast<std::size_t>(ncid)] = gen;
+                for (int j = cellStart[ncid]; j < cellStart[ncid + 1]; ++j) {
+                  const int jj = ids[j];
+                  if (jj == ii || (half && jj < ii)) {
+                    continue;
+                  }
+                  double d2;
+                  if (cartesian) {
+                    // Fractional coordinates of a long edge are not a
+                    // distance. The original points and a wide wrap are.
+                    (void)ssx;
+                    (void)ssy;
+                    (void)ssz;
+                    const std::array<double, 3> raw = {xs[i] - xs[j], ys[i] - ys[j],
+                                                       zs[i] - zs[j]};
+                    const auto wrapped = gen::mic::fractionalWrap(
+                        h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, raw);
+                    d2 = wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] +
+                         wrapped[2] * wrapped[2];
+                    if (!(d2 < rc2)) {
+                      const auto euc = gen::mic::euclideanIfShorter(
+                          h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, raw, wrapped);
+                      d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+                    }
+                  } else if (shifted) {
+                    const double dsx = xs[i] - xs[j] - ssx;
+                    const double dsy = ys[i] - ys[j] - ssy;
+                    const double dsz = zs[i] - zs[j] - ssz;
+                    d2 = tilt2(dsx, dsy, dsz, h);
+                  } else {
+                    double dsx = xs[i] - xs[j];
+                    double dsy = ys[i] - ys[j];
+                    double dsz = zs[i] - zs[j];
+                    dsx -= std::floor(dsx + 0.5);
+                    dsy -= std::floor(dsy + 0.5);
+                    dsz -= std::floor(dsz + 0.5);
+                    d2 = tilt2(dsx, dsy, dsz, h);
+                    if (!(d2 < rc2)) {
+                      // Outside the Smith ball a non-zero integer shift can yield
+                      // a shorter Euclidean image than fractional rounding.
+                      // raw is the true displacement, not the already-wrapped
+                      // vector: the reducer has to start from the points.
+                      const std::array<double, 3> raw = {
+                          h.lx * (xs[i] - xs[j]) + h.xy * (ys[i] - ys[j]) +
+                              h.xz * (zs[i] - zs[j]),
+                          h.ly * (ys[i] - ys[j]) + h.yz * (zs[i] - zs[j]),
+                          h.lz * (zs[i] - zs[j]),
+                      };
+                      const std::array<double, 3> w = {
+                          h.lx * dsx + h.xy * dsy + h.xz * dsz,
+                          h.ly * dsy + h.yz * dsz,
+                          h.lz * dsz,
+                      };
+                      const auto euc = gen::refineEuclidean(
+                          h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, raw, w);
+                      d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+                    }
+                  }
+                  if (d2 < rc2) {
+                    found.push_back(jj);
+                  }
                 }
               }
             }
           }
-        }
-        std::sort(found.begin(), found.end());
-        found.erase(std::unique(found.begin(), found.end()), found.end());
-        if (Write) {
-          const int base = offsets[ii];
-          for (int k = 0; k < static_cast<int>(found.size()); ++k) {
-            cols[base + k] = found[static_cast<std::size_t>(k)];
+          std::sort(found.begin(), found.end());
+          found.erase(std::unique(found.begin(), found.end()), found.end());
+          if (Write) {
+            const int base = offsets[ii];
+            for (int k = 0; k < static_cast<int>(found.size()); ++k) {
+              cols[base + k] = found[static_cast<std::size_t>(k)];
+            }
+          } else {
+            counts[ii] = static_cast<int>(found.size());
           }
-        } else {
-          counts[ii] = static_cast<int>(found.size());
         }
-      }
+      });
     }
   }
+  errors.rethrow();
 }
 
 bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -1422,6 +1461,15 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   // image. One cell would list several images of the same atom.
   const bool shifted = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 && ncell[0] >= 2 &&
                        ncell[1] >= 2 && ncell[2] >= 2;
+  double maxAbs = 0.0;
+  for (int k = 0; k < nSubset; ++k) {
+    const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
+    const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+    maxAbs = std::max(maxAbs, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  // A long edge makes the fractional coordinate's low bits meaningless.
+  // Distances then use the original Cartesian points.
+  const bool cartesian = !gen::plainWrapCertifies(box, maxAbs);
   const int nCells = ncell[0] * ncell[1] * ncell[2];
   const double rc2 = rcutoff * rcutoff;
 #ifdef SEAMS_HAS_OPENMP
@@ -1516,7 +1564,12 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
       const double s0 = sc.px[static_cast<std::size_t>(k)].v;
       const double s1 = sc.py[static_cast<std::size_t>(k)].v;
       const double s2 = sc.pz[static_cast<std::size_t>(k)].v;
-      if (shifted) {
+      if (cartesian) {
+        const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+        sc.xs[static_cast<std::size_t>(slot)].v = p.x;
+        sc.ys[static_cast<std::size_t>(slot)].v = p.y;
+        sc.zs[static_cast<std::size_t>(slot)].v = p.z;
+      } else if (shifted) {
         sc.xs[static_cast<std::size_t>(slot)].v = h.ox + h.lx * s0 + h.xy * s1 + h.xz * s2;
         sc.ys[static_cast<std::size_t>(slot)].v = h.oy + h.ly * s1 + h.yz * s2;
         sc.zs[static_cast<std::size_t>(slot)].v = h.oz + h.lz * s2;
@@ -1551,7 +1604,11 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
       sc.tiltStash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
     sc.tiltStash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
   }
-  if (shifted) {
+  if (cartesian) {
+    passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                    reach[0], reach[1], reach[2], h, rc2, half, false, sc.counts.data(),
+                    nullptr, nullptr, branchy, true);
+  } else if (shifted) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
@@ -1587,7 +1644,11 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   phase().prefix = msSince(tPrefix);
   const auto tFill = Clock::now();
   if (nnz > 0) {
-    if (stashOk && sc.overflowed == 0) {
+    if (cartesian) {
+      passTilt<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                     reach[0], reach[1], reach[2], h, rc2, half, false, nullptr, offsets.data(),
+                     cols.data(), branchy, true);
+    } else if (stashOk && sc.overflowed == 0) {
       scatterStash(sc.tiltStash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
     } else if (shifted) {
       if (half) {
@@ -1730,6 +1791,7 @@ bool ownedBlockPairs(const double *x, const double *y, const double *z, const in
   double shx[27], shy[27], shz[27];
   fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
   int badTeam = 0;
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(team)
 #endif
@@ -1746,343 +1808,346 @@ bool ownedBlockPairs(const double *x, const double *y, const double *z, const in
 #endif
       badTeam = 1;
     } else {
-      const int nyz = ncy * ncz;
-      const auto block0 = Clock::now();
-      std::vector<int> owned;
-      owned.reserve(static_cast<std::size_t>(nCells) / static_cast<std::size_t>(team) + 16);
-      for (int c = 0; c < nCells; ++c) {
-        if (cellStart[c] == cellStart[c + 1]) {
-          continue;
-        }
-        if (assign[static_cast<std::size_t>(ourToLc(c, ncx, ncy, ncz))] == tid) {
-          owned.push_back(c);
-        }
-      }
-      // 2 = owned, 1 = halo painted while walking the owned stencil, 0 = outside.
-      std::vector<char> mark(static_cast<std::size_t>(nCells), 0);
-      for (int c : owned) {
-        mark[static_cast<std::size_t>(c)] = 2;
-      }
-      std::vector<int> halo;
-      halo.reserve(owned.size());
-      auto paint = [&](int nc) {
-        if (mark[static_cast<std::size_t>(nc)] != 0) {
-          return;
-        }
-        mark[static_cast<std::size_t>(nc)] = 1;
-        if (cellStart[nc] != cellStart[nc + 1]) {
-          halo.push_back(nc);
-        }
-      };
-      for (int c : owned) {
-        const int cz = c % ncz;
-        const int cy = (c / ncz) % ncy;
-        const int cx = c / nyz;
-        for (int ox = -rx; ox <= rx; ++ox) {
-          int nx = cx + ox;
-          while (nx < 0) {
-            nx += ncx;
+      errors.run([&] {
+        const int nyz = ncy * ncz;
+        const auto block0 = Clock::now();
+        std::vector<int> owned;
+        owned.reserve(static_cast<std::size_t>(nCells) / static_cast<std::size_t>(team) + 16);
+        for (int c = 0; c < nCells; ++c) {
+          if (cellStart[c] == cellStart[c + 1]) {
+            continue;
           }
-          while (nx >= ncx) {
-            nx -= ncx;
-          }
-          for (int oy = -ry; oy <= ry; ++oy) {
-            int ny = cy + oy;
-            while (ny < 0) {
-              ny += ncy;
-            }
-            while (ny >= ncy) {
-              ny -= ncy;
-            }
-            const int row = nx * ncy + ny;
-            for (int oz = -rz; oz <= rz; ++oz) {
-              if (ox == 0 && oy == 0 && oz == 0) {
-                continue;
-              }
-              int nz = cz + oz;
-              while (nz < 0) {
-                nz += ncz;
-              }
-              while (nz >= ncz) {
-                nz -= ncz;
-              }
-              paint(row * ncz + nz);
-            }
+          if (assign[static_cast<std::size_t>(ourToLc(c, ncx, ncy, ncz))] == tid) {
+            owned.push_back(c);
           }
         }
-      }
-      std::vector<int> begin(static_cast<std::size_t>(nCells), 0);
-      std::vector<int> end(static_cast<std::size_t>(nCells), 0);
-      int total = 0;
-      auto take = [&](int c) {
-        const int n = cellStart[c + 1] - cellStart[c];
-        begin[static_cast<std::size_t>(c)] = total;
-        total += n;
-        end[static_cast<std::size_t>(c)] = total;
-      };
-      for (int c : owned) {
-        take(c);
-      }
-      for (int c : halo) {
-        take(c);
-      }
-      std::vector<double> lx(static_cast<std::size_t>(total));
-      std::vector<double> ly(static_cast<std::size_t>(total));
-      std::vector<double> lz(static_cast<std::size_t>(total));
-      std::vector<int> lid(static_cast<std::size_t>(total));
-      int cursor = 0;
-      auto copyCell = [&](int c) {
-        for (int s = cellStart[c]; s < cellStart[c + 1]; ++s, ++cursor) {
-          const std::size_t u = static_cast<std::size_t>(cursor);
-          lx[u] = x[s];
-          ly[u] = y[s];
-          lz[u] = z[s];
-          lid[u] = ids[s];
+        // 2 = owned, 1 = halo painted while walking the owned stencil, 0 = outside.
+        std::vector<char> mark(static_cast<std::size_t>(nCells), 0);
+        for (int c : owned) {
+          mark[static_cast<std::size_t>(c)] = 2;
         }
-      };
-      for (int c : owned) {
-        copyCell(c);
-      }
-      for (int c : halo) {
-        copyCell(c);
-      }
-      const double *xs = lx.data();
-      const double *ys = ly.data();
-      const double *zs = lz.data();
-      const int *id = lid.data();
-      thread_local std::vector<PairDir> tlsBag;
-      auto &bag = directRows == nullptr ? bags[static_cast<std::size_t>(tid)] : tlsBag;
-      bag.clear();
-      if (bag.capacity() < static_cast<std::size_t>(std::max(total, 1)) * 4) {
-        bag.reserve(static_cast<std::size_t>(std::max(total, 1)) * 4);
-      }
-      int *mine = directRows == nullptr
-                      ? deg.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nop)
-                      : nullptr;
-      const auto search0 = Clock::now();
-      struct Nbr {
-        int begin;
-        int end;
-        double sx, sy, sz;
-        // 0 same cell (larger local slot writes both rows), 1 owned forward
-        // cell (this side writes both rows), 2 ghost (this side writes its row).
-        char rel;
-      };
-      std::vector<Nbr> wide;
-      for (int c : owned) {
-        const int b = begin[static_cast<std::size_t>(c)];
-        const int e = end[static_cast<std::size_t>(c)];
-        const int cz = c % ncz;
-        const int cy = (c / ncz) % ncy;
-        const int cx = c / nyz;
-        Nbr nbr[27];
-        int nn = 0;
-        if (near) {
-          for (int ox = -1; ox <= 1; ++ox) {
-            int nx = cx + ox;
-            int ix = 0;
-            if (nx >= ncx) {
-              nx -= ncx;
-              ix = 1;
-            } else if (nx < 0) {
-              nx += ncx;
-              ix = -1;
-            }
-            for (int oy = -1; oy <= 1; ++oy) {
-              int ny = cy + oy;
-              int iy = 0;
-              if (ny >= ncy) {
-                ny -= ncy;
-                iy = 1;
-              } else if (ny < 0) {
-                ny += ncy;
-                iy = -1;
-              }
-              const int row = nx * ncy + ny;
-              for (int oz = -1; oz <= 1; ++oz) {
-                int nz = cz + oz;
-                int iz = 0;
-                if (nz >= ncz) {
-                  nz -= ncz;
-                  iz = 1;
-                } else if (nz < 0) {
-                  nz += ncz;
-                  iz = -1;
-                }
-                const int nc = row * ncz + nz;
-                const int nb = begin[static_cast<std::size_t>(nc)];
-                const int ne = end[static_cast<std::size_t>(nc)];
-                if (nb == ne) {
-                  continue;
-                }
-                const bool ownedNbr = mark[static_cast<std::size_t>(nc)] == 2;
-                const bool backward = oz < 0 || (oz == 0 && oy < 0) || (oz == 0 && oy == 0 && ox < 0);
-                if (ownedNbr && backward) {
-                  continue;
-                }
-                const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
-                char rel = 2;
-                if (ownedNbr) {
-                  rel = (ox == 0 && oy == 0 && oz == 0) ? 0 : 1;
-                }
-                nbr[nn++] = {nb, ne, shx[k], shy[k], shz[k], rel};
-              }
-            }
+        std::vector<int> halo;
+        halo.reserve(owned.size());
+        auto paint = [&](int nc) {
+          if (mark[static_cast<std::size_t>(nc)] != 0) {
+            return;
           }
-        } else {
-          wide.clear();
+          mark[static_cast<std::size_t>(nc)] = 1;
+          if (cellStart[nc] != cellStart[nc + 1]) {
+            halo.push_back(nc);
+          }
+        };
+        for (int c : owned) {
+          const int cz = c % ncz;
+          const int cy = (c / ncz) % ncy;
+          const int cx = c / nyz;
           for (int ox = -rx; ox <= rx; ++ox) {
             int nx = cx + ox;
-            int ix = 0;
             while (nx < 0) {
               nx += ncx;
-              --ix;
             }
             while (nx >= ncx) {
               nx -= ncx;
-              ++ix;
             }
             for (int oy = -ry; oy <= ry; ++oy) {
               int ny = cy + oy;
-              int iy = 0;
               while (ny < 0) {
                 ny += ncy;
-                --iy;
               }
               while (ny >= ncy) {
                 ny -= ncy;
-                ++iy;
               }
+              const int row = nx * ncy + ny;
               for (int oz = -rz; oz <= rz; ++oz) {
+                if (ox == 0 && oy == 0 && oz == 0) {
+                  continue;
+                }
                 int nz = cz + oz;
-                int iz = 0;
                 while (nz < 0) {
                   nz += ncz;
-                  --iz;
                 }
                 while (nz >= ncz) {
                   nz -= ncz;
-                  ++iz;
                 }
-                const int nc = (nx * ncy + ny) * ncz + nz;
-                const int nb = begin[static_cast<std::size_t>(nc)];
-                const int ne = end[static_cast<std::size_t>(nc)];
-                if (nb == ne) {
+                paint(row * ncz + nz);
+              }
+            }
+          }
+        }
+        std::vector<int> begin(static_cast<std::size_t>(nCells), 0);
+        std::vector<int> end(static_cast<std::size_t>(nCells), 0);
+        int total = 0;
+        auto take = [&](int c) {
+          const int n = cellStart[c + 1] - cellStart[c];
+          begin[static_cast<std::size_t>(c)] = total;
+          total += n;
+          end[static_cast<std::size_t>(c)] = total;
+        };
+        for (int c : owned) {
+          take(c);
+        }
+        for (int c : halo) {
+          take(c);
+        }
+        std::vector<double> lx(static_cast<std::size_t>(total));
+        std::vector<double> ly(static_cast<std::size_t>(total));
+        std::vector<double> lz(static_cast<std::size_t>(total));
+        std::vector<int> lid(static_cast<std::size_t>(total));
+        int cursor = 0;
+        auto copyCell = [&](int c) {
+          for (int s = cellStart[c]; s < cellStart[c + 1]; ++s, ++cursor) {
+            const std::size_t u = static_cast<std::size_t>(cursor);
+            lx[u] = x[s];
+            ly[u] = y[s];
+            lz[u] = z[s];
+            lid[u] = ids[s];
+          }
+        };
+        for (int c : owned) {
+          copyCell(c);
+        }
+        for (int c : halo) {
+          copyCell(c);
+        }
+        const double *xs = lx.data();
+        const double *ys = ly.data();
+        const double *zs = lz.data();
+        const int *id = lid.data();
+        thread_local std::vector<PairDir> tlsBag;
+        auto &bag = directRows == nullptr ? bags[static_cast<std::size_t>(tid)] : tlsBag;
+        bag.clear();
+        if (bag.capacity() < static_cast<std::size_t>(std::max(total, 1)) * 4) {
+          bag.reserve(static_cast<std::size_t>(std::max(total, 1)) * 4);
+        }
+        int *mine = directRows == nullptr
+                        ? deg.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nop)
+                        : nullptr;
+        const auto search0 = Clock::now();
+        struct Nbr {
+          int begin;
+          int end;
+          double sx, sy, sz;
+          // 0 same cell (larger local slot writes both rows), 1 owned forward
+          // cell (this side writes both rows), 2 ghost (this side writes its row).
+          char rel;
+        };
+        std::vector<Nbr> wide;
+        for (int c : owned) {
+          const int b = begin[static_cast<std::size_t>(c)];
+          const int e = end[static_cast<std::size_t>(c)];
+          const int cz = c % ncz;
+          const int cy = (c / ncz) % ncy;
+          const int cx = c / nyz;
+          Nbr nbr[27];
+          int nn = 0;
+          if (near) {
+            for (int ox = -1; ox <= 1; ++ox) {
+              int nx = cx + ox;
+              int ix = 0;
+              if (nx >= ncx) {
+                nx -= ncx;
+                ix = 1;
+              } else if (nx < 0) {
+                nx += ncx;
+                ix = -1;
+              }
+              for (int oy = -1; oy <= 1; ++oy) {
+                int ny = cy + oy;
+                int iy = 0;
+                if (ny >= ncy) {
+                  ny -= ncy;
+                  iy = 1;
+                } else if (ny < 0) {
+                  ny += ncy;
+                  iy = -1;
+                }
+                const int row = nx * ncy + ny;
+                for (int oz = -1; oz <= 1; ++oz) {
+                  int nz = cz + oz;
+                  int iz = 0;
+                  if (nz >= ncz) {
+                    nz -= ncz;
+                    iz = 1;
+                  } else if (nz < 0) {
+                    nz += ncz;
+                    iz = -1;
+                  }
+                  const int nc = row * ncz + nz;
+                  const int nb = begin[static_cast<std::size_t>(nc)];
+                  const int ne = end[static_cast<std::size_t>(nc)];
+                  if (nb == ne) {
+                    continue;
+                  }
+                  const bool ownedNbr = mark[static_cast<std::size_t>(nc)] == 2;
+                  const bool backward = oz < 0 || (oz == 0 && oy < 0) || (oz == 0 && oy == 0 && ox < 0);
+                  if (ownedNbr && backward) {
+                    continue;
+                  }
+                  const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+                  char rel = 2;
+                  if (ownedNbr) {
+                    rel = (ox == 0 && oy == 0 && oz == 0) ? 0 : 1;
+                  }
+                  nbr[nn++] = {nb, ne, shx[k], shy[k], shz[k], rel};
+                }
+              }
+            }
+          } else {
+            wide.clear();
+            for (int ox = -rx; ox <= rx; ++ox) {
+              int nx = cx + ox;
+              int ix = 0;
+              while (nx < 0) {
+                nx += ncx;
+                --ix;
+              }
+              while (nx >= ncx) {
+                nx -= ncx;
+                ++ix;
+              }
+              for (int oy = -ry; oy <= ry; ++oy) {
+                int ny = cy + oy;
+                int iy = 0;
+                while (ny < 0) {
+                  ny += ncy;
+                  --iy;
+                }
+                while (ny >= ncy) {
+                  ny -= ncy;
+                  ++iy;
+                }
+                for (int oz = -rz; oz <= rz; ++oz) {
+                  int nz = cz + oz;
+                  int iz = 0;
+                  while (nz < 0) {
+                    nz += ncz;
+                    --iz;
+                  }
+                  while (nz >= ncz) {
+                    nz -= ncz;
+                    ++iz;
+                  }
+                  const int nc = (nx * ncy + ny) * ncz + nz;
+                  const int nb = begin[static_cast<std::size_t>(nc)];
+                  const int ne = end[static_cast<std::size_t>(nc)];
+                  if (nb == ne) {
+                    continue;
+                  }
+                  wide.push_back({nb, ne, static_cast<double>(ix) * len[0],
+                                  static_cast<double>(iy) * len[1], static_cast<double>(iz) * len[2],
+                                  2});
+                  nn = static_cast<int>(wide.size());
+                }
+              }
+            }
+          }
+          for (int i = b; i < e; ++i) {
+            const int ii = id[static_cast<std::size_t>(i)];
+            const double xi = xs[static_cast<std::size_t>(i)];
+            const double yi = ys[static_cast<std::size_t>(i)];
+            const double zi = zs[static_cast<std::size_t>(i)];
+            const Nbr *span = near ? nbr : wide.data();
+            const int nspan = near ? nn : static_cast<int>(wide.size());
+            for (int t = 0; t < nspan; ++t) {
+              const Nbr nb = span[t];
+              for (int j = nb.begin; j < nb.end; ++j) {
+                if (nb.rel == 0 && j <= i) {
                   continue;
                 }
-                wide.push_back({nb, ne, static_cast<double>(ix) * len[0],
-                                static_cast<double>(iy) * len[1], static_cast<double>(iz) * len[2],
-                                2});
-                nn = static_cast<int>(wide.size());
-              }
-            }
-          }
-        }
-        for (int i = b; i < e; ++i) {
-          const int ii = id[static_cast<std::size_t>(i)];
-          const double xi = xs[static_cast<std::size_t>(i)];
-          const double yi = ys[static_cast<std::size_t>(i)];
-          const double zi = zs[static_cast<std::size_t>(i)];
-          const Nbr *span = near ? nbr : wide.data();
-          const int nspan = near ? nn : static_cast<int>(wide.size());
-          for (int t = 0; t < nspan; ++t) {
-            const Nbr nb = span[t];
-            for (int j = nb.begin; j < nb.end; ++j) {
-              if (nb.rel == 0 && j <= i) {
-                continue;
-              }
-              const double dxv = xi - xs[static_cast<std::size_t>(j)] - nb.sx;
-              const double dyv = yi - ys[static_cast<std::size_t>(j)] - nb.sy;
-              const double dzv = zi - zs[static_cast<std::size_t>(j)] - nb.sz;
-              if (dxv * dxv + dyv * dyv + dzv * dzv >= rc2) {
-                continue;
-              }
-              const int jj = id[static_cast<std::size_t>(j)];
-              if (jj == ii) {
-                continue;
-              }
-              if (nb.rel == 2) {
-                bag.push_back({ii, jj});
-                if (mine != nullptr) {
-                  mine[ii]++;
+                const double dxv = xi - xs[static_cast<std::size_t>(j)] - nb.sx;
+                const double dyv = yi - ys[static_cast<std::size_t>(j)] - nb.sy;
+                const double dzv = zi - zs[static_cast<std::size_t>(j)] - nb.sz;
+                if (dxv * dxv + dyv * dyv + dzv * dzv >= rc2) {
+                  continue;
                 }
-              } else {
-                bag.push_back({ii, jj});
-                bag.push_back({jj, ii});
-                if (mine != nullptr) {
-                  mine[ii]++;
-                  mine[jj]++;
+                const int jj = id[static_cast<std::size_t>(j)];
+                if (jj == ii) {
+                  continue;
+                }
+                if (nb.rel == 2) {
+                  bag.push_back({ii, jj});
+                  if (mine != nullptr) {
+                    mine[ii]++;
+                  }
+                } else {
+                  bag.push_back({ii, jj});
+                  bag.push_back({jj, ii});
+                  if (mine != nullptr) {
+                    mine[ii]++;
+                    mine[jj]++;
+                  }
                 }
               }
             }
           }
         }
-      }
-      if (directRows != nullptr) {
-        const auto commit0 = Clock::now();
-        std::vector<int> start(static_cast<std::size_t>(nop) + 1, 0);
-        for (const PairDir &p : bag) {
-          start[static_cast<std::size_t>(p.a) + 1]++;
-        }
-        for (int i = 0; i < nop; ++i) {
-          start[static_cast<std::size_t>(i) + 1] += start[static_cast<std::size_t>(i)];
-        }
-        std::vector<int> neigh(bag.size());
-        std::vector<int> slot = start;
-        for (const PairDir &p : bag) {
-          neigh[static_cast<std::size_t>(slot[static_cast<std::size_t>(p.a)]++)] = p.b;
-        }
-        for (int c : owned) {
-          for (int s = begin[static_cast<std::size_t>(c)]; s < end[static_cast<std::size_t>(c)]; ++s) {
-            const int ii = id[static_cast<std::size_t>(s)];
-            auto &row = (*directRows)[static_cast<std::size_t>(ii)];
-            if (indexToID != nullptr && indexToID[static_cast<std::size_t>(ii)] == -1) {
-              row.clear();
-              continue;
-            }
-            const int a = start[static_cast<std::size_t>(ii)];
-            const int b = start[static_cast<std::size_t>(ii) + 1];
-            if (b - a > 1) {
-              sortRow(neigh.data() + a, b - a);
-            }
-            thread_local std::vector<int> tmp;
-            tmp.clear();
-            int prev = -1;
-            for (int k = a; k < b; ++k) {
-              const int jj = neigh[static_cast<std::size_t>(k)];
-              if (jj == prev) {
+        if (directRows != nullptr) {
+          const auto commit0 = Clock::now();
+          std::vector<int> start(static_cast<std::size_t>(nop) + 1, 0);
+          for (const PairDir &p : bag) {
+            start[static_cast<std::size_t>(p.a) + 1]++;
+          }
+          for (int i = 0; i < nop; ++i) {
+            start[static_cast<std::size_t>(i) + 1] += start[static_cast<std::size_t>(i)];
+          }
+          std::vector<int> neigh(bag.size());
+          std::vector<int> slot = start;
+          for (const PairDir &p : bag) {
+            neigh[static_cast<std::size_t>(slot[static_cast<std::size_t>(p.a)]++)] = p.b;
+          }
+          for (int c : owned) {
+            for (int s = begin[static_cast<std::size_t>(c)]; s < end[static_cast<std::size_t>(c)]; ++s) {
+              const int ii = id[static_cast<std::size_t>(s)];
+              auto &row = (*directRows)[static_cast<std::size_t>(ii)];
+              if (indexToID != nullptr && indexToID[static_cast<std::size_t>(ii)] == -1) {
+                row.clear();
                 continue;
               }
-              prev = jj;
-              if (indexToID != nullptr && indexToID[static_cast<std::size_t>(jj)] == -1) {
-                continue;
+              const int a = start[static_cast<std::size_t>(ii)];
+              const int b = start[static_cast<std::size_t>(ii) + 1];
+              if (b - a > 1) {
+                sortRow(neigh.data() + a, b - a);
               }
-              tmp.push_back(indexToID != nullptr ? indexToID[static_cast<std::size_t>(jj)] : jj);
-            }
-            const int nwrite = static_cast<int>(tmp.size()) + 1;
-            if (static_cast<int>(row.capacity()) < nwrite) {
-              row.reserve(static_cast<std::size_t>(nwrite));
-            }
-            row.resize(static_cast<std::size_t>(nwrite));
-            row[0] = indexToID != nullptr ? indexToID[static_cast<std::size_t>(ii)] : ii;
-            for (int k = 0; k < static_cast<int>(tmp.size()); ++k) {
-              row[static_cast<std::size_t>(k + 1)] = tmp[static_cast<std::size_t>(k)];
+              thread_local std::vector<int> tmp;
+              tmp.clear();
+              int prev = -1;
+              for (int k = a; k < b; ++k) {
+                const int jj = neigh[static_cast<std::size_t>(k)];
+                if (jj == prev) {
+                  continue;
+                }
+                prev = jj;
+                if (indexToID != nullptr && indexToID[static_cast<std::size_t>(jj)] == -1) {
+                  continue;
+                }
+                tmp.push_back(indexToID != nullptr ? indexToID[static_cast<std::size_t>(jj)] : jj);
+              }
+              const int nwrite = static_cast<int>(tmp.size()) + 1;
+              if (static_cast<int>(row.capacity()) < nwrite) {
+                row.reserve(static_cast<std::size_t>(nwrite));
+              }
+              row.resize(static_cast<std::size_t>(nwrite));
+              row[0] = indexToID != nullptr ? indexToID[static_cast<std::size_t>(ii)] : ii;
+              for (int k = 0; k < static_cast<int>(tmp.size()); ++k) {
+                row[static_cast<std::size_t>(k + 1)] = tmp[static_cast<std::size_t>(k)];
+              }
             }
           }
+          if (profileOn() && tid == 0) {
+            std::fprintf(stderr, "commit_ms %.3f\n", msSince(commit0));
+          }
+          bag.clear();
         }
         if (profileOn() && tid == 0) {
-          std::fprintf(stderr, "commit_ms %.3f\n", msSince(commit0));
+          std::fprintf(stderr,
+                       "block_ms %.3f search_ms %.3f owned_cells %zu halo_cells %zu local %d\n",
+                       msSince(block0) - msSince(search0), msSince(search0), owned.size(), halo.size(),
+                       total);
         }
-        bag.clear();
-      }
-      if (profileOn() && tid == 0) {
-        std::fprintf(stderr,
-                     "block_ms %.3f search_ms %.3f owned_cells %zu halo_cells %zu local %d\n",
-                     msSince(block0) - msSince(search0), msSince(search0), owned.size(), halo.size(),
-                     total);
-      }
+      });
     }
   }
+  errors.rethrow();
   return badTeam == 0;
 }
 
@@ -2539,6 +2604,7 @@ std::vector<std::vector<int>> idRowsFromCsr(
       }
     }
   };
+  seams::RegionErrors errors;
 #if defined(SEAMS_TSAN_JOIN)
   {
     // The caller destroys offsets and cols when this function returns.
@@ -2549,7 +2615,7 @@ std::vector<std::vector<int>> idRowsFromCsr(
     {
 #pragma omp for schedule(static)
       for (int i = 0; i < nop; ++i) {
-        fillRow(i);
+        errors.run([&] { fillRow(i); });
       }
       seams::tsan::arrive_and_wait(rowSlot, omp_get_num_threads());
     }
@@ -2559,9 +2625,10 @@ std::vector<std::vector<int>> idRowsFromCsr(
 #pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
 #endif
   for (int i = 0; i < nop; ++i) {
-    fillRow(i);
+    errors.run([&] { fillRow(i); });
   }
 #endif
+  errors.rethrow();
   phase().rows = msSince(t0);
   if (profileOn()) {
     publishProfile();
@@ -2614,27 +2681,31 @@ void nneigh::CutoffSkin::filter(
   const double rc2 = cutoff_ * cutoff_;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   std::vector<int> counts(static_cast<std::size_t>(nop), 0);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nop >= 256)
 #endif
   for (int i = 0; i < nop; ++i) {
-    int n = 0;
-    const int a = wideOff_[static_cast<std::size_t>(i)];
-    const int b = wideOff_[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = wideCols_[static_cast<std::size_t>(k)];
-      if (j < 0 || j >= nop || j == i) {
-        continue;
+    errors.run([&] {
+      int n = 0;
+      const int a = wideOff_[static_cast<std::size_t>(i)];
+      const int b = wideOff_[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = wideCols_[static_cast<std::size_t>(k)];
+        if (j < 0 || j >= nop || j == i) {
+          continue;
+        }
+        if (half_ && j < i) {
+          continue;
+        }
+        if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
+          ++n;
+        }
       }
-      if (half_ && j < i) {
-        continue;
-      }
-      if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
-        ++n;
-      }
-    }
-    counts[static_cast<std::size_t>(i)] = n;
+      counts[static_cast<std::size_t>(i)] = n;
+    });
   }
+  errors.rethrow();
   offsets_.assign(static_cast<std::size_t>(nop) + 1, 0);
   for (int i = 0; i < nop; ++i) {
     offsets_[static_cast<std::size_t>(i) + 1] =
@@ -2645,22 +2716,25 @@ void nneigh::CutoffSkin::filter(
 #pragma omp parallel for schedule(static) if (nop >= 256)
 #endif
   for (int i = 0; i < nop; ++i) {
-    int slot = offsets_[static_cast<std::size_t>(i)];
-    const int a = wideOff_[static_cast<std::size_t>(i)];
-    const int b = wideOff_[static_cast<std::size_t>(i) + 1];
-    for (int k = a; k < b; ++k) {
-      const int j = wideCols_[static_cast<std::size_t>(k)];
-      if (j < 0 || j >= nop || j == i || (half_ && j < i)) {
-        continue;
+    errors.run([&] {
+      int slot = offsets_[static_cast<std::size_t>(i)];
+      const int a = wideOff_[static_cast<std::size_t>(i)];
+      const int b = wideOff_[static_cast<std::size_t>(i) + 1];
+      for (int k = a; k < b; ++k) {
+        const int j = wideCols_[static_cast<std::size_t>(k)];
+        if (j < 0 || j >= nop || j == i || (half_ && j < i)) {
+          continue;
+        }
+        if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
+          cols_[static_cast<std::size_t>(slot++)] = j;
+        }
       }
-      if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
-        cols_[static_cast<std::size_t>(slot++)] = j;
-      }
-    }
-    const int n = slot - offsets_[static_cast<std::size_t>(i)];
-    std::sort(cols_.begin() + offsets_[static_cast<std::size_t>(i)],
-              cols_.begin() + offsets_[static_cast<std::size_t>(i)] + n);
+      const int n = slot - offsets_[static_cast<std::size_t>(i)];
+      std::sort(cols_.begin() + offsets_[static_cast<std::size_t>(i)],
+                cols_.begin() + offsets_[static_cast<std::size_t>(i)] + n);
+    });
   }
+  errors.rethrow();
 }
 
 bool nneigh::CutoffSkin::update(

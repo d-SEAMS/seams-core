@@ -29,6 +29,7 @@
 #include <utility>
 
 #include <neighbours.hpp>
+#include <region_errors.hpp>
 #include <simd_distance.hpp>
 #include <thread_team.hpp>
 
@@ -166,6 +167,7 @@ int cutoffWidth() {
 //! fill(i) for every row, split over @a width threads once the cloud is
 //! large enough to pay for the team. Each row is written by one thread.
 template <typename Fill> void forEachRow(int nop, int width, Fill &&fill) {
+  seams::RegionErrors errors;
   // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) num_threads(width) if (width > 1 && nop >= kParallelRowsMinAtoms)
@@ -173,8 +175,9 @@ template <typename Fill> void forEachRow(int nop, int width, Fill &&fill) {
   (void)width;
 #endif
   for (int i = 0; i < nop; i++) {
-    fill(i);
+    errors.run([&] { fill(i); });
   }
+  errors.rethrow();
 }
 
 //! One flag per atom, nonzero where keep(type) holds, for the linkcell
@@ -458,14 +461,10 @@ bool nneigh::cellListRowsThreaded(
   }
   const double rc2 = rcutoff * rcutoff;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-#ifdef SEAMS_HAS_MINIMAGE
-  // Cells span the cutoff across every face separation, so the engine wrap
-  // of a neighbour inside the cutoff is its minimum image.
-  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
-#endif
   // each row belongs to one thread; the 27 cells around an atom hold the
   // nearest image of every neighbour because every axis has at least
   // three cells of width rcutoff
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
   // nvc++ -mp=gpu (SEAMS_HAS_OFFLOAD) SIGSEGVs this host parallel-for
   // in libnvomp (__kmpc_fork_call).
@@ -475,60 +474,49 @@ bool nneigh::cellListRowsThreaded(
 #endif
   {
     std::vector<int> cand;
-    std::vector<double> qs;
-    std::vector<double> d2;
 #ifdef SEAMS_HAS_OPENMP
 #if !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp for schedule(static)
 #endif
 #endif
     for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
-      const std::size_t k = static_cast<std::size_t>(kk);
-      const int i = subset[k];
-      const int cid = cellOf[k];
-      const int cz = cid % ncell[2];
-      const int cy = (cid / ncell[2]) % ncell[1];
-      const int cx = cid / (ncell[1] * ncell[2]);
-      cand.clear();
-      for (int dx = -1; dx <= 1; dx++) {
-        const int nx = (cx + dx + ncell[0]) % ncell[0];
-        for (int dy = -1; dy <= 1; dy++) {
-          const int ny = (cy + dy + ncell[1]) % ncell[1];
-          for (int dz = -1; dz <= 1; dz++) {
-            const int nz = (cz + dz + ncell[2]) % ncell[2];
-            const int ncid = (nx * ncell[1] + ny) * ncell[2] + nz;
-            for (int m = cellStart[static_cast<std::size_t>(ncid)];
-                 m < cellStart[static_cast<std::size_t>(ncid) + 1]; m++) {
-              const int j = subset[static_cast<std::size_t>(cellAtoms[static_cast<std::size_t>(m)])];
-              if (j != i) {
-                cand.push_back(j);
+      errors.run([&] {
+        const std::size_t k = static_cast<std::size_t>(kk);
+        const int i = subset[k];
+        const int cid = cellOf[k];
+        const int cz = cid % ncell[2];
+        const int cy = (cid / ncell[2]) % ncell[1];
+        const int cx = cid / (ncell[1] * ncell[2]);
+        cand.clear();
+        for (int dx = -1; dx <= 1; dx++) {
+          const int nx = (cx + dx + ncell[0]) % ncell[0];
+          for (int dy = -1; dy <= 1; dy++) {
+            const int ny = (cy + dy + ncell[1]) % ncell[1];
+            for (int dz = -1; dz <= 1; dz++) {
+              const int nz = (cz + dz + ncell[2]) % ncell[2];
+              const int ncid = (nx * ncell[1] + ny) * ncell[2] + nz;
+              for (int m = cellStart[static_cast<std::size_t>(ncid)];
+                   m < cellStart[static_cast<std::size_t>(ncid) + 1]; m++) {
+                const int j = subset[static_cast<std::size_t>(cellAtoms[static_cast<std::size_t>(m)])];
+                if (j != i) {
+                  cand.push_back(j);
+                }
               }
             }
           }
         }
-      }
-      bool batched = false;
-#ifdef SEAMS_HAS_MINIMAGE
-      if (cells.ok && !cand.empty()) {
-        qs.resize(3 * cand.size());
-        d2.resize(cand.size());
+        auto &row = rows[k];
         for (std::size_t t = 0; t < cand.size(); t++) {
-          std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(cand[t])], 3, &qs[3 * t]);
+          const double r2 = gen::periodicDistSq(frame, yCloud, i, cand[t]);
+          if (r2 <= rc2) {
+            row.push_back(cand[t]);
+          }
         }
-        batched = mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(i)],
-                                qs.data(), cand.size(), d2.data()) == 0;
-      }
-#endif
-      auto &row = rows[k];
-      for (std::size_t t = 0; t < cand.size(); t++) {
-        const double r2 = batched ? d2[t] : gen::periodicDistSq(frame, yCloud, i, cand[t]);
-        if (r2 <= rc2) {
-          row.push_back(cand[t]);
-        }
-      }
-      std::sort(row.begin(), row.end());
+        std::sort(row.begin(), row.end());
+      });
     }
   }
+  errors.rethrow();
   return true;
 }
 
@@ -648,6 +636,7 @@ void searchWindow(const double *cx, const double *cy, const double *cz, const in
                   double cut2, double ex, double ey, double ez, int nThreads,
                   std::vector<PairBag> &partial) {
   // Contiguous slabs, one per thread already pinned by OMP_PLACES.
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nThreads > 1)
 #endif
@@ -660,9 +649,12 @@ void searchWindow(const double *cx, const double *cy, const double *cz, const in
 #endif
     const int slot0 = static_cast<int>((static_cast<long long>(tid) * n) / nt);
     const int slot1 = static_cast<int>((static_cast<long long>(tid + 1) * n) / nt);
-    searchSlots<PX, PY, PZ>(cx, cy, cz, slotAtom, cellStart, cellOf, slot0, slot1, nc0, nc1, nc2,
-                            cut2, ex, ey, ez, partial[static_cast<std::size_t>(tid)].pairs);
+    errors.run([&] {
+      searchSlots<PX, PY, PZ>(cx, cy, cz, slotAtom, cellStart, cellOf, slot0, slot1, nc0, nc1,
+                              nc2, cut2, ex, ey, ez, partial[static_cast<std::size_t>(tid)].pairs);
+    });
   }
+  errors.rethrow();
 }
 
 } // namespace
@@ -1132,35 +1124,39 @@ bool nneigh::blockWindowRows(
     }
     return yCloud.pts[static_cast<std::size_t>(i)].atomID;
   };
+  seams::RegionErrors rowErrors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nThreads > 1)
 #endif
   for (int i = 0; i < n; i++) {
-    const int idi = idOf(i);
-    if (idi < 0) {
-      continue;
-    }
-    auto &row = rows[static_cast<std::size_t>(i)];
-    row.push_back(idi);
-    if (!anchor[static_cast<std::size_t>(i)]) {
-      continue;
-    }
-    const int begin = cursor[static_cast<std::size_t>(i)];
-    const int end = cursor[static_cast<std::size_t>(i) + 1];
-    std::sort(partner.begin() + begin, partner.begin() + end);
-    int prev = -1;
-    for (int t = begin; t < end; t++) {
-      const int j = partner[static_cast<std::size_t>(t)];
-      if (j == prev) {
-        continue;
+    rowErrors.run([&] {
+      const int idi = idOf(i);
+      if (idi < 0) {
+        return;
       }
-      prev = j;
-      const int idj = idOf(j);
-      if (idj >= 0) {
-        row.push_back(idj);
+      auto &row = rows[static_cast<std::size_t>(i)];
+      row.push_back(idi);
+      if (!anchor[static_cast<std::size_t>(i)]) {
+        return;
       }
-    }
+      const int begin = cursor[static_cast<std::size_t>(i)];
+      const int end = cursor[static_cast<std::size_t>(i) + 1];
+      std::sort(partner.begin() + begin, partner.begin() + end);
+      int prev = -1;
+      for (int t = begin; t < end; t++) {
+        const int j = partner[static_cast<std::size_t>(t)];
+        if (j == prev) {
+          continue;
+        }
+        prev = j;
+        const int idj = idOf(j);
+        if (idj >= 0) {
+          row.push_back(idj);
+        }
+      }
+    });
   }
+  rowErrors.rethrow();
   if (const char *split = std::getenv("SEAMS_SPLIT")) {
     if (split[0] == '1') {
       const double rowMs =
@@ -1429,31 +1425,35 @@ std::vector<std::vector<int>> nneigh::neighbourListByIndex(
   std::vector<std::vector<int>> indexNlist(nList.size());
 
   // rows are independent and the map is only read, so each row is one task
+  seams::RegionErrors errors;
   // nvc++ -mp=gpu SIGSEGVs this host parallel-for in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) if (nList.size() >= 4096)
 #endif
   for (std::int64_t ii = 0; ii < static_cast<std::int64_t>(nList.size()); ii++) {
-    const std::size_t iatom = static_cast<std::size_t>(ii);
-    if (nList[iatom].empty()) {
-      continue;
-    }
-    const int iatomID = nList[iatom][0];
-    auto gotI = yCloud.idIndexMap.find(iatomID);
-    if (gotI == yCloud.idIndexMap.end()) {
-      continue;
-    }
-    auto &out = indexNlist[iatom];
-    out.reserve(nList[iatom].size());
-    out.push_back(gotI->second);
-    for (size_t j = 1; j < nList[iatom].size(); j++) {
-      auto gotJ = yCloud.idIndexMap.find(nList[iatom][j]);
-      if (gotJ == yCloud.idIndexMap.end()) {
-        continue;
+    errors.run([&] {
+      const std::size_t iatom = static_cast<std::size_t>(ii);
+      if (nList[iatom].empty()) {
+        return;
       }
-      out.push_back(gotJ->second);
-    }
+      const int iatomID = nList[iatom][0];
+      auto gotI = yCloud.idIndexMap.find(iatomID);
+      if (gotI == yCloud.idIndexMap.end()) {
+        return;
+      }
+      auto &out = indexNlist[iatom];
+      out.reserve(nList[iatom].size());
+      out.push_back(gotI->second);
+      for (size_t j = 1; j < nList[iatom].size(); j++) {
+        auto gotJ = yCloud.idIndexMap.find(nList[iatom][j]);
+        if (gotJ == yCloud.idIndexMap.end()) {
+          continue;
+        }
+        out.push_back(gotJ->second);
+      }
+    });
   }
+  errors.rethrow();
 
   // Return the new neighbour list
   return indexNlist;
@@ -1640,36 +1640,41 @@ void fillGraphFromNom(
       }
     }
     out.assign(static_cast<std::size_t>(n), {});
+    seams::RegionErrors errors;
 #pragma omp parallel for schedule(static)
     for (int r = 0; r < n; r++) {
-      const std::size_t own = static_cast<std::size_t>(r) * static_cast<std::size_t>(k);
-      int nOwn = 0;
-      for (int t = 0; t < k; t++) {
-        nOwn += accepted[own + static_cast<std::size_t>(t)] != 0 ? 1 : 0;
-      }
-      const int b = inOff[static_cast<std::size_t>(r)];
-      const int e = inOff[static_cast<std::size_t>(r) + 1];
-      auto &row = out[static_cast<std::size_t>(r)];
-      row.reserve(static_cast<std::size_t>(1 + nOwn + (e - b)));
-      row.push_back(yCloud.pts[static_cast<std::size_t>(r)].atomID);
-      int t = 0;
-      int c = b;
-      while (t < k || c < e) {
-        const std::size_t mine = own + static_cast<std::size_t>(t);
-        if (t < k && accepted[mine] == 0) {
-          ++t;
-          continue;
+      errors.run([&] {
+        const std::size_t own = static_cast<std::size_t>(r) * static_cast<std::size_t>(k);
+        int nOwn = 0;
+        for (int t = 0; t < k; t++) {
+          nOwn += accepted[own + static_cast<std::size_t>(t)] != 0 ? 1 : 0;
         }
-        if (t < k && (c >= e || mine < static_cast<std::size_t>(inSlot[static_cast<std::size_t>(c)]))) {
-          row.push_back(yCloud.pts[static_cast<std::size_t>(nom[mine])].atomID);
-          ++t;
-        } else {
-          const int from = inSlot[static_cast<std::size_t>(c)] / k;
-          row.push_back(yCloud.pts[static_cast<std::size_t>(from)].atomID);
-          ++c;
+        const int b = inOff[static_cast<std::size_t>(r)];
+        const int e = inOff[static_cast<std::size_t>(r) + 1];
+        auto &row = out[static_cast<std::size_t>(r)];
+        row.reserve(static_cast<std::size_t>(1 + nOwn + (e - b)));
+        row.push_back(yCloud.pts[static_cast<std::size_t>(r)].atomID);
+        int t = 0;
+        int c = b;
+        while (t < k || c < e) {
+          const std::size_t mine = own + static_cast<std::size_t>(t);
+          if (t < k && accepted[mine] == 0) {
+            ++t;
+            continue;
+          }
+          if (t < k &&
+              (c >= e || mine < static_cast<std::size_t>(inSlot[static_cast<std::size_t>(c)]))) {
+            row.push_back(yCloud.pts[static_cast<std::size_t>(nom[mine])].atomID);
+            ++t;
+          } else {
+            const int from = inSlot[static_cast<std::size_t>(c)] / k;
+            row.push_back(yCloud.pts[static_cast<std::size_t>(from)].atomID);
+            ++c;
+          }
         }
-      }
+      });
     }
+    errors.rethrow();
     return;
   }
 #endif
@@ -1750,31 +1755,35 @@ void fillBothGraphsFromNom(
   const int team = omp_get_max_threads();
   std::vector<std::vector<Edge>> mutualParts(static_cast<std::size_t>(team));
   std::vector<std::vector<Edge>> uniParts(static_cast<std::size_t>(team));
+  seams::RegionErrors errors;
 #pragma omp parallel
   {
     std::vector<Edge> mutualLocal;
     std::vector<Edge> uniLocal;
 #pragma omp for schedule(static)
     for (int i = 0; i < n; i++) {
-      for (int t = 0; t < k; t++) {
-        const int j =
-            nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
-                static_cast<std::size_t>(t)];
-        if (j < 0 || j >= n || j == i) {
-          continue;
+      errors.run([&] {
+        for (int t = 0; t < k; t++) {
+          const int j =
+              nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                  static_cast<std::size_t>(t)];
+          if (j < 0 || j >= n || j == i) {
+            continue;
+          }
+          const bool listed = listsPacked(nom, n, k, j, i);
+          if (i < j && listed) {
+            mutualLocal.push_back(Edge{i, j});
+          }
+          if (i < j || !listed) {
+            uniLocal.push_back(Edge{i, j});
+          }
         }
-        const bool listed = listsPacked(nom, n, k, j, i);
-        if (i < j && listed) {
-          mutualLocal.push_back(Edge{i, j});
-        }
-        if (i < j || !listed) {
-          uniLocal.push_back(Edge{i, j});
-        }
-      }
+      });
     }
     mutualParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(mutualLocal);
     uniParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(uniLocal);
   }
+  errors.rethrow();
   auto replay = [&](const std::vector<std::vector<Edge>> &parts,
                     std::vector<std::vector<int>> &out) {
     out.assign(static_cast<std::size_t>(n), {});
@@ -2031,78 +2040,79 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
   out.resize(iIdx.size());
   const int nI = static_cast<int>(iIdx.size());
   const std::size_t nJ = jIdx.size();
-#ifdef SEAMS_HAS_MINIMAGE
-  // Every typeJ position once; each typeI then takes one engine-wrap batch.
-  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
-  std::vector<double> targets(cells.ok && frame.ok ? 3 * nJ : 0);
-  for (std::size_t k = 0; 3 * k < targets.size(); k++) {
-    std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(jIdx[k])], 3,
-                &targets[3 * k]);
+  double span = 0.0;
+  for (const auto &p : yCloud.pts) {
+    span = std::max(span, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
   }
-#endif
+  // An uncertified wrap can sit inside the Smith ball and still be the
+  // wrong image. Every pair then takes the reducer, not the fractional
+  // distance.
+  const bool trustPlain = frame.ok && gen::plainWrapCertifies(frame, span);
+  seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nI >= 256)
 #endif
   {
-    std::vector<double> row(nJ);
+    std::vector<double> row;
+    errors.run([&] { row.resize(nJ); });
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
     for (int t = 0; t < nI; t++) {
-      const int i = iIdx[static_cast<std::size_t>(t)];
-      const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
-      bool batched = false;
-#ifdef SEAMS_HAS_MINIMAGE
-      batched = !targets.empty() &&
-                mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(i)],
-                              targets.data(), nJ, row.data()) == 0;
-#endif
-      for (std::size_t k = 0; k < nJ && !batched; k++) {
-        const auto &pj = yCloud.pts[static_cast<std::size_t>(jIdx[k])];
-        row[k] = frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
-                          : gen::periodicDistSq(frame, yCloud, i, jIdx[k]);
-      }
-      int bestJ = -1;
-      double bestD2 = std::numeric_limits<double>::infinity();
-      for (std::size_t k = 0; k < nJ; k++) {
-        if (jIdx[k] != i && row[k] < bestD2) {
-          bestD2 = row[k];
-          bestJ = jIdx[k];
-        }
-      }
-      if (bestJ >= 0 && frame.ok && !gen::smithInside(frame, bestD2)) {
-        bestJ = -1;
-        bestD2 = std::numeric_limits<double>::infinity();
+      errors.run([&] {
+        const int i = iIdx[static_cast<std::size_t>(t)];
+        const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
         for (std::size_t k = 0; k < nJ; k++) {
           const int j = jIdx[k];
-          if (j == i) {
-            continue;
-          }
-          double d2 = row[k];
-          if (!gen::smithInside(frame, d2)) {
-            d2 = -1.0;
-#ifdef SEAMS_HAS_MINIMAGE
-            if (batched) {
-              d2 = gen::euclideanDistSq(cells, i, j);
-            }
-#endif
-            if (d2 < 0.0) {
-              d2 = gen::periodicDistSq(frame, yCloud, i, j);
-            }
-          }
-          if (d2 < bestD2) {
-            bestD2 = d2;
-            bestJ = j;
+          const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+          if (frame.ok && trustPlain) {
+            row[k] = gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+          } else if (frame.ok) {
+            const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+            row[k] = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+          } else {
+            row[k] = gen::periodicDistSq(frame, yCloud, i, j);
           }
         }
-      }
-      if (bestJ >= 0) {
-        out[static_cast<std::size_t>(t)] = {i, bestJ, std::sqrt(bestD2)};
-      } else {
-        out[static_cast<std::size_t>(t)] = {-1, -1, 0.0};
-      }
+        int bestJ = -1;
+        double bestD2 = std::numeric_limits<double>::infinity();
+        for (std::size_t k = 0; k < nJ; k++) {
+          if (jIdx[k] != i && row[k] < bestD2) {
+            bestD2 = row[k];
+            bestJ = jIdx[k];
+          }
+        }
+        // Past the Smith ball the fractional image is not the shortest.
+        // Recompute those pairs. An uncertified cell already used exactDelta.
+        if (bestJ >= 0 && trustPlain && !gen::smithInside(frame, bestD2)) {
+          bestJ = -1;
+          bestD2 = std::numeric_limits<double>::infinity();
+          for (std::size_t k = 0; k < nJ; k++) {
+            const int j = jIdx[k];
+            if (j == i) {
+              continue;
+            }
+            double d2 = row[k];
+            if (!gen::smithInside(frame, d2)) {
+              const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+              const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+              d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+            }
+            if (d2 < bestD2) {
+              bestD2 = d2;
+              bestJ = j;
+            }
+          }
+        }
+        if (bestJ >= 0) {
+          out[static_cast<std::size_t>(t)] = {i, bestJ, std::sqrt(bestD2)};
+        } else {
+          out[static_cast<std::size_t>(t)] = {-1, -1, 0.0};
+        }
+      });
     }
   }
+  errors.rethrow();
   out.erase(std::remove_if(out.begin(), out.end(),
                            [](const std::tuple<int, int, double> &row) {
                              return std::get<0>(row) < 0;
@@ -2159,6 +2169,11 @@ std::pair<double, double> nneigh::shellSeparation(
   double minNext = 0.0;
   bool haveNext = false;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
+  double span = 0.0;
+  for (const auto &p : yCloud.pts) {
+    span = std::max(span, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  const bool trustPlain = frame.ok && gen::plainWrapCertifies(frame, span);
   std::vector<double> dists;
   for (int i = 0; i < yCloud.nop; i++) {
     if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
@@ -2186,7 +2201,8 @@ std::pair<double, double> nneigh::shellSeparation(
     // below; there is no (k+1)-th distance to bound it from above.
     const int want = nOther < k + 1 ? k : k + 1;
     std::partial_sort(dists.begin(), dists.begin() + want, dists.end());
-    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(want - 1)])) {
+    if (frame.ok &&
+        (!trustPlain || !gen::smithInside(frame, dists[static_cast<std::size_t>(want - 1)]))) {
       dists.clear();
       for (int j = 0; j < yCloud.nop; j++) {
         if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {

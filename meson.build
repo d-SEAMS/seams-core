@@ -124,8 +124,14 @@ _deps += m_dep
 # The wheel build falls back to the Eigen subproject. Its headers are
 # not this project's sources, so -Werror=sign-conversion stays on our
 # code and does not fire inside Eigen.
-eigen_dep = dependency('eigen3', version: '>=3.4.0', include_type: 'system',
-                       required: true)
+# With OpenMP, Eigen opens its own region for a wide matrix product, and an
+# allocation failure inside it calls std::terminate, out of reach of any
+# handler here. Every translation unit that sees Eigen gets the same
+# setting.
+eigen_dep = declare_dependency(
+  dependencies: dependency('eigen3', version: '>=3.4.0', include_type: 'system',
+                           required: true),
+  compile_args: ['-DEIGEN_DONT_PARALLELIZE'])
 _deps += [eigen_dep]
 
 # Prefer FlexiBLAS (one wrapper for BLAS and LAPACK). The conda-forge
@@ -175,17 +181,20 @@ endif
 # missing libomp, so probe an actual parallel region before committing to it.
 # nvc++ 22.3 trips Meson's OpenMP version sniff (preprocessor
 # delimiters). The flag is -mp; do not call dependency('openmp').
+openmp_opt = get_option('with_openmp')
 openmp_dep_ok = false
 _omp_rpath = ''
 _omp_libdir = ''
-if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
+if openmp_opt.disabled()
+  openmp_dep = dependency('', required: false)
+elif cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   openmp_dep = declare_dependency(compile_args: ['-mp'], link_args: ['-mp'])
   openmp_dep_ok = true
   # Host FMA vs device no-FMA (or the reverse) breaks the offload
   # identity check. IEEE division and no FMA on both sides.
   _args += ['-Kieee', '-Mnofma']
 else
-  openmp_dep = dependency('openmp', required: false)
+  openmp_dep = dependency('openmp', required: openmp_opt)
   openmp_dep_ok = openmp_dep.found()
 endif
 openmp_found = false
@@ -258,6 +267,8 @@ if openmp_dep_ok
         _deps += _omp_rpath_dep
       endif
     endif
+  elif openmp_opt.enabled()
+    error('with_openmp=enabled but an OpenMP parallel region does not link')
   else
     message('OpenMP was found but a parallel region does not link; ' +
             'building the per-particle loops single-threaded')
@@ -2214,6 +2225,12 @@ if get_option('with_cli') and get_option('with_tests')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_c_api_sections',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_c_api_sections.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_capi_examples',
     python3,
     args: [
@@ -2471,7 +2488,8 @@ if get_option('with_tests')
     'capi_thread_scale',
     files('tests/capi_thread_scale.c'),
     link_with: ydslib,
-    dependencies: [dependency('openmp', language: 'c', required: false)] + _omp_rpath_dep,
+    dependencies: (openmp_dep.found() ? [dependency('openmp', language: 'c', required: false)] : [])
+      + _omp_rpath_dep,
     include_directories: include_directories('src/include/internal'),
     c_args: ['-std=c11'] + _capi_warn,
     link_args: ['-lm'],
@@ -2528,6 +2546,38 @@ if get_option('with_tests')
       link_args: _libm),
     env: _capi_env,
     timeout: 300)
+  test(
+    'capi_mic_needle',
+    executable(
+      'capi_mic_needle',
+      files('tests/capi_mic_needle.c'),
+      link_with: seams_api_lib,
+      include_directories: include_directories('include'),
+      override_options: ['c_std=c11'],
+      c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+      link_args: _libm),
+    env: _capi_env,
+    suite: 'mic',
+    timeout: 600)
+  # libseams is -fvisibility=hidden. This shared library is too, and the
+  # executable is not. The test fails unless both see one typeinfo.
+  _eh_hidden = shared_library(
+    'exception_typeinfo_hidden',
+    files('tests/exception_typeinfo_hidden.cpp'),
+    dependencies: yds_dep,
+    cpp_args: _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden'],
+    build_rpath: meson.current_build_dir() / 'src')
+  test(
+    'exception_typeinfo',
+    executable(
+      'exception_typeinfo',
+      files('tests/exception_typeinfo.cpp'),
+      dependencies: yds_dep,
+      link_with: _eh_hidden,
+      cpp_args: _args,
+      build_rpath: meson.current_build_dir() / 'src'),
+    suite: 'mic',
+    timeout: 60)
   # GCC marks only ASan and TSan builds; clang reports every sanitizer.
   _signal_mode = (_capi_san.contains('address') or _capi_san.contains('thread') or
                   (cppc.get_id() == 'clang' and _capi_san != 'none')) ? 'sanitized' : 'plain'

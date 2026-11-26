@@ -23,6 +23,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <fcntl.h>
 #include <vector>
 #include <filesystem>
@@ -584,8 +585,10 @@ void sinp::forEachLammpsFrame(
   }
   const int count = static_cast<int>(frames.size());
 
-  std::mutex errorMu;
-  std::string error;
+  // The handler runs inside the OpenMP region and must not throw: no lock,
+  // no string copy, only the first exception kept.
+  std::atomic<bool> failed{false};
+  std::exception_ptr error;
 #ifdef SEAMS_HAS_OPENMP
   const int threads = nThreads > 0 ? nThreads : omp_get_max_threads();
 #pragma omp parallel for schedule(dynamic, 1) num_threads(threads)             \
@@ -601,15 +604,18 @@ void sinp::forEachLammpsFrame(
         cloud = readLammpsTrj(filename, frame, cloud);
       }
       fn(frame, cloud);
-    } catch (const std::exception &ex) {
-      std::lock_guard<std::mutex> lock(errorMu);
-      if (error.empty()) {
-        error = ex.what();
+    } catch (...) {
+      if (!failed.exchange(true, std::memory_order_acq_rel)) {
+        error = std::current_exception();
       }
     }
   }
-  if (!error.empty()) {
-    throw std::runtime_error(error);
+  if (error) {
+    try {
+      std::rethrow_exception(error);
+    } catch (const std::exception &ex) {
+      throw std::runtime_error(ex.what());
+    }
   }
 }
 

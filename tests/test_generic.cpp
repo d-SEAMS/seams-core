@@ -7,6 +7,7 @@
 #include <array>
 #include <cmath>
 #include <filesystem>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -425,6 +426,44 @@ TEST_CASE("extreme skew pair uses the Selling image", "[generic]") {
   REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(r2, 1e-12));
 }
 
+TEST_CASE("x-elongated batches refine the linked minimum image", "[generic]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10006.0, 12.0, 12.0, 3.0, 3.0, 0.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = 2;
+  molSys::Point<double> guest;
+  guest.x = 5000.0;
+  guest.y = 0.0;
+  guest.z = 0.0;
+  molSys::Point<double> framework;
+  framework.x = 0.0;
+  framework.y = 0.0;
+  framework.z = 0.0;
+  cloud.pts = {guest, framework};
+
+  double reference = std::numeric_limits<double>::infinity();
+  for (int j = -500; j <= 500; ++j) {
+    for (int k = -500; k <= 500; ++k) {
+      const double shiftedX = 5000.0 + 3.0 * j + 3.0 * k;
+      const double i = std::round(-shiftedX / 10000.0);
+      const double x = shiftedX + i * 10000.0;
+      const double y = 12.0 * j;
+      const double z = 12.0 * k;
+      reference = std::min(reference, x * x + y * y + z * z);
+    }
+  }
+  const int jatom[1] = {1};
+  double distSq[1] = {-1.0};
+  gen::batchPeriodicDistSq(cloud, 0, jatom, 1, distSq);
+  REQUIRE_THAT(distSq[0], Catch::Matchers::WithinAbs(reference, 1e-8));
+#ifdef SEAMS_HAS_MINIMAGE
+  const auto frame = gen::makeCellFrame(cloud);
+  REQUIRE(frame.ok);
+  REQUIRE_THAT(gen::euclideanDistSq(frame, 0, 1),
+               Catch::Matchers::WithinAbs(reference, 1e-8));
+#endif
+}
+
 TEST_CASE("hex-prism body diagonal is the Euclidean image", "[generic]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {15.0, 8.660254037844386, 10.0, 5.0, 0.0, 0.0};
@@ -470,4 +509,16 @@ TEST_CASE("relDistFromPoint uses dump H on a mixed image", "[generic]") {
                Catch::Matchers::WithinAbs(
                    std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386),
                    1e-10));
+}
+
+TEST_CASE("a cell past the Euclidean range is a range error", "[generic]") {
+  const std::array<double, 3> raw = {0.2, 0.1, 0.05};
+  REQUIRE_THROWS_AS(gen::refineEuclidean(1.0e160, 1.0, 0.4, 0.3, 0.3, 0.3, raw, raw),
+                    gen::mic::RangeError);
+}
+
+TEST_CASE("an off-lattice candidate is not a lattice image", "[generic]") {
+  const std::array<double, 3> raw = {1.2, 0.05, -0.1};
+  const std::array<double, 3> off = {1.2, 0.35, -0.1};
+  REQUIRE_FALSE(gen::mic::latticeImage(10.0, 10.0, 10.0, 0.0, 0.0, 0.0, raw, off));
 }

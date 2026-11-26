@@ -328,6 +328,109 @@ struct DensityProfile {
 };
 
 /**
+ * @brief Number and mass density of one histogram.
+ * @ingroup seams_cpp
+ */
+struct FractionalProfile {
+  std::vector<double> coordinate;     /**< Bin centres. Fractional, or radians for azimuth. */
+  std::vector<double> number_density; /**< Atoms per cubic Angstrom. */
+  std::vector<double> mass_density;   /**< Caller mass units per cubic Angstrom. Mass 1 when masses is empty.
+                                         An amu mass is amu per cubic Angstrom; times 1.66054 it is g/cm^3. */
+  std::vector<double> volume;         /**< Bin volume, cubic Angstrom. */
+};
+
+/**
+ * @brief Knobs for a fractional or directional density.
+ * @ingroup seams_cpp
+ */
+struct FractionalDensityOptions {
+  int species = 0;                         /**< Species filter. Zero keeps every atom. */
+  int bins = 1;                            /**< Positive bin count. */
+  Axis axis = Axis::Z;                     /**< Cell axis. Ignored when use_direction is set. */
+  bool use_direction = false;              /**< Bin an arbitrary Cartesian direction. */
+  std::array<double, 3> direction{{0, 0, 1}}; /**< Cartesian direction. */
+  double origin = 0;                       /**< Fractional origin, wrapped into [0, 1). */
+  std::span<const double> masses{};        /**< One mass per stored atom. Empty means mass 1. */
+};
+
+/**
+ * @brief Pore axis and centre.
+ * @ingroup seams_cpp
+ */
+struct PoreFrame {
+  std::array<double, 3> axis{};               /**< Unit Cartesian axis. */
+  std::array<double, 3> centre{};             /**< Cartesian centre, Angstrom. */
+  std::array<double, 3> centre_fractional{};  /**< Fractional centre. */
+  int axis_index = 0;                         /**< 0, 1, or 2. */
+};
+
+/**
+ * @brief Knobs for detecting a pore axis and centre.
+ * @ingroup seams_cpp
+ */
+struct PoreFrameOptions {
+  int framework = 0;                              /**< Species for an automatic centre. Zero keeps every atom. */
+  int axis = -1;                                  /**< 0, 1, 2, or -1 for the longest edge. */
+  bool use_direction = false;                     /**< Direction replaces axis and must be a cell edge. */
+  std::array<double, 3> direction{{0, 0, 1}};     /**< Cartesian direction. */
+  bool use_centre = false;                        /**< Use centre_fractional instead of the framework centroid. */
+  std::array<double, 3> centre_fractional{{0, 0, 0}}; /**< Fractional centre. */
+};
+
+/**
+ * @brief Radial, azimuthal, and axial pore profiles.
+ * @ingroup seams_cpp
+ */
+struct PoreProfiles {
+  FractionalProfile radial;     /**< Cylindrical shells. */
+  FractionalProfile azimuthal;  /**< Azimuthal sectors. */
+  FractionalProfile axial;      /**< Slabs along the pore axis. */
+};
+
+/**
+ * @brief Knobs for cylindrical pore profiles.
+ * @ingroup seams_cpp
+ */
+struct PoreProfileOptions {
+  int species = 0;                                /**< Species filter. Zero keeps every atom. */
+  int radial_bins = 1;                            /**< Positive radial bin count. */
+  int azimuthal_bins = 1;                         /**< Positive azimuthal bin count. */
+  int axial_bins = 1;                             /**< Positive axial bin count. */
+  double r_max = 0;                               /**< Outer radius, Angstrom. Zero covers the face. */
+  int axis = -1;                                  /**< 0, 1, 2, or -1 for the longest edge. */
+  bool use_direction = false;                     /**< Direction replaces axis and must be a cell edge. */
+  std::array<double, 3> direction{{0, 0, 1}};     /**< Cartesian direction. */
+  bool use_centre = false;                        /**< Use centre_fractional instead of the framework centroid. */
+  std::array<double, 3> centre_fractional{{0, 0, 0}}; /**< Fractional centre. */
+  int framework = 0;                              /**< Species for an automatic centre. */
+  double origin = 0;                              /**< Fractional axial origin. */
+  std::span<const double> masses{};               /**< One mass per stored atom. Empty means mass 1. */
+};
+
+/**
+ * @brief Knobs for host-guest contacts.
+ * @ingroup seams_cpp
+ */
+struct HostGuestOptions {
+  int guest = 1;          /**< Positive guest species. */
+  int framework = 0;      /**< Framework species. Zero keeps every other type. Equal to guest is rejected. */
+  double cutoff = 0;      /**< Contact distance, Angstrom. Zero counts a coincident site. */
+};
+
+/**
+ * @brief Nearest framework site and contact counts.
+ * @ingroup seams_cpp
+ */
+struct HostGuestContacts {
+  std::vector<int> guest_index;         /**< Guest atom indices. */
+  std::vector<int> nearest_index;       /**< Nearest framework index, or -1. */
+  std::vector<int> nearest_type;        /**< Type of that site. */
+  std::vector<double> nearest_distance; /**< Distance, Angstrom. Negative when no site exists. */
+  std::vector<int> framework_types;     /**< Framework types, sorted. */
+  std::vector<int> contacts;            /**< Row-major counts, one row per guest. */
+};
+
+/**
  * @brief The two planar crossings of an ice slab.
  * @ingroup seams_cpp
  */
@@ -1658,6 +1761,128 @@ class System : public detail::Handle<seams_system, seams_system_destroy> {
                   get());
     out.coordinate.resize(n_out);
     out.density.resize(n_out);
+    return out;
+  }
+
+  /** @brief Number and mass density along a cell axis or a Cartesian direction. */
+  [[nodiscard]] FractionalProfile fractional_density(const FractionalDensityOptions &options) {
+    const double *direction = options.use_direction ? options.direction.data() : nullptr;
+    const double *masses = options.masses.empty() ? nullptr : options.masses.data();
+    const std::size_t masses_len = options.masses.empty() ? 0 : options.masses.size();
+    std::size_t n_out = 0;
+    detail::check(seams_density_fractional(get(), options.species, options.bins,
+                                           static_cast<int>(options.axis), direction,
+                                           direction == nullptr ? 0 : 3, options.origin, masses,
+                                           masses_len, nullptr, nullptr, nullptr, nullptr, 0,
+                                           &n_out),
+                  get());
+    FractionalProfile out;
+    out.coordinate.resize(n_out);
+    out.number_density.resize(n_out);
+    out.mass_density.resize(n_out);
+    out.volume.resize(n_out);
+    detail::check(seams_density_fractional(get(), options.species, options.bins,
+                                           static_cast<int>(options.axis), direction,
+                                           direction == nullptr ? 0 : 3, options.origin, masses,
+                                           masses_len, out.coordinate.data(),
+                                           out.number_density.data(), out.mass_density.data(),
+                                           out.volume.data(), n_out, &n_out),
+                  get());
+    out.coordinate.resize(n_out);
+    out.number_density.resize(n_out);
+    out.mass_density.resize(n_out);
+    out.volume.resize(n_out);
+    return out;
+  }
+
+  /** @brief Pore axis and centre, supplied or taken from the framework. */
+  [[nodiscard]] PoreFrame pore_frame(const PoreFrameOptions &options) {
+    const double *direction = options.use_direction ? options.direction.data() : nullptr;
+    const double *centre = options.use_centre ? options.centre_fractional.data() : nullptr;
+    PoreFrame out;
+    int index = 0;
+    detail::check(seams_pore_frame(get(), options.framework, options.axis, direction,
+                                   direction == nullptr ? 0 : 3, centre, centre == nullptr ? 0 : 3,
+                                   out.axis.data(), out.centre.data(), out.centre_fractional.data(),
+                                   &index),
+                  get());
+    out.axis_index = index;
+    return out;
+  }
+
+  /** @brief Radial, azimuthal, and axial densities about a pore axis. */
+  [[nodiscard]] PoreProfiles pore_profiles(const PoreProfileOptions &options) {
+    const double *direction = options.use_direction ? options.direction.data() : nullptr;
+    const double *centre = options.use_centre ? options.centre_fractional.data() : nullptr;
+    const double *masses = options.masses.empty() ? nullptr : options.masses.data();
+    const std::size_t masses_len = options.masses.empty() ? 0 : options.masses.size();
+    std::size_t n_radial = 0;
+    std::size_t n_azimuthal = 0;
+    std::size_t n_axial = 0;
+    detail::check(seams_pore_profiles(get(), options.species, options.radial_bins,
+                                      options.azimuthal_bins, options.axial_bins, options.r_max,
+                                      options.axis, direction, direction == nullptr ? 0 : 3, centre,
+                                      centre == nullptr ? 0 : 3, options.framework, options.origin,
+                                      masses, masses_len, nullptr, nullptr, nullptr, nullptr, 0,
+                                      &n_radial, nullptr, nullptr, nullptr, nullptr, 0, &n_azimuthal,
+                                      nullptr, nullptr, nullptr, nullptr, 0, &n_axial),
+                  get());
+    PoreProfiles out;
+    out.radial.coordinate.resize(n_radial);
+    out.radial.number_density.resize(n_radial);
+    out.radial.mass_density.resize(n_radial);
+    out.radial.volume.resize(n_radial);
+    out.azimuthal.coordinate.resize(n_azimuthal);
+    out.azimuthal.number_density.resize(n_azimuthal);
+    out.azimuthal.mass_density.resize(n_azimuthal);
+    out.azimuthal.volume.resize(n_azimuthal);
+    out.axial.coordinate.resize(n_axial);
+    out.axial.number_density.resize(n_axial);
+    out.axial.mass_density.resize(n_axial);
+    out.axial.volume.resize(n_axial);
+    detail::check(
+        seams_pore_profiles(
+            get(), options.species, options.radial_bins, options.azimuthal_bins,
+            options.axial_bins, options.r_max, options.axis, direction,
+            direction == nullptr ? 0 : 3, centre, centre == nullptr ? 0 : 3, options.framework,
+            options.origin, masses, masses_len, out.radial.coordinate.data(),
+            out.radial.number_density.data(), out.radial.mass_density.data(),
+            out.radial.volume.data(), n_radial, &n_radial, out.azimuthal.coordinate.data(),
+            out.azimuthal.number_density.data(), out.azimuthal.mass_density.data(),
+            out.azimuthal.volume.data(), n_azimuthal, &n_azimuthal, out.axial.coordinate.data(),
+            out.axial.number_density.data(), out.axial.mass_density.data(), out.axial.volume.data(),
+            n_axial, &n_axial),
+        get());
+    return out;
+  }
+
+  /** @brief Nearest framework site and contact counts for each guest. */
+  [[nodiscard]] HostGuestContacts host_guest(const HostGuestOptions &options) {
+    std::size_t n_guest = 0;
+    std::size_t n_types = 0;
+    detail::check(seams_host_guest(get(), options.guest, options.framework, options.cutoff, nullptr,
+                                   nullptr, nullptr, nullptr, 0, &n_guest, nullptr, 0, &n_types,
+                                   nullptr, 0),
+                  get());
+    HostGuestContacts out;
+    out.guest_index.resize(n_guest);
+    out.nearest_index.resize(n_guest);
+    out.nearest_type.resize(n_guest);
+    out.nearest_distance.resize(n_guest);
+    out.framework_types.resize(n_types);
+    out.contacts.resize(n_guest * n_types);
+    detail::check(seams_host_guest(get(), options.guest, options.framework, options.cutoff,
+                                   out.guest_index.data(), out.nearest_index.data(),
+                                   out.nearest_type.data(), out.nearest_distance.data(), n_guest,
+                                   &n_guest, out.framework_types.data(), n_types, &n_types,
+                                   out.contacts.data(), out.contacts.size()),
+                  get());
+    out.guest_index.resize(n_guest);
+    out.nearest_index.resize(n_guest);
+    out.nearest_type.resize(n_guest);
+    out.nearest_distance.resize(n_guest);
+    out.framework_types.resize(n_types);
+    out.contacts.resize(n_guest * n_types);
     return out;
   }
 
