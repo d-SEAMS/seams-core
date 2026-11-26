@@ -913,10 +913,9 @@ def cycles_cache_dir():
     return Path(chosen) if chosen else ROOT / "docs" / ".cache" / "cycles"
 
 
-# One line, "<dataset> <revision>": the Hugging Face dataset that holds
-# rendered stills under <digest>.png and <digest>.world, and its pinned
-# commit. It is a separate file because this script's bytes are part of
-# every digest.
+# The pin stays beside this file so the script bytes, which are part of
+# every digest, do not have to name a dataset. Vendored stills are
+# cycles-stills/<digest>.png and cycles-stills/<digest>.world.
 STILLS_PIN = Path(__file__).resolve().with_name("cycles-stills.pin")
 
 _BPY_VERSION = {}
@@ -962,38 +961,28 @@ def cycles_digest(payload, version):
     return digest.hexdigest()
 
 
-def cycles_remote():
-    """(dataset, revision) of the published stills, or None."""
-    if os.environ.get("MOLECULES_REMOTE", "1") == "0" or not STILLS_PIN.is_file():
-        return None
-    fields = STILLS_PIN.read_text().split()
-    return (fields[0], fields[1]) if len(fields) >= 2 else None
-
-
 def cycles_fetch(digest, folder):
-    """Copy a published still into folder. False when it is not published."""
-    import urllib.error
-    import urllib.request
+    """Copy a vendored still into folder.
 
-    remote = cycles_remote()
-    if remote is None:
+    Bytes live next to this script under cycles-stills/<digest>.png and
+    cycles-stills/<digest>.world. A missing still is not a network fetch.
+    MOLECULES_REMOTE=0 keeps the empty-cache check from reading them.
+    """
+    if os.environ.get("MOLECULES_REMOTE", "1") == "0" or not STILLS_PIN.is_file():
         return False
-    base = "https://huggingface.co/datasets/{}/resolve/{}/".format(*remote)
+    src = STILLS_PIN.with_name("cycles-stills")
+    blobs = []
+    for suffix in (".world", ".png"):
+        path = src / (digest + suffix)
+        if not path.is_file():
+            return False
+        blobs.append(path.read_bytes())
     folder.mkdir(parents=True, exist_ok=True)
-    fetched = []
-    try:
-        for suffix in (".world", ".png"):
-            part = folder / (digest + suffix + ".part")
-            with urllib.request.urlopen(base + digest + suffix, timeout=60) as reply:
-                part.write_bytes(reply.read())
-            fetched.append((part, folder / (digest + suffix)))
-    except (urllib.error.URLError, OSError, ValueError):
-        for part, _ in fetched:
-            part.unlink(missing_ok=True)
-        return False
-    for part, final in fetched:
-        os.replace(part, final)
-    print("engine CYCLES fetched {}".format(digest[:12]), flush=True)
+    for suffix, blob in zip((".world", ".png"), blobs):
+        part = folder / (digest + suffix + ".part")
+        part.write_bytes(blob)
+        os.replace(part, folder / (digest + suffix))
+    print("engine CYCLES vendored {}".format(digest[:12]), flush=True)
     return True
 
 

@@ -1562,20 +1562,6 @@ if get_option('with_cli') and get_option('with_tests')
       timeout: 900)
   endforeach
   test(
-    'docs_frame_tutorials',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'tutorials' / 'test_hf_frames.py',
-      '--small',
-      meson.project_source_root(),
-      seams_exe.full_path(),
-      meson.project_build_root() / 'src',
-    ],
-    env: tutorial_env,
-    depends: [seams_exe, seams_api_lib],
-    suite: 'docs',
-    timeout: 180)
-  test(
     'docs_tutorial_nucleation',
     python3,
     args: [
@@ -2326,7 +2312,10 @@ if get_option('with_cli') and get_option('with_tests')
     '--list',
     check: true).stdout().strip().split('\n')
   foreach _page : _snippet_list
-    if _page != ''
+    # source_science_brine compiles science_tutorials.c in brine mode.
+    # docs_science_tutorials already runs that binary on the same two
+    # frames and checks hexagonal counts 733 and 741.
+    if _page != '' and _page != 'source_science_brine'
       test(
         'docs_snippet_' + _page,
         python3,

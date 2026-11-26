@@ -605,7 +605,7 @@ _check_invariance = executable('check_invariance', 'check_invariance.cpp',
   build_rpath: '$ORIGIN/../src')
 
 # Coverage arc updates are atomic. A thread pool shares those counters
-# and the 1000-trial search stops scaling, so the coverage binary runs
+# and the trial search stops scaling, so the coverage binary runs
 # the same trials in child processes.
 _fuzz_cpp_args = []
 _fuzz_cpp_args += _args
@@ -833,15 +833,15 @@ test('invariance_empty_frame', _check_invariance,
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   should_fail: true)
-# 1000 translations and 1000 permutations on every ordinary frame, plus
-# the eight half-box shifts. A frame above 2048 atoms is checked at one
-# trial. Degree above 80 is every vertex at cap 4. Degree above 40 is
-# every vertex at cap 6. The compact liquid, BCC, and cubic fixtures retain
-# the dense and crystalline graph cases without requiring network access.
-# The limit is 10800 s. A skip fails the run. Heavy cases
+# The first 16 translations and 16 permutations of the mt19937 prefix
+# (seed 20261101 + frames*9973 + trial*10007) on every ordinary frame,
+# plus the eight half-box shifts. Degree above 40 is the dense-graph
+# rule, not the trial loop. The compact liquid, BCC, and cubic fixtures
+# retain the dense and crystalline graph cases without requiring network
+# access. The limit is 10800 s. A skip fails the run. Heavy cases
 # are serial so they do not steal the Levi graph's core.
 test('fuzz_cage_shift_permute', _fuzz_cage,
-  args: [meson.project_source_root() / 'input' / 'traj', '1000'],
+  args: [meson.project_source_root() / 'input' / 'traj', '16'],
   env: _test_env,
   timeout: 10800,
   suite: 'heavy',

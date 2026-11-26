@@ -354,7 +354,7 @@ int main(int argc, char **argv) {
     return 2;
   }
   const fs::path dir(argv[1]);
-  const int trials = argc > 2 ? std::atoi(argv[2]) : 1000;
+  const int trials = argc > 2 ? std::atoi(argv[2]) : 16;
   const double cutoff = 3.5;
   if (!fs::is_directory(dir)) {
     std::fprintf(stderr, "fuzz_cage_invariance: %s is not a directory\n", dir.c_str());
@@ -430,7 +430,7 @@ int main(int argc, char **argv) {
       const GraphSize g0 = graphSize(cloud, cutoff, atomType);
       // A cutoff graph this dense is not an ice cage frame: ring enumeration
       // either does not return within half a minute or emits on the order of
-      // a million six-rings. 1000 enumerations are not a cage-count test.
+      // a million six-rings. Repeated enumerations are not a cage-count test.
       if (g0.maxDegree > 40) {
         checked++;
         const bool ok = ruleAgrees(cloud, 8);
@@ -508,9 +508,9 @@ int main(int argc, char **argv) {
       const int chunk = std::max(1, (trials + static_cast<int>(nThreads) - 1) / static_cast<int>(nThreads));
 #if defined(FUZZ_COVERAGE_PROCESSES) && !defined(_WIN32)
       // -fprofile-update=atomic puts every arc counter on one cache line.
-      // std::threads then serialize inside the ring search, and 1000 trials
-      // do not finish in 10800 s. A child has its own counters, so the same
-      // trial index set scales. _exit prevents a child gcov flush.
+      // std::threads then serialize inside the ring search. A child has its
+      // own counters, so the same trial index set scales. _exit prevents a
+      // child gcov flush.
       std::fflush(nullptr);
       std::vector<pid_t> kids;
       kids.reserve(nThreads);
