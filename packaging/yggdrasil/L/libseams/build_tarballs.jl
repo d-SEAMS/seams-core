@@ -56,6 +56,7 @@ sources = [
 # backward-cpp already on disk and the nodownload below never applies to it.
 script = raw"""
 cd ${WORKSPACE}/srcdir/seams-core
+patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-exception-typeinfo.patch
 
 meson setup build \
     --cross-file="${MESON_TARGET_TOOLCHAIN}" \

@@ -49,6 +49,8 @@
 // or above 2^52 throw mic::RangeError without poisoning the per-thread basis
 // cache.
 
+#include <compiler_compat.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -63,8 +65,11 @@ namespace mic {
 // The cell or the displacement is outside what this header resolves exactly
 // in binary64. It is a property of the input, so the C API reports it as
 // SEAMS_ERR_RANGE rather than as an internal error.
-struct RangeError : std::runtime_error {
+// The destructor is defined in exception_typeinfo.cpp and is the key
+// function: one exported typeinfo in libyodaLib, which libseams catches.
+struct SEAMS_EH_API RangeError : std::runtime_error {
   using std::runtime_error::runtime_error;
+  ~RangeError() override;
 };
 
 namespace {

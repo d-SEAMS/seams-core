@@ -62,6 +62,7 @@ ydslib_sources = files(
   'topo_one_dim.cpp',
   'topo_two_dim.cpp',
   'trajectory.cpp',
+  'exception_typeinfo.cpp',
 )
 
 # backward-cpp's crash handler symbolizes with backtrace_symbols, which
@@ -188,7 +189,7 @@ endif
 ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps + [linkcell_dep],
-  cpp_args: _args,
+  cpp_args: _args + ['-DSEAMS_EH_EXPORT'],
   link_with: _shell_link + _ylm_link,
   link_args: _lib_link_args,
   include_directories: _incdirs,

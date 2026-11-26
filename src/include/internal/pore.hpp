@@ -7,6 +7,7 @@
 #define SEAMS_PORE_H_
 
 #include <mol_sys.hpp>
+#include <compiler_compat.hpp>
 
 #include <array>
 #include <stdexcept>
@@ -38,8 +39,10 @@
 
 namespace pore {
 
-struct BoxError : std::invalid_argument {
+// Key function in exception_typeinfo.cpp, same reason as mic::RangeError.
+struct SEAMS_EH_API BoxError : std::invalid_argument {
   using std::invalid_argument::invalid_argument;
+  ~BoxError() override;
 };
 
 struct Profile {

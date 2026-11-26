@@ -2570,6 +2570,25 @@ if get_option('with_tests')
     env: _capi_env,
     suite: 'mic',
     timeout: 600)
+  # libseams is -fvisibility=hidden. This shared library is too, and the
+  # executable is not. The test fails unless both see one typeinfo.
+  _eh_hidden = shared_library(
+    'exception_typeinfo_hidden',
+    files('tests/exception_typeinfo_hidden.cpp'),
+    dependencies: yds_dep,
+    cpp_args: _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden'],
+    build_rpath: meson.current_build_dir() / 'src')
+  test(
+    'exception_typeinfo',
+    executable(
+      'exception_typeinfo',
+      files('tests/exception_typeinfo.cpp'),
+      dependencies: yds_dep,
+      link_with: _eh_hidden,
+      cpp_args: _args,
+      build_rpath: meson.current_build_dir() / 'src'),
+    suite: 'mic',
+    timeout: 60)
   # GCC marks only ASan and TSan builds; clang reports every sanitizer.
   _signal_mode = (_capi_san.contains('address') or _capi_san.contains('thread') or
                   (cppc.get_id() == 'clang' and _capi_san != 'none')) ? 'sanitized' : 'plain'
