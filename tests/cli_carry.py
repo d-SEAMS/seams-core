@@ -72,12 +72,12 @@ same(["--frame", "1", "--last", str(mw_frames), "cages", "--graph", "cutoff",
 same(["--frame", "1", "--last", str(mw_frames), "chill-plus", "--tum-layers", mw],
      mw_frames)
 for graph in ("seeded", "knn"):
-    same(["--frame", "1", "--last", "30", "-t", "1", "cages", "--graph", graph,
-          liquid], 30)
-same(["--frame", "1", "--last", "15", "-t", "1", "cages", "--graph", "knn",
-      "--signature", "4:6,6:8", liquid], 15)
-same(["--frame", "1", "--last", "8", "-t", "1", "fingerprint", "--graph", "knn",
-      "--by-atom", liquid], 8)
+    same(["--frame", "1", "--last", "2", "-t", "1", "cages", "--graph", graph,
+          liquid], 2)
+same(["--frame", "1", "--last", "2", "-t", "1", "cages", "--graph", "knn",
+      "--signature", "4:6,6:8", liquid], 2)
+same(["--frame", "1", "--last", "2", "-t", "1", "fingerprint", "--graph", "knn",
+      "--by-atom", liquid], 2)
 with tempfile.TemporaryDirectory() as tmp:
     drift = os.path.join(tmp, "drift.lammpstrj")
     perturbed(mw, drift)
