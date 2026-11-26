@@ -473,12 +473,21 @@ linkcell_dep = dependency('linkcell', version: '>=0.6.0', required: true,
                           default_options: _linkcell_opts)
 # The Rust archive stays on libyodaLib. linkcell_eh is shared, so every
 # image that names linkcell::Error links that one library. A partial
-# dependency's links would also pull linkcell_gpu; the subproject
-# variable is the exception library alone.
+# dependency's links would also pull linkcell_gpu and the Rust archive.
+# The subproject exposes the exception library alone. An installed
+# linkcell.pc lists -llinkcell and -llinkcell_eh together, so partializing
+# it drops the typeinfo; liblinkcell_eh is the shared library in that
+# pkg-config libdir.
 _linkcell_eh_dep = declare_dependency()
 if linkcell_dep.type_name() == 'internal'
   _linkcell_eh_dep = declare_dependency(
     link_with: subproject('linkcell').get_variable('linkcell_eh'))
+else
+  _lc_libdir = linkcell_dep.get_variable(pkgconfig: 'libdir', default_value: '')
+  if _lc_libdir == ''
+    error('external linkcell has no pkg-config libdir, so linkcell_eh cannot be linked')
+  endif
+  _linkcell_eh_dep = cppc.find_library('linkcell_eh', dirs: [_lc_libdir], required: true)
 endif
 if _linkcell_tsan
   # The sanitized linkcell is its shared library, one copy however many
