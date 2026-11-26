@@ -2295,7 +2295,10 @@ if get_option('with_cli') and get_option('with_tests')
     '--list',
     check: true).stdout().strip().split('\n')
   foreach _page : _snippet_list
-    if _page != ''
+    # source_science_brine compiles science_tutorials.c in brine mode.
+    # docs_science_tutorials already runs that binary on the same two
+    # frames and checks hexagonal counts 733 and 741.
+    if _page != '' and _page != 'source_science_brine'
       test(
         'docs_snippet_' + _page,
         python3,
