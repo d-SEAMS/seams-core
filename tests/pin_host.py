@@ -378,6 +378,81 @@ def self_test() -> None:
     print("pin host self-test passed", flush=True)
 
 
+def links_openmp() -> bool:
+    """True when this build linked a runtime that can form a team."""
+    done = subprocess.run(
+        ["ldd", str(LIB)], capture_output=True, text=True, check=False)
+    text = done.stdout + done.stderr
+    return any(name in text for name in ("libgomp", "libomp", "libiomp5"))
+
+
+def listed_cpus(lists: set[str]) -> set[int]:
+    found: set[int] = set()
+    for item in lists:
+        for part in item.split(","):
+            part = part.strip()
+            if not part:
+                continue
+            if "-" in part:
+                left, right = part.split("-", 1)
+                found.update(range(int(left), int(right) + 1))
+            else:
+                found.add(int(part))
+    return found
+
+
+def serial_contract() -> int:
+    """No OpenMP runtime: do not invent a team, and stay inside the caller mask."""
+    _singles, after, team, seen = one(child_env())
+    print(f"serial singles team={team} cpus={sorted(seen)} after={sorted(after)}", flush=True)
+    if team >= 2:
+        raise SystemExit(f"serial run invented a team: {seen}")
+    mask = set(mask_cpus())
+    if listed_cpus(after) - mask:
+        raise SystemExit(f"serial run left the caller mask: {after}")
+
+    env = child_env()
+    env["SEAMS_ROOT"] = str(ROOT)
+    gate = tempfile.mkdtemp()
+    env["SEAMS_WAIT_DIR"] = gate
+    env["SEAMS_WAIT_N"] = "2"
+    procs = []
+    for _k in range(2):
+        procs.append(subprocess.Popen(
+            [sys.executable, "-c", WORKER], env=dict(env),
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
+    for proc in procs:
+        out, err = proc.communicate(timeout=120)
+        if proc.returncode != 0:
+            raise SystemExit(err[-2000:] or out[-2000:] or "concurrent serial worker failed")
+        line = [ln for ln in out.splitlines() if ln.startswith("PIN ")][-1]
+        _singles, _after, child_team, _cpus = parse_pin(line)
+        print(line, flush=True)
+        if child_team >= 2:
+            raise SystemExit(f"concurrent serial run invented a team: {line}")
+    shutil.rmtree(gate, ignore_errors=True)
+
+    narrow = narrow_cpus(mask_cpus())
+    narrow_env = child_env()
+    narrow_env["SEAMS_ROOT"] = str(ROOT)
+    _singles, after, team, seen = one(
+        narrow_env, ["taskset", "-c", cpu_spec(narrow)])
+    print(f"serial taskset {cpu_spec(narrow)} cpus={sorted(seen)} team={team}", flush=True)
+    if team >= 2 or not seen <= set(narrow) or not listed_cpus(after) <= set(narrow):
+        raise SystemExit(f"serial run left the taskset mask: {seen} {after}")
+
+    bound = child_env()
+    bound["SEAMS_ROOT"] = str(ROOT)
+    host_cpu = mask_cpus()[-1]
+    code = "import os\nos.sched_setaffinity(0, {" + str(host_cpu) + "})\n" + WORKER
+    _singles, after, _team, seen = parse_pin(run_worker(code, bound))
+    print(f"serial prebound cpus={sorted(seen)} after={sorted(after)}", flush=True)
+    if seen - {host_cpu} or listed_cpus(after) - {host_cpu}:
+        raise SystemExit(f"serial run spread off the host cpu: {seen} {after}")
+    print("pin host checks passed", flush=True)
+    return 0
+
+
 def main() -> int:
     self_test()
     if sys.argv[1:] == ["--self-test"]:
@@ -393,6 +468,8 @@ def main() -> int:
     if ncpu < 8:
         print(f"placement checks not run: {ncpu} cpus in the mask", flush=True)
         return 77
+    if not links_openmp():
+        return serial_contract()
     base = child_env()
     singles, after, team, _cpus = one_placed(base)
     print(f"solo singles={sorted(singles)} team={team} after={sorted(after)}", flush=True)

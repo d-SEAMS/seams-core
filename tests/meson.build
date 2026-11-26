@@ -887,9 +887,8 @@ test('ion_shell_rings', find_program('python3'),
   env: _test_env,
   timeout: 120)
 # Placement is sched_setaffinity, /proc/self/task and taskset: Linux only.
-# What it places is the OpenMP team, which a build without OpenMP never
-# starts.
-if host_machine.system() == 'linux' and openmp_found
+# A build without OpenMP still runs. It checks that no team is invented.
+if host_machine.system() == 'linux'
   test('pin_host', find_program('python3'),
     args: [files('pin_host.py')],
     workdir: meson.project_source_root(),
