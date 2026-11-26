@@ -152,8 +152,8 @@ let
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
   };
   linkcellSrc = fetchzip {
-    url = "https://github.com/d-SEAMS/linkcell/archive/0bc73576ceb4ea79909a3ad7a7931275b59a9fe4.tar.gz";
-    hash = "sha256-hvvSe2mZW4OuCz/HJUMpv8n7rmWZxQ67JaUO1Cy7Rbo=";
+    url = "https://github.com/d-SEAMS/linkcell/archive/f5ea5d6f0cc490686daec5e8352fdee8bc9b2314.tar.gz";
+    hash = "sha256-VoCfM62uyGbIpaoikqtWmvOSVfcPROyGFRQkL55ulD4=";
   };
   vesinSrc = fetchzip {
     url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
@@ -161,7 +161,7 @@ let
   };
   linkcellCargoVendor = rustPlatform.fetchCargoVendor {
     src = linkcellSrc;
-    hash = "sha256-2QscNVUPmCrwO1cAHWnDZAtU8Hsr6Bl/WTO65WwDsC8=";
+    hash = "sha256-tA80Kdax1fXOXnezcGuTrQ+XT1CcCVp6S4L8aLJfZXk=";
   };
   minimageCargoVendor = rustPlatform.fetchCargoVendor {
     src = minimageSrc;
@@ -224,8 +224,15 @@ stdenv.mkDerivation (finalAttrs: {
     cp -R ${linkcellSrc} subprojects/linkcell
     cp -R ${vesinSrc} subprojects/vesin
     chmod -R u+w subprojects/minimage subprojects/linkcell subprojects/vesin
-    patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch
-    patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-exception-typeinfo.patch
+    # linkcell's cargo tests check a two-worker pool. Nix's check hook
+    # sets OMP_NUM_THREADS=1, so this patch pins that environment to 2.
+    # Remove when pin >= the linkcell commit that sets OMP_NUM_THREADS=2
+    # on cargo-tests. f5ea5d6f0cc490686daec5e8352fdee8bc9b2314 does not.
+    # patch -N skips a hunk that is already applied. The dry run keeps a
+    # second pass from failing the script.
+    if patch -N --dry-run -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch >/dev/null; then
+      patch -N -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch
+    fi
     cp -R subprojects/packagefiles/vesin/. subprojects/vesin/
     patch -d subprojects/vesin -p1 < subprojects/packagefiles/vesin-null-reset.patch
     mkdir -p docs/.cache/figshare-11448702

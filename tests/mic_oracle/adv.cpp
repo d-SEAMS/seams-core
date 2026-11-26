@@ -218,8 +218,7 @@ std::vector<Band> bands() {
                  },
                  Band::Window, Band::Cliff});
   // Appended so the earlier bands keep their seeds. One cell, not a draw:
-  // these literals are the cell whose obtuse cleanup runs out the iteration
-  // cap in snapToLattice.
+  // a coverage-reachability case for the obtuse cleanup in snapToLattice.
   out.push_back({"needle-1e10-selling-cap",
                  [](Rng &) {
                    return Cell{1e10,

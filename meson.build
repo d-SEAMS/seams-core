@@ -442,7 +442,13 @@ vesin_dep = dependency('vesin', required: false, fallback: ['vesin', 'vesin_dep'
 # checks; both follow this project's with_tests.
 _sub_flag = get_option('with_tests') ? 'true' : 'false'
 _sub_tests = ['with_tests=' + _sub_flag, 'with_examples=' + _sub_flag]
-_linkcell_opts = _sub_tests + ['use_openmp=' + (openmp_found ? 'true' : 'false')]
+# eh_shared keeps linkcell::Error in the shared library linkcell_eh.
+# false would link src/error.cpp into each final image, and libc++ would
+# miss the handler across DSOs.
+_linkcell_opts = _sub_tests + [
+  'use_openmp=' + (openmp_found ? 'true' : 'false'),
+  'eh_shared=true',
+]
 if gpulite_dep.found() and not gpulite_opt.disabled()
   _linkcell_opts += ['with_gpulite=enabled']
 else
@@ -465,13 +471,25 @@ endif
 linkcell_dep = dependency('linkcell', version: '>=0.6.0', required: true,
                           fallback: ['linkcell', 'linkcell_dep'],
                           default_options: _linkcell_opts)
+# The Rust archive stays on libyodaLib. linkcell_eh is shared, so every
+# image that names linkcell::Error links that one library. A partial
+# dependency's links would also pull linkcell_gpu; the subproject
+# variable is the exception library alone.
+_linkcell_eh_dep = declare_dependency()
+if linkcell_dep.type_name() == 'internal'
+  _linkcell_eh_dep = declare_dependency(
+    link_with: subproject('linkcell').get_variable('linkcell_eh'))
+endif
 if _linkcell_tsan
   # The sanitized linkcell is its shared library, one copy however many
   # targets link it, so every target that calls lc_ links it directly.
   _deps += [linkcell_dep]
 else
-  # Headers only; libyodaLib links the library (src/meson.build).
-  _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true)]
+  # Headers, and linkcell_eh. libyodaLib links the Rust archive
+  # (src/meson.build). Linking that archive again would be a second
+  # copy of the lc_ symbols.
+  _deps += [linkcell_dep.partial_dependency(compile_args: true, includes: true, sources: true),
+            _linkcell_eh_dep]
 endif
 # Always set: installed headers and consumers still test it.
 _args += ['-DSEAMS_HAS_LINKCELL=1']
@@ -2570,14 +2588,27 @@ if get_option('with_tests')
     env: _capi_env,
     suite: 'mic',
     timeout: 600)
-  # libseams is -fvisibility=hidden. This shared library is too, and the
-  # executable is not. The test fails unless both see one typeinfo.
+  # libseams is -fvisibility=hidden. This shared library is too, where
+  # the compiler has that flag, and the executable is not. The address
+  # check fails unless both see one typeinfo. MSVC has no visibility
+  # flag; the probe dllexports its entry points and the test catches by
+  # type instead of comparing addresses.
+  _eh_vis = ['-fvisibility=hidden', '-fvisibility-inlines-hidden']
+  _eh_hidden_args = _args
+  if cppc.has_multi_arguments(_eh_vis)
+    _eh_hidden_args += _eh_vis
+  endif
   _eh_hidden = shared_library(
     'exception_typeinfo_hidden',
     files('tests/exception_typeinfo_hidden.cpp'),
     dependencies: yds_dep,
-    cpp_args: _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden'],
+    cpp_args: _eh_hidden_args,
     build_rpath: meson.current_build_dir() / 'src')
+  _eh_env = environment()
+  if host_machine.system() == 'windows'
+    _eh_env.prepend('PATH', meson.current_build_dir() / 'src')
+    _eh_env.prepend('PATH', meson.current_build_dir() / 'subprojects' / 'linkcell')
+  endif
   test(
     'exception_typeinfo',
     executable(
@@ -2587,6 +2618,7 @@ if get_option('with_tests')
       link_with: _eh_hidden,
       cpp_args: _args,
       build_rpath: meson.current_build_dir() / 'src'),
+    env: _eh_env,
     suite: 'mic',
     timeout: 60)
   # GCC marks only ASan and TSan builds; clang reports every sanitizer.

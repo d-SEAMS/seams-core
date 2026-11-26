@@ -153,11 +153,12 @@ if (cpp_id == 'gcc' or cpp_id == 'clang') and host_machine.cpu_family() == 'x86_
   _args += ['-DSEAMS_YLM_AVX512=1', '-DSEAMS_SHELL_AVX2=1']
 endif
 
-# libyodaLib holds the process's one copy of linkcell and exports its lc_
-# symbols. A consumer that linked the archive again carried a second copy,
-# and that copy's lc_set_threads won the dynamic lookup, so the width never
-# reached the searches libyodaLib runs. yds_dep therefore passes the
-# linkcell headers alone.
+# libyodaLib holds the process's one copy of the linkcell Rust archive and
+# exports its lc_ symbols. A consumer that linked the archive again carried
+# a second copy, and that copy's lc_set_threads won the dynamic lookup, so
+# the width never reached the searches libyodaLib runs. yds_dep therefore
+# passes the linkcell headers and the shared linkcell_eh library, not the
+# archive. linkcell::Error's typeinfo lives in linkcell_eh.
 # cutoffSolid calls ylmAdd8 only on x86-64. At -O0 a compiler keeps that
 # call even when the flag in front of it is constant false, and the
 # arm64 link then misses the symbol. This archive is the same file

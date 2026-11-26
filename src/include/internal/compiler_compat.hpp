@@ -32,7 +32,10 @@
 
 // Exception types that cross from libyodaLib into libseams. libc++ matches
 // a handler by the address of typeinfo, and libseams is built with hidden
-// visibility, so the type has to be one default-visibility symbol.
+// visibility, so the key function is one default-visibility symbol in
+// libyodaLib. On Windows, SEAMS_EH_EXPORT dllexports the class from
+// libyodaLib and every other translation unit dllimports it. MSVC matches
+// the decorated type name, so those addresses are not one value.
 #if defined(_WIN32)
 #if defined(SEAMS_EH_EXPORT)
 #define SEAMS_EH_API __declspec(dllexport)

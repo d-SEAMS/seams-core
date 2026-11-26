@@ -66,11 +66,20 @@ namespace mic {
 // in binary64. It is a property of the input, so the C API reports it as
 // SEAMS_ERR_RANGE rather than as an internal error.
 // The destructor is defined in exception_typeinfo.cpp and is the key
-// function: one exported typeinfo in libyodaLib, which libseams catches.
+// function: one typeinfo in libyodaLib, which libseams catches. Default
+// visibility on ELF. On Windows the class is dllexport from libyodaLib
+// (SEAMS_EH_EXPORT) and dllimport in every other translation unit.
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4275) // std::runtime_error has no dll interface
+#endif
 struct SEAMS_EH_API RangeError : std::runtime_error {
   using std::runtime_error::runtime_error;
   ~RangeError() override;
 };
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 namespace {
 

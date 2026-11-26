@@ -33,10 +33,9 @@ fi
 # the WrapDB patch that adds its meson.build), so Meson finds a
 # buildable subproject already on disk and never needs the network
 # nodownload forbids. Tests (cxxopts, rang) are already off above.
-# The linkcell pin is already on disk, so Meson does not apply the
-# wrap diff. The same patch nix and Yggdrasil apply gives linkcell::Error
-# one exported typeinfo.
-patch -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-exception-typeinfo.patch
+# The linkcell pin is already on disk. Its src/error.cpp is the key
+# function, built by linkcell's own meson as the shared library
+# linkcell_eh, so this script does not patch that tree.
 
 meson setup _build_lib ${MESON_ARGS} \
   --wrap-mode=nodownload \
