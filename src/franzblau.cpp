@@ -3314,6 +3314,11 @@ primitive::RingSearchSplit primitive::lastRingSearchSplit() {
 
 int primitive::lastRingSearchUsedBalls() { return gUsedBalls; }
 
+static int findRingsLimited(primitive::Graph &fullGraph, int v,
+                            std::vector<int> &visited, int maxDepth, int depth,
+                            int root, std::int64_t *steps,
+                            std::int64_t maxSteps, int maxRings);
+
 /**
  *  @details Get all possible rings (only atom indices, not IDs). The input
  *   neighbour list is in terms of indices. All possible rings (including
@@ -3330,7 +3335,14 @@ int primitive::lastRingSearchUsedBalls() { return gUsedBalls; }
  */
 primitive::Graph
 primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbondList,
-                                  int maxDepth, std::int64_t maxSteps, int maxRings) {
+                                  int maxDepth) {
+  return primitive::countAllRingsFromIndexWithin(neighHbondList, maxDepth,
+                                                 RingSearchBudget{});
+}
+
+primitive::Graph primitive::countAllRingsFromIndexWithin(
+    const std::vector<std::vector<int>> &neighHbondList, int maxDepth,
+    const RingSearchBudget &budget) {
   //
   primitive::Graph fullGraph; // Graph object
   std::vector<int>
@@ -3345,13 +3357,13 @@ primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbon
   // ------------------------------
   // Loop through every vertex
   std::int64_t steps = 0;
-  std::int64_t *stepPtr = maxSteps > 0 ? &steps : nullptr;
+  std::int64_t *stepPtr = budget.maxSteps > 0 ? &steps : nullptr;
   for (int iatom = 0; iatom < neighHbondList.size(); iatom++) {
     visited.clear();
     depth = 0;
     // Call the function for getting rings
-    primitive::findRings(fullGraph, iatom, visited, maxDepth, depth, -1, stepPtr, maxSteps,
-                         maxRings);
+    findRingsLimited(fullGraph, iatom, visited, maxDepth, depth, -1, stepPtr,
+                     budget.maxSteps, budget.maxRings);
   } // loop through every vertex
   // ------------------------------
   // Restore back-up of the edges (some may have been removed)
@@ -3384,9 +3396,10 @@ primitive::countAllRingsFromIndex(const std::vector<std::vector<int>> &neighHbon
  * (candidate ring) is being grown. This is initialized to a dummy value of -1,
  * when it is called from primitive::countAllRingsFromIndex.
  */
-int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited, int maxDepth,
-                         int depth, int root, std::int64_t *steps, std::int64_t maxSteps,
-                         int maxRings) {
+static int findRingsLimited(primitive::Graph &fullGraph, int v,
+                            std::vector<int> &visited, int maxDepth, int depth,
+                            int root, std::int64_t *steps,
+                            std::int64_t maxSteps, int maxRings) {
   //
   int nnumNeighbours; // Number of nearest neighbours for iNode
   int n;              // Node of a neighbour (index)
@@ -3437,8 +3450,8 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited, int
     else if (fullGraph.pts[static_cast<std::size_t>(n)].inGraph) {
       fullGraph.pts[static_cast<std::size_t>(n)].inGraph = false; // Set to false now
       // Recursive call
-      primitive::findRings(fullGraph, n, visited, maxDepth, depth, root, steps, maxSteps,
-                           maxRings);
+      findRingsLimited(fullGraph, n, visited, maxDepth, depth, root, steps,
+                       maxSteps, maxRings);
       fullGraph.pts[static_cast<std::size_t>(n)].inGraph = true; // Put n back in the graph
     } // Search the other unsearched neighbours
   }   // end of search through all neighbours
@@ -3458,6 +3471,12 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited, int
   visited.pop_back();
   //
   return 0;
+}
+
+int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
+                         int maxDepth, int depth, int root) {
+  return findRingsLimited(fullGraph, v, visited, maxDepth, depth, root, nullptr,
+                          0, 0);
 }
 
 /**

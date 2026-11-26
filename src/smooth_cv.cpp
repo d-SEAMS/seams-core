@@ -401,8 +401,9 @@ Topology buildTopology(const std::vector<std::vector<int>> &rows, int maxRing) {
                               std::to_string(kMaxRingSearchSteps) + " steps");
     }
   }
-  auto graph = primitive::countAllRingsFromIndex(graphRows, maxRing, kMaxRingSearchSteps,
-                                                 kMaxCandidateRings);
+  auto graph = primitive::countAllRingsFromIndexWithin(
+      graphRows, maxRing,
+      primitive::RingSearchBudget{kMaxRingSearchSteps, kMaxCandidateRings});
   std::vector<std::vector<int>> cycles;
   cycles.reserve(graph.rings.size());
   for (auto &ring : graph.rings) {
