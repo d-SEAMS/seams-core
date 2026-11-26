@@ -682,32 +682,6 @@ const std::vector<HarmonicReference> &referenceQ6() {
 
 } // namespace
 
-TEST_CASE("lookupTableQ3Vec matches independent reference values", "[bop]") {
-  for (const auto &ref : referenceQ3()) {
-    auto result = sph::lookupTableQ3Vec({ref.phi, ref.theta});
-    REQUIRE(result.size() == ref.values.size());
-    for (size_t m = 0; m < result.size(); m++) {
-      REQUIRE_THAT(result[m].real(),
-                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
-      REQUIRE_THAT(result[m].imag(),
-                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
-    }
-  }
-}
-
-TEST_CASE("lookupTableQ6Vec matches independent reference values", "[bop]") {
-  for (const auto &ref : referenceQ6()) {
-    auto result = sph::lookupTableQ6Vec({ref.phi, ref.theta});
-    REQUIRE(result.size() == ref.values.size());
-    for (size_t m = 0; m < result.size(); m++) {
-      REQUIRE_THAT(result[m].real(),
-                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
-      REQUIRE_THAT(result[m].imag(),
-                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
-    }
-  }
-}
-
 TEST_CASE("spherical harmonics satisfy the addition theorem", "[bop]") {
   // sum_m |Y_lm(theta, phi)|^2 = (2l+1) / (4 pi), for every direction
   const std::vector<std::pair<double, double>> directions = {
@@ -871,19 +845,6 @@ molSys::PointCloud<molSys::Point<double>, double> fccCloud(int reps,
 }
 
 } // namespace
-
-TEST_CASE("lookupTableQ4Vec matches independent reference values", "[bop]") {
-  for (const auto &ref : referenceQ4()) {
-    auto result = sph::lookupTableQ4Vec({ref.phi, ref.theta});
-    REQUIRE(result.size() == ref.values.size());
-    for (size_t m = 0; m < result.size(); m++) {
-      REQUIRE_THAT(result[m].real(),
-                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
-      REQUIRE_THAT(result[m].imag(),
-                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
-    }
-  }
-}
 
 TEST_CASE("Q4 satisfies the addition theorem and Condon-Shortley", "[bop]") {
   const std::vector<std::pair<double, double>> directions = {
@@ -1442,15 +1403,29 @@ const std::vector<HarmonicReference> &referenceQ8() {
 
 } // namespace
 
-TEST_CASE("lookupTableQ8Vec matches independent reference values", "[bop]") {
-  for (const auto &ref : referenceQ8()) {
-    auto result = sph::lookupTableQ8Vec({ref.phi, ref.theta});
-    REQUIRE(result.size() == ref.values.size());
-    for (size_t m = 0; m < result.size(); m++) {
-      REQUIRE_THAT(result[m].real(),
-                   Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
-      REQUIRE_THAT(result[m].imag(),
-                   Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
+TEST_CASE("lookup tables match independent reference values", "[bop]") {
+  struct Row {
+    int order;
+    const std::vector<HarmonicReference> &(*refs)();
+    std::vector<std::complex<double>> (*lookup)(std::array<double, 2>);
+  };
+  const Row rows[] = {
+      {3, referenceQ3, sph::lookupTableQ3Vec},
+      {4, referenceQ4, sph::lookupTableQ4Vec},
+      {6, referenceQ6, sph::lookupTableQ6Vec},
+      {8, referenceQ8, sph::lookupTableQ8Vec},
+  };
+  for (const Row &row : rows) {
+    for (const auto &ref : row.refs()) {
+      INFO("l " << row.order << " theta " << ref.theta << " phi " << ref.phi);
+      auto result = row.lookup({ref.phi, ref.theta});
+      REQUIRE(result.size() == ref.values.size());
+      for (size_t m = 0; m < result.size(); m++) {
+        REQUIRE_THAT(result[m].real(),
+                     Catch::Matchers::WithinAbs(ref.values[m].real(), 1e-13));
+        REQUIRE_THAT(result[m].imag(),
+                     Catch::Matchers::WithinAbs(ref.values[m].imag(), 1e-13));
+      }
     }
   }
 }
