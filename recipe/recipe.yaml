@@ -32,7 +32,7 @@ source:
   # pinned main commit subprojects/linkcell.wrap names; cargo fetches
   # its crates.
   - git: https://github.com/d-SEAMS/linkcell.git
-    rev: 0bc73576ceb4ea79909a3ad7a7931275b59a9fe4
+    rev: f5ea5d6f0cc490686daec5e8352fdee8bc9b2314
     target_directory: subprojects/linkcell
 
 build:

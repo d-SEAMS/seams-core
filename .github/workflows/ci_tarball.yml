@@ -87,6 +87,10 @@ jobs:
               rm -rf /opt/git/docs/.cache /opt/git/cmake/vendor
               cp -a /opt/tar/docs/.cache /opt/git/docs/.cache
               cp -a /opt/tar/cmake/vendor /opt/git/cmake/vendor
+              # cargo rustc --lib does not fetch Cargo.lock dev-dependencies.
+              # The dist vendor directory is those crates, so the git tree uses it.
+              # Each subproject keeps that vendor config beside its manifest.
+              python3 /opt/git/scripts/dist_vendor.py --install-cargo /opt/tar /opt/git
               cd /opt/git
               sh scripts/install_pydseamslib.sh --break-system-packages
               chown -R tester:tester /opt/git /opt/tar
@@ -104,6 +108,14 @@ jobs:
             seams-ready \
             bash -lc '
               set -euxo pipefail
+              # Cargo reads .cargo/config.toml from its working directory, not
+              # from --manifest-path. Meson starts cargo in the build tree, so
+              # every invocation goes through the source-directory wrapper.
+              install -d /work/cargo-bin
+              cp /opt/git/scripts/cargo-from-source /work/cargo-bin/cargo
+              chmod +x /work/cargo-bin/cargo
+              PATH="/work/cargo-bin:${PATH}"
+              export PATH
               for tree in git tar; do
                 # A failed step prints the end of its log; meson keeps the
                 # CMake output for chemfiles there.

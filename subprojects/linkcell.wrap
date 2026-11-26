@@ -1,8 +1,8 @@
 [wrap-git]
 url = https://github.com/d-SEAMS/linkcell.git
-revision = 0bc73576ceb4ea79909a3ad7a7931275b59a9fe4
+revision = f5ea5d6f0cc490686daec5e8352fdee8bc9b2314
 depth = 1
-diff_files = linkcell-exception-typeinfo.patch
+diff_files = linkcell-omp-test.patch
 
 [provide]
 linkcell = linkcell_dep

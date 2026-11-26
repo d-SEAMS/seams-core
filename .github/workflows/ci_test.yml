@@ -205,3 +205,17 @@ jobs:
           test -x "$abidiff"
           printf "[binaries]\nabidiff = '%s'\n" "$abidiff" > "$RUNNER_TEMP/abidiff.ini"
           SEAMS_MESON_ARGS="--native-file $RUNNER_TEMP/abidiff.ini" pixi run bash scripts/ci_pixi_suite.sh
+
+  # Installed linkcell >= 0.6.0 is a pkg-config dependency. Partializing it
+  # drops -llinkcell_eh, so exception_typeinfo must link that library from
+  # the prefix and run.
+  external-linkcell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@9936258fee697aff89b3fed6ca1f80a382ef694e # v0.11.3
+        with:
+          environments: default
+          cache-key: pixi-external-linkcell-
+      - name: Build against an installed linkcell
+        run: pixi run sh scripts/check_external_linkcell.sh

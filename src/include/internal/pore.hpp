@@ -39,11 +39,21 @@
 
 namespace pore {
 
-// Key function in exception_typeinfo.cpp, same reason as mic::RangeError.
+// Key function in exception_typeinfo.cpp, same reason as mic::RangeError:
+// one typeinfo in libyodaLib. Default visibility on ELF. On Windows the
+// class is dllexport from libyodaLib (SEAMS_EH_EXPORT) and dllimport in
+// every other translation unit.
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4275) // std::invalid_argument has no dll interface
+#endif
 struct SEAMS_EH_API BoxError : std::invalid_argument {
   using std::invalid_argument::invalid_argument;
   ~BoxError() override;
 };
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
 struct Profile {
   std::vector<double> coordinate;

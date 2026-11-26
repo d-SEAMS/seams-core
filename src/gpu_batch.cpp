@@ -1,7 +1,6 @@
 #include <gpu_batch.hpp>
 #include <seams_config.hpp>
 
-#include <linkcell_gpu.hpp>
 #include <neighbours.hpp>
 
 #include <algorithm>
@@ -12,6 +11,7 @@
 #include <vector>
 
 #ifdef SEAMS_HAS_GPULITE
+#include <linkcell_gpu.hpp>
 #include <gpulite/gpulite.hpp>
 #include <tum_offload.hpp>
 using gpulite::CUDART;
