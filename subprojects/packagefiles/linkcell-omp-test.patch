@@ -1,12 +1,16 @@
 diff --git a/meson.build b/meson.build
-index 988a529..51bbb6d 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -426,6 +426,7 @@ if get_option('with_tests')
+@@ -426,7 +426,12 @@ if get_option('with_tests')
      env: {
        'LINKCELL_OPENMP': _use_openmp ? '1' : '0',
        'CARGO_PROFILE_TEST_OPT_LEVEL': '3',
 +      'OMP_NUM_THREADS': '2',
++      'CARGO_TARGET_DIR': meson.project_build_root() / 'cargo-target-tests',
      },
++    # Cargo loads .cargo/config.toml from the working directory. The offline
++    # vendor directory is written beside this manifest.
++    workdir: _msproot,
      timeout: 300,
    )
+   _cpp = meson.get_compiler('cpp')

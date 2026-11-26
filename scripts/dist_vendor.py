@@ -72,6 +72,51 @@ def drop_build_trees(path):
                 found.unlink()
 
 
+def lock_sourced_crates(lock_text):
+    """Sourced packages in a Cargo.lock, in file order.
+
+    Path and workspace members have no source line. Registry and git
+    packages do. That list is the offline set, dev-dependencies included.
+    """
+    crates = []
+    for block in lock_text.split("[[package]]")[1:]:
+        name = version = source = None
+        for line in block.splitlines():
+            if line.startswith("name = "):
+                name = line.split("=", 1)[1].strip().strip('"')
+            elif line.startswith("version = "):
+                version = line.split("=", 1)[1].strip().strip('"')
+            elif line.startswith("source = "):
+                source = line.split("=", 1)[1].strip().strip('"')
+            elif line.startswith("["):
+                break
+        if name and version and source:
+            crates.append((name, version))
+    return crates
+
+
+def vendored_crate_present(vendor, name, version):
+    return (vendor / name).is_dir() or (vendor / "{}-{}".format(name, version)).is_dir()
+
+
+def require_lock_vendored(project):
+    """Fail when vendor omits a sourced crate from Cargo.lock."""
+    lock = project / "Cargo.lock"
+    if not lock.is_file():
+        raise SystemExit("{} has no Cargo.lock".format(project))
+    missing = [
+        "{} {}".format(name, version)
+        for name, version in lock_sourced_crates(lock.read_text(encoding="utf-8"))
+        if not vendored_crate_present(project / "vendor", name, version)
+    ]
+    if missing:
+        raise SystemExit(
+            "{} vendor is missing {} crate(s) named by Cargo.lock: {}".format(
+                project, len(missing), ", ".join(missing)
+            )
+        )
+
+
 def vendor_cargo(project):
     if not (project / "Cargo.toml").is_file():
         return
@@ -87,6 +132,47 @@ def vendor_cargo(project):
         if existing and not existing.endswith("\n"):
             existing += "\n"
         config.write_text(existing + VENDOR_CONFIG)
+    require_lock_vendored(project)
+
+
+def install_vendored_cargo(dist_root, dest_root):
+    """Copy each dist subproject's lock-derived vendor onto dest_root.
+
+    A library build fetches only the crates it compiles. Cargo test also
+    needs the dev-dependencies in Cargo.lock. The dist vendor directory
+    is that set; the destination checkout has to carry the same trees.
+    """
+    dist_root = Path(dist_root)
+    dest_root = Path(dest_root)
+    vendors = sorted(
+        path for path in (dist_root / "subprojects").glob("*/vendor") if path.is_dir()
+    )
+    if not vendors:
+        raise SystemExit("no cargo vendor directories under {}".format(dist_root / "subprojects"))
+    for vendor in vendors:
+        name = vendor.parent.name
+        target = dest_root / "subprojects" / name
+        if not target.is_dir():
+            raise SystemExit("destination has no subproject {}".format(name))
+        cargo_src = vendor.parent / ".cargo"
+        config = cargo_src / "config.toml"
+        if not config.is_file() or "vendored-sources" not in config.read_text(encoding="utf-8"):
+            raise SystemExit("{} cargo config does not replace crates.io".format(name))
+        src_lock = vendor.parent / "Cargo.lock"
+        dst_lock = target / "Cargo.lock"
+        if not src_lock.is_file() or not dst_lock.is_file():
+            raise SystemExit("{} is missing Cargo.lock".format(name))
+        if src_lock.read_bytes() != dst_lock.read_bytes():
+            raise SystemExit("{} Cargo.lock does not match the vendored tree".format(name))
+        for child_name in ("vendor", ".cargo"):
+            child = target / child_name
+            if child.is_dir():
+                shutil.rmtree(child)
+            elif child.exists():
+                raise SystemExit("{} exists and is not a directory".format(child))
+        shutil.copytree(vendor, target / "vendor")
+        shutil.copytree(cargo_src, target / ".cargo")
+        require_lock_vendored(target)
 
 
 def fetch_checked(dist_root, item):
@@ -208,5 +294,16 @@ def main():
     vendor_bindings(source_root, dist_root)
 
 
-if __name__ == "__main__":
+def cli(argv):
+    if argv[:1] == ["--install-cargo"]:
+        if len(argv) != 3:
+            raise SystemExit("usage: dist_vendor.py --install-cargo DIST_ROOT DEST_ROOT")
+        install_vendored_cargo(Path(argv[1]), Path(argv[2]))
+        return
+    if argv:
+        raise SystemExit("usage: dist_vendor.py --install-cargo DIST_ROOT DEST_ROOT")
     main()
+
+
+if __name__ == "__main__":
+    cli(sys.argv[1:])

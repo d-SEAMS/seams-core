@@ -92,8 +92,94 @@ def _foreign_git_dir_and_index_are_ignored() -> None:
         _assert(foreign_index.read_bytes() == index_bytes, "foreign GIT_INDEX_FILE was modified")
 
 
+LOCK_FIXTURE = """\
+[[package]]
+name = "cfg-if"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "linkcell"
+version = "0.6.0"
+
+[[package]]
+name = "wasip2"
+version = "1.0.4+wasi-0.2.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+"""
+
+
+def _assert_raises(message_part: str, fn) -> None:
+    try:
+        fn()
+    except SystemExit as exc:
+        text = str(exc)
+        _assert(message_part in text, "expected {!r} in {!r}".format(message_part, text))
+        return
+    raise RuntimeError("expected SystemExit containing {!r}".format(message_part))
+
+
+def _lock_names_come_from_the_lock() -> None:
+    got = dist_vendor.lock_sourced_crates(LOCK_FIXTURE)
+    _assert(
+        got == [("cfg-if", "1.0.5"), ("wasip2", "1.0.4+wasi-0.2.12")],
+        "sourced crates were {}".format(got),
+    )
+
+
+def _vendor_must_hold_every_lock_crate() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        project = Path(tmp) / "linkcell"
+        project.mkdir()
+        (project / "Cargo.lock").write_text(LOCK_FIXTURE, encoding="utf-8")
+        _assert_raises("cfg-if 1.0.5", lambda: dist_vendor.require_lock_vendored(project))
+        for name in ("cfg-if", "wasip2"):
+            (project / "vendor" / name).mkdir(parents=True)
+        dist_vendor.require_lock_vendored(project)
+
+
+def _install_copies_the_vendored_tree() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        dist = base / "dist"
+        dest = base / "dest"
+        src = dist / "subprojects" / "linkcell"
+        (src / "vendor" / "cfg-if").mkdir(parents=True)
+        (src / "vendor" / "wasip2").mkdir()
+        (src / ".cargo").mkdir()
+        (src / ".cargo" / "config.toml").write_text(dist_vendor.VENDOR_CONFIG, encoding="utf-8")
+        (src / "Cargo.lock").write_text(LOCK_FIXTURE, encoding="utf-8")
+        target = dest / "subprojects" / "linkcell"
+        target.mkdir(parents=True)
+        (target / "Cargo.lock").write_text(LOCK_FIXTURE, encoding="utf-8")
+        (target / "vendor").mkdir()
+        dist_vendor.install_vendored_cargo(dist, dest)
+        _assert((target / "vendor" / "cfg-if").is_dir(), "cfg-if was not installed")
+        _assert((target / ".cargo" / "config.toml").is_file(), "cargo config was not installed")
+        (target / "Cargo.lock").write_text(LOCK_FIXTURE + "\n", encoding="utf-8")
+        _assert_raises(
+            "Cargo.lock does not match",
+            lambda: dist_vendor.install_vendored_cargo(dist, dest),
+        )
+
+
+def _install_rejects_an_empty_dist() -> None:
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        (base / "dist" / "subprojects").mkdir(parents=True)
+        (base / "dest").mkdir()
+        _assert_raises(
+            "no cargo vendor directories",
+            lambda: dist_vendor.install_vendored_cargo(base / "dist", base / "dest"),
+        )
+
+
 def main() -> int:
     _foreign_git_dir_and_index_are_ignored()
+    _lock_names_come_from_the_lock()
+    _vendor_must_hold_every_lock_crate()
+    _install_copies_the_vendored_tree()
+    _install_rejects_an_empty_dist()
     print("dist_vendor manifest checks ok")
     return 0
 
