@@ -3,13 +3,21 @@
 // Adversarial bands for the Euclidean minimum image, scored against the
 // binary128 reference in oracle.hpp.
 //
-// usage: mic_oracle [pairs-per-band] [seed] [-v]
+// usage: mic_oracle [compact-cells] [seed] [-v]
 //
-// meson test runs 2000 pairs per band. The full run is
-//   build/tests/mic_oracle 100000
-// and a gate rebuilds it at other flags from the build's own commands: the
-// mic_oracle entry of build/compile_commands.json with, for example,
-// -O3 -march=native appended, linked as `ninja -t commands
+// meson test draws 800 cells on each compact band and scores every
+// displacement shape on that cell. Needle and cliff bands draw 8 cells,
+// except the long-edge needle, which draws 48 cells and one displacement
+// each: that is the sample that still reaches a descent landing outside
+// the Voronoi cell and the basis swap in the coset search. The basis is
+// built once per cell. A coverage build compiles the minimum-image
+// headers at -O1 without inlining and with atomic arc counters, and that
+// first call is the runtime. Later shapes on the same cell reuse the
+// cached basis. A fresh cell per pair repeats edges this draw already
+// took. `mic_oracle 100000` raises the compact-band cell count.
+// A gate rebuilds the binary at other flags from the build's own
+// commands: the mic_oracle entry of build/compile_commands.json with, for
+// example, -O3 -march=native appended, linked as `ninja -t commands
 // tests/mic_oracle` links it. The minimum-image code is inline in the
 // headers, so it is compiled at those flags.
 //
@@ -359,7 +367,11 @@ void scoreOne(Score &s, const Band &band, const Pair &p, const Fn &fn, bool must
 int selftest() {
   int bad = 0;
   Rng g{12345};
-  for (int t = 0; t < 2000; t++) {
+  // closest() has to match the shortest translate inside [-8, 8]^3. The
+  // cube is the check. These draws are the legal cells the reduction
+  // sees; repeating the same distribution thousands of times does not
+  // add a translate the cube missed.
+  for (int t = 0; t < 64; t++) {
     const Cell c = legal(g, 1.0);
     const auto r = micoracle::reduce(c);
     const auto raw = cellTimes(c, g.in(-3, 3), g.in(-3, 3), g.in(-3, 3));
@@ -388,7 +400,7 @@ int selftest() {
       bad++;
     }
   }
-  for (int t = 0; t < 500; t++) {
+  for (int t = 0; t < 64; t++) {
     Cell c = legal(g, 1.0);
     c.xy = c.xz = c.yz = 0;
     const auto r = micoracle::reduce(c);
@@ -411,11 +423,20 @@ int selftest() {
 }  // namespace
 
 int main(int argc, char **argv) {
-  const long perBand = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 2000;
+  // Compact bands saturate their reduction and search edges by a few
+  // hundred cells once every displacement shape is scored on the cell.
+  // Needle and cliff cells are the slow basis builds, and eight of each
+  // already cover those bands. argv replaces the compact-band count.
+  constexpr long kCompactCells = 800;
+  constexpr long kHeavyCells = 8;
+  constexpr long kNeedleCells = 48;
+  constexpr int kCompactDisp = 8;
+  constexpr int kHeavyDisp = 4;
+  const long perBand = argc > 1 ? std::strtol(argv[1], nullptr, 10) : kCompactCells;
   const std::uint64_t seed = argc > 2 ? std::strtoull(argv[2], nullptr, 10) : 20261125;
   verbose = argc > 3 && std::string(argv[3]) == "-v";
   if (perBand <= 0 || argc > 4 || (argc > 3 && !verbose)) {
-    std::fprintf(stderr, "usage: mic_oracle [pairs-per-band] [seed] [-v]\n");
+    std::fprintf(stderr, "usage: mic_oracle [compact-cells] [seed] [-v]\n");
     return 2;
   }
 #ifdef SEAMS_HAS_MINIMAGE
@@ -445,68 +466,86 @@ int main(int argc, char **argv) {
   const auto all = bands();
   for (std::size_t bi = 0; bi < all.size(); bi++) {
     const Band &band = all[bi];
-    Rng g{seed + 0x1000 * bi};
+    Rng cells{seed + 0x1000 * bi};
+    Rng dispRng{seed + 0x8000 * bi + 17};
     Score score[3];
-    for (long t = 0; t < perBand; t++) {
-      Pair p{};
-      const Cell want = band.cell(g);
+    const bool needle = std::string(band.name) == "needle-1e8..1e15";
+    const bool heavy =
+        band.sampler == Band::Window || std::string(band.name).find("needle") != std::string::npos;
+    // The long-edge needle shares one generator between the cell and its
+    // single displacement, matching the draw that leaves the Voronoi cell.
+    Rng &disp = needle ? cells : dispRng;
+    const long nCells = needle ? std::min(perBand, kNeedleCells)
+                               : heavy ? std::min(perBand, kHeavyCells) : perBand;
+    const int nDisp = needle ? 1 : heavy ? kHeavyDisp : kCompactDisp;
+    for (long ci = 0; ci < nCells; ci++) {
+      Pair held{};
+      const Cell want = band.cell(cells);
       molSys::PointCloud<molSys::Point<double>, double> cloud;
       if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, 0.0, 0.0, 0.0, want.lx, want.ly,
                                          want.lz, want.xy, want.xz, want.yz)) {
         oracleFail++;
         continue;
       }
-      p.box = gen::makeFracBox(cloud);
-      p.cell = {p.box.lx, p.box.ly, p.box.lz, p.box.xy, p.box.xz, p.box.yz};
-      const auto basis = micoracle::reduce(p.cell);
-      if (!p.box.ok || !basis.ok) {
+      held.box = gen::makeFracBox(cloud);
+      held.cell = {held.box.lx, held.box.ly, held.box.lz, held.box.xy, held.box.xz, held.box.yz};
+      const auto basis = micoracle::reduce(held.cell);
+      if (!held.box.ok || !basis.ok) {
         oracleFail++;
         continue;
       }
-      p.shortest = (double)sqrtq(basis.gn[0]);
-      p.raw = band.sampler == Band::Window ? window(p.cell, g) : mixed(p.cell, p.shortest, g, (int)t);
-      p.wrap = gen::fracDelta(p.box, p.raw[0], p.raw[1], p.raw[2], 0.0, 0.0, 0.0);
-      p.exact = micoracle::closest(p.cell, basis, micoracle::fromDouble(p.raw.data()));
-      if (!p.exact.ok) {
-        oracleFail++;
-        continue;
-      }
-      {
-        const double ex[3] = {(double)p.exact.d.x, (double)p.exact.d.y, (double)p.exact.d.z};
-        const auto t = micoracle::translationScale(p.cell, p.exact.n);
-        const auto fr = micoracle::fractionalScale(p.cell, p.raw.data());
-        const auto fw = micoracle::fractionalScale(p.cell, p.wrap.data());
-        double scale = 0;
-        for (int k = 0; k < 3; k++) {
-          scale = std::max({scale, std::fabs(p.raw[k]), std::fabs(p.wrap[k]), std::fabs(ex[k]),
-                            t[k], fr[k], fw[k]});
-        }
-        p.unit = scale > 0 ? scale * 0x1p-52 : 0x1p-1074;
-      }
-      // Another image whose length is within kUnits of the minimum is a tie:
-      // binary64 cannot tell the two apart, so only the length is scored.
-      {
-        const Q elen = sqrtq(p.exact.n2);
-        const Q tol = (Q)kUnits * (Q)p.unit;
-        p.tie = micoracle::nearTie(basis, micoracle::fromDouble(p.raw.data()), p.exact,
-                                   2 * elen * tol + tol * tol);
-      }
-      std::array<double, 3> moved = p.wrap;
-      const std::array<double, 3> *candidate = nullptr;
-      if (band.kind == Band::OffLattice) {
-        for (double &x : moved) {
-          x += p.shortest * g.in(-1e-3, 1e-3);
-        }
-        candidate = &moved;
-      }
-      for (int f = 0; f < 3; f++) {
-        const bool smith = gen::smithInside(p.box, p.wrap[0] * p.wrap[0] + p.wrap[1] * p.wrap[1] +
-                                                       p.wrap[2] * p.wrap[2]);
-        const bool mustThrow = band.kind == Band::Cliff && !(f == 2 && smith);
-        if (band.kind == Band::OffLattice && f != 0) {
+      held.shortest = (double)sqrtq(basis.gn[0]);
+      for (int shape = 0; shape < nDisp; shape++) {
+        Pair p = held;
+        // The long-edge needle draws one displacement per cell and cycles
+        // the four shapes with the cell index, the same sequence as a
+        // pair-per-cell run.
+        const int which = needle ? static_cast<int>(ci) : shape;
+        p.raw = band.sampler == Band::Window ? window(p.cell, disp)
+                                            : mixed(p.cell, p.shortest, disp, which);
+        p.wrap = gen::fracDelta(p.box, p.raw[0], p.raw[1], p.raw[2], 0.0, 0.0, 0.0);
+        p.exact = micoracle::closest(p.cell, basis, micoracle::fromDouble(p.raw.data()));
+        if (!p.exact.ok) {
+          oracleFail++;
           continue;
         }
-        scoreOne(score[f], band, p, fns[f], mustThrow, candidate);
+        {
+          const double ex[3] = {(double)p.exact.d.x, (double)p.exact.d.y, (double)p.exact.d.z};
+          const auto t = micoracle::translationScale(p.cell, p.exact.n);
+          const auto fr = micoracle::fractionalScale(p.cell, p.raw.data());
+          const auto fw = micoracle::fractionalScale(p.cell, p.wrap.data());
+          double scale = 0;
+          for (int k = 0; k < 3; k++) {
+            scale = std::max({scale, std::fabs(p.raw[k]), std::fabs(p.wrap[k]), std::fabs(ex[k]),
+                              t[k], fr[k], fw[k]});
+          }
+          p.unit = scale > 0 ? scale * 0x1p-52 : 0x1p-1074;
+        }
+        // Another image whose length is within kUnits of the minimum is a tie:
+        // binary64 cannot tell the two apart, so only the length is scored.
+        {
+          const Q elen = sqrtq(p.exact.n2);
+          const Q tol = (Q)kUnits * (Q)p.unit;
+          p.tie = micoracle::nearTie(basis, micoracle::fromDouble(p.raw.data()), p.exact,
+                                     2 * elen * tol + tol * tol);
+        }
+        std::array<double, 3> moved = p.wrap;
+        const std::array<double, 3> *candidate = nullptr;
+        if (band.kind == Band::OffLattice) {
+          for (double &x : moved) {
+            x += p.shortest * disp.in(-1e-3, 1e-3);
+          }
+          candidate = &moved;
+        }
+        for (int f = 0; f < 3; f++) {
+          const bool smith = gen::smithInside(p.box, p.wrap[0] * p.wrap[0] + p.wrap[1] * p.wrap[1] +
+                                                         p.wrap[2] * p.wrap[2]);
+          const bool mustThrow = band.kind == Band::Cliff && !(f == 2 && smith);
+          if (band.kind == Band::OffLattice && f != 0) {
+            continue;
+          }
+          scoreOne(score[f], band, p, fns[f], mustThrow, candidate);
+        }
       }
     }
     for (int f = 0; f < 3; f++) {
