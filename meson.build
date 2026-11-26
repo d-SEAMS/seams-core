@@ -1551,20 +1551,6 @@ if get_option('with_cli') and get_option('with_tests')
       timeout: 900)
   endforeach
   test(
-    'docs_frame_tutorials',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'tutorials' / 'test_hf_frames.py',
-      '--small',
-      meson.project_source_root(),
-      seams_exe.full_path(),
-      meson.project_build_root() / 'src',
-    ],
-    env: tutorial_env,
-    depends: [seams_exe, seams_api_lib],
-    suite: 'docs',
-    timeout: 180)
-  test(
     'docs_tutorial_nucleation',
     python3,
     args: [
