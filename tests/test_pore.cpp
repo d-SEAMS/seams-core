@@ -1851,7 +1851,8 @@ long double coefficientImage(const double c[6], const double w[3], long double r
     const long long n[3] = {-u[k][0], -u[k][1], -u[k][2]};
     const auto v = latticeImage(c, zero, n);
     for (int m = 0; m < 3; ++m) {
-      b[k][m] = v[m];
+      b[static_cast<std::size_t>(k)][static_cast<std::size_t>(m)] =
+          v[static_cast<std::size_t>(m)];
     }
   };
   const auto dot = [](const long double *p, const long double *q) {
@@ -2212,13 +2213,15 @@ TEST_CASE("minimum image is scale-invariant in LAMMPS cgs and si units", "[pore]
     const std::array<double, 3> w = {baseW[0] * scale, baseW[1] * scale, baseW[2] * scale};
     const auto gotMic = gen::mic::euclideanIfShorter(lx, ly, lz, xy, xz, yz, w, w);
     for (int k = 0; k < 3; ++k) {
-      REQUIRE_THAT(gotMic[k] / scale, Catch::Matchers::WithinAbs(refMic[k], 1e-12 * refNorm));
+      REQUIRE_THAT(gotMic[static_cast<std::size_t>(k)] / scale,
+                   Catch::Matchers::WithinAbs(refMic[static_cast<std::size_t>(k)], 1e-12 * refNorm));
     }
 
     const auto cloud = triclinic(lx, ly, lz, xy, xz, yz);
     const auto gotPub = gen::triclinicMinImage(cloud, w[0], w[1], w[2], 0.0, 0.0, 0.0);
     for (int k = 0; k < 3; ++k) {
-      REQUIRE_THAT(gotPub[k] / scale, Catch::Matchers::WithinAbs(refMic[k], 1e-12 * refNorm));
+      REQUIRE_THAT(gotPub[static_cast<std::size_t>(k)] / scale,
+                   Catch::Matchers::WithinAbs(refMic[static_cast<std::size_t>(k)], 1e-12 * refNorm));
     }
   }
 }

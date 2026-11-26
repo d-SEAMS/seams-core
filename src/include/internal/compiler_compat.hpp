@@ -7,7 +7,13 @@
 
 #if defined(__GNUC__) || defined(__clang__)
 #define SEAMS_TARGET(spec) __attribute__((target(spec)))
+// Clang rejects the GCC optimize attribute. The kernels keep their
+// default optimisation there; GCC still requests the named pass.
+#if defined(__clang__)
+#define SEAMS_OPTIMIZE(spec)
+#else
 #define SEAMS_OPTIMIZE(spec) __attribute__((optimize(spec)))
+#endif
 #define SEAMS_WEAK __attribute__((weak))
 #define SEAMS_NOINLINE __attribute__((noinline))
 #define SEAMS_ALWAYS_INLINE __attribute__((always_inline)) inline

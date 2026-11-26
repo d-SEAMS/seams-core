@@ -494,11 +494,11 @@ double diskArea(const std::vector<P2> &poly, double radius, double far, double f
       bool have = false;
       double accepted = 0.0;
       for (int k = 0; k < nroot; ++k) {
-        const double root = roots[k];
-        if (root < -1e-12 || root > 1.0 + 1e-12) {
+        const double along = roots[k];
+        if (along < -1e-12 || along > 1.0 + 1e-12) {
           continue;
         }
-        const double t = std::clamp(root, 0.0, 1.0);
+        const double t = std::clamp(along, 0.0, 1.0);
         if (have && t - accepted < 1e-15) {
           continue;
         }
