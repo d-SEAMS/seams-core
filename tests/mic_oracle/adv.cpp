@@ -15,6 +15,15 @@
 // first call is the runtime. Later shapes on the same cell reuse the
 // cached basis. A fresh cell per pair repeats edges this draw already
 // took. `mic_oracle 100000` raises the compact-band cell count.
+// needle-1e10-selling-cap is not part of that draw. It is one fixed cell
+// with the origin at zero: lx 1e10, ly 0.94595037089926481,
+// lz 0.41367195128549233, xy 0.22894346172539071,
+// xz 0.18843458615172756, yz 0.27052973178254824. Selling reduction of
+// that cell keeps replacing an acute pair with a shorter one, so the
+// obtuse cleanup in snapToLattice runs out its iteration cap. The other
+// bands do not reach that exit. The band then scores four fixed
+// displacements, the first of them (1.3, 0.2, -0.1), through the same
+// binary128 closest and the same scoreOne limit as every other band.
 // A gate rebuilds the binary at other flags from the build's own
 // commands: the mic_oracle entry of build/compile_commands.json with, for
 // example, -O3 -march=native appended, linked as `ninja -t commands
@@ -208,12 +217,36 @@ std::vector<Band> bands() {
                    return needle(lx[g.pick(0, 2)], g, false);
                  },
                  Band::Window, Band::Cliff});
+  // Appended so the earlier bands keep their seeds. One cell, not a draw:
+  // these literals are the cell whose obtuse cleanup runs out the iteration
+  // cap in snapToLattice.
+  out.push_back({"needle-1e10-selling-cap",
+                 [](Rng &) {
+                   return Cell{1e10,
+                               0.94595037089926481,
+                               0.41367195128549233,
+                               0.22894346172539071,
+                               0.18843458615172756,
+                               0.27052973178254824};
+                 },
+                 Band::Mixed, Band::InRange});
   return out;
 }
 
 std::array<double, 3> cellTimes(const Cell &c, double s0, double s1, double s2) {
   return {c.lx * s0 + c.xy * s1 + c.xz * s2, c.ly * s1 + c.yz * s2, c.lz * s2};
 }
+
+// Displacements for needle-1e10-selling-cap. The cell is what exhausts the
+// obtuse cleanup; these four stay near the origin and are scored like any
+// other pair.
+const double kSellingCapRaw[][3] = {
+    {1.3, 0.2, -0.1},
+    {0.7, -0.35, 0.2},
+    {-1.1, 0.15, -0.45},
+    {2.4, 0.55, 0.3},
+};
+constexpr int kSellingCapDisp = 4;
 
 // Four displacement shapes in turn: uniform in a few cells, at the wrap's
 // cell faces, a short image under a long lattice vector, and half a lattice
@@ -367,11 +400,7 @@ void scoreOne(Score &s, const Band &band, const Pair &p, const Fn &fn, bool must
 int selftest() {
   int bad = 0;
   Rng g{12345};
-  // closest() has to match the shortest translate inside [-8, 8]^3. The
-  // cube is the check. These draws are the legal cells the reduction
-  // sees; repeating the same distribution thousands of times does not
-  // add a translate the cube missed.
-  for (int t = 0; t < 64; t++) {
+  for (int t = 0; t < 2000; t++) {
     const Cell c = legal(g, 1.0);
     const auto r = micoracle::reduce(c);
     const auto raw = cellTimes(c, g.in(-3, 3), g.in(-3, 3), g.in(-3, 3));
@@ -400,7 +429,7 @@ int selftest() {
       bad++;
     }
   }
-  for (int t = 0; t < 64; t++) {
+  for (int t = 0; t < 500; t++) {
     Cell c = legal(g, 1.0);
     c.xy = c.xz = c.yz = 0;
     const auto r = micoracle::reduce(c);
@@ -470,14 +499,16 @@ int main(int argc, char **argv) {
     Rng dispRng{seed + 0x8000 * bi + 17};
     Score score[3];
     const bool needle = std::string(band.name) == "needle-1e8..1e15";
-    const bool heavy =
-        band.sampler == Band::Window || std::string(band.name).find("needle") != std::string::npos;
+    const bool sellingCap = std::string(band.name) == "needle-1e10-selling-cap";
+    const bool heavy = !sellingCap && (band.sampler == Band::Window ||
+                                       std::string(band.name).find("needle") != std::string::npos);
     // The long-edge needle shares one generator between the cell and its
     // single displacement, matching the draw that leaves the Voronoi cell.
     Rng &disp = needle ? cells : dispRng;
-    const long nCells = needle ? std::min(perBand, kNeedleCells)
-                               : heavy ? std::min(perBand, kHeavyCells) : perBand;
-    const int nDisp = needle ? 1 : heavy ? kHeavyDisp : kCompactDisp;
+    const long nCells = sellingCap ? 1
+                                   : needle ? std::min(perBand, kNeedleCells)
+                                            : heavy ? std::min(perBand, kHeavyCells) : perBand;
+    const int nDisp = sellingCap ? kSellingCapDisp : needle ? 1 : heavy ? kHeavyDisp : kCompactDisp;
     for (long ci = 0; ci < nCells; ci++) {
       Pair held{};
       const Cell want = band.cell(cells);
@@ -499,10 +530,14 @@ int main(int argc, char **argv) {
         Pair p = held;
         // The long-edge needle draws one displacement per cell and cycles
         // the four shapes with the cell index, the same sequence as a
-        // pair-per-cell run.
+        // pair-per-cell run. The selling-cap cell uses its fixed list.
         const int which = needle ? static_cast<int>(ci) : shape;
-        p.raw = band.sampler == Band::Window ? window(p.cell, disp)
-                                            : mixed(p.cell, p.shortest, disp, which);
+        if (sellingCap) {
+          p.raw = {kSellingCapRaw[shape][0], kSellingCapRaw[shape][1], kSellingCapRaw[shape][2]};
+        } else {
+          p.raw = band.sampler == Band::Window ? window(p.cell, disp)
+                                              : mixed(p.cell, p.shortest, disp, which);
+        }
         p.wrap = gen::fracDelta(p.box, p.raw[0], p.raw[1], p.raw[2], 0.0, 0.0, 0.0);
         p.exact = micoracle::closest(p.cell, basis, micoracle::fromDouble(p.raw.data()));
         if (!p.exact.ok) {
