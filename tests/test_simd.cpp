@@ -9,6 +9,7 @@
 */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <simd_distance.hpp>
 
@@ -62,43 +63,17 @@ void checkSize(size_t n) {
 
 }  // namespace
 
-TEST_CASE("SIMD matches scalar for size 1 (pure remainder)", "[simd]") {
-  checkSize(1);
-}
-
-TEST_CASE("SIMD matches scalar for size 4", "[simd]") {
-  checkSize(4);
-}
-
-TEST_CASE("SIMD matches scalar for size 7 (odd, partial vector)", "[simd]") {
-  checkSize(7);
-}
-
-TEST_CASE("SIMD matches scalar for size 8", "[simd]") {
-  checkSize(8);
-}
-
-TEST_CASE("SIMD matches scalar for size 15", "[simd]") {
-  checkSize(15);
-}
-
-TEST_CASE("SIMD matches scalar for size 16", "[simd]") {
-  checkSize(16);
-}
-
-TEST_CASE("SIMD matches scalar for size 100", "[simd]") {
-  checkSize(100);
-}
-
-TEST_CASE("SIMD matches scalar for size 1000", "[simd]") {
-  checkSize(1000);
-}
-
-TEST_CASE("SIMD handles zero-length input", "[simd]") {
-  double dummy;
-  // Should not crash or write anything
-  seams::BatchPeriodicDistSq(nullptr, nullptr, nullptr,
-                             10.0, 10.0, 10.0, &dummy, 0);
+TEST_CASE("SIMD matches scalar across remainder classes", "[simd]") {
+  // Remainder classes 0, 1, 7, 8, 15 and 16, plus 4, 100 and 1000.
+  // Zero length stays in this table. Each positive size keeps seed 42+n.
+  const auto n = static_cast<size_t>(GENERATE(0, 1, 4, 7, 8, 15, 16, 100, 1000));
+  if (n == 0) {
+    double dummy;
+    seams::BatchPeriodicDistSq(nullptr, nullptr, nullptr,
+                               10.0, 10.0, 10.0, &dummy, 0);
+  } else {
+    checkSize(n);
+  }
 }
 
 TEST_CASE("SIMD handles zero displacements", "[simd]") {
