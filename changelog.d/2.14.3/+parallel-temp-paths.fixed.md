@@ -1,0 +1,1 @@
+Parallel copies of `chill_plus_rule`, `readcon`, `seams_output` and `basal_needle` each use a private temporary directory. A fixed name under the shared temporary directory, and `../output` relative to the shared working directory, is another process's file, and removing it while that process is reading it fails the suite.

@@ -28,6 +28,8 @@
 #include <cstring>
 #include <cstdlib>
 #include <filesystem>
+
+#include "fresh_temp.hpp"
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -226,8 +228,7 @@ TEST_CASE("CHILL+ rule text accepts the two names and rejects the rest",
 }
 
 TEST_CASE("a CHILL+ rule file is read, and an empty file fails", "[chill][rule]") {
-  const auto dir = std::filesystem::temp_directory_path() / "dseams-chill-rule";
-  std::filesystem::create_directories(dir);
+  const auto dir = dseams_test::freshDir();
   const auto path = dir / "rule-ovito.yaml";
   {
     std::ofstream out(path);
@@ -473,9 +474,7 @@ TEST_CASE("a correlation exactly on a bound follows the edge each rule uses",
   chill::getIceTypePlusNoPrint(onStaggered, rows, false, false);
   REQUIRE(onStaggered.pts[0].iceType == molSys::atom_state_type::water);
 
-  const auto dir = std::filesystem::temp_directory_path() / "chill-plus-bop";
-  std::filesystem::remove_all(dir);
-  std::filesystem::create_directory(dir);
+  const auto dir = dseams_test::freshDir();
   Cloud printed = diamond(1);
   auto printedRows = nneigh::neighListO(3.5, printed, 1);
   chill::getCorrelPlus(printed, printedRows, false, 4, true);
@@ -487,21 +486,21 @@ TEST_CASE("a correlation exactly on a bound follows the edge each rule uses",
   chill::getCorrelPlus(printed, printedRows, false, 4, false);
   seams::product::setReduction(saved);
   REQUIRE(printed.pts[0].c_ij.size() == 4);
+  std::filesystem::remove_all(dir);
 }
 
 TEST_CASE("CHILL, q6 and the C API error returns are exercised", "[chill][rule]") {
   Cloud cloud = diamond(2);
   auto rows = nneigh::neighListO(3.5, cloud, 1);
   chill::getCorrel(cloud, rows, false);
-  const auto dir = std::filesystem::temp_directory_path() / "chill-plain";
-  std::filesystem::remove_all(dir);
-  std::filesystem::create_directory(dir);
+  const auto dir = dseams_test::freshDir();
   chill::getIceType(cloud, rows, dir.string() + "/", 1, false, "chill.txt");
   REQUIRE(std::filesystem::exists(dir / "bop" / "chill.txt"));
   const auto q6 = chill::getq6(cloud, rows, false);
   REQUIRE(q6.size() == static_cast<std::size_t>(cloud.nop));
   REQUIRE_FALSE(chill::bondClassifierNames().empty());
   REQUIRE(chill::printIceType(cloud, dir.string() + "/", 1) >= 0);
+  std::filesystem::remove_all(dir);
   auto nudged = q6;
   chill::reclassifyWater(cloud, nudged);
   const std::array<double, 2> angles{{0.2, 0.4}};
@@ -668,8 +667,7 @@ TEST_CASE("CHILL and CHILL+ cover the bond, harmonic and offload arms",
   REQUIRE(hand.pts[4].iceType == molSys::atom_state_type::water);
   chill::getIceTypeNoPrint(hand, nList, true);
   REQUIRE(hand.pts[5].iceType == molSys::atom_state_type::cubic);
-  const auto outDir = std::filesystem::temp_directory_path() / "dseams-chill-ice";
-  std::filesystem::create_directories(outDir);
+  const auto outDir = dseams_test::freshDir();
   hand.pts[0].iceType = molSys::atom_state_type::cubic;
   hand.pts[1].iceType = molSys::atom_state_type::hexagonal;
   hand.pts[2].iceType = molSys::atom_state_type::interfacial;
