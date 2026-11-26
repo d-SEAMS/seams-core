@@ -20,8 +20,6 @@ import os
 import sys
 import shutil
 import subprocess
-import urllib.error
-import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -326,6 +324,17 @@ def fetch_brine(cache: Path):
         return _fetch_brine(cache)
 
 
+def _brine_urlretrieve(url: str, filename):
+    """In-process urlretrieve. The pinned frames are bytes in the tree.
+
+    A missing file or a later checksum miss raises. It does not skip.
+    """
+    leaf = url.rstrip("/").rsplit("/", 1)[-1]
+    blob = (Path(__file__).resolve().parent / "brine_frames" / leaf).read_bytes()
+    Path(filename).write_bytes(blob)
+    return filename, None
+
+
 def _fetch_brine(cache: Path):
     paths = []
     for name, digest in BRINE_FILES.items():
@@ -335,16 +344,14 @@ def _fetch_brine(cache: Path):
             continue
         part = dest.with_name(dest.name + ".part")
         try:
-            urllib.request.urlretrieve(BRINE_URL + "/" + name, part)
-        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            _brine_urlretrieve(BRINE_URL + "/" + name, part)
+        except OSError as exc:
             part.unlink(missing_ok=True)
-            print(f"{SKIP}: {exc}")
-            return None
+            raise SystemExit(f"{SKIP}: {exc}") from exc
         got = hashlib.sha256(part.read_bytes()).hexdigest()
         if got != digest:
             part.unlink(missing_ok=True)
-            print(f"{SKIP}: checksum mismatch for {name}")
-            return None
+            raise SystemExit(f"{SKIP}: checksum mismatch for {name}")
         part.replace(dest)
         paths.append(dest)
     return paths
@@ -746,29 +753,26 @@ def tutorials(root: Path, build: Path):
 
     cache = root / "docs" / ".cache" / "brine-front-230K" / BRINE_REV
     frames = fetch_brine(cache)
-    if frames is None:
-        _bars("Brine frames were not fetched", [("cached", 0), ("fetched", 0)], figures / "brine.svg")
-        print(SKIP)
-    else:
-        early = brine_frame(lib, frames[0])
-        late = brine_frame(lib, frames[1])
-        expect(early["agree"] == early["oxygen"] == 1496, early)
-        expect(late["agree"] == 1496, late)
-        expect(early["histogram"]["hexagonal"] == 733 and early["histogram"]["water"] == 619, early)
-        expect(early["histogram"]["cubic"] == 1 and early["histogram"]["interfacial"] == 91, early)
-        expect(late["histogram"]["hexagonal"] == 741 and late["histogram"]["water"] == 621, late)
-        expect(late["histogram"]["cubic"] == 0 and late["histogram"]["interfacial"] == 89, late)
-        expect(early["found"] == 1 and late["found"] == 1, "front")
-        expect(early["defined"] == 1 and late["defined"] == 1, "defined")
-        expect(early["c_ice"] == 0.0 and late["c_ice"] == 0.0, "c_ice")
-        expect(early["k"] == 0.0 and late["k"] == 0.0, "k")
-        expect(abs(early["thickness"] - 25.5618) < 5e-3, early["thickness"])
-        expect(abs(late["thickness"] - 25.3740) < 5e-3, late["thickness"])
-        print("brine t0 hexagonal 733 water 619 interfacial 91 cubic 1 agree 1496")
-        print(f"brine t0 thickness {early['thickness']:.4f} k {early['k']:.1f}")
-        print("brine tend hexagonal 741 water 621 interfacial 89 cubic 0 agree 1496")
-        print(f"brine tend thickness {late['thickness']:.4f} k {late['k']:.1f}")
-        render_brine_scene(root, frames[1], figures)
+    expect(frames is not None and len(frames) == 2, SKIP)
+    early = brine_frame(lib, frames[0])
+    late = brine_frame(lib, frames[1])
+    expect(early["agree"] == early["oxygen"] == 1496, early)
+    expect(late["agree"] == 1496, late)
+    expect(early["histogram"]["hexagonal"] == 733 and early["histogram"]["water"] == 619, early)
+    expect(early["histogram"]["cubic"] == 1 and early["histogram"]["interfacial"] == 91, early)
+    expect(late["histogram"]["hexagonal"] == 741 and late["histogram"]["water"] == 621, late)
+    expect(late["histogram"]["cubic"] == 0 and late["histogram"]["interfacial"] == 89, late)
+    expect(early["found"] == 1 and late["found"] == 1, "front")
+    expect(early["defined"] == 1 and late["defined"] == 1, "defined")
+    expect(early["c_ice"] == 0.0 and late["c_ice"] == 0.0, "c_ice")
+    expect(early["k"] == 0.0 and late["k"] == 0.0, "k")
+    expect(abs(early["thickness"] - 25.5618) < 5e-3, early["thickness"])
+    expect(abs(late["thickness"] - 25.3740) < 5e-3, late["thickness"])
+    print("brine t0 hexagonal 733 water 619 interfacial 91 cubic 1 agree 1496")
+    print(f"brine t0 thickness {early['thickness']:.4f} k {early['k']:.1f}")
+    print("brine tend hexagonal 741 water 621 interfacial 89 cubic 0 agree 1496")
+    print(f"brine tend thickness {late['thickness']:.4f} k {late['k']:.1f}")
+    render_brine_scene(root, frames[1], figures)
 
     if build.is_dir() and built_library(build / "src", "seams", "SEAMS_LIB") is not None:
         c_interface = run_c(root, build, "interface", [])
@@ -784,11 +788,10 @@ def tutorials(root: Path, build: Path):
             "cages sH 51268 4",
         ):
             expect(line in c_cages, c_cages)
-        if frames is not None:
-            c_brine = run_c(root, build, "brine", [str(frames[0]), str(frames[1])])
-            expect("brine t0 hexagonal 733" in c_brine, c_brine)
-            expect("brine tend hexagonal 741" in c_brine, c_brine)
-            expect("k 0.0" in c_brine, c_brine)
+        c_brine = run_c(root, build, "brine", [str(frames[0]), str(frames[1])])
+        expect("brine t0 hexagonal 733" in c_brine, c_brine)
+        expect("brine tend hexagonal 741" in c_brine, c_brine)
+        expect("k 0.0" in c_brine, c_brine)
         print("c tutorials ok")
     run_julia(root, libdir, frames)
     run_r(root, libdir, frames)
