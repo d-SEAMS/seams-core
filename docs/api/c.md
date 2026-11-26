@@ -2867,7 +2867,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Mutual nearest unlike contacts of a site table.
 
-Cation and anion counts are molecules in the ion cloud.
+Cation and anion counts are molecules in the ion cloud. A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.
 
 ```c
 seams_status seams_contact_pairs(seams_system *sys, const char *site_spec, size_t *n_pairs, int *n_cation, int *n_anion);
@@ -3737,7 +3737,7 @@ Example: `docs/examples/c_api_tour.c`
 
 Purpose: Nearest framework site and contact counts for each guest.
 
-guest_type must be positive. framework_type 0 keeps every atom of another type. framework_type equal to guest_type is an error. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.
+A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted. guest_type must be positive. framework_type 0 keeps every atom of another type. framework_type equal to guest_type is an error. nearest_distance is negative when a guest has no framework atom. A contact is a framework atom at or inside cutoff under the triclinic minimum image. contact_counts is row-major, one row per guest and one column per framework type, types sorted. Pass NULL columns to query the guest and type counts.
 
 ```c
 seams_status seams_host_guest(seams_system *sys, int guest_type, int framework_type, double cutoff, int *guest_index, int *nearest_index, int *nearest_type, double *nearest_distance, size_t guest_cap, size_t *n_guest, int *framework_types, size_t type_cap, size_t *n_types, int *contact_counts, size_t contact_cap);
@@ -4371,6 +4371,8 @@ Example: `docs/examples/c_api_tour.c`
 ### seams_neighbours_build
 
 Purpose: Build a cutoff or mutual neighbour list.
+
+A lattice coefficient at or above 2^52, or a cell edge past the Euclidean range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not substituted.
 
 ```c
 seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type, int graph, seams_neighbours **out);

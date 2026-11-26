@@ -1222,10 +1222,26 @@ inline void snapToLattice(Vec3 a, Vec3 b, Vec3 c, Vec3 v[4], double coef[4][3]) 
 
 inline Obtuse obtuseSuperbasis(Vec3 a, Vec3 b, Vec3 c) {
   const Vec3 original[4] = {a, b, c, scale(-1.0, add(add(a, b), c))};
+  // A needle whose long edge is 2^52 short edges cannot name that edge
+  // with a binary64 coefficient. Reject it before Selling reduction:
+  // the reduction repeats the same overflowing search for every pair.
+  double longest = 0.0;
+  double shortest = std::numeric_limits<double>::infinity();
   for (const Vec3 &v : original) {
-    if (!std::isfinite(n2(v))) {
+    const double len2 = n2(v);
+    if (!std::isfinite(len2)) {
       throw RangeError("minimum-image cell exceeds binary64 range");
     }
+    const double len = std::sqrt(len2);
+    longest = std::max(longest, len);
+    if (len > 0.0 && len < shortest) {
+      shortest = len;
+    }
+  }
+  if (!(shortest < std::numeric_limits<double>::infinity()) ||
+      longest >= shortest * kIntegral) {
+    throw RangeError(
+        "minimum-image lattice coefficient exceeds binary64 integer precision");
   }
   if (alreadyObtuse(original)) {
     const double identity[4][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {-1, -1, -1}};
@@ -1388,7 +1404,7 @@ inline Vec3 refine(const Obtuse &s, Vec3 w, double n[3]) {
 // With Record (cap at most 16), path gets 4 bits per step, the first step
 // highest: 2 * k + (sign < 0) for the relevant vector k taken.
 template <bool Track, bool Record, bool OutT>
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__GNUC__) && !defined(__clang__)
 __attribute__((optimize("O3,tree-vectorize")))
 #endif
 inline int descendFast(const Obtuse &s, Vec3 &x, int cap, double *n, unsigned long long *path,
@@ -1586,7 +1602,9 @@ inline Vec3 certifySlow(const Obtuse &s, const Vec3 &w, double w2, const Vec3 &y
 // y + lo is the unique minimum image without calling voronoiRoom or refine.
 // For a single step with exact/tiny relLo, IEEE-754 round-to-nearest already
 // guarantees |y - y_exact| <= 1.5 eps |y|_1, avoiding the TwoSum replay too.
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__clang__)
+__attribute__((noinline))
+#elif defined(__GNUC__)
 __attribute__((noinline, optimize("O3,tree-vectorize")))
 #endif
 inline Vec3 certifyWrapT(const Obtuse &s, double wx, double wy, double wz, double w2,
@@ -1658,7 +1676,9 @@ inline Vec3 certifyWrapT(const Obtuse &s, double wx, double wy, double wz, doubl
 
 // certifyWrapT for a cell that does not record its wrap steps: the descent
 // from w runs again, recording.
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__clang__)
+__attribute__((noinline))
+#elif defined(__GNUC__)
 __attribute__((noinline, optimize("O3,tree-vectorize")))
 #endif
 inline Vec3 recertifyWrap(const Obtuse &s, const Vec3 &w, double w2) {
@@ -1857,7 +1877,9 @@ inline bool trySmith(const Obtuse &s, const Vec3 &w, double w2, Vec3 &out) {
 // inlined so there is no call overhead or stack copy of t[8] on kept wraps.
 // Near-lattice residuals inside the Smith ball are filtered in 3 instructions
 // on |w.z| before descending; cancelled descents certify from t[0..6].
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(__clang__)
+__attribute__((noinline))
+#elif defined(__GNUC__)
 __attribute__((noinline, optimize("O3,tree-vectorize")))
 #endif
 inline Vec3 recordDisplacement(const Obtuse &s, double wx, double wy, double wz, double w2) {
@@ -2045,6 +2067,31 @@ inline bool sameKey(const double *a, const double *b) {
   return true;
 }
 
+// A cell that cannot be reduced is the same cell on the next pair. Remember
+// it so the search is not repeated for every neighbour.
+struct RefusedCell {
+  double key[6]{};
+  bool set = false;
+};
+
+inline RefusedCell &refusedCell() {
+  thread_local RefusedCell refused;
+  return refused;
+}
+
+inline bool cellRefused(const double key[6]) {
+  const RefusedCell &refused = refusedCell();
+  return refused.set && sameKey(refused.key, key);
+}
+
+inline void refuseCell(const double key[6]) {
+  RefusedCell &refused = refusedCell();
+  for (int i = 0; i < 6; i++) {
+    refused.key[i] = key[i];
+  }
+  refused.set = true;
+}
+
 #if defined(__GNUC__) || defined(__clang__)
 __attribute__((noinline))
 #endif
@@ -2052,6 +2099,10 @@ inline const Cached &fillCachedBasis(Cached (&slots)[4], int &hand, const Cached
                                      double lx, double ly, double lz,
                                      double xy, double xz, double yz) {
   const double key[6] = {lx, ly, lz, xy, xz, yz};
+  if (cellRefused(key)) {
+    throw RangeError(
+        "minimum-image lattice coefficient exceeds binary64 integer precision");
+  }
   for (int idx = 0; idx < 4; idx++) {
     if (slots[idx].filled && sameKey(slots[idx].key, key)) {
       lastSlot = &slots[idx];
@@ -2068,7 +2119,13 @@ inline const Cached &fillCachedBasis(Cached (&slots)[4], int &hand, const Cached
     lastSlot = nullptr;
   }
   slot.filled = false;
-  const Obtuse s = obtuseSuperbasis(a, b, c);
+  Obtuse s;
+  try {
+    s = obtuseSuperbasis(a, b, c);
+  } catch (const RangeError &) {
+    refuseCell(key);
+    throw;
+  }
   for (int k = 0; k < 6; k++) {
     slot.key[k] = key[k];
   }
@@ -2094,9 +2151,34 @@ inline const Cached &cachedBasis(double lx, double ly, double lz, double xy, dou
   return fillCachedBasis(slots, hand, lastSlot, lx, ly, lz, xy, xz, yz);
 }
 
+// Nearest integer of a quotient carried in a type that still resolves
+// fractions past the binary64 mantissa. A coefficient at or above 2^52 is
+// a range error: rounding it would pick a different lattice vector.
+#if defined(__SIZEOF_FLOAT128__)
+inline double roundCoefficient(__float128 q) {
+  const __float128 limit = static_cast<__float128>(kIntegral);
+  if (!(q < limit && -q < limit)) {
+    throw RangeError(
+        "minimum-image lattice coefficient exceeds binary64 integer precision");
+  }
+  return static_cast<double>(std::nearbyint(static_cast<long double>(q)));
+}
+#else
+inline double roundCoefficient(long double q) {
+  const long double limit = static_cast<long double>(kIntegral);
+  if (!(q < limit && -q < limit)) {
+    throw RangeError(
+        "minimum-image lattice coefficient exceeds binary64 integer precision");
+  }
+  return static_cast<double>(std::nearbyint(q));
+}
+#endif
+
 // raw - n . (a, b, c) for the integers n that the fractional wrap of raw
-// picks, evaluated with integerDot rather than through the fractional
-// coordinates.
+// picks. The integers come from a wide division, because raw/edge in
+// binary64 loses the fractional part once the edge passes the mantissa,
+// and the result is evaluated with integerDot rather than through the
+// fractional coordinates.
 inline std::array<double, 3> fractionalWrap(double lx, double ly, double lz, double xy,
                                             double xz, double yz,
                                             const std::array<double, 3> &raw) {
@@ -2105,16 +2187,18 @@ inline std::array<double, 3> fractionalWrap(double lx, double ly, double lz, dou
       throw RangeError("minimum-image displacement is not finite");
     }
   }
-  const double sz = raw[2] / lz;
-  const double sy = (raw[1] - sz * yz) / ly;
-  const double sx = (raw[0] - sy * xy - sz * xz) / lx;
-  const double n[3] = {std::nearbyint(sx), std::nearbyint(sy), std::nearbyint(sz)};
-  for (double v : n) {
-    if (!(std::abs(v) < kIntegral)) {
-      throw RangeError(
-          "minimum-image lattice coefficient exceeds binary64 integer precision");
-    }
-  }
+#if defined(__SIZEOF_FLOAT128__)
+  using Wide = __float128;
+#else
+  using Wide = long double;
+#endif
+  const Wide sz = static_cast<Wide>(raw[2]) / static_cast<Wide>(lz);
+  const Wide sy =
+      (static_cast<Wide>(raw[1]) - sz * static_cast<Wide>(yz)) / static_cast<Wide>(ly);
+  const Wide sx = (static_cast<Wide>(raw[0]) - sy * static_cast<Wide>(xy) -
+                   sz * static_cast<Wide>(xz)) /
+                  static_cast<Wide>(lx);
+  const double n[3] = {roundCoefficient(sx), roundCoefficient(sy), roundCoefficient(sz)};
   const double ax[3] = {lx, xy, xz};
   const double ay[3] = {0.0, ly, yz};
   const double az[3] = {0.0, 0.0, lz};

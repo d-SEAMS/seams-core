@@ -2040,12 +2040,14 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
   out.resize(iIdx.size());
   const int nI = static_cast<int>(iIdx.size());
   const std::size_t nJ = jIdx.size();
-#ifdef SEAMS_HAS_MINIMAGE
-  // minimage's Euclidean images start the exact search past the Smith ball,
-  // which replaces any that are not lattice images. Its engine wrap is not
-  // used: minimage 0.1.4 gets it wrong on needle cells even inside the ball.
-  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
-#endif
+  double span = 0.0;
+  for (const auto &p : yCloud.pts) {
+    span = std::max(span, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  // An uncertified wrap can sit inside the Smith ball and still be the
+  // wrong image. Every pair then takes the reducer, not the fractional
+  // distance.
+  const bool trustPlain = frame.ok && gen::plainWrapCertifies(frame, span);
   seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nI >= 256)
@@ -2061,9 +2063,16 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
         const int i = iIdx[static_cast<std::size_t>(t)];
         const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
         for (std::size_t k = 0; k < nJ; k++) {
-          const auto &pj = yCloud.pts[static_cast<std::size_t>(jIdx[k])];
-          row[k] = frame.ok ? gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z)
-                            : gen::periodicDistSq(frame, yCloud, i, jIdx[k]);
+          const int j = jIdx[k];
+          const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+          if (frame.ok && trustPlain) {
+            row[k] = gen::fracDistSq(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+          } else if (frame.ok) {
+            const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+            row[k] = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+          } else {
+            row[k] = gen::periodicDistSq(frame, yCloud, i, j);
+          }
         }
         int bestJ = -1;
         double bestD2 = std::numeric_limits<double>::infinity();
@@ -2073,7 +2082,9 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
             bestJ = jIdx[k];
           }
         }
-        if (bestJ >= 0 && frame.ok && !gen::smithInside(frame, bestD2)) {
+        // Past the Smith ball the fractional image is not the shortest.
+        // Recompute those pairs. An uncertified cell already used exactDelta.
+        if (bestJ >= 0 && trustPlain && !gen::smithInside(frame, bestD2)) {
           bestJ = -1;
           bestD2 = std::numeric_limits<double>::infinity();
           for (std::size_t k = 0; k < nJ; k++) {
@@ -2083,15 +2094,9 @@ std::vector<std::tuple<int, int, double>> nneigh::nearestUnlike(
             }
             double d2 = row[k];
             if (!gen::smithInside(frame, d2)) {
-              d2 = -1.0;
-#ifdef SEAMS_HAS_MINIMAGE
-              if (cells.ok) {
-                d2 = gen::euclideanDistSq(cells, i, j);
-              }
-#endif
-              if (d2 < 0.0) {
-                d2 = gen::periodicDistSq(frame, yCloud, i, j);
-              }
+              const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+              const auto dr = gen::exactDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+              d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
             }
             if (d2 < bestD2) {
               bestD2 = d2;
@@ -2164,6 +2169,11 @@ std::pair<double, double> nneigh::shellSeparation(
   double minNext = 0.0;
   bool haveNext = false;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
+  double span = 0.0;
+  for (const auto &p : yCloud.pts) {
+    span = std::max(span, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  const bool trustPlain = frame.ok && gen::plainWrapCertifies(frame, span);
   std::vector<double> dists;
   for (int i = 0; i < yCloud.nop; i++) {
     if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
@@ -2191,7 +2201,8 @@ std::pair<double, double> nneigh::shellSeparation(
     // below; there is no (k+1)-th distance to bound it from above.
     const int want = nOther < k + 1 ? k : k + 1;
     std::partial_sort(dists.begin(), dists.begin() + want, dists.end());
-    if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(want - 1)])) {
+    if (frame.ok &&
+        (!trustPlain || !gen::smithInside(frame, dists[static_cast<std::size_t>(want - 1)]))) {
       dists.clear();
       for (int j = 0; j < yCloud.nop; j++) {
         if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {

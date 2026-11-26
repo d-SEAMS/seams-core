@@ -7,8 +7,12 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
+#include <fstream>
 #include <limits>
 #include <random>
+#include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -586,5 +590,333 @@ TEST_CASE("System host_guest and seams_rdf succeed on ordinary triclinic cells",
       }
       REQUIRE(innerGot == innerRef);
     }
+  }
+}
+
+namespace {
+
+uint64_t g_state = 0;
+
+double rnd() {
+  g_state ^= g_state << 13;
+  g_state ^= g_state >> 7;
+  g_state ^= g_state << 17;
+  return static_cast<double>(g_state >> 11) / 9007199254740992.0;
+}
+
+void seed_rng(unsigned long long seed) { g_state = seed * 2654435761ull + 88172645463325252ull; }
+
+void fill_cloud(std::vector<double> &xyz, std::vector<int> &types, int n, double ly, double lz,
+                double xy, double xz, double yz, unsigned long long seed, double x_scale) {
+  seed_rng(seed);
+  xyz.assign(static_cast<std::size_t>(3 * n), 0.0);
+  types.assign(static_cast<std::size_t>(n), 0);
+  for (int i = 0; i < n; ++i) {
+    const double fb = rnd();
+    const double fc = rnd();
+    const double xa = x_scale * rnd();
+    xyz[static_cast<std::size_t>(3 * i)] = xa + fb * xy + fc * xz;
+    xyz[static_cast<std::size_t>(3 * i + 1)] = fb * ly + fc * yz;
+    xyz[static_cast<std::size_t>(3 * i + 2)] = fc * lz;
+    types[static_cast<std::size_t>(i)] = 1 + (i % 2);
+  }
+}
+
+} // namespace
+
+TEST_CASE("a long ordinary cell with atoms far from the origin is not a range error",
+          "[pore][system]") {
+  std::vector<double> xyz;
+  std::vector<int> types;
+  fill_cloud(xyz, types, 100, 30.0, 28.0, 3.0, 1.5, 2.0, 7, 3.0);
+  for (int i = 0; i < 100; ++i) {
+    xyz[static_cast<std::size_t>(3 * i)] += 9000.0;
+  }
+  const std::array<double, 9> box = {0.0, 0.0, 0.0, 1.0e4, 30.0, 28.0, 3.0, 1.5, 2.0};
+  REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+  seams::System sys;
+  sys.set_frame(xyz, box, types);
+  seams::HostGuestOptions options;
+  options.guest = 1;
+  options.framework = 2;
+  options.cutoff = 5.0;
+  const auto report = sys.host_guest(options);
+  REQUIRE(report.nearest_distance.size() > 0);
+  for (double distance : report.nearest_distance) {
+    REQUIRE(std::isfinite(distance));
+    if (distance >= 0.0) {
+      REQUIRE(distance < 40.0);
+    }
+  }
+  const auto contacts = sys.contact_pairs("1=cationHead,2=anion");
+  REQUIRE(contacts.pairs > 0);
+}
+
+TEST_CASE("contacts at the far end of a needle are exact or a range error", "[pore][system]") {
+  const double edge = 1.0e17;
+  const std::vector<double> xyz = {0.6665140243063847, 0.5750009372335341, 0.14932477255801682,
+                                   1.7702453113768646, 0.8684923662106784, 0.0025740216324493304,
+                                   edge,               0.9225423641868384, 0.03232585887320041,
+                                   edge,               0.6289187723290619, 0.016358306193924622};
+  const std::vector<int> types = {1, 2, 1, 2};
+  const std::array<double, 9> box = {0.0, 0.0, 0.0, edge, 1.0, 0.4, 0.3, 0.3, 0.3};
+  seams::System sys;
+  sys.set_frame(xyz, box, types);
+  for (const int threads : {1, 8}) {
+    REQUIRE(seams_set_num_threads(threads) == SEAMS_OK);
+    try {
+      const auto contacts = sys.contact_pairs("1=cationHead,2=anion");
+      REQUIRE(contacts.pairs == 1);
+    } catch (const seams::Error &error) {
+      REQUIRE(error.code() == SEAMS_ERR_RANGE);
+    }
+  }
+}
+
+TEST_CASE("a cell past binary64 distance precision is a typed range error", "[pore][system]") {
+  std::vector<double> ends_xyz;
+  std::vector<int> ends_types;
+  fill_cloud(ends_xyz, ends_types, 4, 1.0, 0.4, 0.3, 0.3, 0.3, 9, 3.0);
+  ends_xyz[6] = 1.0e200;
+  ends_xyz[9] = 1.0e200;
+  const std::array<double, 9> ends_box = {0.0, 0.0, 0.0, 1.0e200, 1.0, 0.4, 0.3, 0.3, 0.3};
+  const std::vector<double> cube_xyz = {0.0, 0.0, 0.0, 24.0e154, 0.0, 0.0};
+  const std::vector<int> cube_types = {1, 2};
+  const std::array<double, 9> cube_box = {0.0, 0.0, 0.0, 24.0e154, 24.0e154, 24.0e154, 0.0, 0.0, 0.0};
+  const std::vector<double> *xyz[2] = {&ends_xyz, &cube_xyz};
+  const std::vector<int> *types[2] = {&ends_types, &cube_types};
+  const std::array<double, 9> *boxes[2] = {&ends_box, &cube_box};
+  for (int k = 0; k < 2; ++k) {
+    seams::System sys;
+    sys.set_frame(*xyz[k], *boxes[k], *types[k]);
+    bool ranged = false;
+    try {
+      sys.contact_pairs("1=cationHead,2=anion");
+    } catch (const seams::Error &error) {
+      REQUIRE(error.code() == SEAMS_ERR_RANGE);
+      ranged = true;
+    }
+    REQUIRE(ranged);
+    ranged = false;
+    seams::HostGuestOptions options;
+    options.guest = 1;
+    options.framework = 2;
+    options.cutoff = 5.0;
+    try {
+      sys.host_guest(options);
+    } catch (const seams::Error &error) {
+      REQUIRE(error.code() == SEAMS_ERR_RANGE);
+      ranged = true;
+    }
+    REQUIRE(ranged);
+  }
+}
+
+TEST_CASE("the contact-pair contract names the range error and the coefficient limit",
+          "[pore][system]") {
+  const std::string here = __FILE__;
+  const auto tests = here.rfind("/tests/");
+  REQUIRE(tests != std::string::npos);
+  const std::string root = here.substr(0, tests);
+  std::ifstream header(root + "/include/seams.h");
+  REQUIRE(header.good());
+  const std::string text((std::istreambuf_iterator<char>(header)), {});
+  const auto fn = text.find("seams_status seams_contact_pairs(");
+  REQUIRE(fn != std::string::npos);
+  const auto doc = text.rfind("/**", fn);
+  REQUIRE(doc != std::string::npos);
+  const std::string block = text.substr(doc, fn - doc);
+  REQUIRE(block.find("SEAMS_ERR_RANGE") != std::string::npos);
+  REQUIRE(block.find("2^52") != std::string::npos);
+  std::ifstream page(root + "/docs/api/c.md");
+  REQUIRE(page.good());
+  const std::string markdown((std::istreambuf_iterator<char>(page)), {});
+  const auto section = markdown.rfind("### seams_contact_pairs");
+  REQUIRE(section != std::string::npos);
+  const auto next = markdown.find("\n### ", section + 4);
+  const std::string contact = markdown.substr(section, next == std::string::npos ? std::string::npos : next - section);
+  REQUIRE(contact.find("SEAMS_ERR_RANGE") != std::string::npos);
+  REQUIRE(contact.find("2^52") != std::string::npos);
+}
+
+namespace {
+
+struct Needle {
+  std::vector<double> xyz;
+  std::vector<int> types;
+};
+
+// The gate cloud: mt19937_64 seed 7, x = i*0.7 + 0.3*U, and, on the seam,
+// the first tenth of the atoms placed just inside x = L.
+Needle make_needle(double edge, int n, bool seam) {
+  std::mt19937_64 rng(7);
+  std::uniform_real_distribution<double> unit(0.0, 1.0);
+  Needle cloud;
+  cloud.xyz.assign(static_cast<std::size_t>(3 * n), 0.0);
+  cloud.types.assign(static_cast<std::size_t>(n), 0);
+  const double ly = 1.0;
+  const double lz = 0.4;
+  for (int i = 0; i < n; ++i) {
+    double x = static_cast<double>(i) * 0.7 + 0.3 * unit(rng);
+    if (seam && i < n / 10) {
+      x = edge - (static_cast<double>(i) * 0.7 + 0.5 * unit(rng)) - 1.0;
+    }
+    cloud.xyz[static_cast<std::size_t>(3 * i)] = x;
+    cloud.xyz[static_cast<std::size_t>(3 * i) + 1] = ly * unit(rng);
+    cloud.xyz[static_cast<std::size_t>(3 * i) + 2] = lz * unit(rng);
+    cloud.types[static_cast<std::size_t>(i)] = 1 + (i % 3);
+  }
+  return cloud;
+}
+
+std::array<double, 9> needle_box(double edge) {
+  return {0.0, 0.0, 0.0, edge, 1.0, 0.4, 0.3, 0.3, 0.3};
+}
+
+#if defined(__SIZEOF_FLOAT128__)
+using Wide = __float128;
+#else
+using Wide = long double;
+#endif
+
+Wide wide_abs(Wide value) { return value < 0 ? -value : value; }
+
+// Brute-force minimum image in a wide type. A pair whose squared length
+// sits on the cutoff is left out of the comparison: the cutoff test is
+// strict, and a tie there is not a wrong neighbour.
+bool wide_neighbour(const std::vector<double> &xyz, int i, int j, double edge, double cutoff,
+                    bool &on_cutoff) {
+  const Wide ly = 1;
+  const Wide lz = 0.4;
+  const Wide xy = 0.3;
+  const Wide xz = 0.3;
+  const Wide yz = 0.3;
+  const Wide dx = static_cast<Wide>(xyz[static_cast<std::size_t>(3 * i)]) -
+                  static_cast<Wide>(xyz[static_cast<std::size_t>(3 * j)]);
+  const Wide dy = static_cast<Wide>(xyz[static_cast<std::size_t>(3 * i) + 1]) -
+                  static_cast<Wide>(xyz[static_cast<std::size_t>(3 * j) + 1]);
+  const Wide dz = static_cast<Wide>(xyz[static_cast<std::size_t>(3 * i) + 2]) -
+                  static_cast<Wide>(xyz[static_cast<std::size_t>(3 * j) + 2]);
+  Wide best = static_cast<Wide>(1.0e300) * static_cast<Wide>(1.0e300);
+  for (int nx = -1; nx <= 1; ++nx) {
+    const Wide bx = dx + static_cast<Wide>(nx) * static_cast<Wide>(edge);
+    if (wide_abs(bx) > 40) {
+      continue;
+    }
+    for (int nz = -12; nz <= 12; ++nz) {
+      for (int ny = -12; ny <= 12; ++ny) {
+        const Wide x = bx + static_cast<Wide>(ny) * xy + static_cast<Wide>(nz) * xz;
+        const Wide y = dy + static_cast<Wide>(ny) * ly + static_cast<Wide>(nz) * yz;
+        const Wide z = dz + static_cast<Wide>(nz) * lz;
+        const Wide d2 = x * x + y * y + z * z;
+        if (d2 < best) {
+          best = d2;
+        }
+      }
+    }
+  }
+  const Wide limit = static_cast<Wide>(cutoff) * static_cast<Wide>(cutoff);
+  const Wide gap = best - limit;
+  on_cutoff = wide_abs(gap) < static_cast<Wide>(1.0e-8);
+  return best < limit;
+}
+
+} // namespace
+
+TEST_CASE("seam neighbours on a long needle match the wide minimum image", "[pore][system]") {
+  constexpr int n = 260;
+  constexpr double edge = 5.0e15;
+  constexpr double cutoff = 3.5;
+  const Needle cloud = make_needle(edge, n, true);
+  const auto box = needle_box(edge);
+  REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+  seams::System sys;
+  sys.set_frame(cloud.xyz, box, cloud.types);
+  std::vector<std::pair<int, int>> listed;
+  try {
+    listed = sys.neighbours(seams::NeighbourOptions{cutoff, 0, seams::Graph::Cutoff}).pairs();
+  } catch (const seams::Error &error) {
+    // The reduced basis of this needle needs a coefficient past 2^52.
+    // A typed range error is the contract; a successful wrong list is not.
+    REQUIRE(error.code() == SEAMS_ERR_RANGE);
+    return;
+  }
+  std::set<std::pair<int, int>> got(listed.begin(), listed.end());
+  long miss = 0;
+  long extra = 0;
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
+      if (i == j) {
+        continue;
+      }
+      bool on_cutoff = false;
+      const bool want = wide_neighbour(cloud.xyz, i, j, edge, cutoff, on_cutoff);
+      if (on_cutoff) {
+        continue;
+      }
+      const bool have = got.count({i, j}) != 0;
+      if (want && !have) {
+        ++miss;
+      }
+      if (!want && have) {
+        ++extra;
+      }
+    }
+  }
+  REQUIRE(miss == 0);
+  REQUIRE(extra == 0);
+}
+
+TEST_CASE("q6 on a long needle matches the compact cell", "[pore][system]") {
+  constexpr int n = 260;
+  constexpr double cutoff = 3.5;
+  const Needle compact = make_needle(1.0e3, n, false);
+  REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+  seams::System reference;
+  reference.set_frame(compact.xyz, needle_box(1.0e3), compact.types);
+  const auto q_ref = reference.q4q6(cutoff, 0);
+  REQUIRE(q_ref.q6.size() == static_cast<std::size_t>(n));
+  for (const double edge : {1.0e6, 1.0e12, 5.0e15}) {
+    const Needle cloud = make_needle(edge, n, false);
+    seams::System sys;
+    sys.set_frame(cloud.xyz, needle_box(edge), cloud.types);
+    seams::Q4Q6 got;
+    try {
+      got = sys.q4q6(cutoff, 0);
+    } catch (const seams::Error &error) {
+      REQUIRE(error.code() == SEAMS_ERR_RANGE);
+      REQUIRE(edge >= 5.0e15);
+      continue;
+    }
+    REQUIRE(got.q6.size() == q_ref.q6.size());
+    double worst = 0.0;
+    for (std::size_t i = 0; i < got.q6.size(); ++i) {
+      worst = std::max(worst, std::fabs(got.q6[i] - q_ref.q6[i]));
+      worst = std::max(worst, std::fabs(got.q4[i] - q_ref.q4[i]));
+    }
+    REQUIRE(worst < 1.0e-8);
+  }
+}
+
+TEST_CASE("host-guest distances on a long needle match the compact cell", "[pore][system]") {
+  constexpr int n = 260;
+  constexpr double cutoff = 3.5;
+  const Needle compact = make_needle(1.0e3, n, false);
+  REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+  seams::HostGuestOptions options;
+  options.guest = 1;
+  options.framework = 2;
+  options.cutoff = cutoff;
+  seams::System reference;
+  reference.set_frame(compact.xyz, needle_box(1.0e3), compact.types);
+  const auto base = reference.host_guest(options);
+  const Needle cloud = make_needle(1.0e12, n, false);
+  seams::System sys;
+  sys.set_frame(cloud.xyz, needle_box(1.0e12), cloud.types);
+  const auto got = sys.host_guest(options);
+  REQUIRE(got.nearest_index == base.nearest_index);
+  REQUIRE(got.nearest_distance.size() == base.nearest_distance.size());
+  for (std::size_t i = 0; i < got.nearest_distance.size(); ++i) {
+    REQUIRE(std::fabs(got.nearest_distance[i] - base.nearest_distance[i]) < 1.0e-6);
   }
 }

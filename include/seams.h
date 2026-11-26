@@ -711,6 +711,11 @@ SEAMS_API int seams_system_count(const seams_system *sys);
 
 /**
  * @brief Build a cutoff or mutual neighbour list.
+ *
+ * A lattice coefficient at or above 2^52, or a cell edge past the Euclidean
+ * range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not
+ * substituted.
+ *
  * @param sys Frame handle that already holds a frame.
  * @param cutoff Positive finite cutoff, Angstrom. The mutual graph keeps
  *        the four nearest neighbours inside cutoff + 1.5.
@@ -2391,6 +2396,10 @@ SEAMS_API seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts
  *
  * Cation and anion counts are molecules in the ion cloud.
  *
+ * A lattice coefficient at or above 2^52, or a cell edge past the Euclidean
+ * range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not
+ * substituted.
+ *
  * @param sys Frame handle.
  * @param site_spec Text such as "1=cationHead,2=anion". Must be non-NULL.
  * @param n_pairs Receives the contact count, or NULL.
@@ -3846,6 +3855,10 @@ SEAMS_API seams_status seams_pore_profiles(
 
 /**
  * @brief Nearest framework site and contact counts for each guest.
+ *
+ * A lattice coefficient at or above 2^52, or a cell edge past the Euclidean
+ * range of binary64, returns SEAMS_ERR_RANGE. The fractional wrap is not
+ * substituted.
  *
  * guest_type must be positive. framework_type 0 keeps every atom of
  * another type. framework_type equal to guest_type is an error.

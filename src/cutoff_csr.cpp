@@ -1244,7 +1244,7 @@ template <bool Write>
 void passTilt(const double *xs, const double *ys, const double *zs, const int *ids,
               const int *cellStart, int ncx, int ncy, int ncz, int rx, int ry, int rz,
               const Tilt &h, double rc2, bool half, bool shifted, int *counts,
-              int *offsets, int *cols, bool branchy = false) {
+              int *offsets, int *cols, bool branchy = false, bool cartesian = false) {
   const int nCells = ncx * ncy * ncz;
   seams::RegionErrors errors;
 #ifdef SEAMS_HAS_OPENMP
@@ -1333,17 +1333,33 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
                   if (jj == ii || (half && jj < ii)) {
                     continue;
                   }
-                  double dsx, dsy, dsz;
                   double d2;
-                  if (shifted) {
-                    dsx = xs[i] - xs[j] - ssx;
-                    dsy = ys[i] - ys[j] - ssy;
-                    dsz = zs[i] - zs[j] - ssz;
+                  if (cartesian) {
+                    // Fractional coordinates of a long edge are not a
+                    // distance. The original points and a wide wrap are.
+                    (void)ssx;
+                    (void)ssy;
+                    (void)ssz;
+                    const std::array<double, 3> raw = {xs[i] - xs[j], ys[i] - ys[j],
+                                                       zs[i] - zs[j]};
+                    const auto wrapped = gen::mic::fractionalWrap(
+                        h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, raw);
+                    d2 = wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] +
+                         wrapped[2] * wrapped[2];
+                    if (!(d2 < rc2)) {
+                      const auto euc = gen::mic::euclideanIfShorter(
+                          h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, raw, wrapped);
+                      d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+                    }
+                  } else if (shifted) {
+                    const double dsx = xs[i] - xs[j] - ssx;
+                    const double dsy = ys[i] - ys[j] - ssy;
+                    const double dsz = zs[i] - zs[j] - ssz;
                     d2 = tilt2(dsx, dsy, dsz, h);
                   } else {
-                    dsx = xs[i] - xs[j];
-                    dsy = ys[i] - ys[j];
-                    dsz = zs[i] - zs[j];
+                    double dsx = xs[i] - xs[j];
+                    double dsy = ys[i] - ys[j];
+                    double dsz = zs[i] - zs[j];
                     dsx -= std::floor(dsx + 0.5);
                     dsy -= std::floor(dsy + 0.5);
                     dsz -= std::floor(dsz + 0.5);
@@ -1351,13 +1367,21 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
                     if (!(d2 < rc2)) {
                       // Outside the Smith ball a non-zero integer shift can yield
                       // a shorter Euclidean image than fractional rounding.
+                      // raw is the true displacement, not the already-wrapped
+                      // vector: the reducer has to start from the points.
+                      const std::array<double, 3> raw = {
+                          h.lx * (xs[i] - xs[j]) + h.xy * (ys[i] - ys[j]) +
+                              h.xz * (zs[i] - zs[j]),
+                          h.ly * (ys[i] - ys[j]) + h.yz * (zs[i] - zs[j]),
+                          h.lz * (zs[i] - zs[j]),
+                      };
                       const std::array<double, 3> w = {
                           h.lx * dsx + h.xy * dsy + h.xz * dsz,
                           h.ly * dsy + h.yz * dsz,
                           h.lz * dsz,
                       };
                       const auto euc = gen::refineEuclidean(
-                          h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, w, w);
+                          h.lx, h.ly, h.lz, h.xy, h.xz, h.yz, raw, w);
                       d2 = euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
                     }
                   }
@@ -1437,6 +1461,15 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   // image. One cell would list several images of the same atom.
   const bool shifted = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 && ncell[0] >= 2 &&
                        ncell[1] >= 2 && ncell[2] >= 2;
+  double maxAbs = 0.0;
+  for (int k = 0; k < nSubset; ++k) {
+    const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
+    const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+    maxAbs = std::max(maxAbs, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  // A long edge makes the fractional coordinate's low bits meaningless.
+  // Distances then use the original Cartesian points.
+  const bool cartesian = !gen::plainWrapCertifies(box, maxAbs);
   const int nCells = ncell[0] * ncell[1] * ncell[2];
   const double rc2 = rcutoff * rcutoff;
 #ifdef SEAMS_HAS_OPENMP
@@ -1531,7 +1564,12 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
       const double s0 = sc.px[static_cast<std::size_t>(k)].v;
       const double s1 = sc.py[static_cast<std::size_t>(k)].v;
       const double s2 = sc.pz[static_cast<std::size_t>(k)].v;
-      if (shifted) {
+      if (cartesian) {
+        const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+        sc.xs[static_cast<std::size_t>(slot)].v = p.x;
+        sc.ys[static_cast<std::size_t>(slot)].v = p.y;
+        sc.zs[static_cast<std::size_t>(slot)].v = p.z;
+      } else if (shifted) {
         sc.xs[static_cast<std::size_t>(slot)].v = h.ox + h.lx * s0 + h.xy * s1 + h.xz * s2;
         sc.ys[static_cast<std::size_t>(slot)].v = h.oy + h.ly * s1 + h.yz * s2;
         sc.zs[static_cast<std::size_t>(slot)].v = h.oz + h.lz * s2;
@@ -1566,7 +1604,11 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
       sc.tiltStash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
     sc.tiltStash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
   }
-  if (shifted) {
+  if (cartesian) {
+    passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                    reach[0], reach[1], reach[2], h, rc2, half, false, sc.counts.data(),
+                    nullptr, nullptr, branchy, true);
+  } else if (shifted) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
@@ -1602,7 +1644,11 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   phase().prefix = msSince(tPrefix);
   const auto tFill = Clock::now();
   if (nnz > 0) {
-    if (stashOk && sc.overflowed == 0) {
+    if (cartesian) {
+      passTilt<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                     reach[0], reach[1], reach[2], h, rc2, half, false, nullptr, offsets.data(),
+                     cols.data(), branchy, true);
+    } else if (stashOk && sc.overflowed == 0) {
       scatterStash(sc.tiltStash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
     } else if (shifted) {
       if (half) {

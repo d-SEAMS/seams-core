@@ -1805,6 +1805,12 @@ bool chill::q4q6ChillPlus(
   seams::prepareCompute();
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
+  double maxAbs = 0.0;
+  for (int i = 0; i < n; ++i) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    maxAbs = std::max(maxAbs, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  const bool trustFold = gen::plainWrapCertifies(frac, maxAbs);
   const double Lx = tilt ? frac.lx : yCloud.box[0];
   const double Ly = tilt ? frac.ly : yCloud.box[1];
   const double Lz = tilt ? frac.lz : yCloud.box[2];
@@ -1839,7 +1845,11 @@ bool chill::q4q6ChillPlus(
 #endif
   for (int i = 0; i < n; ++i) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    if (tilt) {
+    if (!trustFold) {
+      xyz[static_cast<std::size_t>(3 * i)] = p.x;
+      xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
+      xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+    } else if (tilt) {
       double sz = (p.z - frac.oz) / frac.lz;
       double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
       double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
@@ -1928,24 +1938,46 @@ bool chill::q4q6ChillPlus(
         const int j = cols[static_cast<std::size_t>(p)];
         double dx, dy, dz;
         if (tilt) {
-          double dX = xi - xyz[static_cast<std::size_t>(3 * j)];
-          double dY = yi - xyz[static_cast<std::size_t>(3 * j) + 1];
-          double dZ = zi - xyz[static_cast<std::size_t>(3 * j) + 2];
-          dX -= Lx * std::round(dX / Lx);
-          dY -= Ly * std::round(dY / Ly);
-          dZ -= Lz * std::round(dZ / Lz);
-          dx = dX + axy * dY + axz * dZ;
-          dy = dY + ayz * dZ;
-          dz = dZ;
-          if (checkSmith) {
-            const double r2 = dx * dx + dy * dy + dz * dz;
-            if (!gen::smithInside(frac, r2)) {
-              const std::array<double, 3> w = {dx, dy, dz};
+          const std::array<double, 3> raw = {
+              xi - xyz[static_cast<std::size_t>(3 * j)],
+              yi - xyz[static_cast<std::size_t>(3 * j) + 1],
+              zi - xyz[static_cast<std::size_t>(3 * j) + 2]};
+          if (!trustFold) {
+            const auto wrapped = gen::mic::fractionalWrap(
+                frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw);
+            const double r2 = wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] +
+                              wrapped[2] * wrapped[2];
+            if (checkSmith && !gen::smithInside(frac, r2)) {
               const auto euc = gen::refineEuclidean(
-                  frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
+                  frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw, wrapped);
               dx = euc[0];
               dy = euc[1];
               dz = euc[2];
+            } else {
+              dx = wrapped[0];
+              dy = wrapped[1];
+              dz = wrapped[2];
+            }
+          } else {
+            double dX = raw[0];
+            double dY = raw[1];
+            double dZ = raw[2];
+            dX -= Lx * std::round(dX / Lx);
+            dY -= Ly * std::round(dY / Ly);
+            dZ -= Lz * std::round(dZ / Lz);
+            dx = dX + axy * dY + axz * dZ;
+            dy = dY + ayz * dZ;
+            dz = dZ;
+            if (checkSmith) {
+              const double r2 = dx * dx + dy * dy + dz * dz;
+              if (!gen::smithInside(frac, r2)) {
+                const std::array<double, 3> w = {dx, dy, dz};
+                const auto euc = gen::refineEuclidean(
+                    frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
+                dx = euc[0];
+                dy = euc[1];
+                dz = euc[2];
+              }
             }
           }
         } else {

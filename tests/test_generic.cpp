@@ -510,3 +510,15 @@ TEST_CASE("relDistFromPoint uses dump H on a mixed image", "[generic]") {
                    std::sqrt(4.5 * 4.5 + 1.160254037844386 * 1.160254037844386),
                    1e-10));
 }
+
+TEST_CASE("a cell past the Euclidean range is a range error", "[generic]") {
+  const std::array<double, 3> raw = {0.2, 0.1, 0.05};
+  REQUIRE_THROWS_AS(gen::refineEuclidean(1.0e160, 1.0, 0.4, 0.3, 0.3, 0.3, raw, raw),
+                    gen::mic::RangeError);
+}
+
+TEST_CASE("an off-lattice candidate is not a lattice image", "[generic]") {
+  const std::array<double, 3> raw = {1.2, 0.05, -0.1};
+  const std::array<double, 3> off = {1.2, 0.35, -0.1};
+  REQUIRE_FALSE(gen::mic::latticeImage(10.0, 10.0, 10.0, 0.0, 0.0, 0.0, raw, off));
+}

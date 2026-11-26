@@ -1159,6 +1159,14 @@ SteinhardtQl cutoffSolid(
   const double hz = 0.5 * Lz;
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
+  double maxAbs = 0.0;
+  for (int i = 0; i < n; ++i) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    maxAbs = std::max(maxAbs, std::max(std::fabs(p.x), std::max(std::fabs(p.y), std::fabs(p.z))));
+  }
+  // Folding x/L*L in binary64 moves a coordinate by about an ulp of the
+  // edge. Past that, the bond vector is taken from the original points.
+  const bool trustFold = gen::plainWrapCertifies(frac, maxAbs);
   std::atomic<int> mixed{0};
   seams::team::forRange(static_cast<std::size_t>(n), 16384,
                         [&](std::size_t begin, std::size_t end, int) {
@@ -1206,7 +1214,11 @@ SteinhardtQl cutoffSolid(
                         [&](std::size_t from, std::size_t to, int) {
   for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    if (tilt) {
+    if (!trustFold) {
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = p.x;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+    } else if (tilt) {
       // Reduced coordinates. Solve the upper-triangular system before wrapping
       // so integer image shifts in y and z cancel the tilt coupling terms.
       double sz = (p.z - frac.oz) / frac.lz;
@@ -1261,9 +1273,31 @@ SteinhardtQl cutoffSolid(
   const bool checkSmith = tilt && !(cutoff + 1e-12 < frac.halfMin);
   const auto tiltDelta = [&](double xi, double yi, double zi, int j,
                              double &dx, double &dy, double &dz) {
-    double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-    double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-    double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+    const std::array<double, 3> raw = {
+        xi - scratch.xyz[static_cast<std::size_t>(3 * j)],
+        yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
+        zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2]};
+    if (!trustFold) {
+      const auto wrapped = gen::mic::fractionalWrap(
+          frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw);
+      const double r2 =
+          wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2];
+      if (checkSmith && !gen::smithInside(frac, r2)) {
+        const auto euc = gen::refineEuclidean(
+            frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, raw, wrapped);
+        dx = euc[0];
+        dy = euc[1];
+        dz = euc[2];
+      } else {
+        dx = wrapped[0];
+        dy = wrapped[1];
+        dz = wrapped[2];
+      }
+      return;
+    }
+    double dX = raw[0];
+    double dY = raw[1];
+    double dZ = raw[2];
     dX -= frac.lx * std::round(dX / frac.lx);
     dY -= frac.ly * std::round(dY / frac.ly);
     dZ -= frac.lz * std::round(dZ / frac.lz);
@@ -1273,6 +1307,8 @@ SteinhardtQl cutoffSolid(
     if (checkSmith) {
       const double r2 = dx * dx + dy * dy + dz * dz;
       if (!gen::smithInside(frac, r2)) {
+        // w is the fractional image. Searching from it is the minimum
+        // image of the true displacement, because the fold was certified.
         const std::array<double, 3> w = {dx, dy, dz};
         const auto euc = gen::refineEuclidean(
             frac.lx, frac.ly, frac.lz, frac.xy, frac.xz, frac.yz, w, w);
