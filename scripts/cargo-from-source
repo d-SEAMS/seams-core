@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
+"""Run cargo from the manifest directory when that tree vendors crates.
+
+Cargo loads .cargo/config.toml from the working directory and its parents,
+not from --manifest-path. Meson starts cargo in the build tree, so a
+vendored config beside the manifest is invisible and an offline resolution
+asks crates.io. The dist vendor config lives in the source tree; this
+wrapper changes to that directory before the real cargo runs.
+"""
+
+import os
+import shutil
+import sys
+from pathlib import Path
+
+
+def _manifest_dir(argv):
+    for index, arg in enumerate(argv):
+        if arg == "--manifest-path" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve().parent
+        if arg.startswith("--manifest-path="):
+            return Path(arg.split("=", 1)[1]).resolve().parent
+    return None
+
+
+def _wrapper_path():
+    invoked = Path(sys.argv[0])
+    if invoked.is_file():
+        return invoked.resolve()
+    found = shutil.which("cargo")
+    if found:
+        return Path(found).resolve()
+    return invoked.resolve()
+
+
+def _real_cargo(wrapper):
+    for entry in os.environ.get("PATH", "").split(os.pathsep):
+        if not entry:
+            continue
+        candidate = Path(entry) / "cargo"
+        if not candidate.is_file() or not os.access(candidate, os.X_OK):
+            continue
+        try:
+            if candidate.resolve() == wrapper:
+                continue
+        except OSError:
+            continue
+        return str(candidate)
+    raise SystemExit("cargo is not on PATH")
+
+
+def _vendored(source):
+    config = source / ".cargo" / "config.toml"
+    if not config.is_file():
+        return False
+    return "vendored-sources" in config.read_text(encoding="utf-8")
+
+
+def main():
+    wrapper = _wrapper_path()
+    cargo = _real_cargo(wrapper)
+    source = _manifest_dir(sys.argv[1:])
+    if source is not None and _vendored(source):
+        os.chdir(source)
+    wrapper_dir = str(wrapper.parent)
+    kept = []
+    for entry in os.environ.get("PATH", "").split(os.pathsep):
+        if not entry:
+            continue
+        try:
+            if Path(entry).resolve() == Path(wrapper_dir).resolve():
+                continue
+        except OSError:
+            pass
+        kept.append(entry)
+    os.environ["PATH"] = os.pathsep.join(kept)
+    os.execv(cargo, [cargo, *sys.argv[1:]])
+
+
+if __name__ == "__main__":
+    main()

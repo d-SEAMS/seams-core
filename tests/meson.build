@@ -908,6 +908,10 @@ test('dist_vendor_manifest', find_program('python3'),
   args: [files('test_dist_vendor_manifest.py')],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('cargo_from_source', find_program('python3'),
+  args: [files('test_cargo_from_source.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
 test('option_names', find_program('python3'),
   args: [files('option_names.py'), meson.project_build_root() / 'seams',
          meson.project_build_root()],
