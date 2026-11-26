@@ -338,7 +338,7 @@ void ylm12Terms(T x, T y, T z, T u, T invR2, T *re, T *im) {
 
 
 void ylm12AddBonds(const double *dx, const double *dy, const double *dz, int n,
-                   double *qlmInterleaved) {
+                   double *qlmInterleaved) noexcept {
   if (n <= 0) {
     return;
   }
