@@ -1,0 +1,1 @@
+Linkcell's cargo tests still compile at opt-level 3 with debug assertions, and the test profile no longer emits debuginfo. An optimized build with debuginfo took 3m 55s while the rest of the offline suite was running and was killed at the 300s meson timeout.
