@@ -152,8 +152,8 @@ let
     hash = "sha256-8Y9UFgj7hEiXcRNpUa0cHx6aT01QomJWCvvAuBfXya0=";
   };
   linkcellSrc = fetchzip {
-    url = "https://github.com/d-SEAMS/linkcell/archive/f5ea5d6f0cc490686daec5e8352fdee8bc9b2314.tar.gz";
-    hash = "sha256-VoCfM62uyGbIpaoikqtWmvOSVfcPROyGFRQkL55ulD4=";
+    url = "https://github.com/d-SEAMS/linkcell/archive/8da70c187d7afe12ec3d915b050077911e2d71db.tar.gz";
+    hash = "sha256-girboz3/paG037kS2X5M5z9Eo2ZO0FIx5en6uhiBnlI=";
   };
   vesinSrc = fetchzip {
     url = "https://github.com/Luthaf/vesin/archive/refs/tags/v0.5.7.tar.gz";
@@ -230,7 +230,7 @@ stdenv.mkDerivation (finalAttrs: {
     # profile keeps debug assertions. Full debuginfo compiles past the
     # 300s meson budget on a busy machine.
     # Remove when pin >= the linkcell commit that sets both on cargo-tests.
-    # f5ea5d6f0cc490686daec5e8352fdee8bc9b2314 does not.
+    # 8da70c187d7afe12ec3d915b050077911e2d71db does not.
     # patch -N skips a hunk that is already applied. The dry run keeps a
     # second pass from failing the script.
     if patch -N --dry-run -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch >/dev/null; then
