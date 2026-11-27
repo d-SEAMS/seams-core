@@ -465,7 +465,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
 - Keep the 2.13 signatures of `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
 - Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
-- Linkcell's cargo tests still compile at opt-level 3 with debug assertions, and the test profile no longer emits debuginfo. On the offline tarball suite, cargo finished that optimized debuginfo build in 3m 55s, and meson killed the still-running test at the 300s timeout with SIGTERM.
+- Linkcell's cargo tests still compile at opt-level 3 with debug assertions, and the test profile no longer emits debuginfo. On the offline tarball suite, cargo finished that optimized debuginfo build in 3 min 55 s, and meson killed the still-running test at the 300 s timeout with SIGTERM.
 - Name the site-site pair flag `--pair-types`. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
 - On a crowded shell the diamond label uses the four nearest neighbours, the list mdapy uses, and the labels stay those of the cutoff list.
 - Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
