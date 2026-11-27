@@ -348,14 +348,21 @@ configure_file(
   install_dir: get_option('libdir') / 'cmake' / 'seams')
 
 # Test programs. A subproject build with -Dwith_tests=false skips them.
-if get_option('with_tests')
+# scripts/test_engines_api.sh configures the top-level tree with the suite
+# off and compiles test_seams_api by name, so that program is defined then.
+# It is not a default target and it is not registered. The test() call below
+# stays under with_tests.
+if get_option('with_tests') or not meson.is_subproject()
   seams_api_test = executable(
     'test_seams_api',
     files('../tests/test_seams_api.c'),
     link_with: seams_api_lib,
     include_directories: include_directories('../include'),
-    c_args: ['-I' + meson.current_build_dir()])
+    c_args: ['-I' + meson.current_build_dir()],
+    build_by_default: get_option('with_tests'))
+endif
 
+if get_option('with_tests')
   _capi_env = environment()
   _capi_env.set('SEAMS_SAMPLE', meson.project_source_root() / 'input' / 'traj' / 'agi_water_tiny.lammpstrj')
   _capi_env.set('SEAMS_XYZ', meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz')

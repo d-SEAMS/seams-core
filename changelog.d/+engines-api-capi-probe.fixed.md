@@ -1,0 +1,1 @@
+`scripts/test_engines_api.sh` configures with `-Dwith_tests=false` and compiles `test_seams_api`. A top-level build creates that one program when the suite is off, not as a default target and without registering `test()`. A subproject with `with_tests` off still skips it.
