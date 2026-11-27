@@ -590,7 +590,9 @@ bench_ring_carry = executable('bench_ring_carry', 'bench_ring_carry.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
-executable('bench_ring_ic', 'bench_ring_ic.cpp',
+# ovito_ring_counts runs this binary. Keep the return value so that
+# test can name the target instead of a guessed build path.
+bench_ring_ic = executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
@@ -958,8 +960,9 @@ test('ovito_chill_atoms', find_program('python3'),
   timeout: 180)
 test('ovito_ring_counts', find_program('python3'),
   args: [files('test_ovito_ring_counts.py'),
-         meson.project_build_root() / 'tests' / 'bench_ring_ic'],
+         bench_ring_ic],
   workdir: meson.project_source_root(),
+  depends: [bench_ring_ic],
   timeout: 120)
 test('cli_surface', find_program('python3'),
   args: [files('cli_surface.py'), meson.project_build_root() / 'seams'],
