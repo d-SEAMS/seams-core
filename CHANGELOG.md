@@ -465,6 +465,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
 - Keep the 2.13 signatures of `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
 - Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
+- Linkcell's cargo tests still compile at opt-level 3 with debug assertions, and the test profile no longer emits debuginfo. On the offline tarball suite, cargo finished that optimized debuginfo build in 3m 55s, and meson killed the still-running test at the 300s timeout with SIGTERM.
 - Name the site-site pair flag `--pair-types`. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
 - On a crowded shell the diamond label uses the four nearest neighbours, the list mdapy uses, and the labels stay those of the cutoff list.
 - Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
@@ -489,6 +490,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The backtrace signal handler now outlives static destruction. A sanitizer abort at exit hit the freed handler stack and hung `lammps_hook` until its timeout.
 - The brine CLI example fetches the 230 K frame through the same checked download as the science tutorials. The download takes a lock and lands through a `.part` file, so concurrent readers do not see a partial frame.
 - The brine, interface, nucleation and rings picture tracks now show the paper-frame transcripts: 873 atoms with hexagonal 352 and water 434, the 864-molecule interface, 148 nucleation frames, and the 11-frame mW cell. Every tape output and spoken number must agree with its transcript.
+- The cargo-from-source check accepts a working directory that is the manifest directory even when getcwd has resolved a symlink in the path. On macOS that is `/private/var` for a temporary directory under `/var`.
 - The cutoff cell window is timed with `steady_clock` when OpenMP is off, so the macOS R package and the wheels build that loop without `omp_get_wtime`.
 - The cutoff neighbour search clamps its cell count and stencil reach before converting them to integers. A cell edge many orders of magnitude shorter or longer than the cutoff overflowed both, which is undefined behavior and in practice left the reach at one cell. Found by `capi_reload_fuzzer` under UBSan.
 - The documentation build publishes redirects in `docs/page_redirects.json` for every page removed since the previous `gh-pages` tree.
