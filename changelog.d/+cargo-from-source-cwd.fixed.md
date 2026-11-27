@@ -1,0 +1,1 @@
+The cargo-from-source check accepts a working directory that is the manifest directory even when getcwd has resolved a symlink in the path. On macOS that is `/private/var` for a temporary directory under `/var`.

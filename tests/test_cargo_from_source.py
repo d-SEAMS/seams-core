@@ -20,6 +20,17 @@ def _assert(condition: bool, message: str) -> None:
         raise RuntimeError(message)
 
 
+def _same_directory(got: str, expected: Path, label: str) -> None:
+    # getcwd resolves a symlink in the temporary path. macOS reports
+    # /private/var for a /var temporary directory. Both names are that
+    # directory, which is what the wrapper has to enter.
+    try:
+        same = os.path.samefile(got, expected)
+    except OSError:
+        same = False
+    _assert(same, "{} cargo cwd was {}".format(label, got))
+
+
 def _write_project(path: Path, vendored: bool) -> None:
     (path / "src").mkdir(parents=True)
     (path / "Cargo.toml").write_text(
@@ -74,9 +85,9 @@ def _vendored_config_selects_the_manifest_directory() -> None:
         _fake_cargo(base / "bin")
         manifest = str(project / "Cargo.toml")
         got = _recorded(base, project, ["metadata", "--manifest-path", manifest])
-        _assert(got == str(project), "vendored cargo cwd was {}".format(got))
+        _same_directory(got, project, "vendored")
         got = _recorded(base, project, ["metadata", "--manifest-path=" + manifest])
-        _assert(got == str(project), "equals-form cwd was {}".format(got))
+        _same_directory(got, project, "equals-form")
 
 
 def _plain_config_keeps_the_working_directory() -> None:
@@ -90,7 +101,7 @@ def _plain_config_keeps_the_working_directory() -> None:
             project,
             ["metadata", "--manifest-path", str(project / "Cargo.toml")],
         )
-        _assert(got == str(base / "other"), "plain cargo cwd was {}".format(got))
+        _same_directory(got, base / "other", "plain")
 
 
 def main() -> int:
