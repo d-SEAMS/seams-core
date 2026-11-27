@@ -665,7 +665,7 @@ def languages():
             "title": "Rust",
             "intro": (
                 "Item docs from the ``dseams`` crate, taken from "
-                "`dseams/src/lib.rs <https://github.com/d-SEAMS/dseams-rs/blob/main/dseams/src/lib.rs>`_. "
+                "`dseams/src/lib.rs <https://rust.dseams.info/api/src/seams/lib.rs.html>`_. "
                 "``dseams`` is the safe API. ``dseams-sys`` is the raw FFI, re-exported as ``seams::ffi``."
             ),
             "lang": "rust",

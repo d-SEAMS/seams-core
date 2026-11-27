@@ -19,6 +19,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Fixed
 
 - Smooth collective variables bound ring and shortcut enumeration by the ring size and return a range error naming the step, ring, or path limit when a denser graph would pass it, instead of running without a bound. Any atom-type change marks a type-filtered selection stale. A gyration cluster whose smallest eigenvalue is at most 1e-10 times the largest has volume and gradient 0. Switch exponents above 4096 are rejected and the error names 4096.
+- The nanotube tutorial links each of the six yodaStruct iceNanotube example files, and the Rust API page links the published lib.rs source.
 
 ## [2.14.3] - 2026-11-25
 
