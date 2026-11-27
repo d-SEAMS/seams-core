@@ -2,6 +2,8 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <filesystem>
+
+#include "fresh_temp.hpp"
 #include <fstream>
 #include <iomanip>
 #include <numbers>
@@ -67,8 +69,8 @@ TEST_CASE("readCon stores a sheared CON cell as the minimage dump box",
   const double b = 21.702;
   const double xy = b * 0.5;
   const double yy = b * std::numbers::sqrt3 / 2.0;
-  const auto path =
-      std::filesystem::temp_directory_path() / "seams-sheared-cuh2.con";
+  const auto dir = dseams_test::freshDir();
+  const auto path = dir / "seams-sheared-cuh2.con";
   {
     std::ofstream out(path);
     out << "Random Number Seed\n"
@@ -111,16 +113,13 @@ TEST_CASE("readCon stores a sheared CON cell as the minimage dump box",
   REQUIRE_THAT(cell.bx, Catch::Matchers::WithinAbs(xy, 1e-8));
   REQUIRE_THAT(cell.by, Catch::Matchers::WithinAbs(yy, 1e-6));
   REQUIRE_THAT(cell.cz, Catch::Matchers::WithinAbs(100.0, 1e-6));
-  std::filesystem::remove(path);
+  std::filesystem::remove_all(dir);
 }
 
 #ifdef SEAMS_HAS_READCON_DB
 TEST_CASE("readConCorpus selects a campaign hit and decodes it with readcon",
           "[readcon]") {
-  const auto root =
-      std::filesystem::temp_directory_path() / "seams-readcon-corpus";
-  std::filesystem::remove_all(root);
-  std::filesystem::create_directories(root);
+  const auto root = dseams_test::freshDir();
   const int n = sinp::ingestConCorpus(root.string(), 1, "eon/tiny_multi_cuh2.con");
   REQUIRE(n == 2);
 
@@ -147,10 +146,7 @@ TEST_CASE("readConCorpus selects a campaign hit and decodes it with readcon",
 
 TEST_CASE("readConCorpus fans a sharded campaign root out by traj id",
           "[readcon]") {
-  const auto root =
-      std::filesystem::temp_directory_path() / "seams-readcon-shards";
-  std::filesystem::remove_all(root);
-  std::filesystem::create_directories(root);
+  const auto root = dseams_test::freshDir();
   {
     std::ofstream manifest(root / "shards.json");
     manifest << "{\"n_shards\":2,\"version\":1}\n";
