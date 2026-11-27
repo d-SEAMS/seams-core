@@ -226,8 +226,11 @@ stdenv.mkDerivation (finalAttrs: {
     chmod -R u+w subprojects/minimage subprojects/linkcell subprojects/vesin
     # linkcell's cargo tests check a two-worker pool. Nix's check hook
     # sets OMP_NUM_THREADS=1, so this patch pins that environment to 2.
-    # Remove when pin >= the linkcell commit that sets OMP_NUM_THREADS=2
-    # on cargo-tests. f5ea5d6f0cc490686daec5e8352fdee8bc9b2314 does not.
+    # It also turns debuginfo off on the opt-level 3 test profile. That
+    # profile keeps debug assertions. Full debuginfo compiles past the
+    # 300s meson budget on a busy machine.
+    # Remove when pin >= the linkcell commit that sets both on cargo-tests.
+    # f5ea5d6f0cc490686daec5e8352fdee8bc9b2314 does not.
     # patch -N skips a hunk that is already applied. The dry run keeps a
     # second pass from failing the script.
     if patch -N --dry-run -d subprojects/linkcell -p1 < subprojects/packagefiles/linkcell-omp-test.patch >/dev/null; then

@@ -1,0 +1,1 @@
+Linkcell's cargo tests still compile at opt-level 3 with debug assertions, and the test profile no longer emits debuginfo. On the offline tarball suite, cargo finished that optimized debuginfo build in 3 min 55 s, and meson killed the still-running test at the 300 s timeout with SIGTERM.
