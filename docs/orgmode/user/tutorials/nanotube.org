@@ -28,4 +28,8 @@ They are not a prism stack under this count.
 
 The sheet census and the in-plane RDF are [[file:confined-water.org][Confined water]].
 Bulk CHILL+ and cages on the same mixed dump are [[file:bulk-ice.org][the mixed TIP4P tutorial]].
-The Lua examples for a nanotube dump are [[https://github.com/d-SEAMS/yodaStruct/tree/main/example_lua/iceNanotube][example_lua/iceNanotube]] in yodaStruct.
+The Lua examples for a nanotube dump are in yodaStruct.
+shapeMatching uses [[https://raw.githubusercontent.com/d-SEAMS/yodaStruct/main/example_lua/iceNanotube/shapeMatching/config.yml][shapeMatching/config.yml]], [[https://raw.githubusercontent.com/d-SEAMS/yodaStruct/main/example_lua/iceNanotube/shapeMatching/iceType/vars.lua][shapeMatching/iceType/vars.lua]], and [[https://raw.githubusercontent.com/d-SEAMS/yodaStruct/main/example_lua/iceNanotube/shapeMatching/iceType/functions.lua][shapeMatching/iceType/functions.lua]].
+strictCriterion uses [[https://raw.githubusercontent.com/d-SEAMS/yodaStruct/main/example_lua/iceNanotube/strictCriterion/config.yml][strictCriterion/config.yml]], [[https://raw.githubusercontent.com/d-SEAMS/yodaStruct/main/example_lua/iceNanotube/strictCriterion/iceType/vars.lua][strictCriterion/iceType/vars.lua]], and [[https://raw.githubusercontent.com/d-SEAMS/yodaStruct/main/example_lua/iceNanotube/strictCriterion/iceType/functions.lua][strictCriterion/iceType/functions.lua]].
+In each example, config.yml ~variables:~ points to that example's iceType/vars.lua, and vars.lua ~functionScript~ points to its iceType/functions.lua; both paths start at the yodaStruct root, as in example_lua/iceNanotube/shapeMatching/iceType/vars.lua.
+shapeMatching sets ~doShapeMatching=true~ and passes ~doShapeMatching~ to ~prismAnalysis~, while strictCriterion does not set it and passes false.
