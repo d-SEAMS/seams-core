@@ -1,0 +1,1 @@
+`scripts/test_engines_api.sh` builds linkcell from the pinned wrap. `--wrap-mode=nofallback` still skips every other wrap, and `--force-fallback-for=linkcell` keeps a linkcell that pkg-config finds, including an older install on `PKG_CONFIG_PATH`, from replacing that pin.
