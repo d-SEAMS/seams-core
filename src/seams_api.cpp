@@ -5664,8 +5664,7 @@ seams_status seams_cv_rebuild(seams_cv *cv, const seams_system *sys, int type, c
   } catch (const std::invalid_argument &ex) {
     return fail(SEAMS_ERR_ARG, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5684,8 +5683,7 @@ seams_status seams_cv_needs_rebuild(const seams_cv *cv, const seams_system *sys,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5746,8 +5744,7 @@ seams_status seams_cv_value(seams_cv *cv, const seams_system *sys, int kind, int
   } catch (const std::range_error &ex) {
     return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 
@@ -5807,8 +5804,7 @@ seams_status seams_cv_states(seams_cv *cv, const seams_system *sys, double *chi,
   } catch (const std::range_error &ex) {
     return fail(SEAMS_ERR_RANGE, ex.what());
   } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
+    return caught();
   }
 }
 

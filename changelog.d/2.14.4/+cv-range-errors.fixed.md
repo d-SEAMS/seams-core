@@ -1,0 +1,1 @@
+`seams_cv_rebuild`, `seams_cv_needs_rebuild`, `seams_cv_value` and `seams_cv_states` return `SEAMS_ERR_RANGE` with the linked-cell or minimum-image message when the cell is outside what those searches resolve, instead of `SEAMS_ERR_INTERNAL`. A cell of edges 1e8, 1e8 and 20 makes `seams_cv_rebuild` report that the linked-cell mesh is too fine.
